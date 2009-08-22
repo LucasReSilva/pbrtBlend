@@ -31,7 +31,7 @@ from ef.ui import material_settings_panel
 
 from properties import properties
 
-class Main_Render_Settings(properties, context_panel, render_settings_panel):
+class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel):
 	__label__ = 'LuxRender Engine Configuration'
 	
 	def draw(self, context):
@@ -41,7 +41,7 @@ class Main_Render_Settings(properties, context_panel, render_settings_panel):
 		for property in self.properties:
 			layout.itemR(scene, property['attr'])
 			
-class Sampler_Render_Settings(properties, context_panel, render_settings_panel):
+class Lux_Sampler_Render_Settings(properties, context_panel, render_settings_panel):
 	__label__ = 'LuxRender Sampler Configuration'
 	
 	def draw(self, context):
@@ -60,7 +60,7 @@ class Sampler_Render_Settings(properties, context_panel, render_settings_panel):
 			for property in self.sampler_properties[scene.lux_sampler]:
 				layout.itemR(scene, property['attr'])
 				
-class Integrator_Render_Settings(properties, context_panel, render_settings_panel):
+class Lux_Integrator_Render_Settings(properties, context_panel, render_settings_panel):
 	__label__ = 'LuxRender Surface Integrator Configuration'
 	
 	def draw(self, context):
@@ -79,7 +79,7 @@ class Integrator_Render_Settings(properties, context_panel, render_settings_pane
 			for property in self.integrator_properties[scene.lux_surfaceintegrator]:
 				layout.itemR(scene, property['attr'])
 
-class Material_Settings(properties, context_panel, material_settings_panel):
+class Lux_Material_Settings(properties, context_panel, material_settings_panel):
 	def draw(self, context):
 		layout = self.layout
 		
