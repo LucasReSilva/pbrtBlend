@@ -8,6 +8,21 @@ class properties():
 	# specific panels etc.
 	context_name = 'luxrender'
 	
+	all_properties = []
+	
+	@classmethod
+	def get_all_properties(r_class):
+		for p in r_class.properties:
+			r_class.all_properties.append(p)
+		
+		for s in [r_class.sampler_properties,
+				  r_class.integrator_properties]:
+			for p in s.values():
+				for pp in p:
+					r_class.all_properties.append(pp)
+		
+		return r_class.all_properties
+	
 	# Main Engine Render Settings
 	properties = [
 		{
@@ -280,19 +295,6 @@ class properties():
 		'distributedpath_advanced': [],
 	}
 	
-	all_properties = []
 	
-	@classmethod
-	def get_all_properties(r_class):
-		for p in r_class.properties:
-			r_class.all_properties.append(p)
-		
-		for s in [r_class.sampler_properties,
-				  r_class.integrator_properties]:
-			for p in s.values():
-				for pp in p:
-					r_class.all_properties.append(pp)
-		
-		return r_class.all_properties
 	
 	
