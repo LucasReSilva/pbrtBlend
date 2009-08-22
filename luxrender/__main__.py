@@ -24,5 +24,3 @@ class luxrender(properties, engine_base):
 		
 	def render(self, scene):
 		pass
-
-	
