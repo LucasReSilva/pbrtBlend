@@ -25,7 +25,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from engines.engine import engine_base
+from ef.engine import engine_base
 
 from ui import Lux_Main_Render_Settings
 from ui import Lux_Sampler_Render_Settings
