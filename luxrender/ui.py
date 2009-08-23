@@ -31,6 +31,8 @@ from ef.ui import material_settings_panel
 
 from properties import properties
 
+# TODO - refactor all of Lux's settings to use ef.ui.described_layout
+
 class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel):
 	__label__ = 'LuxRender Engine Configuration'
 	

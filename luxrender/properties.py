@@ -35,6 +35,8 @@ class properties():
 	# specific panels etc.
 	context_name = 'luxrender'
 	
+	# TODO - refactor all of Lux's settings to use ef.ui.described_layout
+	
 	all_properties = []
 	
 	@classmethod
