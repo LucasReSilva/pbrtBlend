@@ -30,6 +30,8 @@ from ef.engine import engine_base
 from ui import Lux_Main_Render_Settings
 from ui import Lux_Sampler_Render_Settings
 from ui import Lux_Integrator_Render_Settings
+from ui import Lux_Volume_Integrator_Render_Settings
+from ui import Lux_Filter_Render_Settings
 from properties import properties
 
 # Add standard Blender Interface elements
@@ -46,7 +48,9 @@ class luxrender(properties, engine_base):
 	interfaces = [
 		Lux_Main_Render_Settings,
 		Lux_Sampler_Render_Settings,
-		Lux_Integrator_Render_Settings
+		Lux_Integrator_Render_Settings,
+		Lux_Volume_Integrator_Render_Settings,
+		Lux_Filter_Render_Settings
 	]
 		
 	def render(self, scene):

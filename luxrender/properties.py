@@ -35,25 +35,44 @@ class properties():
 	# specific panels etc.
 	context_name = 'luxrender'
 	
-	# TODO - refactor all of Lux's settings to use ef.ui.described_layout
-	
 	all_properties = []
 	
 	@classmethod
 	def get_all_properties(r_class):
-		for p in r_class.properties:
-			r_class.all_properties.append(p)
-		
-		for s in [r_class.sampler_properties,
-				  r_class.integrator_properties]:
-			for p in s.values():
-				for pp in p:
-					r_class.all_properties.append(pp)
+		for s in [	r_class.engine_properties,
+					r_class.sampler_properties,
+					r_class.integrator_properties,
+					r_class.volume_integrator_properties,
+					r_class.filter_properties
+				]:
+			for p in s:
+				r_class.all_properties.append(p)
 		
 		return r_class.all_properties
 	
 	# Main Engine Render Settings
-	properties = [
+	engine_properties = []
+	
+	sampler_layout = [
+		'lux_sampler', 'lux_sampler_advanced',
+		
+		# metropolis
+		'lux_sampler_metro_strength',										# simple
+		['lux_sampler_metro_lmprob', 'lux_sampler_metro_mncr'],				# adv
+		['lux_sampler_metro_initsamples','lux_sampler_metro_variance'],		# adv
+		
+		# erpt
+		['lux_sampler_erpt_initsamples', 'lux_sampler_erpt_chainlength', 'lux_sampler_erpt_stratawidth'], # simple
+		
+		# lowdiscrepancy
+		['lux_sampler_ld_pixelsampler', 'lux_sampler_ld_samples'],			# simple
+		
+		# random
+		'lux_sampler_rnd_pixelsampler',
+		['lux_sampler_rnd_xsamples', 'lux_sampler_rnd_ysamples'],			# simple 
+	]
+	
+	sampler_properties = [
 		{
 			'type': 'enum',
 			'attr': 'lux_sampler',
@@ -68,6 +87,153 @@ class properties():
 			]
 		},
 		{
+			'type': 'bool',
+			'attr': 'lux_sampler_advanced',
+			'name': 'Advanced',
+			'description': 'Configure advanced sampler settings',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_sampler_metro_strength',
+			'name': 'Strength',
+			'description': 'Metropolis sampler mutation strength',
+			'default': 0.66,
+			'min': 0,
+			'max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_sampler_metro_lmprob',
+			'name': 'LM Prob',
+			'description': 'Large Mutation Probability',
+			'default': 0.4,
+			'min': 0,
+			'max': 1,
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_sampler_metro_mncr',
+			'name': 'MNCR',
+			'description': 'Maximum number of consecutive rejections',
+			'default': 512,
+			'min': 0,
+			'max': 32768,
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_sampler_metro_initsamples',
+			'name': 'Initial',
+			'description': 'Initial Samples',
+			'default': 262144,
+			'min': 1,
+			'max': 1000000,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_sampler_metro_variance',
+			'name': 'Use Variance',
+			'description': 'Use Variance',
+			'default': False,
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_sampler_erpt_initsamples',
+			'name': 'Initial',
+			'description': 'Initial Samples',
+			'default': 100000,
+			'min': 1,
+			'max': 10000000,
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_sampler_erpt_chainlength',
+			'name': 'Ch. Len.',
+			'description': 'Chain Length',
+			'default': 512,
+			'min': 1,
+			'max': 32768,
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_sampler_erpt_stratawidth',
+			'name': 'Str. Width',
+			'description': 'Strata Width',
+			'default': 256,
+			'min': 1,
+			'max': 32768,
+		},
+		{
+			'type': 'enum',
+			'attr': 'lux_sampler_ld_pixelsampler',
+			'name': 'Pixel Sampler',
+			'description': 'Pixel sampling strategy',
+			'default': 'lowdiscrepancy',
+			'items': [
+				('linear', 'linear', 'Linear'),
+				('tile', 'tile', 'Tile'),
+				('random', 'random', 'Random'),
+				('vegas', 'vegas', 'Vegas'),
+				('lowdiscrepancy', 'lowdiscrepancy', 'Low Discrepancy'),
+				('hilbert', 'hilbert', 'Hilbert'),
+			]
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_sampler_ld_samples',
+			'name': 'Samples',
+			'description': 'Average number of samples taken per pixel. More samples create a higher quality image at the cost of render time',
+			'default': 4,
+			'min': 1,
+			'max': 8192,
+		},
+		{
+			'type': 'enum',
+			'attr': 'lux_sampler_rnd_pixelsampler',
+			'name': 'Pixel Sampler',
+			'description': 'Pixel sampling strategy',
+			'default': 'vegas',
+			'items': [
+				('linear', 'linear', 'Linear'),
+				('tile', 'tile', 'Tile'),
+				('random', 'random', 'Random'),
+				('vegas', 'vegas', 'Vegas'),
+				('lowdiscrepancy', 'lowdiscrepancy', 'Low Discrepancy'),
+				('hilbert', 'hilbert', 'Hilbert'),
+			]
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_sampler_rnd_xsamples',
+			'name': 'X Samples',
+			'description': 'Samples in X dimension',
+			'default': 2,
+			'min': 1,
+			'max': 512,
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_sampler_rnd_ysamples',
+			'name': 'Y Samples',
+			'description': 'Samples in Y dimension',
+			'default': 2,
+			'min': 1,
+			'max': 512,
+		},
+	]
+	
+	integrator_layout = [
+		'lux_surfaceintegrator',
+		'lux_integrator_advanced',
+		'lux_integrator_strategy',											# advanced
+		
+		# bidir
+		'lux_integrator_bidir_depth',										# simple
+		['lux_integrator_bidir_edepth', 'lux_integrator_bidir_ldepth'],		# advanced
+	]
+	
+	integrator_properties = [
+		{
 			'type': 'enum', 
 			'attr': 'lux_surfaceintegrator',
 			'name': 'Surface Integrator',
@@ -80,6 +246,60 @@ class properties():
 				('distributedpath', 'distributedpath', 'Distributed Path')
 			]
 		},
+	
+		{
+			'type': 'bool',
+			'attr': 'lux_integrator_advanced',
+			'name': 'Show Advanced Settings',
+			'description': 'Configure advanced integrator settings',
+			'default': False
+		},
+		{
+			'type': 'enum',
+			'attr': 'lux_integrator_strategy',
+			'name': 'Strategy',
+			'description': 'Strategy',
+			'default': 'auto',
+			'items': [
+				('auto', 'auto', 'Auto'),
+				('one', 'one', 'One'),
+				('all', 'all', 'All'),
+			]
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_integrator_bidir_depth',
+			'name': 'Depth',
+			'description': 'Max recursion depth for ray casting',
+			'default': 16,
+			'min': 5,
+			'max': 32,
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_integrator_bidir_edepth',
+			'name': 'Eye Depth',
+			'description': 'Max recursion depth for ray casting from eye',
+			'default': 16,
+			'min': 0,
+			'max': 2048,
+		},
+		{
+			'type': 'int', 
+			'attr': 'lux_integrator_bidir_ldepth',
+			'name': 'Light Depth',
+			'description': 'Max recursion depth for ray casting from light',
+			'default': 16,
+			'min': 0,
+			'max': 2048,
+		},
+	]
+	
+	volume_integrator_layout = [
+		'lux_volumeintegrator', 'lux_volume_stepsize'
+	]
+	
+	volume_integrator_properties = [
 		{
 			'type': 'enum',
 			'attr': 'lux_volumeintegrator',
@@ -91,6 +311,24 @@ class properties():
 				('single', 'single', 'Single'),
 			]
 		},
+		{
+			'type': 'float',
+			'attr': 'lux_volume_stepsize',
+			'name': 'Step Size',
+			'description': 'Volume Integrator Step Size',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 100,
+			'soft_max': 100,
+		}
+	]
+	
+	filter_layout = [
+		'lux_filter'
+	]
+	
+	filter_properties = [
 		{
 			'type': 'enum',
 			'attr': 'lux_filter',
@@ -106,224 +344,3 @@ class properties():
 			]
 		},
 	]
-	
-	# Sampler Render Settings
-	sampler_properties = {
-		# common is a special case, it shows up in all sampler types
-		'common': [
-			{
-				'type': 'bool',
-				'attr': 'lux_sampler_advanced',
-				'name': 'Show Advanced Settings',
-				'description': 'Configure advanced sampler settings',
-				'default': False
-			},
-		],
-		'common_advanced': [],
-		'metropolis': [
-			{
-				'type': 'float',
-				'attr': 'lux_sampler_metro_strength',
-				'name': 'Mutation Strength',
-				'description': 'Metropolis sampler mutation strength',
-				'default': 0.66,
-				'min': 0,
-				'max': 1,
-			},
-		],
-		'metropolis_advanced': [
-			{
-				'type': 'float',
-				'attr': 'lux_sampler_metro_lmprob',
-				'name': 'Large Mutation Probability',
-				'description': 'Large Mutation Probability',
-				'default': 0.4,
-				'min': 0,
-				'max': 1,
-			},
-			{
-				'type': 'int', 
-				'attr': 'lux_sampler_metro_mncr',
-				'name': 'Max Consec Rejects',
-				'description': 'Maximum number of consecutive rejections',
-				'default': 512,
-				'min': 0,
-				'max': 32768,
-			},
-			{
-				'type': 'int',
-				'attr': 'lux_sampler_metro_initsamples',
-				'name': 'Initial Samples', 'description': 'Initial Samples',
-				'default': 262144,
-				'min': 1,
-				'max': 1000000,
-			},
-			{
-				'type': 'bool',
-				'attr': 'lux_sampler_metro_variance',
-				'name': 'Use Variance',
-				'description': 'Use Variance',
-				'default': False,
-			},
-		],
-		'erpt': [
-			{
-				'type': 'int',
-				'attr': 'lux_sampler_erpt_initsamples',
-				'name': 'Initial Samples', 'description': 'Initial Samples',
-				'default': 100000,
-				'min': 1,
-				'max': 10000000,
-			},
-			{
-				'type': 'int', 
-				'attr': 'lux_sampler_erpt_chainlength',
-				'name': 'Chain Length',
-				'description': 'Chain Length',
-				'default': 512,
-				'min': 1,
-				'max': 32768,
-			},
-			{
-				'type': 'int', 
-				'attr': 'lux_sampler_erpt_stratawidth',
-				'name': 'Strata Width',
-				'description': 'Strata Width',
-				'default': 256,
-				'min': 1,
-				'max': 32768,
-			},
-		],
-		'erpt_advanced': [],
-		'lowdiscrepancy': [
-			{
-				'type': 'enum',
-				'attr': 'lux_sampler_ld_pixelsampler',
-				'name': 'Pixel Sampler',
-				'description': 'Pixel sampling strategy',
-				'default': 'lowdiscrepancy',
-				'items': [
-					('linear', 'linear', 'Linear'),
-					('tile', 'tile', 'Tile'),
-					('random', 'random', 'Random'),
-					('vegas', 'vegas', 'Vegas'),
-					('lowdiscrepancy', 'lowdiscrepancy', 'Low Discrepancy'),
-					('hilbert', 'hilbert', 'Hilbert'),
-				]
-			},
-			{
-				'type': 'int', 
-				'attr': 'lux_sampler_ld_samples',
-				'name': 'Samples',
-				'description': 'Average number of samples taken per pixel. More samples create a higher quality image at the cost of render time',
-				'default': 4,
-				'min': 1,
-				'max': 8192,
-			},
-		],
-		'lowdiscrepancy_advanced': [],
-		'random': [
-			{
-				'type': 'enum',
-				'attr': 'lux_sampler_rnd_pixelsampler',
-				'name': 'Pixel Sampler',
-				'description': 'Pixel sampling strategy',
-				'default': 'vegas',
-				'items': [
-					('linear', 'linear', 'Linear'),
-					('tile', 'tile', 'Tile'),
-					('random', 'random', 'Random'),
-					('vegas', 'vegas', 'Vegas'),
-					('lowdiscrepancy', 'lowdiscrepancy', 'Low Discrepancy'),
-					('hilbert', 'hilbert', 'Hilbert'),
-				]
-			},
-			{
-				'type': 'int', 
-				'attr': 'lux_sampler_rnd_xsamples',
-				'name': 'X Samples',
-				'description': 'Samples in X dimension',
-				'default': 2,
-				'min': 1,
-				'max': 512,
-			},
-			{
-				'type': 'int', 
-				'attr': 'lux_sampler_rnd_ysamples',
-				'name': 'Y Samples',
-				'description': 'Samples in Y dimension',
-				'default': 2,
-				'min': 1,
-				'max': 512,
-			},
-		],
-		'random_advanced': [],
-	}
-	
-	integrator_properties = {
-		# common is a special case, it shows up in all integrator types
-		'common': [
-			{
-				'type': 'bool',
-				'attr': 'lux_integrator_advanced',
-				'name': 'Show Advanced Settings',
-				'description': 'Configure advanced integrator settings',
-				'default': False
-			},
-		],
-		'common_advanced': [
-			{
-				'type': 'enum',
-				'attr': 'lux_integrator_strategy',
-				'name': 'Strategy',
-				'description': 'Strategy',
-				'default': 'auto',
-				'items': [
-					('auto', 'auto', 'Auto'),
-					('one', 'one', 'One'),
-					('all', 'all', 'All'),
-				]
-			},
-		],
-		'directlighting': [],
-		'directlighting_advanced': [],
-		'path': [],
-		'path_advanced': [],
-		'bidirectional': [
-			{
-				'type': 'int', 
-				'attr': 'lux_integrator_bidir_depth',
-				'name': 'Depth',
-				'description': 'Max recursion depth for ray casting',
-				'default': 16,
-				'min': 5,
-				'max': 32,
-			},
-		],
-		'bidirectional_advanced': [
-			{
-				'type': 'int', 
-				'attr': 'lux_integrator_bidir_edepth',
-				'name': 'Eye Depth',
-				'description': 'Max recursion depth for ray casting from eye',
-				'default': 16,
-				'min': 0,
-				'max': 2048,
-			},
-			{
-				'type': 'int', 
-				'attr': 'lux_integrator_bidir_ldepth',
-				'name': 'Light Depth',
-				'description': 'Max recursion depth for ray casting from light',
-				'default': 16,
-				'min': 0,
-				'max': 2048,
-			},
-		],
-		'distributedpath': [],
-		'distributedpath_advanced': [],
-	}
-	
-	
-	
-	

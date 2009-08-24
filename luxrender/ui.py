@@ -28,10 +28,9 @@
 from ef.ui import context_panel
 from ef.ui import render_settings_panel
 from ef.ui import material_settings_panel
+from ef.ui import described_layout
 
 from properties import properties
-
-# TODO - refactor all of Lux's settings to use ef.ui.described_layout
 
 class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel):
 	__label__ = 'LuxRender Engine Configuration'
@@ -40,46 +39,69 @@ class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel)
 		layout = self.layout
 		scene = context.scene
 		
-		for property in self.properties:
+		for property in self.engine_properties:
 			layout.itemR(scene, property['attr'])
 			
-class Lux_Sampler_Render_Settings(properties, context_panel, render_settings_panel):
+class Lux_Sampler_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
 	__label__ = 'LuxRender Sampler Configuration'
 	
-	def draw(self, context):
-		layout = self.layout
-		scene = context.scene
+	selection_lookup = {
+		'lux_sampler_advanced':				[{ 'lux_sampler': 'metropolis'}],
+	
+		'lux_sampler_metro_strength':		[{ 'lux_sampler_advanced': False }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_lmprob':			[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_mncr':			[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_initsamples':	[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_variance':		[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
 		
-		for property in self.sampler_properties['common']:
-			layout.itemR(scene, property['attr'])
+		'lux_sampler_erpt_initsamples':		[{ 'lux_sampler': 'erpt'}],
+		'lux_sampler_erpt_chainlength':		[{ 'lux_sampler': 'erpt'}],
+		'lux_sampler_erpt_stratawidth':		[{ 'lux_sampler': 'erpt'}],
 		
-		if (scene.lux_sampler_advanced):
-			for property in self.sampler_properties['common_advanced']:
-				layout.itemR(scene, property['attr'])
-			for property in self.sampler_properties[scene.lux_sampler + '_advanced']:
-				layout.itemR(scene, property['attr'])
-		else:
-			for property in self.sampler_properties[scene.lux_sampler]:
-				layout.itemR(scene, property['attr'])
-				
-class Lux_Integrator_Render_Settings(properties, context_panel, render_settings_panel):
-	__label__ = 'LuxRender Surface Integrator Configuration'
+		'lux_sampler_ld_pixelsampler':		[{ 'lux_sampler': 'lowdiscrepancy'}],
+		'lux_sampler_ld_samples':			[{ 'lux_sampler': 'lowdiscrepancy'}],
+		
+		'lux_sampler_rnd_pixelsampler':		[{ 'lux_sampler': 'random'}],
+		'lux_sampler_rnd_xsamples':			[{ 'lux_sampler': 'random'}],
+		'lux_sampler_rnd_ysamples':			[{ 'lux_sampler': 'random'}],
+	}
 	
 	def draw(self, context):
-		layout = self.layout
-		scene = context.scene
+		for p in self.sampler_layout:
+			self.draw_column(p, self.layout, context.scene)
+				
+class Lux_Integrator_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
+	__label__ = 'LuxRender Surface Integrator Configuration'
+	
+	selection_lookup = {
+		'lux_integrator_strategy':		[{ 'lux_integrator_advanced': True  }],
 		
-		for property in self.integrator_properties['common']:
-			layout.itemR(scene, property['attr'])
-		
-		if (scene.lux_integrator_advanced):
-			for property in self.integrator_properties['common_advanced']:
-				layout.itemR(scene, property['attr'])
-			for property in self.integrator_properties[scene.lux_surfaceintegrator + '_advanced']:
-				layout.itemR(scene, property['attr'])
-		else:
-			for property in self.integrator_properties[scene.lux_surfaceintegrator]:
-				layout.itemR(scene, property['attr'])
+		'lux_integrator_bidir_depth':	[{ 'lux_integrator_advanced': False }, { 'lux_surfaceintegrator': 'bidirectional' }],
+		'lux_integrator_bidir_edepth':	[{ 'lux_integrator_advanced': True  }, { 'lux_surfaceintegrator': 'bidirectional' }],
+		'lux_integrator_bidir_ldepth':	[{ 'lux_integrator_advanced': True  }, { 'lux_surfaceintegrator': 'bidirectional' }],
+	}
+	
+	def draw(self, context):
+		for p in self.integrator_layout:
+			self.draw_column(p, self.layout, context.scene)
+
+class Lux_Volume_Integrator_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
+	__label__ = 'LuxRender Volume Integrator Configuration'
+	
+	selection_lookup = {}
+	
+	def draw(self, context):
+		for p in self.volume_integrator_layout:
+			self.draw_column(p, self.layout, context.scene)
+			
+class Lux_Filter_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
+	__label__ = 'LuxRender Filter Configuration'
+	
+	selection_lookup = {}
+	
+	def draw(self, context):
+		for p in self.filter_layout:
+			self.draw_column(p, self.layout, context.scene)
 
 class Lux_Material_Settings(properties, context_panel, material_settings_panel):
 	def draw(self, context):
