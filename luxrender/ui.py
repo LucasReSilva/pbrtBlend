@@ -32,15 +32,20 @@ from ef.ui import described_layout
 
 from properties import properties
 
-class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel):
+class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
 	__label__ = 'LuxRender Engine Configuration'
 	
+	selection_lookup = {
+		'lux_threads':				[{ 'lux_threads_auto': False }],
+		'lux_file_lxs':				[{ 'lux_singlefile': False }],
+		'lux_file_lxo':				[{ 'lux_singlefile': False }],
+		'lux_file_lxm':				[{ 'lux_singlefile': False }],
+		'lux_file_lxv':				[{ 'lux_singlefile': False }],
+	}
+	
 	def draw(self, context):
-		layout = self.layout
-		scene = context.scene
-		
-		for property in self.engine_properties:
-			layout.itemR(scene, property['attr'])
+		for p in self.engine_layout:
+			self.draw_column(p, self.layout, context.scene)
 			
 class Lux_Sampler_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
 	__label__ = 'LuxRender Sampler Configuration'
@@ -97,10 +102,39 @@ class Lux_Volume_Integrator_Render_Settings(properties, context_panel, render_se
 class Lux_Filter_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
 	__label__ = 'LuxRender Filter Configuration'
 	
-	selection_lookup = {}
+	selection_lookup = {
+		'lux_filter_xwidth':				[{ 'lux_filter_advanced': True }],
+		'lux_filter_ywidth':				[{ 'lux_filter_advanced': True }],
+		
+		'lux_filter_gaussian_alpha':		[{ 'lux_filter_advanced': True }, { 'lux_filter': 'gaussian' }],
+		
+		'lux_filter_mitchell_mode':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }],
+		'lux_filter_mitchell_b':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }, { 'lux_filter_mitchell_mode': 'manual' }],
+		'lux_filter_mitchell_c':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }, { 'lux_filter_mitchell_mode': 'manual' }],		
+		'lux_filter_mitchell_sharpness':	[{ 'lux_filter': 'mitchell' }],
+		
+		'lux_filter_sinc_tau':				[{ 'lux_filter_advanced': True }, { 'lux_filter': 'sinc' }],
+	}
 	
 	def draw(self, context):
 		for p in self.filter_layout:
+			self.draw_column(p, self.layout, context.scene)
+
+class Lux_Accel_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
+	__label__ = 'LuxRender Accelerator Configuration'
+	
+	selection_lookup = {
+		'lux_accel_kd_intcost':			[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_travcost':		[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_ebonus':			[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_maxprims':		[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_maxdepth':		[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_grid_refineim':		[{ 'lux_accelerator': 'grid' }],
+		'lux_accel_qbvh_maxprims':		[{ 'lux_accelerator': 'qbvh' }],
+	}
+	
+	def draw(self, context):
+		for p in self.accelerator_layout:
 			self.draw_column(p, self.layout, context.scene)
 
 class Lux_Material_Settings(properties, context_panel, material_settings_panel):

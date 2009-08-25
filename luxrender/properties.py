@@ -43,15 +43,127 @@ class properties():
 					r_class.sampler_properties,
 					r_class.integrator_properties,
 					r_class.volume_integrator_properties,
-					r_class.filter_properties
+					r_class.filter_properties,
+					r_class.accelerator_properties
 				]:
 			for p in s:
 				r_class.all_properties.append(p)
 		
 		return r_class.all_properties
 	
-	# Main Engine Render Settings
-	engine_properties = []
+	engine_layout = [
+		['lux_threads_auto', 'lux_threads'],
+		'lux_priority',
+		['lux_rgc', 'lux_colclamp', 'lux_noopengl'],
+		[ 'lux_meshopt', 'lux_nolg' ],
+		
+		'lux_singlefile',
+		[ 'lux_file_lxs', 'lux_file_lxo', 'lux_file_lxm', 'lux_file_lxv' ],
+	]
+	
+	engine_properties = [
+		{
+			'type': 'bool',
+			'attr': 'lux_threads_auto',
+			'name': 'Auto Threads',
+			'description': 'Let LuxRender decide how many threads to use',
+			'default': True
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_threads',
+			'name': 'Render Threads',
+			'description': 'Number of threads to use',
+			'default': 1,
+			'min': 1,
+			'soft_min': 1,
+			'max': 64,
+			'soft_max': 64
+		},
+		{
+			'type': 'enum',
+			'attr': 'lux_priority',
+			'name': 'Process Priority',
+			'description': 'Set the process priority for LuxRender',
+			'default': 'belownormal',
+			'items': [
+				('low','low','Low'),
+				('belownormal', 'belownormal', 'Below Normal'),
+				('normal', 'normal', 'Normal'),
+				('abovenormal', 'abovenormal', 'Above Normal'),
+			]
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_noopengl',
+			'name': 'No OpenGL',
+			'description': 'Disable OpenGL viewport (for buggy display drivers)',
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_rgc',
+			'name': 'RGC',
+			'description': 'Reverse Gamma Colour Correction',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_colclamp',
+			'name': 'Colour Clamp',
+			'description': 'Clamp all colours to range 0 - 0.9',
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_meshopt',
+			'name': 'Optimise Meshes',
+			'description': 'Output optimised mesh data',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_nolg',
+			'name': 'No Lightgroups',
+			'description': 'Combine all light groups',
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_singlefile',
+			'name': 'Combine LXS',
+			'description': 'Write only a single LXS file',
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_file_lxs',
+			'name': 'LXS',
+			'description': 'Write LXS (Scene) file',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_file_lxo',
+			'name': 'LXO',
+			'description': 'Write LXO (Objects) file',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_file_lxm',
+			'name': 'LXM',
+			'description': 'Write LXM (Materials) file',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_file_lxv',
+			'name': 'LXV',
+			'description': 'Write LXV (volumes) file',
+			'default': True,
+		},
+	]
 	
 	sampler_layout = [
 		'lux_sampler', 'lux_sampler_advanced',
@@ -246,7 +358,6 @@ class properties():
 				('distributedpath', 'distributedpath', 'Distributed Path')
 			]
 		},
-	
 		{
 			'type': 'bool',
 			'attr': 'lux_integrator_advanced',
@@ -325,7 +436,20 @@ class properties():
 	]
 	
 	filter_layout = [
-		'lux_filter'
+		'lux_filter',
+		'lux_filter_advanced',
+		
+		['lux_filter_xwidth', 'lux_filter_ywidth'],			# advanced
+		'lux_filter_gaussian_alpha',						# gaussian advanced
+		
+		[
+			'lux_filter_mitchell_mode',						# mitchell advanced
+			'lux_filter_mitchell_b',						# mitchell advanced + mode=manual
+			'lux_filter_mitchell_c',						# mitchell advanced + mode=manual
+		],
+		'lux_filter_mitchell_sharpness',					# mitchell simple || (mitchell advanced && mode = slider)
+		
+		'lux_filter_sinc_tau'								# sinc advanced
 	]
 	
 	filter_properties = [
@@ -342,5 +466,201 @@ class properties():
 				('sinc', 'sinc', 'Sinc'),
 				('triangle', 'triangle', 'Triangle'),
 			]
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_filter_advanced',
+			'name': 'Show Advanced Settings',
+			'description': 'Configure advanced filter settings',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_filter_xwidth',
+			'name': 'X Width',
+			'description': 'Width of filter in X dimension',
+			'default': 2,
+			'min': 0,
+			'soft_min': 0,
+			'max': 10,
+			'soft_max': 10,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_filter_ywidth',
+			'name': 'Y Width',
+			'description': 'Width of filter in Y dimension',
+			'default': 2,
+			'min': 0,
+			'soft_min': 0,
+			'max': 10,
+			'soft_max': 10,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_filter_gaussian_alpha',
+			'name': 'Alpha',
+			'description': 'Gaussian Alpha parameter',
+			'default': 2,
+			'min': 0,
+			'soft_min': 0,
+			'max': 10,
+			'soft_max': 10,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_filter_mitchell_sharpness',
+			'name': 'Sharpness',
+			'description': 'Sharpness of Mitchell Filter',
+			'default': 0.5,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'enum',
+			'attr': 'lux_filter_mitchell_mode',
+			'name': 'Mode',
+			'description': 'Mitchell Mode',
+			'items': [
+				('manual', 'manual', 'Manual'),
+				('slider', 'slider', 'Slider'),
+				#('preset', 'preset', 'Preset'),
+			]
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_filter_mitchell_b',
+			'name': 'B',
+			'description': 'Mitchell B parameter',
+			'default': 0.333,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_filter_mitchell_c',
+			'name': 'C',
+			'description': 'Mitchell C parameter',
+			'default': 0.333,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_filter_sinc_tau',
+			'name': 'Tau',
+			'description': 'Sinc Tau parameter',
+			'default': 3,
+			'min': 0,
+			'soft_min': 0,
+			'max': 10,
+			'soft_max': 10,
+		},
+	]
+	
+	accelerator_layout = [
+		'lux_accelerator',
+		
+		[ 'lux_accel_kd_intcost', 'lux_accel_kd_travcost' ],		# tabreckdtree
+		[ 'lux_accel_kd_ebonus', 'lux_accel_kd_maxprims' ],			# tabreckdtree
+		'lux_accel_kd_maxdepth',									# tabreckdtree
+		
+		'lux_accel_grid_refineim',									# grid
+		
+		'lux_accel_qbvh_maxprims',									# qbvh
+	]
+	
+	accelerator_properties = [
+		{
+			'type': 'enum',
+			'attr': 'lux_accelerator',
+			'name': 'Accelerator',
+			'description': 'Scene accelerator type',
+			'default': 'tabreckdtree',
+			'items': [
+				('none', 'none', 'None'),
+				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
+				('grid', 'Grid', 'grid'),
+				('qbvh', 'Qbvh', 'qBVH'),
+			]
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_accel_kd_intcost',
+			'name': 'Inters. Cost',
+			'description': 'Intersection Cost',
+			'default': 80,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1000,
+			'soft_max': 1000,
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_accel_kd_travcost',
+			'name': 'Trav. Cost',
+			'description': 'Traversal Cost',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1000,
+			'soft_max': 1000,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_accel_kd_ebonus',
+			'name': 'Empty Bonus',
+			'description': 'Empty Bonus',
+			'default': 0.2,
+			'min': 0,
+			'soft_min': 0,
+			'max': 100,
+			'soft_max': 100,
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_accel_kd_maxprims',
+			'name': 'Max. Prims.',
+			'description': 'Max Primitives',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1000,
+			'soft_max': 1000,
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_accel_kd_maxdepth',
+			'name': 'Max. Depth',
+			'description': 'Maximum Depth',
+			'default': -1,
+			'min': -1,
+			'soft_min': -1,
+			'max': 100,
+			'soft_max': 100,
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_accel_grid_refineim',
+			'name': 'Refine Immediately',
+			'description': 'Refine Immediately',
+			'default': False
+		},
+		{
+			'type': 'int',
+			'attr': 'lux_accel_qbvh_maxprims',
+			'name': 'Max. Prims.',
+			'description': 'Max Primitives per leaf',
+			'default': 4,
+			'min': 1,
+			'soft_min': 1,
+			'max': 64,
+			'soft_max': 64,
 		},
 	]
