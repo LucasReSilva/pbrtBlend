@@ -48,7 +48,7 @@ class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel,
 			self.draw_column(p, self.layout, context.scene)
 			
 class Lux_Sampler_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
-	__label__ = 'LuxRender Sampler Configuration'
+	__label__ = 'Sampler'
 	
 	selection_lookup = {
 		'lux_sampler_advanced':				[{ 'lux_sampler': 'metropolis'}],
@@ -76,7 +76,7 @@ class Lux_Sampler_Render_Settings(properties, context_panel, render_settings_pan
 			self.draw_column(p, self.layout, context.scene)
 				
 class Lux_Integrator_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
-	__label__ = 'LuxRender Surface Integrator Configuration'
+	__label__ = 'Surface Integrator'
 	
 	selection_lookup = {
 		'lux_integrator_strategy':		[{ 'lux_integrator_advanced': True  }],
@@ -91,7 +91,7 @@ class Lux_Integrator_Render_Settings(properties, context_panel, render_settings_
 			self.draw_column(p, self.layout, context.scene)
 
 class Lux_Volume_Integrator_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
-	__label__ = 'LuxRender Volume Integrator Configuration'
+	__label__ = 'Volume Integrator'
 	
 	selection_lookup = {}
 	
@@ -100,7 +100,7 @@ class Lux_Volume_Integrator_Render_Settings(properties, context_panel, render_se
 			self.draw_column(p, self.layout, context.scene)
 			
 class Lux_Filter_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
-	__label__ = 'LuxRender Filter Configuration'
+	__label__ = 'Filter'
 	
 	selection_lookup = {
 		'lux_filter_xwidth':				[{ 'lux_filter_advanced': True }],
@@ -121,7 +121,7 @@ class Lux_Filter_Render_Settings(properties, context_panel, render_settings_pane
 			self.draw_column(p, self.layout, context.scene)
 
 class Lux_Accel_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
-	__label__ = 'LuxRender Accelerator Configuration'
+	__label__ = 'Accelerator'
 	
 	selection_lookup = {
 		'lux_accel_kd_intcost':			[{ 'lux_accelerator': 'tabreckdtree' }],
