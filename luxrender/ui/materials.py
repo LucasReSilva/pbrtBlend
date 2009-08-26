@@ -31,6 +31,8 @@ from ef.ui import described_layout
 
 from ef.ef import ef
 
+import bpy
+
 class main(
 	context_panel,
 	material_settings_panel,
@@ -39,10 +41,37 @@ class main(
 	context_name = 'luxrender'
 	
 	controls = [
-		'lux_material'
+		# Common props
+		'lux_material',
+		
+		# Car paint
+		'lux_mat_carpaint_label',
+		'lux_mat_carpaint_preset',
+		'lux_mat_carpaint_kd',
+		'lux_mat_carpaint_ks1',
+		'lux_mat_carpaint_ks2',
+		'lux_mat_carpaint_ks3',
+		['lux_mat_carpaint_r1','lux_mat_carpaint_r2','lux_mat_carpaint_r3'],
+		['lux_mat_carpaint_m1','lux_mat_carpaint_m2','lux_mat_carpaint_m3'],
 	]
 	
+	selection = {
+		'lux_mat_carpaint_label':		[{ 'lux_material': 'carpaint' }],
+		'lux_mat_carpaint_preset':		[{ 'lux_material': 'carpaint' }],
+		'lux_mat_carpaint_kd':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_ks1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_ks2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_ks3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_r1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_r2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_r3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_m1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_m2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_m3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+	}
+	
 	material_properties = [
+		# Material Type Select
 		{
 			'type': 'enum',
 			'attr': 'lux_material',
@@ -64,7 +93,126 @@ class main(
 				('light','Light','light'),
 				('portal','Portal','portal'),
 			]
-		}
+		},
+		
+		# Car paint
+		{
+			'type': 'text',
+			'attr': 'lux_mat_carpaint_label',
+			'name': 'Car Paint Settings',
+		},
+		{
+			'type': 'enum',
+			'attr': 'lux_mat_carpaint_preset',
+			'name': 'Preset',
+			'description': 'Preset Car Paint Settings',
+			'default': 'custom',
+			'items': [
+				('custom','Custom','custom'),
+				('fordf8','Ford F8','fordf8'),
+				('polaris','Polaris Silver','polaris'),
+				('opel','Opel Titan','opel'),
+				('bmw339','BMW 339','bmw339'),
+				('2k','2K Acrylic','2k'),
+				('white','White','white'),
+				('blue','Blue','blue'),
+				('bluematte','Blue Matte','bluematte'),
+			]
+		},
+		{
+			'type': 'string',
+			'attr': 'lux_mat_carpaint_kd',
+			'name': 'Diffuse Colour',
+			'description': 'Diffuse Colour',
+			'default': '-- TODO --',
+		},
+		{
+			'type': 'string',
+			'attr': 'lux_mat_carpaint_ks1',
+			'name': 'Specular Layer 1',
+			'description': 'Specular Layer 1 Colour',
+			'default': '-- TODO --',
+		},
+		{
+			'type': 'string',
+			'attr': 'lux_mat_carpaint_ks2',
+			'name': 'Specular Layer 2',
+			'description': 'Specular Layer 2 Colour',
+			'default': '-- TODO --',
+		},
+		{
+			'type': 'string',
+			'attr': 'lux_mat_carpaint_ks3',
+			'name': 'Specular Layer 3',
+			'description': 'Specular Layer 3 Colour',
+			'default': '-- TODO --',
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_mat_carpaint_r1',
+			'name': 'R 1',
+			'description': 'Specular Layer 1 Roughness',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_mat_carpaint_r2',
+			'name': 'R 2',
+			'description': 'Specular Layer 2 Roughness',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_mat_carpaint_r3',
+			'name': 'R 3',
+			'description': 'Specular Layer 3 Roughness',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_mat_carpaint_m1',
+			'name': 'M 1',
+			'description': 'Specular Layer 1 Fresnel',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_mat_carpaint_m2',
+			'name': 'M 2',
+			'description': 'Specular Layer 2 Fresnel',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_mat_carpaint_m3',
+			'name': 'M 3',
+			'description': 'Specular Layer 3 Fresnel',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1,
+			'soft_max': 1,
+		},
 	]
 	
 	def get_properties(self):
