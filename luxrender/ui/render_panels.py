@@ -25,28 +25,22 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef.ef import ef
+import ef.ui
 
-from ef.ui import context_panel
-from ef.ui import render_settings_panel
-from ef.ui import material_settings_panel
-from ef.ui import described_layout
-
-class Lux_Main_Render_Settings(
-	context_panel,
-	render_settings_panel,
-	described_layout):
-	__label__ = 'LuxRender Engine Configuration'
+class render_described_context(ef.ui.context_panel, ef.ui.render_settings_panel, ef.ui.described_layout):
 	context_name = 'luxrender'
+
+class engine(render_described_context):
+	__label__ = 'LuxRender Engine Configuration'
 	
 	controls = [
 		['lux_threads_auto', 'lux_threads'],
 		'lux_priority',
 		['lux_rgc', 'lux_colclamp', 'lux_noopengl'],
-		[ 'lux_meshopt', 'lux_nolg' ],
+		['lux_meshopt', 'lux_nolg'],
 		
 		'lux_singlefile',
-		[ 'lux_file_lxs', 'lux_file_lxo', 'lux_file_lxm', 'lux_file_lxv' ],
+		['lux_file_lxs', 'lux_file_lxo', 'lux_file_lxm', 'lux_file_lxv'],
 	]
 	
 	selection = {
@@ -161,12 +155,8 @@ class Lux_Main_Render_Settings(
 		},
 	]
 			
-class Lux_Sampler_Render_Settings(
-	context_panel,
-	render_settings_panel,
-	described_layout):
+class sampler(render_described_context):
 	__label__ = 'Sampler'
-	context_name = 'luxrender'
 	
 	controls = [
 		[
@@ -362,12 +352,8 @@ class Lux_Sampler_Render_Settings(
 		},
 	]
 				
-class Lux_Integrator_Render_Settings(
-	context_panel,
-	render_settings_panel,
-	described_layout):
+class integrator(render_described_context):
 	__label__ = 'Surface Integrator'
-	context_name = 'luxrender'
 	
 	controls = [
 		[
@@ -453,12 +439,8 @@ class Lux_Integrator_Render_Settings(
 		},
 	]
 
-class Lux_Volume_Integrator_Render_Settings(
-	context_panel,
-	render_settings_panel,
-	described_layout):
+class volume(render_described_context):
 	__label__ = 'Volume Integrator'
-	context_name = 'luxrender'
 	
 	controls = [
 		'lux_volumeintegrator', 'lux_volume_stepsize'
@@ -489,12 +471,8 @@ class Lux_Volume_Integrator_Render_Settings(
 		}
 	]
 			
-class Lux_Filter_Render_Settings(
-	context_panel,
-	render_settings_panel,
-	described_layout):
+class filter(render_described_context):
 	__label__ = 'Filter'
-	context_name = 'luxrender'
 	
 	controls = [
 		[
@@ -643,18 +621,14 @@ class Lux_Filter_Render_Settings(
 		},
 	]
 
-class Lux_Accel_Render_Settings(
-	context_panel,
-	render_settings_panel,
-	described_layout):
+class accelerator(render_described_context):
 	__label__ = 'Accelerator'
-	context_name = 'luxrender'
 	
 	controls = [
 		'lux_accelerator',
 		
-		[ 'lux_accel_kd_intcost', 'lux_accel_kd_travcost' ],		# tabreckdtree
-		[ 'lux_accel_kd_ebonus', 'lux_accel_kd_maxprims' ],			# tabreckdtree
+		['lux_accel_kd_intcost', 'lux_accel_kd_travcost'],			# tabreckdtree
+		['lux_accel_kd_ebonus', 'lux_accel_kd_maxprims'],			# tabreckdtree
 		'lux_accel_kd_maxdepth',									# tabreckdtree
 		
 		'lux_accel_grid_refineim',									# grid
@@ -760,50 +734,3 @@ class Lux_Accel_Render_Settings(
 			'soft_max': 64,
 		},
 	]
-
-class Lux_Material_Settings(
-	context_panel,
-	material_settings_panel,
-	described_layout):
-	__label__ = 'LuxRender Materials'
-	context_name = 'luxrender'
-	
-	controls = [
-		'lux_material'
-	]
-	
-	material_properties = [
-		{
-			'type': 'enum',
-			'attr': 'lux_material',
-			'name': 'Type',
-			'description': 'LuxRender material type',
-			'items': [
-				('carpaint', 'Car Paint', 'carpaint'),
-				('glass', 'Glass', 'glass'),
-				('roughglass','Rough Glass','roughglass'),
-				('glossy','Glossy','glossy'),
-				('matte','Matte','matte'),
-				('mattetranslucent','Matte Translucent','mattetranslucent'),
-				('metal','Metal','metal'),
-				('shinymetal','Shiny Metal','shinymetal'),
-				('mirror','Mirror','mirror'),
-				('mix','Mix','mix'),
-				('null','Null','null'),
-				('boundvolume','Bound Volume','boundvolume'),
-				('light','Light','light'),
-				('portal','Portal','portal'),
-			]
-		}
-	]
-	
-	def get_properties(self):
-		return self.material_properties
-	
-	def draw(self, context):
-		if context.material is not None:
-			if not hasattr(context.material, 'lux_material'):
-				ef.init_properties(context.material, self.material_properties)
-			
-			for p in self.controls:
-				self.draw_column(p, self.layout, context.material)
