@@ -26,7 +26,6 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 class properties():
-	
 	# This render engine's UI display name
 	__label__ = 'LuxRender'
 	
@@ -44,7 +43,7 @@ class properties():
 					r_class.integrator_properties,
 					r_class.volume_integrator_properties,
 					r_class.filter_properties,
-					r_class.accelerator_properties
+					r_class.accelerator_properties,
 				]:
 			for p in s:
 				r_class.all_properties.append(p)
@@ -87,10 +86,10 @@ class properties():
 			'description': 'Set the process priority for LuxRender',
 			'default': 'belownormal',
 			'items': [
-				('low','low','Low'),
-				('belownormal', 'belownormal', 'Below Normal'),
-				('normal', 'normal', 'Normal'),
-				('abovenormal', 'abovenormal', 'Above Normal'),
+				('low','Low','low'),
+				('belownormal', 'Below Normal', 'belownormal'),
+				('normal', 'Normal', 'normal'),
+				('abovenormal', 'Above Normal', 'abovenormal'),
 			]
 		},
 		{
@@ -166,7 +165,11 @@ class properties():
 	]
 	
 	sampler_layout = [
-		'lux_sampler', 'lux_sampler_advanced',
+		[
+			0.7,
+			'lux_sampler',
+			'lux_sampler_advanced',
+		],
 		
 		# metropolis
 		'lux_sampler_metro_strength',										# simple
@@ -192,10 +195,10 @@ class properties():
 			'description': 'Pixel Sampler',
 			'default': 'metropolis',
 			'items': [
-				('metropolis', 'metropolis', 'Metropolis'),
-				('erpt', 'erpt', 'ERPT'),
-				('lowdiscrepancy', 'lowdiscrepancy', 'Low Discrepancy'),
-				('random', 'random', 'Random')
+				('metropolis', 'Metropolis', 'metropolis'),
+				('erpt', 'ERPT', 'erpt'),
+				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
+				('random', 'Random', 'random')
 			]
 		},
 		{
@@ -282,12 +285,12 @@ class properties():
 			'description': 'Pixel sampling strategy',
 			'default': 'lowdiscrepancy',
 			'items': [
-				('linear', 'linear', 'Linear'),
-				('tile', 'tile', 'Tile'),
-				('random', 'random', 'Random'),
-				('vegas', 'vegas', 'Vegas'),
-				('lowdiscrepancy', 'lowdiscrepancy', 'Low Discrepancy'),
-				('hilbert', 'hilbert', 'Hilbert'),
+				('linear', 'Linear', 'linear'),
+				('tile', 'Tile', 'tile'),
+				('random', 'Random', 'random'),
+				('vegas', 'Vegas', 'vegas'),
+				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
+				('hilbert', 'Hilbert', 'hilbert'),
 			]
 		},
 		{
@@ -306,12 +309,12 @@ class properties():
 			'description': 'Pixel sampling strategy',
 			'default': 'vegas',
 			'items': [
-				('linear', 'linear', 'Linear'),
-				('tile', 'tile', 'Tile'),
-				('random', 'random', 'Random'),
-				('vegas', 'vegas', 'Vegas'),
-				('lowdiscrepancy', 'lowdiscrepancy', 'Low Discrepancy'),
-				('hilbert', 'hilbert', 'Hilbert'),
+				('linear', 'Linear', 'linear'),
+				('tile', 'Tile', 'tile'),
+				('random', 'Random', 'random'),
+				('vegas', 'Vegas', 'vegas'),
+				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
+				('hilbert', 'Hilbert', 'hilbert'),
 			]
 		},
 		{
@@ -335,8 +338,12 @@ class properties():
 	]
 	
 	integrator_layout = [
-		'lux_surfaceintegrator',
-		'lux_integrator_advanced',
+		[
+			0.7,
+			'lux_surfaceintegrator',
+			'lux_integrator_advanced',
+		],
+		
 		'lux_integrator_strategy',											# advanced
 		
 		# bidir
@@ -352,16 +359,16 @@ class properties():
 			'description': 'Surface Integrator',
 			'default': 'bidirectional',
 			'items': [
-				('directlighting', 'directlighting', 'Direct Lighting'),
-				('path', 'path', 'Path'),
-				('bidirectional', 'bidirectional', 'Bi-Directional'),
-				('distributedpath', 'distributedpath', 'Distributed Path')
+				('directlighting', 'Direct Lighting', 'directlighting'),
+				('path', 'Path', 'path'),
+				('bidirectional', 'Bi-Directional', 'bidirectional'),
+				('distributedpath', 'Distributed Path', 'distributedpath')
 			]
 		},
 		{
 			'type': 'bool',
 			'attr': 'lux_integrator_advanced',
-			'name': 'Show Advanced Settings',
+			'name': 'Advanced',
 			'description': 'Configure advanced integrator settings',
 			'default': False
 		},
@@ -372,9 +379,9 @@ class properties():
 			'description': 'Strategy',
 			'default': 'auto',
 			'items': [
-				('auto', 'auto', 'Auto'),
-				('one', 'one', 'One'),
-				('all', 'all', 'All'),
+				('auto', 'Auto', 'auto'),
+				('one', 'One', 'one'),
+				('all', 'All', 'all'),
 			]
 		},
 		{
@@ -418,8 +425,8 @@ class properties():
 			'description': 'Volume Integrator',
 			'default': 'single',
 			'items': [
-				('emission', 'emission', 'Emission'),
-				('single', 'single', 'Single'),
+				('emission', 'Emission', 'emission'),
+				('single', 'Single', 'single'),
 			]
 		},
 		{
@@ -436,13 +443,17 @@ class properties():
 	]
 	
 	filter_layout = [
-		'lux_filter',
-		'lux_filter_advanced',
+		[
+			0.75,
+			'lux_filter',
+			'lux_filter_advanced',
+		],
 		
 		['lux_filter_xwidth', 'lux_filter_ywidth'],			# advanced
 		'lux_filter_gaussian_alpha',						# gaussian advanced
 		
 		[
+			0.4,
 			'lux_filter_mitchell_mode',						# mitchell advanced
 			'lux_filter_mitchell_b',						# mitchell advanced + mode=manual
 			'lux_filter_mitchell_c',						# mitchell advanced + mode=manual
@@ -460,17 +471,17 @@ class properties():
 			'description': 'Pixel sampling filter',
 			'default': 'mitchell',
 			'items': [
-				('box', 'box', 'Box'),
-				('gaussian', 'gaussian', 'Gaussian'),
-				('mitchell', 'mitchell', 'Mitchell'),
-				('sinc', 'sinc', 'Sinc'),
-				('triangle', 'triangle', 'Triangle'),
+				('box', 'Box', 'box'),
+				('gaussian', 'Gaussian', 'gaussian'),
+				('mitchell', 'Mitchell', 'mitchell'),
+				('sinc', 'Sinc', 'sinc'),
+				('triangle', 'Triangle', 'triangle'),
 			]
 		},
 		{
 			'type': 'bool',
 			'attr': 'lux_filter_advanced',
-			'name': 'Show Advanced Settings',
+			'name': 'Advanced',
 			'description': 'Configure advanced filter settings',
 			'default': False
 		},
@@ -524,8 +535,8 @@ class properties():
 			'name': 'Mode',
 			'description': 'Mitchell Mode',
 			'items': [
-				('manual', 'manual', 'Manual'),
-				('slider', 'slider', 'Slider'),
+				('manual', 'Manual', 'manual'),
+				('slider', 'Slider', 'slider'),
 				#('preset', 'preset', 'Preset'),
 			]
 		},
@@ -587,7 +598,7 @@ class properties():
 				('none', 'none', 'None'),
 				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
 				('grid', 'Grid', 'grid'),
-				('qbvh', 'Qbvh', 'qBVH'),
+				('qbvh', 'QBVH', 'qbvh'),
 			]
 		},
 		{

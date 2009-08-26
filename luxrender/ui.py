@@ -25,12 +25,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+from ef.ef import ef
+
 from ef.ui import context_panel
 from ef.ui import render_settings_panel
 from ef.ui import material_settings_panel
 from ef.ui import described_layout
 
 from properties import properties
+#from materials import materials
 
 class Lux_Main_Render_Settings(properties, context_panel, render_settings_panel, described_layout):
 	__label__ = 'LuxRender Engine Configuration'
@@ -137,23 +140,18 @@ class Lux_Accel_Render_Settings(properties, context_panel, render_settings_panel
 		for p in self.accelerator_layout:
 			self.draw_column(p, self.layout, context.scene)
 
-class Lux_Material_Settings(properties, context_panel, material_settings_panel):
+from materials import materials
+
+class Lux_Material_Settings(materials, context_panel, material_settings_panel, described_layout):
+	__label__ = 'LuxRender Materials'
+	
+	selection_lookup = {}
+	
 	def draw(self, context):
-		layout = self.layout
+		if context.material is not None:
+			if not hasattr(context.material, 'lux_material'):
+				ef.init_properties(context.material, self.materials)
 		
-		ob = context.object
-		type = ob.type.capitalize()
-		
-		row = layout.row()
-		row.itemL(text="Hello world!", icon='ICON_WORLD_DATA')
-		col = layout.column()
-		row = col.row()
-		row.itemL(text="The currently selected object is: "+ob.name)
-		row = col.row()
-		if type == 'Mesh':
-			row.itemL(text="It is a mesh containing "+str(len(ob.data.verts))+" vertices.")
-		else:
-			row.itemL(text="it is a "+type+".")
-		row = layout.row()
-		row.alignment = 'RIGHT'
-		row.itemL(text="The end")
+			for p in self.materials_layout:
+				self.draw_column(p, self.layout, context.material)
+

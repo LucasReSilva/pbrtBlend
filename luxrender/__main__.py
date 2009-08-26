@@ -32,16 +32,22 @@ from ui import Lux_Sampler_Render_Settings
 from ui import Lux_Integrator_Render_Settings
 from ui import Lux_Volume_Integrator_Render_Settings
 from ui import Lux_Filter_Render_Settings
+from ui import Lux_Material_Settings
 from ui import Lux_Accel_Render_Settings
 
 from properties import properties
 
-# Add standard Blender Interface elements
-import buttons_scene
-buttons_scene.SCENE_PT_render.COMPAT_ENGINES.add('luxrender')
-buttons_scene.SCENE_PT_dimensions.COMPAT_ENGINES.add('luxrender')
-buttons_scene.SCENE_PT_output.COMPAT_ENGINES.add('luxrender')
-del buttons_scene
+from ef.ef import ef
+if ef.host_program() == 'BLENDER25':
+	# Add standard Blender Interface elements
+	import buttons_scene
+	buttons_scene.SCENE_PT_render.COMPAT_ENGINES.add('luxrender')
+	buttons_scene.SCENE_PT_dimensions.COMPAT_ENGINES.add('luxrender')
+	buttons_scene.SCENE_PT_output.COMPAT_ENGINES.add('luxrender')
+	del buttons_scene
+	import buttons_material
+	buttons_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
+	del buttons_material
 
 # Then define all custom stuff
 class luxrender(properties, engine_base):
@@ -53,7 +59,9 @@ class luxrender(properties, engine_base):
 		Lux_Integrator_Render_Settings,
 		Lux_Volume_Integrator_Render_Settings,
 		Lux_Filter_Render_Settings,
-		Lux_Accel_Render_Settings
+		Lux_Accel_Render_Settings,
+		
+		Lux_Material_Settings
 	]
 		
 	def render(self, scene):
