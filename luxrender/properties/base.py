@@ -25,7 +25,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-class materials():
+class properties_base():
 	# This render engine's UI display name
 	__label__ = 'LuxRender'
 	
@@ -33,43 +33,30 @@ class materials():
 	# and is used to detect if the UI should draw engine-
 	# specific panels etc.
 	context_name = 'luxrender'
-	
-	all_properties = []
-	
-	@classmethod
-	def get_all_properties(r_class):
-		for s in [	r_class.materials,
-				]:
-			for p in s:
-				r_class.all_properties.append(p)
 		
-		return r_class.all_properties
-	
-	materials_layout = [
-		'lux_material'
+	controls = [
+		# this list controls the order of property
+		# layout in the Panel. This can be a nested
+		# list, where each list becomes a row in the
+		# panel layout. nesting may be to any depth
 	]
 	
-	materials = [
-		{
-			'type': 'enum',
-			'attr': 'lux_material',
-			'name': 'Type',
-			'description': 'LuxRender material type',
-			'items': [
-				('carpaint', 'Car Paint', 'carpaint'),
-				('glass', 'Glass', 'glass'),
-				('roughglass','Rough Glass','roughglass'),
-				('glossy','Glossy','glossy'),
-				('matte','Matte','matte'),
-				('mattetranslucent','Matte Translucent','mattetranslucent'),
-				('metal','Metal','metal'),
-				('shinymetal','Shiny Metal','shinymetal'),
-				('mirror','Mirror','mirror'),
-				('mix','Mix','mix'),
-				('null','Null','null'),
-				('boundvolume','Bound Volume','boundvolume'),
-				('light','Light','light'),
-				('portal','Portal','portal'),
-			]
-		}
-	]
+	# Include some properties in display based on values of others
+	selection = {
+		# Example: PROPA should be shown if PROPB == VALUE
+		# 'PROPA':		[{ 'PROPB': VALUE }],
+		
+		# Example: PROPA should be shown if (PROPB == VALUEA) or (PROPB == VALUEB)
+		# 'PROPA':		[{ 'PROPB': [VALUEA, VALUEB] }],
+		
+		# Example: PROPA should be shown if (PROPB == VALUEB) and (PROPC == VALUEC)
+		# 'PROPA':		[{ 'PROPB': VALUEB }, { 'PROPC': VALUEC }],
+		
+		# Example: PROPA should be shown if (PROPB == VALUEB) and ((PROPC == VALUEC) or (PROPC == VALUED))
+		# 'PROPA':		[{ 'PROPB': VALUEB }, { 'PROPC': [VALUEC, VALUED] }],
+	}
+	
+	properties = []
+	
+	def get_all_properties(self):
+		return self.properties

@@ -25,32 +25,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-class properties():
-	# This render engine's UI display name
-	__label__ = 'LuxRender'
-	
-	# This should match the engine __main__ class name,
-	# and is used to detect if the UI should draw engine-
-	# specific panels etc.
-	context_name = 'luxrender'
-	
-	all_properties = []
-	
-	@classmethod
-	def get_all_properties(r_class):
-		for s in [	r_class.engine_properties,
-					r_class.sampler_properties,
-					r_class.integrator_properties,
-					r_class.volume_integrator_properties,
-					r_class.filter_properties,
-					r_class.accelerator_properties,
-				]:
-			for p in s:
-				r_class.all_properties.append(p)
-		
-		return r_class.all_properties
-	
-	engine_layout = [
+from base import properties_base
+
+class main(properties_base):
+	controls = [
 		['lux_threads_auto', 'lux_threads'],
 		'lux_priority',
 		['lux_rgc', 'lux_colclamp', 'lux_noopengl'],
@@ -60,7 +38,15 @@ class properties():
 		[ 'lux_file_lxs', 'lux_file_lxo', 'lux_file_lxm', 'lux_file_lxv' ],
 	]
 	
-	engine_properties = [
+	selection = {
+		'lux_threads':				[{ 'lux_threads_auto': False }],
+		'lux_file_lxs':				[{ 'lux_singlefile': False }],
+		'lux_file_lxo':				[{ 'lux_singlefile': False }],
+		'lux_file_lxm':				[{ 'lux_singlefile': False }],
+		'lux_file_lxv':				[{ 'lux_singlefile': False }],
+	}
+	
+	properties = [
 		{
 			'type': 'bool',
 			'attr': 'lux_threads_auto',
@@ -163,8 +149,9 @@ class properties():
 			'default': True,
 		},
 	]
-	
-	sampler_layout = [
+
+class sampler(properties_base):
+	controls = [
 		[
 			0.7,
 			'lux_sampler',
@@ -187,7 +174,28 @@ class properties():
 		['lux_sampler_rnd_xsamples', 'lux_sampler_rnd_ysamples'],			# simple 
 	]
 	
-	sampler_properties = [
+	selection = {
+		'lux_sampler_advanced':				[{ 'lux_sampler': 'metropolis'}],
+	
+		'lux_sampler_metro_strength':		[{ 'lux_sampler_advanced': False }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_lmprob':			[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_mncr':			[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_initsamples':	[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		'lux_sampler_metro_variance':		[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		
+		'lux_sampler_erpt_initsamples':		[{ 'lux_sampler': 'erpt'}],
+		'lux_sampler_erpt_chainlength':		[{ 'lux_sampler': 'erpt'}],
+		'lux_sampler_erpt_stratawidth':		[{ 'lux_sampler': 'erpt'}],
+		
+		'lux_sampler_ld_pixelsampler':		[{ 'lux_sampler': 'lowdiscrepancy'}],
+		'lux_sampler_ld_samples':			[{ 'lux_sampler': 'lowdiscrepancy'}],
+		
+		'lux_sampler_rnd_pixelsampler':		[{ 'lux_sampler': 'random'}],
+		'lux_sampler_rnd_xsamples':			[{ 'lux_sampler': 'random'}],
+		'lux_sampler_rnd_ysamples':			[{ 'lux_sampler': 'random'}],
+	}
+	
+	properties = [
 		{
 			'type': 'enum',
 			'attr': 'lux_sampler',
@@ -337,7 +345,8 @@ class properties():
 		},
 	]
 	
-	integrator_layout = [
+class sintegrator(properties_base):
+	controls = [
 		[
 			0.7,
 			'lux_surfaceintegrator',
@@ -351,7 +360,15 @@ class properties():
 		['lux_integrator_bidir_edepth', 'lux_integrator_bidir_ldepth'],		# advanced
 	]
 	
-	integrator_properties = [
+	selection = {
+		'lux_integrator_strategy':		[{ 'lux_integrator_advanced': True  }],
+		
+		'lux_integrator_bidir_depth':	[{ 'lux_integrator_advanced': False }, { 'lux_surfaceintegrator': 'bidirectional' }],
+		'lux_integrator_bidir_edepth':	[{ 'lux_integrator_advanced': True  }, { 'lux_surfaceintegrator': 'bidirectional' }],
+		'lux_integrator_bidir_ldepth':	[{ 'lux_integrator_advanced': True  }, { 'lux_surfaceintegrator': 'bidirectional' }],
+	}
+	
+	properties = [
 		{
 			'type': 'enum', 
 			'attr': 'lux_surfaceintegrator',
@@ -413,11 +430,12 @@ class properties():
 		},
 	]
 	
-	volume_integrator_layout = [
+class vintegrator(properties_base):
+	controls = [
 		'lux_volumeintegrator', 'lux_volume_stepsize'
 	]
 	
-	volume_integrator_properties = [
+	properties = [
 		{
 			'type': 'enum',
 			'attr': 'lux_volumeintegrator',
@@ -442,7 +460,8 @@ class properties():
 		}
 	]
 	
-	filter_layout = [
+class filter(properties_base):
+	controls = [
 		[
 			0.75,
 			'lux_filter',
@@ -463,7 +482,21 @@ class properties():
 		'lux_filter_sinc_tau'								# sinc advanced
 	]
 	
-	filter_properties = [
+	selection = {
+		'lux_filter_xwidth':				[{ 'lux_filter_advanced': True }],
+		'lux_filter_ywidth':				[{ 'lux_filter_advanced': True }],
+		
+		'lux_filter_gaussian_alpha':		[{ 'lux_filter_advanced': True }, { 'lux_filter': 'gaussian' }],
+		
+		'lux_filter_mitchell_mode':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }],
+		'lux_filter_mitchell_b':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }, { 'lux_filter_mitchell_mode': 'manual' }],
+		'lux_filter_mitchell_c':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }, { 'lux_filter_mitchell_mode': 'manual' }],		
+		'lux_filter_mitchell_sharpness':	[{ 'lux_filter': 'mitchell' }],
+		
+		'lux_filter_sinc_tau':				[{ 'lux_filter_advanced': True }, { 'lux_filter': 'sinc' }],
+	}
+	
+	properties = [
 		{
 			'type': 'enum',
 			'attr': 'lux_filter',
@@ -575,7 +608,8 @@ class properties():
 		},
 	]
 	
-	accelerator_layout = [
+class accelerator(properties_base):
+	controls = [
 		'lux_accelerator',
 		
 		[ 'lux_accel_kd_intcost', 'lux_accel_kd_travcost' ],		# tabreckdtree
@@ -587,7 +621,17 @@ class properties():
 		'lux_accel_qbvh_maxprims',									# qbvh
 	]
 	
-	accelerator_properties = [
+	selection = {
+		'lux_accel_kd_intcost':			[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_travcost':		[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_ebonus':			[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_maxprims':		[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_kd_maxdepth':		[{ 'lux_accelerator': 'tabreckdtree' }],
+		'lux_accel_grid_refineim':		[{ 'lux_accelerator': 'grid' }],
+		'lux_accel_qbvh_maxprims':		[{ 'lux_accelerator': 'qbvh' }],
+	}
+	
+	properties = [
 		{
 			'type': 'enum',
 			'attr': 'lux_accelerator',

@@ -35,7 +35,8 @@ from ui import Lux_Filter_Render_Settings
 from ui import Lux_Material_Settings
 from ui import Lux_Accel_Render_Settings
 
-from properties import properties
+import properties.settings
+import properties.materials
 
 from ef.ef import ef
 if ef.host_program() == 'BLENDER25':
@@ -50,8 +51,18 @@ if ef.host_program() == 'BLENDER25':
 	del buttons_material
 
 # Then define all custom stuff
-class luxrender(properties, engine_base):
+class luxrender(engine_base):
 	__label__ = 'LuxRender'
+	
+	scene_property_classes = [
+		properties.settings.main,
+		properties.settings.sampler,
+		properties.settings.sintegrator,
+		properties.settings.vintegrator,
+		properties.settings.filter,
+		properties.settings.accelerator,
+		#properties.materials.materials,
+	]
 		
 	interfaces = [
 		Lux_Main_Render_Settings,
