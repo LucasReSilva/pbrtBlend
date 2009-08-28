@@ -44,30 +44,51 @@ class main(
 		# Common props
 		'lux_material',
 		
+		# Used by many
+		#'lux_mat_kd',
+		#'lux_mat_kr',
+		#'lux_mat_kt',
+		#['lux_mat_ior_preset', 'lux_mat_ior_list'],
+		
 		# Car paint
-		'lux_mat_carpaint_label',
-		'lux_mat_carpaint_preset',
-		'lux_mat_carpaint_kd',
-		'lux_mat_carpaint_ks1',
-		'lux_mat_carpaint_ks2',
-		'lux_mat_carpaint_ks3',
-		['lux_mat_carpaint_r1','lux_mat_carpaint_r2','lux_mat_carpaint_r3'],
-		['lux_mat_carpaint_m1','lux_mat_carpaint_m2','lux_mat_carpaint_m3'],
+		#'lux_mat_carpaint_label',
+		#'lux_mat_carpaint_preset',
+		
+		#'lux_mat_carpaint_ks1',
+		#'lux_mat_carpaint_ks2',
+		#'lux_mat_carpaint_ks3',
+		#['lux_mat_carpaint_r1','lux_mat_carpaint_r2','lux_mat_carpaint_r3'],
+		#['lux_mat_carpaint_m1','lux_mat_carpaint_m2','lux_mat_carpaint_m3'],
+		
+		# Glass
+		
 	]
 	
 	selection = {
-		'lux_mat_carpaint_label':		[{ 'lux_material': 'carpaint' }],
-		'lux_mat_carpaint_preset':		[{ 'lux_material': 'carpaint' }],
-		'lux_mat_carpaint_kd':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_ks1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_ks2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_ks3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_r1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_r2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_r3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_m1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_m2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_m3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		# Used by many
+		#'lux_mat_kd':					[{ 'lux_material': ['carpaint', 'glass'] }],
+		#'lux_mat_kr':					[{ 'lux_material': ['glass'] }],
+		#'lux_mat_kt':					[{ 'lux_material': ['glass'] }],
+		#'lux_mat_ior_preset':			[{ 'lux_material': ['glass'] }],
+		#'lux_mat_ior_list':				[{ 'lux_material': ['glass'] }],
+	
+		# Car paint
+		#'lux_mat_carpaint_label':		[{ 'lux_material': 'carpaint' }],
+		#'lux_mat_carpaint_preset':		[{ 'lux_material': 'carpaint' }],
+		# Car paint custom
+		#'lux_mat_carpaint_kd':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_ks1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_ks2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_ks3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_r1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_r2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_r3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_m1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_m2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		#'lux_mat_carpaint_m3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		
+		# Glass
+		
 	}
 	
 	material_properties = [
@@ -95,6 +116,48 @@ class main(
 			]
 		},
 		
+		# Used by many mats
+		{
+			'type': 'string',
+			'attr': 'lux_mat_kd',
+			'name': 'Diffuse Colour',
+			'description': 'Diffuse Colour',
+			'default': '-- TODO --',
+		},
+		{
+			'type': 'string',
+			'attr': 'lux_mat_kr',
+			'name': 'Reflection Colour',
+			'description': 'Reflection Colour',
+			'default': '-- TODO --',
+		},
+		{
+			'type': 'string',
+			'attr': 'lux_mat_kt',
+			'name': 'Transmission Colour',
+			'description': 'Transmission Colour',
+			'default': '-- TODO --',
+		},
+		{
+			'type': 'bool',
+			'attr': 'lux_mat_ior_preset',
+			'name': 'IOR Preset',
+			'description': 'IOR Preset',
+			'default': True,
+		},
+		{
+			'type': 'enum',
+			'attr': 'lux_mat_ior_list',
+			'name': 'IOR',
+			'description': 'IOR',
+			'default': '1.5',
+			'items': [
+				('1.5', 'Fused Silica Glass', 'Fused Silica Glass'),
+				('0', '-- TODO --', '0'),
+			]
+		},
+		
+		
 		# Car paint
 		{
 			'type': 'text',
@@ -118,13 +181,6 @@ class main(
 				('blue','Blue','blue'),
 				('bluematte','Blue Matte','bluematte'),
 			]
-		},
-		{
-			'type': 'string',
-			'attr': 'lux_mat_carpaint_kd',
-			'name': 'Diffuse Colour',
-			'description': 'Diffuse Colour',
-			'default': '-- TODO --',
 		},
 		{
 			'type': 'string',
@@ -213,6 +269,9 @@ class main(
 			'max': 1,
 			'soft_max': 1,
 		},
+		
+		# Glass
+		
 	]
 	
 	def get_properties(self):
