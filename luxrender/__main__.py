@@ -54,7 +54,7 @@ class luxrender(engine_base):
 		ui.render_panels.filter,
 		ui.render_panels.accelerator,
 		
-		ui.materials.main
+		ui.materials.material_editor
 	]
 		
 	def render(self, scene):

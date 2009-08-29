@@ -31,12 +31,7 @@ from ef.ui import described_layout
 
 from ef.ef import ef
 
-import bpy
-
-class main(
-	context_panel,
-	material_settings_panel,
-	described_layout):
+class material_editor(context_panel, material_settings_panel, described_layout):
 	__label__ = 'LuxRender Materials'
 	context_name = 'luxrender'
 	
@@ -45,20 +40,21 @@ class main(
 		'lux_material',
 		
 		# Used by many
-		#'lux_mat_kd',
-		#'lux_mat_kr',
-		#'lux_mat_kt',
-		#['lux_mat_ior_preset', 'lux_mat_ior_list'],
+		'lux_mat_kd',
+		'lux_mat_kr',
+		'lux_mat_kt',
+		
+		[0.33, 'lux_mat_ior_preset', ['lux_mat_ior_list', 'lux_mat_ior']],
 		
 		# Car paint
-		#'lux_mat_carpaint_label',
-		#'lux_mat_carpaint_preset',
+		'lux_mat_carpaint_label',
+		'lux_mat_carpaint_preset',
 		
-		#'lux_mat_carpaint_ks1',
-		#'lux_mat_carpaint_ks2',
-		#'lux_mat_carpaint_ks3',
-		#['lux_mat_carpaint_r1','lux_mat_carpaint_r2','lux_mat_carpaint_r3'],
-		#['lux_mat_carpaint_m1','lux_mat_carpaint_m2','lux_mat_carpaint_m3'],
+		'lux_mat_carpaint_ks1',
+		'lux_mat_carpaint_ks2',
+		'lux_mat_carpaint_ks3',
+		['lux_mat_carpaint_r1','lux_mat_carpaint_r2','lux_mat_carpaint_r3'],
+		['lux_mat_carpaint_m1','lux_mat_carpaint_m2','lux_mat_carpaint_m3'],
 		
 		# Glass
 		
@@ -66,26 +62,27 @@ class main(
 	
 	selection = {
 		# Used by many
-		#'lux_mat_kd':					[{ 'lux_material': ['carpaint', 'glass'] }],
-		#'lux_mat_kr':					[{ 'lux_material': ['glass'] }],
-		#'lux_mat_kt':					[{ 'lux_material': ['glass'] }],
-		#'lux_mat_ior_preset':			[{ 'lux_material': ['glass'] }],
-		#'lux_mat_ior_list':				[{ 'lux_material': ['glass'] }],
+		'lux_mat_kd':					[{ 'lux_material': 'carpaint' }],
+		'lux_mat_kr':					[{ 'lux_material': 'glass' }],
+		'lux_mat_kt':					[{ 'lux_material': 'glass' }],
+		'lux_mat_ior_preset':			[{ 'lux_material': 'glass' }],
+		'lux_mat_ior_list':				[{ 'lux_material': 'glass' }, { 'lux_mat_ior_preset': True }],
+		'lux_mat_ior':					[{ 'lux_material': 'glass' }, { 'lux_mat_ior_preset': False }],
 	
 		# Car paint
-		#'lux_mat_carpaint_label':		[{ 'lux_material': 'carpaint' }],
-		#'lux_mat_carpaint_preset':		[{ 'lux_material': 'carpaint' }],
+		'lux_mat_carpaint_label':		[{ 'lux_material': 'carpaint' }],
+		'lux_mat_carpaint_preset':		[{ 'lux_material': 'carpaint' }],
 		# Car paint custom
-		#'lux_mat_carpaint_kd':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_ks1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_ks2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_ks3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_r1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_r2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_r3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_m1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_m2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		#'lux_mat_carpaint_m3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_kd':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_ks1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_ks2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_ks3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_r1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_r2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_r3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_m1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_m2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'lux_mat_carpaint_m3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
 		
 		# Glass
 		
@@ -118,21 +115,21 @@ class main(
 		
 		# Used by many mats
 		{
-			'type': 'string',
+			'type': 'colour',
 			'attr': 'lux_mat_kd',
 			'name': 'Diffuse Colour',
 			'description': 'Diffuse Colour',
 			'default': '-- TODO --',
 		},
 		{
-			'type': 'string',
+			'type': 'colour',
 			'attr': 'lux_mat_kr',
 			'name': 'Reflection Colour',
 			'description': 'Reflection Colour',
 			'default': '-- TODO --',
 		},
 		{
-			'type': 'string',
+			'type': 'colour',
 			'attr': 'lux_mat_kt',
 			'name': 'Transmission Colour',
 			'description': 'Transmission Colour',
@@ -148,13 +145,25 @@ class main(
 		{
 			'type': 'enum',
 			'attr': 'lux_mat_ior_list',
-			'name': 'IOR',
-			'description': 'IOR',
+			'name': '',
+			'description': 'IOR Preset',
 			'default': '1.5',
 			'items': [
+				('-1', 'IOR Preset', 'IOR Preset'),
 				('1.5', 'Fused Silica Glass', 'Fused Silica Glass'),
 				('0', '-- TODO --', '0'),
 			]
+		},
+		{
+			'type': 'float',
+			'attr': 'lux_mat_ior',
+			'name': '',
+			'description': 'IOR',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'max': 10,
+			'soft_max': 10,
 		},
 		
 		
@@ -183,21 +192,21 @@ class main(
 			]
 		},
 		{
-			'type': 'string',
+			'type': 'colour',
 			'attr': 'lux_mat_carpaint_ks1',
 			'name': 'Specular Layer 1',
 			'description': 'Specular Layer 1 Colour',
 			'default': '-- TODO --',
 		},
 		{
-			'type': 'string',
+			'type': 'colour',
 			'attr': 'lux_mat_carpaint_ks2',
 			'name': 'Specular Layer 2',
 			'description': 'Specular Layer 2 Colour',
 			'default': '-- TODO --',
 		},
 		{
-			'type': 'string',
+			'type': 'colour',
 			'attr': 'lux_mat_carpaint_ks3',
 			'name': 'Specular Layer 3',
 			'description': 'Specular Layer 3 Colour',
