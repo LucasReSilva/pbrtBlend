@@ -31,19 +31,19 @@ import ui.render_panels
 import ui.materials
 
 from ef.ef import ef
-if ef.host_program() == 'BLENDER25':
-	# Add standard Blender Interface elements
-	import buttons_scene
-	buttons_scene.SCENE_PT_render.COMPAT_ENGINES.add('luxrender')
-	buttons_scene.SCENE_PT_dimensions.COMPAT_ENGINES.add('luxrender')
-	buttons_scene.SCENE_PT_output.COMPAT_ENGINES.add('luxrender')
-	del buttons_scene
-	import buttons_material
-	buttons_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
-	del buttons_material
+
+# Add standard Blender Interface elements
+import buttons_scene
+buttons_scene.SCENE_PT_render.COMPAT_ENGINES.add('luxrender')
+buttons_scene.SCENE_PT_dimensions.COMPAT_ENGINES.add('luxrender')
+buttons_scene.SCENE_PT_output.COMPAT_ENGINES.add('luxrender')
+del buttons_scene
+import buttons_material
+buttons_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
+del buttons_material
 
 # Then define all custom stuff
-class luxrender(engine_base):
+class _luxrender(engine_base):
 	__label__ = 'LuxRender'
 		
 	interfaces = [
