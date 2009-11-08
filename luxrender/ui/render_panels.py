@@ -31,7 +31,7 @@ class render_described_context(ef.ui.context_panel, ef.ui.render_settings_panel,
 	context_name = 'luxrender'
 
 class engine(render_described_context):
-	__label__ = 'LuxRender Engine Configuration'
+	bl_label = 'LuxRender Engine Configuration'
 	
 	controls = [
 		['lux_threads_auto', 'lux_threads'],
@@ -156,7 +156,7 @@ class engine(render_described_context):
 	]
 			
 class sampler(render_described_context):
-	__label__ = 'Sampler'
+	bl_label = 'Sampler'
 	
 	controls = [
 		[
@@ -353,7 +353,7 @@ class sampler(render_described_context):
 	]
 				
 class integrator(render_described_context):
-	__label__ = 'Surface Integrator'
+	bl_label = 'Surface Integrator'
 	
 	controls = [
 		[
@@ -440,7 +440,7 @@ class integrator(render_described_context):
 	]
 
 class volume(render_described_context):
-	__label__ = 'Volume Integrator'
+	bl_label = 'Volume Integrator'
 	
 	controls = [
 		'lux_volumeintegrator', 'lux_volume_stepsize'
@@ -472,7 +472,7 @@ class volume(render_described_context):
 	]
 			
 class filter(render_described_context):
-	__label__ = 'Filter'
+	bl_label = 'Filter'
 	
 	controls = [
 		[
@@ -622,7 +622,7 @@ class filter(render_described_context):
 	]
 
 class accelerator(render_described_context):
-	__label__ = 'Accelerator'
+	bl_label = 'Accelerator'
 	
 	controls = [
 		'lux_accelerator',

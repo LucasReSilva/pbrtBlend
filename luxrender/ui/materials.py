@@ -32,7 +32,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 class material_editor(context_panel, material_settings_panel, described_layout):
-	__label__ = 'LuxRender Materials'
+	bl_label = 'LuxRender Materials'
 	context_name = 'luxrender'
 	
 	controls = [

@@ -33,18 +33,18 @@ import ui.materials
 from ef.ef import ef
 
 # Add standard Blender Interface elements
-import buttons_scene
-buttons_scene.SCENE_PT_render.COMPAT_ENGINES.add('luxrender')
-buttons_scene.SCENE_PT_dimensions.COMPAT_ENGINES.add('luxrender')
-buttons_scene.SCENE_PT_output.COMPAT_ENGINES.add('luxrender')
-del buttons_scene
-import buttons_material
-buttons_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
-del buttons_material
+import properties_render
+properties_render.RENDER_PT_render.COMPAT_ENGINES.add('luxrender')
+properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('luxrender')
+properties_render.RENDER_PT_output.COMPAT_ENGINES.add('luxrender')
+del properties_render
+import properties_material
+properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
+del properties_material
 
 # Then define all custom stuff
-class _luxrender(engine_base):
-	__label__ = 'LuxRender'
+class luxrender(engine_base):
+	bl_label = 'LuxRender'
 		
 	interfaces = [
 		ui.render_panels.engine,
