@@ -31,9 +31,16 @@ from ef.ui import described_layout
 
 from ef.ef import ef
 
+import bpy
+
+class luxrender_material(bpy.types.IDPropertyGroup):
+    pass
+
 class material_editor(context_panel, material_settings_panel, described_layout):
 	bl_label = 'LuxRender Materials'
 	context_name = 'luxrender'
+	
+	property_group = luxrender_material
 	
 	controls = [
 		# Common props
@@ -88,7 +95,7 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		
 	}
 	
-	material_properties = [
+	properties = [
 		# Material Type Select
 		{
 			'type': 'enum',
@@ -283,13 +290,19 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		
 	]
 	
-	def get_properties(self):
-		return self.material_properties
-	
+	# Overridden to provide data storage in the material, not the scene
 	def draw(self, context):
 		if context.material is not None:
-			if not hasattr(context.material, 'lux_material'):
-				ef.init_properties(context.material, self.material_properties)
+			if not hasattr(context.material, 'luxrender_material'):
+				#ef.ef.ef.log('Initialising Indigo properties in material %s'%context.material.name)
+				ef.init_properties(context.material, [{
+					'type': 'pointer',
+					'attr': self.property_group.__name__,
+					'ptype': self.property_group,
+					'name': self.property_group.__name__,
+					'description': self.property_group.__name__
+				}])
+				ef.init_properties(self.property_group, self.properties)
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.material)

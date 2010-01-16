@@ -26,12 +26,33 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import ef.ui
+import bpy
 
 class render_described_context(ef.ui.context_panel, ef.ui.render_settings_panel, ef.ui.described_layout):
 	context_name = 'luxrender'
 
+class luxrender_engine(bpy.types.IDPropertyGroup):
+    pass
+  
+class luxrender_sampler(bpy.types.IDPropertyGroup):
+    pass
+   
+class luxrender_integrator(bpy.types.IDPropertyGroup):
+    pass
+   
+class luxrender_volume(bpy.types.IDPropertyGroup):
+    pass
+
+class luxrender_filter(bpy.types.IDPropertyGroup):
+    pass
+   
+class luxrender_accelerator(bpy.types.IDPropertyGroup):
+    pass
+
 class engine(render_described_context):
 	bl_label = 'LuxRender Engine Configuration'
+	
+	property_group = luxrender_engine
 	
 	controls = [
 		['lux_threads_auto', 'lux_threads'],
@@ -157,6 +178,8 @@ class engine(render_described_context):
 			
 class sampler(render_described_context):
 	bl_label = 'Sampler'
+	
+	property_group = luxrender_sampler
 	
 	controls = [
 		[
@@ -355,6 +378,8 @@ class sampler(render_described_context):
 class integrator(render_described_context):
 	bl_label = 'Surface Integrator'
 	
+	property_group = luxrender_integrator
+	
 	controls = [
 		[
 			0.7,
@@ -442,6 +467,8 @@ class integrator(render_described_context):
 class volume(render_described_context):
 	bl_label = 'Volume Integrator'
 	
+	property_group = luxrender_volume
+	
 	controls = [
 		'lux_volumeintegrator', 'lux_volume_stepsize'
 	]
@@ -473,6 +500,8 @@ class volume(render_described_context):
 			
 class filter(render_described_context):
 	bl_label = 'Filter'
+	
+	property_group = luxrender_filter
 	
 	controls = [
 		[
@@ -623,6 +652,8 @@ class filter(render_described_context):
 
 class accelerator(render_described_context):
 	bl_label = 'Accelerator'
+	
+	property_group = luxrender_accelerator
 	
 	controls = [
 		'lux_accelerator',
