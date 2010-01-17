@@ -34,14 +34,6 @@ AUTOUPDATE_USERNAMES = {
 
 # NON-standard library imports
 try:
-    import pysvn
-    sc = pysvn.Client()
-except ImportError:
-    print('This script requires pysvn')
-    print(' -> http://pysvn.tigris.org/project_downloads.html')
-    sys.exit(1)
-    
-try:
     import mercurial.ui
     import mercurial.hg
     import mercurial.commands
@@ -64,14 +56,13 @@ except ImportError:
     sys.exit(1)
 
 # Go up to repo root
-releaselib.pushd('../../')
+releaselib.pushd('../')
 REPO_DIR = os.getcwd()
 
-# SVN Update the repo root
-releaselib.print_title('Updating working copy')
-sc.update(REPO_DIR)
-SVN_REV = sc.info(REPO_DIR).revision.number
-print('SVN revision is %i'%SVN_REV)
+# Get the repo revision number
+repo_root = mercurial.hg.repository(mui, REPO_DIR)
+repo_cl = repo_root.changelog
+REPO_REV = repo_cl.rev( repo_cl.tip() )
 
 # Create release directory
 releaselib.print_title('Create release directory')
@@ -80,7 +71,7 @@ RELEASE_DIR = os.path.join(os.getcwd(), 'release', sys.argv[1])
 try:
     os.makedirs(RELEASE_DIR)
     print('Assembling to directory: %s' % RELEASE_DIR)
-except Exception as err:
+except Exception, err:
     if not 'exists' in str(err): # it's OK if the target dir exists
         print(err) #'Cannot make release dir: %s' % RELEASE_DIR)
         sys.exit(1)
@@ -98,10 +89,10 @@ for hgfiles in glob.glob(RELEASE_DIR+'/.hg*'):
     else:
         os.remove(hgfiles)
 
-# SVN add the Exporter Framework files
-sc.add(RELEASE_DIR)
+# REPO add the Exporter Framework files
+mercurial.commands.add(mui, repo_root)
 # Add trunk sources as EF engine
-sc.copy('src/luxrender', os.path.join(RELEASE_DIR, 'engines', 'luxrender'))
+mercurial.commands.copy(mui, repo_root, 'src/luxrender', os.path.join(RELEASE_DIR, 'engines', 'luxrender'))
 
 # Remove development code from source files
 releaselib.print_title('Finalise source code')
@@ -111,56 +102,56 @@ for f in STRIP_FILES:
     
 # Create config file
 releaselib.print_title('Create config files')
-releaselib.make_config_file(RELEASE_DIR, SVN_REV, AUTOUPDATE_URLs)
-sc.add(os.path.join(RELEASE_DIR, 'ef.cfg'))
+releaselib.make_config_file(RELEASE_DIR, REPO_REV, AUTOUPDATE_URLs)
+mercurial.commands.add(mui, repo_root, os.path.join(RELEASE_DIR, 'ef.cfg'))
 
 # Create zipfiles
 releaselib.print_title('Create release ZIPs')
 for f in glob.glob(RELEASE_PARENT+'/*.zip'):
     os.remove(f)
-releaselib.make_release_zips(RELEASE_DIR, SVN_REV)
+releaselib.make_release_zips(RELEASE_DIR, REPO_REV)
 
 # Upload
-releaselib.print_title('Upload release files')
-if len(ssh_key_agent.keys) > 0:
-    # only try 1st key
-    key = ssh_key_agent.keys[0]
-    # upload zips
-    for mod in ['EF', 'luxrender']:
-        print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod]))
-        ssh_transport = paramiko.Transport(UPLOAD_HOSTS[mod])
-        ssh_transport.connect()
-        ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES[mod], key)
-        sftp = paramiko.SFTPClient.from_transport(ssh_transport)
-        for modf in glob.glob(RELEASE_PARENT+'/%s*.zip'%mod.lower()):
-            src = modf
-            trg = AUTOUPDATE_PATHs[mod] + ('/release/%s/'%mod.lower()) + os.path.basename(modf)
-            print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod],trg))
-            sr = sftp.put(src, trg)
-            print('%i bytes transferred' % sr.st_size)
-        sftp.close()
-        ssh_transport.close()
-        del sftp
-        del ssh_transport
-        
-    # Upload manifests
-    print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF']))
-    ssh_transport = paramiko.Transport(UPLOAD_HOSTS['EF'])
-    ssh_transport.connect()
-    ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES['EF'], key)
-    sftp = paramiko.SFTPClient.from_transport(ssh_transport)
-    for modf in glob.glob(RELEASE_PARENT+'/*_update.manifest'):
-        src = modf
-        trg = AUTOUPDATE_PATHs[mod] + '/' + os.path.basename(modf)
-        print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF'],trg))
-        sftp.put(src, trg)
-        print('%i bytes transferred' % sr.st_size)
-    sftp.close()
-    ssh_transport.close()
-    del sftp
-    del ssh_transport
-else:
-    print('No SSH Key Agent found, or no keys available; cannot upload')
+#releaselib.print_title('Upload release files')
+#if len(ssh_key_agent.keys) > 0:
+#    # only try 1st key
+#    key = ssh_key_agent.keys[0]
+#    # upload zips
+#    for mod in ['EF', 'luxrender']:
+#        print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod]))
+#        ssh_transport = paramiko.Transport(UPLOAD_HOSTS[mod])
+#        ssh_transport.connect()
+#        ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES[mod], key)
+#        sftp = paramiko.SFTPClient.from_transport(ssh_transport)
+#        for modf in glob.glob(RELEASE_PARENT+'/%s*.zip'%mod.lower()):
+#            src = modf
+#            trg = AUTOUPDATE_PATHs[mod] + ('/release/%s/'%mod.lower()) + os.path.basename(modf)
+#            print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod],trg))
+#            sr = sftp.put(src, trg)
+#            print('%i bytes transferred' % sr.st_size)
+#        sftp.close()
+#        ssh_transport.close()
+#        del sftp
+#        del ssh_transport
+#        
+#    # Upload manifests
+#    print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF']))
+#    ssh_transport = paramiko.Transport(UPLOAD_HOSTS['EF'])
+#    ssh_transport.connect()
+#    ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES['EF'], key)
+#    sftp = paramiko.SFTPClient.from_transport(ssh_transport)
+#    for modf in glob.glob(RELEASE_PARENT+'/*_update.manifest'):
+#        src = modf
+#        trg = AUTOUPDATE_PATHs[mod] + '/' + os.path.basename(modf)
+#        print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF'],trg))
+#        sftp.put(src, trg)
+#        print('%i bytes transferred' % sr.st_size)
+#    sftp.close()
+#    ssh_transport.close()
+#    del sftp
+#    del ssh_transport
+#else:
+#    print('No SSH Key Agent found, or no keys available; cannot upload')
 
 
 releaselib.print_title('Finished')

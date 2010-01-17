@@ -51,7 +51,7 @@ def make_config_file(EXDIR, VER, AUTOUPDATE_URLs):
         
     cf = ConfigParser.SafeConfigParser()
     
-    for s in ['EF', 'indigo']:
+    for s in ['EF', 'luxrender']:
         cf.add_section(s)
         cf.set(s, 'update_location', AUTOUPDATE_URLs['EF']+'/%s_update.manifest'%s.lower())
         cf.set(s, 'ver', VER)
@@ -91,4 +91,4 @@ def make_release_zips(release_dir, VER):
     output_dir = os.path.split(release_dir)[0]
     
     zipper(release_dir+'/ef', output_dir+'/ef_'+VER+'.zip')
-    zipper(release_dir+'/engines/indigo', output_dir+'/indigo_'+VER+'.zip')
+    zipper(release_dir+'/engines/luxrender', output_dir+'/luxrender_'+VER+'.zip')
