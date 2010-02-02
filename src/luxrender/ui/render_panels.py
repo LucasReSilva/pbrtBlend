@@ -28,17 +28,74 @@
 import ef.ui
 import bpy
 
+DEBUG = True
+
 class render_described_context(ef.ui.context_panel, ef.ui.render_settings_panel, ef.ui.described_layout):
 	context_name = 'luxrender'
+
+# TODO these propery group classes shouldn't strictly be in the UI module (they are called from engine render())
+
+# TODO remove all the lux_ prefixes off the members of the property groups
+
+# TODO adapt values written to d based on simple/advanced views
+
+# TODO check parameter completeness against Lux API
 
 class luxrender_engine(bpy.types.IDPropertyGroup):
     pass
   
 class luxrender_sampler(bpy.types.IDPropertyGroup):
-    pass
+    def api_output(self):
+    	d = {}
+    	
+    	if self.lux_sampler in ['random', 'lowdiscrepancy']:
+    		d['pixelsamples']         = self.lux_sampler_pixelsamples
+    		d['pixelsampler']         = self.lux_sampler_pixelsampler
+    	
+    	if self.lux_sampler == 'erpt':
+    		d['initsamples']          = self.lux_sampler_erpt_initsamples
+    		d['chainlength']          = self.lux_sampler_erpt_chainlength
+#    		d['mutationrange']        = self.lux_sampler_erpt_mutationrange
+    	
+    	if self.lux_sampler == 'metropolis':
+    		d['initsamples']          = self.lux_sampler_metro_initsamples
+    		d['maxconsecrejects']     = self.lux_sampler_metro_mncr
+    		d['largemutationprob']    = self.lux_sampler_metro_lmprob
+#    		d['micromutationprob']    = self.??
+#    		d['mutationrange']        = self.??
+    		d['usevariance']          = self.lux_sampler_metro_variance
+    	
+    	out = self.lux_sampler, list(d.items())
+    	if DEBUG: print(out)
+    	return out
+    		
    
 class luxrender_integrator(bpy.types.IDPropertyGroup):
-    pass
+    def api_output(self):
+    	d={}
+    	
+    	if self.lux_surfaceintegrator in ['directlighting', 'path']:
+    		d['lightstrategy']    = self.lux_integrator_strategy
+#    		d['maxdepth']         = self.??
+    	
+    	if self.lux_surfaceintegrator == 'bidirectional':
+    		d['eyedepth']         = self.lux_integrator_bidir_edepth
+    		d['lightdepth']       = self.lux_integrator_bidir_ldepth
+#    		d['eyerrthreshold']   = self.??
+#    		d['lightrrthreshold'] = self.??
+    	
+    	if self.lux_surfaceintegrator == 'distributedpath':
+    		d['strategy']         = self.lux_integrator_strategy
+#    		d['diffusedepth']     = self.??
+#    		d['glossydepth']      = self.??
+#    		d['speculardepth']    = self.??
+    	
+#    	if self.lux_surfaceintegrator == 'exphotonmap':
+#    		pass
+    	
+    	out = self.lux_surfaceintegrator, list(d.items())
+    	if DEBUG: print(out)
+    	return out
    
 class luxrender_volume(bpy.types.IDPropertyGroup):
     pass
@@ -57,19 +114,21 @@ class engine(render_described_context):
 	controls = [
 		['lux_threads_auto', 'lux_threads'],
 		'lux_priority',
-		['lux_rgc', 'lux_colclamp', 'lux_noopengl'],
+		['lux_rgc', 'lux_colclamp',
+#		 'lux_noopengl'
+		],
 		['lux_meshopt', 'lux_nolg'],
 		
-		'lux_singlefile',
-		['lux_file_lxs', 'lux_file_lxo', 'lux_file_lxm', 'lux_file_lxv'],
+#		'lux_singlefile',
+#		['lux_file_lxs', 'lux_file_lxo', 'lux_file_lxm', 'lux_file_lxv'],
 	]
 	
 	selection = {
 		'lux_threads':				[{ 'lux_threads_auto': False }],
-		'lux_file_lxs':				[{ 'lux_singlefile': False }],
-		'lux_file_lxo':				[{ 'lux_singlefile': False }],
-		'lux_file_lxm':				[{ 'lux_singlefile': False }],
-		'lux_file_lxv':				[{ 'lux_singlefile': False }],
+#		'lux_file_lxs':				[{ 'lux_singlefile': False }],
+#		'lux_file_lxo':				[{ 'lux_singlefile': False }],
+#		'lux_file_lxm':				[{ 'lux_singlefile': False }],
+#		'lux_file_lxv':				[{ 'lux_singlefile': False }],
 	}
 	
 	properties = [
@@ -104,13 +163,13 @@ class engine(render_described_context):
 				('abovenormal', 'Above Normal', 'abovenormal'),
 			]
 		},
-		{
-			'type': 'bool',
-			'attr': 'lux_noopengl',
-			'name': 'No OpenGL',
-			'description': 'Disable OpenGL viewport (for buggy display drivers)',
-			'default': False,
-		},
+#		{
+#			'type': 'bool',
+#			'attr': 'lux_noopengl',
+#			'name': 'No OpenGL',
+#			'description': 'Disable OpenGL viewport (for buggy display drivers)',
+#			'default': False,
+#		},
 		{
 			'type': 'bool',
 			'attr': 'lux_rgc',
@@ -139,41 +198,41 @@ class engine(render_described_context):
 			'description': 'Combine all light groups',
 			'default': False,
 		},
-		{
-			'type': 'bool',
-			'attr': 'lux_singlefile',
-			'name': 'Combine LXS',
-			'description': 'Write only a single LXS file',
-			'default': False,
-		},
-		{
-			'type': 'bool',
-			'attr': 'lux_file_lxs',
-			'name': 'LXS',
-			'description': 'Write LXS (Scene) file',
-			'default': True,
-		},
-		{
-			'type': 'bool',
-			'attr': 'lux_file_lxo',
-			'name': 'LXO',
-			'description': 'Write LXO (Objects) file',
-			'default': True,
-		},
-		{
-			'type': 'bool',
-			'attr': 'lux_file_lxm',
-			'name': 'LXM',
-			'description': 'Write LXM (Materials) file',
-			'default': True,
-		},
-		{
-			'type': 'bool',
-			'attr': 'lux_file_lxv',
-			'name': 'LXV',
-			'description': 'Write LXV (volumes) file',
-			'default': True,
-		},
+#		{
+#			'type': 'bool',
+#			'attr': 'lux_singlefile',
+#			'name': 'Combine LXS',
+#			'description': 'Write only a single LXS file',
+#			'default': False,
+#		},
+#		{
+#			'type': 'bool',
+#			'attr': 'lux_file_lxs',
+#			'name': 'LXS',
+#			'description': 'Write LXS (Scene) file',
+#			'default': True,
+#		},
+#		{
+#			'type': 'bool',
+#			'attr': 'lux_file_lxo',
+#			'name': 'LXO',
+#			'description': 'Write LXO (Objects) file',
+#			'default': True,
+#		},
+#		{
+#			'type': 'bool',
+#			'attr': 'lux_file_lxm',
+#			'name': 'LXM',
+#			'description': 'Write LXM (Materials) file',
+#			'default': True,
+#		},
+#		{
+#			'type': 'bool',
+#			'attr': 'lux_file_lxv',
+#			'name': 'LXV',
+#			'description': 'Write LXV (volumes) file',
+#			'default': True,
+#		},
 	]
 			
 class sampler(render_described_context):
@@ -194,14 +253,13 @@ class sampler(render_described_context):
 		['lux_sampler_metro_initsamples','lux_sampler_metro_variance'],		# adv
 		
 		# erpt
-		['lux_sampler_erpt_initsamples', 'lux_sampler_erpt_chainlength', 'lux_sampler_erpt_stratawidth'], # simple
+		['lux_sampler_erpt_initsamples', 'lux_sampler_erpt_chainlength',
+#		 'lux_sampler_erpt_mutationrange'
+		], # simple
 		
-		# lowdiscrepancy
-		['lux_sampler_ld_pixelsampler', 'lux_sampler_ld_samples'],			# simple
-		
-		# random
-		'lux_sampler_rnd_pixelsampler',
-		['lux_sampler_rnd_xsamples', 'lux_sampler_rnd_ysamples'],			# simple 
+		# random & lowdiscrepancy
+		'lux_sampler_pixelsampler',
+		['lux_sampler_pixelsamples'],			# simple 
 	]
 	
 	selection = {
@@ -215,14 +273,10 @@ class sampler(render_described_context):
 		
 		'lux_sampler_erpt_initsamples':		[{ 'lux_sampler': 'erpt'}],
 		'lux_sampler_erpt_chainlength':		[{ 'lux_sampler': 'erpt'}],
-		'lux_sampler_erpt_stratawidth':		[{ 'lux_sampler': 'erpt'}],
+#		'lux_sampler_erpt_mutationrange':   [{ 'lux_sampler': 'erpt'}],
 		
-		'lux_sampler_ld_pixelsampler':		[{ 'lux_sampler': 'lowdiscrepancy'}],
-		'lux_sampler_ld_samples':			[{ 'lux_sampler': 'lowdiscrepancy'}],
-		
-		'lux_sampler_rnd_pixelsampler':		[{ 'lux_sampler': 'random'}],
-		'lux_sampler_rnd_xsamples':			[{ 'lux_sampler': 'random'}],
-		'lux_sampler_rnd_ysamples':			[{ 'lux_sampler': 'random'}],
+		'lux_sampler_pixelsampler':		    [{ 'lux_sampler': ['random', 'lowdiscrepancy']}],
+		'lux_sampler_pixelsamples':			[{ 'lux_sampler': ['random', 'lowdiscrepancy']}],
 	}
 	
 	properties = [
@@ -307,18 +361,18 @@ class sampler(render_described_context):
 			'min': 1,
 			'max': 32768,
 		},
-		{
-			'type': 'int', 
-			'attr': 'lux_sampler_erpt_stratawidth',
-			'name': 'Str. Width',
-			'description': 'Strata Width',
-			'default': 256,
-			'min': 1,
-			'max': 32768,
-		},
+#		{
+#			'type': 'int', 
+#			'attr': 'lux_sampler_erpt_mutationrange',
+#			'name': 'Str. Width',
+#			'description': 'Strata Width',
+#			'default': 256,
+#			'min': 1,
+#			'max': 32768,
+#		},
 		{
 			'type': 'enum',
-			'attr': 'lux_sampler_ld_pixelsampler',
+			'attr': 'lux_sampler_pixelsampler',
 			'name': 'Pixel Sampler',
 			'description': 'Pixel sampling strategy',
 			'default': 'lowdiscrepancy',
@@ -333,46 +387,14 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'lux_sampler_ld_samples',
-			'name': 'Samples',
+			'attr': 'lux_sampler_pixelsamples',
+			'name': 'Pixel Samples',
 			'description': 'Average number of samples taken per pixel. More samples create a higher quality image at the cost of render time',
 			'default': 4,
 			'min': 1,
 			'max': 8192,
 		},
-		{
-			'type': 'enum',
-			'attr': 'lux_sampler_rnd_pixelsampler',
-			'name': 'Pixel Sampler',
-			'description': 'Pixel sampling strategy',
-			'default': 'vegas',
-			'items': [
-				('linear', 'Linear', 'linear'),
-				('tile', 'Tile', 'tile'),
-				('random', 'Random', 'random'),
-				('vegas', 'Vegas', 'vegas'),
-				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
-				('hilbert', 'Hilbert', 'hilbert'),
-			]
-		},
-		{
-			'type': 'int', 
-			'attr': 'lux_sampler_rnd_xsamples',
-			'name': 'X Samples',
-			'description': 'Samples in X dimension',
-			'default': 2,
-			'min': 1,
-			'max': 512,
-		},
-		{
-			'type': 'int', 
-			'attr': 'lux_sampler_rnd_ysamples',
-			'name': 'Y Samples',
-			'description': 'Samples in Y dimension',
-			'default': 2,
-			'min': 1,
-			'max': 512,
-		},
+
 	]
 				
 class integrator(render_described_context):

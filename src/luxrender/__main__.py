@@ -25,27 +25,30 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+# System libs
+import os
+
+# Framework libs
+from ef.ef import ef
 from ef.engine import engine_base
 
-import ui.render_panels
+# Exporter libs
+from module import LuxManager as LM
 import ui.materials
-
-from ef.ef import ef
+import ui.render_panels
 
 # Add standard Blender Interface elements
 import properties_render
 properties_render.RENDER_PT_render.COMPAT_ENGINES.add('luxrender')
 properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('luxrender')
-properties_render.RENDER_PT_output.COMPAT_ENGINES.add('luxrender')
+# Don't need file output panel for API
+#properties_render.RENDER_PT_output.COMPAT_ENGINES.add('luxrender')
 del properties_render
 
 import properties_material
 properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
 del properties_material
 
-from module import LuxManager as LM
-
-# Then define all custom stuff
 class luxrender(engine_base):
 	bl_label = 'LuxRender'
 	
@@ -62,29 +65,34 @@ class luxrender(engine_base):
 		ui.materials.material_editor
 	]
 	
-	active = True
-	
 	def update_framebuffer(self, xres, yres, fb):
 		'''
 		this will be called by the LuxFilmDisplay thread started by LuxManager
+		
+		TODO, perhaps this class itself is a threaded timer ?
 		'''
 		
 		result = self.begin_result(0,0,xres,yres)
-		lay = result.layers[0]
 		# read default png file
-		lay.load_from_file('luxout.png')
+		if os.path.exists('luxout.png'):
+			lay = result.layers[0]
+			lay.load_from_file('luxout.png')
 		self.end_result(result)
-		
-		
+	
 	
 	def render(self, scene):
 		self.LuxManager.reset()
 		self.update_stats('', 'LuxRender: Parsing Scene')
 		
+		l = self.LuxManager.lux_module
+		
+		# REAL CODE :)
+		l.sampler(*scene.luxrender_sampler.api_output())
+		l.surfaceIntegrator(*scene.luxrender_integrator.api_output())
+		
 		
 		# THIS IS ALL JUST FOR TESTING BELOW;
 		# In future use some classes to gather parameters into dicts for API calls please ;)
-		l = self.LuxManager.lux_module
 		matrix = scene.camera.matrix
 		pos = matrix[3]
 		forwards = -matrix[2]
@@ -118,7 +126,12 @@ class luxrender(engine_base):
 		l.lightSource('sunsky', list(es.items()))
 		# DONE TESTING
 		
+		
+		
+		
+		
 		self.LuxManager.start(self)
+		self.update_stats('', 'LuxRender: Rendering warmup')
 		
 		import time
 		while self.LuxManager.started:

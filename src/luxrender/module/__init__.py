@@ -3,6 +3,9 @@ import bpy
 import pylux as lux
 import threading
 
+def LuxLog(msg):
+    ef.log('[LuxRender] %s' % msg)
+
 class LuxOutput(object):
     '''
     Base class for any Lux output
@@ -22,7 +25,7 @@ class LuxTimerThread(threading.Thread):
     '''
     Periodically call self.kick()
     '''
-    KICK_PERIOD = 10
+    KICK_PERIOD = 8
     
     active = True
     timer = None
@@ -50,8 +53,10 @@ class LuxTimerThread(threading.Thread):
     
 class LuxAPIStats(LuxTimerThread):
     '''
-    Periodically get lux stats and send to ef.log
+    Periodically get lux stats
     '''
+    
+    KICK_PERIOD = 1
     
     stats_dict = {
         'secElapsed':       0.0,
@@ -76,11 +81,9 @@ class LuxAPIStats(LuxTimerThread):
             self.timer.cancel()
             
     def kick(self):
-        print(' ')
         for k in self.stats_dict.keys():
             self.stats_dict[k] = lux.statistics(k)
-            
-        ##ef.log('[LuxRender] %s' % ' | '.join(['%s: %0.2f'%(k,v) for k,v in self.stats_dict.items()]))
+        
         self.stats_string = ' | '.join(['%s: %0.2f'%(k,v) for k,v in self.stats_dict.items()])
               
 class LuxFilmDisplay(LuxTimerThread):
@@ -93,13 +96,16 @@ class LuxFilmDisplay(LuxTimerThread):
         self.RE = RE
         LuxTimerThread.start(self)
             
-    def kick(self):
+    def kick(self, render_end=False):
         if self.RE is not None:
-            px = lux.framebuffer()
+            px = [] #lux.framebuffer()
             xres = int(lux.statistics('filmXres'))
             yres = int(lux.statistics('filmYres'))
             time = lux.statistics('secElapsed')
-            ef.log('[LuxRender] Updating render result %ix%i (%ipx)' % (xres,yres,len(px)))
+            if render_end:
+                LuxLog('Final render result %ix%i' % (xres,yres))
+            else:
+                LuxLog('Updating render result %ix%i' % (xres,yres))
             self.RE.update_framebuffer(xres,yres,px)
         
 def luxlog(a,b,c):
@@ -120,12 +126,14 @@ class LuxManager(LuxOutput):
         lux.init()
         self.reset()
         
-    @staticmethod
-    def luxlog(a, b, c):
-        ef.log('[LuxRender] %s %s %s' % (a,b,c))
+#    @staticmethod
+#    def luxlog(a, b, c):
+#        LuxLog('%s %s %s' % (a,b,c))
 
     def start(self, RE):
-        if self.started: return
+        if self.started:
+            LuxLog('Already rendering!')
+            return
         lux.worldEnd()
         self.stats_thread.start()
         self.fb_thread.start(RE)
@@ -141,17 +149,21 @@ class LuxManager(LuxOutput):
         
         self.stats_thread  = LuxAPIStats()
         
-        if self.fb_thread is not None and self.fb_thread.isAlive():
-            self.fb_thread.stop()
-            self.fb_thread.join()
-        
-        self.fb_thread  = LuxFilmDisplay()
-        
         if not self.started: return
         self.started = False
         
         lux.exit()
         lux.wait()
+        
+        # Get the last image
+        if self.fb_thread is not None and self.fb_thread.isAlive():
+            self.fb_thread.stop()
+            self.fb_thread.join()
+            # Get last FB
+            self.fb_thread.kick(render_end=True)
+        
+        self.fb_thread  = LuxFilmDisplay()
+        
         lux.cleanup()
         
     def __del__(self):
