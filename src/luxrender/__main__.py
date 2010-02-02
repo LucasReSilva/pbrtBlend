@@ -43,9 +43,13 @@ import properties_material
 properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
 del properties_material
 
+from module import LuxManager as LM
+
 # Then define all custom stuff
 class luxrender(engine_base):
 	bl_label = 'LuxRender'
+	
+	LuxManager = LM()
 		
 	interfaces = [
 		ui.render_panels.engine,
@@ -57,6 +61,69 @@ class luxrender(engine_base):
 		
 		ui.materials.material_editor
 	]
+	
+	active = True
+	
+	def update_framebuffer(self, xres, yres, fb):
+		'''
+		this will be called by the LuxFilmDisplay thread started by LuxManager
+		'''
 		
+		result = self.begin_result(0,0,xres,yres)
+		lay = result.layers[0]
+		# read default png file
+		lay.load_from_file('luxout.png')
+		self.end_result(result)
+		
+		
+	
 	def render(self, scene):
-		pass
+		self.LuxManager.reset()
+		self.update_stats('', 'LuxRender: Parsing Scene')
+		
+		
+		# THIS IS ALL JUST FOR TESTING BELOW;
+		# In future use some classes to gather parameters into dicts for API calls please ;)
+		l = self.LuxManager.lux_module
+		matrix = scene.camera.matrix
+		pos = matrix[3]
+		forwards = -matrix[2]
+		target = pos + forwards
+		up = matrix[1]
+		l.lookAt(pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
+		cs = {
+			'fov': scene.camera.data.angle,
+		}
+		l.camera('perspective', list(cs.items()))
+		
+		fs = {
+			# Set resolution
+			'xresolution':   int(scene.render_data.resolution_x * scene.render_data.resolution_percentage / 100.0),
+			'yresolution':   int(scene.render_data.resolution_y * scene.render_data.resolution_percentage / 100.0),
+			
+			# write only default png file
+			'write_exr':         False,
+			'write_png':         True,
+			'write_tga':         False,
+			'write_resume_flm':  False,
+			'displayinterval':   5,
+			'writeinterval':     8,
+		}
+		l.film('fleximage', list(fs.items()))
+		l.worldBegin()
+		
+		es = {
+			'sundir': (0,0,1)
+		}
+		l.lightSource('sunsky', list(es.items()))
+		# DONE TESTING
+		
+		self.LuxManager.start(self)
+		
+		import time
+		while self.LuxManager.started:
+			time.sleep(1)
+			self.update_stats('', 'LuxRender: Rendering | %s' % self.LuxManager.stats_thread.stats_string)
+			if self.test_break():
+				self.LuxManager.reset()
+				self.update_stats('', '')
