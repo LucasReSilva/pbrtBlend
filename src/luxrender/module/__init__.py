@@ -118,7 +118,7 @@ class LuxFilmDisplay(LuxTimerThread):
             
     def kick(self, render_end=False):
         if self.RE is not None:
-            px = lux.framebuffer()
+            px = [] #lux.framebuffer()
             xres = int(lux.statistics('filmXres'))
             yres = int(lux.statistics('filmYres'))
             time = lux.statistics('secElapsed')
