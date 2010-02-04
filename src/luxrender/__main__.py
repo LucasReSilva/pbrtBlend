@@ -26,7 +26,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 # System libs
-import os
+import os, time
 
 # Framework libs
 from ef.ef import ef
@@ -77,6 +77,7 @@ class luxrender(engine_base):
 		if os.path.exists('luxout.png'):
 			lay = result.layers[0]
 			lay.load_from_file('luxout.png')
+			#lay.rect = fb
 		self.end_result(result)
 	
 	
@@ -86,19 +87,15 @@ class luxrender(engine_base):
 		
 		l = self.LuxManager.lux_module
 		
-		# REAL CODE :)
-		l.sampler(
-			*scene.luxrender_sampler.api_output()
-		)
-		l.surfaceIntegrator(
-			*scene.luxrender_integrator.api_output()
-		)
-		l.accelerator(
-			*scene.luxrender_accelerator.api_output()
-		)
+		# Set up render engine parameters
+		l.sampler(            *scene.luxrender_sampler.api_output()       )
+		l.accelerator(        *scene.luxrender_accelerator.api_output()   )
+		l.surfaceIntegrator(  *scene.luxrender_integrator.api_output()    )
+		l.volumeIntegrator(   *scene.luxrender_volume.api_output()        )
+		l.pixelFilter(        *scene.luxrender_filter.api_output()        )
 		
 		
-		# THIS IS ALL JUST FOR TESTING BELOW;
+		# BEGIN TEST CODE
 		# In future use some classes to gather parameters into dicts for API calls please ;)
 		matrix = scene.camera.matrix
 		pos = matrix[3]
@@ -131,12 +128,11 @@ class luxrender(engine_base):
 			'sundir': (0,0,1)
 		}
 		l.lightSource('sunsky', list(es.items()))
-		# DONE TESTING
+		# END TEST CODE
 		
 		
 		
-		
-		# reset output image file
+		# reset output image file and begin rendering
 		if os.path.exists('luxout.png'):
 			os.remove('luxout.png')
 			
@@ -144,10 +140,9 @@ class luxrender(engine_base):
 		self.update_stats('', 'LuxRender: Rendering warmup')
 		
 		# TODO replace time.sleep with a threading event
-		import time
 		while self.LuxManager.started:
 			time.sleep(1)
-			self.update_stats('', 'LuxRender: Rendering | %s' % self.LuxManager.stats_thread.stats_string)
+			self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
 			if self.test_break():
 				self.LuxManager.reset()
 				self.update_stats('', '')

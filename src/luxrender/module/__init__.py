@@ -9,7 +9,7 @@ def LuxLog(*args):
     Accepts variable args (can be used as pylux.errorHandler)
     '''
     if len(args) > 0:
-        ef.log(' '.join(['%s'%a for a in args]), module_name='LuxRender')
+        ef.log(' '.join(['%s'%a for a in args]), module_name='Lux')
 
 class LuxOutput(object):
     '''
@@ -84,27 +84,16 @@ class LuxAPIStats(LuxTimerThread):
         #'terminated':       0.0,
     }
     
-    stats_translate = {
-        'secElapsed':       'Rendering Time',
-        'samplesSec':       'Samples/Sec',
-        'samplesTotSec':    'Total Samples/Sec',
-        'samplesPx':        'Samples/Px',
-        'efficiency':       'Efficiency',
-        'filmEV':           'EV'
-    }
-    
     stats_format = {
         'secElapsed':       format_elapsed_time,
-        'samplesSec':       lambda x: '%0.2f'%x,
-        'samplesTotSec':    lambda x: '%0.2f'%x,
-        'samplesPx':        lambda x: '%0.2f'%x,
-        'efficiency':       lambda x: '%0.2f %%'%x,
-        'filmEV':           lambda x: '%0.2f'%x,
+        'samplesSec':       lambda x: 'Samples/Sec: %0.2f'%x,
+        'samplesTotSec':    lambda x: 'Total Samples/Sec: %0.2f'%x,
+        'samplesPx':        lambda x: 'Samples/Px: %0.2f'%x,
+        'efficiency':       lambda x: 'Efficiency: %0.2f %%'%x,
+        'filmEV':           lambda x: 'EV: %0.2f'%x,
     }
     
     stats_string = ''
-    
-
     
     def stop(self):
         self.active = False
@@ -115,7 +104,7 @@ class LuxAPIStats(LuxTimerThread):
         for k in self.stats_dict.keys():
             self.stats_dict[k] = lux.statistics(k)
         
-        self.stats_string = ' | '.join(['%s: %s'%(self.stats_translate[k], self.stats_format[k](v)) for k,v in self.stats_dict.items()])
+        self.stats_string = ' | '.join(['%s'%self.stats_format[k](v) for k,v in self.stats_dict.items()])
               
 class LuxFilmDisplay(LuxTimerThread):
     '''
@@ -129,7 +118,7 @@ class LuxFilmDisplay(LuxTimerThread):
             
     def kick(self, render_end=False):
         if self.RE is not None:
-            px = [] #lux.framebuffer()
+            px = lux.framebuffer()
             xres = int(lux.statistics('filmXres'))
             yres = int(lux.statistics('filmYres'))
             time = lux.statistics('secElapsed')

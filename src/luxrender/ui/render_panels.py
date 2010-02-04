@@ -420,7 +420,7 @@ class volume(render_described_context):
 	property_group = properties.luxrender_volume
 	
 	controls = [
-		'volumeintegrator', 'lux_volume_stepsize'
+		'volumeintegrator', 'stepsize'
 	]
 	
 	properties = [
