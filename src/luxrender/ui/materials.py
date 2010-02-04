@@ -31,37 +31,36 @@ from ef.ui import described_layout
 
 from ef.ef import ef
 
-import bpy
+import properties
 
-class luxrender_material(bpy.types.IDPropertyGroup):
-    pass
+
 
 class material_editor(context_panel, material_settings_panel, described_layout):
 	bl_label = 'LuxRender Materials'
 	context_name = 'luxrender'
 	
-	property_group = luxrender_material
+	property_group = properties.luxrender_material
 	
 	controls = [
 		# Common props
-		'lux_material',
+		'material',
 		
 		# Used by many
-		'lux_mat_kd',
-		'lux_mat_kr',
-		'lux_mat_kt',
+		'kd',
+		'kr',
+		'kt',
 		
-		[0.33, 'lux_mat_ior_preset', ['lux_mat_ior_list', 'lux_mat_ior']],
+		[0.33, 'ior_preset', ['ior_list', 'ior']],
 		
 		# Car paint
-		'lux_mat_carpaint_label',
-		'lux_mat_carpaint_preset',
+		'carpaint_label',
+		'carpaint_preset',
 		
-		'lux_mat_carpaint_ks1',
-		'lux_mat_carpaint_ks2',
-		'lux_mat_carpaint_ks3',
-		['lux_mat_carpaint_r1','lux_mat_carpaint_r2','lux_mat_carpaint_r3'],
-		['lux_mat_carpaint_m1','lux_mat_carpaint_m2','lux_mat_carpaint_m3'],
+		['carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3'],
+        'carpaint_r',
+		#['carpaint_r1','carpaint_r2','carpaint_r3'],
+        'carpaint_m',
+		#['carpaint_m1','carpaint_m2','carpaint_m3'],
 		
 		# Glass
 		
@@ -69,27 +68,31 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 	
 	selection = {
 		# Used by many
-		'lux_mat_kd':					[{ 'lux_material': 'carpaint' }],
-		'lux_mat_kr':					[{ 'lux_material': 'glass' }],
-		'lux_mat_kt':					[{ 'lux_material': 'glass' }],
-		'lux_mat_ior_preset':			[{ 'lux_material': 'glass' }],
-		'lux_mat_ior_list':				[{ 'lux_material': 'glass' }, { 'lux_mat_ior_preset': True }],
-		'lux_mat_ior':					[{ 'lux_material': 'glass' }, { 'lux_mat_ior_preset': False }],
+		'kd':					[{ 'material': 'carpaint' }],
+		'kr':					[{ 'material': 'glass' }],
+		'kt':					[{ 'material': 'glass' }],
+		'ior_preset':			[{ 'material': 'glass' }],
+		'ior_list':				[{ 'material': 'glass' }, { 'ior_preset': True }],
+		'ior':					[{ 'material': 'glass' }, { 'ior_preset': False }],
 	
 		# Car paint
-		'lux_mat_carpaint_label':		[{ 'lux_material': 'carpaint' }],
-		'lux_mat_carpaint_preset':		[{ 'lux_material': 'carpaint' }],
+		'carpaint_label':		[{ 'material': 'carpaint' }],
+		'carpaint_preset':		[{ 'material': 'carpaint' }],
 		# Car paint custom
-		'lux_mat_carpaint_kd':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_ks1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_ks2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_ks3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_r1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_r2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_r3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_m1':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_m2':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
-		'lux_mat_carpaint_m3':			[{ 'lux_material': 'carpaint' }, { 'lux_mat_carpaint_preset': 'custom' }],
+		'carpaint_kd':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+		'carpaint_ks1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+		'carpaint_ks2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+		'carpaint_ks3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+		
+        'carpaint_r':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#       'carpaint_r1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_r2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_r3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+        
+        'carpaint_m':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_m1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_m2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_m3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
 		
 		# Glass
 		
@@ -99,7 +102,7 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		# Material Type Select
 		{
 			'type': 'enum',
-			'attr': 'lux_material',
+			'attr': 'material',
 			'name': 'Type',
 			'description': 'LuxRender material type',
 			'items': [
@@ -122,36 +125,60 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		
 		# Used by many mats
 		{
-			'type': 'colour',
-			'attr': 'lux_mat_kd',
+			'type': 'float_vector',
+			'attr': 'kd',
 			'name': 'Diffuse Colour',
 			'description': 'Diffuse Colour',
-			'default': '-- TODO --',
+			'size': 3,
+            'default': (0.8, 0.8, 0.8),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3,
+            'subtype': 'COLOR'
 		},
 		{
-			'type': 'colour',
-			'attr': 'lux_mat_kr',
+			'type': 'float_vector',
+			'attr': 'kr',
 			'name': 'Reflection Colour',
 			'description': 'Reflection Colour',
-			'default': '-- TODO --',
+			'size': 3,
+            'default': (0.8, 0.8, 0.8),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3,
+            'subtype': 'COLOR'
 		},
 		{
-			'type': 'colour',
-			'attr': 'lux_mat_kt',
+			'type': 'float_vector',
+			'attr': 'kt',
 			'name': 'Transmission Colour',
 			'description': 'Transmission Colour',
-			'default': '-- TODO --',
+			'size': 3,
+            'default': (0.8, 0.8, 0.8),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3,
+            'subtype': 'COLOR'
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_mat_ior_preset',
+			'attr': 'ior_preset',
 			'name': 'IOR Preset',
 			'description': 'IOR Preset',
 			'default': True,
 		},
 		{
 			'type': 'enum',
-			'attr': 'lux_mat_ior_list',
+			'attr': 'ior_list',
 			'name': '',
 			'description': 'IOR Preset',
 			'default': '1.5',
@@ -163,7 +190,7 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_mat_ior',
+			'attr': 'ior',
 			'name': '',
 			'description': 'IOR',
 			'default': 1,
@@ -177,12 +204,12 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		# Car paint
 		{
 			'type': 'text',
-			'attr': 'lux_mat_carpaint_label',
+			'attr': 'carpaint_label',
 			'name': 'Car Paint Settings',
 		},
 		{
 			'type': 'enum',
-			'attr': 'lux_mat_carpaint_preset',
+			'attr': 'carpaint_preset',
 			'name': 'Preset',
 			'description': 'Preset Car Paint Settings',
 			'default': 'custom',
@@ -199,92 +226,145 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 			]
 		},
 		{
-			'type': 'colour',
-			'attr': 'lux_mat_carpaint_ks1',
+			'type': 'float_vector',
+			'attr': 'carpaint_ks1',
 			'name': 'Specular Layer 1',
 			'description': 'Specular Layer 1 Colour',
-			'default': '-- TODO --',
+			'size': 3,
+            'default': (0.8, 0.8, 0.8),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3,
+            'subtype': 'COLOR'
 		},
 		{
-			'type': 'colour',
-			'attr': 'lux_mat_carpaint_ks2',
+			'type': 'float_vector',
+			'attr': 'carpaint_ks2',
 			'name': 'Specular Layer 2',
 			'description': 'Specular Layer 2 Colour',
-			'default': '-- TODO --',
+			'size': 3,
+            'default': (0.8, 0.8, 0.8),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3,
+            'subtype': 'COLOR'
 		},
 		{
-			'type': 'colour',
-			'attr': 'lux_mat_carpaint_ks3',
+			'type': 'float_vector',
+			'attr': 'carpaint_ks3',
 			'name': 'Specular Layer 3',
 			'description': 'Specular Layer 3 Colour',
-			'default': '-- TODO --',
+			'size': 3,
+            'default': (0.8, 0.8, 0.8),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3,
+            'subtype': 'COLOR'
 		},
-		{
-			'type': 'float',
-			'attr': 'lux_mat_carpaint_r1',
-			'name': 'R 1',
-			'description': 'Specular Layer 1 Roughness',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
-		},
-		{
-			'type': 'float',
-			'attr': 'lux_mat_carpaint_r2',
-			'name': 'R 2',
-			'description': 'Specular Layer 2 Roughness',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
-		},
-		{
-			'type': 'float',
-			'attr': 'lux_mat_carpaint_r3',
-			'name': 'R 3',
-			'description': 'Specular Layer 3 Roughness',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
-		},
-		{
-			'type': 'float',
-			'attr': 'lux_mat_carpaint_m1',
-			'name': 'M 1',
-			'description': 'Specular Layer 1 Fresnel',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
-		},
-		{
-			'type': 'float',
-			'attr': 'lux_mat_carpaint_m2',
-			'name': 'M 2',
-			'description': 'Specular Layer 2 Fresnel',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
-		},
-		{
-			'type': 'float',
-			'attr': 'lux_mat_carpaint_m3',
-			'name': 'M 3',
-			'description': 'Specular Layer 3 Fresnel',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
-		},
+        
+#		{
+#			'type': 'float',
+#			'attr': 'carpaint_r1',
+#			'name': 'R 1',
+#			'description': 'Specular Layer 1 Roughness',
+#			'default': 1,
+#			'min': 0,
+#			'soft_min': 0,
+#			'max': 1,
+#			'soft_max': 1,
+#		},
+#		{
+#			'type': 'float',
+#			'attr': 'carpaint_r2',
+#			'name': 'R 2',
+#			'description': 'Specular Layer 2 Roughness',
+#			'default': 1,
+#			'min': 0,
+#			'soft_min': 0,
+#			'max': 1,
+#			'soft_max': 1,
+#		},
+#		{
+#			'type': 'float',
+#			'attr': 'carpaint_r3',
+#			'name': 'R 3',
+#			'description': 'Specular Layer 3 Roughness',
+#			'default': 1,
+#			'min': 0,
+#			'soft_min': 0,
+#			'max': 1,
+#			'soft_max': 1,
+#		},
+        {
+            'type': 'float_vector',
+            'attr': 'carpaint_r',
+            'name': 'R',
+            'description': 'Specular Layer Roughness',
+            'size': 3,
+            'default': (1.0, 1.0, 1.0),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3
+        },
+#		{
+#			'type': 'float',
+#			'attr': 'carpaint_m1',
+#			'name': 'M 1',
+#			'description': 'Specular Layer 1 Fresnel',
+#			'default': 1,
+#			'min': 0,
+#			'soft_min': 0,
+#			'max': 1,
+#			'soft_max': 1,
+#		},
+#		{
+#			'type': 'float',
+#			'attr': 'carpaint_m2',
+#			'name': 'M 2',
+#			'description': 'Specular Layer 2 Fresnel',
+#			'default': 1,
+#			'min': 0,
+#			'soft_min': 0,
+#			'max': 1,
+#			'soft_max': 1,
+#		},
+#		{
+#			'type': 'float',
+#			'attr': 'carpaint_m3',
+#			'name': 'M 3',
+#			'description': 'Specular Layer 3 Fresnel',
+#			'default': 1,
+#			'min': 0,
+#			'soft_min': 0,
+#			'max': 1,
+#			'soft_max': 1,
+#		},
+        {
+            'type': 'float_vector',
+            'attr': 'carpaint_m',
+            'name': 'M',
+            'description': 'Specular Layer Fresnel',
+            'size': 3,
+            'default': (1.0, 1.0, 1.0),
+            'step': 0.1,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1.0,
+            'soft_max': 1.0,
+            'precision': 3
+        },
 		
 		# Glass
 		

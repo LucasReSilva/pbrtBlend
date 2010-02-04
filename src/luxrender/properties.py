@@ -19,6 +19,11 @@ def dbo(m,o):
 
 # TODO check parameter completeness against Lux API
 
+import bpy
+
+class luxrender_material(bpy.types.IDPropertyGroup):
+    pass
+
 class luxrender_engine(bpy.types.IDPropertyGroup):
     pass
   
