@@ -87,8 +87,15 @@ class luxrender(engine_base):
 		l = self.LuxManager.lux_module
 		
 		# REAL CODE :)
-		l.sampler(*scene.luxrender_sampler.api_output())
-		l.surfaceIntegrator(*scene.luxrender_integrator.api_output())
+		l.sampler(
+			*scene.luxrender_sampler.api_output()
+		)
+		l.surfaceIntegrator(
+			*scene.luxrender_integrator.api_output()
+		)
+		l.accelerator(
+			*scene.luxrender_accelerator.api_output()
+		)
 		
 		
 		# THIS IS ALL JUST FOR TESTING BELOW;
@@ -129,10 +136,14 @@ class luxrender(engine_base):
 		
 		
 		
-		
+		# reset output image file
+		if os.path.exists('luxout.png'):
+			os.remove('luxout.png')
+			
 		self.LuxManager.start(self)
 		self.update_stats('', 'LuxRender: Rendering warmup')
 		
+		# TODO replace time.sleep with a threading event
 		import time
 		while self.LuxManager.started:
 			time.sleep(1)

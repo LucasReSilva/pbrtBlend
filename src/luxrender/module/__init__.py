@@ -3,16 +3,19 @@ import bpy
 import pylux as lux
 import threading
 
-def LuxLog(msg):
-    ef.log('[LuxRender] %s' % msg)
+def LuxLog(*args):
+    '''
+    Send string to EF log, marked as belonging to LuxRender module.
+    Accepts variable args (can be used as pylux.errorHandler)
+    '''
+    if len(args) > 0:
+        ef.log(' '.join(['%s'%a for a in args]), module_name='LuxRender')
 
 class LuxOutput(object):
     '''
     Base class for any Lux output
     '''
     pass
-
-
 
 class LuxFile(LuxOutput):
     '''
@@ -51,6 +54,14 @@ class LuxTimerThread(threading.Thread):
         '''
         pass
     
+import datetime
+def format_elapsed_time(t):
+    td = datetime.timedelta(seconds=t)
+    min = td.days*1440  + td.seconds/60.0
+    hrs = td.days*24    + td.seconds/3600.0
+    
+    return '%i:%02i:%02i' % (hrs, min%60, td.seconds%60)
+
 class LuxAPIStats(LuxTimerThread):
     '''
     Periodically get lux stats
@@ -73,7 +84,27 @@ class LuxAPIStats(LuxTimerThread):
         #'terminated':       0.0,
     }
     
+    stats_translate = {
+        'secElapsed':       'Rendering Time',
+        'samplesSec':       'Samples/Sec',
+        'samplesTotSec':    'Total Samples/Sec',
+        'samplesPx':        'Samples/Px',
+        'efficiency':       'Efficiency',
+        'filmEV':           'EV'
+    }
+    
+    stats_format = {
+        'secElapsed':       format_elapsed_time,
+        'samplesSec':       lambda x: '%0.2f'%x,
+        'samplesTotSec':    lambda x: '%0.2f'%x,
+        'samplesPx':        lambda x: '%0.2f'%x,
+        'efficiency':       lambda x: '%0.2f %%'%x,
+        'filmEV':           lambda x: '%0.2f'%x,
+    }
+    
     stats_string = ''
+    
+
     
     def stop(self):
         self.active = False
@@ -84,7 +115,7 @@ class LuxAPIStats(LuxTimerThread):
         for k in self.stats_dict.keys():
             self.stats_dict[k] = lux.statistics(k)
         
-        self.stats_string = ' | '.join(['%s: %0.2f'%(k,v) for k,v in self.stats_dict.items()])
+        self.stats_string = ' | '.join(['%s: %s'%(self.stats_translate[k], self.stats_format[k](v)) for k,v in self.stats_dict.items()])
               
 class LuxFilmDisplay(LuxTimerThread):
     '''
@@ -107,9 +138,6 @@ class LuxFilmDisplay(LuxTimerThread):
             else:
                 LuxLog('Updating render result %ix%i' % (xres,yres))
             self.RE.update_framebuffer(xres,yres,px)
-        
-def luxlog(a,b,c):
-    print(a,b,c)
 
 class LuxManager(LuxOutput):
     '''
@@ -124,25 +152,24 @@ class LuxManager(LuxOutput):
     
     def __init__(self):
         lux.init()
-        self.reset()
         
-#    @staticmethod
-#    def luxlog(a, b, c):
-#        LuxLog('%s %s %s' % (a,b,c))
+        # log redirection causes segfault
+        #lux.errorHandler(LuxLog)
+        
+        self.reset()
 
     def start(self, RE):
         if self.started:
             LuxLog('Already rendering!')
             return
+        
         lux.worldEnd()
+        
         self.stats_thread.start()
         self.fb_thread.start(RE)
         self.started = True
     
     def reset(self):
-        #causes segfault
-        #lux.errorHandler(LuxManager.luxlog)
-        
         if self.stats_thread is not None and self.stats_thread.isAlive():
             self.stats_thread.stop()
             self.stats_thread.join()
@@ -167,13 +194,7 @@ class LuxManager(LuxOutput):
         lux.cleanup()
         
     def __del__(self):
+        '''
+        Gracefully exit() lux upon destruction
+        '''
         self.reset()
-        
-
-def test():
-    LM = LuxManager()
-    lux.lookAt(0,0,0,0,1,0,1,0,0)
-    lux.worldBegin()
-    lux.lightSource('sunsky', [])
-    
-    return LM

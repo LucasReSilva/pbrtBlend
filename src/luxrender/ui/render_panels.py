@@ -26,122 +26,50 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import ef.ui
-import bpy
-
-DEBUG = True
+import properties
 
 class render_described_context(ef.ui.context_panel, ef.ui.render_settings_panel, ef.ui.described_layout):
 	context_name = 'luxrender'
 
-# TODO these propery group classes shouldn't strictly be in the UI module (they are called from engine render())
 
 # TODO remove all the lux_ prefixes off the members of the property groups
-
-# TODO adapt values written to d based on simple/advanced views
-
-# TODO check parameter completeness against Lux API
-
-class luxrender_engine(bpy.types.IDPropertyGroup):
-    pass
-  
-class luxrender_sampler(bpy.types.IDPropertyGroup):
-    def api_output(self):
-    	d = {}
-    	
-    	if self.lux_sampler in ['random', 'lowdiscrepancy']:
-    		d['pixelsamples']         = self.lux_sampler_pixelsamples
-    		d['pixelsampler']         = self.lux_sampler_pixelsampler
-    	
-    	if self.lux_sampler == 'erpt':
-    		d['initsamples']          = self.lux_sampler_erpt_initsamples
-    		d['chainlength']          = self.lux_sampler_erpt_chainlength
-#    		d['mutationrange']        = self.lux_sampler_erpt_mutationrange
-    	
-    	if self.lux_sampler == 'metropolis':
-    		d['initsamples']          = self.lux_sampler_metro_initsamples
-    		d['maxconsecrejects']     = self.lux_sampler_metro_mncr
-    		d['largemutationprob']    = self.lux_sampler_metro_lmprob
-#    		d['micromutationprob']    = self.??
-#    		d['mutationrange']        = self.??
-    		d['usevariance']          = self.lux_sampler_metro_variance
-    	
-    	out = self.lux_sampler, list(d.items())
-    	if DEBUG: print(out)
-    	return out
-    		
-   
-class luxrender_integrator(bpy.types.IDPropertyGroup):
-    def api_output(self):
-    	d={}
-    	
-    	if self.lux_surfaceintegrator in ['directlighting', 'path']:
-    		d['lightstrategy']    = self.lux_integrator_strategy
-#    		d['maxdepth']         = self.??
-    	
-    	if self.lux_surfaceintegrator == 'bidirectional':
-    		d['eyedepth']         = self.lux_integrator_bidir_edepth
-    		d['lightdepth']       = self.lux_integrator_bidir_ldepth
-#    		d['eyerrthreshold']   = self.??
-#    		d['lightrrthreshold'] = self.??
-    	
-    	if self.lux_surfaceintegrator == 'distributedpath':
-    		d['strategy']         = self.lux_integrator_strategy
-#    		d['diffusedepth']     = self.??
-#    		d['glossydepth']      = self.??
-#    		d['speculardepth']    = self.??
-    	
-#    	if self.lux_surfaceintegrator == 'exphotonmap':
-#    		pass
-    	
-    	out = self.lux_surfaceintegrator, list(d.items())
-    	if DEBUG: print(out)
-    	return out
-   
-class luxrender_volume(bpy.types.IDPropertyGroup):
-    pass
-
-class luxrender_filter(bpy.types.IDPropertyGroup):
-    pass
-   
-class luxrender_accelerator(bpy.types.IDPropertyGroup):
-    pass
 
 class engine(render_described_context):
 	bl_label = 'LuxRender Engine Configuration'
 	
-	property_group = luxrender_engine
+	property_group = properties.luxrender_engine
 	
 	controls = [
-		['lux_threads_auto', 'lux_threads'],
-		'lux_priority',
-		['lux_rgc', 'lux_colclamp',
-#		 'lux_noopengl'
+		['threads_auto', 'threads'],
+		'priority',
+		['rgc', 'colclamp',
+#		 'noopengl'
 		],
-		['lux_meshopt', 'lux_nolg'],
+		['meshopt', 'nolg'],
 		
-#		'lux_singlefile',
-#		['lux_file_lxs', 'lux_file_lxo', 'lux_file_lxm', 'lux_file_lxv'],
+#		'singlefile',
+#		['file_lxs', 'file_lxo', 'file_lxm', 'file_lxv'],
 	]
 	
 	selection = {
-		'lux_threads':				[{ 'lux_threads_auto': False }],
-#		'lux_file_lxs':				[{ 'lux_singlefile': False }],
-#		'lux_file_lxo':				[{ 'lux_singlefile': False }],
-#		'lux_file_lxm':				[{ 'lux_singlefile': False }],
-#		'lux_file_lxv':				[{ 'lux_singlefile': False }],
+		'threads':				[{ 'threads_auto': False }],
+#		'file_lxs':				[{ 'singlefile': False }],
+#		'file_lxo':				[{ 'singlefile': False }],
+#		'file_lxm':				[{ 'singlefile': False }],
+#		'file_lxv':				[{ 'singlefile': False }],
 	}
 	
 	properties = [
 		{
 			'type': 'bool',
-			'attr': 'lux_threads_auto',
+			'attr': 'threads_auto',
 			'name': 'Auto Threads',
 			'description': 'Let LuxRender decide how many threads to use',
 			'default': True
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_threads',
+			'attr': 'threads',
 			'name': 'Render Threads',
 			'description': 'Number of threads to use',
 			'default': 1,
@@ -152,7 +80,7 @@ class engine(render_described_context):
 		},
 		{
 			'type': 'enum',
-			'attr': 'lux_priority',
+			'attr': 'priority',
 			'name': 'Process Priority',
 			'description': 'Set the process priority for LuxRender',
 			'default': 'belownormal',
@@ -165,70 +93,70 @@ class engine(render_described_context):
 		},
 #		{
 #			'type': 'bool',
-#			'attr': 'lux_noopengl',
+#			'attr': 'noopengl',
 #			'name': 'No OpenGL',
 #			'description': 'Disable OpenGL viewport (for buggy display drivers)',
 #			'default': False,
 #		},
 		{
 			'type': 'bool',
-			'attr': 'lux_rgc',
+			'attr': 'rgc',
 			'name': 'RGC',
 			'description': 'Reverse Gamma Colour Correction',
 			'default': True,
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_colclamp',
+			'attr': 'colclamp',
 			'name': 'Colour Clamp',
 			'description': 'Clamp all colours to range 0 - 0.9',
 			'default': False,
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_meshopt',
+			'attr': 'meshopt',
 			'name': 'Optimise Meshes',
 			'description': 'Output optimised mesh data',
 			'default': True,
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_nolg',
+			'attr': 'nolg',
 			'name': 'No Lightgroups',
 			'description': 'Combine all light groups',
 			'default': False,
 		},
 #		{
 #			'type': 'bool',
-#			'attr': 'lux_singlefile',
+#			'attr': 'singlefile',
 #			'name': 'Combine LXS',
 #			'description': 'Write only a single LXS file',
 #			'default': False,
 #		},
 #		{
 #			'type': 'bool',
-#			'attr': 'lux_file_lxs',
+#			'attr': 'file_lxs',
 #			'name': 'LXS',
 #			'description': 'Write LXS (Scene) file',
 #			'default': True,
 #		},
 #		{
 #			'type': 'bool',
-#			'attr': 'lux_file_lxo',
+#			'attr': 'file_lxo',
 #			'name': 'LXO',
 #			'description': 'Write LXO (Objects) file',
 #			'default': True,
 #		},
 #		{
 #			'type': 'bool',
-#			'attr': 'lux_file_lxm',
+#			'attr': 'file_lxm',
 #			'name': 'LXM',
 #			'description': 'Write LXM (Materials) file',
 #			'default': True,
 #		},
 #		{
 #			'type': 'bool',
-#			'attr': 'lux_file_lxv',
+#			'attr': 'file_lxv',
 #			'name': 'LXV',
 #			'description': 'Write LXV (volumes) file',
 #			'default': True,
@@ -238,51 +166,51 @@ class engine(render_described_context):
 class sampler(render_described_context):
 	bl_label = 'Sampler'
 	
-	property_group = luxrender_sampler
+	property_group = properties.luxrender_sampler
 	
 	controls = [
 		[
 			0.7,
-			'lux_sampler',
-			'lux_sampler_advanced',
+			'sampler',
+			'advanced',
 		],
 		
 		# metropolis
-		'lux_sampler_metro_strength',										# simple
-		['lux_sampler_metro_lmprob', 'lux_sampler_metro_mncr'],				# adv
-		['lux_sampler_metro_initsamples','lux_sampler_metro_variance'],		# adv
+		'metro_strength',										# simple
+		['metro_lmprob', 'metro_mncr'],				# adv
+		['metro_initsamples','metro_variance'],		# adv
 		
 		# erpt
-		['lux_sampler_erpt_initsamples', 'lux_sampler_erpt_chainlength',
-#		 'lux_sampler_erpt_mutationrange'
+		['erpt_initsamples', 'erpt_chainlength',
+#		 'erpt_mutationrange'
 		], # simple
 		
 		# random & lowdiscrepancy
-		'lux_sampler_pixelsampler',
-		['lux_sampler_pixelsamples'],			# simple 
+		'pixelsampler',
+		['pixelsamples'],			# simple 
 	]
 	
 	selection = {
-		'lux_sampler_advanced':				[{ 'lux_sampler': 'metropolis'}],
+		'advanced':				[{ 'sampler': 'metropolis'}],
 	
-		'lux_sampler_metro_strength':		[{ 'lux_sampler_advanced': False }, { 'lux_sampler': 'metropolis'}],
-		'lux_sampler_metro_lmprob':			[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
-		'lux_sampler_metro_mncr':			[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
-		'lux_sampler_metro_initsamples':	[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
-		'lux_sampler_metro_variance':		[{ 'lux_sampler_advanced': True  }, { 'lux_sampler': 'metropolis'}],
+		'metro_strength':		[{ 'advanced': False }, { 'sampler': 'metropolis'}],
+		'metro_lmprob':			[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
+		'metro_mncr':			[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
+		'metro_initsamples':	[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
+		'metro_variance':		[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
 		
-		'lux_sampler_erpt_initsamples':		[{ 'lux_sampler': 'erpt'}],
-		'lux_sampler_erpt_chainlength':		[{ 'lux_sampler': 'erpt'}],
-#		'lux_sampler_erpt_mutationrange':   [{ 'lux_sampler': 'erpt'}],
+		'erpt_initsamples':		[{ 'sampler': 'erpt'}],
+		'erpt_chainlength':		[{ 'sampler': 'erpt'}],
+#		'erpt_mutationrange':   [{ 'sampler': 'erpt'}],
 		
-		'lux_sampler_pixelsampler':		    [{ 'lux_sampler': ['random', 'lowdiscrepancy']}],
-		'lux_sampler_pixelsamples':			[{ 'lux_sampler': ['random', 'lowdiscrepancy']}],
+		'pixelsampler':		    [{ 'sampler': ['random', 'lowdiscrepancy']}],
+		'pixelsamples':			[{ 'sampler': ['random', 'lowdiscrepancy']}],
 	}
 	
 	properties = [
 		{
 			'type': 'enum',
-			'attr': 'lux_sampler',
+			'attr': 'sampler',
 			'name': 'Pixel Sampler',
 			'description': 'Pixel Sampler',
 			'default': 'metropolis',
@@ -295,14 +223,14 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_sampler_advanced',
+			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced sampler settings',
 			'default': False
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_sampler_metro_strength',
+			'attr': 'metro_strength',
 			'name': 'Strength',
 			'description': 'Metropolis sampler mutation strength',
 			'default': 0.66,
@@ -311,7 +239,7 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_sampler_metro_lmprob',
+			'attr': 'metro_lmprob',
 			'name': 'LM Prob',
 			'description': 'Large Mutation Probability',
 			'default': 0.4,
@@ -320,7 +248,7 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'lux_sampler_metro_mncr',
+			'attr': 'metro_mncr',
 			'name': 'MNCR',
 			'description': 'Maximum number of consecutive rejections',
 			'default': 512,
@@ -329,7 +257,7 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_sampler_metro_initsamples',
+			'attr': 'metro_initsamples',
 			'name': 'Initial',
 			'description': 'Initial Samples',
 			'default': 262144,
@@ -338,14 +266,14 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_sampler_metro_variance',
+			'attr': 'metro_variance',
 			'name': 'Use Variance',
 			'description': 'Use Variance',
 			'default': False,
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_sampler_erpt_initsamples',
+			'attr': 'erpt_initsamples',
 			'name': 'Initial',
 			'description': 'Initial Samples',
 			'default': 100000,
@@ -354,7 +282,7 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'lux_sampler_erpt_chainlength',
+			'attr': 'erpt_chainlength',
 			'name': 'Ch. Len.',
 			'description': 'Chain Length',
 			'default': 512,
@@ -363,7 +291,7 @@ class sampler(render_described_context):
 		},
 #		{
 #			'type': 'int', 
-#			'attr': 'lux_sampler_erpt_mutationrange',
+#			'attr': 'erpt_mutationrange',
 #			'name': 'Str. Width',
 #			'description': 'Strata Width',
 #			'default': 256,
@@ -372,7 +300,7 @@ class sampler(render_described_context):
 #		},
 		{
 			'type': 'enum',
-			'attr': 'lux_sampler_pixelsampler',
+			'attr': 'pixelsampler',
 			'name': 'Pixel Sampler',
 			'description': 'Pixel sampling strategy',
 			'default': 'lowdiscrepancy',
@@ -387,7 +315,7 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'lux_sampler_pixelsamples',
+			'attr': 'pixelsamples',
 			'name': 'Pixel Samples',
 			'description': 'Average number of samples taken per pixel. More samples create a higher quality image at the cost of render time',
 			'default': 4,
@@ -400,34 +328,34 @@ class sampler(render_described_context):
 class integrator(render_described_context):
 	bl_label = 'Surface Integrator'
 	
-	property_group = luxrender_integrator
+	property_group = properties.luxrender_integrator
 	
 	controls = [
 		[
 			0.7,
-			'lux_surfaceintegrator',
-			'lux_integrator_advanced',
+			'surfaceintegrator',
+			'advanced',
 		],
 		
-		'lux_integrator_strategy',											# advanced
+		'strategy',											# advanced
 		
 		# bidir
-		'lux_integrator_bidir_depth',										# simple
-		['lux_integrator_bidir_edepth', 'lux_integrator_bidir_ldepth'],		# advanced
+		'bidir_depth',										# simple
+		['bidir_edepth', 'bidir_ldepth'],		# advanced
 	]
 	
 	selection = {
-		'lux_integrator_strategy':		[{ 'lux_integrator_advanced': True  }],
+		'strategy':		[{ 'advanced': True  }],
 		
-		'lux_integrator_bidir_depth':	[{ 'lux_integrator_advanced': False }, { 'lux_surfaceintegrator': 'bidirectional' }],
-		'lux_integrator_bidir_edepth':	[{ 'lux_integrator_advanced': True  }, { 'lux_surfaceintegrator': 'bidirectional' }],
-		'lux_integrator_bidir_ldepth':	[{ 'lux_integrator_advanced': True  }, { 'lux_surfaceintegrator': 'bidirectional' }],
+		'bidir_depth':	[{ 'advanced': False }, { 'surfaceintegrator': 'bidirectional' }],
+		'bidir_edepth':	[{ 'advanced': True  }, { 'surfaceintegrator': 'bidirectional' }],
+		'bidir_ldepth':	[{ 'advanced': True  }, { 'surfaceintegrator': 'bidirectional' }],
 	}
 	
 	properties = [
 		{
 			'type': 'enum', 
-			'attr': 'lux_surfaceintegrator',
+			'attr': 'surfaceintegrator',
 			'name': 'Surface Integrator',
 			'description': 'Surface Integrator',
 			'default': 'bidirectional',
@@ -440,14 +368,14 @@ class integrator(render_described_context):
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_integrator_advanced',
+			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced integrator settings',
 			'default': False
 		},
 		{
 			'type': 'enum',
-			'attr': 'lux_integrator_strategy',
+			'attr': 'strategy',
 			'name': 'Strategy',
 			'description': 'Strategy',
 			'default': 'auto',
@@ -459,7 +387,7 @@ class integrator(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'lux_integrator_bidir_depth',
+			'attr': 'bidir_depth',
 			'name': 'Depth',
 			'description': 'Max recursion depth for ray casting',
 			'default': 16,
@@ -468,7 +396,7 @@ class integrator(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'lux_integrator_bidir_edepth',
+			'attr': 'bidir_edepth',
 			'name': 'Eye Depth',
 			'description': 'Max recursion depth for ray casting from eye',
 			'default': 16,
@@ -477,7 +405,7 @@ class integrator(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'lux_integrator_bidir_ldepth',
+			'attr': 'bidir_ldepth',
 			'name': 'Light Depth',
 			'description': 'Max recursion depth for ray casting from light',
 			'default': 16,
@@ -489,16 +417,16 @@ class integrator(render_described_context):
 class volume(render_described_context):
 	bl_label = 'Volume Integrator'
 	
-	property_group = luxrender_volume
+	property_group = properties.luxrender_volume
 	
 	controls = [
-		'lux_volumeintegrator', 'lux_volume_stepsize'
+		'volumeintegrator', 'lux_volume_stepsize'
 	]
 	
 	properties = [
 		{
 			'type': 'enum',
-			'attr': 'lux_volumeintegrator',
+			'attr': 'volumeintegrator',
 			'name': 'Volume Integrator',
 			'description': 'Volume Integrator',
 			'default': 'single',
@@ -509,7 +437,7 @@ class volume(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_volume_stepsize',
+			'attr': 'stepsize',
 			'name': 'Step Size',
 			'description': 'Volume Integrator Step Size',
 			'default': 1,
@@ -523,47 +451,47 @@ class volume(render_described_context):
 class filter(render_described_context):
 	bl_label = 'Filter'
 	
-	property_group = luxrender_filter
+	property_group = properties.luxrender_filter
 	
 	controls = [
 		[
 			0.75,
-			'lux_filter',
-			'lux_filter_advanced',
+			'filter',
+			'advanced',
 		],
 		
-		['lux_filter_xwidth', 'lux_filter_ywidth'],			# advanced
-		'lux_filter_gaussian_alpha',						# gaussian advanced
+		['xwidth', 'ywidth'],			# advanced
+		'gaussian_alpha',						# gaussian advanced
 		
 		[
 			0.4,
-			'lux_filter_mitchell_mode',						# mitchell advanced
-			'lux_filter_mitchell_b',						# mitchell advanced + mode=manual
-			'lux_filter_mitchell_c',						# mitchell advanced + mode=manual
+			'mitchell_mode',						# mitchell advanced
+			'mitchell_b',						# mitchell advanced + mode=manual
+			'mitchell_c',						# mitchell advanced + mode=manual
 		],
-		'lux_filter_mitchell_sharpness',					# mitchell simple || (mitchell advanced && mode = slider)
+		'mitchell_sharpness',					# mitchell simple || (mitchell advanced && mode = slider)
 		
-		'lux_filter_sinc_tau'								# sinc advanced
+		'sinc_tau'								# sinc advanced
 	]
 	
 	selection = {
-		'lux_filter_xwidth':				[{ 'lux_filter_advanced': True }],
-		'lux_filter_ywidth':				[{ 'lux_filter_advanced': True }],
+		'xwidth':				[{ 'advanced': True }],
+		'ywidth':				[{ 'advanced': True }],
 		
-		'lux_filter_gaussian_alpha':		[{ 'lux_filter_advanced': True }, { 'lux_filter': 'gaussian' }],
+		'gaussian_alpha':		[{ 'advanced': True }, { 'filter': 'gaussian' }],
 		
-		'lux_filter_mitchell_mode':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }],
-		'lux_filter_mitchell_b':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }, { 'lux_filter_mitchell_mode': 'manual' }],
-		'lux_filter_mitchell_c':			[{ 'lux_filter_advanced': True }, { 'lux_filter': 'mitchell' }, { 'lux_filter_mitchell_mode': 'manual' }],		
-		'lux_filter_mitchell_sharpness':	[{ 'lux_filter': 'mitchell' }],
+		'mitchell_mode':		[{ 'advanced': True }, { 'filter': 'mitchell' }],
+		'mitchell_b':			[{ 'advanced': True }, { 'filter': 'mitchell' }, { 'mitchell_mode': 'manual' }],
+		'mitchell_c':			[{ 'advanced': True }, { 'filter': 'mitchell' }, { 'mitchell_mode': 'manual' }],		
+		'mitchell_sharpness':	[{ 'filter': 'mitchell' }],
 		
-		'lux_filter_sinc_tau':				[{ 'lux_filter_advanced': True }, { 'lux_filter': 'sinc' }],
+		'sinc_tau':				[{ 'advanced': True }, { 'filter': 'sinc' }],
 	}
 	
 	properties = [
 		{
 			'type': 'enum',
-			'attr': 'lux_filter',
+			'attr': 'filter',
 			'name': 'Filter',
 			'description': 'Pixel sampling filter',
 			'default': 'mitchell',
@@ -577,14 +505,14 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_filter_advanced',
+			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced filter settings',
 			'default': False
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_filter_xwidth',
+			'attr': 'xwidth',
 			'name': 'X Width',
 			'description': 'Width of filter in X dimension',
 			'default': 2,
@@ -595,7 +523,7 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_filter_ywidth',
+			'attr': 'ywidth',
 			'name': 'Y Width',
 			'description': 'Width of filter in Y dimension',
 			'default': 2,
@@ -606,7 +534,7 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_filter_gaussian_alpha',
+			'attr': 'gaussian_alpha',
 			'name': 'Alpha',
 			'description': 'Gaussian Alpha parameter',
 			'default': 2,
@@ -617,7 +545,7 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_filter_mitchell_sharpness',
+			'attr': 'mitchell_sharpness',
 			'name': 'Sharpness',
 			'description': 'Sharpness of Mitchell Filter',
 			'default': 0.5,
@@ -628,7 +556,7 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'enum',
-			'attr': 'lux_filter_mitchell_mode',
+			'attr': 'mitchell_mode',
 			'name': 'Mode',
 			'description': 'Mitchell Mode',
 			'items': [
@@ -639,7 +567,7 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_filter_mitchell_b',
+			'attr': 'mitchell_b',
 			'name': 'B',
 			'description': 'Mitchell B parameter',
 			'default': 0.333,
@@ -650,7 +578,7 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_filter_mitchell_c',
+			'attr': 'mitchell_c',
 			'name': 'C',
 			'description': 'Mitchell C parameter',
 			'default': 0.333,
@@ -661,7 +589,7 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_filter_sinc_tau',
+			'attr': 'sinc_tau',
 			'name': 'Tau',
 			'description': 'Sinc Tau parameter',
 			'default': 3,
@@ -675,34 +603,34 @@ class filter(render_described_context):
 class accelerator(render_described_context):
 	bl_label = 'Accelerator'
 	
-	property_group = luxrender_accelerator
+	property_group = properties.luxrender_accelerator
 	
 	controls = [
-		'lux_accelerator',
+		'accelerator',
 		
-		['lux_accel_kd_intcost', 'lux_accel_kd_travcost'],			# tabreckdtree
-		['lux_accel_kd_ebonus', 'lux_accel_kd_maxprims'],			# tabreckdtree
-		'lux_accel_kd_maxdepth',									# tabreckdtree
+		['kd_intcost', 'kd_travcost'],			# tabreckdtree
+		['kd_ebonus', 'kd_maxprims'],			# tabreckdtree
+		'kd_maxdepth',									# tabreckdtree
 		
-		'lux_accel_grid_refineim',									# grid
+		'grid_refineim',									# grid
 		
-		'lux_accel_qbvh_maxprims',									# qbvh
+		'qbvh_maxprims',									# qbvh
 	]
 	
 	selection = {
-		'lux_accel_kd_intcost':			[{ 'lux_accelerator': 'tabreckdtree' }],
-		'lux_accel_kd_travcost':		[{ 'lux_accelerator': 'tabreckdtree' }],
-		'lux_accel_kd_ebonus':			[{ 'lux_accelerator': 'tabreckdtree' }],
-		'lux_accel_kd_maxprims':		[{ 'lux_accelerator': 'tabreckdtree' }],
-		'lux_accel_kd_maxdepth':		[{ 'lux_accelerator': 'tabreckdtree' }],
-		'lux_accel_grid_refineim':		[{ 'lux_accelerator': 'grid' }],
-		'lux_accel_qbvh_maxprims':		[{ 'lux_accelerator': 'qbvh' }],
+		'kd_intcost':	    [{ 'accelerator': 'tabreckdtree' }],
+		'kd_travcost':		[{ 'accelerator': 'tabreckdtree' }],
+		'kd_ebonus':		[{ 'accelerator': 'tabreckdtree' }],
+		'kd_maxprims':		[{ 'accelerator': 'tabreckdtree' }],
+		'kd_maxdepth':		[{ 'accelerator': 'tabreckdtree' }],
+		'grid_refineim':	[{ 'accelerator': 'grid' }],
+		'qbvh_maxprims':	[{ 'accelerator': 'qbvh' }],
 	}
 	
 	properties = [
 		{
 			'type': 'enum',
-			'attr': 'lux_accelerator',
+			'attr': 'accelerator',
 			'name': 'Accelerator',
 			'description': 'Scene accelerator type',
 			'default': 'tabreckdtree',
@@ -715,7 +643,7 @@ class accelerator(render_described_context):
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_accel_kd_intcost',
+			'attr': 'kd_intcost',
 			'name': 'Inters. Cost',
 			'description': 'Intersection Cost',
 			'default': 80,
@@ -726,7 +654,7 @@ class accelerator(render_described_context):
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_accel_kd_travcost',
+			'attr': 'kd_travcost',
 			'name': 'Trav. Cost',
 			'description': 'Traversal Cost',
 			'default': 1,
@@ -737,7 +665,7 @@ class accelerator(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'lux_accel_kd_ebonus',
+			'attr': 'kd_ebonus',
 			'name': 'Empty Bonus',
 			'description': 'Empty Bonus',
 			'default': 0.2,
@@ -748,7 +676,7 @@ class accelerator(render_described_context):
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_accel_kd_maxprims',
+			'attr': 'kd_maxprims',
 			'name': 'Max. Prims.',
 			'description': 'Max Primitives',
 			'default': 1,
@@ -759,7 +687,7 @@ class accelerator(render_described_context):
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_accel_kd_maxdepth',
+			'attr': 'kd_maxdepth',
 			'name': 'Max. Depth',
 			'description': 'Maximum Depth',
 			'default': -1,
@@ -770,14 +698,14 @@ class accelerator(render_described_context):
 		},
 		{
 			'type': 'bool',
-			'attr': 'lux_accel_grid_refineim',
+			'attr': 'grid_refineim',
 			'name': 'Refine Immediately',
 			'description': 'Refine Immediately',
 			'default': False
 		},
 		{
 			'type': 'int',
-			'attr': 'lux_accel_qbvh_maxprims',
+			'attr': 'qbvh_maxprims',
 			'name': 'Max. Prims.',
 			'description': 'Max Primitives per leaf',
 			'default': 4,
