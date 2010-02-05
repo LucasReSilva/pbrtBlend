@@ -21,8 +21,11 @@ def dbo(m,o):
 
 import bpy
 
-class luxrender_material(bpy.types.IDPropertyGroup):
+class luxrender_channel(bpy.types.IDPropertyGroup):
     pass
+
+class luxrender_material(bpy.types.IDPropertyGroup):
+    property_group = luxrender_channel
 
 class luxrender_engine(bpy.types.IDPropertyGroup):
     pass

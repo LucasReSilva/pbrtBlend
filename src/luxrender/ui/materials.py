@@ -32,7 +32,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import properties
-
+import texture
 
 
 class material_editor(context_panel, material_settings_panel, described_layout):
@@ -53,14 +53,10 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		[0.33, 'ior_preset', ['ior_list', 'ior']],
 		
 		# Car paint
-		'carpaint_label',
 		'carpaint_preset',
 		
-		['carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3'],
-        'carpaint_r',
-		#['carpaint_r1','carpaint_r2','carpaint_r3'],
-        'carpaint_m',
-		#['carpaint_m1','carpaint_m2','carpaint_m3'],
+		'carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3',
+        'carpaint_r', 'carpaint_m',
 		
 		# Glass
 		
@@ -123,52 +119,23 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 			]
 		},
 		
-		# Used by many mats
-		{
-			'type': 'float_vector',
-			'attr': 'kd',
-			'name': 'Diffuse Colour',
-			'description': 'Diffuse Colour',
-			'size': 3,
-            'default': (0.8, 0.8, 0.8),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3,
-            'subtype': 'COLOR'
-		},
-		{
-			'type': 'float_vector',
-			'attr': 'kr',
-			'name': 'Reflection Colour',
-			'description': 'Reflection Colour',
-			'size': 3,
-            'default': (0.8, 0.8, 0.8),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3,
-            'subtype': 'COLOR'
-		},
-		{
-			'type': 'float_vector',
-			'attr': 'kt',
-			'name': 'Transmission Colour',
-			'description': 'Transmission Colour',
-			'size': 3,
-            'default': (0.8, 0.8, 0.8),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3,
-            'subtype': 'COLOR'
-		},
+		texture.Texture(
+			'kd',
+			name = 'Diffuse Colour',
+			description = 'Diffuse Colour',
+		),
+		texture.Texture(
+			'kr',
+			name = 'Reflection Colour',
+			description = 'Reflection Colour',
+		),
+		texture.Texture(
+			'kt',
+			name = 'Transmission Colour',
+			description = 'Transmission Colour',
+		),
+		
+		
 		{
 			'type': 'bool',
 			'attr': 'ior_preset',
@@ -203,11 +170,6 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		
 		# Car paint
 		{
-			'type': 'text',
-			'attr': 'carpaint_label',
-			'name': 'Car Paint Settings',
-		},
-		{
 			'type': 'enum',
 			'attr': 'carpaint_preset',
 			'name': 'Preset',
@@ -225,89 +187,27 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 				('bluematte','Blue Matte','bluematte'),
 			]
 		},
-		{
-			'type': 'float_vector',
-			'attr': 'carpaint_ks1',
-			'name': 'Specular Layer 1',
-			'description': 'Specular Layer 1 Colour',
-			'size': 3,
-            'default': (0.8, 0.8, 0.8),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3,
-            'subtype': 'COLOR'
-		},
-		{
-			'type': 'float_vector',
-			'attr': 'carpaint_ks2',
-			'name': 'Specular Layer 2',
-			'description': 'Specular Layer 2 Colour',
-			'size': 3,
-            'default': (0.8, 0.8, 0.8),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3,
-            'subtype': 'COLOR'
-		},
-		{
-			'type': 'float_vector',
-			'attr': 'carpaint_ks3',
-			'name': 'Specular Layer 3',
-			'description': 'Specular Layer 3 Colour',
-			'size': 3,
-            'default': (0.8, 0.8, 0.8),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3,
-            'subtype': 'COLOR'
-		},
-        
-#		{
-#			'type': 'float',
-#			'attr': 'carpaint_r1',
-#			'name': 'R 1',
-#			'description': 'Specular Layer 1 Roughness',
-#			'default': 1,
-#			'min': 0,
-#			'soft_min': 0,
-#			'max': 1,
-#			'soft_max': 1,
-#		},
-#		{
-#			'type': 'float',
-#			'attr': 'carpaint_r2',
-#			'name': 'R 2',
-#			'description': 'Specular Layer 2 Roughness',
-#			'default': 1,
-#			'min': 0,
-#			'soft_min': 0,
-#			'max': 1,
-#			'soft_max': 1,
-#		},
-#		{
-#			'type': 'float',
-#			'attr': 'carpaint_r3',
-#			'name': 'R 3',
-#			'description': 'Specular Layer 3 Roughness',
-#			'default': 1,
-#			'min': 0,
-#			'soft_min': 0,
-#			'max': 1,
-#			'soft_max': 1,
-#		},
+		
+		texture.Texture(
+			'carpaint_ks1',
+			name = 'Specular Layer 1',
+			description = 'Specular Layer 1 Colour',
+		),
+		texture.Texture(
+			'carpaint_ks2',
+			name = 'Specular Layer 2',
+			description = 'Specular Layer 2 Colour',
+		),
+		texture.Texture(
+			'carpaint_ks3',
+			name = 'Specular Layer 3',
+			description = 'Specular Layer 3 Colour',
+		),
+		
         {
             'type': 'float_vector',
             'attr': 'carpaint_r',
-            'name': 'R',
+            'name': 'Layer Roughnesses',
             'description': 'Specular Layer Roughness',
             'size': 3,
             'default': (1.0, 1.0, 1.0),
@@ -318,43 +218,10 @@ class material_editor(context_panel, material_settings_panel, described_layout):
             'soft_max': 1.0,
             'precision': 3
         },
-#		{
-#			'type': 'float',
-#			'attr': 'carpaint_m1',
-#			'name': 'M 1',
-#			'description': 'Specular Layer 1 Fresnel',
-#			'default': 1,
-#			'min': 0,
-#			'soft_min': 0,
-#			'max': 1,
-#			'soft_max': 1,
-#		},
-#		{
-#			'type': 'float',
-#			'attr': 'carpaint_m2',
-#			'name': 'M 2',
-#			'description': 'Specular Layer 2 Fresnel',
-#			'default': 1,
-#			'min': 0,
-#			'soft_min': 0,
-#			'max': 1,
-#			'soft_max': 1,
-#		},
-#		{
-#			'type': 'float',
-#			'attr': 'carpaint_m3',
-#			'name': 'M 3',
-#			'description': 'Specular Layer 3 Fresnel',
-#			'default': 1,
-#			'min': 0,
-#			'soft_min': 0,
-#			'max': 1,
-#			'soft_max': 1,
-#		},
         {
             'type': 'float_vector',
             'attr': 'carpaint_m',
-            'name': 'M',
+            'name': 'Layer Fresnels',
             'description': 'Specular Layer Fresnel',
             'size': 3,
             'default': (1.0, 1.0, 1.0),
