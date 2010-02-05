@@ -11,8 +11,9 @@ from ef.ef import ef
 
 import properties
 
-def all_defaults(channel_name):
-    return 
+
+# TODO probably re-write all of this into custom textures instead of material properties
+# TODO cannot next textures (eg. for mix)
 
 class Texture(dict):
     '''
@@ -27,19 +28,22 @@ class Texture(dict):
             
             # controls, selection and properties mirror those of described_layout
             
-            'controls': [
+            'controls':
+            [
                 'label',
                 'type',
                 'constant',
             ],
-            'selection': {
+            'selection':
+            {
                 'constant':    [{'type':'constant'}],
             },
-            'properties': [
+            'properties':
+            [
                 {
                     'attr': 'label',
                     'type': 'text',
-                    'name': 'Channel %s'%channel_name
+                    'name': kwargs['description']
                 },
                 {
                     'attr': 'type',
@@ -48,13 +52,29 @@ class Texture(dict):
                     'description': 'Select channel type',
                     'items': [
                         ('constant','constant','constant'),
+                        ('bilerp','bilerp','bilerp'),
+                        ('checkerboard','checkerboard','checkerboard'),
+                        ('constant','constant','constant'),
+                        ('dots','dots','dots'),
+                        ('fbm','fbm','fbm'),
+                        ('imagemap','imagemap','imagemap'),
+                        ('marble','marble','marble'),
+                        ('mix','mix','mix'),
+                        ('scale','scale','scale'),
+                        ('uv','uv','uv'),
+                        ('windy','windy','windy'),
+                        ('wrinkled','wrinkled','wrinkled'),
+                        ('blender_clouds','blender_clouds','blender_clouds'),
+                        ('blender_musgrave','blender_musgrave','blender_musgrave'),
+                        ('blender_marble','blender_marble','blender_marble'),
+                        ('blender_wood ','blender_wood ','blender_wood '),
                     ]
                 },
                 {
                     'attr': 'constant',
                     'type': 'float_vector',
-                    'name': 'Constant Colour',
-                    'description': 'Test Colour',
+                    'name': 'Constant',
+                    'description': 'Constant',
                     'size': 3,
                     'default': (0.8, 0.8, 0.8),
                     'step': 0.1,

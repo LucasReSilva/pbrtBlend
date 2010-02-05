@@ -34,7 +34,6 @@ from ef.ef import ef
 import properties
 import texture
 
-
 class material_editor(context_panel, material_settings_panel, described_layout):
 	bl_label = 'LuxRender Materials'
 	context_name = 'luxrender'
@@ -45,16 +44,22 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		# Common props
 		'material',
 		
-		# Used by many
+		# type-specific presets here
+		'carpaint_preset',
+		
+		
+		# Standard channels used by many
 		'kd',
 		'kr',
 		'kt',
 		
+		# Other standard parameters
 		[0.33, 'ior_preset', ['ior_list', 'ior']],
 		
-		# Car paint
-		'carpaint_preset',
 		
+		# Material specific parameters
+		
+		## Car paint
 		'carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3',
         'carpaint_r', 'carpaint_m',
 		
@@ -64,7 +69,9 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 	
 	selection = {
 		# Used by many
-		'kd':					[{ 'material': 'carpaint' }],
+		
+		# TODO selection mechanism is inadequate; cannot correctly switch kd visibility.
+		'kd':					[{ 'material': ['carpaint','matte'] }],
 		'kr':					[{ 'material': 'glass' }],
 		'kt':					[{ 'material': 'glass' }],
 		'ior_preset':			[{ 'material': 'glass' }],
@@ -74,8 +81,8 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		# Car paint
 		'carpaint_label':		[{ 'material': 'carpaint' }],
 		'carpaint_preset':		[{ 'material': 'carpaint' }],
+		
 		# Car paint custom
-		'carpaint_kd':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
 		'carpaint_ks1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
 		'carpaint_ks2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
 		'carpaint_ks3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
