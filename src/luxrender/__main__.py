@@ -35,7 +35,9 @@ from ef.engine import engine_base
 # Exporter libs
 from module import LuxManager as LM
 import ui.materials
+import ui.textures
 import ui.render_panels
+import nodes
 
 # Add standard Blender Interface elements
 import properties_render
@@ -48,6 +50,10 @@ del properties_render
 import properties_material
 properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
 del properties_material
+
+#import properties_texture
+#properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
+#del properties_texture
 
 class luxrender(engine_base):
 	bl_label = 'LuxRender'
@@ -62,7 +68,10 @@ class luxrender(engine_base):
 		ui.render_panels.filter,
 		ui.render_panels.accelerator,
 		
-		ui.materials.material_editor
+		ui.materials.material_editor,
+		ui.textures.texture_editor,
+		
+		#nodes.test_node
 	]
 	
 	def update_framebuffer(self, xres, yres, fb):

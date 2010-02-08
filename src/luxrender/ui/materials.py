@@ -32,36 +32,54 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import properties
-import texture
 
 class material_editor(context_panel, material_settings_panel, described_layout):
 	bl_label = 'LuxRender Materials'
 	context_name = 'luxrender'
 	
+	
 	property_group = properties.luxrender_material
+	# prevent creating luxrender_material property group in Scene
+	property_group_non_global = True
+	
+	# Overridden to provide data storage in the material, not the scene
+	def draw(self, context):
+		if context.material is not None:
+			if not hasattr(context.material, self.property_group.__name__):
+				ef.init_properties(context.material, [{
+					'type': 'pointer',
+					'attr': self.property_group.__name__,
+					'ptype': self.property_group,
+					'name': self.property_group.__name__,
+					'description': self.property_group.__name__
+				}], cache=False)
+				ef.init_properties(self.property_group, self.properties, cache=False)
+			
+			for p in self.controls:
+				self.draw_column(p, self.layout, context.material, supercontext=context)
 	
 	controls = [
 		# Common props
 		'material',
 		
 		# type-specific presets here
-		'carpaint_preset',
+#		'carpaint_preset',
 		
 		
 		# Standard channels used by many
-		'kd',
-		'kr',
-		'kt',
+#		'kd',
+#		'kr',
+#		'kt',
 		
 		# Other standard parameters
-		[0.33, 'ior_preset', ['ior_list', 'ior']],
+#		[0.33, 'ior_preset', ['ior_list', 'ior']],
 		
 		
 		# Material specific parameters
 		
 		## Car paint
-		'carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3',
-        'carpaint_r', 'carpaint_m',
+#		'carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3',
+#        'carpaint_r', 'carpaint_m',
 		
 		# Glass
 		
@@ -71,31 +89,24 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 		# Used by many
 		
 		# TODO selection mechanism is inadequate; cannot correctly switch kd visibility.
-		'kd':					[{ 'material': ['carpaint','matte'] }],
-		'kr':					[{ 'material': 'glass' }],
-		'kt':					[{ 'material': 'glass' }],
-		'ior_preset':			[{ 'material': 'glass' }],
-		'ior_list':				[{ 'material': 'glass' }, { 'ior_preset': True }],
-		'ior':					[{ 'material': 'glass' }, { 'ior_preset': False }],
+#		'kd':					[{ 'material': ['carpaint','matte'] }],
+#		'kr':					[{ 'material': 'glass' }],
+#		'kt':					[{ 'material': 'glass' }],
+#		'ior_preset':			[{ 'material': 'glass' }],
+#		'ior_list':				[{ 'material': 'glass' }, { 'ior_preset': True }],
+#		'ior':					[{ 'material': 'glass' }, { 'ior_preset': False }],
 	
 		# Car paint
-		'carpaint_label':		[{ 'material': 'carpaint' }],
-		'carpaint_preset':		[{ 'material': 'carpaint' }],
+#		'carpaint_label':		[{ 'material': 'carpaint' }],
+#		'carpaint_preset':		[{ 'material': 'carpaint' }],
 		
 		# Car paint custom
-		'carpaint_ks1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-		'carpaint_ks2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-		'carpaint_ks3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-		
-        'carpaint_r':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#       'carpaint_r1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_r2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_r3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-        
-        'carpaint_m':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_m1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_m2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_m3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_ks1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_ks2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_ks3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#        'carpaint_r':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#        'carpaint_m':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+
 		
 		# Glass
 		
@@ -126,137 +137,121 @@ class material_editor(context_panel, material_settings_panel, described_layout):
 			]
 		},
 		
-		texture.Texture(
-			'kd',
-			name = 'Diffuse Colour',
-			description = 'Diffuse Colour',
-		),
-		texture.Texture(
-			'kr',
-			name = 'Reflection Colour',
-			description = 'Reflection Colour',
-		),
-		texture.Texture(
-			'kt',
-			name = 'Transmission Colour',
-			description = 'Transmission Colour',
-		),
+#		texture.Texture(
+#			'kd',
+#			name = 'Diffuse Colour',
+#			description = 'Diffuse Colour',
+#		),
+#		texture.Texture(
+#			'kr',
+#			name = 'Reflection Colour',
+#			description = 'Reflection Colour',
+#		),
+#		texture.Texture(
+#			'kt',
+#			name = 'Transmission Colour',
+#			description = 'Transmission Colour',
+#		),
 		
 		
-		{
-			'type': 'bool',
-			'attr': 'ior_preset',
-			'name': 'IOR Preset',
-			'description': 'IOR Preset',
-			'default': True,
-		},
-		{
-			'type': 'enum',
-			'attr': 'ior_list',
-			'name': '',
-			'description': 'IOR Preset',
-			'default': '1.5',
-			'items': [
-				('-1', 'IOR Preset', 'IOR Preset'),
-				('1.5', 'Fused Silica Glass', 'Fused Silica Glass'),
-				('0', '-- TODO --', '0'),
-			]
-		},
-		{
-			'type': 'float',
-			'attr': 'ior',
-			'name': '',
-			'description': 'IOR',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 10,
-			'soft_max': 10,
-		},
+#		{
+#			'type': 'bool',
+#			'attr': 'ior_preset',
+#			'name': 'IOR Preset',
+#			'description': 'IOR Preset',
+#			'default': True,
+#		},
+#		{
+#			'type': 'enum',
+#			'attr': 'ior_list',
+#			'name': '',
+#			'description': 'IOR Preset',
+#			'default': '1.5',
+#			'items': [
+#				('-1', 'IOR Preset', 'IOR Preset'),
+#				('1.5', 'Fused Silica Glass', 'Fused Silica Glass'),
+#				('0', '-- TODO --', '0'),
+#			]
+#		},
+#		{
+#			'type': 'float',
+#			'attr': 'ior',
+#			'name': '',
+#			'description': 'IOR',
+#			'default': 1,
+#			'min': 0,
+#			'soft_min': 0,
+#			'max': 10,
+#			'soft_max': 10,
+#		},
 		
 		
 		# Car paint
-		{
-			'type': 'enum',
-			'attr': 'carpaint_preset',
-			'name': 'Preset',
-			'description': 'Preset Car Paint Settings',
-			'default': 'custom',
-			'items': [
-				('custom','Custom','custom'),
-				('fordf8','Ford F8','fordf8'),
-				('polaris','Polaris Silver','polaris'),
-				('opel','Opel Titan','opel'),
-				('bmw339','BMW 339','bmw339'),
-				('2k','2K Acrylic','2k'),
-				('white','White','white'),
-				('blue','Blue','blue'),
-				('bluematte','Blue Matte','bluematte'),
-			]
-		},
+#		{
+#			'type': 'enum',
+#			'attr': 'carpaint_preset',
+#			'name': 'Preset',
+#			'description': 'Preset Car Paint Settings',
+#			'default': 'custom',
+#			'items': [
+#				('custom','Custom','custom'),
+#				('fordf8','Ford F8','fordf8'),
+#				('polaris','Polaris Silver','polaris'),
+#				('opel','Opel Titan','opel'),
+#				('bmw339','BMW 339','bmw339'),
+#				('2k','2K Acrylic','2k'),
+#				('white','White','white'),
+#				('blue','Blue','blue'),
+#				('bluematte','Blue Matte','bluematte'),
+#			]
+#		},
 		
-		texture.Texture(
-			'carpaint_ks1',
-			name = 'Specular Layer 1',
-			description = 'Specular Layer 1 Colour',
-		),
-		texture.Texture(
-			'carpaint_ks2',
-			name = 'Specular Layer 2',
-			description = 'Specular Layer 2 Colour',
-		),
-		texture.Texture(
-			'carpaint_ks3',
-			name = 'Specular Layer 3',
-			description = 'Specular Layer 3 Colour',
-		),
+#		texture.Texture(
+#			'carpaint_ks1',
+#			name = 'Specular Layer 1',
+#			description = 'Specular Layer 1 Colour',
+#		),
+#		texture.Texture(
+#			'carpaint_ks2',
+#			name = 'Specular Layer 2',
+#			description = 'Specular Layer 2 Colour',
+#		),
+#		texture.Texture(
+#			'carpaint_ks3',
+#			name = 'Specular Layer 3',
+#			description = 'Specular Layer 3 Colour',
+#		),
 		
-        {
-            'type': 'float_vector',
-            'attr': 'carpaint_r',
-            'name': 'Layer Roughnesses',
-            'description': 'Specular Layer Roughness',
-            'size': 3,
-            'default': (1.0, 1.0, 1.0),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3
-        },
-        {
-            'type': 'float_vector',
-            'attr': 'carpaint_m',
-            'name': 'Layer Fresnels',
-            'description': 'Specular Layer Fresnel',
-            'size': 3,
-            'default': (1.0, 1.0, 1.0),
-            'step': 0.1,
-            'min': 0.0,
-            'soft_min': 0.0,
-            'max': 1.0,
-            'soft_max': 1.0,
-            'precision': 3
-        },
+#        {
+#            'type': 'float_vector',
+#            'attr': 'carpaint_r',
+#            'name': 'Layer Roughnesses',
+#            'description': 'Specular Layer Roughness',
+#            'size': 3,
+#            'default': (1.0, 1.0, 1.0),
+#            'step': 0.1,
+#            'min': 0.0,
+#            'soft_min': 0.0,
+#            'max': 1.0,
+#            'soft_max': 1.0,
+#            'precision': 3
+#        },
+#        {
+#            'type': 'float_vector',
+#            'attr': 'carpaint_m',
+#            'name': 'Layer Fresnels',
+#            'description': 'Specular Layer Fresnel',
+#            'size': 3,
+#            'default': (1.0, 1.0, 1.0),
+#            'step': 0.1,
+#            'min': 0.0,
+#            'soft_min': 0.0,
+#            'max': 1.0,
+#            'soft_max': 1.0,
+#            'precision': 3
+#        },
 		
 		# Glass
 		
 	]
 	
-	# Overridden to provide data storage in the material, not the scene
-	def draw(self, context):
-		if context.material is not None:
-			if not hasattr(context.material, 'luxrender_material'):
-				#ef.ef.ef.log('Initialising Indigo properties in material %s'%context.material.name)
-				ef.init_properties(context.material, [{
-					'type': 'pointer',
-					'attr': self.property_group.__name__,
-					'ptype': self.property_group,
-					'name': self.property_group.__name__,
-					'description': self.property_group.__name__
-				}])
-				ef.init_properties(self.property_group, self.properties)
-			
-			for p in self.controls:
-				self.draw_column(p, self.layout, context.material)
