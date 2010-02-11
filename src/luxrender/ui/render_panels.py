@@ -28,8 +28,10 @@
 import ef.ui
 import properties
 
-class render_described_context(ef.ui.context_panel, ef.ui.render_settings_panel, ef.ui.described_layout):
-	context_name = 'luxrender'
+from properties_render import RenderButtonsPanel
+
+class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
+	COMPAT_ENGINES = {'luxrender'}
 
 
 # TODO remove all the lux_ prefixes off the members of the property groups

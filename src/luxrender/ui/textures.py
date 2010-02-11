@@ -37,7 +37,7 @@ import properties
 
 class texture_editor(context_panel, texture_settings_panel, described_layout):
     bl_label = 'LuxRender Textures'
-    context_name = 'luxrender'
+    COMPAT_ENGINES = {'luxrender'}
     
     property_group = properties.luxrender_texture
     # prevent creating luxrender_texture property group in Scene

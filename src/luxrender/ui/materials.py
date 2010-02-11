@@ -25,17 +25,17 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef.ui import context_panel
-from ef.ui import material_settings_panel
 from ef.ui import described_layout
 
 from ef.ef import ef
 
 import properties
 
-class material_editor(context_panel, material_settings_panel, described_layout):
+from properties_material import MaterialButtonsPanel
+
+class material_editor(MaterialButtonsPanel, described_layout):
 	bl_label = 'LuxRender Materials'
-	context_name = 'luxrender'
+	COMPAT_ENGINES = {'luxrender'}
 	
 	
 	property_group = properties.luxrender_material
