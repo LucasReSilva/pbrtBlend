@@ -25,13 +25,16 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef.ui import described_layout
+# Blender API
+import bpy
+from properties_material import MaterialButtonsPanel
 
+# EF API
+from ef.ui import described_layout
 from ef.ef import ef
 
+# Lux API
 import properties
-
-from properties_material import MaterialButtonsPanel
 
 class material_editor(MaterialButtonsPanel, described_layout):
 	bl_label = 'LuxRender Materials'
@@ -42,18 +45,29 @@ class material_editor(MaterialButtonsPanel, described_layout):
 	# prevent creating luxrender_material property group in Scene
 	property_group_non_global = True
 	
+	
+	@staticmethod
+	def property_reload():
+		for mat in bpy.data.materials:
+			material_editor.property_create(mat)
+	
+	@staticmethod
+	def property_create(mat):
+		if not hasattr(mat, material_editor.property_group.__name__):
+			#ef.log('Initialising properties in material %s'%context.material.name)
+			ef.init_properties(mat, [{
+				'type': 'pointer',
+				'attr': material_editor.property_group.__name__,
+				'ptype': material_editor.property_group,
+				'name': material_editor.property_group.__name__,
+				'description': material_editor.property_group.__name__
+			}], cache=False)
+			ef.init_properties(material_editor.property_group, material_editor.properties, cache=False)
+	
 	# Overridden to provide data storage in the material, not the scene
 	def draw(self, context):
 		if context.material is not None:
-			if not hasattr(context.material, self.property_group.__name__):
-				ef.init_properties(context.material, [{
-					'type': 'pointer',
-					'attr': self.property_group.__name__,
-					'ptype': self.property_group,
-					'name': self.property_group.__name__,
-					'description': self.property_group.__name__
-				}], cache=False)
-				ef.init_properties(self.property_group, self.properties, cache=False)
+			material_editor.property_create(context.material)
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.material, supercontext=context)
@@ -79,7 +93,7 @@ class material_editor(MaterialButtonsPanel, described_layout):
 		
 		## Car paint
 #		'carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3',
-#        'carpaint_r', 'carpaint_m',
+#		'carpaint_r', 'carpaint_m',
 		
 		# Glass
 		
@@ -104,8 +118,8 @@ class material_editor(MaterialButtonsPanel, described_layout):
 #		'carpaint_ks1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
 #		'carpaint_ks2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
 #		'carpaint_ks3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#        'carpaint_r':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#        'carpaint_m':           [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_r':		   [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
+#		'carpaint_m':		   [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
 
 		
 		# Glass
@@ -222,34 +236,34 @@ class material_editor(MaterialButtonsPanel, described_layout):
 #			description = 'Specular Layer 3 Colour',
 #		),
 		
-#        {
-#            'type': 'float_vector',
-#            'attr': 'carpaint_r',
-#            'name': 'Layer Roughnesses',
-#            'description': 'Specular Layer Roughness',
-#            'size': 3,
-#            'default': (1.0, 1.0, 1.0),
-#            'step': 0.1,
-#            'min': 0.0,
-#            'soft_min': 0.0,
-#            'max': 1.0,
-#            'soft_max': 1.0,
-#            'precision': 3
-#        },
-#        {
-#            'type': 'float_vector',
-#            'attr': 'carpaint_m',
-#            'name': 'Layer Fresnels',
-#            'description': 'Specular Layer Fresnel',
-#            'size': 3,
-#            'default': (1.0, 1.0, 1.0),
-#            'step': 0.1,
-#            'min': 0.0,
-#            'soft_min': 0.0,
-#            'max': 1.0,
-#            'soft_max': 1.0,
-#            'precision': 3
-#        },
+#		{
+#			'type': 'float_vector',
+#			'attr': 'carpaint_r',
+#			'name': 'Layer Roughnesses',
+#			'description': 'Specular Layer Roughness',
+#			'size': 3,
+#			'default': (1.0, 1.0, 1.0),
+#			'step': 0.1,
+#			'min': 0.0,
+#			'soft_min': 0.0,
+#			'max': 1.0,
+#			'soft_max': 1.0,
+#			'precision': 3
+#		},
+#		{
+#			'type': 'float_vector',
+#			'attr': 'carpaint_m',
+#			'name': 'Layer Fresnels',
+#			'description': 'Specular Layer Fresnel',
+#			'size': 3,
+#			'default': (1.0, 1.0, 1.0),
+#			'step': 0.1,
+#			'min': 0.0,
+#			'soft_min': 0.0,
+#			'max': 1.0,
+#			'soft_max': 1.0,
+#			'precision': 3
+#		},
 		
 		# Glass
 		
