@@ -33,7 +33,7 @@ class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
 	COMPAT_ENGINES = {'luxrender'}
 
 
-# TODO remove all the lux_ prefixes off the members of the property groups
+# TODO: remove all the lux_ prefixes off the members of the property groups
 
 class engine(render_described_context):
 	bl_label = 'LuxRender Engine Configuration'

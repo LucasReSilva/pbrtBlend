@@ -101,7 +101,7 @@ class material_editor(MaterialButtonsPanel, described_layout):
 	selection = {
 		# Used by many
 		
-		# TODO selection mechanism is inadequate; cannot correctly switch kd visibility.
+		# TODO: selection mechanism is inadequate; cannot correctly switch kd visibility.
 #		'kd':					[{ 'material': ['carpaint','matte'] }],
 #		'kr':					[{ 'material': 'glass' }],
 #		'kt':					[{ 'material': 'glass' }],

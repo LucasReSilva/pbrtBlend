@@ -77,7 +77,7 @@ class luxrender(engine_base):
 		'''
 		this will be called by the LuxFilmDisplay thread started by LuxManager
 		
-		TODO, perhaps this class itself is a threaded timer ?
+		TODO: perhaps this class itself is a threaded timer ?
 		'''
 		
 		result = self.begin_result(0,0,xres,yres)
@@ -147,7 +147,7 @@ class luxrender(engine_base):
 		self.LuxManager.start(self)
 		self.update_stats('', 'LuxRender: Rendering warmup')
 		
-		# TODO replace time.sleep with a threading event
+		# TODO: replace time.sleep with a threading event
 		while self.LuxManager.started:
 			time.sleep(1)
 			self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)

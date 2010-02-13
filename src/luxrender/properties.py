@@ -36,9 +36,9 @@ def dbo(m,o):
         pprint.pprint(o, width=1, indent=1)
         
 
-# TODO adapt values written to d based on simple/advanced views
+# TODO: adapt values written to d based on simple/advanced views
 
-# TODO check parameter completeness against Lux API
+# TODO: check parameter completeness against Lux API
 
 import bpy
 
