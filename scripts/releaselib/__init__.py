@@ -72,30 +72,31 @@ def strip_dev_code(FILE):
     
     print('\t%i blocks replaced' % rep_count)
     
-def make_config_file(EXDIR, VER, AUTOUPDATE_URLs):
-    VER = '%i'%VER
-        
+def make_config_file(EXDIR, VERSIONS, AUTOUPDATE_URLs):        
     cf = ConfigParser.SafeConfigParser()
     
     for s in ['EF', 'luxrender']:
         cf.add_section(s)
-        cf.set(s, 'update_location', AUTOUPDATE_URLs['EF']+'/%s_update.manifest'%s.lower())
-        cf.set(s, 'ver', VER)
+        cf.set(s, 'update_location', AUTOUPDATE_URLs['EF']+'%s_update.manifest'%s.lower())
+        cf.set(s, 'ver', VERSIONS[s])
         cf.set(s, 'last_check', '0')
         cf.set(s, 'update_period', '864000')
         
         cm = ConfigParser.SafeConfigParser()
         cm.add_section(s)
-        cm.set(s, 'latest_version', VER)
-        cm.set(s, 'package_location', AUTOUPDATE_URLs[s]+'/release/%s/%s_%s.zip'%(s.lower(),s.lower(),VER))
-        fh=open(EXDIR+'/../%s_update.manifest'%s.lower(), 'w')
+        cm.set(s, 'latest_version', VERSIONS[s])
+        cm.set(s, 'package_location', AUTOUPDATE_URLs[s]+'release/%s/%s_%s.zip'%(s.lower(),s.lower(),VERSIONS[s]))
+        fhfn = EXDIR+'/../%s_update.manifest'%s.lower()
+        fh=open(fhfn, 'w')
         cm.write(fh)
         fh.close()
+        print('Wrote %s'%fhfn)
         
-        
-    fh = open(EXDIR+'/ef.cfg', 'w')
+    fhfn = EXDIR+'/ef.cfg'
+    fh = open(fhfn, 'w')
     cf.write(fh)
     fh.close()
+    print('Wrote %s'%fhfn)
 
 def zipper(dir, zip_file):
     zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
@@ -112,9 +113,10 @@ def zipper(dir, zip_file):
     zip.close()
     return zip_file
 
-def make_release_zips(release_dir, VER):
-    VER = '%i'%VER
+def make_release_zips(release_dir, VERSIONS):
     output_dir = os.path.split(release_dir)[0]
     
-    zipper(release_dir+'/ef', output_dir+'/ef_'+VER+'.zip')
-    zipper(release_dir+'/engines/luxrender', output_dir+'/luxrender_'+VER+'.zip')
+    ef_zip = zipper(release_dir+'/ef', output_dir+'/ef_'+VERSIONS['EF']+'.zip')
+    print('Created %s'%ef_zip)
+    luxrender_zip = zipper(release_dir+'/engines/luxrender', output_dir+'/luxrender_'+VERSIONS['luxrender']+'.zip')
+    print('Created %s'%luxrender_zip)

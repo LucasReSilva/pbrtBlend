@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf8 -*-
 #
 # ***** BEGIN GPL LICENSE BLOCK *****
@@ -24,15 +25,20 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+
 # Standard Library imports
 import sys, os, shutil, glob
 import releaselib
 
-# Check CLI args 
-if len(sys.argv) < 3:
-    print('No upload username given')
-    print('%s <version> <username>' % sys.argv[0])
+# Check CLI args
+if len(sys.argv) < 2:
+    print('No version or upload username given')
+    print('%s <version> [username]' % sys.argv[0])
     sys.exit(1)
+if len(sys.argv) < 3:
+    print('No upload username given, will not upload release')
+    print('%s <version> [username]' % sys.argv[0])
+    #sys.exit(1)
 
 # Important URLs + Constants
 FRAMEWORK_REPO  = 'http://ef.beulahelectronics.co.uk/hg/ef'
@@ -48,10 +54,12 @@ AUTOUPDATE_PATHs = {
     'EF':           '/home/beulahelectronics/%s/auto_update' % UPLOAD_HOSTS['EF'],
     'luxrender':    '/home/beulahelectronics/%s/auto_update' % UPLOAD_HOSTS['luxrender'],
 }
-AUTOUPDATE_USERNAMES = {
-    'EF': 'beulahelectronics',
-    'luxrender': sys.argv[2]
-}
+
+if len(sys.argv) > 2:
+    AUTOUPDATE_USERNAMES = {
+        'EF': 'beulahelectronics',
+        'luxrender': sys.argv[2]
+    }
 
 # NON-standard library imports
 try:
@@ -84,6 +92,7 @@ REPO_DIR = os.getcwd()
 repo_root = mercurial.hg.repository(mui, REPO_DIR)
 repo_cl = repo_root.changelog
 REPO_REV = repo_cl.rev( repo_cl.tip() )
+print('luxblend25 revision is %i'%REPO_REV)
 
 # Create release directory
 releaselib.print_title('Create release directory')
@@ -92,7 +101,7 @@ RELEASE_DIR = os.path.join(os.getcwd(), 'release', sys.argv[1])
 try:
     os.makedirs(RELEASE_DIR)
     print('Assembling to directory: %s' % RELEASE_DIR)
-except Exception, err:
+except Exception as err:
     if not 'exists' in str(err): # it's OK if the target dir exists
         print(err) #'Cannot make release dir: %s' % RELEASE_DIR)
         sys.exit(1)
@@ -103,6 +112,10 @@ mercurial.commands.init(mui, RELEASE_DIR)
 hg_local = mercurial.hg.repository(mui, RELEASE_DIR)
 mercurial.commands.pull(mui, hg_local, source=FRAMEWORK_REPO)
 mercurial.commands.update(mui, hg_local)
+# Get HG repo version
+EF_REV = hg_local.changelog.rev( hg_local.changelog.tip() )
+print('EF revision is %i'%EF_REV)
+
 # remove hg repo files, not needed any more
 for hgfiles in glob.glob(RELEASE_DIR+'/.hg*'):
     if os.path.isdir(hgfiles):
@@ -120,59 +133,69 @@ releaselib.print_title('Finalise source code')
 STRIP_FILES = ['bootstrap.py']
 for f in STRIP_FILES:
     releaselib.strip_dev_code(os.path.join(RELEASE_DIR, f))
-    
+
+VERSIONS = {
+ 'EF':          '%i'%EF_REV,
+ 'luxrender':   '%i'%REPO_REV
+} 
+
 # Create config file
 releaselib.print_title('Create config files')
-releaselib.make_config_file(RELEASE_DIR, REPO_REV, AUTOUPDATE_URLs)
+releaselib.make_config_file(
+	RELEASE_DIR,
+	VERSIONS,
+	AUTOUPDATE_URLs
+)
 mercurial.commands.add(mui, repo_root, os.path.join(RELEASE_DIR, 'ef.cfg'))
 
 # Create zipfiles
 releaselib.print_title('Create release ZIPs')
 for f in glob.glob(RELEASE_PARENT+'/*.zip'):
     os.remove(f)
-releaselib.make_release_zips(RELEASE_DIR, REPO_REV)
+releaselib.make_release_zips(RELEASE_DIR, VERSIONS)
 
 # Upload
-#releaselib.print_title('Upload release files')
-#if len(ssh_key_agent.keys) > 0:
-#    # only try 1st key
-#    key = ssh_key_agent.keys[0]
-#    # upload zips
-#    for mod in ['EF', 'luxrender']:
-#        print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod]))
-#        ssh_transport = paramiko.Transport(UPLOAD_HOSTS[mod])
+#if len(sys.argv) > 2:
+#    releaselib.print_title('Upload release files')
+#    if len(ssh_key_agent.keys) > 0:
+#        # only try 1st key
+#        key = ssh_key_agent.keys[0]
+#        # upload zips
+#        for mod in ['EF', 'luxrender']:
+#            print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod]))
+#            ssh_transport = paramiko.Transport(UPLOAD_HOSTS[mod])
+#            ssh_transport.connect()
+#            ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES[mod], key)
+#            sftp = paramiko.SFTPClient.from_transport(ssh_transport)
+#            for modf in glob.glob(RELEASE_PARENT+'/%s*.zip'%mod.lower()):
+#                src = modf
+#                trg = AUTOUPDATE_PATHs[mod] + ('/release/%s/'%mod.lower()) + os.path.basename(modf)
+#                print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod],trg))
+#                sr = sftp.put(src, trg)
+#                print('%i bytes transferred' % sr.st_size)
+#            sftp.close()
+#            ssh_transport.close()
+#            del sftp
+#            del ssh_transport
+#            
+#        # Upload manifests
+#        print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF']))
+#        ssh_transport = paramiko.Transport(UPLOAD_HOSTS['EF'])
 #        ssh_transport.connect()
-#        ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES[mod], key)
+#        ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES['EF'], key)
 #        sftp = paramiko.SFTPClient.from_transport(ssh_transport)
-#        for modf in glob.glob(RELEASE_PARENT+'/%s*.zip'%mod.lower()):
+#        for modf in glob.glob(RELEASE_PARENT+'/*_update.manifest'):
 #            src = modf
-#            trg = AUTOUPDATE_PATHs[mod] + ('/release/%s/'%mod.lower()) + os.path.basename(modf)
-#            print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES[mod],UPLOAD_HOSTS[mod],trg))
-#            sr = sftp.put(src, trg)
+#            trg = AUTOUPDATE_PATHs[mod] + '/' + os.path.basename(modf)
+#            print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF'],trg))
+#            sftp.put(src, trg)
 #            print('%i bytes transferred' % sr.st_size)
 #        sftp.close()
 #        ssh_transport.close()
 #        del sftp
 #        del ssh_transport
-#        
-#    # Upload manifests
-#    print('Connecting %s@%s' % (AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF']))
-#    ssh_transport = paramiko.Transport(UPLOAD_HOSTS['EF'])
-#    ssh_transport.connect()
-#    ssh_transport.auth_publickey(AUTOUPDATE_USERNAMES['EF'], key)
-#    sftp = paramiko.SFTPClient.from_transport(ssh_transport)
-#    for modf in glob.glob(RELEASE_PARENT+'/*_update.manifest'):
-#        src = modf
-#        trg = AUTOUPDATE_PATHs[mod] + '/' + os.path.basename(modf)
-#        print('%s -> %s@%s:%s' % (src,AUTOUPDATE_USERNAMES['EF'],UPLOAD_HOSTS['EF'],trg))
-#        sftp.put(src, trg)
-#        print('%i bytes transferred' % sr.st_size)
-#    sftp.close()
-#    ssh_transport.close()
-#    del sftp
-#    del ssh_transport
-#else:
-#    print('No SSH Key Agent found, or no keys available; cannot upload')
+#    else:
+#        print('No SSH Key Agent found, or no keys available; cannot upload')
 
 
 releaselib.print_title('Finished')
