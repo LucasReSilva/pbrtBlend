@@ -133,8 +133,7 @@ mercurial.commands.copy(
     mui,
     repo_root,
     'src/luxrender',
-    os.path.join(RELEASE_DIR, 'engines', 'luxrender'),
-    exclude=['(.*)\.pyc$'] #,'(.*)\.so$']
+    os.path.join(RELEASE_DIR, 'engines', 'luxrender')
 )
 
 # Remove development code from source files
