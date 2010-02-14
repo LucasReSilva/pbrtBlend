@@ -33,14 +33,14 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 # Lux API
-import properties
+import luxrender.properties
 
 class material_editor(MaterialButtonsPanel, described_layout):
 	bl_label = 'LuxRender Materials'
 	COMPAT_ENGINES = {'luxrender'}
 	
 	
-	property_group = properties.luxrender_material
+	property_group = luxrender.properties.luxrender_material
 	# prevent creating luxrender_material property group in Scene
 	property_group_non_global = True
 	

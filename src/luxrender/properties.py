@@ -42,7 +42,6 @@ def dbo(m,o):
 
 import bpy
 
-
 class luxrender_texture(bpy.types.IDPropertyGroup):
     pass
 

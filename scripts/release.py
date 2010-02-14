@@ -136,12 +136,6 @@ mercurial.commands.copy(
     os.path.join(RELEASE_DIR, 'engines', 'luxrender')
 )
 
-# Remove development code from source files
-releaselib.print_title('Finalise source code')
-STRIP_FILES = ['bootstrap.py']
-for f in STRIP_FILES:
-    releaselib.strip_dev_code(os.path.join(RELEASE_DIR, f))
-
 VERSIONS = {
  'EF':          '%i'%EF_REV,
  'luxrender':   '%i'%REPO_REV

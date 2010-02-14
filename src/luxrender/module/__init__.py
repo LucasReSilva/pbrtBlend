@@ -24,10 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef.ef import ef
-import bpy
-import pylux as lux
 import threading
+import datetime
+
+import bpy
+
+from ef.ef import ef
+
+import luxrender.pylux as lux
 
 def LuxLog(*args):
     '''
@@ -80,7 +84,7 @@ class LuxTimerThread(threading.Thread):
         '''
         pass
     
-import datetime
+
 def format_elapsed_time(t):
     td = datetime.timedelta(seconds=t)
     min = td.days*1440  + td.seconds/60.0
