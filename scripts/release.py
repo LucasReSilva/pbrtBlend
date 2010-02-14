@@ -124,9 +124,18 @@ for hgfiles in glob.glob(RELEASE_DIR+'/.hg*'):
         os.remove(hgfiles)
 
 # REPO add the Exporter Framework files
+releaselib.print_title('Add Exporter Framework to release')
 mercurial.commands.add(mui, repo_root)
+
 # Add trunk sources as EF engine
-mercurial.commands.copy(mui, repo_root, 'src/luxrender', os.path.join(RELEASE_DIR, 'engines', 'luxrender'))
+releaselib.print_title('Copy LuxRender plugin to release')
+mercurial.commands.copy(
+    mui,
+    repo_root,
+    'src/luxrender',
+    os.path.join(RELEASE_DIR, 'engines', 'luxrender'),
+    exclude=['(.*)\.pyc$'] #,'(.*)\.so$']
+)
 
 # Remove development code from source files
 releaselib.print_title('Finalise source code')
