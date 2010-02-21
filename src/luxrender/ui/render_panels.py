@@ -53,12 +53,12 @@ class engine(render_described_context):
 #		['file_lxs', 'file_lxo', 'file_lxm', 'file_lxv'],
 	]
 	
-	selection = {
-		'threads':				[{ 'threads_auto': False }],
-#		'file_lxs':				[{ 'singlefile': False }],
-#		'file_lxo':				[{ 'singlefile': False }],
-#		'file_lxm':				[{ 'singlefile': False }],
-#		'file_lxv':				[{ 'singlefile': False }],
+	visibility = {
+		'threads':				{ 'threads_auto': False },
+#		'file_lxs':				{ 'singlefile': False },
+#		'file_lxo':				{ 'singlefile': False },
+#		'file_lxm':				{ 'singlefile': False },
+#		'file_lxv':				{ 'singlefile': False },
 	}
 	
 	properties = [

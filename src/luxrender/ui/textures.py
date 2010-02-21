@@ -65,7 +65,7 @@ class texture_editor(context_panel, texture_settings_panel, described_layout):
         ['tex1', 'tex2']
     ]
     
-    selection = {
+    visibility = {
     }
     
     properties = [

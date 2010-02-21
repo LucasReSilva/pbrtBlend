@@ -98,7 +98,7 @@ class material_editor(MaterialButtonsPanel, described_layout):
 		
 	]
 	
-	selection = {
+	visibility = {
 		# Used by many
 		
 		# TODO: selection mechanism is inadequate; cannot correctly switch kd visibility.
