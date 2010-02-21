@@ -27,6 +27,7 @@
 from properties_render import RenderButtonsPanel
 
 import ef.ui
+from ef.validate import Logic_OR as O, Logic_AND as A
 
 import luxrender.properties
 
@@ -192,21 +193,21 @@ class sampler(render_described_context):
 		['pixelsamples'],			# simple 
 	]
 	
-	selection = {
-		'advanced':				[{ 'sampler': 'metropolis'}],
+	visibility = {
+		'advanced':				{ 'sampler': 'metropolis'},
 	
-		'metro_strength':		[{ 'advanced': False }, { 'sampler': 'metropolis'}],
-		'metro_lmprob':			[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
-		'metro_mncr':			[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
-		'metro_initsamples':	[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
-		'metro_variance':		[{ 'advanced': True  }, { 'sampler': 'metropolis'}],
+		'metro_strength':		{ 'advanced': False, 'sampler': 'metropolis'},
+		'metro_lmprob':			{ 'advanced': True , 'sampler': 'metropolis'},
+		'metro_mncr':			{ 'advanced': True , 'sampler': 'metropolis'},
+		'metro_initsamples':	{ 'advanced': True , 'sampler': 'metropolis'},
+		'metro_variance':		{ 'advanced': True , 'sampler': 'metropolis'},
 		
-		'erpt_initsamples':		[{ 'sampler': 'erpt'}],
-		'erpt_chainlength':		[{ 'sampler': 'erpt'}],
-#		'erpt_mutationrange':   [{ 'sampler': 'erpt'}],
+		'erpt_initsamples':		{ 'sampler': 'erpt'},
+		'erpt_chainlength':		{ 'sampler': 'erpt'},
+#		'erpt_mutationrange':   { 'sampler': 'erpt'},
 		
-		'pixelsampler':		    [{ 'sampler': ['random', 'lowdiscrepancy']}],
-		'pixelsamples':			[{ 'sampler': ['random', 'lowdiscrepancy']}],
+		'pixelsampler':		    { 'sampler': O(['random', 'lowdiscrepancy']) },
+		'pixelsamples':			{ 'sampler': O(['random', 'lowdiscrepancy']) },
 	}
 	
 	properties = [
@@ -346,12 +347,12 @@ class integrator(render_described_context):
 		['bidir_edepth', 'bidir_ldepth'],		# advanced
 	]
 	
-	selection = {
-		'strategy':		[{ 'advanced': True  }],
+	visibility = {
+		'strategy':		{ 'advanced': True },
 		
-		'bidir_depth':	[{ 'advanced': False }, { 'surfaceintegrator': 'bidirectional' }],
-		'bidir_edepth':	[{ 'advanced': True  }, { 'surfaceintegrator': 'bidirectional' }],
-		'bidir_ldepth':	[{ 'advanced': True  }, { 'surfaceintegrator': 'bidirectional' }],
+		'bidir_depth':	{ 'advanced': False, 'surfaceintegrator': 'bidirectional' },
+		'bidir_edepth':	{ 'advanced': True , 'surfaceintegrator': 'bidirectional' },
+		'bidir_ldepth':	{ 'advanced': True , 'surfaceintegrator': 'bidirectional' },
 	}
 	
 	properties = [
@@ -476,18 +477,18 @@ class filter(render_described_context):
 		'sinc_tau'								# sinc advanced
 	]
 	
-	selection = {
-		'xwidth':				[{ 'advanced': True }],
-		'ywidth':				[{ 'advanced': True }],
+	visibility = {
+		'xwidth':				{ 'advanced': True},
+		'ywidth':				{ 'advanced': True},
 		
-		'gaussian_alpha':		[{ 'advanced': True }, { 'filter': 'gaussian' }],
+		'gaussian_alpha':		{ 'advanced': True, 'filter': 'gaussian' },
 		
-		'mitchell_mode':		[{ 'advanced': True }, { 'filter': 'mitchell' }],
-		'mitchell_b':			[{ 'advanced': True }, { 'filter': 'mitchell' }, { 'mitchell_mode': 'manual' }],
-		'mitchell_c':			[{ 'advanced': True }, { 'filter': 'mitchell' }, { 'mitchell_mode': 'manual' }],		
-		'mitchell_sharpness':	[{ 'filter': 'mitchell' }],
+		'mitchell_mode':		{ 'advanced': True, 'filter': 'mitchell' },
+		'mitchell_b':			{ 'advanced': True, 'filter': 'mitchell', 'mitchell_mode': 'manual' },
+		'mitchell_c':			{ 'advanced': True, 'filter': 'mitchell', 'mitchell_mode': 'manual' },		
+		'mitchell_sharpness':	{ 'filter': 'mitchell' },
 		
-		'sinc_tau':				[{ 'advanced': True }, { 'filter': 'sinc' }],
+		'sinc_tau':				{ 'advanced': True, 'filter': 'sinc' },
 	}
 	
 	properties = [
@@ -619,14 +620,14 @@ class accelerator(render_described_context):
 		'qbvh_maxprims',									# qbvh
 	]
 	
-	selection = {
-		'kd_intcost':	    [{ 'accelerator': 'tabreckdtree' }],
-		'kd_travcost':		[{ 'accelerator': 'tabreckdtree' }],
-		'kd_ebonus':		[{ 'accelerator': 'tabreckdtree' }],
-		'kd_maxprims':		[{ 'accelerator': 'tabreckdtree' }],
-		'kd_maxdepth':		[{ 'accelerator': 'tabreckdtree' }],
-		'grid_refineim':	[{ 'accelerator': 'grid' }],
-		'qbvh_maxprims':	[{ 'accelerator': 'qbvh' }],
+	visibility = {
+		'kd_intcost':	    { 'accelerator': 'tabreckdtree' },
+		'kd_travcost':		{ 'accelerator': 'tabreckdtree' },
+		'kd_ebonus':		{ 'accelerator': 'tabreckdtree' },
+		'kd_maxprims':		{ 'accelerator': 'tabreckdtree' },
+		'kd_maxdepth':		{ 'accelerator': 'tabreckdtree' },
+		'grid_refineim':	{'accelerator': 'grid' },
+		'qbvh_maxprims':	{ 'accelerator': 'qbvh' },
 	}
 	
 	properties = [
