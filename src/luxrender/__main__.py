@@ -57,7 +57,7 @@ del properties_material
 class luxrender(engine_base):
 	bl_label = 'LuxRender'
 	
-	LuxManager = LM()
+	LuxManager = None
 		
 	interfaces = [
 		luxrender.ui.render_panels.engine,
@@ -90,10 +90,10 @@ class luxrender(engine_base):
 	
 	
 	def render(self, scene):
-		self.LuxManager.reset()
+		self.LuxManager = LM('Main render')
 		self.update_stats('', 'LuxRender: Parsing Scene')
 		
-		l = self.LuxManager.lux_module
+		l = self.LuxManager.lux_context
 		
 		# Set up render engine parameters
 		l.sampler(            *scene.luxrender_sampler.api_output()       )

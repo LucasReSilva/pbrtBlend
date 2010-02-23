@@ -40,6 +40,10 @@ def LuxLog(*args):
     '''
     if len(args) > 0:
         ef.log(' '.join(['%s'%a for a in args]), module_name='Lux')
+        
+ 
+# logging handler Causes segfault       
+#lux.errorHandler(LuxLog)
 
 class LuxOutput(object):
     '''
@@ -62,6 +66,12 @@ class LuxTimerThread(threading.Thread):
     
     active = True
     timer = None
+    
+    lux_context = None
+    
+    def __init__(self, lux_context):
+        threading.Thread.__init__(self)
+        self.lux_context = lux_context
     
     def stop(self):
         self.active = False
@@ -132,7 +142,7 @@ class LuxAPIStats(LuxTimerThread):
             
     def kick(self):
         for k in self.stats_dict.keys():
-            self.stats_dict[k] = lux.statistics(k)
+            self.stats_dict[k] = self.lux_context.statistics(k)
         
         self.stats_string = ' | '.join(['%s'%self.stats_format[k](v) for k,v in self.stats_dict.items()])
               
@@ -148,10 +158,10 @@ class LuxFilmDisplay(LuxTimerThread):
             
     def kick(self, render_end=False):
         if self.RE is not None:
-            px = [] #lux.framebuffer()
-            xres = int(lux.statistics('filmXres'))
-            yres = int(lux.statistics('filmYres'))
-            time = lux.statistics('secElapsed')
+            px = [] #self.lux_context.framebuffer()
+            xres = int(self.lux_context.statistics('filmXres'))
+            yres = int(self.lux_context.statistics('filmYres'))
+            time = self.lux_context.statistics('secElapsed')
             if render_end:
                 LuxLog('Final render result %ix%i' % (xres,yres))
             else:
@@ -165,19 +175,23 @@ class LuxManager(LuxOutput):
     Instances of this class will represent a Lux rendering context
     '''
     
-    # TODO: Implement rendering contexts from pylux and adapt __main__.luxrender.render() to use it
+    # Give each context a unique serial number
+    context_count = 0
+    @staticmethod
+    def get_context_number():
+        LuxManager.context_count += 1
+        return LuxManager.context_count
     
-    lux_module = lux
+    
+    lux_context     = None
     
     stats_thread    = None
     fb_thread       = None
     started         = True
     
-    def __init__(self):
-        lux.init()
-        
-        # log redirection causes segfault
-        #lux.errorHandler(LuxLog)
+    def __init__(self, manager_name = ''):
+        if manager_name is not '': manager_name = ' (%s)' % manager_name
+        self.lux_context = lux.Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
         
         self.reset()
 
@@ -186,7 +200,7 @@ class LuxManager(LuxOutput):
             LuxLog('Already rendering!')
             return
         
-        lux.worldEnd()
+        self.lux_context.worldEnd()
         
         self.stats_thread.start()
         self.fb_thread.start(RE)
@@ -197,13 +211,13 @@ class LuxManager(LuxOutput):
             self.stats_thread.stop()
             self.stats_thread.join()
         
-        self.stats_thread  = LuxAPIStats()
+        self.stats_thread  = LuxAPIStats(self.lux_context)
         
         if not self.started: return
         self.started = False
         
-        lux.exit()
-        lux.wait()
+        self.lux_context.exit()
+        self.lux_context.wait()
         
         # Get the last image
         if self.fb_thread is not None and self.fb_thread.isAlive():
@@ -212,9 +226,9 @@ class LuxManager(LuxOutput):
             # Get last FB
             self.fb_thread.kick(render_end=True)
         
-        self.fb_thread  = LuxFilmDisplay()
+        self.fb_thread  = LuxFilmDisplay(self.lux_context)
         
-        lux.cleanup()
+        self.lux_context.cleanup()
         
     def __del__(self):
         '''
