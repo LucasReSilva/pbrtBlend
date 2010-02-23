@@ -118,8 +118,8 @@ class luxrender(engine_base):
 		
 		fs = {
 			# Set resolution
-			'xresolution':   int(scene.render_data.resolution_x * scene.render_data.resolution_percentage / 100.0),
-			'yresolution':   int(scene.render_data.resolution_y * scene.render_data.resolution_percentage / 100.0),
+			'xresolution':   int(scene.render.resolution_x * scene.render.resolution_percentage / 100.0),
+			'yresolution':   int(scene.render.resolution_y * scene.render.resolution_percentage / 100.0),
 			
 			# write only default png file
 			'write_exr':         False,

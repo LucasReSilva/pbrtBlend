@@ -160,8 +160,12 @@ class LuxFilmDisplay(LuxTimerThread):
 
 class LuxManager(LuxOutput):
     '''
-    Use the pylux API
+    Use the pylux API.
+    
+    Instances of this class will represent a Lux rendering context
     '''
+    
+    # TODO: Implement rendering contexts from pylux and adapt __main__.luxrender.render() to use it
     
     lux_module = lux
     
