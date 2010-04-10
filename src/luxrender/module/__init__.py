@@ -31,7 +31,9 @@ import bpy
 
 from ef.ef import ef
 
-import luxrender.pylux as lux
+# CHOOSE API TYPE
+#from luxrender.module.pure_api import lux        # Access lux only through pylux bindings
+from luxrender.module.file_api import lux        # Write conventional lx* files and use pylux to manage lux process
 
 def LuxLog(*args):
     '''
