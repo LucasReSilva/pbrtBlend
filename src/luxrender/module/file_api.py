@@ -33,6 +33,11 @@ import luxrender.pylux
 import luxrender.module
 import luxrender.module.paramset
 
+class Files(object):
+    MAIN = 0
+    MATS = 1
+    GEOM = 2
+
 class lux(object):
     
     class Context(luxrender.pylux.Context):
@@ -43,17 +48,24 @@ class lux(object):
         '''
         
         files = []
+        current_file = Files.MAIN
         
         def wf(self, ind, st, tabs=0):
             '''
             Write a string followed by newline to file index ind
             '''
+            
             if len(self.files) == 0:
-                self.set_filename('test')
+                self.set_filename('default')
             
             self.files[ind].write('%s%s\n' % ('\t'*tabs, st))
         
         def param_formatter(self, param):
+            '''
+            Try to detect the parameter type (via paramset) and
+            format it as a string.
+            '''
+            
             fs_num = '"%s %s" [%s]'
             fs_str = '"%s %s" ["%s"]'
             
@@ -87,6 +99,11 @@ class lux(object):
             return '# unknown param %s : %s' % (k,v)
         
         def set_filename(self, name):
+            '''
+            Open the main, materials, and geometry files for output
+            '''
+            
+            # If any files happen to be open, close them and start again
             for f in self.files:
                 f.close()
             
@@ -96,15 +113,22 @@ class lux(object):
                 open('%s-geom.lxo' % name, 'w'),
             ]
             
-            self.wf(0, '# Main Scene File')
-            self.wf(1, '# Materials File')
-            self.wf(2, '# Geometry File')
+            self.wf(Files.MAIN, '# Main Scene File')
+            self.wf(Files.MATS, '# Materials File')
+            self.wf(Files.GEOM, '# Geometry File')
             
-        def _api(self, identifier, args, file=0):
+        def set_output_file(self, file):
+            self.current_file = file
+            
+        def _api(self, identifier, args=[], file=None):
+            if file is not None:
+                self.set_output_file(file)
+            
+            # name is a string, and params a list
             name, params = args
-            self.wf(file, '\n%s "%s"' % (identifier, name))
+            self.wf(self.current_file, '\n%s "%s"' % (identifier, name))
             for p in params:
-                self.wf(file, self.param_formatter(p), 1)
+                self.wf(self.current_file, self.param_formatter(p), 1)
             
         def sampler(self, *args):
             self._api('Sampler', args)
@@ -122,7 +146,7 @@ class lux(object):
             self._api('PixelFilter', args)
         
         def lookAt(self, *args):
-            self.wf(0, '\nLookAt %s' % ' '.join(['%f'%i for i in args]))
+            self.wf(Files.MAIN, '\nLookAt %s' % ' '.join(['%f'%i for i in args]))
         
         def camera(self, *args):
             self._api('Camera', args)
@@ -131,28 +155,45 @@ class lux(object):
             self._api('Film', args)
         
         def worldBegin(self, *args):
-            self.wf(0, '\nWorldBegin')
+            self.wf(Files.MAIN, '\nWorldBegin')
+        
+        def lightSource(self, *args):
+            self._api('LightSource', args)
+            
+        def attributeBegin(self):
+            self.wf(Files.GEOM, '\nAttributeBegin')
+            
+        def attributeEnd(self):
+            self.wf(Files.GEOM, '\nAttributeEnd')
+            
+        def transform(self, *args):
+            self.wf(Files.GEOM, '\nTransform [%s]' % ' '.join(['%f'%i for i in args]))
+            
+        def shape(self, *args):
+            self._api('Shape', file=Files.GEOM)
+            
+        def material(self, name):
+            self.wf(Files.GEOM, '\nMaterial "%s"' % name)
         
         def worldEnd(self, *args):
             #Don't actually write any WorldEnd to file yet!
+            
+            # Include the other files
+            self.wf(Files.MAIN, '\nInclude "%s"' % self.files[Files.MATS].name)   # Materials
+            self.wf(Files.MAIN, '\nInclude "%s"' % self.files[Files.GEOM].name)   # Geometry
+            
+            # Close files
             luxrender.module.LuxLog('Wrote scene files')
             for f in self.files:
                 f.close()
                 luxrender.module.LuxLog(' %s' % f.name)
             
-            # Now start the rendering by parsing the files we just wrote
-            self.parse(self.files[0].name, False)  # Main scene file
-            self.parse(self.files[1].name, False)  # Materials
-            self.parse(self.files[2].name, False)  # Geometry
+            # Now start the rendering by parsing the main scene file we just wrote
+            self.parse(self.files[Files.MAIN].name, False)  # Main scene file
             luxrender.pylux.Context.worldEnd(self)
             
             # Add the includes and final WorldEnd so that the file is usable directly in LuxRender
-            f=open(self.files[0].name, 'a')
-            f.write('\nInclude "%s"' % self.files[1].name)
-            f.write('\nInclude "%s"' % self.files[2].name)
-            f.write('\n\nWorldEnd\n')
+            f=open(self.files[Files.MAIN].name, 'a')
+            f.write('\nWorldEnd\n')
             f.close()
-        
-        def lightSource(self, *args):
-            self._api('LightSource', args)
         
