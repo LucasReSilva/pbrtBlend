@@ -24,22 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
 
-import luxrender.pylux
+from luxrender.properties import dbo
 
-class Custom_Context(luxrender.pylux.Context):
-    
-    def set_filename(self, name):
-        '''
-        Added for compatibility with file_api
-        '''
-        pass
-    
-    def attributeBegin(self, file=None):
-        '''
-        Added for compatibility with file_api
-        '''
-        
-        super(luxrender.pylux.Context, self).attributeBegin()
-    
-    # no further action required
+# TODO: adapt values written to d based on simple/advanced views
+
+# TODO: check parameter completeness against Lux API
+
+class luxrender_engine(bpy.types.IDPropertyGroup):
+    pass

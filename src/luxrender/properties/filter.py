@@ -24,22 +24,37 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
 
-import luxrender.pylux
+from luxrender.properties import dbo
 
-class Custom_Context(luxrender.pylux.Context):
-    
-    def set_filename(self, name):
-        '''
-        Added for compatibility with file_api
-        '''
-        pass
-    
-    def attributeBegin(self, file=None):
-        '''
-        Added for compatibility with file_api
-        '''
+# TODO: adapt values written to d based on simple/advanced views
+
+# TODO: check parameter completeness against Lux API
+
+class luxrender_filter(bpy.types.IDPropertyGroup):
+    def api_output(self):
+        d={}
         
-        super(luxrender.pylux.Context, self).attributeBegin()
-    
-    # no further action required
+        d['xwidth'] = self.xwidth
+        d['ywidth'] = self.ywidth
+        
+        if self.filter == 'box':
+            pass
+        
+        if self.filter == 'gaussian':
+            d['alpha'] = self.gaussian_alpha
+        
+        if self.filter == 'mitchell':
+            d['B'] = self.mitchell_b
+            d['C'] = self.mitchell_c
+        
+        if self.filter == 'sinc':
+            d['tau'] = self.sinc_tau
+        
+        if self.filter == 'triangle':
+            pass
+        
+        out = self.filter, list(d.items())
+        dbo('FILTER', out)
+        return out

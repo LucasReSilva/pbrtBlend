@@ -32,8 +32,10 @@ import bpy
 from ef.ef import ef
 
 # CHOOSE API TYPE
-import luxrender.module.pure_api    # Access lux only through pylux bindings
-import luxrender.module.file_api    # Write conventional lx* files and use pylux to manage lux process
+# Write conventional lx* files and use pylux to manage lux process
+import luxrender.module.file_api
+# Access lux only through pylux bindings
+import luxrender.module.pure_api
 
 def LuxLog(*args):
     '''
@@ -188,12 +190,12 @@ class LuxManager(LuxOutput):
     
     def __init__(self, manager_name = '', api_type='FILE'):
         if api_type == 'FILE':
-            lux = luxrender.module.file_api.luxrender.pylux
-        elif api_type == 'API':
-            lux = luxrender.module.pure_api.luxrender.pylux
-        
+            Context = luxrender.module.file_api.Custom_Context
+        else:
+            Context = luxrender.module.pure_api.Custom_Context
+            
         if manager_name is not '': manager_name = ' (%s)' % manager_name
-        self.lux_context = lux.Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
+        self.lux_context = Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
         
         self.reset()
 

@@ -29,7 +29,12 @@ from properties_render import RenderButtonsPanel
 import ef.ui
 from ef.validate import Logic_OR as O, Logic_AND as A
 
-import luxrender.properties
+import luxrender.properties.engine
+import luxrender.properties.sampler
+import luxrender.properties.integrator
+import luxrender.properties.volume
+import luxrender.properties.filter
+import luxrender.properties.accelerator
 
 class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
 	COMPAT_ENGINES = {'luxrender'}
@@ -37,7 +42,7 @@ class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
 class engine(render_described_context):
 	bl_label = 'LuxRender Engine Configuration'
 	
-	property_group = luxrender.properties.luxrender_engine
+	property_group = luxrender.properties.engine.luxrender_engine
 	
 	controls = [
 		'api_type',
@@ -127,7 +132,7 @@ class engine(render_described_context):
 class sampler(render_described_context):
 	bl_label = 'Sampler'
 	
-	property_group = luxrender.properties.luxrender_sampler
+	property_group = luxrender.properties.sampler.luxrender_sampler
 	
 	controls = [
 		[
@@ -289,7 +294,7 @@ class sampler(render_described_context):
 class integrator(render_described_context):
 	bl_label = 'Surface Integrator'
 	
-	property_group = luxrender.properties.luxrender_integrator
+	property_group = luxrender.properties.integrator.luxrender_integrator
 	
 	controls = [
 		[
@@ -378,7 +383,7 @@ class integrator(render_described_context):
 class volume(render_described_context):
 	bl_label = 'Volume Integrator'
 	
-	property_group = luxrender.properties.luxrender_volume
+	property_group = luxrender.properties.volume.luxrender_volume
 	
 	controls = [
 		'volumeintegrator', 'stepsize'
@@ -412,7 +417,7 @@ class volume(render_described_context):
 class filter(render_described_context):
 	bl_label = 'Filter'
 	
-	property_group = luxrender.properties.luxrender_filter
+	property_group = luxrender.properties.filter.luxrender_filter
 	
 	controls = [
 		[
@@ -564,7 +569,7 @@ class filter(render_described_context):
 class accelerator(render_described_context):
 	bl_label = 'Accelerator'
 	
-	property_group = luxrender.properties.luxrender_accelerator
+	property_group = luxrender.properties.accelerator.luxrender_accelerator
 	
 	controls = [
 		'accelerator',

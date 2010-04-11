@@ -36,7 +36,7 @@ from luxrender.module import LuxManager as LM
 import luxrender.ui.materials
 import luxrender.ui.textures
 import luxrender.ui.render_panels
-import luxrender.nodes
+#import luxrender.nodes
 
 # Add standard Blender Interface elements
 import properties_render

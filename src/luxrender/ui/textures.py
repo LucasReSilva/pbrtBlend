@@ -32,13 +32,14 @@ from ef.ui import described_layout
 
 from ef.ef import ef
 
-import luxrender.properties
+import luxrender.properties.texture
 
 class texture_editor(context_panel, texture_settings_panel, described_layout):
     bl_label = 'LuxRender Textures'
     COMPAT_ENGINES = {'luxrender'}
     
-    property_group = luxrender.properties.luxrender_texture
+    property_group = luxrender.properties.texture.luxrender_texture
+    
     # prevent creating luxrender_texture property group in Scene
     property_group_non_global = True
     

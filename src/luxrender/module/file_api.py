@@ -201,12 +201,10 @@ class Custom_Context(luxrender.pylux.Context):
         
         # Now start the rendering by parsing the main scene file we just wrote
         self.parse(self.files[Files.MAIN].name, False)  # Main scene file
-        super(luxrender.pylux.Context, self).worldEnd()
+        #super(luxrender.pylux.Context, self).worldEnd()
+        luxrender.pylux.Context.worldEnd(self)
         
         # Add the includes and final WorldEnd so that the file is usable directly in LuxRender
         f=open(self.files[Files.MAIN].name, 'a')
         f.write('\nWorldEnd\n')
         f.close()
-        
-# Replace the pylux.Context with our own extension
-luxrender.pylux.Context = Custom_Context

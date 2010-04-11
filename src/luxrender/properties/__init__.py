@@ -24,22 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
 
-import luxrender.pylux
+DEBUG = False
 
-class Custom_Context(luxrender.pylux.Context):
-    
-    def set_filename(self, name):
-        '''
-        Added for compatibility with file_api
-        '''
-        pass
-    
-    def attributeBegin(self, file=None):
-        '''
-        Added for compatibility with file_api
-        '''
-        
-        super(luxrender.pylux.Context, self).attributeBegin()
-    
-    # no further action required
+if DEBUG:
+    import pprint
+def dbo(m,o):
+    if DEBUG: 
+        print(m)
+        pprint.pprint(o, width=1, indent=1)

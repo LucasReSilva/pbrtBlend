@@ -24,22 +24,20 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
 
-import luxrender.pylux
+from luxrender.properties import dbo
 
-class Custom_Context(luxrender.pylux.Context):
-    
-    def set_filename(self, name):
-        '''
-        Added for compatibility with file_api
-        '''
-        pass
-    
-    def attributeBegin(self, file=None):
-        '''
-        Added for compatibility with file_api
-        '''
+# TODO: adapt values written to d based on simple/advanced views
+
+# TODO: check parameter completeness against Lux API
+
+class luxrender_volume(bpy.types.IDPropertyGroup):
+    def api_output(self):
+        d={}
         
-        super(luxrender.pylux.Context, self).attributeBegin()
-    
-    # no further action required
+        d['stepsize'] = self.stepsize
+        
+        out = self.volumeintegrator, list(d.items())
+        dbo('VOLUME INTEGRATOR', out)
+        return out
