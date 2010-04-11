@@ -34,32 +34,21 @@ import luxrender.properties
 class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
 	COMPAT_ENGINES = {'luxrender'}
 
-
-# TODO: remove all the lux_ prefixes off the members of the property groups
-
 class engine(render_described_context):
 	bl_label = 'LuxRender Engine Configuration'
 	
 	property_group = luxrender.properties.luxrender_engine
 	
 	controls = [
+		'api_type',
 		['threads_auto', 'threads'],
 		'priority',
-		['rgc', 'colclamp',
-#		 'noopengl'
-		],
+		['rgc', 'colclamp'],
 		['meshopt', 'nolg'],
-		
-#		'singlefile',
-#		['file_lxs', 'file_lxo', 'file_lxm', 'file_lxv'],
 	]
 	
 	visibility = {
 		'threads':				{ 'threads_auto': False },
-#		'file_lxs':				{ 'singlefile': False },
-#		'file_lxo':				{ 'singlefile': False },
-#		'file_lxm':				{ 'singlefile': False },
-#		'file_lxv':				{ 'singlefile': False },
 	}
 	
 	properties = [
@@ -83,6 +72,17 @@ class engine(render_described_context):
 		},
 		{
 			'type': 'enum',
+			'attr': 'api_type',
+			'name': 'Output type',
+			'description': 'How to export the scene',
+			'default': 'FILE',
+			'items': [
+				('FILE', 'Write files', 'FILE'),
+				('API', 'Direct export', 'API')
+			] 
+		},
+		{
+			'type': 'enum',
 			'attr': 'priority',
 			'name': 'Process Priority',
 			'description': 'Set the process priority for LuxRender',
@@ -94,13 +94,6 @@ class engine(render_described_context):
 				('abovenormal', 'Above Normal', 'abovenormal'),
 			]
 		},
-#		{
-#			'type': 'bool',
-#			'attr': 'noopengl',
-#			'name': 'No OpenGL',
-#			'description': 'Disable OpenGL viewport (for buggy display drivers)',
-#			'default': False,
-#		},
 		{
 			'type': 'bool',
 			'attr': 'rgc',
@@ -129,41 +122,6 @@ class engine(render_described_context):
 			'description': 'Combine all light groups',
 			'default': False,
 		},
-#		{
-#			'type': 'bool',
-#			'attr': 'singlefile',
-#			'name': 'Combine LXS',
-#			'description': 'Write only a single LXS file',
-#			'default': False,
-#		},
-#		{
-#			'type': 'bool',
-#			'attr': 'file_lxs',
-#			'name': 'LXS',
-#			'description': 'Write LXS (Scene) file',
-#			'default': True,
-#		},
-#		{
-#			'type': 'bool',
-#			'attr': 'file_lxo',
-#			'name': 'LXO',
-#			'description': 'Write LXO (Objects) file',
-#			'default': True,
-#		},
-#		{
-#			'type': 'bool',
-#			'attr': 'file_lxm',
-#			'name': 'LXM',
-#			'description': 'Write LXM (Materials) file',
-#			'default': True,
-#		},
-#		{
-#			'type': 'bool',
-#			'attr': 'file_lxv',
-#			'name': 'LXV',
-#			'description': 'Write LXV (volumes) file',
-#			'default': True,
-#		},
 	]
 			
 class sampler(render_described_context):

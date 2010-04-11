@@ -1,12 +1,36 @@
-'''
-Created on 10 Apr 2010
-
-@author: doug
-'''
+# -*- coding: utf8 -*-
+#
+# ***** BEGIN GPL LICENSE BLOCK *****
+#
+# --------------------------------------------------------------------------
+# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# --------------------------------------------------------------------------
+#
+# Authors:
+# Doug Hammond
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# ***** END GPL LICENCE BLOCK *****
+#
 
 import sys
 
+from ef.ef import ef 
+
 import luxrender.pylux
+import luxrender.module
 import luxrender.module.paramset
 
 class lux(object):
@@ -44,6 +68,16 @@ class lux(object):
                 return fs_num % ('integer', k, ' '.join(['%i'%i for i in v]))
             elif k in luxrender.module.paramset.STRING:
                 return fs_str % ('string', k, v)
+            elif k in luxrender.module.paramset.VEC:
+                return fs_num % ('vector', k, ' '.join(['%f'%i for i in v]))
+            elif k in luxrender.module.paramset.POINT:
+                return fs_num % ('point', k, ' '.join(['%f'%i for i in v]))
+            elif k in luxrender.module.paramset.NORMAL:
+                return fs_num % ('normal', k, ' '.join(['%f'%i for i in v]))
+            elif k in luxrender.module.paramset.COLOR:
+                return fs_num % ('color', k, ' '.join(['%f'%i for i in v]))
+            elif k in luxrender.module.paramset.TEXTURE:
+                return fs_str % ('texture', k, v)
             elif k in luxrender.module.paramset.BOOL:
                 if v:
                     return fs_str % ('bool', k, 'true')
@@ -53,75 +87,72 @@ class lux(object):
             return '# unknown param %s : %s' % (k,v)
         
         def set_filename(self, name):
-            self.files = [
-                sys.stdout, #open('%s.lxs' % name, 'w'),
-                sys.stdout, #open('%s-mat.lxm' % name, 'w'),
-                sys.stdout, #open('%s-geom.lxo' % name, 'w'),
-            ]
-            
-        def sampler(self, *args):
-            name, params = args
-            self.wf(0, 'Sampler "%s"' % name)
-            for p in params:
-                self.wf(0, self.param_formatter(p), 1)
-        
-        def accelerator(self, *args):
-            name, params = args
-            self.wf(0, 'Accelerator "%s"' % name)
-            for p in params:
-                self.wf(0, self.param_formatter(p), 1)
-        
-        def surfaceIntegrator(self, *args):
-            name, params = args
-            self.wf(0, 'SurfaceIntegrator "%s"' % name)
-            for p in params:
-                self.wf(0, self.param_formatter(p), 1)
-        
-        def volumeIntegrator(self, *args):
-            name, params = args
-            self.wf(0, 'VolumeIntegrator "%s"' % name)
-            for p in params:
-                self.wf(0, self.param_formatter(p), 1)
-        
-        def pixelFilter(self, *args):
-            name, params = args
-            self.wf(0, 'PixelFilter "%s"' % name)
-            for p in params:
-                self.wf(0, self.param_formatter(p), 1)
-        
-        def lookAt(self, *args):
-            self.wf(0, 'LookAt %s' % ' '.join(['%f'%i for i in args]))
-        
-        def camera(self, *args):
-            name, params = args
-            self.wf(0, 'Camera "%s"' % name)
-            for p in params:
-                self.wf(0, self.param_formatter(p), 1)
-        
-        def film(self, *args):
-            name, params = args
-            self.wf(0, 'Film "%s"' % name)
-            for p in params:
-                self.wf(0, self.param_formatter(p), 1)
-        
-        def worldBegin(self, *args):
-            self.wf(0, 'WorldBegin')
-        
-        def worldEnd(self, *args):
-            '''
-            Don't actually write any WorldEnd to file!
-            '''
-            
             for f in self.files:
                 f.close()
             
-#            self.parse(self.files[0].name)  # Main scene file
-#            self.parse(self.files[1].name)  # Materials
-#            self.parse(self.files[2].name)  # Geometry
+            self.files = [
+                open('%s.lxs' % name, 'w'),
+                open('%s-mat.lxm' % name, 'w'),
+                open('%s-geom.lxo' % name, 'w'),
+            ]
+            
+            self.wf(0, '# Main Scene File')
+            self.wf(1, '# Materials File')
+            self.wf(2, '# Geometry File')
+            
+        def _api(self, identifier, args, file=0):
+            name, params = args
+            self.wf(file, '\n%s "%s"' % (identifier, name))
+            for p in params:
+                self.wf(file, self.param_formatter(p), 1)
+            
+        def sampler(self, *args):
+            self._api('Sampler', args)
+        
+        def accelerator(self, *args):
+            self._api('Accelerator', args)
+        
+        def surfaceIntegrator(self, *args):
+            self._api('SurfaceIntegrator', args)
+        
+        def volumeIntegrator(self, *args):
+            self._api('VolumeIntegrator', args)
+        
+        def pixelFilter(self, *args):
+            self._api('PixelFilter', args)
+        
+        def lookAt(self, *args):
+            self.wf(0, '\nLookAt %s' % ' '.join(['%f'%i for i in args]))
+        
+        def camera(self, *args):
+            self._api('Camera', args)
+        
+        def film(self, *args):
+            self._api('Film', args)
+        
+        def worldBegin(self, *args):
+            self.wf(0, '\nWorldBegin')
+        
+        def worldEnd(self, *args):
+            #Don't actually write any WorldEnd to file yet!
+            luxrender.module.LuxLog('Wrote scene files')
+            for f in self.files:
+                f.close()
+                luxrender.module.LuxLog(' %s' % f.name)
+            
+            # Now start the rendering by parsing the files we just wrote
+            self.parse(self.files[0].name, False)  # Main scene file
+            self.parse(self.files[1].name, False)  # Materials
+            self.parse(self.files[2].name, False)  # Geometry
             luxrender.pylux.Context.worldEnd(self)
+            
+            # Add the final WorldEnd so that the file is usable directly in LuxRender
+            f=open(self.files[0].name, 'a')
+            f.write('\nInclude "%s"' % self.files[1].name)
+            f.write('\nInclude "%s"' % self.files[2].name)
+            f.write('\n\nWorldEnd\n')
+            f.close()
         
         def lightSource(self, *args):
-            pass
-        
-        
+            self._api('LightSource', args)
         

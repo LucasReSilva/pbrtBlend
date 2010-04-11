@@ -32,8 +32,8 @@ import bpy
 from ef.ef import ef
 
 # CHOOSE API TYPE
-#from luxrender.module.pure_api import lux        # Access lux only through pylux bindings
-from luxrender.module.file_api import lux        # Write conventional lx* files and use pylux to manage lux process
+import luxrender.module.pure_api    # Access lux only through pylux bindings
+import luxrender.module.file_api    # Write conventional lx* files and use pylux to manage lux process
 
 def LuxLog(*args):
     '''
@@ -42,10 +42,6 @@ def LuxLog(*args):
     '''
     if len(args) > 0:
         ef.log(' '.join(['%s'%a for a in args]), module_name='Lux')
-        
- 
-# logging handler Causes segfault       
-#lux.errorHandler(LuxLog)
 
 class LuxOutput(object):
     '''
@@ -184,14 +180,18 @@ class LuxManager(LuxOutput):
         LuxManager.context_count += 1
         return LuxManager.context_count
     
-    
     lux_context     = None
     
     stats_thread    = None
     fb_thread       = None
     started         = True
     
-    def __init__(self, manager_name = ''):
+    def __init__(self, manager_name = '', api_type='FILE'):
+        if api_type == 'FILE':
+            lux = luxrender.module.file_api.lux
+        else:
+            lux = luxrender.module.pure_api.lux
+        
         if manager_name is not '': manager_name = ' (%s)' % manager_name
         self.lux_context = lux.Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
         

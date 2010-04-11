@@ -90,10 +90,12 @@ class luxrender(engine_base):
 	
 	
 	def render(self, scene):
-		self.LuxManager = LM('Main render')
+		self.LuxManager = LM('Main render', scene.luxrender_engine.api_type)
 		self.update_stats('', 'LuxRender: Parsing Scene')
 		
 		l = self.LuxManager.lux_context
+		
+		l.set_filename('default')
 		
 		# Set up render engine parameters
 		l.sampler(            *scene.luxrender_sampler.api_output()       )
