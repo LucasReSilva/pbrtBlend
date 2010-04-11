@@ -146,7 +146,7 @@ class lux(object):
             self.parse(self.files[2].name, False)  # Geometry
             luxrender.pylux.Context.worldEnd(self)
             
-            # Add the final WorldEnd so that the file is usable directly in LuxRender
+            # Add the includes and final WorldEnd so that the file is usable directly in LuxRender
             f=open(self.files[0].name, 'a')
             f.write('\nInclude "%s"' % self.files[1].name)
             f.write('\nInclude "%s"' % self.files[2].name)

@@ -82,9 +82,9 @@ class luxrender(engine_base):
 		
 		result = self.begin_result(0,0,xres,yres)
 		# read default png file
-		if os.path.exists('luxout.png'):
+		if os.path.exists('default.png'):
 			lay = result.layers[0]
-			lay.load_from_file('luxout.png')
+			lay.load_from_file('default.png')
 			#lay.rect = fb
 		self.end_result(result)
 	
@@ -124,6 +124,7 @@ class luxrender(engine_base):
 			'yresolution':   int(scene.render.resolution_y * scene.render.resolution_percentage / 100.0),
 			
 			# write only default png file
+			'filename':          'default',
 			'write_exr':         False,
 			'write_png':         True,
 			'write_tga':         False,
@@ -133,18 +134,21 @@ class luxrender(engine_base):
 		}
 		l.film('fleximage', list(fs.items()))
 		l.worldBegin()
-		
 		es = {
 			'sundir': (0,0,1)
 		}
 		l.lightSource('sunsky', list(es.items()))
 		# END TEST CODE
 		
+		# Light source iteration and export goes here.
 		
+		# Materials iteration and export goes here.
+		
+		# Geometry iteration and export goes here.
 		
 		# reset output image file and begin rendering
-		if os.path.exists('luxout.png'):
-			os.remove('luxout.png')
+		if os.path.exists('default.png'):
+			os.remove('default.png')
 			
 		self.LuxManager.start(self)
 		self.update_stats('', 'LuxRender: Rendering warmup')
