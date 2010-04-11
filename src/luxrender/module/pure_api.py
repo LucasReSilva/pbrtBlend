@@ -27,14 +27,22 @@
 
 import luxrender.pylux
 
-class lux(object):
+class Custom_Context(luxrender.pylux.Context):
     
-    class Context(luxrender.pylux.Context):
+    def set_filename(self, name):
+        '''
+        Added for compatibility with file_api
+        '''
+        pass
+    
+    def attributeBegin(self, file=None):
+        '''
+        Added for compatibility with file_api
+        '''
         
-        def set_filename(self, name):
-            '''
-            Added for compatibility with file_api
-            '''
-            pass
-        
-        # no further action required
+        super(luxrender.pylux.Context, self).attributeBegin()
+    
+    # no further action required
+
+# Replace the pylux.Context with our own extension
+luxrender.pylux.Context = Custom_Context

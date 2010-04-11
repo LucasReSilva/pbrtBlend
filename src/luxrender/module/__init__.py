@@ -188,9 +188,9 @@ class LuxManager(LuxOutput):
     
     def __init__(self, manager_name = '', api_type='FILE'):
         if api_type == 'FILE':
-            lux = luxrender.module.file_api.lux
-        else:
-            lux = luxrender.module.pure_api.lux
+            lux = luxrender.module.file_api.luxrender.pylux
+        elif api_type == 'API':
+            lux = luxrender.module.pure_api.luxrender.pylux
         
         if manager_name is not '': manager_name = ' (%s)' % manager_name
         self.lux_context = lux.Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
