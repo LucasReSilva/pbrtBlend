@@ -30,13 +30,13 @@ def write_lxo(l, scene):
         l.attributeBegin(comment=ob.name, file=Files.GEOM)
 
         # object translation/rotation/scale 
-        l.transform(matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],\
+        l.transform([matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],\
                 matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],\
                 matrix[2][0], matrix[2][1], matrix[2][2], matrix[2][3],\
-                matrix[3][0], matrix[3][1], matrix[3][2], matrix[3][3])
+                matrix[3][0], matrix[3][1], matrix[3][2], matrix[3][3]])
         
         # dummy material for now
-        l.material('matte')
+        l.material('matte', [])
 
         faces_verts = [f.verts for f in me.faces]
         ffaces = [f for f in me.faces]
@@ -90,9 +90,15 @@ def write_lxo(l, scene):
                 for uv in face_uvs:
                     for single_uv in uv:
                         uvs.append(single_uv)
+                        
+        
+        print(' %s num points: %i' % (ob.name, len(points)))
+        print(' %s num normals: %i' % (ob.name, len(normals)))
+        print(' %s num idxs: %i' % (ob.name, len(indices)))
 
         # export shape
         if uv_layer:
+            print(' %s num uvs: %i' % (ob.name, len(uvs)))
             ss = {
 	            'indices': indices,
                 'P': points,
