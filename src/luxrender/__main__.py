@@ -120,14 +120,33 @@ class luxrender(engine_base):
 		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
 		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
 		
+		# TODO:
+		shiftX = 0.0
+		shiftY = 0.0
+		scale = 1.0
+		
 		aspect = xr/yr
-		if aspect > 1:
-			sw = [-aspect, aspect, -1.0, 1.0]
+		invaspect = 1.0/aspect
+		
+		if aspect > 1.0:
+			sw = [
+				((2*shiftX)-1) * scale,
+				((2*shiftX)+1) * scale,
+				((2*shiftY)-invaspect) * scale,
+				((2*shiftY)+invaspect) * scale
+			]
 		else:
-			sw = [-1.0, 1.0, -1.0/aspect, 1.0/aspect]
+			sw = [
+				((2*shiftX)-aspect) * scale,
+				((2*shiftX)+aspect) * scale,
+				((2*shiftY)-1) * scale,
+				((2*shiftY)+1) * scale
+			]
+		
+		fov = degrees(scene.camera.data.angle)
 		
 		cs = {
-			'fov': (360.0 * atan(16.0 / scene.camera.data.lens) / pi),
+			'fov': fov,
 			'screenwindow': sw
 		}
 		l.camera('perspective', list(cs.items()))
