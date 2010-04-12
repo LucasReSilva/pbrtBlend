@@ -165,8 +165,9 @@ class Custom_Context(luxrender.pylux.Context):
         be exporting LightSources to the LXS and other
         geometry to LXO.
         '''
-        
-        self.wf(Files.GEOM, '\nAttributeBegin', file=file)
+
+        # self.wf(Files.GEOM, '\nAttributeBegin', file=file)
+        self.wf(Files.GEOM, '\nAttributeBegin')
         
     def attributeEnd(self):
         self.wf(Files.GEOM, '\nAttributeEnd')
@@ -176,7 +177,7 @@ class Custom_Context(luxrender.pylux.Context):
         self.wf(Files.GEOM, '\nTransform [%s]' % ' '.join(['%f'%i for i in args]))
         
     def shape(self, *args):
-        self._api('Shape', file=Files.GEOM)
+        self._api('Shape', args, file=Files.GEOM)
         
     def material(self, name):
         self.wf(Files.GEOM, '\nMaterial "%s"' % name)

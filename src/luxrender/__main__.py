@@ -26,6 +26,7 @@
 #
 # System libs
 import os, time
+from math import atan, pi, degrees
 
 # Framework libs
 from ef.ef import ef
@@ -37,6 +38,8 @@ import luxrender.ui.materials
 import luxrender.ui.textures
 import luxrender.ui.render_panels
 #import luxrender.nodes
+from luxrender.module.export_geometry import *
+
 
 # Add standard Blender Interface elements
 import properties_render
@@ -114,7 +117,7 @@ class luxrender(engine_base):
 		up = matrix[1]
 		l.lookAt(pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
 		cs = {
-			'fov': scene.camera.data.angle,
+			'fov': (360.0 * atan(16.0 / scene.camera.data.lens) / pi),
 		}
 		l.camera('perspective', list(cs.items()))
 		
@@ -145,6 +148,7 @@ class luxrender(engine_base):
 		# Materials iteration and export goes here.
 		
 		# Geometry iteration and export goes here.
+		write_lxo(l, scene)
 		
 		# reset output image file and begin rendering
 		if os.path.exists('default.png'):
