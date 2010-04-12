@@ -116,15 +116,26 @@ class luxrender(engine_base):
 		target = pos + forwards
 		up = matrix[1]
 		l.lookAt(pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
+		
+		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
+		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
+		
+		aspect = xr/yr
+		if aspect > 1:
+			sw = [-aspect, aspect, -1.0, 1.0]
+		else:
+			sw = [-1.0, 1.0, -1.0/aspect, 1.0/aspect]
+		
 		cs = {
 			'fov': (360.0 * atan(16.0 / scene.camera.data.lens) / pi),
+			'screenwindow': sw
 		}
 		l.camera('perspective', list(cs.items()))
 		
 		fs = {
 			# Set resolution
-			'xresolution':   int(scene.render.resolution_x * scene.render.resolution_percentage / 100.0),
-			'yresolution':   int(scene.render.resolution_y * scene.render.resolution_percentage / 100.0),
+			'xresolution':   int(xr),
+			'yresolution':   int(yr),
 			
 			# write only default png file
 			'filename':          'default',

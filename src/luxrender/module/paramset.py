@@ -48,7 +48,7 @@ FLOAT = [
     'octs', 'offset', 'omega', 'outscale',
     'phimax', 'postscale', 'power', 'prescale',
     'radius', 'reinhard_burn', 'reinhard_postscale', 'reinhard_prescale', 'relsize', 'roughness', 'rrcontinueprob',
-    'scale', 'screenwindow', 'sensitivity', 'sharpness', 'shutterclose', 'shutteropen', 'spheresize', 'start', 'stepsize',
+    'scale', 'sensitivity', 'sharpness', 'shutterclose', 'shutteropen', 'spheresize', 'start', 'stepsize',
     'tau', 'temperature', 'thetamax', 'thetamix', 'turbidity', 'turbulance',
     'u0', 'u1', 'udelta', 'uscale',
     'v0', 'v00', 'v01', 'v1', 'v11', 'value', 'variability', 'variation', 'vdelta', 'vscale',
@@ -85,6 +85,7 @@ INT = [
 FLOAT_VEC = [
     'Pw', 'Pz',
     'density',
+    'screenwindow',
     'st',
     'uknots', 'uv',
     'vknots'
