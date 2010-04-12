@@ -4,6 +4,7 @@ import luxrender.pylux
 import luxrender.module
 import luxrender.module.paramset
 
+from luxrender.module.file_api import Files
 
 def write_lxo(l, scene):
     # l = self.LuxManager.lux_context
@@ -23,10 +24,10 @@ def write_lxo(l, scene):
         if not me:
             continue
 
-        # get oject matrix
+        # get object matrix
         matrix = ob.matrix
 
-        l.attributeBegin()
+        l.attributeBegin(comment=ob.name, file=Files.GEOM)
 
         # object translation/rotation/scale 
         l.transform(matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],\

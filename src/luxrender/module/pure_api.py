@@ -35,11 +35,11 @@ class Custom_Context(luxrender.pylux.Context):
         '''
         pass
     
-    def attributeBegin(self, file=None):
+    def attributeBegin(self, comment='', file=None):
         '''
         Added for compatibility with file_api
         '''
         
-        super(luxrender.pylux.Context, self).attributeBegin()
+        luxrender.pylux.Context.attributeBegin(self)
     
     # no further action required

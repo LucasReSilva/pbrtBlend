@@ -158,7 +158,7 @@ class Custom_Context(luxrender.pylux.Context):
     def lightSource(self, *args):
         self._api('LightSource', args)
         
-    def attributeBegin(self, file=None):
+    def attributeBegin(self, comment='', file=None):
         '''
         The AttributeBegin block could be used to switch
         the current output file, seeing as we will probably
@@ -166,14 +166,12 @@ class Custom_Context(luxrender.pylux.Context):
         geometry to LXO.
         '''
 
-        # self.wf(Files.GEOM, '\nAttributeBegin', file=file)
-        self.wf(Files.GEOM, '\nAttributeBegin')
+        self._api('AttributeBegin # ', [comment, []], file=file)
         
     def attributeEnd(self):
         self.wf(Files.GEOM, '\nAttributeEnd')
         
     def transform(self, *args):
-        # TODO: detect 4x4 matrix input, or 16-item list input
         self.wf(Files.GEOM, '\nTransform [%s]' % ' '.join(['%f'%i for i in args]))
         
     def shape(self, *args):

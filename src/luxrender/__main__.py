@@ -39,6 +39,7 @@ import luxrender.ui.textures
 import luxrender.ui.render_panels
 #import luxrender.nodes
 from luxrender.module.export_geometry import *
+from luxrender.module.file_api import Files
 
 
 # Add standard Blender Interface elements
@@ -167,10 +168,13 @@ class luxrender(engine_base):
 		}
 		l.film('fleximage', list(fs.items()))
 		l.worldBegin()
+		
+		l.attributeBegin(comment='Test Sun', file=Files.MAIN)
 		es = {
 			'sundir': (0,0,1)
 		}
 		l.lightSource('sunsky', list(es.items()))
+		l.attributeEnd()
 		# END TEST CODE
 		
 		# Light source iteration and export goes here.
