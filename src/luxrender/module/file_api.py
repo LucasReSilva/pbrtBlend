@@ -169,7 +169,7 @@ class Custom_Context(luxrender.pylux.Context):
         self._api('AttributeBegin # ', [comment, []], file=file)
         
     def attributeEnd(self):
-        self.wf(Files.GEOM, '\nAttributeEnd')
+        self._api('AttributeEnd #', ['', []])
         
     def transform(self, values):
         self.wf(Files.GEOM, '\nTransform [%s]' % ' '.join(['%f'%i for i in values]))

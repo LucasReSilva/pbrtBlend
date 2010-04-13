@@ -134,7 +134,7 @@ STRING = [
     'filename',
     'filtertype',
     'iesname',
-    'ldr_clamp_method',
+    'ldr_clamp_method', 'lightstrategy',
     'mapname', 'mapping',
     'name', 'namedmaterial1', 'namedmaterial2',
     'noisebasis', 'noisebasis2', 'noisetype',

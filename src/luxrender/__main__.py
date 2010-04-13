@@ -40,6 +40,7 @@ import luxrender.ui.render_panels
 
 import luxrender.module.export_geometry     as export_geometry
 import luxrender.module.export_camerafilm   as export_camerafilm
+import luxrender.module.export_lights       as export_lights
 from luxrender.module.file_api import Files
 
 
@@ -134,18 +135,9 @@ class luxrender(engine_base):
         l.film(   *export_camerafilm.film(scene)   )
         
         
-        # BEGIN TEST CODE
         l.worldBegin()
-        
-        l.attributeBegin(comment='Test Sun', file=Files.MAIN)
-        es = {
-            'sundir': (0,0,1)
-        }
-        l.lightSource('sunsky', list(es.items()))
-        l.attributeEnd()
-        # END TEST CODE
-        
         # Light source iteration and export goes here.
+        export_lights.lights(l, scene)
         
         # Materials iteration and export goes here.
         
