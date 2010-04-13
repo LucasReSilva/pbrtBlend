@@ -160,19 +160,29 @@ class Custom_Context(luxrender.pylux.Context):
         
     def attributeBegin(self, comment='', file=None):
         '''
-        The AttributeBegin block could be used to switch
+        The AttributeBegin block can be used to switch
         the current output file, seeing as we will probably
         be exporting LightSources to the LXS and other
         geometry to LXO.
         '''
-
+        
         self._api('AttributeBegin # ', [comment, []], file=file)
         
     def attributeEnd(self):
         self._api('AttributeEnd #', ['', []])
+    
+    def transformBegin(self, comment='', file=None):
+        '''
+        See attributeBegin
+        '''
+        
+        self._api('TransformBegin # ', [comment, []], file=file)
+    
+    def transformEnd(self):
+        self._api('TransformEnd #', ['', []])
         
     def transform(self, values):
-        self.wf(Files.GEOM, '\nTransform [%s]' % ' '.join(['%f'%i for i in values]))
+        self.wf(self.current_file, '\nTransform [%s]' % ' '.join(['%f'%i for i in values]))
         
     def shape(self, *args):
         self._api('Shape', args, file=Files.GEOM)

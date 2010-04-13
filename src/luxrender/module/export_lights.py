@@ -24,9 +24,26 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+from math import degrees
+
 import bpy, Mathutils
 
 from luxrender.module.file_api import Files
+from luxrender.module import matrix_to_list
+
+def attr_light(l, name, type, params, transform=None):
+    if transform is not None:
+        l.transformBegin(comment=name, file=Files.MAIN)
+        l.transform(transform)
+    else:
+        l.attributeBegin(comment=name, file=Files.MAIN)
+        
+    l.lightSource(type, list(params.items()))
+    
+    if transform is not None:
+        l.transformEnd()
+    else:
+        l.attributeEnd()
 
 def lights(l, scene):
     
@@ -38,14 +55,20 @@ def lights(l, scene):
         
         if ob.data.type == 'SUN':
             invmatrix = Mathutils.Matrix(ob.matrix).invert()
-            
-            l.attributeBegin(comment=ob.name, file=Files.MAIN)
-            ltype = 'sunsky'
             es = {
                 'sundir': (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2])
             }
-            
-            l.lightSource(ltype, list(es.items()))
-            
-            l.attributeEnd()
+            attr_light(l, ob.name, 'sunsky', es)
+        
+        if ob.data.type == 'SPOT':
+            coneangle = degrees(ob.data.spot_size) * 0.5
+            conedeltaangle = degrees(ob.data.spot_size * 0.5 * ob.data.spot_blend)
+            es = {
+                'L': [i*ob.data.energy for i in ob.data.color],
+                'from': (0,0,0),
+                'to': (0,0,-1),
+                'coneangle': coneangle,
+                'conedeltaangle': conedeltaangle
+            }
+            attr_light(l, ob.name, 'spot', es, transform=matrix_to_list(ob.matrix))
         

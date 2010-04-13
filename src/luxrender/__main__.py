@@ -56,6 +56,13 @@ import properties_material
 properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
 del properties_material
 
+import properties_data_lamp
+properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add('luxrender')
+properties_data_lamp.DATA_PT_lamp.COMPAT_ENGINES.add('luxrender')
+properties_data_lamp.DATA_PT_sunsky.COMPAT_ENGINES.add('luxrender')
+properties_data_lamp.DATA_PT_spot.COMPAT_ENGINES.add('luxrender')
+del properties_data_lamp
+
 #import properties_texture
 #properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
 #del properties_texture
