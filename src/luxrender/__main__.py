@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond
+# Doug Hammond, Genscher
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -25,8 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 # System libs
-import os, time
-from math import atan, pi, degrees
+import os, time, threading
 
 # Framework libs
 from ef.ef import ef
@@ -38,7 +37,9 @@ import luxrender.ui.materials
 import luxrender.ui.textures
 import luxrender.ui.render_panels
 #import luxrender.nodes
-from luxrender.module.export_geometry import *
+
+import luxrender.module.export_geometry     as export_geometry
+import luxrender.module.export_camerafilm   as export_camerafilm
 from luxrender.module.file_api import Files
 
 
@@ -59,142 +60,112 @@ del properties_material
 #del properties_texture
 
 class luxrender(engine_base):
-	bl_label = 'LuxRender'
-	
-	LuxManager = None
-		
-	interfaces = [
-		luxrender.ui.render_panels.engine,
-		luxrender.ui.render_panels.sampler,
-		luxrender.ui.render_panels.integrator,
-		luxrender.ui.render_panels.volume,
-		luxrender.ui.render_panels.filter,
-		luxrender.ui.render_panels.accelerator,
-		
-		luxrender.ui.materials.material_editor,
-		luxrender.ui.textures.texture_editor,
-		
-		#luxrender.nodes.test_node
-	]
-	
-	def update_framebuffer(self, xres, yres, fb):
-		'''
-		this will be called by the LuxFilmDisplay thread started by LuxManager
-		
-		TODO: perhaps this class itself is a threaded timer ?
-		'''
-		
-		result = self.begin_result(0,0,xres,yres)
-		# read default png file
-		if os.path.exists('default.png'):
-			lay = result.layers[0]
-			lay.load_from_file('default.png')
-			#lay.rect = fb
-		self.end_result(result)
-	
-	
-	def render(self, scene):
-		self.LuxManager = LM('Main render', scene.luxrender_engine.api_type)
-		self.update_stats('', 'LuxRender: Parsing Scene')
-		
-		l = self.LuxManager.lux_context
-		
-		l.set_filename('default')
-		
-		# Set up render engine parameters
-		l.sampler(            *scene.luxrender_sampler.api_output()       )
-		l.accelerator(        *scene.luxrender_accelerator.api_output()   )
-		l.surfaceIntegrator(  *scene.luxrender_integrator.api_output()    )
-		l.volumeIntegrator(   *scene.luxrender_volume.api_output()        )
-		l.pixelFilter(        *scene.luxrender_filter.api_output()        )
-		
-		
-		# BEGIN TEST CODE
-		# In future use some classes to gather parameters into dicts for API calls please ;)
-		matrix = scene.camera.matrix
-		pos = matrix[3]
-		forwards = -matrix[2]
-		target = pos + forwards
-		up = matrix[1]
-		l.lookAt(pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
-		
-		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
-		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
-		
-		# TODO:
-		shiftX = 0.0
-		shiftY = 0.0
-		scale = 1.0
-		
-		aspect = xr/yr
-		invaspect = 1.0/aspect
-		
-		if aspect > 1.0:
-			sw = [
-				((2*shiftX)-1) * scale,
-				((2*shiftX)+1) * scale,
-				((2*shiftY)-invaspect) * scale,
-				((2*shiftY)+invaspect) * scale
-			]
-		else:
-			sw = [
-				((2*shiftX)-aspect) * scale,
-				((2*shiftX)+aspect) * scale,
-				((2*shiftY)-1) * scale,
-				((2*shiftY)+1) * scale
-			]
-		
-		fov = degrees(scene.camera.data.angle)
-		
-		cs = {
-			'fov': fov,
-			'screenwindow': sw
-		}
-		l.camera('perspective', list(cs.items()))
-		
-		fs = {
-			# Set resolution
-			'xresolution':   int(xr),
-			'yresolution':   int(yr),
-			
-			# write only default png file
-			'filename':          'default',
-			'write_exr':         False,
-			'write_png':         True,
-			'write_tga':         False,
-			'write_resume_flm':  False,
-			'displayinterval':   5,
-			'writeinterval':     8,
-		}
-		l.film('fleximage', list(fs.items()))
-		l.worldBegin()
-		
-		l.attributeBegin(comment='Test Sun', file=Files.MAIN)
-		es = {
-			'sundir': (0,0,1)
-		}
-		l.lightSource('sunsky', list(es.items()))
-		l.attributeEnd()
-		# END TEST CODE
-		
-		# Light source iteration and export goes here.
-		
-		# Materials iteration and export goes here.
-		
-		# Geometry iteration and export goes here.
-		write_lxo(l, scene)
-		
-		# reset output image file and begin rendering
-		if os.path.exists('default.png'):
-			os.remove('default.png')
-			
-		self.LuxManager.start(self)
-		self.update_stats('', 'LuxRender: Rendering warmup')
-		
-		# TODO: replace time.sleep with a threading event
-		while self.LuxManager.started:
-			time.sleep(1)
-			self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
-			if self.test_break():
-				self.LuxManager.reset()
-				self.update_stats('', '')
+    bl_label = 'LuxRender'
+    
+    LuxManager = None
+        
+    interfaces = [
+        luxrender.ui.render_panels.engine,
+        luxrender.ui.render_panels.sampler,
+        luxrender.ui.render_panels.integrator,
+        luxrender.ui.render_panels.volume,
+        luxrender.ui.render_panels.filter,
+        luxrender.ui.render_panels.accelerator,
+        
+        luxrender.ui.materials.material_editor,
+        luxrender.ui.textures.texture_editor,
+        
+        #luxrender.nodes.test_node
+    ]
+    
+    render_update_timer = None
+    
+    def update_framebuffer(self, xres, yres, fb):
+        '''
+        this will be called by the LuxFilmDisplay thread started by LuxManager
+        
+        TODO: perhaps this class itself is a threaded timer ?
+        '''
+        
+        #print('fb len: %i' % len(fb))
+        #print('fb max: %i' % max(fb))
+        #print('fb min: %i' % min(fb))
+        
+        result = self.begin_result(0,0,xres,yres)
+        # read default png file
+        if os.path.exists('default.png'):
+            lay = result.layers[0]
+            lay.load_from_file('default.png')
+        self.end_result(result)
+    
+    def render(self, scene):
+        if scene.luxrender_engine.threads_auto:
+            try:
+                import multiprocessing
+                threads = multiprocessing.cpu_count()
+            except:
+                # TODO: when might this fail?
+                threads = 4
+        else:
+            threads = scene.luxrender_engine.threads
+        
+        # Set up the rendering context
+        self.LuxManager = LM(
+            'Main render',
+            api_type = scene.luxrender_engine.api_type,
+            threads = threads
+        )
+        
+        l = self.LuxManager.lux_context
+        l.set_filename('default')
+        
+        self.update_stats('', 'LuxRender: Parsing Scene')
+        
+        # Set up render engine parameters
+        l.sampler(            *scene.luxrender_sampler.api_output()       )
+        l.accelerator(        *scene.luxrender_accelerator.api_output()   )
+        l.surfaceIntegrator(  *scene.luxrender_integrator.api_output()    )
+        l.volumeIntegrator(   *scene.luxrender_volume.api_output()        )
+        l.pixelFilter(        *scene.luxrender_filter.api_output()        )
+        
+        # Set up camera, view and film
+        l.lookAt( *export_camerafilm.lookAt(scene) )
+        l.camera( *export_camerafilm.camera(scene) )
+        l.film(   *export_camerafilm.film(scene)   )
+        
+        
+        # BEGIN TEST CODE
+        l.worldBegin()
+        
+        l.attributeBegin(comment='Test Sun', file=Files.MAIN)
+        es = {
+            'sundir': (0,0,1)
+        }
+        l.lightSource('sunsky', list(es.items()))
+        l.attributeEnd()
+        # END TEST CODE
+        
+        # Light source iteration and export goes here.
+        
+        # Materials iteration and export goes here.
+        
+        # Geometry iteration and export goes here.
+        export_geometry.write_lxo(l, scene)
+        
+        # reset output image file and begin rendering
+        if os.path.exists('default.png'):
+            os.remove('default.png')
+            
+        self.LuxManager.start(self)
+        self.update_stats('', 'LuxRender: Rendering warmup')
+        
+        while self.LuxManager.started:
+            self.render_update_timer = threading.Timer(1, self.stats_timer)
+            self.render_update_timer.start()
+            if self.render_update_timer.isAlive(): self.render_update_timer.join()
+    
+    def stats_timer(self):
+        self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
+        if self.test_break():
+            self.LuxManager.reset()
+            self.update_stats('', '')

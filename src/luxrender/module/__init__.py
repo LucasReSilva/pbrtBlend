@@ -158,10 +158,10 @@ class LuxFilmDisplay(LuxTimerThread):
             
     def kick(self, render_end=False):
         if self.RE is not None:
+            #self.lux_context.updateFramebuffer()
             px = [] #self.lux_context.framebuffer()
             xres = int(self.lux_context.statistics('filmXres'))
             yres = int(self.lux_context.statistics('filmYres'))
-            time = self.lux_context.statistics('secElapsed')
             if render_end:
                 LuxLog('Final render result %ix%i' % (xres,yres))
             else:
@@ -183,12 +183,14 @@ class LuxManager(LuxOutput):
         return LuxManager.context_count
     
     lux_context     = None
-    
+    thread_count    = 1
     stats_thread    = None
     fb_thread       = None
     started         = True
     
-    def __init__(self, manager_name = '', api_type='FILE'):
+    def __init__(self, manager_name = '', api_type='FILE', threads=1):
+        self.thread_count = threads
+        
         if api_type == 'FILE':
             Context = luxrender.module.file_api.Custom_Context
         else:
@@ -209,6 +211,13 @@ class LuxManager(LuxOutput):
         self.stats_thread.start()
         self.fb_thread.start(RE)
         self.started = True
+        
+        while self.lux_context.statistics('sceneIsReady') != 1.0:
+            # TODO: such a tight loop is not a good idea
+            pass
+        
+        for i in range(self.thread_count - 1):
+            self.lux_context.addThread()
     
     def reset(self):
         if self.stats_thread is not None and self.stats_thread.isAlive():

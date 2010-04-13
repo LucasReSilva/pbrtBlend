@@ -177,8 +177,9 @@ class Custom_Context(luxrender.pylux.Context):
     def shape(self, *args):
         self._api('Shape', args, file=Files.GEOM)
         
-    def material(self, name, *args):
-        self.wf(Files.GEOM, '\nMaterial "%s"' % name)
+    def material(self, *args):
+        #self.wf(Files.GEOM, '\nMaterial "%s"' % name)
+        self._api('Material', args)
     
     def texture(self, name, type, texture, *params):
         self.wf(Files.MATS, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
