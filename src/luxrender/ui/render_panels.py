@@ -140,6 +140,7 @@ class sampler(render_described_context):
 			'sampler',
 			'advanced',
 		],
+		'haltspp',
 		
 		# metropolis
 		'metro_strength',										# simple
@@ -193,6 +194,17 @@ class sampler(render_described_context):
 			'name': 'Advanced',
 			'description': 'Configure advanced sampler settings',
 			'default': False
+		},
+		{
+		    'type': 'int',
+		    'attr': 'haltspp',
+		    'name': 'Halt SPP',
+		    'description': 'Halt the rendering at this number od samples/px (0=disabled)',
+		    'default': 0,
+		    'min': 0,
+		    'soft_min': 0,
+		    'max': 65535,
+		    'soft_max': 65535,
 		},
 		{
 			'type': 'float',

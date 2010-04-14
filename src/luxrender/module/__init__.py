@@ -137,6 +137,8 @@ class LuxAPIStats(LuxTimerThread):
         'samplesPx':        lambda x: 'Samples/Px: %0.2f'%x,
         'efficiency':       lambda x: 'Efficiency: %0.2f %%'%x,
         'filmEV':           lambda x: 'EV: %0.2f'%x,
+        #'filmIsReady':      lambda x: 'FIR: %f'%x,
+        #'terminated':       lambda x: 'TERM: %f'%x,
     }
     
     stats_string = ''

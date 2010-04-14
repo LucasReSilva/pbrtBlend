@@ -93,4 +93,7 @@ def film(scene):
         'writeinterval':     8,
     }
     
+    if scene.luxrender_sampler.haltspp > 0:
+        fs['haltspp'] = scene.luxrender_sampler.haltspp
+    
     return ('fleximage', list(fs.items()))

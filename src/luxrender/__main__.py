@@ -167,6 +167,8 @@ class luxrender(engine_base):
     
     def stats_timer(self):
         self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
-        if self.test_break():
+        if self.test_break() or \
+            self.LuxManager.lux_context.statistics('filmIsReady') == 1.0 or \
+            self.LuxManager.lux_context.statistics('terminated') == 1.0:    # haltspp condition is impossible to detect
             self.LuxManager.reset()
             self.update_stats('', '')
