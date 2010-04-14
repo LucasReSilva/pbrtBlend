@@ -84,7 +84,7 @@ def film(scene):
         'yresolution':   int(yr),
         
         # write only default png file
-        'filename':          'default',
+        'filename':          'default-%05i' % scene.frame_current,
         'write_exr':         False,
         'write_png':         True,
         'write_tga':         False,

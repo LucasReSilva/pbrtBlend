@@ -88,6 +88,7 @@ class luxrender(engine_base):
     ]
     
     render_update_timer = None
+    anim_frame = '00000'
     
     def update_framebuffer(self, xres, yres, fb):
         '''
@@ -102,12 +103,14 @@ class luxrender(engine_base):
         
         result = self.begin_result(0,0,xres,yres)
         # read default png file
-        if os.path.exists('default.png'):
+        if os.path.exists('default-%s.png' % self.anim_frame):
             lay = result.layers[0]
-            lay.load_from_file('default.png')
+            lay.load_from_file('default-%s.png' % self.anim_frame)
         self.end_result(result)
     
     def render(self, scene):
+        scene.set_frame(scene.frame_current)
+        
         if scene.luxrender_engine.threads_auto:
             try:
                 import multiprocessing
@@ -125,8 +128,10 @@ class luxrender(engine_base):
             threads = threads
         )
         
+        self.anim_frame = '%05i' % scene.frame_current
+        
         l = self.LuxManager.lux_context
-        l.set_filename('default')
+        l.set_filename('default-%s' % self.anim_frame)
         
         self.update_stats('', 'LuxRender: Parsing Scene')
         
@@ -155,8 +160,8 @@ class luxrender(engine_base):
         export_geometry.write_lxo(l, scene)
         
         # reset output image file and begin rendering
-        if os.path.exists('default.png'):
-            os.remove('default.png')
+        if os.path.exists('default-%s.png' % self.anim_frame):
+            os.remove('default-%s.png' % self.anim_frame)
             
         self.LuxManager.start(self)
         self.update_stats('', 'LuxRender: Rendering warmup')
