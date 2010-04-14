@@ -144,7 +144,9 @@ class luxrender(engine_base):
         
         l.worldBegin()
         # Light source iteration and export goes here.
-        export_lights.lights(l, scene)
+        if export_lights.lights(l, scene) == False:
+            print('LuxRender: Error - No lights in scene.')
+            return
         
         # Materials iteration and export goes here.
         

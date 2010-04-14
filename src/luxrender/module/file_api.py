@@ -157,6 +157,9 @@ class Custom_Context(luxrender.pylux.Context):
     
     def lightSource(self, *args):
         self._api('LightSource', args)
+
+    def arealightSource(self, *args):
+        self._api('AreaLightSource', args)
         
     def attributeBegin(self, comment='', file=None):
         '''
@@ -185,7 +188,7 @@ class Custom_Context(luxrender.pylux.Context):
         self.wf(self.current_file, '\nTransform [%s]' % ' '.join(['%f'%i for i in values]))
         
     def shape(self, *args):
-        self._api('Shape', args, file=Files.GEOM)
+        self._api('Shape', args, file=self.current_file)
         
     def material(self, *args):
         #self.wf(Files.GEOM, '\nMaterial "%s"' % name)

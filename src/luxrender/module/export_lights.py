@@ -26,7 +26,7 @@
 #
 from math import degrees
 
-import bpy, Mathutils
+import bpy, mathutils
 
 from luxrender.module.file_api import Files
 from luxrender.module import matrix_to_list
@@ -48,27 +48,73 @@ def attr_light(l, name, type, params, transform=None):
 def lights(l, scene):
     
     sel = scene.objects
+    have_light = False
+
     for ob in sel:
         
-        if ob.type not in ('LAMP'):
+        if ob.type != 'LAMP':
             continue
         
         if ob.data.type == 'SUN':
-            invmatrix = Mathutils.Matrix(ob.matrix).invert()
+            invmatrix = mathutils.Matrix(ob.matrix).invert()
             es = {
                 'sundir': (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2])
             }
             attr_light(l, ob.name, 'sunsky', es)
+            have_light = True
         
         if ob.data.type == 'SPOT':
             coneangle = degrees(ob.data.spot_size) * 0.5
             conedeltaangle = degrees(ob.data.spot_size * 0.5 * ob.data.spot_blend)
             es = {
-                'L': [i*ob.data.energy for i in ob.data.color],
+                'L': [i for i in ob.data.color],
                 'from': (0,0,0),
                 'to': (0,0,-1),
                 'coneangle': coneangle,
-                'conedeltaangle': conedeltaangle
+                'conedeltaangle': conedeltaangle,
+                'gain': ob.data.energy
             }
             attr_light(l, ob.name, 'spot', es, transform=matrix_to_list(ob.matrix))
+            have_light = True
+
+        if ob.data.type == 'POINT':
+            es = {
+                'L': [i for i in ob.data.color],
+                'gain': ob.data.energy,
+                'from': (0,0,0)
+            }
+            attr_light(l, ob.name, 'point', es, transform=matrix_to_list(ob.matrix))
+            have_light = True
+        
+        if ob.data.type == 'AREA':
+            es = {
+                'L': [i for i in ob.data.color],
+                'gain': ob.data.energy,
+                'power': 100.0,
+                'efficacy': 17.0
+            }
+            
+            l.attributeBegin(ob.name, file=Files.MAIN)
+            
+            l.transform(matrix_to_list(ob.matrix))
+
+            l.arealightSource('area', list(es.items()))
+
+            areax = ob.data.size
+
+            if ob.data.shape == 'SQUARE': areay = areax
+            elif ob.data.shape == 'RECTANGLE': areay = ob.data.size_y
+            else: areay = areax # not supported yet
+
+            points = [-areax/2, areay/2, 0.0, areax/2, areay/2, 0.0, areax/2, -areay/2, 0.0, -areax/2, -areay/2, 0.0]
+            ss = {
+                'indices': [0, 1, 2, 0, 2, 3],
+                'P': points
+            }
+            l.shape('trianglemesh', list(ss.items()))
+            l.attributeEnd()
+
+            have_light = True
+
+    return have_light
         
