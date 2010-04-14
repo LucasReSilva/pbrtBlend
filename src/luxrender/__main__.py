@@ -33,6 +33,7 @@ from ef.engine import engine_base
 
 # Exporter libs
 from luxrender.module import LuxManager as LM
+from luxrender.module import LuxLog
 import luxrender.ui.materials
 import luxrender.ui.textures
 import luxrender.ui.render_panels
@@ -145,7 +146,7 @@ class luxrender(engine_base):
         l.worldBegin()
         # Light source iteration and export goes here.
         if export_lights.lights(l, scene) == False:
-            print('LuxRender: Error - No lights in scene.')
+            LuxLog('Error - No lights in scene.')
             return
         
         # Materials iteration and export goes here.
@@ -169,6 +170,7 @@ class luxrender(engine_base):
         self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
         if self.test_break() or \
             self.LuxManager.lux_context.statistics('filmIsReady') == 1.0 or \
-            self.LuxManager.lux_context.statistics('terminated') == 1.0:    # haltspp condition is impossible to detect
+            self.LuxManager.lux_context.statistics('terminated') == 1.0 or \
+            self.LuxManager.lux_context.statistics('enoughSamples') == 1.0:
             self.LuxManager.reset()
             self.update_stats('', '')
