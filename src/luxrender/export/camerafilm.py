@@ -67,9 +67,10 @@ def camera(scene):
     
     xr, yr = resolution(scene)
     
+    shiftX = scene.camera.data.shift_x
+    shiftY = scene.camera.data.shift_x
+    
     # TODO:
-    shiftX = 0.0
-    shiftY = 0.0
     scale = 1.0
     
     aspect = xr/yr
@@ -93,11 +94,22 @@ def camera(scene):
     fov = degrees(scene.camera.data.angle)
     
     cs = {
-        'fov': fov,
-        'screenwindow': sw
+        'fov':              fov,
+        'screenwindow':     sw,
+        'autofocus':        False
     }
     
-    return ('perspective',  list(cs.items()))
+    # TODO: merge this entire def into luxrender_camera.api_output ?
+    camtype, camparams = scene.camera.data.luxrender_camera.api_output() 
+    cs.update( camparams )
+    
+    if not scene.camera.data.luxrender_camera.autofocus:
+        if scene.camera.data.dof_object is not None:
+            cs['focaldistance'] = (scene.camera.location - scene.camera.dof_object.location).length
+        elif scene.camera.data.dof_distance > 0:
+            cs['focaldistance'] = scene.camera.data.dof_distance 
+    
+    return (camtype,  list(cs.items()))
 
 def film(scene):
     '''

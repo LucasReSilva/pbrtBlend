@@ -32,6 +32,24 @@ from luxrender.properties import dbo
 
 # TODO: check parameter completeness against Lux API
 
+class luxrender_camera(bpy.types.IDPropertyGroup):
+    
+    def api_output(self, scene):
+        print(self.context)
+        
+        d = {}
+        
+        if self.autofocus:
+            d['autofocus'] = True
+            
+        if use_clipping:
+            d['hither'] = scene.camera.data.clip_start,
+            d['yon'] = scene.camera.data.clip_end,
+        
+        out = self.type, list(d.items())
+        dbo('CAMERA', out)
+        return out
+
 class luxrender_tonemapping(bpy.types.IDPropertyGroup):
     '''
     Storage class for LuxRender ToneMapping settings.
@@ -54,6 +72,12 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
             d['reinhard_prescale']      = self.reinhard_prescale
             d['reinhard_postscale']     = self.reinhard_postscale
             d['reinhard_burn']          = self.reinhard_burn
+            
+        if self.type == 'linear':
+            d['linear_sensitivity']     = self.linear_sensitivity
+            d['linear_exposure']        = self.linear_exposure
+            d['linear_fstop']           = self.linear_fstop
+            d['linear_gamma']           = self.linear_gamma
         
         out = self.type, list(d.items())
         dbo('TONEMAPPING', out)

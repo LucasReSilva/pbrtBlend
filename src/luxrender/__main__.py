@@ -88,6 +88,7 @@ class luxrender(engine_base):
         luxrender.ui.render_panels.filter,
         luxrender.ui.render_panels.accelerator,
         
+        luxrender.ui.camera.camera,
         luxrender.ui.camera.tonemapping,
         
         luxrender.ui.materials.material_editor,

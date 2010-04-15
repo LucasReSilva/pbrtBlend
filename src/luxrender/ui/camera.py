@@ -24,27 +24,158 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from properties_data_camera import DataButtonsPanel as CameraPanel
+import bpy
 
-import ef.ui
-import luxrender.properties.tonemapping
+# EF API
+from ef.ui import described_layout, camera_settings_panel
+from ef.ef import ef
 
-class tonemapping(CameraPanel, ef.ui.described_layout):
-    bl_label = 'LuxRender ToneMapping'
+import luxrender.properties.camera
+
+class camera(camera_settings_panel, described_layout):
+    bl_label = 'LuxRender Camera'
+    COMPAT_ENGINES = {'luxrender'}
     
-    property_group = luxrender.properties.tonemapping.luxrender_tonemapping
+    property_group = luxrender.properties.camera.luxrender_camera
+    # prevent creating luxrender_material property group in Scene
+    property_group_non_global = True
+    
+    @staticmethod
+    def property_reload():
+        for cam in bpy.data.cameras:
+            camera.property_create(cam)
+    
+    @staticmethod
+    def property_create(cam):
+        if not hasattr(cam, camera.property_group.__name__):
+            ef.init_properties(cam, [{
+                'type': 'pointer',
+                'attr': camera.property_group.__name__,
+                'ptype': camera.property_group,
+                'name': camera.property_group.__name__,
+                'description': camera.property_group.__name__
+            }], cache=False)
+            ef.init_properties(camera.property_group, camera.properties, cache=False)
+    
+    # Overridden to provide data storage in the camera, not the scene
+    def draw(self, context):
+        if context.camera is not None:
+            camera.property_create(context.camera)
+            
+            # Show only certain controls for Blender's perspective camera type 
+            context.camera.luxrender_camera.is_perspective = (context.camera.type == 'PERSP')
+            
+            for p in self.controls:
+                self.draw_column(p, self.layout, context.camera, supercontext=context)
+    
+    controls = [
+        'type',
+        'fstop',
+        'sensitivity',
+    ]
+    
+    visibility = {
+        'type':             { 'is_perspective': True },
+        'fstop':            { 'is_perspective': True },
+        'sensitivity':      { 'is_perspective': True },
+    }
+    
+    properties = [
+        # hidden property set via draw() method
+        {
+            'type': 'bool',
+            'attr': 'is_perspective',
+            'name': 'is_perspective',
+            'default': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'use_clipping',
+            'name': 'Clipping',
+            'description': 'Use near/far geometry clipping',
+            'default': False,
+        },
+        {
+            'type': 'bool',
+            'attr': 'autofocus',
+            'name': 'Auto focus',
+            'description': 'Use auto focus',
+            'default': True,
+        },
+        {
+            'type': 'enum',
+            'attr': 'type',
+            'name': 'Perspective type',
+            'description': 'Choose camera type',
+            'default': 'perspective',
+            'items': [
+                ('perspective', 'Perspective', 'perspective'),
+                ('environment', 'Environment', 'environment'),
+                #('realistic', 'Realistic', 'realistic'),
+            ]
+        },
+        {
+            'type': 'float',
+            'attr': 'fstop',
+            'name': 'f/Stop',
+            'description': 'f/Stop',
+            'default': 2.8,
+            'min': 0.1,
+            'soft_min': 0.1,
+            'max': 64.0,
+            'soft_max': 64.0
+        },
+        {
+            'type': 'float',
+            'attr': 'sensitivity',
+            'name': 'ISO',
+            'description': 'Sensitivity (ISO)',
+            'default': 50.0,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 6400.0,
+            'soft_max': 6400.0
+        },
+        {
+            'type': 'float',
+            'attr': 'linear_exposure',
+            'name': 'Exposure',
+            'description': 'Linear Exposure time (secs)',
+            'precision': 6,
+            'default': 1.0,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 25.0,
+            'soft_max': 25.0
+        },
+        
+    ]
+
+class tonemapping(camera_settings_panel, described_layout):
+    bl_label = 'LuxRender ToneMapping'
+    COMPAT_ENGINES = {'luxrender'}
+    
+    property_group = luxrender.properties.camera.luxrender_tonemapping
     
     controls = [
         'type',
         
         # Reinhard
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
+        
+        # Linear
+        'linear_sensitivity', 'linear_exposure', 'linear_fstop', 'linear_gamma',
     ]
     
     visibility = {
+        # Reinhard
         'reinhard_prescale':            { 'type': 'reinhard' },
         'reinhard_postscale':           { 'type': 'reinhard' },
         'reinhard_burn':                { 'type': 'reinhard' },
+        
+        # Linear
+        'linear_exposure':              { 'type': 'linear' },
+        #'linear_gamma':                 { 'type': 'linear' },
     }
     
     properties = [
@@ -61,6 +192,8 @@ class tonemapping(CameraPanel, ef.ui.described_layout):
                 ('maxwhite', 'Maxwhite', 'maxwhite')
             ]
         },
+        
+        # Reinhard
         {
             'type': 'float',
             'attr': 'reinhard_prescale',
@@ -93,6 +226,19 @@ class tonemapping(CameraPanel, ef.ui.described_layout):
             'soft_min': 0.0,
             'max': 25.0,
             'soft_max': 25.0
+        },
+        
+        #Linear
+        {
+            'type': 'float',
+            'attr': 'linear_gamma',
+            'name': 'Burn',
+            'description': 'Linear gamma',
+            'default': 1.0,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 5.0,
+            'soft_max': 5.0
         },
     ]
     
