@@ -94,8 +94,13 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
         d = {
             'fov':              math.degrees(scene.camera.data.angle),
             'screenwindow':     self.screenwindow(xr, yr, cam),
-            'autofocus':        False
+            'autofocus':        False,
+            'shutteropen':      0.0,
+            'shutterclose':     self.exposure
         }
+        
+        if self.use_dof:
+            d['lensradius'] = (cam.lens / 1000.0) / ( 2.0 * self.fstop )
         
         if self.autofocus:
             d['autofocus'] = True

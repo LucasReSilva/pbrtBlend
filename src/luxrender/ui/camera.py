@@ -69,15 +69,15 @@ class camera(camera_settings_panel, described_layout):
                 self.draw_column(p, self.layout, context.camera, supercontext=context)
     
     controls = [
+        ['autofocus', 'use_dof', 'use_clipping'],
         'type',
         'fstop',
         'sensitivity',
+        'exposure',
     ]
     
     visibility = {
-        'type':             { 'is_perspective': True },
-        'fstop':            { 'is_perspective': True },
-        'sensitivity':      { 'is_perspective': True },
+        'type':             { 'is_perspective': True }, 
     }
     
     properties = [
@@ -97,6 +97,13 @@ class camera(camera_settings_panel, described_layout):
         },
         {
             'type': 'bool',
+            'attr': 'use_dof',
+            'name': 'DOF',
+            'description': 'Use DOF effect',
+            'default': False,
+        },
+        {
+            'type': 'bool',
             'attr': 'autofocus',
             'name': 'Auto focus',
             'description': 'Use auto focus',
@@ -105,7 +112,7 @@ class camera(camera_settings_panel, described_layout):
         {
             'type': 'enum',
             'attr': 'type',
-            'name': 'Perspective type',
+            'name': 'Camera type',
             'description': 'Choose camera type',
             'default': 'perspective',
             'items': [
@@ -164,7 +171,7 @@ class tonemapping(camera_settings_panel, described_layout):
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
         
         # Linear
-        'linear_sensitivity', 'linear_exposure', 'linear_fstop', 'linear_gamma',
+        'linear_gamma',
     ]
     
     visibility = {
@@ -174,8 +181,7 @@ class tonemapping(camera_settings_panel, described_layout):
         'reinhard_burn':                { 'type': 'reinhard' },
         
         # Linear
-        'linear_exposure':              { 'type': 'linear' },
-        #'linear_gamma':                 { 'type': 'linear' },
+        'linear_gamma':                 { 'type': 'linear' },
     }
     
     properties = [
@@ -232,7 +238,7 @@ class tonemapping(camera_settings_panel, described_layout):
         {
             'type': 'float',
             'attr': 'linear_gamma',
-            'name': 'Burn',
+            'name': 'Gamma',
             'description': 'Linear gamma',
             'default': 1.0,
             'min': 0.0,
