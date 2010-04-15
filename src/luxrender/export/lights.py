@@ -29,7 +29,7 @@ from math import degrees
 import bpy, mathutils
 
 from luxrender.module.file_api import Files
-from luxrender.module import matrix_to_list
+from luxrender.export import matrix_to_list
 
 def attr_light(l, name, type, params, transform=None):
     if transform is not None:

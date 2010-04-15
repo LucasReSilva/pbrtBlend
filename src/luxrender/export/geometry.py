@@ -27,7 +27,7 @@
 import bpy
 
 from luxrender.module.file_api import Files
-from luxrender.module import matrix_to_list
+from luxrender.export import matrix_to_list
 
 def write_lxo(l, scene):
     
