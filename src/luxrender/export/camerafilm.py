@@ -115,9 +115,7 @@ def film(scene):
         'xresolution':   int(xr),
         'yresolution':   int(yr),
         
-        # TODO: add UI switches for output file types
-        # TODO: add RELATIVE output path to filename
-        'filename':          'default-%05i' % scene.frame_current,
+        'filename':          'default',
         'write_exr':         False,
         'write_png':         True,
         'write_tga':         False,
@@ -130,5 +128,9 @@ def film(scene):
     
     if scene.luxrender_sampler.haltspp > 0:
         fs['haltspp'] = scene.luxrender_sampler.haltspp
+    
+    # update the film settings with tonemapper settings
+    type, ts = scene.luxrender_tonemapping.api_output()
+    fs.update(ts)
     
     return ('fleximage', list(fs.items()))

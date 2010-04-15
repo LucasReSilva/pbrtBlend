@@ -37,6 +37,7 @@ from luxrender.module import LuxLog
 import luxrender.ui.materials
 import luxrender.ui.textures
 import luxrender.ui.render_panels
+import luxrender.ui.camera
 #import luxrender.nodes
 
 import luxrender.export.geometry    as export_geometry
@@ -49,8 +50,7 @@ from luxrender.module.file_api import Files
 import properties_render
 properties_render.RENDER_PT_render.COMPAT_ENGINES.add('luxrender')
 properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('luxrender')
-# Don't need file output panel for API
-#properties_render.RENDER_PT_output.COMPAT_ENGINES.add('luxrender')
+properties_render.RENDER_PT_output.COMPAT_ENGINES.add('luxrender')
 del properties_render
 
 import properties_material
@@ -87,6 +87,8 @@ class luxrender(engine_base):
         luxrender.ui.render_panels.volume,
         luxrender.ui.render_panels.filter,
         luxrender.ui.render_panels.accelerator,
+        
+        luxrender.ui.camera.tonemapping,
         
         luxrender.ui.materials.material_editor,
         luxrender.ui.textures.texture_editor,
@@ -153,11 +155,10 @@ class luxrender(engine_base):
         
         l = self.LuxManager.lux_context
         
-        # TODO: insert an output path here ...
-        l.set_filename('default')
-        
-        # TODO: ... and here
-        self.output_file = 'default-%05i.png' % scene.frame_current
+        if scene.luxrender_engine.api_type == 'FILE':
+            # TODO: insert an output path here ?
+            # TODO: only if the user selects a 'keep files' option
+            l.set_filename('default')
         
         # BEGIN!
         self.update_stats('', 'LuxRender: Parsing Scene')
@@ -186,10 +187,13 @@ class luxrender(engine_base):
         # Geometry iteration and export goes here.
         export_geometry.write_lxo(l, scene)
         
-        # reset output image file and begin rendering
+        # TODO: this will be removed when direct framebuffer
+        # access is implemented in Blender
         if os.path.exists(self.output_file):
+            # reset output image file and
             os.remove(self.output_file)
             
+        # Begin rendering
         self.LuxManager.start(self)
         self.update_stats('', 'LuxRender: Rendering warmup')
         
@@ -197,6 +201,8 @@ class luxrender(engine_base):
             self.render_update_timer = threading.Timer(1, self.stats_timer)
             self.render_update_timer.start()
             if self.render_update_timer.isAlive(): self.render_update_timer.join()
+            
+        # TODO: tidy up scene files and output file ?
     
     def stats_timer(self):
         '''
