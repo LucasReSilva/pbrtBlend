@@ -86,7 +86,7 @@ def film(scene):
         fs['haltspp'] = scene.luxrender_sampler.haltspp
     
     # update the film settings with tonemapper settings
-    type, ts = scene.luxrender_tonemapping.api_output()
+    type, ts = scene.luxrender_tonemapping.api_output(scene)
     fs.update(ts)
     
     return ('fleximage', list(fs.items()))
