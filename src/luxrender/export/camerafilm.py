@@ -83,12 +83,15 @@ def film(scene):
         'xresolution':   int(xr),
         'yresolution':   int(yr),
         
-        # write only default png file
+        # TODO: add UI switches for output file types
+        # TODO: add RELATIVE output path to filename
         'filename':          'default-%05i' % scene.frame_current,
         'write_exr':         False,
         'write_png':         True,
         'write_tga':         False,
         'write_resume_flm':  False,
+        
+        # TODO: add UI controls for update intervals, and sync with LuxTimerThread.KICK_PERIODs
         'displayinterval':   5,
         'writeinterval':     8,
     }

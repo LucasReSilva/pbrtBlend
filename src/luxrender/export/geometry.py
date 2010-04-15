@@ -108,13 +108,13 @@ def write_lxo(l, scene):
                         uvs.append(single_uv)
                         
         
-        print(' %s num points: %i' % (ob.name, len(points)))
-        print(' %s num normals: %i' % (ob.name, len(normals)))
-        print(' %s num idxs: %i' % (ob.name, len(indices)))
+        #print(' %s num points: %i' % (ob.name, len(points)))
+        #print(' %s num normals: %i' % (ob.name, len(normals)))
+        #print(' %s num idxs: %i' % (ob.name, len(indices)))
         
         # export shape
         if uv_layer:
-            print(' %s num uvs: %i' % (ob.name, len(uvs)))
+            #print(' %s num uvs: %i' % (ob.name, len(uvs)))
             ss = {
                 'indices': indices,
                 'P': points,

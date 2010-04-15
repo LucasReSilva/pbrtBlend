@@ -39,9 +39,9 @@ import luxrender.ui.textures
 import luxrender.ui.render_panels
 #import luxrender.nodes
 
-import luxrender.module.export_geometry     as export_geometry
-import luxrender.module.export_camerafilm   as export_camerafilm
-import luxrender.module.export_lights       as export_lights
+import luxrender.export.geometry    as export_geometry
+import luxrender.export.camerafilm  as export_camerafilm
+import luxrender.export.lights      as export_lights
 from luxrender.module.file_api import Files
 
 
@@ -72,7 +72,10 @@ class luxrender(engine_base):
     bl_label = 'LuxRender'
     
     LuxManager = None
-        
+    render_update_timer = None
+    output_file = 'default.png'
+    
+    # This member is read by the ExporterFramework to set up the IU panels
     interfaces = [
         luxrender.ui.render_panels.engine,
         luxrender.ui.render_panels.sampler,
@@ -87,9 +90,6 @@ class luxrender(engine_base):
         #luxrender.nodes.test_node
     ]
     
-    render_update_timer = None
-    anim_frame = '00000'
-    
     def update_framebuffer(self, xres, yres, fb):
         '''
         this will be called by the LuxFilmDisplay thread started by LuxManager
@@ -102,13 +102,16 @@ class luxrender(engine_base):
         #print('fb min: %i' % min(fb))
         
         result = self.begin_result(0,0,xres,yres)
-        # read default png file
-        if os.path.exists('default-%s.png' % self.anim_frame):
+        # TODO: don't read the file whilst it is still being written..
+        # ... however file locking in python seems incomplete/non-portable ?
+        if os.path.exists(self.output_file):
             lay = result.layers[0]
-            lay.load_from_file('default-%s.png' % self.anim_frame)
+            # TODO: use the framebuffer direct from pylux when Blender's API supports it
+            lay.load_from_file(self.output_file)
         self.end_result(result)
     
     def render(self, scene):
+        # force scene update to current rendering frame
         scene.set_frame(scene.frame_current)
         
         if scene.luxrender_engine.threads_auto:
@@ -128,11 +131,15 @@ class luxrender(engine_base):
             threads = threads
         )
         
-        self.anim_frame = '%05i' % scene.frame_current
-        
         l = self.LuxManager.lux_context
-        l.set_filename('default-%s' % self.anim_frame)
         
+        # TODO: insert an output path here ...
+        l.set_filename('default')
+        
+        # TODO: ... and here
+        self.output_file = 'default-%05i.png' % scene.frame_current
+        
+        # BEGIN!
         self.update_stats('', 'LuxRender: Parsing Scene')
         
         # Set up render engine parameters
@@ -160,8 +167,8 @@ class luxrender(engine_base):
         export_geometry.write_lxo(l, scene)
         
         # reset output image file and begin rendering
-        if os.path.exists('default-%s.png' % self.anim_frame):
-            os.remove('default-%s.png' % self.anim_frame)
+        if os.path.exists(self.output_file):
+            os.remove(self.output_file)
             
         self.LuxManager.start(self)
         self.update_stats('', 'LuxRender: Rendering warmup')

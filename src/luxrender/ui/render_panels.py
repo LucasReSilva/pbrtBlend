@@ -601,7 +601,7 @@ class accelerator(render_described_context):
 		'kd_ebonus':		{ 'accelerator': 'tabreckdtree' },
 		'kd_maxprims':		{ 'accelerator': 'tabreckdtree' },
 		'kd_maxdepth':		{ 'accelerator': 'tabreckdtree' },
-		'grid_refineim':	{'accelerator': 'grid' },
+		'grid_refineim':	{ 'accelerator': 'grid' },
 		'qbvh_maxprims':	{ 'accelerator': 'qbvh' },
 	}
 	
