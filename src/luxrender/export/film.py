@@ -24,7 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from math import degrees
 
 def lookAt(scene):
     '''
@@ -55,61 +54,6 @@ def resolution(scene):
     yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
     
     return xr, yr
-
-def camera(scene):
-    '''
-    scene        bpy.types.scene
-    
-    Calculate type and parameters for LuxRender Camera statement
-    
-    Returns tuple(2) (string, list) 
-    '''
-    
-    xr, yr = resolution(scene)
-    
-    shiftX = scene.camera.data.shift_x
-    shiftY = scene.camera.data.shift_x
-    
-    # TODO:
-    scale = 1.0
-    
-    aspect = xr/yr
-    invaspect = 1.0/aspect
-    
-    if aspect > 1.0:
-        sw = [
-            ((2*shiftX)-1) * scale,
-            ((2*shiftX)+1) * scale,
-            ((2*shiftY)-invaspect) * scale,
-            ((2*shiftY)+invaspect) * scale
-        ]
-    else:
-        sw = [
-            ((2*shiftX)-aspect) * scale,
-            ((2*shiftX)+aspect) * scale,
-            ((2*shiftY)-1) * scale,
-            ((2*shiftY)+1) * scale
-        ]
-    
-    fov = degrees(scene.camera.data.angle)
-    
-    cs = {
-        'fov':              fov,
-        'screenwindow':     sw,
-        'autofocus':        False
-    }
-    
-    # TODO: merge this entire def into luxrender_camera.api_output ?
-    camtype, camparams = scene.camera.data.luxrender_camera.api_output() 
-    cs.update( camparams )
-    
-    if not scene.camera.data.luxrender_camera.autofocus:
-        if scene.camera.data.dof_object is not None:
-            cs['focaldistance'] = (scene.camera.location - scene.camera.dof_object.location).length
-        elif scene.camera.data.dof_distance > 0:
-            cs['focaldistance'] = scene.camera.data.dof_distance 
-    
-    return (camtype,  list(cs.items()))
 
 def film(scene):
     '''

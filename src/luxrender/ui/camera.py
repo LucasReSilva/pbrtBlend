@@ -37,7 +37,7 @@ class camera(camera_settings_panel, described_layout):
     COMPAT_ENGINES = {'luxrender'}
     
     property_group = luxrender.properties.camera.luxrender_camera
-    # prevent creating luxrender_material property group in Scene
+    # prevent creating luxrender_camera property group in Scene
     property_group_non_global = True
     
     @staticmethod
@@ -138,9 +138,9 @@ class camera(camera_settings_panel, described_layout):
         },
         {
             'type': 'float',
-            'attr': 'linear_exposure',
+            'attr': 'exposure',
             'name': 'Exposure',
-            'description': 'Linear Exposure time (secs)',
+            'description': 'Exposure time (secs)',
             'precision': 6,
             'default': 1.0,
             'min': 0.0,

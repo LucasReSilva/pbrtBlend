@@ -24,27 +24,90 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import math
+
 import bpy
 
 from luxrender.properties import dbo
+from luxrender.export.camerafilm import resolution
 
 # TODO: adapt values written to d based on simple/advanced views
 
 # TODO: check parameter completeness against Lux API
 
 class luxrender_camera(bpy.types.IDPropertyGroup):
+    '''
+    Storage class for LuxRender Camera settings.
+    This class will be instantiated within a Blender camera
+    object.
+    '''
+    
+    def screenwindow(self, xr, yr, cam):
+        '''
+        xr            float
+        yr            float
+        cam           bpy.types.camera
+        
+        Calculate LuxRender camera's screenwindow parameter
+        
+        Returns list[4]
+        '''
+        
+        shiftX = cam.shift_x
+        shiftY = cam.shift_x
+        
+        # TODO:
+        scale = 1.0
+        
+        aspect = xr/yr
+        invaspect = 1.0/aspect
+        
+        if aspect > 1.0:
+            sw = [
+                ((2*shiftX)-1) * scale,
+                ((2*shiftX)+1) * scale,
+                ((2*shiftY)-invaspect) * scale,
+                ((2*shiftY)+invaspect) * scale
+            ]
+        else:
+            sw = [
+                ((2*shiftX)-aspect) * scale,
+                ((2*shiftX)+aspect) * scale,
+                ((2*shiftY)-1) * scale,
+                ((2*shiftY)+1) * scale
+                ]
+                
+        return sw
     
     def api_output(self, scene):
-        print(self.context)
+        '''
+        scene            bpy.types.scene
         
-        d = {}
+        Format this class's members into a LuxRender ParamSet
+        
+        Returns dict
+        '''
+        
+        cam = scene.camera.data
+        xr, yr = resolution(scene)
+        
+        d = {
+            'fov':              math.degrees(scene.camera.data.angle),
+            'screenwindow':     self.screenwindow(xr, yr, cam),
+            'autofocus':        False
+        }
         
         if self.autofocus:
             d['autofocus'] = True
+        else:
+            if cam.dof_object is not None:
+                d['focaldistance'] = (scene.camera.location - cam.dof_object.location).length
+            elif cam.dof_distance > 0:
+                d['focaldistance'] = cam.dof_distance
             
-        if use_clipping:
-            d['hither'] = scene.camera.data.clip_start,
-            d['yon'] = scene.camera.data.clip_end,
+        if self.use_clipping:
+            d['hither'] = cam.clip_start,
+            d['yon']    = cam.clip_end,
         
         out = self.type, list(d.items())
         dbo('CAMERA', out)
@@ -57,12 +120,16 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
     object.
     '''
     
-    def api_output(self):
+    def api_output(self, scene):
         '''
+        scene            bpy.types.scene
+        
         Format this class's members into a LuxRender ParamSet
         
         Returns dict
         '''
+        
+        cam = scene.camera.data
         
         d = {}
         
@@ -74,9 +141,9 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
             d['reinhard_burn']          = self.reinhard_burn
             
         if self.type == 'linear':
-            d['linear_sensitivity']     = self.linear_sensitivity
-            d['linear_exposure']        = self.linear_exposure
-            d['linear_fstop']           = self.linear_fstop
+            d['linear_sensitivity']     = cam.luxrender_camera.sensitivity
+            d['linear_exposure']        = cam.luxrender_camera.exposure
+            d['linear_fstop']           = cam.luxrender_camera.fstop
             d['linear_gamma']           = self.linear_gamma
         
         out = self.type, list(d.items())

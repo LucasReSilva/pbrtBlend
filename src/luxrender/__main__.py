@@ -41,7 +41,7 @@ import luxrender.ui.camera
 #import luxrender.nodes
 
 import luxrender.export.geometry    as export_geometry
-import luxrender.export.camerafilm  as export_camerafilm
+import luxrender.export.film        as export_film
 import luxrender.export.lights      as export_lights
 from luxrender.module.file_api import Files
 
@@ -172,9 +172,9 @@ class luxrender(engine_base):
         l.pixelFilter(        *scene.luxrender_filter.api_output()        )
         
         # Set up camera, view and film
-        l.lookAt( *export_camerafilm.lookAt(scene) )
-        l.camera( *export_camerafilm.camera(scene) )
-        l.film(   *export_camerafilm.film(scene)   )
+        l.lookAt( *export_film.lookAt(scene) )
+        l.camera( *scene.camera.data.luxrender_camera.api_output(scene) )
+        l.film(   *export_film.film(scene)   )
         
         
         l.worldBegin()
