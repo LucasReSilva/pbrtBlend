@@ -50,7 +50,14 @@ class Custom_Context(luxrender.pylux.Context):
     
     def wf(self, ind, st, tabs=0):
         '''
-        Write a string followed by newline to file index ind
+        ind             int
+        st              string
+        tabs            int
+        
+        Write a string followed by newline to file index ind.
+        Optionally indent the string by a number of tabs
+        
+        Returns None
         '''
         
         if len(self.files) == 0:
@@ -60,8 +67,12 @@ class Custom_Context(luxrender.pylux.Context):
     
     def param_formatter(self, param):
         '''
+        param            string
+        
         Try to detect the parameter type (via paramset) and
         format it as a string.
+        
+        Returns string
         '''
         
         fs_num = '"%s %s" [%s]'
@@ -98,7 +109,12 @@ class Custom_Context(luxrender.pylux.Context):
     
     def set_filename(self, name):
         '''
-        Open the main, materials, and geometry files for output
+        name            string
+        
+        Open the main, materials, and geometry files for output,
+        using filenames based on the given name.
+        
+        Returns None
         '''
         
         # If any files happen to be open, close them and start again
@@ -116,9 +132,30 @@ class Custom_Context(luxrender.pylux.Context):
         self.wf(Files.GEOM, '# Geometry File')
         
     def set_output_file(self, file):
+        '''
+        file            int
+        
+        Switch next output to the given file index
+        
+        Returns None
+        '''
+        
         self.current_file = file
         
     def _api(self, identifier, args=[], file=None):
+        '''
+        identifier            string
+        args                  list
+        file                  None or int
+        
+        Make a standard pylux.Context API call. In this case
+        the identifier followed by its name followed by its
+        formatted parameters are written to either the current
+        output file, or the file specified by the given index.
+        
+        Returns None
+        '''
+        
         if file is not None:
             self.set_output_file(file)
         
@@ -127,7 +164,10 @@ class Custom_Context(luxrender.pylux.Context):
         self.wf(self.current_file, '\n%s "%s"' % (identifier, name))
         for p in params:
             self.wf(self.current_file, self.param_formatter(p), 1)
-        
+    
+    
+    # Wrapped pylux.Context API calls follow ...
+    
     def sampler(self, *args):
         self._api('Sampler', args)
     
@@ -163,6 +203,9 @@ class Custom_Context(luxrender.pylux.Context):
         
     def attributeBegin(self, comment='', file=None):
         '''
+        comment            string
+        file               None or int
+        
         The AttributeBegin block can be used to switch
         the current output file, seeing as we will probably
         be exporting LightSources to the LXS and other
@@ -176,6 +219,9 @@ class Custom_Context(luxrender.pylux.Context):
     
     def transformBegin(self, comment='', file=None):
         '''
+        comment            string
+        file               None or int
+        
         See attributeBegin
         '''
         
@@ -200,6 +246,11 @@ class Custom_Context(luxrender.pylux.Context):
             self.wf(Files.MATS, self.param_formatter(p), 1)
     
     def worldEnd(self):
+        '''
+        Special handling of worldEnd API.
+        See inline comments for further info
+        '''
+        
         #Don't actually write any WorldEnd to file yet!
         
         # Include the other files

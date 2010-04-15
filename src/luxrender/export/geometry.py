@@ -30,6 +30,15 @@ from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
 
 def write_lxo(l, scene):
+    '''
+    l            pylux.Context
+    scene        bpy.types.scene
+    
+    Iterate over the given scene's objects,
+    and export the compatible ones to the context l.
+    
+    Returns None
+    '''
     
     sel = scene.objects
     for ob in sel:

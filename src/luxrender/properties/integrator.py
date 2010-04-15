@@ -33,7 +33,19 @@ from luxrender.properties import dbo
 # TODO: check parameter completeness against Lux API
 
 class luxrender_integrator(bpy.types.IDPropertyGroup):
+    '''
+    Storage class for LuxRender SurfaceIntegrator settings.
+    This class will be instantiated within a Blender scene
+    object.
+    '''
+    
     def api_output(self):
+        '''
+        Format this class's members into a LuxRender ParamSet
+        
+        Returns dict
+        '''
+        
         d={}
         
         if self.surfaceintegrator in ['directlighting', 'path']:

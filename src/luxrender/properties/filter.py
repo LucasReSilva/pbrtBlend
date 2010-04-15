@@ -33,7 +33,19 @@ from luxrender.properties import dbo
 # TODO: check parameter completeness against Lux API
 
 class luxrender_filter(bpy.types.IDPropertyGroup):
+    '''
+    Storage class for LuxRender PixelFilter settings.
+    This class will be instantiated within a Blender scene
+    object.
+    '''
+    
     def api_output(self):
+        '''
+        Format this class's members into a LuxRender ParamSet
+        
+        Returns dict
+        '''
+        
         d={}
         
         d['xwidth'] = self.xwidth

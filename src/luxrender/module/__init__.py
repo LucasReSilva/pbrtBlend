@@ -44,19 +44,6 @@ def LuxLog(*args):
     '''
     if len(args) > 0:
         ef.log(' '.join(['%s'%a for a in args]), module_name='Lux')
-
-class LuxOutput(object):
-    '''
-    Base class for any Lux output
-    '''
-    pass
-
-class LuxFile(LuxOutput):
-    '''
-    Write to LXS file
-    '''
-    
-    pass
     
 class LuxTimerThread(threading.Thread):
     '''
@@ -172,17 +159,26 @@ class LuxFilmDisplay(LuxTimerThread):
                 LuxLog('Updating render result %ix%i' % (xres,yres))
             self.RE.update_framebuffer(xres,yres,px)
 
-class LuxManager(LuxOutput):
+class LuxManager(object):
     '''
-    Use the pylux API.
+    Manage a pylux.Context object for rendering.
     
-    Instances of this class will represent a Lux rendering context
+    Objects of this class are responsible for the life cycle of
+    a pylux.Context object, ensuring proper initialisation, usage
+    and termination.
+    
+    Additionally, LuxManager objects will also spawn timer threads
+    in order to update the rendering statistics and image framebuffer.
     '''
     
-    # Give each context a unique serial number
     context_count = 0
     @staticmethod
     def get_context_number():
+        '''
+        Give each context a unique serial number by keeping
+        count in a static member of LuxManager
+        '''
+        
         LuxManager.context_count += 1
         return LuxManager.context_count
     
@@ -193,6 +189,13 @@ class LuxManager(LuxOutput):
     started         = True
     
     def __init__(self, manager_name = '', api_type='FILE', threads=1):
+        '''
+        Initialise the LuxManager by setting its name, the pylux API
+        type, and number of threads to render with.
+        
+        Returns LuxManager object
+        '''
+        
         self.thread_count = threads
         
         if api_type == 'FILE':
@@ -206,6 +209,16 @@ class LuxManager(LuxOutput):
         self.reset()
 
     def start(self, RE):
+        '''
+        RE        bpy.types.RenderEngine
+        
+        Start the pylux.Context object rendering. This is achieved
+        by calling its worldEnd() method. Here we also start the
+        timer threads for stats and framebuffer updates.
+        
+        Returns None
+        '''
+        
         if self.started:
             LuxLog('Already rendering!')
             return
@@ -216,6 +229,7 @@ class LuxManager(LuxOutput):
         self.fb_thread.start(RE)
         self.started = True
         
+        # Wait until scene is fully parsed before adding more render threads
         while self.lux_context.statistics('sceneIsReady') != 1.0:
             # TODO: such a tight loop is not a good idea
             pass
@@ -224,6 +238,13 @@ class LuxManager(LuxOutput):
             self.lux_context.addThread()
     
     def reset(self):
+        '''
+        Stop the current Context from rendering, and reset the
+        timer threads.
+        
+        Returns None
+        '''
+        
         if self.stats_thread is not None and self.stats_thread.isAlive():
             self.stats_thread.stop()
             self.stats_thread.join()

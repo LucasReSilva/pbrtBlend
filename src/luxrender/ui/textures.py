@@ -35,6 +35,10 @@ from ef.ef import ef
 import luxrender.properties.texture
 
 class texture_editor(context_panel, texture_settings_panel, described_layout):
+    '''
+    Texture Editor UI Panel
+    '''
+    
     bl_label = 'LuxRender Textures'
     COMPAT_ENGINES = {'luxrender'}
     

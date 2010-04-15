@@ -28,6 +28,13 @@
 import luxrender.pylux
 
 class Custom_Context(luxrender.pylux.Context):
+    '''
+    This is the 'pure' entry point to the pylux.Context API
+    
+    Some methods in this class have been overridden with
+    extensions to provide additional functionality in other
+    API types (eg. file_api).
+    '''
     
     def set_filename(self, name):
         '''

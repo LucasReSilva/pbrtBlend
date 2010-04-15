@@ -27,6 +27,14 @@
 from math import degrees
 
 def lookAt(scene):
+    '''
+    scene        bpy.types.scene
+    
+    Derive a list describing 3 points for a LuxRender LookAt statement
+    
+    Returns tuple(9) (floats)
+    '''
+    
     matrix = scene.camera.matrix
     pos = matrix[3]
     forwards = -matrix[2]
@@ -35,12 +43,28 @@ def lookAt(scene):
     return (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
     
 def resolution(scene):
+    '''
+    scene        bpy.types.scene
+    
+    Calculate the output render resolution
+    
+    Returns tuple(2) (floats)
+    '''
+    
     xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
     yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
     
     return xr, yr
 
 def camera(scene):
+    '''
+    scene        bpy.types.scene
+    
+    Calculate type and parameters for LuxRender Camera statement
+    
+    Returns tuple(2) (string, list) 
+    '''
+    
     xr, yr = resolution(scene)
     
     # TODO:
@@ -76,6 +100,14 @@ def camera(scene):
     return ('perspective',  list(cs.items()))
 
 def film(scene):
+    '''
+    scene        bpy.types.scene
+    
+    Calculate type and parameters for LuxRender Film statement
+    
+    Returns tuple(2) (string, list) 
+    '''
+    
     xr, yr = resolution(scene)
     
     fs = {

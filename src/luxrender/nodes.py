@@ -30,6 +30,10 @@ class node_props(bpy.types.IDPropertyGroup):
     pass
 
 class test_node(bpy.types.TextureNode):
+    '''
+    Experimental custom node implementation. DOES NOT YET WORK
+    '''
+    
     property_group = node_props
     
     name = "TEST NODE"

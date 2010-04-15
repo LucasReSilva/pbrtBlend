@@ -69,6 +69,10 @@ del properties_data_lamp
 #del properties_texture
 
 class luxrender(engine_base):
+    '''
+    LuxRender Engine Exporter/Integration class
+    '''
+    
     bl_label = 'LuxRender'
     
     LuxManager = None
@@ -92,9 +96,17 @@ class luxrender(engine_base):
     
     def update_framebuffer(self, xres, yres, fb):
         '''
-        this will be called by the LuxFilmDisplay thread started by LuxManager
+        xres        int
+        yres        int
+        fb          list
+        
+        Update the current RenderResult with the current render image.
+        
+        This will be called by the LuxFilmDisplay thread started by LuxManager
         
         TODO: perhaps this class itself is a threaded timer ?
+        
+        Returns None
         '''
         
         #print('fb len: %i' % len(fb))
@@ -111,6 +123,14 @@ class luxrender(engine_base):
         self.end_result(result)
     
     def render(self, scene):
+        '''
+        scene        bpy.types.scene
+        
+        Export the given scene to LuxRender
+        
+        Returns None
+        '''
+        
         # force scene update to current rendering frame
         scene.set_frame(scene.frame_current)
         
@@ -179,6 +199,12 @@ class luxrender(engine_base):
             if self.render_update_timer.isAlive(): self.render_update_timer.join()
     
     def stats_timer(self):
+        '''
+        Update the displayed rendering statistics and detect end of rendering
+        
+        Returns None
+        '''
+        
         self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
         if self.test_break() or \
             self.LuxManager.lux_context.statistics('filmIsReady') == 1.0 or \

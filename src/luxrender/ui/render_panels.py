@@ -37,9 +37,17 @@ import luxrender.properties.filter
 import luxrender.properties.accelerator
 
 class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
+	'''
+	Base class for render engine settings panels
+	'''
+	
 	COMPAT_ENGINES = {'luxrender'}
 
 class engine(render_described_context):
+	'''
+	Engine settings UI Panel
+	'''
+	
 	bl_label = 'LuxRender Engine Configuration'
 	
 	property_group = luxrender.properties.engine.luxrender_engine
@@ -130,6 +138,10 @@ class engine(render_described_context):
 	]
 			
 class sampler(render_described_context):
+	'''
+	Sampler settings UI Panel
+	'''
+	
 	bl_label = 'Sampler'
 	
 	property_group = luxrender.properties.sampler.luxrender_sampler
@@ -304,6 +316,10 @@ class sampler(render_described_context):
 	]
 				
 class integrator(render_described_context):
+	'''
+	Surface Integrator settings UI Panel
+	'''
+	
 	bl_label = 'Surface Integrator'
 	
 	property_group = luxrender.properties.integrator.luxrender_integrator
@@ -393,6 +409,10 @@ class integrator(render_described_context):
 	]
 
 class volume(render_described_context):
+	'''
+	Volume Integrator settings UI panel
+	'''
+	
 	bl_label = 'Volume Integrator'
 	
 	property_group = luxrender.properties.volume.luxrender_volume
@@ -427,6 +447,10 @@ class volume(render_described_context):
 	]
 			
 class filter(render_described_context):
+	'''
+	PixelFilter settings UI Panel
+	'''
+	
 	bl_label = 'Filter'
 	
 	property_group = luxrender.properties.filter.luxrender_filter
@@ -579,6 +603,10 @@ class filter(render_described_context):
 	]
 
 class accelerator(render_described_context):
+	'''
+	Accelerator settings UI Panel
+	'''
+	
 	bl_label = 'Accelerator'
 	
 	property_group = luxrender.properties.accelerator.luxrender_accelerator

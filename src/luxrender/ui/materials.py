@@ -36,6 +36,10 @@ from ef.ef import ef
 import luxrender.properties.material
 
 class material_editor(MaterialButtonsPanel, described_layout):
+	'''
+	Material Editor UI Panel
+	'''
+	
 	bl_label = 'LuxRender Materials'
 	COMPAT_ENGINES = {'luxrender'}
 	

@@ -32,6 +32,22 @@ from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
 
 def attr_light(l, name, type, params, transform=None):
+    '''
+    l            pylux.Context
+    name         string
+    type         string
+    params       dict
+    transform    None or list
+    
+    This method outputs a lightSource of the given name and
+    type to context l. The lightSource will be wrapped in a
+    transformBegin...transformEnd block if a transform is
+    given, otherwise it will appear in an attributeBegin...
+    attributeEnd block.
+    
+    Returns None
+    '''
+    
     if transform is not None:
         l.transformBegin(comment=name, file=Files.MAIN)
         l.transform(transform)
@@ -46,6 +62,16 @@ def attr_light(l, name, type, params, transform=None):
         l.attributeEnd()
 
 def lights(l, scene):
+    '''
+    l            pylux.Context
+    scene        bpy.types.scene
+    
+    Iterate over the given scene's light sources,
+    and export the compatible ones to the context l.
+    
+    Returns Boolean indicating if any light sources
+    were exported.
+    '''
     
     sel = scene.objects
     have_light = False

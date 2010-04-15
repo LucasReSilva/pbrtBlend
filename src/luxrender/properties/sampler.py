@@ -33,7 +33,19 @@ from luxrender.properties import dbo
 # TODO: check parameter completeness against Lux API
 
 class luxrender_sampler(bpy.types.IDPropertyGroup):
+    '''
+    Storage class for LuxRender Sampler settings.
+    This class will be instantiated within a Blender scene
+    object.
+    '''
+    
     def api_output(self):
+        '''
+        Format this class's members into a LuxRender ParamSet
+        
+        Returns dict
+        '''
+        
         d = {}
         
         if self.sampler in ['random', 'lowdiscrepancy']:
