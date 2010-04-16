@@ -29,7 +29,7 @@ import math
 import bpy
 
 from luxrender.properties import dbo
-from luxrender.export.camerafilm import resolution
+from luxrender.export.film import resolution
 
 # TODO: adapt values written to d based on simple/advanced views
 
