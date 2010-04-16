@@ -61,7 +61,9 @@ def write_lxo(l, scene):
         l.transform( matrix_to_list(ob.matrix) )
         
         # dummy material for now
-        l.material('matte', [])
+        l.material('matte', [
+            ('color Kd', [0.7, 0.6, 0.7])
+        ])
         
         faces_verts = [f.verts for f in me.faces]
         ffaces = [f for f in me.faces]
@@ -122,25 +124,17 @@ def write_lxo(l, scene):
         #print(' %s num idxs: %i' % (ob.name, len(indices)))
         
         # export shape
+        ss = [
+            ('integer indices', indices),
+            ('point P', points),
+            ('normal N', normals),
+        ]
         if uv_layer:
             #print(' %s num uvs: %i' % (ob.name, len(uvs)))
-            ss = {
-                'indices': indices,
-                'P': points,
-                'N': normals,
-                'uv': uvs,
-            }
-        else:        
-            ss = {
-                'indices': indices,
-                'P': points,
-                'N': normals,
-            }
+            ss.append( ('float uv', uvs) )
             
-        l.shape('trianglemesh', list(ss.items()))
+        l.shape('trianglemesh', ss)
         
         l.attributeEnd()
         
         bpy.data.meshes.remove(me)
-        
-

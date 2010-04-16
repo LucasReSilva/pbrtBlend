@@ -92,27 +92,27 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
         xr, yr = resolution(scene)
         
         d = {
-            'fov':              math.degrees(scene.camera.data.angle),
-            'screenwindow':     self.screenwindow(xr, yr, cam),
-            'autofocus':        False,
-            'shutteropen':      0.0,
-            'shutterclose':     self.exposure
+            'float fov':            math.degrees(scene.camera.data.angle),
+            'float screenwindow':   self.screenwindow(xr, yr, cam),
+            'bool autofocus':       False,
+            'float shutteropen':    0.0,
+            'float shutterclose':   self.exposure
         }
         
         if self.use_dof:
-            d['lensradius'] = (cam.lens / 1000.0) / ( 2.0 * self.fstop )
+            d['float lensradius'] = (cam.lens / 1000.0) / ( 2.0 * self.fstop )
         
         if self.autofocus:
-            d['autofocus'] = True
+            d['bool autofocus'] = True
         else:
             if cam.dof_object is not None:
-                d['focaldistance'] = (scene.camera.location - cam.dof_object.location).length
+                d['float focaldistance'] = (scene.camera.location - cam.dof_object.location).length
             elif cam.dof_distance > 0:
-                d['focaldistance'] = cam.dof_distance
+                d['float focaldistance'] = cam.dof_distance
             
         if self.use_clipping:
-            d['hither'] = cam.clip_start,
-            d['yon']    = cam.clip_end,
+            d['float hither'] = cam.clip_start,
+            d['float yon']    = cam.clip_end,
         
         out = self.type, list(d.items())
         dbo('CAMERA', out)
@@ -138,18 +138,18 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
         
         d = {}
         
-        d['tonemapkernel']              = self.type
+        d['string tonemapkernel']           = self.type
         
         if self.type == 'reinhard':
-            d['reinhard_prescale']      = self.reinhard_prescale
-            d['reinhard_postscale']     = self.reinhard_postscale
-            d['reinhard_burn']          = self.reinhard_burn
+            d['float reinhard_prescale']    = self.reinhard_prescale
+            d['float reinhard_postscale']   = self.reinhard_postscale
+            d['float reinhard_burn']        = self.reinhard_burn
             
         if self.type == 'linear':
-            d['linear_sensitivity']     = cam.luxrender_camera.sensitivity
-            d['linear_exposure']        = cam.luxrender_camera.exposure
-            d['linear_fstop']           = cam.luxrender_camera.fstop
-            d['linear_gamma']           = self.linear_gamma
+            d['float linear_sensitivity']   = cam.luxrender_camera.sensitivity
+            d['float linear_exposure']      = cam.luxrender_camera.exposure
+            d['float linear_fstop']         = cam.luxrender_camera.fstop
+            d['float linear_gamma']         = self.linear_gamma
         
         out = self.type, list(d.items())
         dbo('TONEMAPPING', out)

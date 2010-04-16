@@ -36,12 +36,6 @@ class Custom_Context(luxrender.pylux.Context):
     API types (eg. file_api).
     '''
     
-    def set_filename(self, name):
-        '''
-        Added for compatibility with file_api
-        '''
-        pass
-    
     def attributeBegin(self, comment='', file=None):
         '''
         Added for compatibility with file_api

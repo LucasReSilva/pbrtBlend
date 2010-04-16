@@ -48,21 +48,21 @@ class luxrender_filter(bpy.types.IDPropertyGroup):
         
         d={}
         
-        d['xwidth'] = self.xwidth
-        d['ywidth'] = self.ywidth
+        d['float xwidth'] = self.xwidth
+        d['float ywidth'] = self.ywidth
         
         if self.filter == 'box':
             pass
         
         if self.filter == 'gaussian':
-            d['alpha'] = self.gaussian_alpha
+            d['float alpha'] = self.gaussian_alpha
         
         if self.filter == 'mitchell':
-            d['B'] = self.mitchell_b
-            d['C'] = self.mitchell_c
+            d['float B'] = self.mitchell_b
+            d['float C'] = self.mitchell_c
         
         if self.filter == 'sinc':
-            d['tau'] = self.sinc_tau
+            d['float tau'] = self.sinc_tau
         
         if self.filter == 'triangle':
             pass

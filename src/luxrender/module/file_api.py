@@ -31,7 +31,6 @@ from ef.ef import ef
 
 import luxrender.pylux
 import luxrender.module
-import luxrender.module.paramset
 
 class Files(object):
     MAIN = 0
@@ -67,10 +66,9 @@ class Custom_Context(luxrender.pylux.Context):
     
     def param_formatter(self, param):
         '''
-        param            string
+        param            tuple(2)
         
-        Try to detect the parameter type (via paramset) and
-        format it as a string.
+        Detect the parameter type and format it as a string.
         
         Returns string
         '''
@@ -79,31 +77,38 @@ class Custom_Context(luxrender.pylux.Context):
         fs_str = '"%s %s" ["%s"]'
         
         k, v = param
-        if k in luxrender.module.paramset.FLOAT:
-            return fs_num % ('float', k, '%f' % v)
-        elif k in luxrender.module.paramset.FLOAT_VEC:
-            return fs_num % ('float', k, ' '.join(['%f'%i for i in v]))
-        elif k in luxrender.module.paramset.INT:
-            return fs_num % ('integer', k, '%i' % v)
-        elif k in luxrender.module.paramset.INT_VEC:
-            return fs_num % ('integer', k, ' '.join(['%i'%i for i in v]))
-        elif k in luxrender.module.paramset.STRING:
-            return fs_str % ('string', k, v)
-        elif k in luxrender.module.paramset.VEC:
-            return fs_num % ('vector', k, ' '.join(['%f'%i for i in v]))
-        elif k in luxrender.module.paramset.POINT:
-            return fs_num % ('point', k, ' '.join(['%f'%i for i in v]))
-        elif k in luxrender.module.paramset.NORMAL:
-            return fs_num % ('normal', k, ' '.join(['%f'%i for i in v]))
-        elif k in luxrender.module.paramset.COLOR:
-            return fs_num % ('color', k, ' '.join(['%f'%i for i in v]))
-        elif k in luxrender.module.paramset.TEXTURE:
-            return fs_str % ('texture', k, v)
-        elif k in luxrender.module.paramset.BOOL:
+        
+        tokens = k.split(' ')
+        if len(tokens) != 2:
+            return '# unknown param %s : %s' % (k,v)
+        
+        t_type, t_name = tokens
+        
+        if t_type == "float" and type(v) in (list, tuple):
+            return fs_num % ('float', t_name, ' '.join(['%f'%i for i in v]))
+        if t_type == "float":
+            return fs_num % ('float', t_name, '%f' % v)
+        if t_type == "integer" and type(v) in (list, tuple):
+            return fs_num % ('integer', t_name, ' '.join(['%i'%i for i in v]))
+        if t_type == "integer":
+            return fs_num % ('integer', t_name, '%i' % v)
+        if t_type == "string":
+            return fs_str % ('string', t_name, v)
+        if t_type == "vector":
+            return fs_num % ('vector', t_name, ' '.join(['%f'%i for i in v]))
+        if t_type == "point":
+            return fs_num % ('point', t_name, ' '.join(['%f'%i for i in v]))
+        if t_type == "normal":
+            return fs_num % ('normal', t_name, ' '.join(['%f'%i for i in v]))
+        if t_type == "color":
+            return fs_num % ('color', t_name, ' '.join(['%f'%i for i in v]))
+        if t_type == "texture":
+            return fs_str % ('texture', t_name, v)
+        if t_type == "bool":
             if v:
-                return fs_str % ('bool', k, 'true')
+                return fs_str % ('bool', t_name, 'true')
             else:
-                return fs_str % ('bool', k, 'false')
+                return fs_str % ('bool', t_name, 'false')
             
         return '# unknown param %s : %s' % (k,v)
     

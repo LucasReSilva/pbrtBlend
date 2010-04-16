@@ -91,7 +91,7 @@ class engine(render_described_context):
 			'default': 'FILE',
 			'items': [
 				('FILE', 'Write files', 'FILE'),
-				('API', 'Direct export', 'API')
+				#('API', 'Direct export', 'API')	# BROKEN
 			] 
 		},
 		{

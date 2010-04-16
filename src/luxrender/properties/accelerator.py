@@ -49,17 +49,17 @@ class luxrender_accelerator(bpy.types.IDPropertyGroup):
         d={}
         
         if self.accelerator == 'tabreckdtree':
-            d['intersectcost']          = self.kd_intcost
-            d['traversalcost']          = self.kd_travcost
-            d['emptybonus']             = self.kd_ebonus
-            d['maxprims']               = self.kd_maxprims
-            d['maxdepth']               = self.kd_maxdepth
+            d['float intersectcost']        = self.kd_intcost
+            d['float traversalcost']        = self.kd_travcost
+            d['float emptybonus']           = self.kd_ebonus
+            d['integer maxprims']           = self.kd_maxprims
+            d['integer maxdepth']           = self.kd_maxdepth
         
         if self.accelerator == 'grid':
-            d['refineimmediately']      = self.grid_refineim
+            d['bool refineimmediately']     = self.grid_refineim
             
         if self.accelerator == 'qbvh':
-            d['maxprimsperleaf']        = self.qbvh_maxprims
+            d['integer maxprimsperleaf']    = self.qbvh_maxprims
 #            d['fullsweepthreshold']     = self.??
 #            d['skipfactor']             = self.??
         

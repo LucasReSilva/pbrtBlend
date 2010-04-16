@@ -49,21 +49,21 @@ class luxrender_sampler(bpy.types.IDPropertyGroup):
         d = {}
         
         if self.sampler in ['random', 'lowdiscrepancy']:
-            d['pixelsamples']         = self.pixelsamples
-            d['pixelsampler']         = self.pixelsampler
+            d['integer pixelsamples']       = self.pixelsamples
+            d['string pixelsampler']        = self.pixelsampler
         
         if self.sampler == 'erpt':
-            d['initsamples']          = self.erpt_initsamples
-            d['chainlength']          = self.erpt_chainlength
+            d['integer initsamples']        = self.erpt_initsamples
+            d['integer chainlength']        = self.erpt_chainlength
 #            d['mutationrange']        = self.erpt_mutationrange
         
         if self.sampler == 'metropolis':
-            d['initsamples']          = self.metro_initsamples
-            d['maxconsecrejects']     = self.metro_mncr
-            d['largemutationprob']    = self.metro_lmprob
+            d['integer initsamples']        = self.metro_initsamples
+            d['integer maxconsecrejects']   = self.metro_mncr
+            d['float largemutationprob']    = self.metro_lmprob
 #            d['micromutationprob']    = self.??
 #            d['mutationrange']        = self.??
-            d['usevariance']          = self.metro_variance
+            d['bool usevariance']           = self.metro_variance
         
         out = self.sampler, list(d.items())
         dbo('SAMPLER', out)

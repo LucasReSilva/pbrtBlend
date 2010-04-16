@@ -48,7 +48,7 @@ class luxrender_volume(bpy.types.IDPropertyGroup):
         
         d={}
         
-        d['stepsize'] = self.stepsize
+        d['float stepsize'] = self.stepsize
         
         out = self.volumeintegrator, list(d.items())
         dbo('VOLUME INTEGRATOR', out)

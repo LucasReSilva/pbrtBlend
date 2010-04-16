@@ -68,22 +68,22 @@ def film(scene):
     
     fs = {
         # Set resolution
-        'xresolution':   int(xr),
-        'yresolution':   int(yr),
+        'integer xresolution':      int(xr),
+        'integer yresolution':      int(yr),
         
-        'filename':          'default',
-        'write_exr':         False,
-        'write_png':         True,
-        'write_tga':         False,
-        'write_resume_flm':  False,
+        'string filename':          'default',
+        'bool write_exr':           False,
+        'bool write_png':           True,
+        'bool write_tga':           False,
+        'bool write_resume_flm':    False,
         
         # TODO: add UI controls for update intervals, and sync with LuxTimerThread.KICK_PERIODs
-        'displayinterval':   5,
-        'writeinterval':     8,
+        'integer displayinterval':  5,
+        'integer writeinterval':    8,
     }
     
     if scene.luxrender_sampler.haltspp > 0:
-        fs['haltspp'] = scene.luxrender_sampler.haltspp
+        fs['integer haltspp'] = scene.luxrender_sampler.haltspp
     
     # update the film settings with tonemapper settings
     type, ts = scene.luxrender_tonemapping.api_output(scene)

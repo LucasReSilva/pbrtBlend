@@ -31,6 +31,8 @@ import bpy, mathutils
 from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
 
+from luxrender.properties import dbo
+
 def attr_light(l, name, type, params, transform=None):
     '''
     l            pylux.Context
@@ -53,7 +55,8 @@ def attr_light(l, name, type, params, transform=None):
         l.transform(transform)
     else:
         l.attributeBegin(comment=name, file=Files.MAIN)
-        
+    
+    dbo('LIGHT', (type, list(params.items())))
     l.lightSource(type, list(params.items()))
     
     if transform is not None:
@@ -84,7 +87,7 @@ def lights(l, scene):
         if ob.data.type == 'SUN':
             invmatrix = mathutils.Matrix(ob.matrix).invert()
             es = {
-                'sundir': (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2])
+                'vector sundir': (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2])
             }
             attr_light(l, ob.name, 'sunsky', es)
             have_light = True
@@ -93,31 +96,31 @@ def lights(l, scene):
             coneangle = degrees(ob.data.spot_size) * 0.5
             conedeltaangle = degrees(ob.data.spot_size * 0.5 * ob.data.spot_blend)
             es = {
-                'L': [i for i in ob.data.color],
-                'from': (0,0,0),
-                'to': (0,0,-1),
-                'coneangle': coneangle,
-                'conedeltaangle': conedeltaangle,
-                'gain': ob.data.energy
+                'color L': list(ob.data.color),
+                'point from': (0,0,0),
+                'point to': (0,0,-1),
+                'float coneangle': coneangle,
+                'float conedeltaangle': conedeltaangle,
+                'float gain': ob.data.energy
             }
             attr_light(l, ob.name, 'spot', es, transform=matrix_to_list(ob.matrix))
             have_light = True
 
         if ob.data.type == 'POINT':
             es = {
-                'L': [i for i in ob.data.color],
-                'gain': ob.data.energy,
-                'from': (0,0,0)
+                'color L': list(ob.data.color),
+                'float gain': ob.data.energy,
+                'point from': (0,0,0)
             }
             attr_light(l, ob.name, 'point', es, transform=matrix_to_list(ob.matrix))
             have_light = True
         
         if ob.data.type == 'AREA':
             es = {
-                'L': [i for i in ob.data.color],
-                'gain': ob.data.energy,
-                'power': 100.0,
-                'efficacy': 17.0
+                'color L': list(ob.data.color),
+                'float gain': ob.data.energy,
+                'float power': 100.0,
+                'float efficacy': 17.0
             }
             
             l.attributeBegin(ob.name, file=Files.MAIN)
@@ -134,8 +137,8 @@ def lights(l, scene):
 
             points = [-areax/2, areay/2, 0.0, areax/2, areay/2, 0.0, areax/2, -areay/2, 0.0, -areax/2, -areay/2, 0.0]
             ss = {
-                'indices': [0, 1, 2, 0, 2, 3],
-                'P': points
+                'integer indices': [0, 1, 2, 0, 2, 3],
+                'point P': points
             }
             l.shape('trianglemesh', list(ss.items()))
             l.attributeEnd()

@@ -49,17 +49,17 @@ class luxrender_integrator(bpy.types.IDPropertyGroup):
         d={}
         
         if self.surfaceintegrator in ['directlighting', 'path']:
-            d['lightstrategy']    = self.strategy
+            d['string lightstrategy']   = self.strategy
 #            d['maxdepth']         = self.??
         
         if self.surfaceintegrator == 'bidirectional':
-            d['eyedepth']         = self.bidir_edepth
-            d['lightdepth']       = self.bidir_ldepth
+            d['integer eyedepth']       = self.bidir_edepth
+            d['integer lightdepth']     = self.bidir_ldepth
 #            d['eyerrthreshold']   = self.??
 #            d['lightrrthreshold'] = self.??
         
         if self.surfaceintegrator == 'distributedpath':
-            d['strategy']         = self.strategy
+            d['string strategy']        = self.strategy
 #            d['diffusedepth']     = self.??
 #            d['glossydepth']      = self.??
 #            d['speculardepth']    = self.??
