@@ -26,10 +26,11 @@
 #
 import bpy
 
+from luxrender.module import LuxLog
 from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
 
-def write_lxo(l, scene):
+def write_lxo(render_engine, l, scene):
     '''
     l            pylux.Context
     scene        bpy.types.scene
@@ -41,7 +42,11 @@ def write_lxo(l, scene):
     '''
     
     sel = scene.objects
+    total_objects = len(sel)
+    rpcs = []
+    ipc = 0.0
     for ob in sel:
+        ipc += 1.0
         
         if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE'):
             continue
@@ -62,7 +67,7 @@ def write_lxo(l, scene):
         
         # dummy material for now
         l.material('matte', [
-            ('color Kd', [0.7, 0.6, 0.7])
+            ('color Kd', [0.75, 0.75, 0.75])
         ])
         
         faces_verts = [f.verts for f in me.faces]
@@ -138,3 +143,8 @@ def write_lxo(l, scene):
         l.attributeEnd()
         
         bpy.data.meshes.remove(me)
+        
+        pc = int(100 * ipc/total_objects)
+        if pc not in rpcs:
+            rpcs.append(pc)
+            render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)

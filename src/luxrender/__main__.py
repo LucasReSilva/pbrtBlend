@@ -186,7 +186,7 @@ class luxrender(engine_base):
         # Materials iteration and export goes here.
         
         # Geometry iteration and export goes here.
-        export_geometry.write_lxo(l, scene)
+        export_geometry.write_lxo(self, l, scene)
         
         # TODO: this will be removed when direct framebuffer
         # access is implemented in Blender

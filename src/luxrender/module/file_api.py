@@ -63,6 +63,7 @@ class Custom_Context(luxrender.pylux.Context):
             self.set_filename('default')
         
         self.files[ind].write('%s%s\n' % ('\t'*tabs, st))
+        self.files[ind].flush()
     
     def param_formatter(self, param):
         '''
