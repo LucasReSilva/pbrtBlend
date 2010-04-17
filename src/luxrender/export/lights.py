@@ -83,8 +83,10 @@ def lights(l, scene):
         
         if ob.type != 'LAMP':
             continue
+
+        light = ob.data
         
-        if ob.data.type == 'SUN':
+        if light.type == 'SUN':
             invmatrix = mathutils.Matrix(ob.matrix).invert()
             es = {
                 'vector sundir': (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2])
@@ -92,35 +94,35 @@ def lights(l, scene):
             attr_light(l, ob.name, 'sunsky', es)
             have_light = True
         
-        if ob.data.type == 'SPOT':
-            coneangle = degrees(ob.data.spot_size) * 0.5
-            conedeltaangle = degrees(ob.data.spot_size * 0.5 * ob.data.spot_blend)
+        if light.type == 'SPOT':
+            coneangle = degrees(light.spot_size) * 0.5
+            conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
             es = {
-                'color L': list(ob.data.color),
+                'color L': list(light.color),
                 'point from': (0,0,0),
                 'point to': (0,0,-1),
                 'float coneangle': coneangle,
                 'float conedeltaangle': conedeltaangle,
-                'float gain': ob.data.energy
+                'float gain': light.energy
             }
             attr_light(l, ob.name, 'spot', es, transform=matrix_to_list(ob.matrix))
             have_light = True
 
-        if ob.data.type == 'POINT':
+        if light.type == 'POINT':
             es = {
-                'color L': list(ob.data.color),
-                'float gain': ob.data.energy,
+                'color L': list(light.color),
+                'float gain': light.energy,
                 'point from': (0,0,0)
             }
             attr_light(l, ob.name, 'point', es, transform=matrix_to_list(ob.matrix))
             have_light = True
         
-        if ob.data.type == 'AREA':
+        if light.type == 'AREA':
             es = {
-                'color L': list(ob.data.color),
-                'float gain': ob.data.energy,
-                'float power': 100.0,
-                'float efficacy': 17.0
+                'color L': list(light.color),
+                'float gain': light.energy,
+                'float power': light.luxrender_lamp.power,
+                'float efficacy': light.luxrender_lamp.efficacy
             }
             
             l.attributeBegin(ob.name, file=Files.MAIN)
@@ -129,10 +131,10 @@ def lights(l, scene):
 
             l.arealightSource('area', list(es.items()))
 
-            areax = ob.data.size
+            areax = light.size
 
-            if ob.data.shape == 'SQUARE': areay = areax
-            elif ob.data.shape == 'RECTANGLE': areay = ob.data.size_y
+            if light.shape == 'SQUARE': areay = areax
+            elif light.shape == 'RECTANGLE': areay = light.size_y
             else: areay = areax # not supported yet
 
             points = [-areax/2, areay/2, 0.0, areax/2, areay/2, 0.0, areax/2, -areay/2, 0.0, -areax/2, -areay/2, 0.0]

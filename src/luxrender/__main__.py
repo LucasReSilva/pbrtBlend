@@ -38,6 +38,7 @@ import luxrender.ui.materials
 import luxrender.ui.textures
 import luxrender.ui.render_panels
 import luxrender.ui.camera
+import luxrender.ui.lamps
 #import luxrender.nodes
 
 import luxrender.export.geometry    as export_geometry
@@ -59,9 +60,7 @@ del properties_material
 
 import properties_data_lamp
 properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add('luxrender')
-properties_data_lamp.DATA_PT_lamp.COMPAT_ENGINES.add('luxrender')
-properties_data_lamp.DATA_PT_sunsky.COMPAT_ENGINES.add('luxrender')
-properties_data_lamp.DATA_PT_spot.COMPAT_ENGINES.add('luxrender')
+# properties_data_lamp.DATA_PT_lamp.COMPAT_ENGINES.add('luxrender')
 del properties_data_lamp
 
 #import properties_texture
@@ -87,6 +86,8 @@ class luxrender(engine_base):
         luxrender.ui.render_panels.volume,
         luxrender.ui.render_panels.filter,
         luxrender.ui.render_panels.accelerator,
+
+        luxrender.ui.lamps.lamps,
         
         luxrender.ui.camera.camera,
         luxrender.ui.camera.tonemapping,
