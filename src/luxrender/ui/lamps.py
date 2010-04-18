@@ -67,13 +67,25 @@ class lamps(DataButtonsPanel, described_layout):
 
                 # SPOT LAMP: Blender Properties
                 if lamp.type == 'SPOT':
-                    lamp = context.lamp
                     wide_ui = context.region.width > narrowui
 
                     if wide_ui:
                         col = split.column()
                     col.prop(lamp, "spot_size", text="Size")
                     col.prop(lamp, "spot_blend", text="Blend", slider=True)
+                # AREA LAMP: Blender Properties
+                elif lamp.type == 'AREA':
+
+                    if wide_ui:
+                        col = split.column()
+                    col.row().prop(lamp, "shape", expand=True)
+
+                    sub = col.column(align=True)
+                    if (lamp.shape == 'SQUARE'):
+                        sub.prop(lamp, "size")
+                    elif (lamp.shape == 'RECTANGLE'):
+                        sub.prop(lamp, "size", text="Size X")
+                        sub.prop(lamp, "size_y", text="Size Y")
                 elif wide_ui:
                     col = split.column()
                 

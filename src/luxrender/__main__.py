@@ -60,7 +60,7 @@ del properties_material
 
 import properties_data_lamp
 properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add('luxrender')
-# properties_data_lamp.DATA_PT_lamp.COMPAT_ENGINES.add('luxrender')
+# properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add('luxrender')
 del properties_data_lamp
 
 #import properties_texture
