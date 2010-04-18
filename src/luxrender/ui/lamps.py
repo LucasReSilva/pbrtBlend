@@ -65,9 +65,19 @@ class lamps(DataButtonsPanel, described_layout):
                 sub.prop(lamp, "color", text="")
                 sub.prop(lamp, "energy", text="Gain")
 
-                if wide_ui:
+                # SPOT LAMP: Blender Properties
+                if lamp.type == 'SPOT':
+                    lamp = context.lamp
+                    wide_ui = context.region.width > narrowui
+
+                    if wide_ui:
+                        col = split.column()
+                    col.prop(lamp, "spot_size", text="Size")
+                    col.prop(lamp, "spot_blend", text="Blend", slider=True)
+                elif wide_ui:
                     col = split.column()
                 
+                # LuxRender properties
                 for p in self.controls:
                     self.draw_column(p, self.layout, context.lamp, supercontext=context)
     
