@@ -68,6 +68,18 @@ del properties_data_lamp
 #properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
 #del properties_texture
 
+# compatible() copied from blender repository (netrender)
+def compatible(module):
+    module = __import__(module)
+    for subclass in module.__dict__.values():
+        try:		subclass.COMPAT_ENGINES.add('luxrender')
+        except:	pass
+    del module
+
+compatible("properties_data_mesh")
+compatible("properties_data_camera")
+compatible("properties_texture")
+
 class luxrender(engine_base):
     '''
     LuxRender Engine Exporter/Integration class
