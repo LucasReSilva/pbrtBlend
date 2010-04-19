@@ -35,10 +35,10 @@ from luxrender.export import Paramset
 # getMeshType(self, scene, mesh, ss)
 # returns type of mesh as string to use depending on thresholds
 #-------------------------------------------------
-def getMeshType(scene, mesh, paramset):
+def getMeshType(scene, mesh):
     
     # TODO: don't really like modifying paramset by reference, pass it through the return statement
-    
+    paramset = Paramset()
     dstr = 'trianglemesh'
 
     # check if subdivision is used
@@ -48,7 +48,7 @@ def getMeshType(scene, mesh, paramset):
         paramset.add_bool('dmnormalsmooth', mesh.luxrender_mesh.nsmooth)
         paramset.add_bool('dmsharpboundary', mesh.luxrender_mesh.sharpbound)
     
-    return dstr
+    return dstr,paramset
 
 def write_lxo(render_engine, l, scene):
     '''
@@ -148,10 +148,8 @@ def write_lxo(render_engine, l, scene):
         #print(' %s num normals: %i' % (ob.name, len(normals)))
         #print(' %s num idxs: %i' % (ob.name, len(indices)))
         
-        # export shape
-        shape_params = Paramset()
-        
-        shape_type = getMeshType(scene, ob.data, shape_params)
+        # export shape        
+        shape_type, shape_params = getMeshType(scene, ob.data)
         
         shape_params.add_integer('indices', indices)
         shape_params.add_point('P', points)
