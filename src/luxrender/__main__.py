@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond, Genscher
+# Doug Hammond, Daniel Genrich
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -39,6 +39,7 @@ import luxrender.ui.textures
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
+import luxrender.ui.meshes
 #import luxrender.nodes
 
 import luxrender.export.geometry    as export_geometry
@@ -87,7 +88,9 @@ class luxrender(engine_base):
         luxrender.ui.render_panels.filter,
         luxrender.ui.render_panels.accelerator,
 
+        # custom object data panels
         luxrender.ui.lamps.lamps,
+        luxrender.ui.meshes.meshes,
         
         luxrender.ui.camera.camera,
         luxrender.ui.camera.tonemapping,

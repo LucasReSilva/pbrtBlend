@@ -30,6 +30,23 @@ from luxrender.module import LuxLog
 from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
 
+#-------------------------------------------------
+# getMeshType(self, scene, mesh, ss)
+# returns type of mesh as string to use depending on thresholds
+#-------------------------------------------------
+def getMeshType(scene, mesh, ss):
+    dstr = ''
+
+    # check if subdivision is used
+    if mesh.luxrender_mesh.subdiv == True:
+        dstr = 'loopsubdiv'
+        ss.append( ('integer nlevels', mesh.luxrender_mesh.sublevels) )
+        ss.append( ('bool dmnormalsmooth', mesh.luxrender_mesh.nsmooth) )
+        ss.append( ('bool dmsharpboundary', mesh.luxrender_mesh.sharpbound) )
+    
+    if dstr != '': return dstr
+    else: return 'trianglemesh'
+
 def write_lxo(render_engine, l, scene):
     '''
     l            pylux.Context
@@ -129,16 +146,19 @@ def write_lxo(render_engine, l, scene):
         #print(' %s num idxs: %i' % (ob.name, len(indices)))
         
         # export shape
-        ss = [
-            ('integer indices', indices),
-            ('point P', points),
-            ('normal N', normals),
-        ]
+        ss = []
+        shape_type = getMeshType(scene, ob.data, ss)
+
+        ss.append(('integer indices', indices))
+        ss.append(('point P', points))
+        ss.append(('normal N', normals))
+
         if uv_layer:
             #print(' %s num uvs: %i' % (ob.name, len(uvs)))
             ss.append( ('float uv', uvs) )
-            
-        l.shape('trianglemesh', ss)
+        
+         
+        l.shape(shape_type, ss)
         
         l.attributeEnd()
         
