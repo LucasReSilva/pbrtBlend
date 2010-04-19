@@ -59,55 +59,7 @@ class Custom_Context(luxrender.pylux.Context):
         
         self.files[ind].write('%s%s\n' % ('\t'*tabs, st))
         self.files[ind].flush()
-    
-    def param_formatter(self, param):
-        '''
-        param            tuple(2)
         
-        Detect the parameter type and format it as a string.
-        
-        Returns string
-        '''
-        
-        fs_num = '"%s %s" [%s]'
-        fs_str = '"%s %s" ["%s"]'
-        
-        k, v = param
-        
-        tokens = k.split(' ')
-        if len(tokens) != 2:
-            return '# unknown param %s : %s' % (k,v)
-        
-        t_type, t_name = tokens
-        
-        if t_type == "float" and type(v) in (list, tuple):
-            return fs_num % ('float', t_name, ' '.join(['%f'%i for i in v]))
-        if t_type == "float":
-            return fs_num % ('float', t_name, '%f' % v)
-        if t_type == "integer" and type(v) in (list, tuple):
-            return fs_num % ('integer', t_name, ' '.join(['%i'%i for i in v]))
-        if t_type == "integer":
-            return fs_num % ('integer', t_name, '%i' % v)
-        if t_type == "string":
-            return fs_str % ('string', t_name, v)
-        if t_type == "vector":
-            return fs_num % ('vector', t_name, ' '.join(['%f'%i for i in v]))
-        if t_type == "point":
-            return fs_num % ('point', t_name, ' '.join(['%f'%i for i in v]))
-        if t_type == "normal":
-            return fs_num % ('normal', t_name, ' '.join(['%f'%i for i in v]))
-        if t_type == "color":
-            return fs_num % ('color', t_name, ' '.join(['%f'%i for i in v]))
-        if t_type == "texture":
-            return fs_str % ('texture', t_name, v)
-        if t_type == "bool":
-            if v:
-                return fs_str % ('bool', t_name, 'true')
-            else:
-                return fs_str % ('bool', t_name, 'false')
-            
-        return '# unknown param %s : %s' % (k,v)
-    
     def set_filename(self, name):
         '''
         name            string
@@ -164,8 +116,7 @@ class Custom_Context(luxrender.pylux.Context):
         name, params = args
         self.wf(self.current_file, '\n%s "%s"' % (identifier, name))
         for p in params:
-            self.wf(self.current_file, self.param_formatter(p), 1)
-    
+            self.wf(self.current_file, p.to_string(), 1)
     
     # Wrapped pylux.Context API calls follow ...
     
@@ -243,7 +194,7 @@ class Custom_Context(luxrender.pylux.Context):
     def texture(self, name, type, texture, *params):
         self.wf(Files.MATS, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
         for p in params:
-            self.wf(Files.MATS, self.param_formatter(p), 1)
+            self.wf(Files.MATS, p.to_string(), 1)
     
     def worldEnd(self):
         '''

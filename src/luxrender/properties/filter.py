@@ -27,6 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
+from luxrender.export import Paramset
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -43,30 +44,30 @@ class luxrender_filter(bpy.types.IDPropertyGroup):
         '''
         Format this class's members into a LuxRender ParamSet
         
-        Returns dict
+        Returns tuple
         '''
         
-        d={}
+        params = Paramset()
         
-        d['float xwidth'] = self.xwidth
-        d['float ywidth'] = self.ywidth
+        params.add_float('xwidth', self.xwidth)
+        params.add_float('ywidth', self.ywidth)
         
         if self.filter == 'box':
             pass
         
         if self.filter == 'gaussian':
-            d['float alpha'] = self.gaussian_alpha
+            params.add_float('alpha', self.gaussian_alpha)
         
         if self.filter == 'mitchell':
-            d['float B'] = self.mitchell_b
-            d['float C'] = self.mitchell_c
+            params.add_float('B', self.mitchell_b)
+            params.add_float('C', self.mitchell_c)
         
         if self.filter == 'sinc':
-            d['float tau'] = self.sinc_tau
+            params.add_float('tau', self.sinc_tau)
         
         if self.filter == 'triangle':
             pass
         
-        out = self.filter, list(d.items())
+        out = self.filter, params
         dbo('FILTER', out)
         return out

@@ -27,6 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
+from luxrender.export import Paramset
 
 # TODO: adapt values written to d based on simple/advanced views
 

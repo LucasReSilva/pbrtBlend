@@ -27,6 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
+from luxrender.export import Paramset
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -46,10 +47,11 @@ class luxrender_volume(bpy.types.IDPropertyGroup):
         Returns dict
         '''
         
-        d={}
+        params = Paramset()
         
-        d['float stepsize'] = self.stepsize
+        params.add_float('stepsize', self.stepsize)
         
-        out = self.volumeintegrator, list(d.items())
+        out = self.volumeintegrator, params
         dbo('VOLUME INTEGRATOR', out)
         return out
+

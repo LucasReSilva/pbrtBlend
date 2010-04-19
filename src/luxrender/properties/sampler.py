@@ -27,6 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
+from luxrender.export import Paramset
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -43,28 +44,25 @@ class luxrender_sampler(bpy.types.IDPropertyGroup):
         '''
         Format this class's members into a LuxRender ParamSet
         
-        Returns dict
+        Returns tuple
         '''
         
-        d = {}
+        params = Paramset()
         
         if self.sampler in ['random', 'lowdiscrepancy']:
-            d['integer pixelsamples']       = self.pixelsamples
-            d['string pixelsampler']        = self.pixelsampler
+            params.add_integer('pixelsamples', self.pixelsamples)
+            params.add_string('pixelsampler', self.pixelsampler)
         
         if self.sampler == 'erpt':
-            d['integer initsamples']        = self.erpt_initsamples
-            d['integer chainlength']        = self.erpt_chainlength
-#            d['mutationrange']        = self.erpt_mutationrange
+            params.add_integer('initsamples', self.erpt_initsamples)
+            params.add_integer('chainlength', self.erpt_chainlength)
         
         if self.sampler == 'metropolis':
-            d['integer initsamples']        = self.metro_initsamples
-            d['integer maxconsecrejects']   = self.metro_mncr
-            d['float largemutationprob']    = self.metro_lmprob
-#            d['micromutationprob']    = self.??
-#            d['mutationrange']        = self.??
-            d['bool usevariance']           = self.metro_variance
+            params.add_integer('initsamples', self.metro_initsamples)
+            params.add_integer('maxconsecrejects', self.metro_mncr)
+            params.add_float('largemutationprob', self.metro_lmprob)
+            params.add_bool('usevariance', self.metro_variance)
         
-        out = self.sampler, list(d.items())
+        out = self.sampler, params
         dbo('SAMPLER', out)
         return out

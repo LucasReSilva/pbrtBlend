@@ -30,6 +30,7 @@ import bpy
 
 from luxrender.properties import dbo
 from luxrender.export.film import resolution
+from luxrender.export import Paramset
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -85,36 +86,36 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
         
         Format this class's members into a LuxRender ParamSet
         
-        Returns dict
+        Returns tuple
         '''
         
         cam = scene.camera.data
         xr, yr = resolution(scene)
         
-        d = {
-            'float fov':            math.degrees(scene.camera.data.angle),
-            'float screenwindow':   self.screenwindow(xr, yr, cam),
-            'bool autofocus':       False,
-            'float shutteropen':    0.0,
-            'float shutterclose':   self.exposure
-        }
+        params = Paramset()
+        
+        params.add_float('fov', math.degrees(scene.camera.data.angle))
+        params.add_float('screenwindow', self.screenwindow(xr, yr, cam))
+        params.add_bool('autofocus', False)
+        params.add_float('shutteropen', 0.0)
+        params.add_float('shutterclose', self.exposure)
         
         if self.use_dof:
-            d['float lensradius'] = (cam.lens / 1000.0) / ( 2.0 * self.fstop )
+            params.add_float('lensradius', (cam.lens / 1000.0) / ( 2.0 * self.fstop ))
         
         if self.autofocus:
-            d['bool autofocus'] = True
+            params.add_bool('autofocus', True)
         else:
             if cam.dof_object is not None:
-                d['float focaldistance'] = (scene.camera.location - cam.dof_object.location).length
+                params.add_float('focaldistance', (scene.camera.location - cam.dof_object.location).length)
             elif cam.dof_distance > 0:
-                d['float focaldistance'] = cam.dof_distance
+                params.add_float('focaldistance', cam.dof_distance)
             
         if self.use_clipping:
-            d['float hither'] = cam.clip_start,
-            d['float yon']    = cam.clip_end,
+            params.add_float('hither', cam.clip_start)
+            params.add_float('yon', cam.clip_end)
         
-        out = self.type, list(d.items())
+        out = self.type, params
         dbo('CAMERA', out)
         return out
 
@@ -131,26 +132,26 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
         
         Format this class's members into a LuxRender ParamSet
         
-        Returns dict
+        Returns tuple
         '''
         
         cam = scene.camera.data
         
-        d = {}
+        params = Paramset()
         
-        d['string tonemapkernel']           = self.type
+        params.add_string('tonemapkernel', self.type)
         
         if self.type == 'reinhard':
-            d['float reinhard_prescale']    = self.reinhard_prescale
-            d['float reinhard_postscale']   = self.reinhard_postscale
-            d['float reinhard_burn']        = self.reinhard_burn
+            params.add_float('reinhard_prescale', self.reinhard_prescale)
+            params.add_float('reinhard_postscale', self.reinhard_postscale)
+            params.add_float('reinhard_burn', self.reinhard_burn)
             
         if self.type == 'linear':
-            d['float linear_sensitivity']   = cam.luxrender_camera.sensitivity
-            d['float linear_exposure']      = cam.luxrender_camera.exposure
-            d['float linear_fstop']         = cam.luxrender_camera.fstop
-            d['float linear_gamma']         = self.linear_gamma
-        
-        out = self.type, list(d.items())
+            params.add_float('linear_sensitivity', cam.luxrender_camera.sensitivity)
+            params.add_float('linear_exposure', cam.luxrender_camera.exposure)
+            params.add_float('linear_fstop', cam.luxrender_camera.fstop)
+            params.add_float('linear_gamma', self.linear_gamma)
+            
+        out = self.type, params
         dbo('TONEMAPPING', out)
         return out

@@ -44,23 +44,23 @@ class luxrender_accelerator(bpy.types.IDPropertyGroup):
         '''
         Format this class's members into a LuxRender ParamSet
         
-        Returns dict
+        Returns tuple
         '''
         
         params = Paramset()
         
         if self.accelerator == 'tabreckdtree':
-            params.add('float', 'intersectcost', self.kd_intcost)
-            params.add('float', 'traversalcost', self.kd_travcost)
-            params.add('float', 'emptybonus', self.kd_ebonus)
-            params.add('integer', 'maxprims', self.kd_maxprims)
-            params.add('integer', 'maxdepth', self.kd_maxdepth)
+            params.add_float('intersectcost', self.kd_intcost)
+            params.add_float('traversalcost', self.kd_travcost)
+            params.add_float('emptybonus', self.kd_ebonus)
+            params.add_integer('maxprims', self.kd_maxprims)
+            params.add_integer('maxdepth', self.kd_maxdepth)
         
         if self.accelerator == 'grid':
-            params.add('bool', 'refineimmediately', self.grid_refineim)
+            params.add_bool('refineimmediately', self.grid_refineim)
             
         if self.accelerator == 'qbvh':
-            params.add('integer', 'maxprimsperleaf', self.qbvh_maxprims)
+            params.add_integer('maxprimsperleaf', self.qbvh_maxprims)
         
         out = self.accelerator, params
         dbo('ACCELERATOR', out)

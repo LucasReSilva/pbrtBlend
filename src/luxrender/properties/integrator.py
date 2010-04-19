@@ -27,6 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
+from luxrender.export import Paramset
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -43,30 +44,24 @@ class luxrender_integrator(bpy.types.IDPropertyGroup):
         '''
         Format this class's members into a LuxRender ParamSet
         
-        Returns dict
+        Returns tuple
         '''
         
-        d={}
+        params = Paramset()
         
         if self.surfaceintegrator in ['directlighting', 'path']:
-            d['string lightstrategy']   = self.strategy
-#            d['maxdepth']         = self.??
+            params.add_string('lightstrategy', self.strategy)
         
         if self.surfaceintegrator == 'bidirectional':
-            d['integer eyedepth']       = self.bidir_edepth
-            d['integer lightdepth']     = self.bidir_ldepth
-#            d['eyerrthreshold']   = self.??
-#            d['lightrrthreshold'] = self.??
+            params.add_integer('eyedepth', self.bidir_edepth)
+            params.add_integer('lightdepth', self.bidir_ldepth)
         
         if self.surfaceintegrator == 'distributedpath':
-            d['string strategy']        = self.strategy
-#            d['diffusedepth']     = self.??
-#            d['glossydepth']      = self.??
-#            d['speculardepth']    = self.??
-        
+            params.add_string('strategy', self.strategy)
+
 #        if self.lux_surfaceintegrator == 'exphotonmap':
 #            pass
         
-        out = self.surfaceintegrator, list(d.items())
+        out = self.surfaceintegrator, params
         dbo('SURFACE INTEGRATOR', out)
         return out

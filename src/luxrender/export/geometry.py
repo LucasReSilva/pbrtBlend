@@ -29,23 +29,24 @@ import bpy
 from luxrender.module import LuxLog
 from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
+from luxrender.export import Paramset
 
 #-------------------------------------------------
 # getMeshType(self, scene, mesh, ss)
 # returns type of mesh as string to use depending on thresholds
 #-------------------------------------------------
-def getMeshType(scene, mesh, ss):
+def getMeshType(scene, mesh, paramset):
     
-    # TODO: don't really like modifying ss by reference, pass it through the return statement
+    # TODO: don't really like modifying paramset by reference, pass it through the return statement
     
     dstr = 'trianglemesh'
 
     # check if subdivision is used
     if mesh.luxrender_mesh.subdiv == True:
         dstr = 'loopsubdiv'
-        ss.append( ('integer nlevels', mesh.luxrender_mesh.sublevels) )
-        ss.append( ('bool dmnormalsmooth', mesh.luxrender_mesh.nsmooth) )
-        ss.append( ('bool dmsharpboundary', mesh.luxrender_mesh.sharpbound) )
+        paramset.add_integer('nlevels', mesh.luxrender_mesh.sublevels)
+        paramset.add_bool('dmnormalsmooth', mesh.luxrender_mesh.nsmooth)
+        paramset.add_bool('dmsharpboundary', mesh.luxrender_mesh.sharpbound)
     
     return dstr
 
@@ -85,9 +86,9 @@ def write_lxo(render_engine, l, scene):
         l.transform( matrix_to_list(ob.matrix) )
         
         # dummy material for now
-        l.material('matte', [
-            ('color Kd', [0.75, 0.75, 0.75])
-        ])
+        dummy_params = Paramset()
+        dummy_params.add_color('Kd', [0.75, 0.75, 0.75])
+        l.material('matte', dummy_params)
         
         faces_verts = [f.verts for f in me.faces]
         ffaces = [f for f in me.faces]
@@ -148,19 +149,19 @@ def write_lxo(render_engine, l, scene):
         #print(' %s num idxs: %i' % (ob.name, len(indices)))
         
         # export shape
-        ss = []
-        shape_type = getMeshType(scene, ob.data, ss)
-
-        ss.append(('integer indices', indices))
-        ss.append(('point P', points))
-        ss.append(('normal N', normals))
-
+        shape_params = Paramset()
+        
+        shape_type = getMeshType(scene, ob.data, shape_params)
+        
+        shape_params.add_integer('indices', indices)
+        shape_params.add_point('P', points)
+        shape_params.add_normal('N', normals)
+        
         if uv_layer:
             #print(' %s num uvs: %i' % (ob.name, len(uvs)))
-            ss.append( ('float uv', uvs) )
+            shape_params.add_float('uv', uvs)
         
-         
-        l.shape(shape_type, ss)
+        l.shape(shape_type, shape_params)
         
         l.attributeEnd()
         

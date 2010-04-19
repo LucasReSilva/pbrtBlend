@@ -25,6 +25,8 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
+from luxrender.export import Paramset
+
 def lookAt(scene):
     '''
     scene        bpy.types.scene
@@ -66,27 +68,27 @@ def film(scene):
     
     xr, yr = resolution(scene)
     
-    fs = {
-        # Set resolution
-        'integer xresolution':      int(xr),
-        'integer yresolution':      int(yr),
-        
-        'string filename':          'default',
-        'bool write_exr':           False,
-        'bool write_png':           True,
-        'bool write_tga':           False,
-        'bool write_resume_flm':    False,
-        
-        # TODO: add UI controls for update intervals, and sync with LuxTimerThread.KICK_PERIODs
-        'integer displayinterval':  5,
-        'integer writeinterval':    8,
-    }
+    params = Paramset()
+    
+    # Set resolution
+    params.add_integer('xresolution', int(xr))
+    params.add_integer('yresolution', int(yr))
+    
+    params.add_string('filename', 'default')
+    params.add_bool('write_exr', False)
+    params.add_bool('write_png', True)
+    params.add_bool('write_tga', False)
+    params.add_bool('write_resume_flm', False)
+    
+    # TODO: add UI controls for update intervals, and sync with LuxTimerThread.KICK_PERIODs
+    params.add_integer('displayinterval', 5)
+    params.add_integer('writeinterval', 8)
     
     if scene.luxrender_sampler.haltspp > 0:
-        fs['integer haltspp'] = scene.luxrender_sampler.haltspp
+        params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
     
     # update the film settings with tonemapper settings
-    type, ts = scene.luxrender_tonemapping.api_output(scene)
-    fs.update(ts)
+    tonemapping_type, tonemapping_params = scene.luxrender_tonemapping.api_output(scene)
+    params.update(tonemapping_params)
     
-    return ('fleximage', list(fs.items()))
+    return ('fleximage', params)
