@@ -27,6 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
+from luxrender.export import Paramset
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -46,23 +47,21 @@ class luxrender_accelerator(bpy.types.IDPropertyGroup):
         Returns dict
         '''
         
-        d={}
+        params = Paramset()
         
         if self.accelerator == 'tabreckdtree':
-            d['float intersectcost']        = self.kd_intcost
-            d['float traversalcost']        = self.kd_travcost
-            d['float emptybonus']           = self.kd_ebonus
-            d['integer maxprims']           = self.kd_maxprims
-            d['integer maxdepth']           = self.kd_maxdepth
+            params.add('float', 'intersectcost', self.kd_intcost)
+            params.add('float', 'traversalcost', self.kd_travcost)
+            params.add('float', 'emptybonus', self.kd_ebonus)
+            params.add('integer', 'maxprims', self.kd_maxprims)
+            params.add('integer', 'maxdepth', self.kd_maxdepth)
         
         if self.accelerator == 'grid':
-            d['bool refineimmediately']     = self.grid_refineim
+            params.add('bool', 'refineimmediately', self.grid_refineim)
             
         if self.accelerator == 'qbvh':
-            d['integer maxprimsperleaf']    = self.qbvh_maxprims
-#            d['fullsweepthreshold']     = self.??
-#            d['skipfactor']             = self.??
+            params.add('integer', 'maxprimsperleaf', self.qbvh_maxprims)
         
-        out = self.accelerator, list(d.items())
+        out = self.accelerator, params
         dbo('ACCELERATOR', out)
         return out

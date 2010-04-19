@@ -25,6 +25,13 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
+class Paramset(list):
+    
+    def add(self, type, name, value):
+        self.append(
+            ("%s %s" % (type, name), value)
+        )
+
 def matrix_to_list(matrix):
     '''
     matrix          Matrix

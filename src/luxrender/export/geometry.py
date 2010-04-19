@@ -35,7 +35,10 @@ from luxrender.export import matrix_to_list
 # returns type of mesh as string to use depending on thresholds
 #-------------------------------------------------
 def getMeshType(scene, mesh, ss):
-    dstr = ''
+    
+    # TODO: don't really like modifying ss by reference, pass it through the return statement
+    
+    dstr = 'trianglemesh'
 
     # check if subdivision is used
     if mesh.luxrender_mesh.subdiv == True:
@@ -44,8 +47,7 @@ def getMeshType(scene, mesh, ss):
         ss.append( ('bool dmnormalsmooth', mesh.luxrender_mesh.nsmooth) )
         ss.append( ('bool dmsharpboundary', mesh.luxrender_mesh.sharpbound) )
     
-    if dstr != '': return dstr
-    else: return 'trianglemesh'
+    return dstr
 
 def write_lxo(render_engine, l, scene):
     '''
@@ -164,6 +166,7 @@ def write_lxo(render_engine, l, scene):
         
         bpy.data.meshes.remove(me)
         
+        # TODO: this probably isn't very efficient for large scenes
         pc = int(100 * ipc/total_objects)
         if pc not in rpcs:
             rpcs.append(pc)

@@ -24,11 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-
-import sys
-
-from ef.ef import ef 
-
 import luxrender.pylux
 import luxrender.module
 
@@ -243,7 +238,6 @@ class Custom_Context(luxrender.pylux.Context):
         self._api('Shape', args, file=self.current_file)
         
     def material(self, *args):
-        #self.wf(Files.GEOM, '\nMaterial "%s"' % name)
         self._api('Material', args)
     
     def texture(self, name, type, texture, *params):
@@ -269,12 +263,11 @@ class Custom_Context(luxrender.pylux.Context):
             f.close()
             luxrender.module.LuxLog(' %s' % f.name)
         
-        # Now start the rendering by parsing the main scene file we just wrote
-        self.parse(self.files[Files.MAIN].name, False)  # Main scene file
-        #super(luxrender.pylux.Context, self).worldEnd()
+        # Now start the rendering by synchronously parsing the main scene file we just wrote
+        self.parse(self.files[Files.MAIN].name, False)
         luxrender.pylux.Context.worldEnd(self)
         
-        # Add the includes and final WorldEnd so that the file is usable directly in LuxRender
+        # Add the final WorldEnd so that the file is usable directly in LuxRender
         f=open(self.files[Files.MAIN].name, 'a')
         f.write('\nWorldEnd\n')
         f.close()

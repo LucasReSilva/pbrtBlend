@@ -230,12 +230,12 @@ class LuxManager(object):
         self.started = True
         
         # Wait until scene is fully parsed before adding more render threads
-        #while self.lux_context.statistics('sceneIsReady') != 1.0:
+        while self.lux_context.statistics('sceneIsReady') != 1.0:
             # TODO: such a tight loop is not a good idea
-        #    pass
+            pass
         
-        #for i in range(self.thread_count - 1):
-        #    self.lux_context.addThread()
+        for i in range(self.thread_count - 1):
+            self.lux_context.addThread()
     
     def reset(self):
         '''
@@ -245,6 +245,7 @@ class LuxManager(object):
         Returns None
         '''
         
+        # Stop the stats thread
         if self.stats_thread is not None and self.stats_thread.isAlive():
             self.stats_thread.stop()
             self.stats_thread.join()
@@ -257,11 +258,11 @@ class LuxManager(object):
         self.lux_context.exit()
         self.lux_context.wait()
         
-        # Get the last image
+        # Stop the framebuffer update thread
         if self.fb_thread is not None and self.fb_thread.isAlive():
             self.fb_thread.stop()
             self.fb_thread.join()
-            # Get last FB
+            # Get the last image
             self.fb_thread.kick(render_end=True)
         
         self.fb_thread  = LuxFilmDisplay(self.lux_context)
