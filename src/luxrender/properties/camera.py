@@ -30,7 +30,7 @@ import bpy
 
 from luxrender.properties import dbo
 from luxrender.export.film import resolution
-from luxrender.export import Paramset
+from luxrender.export import ParamSet
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -92,7 +92,7 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
         cam = scene.camera.data
         xr, yr = resolution(scene)
         
-        params = Paramset()
+        params = ParamSet()
         
         params.add_float('fov', math.degrees(scene.camera.data.angle))
         params.add_float('screenwindow', self.screenwindow(xr, yr, cam))
@@ -137,7 +137,7 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
         
         cam = scene.camera.data
         
-        params = Paramset()
+        params = ParamSet()
         
         params.add_string('tonemapkernel', self.type)
         

@@ -30,11 +30,11 @@ import bpy, mathutils
 
 from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
-from luxrender.export import Paramset
+from luxrender.export import ParamSet
 
 from luxrender.properties import dbo
 
-def attr_light(l, name, type, paramset, transform=None):
+def attr_light(l, name, type, params, transform=None):
     '''
     l            pylux.Context
     name         string
@@ -57,8 +57,8 @@ def attr_light(l, name, type, paramset, transform=None):
     else:
         l.attributeBegin(comment=name, file=Files.MAIN)
     
-    dbo('LIGHT', (type, paramset))
-    l.lightSource(type, paramset)
+    dbo('LIGHT', (type, params))
+    l.lightSource(type, params)
     
     if transform is not None:
         l.transformEnd()
@@ -89,7 +89,7 @@ def lights(l, scene):
         
         if light.type == 'SUN':
             invmatrix = mathutils.Matrix(ob.matrix).invert()
-            sun_params = Paramset()
+            sun_params = ParamSet()
             sun_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
             attr_light(l, ob.name, 'sunsky', sun_params)
             have_light = True
@@ -97,7 +97,7 @@ def lights(l, scene):
         if light.type == 'SPOT':
             coneangle = degrees(light.spot_size) * 0.5
             conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
-            spot_params = Paramset()
+            spot_params = ParamSet()
             spot_params.add_color('L', list(light.color))
             spot_params.add_point('from', (0,0,0))
             spot_params.add_point('to', (0,0,-1))
@@ -108,7 +108,7 @@ def lights(l, scene):
             have_light = True
 
         if light.type == 'POINT':
-            point_params = Paramset()
+            point_params = ParamSet()
             point_params.add_color('L', list(light.color))
             point_params.add_float('gain', light.energy)
             point_params.add_point('from', (0,0,0))  # TODO: ?
@@ -116,7 +116,7 @@ def lights(l, scene):
             have_light = True
         
         if light.type == 'AREA':
-            area_params = Paramset()
+            area_params = ParamSet()
             area_params.add_color('L', list(light.color))
             area_params.add_float('gain', light.energy)
             area_params.add_float('power', light.luxrender_lamp.power)
@@ -134,7 +134,7 @@ def lights(l, scene):
             else: areay = areax # not supported yet
 
             points = [-areax/2, areay/2, 0.0, areax/2, areay/2, 0.0, areax/2, -areay/2, 0.0, -areax/2, -areay/2, 0.0]
-            shape_params = Paramset()
+            shape_params = ParamSet()
             shape_params.add_integer('indices', [0, 1, 2, 0, 2, 3])
             shape_params.add_point('P', points)
             l.shape('trianglemesh', shape_params)

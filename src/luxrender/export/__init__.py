@@ -25,14 +25,16 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-class ParamsetItem(object):
+class ParamSetItem(object):
     
     type  = None
+    type_name = None
     name  = None
     value = None
     
     def __init__(self, *args):
         self.type, self.name, self.value = args
+        self.type_name = "%s %s" % (self.type, self.name)
     
     def __repr__(self):
         return "<%s:%s:%s>" % (self.type, self.name, self.value)
@@ -69,7 +71,7 @@ class ParamsetItem(object):
             
         return '# unknown param (%s, %s, %s)' % self
 
-class Paramset(list):
+class ParamSet(list):
     
     names = []
     
@@ -84,7 +86,7 @@ class Paramset(list):
                     self.remove(p)
         
         self.append(
-            ParamsetItem(type, name, value)
+            ParamSetItem(type, name, value)
         )
         self.names.append(name)
         

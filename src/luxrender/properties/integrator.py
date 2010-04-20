@@ -27,7 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
-from luxrender.export import Paramset
+from luxrender.export import ParamSet
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -47,7 +47,7 @@ class luxrender_integrator(bpy.types.IDPropertyGroup):
         Returns tuple
         '''
         
-        params = Paramset()
+        params = ParamSet()
         
         if self.surfaceintegrator in ['directlighting', 'path']:
             params.add_string('lightstrategy', self.strategy)

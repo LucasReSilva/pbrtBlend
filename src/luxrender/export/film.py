@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-from luxrender.export import Paramset
+from luxrender.export import ParamSet
 
 def lookAt(scene):
     '''
@@ -68,7 +68,7 @@ def film(scene):
     
     xr, yr = resolution(scene)
     
-    params = Paramset()
+    params = ParamSet()
     
     # Set resolution
     params.add_integer('xresolution', int(xr))

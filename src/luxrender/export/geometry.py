@@ -29,7 +29,7 @@ import bpy
 from luxrender.module import LuxLog
 from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
-from luxrender.export import Paramset
+from luxrender.export import ParamSet
 
 #-------------------------------------------------
 # getMeshType(self, scene, mesh, ss)
@@ -37,18 +37,17 @@ from luxrender.export import Paramset
 #-------------------------------------------------
 def getMeshType(scene, mesh):
     
-    # TODO: don't really like modifying paramset by reference, pass it through the return statement
-    paramset = Paramset()
+    params = ParamSet()
     dstr = 'trianglemesh'
 
     # check if subdivision is used
     if mesh.luxrender_mesh.subdiv == True:
         dstr = 'loopsubdiv'
-        paramset.add_integer('nlevels', mesh.luxrender_mesh.sublevels)
-        paramset.add_bool('dmnormalsmooth', mesh.luxrender_mesh.nsmooth)
-        paramset.add_bool('dmsharpboundary', mesh.luxrender_mesh.sharpbound)
+        params.add_integer('nlevels', mesh.luxrender_mesh.sublevels)
+        params.add_bool('dmnormalsmooth', mesh.luxrender_mesh.nsmooth)
+        params.add_bool('dmsharpboundary', mesh.luxrender_mesh.sharpbound)
     
-    return dstr,paramset
+    return dstr,params
 
 def write_lxo(render_engine, l, scene):
     '''
@@ -86,7 +85,7 @@ def write_lxo(render_engine, l, scene):
         l.transform( matrix_to_list(ob.matrix) )
         
         # dummy material for now
-        dummy_params = Paramset()
+        dummy_params = ParamSet()
         dummy_params.add_color('Kd', [0.75, 0.75, 0.75])
         l.material('matte', dummy_params)
         

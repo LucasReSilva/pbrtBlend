@@ -27,7 +27,7 @@
 import bpy
 
 from luxrender.properties import dbo
-from luxrender.export import Paramset
+from luxrender.export import ParamSet
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -47,7 +47,7 @@ class luxrender_sampler(bpy.types.IDPropertyGroup):
         Returns tuple
         '''
         
-        params = Paramset()
+        params = ParamSet()
         
         if self.sampler in ['random', 'lowdiscrepancy']:
             params.add_integer('pixelsamples', self.pixelsamples)
