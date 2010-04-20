@@ -26,13 +26,15 @@
 #
 import bpy
 
+from properties_data_camera import DataButtonsPanel
+
 # EF API
-from ef.ui import described_layout, camera_settings_panel
+from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.camera
 
-class camera(camera_settings_panel, described_layout):
+class camera(DataButtonsPanel, described_layout):
     bl_label = 'LuxRender Camera'
     COMPAT_ENGINES = {'luxrender'}
     
@@ -158,7 +160,7 @@ class camera(camera_settings_panel, described_layout):
         
     ]
 
-class tonemapping(camera_settings_panel, described_layout):
+class tonemapping(DataButtonsPanel, described_layout):
     bl_label = 'LuxRender ToneMapping'
     COMPAT_ENGINES = {'luxrender'}
     

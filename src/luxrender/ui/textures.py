@@ -25,16 +25,16 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from properties_texture import context_tex_datablock
+from properties_texture import TextureButtonsPanel
 
 from ef.ui import context_panel
-from ef.ui import texture_settings_panel
 from ef.ui import described_layout
 
 from ef.ef import ef
 
 import luxrender.properties.texture
 
-class texture_editor(context_panel, texture_settings_panel, described_layout):
+class texture_editor(context_panel, TextureButtonsPanel, described_layout):
     '''
     Texture Editor UI Panel
     '''
