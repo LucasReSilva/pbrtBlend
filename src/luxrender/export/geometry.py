@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import random
+
 import bpy
 
 from luxrender.module import LuxLog
@@ -86,7 +88,13 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
         
         # dummy material for now
         dummy_params = ParamSet()
-        dummy_params.add_color('Kd', [0.75, 0.75, 0.75])
+        dummy_params.add_color('Kd', [
+            #0.75, 0.75, 0.75
+            # just for a laugh
+            random.random(),
+            random.random(),
+            random.random()
+        ])
         l.material('matte', dummy_params)
         
         faces_verts = [f.verts for f in me.faces]
