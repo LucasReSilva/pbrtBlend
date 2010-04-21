@@ -91,27 +91,32 @@ def write_lxo(render_engine, l, scene):
         
         faces_verts = [f.verts for f in me.faces]
         ffaces = [f for f in me.faces]
-        faces_normals = [tuple(f.normal) for f in me.faces]
-        verts_normals = [tuple(v.normal) for v in me.verts]
+        #faces_normals = [tuple(f.normal) for f in me.faces]
+        #verts_normals = [tuple(v.normal) for v in me.verts]
         
         # face indices
         index = 0
         indices = []
+        ntris = 0
         for face in ffaces:
             indices.append(index)
             indices.append(index+1)
             indices.append(index+2)
+            ntris += 3
             if (len(face.verts)==4):
                 indices.append(index)
                 indices.append(index+2)
                 indices.append(index+3)
+                ntris += 3
             index += len(face.verts)
             
         # vertex positions
         points = []
+        nvertices = 0
         for face in ffaces:
             for vertex in face.verts:
                 v = me.verts[vertex]
+                nvertices += 1
                 for co in v.co:
                     points.append(co)
                     
@@ -143,20 +148,26 @@ def write_lxo(render_engine, l, scene):
                         uvs.append(single_uv)
                         
         
-        #print(' %s num points: %i' % (ob.name, len(points)))
-        #print(' %s num normals: %i' % (ob.name, len(normals)))
-        #print(' %s num idxs: %i' % (ob.name, len(indices)))
+        print(' %s num points: %i' % (ob.name, len(points)))
+        print(' %s num normals: %i' % (ob.name, len(normals)))
+        print(' %s num idxs: %i' % (ob.name, len(indices)))
         
         # export shape        
         shape_type, shape_params = getMeshType(scene, ob.data)
         
+        # ntris isn't really the number of tris!!
+        shape_params.add_integer('ntris', ntris)
         shape_params.add_integer('indices', indices)
+        shape_params.add_integer('nvertices', nvertices)
         shape_params.add_point('P', points)
         shape_params.add_normal('N', normals)
         
         if uv_layer:
-            #print(' %s num uvs: %i' % (ob.name, len(uvs)))
+            print(' %s num uvs: %i' % (ob.name, len(uvs)))
             shape_params.add_float('uv', uvs)
+        
+        print(' %s ntris: %i' % (ob.name, ntris))
+        print(' %s nvertices: %i' % (ob.name, nvertices))
         
         l.shape(shape_type, shape_params)
         
