@@ -26,8 +26,9 @@
 #
 
 # TODO: Implement
+from luxrender.module.pure_api import Custom_Context as Pylux_Context
 
-class Custom_Context(object):
+class Custom_Context(Pylux_Context):
     '''
     This class mimicks the pylux.Context API for collecting
     Volume/Texture/Material data to be submitted to the

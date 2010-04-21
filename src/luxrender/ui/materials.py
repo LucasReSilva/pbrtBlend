@@ -79,53 +79,9 @@ class material_editor(MaterialButtonsPanel, described_layout):
 		# Common props
 		'material',
 		
-		# type-specific presets here
-#		'carpaint_preset',
-		
-		
-		# Standard channels used by many
-#		'kd',
-#		'kr',
-#		'kt',
-		
-		# Other standard parameters
-#		[0.33, 'ior_preset', ['ior_list', 'ior']],
-		
-		
-		# Material specific parameters
-		
-		## Car paint
-#		'carpaint_ks1', 'carpaint_ks2', 'carpaint_ks3',
-#		'carpaint_r', 'carpaint_m',
-		
-		# Glass
-		
 	]
 	
 	visibility = {
-		# Used by many
-		
-		# TODO: selection mechanism is inadequate; cannot correctly switch kd visibility.
-#		'kd':					[{ 'material': ['carpaint','matte'] }],
-#		'kr':					[{ 'material': 'glass' }],
-#		'kt':					[{ 'material': 'glass' }],
-#		'ior_preset':			[{ 'material': 'glass' }],
-#		'ior_list':				[{ 'material': 'glass' }, { 'ior_preset': True }],
-#		'ior':					[{ 'material': 'glass' }, { 'ior_preset': False }],
-	
-		# Car paint
-#		'carpaint_label':		[{ 'material': 'carpaint' }],
-#		'carpaint_preset':		[{ 'material': 'carpaint' }],
-		
-		# Car paint custom
-#		'carpaint_ks1':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_ks2':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_ks3':			[{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_r':		   [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-#		'carpaint_m':		   [{ 'material': 'carpaint' }, { 'carpaint_preset': 'custom' }],
-
-		
-		# Glass
 		
 	}
 	
@@ -151,124 +107,8 @@ class material_editor(MaterialButtonsPanel, described_layout):
 				('boundvolume','Bound Volume','boundvolume'),
 				('light','Light','light'),
 				('portal','Portal','portal'),
-			]
+			],
 		},
-		
-#		texture.Texture(
-#			'kd',
-#			name = 'Diffuse Colour',
-#			description = 'Diffuse Colour',
-#		),
-#		texture.Texture(
-#			'kr',
-#			name = 'Reflection Colour',
-#			description = 'Reflection Colour',
-#		),
-#		texture.Texture(
-#			'kt',
-#			name = 'Transmission Colour',
-#			description = 'Transmission Colour',
-#		),
-		
-		
-#		{
-#			'type': 'bool',
-#			'attr': 'ior_preset',
-#			'name': 'IOR Preset',
-#			'description': 'IOR Preset',
-#			'default': True,
-#		},
-#		{
-#			'type': 'enum',
-#			'attr': 'ior_list',
-#			'name': '',
-#			'description': 'IOR Preset',
-#			'default': '1.5',
-#			'items': [
-#				('-1', 'IOR Preset', 'IOR Preset'),
-#				('1.5', 'Fused Silica Glass', 'Fused Silica Glass'),
-#				('0', '-- TODO --', '0'),
-#			]
-#		},
-#		{
-#			'type': 'float',
-#			'attr': 'ior',
-#			'name': '',
-#			'description': 'IOR',
-#			'default': 1,
-#			'min': 0,
-#			'soft_min': 0,
-#			'max': 10,
-#			'soft_max': 10,
-#		},
-		
-		
-		# Car paint
-#		{
-#			'type': 'enum',
-#			'attr': 'carpaint_preset',
-#			'name': 'Preset',
-#			'description': 'Preset Car Paint Settings',
-#			'default': 'custom',
-#			'items': [
-#				('custom','Custom','custom'),
-#				('fordf8','Ford F8','fordf8'),
-#				('polaris','Polaris Silver','polaris'),
-#				('opel','Opel Titan','opel'),
-#				('bmw339','BMW 339','bmw339'),
-#				('2k','2K Acrylic','2k'),
-#				('white','White','white'),
-#				('blue','Blue','blue'),
-#				('bluematte','Blue Matte','bluematte'),
-#			]
-#		},
-		
-#		texture.Texture(
-#			'carpaint_ks1',
-#			name = 'Specular Layer 1',
-#			description = 'Specular Layer 1 Colour',
-#		),
-#		texture.Texture(
-#			'carpaint_ks2',
-#			name = 'Specular Layer 2',
-#			description = 'Specular Layer 2 Colour',
-#		),
-#		texture.Texture(
-#			'carpaint_ks3',
-#			name = 'Specular Layer 3',
-#			description = 'Specular Layer 3 Colour',
-#		),
-		
-#		{
-#			'type': 'float_vector',
-#			'attr': 'carpaint_r',
-#			'name': 'Layer Roughnesses',
-#			'description': 'Specular Layer Roughness',
-#			'size': 3,
-#			'default': (1.0, 1.0, 1.0),
-#			'step': 0.1,
-#			'min': 0.0,
-#			'soft_min': 0.0,
-#			'max': 1.0,
-#			'soft_max': 1.0,
-#			'precision': 3
-#		},
-#		{
-#			'type': 'float_vector',
-#			'attr': 'carpaint_m',
-#			'name': 'Layer Fresnels',
-#			'description': 'Specular Layer Fresnel',
-#			'size': 3,
-#			'default': (1.0, 1.0, 1.0),
-#			'step': 0.1,
-#			'min': 0.0,
-#			'soft_min': 0.0,
-#			'max': 1.0,
-#			'soft_max': 1.0,
-#			'precision': 3
-#		},
-		
-		# Glass
 		
 	]
 	

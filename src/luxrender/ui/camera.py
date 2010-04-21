@@ -33,6 +33,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.camera
+from luxrender.module import LuxManager as LM
 
 class camera(DataButtonsPanel, described_layout):
     bl_label = 'LuxRender Camera'
@@ -160,6 +161,31 @@ class camera(DataButtonsPanel, described_layout):
         
     ]
 
+class tonemapping_live_update(object):
+    prop_lookup = {
+        #'type':                 'LUX_FILM_TM_TONEMAPKERNEL',
+        'reinhard_prescale':    'LUX_FILM_TM_REINHARD_PRESCALE',
+        'reinhard_postscale':   'LUX_FILM_TM_REINHARD_POSTSCALE',
+        'reinhard_burn':        'LUX_FILM_TM_REINHARD_BURN',
+    }
+    prop_vals = {}
+    @staticmethod
+    def update(context, scene, property):
+        if LM.ActiveManager is not None and LM.ActiveManager.started:
+            prop_val = getattr(scene.luxrender_tonemapping, property)
+            if property not in tonemapping_live_update.prop_vals.keys():
+                tonemapping_live_update.prop_vals[property] = prop_val
+            
+            if tonemapping_live_update.prop_vals[property] != prop_val:
+                tonemapping_live_update.prop_vals[property] = prop_val
+                c = LM.ActiveManager.lux_context
+                c.setParameterValue(
+                    c.PYLUX.luxComponent.LUX_FILM,
+                    getattr(c.PYLUX.luxComponentParameters, tonemapping_live_update.prop_lookup[property]),
+                    prop_val,
+                    0
+                )
+
 class tonemapping(DataButtonsPanel, described_layout):
     bl_label = 'LuxRender ToneMapping'
     COMPAT_ENGINES = {'luxrender'}
@@ -198,7 +224,8 @@ class tonemapping(DataButtonsPanel, described_layout):
                 ('linear', 'Linear', 'linear'),
                 ('contrast', 'Contrast', 'contrast'),
                 ('maxwhite', 'Maxwhite', 'maxwhite')
-            ]
+            ],
+            #'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'type')
         },
         
         # Reinhard
@@ -211,7 +238,8 @@ class tonemapping(DataButtonsPanel, described_layout):
             'min': 0.0,
             'soft_min': 0.0,
             'max': 25.0,
-            'soft_max': 25.0
+            'soft_max': 25.0,
+            'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_prescale') 
         },
         {
             'type': 'float',
@@ -222,7 +250,8 @@ class tonemapping(DataButtonsPanel, described_layout):
             'min': 0.0,
             'soft_min': 0.0,
             'max': 25.0,
-            'soft_max': 25.0
+            'soft_max': 25.0,
+            'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_postscale')
         },
         {
             'type': 'float',
@@ -233,7 +262,8 @@ class tonemapping(DataButtonsPanel, described_layout):
             'min': 0.0,
             'soft_min': 0.0,
             'max': 25.0,
-            'soft_max': 25.0
+            'soft_max': 25.0,
+            'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_burn')
         },
         
         #Linear

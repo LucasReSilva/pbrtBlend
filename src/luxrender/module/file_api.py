@@ -24,15 +24,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import luxrender.pylux
 import luxrender.module
+from luxrender.module.pure_api import Custom_Context as Pylux_Context
 
 class Files(object):
     MAIN = 0
     MATS = 1
     GEOM = 2
 
-class Custom_Context(luxrender.pylux.Context):
+class Custom_Context(Pylux_Context):
     '''
     Wrap the real pylux Context object so that we can
     change the behaviour of certain API calls (ie. write

@@ -91,7 +91,7 @@ class luxrender(engine_base):
     render_update_timer = None
     output_file = 'default.png'
     
-    # This member is read by the ExporterFramework to set up the IU panels
+    # This member is read by the ExporterFramework to set up the UI panels
     interfaces = [
         luxrender.ui.render_panels.engine,
         luxrender.ui.render_panels.sampler,
@@ -169,6 +169,7 @@ class luxrender(engine_base):
             api_type = scene.luxrender_engine.api_type,
             threads = threads
         )
+        LM.SetActive(self.LuxManager)
         
         l = self.LuxManager.lux_context
         
@@ -234,4 +235,5 @@ class luxrender(engine_base):
             self.LuxManager.lux_context.statistics('terminated') == 1.0 or \
             self.LuxManager.lux_context.statistics('enoughSamples') == 1.0:
             self.LuxManager.reset()
+            LM.ClearActive()
             self.update_stats('', '')

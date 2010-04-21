@@ -172,6 +172,14 @@ class LuxManager(object):
     in order to update the rendering statistics and image framebuffer.
     '''
     
+    ActiveManager = None
+    @staticmethod
+    def SetActive(LM):
+        LuxManager.ActiveManager = LM
+    @staticmethod
+    def ClearActive():
+        LuxManager.ActiveManager = None
+    
     context_count = 0
     @staticmethod
     def get_context_number():
@@ -187,7 +195,7 @@ class LuxManager(object):
     thread_count    = 1
     stats_thread    = None
     fb_thread       = None
-    started         = True
+    started         = True  # unintuitive, but reset() is called in the constructor !
     
     def __init__(self, manager_name = '', api_type='FILE', threads=1):
         '''
