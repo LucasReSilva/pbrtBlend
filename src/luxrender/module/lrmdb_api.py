@@ -37,6 +37,8 @@ class Custom_Context(object):
     preview data ?
     '''
     
+    API_TYPE = 'LRMDB'
+    
     material_definitions = []
     
     def makeNamedVolume(self):

@@ -39,6 +39,8 @@ class Custom_Context(luxrender.pylux.Context):
     to files and use the Context to monitor rendering)
     '''
     
+    API_TYPE = 'FILE'
+    
     files = []
     current_file = Files.MAIN
     

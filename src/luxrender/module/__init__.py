@@ -106,10 +106,10 @@ class LuxAPIStats(LuxTimerThread):
         #'filmYres':         0.0,
         #'displayInterval':  0.0,
         'filmEV':           0.0,
-        #'sceneIsReady':     0.0,
+        'sceneIsReady':     0.0,
         #'filmIsReady':      0.0,
         #'terminated':       0.0,
-        #'enoughSamples':    0.0,
+        'enoughSamples':    0.0,
     }
     
     stats_format = {
@@ -119,9 +119,10 @@ class LuxAPIStats(LuxTimerThread):
         'samplesPx':        lambda x: 'Samples/Px: %0.2f'%x,
         'efficiency':       lambda x: 'Efficiency: %0.2f %%'%x,
         'filmEV':           lambda x: 'EV: %0.2f'%x,
+        'sceneIsReady':      lambda x: 'SIR: '+ ('True' if x else 'False'),
         #'filmIsReady':      lambda x: 'FIR: %f'%x,
         #'terminated':       lambda x: 'TERM: %f'%x,
-        #'enoughSamples':    lambda x: 'ENOUGH: %f'%x
+        'enoughSamples':    lambda x: 'HALT: '+ ('True' if x else 'False'),
     }
     
     stats_string = ''

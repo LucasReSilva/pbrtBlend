@@ -36,6 +36,8 @@ class Custom_Context(luxrender.pylux.Context):
     API types (eg. file_api).
     '''
     
+    API_TYPE = 'PURE'
+    
     def attributeBegin(self, comment='', file=None):
         '''
         Added for compatibility with file_api

@@ -155,10 +155,12 @@ def write_lxo(render_engine, l, scene):
         # export shape        
         shape_type, shape_params = getMeshType(scene, ob.data)
         
-        # ntris isn't really the number of tris!!
-        shape_params.add_integer('ntris', ntris)
+        if l.API_TYPE == 'PURE':
+            # ntris isn't really the number of tris!!
+            shape_params.add_integer('ntris', ntris)
+            shape_params.add_integer('nvertices', nvertices)
+        
         shape_params.add_integer('indices', indices)
-        shape_params.add_integer('nvertices', nvertices)
         shape_params.add_point('P', points)
         shape_params.add_normal('N', normals)
         
