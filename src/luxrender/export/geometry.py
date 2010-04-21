@@ -62,6 +62,8 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
     Returns None
     '''
     
+    vis_layers = scene.visible_layers
+    
     sel = scene.objects
     total_objects = len(sel)
     rpcs = []
@@ -70,6 +72,14 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
         ipc += 1.0
         
         if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE'):
+            continue
+        
+        # Check layers
+        visible = False
+        for layer_index, o_layer in enumerate(ob.layers):
+            visible = visible or (o_layer and vis_layers[layer_index])
+        
+        if not visible:
             continue
         
         # materials are exported in write_lxm()
@@ -89,11 +99,11 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
         # dummy material for now
         dummy_params = ParamSet()
         dummy_params.add_color('Kd', [
-            #0.75, 0.75, 0.75
+            0.75, 0.75, 0.75
             # just for a laugh
-            random.random(),
-            random.random(),
-            random.random()
+            #random.random(),
+            #random.random(),
+            #random.random()
         ])
         l.material('matte', dummy_params)
         

@@ -87,7 +87,7 @@ class luxrender(engine_base):
     '''
     
     bl_label = 'LuxRender'
-    bl_preview = False # blender's preview scene is inadequate
+    bl_preview = False # blender's preview scene is inadequate, needs custom rebuild
     
     LuxManager = None
     render_update_timer = None
