@@ -89,33 +89,43 @@ class ParamSet(list):
             ParamSetItem(type, name, value)
         )
         self.names.append(name)
+        return self
         
     def add_float(self, name, value):
         self.add('float', name, value)
+        return self
        
     def add_integer(self, name, value):
         self.add('integer', name, value)
+        return self
         
     def add_bool(self, name, value):
         self.add('bool', name, value)
+        return self
         
     def add_string(self, name, value):
         self.add('string', name, value)
+        return self
         
     def add_vector(self, name, value):
         self.add('vector', name, value)
+        return self
         
     def add_point(self, name, value):
         self.add('point', name, value)
+        return self
         
     def add_normal(self, name, value):
         self.add('normal', name, value)
+        return self
         
     def add_color(self, name, value):
         self.add('color', name, value)
+        return self
                  
     def add_texture(self, name, value):
         self.add('texture', name, value)
+        return self
 
 def matrix_to_list(matrix):
     '''

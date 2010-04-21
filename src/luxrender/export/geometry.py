@@ -49,7 +49,7 @@ def getMeshType(scene, mesh):
     
     return dstr,params
 
-def write_lxo(render_engine, l, scene):
+def write_lxo(render_engine, l, scene, smoothing_enabled=True):
     '''
     l            pylux.Context
     scene        bpy.types.scene
@@ -125,7 +125,7 @@ def write_lxo(render_engine, l, scene):
         for face in ffaces:
             normal = face.normal
             for vertex in face.verts:
-                if (face.smooth):
+                if (smoothing_enabled and face.smooth):
                     normal = vertex.normal
                 for no in normal:
                     normals.append(no)

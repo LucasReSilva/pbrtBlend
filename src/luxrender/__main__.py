@@ -57,6 +57,7 @@ del properties_render
 
 import properties_material
 properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
+properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('luxrender')
 del properties_material
 
 import properties_data_lamp
@@ -86,6 +87,7 @@ class luxrender(engine_base):
     '''
     
     bl_label = 'LuxRender'
+    bl_preview = True
     
     LuxManager = None
     render_update_timer = None
@@ -141,14 +143,23 @@ class luxrender(engine_base):
             lay.load_from_file(self.output_file)
         self.end_result(result)
     
-    def render(self, scene):
+    def render(self, context):
         '''
         scene        bpy.types.scene
         
-        Export the given scene to LuxRender
+        Export the given scene to LuxRender.
+        Choose from one of several methods depending on
+        what needs to be rendered.
         
         Returns None
         '''
+        
+        if context.name == 'preview':
+            self.render_preview(context)
+        else:
+            self.render_scene(context)
+        
+    def render_init(self, scene):
         
         # force scene update to current rendering frame
         scene.set_frame(scene.frame_current)
@@ -165,8 +176,8 @@ class luxrender(engine_base):
         
         # Set up the rendering context
         self.LuxManager = LM(
-            'Main render',
-            api_type = scene.luxrender_engine.api_type,
+            scene.name,
+            api_type = scene.luxrender_engine.api_type if scene.name is not 'preview' else 'PURE',
             threads = threads
         )
         LM.SetActive(self.LuxManager)
@@ -180,6 +191,37 @@ class luxrender(engine_base):
         
         # BEGIN!
         self.update_stats('', 'LuxRender: Parsing Scene')
+        
+        return l
+    
+    def render_preview(self, scene):
+        
+        l = self.render_init(scene)
+        
+        # Set up render parameters optimised for preview
+        from luxrender.export.preview_scene import preview_scene_setup
+        preview_scene_setup(scene, l)
+        
+        # Set up camera, view and film
+        l.lookAt( *export_film.lookAt(scene) )
+        l.camera( *scene.camera.data.luxrender_camera.api_output(scene) )
+        
+        l.worldBegin()
+        # Light source iteration and export goes here.
+        if export_lights.lights(l, scene) == False:
+            LuxLog('Error - No lights in scene.')
+            return
+        
+        # Materials iteration and export goes here.
+        
+        # Geometry iteration and export goes here.
+        export_geometry.write_lxo(self, l, scene, smoothing_enabled=False)
+        
+        self.render_start()
+    
+    def render_scene(self, scene):
+        
+        l = self.render_init(scene)
         
         # Set up render engine parameters
         l.sampler(            *scene.luxrender_sampler.api_output()       )
@@ -203,8 +245,11 @@ class luxrender(engine_base):
         # Materials iteration and export goes here.
         
         # Geometry iteration and export goes here.
-        export_geometry.write_lxo(self, l, scene)
+        export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)
         
+        self.render_start()
+        
+    def render_start(self):
         # TODO: this will be removed when direct framebuffer
         # access is implemented in Blender
         if os.path.exists(self.output_file):
