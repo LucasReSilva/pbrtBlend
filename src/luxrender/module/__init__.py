@@ -106,10 +106,10 @@ class LuxAPIStats(LuxTimerThread):
         #'filmYres':         0.0,
         #'displayInterval':  0.0,
         'filmEV':           0.0,
-        'sceneIsReady':     0.0,
+        #'sceneIsReady':     0.0,
         #'filmIsReady':      0.0,
         #'terminated':       0.0,
-        'enoughSamples':    0.0,
+        #'enoughSamples':    0.0,
     }
     
     stats_format = {
@@ -119,10 +119,10 @@ class LuxAPIStats(LuxTimerThread):
         'samplesPx':        lambda x: 'Samples/Px: %0.2f'%x,
         'efficiency':       lambda x: 'Efficiency: %0.2f %%'%x,
         'filmEV':           lambda x: 'EV: %0.2f'%x,
-        'sceneIsReady':      lambda x: 'SIR: '+ ('True' if x else 'False'),
+        #'sceneIsReady':      lambda x: 'SIR: '+ ('True' if x else 'False'),
         #'filmIsReady':      lambda x: 'FIR: %f'%x,
         #'terminated':       lambda x: 'TERM: %f'%x,
-        'enoughSamples':    lambda x: 'HALT: '+ ('True' if x else 'False'),
+        #'enoughSamples':    lambda x: 'HALT: '+ ('True' if x else 'False'),
     }
     
     stats_string = ''
@@ -231,12 +231,12 @@ class LuxManager(object):
         self.started = True
         
         # Wait until scene is fully parsed before adding more render threads
-        #while self.lux_context.statistics('sceneIsReady') != 1.0:
+        while self.lux_context.statistics('sceneIsReady') != 1.0:
             # TODO: such a tight loop is not a good idea
-        #    pass
+            pass
         
-        #for i in range(self.thread_count - 1):
-        #    self.lux_context.addThread()
+        for i in range(self.thread_count - 1):
+            self.lux_context.addThread()
     
     def reset(self):
         '''
