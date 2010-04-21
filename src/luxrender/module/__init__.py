@@ -230,12 +230,12 @@ class LuxManager(object):
         self.started = True
         
         # Wait until scene is fully parsed before adding more render threads
-        while self.lux_context.statistics('sceneIsReady') != 1.0:
+        #while self.lux_context.statistics('sceneIsReady') != 1.0:
             # TODO: such a tight loop is not a good idea
-            pass
+        #    pass
         
-        for i in range(self.thread_count - 1):
-            self.lux_context.addThread()
+        #for i in range(self.thread_count - 1):
+        #    self.lux_context.addThread()
     
     def reset(self):
         '''
