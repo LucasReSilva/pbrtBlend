@@ -30,6 +30,7 @@ from properties_data_lamp import DataButtonsPanel
 # EF API
 from ef.ui import described_layout
 from ef.ef import ef
+from ef.validate import Logic_Operator as LO 
 
 # Lux API
 import luxrender.properties.lamp
@@ -76,8 +77,8 @@ class lamps(DataButtonsPanel, described_layout):
             else:
                 layout.prop(lamp, "type", text="")
             
-            # Show only certain controls for Blender's perspective lamp type 
-            if context.lamp.type not in ['SPOT', 'AREA', 'SUN']:
+            # Show only certain controls for Blender's lamp types
+            if context.lamp.type not in ['POINT', 'SUN', 'SPOT', 'HEMI', 'AREA']:
                 context.lamp.luxrender_lamp.type = 'UNSUPPORTED'
                 layout.label(text="Lamp type not supported by LuxRender.")
             else:
@@ -99,6 +100,7 @@ class lamps(DataButtonsPanel, described_layout):
                         col = split.column()
                     col.prop(lamp, "spot_size", text="Size")
                     col.prop(lamp, "spot_blend", text="Blend", slider=True)
+                
                 # AREA LAMP: Blender Properties
                 elif lamp.type == 'AREA':
 
@@ -121,39 +123,113 @@ class lamps(DataButtonsPanel, described_layout):
     
     # luxrender properties
     controls = [
+        'importance', 'lightgroup',
         ['power','efficacy'],
+        'turbidity', 'sunsky_type',
+        'infinite_map',
+        'mapping_type',
     ]
     
     visibility = {
-        'power': { 'type': 'AREA'},
-        'efficacy': { 'type': 'AREA'}
+        'power':            { 'type': 'AREA'},
+        'efficacy':         { 'type': 'AREA'},
+        
+        'turbidity':        { 'type': 'SUN' },
+        'sunsky_type':      { 'type': 'SUN' },
+        
+        'infinite_map':     { 'type': 'HEMI' },
+        'mapping_type':     { 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
     }
     
     properties = [
         {
-            'type': 'enum',
+            # hidden value for visibility control
+            'type': 'string',
             'attr': 'type',
-            'name': 'Luxrender Lamp type',
-            'default': 'SPOT',
-            'items': [
-                ('UNSUPPORTED', 'Unsupported', 'UNSUPPORTED'),
-                ('SPOT', 'Spot', 'SPOT'),
-                ('AREA', 'Area', 'AREA'),
-                ('SUN', 'Sun', 'SUN'),
-            ]
-        },    
+            'default': 'UNSUPPORTED',
+        },
+        {
+            'type': 'string',
+            'attr': 'lightgroup',
+            'name': 'Light Group',
+            'description': 'Name of group to put this light in',
+            'default': 'default'
+        },
         {
             'type': 'float',
             'attr': 'power',
             'name': 'Power',
             'default': 100.0,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1e6,
+            'soft_max': 1e6,
         },   
         {
             'type': 'float',
             'attr': 'efficacy',
             'name': 'Efficacy',
             'default': 17.0,
-        },      
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1e6,
+            'soft_max': 1e6,
+        },
+        {
+            'type': 'float',
+            'attr': 'importance',
+            'name': 'Importance',
+            'description': 'Light source importance',
+            'default': 0.0,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 1e3,
+            'soft_max': 1e3,
+        },
+        
+        # Sun
+        {
+            'type': 'float',
+            'attr': 'turbidity',
+            'name': 'turbidity',
+            'default': 2.0,
+            'min': 0.7,
+            'soft_min': 0.7,
+            'max': 35.0,
+            'soft_max': 35.0,
+        },
+        {
+            'type': 'enum',
+            'attr': 'sunsky_type',
+            'name': 'Sky Type',
+            'default': 'sunsky',
+            'items': [
+                ('sunsky', 'Sun & Sky', 'sunsky'),
+                ('sun', 'Sun Only', 'sun'),
+                #('sky', 'Sky Only', 'sky'),    # sky only doesn't work
+            ]
+        },
+        
+        # HEMI / INFINITE
+        {
+            'type': 'string',
+            'subtype': 'FILE_PATH',
+            'attr': 'infinite_map',
+            'name': 'HDRI Map',
+            'description': 'HDR image to use for lighting',
+            'default': ''
+        },
+        {
+            'type': 'enum',
+            'attr': 'mapping_type',
+            'name': 'Map Type',
+            'default': 'latlong',
+            'items': [
+                ('latlong', 'Lat Long', 'latlong'),
+                ('angular', 'Angular', 'angular'),
+                ('vcross', 'Vert Cross', 'vcross')
+            ]
+        },
     ]
 
 
