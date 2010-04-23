@@ -58,7 +58,7 @@ def attr_light(l, name, group, type, params, transform=None):
         l.attributeBegin(comment=name, file=Files.MAIN)
     
     dbo('LIGHT', (type, params))
-    #l.lightGroup(group)
+    l.lightGroup(group)
     l.lightSource(type, params)
     
     if transform is not None:
@@ -88,63 +88,59 @@ def lights(l, scene):
 
         light = ob.data
         
+        # Params common to all light types
+        light_params = ParamSet() \
+            .add_float('gain', light.energy) \
+            .add_float('importance', light.luxrender_lamp.importance)
+        
         if light.type == 'SUN':
             invmatrix = mathutils.Matrix(ob.matrix).invert()
-            sun_params = ParamSet() \
-                .add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2])) \
-                .add_float('turbidity', light.luxrender_lamp.turbidity) \
-                .add_float('importance', light.luxrender_lamp.importance)
-            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, sun_params)
+            light_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
+            light_params.add_float('turbidity', light.luxrender_lamp.turbidity)
+            # nsamples
+            # relsize (sun only)
+            # [a-e]const (sky only)
+            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params)
             have_light = True
         
         if light.type == 'SPOT':
             coneangle = degrees(light.spot_size) * 0.5
             conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
-            spot_params = ParamSet() \
-                .add_color('L', list(light.color)) \
-                .add_point('from', (0,0,0)) \
-                .add_point('to', (0,0,-1)) \
-                .add_float('coneangle', coneangle) \
-                .add_float('conedeltaangle', conedeltaangle) \
-                .add_float('gain', light.energy)\
-                .add_float('importance', light.luxrender_lamp.importance)
-            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'spot', spot_params, transform=matrix_to_list(ob.matrix))
+            light_params.add_color('L', list(light.color))
+            light_params.add_point('from', (0,0,0))
+            light_params.add_point('to', (0,0,-1))
+            light_params.add_float('coneangle', coneangle)
+            light_params.add_float('conedeltaangle', conedeltaangle)
+            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(ob.matrix))
             have_light = True
 
         if light.type == 'POINT':
-            point_params = ParamSet() \
-                .add_color('L', list(light.color)) \
-                .add_float('gain', light.energy) \
-                .add_float('importance', light.luxrender_lamp.importance) \
-                .add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'point', point_params, transform=matrix_to_list(ob.matrix))
+            light_params.add_color('L', list(light.color))
+            light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
+            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(ob.matrix))
             have_light = True
             
         if light.type == 'HEMI':
-            infinite_params = ParamSet() \
-                .add_float('gain', light.energy) \
-                .add_float('importance', light.luxrender_lamp.importance)
             if light.luxrender_lamp.infinite_map != '':
-                infinite_params.add_string('mapname', light.luxrender_lamp.infinite_map) \
-                               .add_string('mapping', light.luxrender_lamp.mapping_type)
+                light_params.add_string('mapname', light.luxrender_lamp.infinite_map)
+                light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
             else:
                 # TODO: check if users want L multiplied to HDRI maps
-                infinite_params.add_color('L', list(light.color))
-            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'infinite', infinite_params, transform=matrix_to_list(ob.matrix))
+                light_params.add_color('L', list(light.color))
+            # nsamples
+            # gamma
+            attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(ob.matrix))
             have_light = True
         
         if light.type == 'AREA':
-            area_params = ParamSet() \
-                .add_color('L', list(light.color)) \
-                .add_float('gain', light.energy) \
-                .add_float('power', light.luxrender_lamp.power) \
-                .add_float('efficacy', light.luxrender_lamp.efficacy)\
-                .add_float('importance', light.luxrender_lamp.importance)
-                
+            light_params.add_color('L', list(light.color))
+            light_params.add_float('power', light.luxrender_lamp.power)
+            light_params.add_float('efficacy', light.luxrender_lamp.efficacy)
+            # nsamples
             l.attributeBegin(ob.name, file=Files.MAIN)
             l.transform(matrix_to_list(ob.matrix))
-            #l.lightGroup(light.luxrender_lamp.lightgroup)
-            l.arealightSource('area', area_params)
+            l.lightGroup(light.luxrender_lamp.lightgroup)
+            l.arealightSource('area', light_params)
 
             areax = light.size
 
