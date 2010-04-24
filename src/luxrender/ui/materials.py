@@ -107,9 +107,9 @@ class material_editor(MaterialButtonsPanel, described_layout):
 	
 	visibility = {
 		# Mix Material
-		'amount':                 { 'material': 'mix' },
-		'namedmaterial1':         { 'material': 'mix' },
-		'namedmaterial2':         { 'material': 'mix' },
+		'amount':				{ 'material': 'mix' },
+		'namedmaterial1':		{ 'material': 'mix' },
+		'namedmaterial2':		{ 'material': 'mix' },
 	}
 	
 	properties = [

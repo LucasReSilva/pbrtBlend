@@ -34,4 +34,4 @@ from luxrender.export import ParamSet
 # TODO: check parameter completeness against Lux API
 
 class luxrender_mesh(bpy.types.IDPropertyGroup):
-    pass
+	pass

@@ -29,11 +29,11 @@ import bpy
 DEBUG = False
 
 if DEBUG:
-    import pprint
+	import pprint
 def dbo(m,o):
-    '''
-    Print some debugging info to the console
-    '''
-    if DEBUG: 
-        print(m)
-        pprint.pprint(o, width=1, indent=1)
+	'''
+	Print some debugging info to the console
+	'''
+	if DEBUG: 
+		print(m)
+		pprint.pprint(o, width=1, indent=1)

@@ -29,24 +29,24 @@
 from luxrender.module.pure_api import Custom_Context as Pylux_Context
 
 class Custom_Context(Pylux_Context):
-    '''
-    This class mimicks the pylux.Context API for collecting
-    Volume/Texture/Material data to be submitted to the
-    LRMDB.
-    
-    TODO: might also use this class for exporting material
-    preview data ?
-    '''
-    
-    API_TYPE = 'LRMDB'
-    
-    material_definitions = []
-    
-    def makeNamedVolume(self):
-        pass
-    
-    def texture(self):
-        pass
-    
-    def makeNamedMaterial(self):
-        pass
+	'''
+	This class mimicks the pylux.Context API for collecting
+	Volume/Texture/Material data to be submitted to the
+	LRMDB.
+	
+	TODO: might also use this class for exporting material
+	preview data ?
+	'''
+	
+	API_TYPE = 'LRMDB'
+	
+	material_definitions = []
+	
+	def makeNamedVolume(self):
+		pass
+	
+	def texture(self):
+		pass
+	
+	def makeNamedMaterial(self):
+		pass

@@ -42,10 +42,10 @@ import luxrender.ui.lamps
 import luxrender.ui.meshes
 #import luxrender.nodes
 
-import luxrender.export.geometry    as export_geometry
-import luxrender.export.film        as export_film
-import luxrender.export.lights      as export_lights
-from luxrender.module.file_api import Files
+import luxrender.export.geometry	as export_geometry
+import luxrender.export.film		as export_film
+import luxrender.export.lights		as export_lights
+from luxrender.module.file_api		import Files
 
 
 # Add standard Blender Interface elements
@@ -71,214 +71,214 @@ del properties_texture
 
 # compatible() copied from blender repository (netrender)
 def compatible(module):
-    module = __import__(module)
-    for subclass in module.__dict__.values():
-        try:		subclass.COMPAT_ENGINES.add('luxrender')
-        except:	pass
-    del module
+	module = __import__(module)
+	for subclass in module.__dict__.values():
+		try:	subclass.COMPAT_ENGINES.add('luxrender')
+		except:	pass
+	del module
 
 compatible("properties_data_mesh")
 compatible("properties_data_camera")
 #compatible("properties_texture")
 
 class luxrender(engine_base):
-    '''
-    LuxRender Engine Exporter/Integration class
-    '''
-    
-    bl_label = 'LuxRender'
-    bl_preview = False # blender's preview scene is inadequate, needs custom rebuild
-    
-    LuxManager = None
-    render_update_timer = None
-    output_file = 'default.png'
-    
-    # This member is read by the ExporterFramework to set up the UI panels
-    interfaces = [
-        luxrender.ui.render_panels.engine,
-        luxrender.ui.render_panels.sampler,
-        luxrender.ui.render_panels.integrator,
-        luxrender.ui.render_panels.volume,
-        luxrender.ui.render_panels.filter,
-        luxrender.ui.render_panels.accelerator,
+	'''
+	LuxRender Engine Exporter/Integration class
+	'''
+	
+	bl_label = 'LuxRender'
+	bl_preview = False # blender's preview scene is inadequate, needs custom rebuild
+	
+	LuxManager = None
+	render_update_timer = None
+	output_file = 'default.png'
+	
+	# This member is read by the ExporterFramework to set up the UI panels
+	interfaces = [
+		luxrender.ui.render_panels.engine,
+		luxrender.ui.render_panels.sampler,
+		luxrender.ui.render_panels.integrator,
+		luxrender.ui.render_panels.volume,
+		luxrender.ui.render_panels.filter,
+		luxrender.ui.render_panels.accelerator,
 
-        # custom object data panels
-        luxrender.ui.lamps.lamps,
-        luxrender.ui.meshes.meshes,
-        
-        luxrender.ui.camera.camera,
-        luxrender.ui.camera.tonemapping,
-        
-        luxrender.ui.materials.material_editor,
-        luxrender.ui.textures.texture_editor,
-        
-        #luxrender.nodes.test_node
-    ]
-    
-    def update_framebuffer(self, xres, yres, fb):
-        '''
-        xres        int
-        yres        int
-        fb          list
-        
-        Update the current RenderResult with the current render image.
-        
-        This will be called by the LuxFilmDisplay thread started by LuxManager
-        
-        TODO: perhaps this class itself is a threaded timer ?
-        
-        Returns None
-        '''
-        
-        #print('fb len: %i' % len(fb))
-        #print('fb max: %i' % max(fb))
-        #print('fb min: %i' % min(fb))
-        
-        result = self.begin_result(0,0,xres,yres)
-        # TODO: don't read the file whilst it is still being written..
-        # ... however file locking in python seems incomplete/non-portable ?
-        if os.path.exists(self.output_file):
-            lay = result.layers[0]
-            # TODO: use the framebuffer direct from pylux when Blender's API supports it
-            lay.load_from_file(self.output_file)
-        self.end_result(result)
-    
-    def render(self, context):
-        '''
-        scene        bpy.types.scene
-        
-        Export the given scene to LuxRender.
-        Choose from one of several methods depending on what needs to be rendered.
-        
-        Returns None
-        '''
-        
-        if context.name == 'preview':
-            self.render_preview(context)
-        else:
-            self.render_scene(context)
-        
-    def render_init(self, scene, api_type):
-        
-        # force scene update to current rendering frame
-        scene.set_frame(scene.frame_current)
-        
-        if scene.luxrender_engine.threads_auto:
-            try:
-                import multiprocessing
-                threads = multiprocessing.cpu_count()
-            except:
-                # TODO: when might this fail?
-                threads = 4
-        else:
-            threads = scene.luxrender_engine.threads
-        
-        # Set up the rendering context
-        self.LuxManager = LM(
-            scene.name,
-            api_type = api_type,
-            threads = threads
-        )
-        LM.SetActive(self.LuxManager)
-        
-        l = self.LuxManager.lux_context
-        
-        if api_type == 'FILE':
-            # TODO: insert an output path here ?
-            # TODO: only if the user selects a 'keep files' option
-            l.set_filename('default')
-        
-        # BEGIN!
-        self.update_stats('', 'LuxRender: Parsing Scene')
-        
-        return l
-    
-    def render_preview(self, scene):
-        
-        l = self.render_init(scene, 'FILE')
-        
-        # Set up render parameters optimised for preview
-        from luxrender.export.preview_scene import preview_scene_setup , preview_scene_lights
-        preview_scene_setup(scene, l)
-        
-        # Set up camera, view and film
-        l.lookAt( *export_film.lookAt(scene) )
-        l.camera( *scene.camera.data.luxrender_camera.api_output(scene) )
-        
-        l.worldBegin()
-        preview_scene_lights(l)
-        # Light source iteration and export goes here.
-#        if export_lights.lights(l, scene) == False:
-#            LuxLog('Error - No lights in scene.')
-#            return
-        
-        # Materials iteration and export goes here.
-        
-        # Geometry iteration and export goes here.
-        export_geometry.write_lxo(self, l, scene, smoothing_enabled=False)
-        
-        self.render_start()
-    
-    def render_scene(self, scene):
-        
-        l = self.render_init(scene, scene.luxrender_engine.api_type)
-        
-        # Set up render engine parameters
-        l.sampler(            *scene.luxrender_sampler.api_output()       )
-        l.accelerator(        *scene.luxrender_accelerator.api_output()   )
-        l.surfaceIntegrator(  *scene.luxrender_integrator.api_output()    )
-        l.volumeIntegrator(   *scene.luxrender_volume.api_output()        )
-        l.pixelFilter(        *scene.luxrender_filter.api_output()        )
-        
-        # Set up camera, view and film
-        l.lookAt( *export_film.lookAt(scene) )
-        l.camera( *scene.camera.data.luxrender_camera.api_output(scene) )
-        l.film(   *export_film.film(scene)   )
-        
-        
-        l.worldBegin()
-        # Light source iteration and export goes here.
-        if export_lights.lights(l, scene) == False:
-            LuxLog('Error - No lights in scene.')
-            return
-        
-        # Materials iteration and export goes here.
-        
-        # Geometry iteration and export goes here.
-        export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)
-        
-        self.render_start()
-        
-    def render_start(self):
-        # TODO: this will be removed when direct framebuffer
-        # access is implemented in Blender
-        if os.path.exists(self.output_file):
-            # reset output image file and
-            os.remove(self.output_file)
-            
-        # Begin rendering
-        self.LuxManager.start(self)
-        self.update_stats('', 'LuxRender: Rendering warmup')
-        
-        while self.LuxManager.started:
-            self.render_update_timer = threading.Timer(1, self.stats_timer)
-            self.render_update_timer.start()
-            if self.render_update_timer.isAlive(): self.render_update_timer.join()
-            
-        # TODO: tidy up scene files and output file ?
-    
-    def stats_timer(self):
-        '''
-        Update the displayed rendering statistics and detect end of rendering
-        
-        Returns None
-        '''
-        
-        self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
-        if self.test_break() or \
-            self.LuxManager.lux_context.statistics('filmIsReady') == 1.0 or \
-            self.LuxManager.lux_context.statistics('terminated') == 1.0 or \
-            self.LuxManager.lux_context.statistics('enoughSamples') == 1.0:
-            self.LuxManager.reset()
-            LM.ClearActive()
-            self.update_stats('', '')
+		# custom object data panels
+		luxrender.ui.lamps.lamps,
+		luxrender.ui.meshes.meshes,
+		
+		luxrender.ui.camera.camera,
+		luxrender.ui.camera.tonemapping,
+		
+		luxrender.ui.materials.material_editor,
+		luxrender.ui.textures.texture_editor,
+		
+		#luxrender.nodes.test_node
+	]
+	
+	def update_framebuffer(self, xres, yres, fb):
+		'''
+		xres		int
+		yres		int
+		fb			list
+		
+		Update the current RenderResult with the current render image.
+		
+		This will be called by the LuxFilmDisplay thread started by LuxManager
+		
+		TODO: perhaps this class itself is a threaded timer ?
+		
+		Returns None
+		'''
+		
+		#print('fb len: %i' % len(fb))
+		#print('fb max: %i' % max(fb))
+		#print('fb min: %i' % min(fb))
+		
+		result = self.begin_result(0,0,xres,yres)
+		# TODO: don't read the file whilst it is still being written..
+		# ... however file locking in python seems incomplete/non-portable ?
+		if os.path.exists(self.output_file):
+			lay = result.layers[0]
+			# TODO: use the framebuffer direct from pylux when Blender's API supports it
+			lay.load_from_file(self.output_file)
+		self.end_result(result)
+	
+	def render(self, context):
+		'''
+		scene		bpy.types.scene
+		
+		Export the given scene to LuxRender.
+		Choose from one of several methods depending on what needs to be rendered.
+		
+		Returns None
+		'''
+		
+		if context.name == 'preview':
+			self.render_preview(context)
+		else:
+			self.render_scene(context)
+		
+	def render_init(self, scene, api_type):
+		
+		# force scene update to current rendering frame
+		scene.set_frame(scene.frame_current)
+		
+		if scene.luxrender_engine.threads_auto:
+			try:
+				import multiprocessing
+				threads = multiprocessing.cpu_count()
+			except:
+				# TODO: when might this fail?
+				threads = 4
+		else:
+			threads = scene.luxrender_engine.threads
+		
+		# Set up the rendering context
+		self.LuxManager = LM(
+			scene.name,
+			api_type = api_type,
+			threads = threads
+		)
+		LM.SetActive(self.LuxManager)
+		
+		l = self.LuxManager.lux_context
+		
+		if api_type == 'FILE':
+			# TODO: insert an output path here ?
+			# TODO: only if the user selects a 'keep files' option
+			l.set_filename('default')
+		
+		# BEGIN!
+		self.update_stats('', 'LuxRender: Parsing Scene')
+		
+		return l
+	
+	def render_preview(self, scene):
+		
+		l = self.render_init(scene, 'FILE')
+		
+		# Set up render parameters optimised for preview
+		from luxrender.export.preview_scene import preview_scene_setup , preview_scene_lights
+		preview_scene_setup(scene, l)
+		
+		# Set up camera, view and film
+		l.lookAt( *export_film.lookAt(scene) )
+		l.camera( *scene.camera.data.luxrender_camera.api_output(scene) )
+		
+		l.worldBegin()
+		preview_scene_lights(l)
+		# Light source iteration and export goes here.
+#		if export_lights.lights(l, scene) == False:
+#			LuxLog('Error - No lights in scene.')
+#			return
+		
+		# Materials iteration and export goes here.
+		
+		# Geometry iteration and export goes here.
+		export_geometry.write_lxo(self, l, scene, smoothing_enabled=False)
+		
+		self.render_start()
+	
+	def render_scene(self, scene):
+		
+		l = self.render_init(scene, scene.luxrender_engine.api_type)
+		
+		# Set up render engine parameters
+		l.sampler(				*scene.luxrender_sampler.api_output()		)
+		l.accelerator(			*scene.luxrender_accelerator.api_output()	)
+		l.surfaceIntegrator(	*scene.luxrender_integrator.api_output()	)
+		l.volumeIntegrator(		*scene.luxrender_volume.api_output()		)
+		l.pixelFilter(			*scene.luxrender_filter.api_output()		)
+		
+		# Set up camera, view and film
+		l.lookAt(	*export_film.lookAt(scene)	)
+		l.camera(	*scene.camera.data.luxrender_camera.api_output(scene)	)
+		l.film(		*export_film.film(scene)	)
+		
+		
+		l.worldBegin()
+		# Light source iteration and export goes here.
+		if export_lights.lights(l, scene) == False:
+			LuxLog('Error - No lights in scene.')
+			return
+		
+		# Materials iteration and export goes here.
+		
+		# Geometry iteration and export goes here.
+		export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)
+		
+		self.render_start()
+		
+	def render_start(self):
+		# TODO: this will be removed when direct framebuffer
+		# access is implemented in Blender
+		if os.path.exists(self.output_file):
+			# reset output image file and
+			os.remove(self.output_file)
+			
+		# Begin rendering
+		self.LuxManager.start(self)
+		self.update_stats('', 'LuxRender: Rendering warmup')
+		
+		while self.LuxManager.started:
+			self.render_update_timer = threading.Timer(1, self.stats_timer)
+			self.render_update_timer.start()
+			if self.render_update_timer.isAlive(): self.render_update_timer.join()
+			
+		# TODO: tidy up scene files and output file ?
+	
+	def stats_timer(self):
+		'''
+		Update the displayed rendering statistics and detect end of rendering
+		
+		Returns None
+		'''
+		
+		self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
+		if self.test_break() or \
+			self.LuxManager.lux_context.statistics('filmIsReady') == 1.0 or \
+			self.LuxManager.lux_context.statistics('terminated') == 1.0 or \
+			self.LuxManager.lux_context.statistics('enoughSamples') == 1.0:
+			self.LuxManager.reset()
+			LM.ClearActive()
+			self.update_stats('', '')

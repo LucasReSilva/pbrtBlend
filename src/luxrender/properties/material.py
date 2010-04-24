@@ -34,10 +34,10 @@ from luxrender.export import ParamSet
 # TODO: check parameter completeness against Lux API
 
 class luxrender_material(bpy.types.IDPropertyGroup):
-    '''
-    Storage class for LuxRender Material settings.
-    This class will be instantiated within a Blender Material
-    object.
-    '''
-    
-    pass
+	'''
+	Storage class for LuxRender Material settings.
+	This class will be instantiated within a Blender Material
+	object.
+	'''
+	
+	pass

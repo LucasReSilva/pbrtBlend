@@ -35,76 +35,75 @@ from ef.ef import ef
 import luxrender.properties.mesh
 
 class meshes(DataButtonsPanel, described_layout):
-    bl_label = 'LuxRender Meshes'
-    COMPAT_ENGINES = {'luxrender'}
+	bl_label = 'LuxRender Meshes'
+	COMPAT_ENGINES = {'luxrender'}
 	
-    property_group = luxrender.properties.mesh.luxrender_mesh
+	property_group = luxrender.properties.mesh.luxrender_mesh
 
-    # prevent creating luxrender_material property group in Scene
-    property_group_non_global = True
+	# prevent creating luxrender_material property group in Scene
+	property_group_non_global = True
 
-    @staticmethod
-    def property_reload():
-        for mesh in bpy.data.meshes:
-            meshes.property_create(mesh)
-    
-    @staticmethod
-    def property_create(mesh):
-        if not hasattr(mesh, meshes.property_group.__name__):
-            ef.init_properties(mesh, [{
-                'type': 'pointer',
-                'attr': meshes.property_group.__name__,
-                'ptype': meshes.property_group,
-                'name': meshes.property_group.__name__,
-                'description': meshes.property_group.__name__
-            }], cache=False)
-            ef.init_properties(meshes.property_group, meshes.properties, cache=False)
-    
-    # Overridden to provide data storage in the lamp, not the scene
-    def draw(self, context):
-        if context.mesh is not None:
+	@staticmethod
+	def property_reload():
+		for mesh in bpy.data.meshes:
+			meshes.property_create(mesh)
+	
+	@staticmethod
+	def property_create(mesh):
+		if not hasattr(mesh, meshes.property_group.__name__):
+			ef.init_properties(mesh, [{
+				'type': 'pointer',
+				'attr': meshes.property_group.__name__,
+				'ptype': meshes.property_group,
+				'name': meshes.property_group.__name__,
+				'description': meshes.property_group.__name__
+			}], cache=False)
+			ef.init_properties(meshes.property_group, meshes.properties, cache=False)
+	
+	# Overridden to provide data storage in the lamp, not the scene
+	def draw(self, context):
+		if context.mesh is not None:
 
-            # LuxRender properties
-            for p in self.controls:
-                self.draw_column(p, self.layout, context.mesh, supercontext=context)
-    
-    # luxrender properties
-    controls = [
-        ['subdiv','sublevels'],
-        ['nsmooth', 'sharpbound'],
-    ]
-    
-    visibility = {
-        'nsmooth': { 'subdiv': True},
-        'sharpbound': { 'subdiv': True},
-        'sublevels': { 'subdiv': True}
-    }
-    
-    properties = [
-        {
-            'type': 'bool',
-            'attr': 'subdiv',
-            'name': 'Use Subdivision',
-            'default': False,
-        },   
-        {
-            'type': 'bool',
-            'attr': 'nsmooth',
-            'name': 'Use Autosmoothing',
-            'default': True,
-        },
-        {
-            'type': 'bool',
-            'attr': 'sharpbound',
-            'name': 'Sharpen Bounds',
-            'default': False,
-        },
-        {
-            'type': 'int',
-            'attr': 'sublevels',
-            'name': 'Subdivision Levels',
-            'default': 2,
-        },      
-    ]
-
+			# LuxRender properties
+			for p in self.controls:
+				self.draw_column(p, self.layout, context.mesh, supercontext=context)
+	
+	# luxrender properties
+	controls = [
+		['subdiv','sublevels'],
+		['nsmooth', 'sharpbound'],
+	]
+	
+	visibility = {
+		'nsmooth':		{ 'subdiv': True },
+		'sharpbound':	{ 'subdiv': True },
+		'sublevels':	{ 'subdiv': True }
+	}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'subdiv',
+			'name': 'Use Subdivision',
+			'default': False,
+		},   
+		{
+			'type': 'bool',
+			'attr': 'nsmooth',
+			'name': 'Use Autosmoothing',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'sharpbound',
+			'name': 'Sharpen Bounds',
+			'default': False,
+		},
+		{
+			'type': 'int',
+			'attr': 'sublevels',
+			'name': 'Subdivision Levels',
+			'default': 2,
+		},	  
+	]
 

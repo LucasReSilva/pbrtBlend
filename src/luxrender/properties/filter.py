@@ -34,40 +34,40 @@ from luxrender.export import ParamSet
 # TODO: check parameter completeness against Lux API
 
 class luxrender_filter(bpy.types.IDPropertyGroup):
-    '''
-    Storage class for LuxRender PixelFilter settings.
-    This class will be instantiated within a Blender scene
-    object.
-    '''
-    
-    def api_output(self):
-        '''
-        Format this class's members into a LuxRender ParamSet
-        
-        Returns tuple
-        '''
-        
-        params = ParamSet()
-        
-        params.add_float('xwidth', self.xwidth)
-        params.add_float('ywidth', self.ywidth)
-        
-        if self.filter == 'box':
-            pass
-        
-        if self.filter == 'gaussian':
-            params.add_float('alpha', self.gaussian_alpha)
-        
-        if self.filter == 'mitchell':
-            params.add_float('B', self.mitchell_b)
-            params.add_float('C', self.mitchell_c)
-        
-        if self.filter == 'sinc':
-            params.add_float('tau', self.sinc_tau)
-        
-        if self.filter == 'triangle':
-            pass
-        
-        out = self.filter, params
-        dbo('FILTER', out)
-        return out
+	'''
+	Storage class for LuxRender PixelFilter settings.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	def api_output(self):
+		'''
+		Format this class's members into a LuxRender ParamSet
+		
+		Returns tuple
+		'''
+		
+		params = ParamSet()
+		
+		params.add_float('xwidth', self.xwidth)
+		params.add_float('ywidth', self.ywidth)
+		
+		if self.filter == 'box':
+			pass
+		
+		if self.filter == 'gaussian':
+			params.add_float('alpha', self.gaussian_alpha)
+		
+		if self.filter == 'mitchell':
+			params.add_float('B', self.mitchell_b)
+			params.add_float('C', self.mitchell_c)
+		
+		if self.filter == 'sinc':
+			params.add_float('tau', self.sinc_tau)
+		
+		if self.filter == 'triangle':
+			pass
+		
+		out = self.filter, params
+		dbo('FILTER', out)
+		return out

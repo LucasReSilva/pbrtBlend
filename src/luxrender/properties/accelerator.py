@@ -34,34 +34,34 @@ from luxrender.export import ParamSet
 # TODO: check parameter completeness against Lux API
 
 class luxrender_accelerator(bpy.types.IDPropertyGroup):
-    '''
-    Storage class for LuxRender Accelerator settings.
-    This class will be instantiated within a Blender scene
-    object.
-    '''
-    
-    def api_output(self):
-        '''
-        Format this class's members into a LuxRender ParamSet
-        
-        Returns tuple
-        '''
-        
-        params = ParamSet()
-        
-        if self.accelerator == 'tabreckdtree':
-            params.add_float('intersectcost', self.kd_intcost)
-            params.add_float('traversalcost', self.kd_travcost)
-            params.add_float('emptybonus', self.kd_ebonus)
-            params.add_integer('maxprims', self.kd_maxprims)
-            params.add_integer('maxdepth', self.kd_maxdepth)
-        
-        if self.accelerator == 'grid':
-            params.add_bool('refineimmediately', self.grid_refineim)
-            
-        if self.accelerator == 'qbvh':
-            params.add_integer('maxprimsperleaf', self.qbvh_maxprims)
-        
-        out = self.accelerator, params
-        dbo('ACCELERATOR', out)
-        return out
+	'''
+	Storage class for LuxRender Accelerator settings.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	def api_output(self):
+		'''
+		Format this class's members into a LuxRender ParamSet
+		
+		Returns tuple
+		'''
+		
+		params = ParamSet()
+		
+		if self.accelerator == 'tabreckdtree':
+			params.add_float('intersectcost', self.kd_intcost)
+			params.add_float('traversalcost', self.kd_travcost)
+			params.add_float('emptybonus', self.kd_ebonus)
+			params.add_integer('maxprims', self.kd_maxprims)
+			params.add_integer('maxdepth', self.kd_maxdepth)
+		
+		if self.accelerator == 'grid':
+			params.add_bool('refineimmediately', self.grid_refineim)
+			
+		if self.accelerator == 'qbvh':
+			params.add_integer('maxprimsperleaf', self.qbvh_maxprims)
+		
+		out = self.accelerator, params
+		dbo('ACCELERATOR', out)
+		return out

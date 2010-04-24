@@ -34,24 +34,23 @@ from luxrender.export import ParamSet
 # TODO: check parameter completeness against Lux API
 
 class luxrender_volume(bpy.types.IDPropertyGroup):
-    '''
-    Storage class for LuxRender Volune Integrator settings.
-    This class will be instantiated within a Blender scene
-    object.
-    '''
-    
-    def api_output(self):
-        '''
-        Format this class's members into a LuxRender ParamSet
-        
-        Returns dict
-        '''
-        
-        params = ParamSet()
-        
-        params.add_float('stepsize', self.stepsize)
-        
-        out = self.volumeintegrator, params
-        dbo('VOLUME INTEGRATOR', out)
-        return out
-
+	'''
+	Storage class for LuxRender Volune Integrator settings.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	def api_output(self):
+		'''
+		Format this class's members into a LuxRender ParamSet
+		
+		Returns dict
+		'''
+		
+		params = ParamSet()
+		
+		params.add_float('stepsize', self.stepsize)
+		
+		out = self.volumeintegrator, params
+		dbo('VOLUME INTEGRATOR', out)
+		return out

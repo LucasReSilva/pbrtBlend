@@ -155,7 +155,7 @@ class sampler(render_described_context):
 		'haltspp',
 		
 		# metropolis
-		'metro_strength',										# simple
+		'metro_strength',							# simple
 		['metro_lmprob', 'metro_mncr'],				# adv
 		['metro_initsamples','metro_variance'],		# adv
 		
@@ -182,7 +182,7 @@ class sampler(render_described_context):
 		'erpt_chainlength':		{ 'sampler': 'erpt'},
 #		'erpt_mutationrange':   { 'sampler': 'erpt'},
 		
-		'pixelsampler':		    { 'sampler': O(['random', 'lowdiscrepancy']) },
+		'pixelsampler':			{ 'sampler': O(['random', 'lowdiscrepancy']) },
 		'pixelsamples':			{ 'sampler': O(['random', 'lowdiscrepancy']) },
 	}
 	
@@ -208,15 +208,15 @@ class sampler(render_described_context):
 			'default': False
 		},
 		{
-		    'type': 'int',
-		    'attr': 'haltspp',
-		    'name': 'Halt SPP',
-		    'description': 'Halt the rendering at this number od samples/px (0=disabled)',
-		    'default': 0,
-		    'min': 0,
-		    'soft_min': 0,
-		    'max': 65535,
-		    'soft_max': 65535,
+			'type': 'int',
+			'attr': 'haltspp',
+			'name': 'Halt SPP',
+			'description': 'Halt the rendering at this number od samples/px (0=disabled)',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+			'max': 65535,
+			'soft_max': 65535,
 		},
 		{
 			'type': 'float',
@@ -331,10 +331,10 @@ class integrator(render_described_context):
 			'advanced',
 		],
 		
-		'strategy',											# advanced
+		'strategy',								# advanced
 		
 		# bidir
-		'bidir_depth',										# simple
+		'bidir_depth',							# simple
 		['bidir_edepth', 'bidir_ldepth'],		# advanced
 	]
 	
@@ -463,17 +463,17 @@ class filter(render_described_context):
 		],
 		
 		['xwidth', 'ywidth'],			# advanced
-		'gaussian_alpha',						# gaussian advanced
+		'gaussian_alpha',				# gaussian advanced
 		
 		[
 			0.4,
-			'mitchell_mode',						# mitchell advanced
-			'mitchell_b',						# mitchell advanced + mode=manual
-			'mitchell_c',						# mitchell advanced + mode=manual
+			'mitchell_mode',			# mitchell advanced
+			'mitchell_b',				# mitchell advanced + mode=manual
+			'mitchell_c',				# mitchell advanced + mode=manual
 		],
-		'mitchell_sharpness',					# mitchell simple || (mitchell advanced && mode = slider)
+		'mitchell_sharpness',			# mitchell simple || (mitchell advanced && mode = slider)
 		
-		'sinc_tau'								# sinc advanced
+		'sinc_tau'						# sinc advanced
 	]
 	
 	visibility = {
@@ -616,15 +616,15 @@ class accelerator(render_described_context):
 		
 		['kd_intcost', 'kd_travcost'],			# tabreckdtree
 		['kd_ebonus', 'kd_maxprims'],			# tabreckdtree
-		'kd_maxdepth',									# tabreckdtree
+		'kd_maxdepth',							# tabreckdtree
 		
-		'grid_refineim',									# grid
+		'grid_refineim',						# grid
 		
-		'qbvh_maxprims',									# qbvh
+		'qbvh_maxprims',						# qbvh
 	]
 	
 	visibility = {
-		'kd_intcost':	    { 'accelerator': 'tabreckdtree' },
+		'kd_intcost':		{ 'accelerator': 'tabreckdtree' },
 		'kd_travcost':		{ 'accelerator': 'tabreckdtree' },
 		'kd_ebonus':		{ 'accelerator': 'tabreckdtree' },
 		'kd_maxprims':		{ 'accelerator': 'tabreckdtree' },

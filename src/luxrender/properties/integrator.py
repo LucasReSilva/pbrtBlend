@@ -34,34 +34,34 @@ from luxrender.export import ParamSet
 # TODO: check parameter completeness against Lux API
 
 class luxrender_integrator(bpy.types.IDPropertyGroup):
-    '''
-    Storage class for LuxRender SurfaceIntegrator settings.
-    This class will be instantiated within a Blender scene
-    object.
-    '''
-    
-    def api_output(self):
-        '''
-        Format this class's members into a LuxRender ParamSet
-        
-        Returns tuple
-        '''
-        
-        params = ParamSet()
-        
-        if self.surfaceintegrator in ['directlighting', 'path']:
-            params.add_string('lightstrategy', self.strategy)
-        
-        if self.surfaceintegrator == 'bidirectional':
-            params.add_integer('eyedepth', self.bidir_edepth)
-            params.add_integer('lightdepth', self.bidir_ldepth)
-        
-        if self.surfaceintegrator == 'distributedpath':
-            params.add_string('strategy', self.strategy)
+	'''
+	Storage class for LuxRender SurfaceIntegrator settings.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	def api_output(self):
+		'''
+		Format this class's members into a LuxRender ParamSet
+		
+		Returns tuple
+		'''
+		
+		params = ParamSet()
+		
+		if self.surfaceintegrator in ['directlighting', 'path']:
+			params.add_string('lightstrategy', self.strategy)
+		
+		if self.surfaceintegrator == 'bidirectional':
+			params.add_integer('eyedepth', self.bidir_edepth)
+			params.add_integer('lightdepth', self.bidir_ldepth)
+		
+		if self.surfaceintegrator == 'distributedpath':
+			params.add_string('strategy', self.strategy)
 
-#        if self.lux_surfaceintegrator == 'exphotonmap':
-#            pass
-        
-        out = self.surfaceintegrator, params
-        dbo('SURFACE INTEGRATOR', out)
-        return out
+#		if self.lux_surfaceintegrator == 'exphotonmap':
+#			pass
+		
+		out = self.surfaceintegrator, params
+		dbo('SURFACE INTEGRATOR', out)
+		return out

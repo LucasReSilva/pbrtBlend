@@ -34,10 +34,10 @@ from luxrender.export import ParamSet
 # TODO: check parameter completeness against Lux API
 
 class luxrender_engine(bpy.types.IDPropertyGroup):
-    '''
-    Storage class for LuxRender Engine settings.
-    This class will be instantiated within a Blender scene
-    object.
-    '''
-    
-    pass
+	'''
+	Storage class for LuxRender Engine settings.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	pass
