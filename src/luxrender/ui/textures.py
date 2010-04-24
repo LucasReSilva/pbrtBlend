@@ -35,72 +35,13 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.texture
+from luxrender.ui import FloatTexture, ColorTexture
 
-def ParamTextureFloat(attr, name, property_group, fl_default=0.0, fl_min=0.0, fl_max=1.0, rows=5, type='DEFAULT'):
-	return [
-		{
-			'attr': '%s_usetexture' % attr,
-			'type': 'bool',
-			'name': 'T',
-			'description': 'Textured %s' % name,
-			'default': False,
-			'toggle': True,
-		},
-		{
-			'attr': '%s_floatvalue' % attr,
-			'type': 'float',
-			'name': name,
-			'description': '%s Value' % name,
-			'default': fl_default,
-			'min': fl_min,
-			'soft_min': fl_min,
-			'max': fl_max,
-			'soft_max': fl_min,
-		},
-		{
-			'attr': '%s_texturename' % attr,
-			'type': 'string',
-			'name': '%s_texturename' % attr,
-			'description': '%s Texture' % name,
-		},
-		{
-			'type': 'prop_object',
-			'attr': '%s_texture' % attr,
-			'src': lambda s,c: s.object.material_slots[s.object.active_material_index].material, #context_tex_datablock(s),
-			'src_attr': 'texture_slots',
-			'trg': lambda s,c: getattr(c, property_group),
-			'trg_attr': '%s_texturename' % attr,
-			'name': name
-		},
-	]
+TF_tex1 = FloatTexture('tex1', 'Texture 1', 'luxrender_texture')
+TF_tex2 = FloatTexture('tex2', 'Texture 2', 'luxrender_texture')
 
-def ParamTextureColor(attr, name, property_group, rows=5, type='DEFAULT'):
-	return [
-		{
-			'type': 'float_vector',
-			'attr': attr,
-			'name': name,
-			'description': name,
-			'default': (0.8,0.8,0.8),
-			'subtype': 'COLOR',
-			'precision': 5,
-		},
-#		{
-#			'attr': '%s_texture' % attr,
-#			'type': 'string',
-#			'name': '%s_texture' % attr,
-#			'description': '%s_texture' % attr,
-#		},
-#		{
-#			'type': 'prop_object',
-#			'attr': attr,
-#			'src': lambda s,c: s.object.material_slots[s.object.active_material_index].material, #context_tex_datablock(s),
-#			'src_attr': 'texture_slots',
-#			'trg': lambda s,c: getattr(c, property_group),
-#			'trg_attr': '%s_texture' % attr,
-#			'name': name
-#		},
-	]
+def texture_visibility():
+	return {}
 
 class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	'''
@@ -133,13 +74,11 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	
 	controls = [
 		'type',
-		
-		'tex1',
-		'tex2'
-	]
+	] + \
+	TF_tex1.get_controls() + \
+	TF_tex2.get_controls()
 	
-	visibility = {
-	}
+	visibility = texture_visibility()
 	
 	properties = [
 		{
@@ -152,5 +91,5 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 			],
 		},
 	] + \
-	ParamTextureFloat('tex1', 'Texture 1', 'luxrender_texture') + \
-	ParamTextureFloat('tex2', 'Texture 2', 'luxrender_texture')
+	TF_tex1.get_properties() + \
+	TF_tex2.get_properties()
