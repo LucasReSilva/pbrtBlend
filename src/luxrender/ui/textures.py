@@ -36,23 +36,71 @@ from ef.ef import ef
 
 import luxrender.properties.texture
 
-def ParamTextureFloat(attr, name, descr, property_group, rows=5, type='DEFAULT'):
+def ParamTextureFloat(attr, name, property_group, fl_default=0.0, fl_min=0.0, fl_max=1.0, rows=5, type='DEFAULT'):
 	return [
 		{
-			'attr': '%s_texture' % attr,
+			'attr': '%s_type' % attr,
+			'type': 'enum',
+			'name': '%s Type' % name,
+			'default': 'float',
+			'items': [
+				('float', 'Value', 'float'),
+				('texture', 'Texture', 'texture'),
+			]
+		},
+		{
+			'attr': '%s_floatvalue' % attr,
+			'type': 'float',
+			'name': name,
+			'default': fl_default,
+			'min': fl_min,
+			'soft_min': fl_min,
+			'max': fl_max,
+			'soft_max': fl_min,
+		},
+		{
+			'attr': '%s_texturename' % attr,
 			'type': 'string',
-			'name': '%s_texture' % attr,
-			'description': '%s_texture' % attr,
+			'name': '%s_texturename' % attr,
+			'description': '%s_texturename' % attr,
 		},
 		{
 			'type': 'prop_object',
-			'attr': attr,
+			'attr': '%s_texture' % attr,
 			'src': lambda s,c: s.object.material_slots[s.object.active_material_index].material, #context_tex_datablock(s),
 			'src_attr': 'texture_slots',
 			'trg': lambda s,c: getattr(c, property_group),
-			'trg_attr': '%s_texture' % attr,
-			'name': descr
+			'trg_attr': '%s_texturename' % attr,
+			'name': name
 		},
+	]
+
+def ParamTextureColor(attr, name, property_group, rows=5, type='DEFAULT'):
+	return [
+		{
+			'type': 'float_vector',
+			'attr': attr,
+			'name': name,
+			'description': name,
+			'default': (0.8,0.8,0.8),
+			'subtype': 'COLOR',
+			'precision': 5,
+		},
+#		{
+#			'attr': '%s_texture' % attr,
+#			'type': 'string',
+#			'name': '%s_texture' % attr,
+#			'description': '%s_texture' % attr,
+#		},
+#		{
+#			'type': 'prop_object',
+#			'attr': attr,
+#			'src': lambda s,c: s.object.material_slots[s.object.active_material_index].material, #context_tex_datablock(s),
+#			'src_attr': 'texture_slots',
+#			'trg': lambda s,c: getattr(c, property_group),
+#			'trg_attr': '%s_texture' % attr,
+#			'name': name
+#		},
 	]
 
 class texture_editor(context_panel, TextureButtonsPanel, described_layout):
@@ -105,5 +153,5 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 			],
 		},
 	] + \
-	ParamTextureFloat('tex1', 'Texture 1', 'First Texture', 'luxrender_texture') + \
-	ParamTextureFloat('tex2', 'Texture 2', 'Second Texture', 'luxrender_texture')
+	ParamTextureFloat('tex1', 'Texture 1', 'luxrender_texture') + \
+	ParamTextureFloat('tex2', 'Texture 2', 'luxrender_texture')
