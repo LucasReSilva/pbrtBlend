@@ -65,9 +65,9 @@ properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add('luxrender')
 # properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add('luxrender')
 del properties_data_lamp
 
-#import properties_texture
-#properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
-#del properties_texture
+import properties_texture
+properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
+del properties_texture
 
 # compatible() copied from blender repository (netrender)
 def compatible(module):
@@ -79,7 +79,7 @@ def compatible(module):
 
 compatible("properties_data_mesh")
 compatible("properties_data_camera")
-compatible("properties_texture")
+#compatible("properties_texture")
 
 class luxrender(engine_base):
     '''

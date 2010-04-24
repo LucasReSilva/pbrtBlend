@@ -34,6 +34,26 @@ from ef.ef import ef
 
 # Lux API
 import luxrender.properties.material
+from luxrender.ui.textures import ParamTextureFloat
+
+def ParamMaterial(attr, name, descr, property_group):
+	return [
+		{
+			'attr': '%s_material' % attr,
+			'type': 'string',
+			'name': '%s_material' % attr,
+			'description': '%s_material' % attr,
+		},
+		{
+			'type': 'prop_object',
+			'attr': attr,
+			'src': lambda s,c: s.object,
+			'src_attr': 'material_slots',
+			'trg': lambda s,c: getattr(c, property_group),
+			'trg_attr': '%s_material' % attr,
+			'name': descr
+		},
+	]
 
 class material_editor(MaterialButtonsPanel, described_layout):
 	'''
@@ -79,10 +99,17 @@ class material_editor(MaterialButtonsPanel, described_layout):
 		# Common props
 		'material',
 		
+		# Mix Material,
+		'amount',
+		'namedmaterial1',
+		'namedmaterial2',
 	]
 	
 	visibility = {
-		
+		# Mix Material
+		'amount':                 { 'material': 'mix' },
+		'namedmaterial1':         { 'material': 'mix' },
+		'namedmaterial2':         { 'material': 'mix' },
 	}
 	
 	properties = [
@@ -104,11 +131,10 @@ class material_editor(MaterialButtonsPanel, described_layout):
 				('mirror','Mirror','mirror'),
 				('mix','Mix','mix'),
 				('null','Null','null'),
-				('boundvolume','Bound Volume','boundvolume'),
-				('light','Light','light'),
-				('portal','Portal','portal'),
 			],
 		},
-		
-	]
+	] + \
+	ParamTextureFloat('amount', 'Amount', 'Mix Amount', 'luxrender_material', type='COMPACT') + \
+	ParamMaterial('namedmaterial1', 'Material 1', 'First Material', 'luxrender_material') + \
+	ParamMaterial('namedmaterial2', 'Material 2', 'Second Material', 'luxrender_material')
 	

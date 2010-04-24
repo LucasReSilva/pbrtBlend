@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
+
 from properties_texture import context_tex_datablock
 from properties_texture import TextureButtonsPanel
 
@@ -34,103 +36,74 @@ from ef.ef import ef
 
 import luxrender.properties.texture
 
+def ParamTextureFloat(attr, name, descr, property_group, rows=5, type='DEFAULT'):
+	return [
+		{
+			'attr': '%s_texture' % attr,
+			'type': 'string',
+			'name': '%s_texture' % attr,
+			'description': '%s_texture' % attr,
+		},
+		{
+			'type': 'prop_object',
+			'attr': attr,
+			'src': lambda s,c: s.object.material_slots[s.object.active_material_index].material, #context_tex_datablock(s),
+			'src_attr': 'texture_slots',
+			'trg': lambda s,c: getattr(c, property_group),
+			'trg_attr': '%s_texture' % attr,
+			'name': descr
+		},
+	]
+
 class texture_editor(context_panel, TextureButtonsPanel, described_layout):
-    '''
-    Texture Editor UI Panel
-    '''
-    
-    bl_label = 'LuxRender Textures'
-    COMPAT_ENGINES = {'luxrender'}
-    
-    property_group = luxrender.properties.texture.luxrender_texture
-    
-    # prevent creating luxrender_texture property group in Scene
-    property_group_non_global = True
-    
-    # Overridden to provide data storage in the texture, not the scene
-    def draw(self, context):
-        if context.texture is not None:
-            if not hasattr(context.texture, self.property_group.__name__):
-                ef.init_properties(context.texture, [{
-                    'type': 'pointer',
-                    'attr': self.property_group.__name__,
-                    'ptype': self.property_group,
-                    'name': self.property_group.__name__,
-                    'description': self.property_group.__name__
-                }], cache=False)
-                ef.init_properties(self.property_group, self.properties, cache=False)
-            
-            for p in self.controls:
-                self.draw_column(p, self.layout, context.texture, supercontext=context)
-    
-    controls = [
-        'type',
-        
-        ['tex1_label', 'tex2_label'],
-        ['tex1', 'tex2']
-    ]
-    
-    visibility = {
-    }
-    
-    properties = [
-        {
-            'attr': 'type',
-            'type': 'enum',
-            'name': 'Type',
-            'description': 'LuxRender Texture Type',
-            'items': [
-                ('scale','scale','scale'),
-            ],
-        },
-        {
-            'type': 'text',
-            'attr': 'tex1_label',
-            'name': 'Texture 1'
-        },
-        {
-            'type': 'text',
-            'attr': 'tex2_label',
-            'name': 'Texture 2'
-        },
-        {
-            'type': 'int',
-            'attr': 'tex1_index',
-            'name': 'tex1_index',
-            'description': 'tex1_index',
-            'min': 0,  'soft_min': 0,
-            'max': 17, 'soft_max': 17,
-        },
-        {
-            'type': 'int',
-            'attr': 'tex2_index',
-            'name': 'tex2_index',
-            'description': 'tex2_index',
-            'min': 0,  'soft_min': 0,
-            'max': 17, 'soft_max': 17,
-        },
-        {
-            'attr': 'tex1',
-            'type': 'template_list',
-            # source data list
-            'src': lambda s,c: context_tex_datablock(s),
-            'src_attr': 'texture_slots',
-            # target property
-            'trg': lambda s,c: c.luxrender_texture,
-            'trg_attr': 'tex1_index',
-            'text': 'Texture 1',
-        },
-        {
-            'attr': 'tex2',
-            'type': 'template_list',
-            # source data list
-            'src': lambda s,c: context_tex_datablock(s),
-            'src_attr': 'texture_slots',
-            # target property
-            'trg': lambda s,c: c.luxrender_texture,
-            'trg_attr': 'tex2_index',
-            'text': 'Texture 2',
-        },
-        
-        
-    ]
+	'''
+	Texture Editor UI Panel
+	'''
+	
+	bl_label = 'LuxRender Textures'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	property_group = luxrender.properties.texture.luxrender_texture
+	
+	# prevent creating luxrender_texture property group in Scene
+	property_group_non_global = True
+	
+	# Overridden to provide data storage in the texture, not the scene
+	def draw(self, context):
+		if context.texture is not None:
+			if not hasattr(context.texture, self.property_group.__name__):
+				ef.init_properties(context.texture, [{
+					'type': 'pointer',
+					'attr': self.property_group.__name__,
+					'ptype': self.property_group,
+					'name': self.property_group.__name__,
+					'description': self.property_group.__name__
+				}], cache=False)
+				ef.init_properties(self.property_group, self.properties, cache=False)
+			
+			for p in self.controls:
+				self.draw_column(p, self.layout, context.texture, supercontext=context)
+	
+	controls = [
+		'type',
+		
+		'tex1',
+		'tex2'
+	]
+	
+	visibility = {
+	}
+	
+	properties = [
+		{
+			'attr': 'type',
+			'type': 'enum',
+			'name': 'Type',
+			'description': 'LuxRender Texture Type',
+			'items': [
+				('scale','scale','scale'),
+			],
+		},
+	] + \
+	ParamTextureFloat('tex1', 'Texture 1', 'First Texture', 'luxrender_texture') + \
+	ParamTextureFloat('tex2', 'Texture 2', 'Second Texture', 'luxrender_texture')
