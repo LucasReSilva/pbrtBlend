@@ -56,41 +56,41 @@ def ParamMaterial(attr, name, property_group):
 	]
 
 # Float Textures
-TF_amount		= FloatTexture('amount', 'Mix Amount', 'luxrender_material')
-TF_bumpmap		= FloatTexture('bumpmap', 'Bump Map', 'luxrender_material')
-TF_cauchyb		= FloatTexture('cauchyb', 'Cauchy B', 'luxrender_material')
-TF_d			= FloatTexture('d', 'Absorption Depth', 'luxrender_material')
-TF_film			= FloatTexture('film', 'Thin Film', 'luxrender_material')
-TF_filmindex	= FloatTexture('filmindex', 'Film IOR', 'luxrender_material')
-TF_index		= FloatTexture('index', 'IOR', 'luxrender_material')
-TF_M1			= FloatTexture('M1', 'M1', 'luxrender_material')
-TF_M2			= FloatTexture('M2', 'M2', 'luxrender_material')
-TF_M3			= FloatTexture('M3', 'M3', 'luxrender_material')
-TF_R1			= FloatTexture('R1', 'R1', 'luxrender_material')
-TF_R2			= FloatTexture('R2', 'R2', 'luxrender_material')
-TF_R3			= FloatTexture('R3', 'R3', 'luxrender_material')
-TF_sigma		= FloatTexture('sigma', 'Sigma', 'luxrender_material')
-TF_uroughness	= FloatTexture('uroughness', 'uroughness', 'luxrender_material')
-TF_vroughness	= FloatTexture('vroughness', 'vroughness', 'luxrender_material')
+TF_amount		= FloatTexture('material', 'amount', 'Mix Amount',		'luxrender_material')
+TF_bumpmap		= FloatTexture('material', 'bumpmap', 'Bump Map',		'luxrender_material')
+TF_cauchyb		= FloatTexture('material', 'cauchyb', 'Cauchy B',		'luxrender_material')
+TF_d			= FloatTexture('material', 'd', 'Absorption Depth',		'luxrender_material')
+TF_film			= FloatTexture('material', 'film', 'Thin Film',			'luxrender_material')
+TF_filmindex	= FloatTexture('material', 'filmindex', 'Film IOR',		'luxrender_material')
+TF_index		= FloatTexture('material', 'index', 'IOR',				'luxrender_material')
+TF_M1			= FloatTexture('material', 'M1', 'M1',					'luxrender_material')
+TF_M2			= FloatTexture('material', 'M2', 'M2',					'luxrender_material')
+TF_M3			= FloatTexture('material', 'M3', 'M3',					'luxrender_material')
+TF_R1			= FloatTexture('material', 'R1', 'R1',					'luxrender_material')
+TF_R2			= FloatTexture('material', 'R2', 'R2',					'luxrender_material')
+TF_R3			= FloatTexture('material', 'R3', 'R3',					'luxrender_material')
+TF_sigma		= FloatTexture('material', 'sigma', 'Sigma',			'luxrender_material')
+TF_uroughness	= FloatTexture('material', 'uroughness', 'uroughness',	'luxrender_material')
+TF_vroughness	= FloatTexture('material', 'vroughness', 'vroughness',	'luxrender_material')
 
 # Color Textures
-TC_Ka	= ColorTexture('Ka', 'Absorption color', 'luxrender_material')
-TC_Kd	= ColorTexture('Kd', 'Diffuse color', 'luxrender_material')
-TC_Kr	= ColorTexture('Kr', 'Reflection color', 'luxrender_material')
-TC_Ks	= ColorTexture('Ks', 'Specular color', 'luxrender_material')
-TC_Ks1	= ColorTexture('Ks1', 'Specular color 1', 'luxrender_material')
-TC_Ks2	= ColorTexture('Ks2', 'Specular color 2', 'luxrender_material')
-TC_Ks3	= ColorTexture('Ks3', 'Specular color 3', 'luxrender_material')
-TC_Kt	= ColorTexture('Kt', 'Transmission color', 'luxrender_material')
+TC_Ka	= ColorTexture('material', 'Ka', 'Absorption color',	'luxrender_material')
+TC_Kd	= ColorTexture('material', 'Kd', 'Diffuse color',		'luxrender_material')
+TC_Kr	= ColorTexture('material', 'Kr', 'Reflection color',	'luxrender_material')
+TC_Ks	= ColorTexture('material', 'Ks', 'Specular color',		'luxrender_material')
+TC_Ks1	= ColorTexture('material', 'Ks1', 'Specular color 1',	'luxrender_material')
+TC_Ks2	= ColorTexture('material', 'Ks2', 'Specular color 2',	'luxrender_material')
+TC_Ks3	= ColorTexture('material', 'Ks3', 'Specular color 3',	'luxrender_material')
+TC_Kt	= ColorTexture('material', 'Kt', 'Transmission color',	'luxrender_material')
 
 def material_visibility():
 	# non-texture properties
 	vis = {
-		'architectural':			{ 'material': has_property('architectural') },
-		'dispersion':				{ 'material': has_property('dispersion') },
-		'name':						{ 'material': has_property('name') },
-		'namedmaterial1':			{ 'material': has_property('namedmaterial1') },
-		'namedmaterial2':			{ 'material': has_property('namedmaterial2') },
+		'architectural':			{ 'material': has_property('material', 'architectural') },
+		'dispersion':				{ 'material': has_property('material', 'dispersion') },
+		'name':						{ 'material': has_property('material', 'name') },
+		'namedmaterial1':			{ 'material': has_property('material', 'namedmaterial1') },
+		'namedmaterial2':			{ 'material': has_property('material', 'namedmaterial2') },
 	}
 	
 	# Float Texture based properties

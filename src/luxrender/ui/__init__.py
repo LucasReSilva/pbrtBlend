@@ -26,7 +26,25 @@
 #
 from ef.validate import Logic_AND as A, Logic_OR as O, Logic_Operator as OP
 
-def has_property(property_name):
+def has_property(parent_type, property_name):
+	if parent_type == 'material':
+		return has_material_property(property_name)
+	elif parent_type == 'texture':
+		return has_texture_property(property_name)
+
+def has_texture_property(property_name):
+	'''
+	Refer to http://www.luxrender.net/static/textures-parameters.xhtml
+	for contents of this mapping
+	'''
+	
+	map = {
+		'temperature':		O(['blackbody']),
+	}
+	
+	return map[property_name]
+
+def has_material_property(property_name):
 	'''
 	Refer to http://www.luxrender.net/static/materials-parameters.xhtml
 	for contents of this mapping
@@ -66,29 +84,52 @@ def has_property(property_name):
 	
 	return map[property_name]
 
-class ColorTexture(object):
+class TextureBase(object):
+	parent_type		= None
 	attr			= None
 	name			= None
 	property_group	= None
-	
-	def __init__(self, attr, name, property_group):
+	def __init__(self, parent_type, attr, name, property_group):
+		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
 		self.property_group = property_group
 	
+	def get_extra_controls(self):
+		'''
+		Subclasses can override this for their own needs
+		'''	
+		return []
+	
+	def get_extra_visibility(self):
+		'''
+		Subclasses can override this for their own needs
+		'''	
+		return {}
+	
+	def get_extra_properties(self):
+		'''
+		Subclasses can override this for their own needs
+		'''	
+		return []
+
+class ColorTexture(TextureBase):
+
 	def get_controls(self):
 		return [
 			[ 0.9, ['%s_label' % self.attr, self.attr], '%s_usetexture' % self.attr ],
 			'%s_texture' % self.attr
-		]
+		] + self.get_extra_controls()
 	
 	def get_visibility(self):
-		return {
-			'%s_label' % self.attr: 			{ 'material': has_property(self.attr) },
-			self.attr: 							{ 'material': has_property(self.attr) },
-			'%s_usetexture' % self.attr:		{ 'material': has_property(self.attr) },
-			'%s_texture' % self.attr:			{ 'material': has_property(self.attr), '%s_usetexture' % self.attr: True },
+		vis = {
+			'%s_label' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
+			self.attr: 							{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_usetexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usetexture' % self.attr: True },
 		}
+		vis.update(self.get_extra_visibility())
+		return vis
 	
 	def get_properties(self):
 		return [
@@ -128,21 +169,19 @@ class ColorTexture(object):
 				'trg_attr': '%s_texturename' % self.attr,
 				'name': self.name
 			},
-		]
+		] + self.get_extra_properties()
 
-class FloatTexture(object):
-	attr			= None
-	name			= None
-	property_group	= None
+class FloatTexture(TextureBase):
 	default			= 0.0
 	min				= 0.0
 	max				= 1.0
 	precision		= 3
 	
 	def __init__(self,
-			attr, name, property_group,
+			parent_type, attr, name, property_group,
 			default = 0.0, min = 0.0, max = 1.0, precision=3
 		):
+		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
 		self.property_group = property_group
@@ -155,14 +194,16 @@ class FloatTexture(object):
 		return [
 			[0.9, '%s_floatvalue' % self.attr, '%s_usetexture' % self.attr],
 			'%s_texture' % self.attr,
-		]
+		] + self.get_extra_controls()
 	
 	def get_visibility(self):
-		return {
-			'%s_usetexture' % self.attr:		{ 'material': has_property(self.attr) },
-			'%s_floatvalue' % self.attr:		{ 'material': has_property(self.attr) },
-			'%s_texture' % self.attr:			{ 'material': has_property(self.attr), '%s_usetexture' % self.attr: True },
+		vis = {
+			'%s_usetexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_floatvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usetexture' % self.attr: True },
 		}
+		vis.update(self.get_extra_visibility())
+		return vis
 	
 	def get_properties(self):
 		return [
@@ -202,4 +243,4 @@ class FloatTexture(object):
 				'trg_attr': '%s_texturename' % self.attr,
 				'name': self.name
 			},
-		]
+		] + self.get_extra_properties()

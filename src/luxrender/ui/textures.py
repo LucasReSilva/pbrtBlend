@@ -37,11 +37,18 @@ from ef.ef import ef
 import luxrender.properties.texture
 from luxrender.ui import FloatTexture, ColorTexture
 
-TF_tex1 = FloatTexture('tex1', 'Texture 1', 'luxrender_texture')
-TF_tex2 = FloatTexture('tex2', 'Texture 2', 'luxrender_texture')
+# TODO: Not sure hoe to morph type of tex1/tex2 from Float/Color depending on context
+#TF_tex1 = FloatTexture('texture', 'tex1', 'Texture 1', 'luxrender_texture')
+#TF_tex2 = FloatTexture('texture', 'tex2', 'Texture 2', 'luxrender_texture')
+
+TF_temperature		= FloatTexture('texture', 'temperature', 'Temperature', 'luxrender_texture')
 
 def texture_visibility():
-	return {}
+	vis = {}
+	
+	vis.update( TF_temperature.get_visibility() )
+	
+	return vis
 
 class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	'''
@@ -55,6 +62,13 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	
 	# prevent creating luxrender_texture property group in Scene
 	property_group_non_global = True
+	
+	def poll(self, context):
+		'''
+		Only show LuxRender panel with 'Plugin' texture type
+		'''
+		
+		return super().poll(context) and context.texture.type == 'PLUGIN'
 	
 	# Overridden to provide data storage in the texture, not the scene
 	def draw(self, context):
@@ -71,25 +85,23 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.texture, supercontext=context)
-	
+				
 	controls = [
-		'type',
+		'texture',
 	] + \
-	TF_tex1.get_controls() + \
-	TF_tex2.get_controls()
+	TF_temperature.get_controls()
 	
 	visibility = texture_visibility()
 	
 	properties = [
 		{
-			'attr': 'type',
+			'attr': 'texture',
 			'type': 'enum',
 			'name': 'Type',
 			'description': 'LuxRender Texture Type',
 			'items': [
-				('scale','scale','scale'),
+				('blackbody', 'Blackbody', 'blackbody'),
 			],
 		},
 	] + \
-	TF_tex1.get_properties() + \
-	TF_tex2.get_properties()
+	TF_temperature.get_properties()
