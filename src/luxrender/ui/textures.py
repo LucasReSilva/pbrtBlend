@@ -39,19 +39,18 @@ import luxrender.properties.texture
 def ParamTextureFloat(attr, name, property_group, fl_default=0.0, fl_min=0.0, fl_max=1.0, rows=5, type='DEFAULT'):
 	return [
 		{
-			'attr': '%s_type' % attr,
-			'type': 'enum',
-			'name': '%s Type' % name,
-			'default': 'float',
-			'items': [
-				('float', 'Value', 'float'),
-				('texture', 'Texture', 'texture'),
-			]
+			'attr': '%s_usetexture' % attr,
+			'type': 'bool',
+			'name': 'T',
+			'description': 'Textured %s' % name,
+			'default': False,
+			'toggle': True,
 		},
 		{
 			'attr': '%s_floatvalue' % attr,
 			'type': 'float',
 			'name': name,
+			'description': '%s Value' % name,
 			'default': fl_default,
 			'min': fl_min,
 			'soft_min': fl_min,
@@ -62,7 +61,7 @@ def ParamTextureFloat(attr, name, property_group, fl_default=0.0, fl_min=0.0, fl
 			'attr': '%s_texturename' % attr,
 			'type': 'string',
 			'name': '%s_texturename' % attr,
-			'description': '%s_texturename' % attr,
+			'description': '%s Texture' % name,
 		},
 		{
 			'type': 'prop_object',
