@@ -24,3 +24,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+from luxrender.__main__ import luxrender
+
+def register():
+	luxrender.install()
+	
+def unregister():
+	luxrender.uninstall()
