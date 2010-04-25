@@ -102,7 +102,7 @@ def zipper(dir, zip_file):
     zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
     root_len = len(os.path.abspath(dir))
     for root, dirs, files in os.walk(dir):
-        archive_root = os.path.basename(os.path.abspath(root)) + '/' + os.path.abspath(root)[root_len:]
+        archive_root = os.path.basename(os.path.abspath(dir)) + '/' + os.path.abspath(root)[root_len:]
         for f in files:
             if '.svn' in root: continue
             if f[-4:] == '.pyc': continue
