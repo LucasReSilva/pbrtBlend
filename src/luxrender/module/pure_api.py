@@ -24,8 +24,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-
-import luxrender.pylux
+try:
+	import luxrender.pylux
+except ImportError as err:
+	raise Exception('Binary pylux module not found! Visit http://www.luxrender.net/ to obtain one.')
 
 class Custom_Context(luxrender.pylux.Context):
 	'''

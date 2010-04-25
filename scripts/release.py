@@ -75,14 +75,14 @@ except ImportError:
         print(' -> http://mercurial.selenic.com/downloads/')
     sys.exit(1)
     
-try:
-    import paramiko
-    ssh_key_agent = paramiko.Agent()
-except ImportError:
-    print('This script requires Paramiko')
-    print(' -> http://www.voidspace.org.uk/python/modules.shtml#pycrypto')
-    print(' -> http://www.lag.net/paramiko/')
-    sys.exit(1)
+#try:
+#    import paramiko
+#    ssh_key_agent = paramiko.Agent()
+#except ImportError:
+#    print('This script requires Paramiko')
+#    print(' -> http://www.voidspace.org.uk/python/modules.shtml#pycrypto')
+#    print(' -> http://www.lag.net/paramiko/')
+#    sys.exit(1)
 
 # Go up to repo root
 releaselib.pushd('../')
@@ -133,7 +133,7 @@ mercurial.commands.copy(
     mui,
     repo_root,
     'src/luxrender',
-    os.path.join(RELEASE_DIR, 'engines', 'luxrender')
+    os.path.join(RELEASE_DIR, 'luxrender')
 )
 
 VERSIONS = {
@@ -202,5 +202,6 @@ releaselib.make_release_zips(RELEASE_DIR, VERSIONS)
 
 releaselib.print_title('Finished')
 print('Please check contents of %s and commit if OK' % RELEASE_DIR)
+print("Don't forget to distribute or make available a pylux module to go with this exporter!")
 # return to script dir
 releaselib.popd()
