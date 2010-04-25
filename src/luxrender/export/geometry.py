@@ -32,6 +32,7 @@ from luxrender.module import LuxLog
 from luxrender.module.file_api import Files
 from luxrender.export import matrix_to_list
 from luxrender.export import ParamSet
+from luxrender.export.materials import materials as export_materials
 
 #-------------------------------------------------
 # getMeshType(self, scene, mesh, ss)
@@ -52,17 +53,6 @@ def getMeshType(mesh):
 	return dstr,params
 
 def exportMesh(ob, me, l, smoothing_enabled):
-	
-	# dummy material for now
-	dummy_params = ParamSet()
-	dummy_params.add_color('Kd', [
-		0.75, 0.75, 0.75
-		# just for a laugh
-		#random.random(),
-		#random.random(),
-		#random.random()
-	])
-	l.material('matte', dummy_params)
 	
 	faces_verts = [f.verts for f in me.faces]
 	ffaces = [f for f in me.faces]
@@ -160,7 +150,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 	Returns		None
 	'''
 	
-	vis_layers = scene.visible_layers
+	vis_layers = scene.layers
 	
 	sel = scene.objects
 	total_objects = len(sel)
@@ -190,7 +180,10 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			continue
 
 		l.attributeBegin(comment=ob.name, file=Files.GEOM)
-			
+		
+		export_materials(l, ob)
+		
+		
 		# object translation/rotation/scale 
 		l.transform( matrix_to_list(ob.matrix) )
 
@@ -205,3 +198,4 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if pc not in rpcs:
 			rpcs.append(pc)
 			render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
+	

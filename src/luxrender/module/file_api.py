@@ -149,6 +149,9 @@ class Custom_Context(Pylux_Context):
 	def worldBegin(self, *args):
 		self.wf(Files.MAIN, '\nWorldBegin')
 	
+	def lightGroup(self, *args):
+		self._api('LightGroup', args)
+	
 	def lightSource(self, *args):
 		self._api('LightSource', args)
 
@@ -192,8 +195,16 @@ class Custom_Context(Pylux_Context):
 		
 	def material(self, *args):
 		self._api('Material', args)
+		
+	def namedMaterial(self, name):
+		self._api('NamedMaterial', [name, []])
 	
-	def texture(self, name, type, texture, *params):
+	def makeNamedMaterial(self, name, params):
+		self.wf(Files.MATS, '\nMakeNamedMaterial "%s"' % name)
+		for p in params:
+			self.wf(Files.MATS, p.to_string(), 1)
+	
+	def texture(self, name, type, texture, params):
 		self.wf(Files.MATS, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
 		for p in params:
 			self.wf(Files.MATS, p.to_string(), 1)

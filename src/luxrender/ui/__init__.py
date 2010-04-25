@@ -44,13 +44,13 @@ def has_texture_property(property_name):
 	
 	return map[property_name]
 
-def has_material_property(property_name):
+def material_property_map():
 	'''
 	Refer to http://www.luxrender.net/static/materials-parameters.xhtml
 	for contents of this mapping
 	'''
 	
-	map = {
+	return {
 		'amount':			O(['mix']),
 		'architectural':	O(['glass', 'glass2']),
 		'bumpmap':			O(['carpaint', 'glass', 'glass2', 'glossy_lossy', 'glossy', 'matte', 'mattetranslucent', 'metal', 'mirror', 'roughglass', 'shinymetal']),
@@ -82,7 +82,8 @@ def has_material_property(property_name):
 		'vroughness':		O(['glossy_lossy', 'glossy', 'metal', 'roughglass', 'shinymetal']),
 	}
 	
-	return map[property_name]
+def has_material_property(property_name):
+	return material_property_map()[property_name]
 
 class TextureBase(object):
 	parent_type		= None
@@ -117,14 +118,14 @@ class ColorTexture(TextureBase):
 
 	def get_controls(self):
 		return [
-			[ 0.9, ['%s_label' % self.attr, self.attr], '%s_usetexture' % self.attr ],
-			'%s_texture' % self.attr
+			[ 0.9, ['%s_label' % self.attr, '%s_color' % self.attr], '%s_usetexture' % self.attr ],
+			#'%s_texture' % self.attr
 		] + self.get_extra_controls()
 	
 	def get_visibility(self):
 		vis = {
 			'%s_label' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
-			self.attr: 							{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_color' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
 			'%s_usetexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
 			'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usetexture' % self.attr: True },
 		}
@@ -133,6 +134,11 @@ class ColorTexture(TextureBase):
 	
 	def get_properties(self):
 		return [
+			{
+				'attr': self.attr,
+				'type': 'string',
+				'default': 'lux_color_texture',
+			},
 			{
 				'attr': '%s_usetexture' % self.attr,
 				'type': 'bool',
@@ -148,7 +154,7 @@ class ColorTexture(TextureBase):
 			},
 			{
 				'type': 'float_vector',
-				'attr': self.attr,
+				'attr': '%s_color' % self.attr,
 				'name': '', #self.name,
 				'description': self.name,
 				'default': (0.8,0.8,0.8),
@@ -193,7 +199,7 @@ class FloatTexture(TextureBase):
 	def get_controls(self):
 		return [
 			[0.9, '%s_floatvalue' % self.attr, '%s_usetexture' % self.attr],
-			'%s_texture' % self.attr,
+			#'%s_texture' % self.attr,
 		] + self.get_extra_controls()
 	
 	def get_visibility(self):
@@ -207,6 +213,12 @@ class FloatTexture(TextureBase):
 	
 	def get_properties(self):
 		return [
+			{
+				'attr': self.attr,
+				'type': 'string',
+				'default': 'lux_float_texture',
+			},
+			
 			{
 				'attr': '%s_usetexture' % self.attr,
 				'type': 'bool',

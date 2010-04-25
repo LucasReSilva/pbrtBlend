@@ -83,6 +83,7 @@ compatible("properties_data_mesh")
 compatible("properties_data_camera")
 
 class luxrender(engine_base):
+
 	'''
 	LuxRender Engine Exporter/Integration class
 	'''

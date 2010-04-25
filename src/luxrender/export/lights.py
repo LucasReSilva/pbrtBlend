@@ -58,7 +58,7 @@ def attr_light(l, name, group, type, params, transform=None):
 		l.attributeBegin(comment=name, file=Files.MAIN)
 	
 	dbo('LIGHT', (type, params))
-	l.lightGroup(group)
+	l.lightGroup(group, [])
 	l.lightSource(type, params)
 	
 	if transform is not None:
@@ -139,7 +139,7 @@ def lights(l, scene):
 			# nsamples
 			l.attributeBegin(ob.name, file=Files.MAIN)
 			l.transform(matrix_to_list(ob.matrix))
-			l.lightGroup(light.luxrender_lamp.lightgroup)
+			l.lightGroup(light.luxrender_lamp.lightgroup, [])
 			l.arealightSource('area', light_params)
 
 			areax = light.size

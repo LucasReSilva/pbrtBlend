@@ -78,6 +78,7 @@ class ParamSet(list):
 	def update(self, other):
 		for p in other:
 			self.add(p.type, p.name, p.value)
+		return self
 	
 	def add(self, type, name, value):
 		if name in self.names:

@@ -55,6 +55,8 @@ def ParamMaterial(attr, name, property_group):
 		},
 	]
 
+# TODO: add default values
+
 # Float Textures
 TF_amount		= FloatTexture('material', 'amount', 'Mix Amount',		'luxrender_material')
 TF_bumpmap		= FloatTexture('material', 'bumpmap', 'Bump Map',		'luxrender_material')
@@ -62,7 +64,7 @@ TF_cauchyb		= FloatTexture('material', 'cauchyb', 'Cauchy B',		'luxrender_materi
 TF_d			= FloatTexture('material', 'd', 'Absorption Depth',		'luxrender_material')
 TF_film			= FloatTexture('material', 'film', 'Thin Film',			'luxrender_material')
 TF_filmindex	= FloatTexture('material', 'filmindex', 'Film IOR',		'luxrender_material')
-TF_index		= FloatTexture('material', 'index', 'IOR',				'luxrender_material')
+TF_index		= FloatTexture('material', 'index', 'IOR',				'luxrender_material', min=0.0, max=25.0, default=1.0)
 TF_M1			= FloatTexture('material', 'M1', 'M1',					'luxrender_material')
 TF_M2			= FloatTexture('material', 'M2', 'M2',					'luxrender_material')
 TF_M3			= FloatTexture('material', 'M3', 'M3',					'luxrender_material')
@@ -219,6 +221,7 @@ class material_editor(MaterialButtonsPanel, described_layout):
 			'attr': 'material',
 			'name': 'Type',
 			'description': 'LuxRender material type',
+			'default': 'matte',
 			'items': [
 				('carpaint', 'Car Paint', 'carpaint'),
 				('glass', 'Glass', 'glass'),

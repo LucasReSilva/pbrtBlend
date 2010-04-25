@@ -37,13 +37,13 @@ import luxrender.module.file_api
 # Access lux only through pylux bindings
 import luxrender.module.pure_api
 
-def LuxLog(*args):
+def LuxLog(*args, popup=False):
 	'''
 	Send string to EF log, marked as belonging to LuxRender module.
 	Accepts variable args (can be used as pylux.errorHandler)
 	'''
 	if len(args) > 0:
-		ef.log(' '.join(['%s'%a for a in args]), module_name='Lux')
+		ef.log(' '.join(['%s'%a for a in args]), module_name='Lux', popup=popup)
 	
 class LuxTimerThread(threading.Thread):
 	'''
@@ -150,7 +150,7 @@ class LuxFilmDisplay(LuxTimerThread):
 			
 	def kick(self, render_end=False):
 		if self.RE is not None:
-			#self.lux_context.updateFramebuffer()
+			self.lux_context.updateFramebuffer()
 			px = [] #self.lux_context.framebuffer()
 			xres = int(self.lux_context.statistics('filmXres'))
 			yres = int(self.lux_context.statistics('filmYres'))
