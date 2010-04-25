@@ -138,7 +138,7 @@ mercurial.commands.copy(
 
 VERSIONS = {
  'EF':          '%i'%EF_REV,
- 'luxrender':   '%i'%REPO_REV
+ 'luxrender':   '%i'%sys.argv[1], #REPO_REV
 } 
 
 # Create config file
