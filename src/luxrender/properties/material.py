@@ -25,13 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-
-from . import dbo
-
-# TODO: adapt values written to d based on simple/advanced views
-
-# TODO: check parameter completeness against Lux API
-
+ 
 class luxrender_material(bpy.types.IDPropertyGroup):
 	'''
 	Storage class for LuxRender Material settings.

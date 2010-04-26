@@ -27,7 +27,8 @@
 import random
 
 from . import ParamSet
-from ..ui import material_property_map, FloatTexture, ColorTexture
+from ..properties.util import material_property_map
+from ..properties.texture import FloatTexture, ColorTexture
 
 class ExportedMaterials(object):
 	# Static class variables
