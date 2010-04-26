@@ -34,8 +34,41 @@ from ef.validate import Logic_Operator as LO
 
 # Lux API
 import luxrender.properties.lamp
+from ..properties.texture import ColorTexture
 
 narrowui = 180
+
+class LampColorTexture(ColorTexture):
+	def texture_slot_finder(self):
+		return lambda s,c: s.object.data
+	def get_visibility(self):
+		vis = {
+			'%s_texture' % self.attr:			{ '%s_usetexture' % self.attr: True },
+		}
+		return vis
+
+TC_L = LampColorTexture('lamp', 'L', 'Colour', 'luxrender_lamp')
+
+def lamp_visibility():
+	vis = {
+		'power':			{ 'type': 'AREA'},
+		'efficacy':			{ 'type': 'AREA'},
+		
+		'turbidity':		{ 'type': 'SUN' },
+		'sunsky_type':		{ 'type': 'SUN' },
+		
+		'infinite_map':		{ 'type': 'HEMI' },
+		'mapping_type':		{ 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
+		
+		'L_color':			{ 'type': LO({'!=': 'SUN'}) },
+		'L_usetexture':		{ 'type': LO({'!=': 'SUN'}) },
+		'L_texture':		{ 'type': LO({'!=': 'SUN'}), 'L_usetexture': True }
+	}
+	
+	# Add TC_L manually, because we need to exlude it from SUN
+	#vis.update(TC_L.get_visibility())
+	
+	return vis
 
 class lamps(DataButtonsPanel, described_layout):
 	bl_label = 'LuxRender Lamps'
@@ -130,7 +163,7 @@ class lamps(DataButtonsPanel, described_layout):
 					self.draw_column(p, self.layout, context.lamp, supercontext=context)
 	
 	# luxrender properties
-	controls = [
+	controls = TC_L.get_controls() + [
 		'importance', 'lightgroup',
 		['power','efficacy'],
 		'turbidity', 'sunsky_type',
@@ -138,18 +171,9 @@ class lamps(DataButtonsPanel, described_layout):
 		'mapping_type',
 	]
 	
-	visibility = {
-		'power':			{ 'type': 'AREA'},
-		'efficacy':			{ 'type': 'AREA'},
-		
-		'turbidity':		{ 'type': 'SUN' },
-		'sunsky_type':		{ 'type': 'SUN' },
-		
-		'infinite_map':		{ 'type': 'HEMI' },
-		'mapping_type':		{ 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
-	}
+	visibility = lamp_visibility()
 	
-	properties = [
+	properties = TC_L.get_properties() + [
 		{
 			# hidden value for visibility control
 			'type': 'string',

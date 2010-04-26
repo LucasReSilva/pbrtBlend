@@ -39,6 +39,9 @@ class TextureBase(object):
 		self.name = name
 		self.property_group = property_group
 	
+	def texture_slot_finder(self):
+		return lambda s,c: s.object.material_slots[s.object.active_material_index].material
+	
 	def get_extra_controls(self):
 		'''
 		Subclasses can override this for their own needs
@@ -112,7 +115,7 @@ class ColorTexture(TextureBase):
 			{
 				'type': 'prop_object',
 				'attr': '%s_texture' % self.attr,
-				'src': lambda s,c: s.object.material_slots[s.object.active_material_index].material,
+				'src': self.texture_slot_finder(),
 				'src_attr': 'texture_slots',
 				'trg': lambda s,c: getattr(c, self.property_group),
 				'trg_attr': '%s_texturename' % self.attr,
@@ -192,7 +195,7 @@ class FloatTexture(TextureBase):
 			{
 				'type': 'prop_object',
 				'attr': '%s_texture' % self.attr,
-				'src': lambda s,c: s.object.material_slots[s.object.active_material_index].material,
+				'src': self.texture_slot_finder(),
 				'src_attr': 'texture_slots',
 				'trg': lambda s,c: getattr(c, self.property_group),
 				'trg_attr': '%s_texturename' % self.attr,
