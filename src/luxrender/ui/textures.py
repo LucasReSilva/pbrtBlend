@@ -68,7 +68,7 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 		Only show LuxRender panel with 'Plugin' texture type
 		'''
 		
-		return super().poll(context) and context.texture.type == 'PLUGIN'
+		return TextureButtonsPanel.poll(self, context) and context.texture.type == 'PLUGIN'
 	
 	# Overridden to provide data storage in the texture, not the scene
 	def draw(self, context):
