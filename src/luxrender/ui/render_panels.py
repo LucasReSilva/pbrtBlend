@@ -68,8 +68,9 @@ class engine(render_described_context):
 		'write_lxs':			{ 'export_type': 'INT', 'write_files': True },
 		'write_lxm':			{ 'export_type': 'INT', 'write_files': True },
 		'write_lxo':			{ 'export_type': 'INT', 'write_files': True },
-		'threads':				{ 'threads_auto': False },
-		'priority':				{ 'export_type': 'EXT' },
+		'threads_auto':			A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
+		'threads':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
+		'priority':				{ 'export_type': 'EXT', 'render': True },
 	}
 	
 	properties = [
