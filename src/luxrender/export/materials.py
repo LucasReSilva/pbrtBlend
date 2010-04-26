@@ -30,6 +30,39 @@ from . import ParamSet
 from ..properties.util import material_property_map
 from ..properties.texture import FloatTexture, ColorTexture
 
+def write_lxm(l, scene):
+	'''
+	l			pylux.Context
+	scene		bpy.types.scene
+	
+	Iterate over the given scene's objects, and export materials
+	of visible ones to the lux Conext l
+	
+	Returns		None
+	'''
+	
+	vis_layers = scene.layers
+	
+	sel = scene.objects
+	total_objects = len(sel)
+	rpcs = []
+	ipc = 0.0
+	for ob in sel:
+		ipc += 1.0
+		
+		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE'):
+			continue
+		
+		# Check layers
+		visible = False
+		for layer_index, o_layer in enumerate(ob.layers):
+			visible = visible or (o_layer and vis_layers[layer_index])
+		
+		if not visible:
+			continue
+		
+		materials_file(l, ob)
+
 class ExportedMaterials(object):
 	# Static class variables
 	material_names = []
@@ -62,11 +95,10 @@ class ExportedMaterials(object):
 			if n not in ExportedMaterials.exported_material_names:
 				lux_context.makeNamedMaterial(n, p)
 				ExportedMaterials.exported_material_names.append(n)
-	
 
-def materials(lux_context, ob):
+def export_object_material(lux_context, ob):
 	if lux_context.API_TYPE == 'FILE':
-		materials_file(lux_context, ob)
+		lux_context.namedMaterial(ob.active_material.name)
 	elif lux_context.API_TYPE == 'PURE':
 		materials_direct(lux_context, ob)
 
@@ -77,7 +109,6 @@ def materials_direct(lux_context, ob):
 			lux_context.material('matte', material_params)
 
 def materials_file(lux_context, ob):
-	lux_context.namedMaterial(ob.active_material.name)
 	for m in ob.data.materials:
 		if hasattr(m, 'luxrender_material') and m.name not in ExportedMaterials.material_names:
 			material_params = luxrender_material_params(m, add_type=True)
@@ -120,7 +151,7 @@ def add_color_texture(lux_prop_name, lux_mat):
 	return params
 
 def luxrender_material_params(mat, add_type=False):
-	print('mat %s'%mat.name)
+	#print('mat %s'%mat.name)
 	lux_mat = mat.luxrender_material
 	mp = ParamSet()
 	lux_mat_type = lux_mat.material

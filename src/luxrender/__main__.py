@@ -186,15 +186,22 @@ class luxrender(engine_base):
 		
 		l = self.LuxManager.lux_context
 		
+		LXS = scene.luxrender_engine.write_lxs
+		LXM = scene.luxrender_engine.write_lxm
+		LXO = scene.luxrender_engine.write_lxo
+		
 		if api_type == 'FILE':
-			# TODO: insert an output path here ?
-			# TODO: only if the user selects a 'keep files' option
-			l.set_filename(
-				'default',
-				LXS = scene.luxrender_engine.write_lxs,
-				LXM = scene.luxrender_engine.write_lxm,
-				LXO = scene.luxrender_engine.write_lxo
-			)
+			if LXS or LXM or LXO:
+				# TODO: insert an output path here ?
+				# TODO: only if the user selects a 'keep files' option
+				l.set_filename(
+					'default',
+					LXS = LXS, 
+					LXM = LXM,
+					LXO = LXO
+				)
+			else:
+				raise Exception('Nothing to do! Select at least one of LXM/LXS/LXO')
 		
 		# BEGIN!
 		self.update_stats('', 'LuxRender: Parsing Scene')
@@ -220,65 +227,122 @@ class luxrender(engine_base):
 #			LuxLog('Error - No lights in scene.')
 #			return
 		
-		export_materials.ExportedMaterials.clear()
+		# No materials as we're using API with no files, export
+		# is handled in geometry iteration
 		
 		# Geometry iteration and export goes here.
 		export_geometry.write_lxo(self, l, scene, smoothing_enabled=False)
 		
-		self.render_start()
+		self.render_start(scene)
 	
 	def render_scene(self, scene):
 		
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
 			api_type = 'API'
+			write_files = scene.luxrender_engine.write_files
 		else:
 			api_type = 'FILE'
-			
+			write_files = True
 		
 		l = self.render_init(scene, api_type)
 		
-		# Set up render engine parameters
-		l.sampler(				*scene.luxrender_sampler.api_output()		)
-		l.accelerator(			*scene.luxrender_accelerator.api_output()	)
-		l.surfaceIntegrator(	*scene.luxrender_integrator.api_output()	)
-		l.volumeIntegrator(		*scene.luxrender_volume.api_output()		)
-		l.pixelFilter(			*scene.luxrender_filter.api_output()		)
+		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxs):
+			# Set up render engine parameters
+			l.sampler(				*scene.luxrender_sampler.api_output()		)
+			l.accelerator(			*scene.luxrender_accelerator.api_output()	)
+			l.surfaceIntegrator(	*scene.luxrender_integrator.api_output()	)
+			l.volumeIntegrator(		*scene.luxrender_volume.api_output()		)
+			l.pixelFilter(			*scene.luxrender_filter.api_output()		)
+			
+			# Set up camera, view and film
+			l.lookAt(	*export_film.lookAt(scene)	)
+			l.camera(	*scene.camera.data.luxrender_camera.api_output(scene)	)
+			l.film(		*export_film.film(scene)	)
+			
+			
+			l.worldBegin()
+			
+			# Light source iteration and export goes here.
+			if export_lights.lights(l, scene) == False:
+				LuxLog('Error - No lights in scene.')
+				return
 		
-		# Set up camera, view and film
-		l.lookAt(	*export_film.lookAt(scene)	)
-		l.camera(	*scene.camera.data.luxrender_camera.api_output(scene)	)
-		l.film(		*export_film.film(scene)	)
+		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxm):
+			export_materials.ExportedMaterials.clear()
+			export_materials.write_lxm(l, scene)
 		
+		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxo):
+			export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)
 		
-		l.worldBegin()
-		# Light source iteration and export goes here.
-		if export_lights.lights(l, scene) == False:
-			LuxLog('Error - No lights in scene.')
-			return
+		self.render_start(scene)
 		
-		export_materials.ExportedMaterials.clear()
-		
-		# Geometry iteration and export goes here.
-		export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)
-		
-		self.render_start()
-		
-	def render_start(self):
+	def render_start(self, scene):
 		# TODO: this will be removed when direct framebuffer
 		# access is implemented in Blender
 		if os.path.exists(self.output_file):
 			# reset output image file and
 			os.remove(self.output_file)
-			
-		# Begin rendering
-		self.LuxManager.start(self)
-		self.update_stats('', 'LuxRender: Rendering warmup')
 		
-		while self.LuxManager.started:
-			self.render_update_timer = threading.Timer(1, self.stats_timer)
-			self.render_update_timer.start()
-			if self.render_update_timer.isAlive(): self.render_update_timer.join()
-			
+		internal		= (scene.luxrender_engine.export_type == 'INT')
+		write_files		= scene.luxrender_engine.write_files
+		render			= scene.luxrender_engine.render
+		
+		# Handle various option combinations using simplified variable names !
+		if internal:
+			if write_files:
+				if render:
+					start_rendering = True
+					parse = True
+					worldEnd = False
+				else:
+					start_rendering = False
+					parse = False
+					worldEnd = False
+			else:
+				# will always render
+				parse = False
+				worldEnd = True
+				start_rendering = True
+		else:
+			# external always writes files
+			if render:
+				start_rendering = True
+				parse = False
+				worldEnd = False
+			else:
+				start_rendering = False
+				parse = False
+				worldEnd = False
+		
+		#print('internal %s' % internal)
+		#print('write_files %s' % write_files)
+		#print('render %s' % render)
+		#print('start_rendering %s' % start_rendering)
+		#print('parse %s' % parse)
+		#print('worldEnd %s' % worldEnd)
+		
+		if self.LuxManager.lux_context.API_TYPE == 'FILE':
+			#print('calling pylux.context.worldEnd() (1)')
+			self.LuxManager.lux_context.worldEnd()
+			if parse:
+				#print('calling file_api.parse()')
+				self.LuxManager.lux_context.parse(self.LuxManager.lux_context.file_names[0], True)
+		elif worldEnd:
+			#print('calling pylux.context.worldEnd() (2)')
+			self.LuxManager.lux_context.worldEnd()
+		
+		# Begin rendering
+		if start_rendering:
+			if internal:
+				self.LuxManager.start(self)
+				self.update_stats('', 'LuxRender: Rendering warmup')
+				while self.LuxManager.started:
+					self.render_update_timer = threading.Timer(1, self.stats_timer)
+					self.render_update_timer.start()
+					if self.render_update_timer.isAlive(): self.render_update_timer.join()
+			else:
+				LuxLog('External LuxRender will be started with scene file "%s"' % self.LuxManager.lux_context.file_names[0])
+		
 		# TODO: tidy up scene files and output file ?
 	
 	def stats_timer(self):

@@ -32,7 +32,7 @@ from ..module import LuxLog
 from ..module.file_api import Files
 from . import matrix_to_list
 from . import ParamSet
-from .materials import materials as export_materials
+from .materials import export_object_material
 
 #-------------------------------------------------
 # getMeshType(self, scene, mesh, ss)
@@ -170,10 +170,6 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if not visible:
 			continue
 		
-		# materials are exported in write_lxm()
-		# me = ob.data
-		# me_materials = me.materials
-		
 		me = ob.create_mesh(scene, True, 'RENDER')
 		
 		if not me:
@@ -181,8 +177,9 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 
 		l.attributeBegin(comment=ob.name, file=Files.GEOM)
 		
-		export_materials(l, ob)
-		
+		# Export either NamedMaterial stmt or the full material
+		# definition depending on the output type
+		export_object_material(l, ob)
 		
 		# object translation/rotation/scale 
 		l.transform( matrix_to_list(ob.matrix) )

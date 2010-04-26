@@ -232,8 +232,6 @@ class LuxManager(object):
 			LuxLog('Already rendering!')
 			return
 		
-		self.lux_context.worldEnd()
-		
 		self.stats_thread.start()
 		self.fb_thread.start(RE)
 		self.started = True

@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+
 import luxrender.module
 from .pure_api import Custom_Context as Pylux_Context
 
@@ -42,7 +44,9 @@ class Custom_Context(Pylux_Context):
 	API_TYPE = 'FILE'
 	
 	files = []
+	file_names = []
 	current_file = Files.MAIN
+	parse_at_worldend = True
 	
 	def wf(self, ind, st, tabs=0):
 		'''
@@ -74,24 +78,29 @@ class Custom_Context(Pylux_Context):
 		
 		# If any files happen to be open, close them and start again
 		for f in self.files:
-			f.close()
+			if f is not None:
+				f.close()
 		
 		self.files = []
+		self.file_names = []
 		
+		self.file_names.append('%s.lxs' % name)
 		if LXS:
-			self.files.append(open('%s.lxs' % name, 'w'))
+			self.files.append(open(self.file_names[Files.MAIN], 'w'))
 			self.wf(Files.MAIN, '# Main Scene File')
 		else:
 			self.files.append(None)
-			
+		
+		self.file_names.append('%s-mat.lxm' % name)
 		if LXM:
-			self.files.append(open('%s-mat.lxm' % name, 'w'))
+			self.files.append(open(self.file_names[Files.MATS], 'w'))
 			self.wf(Files.MATS, '# Materials File')
 		else:
 			self.files.append(None)
 		
+		self.file_names.append('%s-geom.lxo' % name)
 		if LXO:
-			self.files.append(open('%s-geom.lxo' % name, 'w'))
+			self.files.append(open(self.file_names[Files.GEOM], 'w'))
 			self.wf(Files.GEOM, '# Geometry File')
 		else:
 			self.files.append(None)
@@ -225,23 +234,20 @@ class Custom_Context(Pylux_Context):
 		See inline comments for further info
 		'''
 		
-		#Don't actually write any WorldEnd to file yet!
-		
-		# Include the other files
-		self.wf(Files.MAIN, '\nInclude "%s"' % self.files[Files.MATS].name)   # Materials
-		self.wf(Files.MAIN, '\nInclude "%s"' % self.files[Files.GEOM].name)   # Geometry
+		if self.files[Files.MAIN] is not None:
+			# Include the other files if they exist
+			for idx in [Files.MATS, Files.GEOM]:
+				if os.path.exists(self.file_names[idx]):
+					self.wf(Files.MAIN, '\nInclude "%s"' % self.file_names[idx])
+			
+			# End of the world as we know it
+			self.wf(Files.MAIN, 'WorldEnd')
 		
 		# Close files
 		luxrender.module.LuxLog('Wrote scene files')
 		for f in self.files:
-			f.close()
-			luxrender.module.LuxLog(' %s' % f.name)
-		
-		# Now start the rendering by synchronously parsing the main scene file we just wrote
-		self.parse(self.files[Files.MAIN].name, False)
-		luxrender.pylux.Context.worldEnd(self)
-		
-		# Add the final WorldEnd so that the file is usable directly in LuxRender
-		f=open(self.files[Files.MAIN].name, 'a')
-		f.write('\nWorldEnd\n')
-		f.close()
+			if f is not None:
+				f.close()
+				luxrender.module.LuxLog(' %s' % f.name)
+	
+

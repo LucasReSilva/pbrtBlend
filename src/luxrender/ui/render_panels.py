@@ -54,7 +54,7 @@ class engine(render_described_context):
 	
 	controls = [
 		'export_type',
-		'write_files',
+		['write_files', 'render'],
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		'priority',
 		['threads_auto', 'threads'],
@@ -64,6 +64,7 @@ class engine(render_described_context):
 	
 	visibility = {
 		'write_files':			{ 'export_type': 'INT' },
+		'render':				O([{'write_files': True}, {'export_type': 'EXT'}]),
 		'write_lxs':			{ 'export_type': 'INT', 'write_files': True },
 		'write_lxm':			{ 'export_type': 'INT', 'write_files': True },
 		'write_lxo':			{ 'export_type': 'INT', 'write_files': True },
@@ -95,11 +96,18 @@ class engine(render_described_context):
 			'attr': 'export_type',
 			'name': 'Renderer',
 			'description': 'Run LuxRender inside or outside of Blender',
-			'default': 'FILE',
+			'default': 'INT',
 			'items': [
 				('EXT', 'External', 'EXT'),
 				('INT', 'Internal', 'INT')
 			] 
+		},
+		{
+			'type': 'bool',
+			'attr': 'render',
+			'name': 'Run Renderer',
+			'description': 'Run Renderer after export',
+			'default': True,
 		},
 		{
 			'type': 'bool',
