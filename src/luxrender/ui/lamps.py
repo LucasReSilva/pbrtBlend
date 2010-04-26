@@ -88,16 +88,21 @@ class lamps(DataButtonsPanel, described_layout):
 
 				# TODO: check which properties are supported by which light type
 				col = split.column()
-				sub = col.column()
-				sub.prop(lamp, "color", text="")
-				sub.prop(lamp, "energy", text="Gain")
+				#sub = col.column()
+				
+				# color is handled by Lux's L ColorTexture
+				#sub.prop(lamp, "color", text="")
+				layout.prop(lamp, "energy", text="Gain")
 
 				# SPOT LAMP: Blender Properties
 				if lamp.type == 'SPOT':
 					wide_ui = context.region.width > narrowui
 
 					if wide_ui:
-						col = split.column()
+						#col = split.column()
+						col=layout.row()
+					else:
+						col=layout.column()
 					col.prop(lamp, "spot_size", text="Size")
 					col.prop(lamp, "spot_blend", text="Blend", slider=True)
 				
@@ -105,7 +110,10 @@ class lamps(DataButtonsPanel, described_layout):
 				elif lamp.type == 'AREA':
 
 					if wide_ui:
-						col = split.column()
+						#col = split.column()
+						col=layout.row()
+					else:
+						col=layout.column()
 					col.row().prop(lamp, "shape", expand=True)
 
 					sub = col.column(align=True)
