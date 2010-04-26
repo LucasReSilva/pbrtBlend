@@ -189,7 +189,12 @@ class luxrender(engine_base):
 		if api_type == 'FILE':
 			# TODO: insert an output path here ?
 			# TODO: only if the user selects a 'keep files' option
-			l.set_filename('default')
+			l.set_filename(
+				'default',
+				LXS = scene.luxrender_engine.write_lxs,
+				LXM = scene.luxrender_engine.write_lxm,
+				LXO = scene.luxrender_engine.write_lxo
+			)
 		
 		# BEGIN!
 		self.update_stats('', 'LuxRender: Parsing Scene')
@@ -198,7 +203,7 @@ class luxrender(engine_base):
 	
 	def render_preview(self, scene):
 		
-		l = self.render_init(scene, 'FILE')
+		l = self.render_init(scene, 'API')
 		
 		# Set up render parameters optimised for preview
 		from luxrender.export.preview_scene import preview_scene_setup , preview_scene_lights
@@ -224,7 +229,13 @@ class luxrender(engine_base):
 	
 	def render_scene(self, scene):
 		
-		l = self.render_init(scene, scene.luxrender_engine.api_type)
+		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
+			api_type = 'API'
+		else:
+			api_type = 'FILE'
+			
+		
+		l = self.render_init(scene, api_type)
 		
 		# Set up render engine parameters
 		l.sampler(				*scene.luxrender_sampler.api_output()		)

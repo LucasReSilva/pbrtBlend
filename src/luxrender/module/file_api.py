@@ -62,7 +62,7 @@ class Custom_Context(Pylux_Context):
 		self.files[ind].write('%s%s\n' % ('\t'*tabs, st))
 		self.files[ind].flush()
 		
-	def set_filename(self, name):
+	def set_filename(self, name, LXS=True, LXM=True, LXO=True):
 		'''
 		name				string
 		
@@ -76,15 +76,25 @@ class Custom_Context(Pylux_Context):
 		for f in self.files:
 			f.close()
 		
-		self.files = [
-			open('%s.lxs' % name, 'w'),
-			open('%s-mat.lxm' % name, 'w'),
-			open('%s-geom.lxo' % name, 'w'),
-		]
+		self.files = []
 		
-		self.wf(Files.MAIN, '# Main Scene File')
-		self.wf(Files.MATS, '# Materials File')
-		self.wf(Files.GEOM, '# Geometry File')
+		if LXS:
+			self.files.append(open('%s.lxs' % name, 'w'))
+			self.wf(Files.MAIN, '# Main Scene File')
+		else:
+			self.files.append(None)
+			
+		if LXM:
+			self.files.append(open('%s-mat.lxm' % name, 'w'))
+			self.wf(Files.MATS, '# Materials File')
+		else:
+			self.files.append(None)
+		
+		if LXO:
+			self.files.append(open('%s-geom.lxo' % name, 'w'))
+			self.wf(Files.GEOM, '# Geometry File')
+		else:
+			self.files.append(None)
 		
 	def set_output_file(self, file):
 		'''

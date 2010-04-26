@@ -53,15 +53,22 @@ class engine(render_described_context):
 	property_group = luxrender.properties.engine.luxrender_engine
 	
 	controls = [
-		'api_type',
-		['threads_auto', 'threads'],
+		'export_type',
+		'write_files',
+		['write_lxs', 'write_lxm', 'write_lxo'],
 		'priority',
+		['threads_auto', 'threads'],
 		['rgc', 'colclamp'],
 		['meshopt', 'nolg'],
 	]
 	
 	visibility = {
+		'write_files':			{ 'export_type': 'INT' },
+		'write_lxs':			{ 'export_type': 'INT', 'write_files': True },
+		'write_lxm':			{ 'export_type': 'INT', 'write_files': True },
+		'write_lxo':			{ 'export_type': 'INT', 'write_files': True },
 		'threads':				{ 'threads_auto': False },
+		'priority':				{ 'export_type': 'EXT' },
 	}
 	
 	properties = [
@@ -85,14 +92,42 @@ class engine(render_described_context):
 		},
 		{
 			'type': 'enum',
-			'attr': 'api_type',
-			'name': 'Output type',
-			'description': 'How to export the scene',
+			'attr': 'export_type',
+			'name': 'Renderer',
+			'description': 'Run LuxRender inside or outside of Blender',
 			'default': 'FILE',
 			'items': [
-				('FILE', 'Write files', 'FILE'),
-				('API', 'Direct export', 'API')
+				('EXT', 'External', 'EXT'),
+				('INT', 'Internal', 'INT')
 			] 
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_files',
+			'name': 'Write to disk',
+			'description': 'Write scene files to disk',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_lxs',
+			'name': 'LXS',
+			'description': 'Write master scene file',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_lxm',
+			'name': 'LXM',
+			'description': 'Write materials file',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_lxo',
+			'name': 'LXO',
+			'description': 'Write objects file',
+			'default': True,
 		},
 		{
 			'type': 'enum',
