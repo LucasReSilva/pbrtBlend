@@ -26,8 +26,8 @@
 #
 import random
 
-from luxrender.export import ParamSet
-from luxrender.ui import material_property_map, FloatTexture, ColorTexture
+from . import ParamSet
+from ..ui import material_property_map, FloatTexture, ColorTexture
 
 class ExportedMaterials(object):
 	# Static class variables
@@ -91,7 +91,7 @@ def add_float_texture(lux_prop_name, lux_mat):
 		# TODO: find and export the named texture
 		params.add_texture(
 			lux_prop_name,
-			getattr(lux_mat, '%_texturename'%lux_prop_name)
+			getattr(lux_mat, '%s_texturename'%lux_prop_name)
 		)
 	else:
 		params.add_float(
@@ -108,7 +108,7 @@ def add_color_texture(lux_prop_name, lux_mat):
 		# TODO: find and export the named texture
 		params.add_texture(
 			lux_prop_name,
-			getattr(lux_mat, '%_texturename'%lux_prop_name)
+			getattr(lux_mat, '%s_texturename'%lux_prop_name)
 		)
 	else:
 		params.add_color(

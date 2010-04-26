@@ -32,8 +32,8 @@ from ef.ef import ef
 from ef.engine import engine_base
 
 # Exporter libs
-from luxrender.module import LuxManager as LM
-from luxrender.module import LuxLog
+from .module import LuxManager as LM
+from .module import LuxLog
 import luxrender.ui.materials
 import luxrender.ui.textures
 import luxrender.ui.render_panels
@@ -42,10 +42,11 @@ import luxrender.ui.lamps
 import luxrender.ui.meshes
 #import luxrender.nodes
 
-import luxrender.export.geometry	as export_geometry
-import luxrender.export.film		as export_film
-import luxrender.export.lights		as export_lights
-from luxrender.module.file_api		import Files
+from .export import film		as export_film
+from .export import lights		as export_lights
+from .export import materials	as export_materials
+from .export import geometry	as export_geometry
+from .module.file_api			import Files
 
 
 # Add standard Blender Interface elements
@@ -214,7 +215,7 @@ class luxrender(engine_base):
 #			LuxLog('Error - No lights in scene.')
 #			return
 		
-		# Materials iteration and export goes here.
+		export_materials.ExportedMaterials.clear()
 		
 		# Geometry iteration and export goes here.
 		export_geometry.write_lxo(self, l, scene, smoothing_enabled=False)
@@ -244,7 +245,7 @@ class luxrender(engine_base):
 			LuxLog('Error - No lights in scene.')
 			return
 		
-		# Materials iteration and export goes here.
+		export_materials.ExportedMaterials.clear()
 		
 		# Geometry iteration and export goes here.
 		export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)

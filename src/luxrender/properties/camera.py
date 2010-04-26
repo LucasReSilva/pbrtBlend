@@ -28,9 +28,9 @@ import math
 
 import bpy
 
-from luxrender.properties import dbo
-from luxrender.export.film import resolution
-from luxrender.export import ParamSet
+from . import dbo
+from ..export.film import resolution
+from ..export import ParamSet
 
 # TODO: adapt values written to d based on simple/advanced views
 

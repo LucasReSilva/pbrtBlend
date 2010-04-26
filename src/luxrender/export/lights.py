@@ -28,11 +28,11 @@ from math import degrees
 
 import bpy, mathutils
 
-from luxrender.module.file_api import Files
-from luxrender.export import matrix_to_list
-from luxrender.export import ParamSet
+from ..module.file_api import Files
+from . import matrix_to_list
+from . import ParamSet
 
-from luxrender.properties import dbo
+from ..properties import dbo
 
 def attr_light(l, name, group, type, params, transform=None):
 	'''

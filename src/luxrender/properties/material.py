@@ -26,8 +26,7 @@
 #
 import bpy
 
-from luxrender.properties import dbo
-from luxrender.export import ParamSet
+from . import dbo
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -41,3 +40,4 @@ class luxrender_material(bpy.types.IDPropertyGroup):
 	'''
 	
 	pass
+

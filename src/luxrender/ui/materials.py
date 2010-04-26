@@ -34,7 +34,7 @@ from ef.ef import ef
 
 # Lux API
 import luxrender.properties.material
-from luxrender.ui import FloatTexture, ColorTexture, has_property
+from . import FloatTexture, ColorTexture, has_property
 
 def ParamMaterial(attr, name, property_group):
 	return [

@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-from luxrender.export import ParamSet
+from . import ParamSet
 
 def lookAt(scene):
 	'''

@@ -33,7 +33,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.camera
-from luxrender.module import LuxManager as LM
+from ..module import LuxManager as LM
 
 class camera(DataButtonsPanel, described_layout):
 	bl_label = 'LuxRender Camera'
@@ -246,7 +246,7 @@ class tonemapping(DataButtonsPanel, described_layout):
 			'attr': 'reinhard_postscale',
 			'name': 'Post',
 			'description': 'Reinhard Post-Scale factor',
-			'default': 1.1,
+			'default': 1.04,
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 25.0,

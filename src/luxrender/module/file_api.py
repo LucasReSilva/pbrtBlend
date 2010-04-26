@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import luxrender.module
-from luxrender.module.pure_api import Custom_Context as Pylux_Context
+from .pure_api import Custom_Context as Pylux_Context
 
 class Files(object):
 	MAIN = 0

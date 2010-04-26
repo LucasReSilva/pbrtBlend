@@ -1,6 +1,6 @@
 
-from luxrender.export import ParamSet
-from luxrender.export.film import resolution
+from . import ParamSet
+from .film import resolution
 
 def preview_scene_setup(scene, lux_context):
 	

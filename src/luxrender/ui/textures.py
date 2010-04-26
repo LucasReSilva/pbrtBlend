@@ -35,7 +35,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.texture
-from luxrender.ui import FloatTexture, ColorTexture
+from . import FloatTexture, ColorTexture
 
 # TODO: Not sure hoe to morph type of tex1/tex2 from Float/Color depending on context
 #TF_tex1 = FloatTexture('texture', 'tex1', 'Texture 1', 'luxrender_texture')

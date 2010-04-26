@@ -28,11 +28,11 @@ import random
 
 import bpy
 
-from luxrender.module import LuxLog
-from luxrender.module.file_api import Files
-from luxrender.export import matrix_to_list
-from luxrender.export import ParamSet
-from luxrender.export.materials import materials as export_materials
+from ..module import LuxLog
+from ..module.file_api import Files
+from . import matrix_to_list
+from . import ParamSet
+from .materials import materials as export_materials
 
 #-------------------------------------------------
 # getMeshType(self, scene, mesh, ss)
