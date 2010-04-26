@@ -300,9 +300,9 @@ class luxrender(engine_base):
 					worldEnd = False
 			else:
 				# will always render
+				start_rendering = True
 				parse = False
 				worldEnd = True
-				start_rendering = True
 		else:
 			# external always writes files
 			if render:
