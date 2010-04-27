@@ -128,32 +128,45 @@ class FloatTexture(TextureBase):
 	min				= 0.0
 	max				= 1.0
 	precision		= 3
+	texture_only	= False
 	
 	def __init__(self,
 			parent_type, attr, name, property_group,
+			add_float_value = True,
 			default = 0.0, min = 0.0, max = 1.0, precision=3
 		):
 		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
 		self.property_group = property_group
+		self.texture_only = (not add_float_value)
 		self.default = default
 		self.min = min
 		self.max = max
 		self.precision = precision
 	
 	def get_controls(self):
-		return [
-			[0.9, '%s_floatvalue' % self.attr, '%s_usetexture' % self.attr],
-			'%s_texture' % self.attr,
-		] + self.get_extra_controls()
+		if self.texture_only:
+			return [
+				'%s_texture' % self.attr,
+			] + self.get_extra_controls()
+		else:
+			return [
+				[0.9, '%s_floatvalue' % self.attr, '%s_usetexture' % self.attr],
+				'%s_texture' % self.attr,
+			] + self.get_extra_controls()
 	
 	def get_visibility(self):
-		vis = {
-			'%s_usetexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_floatvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usetexture' % self.attr: True },
-		}
+		if self.texture_only:
+			vis = {
+				'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
+			}
+		else:
+			vis = {
+				'%s_usetexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_floatvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usetexture' % self.attr: True },
+			}
 		vis.update(self.get_extra_visibility())
 		return vis
 	
@@ -170,7 +183,7 @@ class FloatTexture(TextureBase):
 				'type': 'bool',
 				'name': 'T',
 				'description': 'Textured %s' % self.name,
-				'default': False,
+				'default': False if not self.texture_only else True,
 				'toggle': True,
 			},
 			{

@@ -113,7 +113,7 @@ def lights(l, scene):
 			# TODO: find and export the named texture
 		#	light_params.add_texture('L', lamp.luxrender_lamp.L_texturename)
 		#else:
-		light_params.update( add_color_texture(l, 'L', light.luxrender_lamp) )
+		light_params.update( add_color_texture(l, 'L', light.luxrender_lamp, light) )
 		
 		if light.type == 'SPOT':
 			coneangle = degrees(light.spot_size) * 0.5

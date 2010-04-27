@@ -29,6 +29,7 @@ import random
 import bpy
 
 from . import ParamSet
+from ..module import LuxLog
 from ..properties.util import material_property_map, texture_property_map, texture_property_translate
 from ..properties.texture import FloatTexture, ColorTexture
 
@@ -161,40 +162,46 @@ def materials_file(lux_context, ob):
 	
 	ExportedMaterials.export_new_named(lux_context)
 
-def add_float_texture(lux_context, lux_prop_name, lux_mat):
+def add_float_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 	params = ParamSet()
 	
-	if getattr(lux_mat, '%s_usetexture'%lux_prop_name):
-		texture_name = getattr(lux_mat, '%s_texturename'%lux_prop_name)
-		params.add_texture(
-			texture_property_translate(lux_prop_name),
-			texture_name
-		)
-		luxrender_texture_params('float', lux_context, bpy.data.textures[texture_name])
-		ExportedTextures.export_new(lux_context)
+	if getattr(lux_mattex, '%s_usetexture'%lux_prop_name):
+		texture_name = getattr(lux_mattex, '%s_texturename'%lux_prop_name)
+		if texture_name in bpy.data.textures:
+			params.add_texture(
+				texture_property_translate(lux_prop_name),
+				texture_name
+			)
+			luxrender_texture_params('float', lux_context, bpy.data.textures[texture_name])
+			ExportedTextures.export_new(lux_context)
+		else:
+			LuxLog('WARNING: Unassigned texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_float(
 			texture_property_translate(lux_prop_name),
-			float(getattr(lux_mat, '%s_floatvalue'%lux_prop_name))
+			float(getattr(lux_mattex, '%s_floatvalue'%lux_prop_name))
 		)
 	
 	return params
 
-def add_color_texture(lux_context, lux_prop_name, lux_mat):
+def add_color_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 	params = ParamSet()
 	
-	if getattr(lux_mat, '%s_usetexture'%lux_prop_name):
-		texture_name = getattr(lux_mat, '%s_texturename'%lux_prop_name)
-		params.add_texture(
-			texture_property_translate(lux_prop_name),
-			texture_name
-		)
-		luxrender_texture_params('color', lux_context, bpy.data.textures[texture_name])
-		ExportedTextures.export_new(lux_context)
+	if getattr(lux_mattex, '%s_usetexture'%lux_prop_name):
+		texture_name = getattr(lux_mattex, '%s_texturename'%lux_prop_name)
+		if texture_name in bpy.data.textures:
+			params.add_texture(
+				texture_property_translate(lux_prop_name),
+				texture_name
+			)
+			luxrender_texture_params('color', lux_context, bpy.data.textures[texture_name])
+			ExportedTextures.export_new(lux_context)
+		else:
+			LuxLog('WARNING: Unassigned texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_color(
 			texture_property_translate(lux_prop_name),
-			[float(i) for i in getattr(lux_mat, '%s_color'%lux_prop_name)]
+			[float(i) for i in getattr(lux_mattex, '%s_color'%lux_prop_name)]
 		)
 	
 	return params
@@ -213,9 +220,9 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 			if lux_tex.texture in tpm[lux_prop_realname]:
 				lux_prop = getattr(lux_tex, lux_prop_name)
 				if lux_prop == 'lux_float_texture':
-					tp.update(add_float_texture(lux_context, lux_prop_name, lux_tex))
+					tp.update(add_float_texture(lux_context, lux_prop_name, lux_tex, tex))
 				elif lux_prop == 'lux_color_texture':
-					tp.update(add_color_texture(lux_context, lux_prop_name, lux_tex))
+					tp.update(add_color_texture(lux_context, lux_prop_name, lux_tex, tex))
 				# TODO: these basic types should cover everything for now ?
 				elif type(lux_prop) is float:
 					tp.add_float(lux_prop_name, lux_prop)
@@ -241,9 +248,9 @@ def luxrender_material_params(lux_context, mat, add_type=False):
 		if lux_mat_type in mpm[lux_prop_name]:
 			lux_prop = getattr(lux_mat, lux_prop_name)
 			if lux_prop == 'lux_float_texture':
-				mp.update(add_float_texture(lux_context, lux_prop_name, lux_mat))
+				mp.update(add_float_texture(lux_context, lux_prop_name, lux_mat, mat))
 			elif lux_prop == 'lux_color_texture':
-				mp.update(add_color_texture(lux_context, lux_prop_name, lux_mat))
+				mp.update(add_color_texture(lux_context, lux_prop_name, lux_mat, mat))
 			# TODO: these basic types should cover everything for now ?
 			elif type(lux_prop) is float:
 				mp.add_float(lux_prop_name, lux_prop)

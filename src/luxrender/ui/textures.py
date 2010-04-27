@@ -42,15 +42,15 @@ from ..properties.texture import FloatTexture, ColorTexture
 #TF_tex1 = FloatTexture('texture', 'tex1', 'Texture 1', 'luxrender_texture')
 #TF_tex2 = FloatTexture('texture', 'tex2', 'Texture 2', 'luxrender_texture')
 
-TF_amount			= FloatTexture('texture', 'amount', 'Amount', 'luxrender_texture')
-TF_brickmodtex		= FloatTexture('texture', 'f_brickmodtex', 'Mod Tex', 'luxrender_texture')
-TF_brickrun			= FloatTexture('texture', 'f_brickrun', 'Run', 'luxrender_texture')
-TF_bricktex			= FloatTexture('texture', 'f_bricktex', 'Tex', 'luxrender_texture')
-TF_mortartex		= FloatTexture('texture', 'f_mortartex', 'Mortar Tex', 'luxrender_texture')
-TF_tex1				= FloatTexture('texture', 'f_tex1', 'Tex 1', 'luxrender_texture')
-TF_tex2				= FloatTexture('texture', 'f_tex2', 'Tex 2', 'luxrender_texture')
-TF_inside			= FloatTexture('texture', 'inside', 'Inside', 'luxrender_texture')
-TF_outside			= FloatTexture('texture', 'outside', 'Outside', 'luxrender_texture')
+TF_amount			= FloatTexture('texture', 'amount', 'Amount',			'luxrender_texture', add_float_value=False)
+TF_brickmodtex		= FloatTexture('texture', 'f_brickmodtex', 'Mod Tex',	'luxrender_texture', add_float_value=False)
+TF_brickrun			= FloatTexture('texture', 'f_brickrun', 'Run',			'luxrender_texture', add_float_value=False)
+TF_bricktex			= FloatTexture('texture', 'f_bricktex', 'Tex',			'luxrender_texture', add_float_value=False)
+TF_mortartex		= FloatTexture('texture', 'f_mortartex', 'Mortar Tex',	'luxrender_texture', add_float_value=False)
+TF_tex1				= FloatTexture('texture', 'f_tex1', 'Tex 1',			'luxrender_texture', add_float_value=False)
+TF_tex2				= FloatTexture('texture', 'f_tex2', 'Tex 2',			'luxrender_texture', add_float_value=False)
+TF_inside			= FloatTexture('texture', 'inside', 'Inside',			'luxrender_texture', add_float_value=False)
+TF_outside			= FloatTexture('texture', 'outside', 'Outside',			'luxrender_texture', add_float_value=False)
 
 def texture_visibility():
 	vis = {}
