@@ -13,7 +13,22 @@ def has_property(parent_type, property_name):
 		return has_texture_property(property_name)
 	
 #------------------------------------------------------------------------------ 
+
+def texture_property_translate(name):
+	xlate = {
+		'f_brickmodtex': 'brickmodtex',
+		'f_brickrun': 'brickrun',
+		'f_bricktex': 'bricktex',
+		'f_mortartex': 'mortartex',
+		'f_tex1': 'tex1',
+		'f_tex2': 'tex2',
+	}
 	
+	if name in xlate.keys():
+		return xlate[name]
+	else:
+		return name
+
 def texture_property_map():
 	'''
 	Refer to http://www.luxrender.net/static/textures-parameters.xhtml
@@ -105,7 +120,7 @@ def texture_property_map():
 
 def has_texture_property(property_name):
 	
-	
+	property_name = texture_property_translate(property_name)
 	return texture_property_map()[property_name]
 
 #------------------------------------------------------------------------------ 

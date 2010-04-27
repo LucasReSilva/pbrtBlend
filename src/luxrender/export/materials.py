@@ -29,7 +29,7 @@ import random
 import bpy
 
 from . import ParamSet
-from ..properties.util import material_property_map, texture_property_map
+from ..properties.util import material_property_map, texture_property_map, texture_property_translate
 from ..properties.texture import FloatTexture, ColorTexture
 
 def write_lxm(l, scene):
@@ -167,14 +167,14 @@ def add_float_texture(lux_context, lux_prop_name, lux_mat):
 	if getattr(lux_mat, '%s_usetexture'%lux_prop_name):
 		texture_name = getattr(lux_mat, '%s_texturename'%lux_prop_name)
 		params.add_texture(
-			lux_prop_name,
+			texture_property_translate(lux_prop_name),
 			texture_name
 		)
 		luxrender_texture_params('float', lux_context, bpy.data.textures[texture_name])
 		ExportedTextures.export_new(lux_context)
 	else:
 		params.add_float(
-			lux_prop_name,
+			texture_property_translate(lux_prop_name),
 			float(getattr(lux_mat, '%s_floatvalue'%lux_prop_name))
 		)
 	
@@ -186,14 +186,14 @@ def add_color_texture(lux_context, lux_prop_name, lux_mat):
 	if getattr(lux_mat, '%s_usetexture'%lux_prop_name):
 		texture_name = getattr(lux_mat, '%s_texturename'%lux_prop_name)
 		params.add_texture(
-			lux_prop_name,
+			texture_property_translate(lux_prop_name),
 			texture_name
 		)
 		luxrender_texture_params('color', lux_context, bpy.data.textures[texture_name])
 		ExportedTextures.export_new(lux_context)
 	else:
 		params.add_color(
-			lux_prop_name,
+			texture_property_translate(lux_prop_name),
 			[float(i) for i in getattr(lux_mat, '%s_color'%lux_prop_name)]
 		)
 	
@@ -208,21 +208,23 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 		lux_tex = tex.luxrender_texture
 		
 		tpm = texture_property_map()
-		for lux_prop_name in [lp for lp in dir(lux_tex) if lp in tpm.keys()]:
-			lux_prop = getattr(lux_tex, lux_prop_name)
-			if lux_prop == 'lux_float_texture':
-				tp.update(add_float_texture(lux_context, lux_prop_name, lux_tex))
-			elif lux_prop == 'lux_color_texture':
-				tp.update(add_color_texture(lux_context, lux_prop_name, lux_tex))
-			# TODO: these basic types should cover everything for now ?
-			elif type(lux_prop) is float:
-				tp.add_float(lux_prop_name, lux_prop)
-			elif type(lux_prop) is str:
-				tp.add_string(lux_prop_name, lux_prop)
-			elif type(lux_prop) is bool:
-				tp.add_bool(lux_prop_name, lux_prop)
-			elif type(lux_prop) is int:
-				tp.add_integer(lux_prop_name, lux_prop)
+		for lux_prop_name in [lp for lp in dir(lux_tex) if texture_property_translate(lp) in tpm.keys()]:
+			lux_prop_realname = texture_property_translate(lux_prop_name)
+			if lux_tex.texture in tpm[lux_prop_realname]:
+				lux_prop = getattr(lux_tex, lux_prop_name)
+				if lux_prop == 'lux_float_texture':
+					tp.update(add_float_texture(lux_context, lux_prop_name, lux_tex))
+				elif lux_prop == 'lux_color_texture':
+					tp.update(add_color_texture(lux_context, lux_prop_name, lux_tex))
+				# TODO: these basic types should cover everything for now ?
+				elif type(lux_prop) is float:
+					tp.add_float(lux_prop_name, lux_prop)
+				elif type(lux_prop) is str:
+					tp.add_string(lux_prop_name, lux_prop)
+				elif type(lux_prop) is bool:
+					tp.add_bool(lux_prop_name, lux_prop)
+				elif type(lux_prop) is int:
+					tp.add_integer(lux_prop_name, lux_prop)
 		
 		ExportedTextures.texture(tex.name, tex_type, lux_tex.texture, tp)
 

@@ -42,54 +42,28 @@ from ..properties.texture import FloatTexture, ColorTexture
 #TF_tex1 = FloatTexture('texture', 'tex1', 'Texture 1', 'luxrender_texture')
 #TF_tex2 = FloatTexture('texture', 'tex2', 'Texture 2', 'luxrender_texture')
 
-TF_A				= FloatTexture('texture', 'A', 'A', 'luxrender_texture')
 TF_amount			= FloatTexture('texture', 'amount', 'Amount', 'luxrender_texture')
-TF_B				= FloatTexture('texture', 'B', 'B', 'luxrender_texture')
-TF_brickbevel		= FloatTexture('texture', 'brickbevel', 'Bevel', 'luxrender_texture')
-TF_brickdepth		= FloatTexture('texture', 'brickdepth', 'Depth', 'luxrender_texture')
-TF_brickheight		= FloatTexture('texture', 'brickheight', 'Height', 'luxrender_texture')
-TF_brickwidth		= FloatTexture('texture', 'brickwidth', 'Width', 'luxrender_texture')
-TF_C				= FloatTexture('texture', 'C', 'C', 'luxrender_texture')
-TF_cauchya			= FloatTexture('texture', 'cauchya', 'Cauchy A', 'luxrender_texture')
-TF_cauchyb			= FloatTexture('texture', 'cauchyb', 'Cauchy B', 'luxrender_texture')
-TF_energy			= FloatTexture('texture', 'evergy', 'Energy', 'luxrender_texture')
-TF_freq				= FloatTexture('texture', 'freq', 'Frequency', 'luxrender_texture')
-TF_gain				= FloatTexture('texture', 'gain', 'Gain', 'luxrender_texture')
-TF_gamma			= FloatTexture('texture', 'gamma', 'Gamma', 'luxrender_texture')
-TF_index			= FloatTexture('texture', 'index', 'IOR', 'luxrender_texture')
+TF_brickmodtex		= FloatTexture('texture', 'f_brickmodtex', 'Mod Tex', 'luxrender_texture')
+TF_brickrun			= FloatTexture('texture', 'f_brickrun', 'Run', 'luxrender_texture')
+TF_bricktex			= FloatTexture('texture', 'f_bricktex', 'Tex', 'luxrender_texture')
+TF_mortartex		= FloatTexture('texture', 'f_mortartex', 'Mortar Tex', 'luxrender_texture')
+TF_tex1				= FloatTexture('texture', 'f_tex1', 'Tex 1', 'luxrender_texture')
+TF_tex2				= FloatTexture('texture', 'f_tex2', 'Tex 2', 'luxrender_texture')
 TF_inside			= FloatTexture('texture', 'inside', 'Inside', 'luxrender_texture')
-TF_maxanisotropy	= FloatTexture('texture', 'maxanisotropy', 'Max Anisotropy', 'luxrender_texture')
-TF_mortarsize		= FloatTexture('texture', 'mortarsize', 'Mortar Size', 'luxrender_texture')
 TF_outside			= FloatTexture('texture', 'outside', 'Outside', 'luxrender_texture')
-TF_wavelength		= FloatTexture('texture', 'wavelength', 'Wavelength', 'luxrender_texture')
-TF_width			= FloatTexture('texture', 'width', 'Width', 'luxrender_texture')
-TF_temperature		= FloatTexture('texture', 'temperature', 'Temperature', 'luxrender_texture', min=1500.0, max=15000.0, default=6500.0)
 
 def texture_visibility():
 	vis = {}
 	
-	vis.update( TF_A.get_visibility() )
 	vis.update( TF_amount.get_visibility() )
-	vis.update( TF_B.get_visibility() )
-	vis.update( TF_brickbevel.get_visibility() )
-	vis.update( TF_brickdepth.get_visibility() )
-	vis.update( TF_brickheight.get_visibility() )
-	vis.update( TF_brickwidth.get_visibility() )
-	vis.update( TF_C.get_visibility() )
-	vis.update( TF_cauchya.get_visibility() )
-	vis.update( TF_cauchyb.get_visibility() )
-	vis.update( TF_energy.get_visibility() )
-	vis.update( TF_freq.get_visibility() )
-	vis.update( TF_gain.get_visibility() )
-	vis.update( TF_gamma.get_visibility() )
-	vis.update( TF_index.get_visibility() )
+	vis.update( TF_brickmodtex.get_visibility() )
+	vis.update( TF_brickrun.get_visibility() )
+	vis.update( TF_bricktex.get_visibility() )
+	vis.update( TF_mortartex.get_visibility() )
+	vis.update( TF_tex1.get_visibility() )
+	vis.update( TF_tex2.get_visibility() )
 	vis.update( TF_inside.get_visibility() )
-	vis.update( TF_maxanisotropy.get_visibility() )
-	vis.update( TF_mortarsize.get_visibility() )
 	vis.update( TF_outside.get_visibility() )
-	vis.update( TF_wavelength.get_visibility() )
-	vis.update( TF_width.get_visibility() )
-	vis.update( TF_temperature.get_visibility() )
 	
 	return vis
 
@@ -141,28 +115,15 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	controls = [
 		'texture',
 	] + \
-	TF_A.get_controls() + \
 	TF_amount.get_controls() + \
-	TF_B.get_controls() + \
-	TF_brickbevel.get_controls() + \
-	TF_brickdepth.get_controls() + \
-	TF_brickheight.get_controls() + \
-	TF_brickwidth.get_controls() + \
-	TF_C.get_controls() + \
-	TF_cauchya.get_controls() + \
-	TF_cauchyb.get_controls() + \
-	TF_energy.get_controls() + \
-	TF_freq.get_controls() + \
-	TF_gain.get_controls() + \
-	TF_gamma.get_controls() + \
-	TF_index.get_controls() + \
+	TF_brickmodtex.get_controls() + \
+	TF_brickrun.get_controls() + \
+	TF_bricktex.get_controls() + \
+	TF_mortartex.get_controls() + \
+	TF_tex1.get_controls() + \
+	TF_tex2.get_controls() + \
 	TF_inside.get_controls() + \
-	TF_maxanisotropy.get_controls() + \
-	TF_mortarsize.get_controls() + \
-	TF_outside.get_controls() + \
-	TF_wavelength.get_controls() + \
-	TF_width.get_controls() + \
-	TF_temperature.get_controls()
+	TF_outside.get_controls()
 	
 	visibility = texture_visibility()
 	
@@ -173,29 +134,40 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 			'name': 'Type',
 			'description': 'LuxRender Texture Type',
 			'items': [
-				('blackbody', 'Blackbody', 'blackbody'),
+				('bilerp', 'bilerp', 'bilerp'),
+				('blackbody', 'blackbody', 'blackbody'),
+				('brick', 'brick', 'brick'),
+				('cauchy', 'cauchy', 'cauchy'),
+				('checkerboard', 'checkerboard', 'checkerboard'),
+				('constant', 'constant', 'constant'),
+				('dots', 'dots', 'dots'),
+				('equalenergy', 'equalenergy', 'equalenergy'),
+				('fbm', 'fbm', 'fbm'),
+				('frequency', 'frequency', 'frequency'),
+				('gaussian', 'gaussian', 'gaussian'),
+				('harlequin', 'harlequin', 'harlequin'),
+				('imagemap', 'imagemap', 'imagemap'),
+				('irregulardata', 'irregulardata', 'irregulardata'),
+				('lampspectrum', 'lampspectrum', 'lampspectrum'),
+				('marble', 'marble', 'marble'),
+				('mix', 'mix', 'mix'),
+				('regulardata', 'regulardata', 'regulardata'),
+				('scale', 'scale', 'scale'),
+				('sellmeier', 'sellmeier', 'sellmeier'),
+				('tabulateddata', 'tabulateddata', 'tabulateddata'),
+				('tabulatedfresnel', 'tabulatedfresnel', 'tabulatedfresnel'),
+				('uv', 'uv', 'uv'),
+				('windy', 'windy', 'windy'),
+				('wrinkled', 'wrinkled', 'wrinkled'),
 			],
 		},
 	] + \
-	TF_A.get_properties() + \
 	TF_amount.get_properties() + \
-	TF_B.get_properties() + \
-	TF_brickbevel.get_properties() + \
-	TF_brickdepth.get_properties() + \
-	TF_brickheight.get_properties() + \
-	TF_brickwidth.get_properties() + \
-	TF_C.get_properties() + \
-	TF_cauchya.get_properties() + \
-	TF_cauchyb.get_properties() + \
-	TF_energy.get_properties() + \
-	TF_freq.get_properties() + \
-	TF_gain.get_properties() + \
-	TF_gamma.get_properties() + \
-	TF_index.get_properties() + \
+	TF_brickmodtex.get_properties() + \
+	TF_brickrun.get_properties() + \
+	TF_bricktex.get_properties() + \
+	TF_mortartex.get_properties() + \
+	TF_tex1.get_properties() + \
+	TF_tex2.get_properties() + \
 	TF_inside.get_properties() + \
-	TF_maxanisotropy.get_properties() + \
-	TF_mortarsize.get_properties() + \
-	TF_outside.get_properties() + \
-	TF_wavelength.get_properties() + \
-	TF_width.get_properties() + \
-	TF_temperature.get_properties()
+	TF_outside.get_properties()
