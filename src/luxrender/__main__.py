@@ -268,6 +268,7 @@ class luxrender(engine_base):
 				return
 		
 		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxm):
+			export_materials.ExportedTextures.clear()
 			export_materials.ExportedMaterials.clear()
 			export_materials.write_lxm(l, scene)
 		

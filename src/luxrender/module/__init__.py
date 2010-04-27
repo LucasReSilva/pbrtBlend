@@ -24,8 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import threading
-import datetime
+import threading, datetime, time
 
 import bpy
 
@@ -239,7 +238,7 @@ class LuxManager(object):
 		# Wait until scene is fully parsed before adding more render threads
 		while self.lux_context.statistics('sceneIsReady') != 1.0:
 			# TODO: such a tight loop is not a good idea
-			pass
+			time.sleep(0.3)
 		
 		for i in range(self.thread_count - 1):
 			self.lux_context.addThread()

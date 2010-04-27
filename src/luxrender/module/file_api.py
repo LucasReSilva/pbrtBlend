@@ -174,7 +174,7 @@ class Custom_Context(Pylux_Context):
 	def lightSource(self, *args):
 		self._api('LightSource', args)
 
-	def arealightSource(self, *args):
+	def areaLightSource(self, *args):
 		self._api('AreaLightSource', args)
 		
 	def attributeBegin(self, comment='', file=None):

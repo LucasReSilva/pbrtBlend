@@ -71,19 +71,28 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 		
 		return TextureButtonsPanel.poll(self, context) and context.texture.type == 'PLUGIN'
 	
+	@staticmethod
+	def property_reload():
+		for tex in bpy.data.textures:
+			texture_editor.property_create(tex)
+			
+	@staticmethod
+	def property_create(texture):
+		if not hasattr(texture, texture_editor.property_group.__name__):
+			ef.init_properties(texture, [{
+				'type': 'pointer',
+				'attr': texture_editor.property_group.__name__,
+				'ptype': texture_editor.property_group,
+				'name': texture_editor.property_group.__name__,
+				'description': texture_editor.property_group.__name__
+			}], cache=False)
+			ef.init_properties(texture_editor.property_group, texture_editor.properties, cache=False)
+	
 	# Overridden to provide data storage in the texture, not the scene
 	def draw(self, context):
 		if context.texture is not None:
-			if not hasattr(context.texture, self.property_group.__name__):
-				ef.init_properties(context.texture, [{
-					'type': 'pointer',
-					'attr': self.property_group.__name__,
-					'ptype': self.property_group,
-					'name': self.property_group.__name__,
-					'description': self.property_group.__name__
-				}], cache=False)
-				ef.init_properties(self.property_group, self.properties, cache=False)
-			
+			texture_editor.property_create(context.texture)
+		
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.texture, supercontext=context)
 				
