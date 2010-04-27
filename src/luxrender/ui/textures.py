@@ -42,7 +42,7 @@ from ..properties.texture import FloatTexture, ColorTexture
 #TF_tex1 = FloatTexture('texture', 'tex1', 'Texture 1', 'luxrender_texture')
 #TF_tex2 = FloatTexture('texture', 'tex2', 'Texture 2', 'luxrender_texture')
 
-TF_temperature		= FloatTexture('texture', 'temperature', 'Temperature', 'luxrender_texture')
+TF_temperature		= FloatTexture('texture', 'temperature', 'Temperature', 'luxrender_texture', min=1500.0, max=15000.0, default=6500.0)
 
 def texture_visibility():
 	vis = {}

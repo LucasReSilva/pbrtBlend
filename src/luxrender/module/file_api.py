@@ -224,9 +224,9 @@ class Custom_Context(Pylux_Context):
 			self.wf(Files.MATS, p.to_string(), 1)
 	
 	def texture(self, name, type, texture, params):
-		self.wf(Files.MATS, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
+		self.wf(self.current_file, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
 		for p in params:
-			self.wf(Files.MATS, p.to_string(), 1)
+			self.wf(self.current_file, p.to_string(), 1)
 	
 	def worldEnd(self):
 		'''

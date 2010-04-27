@@ -263,16 +263,22 @@ class luxrender(engine_base):
 			l.worldBegin()
 			
 			# Light source iteration and export goes here.
+			export_materials.ExportedTextures.clear()
+			if api_type == 'FILE':
+				l.set_output_file(Files.MAIN)
 			if export_lights.lights(l, scene) == False:
 				LuxLog('Error - No lights in scene.')
 				return
 		
 		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxm):
-			export_materials.ExportedTextures.clear()
+			if api_type == 'FILE':
+				l.set_output_file(Files.MATS)
 			export_materials.ExportedMaterials.clear()
 			export_materials.write_lxm(l, scene)
 		
 		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxo):
+			if api_type == 'FILE':
+				l.set_output_file(Files.GEOM)
 			export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)
 		
 		self.render_start(scene)
