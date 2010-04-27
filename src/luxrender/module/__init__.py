@@ -148,7 +148,7 @@ class LuxFilmDisplay(LuxTimerThread):
 		LuxTimerThread.start(self)
 			
 	def kick(self, render_end=False):
-		if self.RE is not None:
+		if self.RE is not None and self.lux_context.statistics('sceneIsReady') > 0.0:
 			self.lux_context.updateFramebuffer()
 			px = [] #self.lux_context.framebuffer()
 			xres = int(self.lux_context.statistics('filmXres'))
@@ -231,14 +231,15 @@ class LuxManager(object):
 			LuxLog('Already rendering!')
 			return
 		
-		self.stats_thread.start()
-		self.fb_thread.start(RE)
 		self.started = True
 		
 		# Wait until scene is fully parsed before adding more render threads
 		while self.lux_context.statistics('sceneIsReady') != 1.0:
 			# TODO: such a tight loop is not a good idea
 			time.sleep(0.3)
+			
+		self.stats_thread.start()
+		self.fb_thread.start(RE)
 		
 		for i in range(self.thread_count - 1):
 			self.lux_context.addThread()
