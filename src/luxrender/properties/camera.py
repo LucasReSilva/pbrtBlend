@@ -114,6 +114,9 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
 		if self.use_clipping:
 			params.add_float('hither', cam.clip_start)
 			params.add_float('yon', cam.clip_end)
+
+		# update the camera settings with motion blur settings
+		params.add_string('shutterdistribution', self.shutterdistribution)
 		
 		out = self.type, params
 		dbo('CAMERA', out)
@@ -155,3 +158,4 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
 		out = self.type, params
 		dbo('TONEMAPPING', out)
 		return out
+

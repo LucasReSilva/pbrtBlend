@@ -77,10 +77,16 @@ class camera(DataButtonsPanel, described_layout):
 		'fstop',
 		'sensitivity',
 		'exposure',
+		'usemblur',
+		'shutterdistribution', 
+		['cammblur', 'objectmblur'], 
 	]
 	
 	visibility = {
 		'type':			{ 'is_perspective': True }, 
+		'shutterdistribution': { 'usemblur': True },
+		'cammblur': { 'usemblur': True },
+		'objectmblur': { 'usemblur': True },
 	}
 	
 	properties = [
@@ -157,6 +163,34 @@ class camera(DataButtonsPanel, described_layout):
 			'soft_min': 0.0,
 			'max': 25.0,
 			'soft_max': 25.0
+		},
+		{
+			'type': 'bool',
+			'attr': 'usemblur',
+			'name': 'Motion Blur',
+			'default': False
+		},
+		{
+			'type': 'enum',
+			'attr': 'shutterdistribution',
+			'name': 'Distribution',
+			'default': 'uniform',
+			'items': [
+				('uniform', 'Uniform', 'uniform'),
+				('gaussian', 'Gaussian', 'gaussian'),
+			]
+		},
+		{
+			'type': 'bool',
+			'attr': 'cammblur',
+			'name': 'Camera Motion Blur',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'objectmblur',
+			'name': 'Object Motion Blur',
+			'default': True
 		},
 		
 	]
@@ -279,4 +313,4 @@ class tonemapping(DataButtonsPanel, described_layout):
 			'soft_max': 5.0
 		},
 	]
-	
+
