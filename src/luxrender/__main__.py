@@ -48,6 +48,7 @@ from .export import materials	as export_materials
 from .export import geometry	as export_geometry
 from .module.file_api			import Files
 
+from mathutils import Matrix
 
 # Add standard Blender Interface elements
 import properties_render
@@ -258,7 +259,7 @@ class luxrender(engine_base):
 			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 				scene.set_frame(scene.frame_current + 1)
-				m1 = 1.0 * scene.camera.matrix # multiply by 1.0 to get a copy of original matrix (will be frame-independant) 
+				m1 = Matrix.copy(scene.camera.matrix)
 				scene.set_frame(scene.frame_current - 1)
 				if m1 != scene.camera.matrix:				
 					l.transformBegin(file=Files.MAIN)
