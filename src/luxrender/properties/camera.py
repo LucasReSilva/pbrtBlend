@@ -115,8 +115,12 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
 			params.add_float('hither', cam.clip_start)
 			params.add_float('yon', cam.clip_end)
 
-		# update the camera settings with motion blur settings
-		params.add_string('shutterdistribution', self.shutterdistribution)
+		if self.usemblur:
+			# update the camera settings with motion blur settings
+			params.add_string('shutterdistribution', self.shutterdistribution)
+
+			if self.cammblur and self.is_cam_animated:
+				   params.add_string('endtransform', 'CameraEndTransform')
 		
 		out = self.type, params
 		dbo('CAMERA', out)

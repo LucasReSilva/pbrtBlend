@@ -159,6 +159,9 @@ class Custom_Context(Pylux_Context):
 	def lookAt(self, *args):
 		self.wf(Files.MAIN, '\nLookAt %s' % ' '.join(['%f'%i for i in args]))
 	
+	def coordinateSystem(self, name):
+		self._api('CoordinateSystem', [name, []])
+	
 	def camera(self, *args):
 		self._api('Camera', args)
 	
