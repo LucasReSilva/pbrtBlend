@@ -255,6 +255,7 @@ class luxrender(engine_base):
 			l.pixelFilter(			*scene.luxrender_filter.api_output()		)
 			
 			# Set up camera, view and film
+			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 				scene.set_frame(scene.frame_current + 1)
 				m1 = 1.0 * scene.camera.matrix # multiply by 1.0 to get a copy of original matrix (will be frame-independant) 
@@ -269,9 +270,9 @@ class luxrender(engine_base):
 					l.lookAt( *transform )
 					l.coordinateSystem('CameraEndTransform')
 					l.transformEnd()
-					scene.camera.data.luxrender_camera.is_cam_animated = True
+					is_cam_animated = True
 			l.lookAt(	*export_film.lookAt(scene)	)
-			l.camera(	*scene.camera.data.luxrender_camera.api_output(scene)	)
+			l.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
 			l.film(		*export_film.film(scene)	)
 			
 			

@@ -191,14 +191,7 @@ class camera(DataButtonsPanel, described_layout):
 			'attr': 'objectmblur',
 			'name': 'Object Motion Blur',
 			'default': True
-		},
-		# non visible property
-		{
-			'type': 'bool',
-			'attr': 'is_cam_animated',
-			'name': 'Is the camera animated?',
-			'default': False
-		},		
+		},	
 	]
 
 class tonemapping_live_update(object):
