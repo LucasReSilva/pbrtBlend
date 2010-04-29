@@ -160,7 +160,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 	for ob in sel:
 		ipc += 1.0
 		
-		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE'):
+		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 			continue
 		
 		# Check layers
