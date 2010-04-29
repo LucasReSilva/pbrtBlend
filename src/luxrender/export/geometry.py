@@ -27,6 +27,7 @@
 import random
 
 import bpy
+from mathutils import Matrix
 
 from ..module import LuxLog
 from ..module.file_api import Files
@@ -175,16 +176,45 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if not me:
 			continue
 
+		# object motion blur
+		is_object_animated = False
+		if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
+			scene.set_frame(scene.frame_current + 1)
+			m1 = Matrix.copy(ob.matrix)
+			scene.set_frame(scene.frame_current - 1)
+			if m1 != ob.matrix:				
+				is_object_animated = True
+	
+		if is_object_animated:
+			l.objectBegin(ob.name)
+
+			# Export either NamedMaterial stmt or the full material
+			# definition depending on the output type
+			export_object_material(l, ob)
+
+			exportMesh(ob, me, l, smoothing_enabled)
+			l.objectEnd(ob.name)
+
 		l.attributeBegin(comment=ob.name, file=Files.GEOM)
-		
-		# Export either NamedMaterial stmt or the full material
-		# definition depending on the output type
-		export_object_material(l, ob)
 		
 		# object translation/rotation/scale 
 		l.transform( matrix_to_list(ob.matrix) )
+		
+		# special case for motion blur since the mesh is already exported before the attribute
+		if is_object_animated:
+			l.transformBegin(comment=ob.name, file=Files.GEOM)
+			l.identity()
+			l.transform(matrix_to_list(m1))
+			l.coordinateSystem('%s' % ob.name + '_motion')
+			l.transformEnd()
+			l.motionInstance(ob.name, 0.0, 1.0, ob.name + '_motion')
 
-		exportMesh(ob, me, l, smoothing_enabled)
+		else:
+			# Export either NamedMaterial stmt or the full material
+			# definition depending on the output type
+			export_object_material(l, ob)
+
+			exportMesh(ob, me, l, smoothing_enabled)
 
 		l.attributeEnd()
 		

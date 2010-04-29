@@ -140,6 +140,12 @@ class Custom_Context(Pylux_Context):
 			self.wf(self.current_file, p.to_string(), 1)
 	
 	# Wrapped pylux.Context API calls follow ...
+
+	def objectBegin(self, name, file=None):
+		self._api('ObjectBegin ', [name, []], file=file)
+
+	def objectEnd(self, comment=''):
+		self._api('ObjectEnd # ', [comment, []])
 	
 	def sampler(self, *args):
 		self._api('Sampler', args)
@@ -162,6 +168,9 @@ class Custom_Context(Pylux_Context):
 	def coordinateSystem(self, name):
 		self._api('CoordinateSystem', [name, []])
 	
+	def identity(self):
+		self._api('Identity #', ['', []])
+	
 	def camera(self, *args):
 		self._api('Camera', args)
 	
@@ -179,6 +188,9 @@ class Custom_Context(Pylux_Context):
 
 	def areaLightSource(self, *args):
 		self._api('AreaLightSource', args)
+
+	def motionInstance(self, name, start, stop, motion_name):
+		self.wf(self.current_file, '\nMotionInstance "%s" %f %f "%s"' % (name, start, stop, motion_name))
 		
 	def attributeBegin(self, comment='', file=None):
 		'''
