@@ -170,6 +170,8 @@ def get_render_objects(scene):
 			ob.create_dupli_list(scene)
 
 			for dupli_ob in ob.dupli_list:
+				if dupli_ob.object.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
+					continue
 				objects.append([dupli_ob.object, dupli_ob.matrix])
 		else:
 			objects.append([ob, ob.matrix])	
