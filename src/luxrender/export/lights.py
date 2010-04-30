@@ -87,6 +87,9 @@ def lights(l, scene):
 		if ob.type != 'LAMP':
 			continue
 
+		if ob.parent and ob.parent.dupli_type != 'NONE':
+			continue
+
 		light = ob.data
 		
 		# Params common to all light types

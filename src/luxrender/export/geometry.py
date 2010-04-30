@@ -140,18 +140,81 @@ def exportMesh(ob, me, l, smoothing_enabled):
 	l.shape(shape_type, shape_params)
 
 #-------------------------------------------------
-# get_render_objects(scene)
-# returns array with objects to render/export
+# export_mesh(l, scene, object, matrix)
+# create mesh from object and export it to file
 #-------------------------------------------------
-def get_render_objects(scene):
-	objects = []	
+def export_mesh(l, scene, ob, matrix, smoothing_enabled):
+	me = ob.create_mesh(scene, True, 'RENDER')
+		
+	if not me:
+		return
+
+	# object motion blur
+	is_object_animated = False
+	if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
+		scene.set_frame(scene.frame_current + 1)
+		m1 = Matrix.copy(matrix)
+		scene.set_frame(scene.frame_current - 1)
+		if m1 != matrix:				
+			is_object_animated = True
+
+	if is_object_animated:
+		l.objectBegin(ob.name)
+
+		# Export either NamedMaterial stmt or the full material
+		# definition depending on the output type
+		export_object_material(l, ob)
+
+		exportMesh(ob, me, l, smoothing_enabled)
+		l.objectEnd(ob.name)
+
+	l.attributeBegin(comment=ob.name, file=Files.GEOM)
+	
+	# object translation/rotation/scale 
+	l.transform( matrix_to_list(matrix) )
+	
+	# special case for motion blur since the mesh is already exported before the attribute
+	if is_object_animated:
+		l.transformBegin(comment=ob.name, file=Files.GEOM)
+		l.identity()
+		l.transform(matrix_to_list(m1))
+		l.coordinateSystem('%s' % ob.name + '_motion')
+		l.transformEnd()
+		l.motionInstance(ob.name, 0.0, 1.0, ob.name + '_motion')
+
+	else:
+		# Export either NamedMaterial stmt or the full material
+		# definition depending on the output type
+		export_object_material(l, ob)
+
+		exportMesh(ob, me, l, smoothing_enabled)
+
+	l.attributeEnd()
+	
+	bpy.data.meshes.remove(me)
+
+def write_lxo(render_engine, l, scene, smoothing_enabled=True):
+	'''
+	l			pylux.Context
+	scene		bpy.types.scene
+	
+	Iterate over the given scene's objects,
+	and export the compatible ones to the context l.
+	
+	Returns		None
+	'''
+
+	objects = []
+	rpcs = []
+	ipc = 0.0
 
 	vis_layers = scene.layers
 	
 	sel = scene.objects
+	total_objects = len(sel)
 
-	for ob in sel:
-		
+	# browse all scene objects for "mesh-convertible" ones
+	for ob in sel:		
 		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 			continue
 		
@@ -167,97 +230,26 @@ def get_render_objects(scene):
 			continue
 
 		if ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
+			# create dupli objects
 			ob.create_dupli_list(scene)
 
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 					continue
-				objects.append([dupli_ob.object, dupli_ob.matrix])
+				export_mesh(l, scene, dupli_ob.object, dupli_ob.matrix, smoothing_enabled)
+
+			# free object dupli list again. Warning: all dupli objects are INVALID now!
+			if ob.dupli_list: 
+				ob.free_dupli_list()
 		else:
-			objects.append([ob, ob.matrix])	
+			export_mesh(l, scene, ob.object, ob.matrix, smoothing_enabled)
 
-	return objects
-
-def free_render_objects(objects):
-	for [ob, matrix] in objects:
-		if ob.dupli_list: 
-			ob.free_dupli_list()
-
-
-def write_lxo(render_engine, l, scene, smoothing_enabled=True):
-	'''
-	l			pylux.Context
-	scene		bpy.types.scene
-	
-	Iterate over the given scene's objects,
-	and export the compatible ones to the context l.
-	
-	Returns		None
-	'''
-
-	rpcs = []
-	ipc = 0.0
-	
-	objects = get_render_objects(scene)
-	total_objects = len(objects)
-	for [ob, matrix] in objects:
+		# exported another object		
 		ipc += 1.0
 
-		me = ob.create_mesh(scene, True, 'RENDER')
-		
-		if not me:
-			continue
-
-		# object motion blur
-		is_object_animated = False
-		if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
-			scene.set_frame(scene.frame_current + 1)
-			m1 = Matrix.copy(matrix)
-			scene.set_frame(scene.frame_current - 1)
-			if m1 != matrix:				
-				is_object_animated = True
-	
-		if is_object_animated:
-			l.objectBegin(ob.name)
-
-			# Export either NamedMaterial stmt or the full material
-			# definition depending on the output type
-			export_object_material(l, ob)
-
-			exportMesh(ob, me, l, smoothing_enabled)
-			l.objectEnd(ob.name)
-
-		l.attributeBegin(comment=ob.name, file=Files.GEOM)
-		
-		# object translation/rotation/scale 
-		l.transform( matrix_to_list(matrix) )
-		
-		# special case for motion blur since the mesh is already exported before the attribute
-		if is_object_animated:
-			l.transformBegin(comment=ob.name, file=Files.GEOM)
-			l.identity()
-			l.transform(matrix_to_list(m1))
-			l.coordinateSystem('%s' % ob.name + '_motion')
-			l.transformEnd()
-			l.motionInstance(ob.name, 0.0, 1.0, ob.name + '_motion')
-
-		else:
-			# Export either NamedMaterial stmt or the full material
-			# definition depending on the output type
-			export_object_material(l, ob)
-
-			exportMesh(ob, me, l, smoothing_enabled)
-
-		l.attributeEnd()
-		
-		bpy.data.meshes.remove(me)
-		
 		# TODO: this probably isn't very efficient for large scenes
 		pc = int(100 * ipc/total_objects)
 		if pc not in rpcs:
 			rpcs.append(pc)
 			render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
-
-	# free stuff like e.g. duplis
-	free_render_objects(objects)
 	
