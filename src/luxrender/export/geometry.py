@@ -53,7 +53,7 @@ def getMeshType(mesh):
 	
 	return dstr,params
 
-def exportMesh(ob, me, l, smoothing_enabled):
+def exportGeometry(ob, me, l, smoothing_enabled):
 	
 	faces_verts = [f.verts for f in me.faces]
 	ffaces = [f for f in me.faces]
@@ -143,7 +143,7 @@ def exportMesh(ob, me, l, smoothing_enabled):
 # export_mesh(l, scene, object, matrix)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def export_mesh(l, scene, ob, matrix, smoothing_enabled):
+def exportMesh(l, scene, ob, matrix, smoothing_enabled):
 	me = ob.create_mesh(scene, True, 'RENDER')
 		
 	if not me:
@@ -165,7 +165,7 @@ def export_mesh(l, scene, ob, matrix, smoothing_enabled):
 		# definition depending on the output type
 		export_object_material(l, ob)
 
-		exportMesh(ob, me, l, smoothing_enabled)
+		exportGeometry(ob, me, l, smoothing_enabled)
 		l.objectEnd(ob.name)
 
 	l.attributeBegin(comment=ob.name, file=Files.GEOM)
@@ -187,7 +187,7 @@ def export_mesh(l, scene, ob, matrix, smoothing_enabled):
 		# definition depending on the output type
 		export_object_material(l, ob)
 
-		exportMesh(ob, me, l, smoothing_enabled)
+		exportGeometry(ob, me, l, smoothing_enabled)
 
 	l.attributeEnd()
 	
@@ -236,13 +236,13 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 					continue
-				export_mesh(l, scene, dupli_ob.object, dupli_ob.matrix, smoothing_enabled)
+				exportMesh(l, scene, dupli_ob.object, dupli_ob.matrix, smoothing_enabled)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
 		else:
-			export_mesh(l, scene, ob.object, ob.matrix, smoothing_enabled)
+			exportMesh(l, scene, ob.object, ob.matrix, smoothing_enabled)
 
 		# exported another object		
 		ipc += 1.0
