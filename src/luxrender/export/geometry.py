@@ -36,7 +36,7 @@ from . import ParamSet
 from .materials import export_object_material
 
 #-------------------------------------------------
-# getMeshType(self, scene, mesh, ss)
+# getMeshType(mesh)
 # returns type of mesh as string to use depending on thresholds
 #-------------------------------------------------
 def getMeshType(mesh):
@@ -139,26 +139,18 @@ def exportMesh(ob, me, l, smoothing_enabled):
 	
 	l.shape(shape_type, shape_params)
 
+#-------------------------------------------------
+# get_render_objects(scene)
+# returns array with objects to render/export
+#-------------------------------------------------
+def get_render_objects(scene):
+	objects = []	
 
-def write_lxo(render_engine, l, scene, smoothing_enabled=True):
-	'''
-	l			pylux.Context
-	scene		bpy.types.scene
-	
-	Iterate over the given scene's objects,
-	and export the compatible ones to the context l.
-	
-	Returns		None
-	'''
-	
 	vis_layers = scene.layers
 	
 	sel = scene.objects
-	total_objects = len(sel)
-	rpcs = []
-	ipc = 0.0
+
 	for ob in sel:
-		ipc += 1.0
 		
 		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 			continue
@@ -171,6 +163,44 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if not visible:
 			continue
 		
+		if ob.parent and ob.parent.dupli_type != 'NONE':
+			continue
+
+		if ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
+			ob.create_dupli_list(scene)
+
+			for dupli_ob in ob.dupli_list:
+				objects.append([dupli_ob.object, dupli_ob.matrix])
+		else:
+			objects.append([ob, ob.matrix])	
+
+	return objects
+
+def free_render_objects(objects):
+	for [ob, matrix] in objects:
+		if ob.dupli_list: 
+			ob.free_dupli_list()
+
+
+def write_lxo(render_engine, l, scene, smoothing_enabled=True):
+	'''
+	l			pylux.Context
+	scene		bpy.types.scene
+	
+	Iterate over the given scene's objects,
+	and export the compatible ones to the context l.
+	
+	Returns		None
+	'''
+
+	rpcs = []
+	ipc = 0.0
+	
+	objects = get_render_objects(scene)
+	total_objects = len(objects)
+	for [ob, matrix] in objects:
+		ipc += 1.0
+
 		me = ob.create_mesh(scene, True, 'RENDER')
 		
 		if not me:
@@ -180,9 +210,9 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		is_object_animated = False
 		if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
 			scene.set_frame(scene.frame_current + 1)
-			m1 = Matrix.copy(ob.matrix)
+			m1 = Matrix.copy(matrix)
 			scene.set_frame(scene.frame_current - 1)
-			if m1 != ob.matrix:				
+			if m1 != matrix:				
 				is_object_animated = True
 	
 		if is_object_animated:
@@ -198,7 +228,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		l.attributeBegin(comment=ob.name, file=Files.GEOM)
 		
 		# object translation/rotation/scale 
-		l.transform( matrix_to_list(ob.matrix) )
+		l.transform( matrix_to_list(matrix) )
 		
 		# special case for motion blur since the mesh is already exported before the attribute
 		if is_object_animated:
@@ -225,4 +255,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if pc not in rpcs:
 			rpcs.append(pc)
 			render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
+
+	# free stuff like e.g. duplis
+	free_render_objects(objects)
 	
