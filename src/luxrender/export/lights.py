@@ -157,6 +157,10 @@ def exportLights(l, scene, ob, matrix):
 
 	return False
 
+#-------------------------------------------------
+# lights(l, scene)
+# MAIN export function
+#-------------------------------------------------
 def lights(l, scene):
 	'''
 	l				pylux.Context

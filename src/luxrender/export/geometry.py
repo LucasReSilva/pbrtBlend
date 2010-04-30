@@ -193,6 +193,10 @@ def exportMesh(l, scene, ob, matrix, smoothing_enabled):
 	
 	bpy.data.meshes.remove(me)
 
+#-------------------------------------------------
+# write_lxo(render_engine, l, scene, smoothing_enabled=True)
+# MAIN export function
+#-------------------------------------------------
 def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 	'''
 	l			pylux.Context
