@@ -246,7 +246,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			if ob.dupli_list: 
 				ob.free_dupli_list()
 		else:
-			exportMesh(l, scene, ob.object, ob.matrix, smoothing_enabled)
+			exportMesh(l, scene, ob, ob.matrix, smoothing_enabled)
 
 		# exported another object		
 		ipc += 1.0
