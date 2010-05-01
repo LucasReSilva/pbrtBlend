@@ -29,6 +29,7 @@ def texture_property_translate(name):
 		'c_mortartex': 'mortartex',
 		'c_tex1': 'tex1',
 		'c_tex2': 'tex2',
+		
 	}
 	
 	if name in xlate.keys():

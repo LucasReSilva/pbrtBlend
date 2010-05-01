@@ -218,7 +218,9 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 		
 		tpm = texture_property_map()
 		for lux_prop_name in [lp for lp in dir(lux_tex) if texture_property_translate(lp) in tpm.keys()]:
+			# don't parse float texture properties if not a float texture
 			if lux_prop_name.startswith('f_') and lux_tex.variant != 'FLOAT': continue
+			# don't parse color texture properties if not a color texture
 			if lux_prop_name.startswith('c_') and lux_tex.variant != 'COLOR': continue
 			lux_prop_realname = texture_property_translate(lux_prop_name)
 			if lux_tex.texture in tpm[lux_prop_realname]:
