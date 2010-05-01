@@ -52,18 +52,96 @@ TF_tex2				= FloatTexture('texture', 'f_tex2', 'Tex 2',			'luxrender_texture', a
 TF_inside			= FloatTexture('texture', 'inside', 'Inside',			'luxrender_texture', add_float_value=False)
 TF_outside			= FloatTexture('texture', 'outside', 'Outside',			'luxrender_texture', add_float_value=False)
 
-def texture_visibility():
+TC_brickmodtex		= ColorTexture('texture', 'c_brickmodtex', 'Mod Tex',	'luxrender_texture')
+TC_brickrun			= ColorTexture('texture', 'c_brickrun', 'Run',			'luxrender_texture')
+TC_bricktex			= ColorTexture('texture', 'c_bricktex', 'Tex',			'luxrender_texture')
+TC_mortartex		= ColorTexture('texture', 'c_mortartex', 'Mortar Tex',	'luxrender_texture')
+TC_tex1				= ColorTexture('texture', 'c_tex1', 'Tex 1',			'luxrender_texture')
+TC_tex2				= ColorTexture('texture', 'c_tex2', 'Tex 2',			'luxrender_texture')
+
+def discover_float_color(context):
+	float_col = False
+	
+	for ms in context.object.material_slots:
+		# first search in the parent object's materials
+		lm = ms.material.luxrender_material
+		for p in dir(lm):
+			if p.endswith('_texturename') and getattr(lm, p) == context.texture.name:
+				tex_slot = p.replace('_texturename', '')
+				return getattr(lm, tex_slot)
+		
+		# then search in textures
+		for ts in ms.material.texture_slots:
+			if hasattr(ts.texture, 'luxrender_texture'):
+				lt = ts.texture.luxrender_texture
+				for p in dir(lt):
+					if p.endswith('_texturename') and getattr(lt, p) == context.texture.name:
+						tex_slot = p.replace('_texturename', '')
+						return getattr(lt, tex_slot)
+	
+	return float_col
+
+def texture_controls(context=None):
+	
+	ctrl = [
+		'texture',
+	]
+	
+	if context != None:
+		float_col = discover_float_color(context)
+		
+		if float_col == 'lux_float_texture':
+			context.texture.luxrender_texture.variant = 'FLOAT'
+			
+			# this is NOT the same as append() !
+			ctrl += \
+				TF_amount.get_controls() + \
+				TF_brickmodtex.get_controls() + \
+				TF_brickrun.get_controls() + \
+				TF_bricktex.get_controls() + \
+				TF_mortartex.get_controls() + \
+				TF_tex1.get_controls() + \
+				TF_tex2.get_controls() + \
+				TF_inside.get_controls() + \
+				TF_outside.get_controls()
+		elif float_col == 'lux_color_texture':
+			context.texture.luxrender_texture.variant = 'COLOR'
+			
+			# this is NOT the same as append() !
+			ctrl += \
+				TC_brickmodtex.get_controls() + \
+				TC_brickrun.get_controls() + \
+				TC_bricktex.get_controls() + \
+				TC_mortartex.get_controls() + \
+				TC_tex1.get_controls() + \
+				TC_tex2.get_controls()
+		
+	
+	return ctrl
+
+def texture_visibility(context=None):
 	vis = {}
 	
 	vis.update( TF_amount.get_visibility() )
-	vis.update( TF_brickmodtex.get_visibility() )
-	vis.update( TF_brickrun.get_visibility() )
-	vis.update( TF_bricktex.get_visibility() )
-	vis.update( TF_mortartex.get_visibility() )
-	vis.update( TF_tex1.get_visibility() )
-	vis.update( TF_tex2.get_visibility() )
 	vis.update( TF_inside.get_visibility() )
 	vis.update( TF_outside.get_visibility() )
+	
+	if context != None:
+		float_col = discover_float_color(context)
+		if float_col == 'lux_float_texture':
+			vis.update( TF_brickmodtex.get_visibility() )
+			vis.update( TF_brickrun.get_visibility() )
+			vis.update( TF_bricktex.get_visibility() )
+			vis.update( TF_mortartex.get_visibility() )
+			vis.update( TF_tex1.get_visibility() )
+			vis.update( TF_tex2.get_visibility() )
+		elif float_col == 'lux_color_texture':
+			vis.update( TC_brickmodtex.get_visibility() )
+			vis.update( TC_brickrun.get_visibility() )
+			vis.update( TC_bricktex.get_visibility() )
+			vis.update( TC_mortartex.get_visibility() )
+			vis.update( TC_tex1.get_visibility() )
+			vis.update( TC_tex2.get_visibility() )
 	
 	return vis
 
@@ -108,23 +186,14 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	def draw(self, context):
 		if context.texture is not None:
 			texture_editor.property_create(context.texture)
-		
+			
+			texture_editor.controls = texture_controls(context)
+			texture_editor.visibility = texture_visibility(context)
+			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.texture, supercontext=context)
 				
-	controls = [
-		'texture',
-	] + \
-	TF_amount.get_controls() + \
-	TF_brickmodtex.get_controls() + \
-	TF_brickrun.get_controls() + \
-	TF_bricktex.get_controls() + \
-	TF_mortartex.get_controls() + \
-	TF_tex1.get_controls() + \
-	TF_tex2.get_controls() + \
-	TF_inside.get_controls() + \
-	TF_outside.get_controls()
-	
+	controls = texture_controls()
 	visibility = texture_visibility()
 	
 	properties = [
@@ -161,6 +230,14 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 				('wrinkled', 'wrinkled', 'wrinkled'),
 			],
 		},
+		{
+			'attr': 'variant',
+			'type': 'enum',
+			'items': [
+				('FLOAT', 'FLOAT', 'FLOAT'),
+				('COLOR', 'COLOR', 'COLOR'),
+			]
+		},
 	] + \
 	TF_amount.get_properties() + \
 	TF_brickmodtex.get_properties() + \
@@ -170,4 +247,10 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	TF_tex1.get_properties() + \
 	TF_tex2.get_properties() + \
 	TF_inside.get_properties() + \
-	TF_outside.get_properties()
+	TF_outside.get_properties() + \
+	TC_brickmodtex.get_properties() + \
+	TC_brickrun.get_properties() + \
+	TC_bricktex.get_properties() + \
+	TC_mortartex.get_properties() + \
+	TC_tex1.get_properties() + \
+	TC_tex2.get_properties()

@@ -64,7 +64,7 @@ class ColorTexture(TextureBase):
 
 	def get_controls(self):
 		return [
-			[ 0.9, ['%s_label' % self.attr, '%s_color' % self.attr], '%s_usetexture' % self.attr ],
+			[ 0.9, [0.375,'%s_label' % self.attr, '%s_color' % self.attr], '%s_usetexture' % self.attr ],
 			'%s_texture' % self.attr
 		] + self.get_extra_controls()
 	

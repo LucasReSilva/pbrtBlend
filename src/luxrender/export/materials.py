@@ -167,15 +167,16 @@ def add_float_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 	
 	if getattr(lux_mattex, '%s_usetexture'%lux_prop_name):
 		texture_name = getattr(lux_mattex, '%s_texturename'%lux_prop_name)
-		if texture_name in bpy.data.textures:
-			params.add_texture(
-				texture_property_translate(lux_prop_name),
-				texture_name
-			)
-			luxrender_texture_params('float', lux_context, bpy.data.textures[texture_name])
-			ExportedTextures.export_new(lux_context)
+		if texture_name != '':
+			if texture_name in bpy.data.textures and bpy.data.textures[texture_name].luxrender_texture.variant == 'FLOAT':
+				params.add_texture(
+					texture_property_translate(lux_prop_name),
+					texture_name
+				)
+				luxrender_texture_params('float', lux_context, bpy.data.textures[texture_name])
+				ExportedTextures.export_new(lux_context)
 		else:
-			LuxLog('WARNING: Unassigned texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
+			LuxLog('WARNING: Unassigned float texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_float(
 			texture_property_translate(lux_prop_name),
@@ -189,15 +190,16 @@ def add_color_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 	
 	if getattr(lux_mattex, '%s_usetexture'%lux_prop_name):
 		texture_name = getattr(lux_mattex, '%s_texturename'%lux_prop_name)
-		if texture_name in bpy.data.textures:
-			params.add_texture(
-				texture_property_translate(lux_prop_name),
-				texture_name
-			)
-			luxrender_texture_params('color', lux_context, bpy.data.textures[texture_name])
-			ExportedTextures.export_new(lux_context)
+		if texture_name != '':
+			if texture_name in bpy.data.textures and bpy.data.textures[texture_name].luxrender_texture.variant == 'COLOR':
+				params.add_texture(
+					texture_property_translate(lux_prop_name),
+					texture_name
+				)
+				luxrender_texture_params('color', lux_context, bpy.data.textures[texture_name])
+				ExportedTextures.export_new(lux_context)
 		else:
-			LuxLog('WARNING: Unassigned texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
+			LuxLog('WARNING: Unassigned color texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_color(
 			texture_property_translate(lux_prop_name),
@@ -216,6 +218,8 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 		
 		tpm = texture_property_map()
 		for lux_prop_name in [lp for lp in dir(lux_tex) if texture_property_translate(lp) in tpm.keys()]:
+			if lux_prop_name.startswith('f_') and lux_tex.variant != 'FLOAT': continue
+			if lux_prop_name.startswith('c_') and lux_tex.variant != 'COLOR': continue
 			lux_prop_realname = texture_property_translate(lux_prop_name)
 			if lux_tex.texture in tpm[lux_prop_realname]:
 				lux_prop = getattr(lux_tex, lux_prop_name)

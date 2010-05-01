@@ -22,6 +22,13 @@ def texture_property_translate(name):
 		'f_mortartex': 'mortartex',
 		'f_tex1': 'tex1',
 		'f_tex2': 'tex2',
+		
+		'c_brickmodtex': 'brickmodtex',
+		'c_brickrun': 'brickrun',
+		'c_bricktex': 'bricktex',
+		'c_mortartex': 'mortartex',
+		'c_tex1': 'tex1',
+		'c_tex2': 'tex2',
 	}
 	
 	if name in xlate.keys():

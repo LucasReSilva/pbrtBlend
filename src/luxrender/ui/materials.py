@@ -77,14 +77,14 @@ TF_uroughness	= FloatTexture('material', 'uroughness', 'uroughness',	'luxrender_
 TF_vroughness	= FloatTexture('material', 'vroughness', 'vroughness',	'luxrender_material', add_float_value=True )
 
 # Color Textures
-TC_Ka	= ColorTexture('material', 'Ka', 'Absorption color',	'luxrender_material')
-TC_Kd	= ColorTexture('material', 'Kd', 'Diffuse color',		'luxrender_material')
-TC_Kr	= ColorTexture('material', 'Kr', 'Reflection color',	'luxrender_material')
-TC_Ks	= ColorTexture('material', 'Ks', 'Specular color',		'luxrender_material')
-TC_Ks1	= ColorTexture('material', 'Ks1', 'Specular color 1',	'luxrender_material')
-TC_Ks2	= ColorTexture('material', 'Ks2', 'Specular color 2',	'luxrender_material')
-TC_Ks3	= ColorTexture('material', 'Ks3', 'Specular color 3',	'luxrender_material')
-TC_Kt	= ColorTexture('material', 'Kt', 'Transmission color',	'luxrender_material')
+TC_Ka			= ColorTexture('material', 'Ka', 'Absorption color',	'luxrender_material')
+TC_Kd			= ColorTexture('material', 'Kd', 'Diffuse color',		'luxrender_material')
+TC_Kr			= ColorTexture('material', 'Kr', 'Reflection color',	'luxrender_material')
+TC_Ks			= ColorTexture('material', 'Ks', 'Specular color',		'luxrender_material')
+TC_Ks1			= ColorTexture('material', 'Ks1', 'Specular color 1',	'luxrender_material')
+TC_Ks2			= ColorTexture('material', 'Ks2', 'Specular color 2',	'luxrender_material')
+TC_Ks3			= ColorTexture('material', 'Ks3', 'Specular color 3',	'luxrender_material')
+TC_Kt			= ColorTexture('material', 'Kt', 'Transmission color',	'luxrender_material')
 
 def material_visibility():
 	# non-texture properties
