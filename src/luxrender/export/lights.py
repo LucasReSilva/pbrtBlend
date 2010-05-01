@@ -167,27 +167,29 @@ def lights(l, scene):
 	have_light = False
 
 	for ob in sel:
-		
-		if ob.type != 'LAMP':
-			continue
 
 		if ob.parent and ob.parent.dupli_type != 'NONE':
 			continue
 
+		# we have to check for duplis before the "LAMP" ceck 
+		# to support a mesh/object which got lamp as dupli object
 		if ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
 			# create dupli objects
 			ob.create_dupli_list(scene)
 
 			for dupli_ob in ob.dupli_list:
-				if dupli_ob.object.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
+				if dupli_ob.object.type != 'LAMP':
 					continue
 				have_light = exportLights(l, scene, dupli_ob.object, dupli_ob.matrix)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
-		else:
-			have_light = exportLights(l, scene, ob, ob.matrix)
+		
+		if ob.type != 'LAMP':
+			continue
+
+		have_light = exportLights(l, scene, ob, ob.matrix)
 
 	return have_light
 		
