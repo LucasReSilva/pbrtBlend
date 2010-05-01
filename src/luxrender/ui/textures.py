@@ -35,7 +35,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.texture
-from ..properties.util import has_property, texture_property_map
+from ..properties.util import has_property, texture_property_map, texture_translate_dict
 from ..properties.texture import FloatTexture, ColorTexture
 
 TF_amount			= FloatTexture('texture', 'amount', 'Amount',			'luxrender_texture')
@@ -114,7 +114,7 @@ def texture_controls(context=None):
 		'mapping',
 		'maxanisotropy',
 		'mortarsize',
-		'name',
+		'lampspectrum_name',
 		'octaves',
 		'phase',
 		'roughness',
@@ -163,7 +163,10 @@ def texture_controls(context=None):
 
 def texture_visibility(context=None):
 	vis = {}
+	reverse_translate = texture_translate_dict()
 	for k, v in texture_property_map().items():
+		if k in reverse_translate.values():
+			k = list(reverse_translate.keys())[ list(reverse_translate.values()).index(k) ]
 		vis[k] = { 'texture': v }
 		
 	vis.update( TF_amount.get_visibility() )
@@ -414,8 +417,9 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 			'name': 'Mortar Size',
 		},
 		{
-			'attr': 'name',
+			'attr': 'lampspectrum_name',
 			'type': 'enum',
+			'name': 'Lamp Name',
 			'items': lampspectrum_names()
 		},
 		{
@@ -491,6 +495,7 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 		{
 			'attr': 'wrap',
 			'type': 'enum',
+			'name': 'Wrapping',
 			'default': 'repeat',
 			'items': [
 				('repeat', 'repeat', 'repeat'),

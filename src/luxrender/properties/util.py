@@ -14,8 +14,8 @@ def has_property(parent_type, property_name):
 	
 #------------------------------------------------------------------------------ 
 
-def texture_property_translate(name):
-	xlate = {
+def texture_translate_dict():
+	return {
 		'f_brickmodtex': 'brickmodtex',
 		'f_brickrun': 'brickrun',
 		'f_bricktex': 'bricktex',
@@ -30,7 +30,11 @@ def texture_property_translate(name):
 		'c_tex1': 'tex1',
 		'c_tex2': 'tex2',
 		
+		'lampspectrum_name': 'name'
 	}
+
+def texture_property_translate(name):
+	xlate = texture_translate_dict()
 	
 	if name in xlate.keys():
 		return xlate[name]
