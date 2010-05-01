@@ -89,16 +89,11 @@ def exportLights(l, scene, ob, matrix):
 	
 	
 	# all lights apart from sun + sky have "color L"
-	#if lamp.luxrender_lamp.L_usetexture:
-		# TODO: find and export the named texture
-	#	light_params.add_texture('L', lamp.luxrender_lamp.L_texturename)
-	#else:
 	light_params.update( add_color_texture(l, 'L', light.luxrender_lamp, light) )
 	
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5
 		conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
-		#light_params.add_color('L', list(light.color))
 		light_params.add_point('from', (0,0,0))
 		light_params.add_point('to', (0,0,-1))
 		light_params.add_float('coneangle', coneangle)
@@ -108,7 +103,6 @@ def exportLights(l, scene, ob, matrix):
 		return True
 
 	if light.type == 'POINT':
-		#light_params.add_color('L', list(light.color))
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
 		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix))
 
@@ -118,9 +112,6 @@ def exportLights(l, scene, ob, matrix):
 		if light.luxrender_lamp.infinite_map != '':
 			light_params.add_string('mapname', light.luxrender_lamp.infinite_map)
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
-		#else:
-			# TODO: check if users want L multiplied to HDRI maps
-			#light_params.add_color('L', list(light.color))
 		# nsamples
 		# gamma
 		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix))
@@ -128,7 +119,6 @@ def exportLights(l, scene, ob, matrix):
 		return True
 	
 	if light.type == 'AREA':
-		#light_params.add_color('L', list(light.color))
 		light_params.add_float('power', light.luxrender_lamp.power)
 		light_params.add_float('efficacy', light.luxrender_lamp.efficacy)
 		# nsamples
@@ -146,7 +136,7 @@ def exportLights(l, scene, ob, matrix):
 		else:
 			areay = areax # not supported yet
 
-		points = [-areax/2, areay/2, 0.0, areax/2, areay/2, 0.0, areax/2, -areay/2, 0.0, -areax/2, -areay/2, 0.0]
+		points = [-areax/2.0, areay/2.0, 0.0, areax/2.0, areay/2.0, 0.0, areax/2.0, -areay/2.0, 0.0, -areax/2.0, -areay/2.0, 0.0]
 		shape_params = ParamSet() \
 			.add_integer('indices', [0, 1, 2, 0, 2, 3]) \
 			.add_point('P', points)

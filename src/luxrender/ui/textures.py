@@ -75,22 +75,37 @@ def discover_float_color(context):
 	
 	float_col = False
 	
-	for ms in context.object.material_slots:
-		# first search in the parent object's materials
-		lm = ms.material.luxrender_material
-		for p in dir(lm):
-			if p.endswith('_texturename') and getattr(lm, p) == context.texture.name:
-				tex_slot = p.replace('_texturename', '')
-				return getattr(lm, tex_slot)
-		
-		# then search in textures
-		for ts in ms.material.texture_slots:
-			if hasattr(ts, 'texture') and hasattr(ts.texture, 'luxrender_texture'):
-				lt = ts.texture.luxrender_texture
-				for p in dir(lt):
-					if p.endswith('_texturename') and getattr(lt, p) == context.texture.name:
-						tex_slot = p.replace('_texturename', '')
-						return getattr(lt, tex_slot)
+	if context.object.type == 'LAMP':
+			lm = context.object.data.luxrender_lamp
+			for p in dir(lm):
+				if p.endswith('_texturename') and getattr(lm, p) == context.texture.name:
+					tex_slot = p.replace('_texturename', '')
+					return getattr(lm, tex_slot)
+			# then search in textures
+			for ts in context.object.data.texture_slots:
+				if hasattr(ts, 'texture') and hasattr(ts.texture, 'luxrender_texture'):
+					lt = ts.texture.luxrender_texture
+					for p in dir(lt):
+						if p.endswith('_texturename') and getattr(lt, p) == context.texture.name:
+							tex_slot = p.replace('_texturename', '')
+							return getattr(lt, tex_slot)
+	else:
+		for ms in context.object.material_slots:
+			# first search in the parent object's materials
+			lm = ms.material.luxrender_material
+			for p in dir(lm):
+				if p.endswith('_texturename') and getattr(lm, p) == context.texture.name:
+					tex_slot = p.replace('_texturename', '')
+					return getattr(lm, tex_slot)
+			
+			# then search in textures
+			for ts in ms.material.texture_slots:
+				if hasattr(ts, 'texture') and hasattr(ts.texture, 'luxrender_texture'):
+					lt = ts.texture.luxrender_texture
+					for p in dir(lt):
+						if p.endswith('_texturename') and getattr(lt, p) == context.texture.name:
+							tex_slot = p.replace('_texturename', '')
+							return getattr(lt, tex_slot)
 	
 	return float_col
 
@@ -114,7 +129,7 @@ def texture_controls(context=None):
 		'mapping',
 		'maxanisotropy',
 		'mortarsize',
-		'lampspectrum_name',
+		'zlampspectrum_name',
 		'octaves',
 		'phase',
 		'roughness',
@@ -192,7 +207,7 @@ def texture_visibility(context=None):
 	
 	return vis
 
-class texture_editor(context_panel, TextureButtonsPanel, described_layout):
+class texture_editor(TextureButtonsPanel, described_layout):
 	'''
 	Texture Editor UI Panel
 	'''
@@ -201,7 +216,6 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 	COMPAT_ENGINES = {'luxrender'}
 	
 	property_group = luxrender.properties.texture.luxrender_texture
-	
 	# prevent creating luxrender_texture property group in Scene
 	property_group_non_global = True
 	
@@ -417,7 +431,7 @@ class texture_editor(context_panel, TextureButtonsPanel, described_layout):
 			'name': 'Mortar Size',
 		},
 		{
-			'attr': 'lampspectrum_name',
+			'attr': 'zlampspectrum_name',
 			'type': 'enum',
 			'name': 'Lamp Name',
 			'items': lampspectrum_names()

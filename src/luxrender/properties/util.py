@@ -30,7 +30,7 @@ def texture_translate_dict():
 		'c_tex1': 'tex1',
 		'c_tex2': 'tex2',
 		
-		'lampspectrum_name': 'name'
+		'zlampspectrum_name': 'name'
 	}
 
 def texture_property_translate(name):

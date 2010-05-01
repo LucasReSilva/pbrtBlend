@@ -209,7 +209,7 @@ def add_color_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 	return params
 
 def luxrender_texture_params(tex_type, lux_context, tex):
-	# TODO: detect texture type, convert if necessary
+	# TODO: detect luxrender/blender texture, convert if necessary
 	
 	tp = ParamSet()
 	
@@ -231,13 +231,13 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 					tp.update(add_color_texture(lux_context, lux_prop_name, lux_tex, tex))
 				# TODO: these basic types should cover everything for now ?
 				elif type(lux_prop) is float:
-					tp.add_float(lux_prop_name, lux_prop)
+					tp.add_float(lux_prop_realname, lux_prop)
 				elif type(lux_prop) is str:
-					tp.add_string(lux_prop_name, lux_prop)
+					tp.add_string(lux_prop_realname, lux_prop)
 				elif type(lux_prop) is bool:
-					tp.add_bool(lux_prop_name, lux_prop)
+					tp.add_bool(lux_prop_realname, lux_prop)
 				elif type(lux_prop) is int:
-					tp.add_integer(lux_prop_name, lux_prop)
+					tp.add_integer(lux_prop_realname, lux_prop)
 		
 		ExportedTextures.texture(tex.name, tex_type, lux_tex.texture, tp)
 
