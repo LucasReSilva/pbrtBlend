@@ -72,7 +72,7 @@ def discover_float_color(context):
 		
 		# then search in textures
 		for ts in ms.material.texture_slots:
-			if hasattr(ts.texture, 'luxrender_texture'):
+			if hasattr(ts, 'texture') and hasattr(ts.texture, 'luxrender_texture'):
 				lt = ts.texture.luxrender_texture
 				for p in dir(lt):
 					if p.endswith('_texturename') and getattr(lt, p) == context.texture.name:

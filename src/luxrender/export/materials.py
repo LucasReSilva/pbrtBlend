@@ -175,7 +175,7 @@ def add_float_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 				)
 				luxrender_texture_params('float', lux_context, bpy.data.textures[texture_name])
 				ExportedTextures.export_new(lux_context)
-		else:
+		elif lux_prop_name != 'bumpmap':
 			LuxLog('WARNING: Unassigned float texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_float(
@@ -198,7 +198,7 @@ def add_color_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 				)
 				luxrender_texture_params('color', lux_context, bpy.data.textures[texture_name])
 				ExportedTextures.export_new(lux_context)
-		else:
+		elif lux_prop_name != 'bumpmap':
 			LuxLog('WARNING: Unassigned color texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_color(
