@@ -123,6 +123,10 @@ def texture_controls(context=None):
 		'temperature',
 		['uscale', 'vscale'],
 		['udelta', 'vdelta'],
+		'variation',
+		'wavelength',
+		'width',
+		'wrap'
 	] + \
 	TF_amount.get_controls() + \
 	TF_inside.get_controls() + \
