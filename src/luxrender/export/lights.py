@@ -168,7 +168,8 @@ def lights(l, scene):
 
 	for ob in sel:
 
-		if ob.parent and ob.parent.dupli_type != 'NONE':
+		# skip dupli (child) objects when they are not lamps
+		if (ob.parent and ob.parent.dupli_type != 'NONE') and ob.type != 'LAMP':
 			continue
 
 		# we have to check for duplis before the "LAMP" ceck 
@@ -180,16 +181,16 @@ def lights(l, scene):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light = exportLights(l, scene, dupli_ob.object, dupli_ob.matrix)
+				have_light |= exportLights(l, scene, dupli_ob.object, dupli_ob.matrix)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
-		
-		if ob.type != 'LAMP':
-			continue
+		else:
+			if ob.type != 'LAMP':
+				continue
 
-		have_light = exportLights(l, scene, ob, ob.matrix)
+			have_light |= exportLights(l, scene, ob, ob.matrix)
 
 	return have_light
 		
