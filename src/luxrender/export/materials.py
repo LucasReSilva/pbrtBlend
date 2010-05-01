@@ -28,10 +28,13 @@ import random
 
 import bpy
 
+from ef.validate import Visibility
+
 from . import ParamSet
 from ..module import LuxLog
 from ..properties.util import material_property_map, texture_property_map, texture_property_translate
 from ..properties.texture import FloatTexture, ColorTexture
+from ..ui.textures import texture_visibility
 
 def write_lxm(l, scene):
 	'''
@@ -216,6 +219,9 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 	if hasattr(tex, 'luxrender_texture'):
 		lux_tex = tex.luxrender_texture
 		
+		#tex_validate = Visibility(lux_tex)
+		#tex_visibility = texture_visibility()
+		
 		tpm = texture_property_map()
 		for lux_prop_name in [lp for lp in dir(lux_tex) if texture_property_translate(lp) in tpm.keys()]:
 			# don't parse float texture properties if not a float texture
@@ -224,6 +230,7 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 			if lux_prop_name.startswith('c_') and lux_tex.variant != 'COLOR': continue
 			lux_prop_realname = texture_property_translate(lux_prop_name)
 			if lux_tex.texture in tpm[lux_prop_realname]:
+			#if tex_validate.test_logic(lux_prop_realname, tex_visibility):
 				lux_prop = getattr(lux_tex, lux_prop_name)
 				if lux_prop == 'lux_float_texture':
 					tp.update(add_float_texture(lux_context, lux_prop_name, lux_tex, tex))
@@ -238,6 +245,8 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 					tp.add_bool(lux_prop_realname, lux_prop)
 				elif type(lux_prop) is int:
 					tp.add_integer(lux_prop_realname, lux_prop)
+				elif type(lux_prop).__name__ == 'bpy_prop_array':
+					tp.add_vector(lux_prop_realname, lux_prop)
 		
 		ExportedTextures.texture(tex.name, tex_type, lux_tex.texture, tp)
 
@@ -248,7 +257,7 @@ def luxrender_material_params(lux_context, mat, add_type=False):
 	lux_mat_type = lux_mat.material
 	if add_type:
 		mp.add_string('type', lux_mat_type)
-		
+	
 	mpm = material_property_map()
 	for lux_prop_name in [lp for lp in dir(lux_mat) if lp in mpm.keys()]:
 		if lux_mat_type in mpm[lux_prop_name]:
@@ -266,5 +275,7 @@ def luxrender_material_params(lux_context, mat, add_type=False):
 				mp.add_bool(lux_prop_name, lux_prop)
 			elif type(lux_prop) is int:
 				mp.add_integer(lux_prop_name, lux_prop)
+			elif type(lux_prop).__name__ == 'bpy_prop_array':
+				mp.add_vector(lux_prop_name, lux_prop)
 	
 	return mp

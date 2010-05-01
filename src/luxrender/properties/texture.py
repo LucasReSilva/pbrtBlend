@@ -40,7 +40,13 @@ class TextureBase(object):
 		self.property_group = property_group
 	
 	def texture_slot_finder(self):
-		return lambda s,c: s.object.material_slots[s.object.active_material_index].material
+		def func(s,c):
+			if s.object.type == 'LAMP':
+				return s.object.data
+			else:
+				return s.object.material_slots[s.object.active_material_index].material
+		
+		return func
 	
 	def get_extra_controls(self):
 		'''

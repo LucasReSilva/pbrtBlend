@@ -30,6 +30,7 @@ def texture_translate_dict():
 		'c_tex1': 'tex1',
 		'c_tex2': 'tex2',
 		
+		'marble_scale': 'scale',
 		'zlampspectrum_name': 'name'
 	}
 
@@ -99,12 +100,14 @@ def texture_property_map():
 		#'outscale': ,
 		'outside':			O(['dots']),
 		'phase':			O(['frequency']),
+		'rotate':			O(['bilerp', 'checkerboard', 'dots', 'uv']),
 		'roughness':		O(['fbm', 'marble', 'wrinkled']),
-		'scale':			O(['marble']),
+		'scale':			O(['bilerp', 'checkerboard', 'dots', 'uv']),
 		'start':			O(['regulardata']),
 		'temperature':		O(['blackbody']),
 		'tex1':				O(['checkerboard', 'mix', 'scale']),
 		'tex2':				O(['checkerboard', 'mix', 'scale']),
+		'translate':		O(['bilerp', 'checkerboard', 'dots', 'uv']),
 		#'turbulence': ,
 		#'type': ,
 		'udelta':			O(['bilerp', 'checkerboard', 'dots', 'imagemap', 'uv']),
