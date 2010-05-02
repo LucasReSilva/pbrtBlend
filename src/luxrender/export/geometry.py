@@ -245,7 +245,6 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 					continue
 				exportMesh(l, scene, dupli_ob.object, dupli_ob.matrix, smoothing_enabled)
 				if dupli_ob.object.name not in duplis:
-					print(dupli_ob.object.name)
 					duplis.append(dupli_ob.object.name)
 			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
@@ -271,12 +270,15 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			continue
 
 		# special case for objects with particle system: check if emitter should be rendered
-		render_emitter = False
+		if len(ob.particle_systems) > 0:
+			render_emitter = False
+		else:
+			render_emitter = True
 		for psys in ob.particle_systems:
 			render_emitter |= psys.settings.emitter
 
-		# dupli object render rule copied from convertblender.c (blender internal render)
-		if (not ob.duplis_used or ob.dupli_type == 'DUPLIFRAMES' or render_emitter) and ob.name not in duplis:
+		# dupli object render rule copied from convertblender.c (blender internal render)		
+		if (not ob.duplis_used or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			exportMesh(l, scene, ob, ob.matrix, smoothing_enabled)
 
 		# exported another object		
