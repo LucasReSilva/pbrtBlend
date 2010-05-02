@@ -39,13 +39,33 @@ class ui_panel_bilerp(luxrender_texture_base):
 	property_group = bilerp
 	
 	controls = [
-		'dummy'
+		['v00', 'v01'],
+		['v10', 'v11'],
 	]
 	
 	properties = [
 		{
-			'attr': 'dummy',
-			'type': 'string',
-			'name': 'Test',
-		}
+			'attr': 'v00',
+			'type': 'float',
+			'name': '(0,0)',
+			'default': 0.0
+		},
+		{
+			'attr': 'v01',
+			'type': 'float',
+			'name': '(0,1)',
+			'default': 1.0
+		},
+		{
+			'attr': 'v10',
+			'type': 'float',
+			'name': '(1,0)',
+			'default': 0.0
+		},
+		{
+			'attr': 'v11',
+			'type': 'float',
+			'name': '(1,1)',
+			'default': 1.0
+		},
 	]
