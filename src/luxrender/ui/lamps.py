@@ -34,20 +34,21 @@ from ef.validate import Logic_Operator as LO
 
 # Lux API
 import luxrender.properties.lamp
-from ..properties.texture import ColorTexture
+from ..properties.texture import ColorTextureParameter
 
 narrowui = 180
 
-class LampColorTexture(ColorTexture):
+class LampColorTextureParameter(ColorTextureParameter):
 	def texture_slot_finder(self):
 		return lambda s,c: s.object.data
+	
 	def get_visibility(self):
 		vis = {
 			'%s_texture' % self.attr:			{ '%s_usetexture' % self.attr: True },
 		}
 		return vis
 
-TC_L = LampColorTexture('lamp', 'L', 'Colour', 'luxrender_lamp')
+TC_L = LampColorTextureParameter('lamp', 'L', 'Colour', 'luxrender_lamp')
 
 def lamp_visibility():
 	vis = {

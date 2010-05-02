@@ -69,8 +69,16 @@ del properties_data_lamp
 
 import properties_texture
 properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
-# TODO: add the other supported blender textures
+properties_texture.TEXTURE_PT_blend.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_clouds.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_distortednoise.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_magic.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_marble.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_musgrave.COMPAT_ENGINES.add('luxrender')
+#properties_texture.TEXTURE_PT_noise.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_stucci.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_voronoi.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_wood.COMPAT_ENGINES.add('luxrender')
 del properties_texture
 
 # compatible() copied from blender repository (netrender)

@@ -28,7 +28,7 @@ import bpy
 
 from .util import has_property
 
-class TextureBase(object):
+class TextureParameterBase(object):
 	parent_type		= None
 	attr			= None
 	name			= None
@@ -66,7 +66,7 @@ class TextureBase(object):
 		'''	
 		return []
 
-class ColorTexture(TextureBase):
+class ColorTextureParameter(TextureParameterBase):
 
 	def get_controls(self):
 		return [
@@ -129,7 +129,7 @@ class ColorTexture(TextureBase):
 			},
 		] + self.get_extra_properties()
 
-class FloatTexture(TextureBase):
+class FloatTextureParameter(TextureParameterBase):
 	default			= 0.0
 	min				= 0.0
 	max				= 1.0
@@ -222,7 +222,8 @@ class FloatTexture(TextureBase):
 			},
 		] + self.get_extra_properties()
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
+
 class luxrender_texture(bpy.types.IDPropertyGroup):
 	'''
 	Storage class for LuxRender Texture settings.
@@ -230,4 +231,7 @@ class luxrender_texture(bpy.types.IDPropertyGroup):
 	object.
 	'''
 	
-	pass
+	texture_type = bpy.props.EnumProperty(name='texture_type', items=[
+			('test1','test1','test1'),
+			('test2','test2','test2'),
+		])

@@ -32,9 +32,7 @@ from ef.validate import Visibility
 
 from . import ParamSet
 from ..module import LuxLog
-from ..properties.util import material_property_map, texture_property_map, texture_property_translate
-from ..properties.texture import FloatTexture, ColorTexture
-from ..ui.textures import texture_visibility
+from ..properties.util import material_property_map
 
 def write_lxm(l, scene):
 	'''
@@ -219,36 +217,9 @@ def luxrender_texture_params(tex_type, lux_context, tex):
 	if hasattr(tex, 'luxrender_texture'):
 		lux_tex = tex.luxrender_texture
 		
-		#tex_validate = Visibility(lux_tex)
-		#tex_visibility = texture_visibility()
+		# TODO
 		
-		tpm = texture_property_map()
-		for lux_prop_name in [lp for lp in dir(lux_tex) if texture_property_translate(lp) in tpm.keys()]:
-			# don't parse float texture properties if not a float texture
-			if lux_prop_name.startswith('f_') and lux_tex.variant != 'FLOAT': continue
-			# don't parse color texture properties if not a color texture
-			if lux_prop_name.startswith('c_') and lux_tex.variant != 'COLOR': continue
-			lux_prop_realname = texture_property_translate(lux_prop_name)
-			if lux_tex.texture in tpm[lux_prop_realname]:
-			#if tex_validate.test_logic(lux_prop_realname, tex_visibility):
-				lux_prop = getattr(lux_tex, lux_prop_name)
-				if lux_prop == 'lux_float_texture':
-					tp.update(add_float_texture(lux_context, lux_prop_name, lux_tex, tex))
-				elif lux_prop == 'lux_color_texture':
-					tp.update(add_color_texture(lux_context, lux_prop_name, lux_tex, tex))
-				# TODO: these basic types should cover everything for now ?
-				elif type(lux_prop) is float:
-					tp.add_float(lux_prop_realname, lux_prop)
-				elif type(lux_prop) is str:
-					tp.add_string(lux_prop_realname, lux_prop)
-				elif type(lux_prop) is bool:
-					tp.add_bool(lux_prop_realname, lux_prop)
-				elif type(lux_prop) is int:
-					tp.add_integer(lux_prop_realname, lux_prop)
-				elif type(lux_prop).__name__ == 'bpy_prop_array':
-					tp.add_vector(lux_prop_realname, lux_prop)
-		
-		ExportedTextures.texture(tex.name, tex_type, lux_tex.texture, tp)
+		#ExportedTextures.texture(tex.name, tex_type, lux_tex.texture, tp)
 
 def luxrender_material_params(lux_context, mat, add_type=False):
 	#print('mat %s'%mat.name)

@@ -35,9 +35,9 @@ from ef.ef import ef
 # Lux API
 import luxrender.properties.material
 from ..properties.util import has_property 
-from ..properties.texture import FloatTexture, ColorTexture
+from ..properties.texture import FloatTextureParameter, ColorTextureParameter
 
-def ParamMaterial(attr, name, property_group):
+def MaterialParameter(attr, name, property_group):
 	return [
 		{
 			'attr': '%s_material' % attr,
@@ -59,32 +59,32 @@ def ParamMaterial(attr, name, property_group):
 # TODO: add default values
 
 # Float Textures
-TF_amount		= FloatTexture('material', 'amount', 'Mix Amount',		'luxrender_material', add_float_value=True )
-TF_bumpmap		= FloatTexture('material', 'bumpmap', 'Bump Map',		'luxrender_material', add_float_value=False )
-TF_cauchyb		= FloatTexture('material', 'cauchyb', 'Cauchy B',		'luxrender_material', add_float_value=True )
-TF_d			= FloatTexture('material', 'd', 'Absorption Depth',		'luxrender_material', add_float_value=True )
-TF_film			= FloatTexture('material', 'film', 'Thin Film',			'luxrender_material', add_float_value=True )
-TF_filmindex	= FloatTexture('material', 'filmindex', 'Film IOR',		'luxrender_material', add_float_value=True )
-TF_index		= FloatTexture('material', 'index', 'IOR',				'luxrender_material', add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_M1			= FloatTexture('material', 'M1', 'M1',					'luxrender_material', add_float_value=True )
-TF_M2			= FloatTexture('material', 'M2', 'M2',					'luxrender_material', add_float_value=True )
-TF_M3			= FloatTexture('material', 'M3', 'M3',					'luxrender_material', add_float_value=True )
-TF_R1			= FloatTexture('material', 'R1', 'R1',					'luxrender_material', add_float_value=True )
-TF_R2			= FloatTexture('material', 'R2', 'R2',					'luxrender_material', add_float_value=True )
-TF_R3			= FloatTexture('material', 'R3', 'R3',					'luxrender_material', add_float_value=True )
-TF_sigma		= FloatTexture('material', 'sigma', 'Sigma',			'luxrender_material', add_float_value=True )
-TF_uroughness	= FloatTexture('material', 'uroughness', 'uroughness',	'luxrender_material', add_float_value=True )
-TF_vroughness	= FloatTexture('material', 'vroughness', 'vroughness',	'luxrender_material', add_float_value=True )
+TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',		'luxrender_material', add_float_value=True )
+TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',		'luxrender_material', add_float_value=False )
+TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',		'luxrender_material', add_float_value=True )
+TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',		'luxrender_material', add_float_value=True )
+TF_film			= FloatTextureParameter('material', 'film', 'Thin Film',			'luxrender_material', add_float_value=True )
+TF_filmindex	= FloatTextureParameter('material', 'filmindex', 'Film IOR',		'luxrender_material', add_float_value=True )
+TF_index		= FloatTextureParameter('material', 'index', 'IOR',				'luxrender_material', add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_M1			= FloatTextureParameter('material', 'M1', 'M1',					'luxrender_material', add_float_value=True )
+TF_M2			= FloatTextureParameter('material', 'M2', 'M2',					'luxrender_material', add_float_value=True )
+TF_M3			= FloatTextureParameter('material', 'M3', 'M3',					'luxrender_material', add_float_value=True )
+TF_R1			= FloatTextureParameter('material', 'R1', 'R1',					'luxrender_material', add_float_value=True )
+TF_R2			= FloatTextureParameter('material', 'R2', 'R2',					'luxrender_material', add_float_value=True )
+TF_R3			= FloatTextureParameter('material', 'R3', 'R3',					'luxrender_material', add_float_value=True )
+TF_sigma		= FloatTextureParameter('material', 'sigma', 'Sigma',			'luxrender_material', add_float_value=True )
+TF_uroughness	= FloatTextureParameter('material', 'uroughness', 'uroughness',	'luxrender_material', add_float_value=True )
+TF_vroughness	= FloatTextureParameter('material', 'vroughness', 'vroughness',	'luxrender_material', add_float_value=True )
 
 # Color Textures
-TC_Ka			= ColorTexture('material', 'Ka', 'Absorption color',	'luxrender_material')
-TC_Kd			= ColorTexture('material', 'Kd', 'Diffuse color',		'luxrender_material')
-TC_Kr			= ColorTexture('material', 'Kr', 'Reflection color',	'luxrender_material')
-TC_Ks			= ColorTexture('material', 'Ks', 'Specular color',		'luxrender_material')
-TC_Ks1			= ColorTexture('material', 'Ks1', 'Specular color 1',	'luxrender_material')
-TC_Ks2			= ColorTexture('material', 'Ks2', 'Specular color 2',	'luxrender_material')
-TC_Ks3			= ColorTexture('material', 'Ks3', 'Specular color 3',	'luxrender_material')
-TC_Kt			= ColorTexture('material', 'Kt', 'Transmission color',	'luxrender_material')
+TC_Ka			= ColorTextureParameter('material', 'Ka', 'Absorption color',	'luxrender_material')
+TC_Kd			= ColorTextureParameter('material', 'Kd', 'Diffuse color',		'luxrender_material')
+TC_Kr			= ColorTextureParameter('material', 'Kr', 'Reflection color',	'luxrender_material')
+TC_Ks			= ColorTextureParameter('material', 'Ks', 'Specular color',		'luxrender_material')
+TC_Ks1			= ColorTextureParameter('material', 'Ks1', 'Specular color 1',	'luxrender_material')
+TC_Ks2			= ColorTextureParameter('material', 'Ks2', 'Specular color 2',	'luxrender_material')
+TC_Ks3			= ColorTextureParameter('material', 'Ks3', 'Specular color 3',	'luxrender_material')
+TC_Kt			= ColorTextureParameter('material', 'Kt', 'Transmission color',	'luxrender_material')
 
 def material_visibility():
 	# non-texture properties
@@ -96,7 +96,7 @@ def material_visibility():
 		'namedmaterial2':			{ 'material': has_property('material', 'namedmaterial2') },
 	}
 	
-	# Float Texture based properties
+	# Float Texture paramters
 	vis.update( TF_amount.get_visibility() )
 	vis.update( TF_bumpmap.get_visibility() )
 	vis.update( TF_cauchyb.get_visibility() )
@@ -114,7 +114,7 @@ def material_visibility():
 	vis.update( TF_uroughness.get_visibility() )
 	vis.update( TF_vroughness.get_visibility() )
 	
-	# Color Texture based properties
+	# Color Texture parameters
 	vis.update( TC_Ka.get_visibility() )
 	vis.update( TC_Kd.get_visibility() )
 	vis.update( TC_Kr.get_visibility() )
@@ -281,8 +281,8 @@ class material_editor(MaterialButtonsPanel, described_layout):
 			'name': 'Name'
 		},
 	] + \
-	ParamMaterial('namedmaterial1', 'Material 1', 'luxrender_material') + \
-	ParamMaterial('namedmaterial2', 'Material 2', 'luxrender_material') + \
+	MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_material') + \
+	MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_material') + \
 	TF_R1.get_properties()+ \
 	TF_R2.get_properties() + \
 	TF_R3.get_properties() + \
