@@ -180,7 +180,7 @@ def add_float_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 			LuxLog('WARNING: Unassigned float texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_float(
-			texture_property_translate(lux_prop_name),
+			lux_prop_name,
 			float(getattr(lux_mattex, '%s_floatvalue'%lux_prop_name))
 		)
 	
@@ -203,7 +203,7 @@ def add_color_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 			LuxLog('WARNING: Unassigned color texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
 	else:
 		params.add_color(
-			texture_property_translate(lux_prop_name),
+			lux_prop_name,
 			[float(i) for i in getattr(lux_mattex, '%s_color'%lux_prop_name)]
 		)
 	
