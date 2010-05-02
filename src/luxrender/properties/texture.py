@@ -204,7 +204,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'precision': self.precision,
-				'slider': True
+				#'slider': True
 			},
 			{
 				'attr': '%s_texturename' % self.attr,
