@@ -231,7 +231,4 @@ class luxrender_texture(bpy.types.IDPropertyGroup):
 	object.
 	'''
 	
-	texture_type = bpy.props.EnumProperty(name='texture_type', items=[
-			('test1','test1','test1'),
-			('test2','test2','test2'),
-		])
+	pass

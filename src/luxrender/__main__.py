@@ -122,7 +122,9 @@ class luxrender(engine_base):
 		luxrender.ui.camera.tonemapping,
 		
 		luxrender.ui.materials.material_editor,
-		luxrender.ui.textures.texture_editor,
+		
+		luxrender.ui.textures.texture_main,
+		luxrender.ui.textures.texture_bilerp,
 		
 		#luxrender.nodes.test_node
 	]

@@ -85,21 +85,66 @@ def discover_float_color(context):
 	return float_col
 
 
-class t1(bpy.types.IDPropertyGroup):
-	a1 = bpy.props.StringProperty(name='a1')
-	
-	controls = []
-	visibility = {}
-	properties = []
-	
-class t2(bpy.types.IDPropertyGroup):
-	a1 = bpy.props.StringProperty(name='a1')
-	
-	controls = []
-	visibility = {}
-	properties = []
 
-class texture_editor(TextureButtonsPanel, described_layout):
+class luxrender_texture_base(TextureButtonsPanel, described_layout):
+	COMPAT_ENGINES = {'luxrender'}
+	property_group_non_global = True
+	
+	@classmethod
+	def property_reload(r_class):
+		for tex in bpy.data.textures:
+			r_class.property_create(tex.luxrender_texture)
+	
+	@classmethod
+	def property_create(r_class, lux_tex_property_group):
+		if not hasattr(lux_tex_property_group, r_class.property_group.__name__):
+			#ef.log('Initialising properties in material %s'%context.material.name)
+			ef.init_properties(lux_tex_property_group, [{
+				'type': 'pointer',
+				'attr': r_class.property_group.__name__,
+				'ptype': r_class.property_group,
+				'name': r_class.property_group.__name__,
+				'description': r_class.property_group.__name__
+			}], cache=False)
+			ef.init_properties(r_class.property_group, r_class.properties, cache=False)
+	
+	# Overridden to provide data storage in the material, not the scene
+	def draw(self, context):
+		if context.texture is not None:
+			self.property_create(context.texture.luxrender_texture)
+			
+			for p in self.controls:
+				self.draw_column(p, self.layout, context.texture.luxrender_texture, supercontext=context)
+				
+	def poll(self, context):
+		'''
+		Only show LuxRender panel with 'Plugin' texture type
+		'''
+		
+		return TextureButtonsPanel.poll(self, context) and context.texture.type == 'PLUGIN' and context.texture.luxrender_texture.type in self.LUX_COMPAT
+
+class bilerp_properties(bpy.types.IDPropertyGroup):
+	pass
+class texture_bilerp(luxrender_texture_base):
+	bl_label = 'LuxRender BiLerp Texture'
+	
+	LUX_COMPAT = {'bilerp'}
+	
+	property_group = bilerp_properties
+	
+	controls = [
+		'dummy'
+	]
+	
+	properties = [
+		{
+			'attr': 'dummy',
+			'type': 'string',
+			'name': 'Test',
+		}
+	]
+
+class texture_main(TextureButtonsPanel, described_layout):
 	'''
 	Texture Editor UI Panel
 	'''
@@ -108,8 +153,6 @@ class texture_editor(TextureButtonsPanel, described_layout):
 	COMPAT_ENGINES = {'luxrender'}
 	
 	property_group = luxrender.properties.texture.luxrender_texture
-	#property_groups = [luxrender.properties.texture.luxrender_texture, t1, t2] 
-	
 	# prevent creating luxrender_texture property group in Scene
 	property_group_non_global = True
 	
@@ -123,12 +166,11 @@ class texture_editor(TextureButtonsPanel, described_layout):
 	@staticmethod
 	def property_reload():
 		for tex in bpy.data.textures:
-			texture_editor.property_create(tex)
+			texture_main.property_create(tex)
 			
 	@staticmethod
 	def property_create(texture):
-		#for pg in texture_editor.property_groups:
-		pg = texture_editor.property_group
+		pg = texture_main.property_group
 		if not hasattr(texture, pg.__name__):
 			ef.init_properties(texture, [{
 				'type': 'pointer',
@@ -137,18 +179,28 @@ class texture_editor(TextureButtonsPanel, described_layout):
 				'name': pg.__name__,
 				'description': pg.__name__
 			}], cache=False)
-			#ef.init_properties(pg, pg.properties, cache=False)
+			ef.init_properties(pg, texture_main.properties, cache=False)
 	
 	# Overridden to provide data storage in the texture, not the scene
 	def draw(self, context):
 		if context.texture is not None:
-			texture_editor.property_create(context.texture)
+			texture_main.property_create(context.texture)
 			
-			#self.visibility = self.property_group.visibility
-			#for p in self.property_group.controls:
-			#	self.draw_column(p, self.layout, context.texture, supercontext=context)
-			self.layout.prop(context.texture, 'luxrender_texture')
+			for p in texture_main.controls:
+				self.draw_column(p, self.layout, context.texture, supercontext=context)
 				
-	controls = []
+	controls = [
+		'type'
+	]
 	visibility = {}
-	properties = []
+	properties = [
+		{
+			'attr': 'type',
+			'name': 'Type',
+			'type': 'enum',
+			'items': [
+				('none', 'none', 'none'),
+				('bilerp', 'bilerp', 'bilerp'),
+			],
+		},
+	]
