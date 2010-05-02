@@ -215,9 +215,11 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 	vis_layers = scene.layers
 	
 	sel = scene.objects
-	total_objects = len(sel)
+	total_objects = len(sel)	
 
 	# browse all scene objects for "mesh-convertible" ones
+	# First round: check for duplis
+	duplis = []
 	for ob in sel:		
 		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 			continue
@@ -227,13 +229,14 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		for layer_index, o_layer in enumerate(ob.layers):
 			visible = visible or (o_layer and vis_layers[layer_index])
 		
-		if not visible:
+		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
+		if not visible or ob.restrict_render:
 			continue
 		
-		if ob.parent and ob.parent.dupli_type != 'NONE':
+		if ob.parent and ob.parent.duplis_used:
 			continue
 
-		if ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
+		if ob.duplis_used:
 			# create dupli objects
 			ob.create_dupli_list(scene)
 
@@ -241,11 +244,39 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 				if dupli_ob.object.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 					continue
 				exportMesh(l, scene, dupli_ob.object, dupli_ob.matrix, smoothing_enabled)
-
+				if dupli_ob.object.name not in duplis:
+					print(dupli_ob.object.name)
+					duplis.append(dupli_ob.object.name)
+			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
-		else:
+
+	# browse all scene objects for "mesh-convertible" ones
+	# skip duplicated objects here
+	for ob in sel:		
+		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
+			continue
+		
+		# Check layers
+		visible = False
+		for layer_index, o_layer in enumerate(ob.layers):
+			visible = visible or (o_layer and vis_layers[layer_index])
+		
+		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
+		if not visible or ob.restrict_render:
+			continue
+		
+		if ob.parent and ob.parent.duplis_used:
+			continue
+
+		# special case for objects with particle system: check if emitter should be rendered
+		render_emitter = False
+		for psys in ob.particle_systems:
+			render_emitter |= psys.settings.emitter
+
+		# dupli object render rule copied from convertblender.c (blender internal render)
+		if (not ob.duplis_used or ob.dupli_type == 'DUPLIFRAMES' or render_emitter) and ob.name not in duplis:
 			exportMesh(l, scene, ob, ob.matrix, smoothing_enabled)
 
 		# exported another object		
