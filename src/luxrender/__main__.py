@@ -269,7 +269,7 @@ class luxrender(engine_base):
 				scene.set_frame(scene.frame_current + 1)
 				m1 = Matrix.copy(scene.camera.matrix)
 				scene.set_frame(scene.frame_current - 1)
-				if m1 != scene.camera.matrix:				
+				if m1 != scene.camera.matrix:
 					l.transformBegin(file=Files.MAIN)
 					pos = m1[3]
 					forwards = -m1[2]

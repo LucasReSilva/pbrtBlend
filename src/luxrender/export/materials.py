@@ -145,7 +145,10 @@ class ExportedMaterials(object):
 
 def export_object_material(lux_context, ob):
 	if lux_context.API_TYPE == 'FILE':
-		lux_context.namedMaterial(ob.active_material.name)
+		if ob.active_material is not None:
+			lux_context.namedMaterial(ob.active_material.name)
+		#else:
+		#	LuxLog('WARNING: Object "%s" has no material assigned' % ob.name)
 	elif lux_context.API_TYPE == 'PURE':
 		materials_direct(lux_context, ob)
 
