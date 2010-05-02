@@ -28,10 +28,31 @@ import bpy
 
 from ef.validate import Logic_OR as O
 
+from ...export import ParamSet
 from ..textures import luxrender_texture_base
 
 class mapping(bpy.types.IDPropertyGroup):
-	pass
+	
+	def get_paramset(self):
+		mapping_params = ParamSet()
+		
+		mapping_params.add_string('mapping', self.type)
+		mapping_params.add_float('udelta', self.udelta)
+		
+		if self.type == 'planar':
+			mapping_params.add_vector('v1', self.v1)
+			mapping_params.add_vector('v2', self.v2)
+			
+		if self.type in {'uv', 'spherical', 'cylindrical'}:
+			mapping_params.add_float('uscale', self.uscale)
+			
+		if self.type in {'uv', 'spherical'}:
+			mapping_params.add_float('vscale', self.vscale)
+			
+		if self.type in {'uv', 'spherical', 'planar'}:
+			mapping_params.add_float('vdelta', self.vdelta)
+		
+		return mapping_params
 
 class ui_panel_mapping(luxrender_texture_base):
 	bl_label = 'LuxRender Texture Mapping'
@@ -73,16 +94,12 @@ class ui_panel_mapping(luxrender_texture_base):
 			'type': 'float',
 			'name': 'U Scale',
 			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
 		},
 		{
 			'attr': 'vscale',
 			'type': 'float',
 			'name': 'V Scale',
-			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
+			'default': -1.0,
 		},
 		{
 			'attr': 'udelta',

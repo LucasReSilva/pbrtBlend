@@ -26,10 +26,18 @@
 #
 import bpy
 
+from ...export import ParamSet
 from ..textures import luxrender_texture_base
 
 class bilerp(bpy.types.IDPropertyGroup):
-	pass
+	
+	def get_paramset(self):
+		
+		return ParamSet() \
+			.add_float('v00', self.v00) \
+			.add_float('v10', self.v10) \
+			.add_float('v01', self.v01) \
+			.add_float('v11', self.v11)
 
 class ui_panel_bilerp(luxrender_texture_base):
 	bl_label = 'LuxRender BiLerp Texture'

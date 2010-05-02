@@ -27,6 +27,7 @@
 import bpy
 
 from .util import has_property
+from ..export import ParamSet
 
 class TextureParameterBase(object):
 	parent_type		= None
@@ -231,4 +232,32 @@ class luxrender_texture(bpy.types.IDPropertyGroup):
 	object.
 	'''
 	
-	pass
+	def check_float_connection(self, lux_mattex, property_name):
+		from ..ui.textures import discover_float_color
+		'''
+		Problem: cannot get access to containing material/texture
+		'''
+		pass
+	
+	def check_color_connection(self, lux_mattex, property_name):
+		from ..ui.textures import discover_float_color
+		'''
+		Problem: cannot get access to containing material/texture
+		'''
+		pass
+	
+	def get_paramset(self):
+		'''
+		Construct the ParamSet for this LuxRender texture
+		'''
+		
+		#if self.type == 'bilerp':
+		#	return self.bilerp.get_paramset()
+		
+		params = getattr(self, self.type).get_paramset() # oh, is that too abstract ?
+		
+		if self.type in {'bilerp'}:
+			params.update( self.mapping.get_paramset() )
+			
+		return params
+	
