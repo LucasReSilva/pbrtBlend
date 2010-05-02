@@ -35,7 +35,8 @@ from ef.engine import engine_base
 from .module import LuxManager as LM
 from .module import LuxLog
 import luxrender.ui.materials
-import luxrender.ui.textures
+from luxrender.ui.textures import main as texture_main
+from luxrender.ui.textures import bilerp, mapping
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
@@ -72,6 +73,7 @@ properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_blend.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_clouds.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_distortednoise.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_image.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_magic.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_marble.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_musgrave.COMPAT_ENGINES.add('luxrender')
@@ -123,8 +125,9 @@ class luxrender(engine_base):
 		
 		luxrender.ui.materials.material_editor,
 		
-		luxrender.ui.textures.texture_main,
-		luxrender.ui.textures.texture_bilerp,
+		texture_main.ui_panel_main,
+		bilerp.ui_panel_bilerp,
+		mapping.ui_panel_mapping,
 		
 		#luxrender.nodes.test_node
 	]
