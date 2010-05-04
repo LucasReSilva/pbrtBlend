@@ -28,7 +28,7 @@ from math import degrees
 
 import bpy, mathutils
 
-from ..export.materials import add_color_texture
+from ..export.materials import add_texture_parameter
 from ..module.file_api import Files
 from ..properties import dbo
 from . import matrix_to_list
@@ -89,7 +89,7 @@ def exportLights(l, scene, ob, matrix):
 	
 	
 	# all lights apart from sun + sky have "color L"
-	light_params.update( add_color_texture(l, 'L', light.luxrender_lamp, light) )
+	light_params.update( add_texture_parameter(l, 'L', 'color', light.luxrender_lamp, light) )
 	
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5

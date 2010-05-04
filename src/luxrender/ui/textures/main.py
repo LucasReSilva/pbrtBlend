@@ -39,6 +39,8 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 	'''
 	
 	bl_label = 'LuxRender Textures'
+	bl_show_header = False
+	
 	COMPAT_ENGINES = {'luxrender'}
 	
 	property_group = luxrender_texture
@@ -85,11 +87,12 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 	properties = [
 		{
 			'attr': 'type',
-			'name': 'Type',
+			'name': 'LuxRender Type',
 			'type': 'enum',
 			'items': [
 				('none', 'none', 'none'),
 				('bilerp', 'bilerp', 'bilerp'),
+				('brick', 'brick', 'brick'),
 			],
 		},
 	]

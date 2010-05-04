@@ -156,7 +156,7 @@ def materials_direct(lux_context, ob):
 	for m in ob.data.materials:
 		if hasattr(m, 'luxrender_material'):
 			material_params = luxrender_material_params(lux_context, m)
-			lux_context.material('matte', material_params)
+			lux_context.material('matte', material_params)	# TODO: Why is 'matte' hard-coded here ?
 
 def materials_file(lux_context, ob):
 	for m in ob.data.materials:
@@ -166,10 +166,11 @@ def materials_file(lux_context, ob):
 	
 	ExportedMaterials.export_new_named(lux_context)
 
-def add_float_texture(lux_context, lux_prop_name, lux_mattex, mattex):
+def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, mattex):
 	'''
 	lux_context				pylux.Context - like object
 	lux_prop_name			LuxRender material/texture parameter name
+	variant					Required variant: 'float' or 'color'
 	lux_mattex				luxrender_material or luxrender_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
 	mattex					Blender material or texture object
 	
@@ -188,49 +189,25 @@ def add_float_texture(lux_context, lux_prop_name, lux_mattex, mattex):
 					texture_name
 				)
 				tex_luxrender_texture = bpy.data.textures[texture_name].luxrender_texture
-				ExportedTextures.texture(texture_name, 'float', tex_luxrender_texture.type, tex_luxrender_texture.get_paramset())
-				ExportedTextures.export_new(lux_context)
+				lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()
+				if lux_tex_variant == variant:
+					ExportedTextures.texture(texture_name, variant, tex_luxrender_texture.type, paramset)
+					ExportedTextures.export_new(lux_context)
+				else:
+					LuxLog('WARNING: Texture %s -> %s is wrong variant; needed %s, got %s' % (mattex.name, lux_prop_name, variant, lux_tex_variant))
 		elif lux_prop_name != 'bumpmap':
-			LuxLog('WARNING: Unassigned float texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
+			LuxLog('WARNING: Unassigned %s texture slot %s -> %s' % (variant, mattex.name, lux_prop_name))
 	else:
-		params.add_float(
-			lux_prop_name,
-			float(getattr(lux_mattex, '%s_floatvalue'%lux_prop_name))
-		)
-	
-	return params
-
-def add_color_texture(lux_context, lux_prop_name, lux_mattex, mattex):
-	'''
-	lux_context				pylux.Context - like object
-	lux_prop_name			LuxRender material/texture parameter name
-	lux_mattex				luxrender_material or luxrender_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
-	mattex					Blender material or texture object
-	
-	Either insert a color parameter or a color texture reference, depending on setup
-	
-	Returns					ParamSet
-	'''
-	params = ParamSet()
-	
-	if getattr(lux_mattex, '%s_usetexture'%lux_prop_name):
-		texture_name = getattr(lux_mattex, '%s_texturename'%lux_prop_name)
-		if texture_name != '':
-			if texture_name in bpy.data.textures: # and bpy.data.textures[texture_name].luxrender_texture.check_color_connection(lux_mattex, lux_prop_name):
-				params.add_texture(
-					lux_prop_name,
-					texture_name
-				)
-				tex_luxrender_texture = bpy.data.textures[texture_name].luxrender_texture
-				ExportedTextures.texture(texture_name, 'color', tex_luxrender_texture.type, tex_luxrender_texture.get_paramset())
-				ExportedTextures.export_new(lux_context)
-		elif lux_prop_name != 'bumpmap':
-			LuxLog('WARNING: Unassigned color texture slot %s -> %s' % (mattex.name, texture_property_translate(lux_prop_name)))
-	else:
-		params.add_color(
-			lux_prop_name,
-			[float(i) for i in getattr(lux_mattex, '%s_color'%lux_prop_name)]
-		)
+		if variant == 'float':
+			params.add_float(
+				lux_prop_name,
+				float(getattr(lux_mattex, '%s_floatvalue'%lux_prop_name))
+			)
+		else:
+			params.add_color(
+				lux_prop_name,
+				[float(i) for i in getattr(lux_mattex, '%s_color'%lux_prop_name)]
+			)
 	
 	return params
 
@@ -247,9 +224,9 @@ def luxrender_material_params(lux_context, mat, add_type=False):
 		if lux_mat_type in mpm[lux_prop_name]:
 			lux_prop = getattr(lux_mat, lux_prop_name)
 			if lux_prop == 'lux_float_texture':
-				mp.update(add_float_texture(lux_context, lux_prop_name, lux_mat, mat))
+				mp.update(add_texture_parameter(lux_context, lux_prop_name, 'float', lux_mat, mat))
 			elif lux_prop == 'lux_color_texture':
-				mp.update(add_color_texture(lux_context, lux_prop_name, lux_mat, mat))
+				mp.update(add_texture_parameter(lux_context, lux_prop_name, 'color', lux_mat, mat))
 			# TODO: these basic types should cover everything for now ?
 			elif type(lux_prop) is float:
 				mp.add_float(lux_prop_name, lux_prop)

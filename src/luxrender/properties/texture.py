@@ -232,32 +232,27 @@ class luxrender_texture(bpy.types.IDPropertyGroup):
 	object.
 	'''
 	
-	def check_float_connection(self, lux_mattex, property_name):
-		from ..ui.textures import discover_float_color
-		'''
-		Problem: cannot get access to containing material/texture
-		'''
-		pass
-	
-	def check_color_connection(self, lux_mattex, property_name):
-		from ..ui.textures import discover_float_color
-		'''
-		Problem: cannot get access to containing material/texture
-		'''
-		pass
-	
 	def get_paramset(self):
 		'''
-		Construct the ParamSet for this LuxRender texture
+		Discover the type of this LuxRender texture, and return its
+		variant name and its ParamSet.
+		We also add in the ParamSets of any panels shared by texture
+		types, eg. 2D/3D mapping and transform params
+		
+		Return		tuple(string('float'|'color'), ParamSet)
 		'''
 		
-		#if self.type == 'bilerp':
-		#	return self.bilerp.get_paramset()
+		# this requires the sub-IDPropertyGroup name to be the same as the texture name
+		lux_texture = getattr(self, self.type) 
+		params = lux_texture.get_paramset() 
 		
-		params = getattr(self, self.type).get_paramset() # oh, is that too abstract ?
-		
-		if self.type in {'bilerp'}:
+		# 2D Mapping options
+		if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
 			params.update( self.mapping.get_paramset() )
 			
-		return params
+		# 3D Mapping options
+		if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
+			params.update( self.transform.get_paramset() )
+			
+		return lux_texture.variant, params
 	

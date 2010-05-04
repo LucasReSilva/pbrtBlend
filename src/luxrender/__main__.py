@@ -36,7 +36,7 @@ from .module import LuxManager as LM
 from .module import LuxLog
 import luxrender.ui.materials
 from luxrender.ui.textures import main as texture_main
-from luxrender.ui.textures import bilerp, mapping
+from luxrender.ui.textures import bilerp, mapping, transform
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
@@ -128,7 +128,7 @@ class luxrender(engine_base):
 		texture_main.ui_panel_main,
 		bilerp.ui_panel_bilerp,
 		mapping.ui_panel_mapping,
-		
+		transform.ui_panel_transform,
 		#luxrender.nodes.test_node
 	]
 	
