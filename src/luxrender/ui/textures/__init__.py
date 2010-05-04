@@ -31,53 +31,17 @@ from properties_texture import TextureButtonsPanel
 from ef.ui import described_layout
 from ef.ef import ef
 
-def discover_float_color(context):
-	'''
-	Try to determine whether to display float-type controls or color-type
-	controls for this texture, depending on which type of texture slot
-	it has been loaded into.
-	
-	There will be issues if the same texture is used both as a float and
-	a colour, since the type returned will be the first one found only.
-	'''
-	
-	float_col = False
-	
-	if context.object.type == 'LAMP':
-			lm = context.object.data.luxrender_lamp
-			for p in dir(lm):
-				if p.endswith('_texturename') and getattr(lm, p) == context.texture.name:
-					tex_slot = p.replace('_texturename', '')
-					return getattr(lm, tex_slot)
-			# then search in textures
-			for ts in context.object.data.texture_slots:
-				if hasattr(ts, 'texture') and hasattr(ts.texture, 'luxrender_texture'):
-					lt = ts.texture.luxrender_texture
-					for p in dir(lt):
-						if p.endswith('_texturename') and getattr(lt, p) == context.texture.name:
-							tex_slot = p.replace('_texturename', '')
-							return getattr(lt, tex_slot)
-	else:
-		for ms in context.object.material_slots:
-			# first search in the parent object's materials
-			lm = ms.material.luxrender_material
-			for p in dir(lm):
-				if p.endswith('_texturename') and getattr(lm, p) == context.texture.name:
-					tex_slot = p.replace('_texturename', '')
-					return getattr(lm, tex_slot)
-			
-			# then search in textures
-			for ts in ms.material.texture_slots:
-				if hasattr(ts, 'texture') and hasattr(ts.texture, 'luxrender_texture'):
-					lt = ts.texture.luxrender_texture
-					for p in dir(lt):
-						if p.endswith('_texturename') and getattr(lt, p) == context.texture.name:
-							tex_slot = p.replace('_texturename', '')
-							return getattr(lt, tex_slot)
-	
-	return float_col
-
 class luxrender_texture_base(TextureButtonsPanel, described_layout):
+	'''
+	This is the base class for all LuxRender texture sub-panels.
+	All subpanels should have their own property_groups, and define
+	a string attribute in thier property_group called 'variant'.
+	It should be set to either 'float' or 'color' depending on the
+	texture type, and may display the choice to the user as a switch,
+	or keep it as a hidden attribute if the texture is mono-typed.
+	'''
+	
+	bl_show_header = False
 	COMPAT_ENGINES = {'luxrender'}
 	property_group_non_global = True
 	

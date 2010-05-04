@@ -26,56 +26,38 @@
 #
 import bpy
 
-from ef.validate import Logic_OR as O
-
 from ...export import ParamSet
 from ..textures import luxrender_texture_base
 
-class transform(bpy.types.IDPropertyGroup):
+class blackbody(bpy.types.IDPropertyGroup):
 	
 	def get_paramset(self):
-		transform_params = ParamSet()
 		
-		transform_params.add_vector('translate', self.translate)
-		transform_params.add_vector('rotate', self.rotate)
-		transform_params.add_vector('scale', self.scale)
-		
-		return transform_params
+		return ParamSet().add_float('temperature', self.temperature)
 
-class ui_panel_transform(luxrender_texture_base):
-	bl_label = 'LuxRender Texture Transform'
-	bl_default_closed = True
-	bl_show_header = True
+class ui_panel_blackbody(luxrender_texture_base):
+	bl_label = 'LuxRender Blackbody Texture'
 	
-	LUX_COMPAT = {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}
+	LUX_COMPAT = {'blackbody'}
 	
-	property_group = transform
+	property_group = blackbody
 	
 	controls = [
-		'translate',
-		'rotate',
-		'scale',
+		'temperature'
 	]
 	
 	visibility = {}
 	
 	properties = [
 		{
-			'type': 'float_vector',
-			'attr': 'translate',
-			'name': 'Translate',
-			'default': (0.0, 0.0, 0.0),
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'color'
 		},
 		{
-			'type': 'float_vector',
-			'attr': 'rotate',
-			'name': 'Rotate',
-			'default': (0.0, 0.0, 0.0),
-		},
-		{
-			'type': 'float_vector',
-			'attr': 'scale',
-			'name': 'Scale',
-			'default': (1.0, 1.0, 1.0),
-		},
+			'type': 'float',
+			'attr': 'temperature',
+			'name': 'Temperature',
+			'default': 6500.0
+		}
 	]

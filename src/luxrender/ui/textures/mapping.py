@@ -57,6 +57,7 @@ class mapping(bpy.types.IDPropertyGroup):
 class ui_panel_mapping(luxrender_texture_base):
 	bl_label = 'LuxRender Texture Mapping'
 	bl_default_closed = True
+	bl_show_header = True
 	
 	LUX_COMPAT = {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}
 	

@@ -48,7 +48,6 @@ class bilerp(bpy.types.IDPropertyGroup):
 
 class ui_panel_bilerp(luxrender_texture_base):
 	bl_label = 'LuxRender BiLerp Texture'
-	bl_show_header = False
 	
 	LUX_COMPAT = {'bilerp'}
 	

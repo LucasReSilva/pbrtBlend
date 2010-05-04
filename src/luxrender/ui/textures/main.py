@@ -92,6 +92,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 			'items': [
 				('none', 'none', 'none'),
 				('bilerp', 'bilerp', 'bilerp'),
+				('blackbody','blackbody','blackbody'),
 				('brick', 'brick', 'brick'),
 			],
 		},
