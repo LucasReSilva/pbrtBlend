@@ -59,6 +59,8 @@ try:
 			luxrender.pylux.Context.transformBegin(self)
 		
 		# no further action required
-
+	
+	PYLUX_AVAILABLE = True
 except ImportError as err:
 	LuxLog('ERROR: Binary pylux module not found! Visit http://www.luxrender.net/ to obtain one.')
+	PYLUX_AVAILABLE = False
