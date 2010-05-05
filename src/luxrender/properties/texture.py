@@ -34,11 +34,13 @@ class TextureParameterBase(object):
 	attr			= None
 	name			= None
 	property_group	= None
-	def __init__(self, parent_type, attr, name, property_group):
+	default			= (0.8, 0.8, 0.8)
+	def __init__(self, parent_type, attr, name, property_group, default=(0.8,0.8,0.8)):
 		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
 		self.property_group = property_group
+		self.default = default
 	
 	def texture_slot_finder(self):
 		def func(s,c):
@@ -48,6 +50,9 @@ class TextureParameterBase(object):
 				return s.object.material_slots[s.object.active_material_index].material
 		
 		return func
+	
+	def texture_slot_set_attr(self):
+		return lambda s,c: getattr(c, self.property_group)
 	
 	def get_extra_controls(self):
 		'''
@@ -71,16 +76,16 @@ class ColorTextureParameter(TextureParameterBase):
 
 	def get_controls(self):
 		return [
-			[ 0.9, [0.375,'%s_label' % self.attr, '%s_color' % self.attr], '%s_usetexture' % self.attr ],
-			'%s_texture' % self.attr
+			[ 0.9, [0.375,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
+			'%s_colortexture' % self.attr
 		] + self.get_extra_controls()
 	
 	def get_visibility(self):
 		vis = {
-			'%s_label' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_color' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_usetexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usetexture' % self.attr: True },
+			'%s_colorlabel' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_color' % self.attr: 				{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_usecolortexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_colortexture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usecolortexture' % self.attr: True },
 		}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -93,7 +98,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'default': 'lux_color_texture',
 			},
 			{
-				'attr': '%s_usetexture' % self.attr,
+				'attr': '%s_usecolortexture' % self.attr,
 				'type': 'bool',
 				'name': 'T',
 				'description': 'Textured %s' % self.name,
@@ -102,7 +107,7 @@ class ColorTextureParameter(TextureParameterBase):
 			},
 			{
 				'type': 'text',
-				'attr': '%s_label' % self.attr,
+				'attr': '%s_colorlabel' % self.attr,
 				'name': self.name
 			},
 			{
@@ -110,22 +115,22 @@ class ColorTextureParameter(TextureParameterBase):
 				'attr': '%s_color' % self.attr,
 				'name': '', #self.name,
 				'description': self.name,
-				'default': (0.8,0.8,0.8),
+				'default': self.default,
 				'subtype': 'COLOR',
 			},
 			{
-				'attr': '%s_texturename' % self.attr,
+				'attr': '%s_colortexturename' % self.attr,
 				'type': 'string',
-				'name': '%s_texturename' % self.attr,
+				'name': '%s_colortexturename' % self.attr,
 				'description': '%s Texture' % self.name,
 			},
 			{
 				'type': 'prop_object',
-				'attr': '%s_texture' % self.attr,
+				'attr': '%s_colortexture' % self.attr,
 				'src': self.texture_slot_finder(),
 				'src_attr': 'texture_slots',
-				'trg': lambda s,c: getattr(c, self.property_group),
-				'trg_attr': '%s_texturename' % self.attr,
+				'trg': self.texture_slot_set_attr(),
+				'trg_attr': '%s_colortexturename' % self.attr,
 				'name': self.name
 			},
 		] + self.get_extra_properties()
@@ -155,24 +160,24 @@ class FloatTextureParameter(TextureParameterBase):
 	def get_controls(self):
 		if self.texture_only:
 			return [
-				'%s_texture' % self.attr,
+				'%s_floattexture' % self.attr,
 			] + self.get_extra_controls()
 		else:
 			return [
-				[0.9, '%s_floatvalue' % self.attr, '%s_usetexture' % self.attr],
-				'%s_texture' % self.attr,
+				[0.9, '%s_floatvalue' % self.attr, '%s_usefloattexture' % self.attr],
+				'%s_floattexture' % self.attr,
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
 		if self.texture_only:
 			vis = {
-				'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_floattexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
 			}
 		else:
 			vis = {
-				'%s_usetexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_usefloattexture' % self.attr:	{ self.parent_type: has_property(self.parent_type, self.attr) },
 				'%s_floatvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_texture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usetexture' % self.attr: True },
+				'%s_floattexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefloattexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -186,7 +191,7 @@ class FloatTextureParameter(TextureParameterBase):
 			},
 			
 			{
-				'attr': '%s_usetexture' % self.attr,
+				'attr': '%s_usefloattexture' % self.attr,
 				'type': 'bool',
 				'name': 'T',
 				'description': 'Textured %s' % self.name,
@@ -207,18 +212,18 @@ class FloatTextureParameter(TextureParameterBase):
 				#'slider': True
 			},
 			{
-				'attr': '%s_texturename' % self.attr,
+				'attr': '%s_floattexturename' % self.attr,
 				'type': 'string',
-				'name': '%s_texturename' % self.attr,
+				'name': '%s_floattexturename' % self.attr,
 				'description': '%s Texture' % self.name,
 			},
 			{
 				'type': 'prop_object',
-				'attr': '%s_texture' % self.attr,
+				'attr': '%s_floattexture' % self.attr,
 				'src': self.texture_slot_finder(),
 				'src_attr': 'texture_slots',
-				'trg': lambda s,c: getattr(c, self.property_group),
-				'trg_attr': '%s_texturename' % self.attr,
+				'trg': self.texture_slot_set_attr(),
+				'trg_attr': '%s_floattexturename' % self.attr,
 				'name': self.name
 			},
 		] + self.get_extra_properties()

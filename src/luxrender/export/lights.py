@@ -89,7 +89,7 @@ def exportLights(l, scene, ob, matrix):
 	
 	
 	# all lights apart from sun + sky have "color L"
-	light_params.update( add_texture_parameter(l, 'L', 'color', light.luxrender_lamp, light) )
+	light_params.update( add_texture_parameter(l, 'L', 'color', light.luxrender_lamp) )
 	
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5
