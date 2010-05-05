@@ -24,37 +24,41 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+
+from .__init__ import LuxLog
 try:
 	import luxrender.pylux
-except ImportError as err:
-	raise Exception('Binary pylux module not found! Visit http://www.luxrender.net/ to obtain one.')
+	LuxLog('Using pylux version %s' % luxrender.pylux.version())
 
-class Custom_Context(luxrender.pylux.Context):
-	'''
-	This is the 'pure' entry point to the pylux.Context API
-	
-	Some methods in this class have been overridden with
-	extensions to provide additional functionality in other
-	API types (eg. file_api).
-	
-	The other Custom_Context APIs are based on this one
-	'''
-	
-	PYLUX = luxrender.pylux
-	API_TYPE = 'PURE'
-	
-	def attributeBegin(self, comment='', file=None):
+	class Custom_Context(luxrender.pylux.Context):
 		'''
-		Added for compatibility with file_api
+		This is the 'pure' entry point to the pylux.Context API
+		
+		Some methods in this class have been overridden with
+		extensions to provide additional functionality in other
+		API types (eg. file_api).
+		
+		The other Custom_Context APIs are based on this one
 		'''
 		
-		luxrender.pylux.Context.attributeBegin(self)
-	
-	def transformBegin(self, comment='', file=None):
-		'''
-		Added for compatibility with file_api
-		'''
+		PYLUX = luxrender.pylux
+		API_TYPE = 'PURE'
 		
-		luxrender.pylux.Context.transformBegin(self)
-	
-	# no further action required
+		def attributeBegin(self, comment='', file=None):
+			'''
+			Added for compatibility with file_api
+			'''
+			
+			luxrender.pylux.Context.attributeBegin(self)
+		
+		def transformBegin(self, comment='', file=None):
+			'''
+			Added for compatibility with file_api
+			'''
+			
+			luxrender.pylux.Context.transformBegin(self)
+		
+		# no further action required
+
+except ImportError as err:
+	LuxLog('ERROR: Binary pylux module not found! Visit http://www.luxrender.net/ to obtain one.')

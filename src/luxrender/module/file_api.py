@@ -27,14 +27,14 @@
 import os
 
 import luxrender.module
-from .pure_api import Custom_Context as Pylux_Context
+#from .pure_api import Custom_Context as Pylux_Context
 
 class Files(object):
 	MAIN = 0
 	MATS = 1
 	GEOM = 2
 
-class Custom_Context(Pylux_Context):
+class Custom_Context(object): #Pylux_Context):
 	'''
 	Wrap the real pylux Context object so that we can
 	change the behaviour of certain API calls (ie. write
@@ -43,10 +43,14 @@ class Custom_Context(Pylux_Context):
 	
 	API_TYPE = 'FILE'
 	
+	context_name = ''
 	files = []
 	file_names = []
 	current_file = Files.MAIN
 	parse_at_worldend = True
+	
+	def __init__(self, name):
+		self.context_name = name
 	
 	def wf(self, ind, st, tabs=0):
 		'''
@@ -265,4 +269,18 @@ class Custom_Context(Pylux_Context):
 				f.close()
 				luxrender.module.LuxLog(' %s' % f.name)
 	
+	def cleanup(self):
+		self.exit()
+	
+	def exit(self):
+		# If any files happen to be open, close them and start again
+		for f in self.files:
+			if f is not None:
+				f.close()
+	
+	def wait(self):
+		pass
+	
+	def parse(self, filename, async):
+		LuxLog('TODO: will parse %s' % filename)
 
