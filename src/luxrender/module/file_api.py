@@ -27,14 +27,17 @@
 import os
 
 import luxrender.module
-#from .pure_api import Custom_Context as Pylux_Context
+from .pure_api import PYLUX_AVAILABLE
+
+if PYLUX_AVAILABLE:
+	from .pure_api import Custom_Context as Pylux_Context
 
 class Files(object):
 	MAIN = 0
 	MATS = 1
 	GEOM = 2
 
-class Custom_Context(object): #Pylux_Context):
+class Custom_Context(object):
 	'''
 	Wrap the real pylux Context object so that we can
 	change the behaviour of certain API calls (ie. write
@@ -282,5 +285,13 @@ class Custom_Context(object): #Pylux_Context):
 		pass
 	
 	def parse(self, filename, async):
-		LuxLog('TODO: will parse %s' % filename)
-
+		'''
+		In a deviation from the API, this function returns a new context,
+		which must be passed back to LuxManager so that it can control the
+		rendering process.
+		'''
+		
+		c = Pylux_Context(self.context_name)
+		c.parse(filename, async)
+		
+		return c

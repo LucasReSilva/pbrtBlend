@@ -364,8 +364,13 @@ class luxrender(engine_base):
 			#print('calling pylux.context.worldEnd() (1)')
 			self.LuxManager.lux_context.worldEnd()
 			if parse:
-				#print('calling file_api.parse()')
-				self.LuxManager.lux_context.parse(self.LuxManager.lux_context.file_names[0], True)
+				# file_api.parse() creates a real pylux context. we must replace
+				# LuxManager's context with that one so that the running renderer
+				# can be controlled.
+				ctx = self.LuxManager.lux_context.parse(self.LuxManager.lux_context.file_names[0], True)
+				self.LuxManager.lux_context = ctx
+				self.LuxManager.stats_thread.lux_context = ctx
+				self.LuxManager.fb_thread.lux_context = ctx
 		elif worldEnd:
 			#print('calling pylux.context.worldEnd() (2)')
 			self.LuxManager.lux_context.worldEnd()
