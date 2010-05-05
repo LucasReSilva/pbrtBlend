@@ -36,7 +36,7 @@ from .module import LuxManager as LM
 from .module import LuxLog
 import luxrender.ui.materials
 from luxrender.ui.textures import main as texture_main
-from luxrender.ui.textures import bilerp, blackbody, brick, mapping, transform
+from luxrender.ui.textures import bilerp, blackbody, brick, checkerboard, mapping, transform
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
@@ -129,6 +129,7 @@ class luxrender(engine_base):
 		bilerp.ui_panel_bilerp,
 		blackbody.ui_panel_blackbody,
 		brick.ui_panel_brick,
+		checkerboard.ui_panel_checkerboard,
 		mapping.ui_panel_mapping,
 		transform.ui_panel_transform,
 		

@@ -94,6 +94,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 				('bilerp', 'bilerp', 'bilerp'),
 				('blackbody','blackbody','blackbody'),
 				('brick', 'brick', 'brick'),
+				('checkerboard', 'checkerboard', 'checkerboard'),
 			],
 		},
 	]
