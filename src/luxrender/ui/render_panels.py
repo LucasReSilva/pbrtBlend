@@ -195,51 +195,38 @@ class sampler(render_described_context):
 	property_group = luxrender.properties.sampler.luxrender_sampler
 	
 	controls = [
-		[
-			0.7,
-			'sampler',
-			'advanced',
-		],
+		[ 0.7, 'sampler', 'advanced'],
 		'haltspp',
 		
-		# metropolis
-		'metro_strength',							# simple
-		['metro_lmprob', 'metro_mncr'],				# adv
-		['metro_initsamples','metro_variance'],		# adv
+		'chainlength',
+		'mutationrange',
+		'basesampler',
 		
-		# erpt
-		['erpt_initsamples', 'erpt_chainlength',
-#		 'erpt_mutationrange'
-		], # simple
-		
-		# random & lowdiscrepancy
 		'pixelsampler',
-		['pixelsamples'],			# simple 
+		'pixelsamples',
+		
+		'maxconsecrejects',
+		'largemutationprob',
+		'usevariance',
 	]
 	
 	visibility = {
-		'advanced':				{ 'sampler': 'metropolis'},
-	
-		'metro_strength':		{ 'advanced': False, 'sampler': 'metropolis'},
-		'metro_lmprob':			{ 'advanced': True , 'sampler': 'metropolis'},
-		'metro_mncr':			{ 'advanced': True , 'sampler': 'metropolis'},
-		'metro_initsamples':	{ 'advanced': True , 'sampler': 'metropolis'},
-		'metro_variance':		{ 'advanced': True , 'sampler': 'metropolis'},
-		
-		'erpt_initsamples':		{ 'sampler': 'erpt'},
-		'erpt_chainlength':		{ 'sampler': 'erpt'},
-#		'erpt_mutationrange':   { 'sampler': 'erpt'},
-		
-		'pixelsampler':			{ 'sampler': O(['random', 'lowdiscrepancy']) },
-		'pixelsamples':			{ 'sampler': O(['random', 'lowdiscrepancy']) },
+		'chainlength':			{ 'sampler': 'erpt' },
+		'mutationrange':		{ 'advanced': True, 'sampler': O(['erpt', 'metropolis']) },
+		'basesampler':			{ 'sampler': 'erpt' },
+		'pixelsampler':			O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
+		'pixelsamples':			O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
+		'maxconsecrejects':		A([{ 'advanced': True }, O([{ 'sampler': 'metropolis' }, 	{'sampler':'erpt', 'basesampler': 'metropolis' } ]) ]),
+		'largemutationprob':	O([{ 'sampler': 'metropolis' },								{'sampler':'erpt', 'basesampler': 'metropolis' } ]),
+		'usevariance':			O([{ 'sampler': 'metropolis' },								{'sampler':'erpt', 'basesampler': 'metropolis' } ]),
 	}
 	
 	properties = [
 		{
 			'type': 'enum',
 			'attr': 'sampler',
-			'name': 'Pixel Sampler',
-			'description': 'Pixel Sampler',
+			'name': 'Sampler Type',
+			'description': 'Sampler Type',
 			'default': 'metropolis',
 			'items': [
 				('metropolis', 'Metropolis', 'metropolis'),
@@ -259,7 +246,7 @@ class sampler(render_described_context):
 			'type': 'int',
 			'attr': 'haltspp',
 			'name': 'Halt SPP',
-			'description': 'Halt the rendering at this number od samples/px (0=disabled)',
+			'description': 'Halt the rendering at this number of samples/px (0=disabled)',
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
@@ -268,17 +255,8 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'metro_strength',
-			'name': 'Strength',
-			'description': 'Metropolis sampler mutation strength',
-			'default': 0.66,
-			'min': 0,
-			'max': 1,
-		},
-		{
-			'type': 'float',
-			'attr': 'metro_lmprob',
-			'name': 'LM Prob',
+			'attr': 'largemutationprob',
+			'name': 'Large Mutation Probability',
 			'description': 'Large Mutation Probability',
 			'default': 0.4,
 			'min': 0,
@@ -286,56 +264,47 @@ class sampler(render_described_context):
 		},
 		{
 			'type': 'int', 
-			'attr': 'metro_mncr',
-			'name': 'MNCR',
+			'attr': 'maxconsecrejects',
+			'name': 'Max. Consecutive Rejections',
 			'description': 'Maximum number of consecutive rejections',
 			'default': 512,
 			'min': 0,
 			'max': 32768,
 		},
 		{
-			'type': 'int',
-			'attr': 'metro_initsamples',
-			'name': 'Initial',
-			'description': 'Initial Samples',
-			'default': 262144,
-			'min': 1,
-			'max': 1000000,
-		},
-		{
 			'type': 'bool',
-			'attr': 'metro_variance',
+			'attr': 'usevariance',
 			'name': 'Use Variance',
 			'description': 'Use Variance',
 			'default': False,
 		},
 		{
-			'type': 'int',
-			'attr': 'erpt_initsamples',
-			'name': 'Initial',
-			'description': 'Initial Samples',
-			'default': 100000,
-			'min': 1,
-			'max': 10000000,
+			'type': 'enum',
+			'attr': 'basesampler',
+			'name': 'Base Sampler',
+			'items': [
+				('random','random', 'random'),
+				('lowdiscrepancy', 'lowdiscrepancy', 'lowdiscrepancy'),
+				('metropolis', 'metropolis', 'metropolis')
+			]
 		},
 		{
 			'type': 'int', 
-			'attr': 'erpt_chainlength',
-			'name': 'Ch. Len.',
+			'attr': 'chainlength',
+			'name': 'Chain Length',
 			'description': 'Chain Length',
-			'default': 512,
+			'default': 100,
 			'min': 1,
 			'max': 32768,
 		},
-#		{
-#			'type': 'int', 
-#			'attr': 'erpt_mutationrange',
-#			'name': 'Str. Width',
-#			'description': 'Strata Width',
-#			'default': 256,
-#			'min': 1,
-#			'max': 32768,
-#		},
+		{
+			'type': 'int', 
+			'attr': 'mutationrange',
+			'name': 'Mutation Range',
+			'default': 256,
+			'min': 1,
+			'max': 32768,
+		},
 		{
 			'type': 'enum',
 			'attr': 'pixelsampler',
@@ -345,7 +314,6 @@ class sampler(render_described_context):
 			'items': [
 				('linear', 'Linear', 'linear'),
 				('tile', 'Tile', 'tile'),
-				('random', 'Random', 'random'),
 				('vegas', 'Vegas', 'vegas'),
 				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
 				('hilbert', 'Hilbert', 'hilbert'),
@@ -660,8 +628,7 @@ class accelerator(render_described_context):
 	property_group = luxrender.properties.accelerator.luxrender_accelerator
 	
 	controls = [
-		'accelerator',
-		'advanced',
+		[0.7, 'accelerator', 'advanced'],
 		
 		'intersectcost',
 		'traversalcost',

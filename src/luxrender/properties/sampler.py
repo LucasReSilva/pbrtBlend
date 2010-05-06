@@ -49,19 +49,22 @@ class luxrender_sampler(bpy.types.IDPropertyGroup):
 		
 		params = ParamSet()
 		
-		if self.sampler in ['random', 'lowdiscrepancy']:
+		if self.sampler in ['random', 'lowdiscrepancy'] or (self.sampler == 'erpt' and self.basesampler in ['random', 'lowdiscrepancy']):
 			params.add_integer('pixelsamples', self.pixelsamples)
 			params.add_string('pixelsampler', self.pixelsampler)
 		
 		if self.sampler == 'erpt':
-			params.add_integer('initsamples', self.erpt_initsamples)
-			params.add_integer('chainlength', self.erpt_chainlength)
+			params.add_integer('chainlength', self.chainlength)
+			params.add_string('basesampler', self.basesampler)
 		
 		if self.sampler == 'metropolis':
-			params.add_integer('initsamples', self.metro_initsamples)
-			params.add_integer('maxconsecrejects', self.metro_mncr)
-			params.add_float('largemutationprob', self.metro_lmprob)
-			params.add_bool('usevariance', self.metro_variance)
+			params.add_integer('maxconsecrejects', self.maxconsecrajects)
+			params.add_float('largemutationprob', self.largemutationprob)
+			params.add_bool('usevariance', self.usevariance)
+			
+		if self.advanced:
+			if self.sampler == 'metropolis' or (self.sampler == 'erpt' and self.basesampler == 'metropolis'):
+				params.add_integer('mutationrange', self.mutationrange)
 		
 		out = self.sampler, params
 		dbo('SAMPLER', out)
