@@ -58,12 +58,12 @@ class luxrender_sampler(bpy.types.IDPropertyGroup):
 			params.add_string('basesampler', self.basesampler)
 		
 		if self.sampler == 'metropolis':
-			params.add_integer('maxconsecrejects', self.maxconsecrajects)
 			params.add_float('largemutationprob', self.largemutationprob)
 			params.add_bool('usevariance', self.usevariance)
 			
 		if self.advanced:
 			if self.sampler == 'metropolis' or (self.sampler == 'erpt' and self.basesampler == 'metropolis'):
+				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 				params.add_integer('mutationrange', self.mutationrange)
 		
 		out = self.sampler, params
