@@ -101,31 +101,31 @@ class ParamSet(list):
 		return self
 	
 	def add_bool(self, name, value):
-		self.add('bool', name, value)
+		self.add('bool', name, bool(value))
 		return self
 	
 	def add_string(self, name, value):
-		self.add('string', name, value)
+		self.add('string', name, str(value))
 		return self
 	
 	def add_vector(self, name, value):
-		self.add('vector', name, value)
+		self.add('vector', name, [i for i in value])
 		return self
 	
 	def add_point(self, name, value):
-		self.add('point', name, value)
+		self.add('point', name, [p for p in value])
 		return self
 	
 	def add_normal(self, name, value):
-		self.add('normal', name, value)
+		self.add('normal', name, [n for n in value])
 		return self
 	
 	def add_color(self, name, value):
-		self.add('color', name, value)
+		self.add('color', name, [c for c in value])
 		return self
 	
 	def add_texture(self, name, value):
-		self.add('texture', name, value)
+		self.add('texture', name, str(value))
 		return self
 
 def matrix_to_list(matrix):

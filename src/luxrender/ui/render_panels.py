@@ -661,24 +661,33 @@ class accelerator(render_described_context):
 	
 	controls = [
 		'accelerator',
+		'advanced',
 		
-		['kd_intcost', 'kd_travcost'],			# tabreckdtree
-		['kd_ebonus', 'kd_maxprims'],			# tabreckdtree
-		'kd_maxdepth',							# tabreckdtree
-		
-		'grid_refineim',						# grid
-		
-		'qbvh_maxprims',						# qbvh
+		'intersectcost',
+		'traversalcost',
+		'emptybonus'
+		'treetype',
+		'costsample',
+		'maxprims',
+		'maxdepth',
+		'refineimmediately',
+		'maxprimsperleaf',
+		'fullsweepthreshold',
+		'skipfactor',
 	]
 	
 	visibility = {
-		'kd_intcost':		{ 'accelerator': 'tabreckdtree' },
-		'kd_travcost':		{ 'accelerator': 'tabreckdtree' },
-		'kd_ebonus':		{ 'accelerator': 'tabreckdtree' },
-		'kd_maxprims':		{ 'accelerator': 'tabreckdtree' },
-		'kd_maxdepth':		{ 'accelerator': 'tabreckdtree' },
-		'grid_refineim':	{ 'accelerator': 'grid' },
-		'qbvh_maxprims':	{ 'accelerator': 'qbvh' },
+		'intersectcost':		{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
+		'traversalcost':		{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
+		'emptybonus':			{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
+		'treetype':				{ 'advanced': True, 'accelerator': 'bvh' },
+		'costsample':			{ 'advanced': True, 'accelerator': 'bvh' },
+		'maxprims':				{ 'advanced': True, 'accelerator': 'tabreckdtree' },
+		'maxdepth':				{ 'advanced': True, 'accelerator': 'tabreckdtree' },
+		'refineimmediately':	{ 'advanced': True, 'accelerator': 'grid' },
+		'maxprimsperleaf':		{ 'advanced': True, 'accelerator': 'qbvh' },
+		'fullsweepthreshold':	{ 'advanced': True, 'accelerator': 'qbvh' },
+		'skipfactor':			{ 'advanced': True, 'accelerator': 'qbvh' },
 	}
 	
 	properties = [
@@ -689,83 +698,89 @@ class accelerator(render_described_context):
 			'description': 'Scene accelerator type',
 			'default': 'tabreckdtree',
 			'items': [
-				('none', 'none', 'None'),
+				#('none', 'none', 'None'),
+				#('bruteforce', 'bruteforce', 'bruteforce'),
 				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
 				('grid', 'Grid', 'grid'),
+				('bvh', 'BVH', 'bvh'),
 				('qbvh', 'QBVH', 'qbvh'),
 			]
 		},
 		{
-			'type': 'int',
-			'attr': 'kd_intcost',
-			'name': 'Inters. Cost',
-			'description': 'Intersection Cost',
-			'default': 80,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1000,
-			'soft_max': 1000,
-		},
-		{
-			'type': 'int',
-			'attr': 'kd_travcost',
-			'name': 'Trav. Cost',
-			'description': 'Traversal Cost',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1000,
-			'soft_max': 1000,
-		},
-		{
-			'type': 'float',
-			'attr': 'kd_ebonus',
-			'name': 'Empty Bonus',
-			'description': 'Empty Bonus',
-			'default': 0.2,
-			'min': 0,
-			'soft_min': 0,
-			'max': 100,
-			'soft_max': 100,
-		},
-		{
-			'type': 'int',
-			'attr': 'kd_maxprims',
-			'name': 'Max. Prims.',
-			'description': 'Max Primitives',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1000,
-			'soft_max': 1000,
-		},
-		{
-			'type': 'int',
-			'attr': 'kd_maxdepth',
-			'name': 'Max. Depth',
-			'description': 'Maximum Depth',
-			'default': -1,
-			'min': -1,
-			'soft_min': -1,
-			'max': 100,
-			'soft_max': 100,
-		},
-		{
+			'attr': 'advanced',
 			'type': 'bool',
-			'attr': 'grid_refineim',
+			'name': 'Advanced',
+			'default': False,
+		},
+		{
+			'attr': 'intersectcost',
+			'type': 'int',
+			'name': 'Intersect Cost',
+			'default': 80
+		},
+		{
+			'attr': 'traversalcost',
+			'type': 'int',
+			'name': 'Traversal Cost',
+			'default': 1
+		},
+		{
+			'attr': 'emptybonus',
+			'type': 'float',
+			'name': 'Empty Bonus',
+			'default': 0.5
+		},
+		{
+			'attr': 'treetype',
+			'type': 'enum',
+			'name': 'Tree Type',
+			'default': '2',
+			'items': [
+				('2', 'Binary', '2'),
+				('4', 'Quad', '4'),
+				('8', 'Oct', '8'),
+			]
+		},
+		{
+			'attr': 'costsample',
+			'type': 'int',
+			'name': 'Costsample',
+			'default': 0
+		},
+		{
+			'attr': 'maxprims',
+			'type': 'int',
+			'name': 'Max. Prims',
+			'default': 1
+		},
+		{
+			'attr': 'maxdepth',
+			'type': 'int',
+			'name': 'Max. depth',
+			'default': -1
+		},
+		{
+			'attr': 'refineimmediately',
+			'type': 'bool',
 			'name': 'Refine Immediately',
-			'description': 'Refine Immediately',
 			'default': False
 		},
 		{
+			'attr': 'maxprimsperleaf',
 			'type': 'int',
-			'attr': 'qbvh_maxprims',
-			'name': 'Max. Prims.',
-			'description': 'Max Primitives per leaf',
-			'default': 4,
-			'min': 1,
-			'soft_min': 1,
-			'max': 64,
-			'soft_max': 64,
+			'name': 'Max. prims per leaf',
+			'default': 4
+		},
+		{
+			'attr': 'fullsweepthreshold',
+			'type': 'int',
+			'name': 'Full sweep threshold',
+			'default': 16,
+		},
+		{
+			'attr': 'skipfactor',
+			'type': 'int',
+			'name': 'Skip factor',
+			'default': 1
 		},
 	]

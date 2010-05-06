@@ -29,10 +29,6 @@ import bpy
 from . import dbo
 from ..export import ParamSet
 
-# TODO: adapt values written to d based on simple/advanced views
-
-# TODO: check parameter completeness against Lux API
-
 class luxrender_accelerator(bpy.types.IDPropertyGroup):
 	'''
 	Storage class for LuxRender Accelerator settings.
@@ -49,18 +45,28 @@ class luxrender_accelerator(bpy.types.IDPropertyGroup):
 		
 		params = ParamSet()
 		
-		if self.accelerator == 'tabreckdtree':
-			params.add_float('intersectcost', self.kd_intcost)
-			params.add_float('traversalcost', self.kd_travcost)
-			params.add_float('emptybonus', self.kd_ebonus)
-			params.add_integer('maxprims', self.kd_maxprims)
-			params.add_integer('maxdepth', self.kd_maxdepth)
-		
-		if self.accelerator == 'grid':
-			params.add_bool('refineimmediately', self.grid_refineim)
+		if self.advanced:
+			if self.accelerator == 'tabreckdtree':
+				params.add_float('intersectcost', self.intersectcost)
+				params.add_float('traversalcost', self.traversalcost)
+				params.add_float('emptybonus', self.emptybonus)
+				params.add_integer('maxprims', self.maxprims)
+				params.add_integer('maxdepth', self.maxdepth)
 			
-		if self.accelerator == 'qbvh':
-			params.add_integer('maxprimsperleaf', self.qbvh_maxprims)
+			if self.accelerator == 'grid':
+				params.add_bool('refineimmediately', self.refineimmediately)
+			
+			if self.accelerator == 'bvh':
+				params.add_integer('treetype', self.treetype)
+				params.add_integer('costsamples', self.costsamples)
+				params.add_integer('intersectcost', self.intersectcost)
+				params.add_integer('traversalcost', self.traversalcost)
+				params.add_float('emptybonus', self.emptybonus)
+			
+			if self.accelerator == 'qbvh':
+				params.add_integer('maxprimsperleaf', self.maxprimsperleaf)
+				params.add_integer('fullsweepthreshold', self.fullsweepthreshold)
+				params.add_integer('skipfactor', self.skipfactor)
 		
 		out = self.accelerator, params
 		dbo('ACCELERATOR', out)
