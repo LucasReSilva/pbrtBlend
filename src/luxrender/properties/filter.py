@@ -29,10 +29,6 @@ import bpy
 from . import dbo
 from ..export import ParamSet
 
-# TODO: adapt values written to d based on simple/advanced views
-
-# TODO: check parameter completeness against Lux API
-
 class luxrender_filter(bpy.types.IDPropertyGroup):
 	'''
 	Storage class for LuxRender PixelFilter settings.
