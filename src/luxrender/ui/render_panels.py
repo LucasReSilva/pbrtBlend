@@ -472,38 +472,23 @@ class filter(render_described_context):
 	property_group = luxrender.properties.filter.luxrender_filter
 	
 	controls = [
-		[
-			0.75,
-			'filter',
-			'advanced',
-		],
+		[ 0.7, 'filter', 'advanced'],
 		
-		['xwidth', 'ywidth'],			# advanced
-		'gaussian_alpha',				# gaussian advanced
-		
-		[
-			0.4,
-			'mitchell_mode',			# mitchell advanced
-			'mitchell_b',				# mitchell advanced + mode=manual
-			'mitchell_c',				# mitchell advanced + mode=manual
-		],
-		'mitchell_sharpness',			# mitchell simple || (mitchell advanced && mode = slider)
-		
-		'sinc_tau'						# sinc advanced
+		['xwidth', 'ywidth'],
+		'alpha',
+		['b', 'c'],
+		'supersample',
+		'tau'
 	]
 	
 	visibility = {
-		'xwidth':				{ 'advanced': True},
-		'ywidth':				{ 'advanced': True},
-		
-		'gaussian_alpha':		{ 'advanced': True, 'filter': 'gaussian' },
-		
-		'mitchell_mode':		{ 'advanced': True, 'filter': 'mitchell' },
-		'mitchell_b':			{ 'advanced': True, 'filter': 'mitchell', 'mitchell_mode': 'manual' },
-		'mitchell_c':			{ 'advanced': True, 'filter': 'mitchell', 'mitchell_mode': 'manual' },		
-		'mitchell_sharpness':	{ 'filter': 'mitchell' },
-		
-		'sinc_tau':				{ 'advanced': True, 'filter': 'sinc' },
+		'xwidth':				{ 'advanced': True },
+		'ywidth':				{ 'advanced': True },
+		'alpha':				{ 'advanced': True, 'filter': 'gaussian' },
+		'b':					{ 'advanced': True, 'filter': 'mitchell' },
+		'c':					{ 'advanced': True, 'filter': 'mitchell' },
+		'supersample':			{ 'advanced': True, 'filter': 'mitchell' },
+		'tau':					{ 'advanced': True, 'filter': 'sinc' },
 	}
 	
 	properties = [
@@ -511,7 +496,7 @@ class filter(render_described_context):
 			'type': 'enum',
 			'attr': 'filter',
 			'name': 'Filter',
-			'description': 'Pixel sampling filter',
+			'description': 'Pixel splatting filter',
 			'default': 'mitchell',
 			'items': [
 				('box', 'Box', 'box'),
@@ -552,43 +537,21 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'gaussian_alpha',
+			'attr': 'alpha',
 			'name': 'Alpha',
 			'description': 'Gaussian Alpha parameter',
-			'default': 2,
-			'min': 0,
-			'soft_min': 0,
-			'max': 10,
-			'soft_max': 10,
+			'default': 2.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
 		},
 		{
 			'type': 'float',
-			'attr': 'mitchell_sharpness',
-			'name': 'Sharpness',
-			'description': 'Sharpness of Mitchell Filter',
-			'default': 0.5,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
-		},
-		{
-			'type': 'enum',
-			'attr': 'mitchell_mode',
-			'name': 'Mode',
-			'description': 'Mitchell Mode',
-			'items': [
-				('manual', 'Manual', 'manual'),
-				('slider', 'Slider', 'slider'),
-				#('preset', 'preset', 'Preset'),
-			]
-		},
-		{
-			'type': 'float',
-			'attr': 'mitchell_b',
+			'attr': 'b',
 			'name': 'B',
 			'description': 'Mitchell B parameter',
-			'default': 0.333,
+			'default': 1/3,
 			'min': 0,
 			'soft_min': 0,
 			'max': 1,
@@ -596,10 +559,10 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'mitchell_c',
+			'attr': 'c',
 			'name': 'C',
 			'description': 'Mitchell C parameter',
-			'default': 0.333,
+			'default': 1/3,
 			'min': 0,
 			'soft_min': 0,
 			'max': 1,
@@ -607,10 +570,10 @@ class filter(render_described_context):
 		},
 		{
 			'type': 'float',
-			'attr': 'sinc_tau',
+			'attr': 'tau',
 			'name': 'Tau',
 			'description': 'Sinc Tau parameter',
-			'default': 3,
+			'default': 3.0,
 			'min': 0,
 			'soft_min': 0,
 			'max': 10,

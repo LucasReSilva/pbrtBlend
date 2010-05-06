@@ -35,7 +35,7 @@ from ..export import ParamSet
 
 class luxrender_volume(bpy.types.IDPropertyGroup):
 	'''
-	Storage class for LuxRender Volune Integrator settings.
+	Storage class for LuxRender Volume Integrator settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''

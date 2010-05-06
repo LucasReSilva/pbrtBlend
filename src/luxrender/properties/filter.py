@@ -49,24 +49,19 @@ class luxrender_filter(bpy.types.IDPropertyGroup):
 		
 		params = ParamSet()
 		
-		params.add_float('xwidth', self.xwidth)
-		params.add_float('ywidth', self.ywidth)
-		
-		if self.filter == 'box':
-			pass
-		
-		if self.filter == 'gaussian':
-			params.add_float('alpha', self.gaussian_alpha)
-		
-		if self.filter == 'mitchell':
-			params.add_float('B', self.mitchell_b)
-			params.add_float('C', self.mitchell_c)
-		
-		if self.filter == 'sinc':
-			params.add_float('tau', self.sinc_tau)
-		
-		if self.filter == 'triangle':
-			pass
+		if self.advanced:
+			params.add_float('xwidth', self.xwidth)
+			params.add_float('ywidth', self.ywidth)
+			
+			if self.filter == 'gaussian':
+				params.add_float('alpha', self.alpha)
+			
+			if self.filter == 'mitchell':
+				params.add_float('B', self.b)
+				params.add_float('C', self.c)
+			
+			if self.filter == 'sinc':
+				params.add_float('tau', self.tau)
 		
 		out = self.filter, params
 		dbo('FILTER', out)
