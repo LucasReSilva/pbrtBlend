@@ -29,10 +29,6 @@ import bpy
 from . import dbo
 from ..export import ParamSet
 
-# TODO: adapt values written to d based on simple/advanced views
-
-# TODO: check parameter completeness against Lux API
-
 class luxrender_sampler(bpy.types.IDPropertyGroup):
 	'''
 	Storage class for LuxRender Sampler settings.
@@ -62,6 +58,8 @@ class luxrender_sampler(bpy.types.IDPropertyGroup):
 			params.add_bool('usevariance', self.usevariance)
 			
 		if self.advanced:
+			if self.sampler == 'metropolis' or (self.sampler == 'erpt' and self.basesampler == 'metropolis'):
+				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 			if self.sampler in ['metropolis', 'erpt']:
 				params.add_integer('mutationrange', self.mutationrange)
 		
