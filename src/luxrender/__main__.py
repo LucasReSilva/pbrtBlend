@@ -25,11 +25,12 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 # System libs
-import os, time, threading
+import os, time, threading, subprocess
 
 # Framework libs
 from ef.ef import ef
 from ef.engine import engine_base
+from ef.util import util as efutil
 
 # Exporter libs
 from .module import LuxManager as LM
@@ -204,20 +205,32 @@ class luxrender(engine_base):
 		
 		l = self.LuxManager.lux_context
 		
-		LXS = scene.luxrender_engine.write_lxs
-		LXM = scene.luxrender_engine.write_lxm
-		LXO = scene.luxrender_engine.write_lxo
-		
 		if api_type == 'FILE':
+			
+			LXS = scene.luxrender_engine.write_lxs
+			LXM = scene.luxrender_engine.write_lxm
+			LXO = scene.luxrender_engine.write_lxo
+			
+			if not os.access( scene.render.output_path, os.W_OK):
+				raise Exception('Output path is not writable')
+			
+			lxs_filename = os.path.join(
+				scene.render.output_path,
+				efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
+			)
+			
+			efutil.export_path = lxs_filename
+			
 			if LXS or LXM or LXO:
 				# TODO: insert an output path here ?
 				# TODO: only if the user selects a 'keep files' option
 				l.set_filename(
-					'default',
+					lxs_filename,
 					LXS = LXS, 
 					LXM = LXM,
 					LXO = LXO
 				)
+				self.output_file = lxs_filename + '.png'
 			else:
 				raise Exception('Nothing to do! Select at least one of LXM/LXS/LXO')
 		
@@ -387,9 +400,24 @@ class luxrender(engine_base):
 					self.render_update_timer.start()
 					if self.render_update_timer.isAlive(): self.render_update_timer.join()
 			else:
-				LuxLog('External LuxRender will be started with scene file "%s"' % self.LuxManager.lux_context.file_names[0])
-		
-		# TODO: tidy up scene files and output file ?
+				config_updates = {
+					'auto_start': render
+				}
+				
+				luxrender_path = scene.luxrender_engine.exe_path
+				if os.path.exists(luxrender_path):
+					config_updates['exe_path'] = luxrender_path
+				
+				try:
+					for k,v in config_updates.items():
+						efutil.write_config_value('luxrender', 'defaults', k, v)
+				except Exception as err:
+					LuxLog('Saving LuxRender config failed: %s' % err)
+				
+				fn = self.LuxManager.lux_context.file_names[0]
+				LuxLog('Launching LuxRender with scene file "%s"' % fn)
+				# TODO: add support for luxrender command line options
+				subprocess.Popen([luxrender_path + ' %s'%fn], shell=True)
 	
 	def stats_timer(self):
 		'''

@@ -27,6 +27,8 @@
 
 from . import ParamSet
 
+from ef.util import util as efutil
+
 def lookAt(scene):
 	'''
 	scene		bpy.types.scene
@@ -74,7 +76,7 @@ def film(scene):
 	params.add_integer('xresolution', int(xr))
 	params.add_integer('yresolution', int(yr))
 	
-	params.add_string('filename', 'default')
+	params.add_string('filename', efutil.export_path)
 	params.add_bool('write_exr', False)
 	params.add_bool('write_png', True)
 	params.add_bool('write_tga', False)

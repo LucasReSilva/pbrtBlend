@@ -27,6 +27,7 @@
 from properties_render import RenderButtonsPanel
 
 import ef.ui
+from ef.util import util as efutil
 from ef.validate import Logic_OR as O, Logic_AND as A
 
 from ..module.pure_api import PYLUX_AVAILABLE
@@ -57,6 +58,7 @@ class engine(render_described_context):
 	controls = [
 		'export_type',
 		['write_files', 'render'],
+		'exe_path',
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		'priority',
 		['threads_auto', 'threads'],
@@ -67,6 +69,7 @@ class engine(render_described_context):
 	visibility = {
 		'write_files':			{ 'export_type': 'INT' },
 		'render':				O([{'write_files': True}, {'export_type': 'EXT'}]),
+		'exe_path':				{ 'render': True, 'export_type': 'EXT' },
 		'write_lxs':			{ 'export_type': 'INT', 'write_files': True },
 		'write_lxm':			{ 'export_type': 'INT', 'write_files': True },
 		'write_lxo':			{ 'export_type': 'INT', 'write_files': True },
@@ -112,7 +115,15 @@ class engine(render_described_context):
 			'attr': 'render',
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
-			'default': True,
+			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'exe_path',
+			'name': 'Path to LuxRender',
+			'description': 'Path to LuxRender',
+			'default': efutil.find_config_value('luxrender', 'defaults', 'exe_path', '')
 		},
 		{
 			'type': 'bool',
