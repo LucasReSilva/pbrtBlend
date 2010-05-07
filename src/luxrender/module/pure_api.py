@@ -29,7 +29,8 @@ from .__init__ import LuxLog
 try:
 	import luxrender.pylux
 	LuxLog('Using pylux version %s' % luxrender.pylux.version())
-
+	#luxrender.pylux.errorHandler(LuxLog)
+	
 	class Custom_Context(luxrender.pylux.Context):
 		'''
 		This is the 'pure' entry point to the pylux.Context API

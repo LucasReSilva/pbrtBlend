@@ -34,25 +34,20 @@ from . import ParamSet
 from ..module import LuxLog
 from ..properties.util import material_property_map
 
-def write_lxm(l, scene):
+def write_lxm(lux_context, scene):
 	'''
-	l			pylux.Context
-	scene		bpy.types.scene
+	lux_context			pylux.Context
+	scene				bpy.types.scene
 	
 	Iterate over the given scene's objects, and export materials
-	of visible ones to the lux Conext l
+	of visible ones to the lux Conext lux_context
 	
-	Returns		None
+	Returns				None
 	'''
 	
 	vis_layers = scene.layers
 	
-	sel = scene.objects
-	total_objects = len(sel)
-	rpcs = []
-	ipc = 0.0
-	for ob in sel:
-		ipc += 1.0
+	for ob in scene.objects:
 		
 		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 			continue
@@ -65,7 +60,7 @@ def write_lxm(l, scene):
 		if not visible:
 			continue
 		
-		materials_file(l, ob)
+		materials_file(lux_context, ob)
 
 class ExportedTextures(object):
 	# static class variables
@@ -129,9 +124,7 @@ class ExportedMaterials(object):
 	@staticmethod
 	def calculate_dependencies():
 		'''
-		TODO: iterate over materials, detect texture dependencies
-		and re-order texture export lists so that deps are satisfied
-		TODO: for extra marks, detect and cure cyclic-deps 
+		TODO: detect and cure cyclic-deps 
 		'''
 		pass
 	
@@ -155,13 +148,12 @@ def export_object_material(lux_context, ob):
 def materials_direct(lux_context, ob):
 	for m in ob.data.materials:
 		if hasattr(m, 'luxrender_material'):
-			material_params = luxrender_material_params(lux_context, m)
-			lux_context.material('matte', material_params)	# TODO: Why is 'matte' hard-coded here ?
+			lux_context.material( *luxrender_material_params(lux_context, m) )
 
 def materials_file(lux_context, ob):
 	for m in ob.data.materials:
 		if hasattr(m, 'luxrender_material') and m.name not in ExportedMaterials.material_names:
-			material_params = luxrender_material_params(lux_context, m, add_type=True)
+			mat_type, material_params = luxrender_material_params(lux_context, m, add_type=True)
 			ExportedMaterials.makeNamedMaterial(m.name, material_params)
 	
 	ExportedMaterials.export_new_named(lux_context)
@@ -241,4 +233,4 @@ def luxrender_material_params(lux_context, mat, add_type=False):
 			elif type(lux_prop).__name__ == 'bpy_prop_array':
 				mp.add_vector(lux_prop_name, lux_prop)
 	
-	return mp
+	return lux_mat_type, mp

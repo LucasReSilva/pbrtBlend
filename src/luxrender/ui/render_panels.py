@@ -57,7 +57,9 @@ class engine(render_described_context):
 	
 	controls = [
 		'export_type',
-		['write_files', 'render'],
+		# TODO: write_files forced to True until segfaulting pylux can be fixed
+		#'write_files',
+		'render',
 		'exe_path',
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		'priority',
@@ -67,7 +69,7 @@ class engine(render_described_context):
 	]
 	
 	visibility = {
-		'write_files':			{ 'export_type': 'INT' },
+		#'write_files':			{ 'export_type': 'INT' },
 		'render':				O([{'write_files': True}, {'export_type': 'EXT'}]),
 		'exe_path':				{ 'render': True, 'export_type': 'EXT' },
 		'write_lxs':			{ 'export_type': 'INT', 'write_files': True },

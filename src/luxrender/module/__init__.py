@@ -31,7 +31,7 @@ import bpy
 from ef.ef import ef
 
 # CHOOSE API TYPE
-# Write conventional lx* files and use pylux to manage lux process
+# Write conventional lx* files and use pylux to manage lux process or external process
 import luxrender.module.file_api
 # Access lux only through pylux bindings
 import luxrender.module.pure_api
@@ -237,7 +237,7 @@ class LuxManager(object):
 		while self.lux_context.statistics('sceneIsReady') != 1.0:
 			# TODO: such a tight loop is not a good idea
 			time.sleep(0.3)
-			
+		
 		self.stats_thread.start()
 		self.fb_thread.start(RE)
 		
