@@ -24,6 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import math
 
 class ParamSetItem(object):
 	
@@ -32,6 +33,8 @@ class ParamSetItem(object):
 	name		= None
 	value		= None
 	
+	WRAP_WIDTH	= 100
+	
 	def __init__(self, *args):
 		self.type, self.name, self.value = args
 		self.type_name = "%s %s" % (self.type, self.name)
@@ -39,26 +42,43 @@ class ParamSetItem(object):
 	def __repr__(self):
 		return "<%s:%s:%s>" % (self.type, self.name, self.value)
 	
+	def list_wrap(self, lst, cnt, type='f'):
+		fcnt = float(cnt)
+		flen = float(len(lst))
+		str = ''
+		if type == 'f':
+			for row in range( math.ceil(flen/fcnt) ):
+				str += ' '.join(['%f'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
+		elif type == 'i':
+			for row in range( math.ceil(flen/fcnt) ):
+				str += ' '.join(['%i'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
+		return str
+	
 	def to_string(self):
 		fs_num = '"%s %s" [%s]'
 		fs_str = '"%s %s" ["%s"]'
 		
 		if self.type == "float" and type(self.value) in (list, tuple):
-			return fs_num % ('float', self.name, ' '.join(['%f'%i for i in self.value]))
+			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
+			return fs_num % ('float', self.name, lst)
 		if self.type == "float":
 			return fs_num % ('float', self.name, '%f' % self.value)
 		if self.type == "integer" and type(self.value) in (list, tuple):
-			return fs_num % ('integer', self.name, ' '.join(['%i'%i for i in self.value]))
+			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'i')
+			return fs_num % ('integer', self.name, lst)
 		if self.type == "integer":
 			return fs_num % ('integer', self.name, '%i' % self.value)
 		if self.type == "string":
 			return fs_str % ('string', self.name, self.value)
 		if self.type == "vector":
-			return fs_num % ('vector', self.name, ' '.join(['%f'%i for i in self.value]))
+			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
+			return fs_num % ('vector', self.name, lst)
 		if self.type == "point":
-			return fs_num % ('point', self.name, ' '.join(['%f'%i for i in self.value]))
+			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
+			return fs_num % ('point', self.name, lst)
 		if self.type == "normal":
-			return fs_num % ('normal', self.name, ' '.join(['%f'%i for i in self.value]))
+			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
+			return fs_num % ('normal', self.name, lst)
 		if self.type == "color":
 			return fs_num % ('color', self.name, ' '.join(['%f'%i for i in self.value]))
 		if self.type == "texture":
