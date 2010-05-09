@@ -60,7 +60,7 @@ def MaterialParameter(attr, name, property_group):
 
 # Float Textures
 TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',		'luxrender_material', add_float_value=True )
-TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',		'luxrender_material', add_float_value=False )
+TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',		'luxrender_material', add_float_value=True, multiply_float=True )
 TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',		'luxrender_material', add_float_value=True )
 TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',	'luxrender_material', add_float_value=True )
 TF_film			= FloatTextureParameter('material', 'film', 'Thin Film',		'luxrender_material', add_float_value=True )
@@ -96,7 +96,7 @@ def material_visibility():
 		'namedmaterial2':			{ 'material': has_property('material', 'namedmaterial2') },
 	}
 	
-	# Float Texture paramters
+	# Float Texture parameters
 	vis.update( TF_amount.get_visibility() )
 	vis.update( TF_bumpmap.get_visibility() )
 	vis.update( TF_cauchyb.get_visibility() )

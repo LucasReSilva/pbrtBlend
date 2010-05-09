@@ -141,10 +141,12 @@ class FloatTextureParameter(TextureParameterBase):
 	max				= 1.0
 	precision		= 3
 	texture_only	= False
+	multiply_float  = False
 	
 	def __init__(self,
 			parent_type, attr, name, property_group,
 			add_float_value = True,
+			multiply_float = False, 
 			default = 0.0, min = 0.0, max = 1.0, precision=3
 		):
 		self.parent_type = parent_type
@@ -152,6 +154,7 @@ class FloatTextureParameter(TextureParameterBase):
 		self.name = name
 		self.property_group = property_group
 		self.texture_only = (not add_float_value)
+		self.multiply_float = multiply_float
 		self.default = default
 		self.min = min
 		self.max = max
@@ -189,7 +192,11 @@ class FloatTextureParameter(TextureParameterBase):
 				'type': 'string',
 				'default': 'lux_float_texture',
 			},
-			
+			{
+				'attr': '%s_multiplyfloat' % self.attr,
+				'type': 'bool',
+				'default': self.multiply_float
+			},
 			{
 				'attr': '%s_usefloattexture' % self.attr,
 				'type': 'bool',

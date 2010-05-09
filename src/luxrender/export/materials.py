@@ -193,26 +193,39 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 			texture_name = getattr(lux_mattex, '%s_%stexturename' % (lux_prop_name, variant))
 			if texture_name != '':
 				if texture_name in bpy.data.textures:
-					params.add_texture(
-						lux_prop_name,
-						texture_name
-					)
 					texture = bpy.data.textures[texture_name]
 					if texture.type == 'PLUGIN':
 						tex_luxrender_texture = texture.luxrender_texture
 						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()
 						if lux_tex_variant == variant:
 							ExportedTextures.texture(texture_name, variant, tex_luxrender_texture.type, paramset)
-							ExportedTextures.export_new(lux_context)
 						else:
 							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 					else:
 						lux_tex_variant, lux_tex_name, paramset = convert_texture(texture)
 						if lux_tex_variant == variant:
 							ExportedTextures.texture(texture_name, lux_tex_variant, lux_tex_name, paramset)
-							ExportedTextures.export_new(lux_context)
 						else:
 							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
+					
+					if hasattr(lux_mattex, '%s_multiplyfloat' % lux_prop_name) and getattr(lux_mattex, '%s_multiplyfloat' % lux_prop_name):
+						ExportedTextures.texture(
+							texture_name + '_scaled',
+							variant,
+							'scale',
+							ParamSet() \
+								.add_float('tex1', float(getattr(lux_mattex, '%s_floatvalue' % lux_prop_name))) \
+								.add_texture('tex2', texture_name)
+						)
+						texture_name += '_scaled'
+					
+					ExportedTextures.export_new(lux_context)
+					
+					params.add_texture(
+						lux_prop_name,
+						texture_name
+					)
+					
 			elif lux_prop_name != 'bumpmap':
 				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, lux_prop_name))
 		else:
