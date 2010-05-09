@@ -411,6 +411,10 @@ class luxrender(engine_base):
 				luxrender_path = scene.luxrender_engine.exe_path
 				if os.path.exists(luxrender_path):
 					config_updates['exe_path'] = luxrender_path
+
+				# Get binary from OSX package
+				if sys.platform == 'darwin':
+					luxrender_path += '.app/Contents/MacOS/luxrender'
 				
 				try:
 					for k,v in config_updates.items():
