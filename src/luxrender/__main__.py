@@ -37,7 +37,8 @@ from .module import LuxManager as LM
 from .module import LuxLog
 import luxrender.ui.materials
 from luxrender.ui.textures import main as texture_main
-from luxrender.ui.textures import bilerp, blackbody, brick, checkerboard, mapping, transform
+from luxrender.ui.textures import	bilerp, blackbody, brick, checkerboard, \
+									imagemap, mapping, transform
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
@@ -74,7 +75,7 @@ properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_blend.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_clouds.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_distortednoise.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_image.COMPAT_ENGINES.add('luxrender')
+#properties_texture.TEXTURE_PT_image.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_magic.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_marble.COMPAT_ENGINES.add('luxrender')
 properties_texture.TEXTURE_PT_musgrave.COMPAT_ENGINES.add('luxrender')
@@ -131,6 +132,9 @@ class luxrender(engine_base):
 		blackbody.ui_panel_blackbody,
 		brick.ui_panel_brick,
 		checkerboard.ui_panel_checkerboard,
+		
+		imagemap.ui_panel_imagemap,
+		
 		mapping.ui_panel_mapping,
 		transform.ui_panel_transform,
 		
@@ -226,17 +230,18 @@ class luxrender(engine_base):
 			efutil.export_path = lxs_filename
 			
 			if LXS or LXM or LXO:
-				# TODO: insert an output path here ?
-				# TODO: only if the user selects a 'keep files' option
 				l.set_filename(
 					lxs_filename,
 					LXS = LXS, 
 					LXM = LXM,
 					LXO = LXO
 				)
-				self.output_file = lxs_filename + '.png'
+				self.output_file = efutil.path_relative_to_export(lxs_filename + '.png')
 			else:
 				raise Exception('Nothing to do! Select at least one of LXM/LXS/LXO')
+		else:
+			# Set export path so that relative paths in export work correctly
+			efutil.export_path = scene.render.output_path
 		
 		# BEGIN!
 		self.update_stats('', 'LuxRender: Parsing Scene')
@@ -379,6 +384,10 @@ class luxrender(engine_base):
 		#print('parse %s' % parse)
 		#print('worldEnd %s' % worldEnd)
 		
+		# Set path to export path to launch render
+		working_path = os.getcwd()
+		os.chdir( os.path.dirname(efutil.export_path) )
+		
 		if self.LuxManager.lux_context.API_TYPE == 'FILE':
 			#print('calling pylux.context.worldEnd() (1)')
 			self.LuxManager.lux_context.worldEnd()
@@ -426,6 +435,8 @@ class luxrender(engine_base):
 				LuxLog('Launching LuxRender with scene file "%s"' % fn)
 				# TODO: add support for luxrender command line options
 				subprocess.Popen([luxrender_path + ' %s'%fn], shell=True)
+		
+		os.chdir(working_path)
 	
 	def stats_timer(self):
 		'''
