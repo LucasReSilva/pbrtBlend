@@ -119,7 +119,7 @@ class luxrender_integrator(bpy.types.IDPropertyGroup):
 			params.add_integer('maxdepth', self.maxdepth) \
 				  .add_float('rrcontinueprob', self.rrcontinueprob) \
 				  .add_string('rrstrategy', self.rrstrategy) \
-				  .add_bool('includeenvironment', self.includeenvironent)
+				  .add_bool('includeenvironment', self.includeenvironment)
 		
 		out = self.surfaceintegrator, params
 		dbo('SURFACE INTEGRATOR', out)
