@@ -76,7 +76,7 @@ def film(scene):
 	params.add_integer('xresolution', int(xr))
 	params.add_integer('yresolution', int(yr))
 	
-	params.add_string('filename', efutil.export_path)
+	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 	params.add_bool('write_exr', False)
 	params.add_bool('write_png', True)
 	params.add_bool('write_tga', False)
