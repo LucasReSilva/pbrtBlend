@@ -54,7 +54,7 @@ class luxrender_integrator(bpy.types.IDPropertyGroup):
 				params.add_float('lightrrthreshold', self.lightrrthreshold)
 		
 		if self.surfaceintegrator == 'directlighting':
-			self.add_integer('maxdepth', self.maxdepth)
+			params.add_integer('maxdepth', self.maxdepth)
 		
 		if self.surfaceintegrator == 'distributedpath':
 			params.add_string('strategy', self.strategy) \
@@ -119,7 +119,7 @@ class luxrender_integrator(bpy.types.IDPropertyGroup):
 			params.add_integer('maxdepth', self.maxdepth) \
 				  .add_float('rrcontinueprob', self.rrcontinueprob) \
 				  .add_string('rrstrategy', self.rrstrategy) \
-				  .add_boo('includeenvironment', self.includeenvironent)
+				  .add_bool('includeenvironment', self.includeenvironent)
 		
 		out = self.surfaceintegrator, params
 		dbo('SURFACE INTEGRATOR', out)

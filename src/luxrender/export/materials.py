@@ -166,10 +166,10 @@ def convert_texture(texture):
 	lux_tex_name = 'blender_%s' % texture.type.lower()
 	
 	if texture.type == 'CLOUDS':
-		paramset.add_string('noisetype', texture.noise_type) \
-				.add_string('noisebasis', texture.noise_basis) \
+		paramset.add_string('noisetype', texture.noise_type.lower() ) \
+				.add_string('noisebasis', texture.noise_basis.lower() ) \
 				.add_float('noisesize', texture.noise_size) \
-				.add_float('noisedepth', texture.noise_depth) \
+				.add_integer('noisedepth', texture.noise_depth) \
 				.add_float('nabla', texture.nabla)
 	
 	
