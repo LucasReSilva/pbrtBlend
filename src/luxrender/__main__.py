@@ -175,6 +175,10 @@ class luxrender(engine_base):
 		Returns None
 		'''
 		
+		# Force update of all custom properties
+		for ui in self.interfaces:
+			ui.property_reload()
+		
 		if context.name == 'preview':
 			self.render_preview(context)
 		else:

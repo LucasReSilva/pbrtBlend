@@ -158,6 +158,23 @@ def materials_file(lux_context, ob):
 	
 	ExportedMaterials.export_new_named(lux_context)
 
+def convert_texture(texture):
+	
+	# Lux only supports blender's textures in float variant
+	variant = 'float'
+	paramset = ParamSet()
+	lux_tex_name = 'blender_%s' % texture.type.lower()
+	
+	if texture.type == 'CLOUDS':
+		paramset.add_string('noisetype', texture.noise_type) \
+				.add_string('noisebasis', texture.noise_basis) \
+				.add_float('noisesize', texture.noise_size) \
+				.add_float('noisedepth', texture.noise_depth) \
+				.add_float('nabla', texture.nabla)
+	
+	
+	return variant, lux_tex_name, paramset
+
 def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 	'''
 	lux_context				pylux.Context - like object
@@ -180,13 +197,22 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 						lux_prop_name,
 						texture_name
 					)
-					tex_luxrender_texture = bpy.data.textures[texture_name].luxrender_texture
-					lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()
-					if lux_tex_variant == variant:
-						ExportedTextures.texture(texture_name, variant, tex_luxrender_texture.type, paramset)
-						ExportedTextures.export_new(lux_context)
+					texture = bpy.data.textures[texture_name]
+					if texture.type == 'PLUGIN':
+						tex_luxrender_texture = texture.luxrender_texture
+						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()
+						if lux_tex_variant == variant:
+							ExportedTextures.texture(texture_name, variant, tex_luxrender_texture.type, paramset)
+							ExportedTextures.export_new(lux_context)
+						else:
+							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 					else:
-						LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
+						lux_tex_variant, lux_tex_name, paramset = convert_texture(texture)
+						if lux_tex_variant == variant:
+							ExportedTextures.texture(texture_name, lux_tex_variant, lux_tex_name, paramset)
+							ExportedTextures.export_new(lux_context)
+						else:
+							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 			elif lux_prop_name != 'bumpmap':
 				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, lux_prop_name))
 		else:
