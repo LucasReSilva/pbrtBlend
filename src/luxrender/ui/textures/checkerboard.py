@@ -47,7 +47,12 @@ class checkerboard(bpy.types.IDPropertyGroup):
 			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
 		)
 		
-		return checkerboard_params
+		if self.dimension == 2:
+			features = {'2DMAPPING'}
+		else:
+			features = {'3DMAPPING'}
+		
+		return features, checkerboard_params
 
 tex1 = FloatTextureParameter('texture', 'tex1', 'Texture 1', 'checkerboard', default=0.0)
 tex2 = FloatTextureParameter('texture', 'tex2', 'Texture 2', 'checkerboard', default=1.0)

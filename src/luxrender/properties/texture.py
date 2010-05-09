@@ -256,14 +256,16 @@ class luxrender_texture(bpy.types.IDPropertyGroup):
 		
 		# this requires the sub-IDPropertyGroup name to be the same as the texture name
 		lux_texture = getattr(self, self.type) 
-		params = lux_texture.get_paramset() 
+		features, params = lux_texture.get_paramset() 
 		
 		# 2D Mapping options
-		if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
+		#if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
+		if '2DMAPPING' in features:
 			params.update( self.mapping.get_paramset() )
 			
 		# 3D Mapping options
-		if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
+		#if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
+		if '3DMAPPING' in features:
 			params.update( self.transform.get_paramset() )
 			
 		return lux_texture.variant, params

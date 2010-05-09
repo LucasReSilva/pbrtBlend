@@ -28,6 +28,8 @@ from math import degrees
 
 import bpy, mathutils
 
+from ef.util import util as efutil
+
 from ..export.materials import add_texture_parameter
 from ..module.file_api import Files
 from ..properties import dbo
@@ -110,7 +112,11 @@ def exportLights(l, scene, ob, matrix):
 		
 	if light.type == 'HEMI':
 		if light.luxrender_lamp.infinite_map != '':
-			light_params.add_string('mapname', light.luxrender_lamp.infinite_map)
+			if l.API_TYPE == 'FILE':
+				# export relative file path
+				light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
+			else:
+				light_params.add_string('mapname', light.luxrender_lamp.infinite_map)
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
 		# nsamples
 		# gamma

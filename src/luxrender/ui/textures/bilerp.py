@@ -34,17 +34,19 @@ class bilerp(bpy.types.IDPropertyGroup):
 	def get_paramset(self):
 		
 		if self.variant == 'float':
-			return ParamSet() \
+			params = ParamSet() \
 				.add_float('v00', self.v00_f) \
 				.add_float('v10', self.v10_f) \
 				.add_float('v01', self.v01_f) \
 				.add_float('v11', self.v11_f)
 		else:
-			return ParamSet() \
+			params = ParamSet() \
 				.add_color('v00', self.v00_c) \
 				.add_color('v10', self.v10_c) \
 				.add_color('v01', self.v01_c) \
 				.add_color('v11', self.v11_c)
+				
+		return {'2DMAPPING'}, params
 
 class ui_panel_bilerp(luxrender_texture_base):
 	bl_label = 'LuxRender BiLerp Texture'

@@ -55,7 +55,7 @@ class brick(bpy.types.IDPropertyGroup):
 			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'mortartex', self.variant, self)
 		)
 		
-		return brick_params
+		return {'3DMAPPING'}, brick_params
 
 brickmodtex_f	= FloatTextureParameter('texture', 'brickmodtex', 'brickmodtex', 'brick', default=1.0, min=0.0)
 brickmodtex_c	= ColorTextureParameter('texture', 'brickmodtex', 'brickmodtex', 'brick', default=(1.0,1.0,1.0))
