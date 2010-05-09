@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 # System libs
-import os, time, threading, subprocess
+import os, time, threading, subprocess, sys
 
 # Framework libs
 from ef.ef import ef
