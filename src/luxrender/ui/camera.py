@@ -201,10 +201,26 @@ class colorspace(DataButtonsPanel, described_layout):
 	property_group = luxrender.properties.camera.luxrender_colorspace
 	
 	controls = [
-		'gamma'
+		'gamma',
+		
+		[0.1, 'preset', 'preset_name'],
+		['cs_whiteX', 'cs_whiteY'],
+		['cs_redX', 'cs_redY'],
+		['cs_greenX', 'cs_greenY'],
+		['cs_blueX', 'cs_blueY'],
 	]
 	
-	visibility = {}
+	visibility = {
+		'preset_name':				{ 'preset': True },
+		'cs_whiteX':				{ 'preset': False },
+		'cs_whiteY':				{ 'preset': False },
+		'cs_redX':					{ 'preset': False },
+		'cs_redY':					{ 'preset': False },
+		'cs_greenX':				{ 'preset': False },
+		'cs_greenY':				{ 'preset': False },
+		'cs_blueX':					{ 'preset': False },
+		'cs_blueY':					{ 'preset': False },
+	}
 	
 	properties = [
 		{
@@ -212,6 +228,88 @@ class colorspace(DataButtonsPanel, described_layout):
 			'type': 'float',
 			'name': 'Gamma',
 			'default': 2.2
+		},
+		{
+			'attr': 'preset',
+			'type': 'bool',
+			'name': 'P',
+			'default': True,
+			'toggle': True
+		},
+		{
+			'attr': 'preset_name',
+			'type': 'enum',
+			'name': 'Preset',
+			'default': 'sRGB',
+			'items': [
+				('sRGB', 'sRGB - HDTV (ITU-R BT.709-5)', 'sRGB'),
+				('romm_rgb', 'ROMM RGB', 'romm_rgb'),
+				('adobe_rgb_98', 'Adobe RGB 98', 'adobe_rgb_98'),
+				('apple_rgb', 'Apple RGB', 'apple_rgb'),
+				('ntsc_1953', 'NTSC (FCC 1953, ITU-R BT.470-2 System M)', 'ntsc_1953'),
+				('ntsc_1979', 'NTSC (1979) (SMPTE C, SMPTE-RP 145)', 'ntsc_1979'),
+				('pal_secam', 'PAL/SECAM (EBU 3213, ITU-R BT.470-6)', 'pal_secam'),
+				('cie_e', 'CIE (1931) E', 'cie_e'),
+			]
+		},
+		{
+			'attr': 'cs_whiteX',
+			'type': 'float',
+			'name': 'White X',
+			'precision': 6,
+			'default': 0.314275
+		},
+		{
+			'attr': 'cs_whiteY',
+			'type': 'float',
+			'name': 'White Y',
+			'precision': 6,
+			'default': 0.329411
+		},
+		
+		{
+			'attr': 'cs_redX',
+			'type': 'float',
+			'name': 'Red X',
+			'precision': 6,
+			'default': 0.63
+		},
+		{
+			'attr': 'cs_redY',
+			'type': 'float',
+			'name': 'Red Y',
+			'precision': 6,
+			'default': 0.34
+		},
+		
+		{
+			'attr': 'cs_greenX',
+			'type': 'float',
+			'name': 'Green X',
+			'precision': 6,
+			'default': 0.31
+		},
+		{
+			'attr': 'cs_greenY',
+			'type': 'float',
+			'name': 'Green Y',
+			'precision': 6,
+			'default': 0.595
+		},
+		
+		{
+			'attr': 'cs_blueX',
+			'type': 'float',
+			'name': 'Blue X',
+			'precision': 6,
+			'default': 0.155
+		},
+		{
+			'attr': 'cs_blueY',
+			'type': 'float',
+			'name': 'Blue Y',
+			'precision': 6,
+			'default': 0.07
 		},
 	]
 

@@ -59,6 +59,80 @@ def resolution(scene):
 	
 	return xr, yr
 
+class colorspace_presets(object):
+	class sRGB(object):
+		cs_whiteX	= 0.314275
+		cs_whiteY	= 0.329411
+		cs_redX		= 0.63
+		cs_redY		= 0.34
+		cs_greenX	= 0.31
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class romm_rgb(object):
+		cs_whiteX	= 0.346
+		cs_whiteY	= 0.359
+		cs_redX		= 0.7347
+		cs_redY		= 0.2653
+		cs_greenX	= 0.1596
+		cs_greenY	= 0.8404
+		cs_blueX	= 0.0366
+		cs_blueY	= 0.0001
+	class adobe_rgb_98(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.64
+		cs_redY		= 0.34
+		cs_greenX	= 0.21
+		cs_greenY	= 0.71
+		cs_blueX	= 0.15
+		cs_blueY	= 0.06
+	class apple_rgb(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.625
+		cs_redY		= 0.34
+		cs_greenX	= 0.28
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class ntsc_1953(object):
+		cs_whiteX	= 0.31
+		cs_whiteY	= 0.316
+		cs_redX		= 0.67
+		cs_redY		= 0.33
+		cs_greenX	= 0.21
+		cs_greenY	= 0.71
+		cs_blueX	= 0.14
+		cs_blueY	= 0.08
+	class ntsc_1979(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.63
+		cs_redY		= 0.34
+		cs_greenX	= 0.31
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class pal_secam(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.64
+		cs_redY		= 0.33
+		cs_greenX	= 0.29
+		cs_greenY	= 0.6
+		cs_blueX	= 0.15
+		cs_blueY	= 0.06
+	class cie_e(object):
+		cs_whiteX	= 0.333
+		cs_whiteY	= 0.333
+		cs_redX		= 0.7347
+		cs_redY		= 0.2653
+		cs_greenX	= 0.2738
+		cs_greenY	= 0.7174
+		cs_blueX	= 0.1666
+		cs_blueY	= 0.0089
+
 def film(scene):
 	'''
 	scene		bpy.types.scene
@@ -76,6 +150,20 @@ def film(scene):
 	params.add_integer('xresolution', int(xr))
 	params.add_integer('yresolution', int(yr))
 	
+	# ColourSpace
+	cso = scene.luxrender_colorspace
+	params.add_float('gamma', cso.gamma)
+	if cso.preset:
+		cs_object = getattr(colorspace_presets, cso.preset_name)
+	else:
+		cs_object = cso
+	
+	params.add_float('colorspace_white',	[cs_object.cs_whiteX,	cs_object.cs_whiteY])
+	params.add_float('colorspace_red',		[cs_object.cs_redX,		cs_object.cs_redY])
+	params.add_float('colorspace_green',	[cs_object.cs_greenX,	cs_object.cs_greenY])
+	params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
+	
+	# Output types
 	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 	params.add_bool('write_exr', False)
 	params.add_bool('write_png', True)
@@ -86,6 +174,7 @@ def film(scene):
 	params.add_integer('displayinterval', 5)
 	params.add_integer('writeinterval', 8)
 	
+	# Halt conditions
 	if scene.luxrender_sampler.haltspp > 0:
 		params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
 	

@@ -45,13 +45,20 @@ class ParamSetItem(object):
 	def list_wrap(self, lst, cnt, type='f'):
 		fcnt = float(cnt)
 		flen = float(len(lst))
-		str = ''
-		if type == 'f':
-			for row in range( math.ceil(flen/fcnt) ):
-				str += ' '.join(['%f'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
-		elif type == 'i':
-			for row in range( math.ceil(flen/fcnt) ):
-				str += ' '.join(['%i'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
+		
+		if flen > fcnt:
+			str = ''
+			if type == 'f':
+				for row in range( math.ceil(flen/fcnt) ):
+					str += ' '.join(['%f'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
+			elif type == 'i':
+				for row in range( math.ceil(flen/fcnt) ):
+					str += ' '.join(['%i'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
+		else:
+			if type == 'f':
+				str = ' '.join(['%f'%i for i in lst])
+			elif type == 'i':
+				str = ' '.join(['%i'%i for i in lst])
 		return str
 	
 	def to_string(self):
