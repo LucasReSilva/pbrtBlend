@@ -64,7 +64,7 @@ class engine(render_described_context):
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		'priority',
 		['threads_auto', 'threads'],
-		['rgc', 'colclamp'],
+		# ['rgc', 'colclamp'],
 		# ['meshopt', 'nolg'],
 	]
 	
