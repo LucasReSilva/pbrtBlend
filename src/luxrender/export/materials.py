@@ -180,7 +180,9 @@ def RGC(value):
 		gamma = bpy.context.scene.luxrender_colorspace.gamma
 	else:
 		gamma = 1.0
-	ncol = value**gamma
+	
+	ncol = value**(1/gamma)
+	
 	if bpy.context.scene.luxrender_engine.colclamp:
 		ncol = ncol * 0.9
 		if ncol > 0.9:

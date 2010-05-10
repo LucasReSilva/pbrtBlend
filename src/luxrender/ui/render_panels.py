@@ -173,7 +173,7 @@ class engine(render_described_context):
 			'attr': 'rgc',
 			'name': 'RGC',
 			'description': 'Reverse Gamma Colour Correction',
-			'default': True,
+			'default': False,
 		},
 		{
 			'type': 'bool',

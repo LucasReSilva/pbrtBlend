@@ -115,7 +115,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'type': 'bool',
 				'name': 'R',
 				'description': 'Reverse Gamma Correct %s' % self.name,
-				'default': True,
+				'default': False,
 				'toggle': True,
 			},
 			{
