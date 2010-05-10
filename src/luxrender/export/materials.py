@@ -230,10 +230,12 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, lux_prop_name))
 		else:
 			if variant == 'float':
-				params.add_float(
-					lux_prop_name,
-					float(getattr(lux_mattex, '%s_floatvalue' % lux_prop_name))
-				)
+				fval = float(getattr(lux_mattex, '%s_floatvalue' % lux_prop_name))
+				if not (getattr(lux_mattex, '%s_ignorezero' % lux_prop_name) and fval==0.0):
+					params.add_float(
+						lux_prop_name,
+						fval
+					)
 			else:
 				params.add_color(
 					lux_prop_name,

@@ -146,12 +146,14 @@ class FloatTextureParameter(TextureParameterBase):
 	precision		= 3
 	texture_only	= False
 	multiply_float  = False
+	ignore_zero     = False
 	
 	def __init__(self,
 			parent_type, attr, name, property_group,
-			add_float_value = True,
-			multiply_float = False, 
-			default = 0.0, min = 0.0, max = 1.0, precision=3
+			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
+			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
+			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
+			default = 0.0, min = 0.0, max = 1.0, precision=4
 		):
 		self.parent_type = parent_type
 		self.attr = attr
@@ -159,6 +161,7 @@ class FloatTextureParameter(TextureParameterBase):
 		self.property_group = property_group
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
+		self.ignore_zero = ignore_zero
 		self.default = default
 		self.min = min
 		self.max = max
@@ -200,6 +203,11 @@ class FloatTextureParameter(TextureParameterBase):
 				'attr': '%s_multiplyfloat' % self.attr,
 				'type': 'bool',
 				'default': self.multiply_float
+			},
+			{
+				'attr': '%s_ignorezero' % self.attr,
+				'type': 'bool',
+				'default': self.ignore_zero
 			},
 			{
 				'attr': '%s_usefloattexture' % self.attr,
