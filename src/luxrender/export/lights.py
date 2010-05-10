@@ -171,9 +171,18 @@ def lights(l, scene):
 	
 	sel = scene.objects
 	have_light = False
+	vis_layers = scene.layers
 
 	for ob in sel:
-
+		
+		# Check layers
+		visible = False
+		for layer_index, o_layer in enumerate(ob.layers):
+			visible = visible or (o_layer and vis_layers[layer_index])
+		
+		if not visible:
+			continue
+		
 		# skip dupli (child) objects when they are not lamps
 		if (ob.parent and ob.parent.dupli_type != 'NONE') and ob.type != 'LAMP':
 			continue
