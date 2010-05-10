@@ -32,7 +32,7 @@ from ef.validate import Visibility
 
 from . import ParamSet
 from ..module import LuxLog
-from ..properties.util import material_property_map
+from ..properties.material import material_property_map
 
 def write_lxm(lux_context, scene):
 	'''

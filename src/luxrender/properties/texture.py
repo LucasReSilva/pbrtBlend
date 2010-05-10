@@ -26,8 +26,12 @@
 #
 import bpy
 
-from .util import has_property
+from .material import has_material_property
 from ..export import ParamSet
+
+def has_property(parent_type, property_name):
+	if parent_type == 'material':
+		return has_material_property(property_name)
 
 class TextureParameterBase(object):
 	parent_type		= None
