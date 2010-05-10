@@ -100,8 +100,12 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
 		params.add_float('shutteropen', 0.0)
 		params.add_float('shutterclose', self.exposure)
 		
+		ws = 1.0
+		if scene.unit_settings.system == 'METRIC':
+			ws = scene.unit_settings.scale_length
+		
 		if self.use_dof:
-			params.add_float('lensradius', (cam.lens / 1000.0) / ( 2.0 * self.fstop ))
+			params.add_float('lensradius', ((cam.lens / 1000.0) / ( 2.0 * self.fstop )) / ws)
 		
 		if self.autofocus:
 			params.add_bool('autofocus', True)
