@@ -44,7 +44,7 @@ class LampColorTextureParameter(ColorTextureParameter):
 	
 	def get_visibility(self):
 		vis = {
-			'%s_texture' % self.attr:			{ '%s_usetexture' % self.attr: True },
+			'%s_colortexture' % self.attr:		{ '%s_usecolortexture' % self.attr: True },
 		}
 		return vis
 
@@ -52,18 +52,18 @@ TC_L = LampColorTextureParameter('lamp', 'L', 'Colour', 'luxrender_lamp')
 
 def lamp_visibility():
 	vis = {
-		'power':			{ 'type': 'AREA'},
-		'efficacy':			{ 'type': 'AREA'},
+		'power':				{ 'type': 'AREA'},
+		'efficacy':				{ 'type': 'AREA'},
 		
-		'turbidity':		{ 'type': 'SUN' },
-		'sunsky_type':		{ 'type': 'SUN' },
+		'turbidity':			{ 'type': 'SUN' },
+		'sunsky_type':			{ 'type': 'SUN' },
 		
-		'infinite_map':		{ 'type': 'HEMI' },
-		'mapping_type':		{ 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
+		'infinite_map':			{ 'type': 'HEMI' },
+		'mapping_type':			{ 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
 		
-		'L_color':			{ 'type': LO({'!=': 'SUN'}) },
-		'L_usetexture':		{ 'type': LO({'!=': 'SUN'}) },
-		'L_texture':		{ 'type': LO({'!=': 'SUN'}), 'L_usetexture': True }
+		'L_color':				{ 'type': LO({'!=': 'SUN'}) },
+		'L_usecolortexture':	{ 'type': LO({'!=': 'SUN'}) },
+		'L_colortexture':		{ 'type': LO({'!=': 'SUN'}), 'L_usecolortexture': True }
 	}
 	
 	# Add TC_L manually, because we need to exlude it from SUN
