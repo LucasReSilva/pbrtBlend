@@ -33,7 +33,7 @@ class blackbody(bpy.types.IDPropertyGroup):
 	
 	def get_paramset(self):
 		
-		return ParamSet().add_float('temperature', self.temperature)
+		return set(), ParamSet().add_float('temperature', self.temperature)
 
 class ui_panel_blackbody(luxrender_texture_base):
 	bl_label = 'LuxRender Blackbody Texture'
