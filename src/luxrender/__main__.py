@@ -123,6 +123,7 @@ class luxrender(engine_base):
 		luxrender.ui.meshes.meshes,
 		
 		luxrender.ui.camera.camera,
+		luxrender.ui.camera.colorspace,
 		luxrender.ui.camera.tonemapping,
 		
 		luxrender.ui.materials.material_editor,

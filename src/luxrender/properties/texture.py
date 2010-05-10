@@ -80,7 +80,7 @@ class ColorTextureParameter(TextureParameterBase):
 
 	def get_controls(self):
 		return [
-			[ 0.9, [0.375,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
+			[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolorrgc' % self.attr, '%s_usecolortexture' % self.attr ],
 			'%s_colortexture' % self.attr
 		] + self.get_extra_controls()
 	
@@ -88,6 +88,7 @@ class ColorTextureParameter(TextureParameterBase):
 		vis = {
 			'%s_colorlabel' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
 			'%s_color' % self.attr: 				{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_usecolorrgc' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
 			'%s_usecolortexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
 			'%s_colortexture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usecolortexture' % self.attr: True },
 		}
@@ -107,6 +108,14 @@ class ColorTextureParameter(TextureParameterBase):
 				'name': 'T',
 				'description': 'Textured %s' % self.name,
 				'default': False,
+				'toggle': True,
+			},
+			{
+				'attr': '%s_usecolorrgc' % self.attr,
+				'type': 'bool',
+				'name': 'R',
+				'description': 'Reverse Gamma Correct %s' % self.name,
+				'default': True,
 				'toggle': True,
 			},
 			{

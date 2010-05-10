@@ -175,6 +175,20 @@ def convert_texture(texture):
 	
 	return variant, lux_tex_name, paramset
 
+def RGC(value):
+	if bpy.context.scene.luxrender_engine.rgc:
+		gamma = bpy.context.scene.luxrender_colorspace.gamma
+	else:
+		gamma = 1.0
+	ncol = value**gamma
+	if bpy.context.scene.luxrender_engine.colclamp:
+		ncol = ncol * 0.9
+		if ncol > 0.9:
+			ncol = 0.9
+		if ncol < 0.0:
+			ncol = 0.0
+	return ncol
+
 def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 	'''
 	lux_context				pylux.Context - like object
@@ -237,10 +251,17 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 						fval
 					)
 			else:
-				params.add_color(
-					lux_prop_name,
-					[float(i) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
-				)
+				use_rgc = getattr(lux_mattex, '%s_usecolorrgc' % lux_prop_name)
+				if use_rgc:
+					params.add_color(
+						lux_prop_name,
+						[RGC(i) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
+					)
+				else:
+					params.add_color(
+						lux_prop_name,
+						[float(i) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
+					)
 	else:
 		LuxLog('WARNING: Texture %s is unsupported variant; needed %s' % (lux_prop_name, variant))
 	

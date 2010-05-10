@@ -83,10 +83,10 @@ class camera(DataButtonsPanel, described_layout):
 	]
 	
 	visibility = {
-		'type':			{ 'is_perspective': True }, 
-		'shutterdistribution': { 'usemblur': True },
-		'cammblur': { 'usemblur': True },
-		'objectmblur': { 'usemblur': True },
+		'type':						{ 'is_perspective': True }, 
+		'shutterdistribution':		{ 'usemblur': True },
+		'cammblur':					{ 'usemblur': True },
+		'objectmblur':				{ 'usemblur': True },
 	}
 	
 	properties = [
@@ -192,6 +192,27 @@ class camera(DataButtonsPanel, described_layout):
 			'name': 'Object Motion Blur',
 			'default': True
 		},	
+	]
+
+class colorspace(DataButtonsPanel, described_layout):
+	bl_label = 'LuxRender Colour-Space'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	property_group = luxrender.properties.camera.luxrender_colorspace
+	
+	controls = [
+		'gamma'
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'attr': 'gamma',
+			'type': 'float',
+			'name': 'Gamma',
+			'default': 2.2
+		},
 	]
 
 class tonemapping_live_update(object):

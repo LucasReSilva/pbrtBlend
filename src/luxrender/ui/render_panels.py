@@ -65,7 +65,7 @@ class engine(render_described_context):
 		'priority',
 		['threads_auto', 'threads'],
 		['rgc', 'colclamp'],
-		['meshopt', 'nolg'],
+		# ['meshopt', 'nolg'],
 	]
 	
 	visibility = {

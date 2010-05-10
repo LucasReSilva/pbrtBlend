@@ -126,6 +126,15 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
 		dbo('CAMERA', out)
 		return out
 
+class luxrender_colorspace(bpy.types.IDPropertyGroup):
+	'''
+	Storage class for LuxRender Colour-Space settings.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	pass
+
 class luxrender_tonemapping(bpy.types.IDPropertyGroup):
 	'''
 	Storage class for LuxRender ToneMapping settings.
