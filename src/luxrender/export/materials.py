@@ -253,6 +253,8 @@ def convert_texture(texture):
 				.add_string('type', texture.musgrave_type.lower() ) \
 				.add_float('nabla', texture.nabla)
 	
+	paramset.update( texture.luxrender_texture.transform.get_paramset() )
+	
 	return variant, lux_tex_name, paramset
 
 def RGC(value):

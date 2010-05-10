@@ -52,7 +52,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 		Only show LuxRender panel with 'Plugin' texture type
 		'''
 		
-		return TextureButtonsPanel.poll(self, context) and context.texture.type == 'PLUGIN'
+		return TextureButtonsPanel.poll(self, context) # and context.texture.type == 'PLUGIN'
 	
 	@classmethod
 	def property_reload(r_class):
@@ -77,14 +77,23 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 		if context.texture is not None:
 			self.property_create(context.texture)
 			
+			context.texture.luxrender_texture.use_lux_texture = (context.texture.type == 'PLUGIN')
+			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.texture, supercontext=context)
 				
 	controls = [
 		'type'
 	]
-	visibility = {}
+	visibility = {
+		'type': { 'use_lux_texture': True }
+	}
 	properties = [
+		{
+			'attr': 'use_lux_texture',
+			'type': 'bool',
+			'default': False,
+		},
 		{
 			'attr': 'type',
 			'name': 'LuxRender Type',
