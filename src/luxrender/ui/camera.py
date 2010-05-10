@@ -195,7 +195,7 @@ class camera(DataButtonsPanel, described_layout):
 	]
 
 class colorspace(DataButtonsPanel, described_layout):
-	bl_label = 'LuxRender Colour-Space'
+	bl_label = 'LuxRender Colour Space'
 	COMPAT_ENGINES = {'luxrender'}
 	
 	property_group = luxrender.properties.camera.luxrender_colorspace

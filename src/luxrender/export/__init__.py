@@ -76,7 +76,7 @@ class ParamSetItem(object):
 		if self.type == "integer":
 			return fs_num % ('integer', self.name, '%i' % self.value)
 		if self.type == "string":
-			return fs_str % ('string', self.name, self.value)
+			return fs_str % ('string', self.name, self.value.replace('\\', '\\\\'))
 		if self.type == "vector":
 			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
 			return fs_num % ('vector', self.name, lst)
