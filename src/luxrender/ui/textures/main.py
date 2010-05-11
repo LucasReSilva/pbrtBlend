@@ -111,6 +111,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 				('lampspectrum', 'lampspectrum', 'lampspectrum'),
 				('marble', 'marble', 'marble'),
 				('mix', 'mix', 'mix'),
+				('scale', 'scale', 'scale'),
 				
 			],
 		},
