@@ -105,6 +105,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 				('brick', 'brick', 'brick'),
 				('checkerboard', 'checkerboard', 'checkerboard'),
 				('dots', 'dots', 'dots'),
+				('equalenergy', 'equalenergy', 'equalenergy'),
 				
 				('imagemap', 'imagemap', 'imagemap'),
 			],

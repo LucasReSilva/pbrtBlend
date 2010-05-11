@@ -38,7 +38,7 @@ from .module import LuxLog
 import luxrender.ui.materials
 from luxrender.ui.textures import main as texture_main
 from luxrender.ui.textures import	bilerp, blackbody, brick, checkerboard, dots, \
-									imagemap, mapping, transform
+									equalenergy, imagemap, mapping, transform
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
@@ -134,6 +134,7 @@ class luxrender(engine_base):
 		brick.ui_panel_brick,
 		checkerboard.ui_panel_checkerboard,
 		dots.ui_panel_dots,
+		equalenergy.ui_panel_equalenergy,
 		
 		imagemap.ui_panel_imagemap,
 		
