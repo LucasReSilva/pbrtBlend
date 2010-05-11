@@ -29,20 +29,20 @@ import bpy
 from ...export import ParamSet
 from ..textures import luxrender_texture_base
 
-class uv(bpy.types.IDPropertyGroup):
+class windy(bpy.types.IDPropertyGroup):
 	
 	def get_paramset(self):
 		
-		uv_params = ParamSet()
-			
-		return {'2DMAPPING'}, uv_params
+		windy_params = ParamSet()
+		
+		return {'3DMAPPING'}, windy_params
 
-class ui_panel_uv(luxrender_texture_base):
-	bl_label = 'LuxRender UV Texture'
+class ui_panel_windy(luxrender_texture_base):
+	bl_label = 'LuxRender windy Texture'
 	
-	LUX_COMPAT = {'uv'}
+	LUX_COMPAT = {'windy'}
 	
-	property_group = uv
+	property_group = windy
 	
 	controls = [
 		# None
@@ -52,8 +52,8 @@ class ui_panel_uv(luxrender_texture_base):
 	
 	properties = [
 		{
-			'type': 'string',
 			'attr': 'variant',
-			'default': 'color'
+			'type': 'string',
+			'default': 'float'
 		},
 	]

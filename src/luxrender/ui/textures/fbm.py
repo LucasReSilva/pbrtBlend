@@ -29,31 +29,45 @@ import bpy
 from ...export import ParamSet
 from ..textures import luxrender_texture_base
 
-class uv(bpy.types.IDPropertyGroup):
+class fbm(bpy.types.IDPropertyGroup):
 	
 	def get_paramset(self):
 		
-		uv_params = ParamSet()
-			
-		return {'2DMAPPING'}, uv_params
+		fbm_params = ParamSet().add_integer('octaves', self.octaves) \
+							   .add_float('roughness', self.roughness)
+		
+		return {'3DMAPPING'}, fbm_params
 
-class ui_panel_uv(luxrender_texture_base):
-	bl_label = 'LuxRender UV Texture'
+class ui_panel_fbm(luxrender_texture_base):
+	bl_label = 'LuxRender fbm Texture'
 	
-	LUX_COMPAT = {'uv'}
+	LUX_COMPAT = {'fbm'}
 	
-	property_group = uv
+	property_group = fbm
 	
 	controls = [
-		# None
+		'octaves',
+		'roughness',
 	]
 	
 	visibility = {} 
 	
 	properties = [
 		{
-			'type': 'string',
 			'attr': 'variant',
-			'default': 'color'
+			'type': 'string',
+			'default': 'float'
+		},
+		{
+			'type': 'int',
+			'attr': 'octaves',
+			'name': 'Octaves',
+			'default': 8
+		},
+		{
+			'type': 'float',
+			'attr': 'roughness',
+			'name': 'Roughness',
+			'default': 0.5
 		},
 	]

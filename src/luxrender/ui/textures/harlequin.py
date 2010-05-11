@@ -29,20 +29,20 @@ import bpy
 from ...export import ParamSet
 from ..textures import luxrender_texture_base
 
-class uv(bpy.types.IDPropertyGroup):
+class harlequin(bpy.types.IDPropertyGroup):
 	
 	def get_paramset(self):
 		
-		uv_params = ParamSet()
-			
-		return {'2DMAPPING'}, uv_params
+		harlequin_params = ParamSet()
+		
+		return set(), harlequin_params
 
-class ui_panel_uv(luxrender_texture_base):
-	bl_label = 'LuxRender UV Texture'
+class ui_panel_harlequin(luxrender_texture_base):
+	bl_label = 'LuxRender harlequin Texture'
 	
-	LUX_COMPAT = {'uv'}
+	LUX_COMPAT = {'harlequin'}
 	
-	property_group = uv
+	property_group = harlequin
 	
 	controls = [
 		# None
@@ -52,8 +52,8 @@ class ui_panel_uv(luxrender_texture_base):
 	
 	properties = [
 		{
-			'type': 'string',
 			'attr': 'variant',
+			'type': 'string',
 			'default': 'color'
 		},
 	]

@@ -33,10 +33,10 @@ class marble(bpy.types.IDPropertyGroup):
 	
 	def get_paramset(self):
 		
-		return set(), ParamSet().add_integer('octaves', self.octaves) \
-								.add_float('roughness', self.roughness) \
-								.add_float('scale', self.scale) \
-								.add_float('variation', self.variation)
+		return {'3DMAPPING'}, ParamSet().add_integer('octaves', self.octaves) \
+										.add_float('roughness', self.roughness) \
+										.add_float('scale', self.scale) \
+										.add_float('variation', self.variation)
 
 class ui_panel_marble(luxrender_texture_base):
 	bl_label = 'LuxRender Marble Texture'

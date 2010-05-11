@@ -106,14 +106,17 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 				('checkerboard', 'checkerboard', 'checkerboard'),
 				('dots', 'dots', 'dots'),
 				('equalenergy', 'equalenergy', 'equalenergy'),
+				('fbm', 'fbm', 'fbm'),
 				('gaussian', 'gaussian', 'gaussian'),
+				('harlequin', 'harlequin', 'harlequin'),
 				('imagemap', 'imagemap', 'imagemap'),
 				('lampspectrum', 'lampspectrum', 'lampspectrum'),
 				('marble', 'marble', 'marble'),
 				('mix', 'mix', 'mix'),
 				('scale', 'scale', 'scale'),
 				('uv', 'uv', 'uv'),
-				
+				('windy', 'windy', 'windy'),
+				('wrinkled', 'wrinkled', 'wrinkled'),
 			],
 		},
 	]

@@ -38,8 +38,9 @@ from .module import LuxLog
 import luxrender.ui.materials
 from luxrender.ui.textures import main as texture_main
 from luxrender.ui.textures import	bilerp, blackbody, brick, checkerboard, dots, \
-									equalenergy, gaussian, imagemap, lampspectrum, \
-									mapping, marble, mix, scale, transform, uv
+									equalenergy, fbm, gaussian, harlequin, imagemap, \
+									lampspectrum, mapping, marble, mix, scale, \
+									transform, uv, windy, wrinkled
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
@@ -130,22 +131,26 @@ class luxrender(engine_base):
 		luxrender.ui.materials.material_editor,
 		
 		texture_main.ui_panel_main,
+		
 		bilerp.ui_panel_bilerp,
 		blackbody.ui_panel_blackbody,
 		brick.ui_panel_brick,
 		checkerboard.ui_panel_checkerboard,
 		dots.ui_panel_dots,
 		equalenergy.ui_panel_equalenergy,
+		fbm.ui_panel_fbm,
 		gaussian.ui_panel_gaussian,
+		harlequin.ui_panel_harlequin,
 		imagemap.ui_panel_imagemap,
 		lampspectrum.ui_panel_lampspectrum,
 		mapping.ui_panel_mapping,
 		marble.ui_panel_marble,
 		mix.ui_panel_mix,
-		
 		scale.ui_panel_scale,
 		transform.ui_panel_transform,
 		uv.ui_panel_uv,
+		windy.ui_panel_windy,
+		wrinkled.ui_panel_wrinkled,
 		
 		#luxrender.nodes.test_node
 	]
