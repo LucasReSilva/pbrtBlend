@@ -112,7 +112,9 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 				('marble', 'marble', 'marble'),
 				('mix', 'mix', 'mix'),
 				('scale', 'scale', 'scale'),
+				('uv', 'uv', 'uv'),
 				
 			],
 		},
 	]
+
