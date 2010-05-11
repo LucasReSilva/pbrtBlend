@@ -107,9 +107,11 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 				('dots', 'dots', 'dots'),
 				('equalenergy', 'equalenergy', 'equalenergy'),
 				('gaussian', 'gaussian', 'gaussian'),
-				('lampspectrum', 'lampspectrum', 'lampspectrum'),
-				
 				('imagemap', 'imagemap', 'imagemap'),
+				('lampspectrum', 'lampspectrum', 'lampspectrum'),
+				('marble', 'marble', 'marble'),
+				('mix', 'mix', 'mix'),
+				
 			],
 		},
 	]

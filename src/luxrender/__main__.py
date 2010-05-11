@@ -39,7 +39,7 @@ import luxrender.ui.materials
 from luxrender.ui.textures import main as texture_main
 from luxrender.ui.textures import	bilerp, blackbody, brick, checkerboard, dots, \
 									equalenergy, gaussian, imagemap, lampspectrum, \
-									mapping, transform
+									mapping, marble, mix, transform
 import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
@@ -137,11 +137,12 @@ class luxrender(engine_base):
 		dots.ui_panel_dots,
 		equalenergy.ui_panel_equalenergy,
 		gaussian.ui_panel_gaussian,
-		lampspectrum.ui_panel_lampspectrum,
-		
 		imagemap.ui_panel_imagemap,
-		
+		lampspectrum.ui_panel_lampspectrum,
 		mapping.ui_panel_mapping,
+		marble.ui_panel_marble,
+		mix.ui_panel_mix,
+		
 		transform.ui_panel_transform,
 		
 		#luxrender.nodes.test_node
