@@ -37,7 +37,13 @@ class imagemap(bpy.types.IDPropertyGroup):
 		
 		params = ParamSet()
 		
-		params.add_string('filename', efutil.path_relative_to_export(self.filename) )
+		params.add_string('filename', efutil.path_relative_to_export(self.filename) ) \
+			  .add_integer('discardmipmaps', self.discardmipmaps) \
+			  .add_string('filtertype', self.filtertype) \
+			  .add_float('gain', self.gain) \
+			  .add_float('gamma', self.gamma) \
+			  .add_float('maxanisotropy', self.maxanisotropy) \
+			  .add_string('wrap', self.wrap)
 		
 		if self.variant == 'float':
 			params.add_string('channel', self.channel)
@@ -54,7 +60,8 @@ class ui_panel_imagemap(luxrender_texture_base):
 	controls = [
 		'variant',
 		'filename',
-		'channel'
+		'channel',
+		'discardmipmaps',
 		'filtertype',
 		'gain',
 		'gamma',
@@ -96,6 +103,14 @@ class ui_panel_imagemap(luxrender_texture_base):
 				('alpha', 'alpha', 'alpha'),
 				('colored_mean', 'colored_mean', 'colored_mean')
 			]
+		},
+		{
+			'type': 'int',
+			'attr': 'discardmipmaps',
+			'name': 'Discard MipMaps below',
+			'description': 'Set to 0 to disable',
+			'default': 0,
+			'min': 0
 		},
 		{
 			'type': 'enum',
