@@ -48,7 +48,7 @@ class ui_panel_transform(luxrender_texture_base):
 	bl_default_closed = True
 	bl_show_header = True
 	
-	LUX_COMPAT = set() #{'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}
+	LUX_COMPAT = {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}
 	
 	property_group = transform
 	
@@ -57,7 +57,12 @@ class ui_panel_transform(luxrender_texture_base):
 		Lux 3D Mapping applies to Blender textures too
 		'''
 		
-		return TextureButtonsPanel.poll(self, context)
+		pp = TextureButtonsPanel.poll(self, context)
+		
+		if pp and context.texture.type == 'PLUGIN':
+			pp &= context.texture.luxrender_texture.type in self.LUX_COMPAT
+		
+		return pp
 	
 	controls = [
 		'translate',

@@ -99,12 +99,12 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 			'name': 'LuxRender Type',
 			'type': 'enum',
 			'items': [
-				('none', 'none', 'none'),
+				#('none', 'none', 'none'),
 				('bilerp', 'bilerp', 'bilerp'),
 				('blackbody','blackbody','blackbody'),
 				('brick', 'brick', 'brick'),
 				('checkerboard', 'checkerboard', 'checkerboard'),
-				
+				('dots', 'dots', 'dots'),
 				
 				('imagemap', 'imagemap', 'imagemap'),
 			],
