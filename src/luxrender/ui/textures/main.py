@@ -106,6 +106,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout):
 				('checkerboard', 'checkerboard', 'checkerboard'),
 				('dots', 'dots', 'dots'),
 				('equalenergy', 'equalenergy', 'equalenergy'),
+				('gaussian', 'gaussian', 'gaussian'),
 				
 				('imagemap', 'imagemap', 'imagemap'),
 			],
