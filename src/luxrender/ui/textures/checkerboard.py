@@ -84,7 +84,7 @@ class ui_panel_checkerboard(luxrender_texture_base):
 		},
 		{
 			'attr': 'aamode',
-			'type': 'string',
+			'type': 'enum',
 			'name': 'Anti-Alias Mode',
 			'default': 'closedform',
 			'items': [
