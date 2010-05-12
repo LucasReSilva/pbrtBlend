@@ -29,7 +29,7 @@ from properties_texture import TextureButtonsPanel
 
 from ef.validate import Logic_OR as O
 
-from ...export import ParamSet
+from ...export import ParamSet, get_worldscale
 from ..textures import luxrender_texture_base
 
 class transform(bpy.types.IDPropertyGroup):
@@ -37,9 +37,11 @@ class transform(bpy.types.IDPropertyGroup):
 	def get_paramset(self):
 		transform_params = ParamSet()
 		
-		transform_params.add_vector('translate', self.translate)
+		ws = get_worldscale(as_scalematrix=False)
+		
+		transform_params.add_vector('translate', [i*ws for i in self.translate])
 		transform_params.add_vector('rotate', self.rotate)
-		transform_params.add_vector('scale', self.scale)
+		transform_params.add_vector('scale', [i*ws for i in self.scale])
 		
 		return transform_params
 

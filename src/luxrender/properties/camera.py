@@ -29,6 +29,7 @@ import math
 import bpy
 
 from . import dbo
+from ..export import get_worldscale
 from ..export.film import resolution
 from ..export import ParamSet
 
@@ -101,19 +102,22 @@ class luxrender_camera(bpy.types.IDPropertyGroup):
 		params.add_float('shutterclose', self.exposure)
 		
 		if self.use_dof:
+			# Do not world-scale this, it is already in meters !
 			params.add_float('lensradius', (cam.lens / 1000.0) / ( 2.0 * self.fstop ))
+		
+		ws = get_worldscale(scene=scene, as_scalematrix=False)
 		
 		if self.autofocus:
 			params.add_bool('autofocus', True)
 		else:
 			if cam.dof_object is not None:
-				params.add_float('focaldistance', (scene.camera.location - cam.dof_object.location).length)
+				params.add_float('focaldistance', ws*((scene.camera.location - cam.dof_object.location).length))
 			elif cam.dof_distance > 0:
-				params.add_float('focaldistance', cam.dof_distance)
+				params.add_float('focaldistance', ws*cam.dof_distance)
 			
 		if self.use_clipping:
-			params.add_float('hither', cam.clip_start)
-			params.add_float('yon', cam.clip_end)
+			params.add_float('hither', ws*cam.clip_start)
+			params.add_float('yon', ws*cam.clip_end)
 
 		if self.usemblur:
 			# update the camera settings with motion blur settings
