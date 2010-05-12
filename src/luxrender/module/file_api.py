@@ -154,6 +154,9 @@ class Custom_Context(object):
 	def objectEnd(self, comment=''):
 		self._api('ObjectEnd # ', [comment, []])
 	
+	def objectInstance(self, name):
+		self._api('ObjectInstance ', [name, []])
+	
 	def sampler(self, *args):
 		self._api('Sampler', args)
 	
@@ -229,7 +232,7 @@ class Custom_Context(object):
 		self._api('TransformEnd #', ['', []])
 		
 	def transform(self, values):
-		self.wf(self.current_file, '\nTransform [%s]' % ' '.join(['%f'%i for i in values]))
+		self.wf(self.current_file, '\nTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
 		
 	def shape(self, *args):
 		self._api('Shape', args, file=self.current_file)

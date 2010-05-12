@@ -100,13 +100,13 @@ def exportLights(l, scene, ob, matrix):
 		light_params.add_point('to', (0,0,-1))
 		light_params.add_float('coneangle', coneangle)
 		light_params.add_float('conedeltaangle', conedeltaangle)
-		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix))
+		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
 
 		return True
 
 	if light.type == 'POINT':
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix))
+		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
 
 		return True
 		
@@ -120,7 +120,7 @@ def exportLights(l, scene, ob, matrix):
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
 		# nsamples
 		# gamma
-		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix))
+		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
 
 		return True
 	
@@ -129,7 +129,7 @@ def exportLights(l, scene, ob, matrix):
 		light_params.add_float('efficacy', light.luxrender_lamp.efficacy)
 		# nsamples
 		l.attributeBegin(ob.name, file=Files.MAIN)
-		l.transform(matrix_to_list(matrix))
+		l.transform(matrix_to_list(matrix, scene=scene, apply_worldscale=True))
 		l.lightGroup(light.luxrender_lamp.lightgroup, [])
 		l.areaLightSource('area', light_params)
 

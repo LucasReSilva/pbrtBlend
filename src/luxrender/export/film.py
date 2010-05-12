@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-from . import ParamSet
+from . import ParamSet, get_worldscale
 
 from ef.util import util as efutil
 
@@ -38,10 +38,16 @@ def lookAt(scene):
 	Returns		tuple(9) (floats)
 	'''
 	
-	matrix = scene.camera.matrix
+	matrix = scene.camera.matrix.copy()
+	ws = get_worldscale()
+	matrix *= ws
+	ws = get_worldscale(scene=scene, as_scalematrix=False)
+	matrix[3][0] *= ws
+	matrix[3][1] *= ws
+	matrix[3][2] *= ws
 	pos = matrix[3]
 	forwards = -matrix[2]
-	target = pos + forwards
+	target = (pos + forwards)
 	up = matrix[1]
 	return (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
 	

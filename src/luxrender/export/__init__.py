@@ -26,6 +26,8 @@
 #
 import math
 
+import bpy, mathutils
+
 class ParamSetItem(object):
 	
 	type		= None
@@ -50,13 +52,13 @@ class ParamSetItem(object):
 			str = ''
 			if type == 'f':
 				for row in range( math.ceil(flen/fcnt) ):
-					str += ' '.join(['%f'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
+					str += ' '.join(['%0.15f'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
 			elif type == 'i':
 				for row in range( math.ceil(flen/fcnt) ):
 					str += ' '.join(['%i'%i for i in lst[(row*cnt):(row+1)*cnt]]) + '\n'
 		else:
 			if type == 'f':
-				str = ' '.join(['%f'%i for i in lst])
+				str = ' '.join(['%0.15f'%i for i in lst])
 			elif type == 'i':
 				str = ' '.join(['%i'%i for i in lst])
 		return str
@@ -69,7 +71,7 @@ class ParamSetItem(object):
 			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
 			return fs_num % ('float', self.name, lst)
 		if self.type == "float":
-			return fs_num % ('float', self.name, '%f' % self.value)
+			return fs_num % ('float', self.name, '%0.15f' % self.value)
 		if self.type == "integer" and type(self.value) in (list, tuple):
 			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'i')
 			return fs_num % ('integer', self.name, lst)
@@ -87,7 +89,7 @@ class ParamSetItem(object):
 			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
 			return fs_num % ('normal', self.name, lst)
 		if self.type == "color":
-			return fs_num % ('color', self.name, ' '.join(['%f'%i for i in self.value]))
+			return fs_num % ('color', self.name, ' '.join(['%0.8f'%i for i in self.value]))
 		if self.type == "texture":
 			return fs_str % ('texture', self.name, self.value)
 		if self.type == "bool":
@@ -155,7 +157,23 @@ class ParamSet(list):
 		self.add('texture', name, str(value))
 		return self
 
-def matrix_to_list(matrix):
+def get_worldscale(scene=None, as_scalematrix=True):
+	ws = 1.0
+	
+	if scene == None:
+		scn_us = bpy.context.scene.unit_settings
+	else:
+		scn_us = scene.unit_settings
+	
+	if scn_us.system == 'METRIC':
+		ws = scn_us.scale_length
+	
+	if as_scalematrix:
+		return mathutils.ScaleMatrix(ws, 4)
+	else:
+		return ws
+
+def matrix_to_list(matrix, scene=None, apply_worldscale=False):
 	'''
 	matrix		  Matrix
 	
@@ -164,11 +182,19 @@ def matrix_to_list(matrix):
 	Returns list[16]
 	'''
 	
+	if apply_worldscale:
+		matrix = matrix.copy()
+		sm = get_worldscale(scene=scene)
+		matrix *= sm
+		sm = get_worldscale(scene=scene, as_scalematrix = False)
+		matrix[3][0] *= sm
+		matrix[3][1] *= sm
+		matrix[3][2] *= sm
+		
+	
 	l = [	matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],\
 			matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],\
 			matrix[2][0], matrix[2][1], matrix[2][2], matrix[2][3],\
 			matrix[3][0], matrix[3][1], matrix[3][2], matrix[3][3] ]
 	
 	return [float(i) for i in l]
-
-	

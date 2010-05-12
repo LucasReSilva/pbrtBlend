@@ -47,6 +47,7 @@ import luxrender.ui.lamps
 import luxrender.ui.meshes
 #import luxrender.nodes
 
+from .export import get_worldscale
 from .export import film		as export_film
 from .export import lights		as export_lights
 from .export import materials	as export_materials
@@ -312,13 +313,19 @@ class luxrender(engine_base):
 			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 				scene.set_frame(scene.frame_current + 1)
-				m1 = Matrix.copy(scene.camera.matrix)
+				m1 = scene.camera.matrix.copy()
 				scene.set_frame(scene.frame_current - 1)
 				if m1 != scene.camera.matrix:
 					l.transformBegin(file=Files.MAIN)
+					ws = get_worldscale()
+					matrix *= ws
+					ws = get_worldscale(scene=scene, as_scalematrix=False)
+					matrix[3][0] *= ws
+					matrix[3][1] *= ws
+					matrix[3][2] *= ws
 					pos = m1[3]
 					forwards = -m1[2]
-					target = pos + forwards
+					target = (pos + forwards)
 					up = m1[1]
 					transform = (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
 					l.lookAt( *transform )

@@ -159,26 +159,26 @@ def exportMesh(l, scene, ob, matrix, smoothing_enabled):
 		if m1 != matrix:				
 			is_object_animated = True
 
-	if is_object_animated:
-		l.objectBegin(ob.name)
+	#if is_object_animated:
+	l.objectBegin(ob.name)
 
-		# Export either NamedMaterial stmt or the full material
-		# definition depending on the output type
-		export_object_material(l, ob)
+	# Export either NamedMaterial stmt or the full material
+	# definition depending on the output type
+	export_object_material(l, ob)
 
-		exportGeometry(ob, me, l, smoothing_enabled)
-		l.objectEnd(ob.name)
+	exportGeometry(ob, me, l, smoothing_enabled)
+	l.objectEnd() #ob.name)
 
 	l.attributeBegin(comment=ob.name, file=Files.GEOM)
 	
 	# object translation/rotation/scale 
-	l.transform( matrix_to_list(matrix) )
+	l.transform( matrix_to_list(matrix, scene=scene, apply_worldscale=True) )
 	
 	# special case for motion blur since the mesh is already exported before the attribute
 	if is_object_animated:
 		l.transformBegin(comment=ob.name, file=Files.GEOM)
 		l.identity()
-		l.transform(matrix_to_list(m1))
+		l.transform(matrix_to_list(m1, scene=scene, apply_worldscale=True))
 		l.coordinateSystem('%s' % ob.name + '_motion')
 		l.transformEnd()
 		l.motionInstance(ob.name, 0.0, 1.0, ob.name + '_motion')
@@ -186,9 +186,10 @@ def exportMesh(l, scene, ob, matrix, smoothing_enabled):
 	else:
 		# Export either NamedMaterial stmt or the full material
 		# definition depending on the output type
-		export_object_material(l, ob)
+		#export_object_material(l, ob)
 
-		exportGeometry(ob, me, l, smoothing_enabled)
+		#exportGeometry(ob, me, l, smoothing_enabled)
+		l.objectInstance(ob.name)
 
 	l.attributeEnd()
 	
