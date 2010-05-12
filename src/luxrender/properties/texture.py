@@ -153,7 +153,7 @@ class FloatTextureParameter(TextureParameterBase):
 	default			= 0.0
 	min				= 0.0
 	max				= 1.0
-	precision		= 3
+	precision		= 4
 	texture_only	= False
 	multiply_float  = False
 	ignore_zero     = False

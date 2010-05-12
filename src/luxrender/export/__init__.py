@@ -165,7 +165,9 @@ def get_worldscale(scene=None, as_scalematrix=True):
 	else:
 		scn_us = scene.unit_settings
 	
-	if scn_us.system == 'METRIC':
+	if scn_us.system in ['METRIC', 'IMPERIAL']:
+		# The units used in modelling are for display only. behind
+		# the scenes everything is in meters
 		ws = scn_us.scale_length
 	
 	if as_scalematrix:
