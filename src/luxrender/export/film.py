@@ -39,7 +39,7 @@ def lookAt(scene):
 	'''
 	
 	matrix = scene.camera.matrix.copy()
-	ws = get_worldscale()
+	ws = get_worldscale(scene=scene)
 	matrix *= ws
 	ws = get_worldscale(scene=scene, as_scalematrix=False)
 	matrix[3][0] *= ws

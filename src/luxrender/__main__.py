@@ -317,7 +317,7 @@ class luxrender(engine_base):
 				scene.set_frame(scene.frame_current - 1)
 				if m1 != scene.camera.matrix:
 					l.transformBegin(file=Files.MAIN)
-					ws = get_worldscale()
+					ws = get_worldscale(scene=scene)
 					matrix *= ws
 					ws = get_worldscale(scene=scene, as_scalematrix=False)
 					matrix[3][0] *= ws
