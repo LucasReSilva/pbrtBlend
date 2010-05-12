@@ -33,8 +33,7 @@ from ef.util import util as efutil
 from ..export.materials import add_texture_parameter
 from ..module.file_api import Files
 from ..properties import dbo
-from . import matrix_to_list
-from . import ParamSet
+from . import ParamSet, get_worldscale, matrix_to_list
 
 
 def attr_light(l, name, group, type, params, transform=None):
@@ -73,6 +72,7 @@ def exportLights(l, scene, ob, matrix):
 	light = ob.data
 		
 	# Params common to all light types
+	
 	light_params = ParamSet() \
 		.add_float('gain', light.energy) \
 		.add_float('importance', light.luxrender_lamp.importance)
@@ -127,6 +127,9 @@ def exportLights(l, scene, ob, matrix):
 	if light.type == 'AREA':
 		light_params.add_float('power', light.luxrender_lamp.power)
 		light_params.add_float('efficacy', light.luxrender_lamp.efficacy)
+		
+		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
+		light_params.add_float('gain', light.energy * (get_worldscale(scene=scene, as_scalematrix=False)**2))
 		# nsamples
 		l.attributeBegin(ob.name, file=Files.MAIN)
 		l.transform(matrix_to_list(matrix, scene=scene, apply_worldscale=True))
