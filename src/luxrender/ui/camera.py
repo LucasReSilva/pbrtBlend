@@ -35,41 +35,44 @@ from ef.ef import ef
 import luxrender.properties.camera
 from ..module import LuxManager as LM
 
-class camera(DataButtonsPanel, described_layout):
-	bl_label = 'LuxRender Camera'
+class camera_panel(DataButtonsPanel, described_layout):
 	COMPAT_ENGINES = {'luxrender'}
 	
-	property_group = luxrender.properties.camera.luxrender_camera
 	# prevent creating luxrender_camera property group in Scene
 	property_group_non_global = True
 	
-	@staticmethod
-	def property_reload():
+	@classmethod
+	def property_reload(cls):
 		for cam in bpy.data.cameras:
-			camera.property_create(cam)
+			cls.property_create(cam)
 	
-	@staticmethod
-	def property_create(cam):
-		if not hasattr(cam, camera.property_group.__name__):
+	@classmethod
+	def property_create(cls, cam):
+		if not hasattr(cam, cls.property_group.__name__):
 			ef.init_properties(cam, [{
 				'type': 'pointer',
-				'attr': camera.property_group.__name__,
-				'ptype': camera.property_group,
-				'name': camera.property_group.__name__,
-				'description': camera.property_group.__name__
+				'attr': cls.property_group.__name__,
+				'ptype': cls.property_group,
+				'name': cls.property_group.__name__,
+				'description': cls.property_group.__name__
 			}], cache=False)
-			ef.init_properties(camera.property_group, camera.properties, cache=False)
+			ef.init_properties(cls.property_group, cls.properties, cache=False)
 	
 	# Overridden to provide data storage in the camera, not the scene
 	def draw(self, context):
 		if context.camera is not None:
-			camera.property_create(context.camera)
+			self.property_create(context.camera)
 			
 			# Show only certain controls for Blender's perspective camera type 
 			context.camera.luxrender_camera.is_perspective = (context.camera.type == 'PERSP')
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.camera, supercontext=context)
+
+class camera(camera_panel):
+	bl_label = 'LuxRender Camera'
+	
+	property_group = luxrender.properties.camera.luxrender_camera
 	
 	controls = [
 		['autofocus', 'use_dof', 'use_clipping'],
@@ -194,9 +197,8 @@ class camera(DataButtonsPanel, described_layout):
 		},	
 	]
 
-class colorspace(DataButtonsPanel, described_layout):
+class colorspace(camera_panel):
 	bl_label = 'LuxRender Colour Space'
-	COMPAT_ENGINES = {'luxrender'}
 	
 	property_group = luxrender.properties.camera.luxrender_colorspace
 	
@@ -324,7 +326,7 @@ class tonemapping_live_update(object):
 	@staticmethod
 	def update(context, scene, property):
 		if LM.ActiveManager is not None and LM.ActiveManager.started:
-			prop_val = getattr(scene.luxrender_tonemapping, property)
+			prop_val = getattr(scene.camera.data.luxrender_tonemapping, property)
 			if property not in tonemapping_live_update.prop_vals.keys():
 				tonemapping_live_update.prop_vals[property] = prop_val
 			
@@ -338,9 +340,8 @@ class tonemapping_live_update(object):
 					0
 				)
 
-class tonemapping(DataButtonsPanel, described_layout):
+class tonemapping(camera_panel):
 	bl_label = 'LuxRender ToneMapping'
-	COMPAT_ENGINES = {'luxrender'}
 	
 	property_group = luxrender.properties.camera.luxrender_tonemapping
 	

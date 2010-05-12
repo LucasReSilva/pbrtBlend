@@ -157,7 +157,7 @@ def film(scene):
 	params.add_integer('yresolution', int(yr))
 	
 	# ColourSpace
-	cso = scene.luxrender_colorspace
+	cso = scene.camera.data.luxrender_colorspace
 	params.add_float('gamma', cso.gamma)
 	if cso.preset:
 		cs_object = getattr(colorspace_presets, cso.preset_name)
@@ -185,7 +185,7 @@ def film(scene):
 		params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
 	
 	# update the film settings with tonemapper settings
-	tonemapping_type, tonemapping_params = scene.luxrender_tonemapping.api_output(scene)
+	tonemapping_type, tonemapping_params = scene.camera.data.luxrender_tonemapping.api_output(scene)
 	params.update(tonemapping_params)
 	
 	return ('fleximage', params)

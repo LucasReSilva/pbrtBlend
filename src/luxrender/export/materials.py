@@ -259,7 +259,7 @@ def convert_texture(texture):
 
 def RGC(value):
 	if bpy.context.scene.luxrender_engine.rgc:
-		gamma = bpy.context.scene.luxrender_colorspace.gamma
+		gamma = bpy.context.scene.camera.data.luxrender_colorspace.gamma
 	else:
 		gamma = 1.0
 	
