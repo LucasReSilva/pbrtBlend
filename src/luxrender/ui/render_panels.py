@@ -62,7 +62,7 @@ class engine(render_described_context):
 		'render',
 		'exe_path',
 		['write_lxs', 'write_lxm', 'write_lxo'],
-		'priority',
+		# 'priority',
 		['threads_auto', 'threads'],
 		# ['rgc', 'colclamp'],
 		# ['meshopt', 'nolg'],
@@ -306,7 +306,7 @@ class sampler(render_described_context):
 			'attr': 'chainlength',
 			'name': 'Chain Length',
 			'description': 'Chain Length',
-			'default': 100,
+			'default': 512,
 			'min': 1,
 			'max': 32768,
 		},
@@ -547,7 +547,7 @@ class integrator(render_described_context):
 			'attr': 'eyedepth',
 			'name': 'Eye Depth',
 			'description': 'Max recursion depth for ray casting from eye',
-			'default': 8,
+			'default': 16,
 			'min': 0,
 			'max': 2048,
 		},
@@ -556,7 +556,7 @@ class integrator(render_described_context):
 			'attr': 'lightdepth',
 			'name': 'Light Depth',
 			'description': 'Max recursion depth for ray casting from light',
-			'default': 8,
+			'default': 16,
 			'min': 0,
 			'max': 2048,
 		},
@@ -576,7 +576,7 @@ class integrator(render_described_context):
 			'type': 'int',
 			'attr': 'maxdepth',
 			'name': 'Max. depth',
-			'default': 5
+			'default': 8,
 		},
 		
 		{
@@ -708,7 +708,7 @@ class integrator(render_described_context):
 			'type': 'int',
 			'attr': 'specularreflectdepth',
 			'name': 'Reflection depth',
-			'default': 2
+			'default': 3
 		},
 		{
 			'type': 'int',
@@ -781,7 +781,7 @@ class integrator(render_described_context):
 			'type': 'int',
 			'attr': 'directphotons',
 			'name': 'Direct photons',
-			'default': 200000
+			'default': 1000000
 		},
 		{
 			'type': 'int',
@@ -811,7 +811,7 @@ class integrator(render_described_context):
 			'type': 'float',
 			'attr': 'maxphotondist',
 			'name': 'Max. photon distance',
-			'default': 0.5,
+			'default': 0.1,
 		},
 		{
 			'type': 'bool',
@@ -957,11 +957,11 @@ class volume(render_described_context):
 			'attr': 'stepsize',
 			'name': 'Step Size',
 			'description': 'Volume Integrator Step Size',
-			'default': 1,
-			'min': 0,
-			'soft_min': 0,
-			'max': 100,
-			'soft_max': 100,
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
 		}
 	]
 			
@@ -1021,22 +1021,22 @@ class filter(render_described_context):
 			'attr': 'xwidth',
 			'name': 'X Width',
 			'description': 'Width of filter in X dimension',
-			'default': 2,
-			'min': 0,
-			'soft_min': 0,
-			'max': 10,
-			'soft_max': 10,
+			'default': 2.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
 		},
 		{
 			'type': 'float',
 			'attr': 'ywidth',
 			'name': 'Y Width',
 			'description': 'Width of filter in Y dimension',
-			'default': 2,
-			'min': 0,
-			'soft_min': 0,
-			'max': 10,
-			'soft_max': 10,
+			'default': 2.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
 		},
 		{
 			'type': 'float',
@@ -1055,10 +1055,10 @@ class filter(render_described_context):
 			'name': 'B',
 			'description': 'Mitchell B parameter',
 			'default': 1/3,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
 		},
 		{
 			'type': 'float',
@@ -1066,10 +1066,10 @@ class filter(render_described_context):
 			'name': 'C',
 			'description': 'Mitchell C parameter',
 			'default': 1/3,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1,
-			'soft_max': 1,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
 		},
 		{
 			'type': 'float',
@@ -1077,10 +1077,10 @@ class filter(render_described_context):
 			'name': 'Tau',
 			'description': 'Sinc Tau parameter',
 			'default': 3.0,
-			'min': 0,
-			'soft_min': 0,
-			'max': 10,
-			'soft_max': 10,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
 		},
 	]
 
@@ -1161,7 +1161,7 @@ class accelerator(render_described_context):
 			'attr': 'emptybonus',
 			'type': 'float',
 			'name': 'Empty Bonus',
-			'default': 0.5
+			'default': 0.2
 		},
 		{
 			'attr': 'treetype',

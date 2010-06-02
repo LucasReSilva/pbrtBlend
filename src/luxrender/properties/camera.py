@@ -172,6 +172,9 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup):
 			params.add_float('linear_fstop', cam.luxrender_camera.fstop)
 			params.add_float('linear_gamma', self.linear_gamma)
 			
+		if self.type == 'contrast':
+			params.add_float('ywa', self.ywa)
+			
 		out = self.type, params
 		dbo('TONEMAPPING', out)
 		return out

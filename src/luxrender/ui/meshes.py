@@ -104,6 +104,10 @@ class meshes(DataButtonsPanel, described_layout):
 			'attr': 'sublevels',
 			'name': 'Subdivision Levels',
 			'default': 2,
+			'min': 0,
+			'soft_min': 0,
+			'max': 15,
+			'soft_max': 15
 		},	  
 	]
 

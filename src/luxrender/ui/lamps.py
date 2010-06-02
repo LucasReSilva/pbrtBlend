@@ -66,7 +66,7 @@ def lamp_visibility():
 		'L_colortexture':		{ 'type': LO({'!=': 'SUN'}), 'L_usecolortexture': True }
 	}
 	
-	# Add TC_L manually, because we need to exlude it from SUN
+	# Add TC_L manually, because we need to exclude it from SUN
 	#vis.update(TC_L.get_visibility())
 	
 	return vis
@@ -225,11 +225,11 @@ class lamps(DataButtonsPanel, described_layout):
 			'type': 'float',
 			'attr': 'turbidity',
 			'name': 'turbidity',
-			'default': 2.0,
+			'default': 2.2,
 			'min': 0.7,
 			'soft_min': 0.7,
-			'max': 35.0,
-			'soft_max': 35.0,
+			'max': 50.0,
+			'soft_max': 50.0,
 		},
 		{
 			'type': 'enum',

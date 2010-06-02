@@ -139,19 +139,19 @@ class camera(camera_panel):
 			'name': 'f/Stop',
 			'description': 'f/Stop',
 			'default': 2.8,
-			'min': 0.1,
-			'soft_min': 0.1,
-			'max': 64.0,
-			'soft_max': 64.0
+			'min': 0.4,
+			'soft_min': 0.4,
+			'max': 128.0,
+			'soft_max': 128.0
 		},
 		{
 			'type': 'float',
 			'attr': 'sensitivity',
 			'name': 'ISO',
 			'description': 'Sensitivity (ISO)',
-			'default': 50.0,
-			'min': 0.0,
-			'soft_min': 0.0,
+			'default': 320.0,
+			'min': 10.0,
+			'soft_min': 10.0,
 			'max': 6400.0,
 			'soft_max': 6400.0
 		},
@@ -238,6 +238,7 @@ class colorspace(camera_panel):
 			'default': True,
 			'toggle': True
 		},
+		# TODO - change actual parameter values when user chooses a preset
 		{
 			'attr': 'preset_name',
 			'type': 'enum',
@@ -353,6 +354,9 @@ class tonemapping(camera_panel):
 		
 		# Linear
 		'linear_gamma',
+		
+		# Contrast
+		'ywa',
 	]
 	
 	visibility = {
@@ -363,6 +367,9 @@ class tonemapping(camera_panel):
 		
 		# Linear
 		'linear_gamma':					{ 'type': 'linear' },
+		
+		# Contrast
+		'ywa':							{ 'type': 'contrast' },
 	}
 	
 	properties = [
@@ -387,24 +394,24 @@ class tonemapping(camera_panel):
 			'attr': 'reinhard_prescale',
 			'name': 'Pre',
 			'description': 'Reinhard Pre-Scale factor',
-			'default': 2.0,
+			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 25.0,
 			'soft_max': 25.0,
-			'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_prescale') 
+			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_prescale') 
 		},
 		{
 			'type': 'float',
 			'attr': 'reinhard_postscale',
 			'name': 'Post',
 			'description': 'Reinhard Post-Scale factor',
-			'default': 1.04,
+			'default': 1.2,
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 25.0,
 			'soft_max': 25.0,
-			'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_postscale')
+			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_postscale')
 		},
 		{
 			'type': 'float',
@@ -412,11 +419,11 @@ class tonemapping(camera_panel):
 			'name': 'Burn',
 			'description': 'Reinhard Burn factor',
 			'default': 6.0,
-			'min': 0.0,
-			'soft_min': 0.0,
+			'min': 0.01,
+			'soft_min': 0.01,
 			'max': 25.0,
 			'soft_max': 25.0,
-			'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_burn')
+			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_burn')
 		},
 		
 		#Linear
@@ -431,5 +438,18 @@ class tonemapping(camera_panel):
 			'max': 5.0,
 			'soft_max': 5.0
 		},
+		
+		#Contrast
+		{
+			'type': 'float',
+			'attr': 'ywa',
+			'name': 'Ywa',
+			'description': 'World adaption luminance',
+			'default': 0.1,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 2e5,
+			'soft_max': 2e5
+		}
 	]
 
