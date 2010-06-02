@@ -61,7 +61,7 @@ def MaterialParameter(attr, name, property_group):
 # Float Textures
 TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',		'luxrender_material', add_float_value=True, min=0.0, default=0.5, max=1.0 )
 TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',		'luxrender_material', add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
-TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',		'luxrender_material', add_float_value=True, defaul=0.004, min=0.0, max=1.0 )
+TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',		'luxrender_material', add_float_value=True, default=0.004, min=0.0, max=1.0 )
 TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',	'luxrender_material', add_float_value=True, default=0.15, min=0.0, max=15.0 )
 TF_film			= FloatTextureParameter('material', 'film', 'Thin Film',		'luxrender_material', add_float_value=True, min=1.0, default=200.0, max=1500.0 )
 TF_filmindex	= FloatTextureParameter('material', 'filmindex', 'Film IOR',	'luxrender_material', add_float_value=True, default=1.5, min=1.0, max=6.0 )
