@@ -64,24 +64,40 @@ class ui_panel_marble(luxrender_texture_base):
 			'type': 'int',
 			'attr': 'octaves',
 			'name': 'Octaves',
-			'default': 8
+			'default': 8,
+			'min': 1,
+			'soft_min': 1,
+			'max': 100,
+			'soft_max': 100
 		},
 		{
 			'type': 'float',
 			'attr': 'roughness',
 			'name': 'Roughness',
-			'default': 0.5
+			'default': 0.5,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
 		},
 		{
 			'type': 'float',
 			'attr': 'scale',
 			'name': 'Scale',
-			'default': 1.0
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 		{
 			'type': 'float',
 			'attr': 'variation',
 			'name': 'Variation',
 			'default': 0.2,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 	]

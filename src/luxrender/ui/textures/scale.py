@@ -47,9 +47,9 @@ class scale(bpy.types.IDPropertyGroup):
 		
 		return set(), scale_params
 
-tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', 'scale', default=1.0, min=0.0)
+tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', 'scale', default=1.0, min=0.0, max=100.0)
 tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'scale', default=(1.0,1.0,1.0))
-tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'scale', default=0.0, min=0.0)
+tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'scale', default=0.0, min=0.0, max=100.0)
 tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'scale', default=(0.0,0.0,0.0))
 
 class ui_panel_scale(luxrender_texture_base):

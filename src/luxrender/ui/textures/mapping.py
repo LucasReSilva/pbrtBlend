@@ -96,24 +96,40 @@ class ui_panel_mapping(luxrender_texture_base):
 			'type': 'float',
 			'name': 'U Scale',
 			'default': 1.0,
+			'min': -100.0,
+			'soft_min': -100.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 		{
 			'attr': 'vscale',
 			'type': 'float',
 			'name': 'V Scale',
 			'default': -1.0,
+			'min': -100.0,
+			'soft_min': -100.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 		{
 			'attr': 'udelta',
 			'type': 'float',
 			'name': 'U Offset',
 			'default': 0.0,
+			'min': -100.0,
+			'soft_min': -100.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 		{
 			'attr': 'vdelta',
 			'type': 'float',
 			'name': 'V Offset',
 			'default': 0.0,
+			'min': -100.0,
+			'soft_min': -100.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 		{
 			'attr': 'v1',

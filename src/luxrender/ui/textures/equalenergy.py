@@ -61,5 +61,7 @@ class ui_panel_equalenergy(luxrender_texture_base):
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
 		}
 	]

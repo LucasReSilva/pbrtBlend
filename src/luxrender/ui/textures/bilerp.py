@@ -124,7 +124,7 @@ class ui_panel_bilerp(luxrender_texture_base):
 			'type': 'float_vector',
 			'subtype': 'COLOR',
 			'name': '(0,1)',
-			'default': (0.0, 0.0, 0.0)
+			'default': (1.0, 1.0, 1.0)
 		},
 		{
 			'attr': 'v10_c',
@@ -138,6 +138,6 @@ class ui_panel_bilerp(luxrender_texture_base):
 			'type': 'float_vector',
 			'subtype': 'COLOR',
 			'name': '(1,1)',
-			'default': (0.0, 0.0, 0.0)
+			'default': (1.0, 1.0, 1.0)
 		},
 	]

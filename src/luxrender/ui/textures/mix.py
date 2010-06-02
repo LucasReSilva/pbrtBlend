@@ -50,10 +50,10 @@ class mix(bpy.types.IDPropertyGroup):
 		
 		return set(), mix_params
 
-amount_f	= FloatTextureParameter('texture', 'amount', 'amount', 'mix', default=0.5, min=0.0)
-tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', 'mix', default=1.0, min=0.0)
+amount_f	= FloatTextureParameter('texture', 'amount', 'amount', 'mix', default=0.5, min=0.0, max=1.0)
+tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', 'mix', default=1.0, min=0.0, max=100.0)
 tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'mix', default=(1.0,1.0,1.0))
-tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'mix', default=0.0, min=0.0)
+tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'mix', default=0.0, min=0.0, max=100.0)
 tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'mix', default=(0.0,0.0,0.0))
 
 class ui_panel_mix(luxrender_texture_base):

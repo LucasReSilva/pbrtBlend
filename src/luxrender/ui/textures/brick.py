@@ -57,12 +57,12 @@ class brick(bpy.types.IDPropertyGroup):
 		
 		return {'3DMAPPING'}, brick_params
 
-brickmodtex_f	= FloatTextureParameter('texture', 'brickmodtex', 'brickmodtex', 'brick', default=1.0, min=0.0)
+brickmodtex_f	= FloatTextureParameter('texture', 'brickmodtex', 'brickmodtex', 'brick', default=0.0, min=0.0, max=1.0)
 brickmodtex_c	= ColorTextureParameter('texture', 'brickmodtex', 'brickmodtex', 'brick', default=(1.0,1.0,1.0))
-bricktex_f		= FloatTextureParameter('texture', 'bricktex', 'bricktex', 'brick', default=1.0, min=0.0)
+bricktex_f		= FloatTextureParameter('texture', 'bricktex', 'bricktex', 'brick', default=0.0, min=0.0, max=1.0)
 bricktex_c		= ColorTextureParameter('texture', 'bricktex', 'bricktex', 'brick', default=(1.0,1.0,1.0))
-mortartex_f		= FloatTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=0.2, min=0.0)
-mortartex_c		= ColorTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=(0.2,0.2,0.2))
+mortartex_f		= FloatTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=0.0, min=0.0, max=1.0)
+mortartex_c		= ColorTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=(1.0,1.0,1.0))
 
 class ui_panel_brick(luxrender_texture_base):
 	bl_label = 'LuxRender Brick Texture'
@@ -154,30 +154,50 @@ class ui_panel_brick(luxrender_texture_base):
 			'type': 'float',
 			'name': 'brickrun',
 			'default': 0.5,
+			'min': -10.0,
+			'soft_min': -10.0,
+			'max': 10.0,
+			'soft_max': 10.0
 		},
 		{
 			'attr': 'mortarsize',
 			'type': 'float',
 			'name': 'Mortar Size',
 			'default': 0.01,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
 		},
 		{
 			'attr': 'brickwidth',
 			'type': 'float',
 			'name': 'Width',
 			'default': 0.3,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
 		},
 		{
 			'attr': 'brickdepth',
 			'type': 'float',
 			'name': 'Depth',
 			'default': 0.15,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
 		},
 		{
 			'attr': 'brickheight',
 			'type': 'float',
 			'name': 'Height',
 			'default': 0.1,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
 		},
 	] + \
 	brickmodtex_f.get_properties() + \

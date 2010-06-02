@@ -65,6 +65,8 @@ class ui_panel_gaussian(luxrender_texture_base):
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
 		},
 		{
 			'type': 'float',
@@ -81,8 +83,8 @@ class ui_panel_gaussian(luxrender_texture_base):
 			'attr': 'width',
 			'name': 'Width (nm)',
 			'default': 50.0,
-			'min': 1.0,
-			'soft_min': 1.0,
+			'min': 20.0,
+			'soft_min': 20.0,
 			'max': 300.0,
 			'soft_max': 300.0,
 		},

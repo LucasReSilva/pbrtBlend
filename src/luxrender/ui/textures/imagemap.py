@@ -127,13 +127,21 @@ class ui_panel_imagemap(luxrender_texture_base):
 			'type': 'float',
 			'attr': 'gain',
 			'name': 'Gain',
-			'default': 1.0
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
 		},
 		{
 			'type': 'float',
 			'attr': 'gamma',
 			'name': 'Gamma',
-			'default': 1.0
+			'default': 2.2,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 6.0,
+			'soft_max': 6.0
 		},
 		{
 			'type': 'float',
