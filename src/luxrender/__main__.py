@@ -182,6 +182,8 @@ class luxrender(engine_base):
 			lay = result.layers[0]
 			# TODO: use the framebuffer direct from pylux when Blender's API supports it
 			lay.load_from_file(self.output_file)
+		else:
+			LuxLog('ERROR: Could not load render result from %s' % self.output_file)
 		self.end_result(result)
 	
 	def render(self, context):
@@ -257,6 +259,7 @@ class luxrender(engine_base):
 		else:
 			# Set export path so that relative paths in export work correctly
 			efutil.export_path = scene.render.output_path
+			self.output_file = efutil.path_relative_to_export(efutil.export_path) + '.png'
 		
 		# BEGIN!
 		self.update_stats('', 'LuxRender: Parsing Scene')
@@ -273,7 +276,7 @@ class luxrender(engine_base):
 		
 		# Set up camera, view and film
 		l.lookAt( *export_film.lookAt(scene) )
-		l.camera( *scene.camera.data.luxrender_camera.api_output(scene) )
+		l.camera( *scene.camera.data.luxrender_camera.api_output(scene, False) )
 		
 		l.worldBegin()
 		preview_scene_lights(l)
@@ -445,6 +448,9 @@ class luxrender(engine_base):
 				# Get binary from OSX package
 				if sys.platform == 'darwin':
 					luxrender_path += '/Contents/MacOS/luxrender'
+				
+				if not os.path.exists(luxrender_path):
+					raise
 				
 				try:
 					for k,v in config_updates.items():
