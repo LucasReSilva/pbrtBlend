@@ -245,7 +245,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
-				exportMesh(l, scene, dupli_ob.object, dupli_ob.matrix, smoothing_enabled)
+				exportMesh(l, scene, dupli_ob.object, dupli_ob.matrix_world, smoothing_enabled)
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
 			
@@ -281,7 +281,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 
 		# dupli object render rule copied from convertblender.c (blender internal render)		
 		if (not ob.duplis_used or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
-			exportMesh(l, scene, ob, ob.matrix, smoothing_enabled)
+			exportMesh(l, scene, ob, ob.matrix_world, smoothing_enabled)
 
 		# exported another object		
 		ipc += 1.0

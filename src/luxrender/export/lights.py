@@ -199,7 +199,7 @@ def lights(l, scene):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light |= exportLights(l, scene, dupli_ob.object, dupli_ob.matrix)
+				have_light |= exportLights(l, scene, dupli_ob.object, dupli_ob.matrix_world)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
@@ -208,7 +208,7 @@ def lights(l, scene):
 			if ob.type != 'LAMP':
 				continue
 
-			have_light |= exportLights(l, scene, ob, ob.matrix)
+			have_light |= exportLights(l, scene, ob, ob.matrix_world)
 
 	return have_light
 		

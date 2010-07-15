@@ -313,9 +313,9 @@ class luxrender(engine_base):
 			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 				scene.set_frame(scene.frame_current + 1)
-				m1 = scene.camera.matrix.copy()
+				m1 = scene.camera.matrix_world.copy()
 				scene.set_frame(scene.frame_current - 1)
-				if m1 != scene.camera.matrix:
+				if m1 != scene.camera.matrix_world:
 					l.transformBegin(file=Files.MAIN)
 					ws = get_worldscale(scene=scene)
 					matrix *= ws

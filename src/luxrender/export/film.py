@@ -38,7 +38,7 @@ def lookAt(scene):
 	Returns		tuple(9) (floats)
 	'''
 	
-	matrix = scene.camera.matrix.copy()
+	matrix = scene.camera.matrix_world.copy()
 	ws = get_worldscale(scene=scene)
 	matrix *= ws
 	ws = get_worldscale(scene=scene, as_scalematrix=False)
