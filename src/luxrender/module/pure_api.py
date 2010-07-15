@@ -63,5 +63,5 @@ try:
 	
 	PYLUX_AVAILABLE = True
 except ImportError as err:
-	LuxLog('ERROR: Binary pylux module not found! Visit http://www.luxrender.net/ to obtain one.')
+	LuxLog('WARNING: Binary pylux module not found! Visit http://www.luxrender.net/ to obtain one.')
 	PYLUX_AVAILABLE = False
