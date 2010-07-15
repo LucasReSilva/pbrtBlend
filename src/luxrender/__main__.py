@@ -236,11 +236,11 @@ class luxrender(engine_base):
 			LXM = scene.luxrender_engine.write_lxm
 			LXO = scene.luxrender_engine.write_lxo
 			
-			if not os.access( scene.render.output_path, os.W_OK):
+			if not os.access( os.path.dirname(scene.render.output_path), os.W_OK):
 				raise Exception('Output path is not writable')
 			
 			lxs_filename = os.path.join(
-				scene.render.output_path,
+				os.path.dirname(scene.render.output_path),
 				efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
 			)
 			
