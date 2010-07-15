@@ -138,7 +138,10 @@ def exportGeometry(ob, me, l, smoothing_enabled):
 	#print(' %s ntris: %i' % (ob.name, ntris))
 	#print(' %s nvertices: %i' % (ob.name, nvertices))
 	
-	l.shape(shape_type, shape_params)
+	if ob.data.luxrender_mesh.portal:
+		l.portalShape(shape_type, shape_params)
+	else:
+		l.shape(shape_type, shape_params)
 
 #-------------------------------------------------
 # export_mesh(l, scene, object, matrix)

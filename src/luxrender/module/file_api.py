@@ -236,6 +236,9 @@ class Custom_Context(object):
 		
 	def shape(self, *args):
 		self._api('Shape', args, file=self.current_file)
+	
+	def portalShape(self, *args):
+		self._api('PortalShape', args, file=self.current_file)
 		
 	def material(self, *args):
 		self._api('Material', args)

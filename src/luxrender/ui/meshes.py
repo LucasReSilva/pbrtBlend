@@ -35,7 +35,7 @@ from ef.ef import ef
 import luxrender.properties.mesh
 
 class meshes(DataButtonsPanel, described_layout):
-	bl_label = 'LuxRender Meshes'
+	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}
 	
 	property_group = luxrender.properties.mesh.luxrender_mesh
@@ -70,11 +70,13 @@ class meshes(DataButtonsPanel, described_layout):
 	
 	# luxrender properties
 	controls = [
+		'portal',
 		['subdiv','sublevels'],
 		['nsmooth', 'sharpbound'],
 	]
 	
 	visibility = {
+		
 		'nsmooth':		{ 'subdiv': True },
 		'sharpbound':	{ 'subdiv': True },
 		'sublevels':	{ 'subdiv': True }
@@ -83,10 +85,16 @@ class meshes(DataButtonsPanel, described_layout):
 	properties = [
 		{
 			'type': 'bool',
+			'attr': 'portal',
+			'name': 'Exit Portal',
+			'default': False,
+		},
+		{
+			'type': 'bool',
 			'attr': 'subdiv',
 			'name': 'Use Subdivision',
 			'default': False,
-		},   
+		},
 		{
 			'type': 'bool',
 			'attr': 'nsmooth',
@@ -108,6 +116,6 @@ class meshes(DataButtonsPanel, described_layout):
 			'soft_min': 0,
 			'max': 15,
 			'soft_max': 15
-		},	  
+		},
 	]
 
