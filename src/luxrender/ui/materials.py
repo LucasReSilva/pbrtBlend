@@ -56,25 +56,23 @@ def MaterialParameter(attr, name, property_group):
 		},
 	]
 
-# TODO: add default values
-
 # Float Textures
-TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',		'luxrender_material', add_float_value=True, min=0.0, default=0.5, max=1.0 )
-TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',		'luxrender_material', add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
-TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',		'luxrender_material', add_float_value=True, default=0.004, min=0.0, max=1.0 )
-TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',	'luxrender_material', add_float_value=True, default=0.15, min=0.0, max=15.0 )
-TF_film			= FloatTextureParameter('material', 'film', 'Thin Film',		'luxrender_material', add_float_value=True, min=1.0, default=200.0, max=1500.0 )
-TF_filmindex	= FloatTextureParameter('material', 'filmindex', 'Film IOR',	'luxrender_material', add_float_value=True, default=1.5, min=1.0, max=6.0 )
-TF_index		= FloatTextureParameter('material', 'index', 'IOR',				'luxrender_material', add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_M1			= FloatTextureParameter('material', 'M1', 'M1',					'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_M2			= FloatTextureParameter('material', 'M2', 'M2',					'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_M3			= FloatTextureParameter('material', 'M3', 'M3',					'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R1			= FloatTextureParameter('material', 'R1', 'R1',					'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R2			= FloatTextureParameter('material', 'R2', 'R2',					'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R3			= FloatTextureParameter('material', 'R3', 'R3',					'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_sigma		= FloatTextureParameter('material', 'sigma', 'Sigma',			'luxrender_material', add_float_value=True, min=0.0, max=100.0 )
-TF_uroughness	= FloatTextureParameter('material', 'uroughness', 'uroughness',	'luxrender_material', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_vroughness	= FloatTextureParameter('material', 'vroughness', 'vroughness',	'luxrender_material', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',				'luxrender_material', add_float_value=True, min=0.0, default=0.5, max=1.0 )
+TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',				'luxrender_material', add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
+TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',				'luxrender_material', add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
+TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',			'luxrender_material', add_float_value=True, default=0.15, min=0.0, max=15.0 )
+TF_film			= FloatTextureParameter('material', 'film', 'Thin Film Thickness (nm)',	'luxrender_material', add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
+TF_filmindex	= FloatTextureParameter('material', 'filmindex', 'Film IOR',			'luxrender_material', add_float_value=True, default=1.5, min=1.0, max=6.0 )
+TF_index		= FloatTextureParameter('material', 'index', 'IOR',						'luxrender_material', add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_M1			= FloatTextureParameter('material', 'M1', 'M1',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_M2			= FloatTextureParameter('material', 'M2', 'M2',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_M3			= FloatTextureParameter('material', 'M3', 'M3',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R1			= FloatTextureParameter('material', 'R1', 'R1',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R2			= FloatTextureParameter('material', 'R2', 'R2',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R3			= FloatTextureParameter('material', 'R3', 'R3',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_sigma		= FloatTextureParameter('material', 'sigma', 'Sigma',					'luxrender_material', add_float_value=True, min=0.0, max=100.0 )
+TF_uroughness	= FloatTextureParameter('material', 'uroughness', 'uroughness',			'luxrender_material', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_vroughness	= FloatTextureParameter('material', 'vroughness', 'vroughness',			'luxrender_material', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 # Color Textures
 TC_Ka			= ColorTextureParameter('material', 'Ka', 'Absorption color',	'luxrender_material', default=(0.2,0.2,0.2) )
@@ -186,16 +184,14 @@ class material_editor(MaterialButtonsPanel, described_layout):
 		'architectural',
 	] + \
 	TF_index.get_controls() + \
+	[
+		'dispersion',
+	] + \
 	TF_cauchyb.get_controls() + \
 	TC_Kr.get_controls() + \
 	TC_Kt.get_controls() + \
 	TF_film.get_controls() + \
 	TF_filmindex.get_controls() + \
-	[
-		'dispersion',
-		
-		# Carpaint options
-	] + \
 	TC_Ks1.get_controls() + \
 	TC_Ks2.get_controls() + \
 	TC_Ks3.get_controls() + \
@@ -255,7 +251,7 @@ class material_editor(MaterialButtonsPanel, described_layout):
 	[
 		{
 			'type': 'bool',
-			'attr': 'dipsersion',
+			'attr': 'dispersion',
 			'name': 'Dispersion',
 			'default': False
 		},
@@ -289,4 +285,3 @@ class material_editor(MaterialButtonsPanel, described_layout):
 	TF_sigma.get_properties() + \
 	TF_uroughness.get_properties() + \
 	TF_vroughness.get_properties()
-
