@@ -31,6 +31,7 @@ from ef.util import util as efutil
 from ef.validate import Logic_OR as O, Logic_AND as A
 
 from ..module.pure_api import PYLUX_AVAILABLE
+from ..module.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
 
 import luxrender.properties.engine
 import luxrender.properties.sampler
@@ -45,6 +46,17 @@ class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
 	'''
 	
 	COMPAT_ENGINES = {'luxrender'}
+
+def find_apis():
+	apis = [
+		('EXT', 'External', 'EXT'),
+	]
+	if PYLUX_AVAILABLE:
+		apis.append( ('INT', 'Internal', 'INT') )
+	if LUXFIRE_CLIENT_AVAILABLE:
+		apis.append( ('LFC', 'LuxFire Client', 'LFC') )
+	
+	return apis
 
 class engine(render_described_context):
 	'''
@@ -104,13 +116,8 @@ class engine(render_described_context):
 			'attr': 'export_type',
 			'name': 'Renderer',
 			'description': 'Run LuxRender inside or outside of Blender',
-			'default': 'INT' if PYLUX_AVAILABLE else 'EXT',
-			'items': [
-				('EXT', 'External', 'EXT'),
-				('INT', 'Internal', 'INT')
-			] if PYLUX_AVAILABLE else [
-				('EXT', 'External', 'EXT'),
-			]
+			'default': 'EXT', # if not PYLUX_AVAILABLE else 'INT',
+			'items': find_apis()
 		},
 		{
 			'type': 'bool',

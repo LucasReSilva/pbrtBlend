@@ -30,12 +30,6 @@ import bpy
 
 from ef.ef import ef
 
-# CHOOSE API TYPE
-# Write conventional lx* files and use pylux to manage lux process or external process
-import luxrender.module.file_api
-# Access lux only through pylux bindings
-import luxrender.module.pure_api
-
 def LuxLog(*args, popup=False):
 	'''
 	Send string to EF log, marked as belonging to LuxRender module.
@@ -43,7 +37,15 @@ def LuxLog(*args, popup=False):
 	'''
 	if len(args) > 0:
 		ef.log(' '.join(['%s'%a for a in args]), module_name='Lux', popup=popup)
-	
+
+# CHOOSE API TYPE
+# Write conventional lx* files and use pylux to manage lux process or external process
+import luxrender.module.file_api
+# Access lux via a remote LuxFire slave
+import luxrender.module.luxfire_client
+# Access lux only through pylux bindings
+import luxrender.module.pure_api
+
 class LuxTimerThread(threading.Thread):
 	'''
 	Periodically call self.kick()
@@ -208,9 +210,13 @@ class LuxManager(object):
 		
 		if api_type == 'FILE':
 			Context = luxrender.module.file_api.Custom_Context
-		else:
+		elif api_type == 'LUXFIRE_CLIENT':
+			Context = luxrender.module.luxfire_client.Client_Locator
+		elif api_type == 'API':
 			Context = luxrender.module.pure_api.Custom_Context
-			
+		else:
+			raise Exception('Unknown exporter API type')
+		
 		if manager_name is not '': manager_name = ' (%s)' % manager_name
 		self.lux_context = Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
 		

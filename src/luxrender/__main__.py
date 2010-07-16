@@ -298,13 +298,16 @@ class luxrender(engine_base):
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
 			api_type = 'API'
 			write_files = scene.luxrender_engine.write_files
+		elif scene.luxrender_engine.export_type == 'LFC':
+			api_type = 'LUXFIRE_CLIENT'
+			write_files = False
 		else:
 			api_type = 'FILE'
 			write_files = True
 		
 		l = self.render_init(scene, api_type)
 		
-		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxs):
+		if (api_type in ['API', 'LUXFIRE_CLIENT'] and not write_files) or (write_files and scene.luxrender_engine.write_lxs):
 			# Set up render engine parameters
 			l.sampler(				*scene.luxrender_sampler.api_output()		)
 			l.accelerator(			*scene.luxrender_accelerator.api_output()	)
@@ -346,17 +349,18 @@ class luxrender(engine_base):
 			export_materials.ExportedTextures.clear()
 			if api_type == 'FILE':
 				l.set_output_file(Files.MAIN)
+			
 			if export_lights.lights(l, scene) == False:
 				LuxLog('Error - No lights in scene.')
 				return
 		
-		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxm):
+		if (api_type in ['API', 'LUXFIRE_CLIENT'] and not write_files) or (write_files and scene.luxrender_engine.write_lxm):
 			if api_type == 'FILE':
 				l.set_output_file(Files.MATS)
 			export_materials.ExportedMaterials.clear()
 			export_materials.write_lxm(l, scene)
 		
-		if (api_type == 'API' and not write_files) or (write_files and scene.luxrender_engine.write_lxo):
+		if (api_type in ['API', 'LUXFIRE_CLIENT'] and not write_files) or (write_files and scene.luxrender_engine.write_lxo):
 			if api_type == 'FILE':
 				l.set_output_file(Files.GEOM)
 			export_geometry.write_lxo(self, l, scene, smoothing_enabled=True)
@@ -370,7 +374,7 @@ class luxrender(engine_base):
 			# reset output image file and
 			os.remove(self.output_file)
 		
-		internal		= (scene.luxrender_engine.export_type == 'INT')
+		internal		= (scene.luxrender_engine.export_type in ['INT', 'LFC'])
 		write_files		= scene.luxrender_engine.write_files
 		render			= scene.luxrender_engine.render
 		

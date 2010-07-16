@@ -28,7 +28,7 @@ import math
 
 import bpy, mathutils
 
-class ParamSetItem(object):
+class ParamSetItem(list):
 	
 	type		= None
 	type_name	= None
@@ -40,9 +40,11 @@ class ParamSetItem(object):
 	def __init__(self, *args):
 		self.type, self.name, self.value = args
 		self.type_name = "%s %s" % (self.type, self.name)
+		self.append(self.type_name)
+		self.append(self.value)
 	
-	def __repr__(self):
-		return "<%s:%s:%s>" % (self.type, self.name, self.value)
+	#def __repr__(self):
+	#	return "<%s:%s:%s>" % (self.type, self.name, self.value)
 	
 	def list_wrap(self, lst, cnt, type='f'):
 		fcnt = float(cnt)
@@ -98,7 +100,7 @@ class ParamSetItem(object):
 			else:
 				return fs_str % ('bool', self.name, 'false')
 			
-		return '# unknown param (%s, %s, %s)' % self
+		return '# unknown param (%s, %s, %s)' % (self.type, self.name, self.value)
 
 class ParamSet(list):
 	

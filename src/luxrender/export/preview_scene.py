@@ -1,5 +1,5 @@
 
-from . import ParamSet
+from ..export import ParamSet
 from .film import resolution
 
 def preview_scene_setup(scene, lux_context):

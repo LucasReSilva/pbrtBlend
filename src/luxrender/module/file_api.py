@@ -27,10 +27,6 @@
 import os
 
 import luxrender.module
-from .pure_api import PYLUX_AVAILABLE
-
-if PYLUX_AVAILABLE:
-	from .pure_api import Custom_Context as Pylux_Context
 
 class Files(object):
 	MAIN = 0
@@ -296,8 +292,12 @@ class Custom_Context(object):
 		which must be passed back to LuxManager so that it can control the
 		rendering process.
 		'''
-		
-		c = Pylux_Context(self.context_name)
-		c.parse(filename, async)
-		
-		return c
+		from .pure_api import PYLUX_AVAILABLE
+		if PYLUX_AVAILABLE:
+			from .pure_api import Custom_Context as Pylux_Context
+			c = Pylux_Context(self.context_name)
+			c.parse(filename, async)
+			
+			return c
+		else:
+			raise Exception('This method requires pylux')

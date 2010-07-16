@@ -32,7 +32,7 @@ from mathutils import Matrix
 from ..module import LuxLog
 from ..module.file_api import Files
 from . import matrix_to_list
-from . import ParamSet
+from ..export import ParamSet
 from .materials import export_object_material
 
 #-------------------------------------------------
@@ -235,7 +235,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			visible = visible or (o_layer and vis_layers[layer_index])
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-		if not visible or ob.restrict_render:
+		if not visible or ob.hide_render:
 			continue
 		
 		if ob.parent and ob.parent.duplis_used:
@@ -268,7 +268,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			visible = visible or (o_layer and vis_layers[layer_index])
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-		if not visible or ob.restrict_render:
+		if not visible or ob.hide_render:
 			continue
 		
 		if ob.parent and ob.parent.duplis_used:

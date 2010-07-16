@@ -30,7 +30,7 @@ import bpy
 
 from ef.validate import Visibility
 
-from . import ParamSet
+from ..export import ParamSet
 from ..module import LuxLog
 from ..properties.material import material_property_map
 

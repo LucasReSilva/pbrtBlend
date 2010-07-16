@@ -25,7 +25,8 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-from . import ParamSet, get_worldscale
+from ..export import get_worldscale
+from ..export import ParamSet
 
 from ef.util import util as efutil
 
