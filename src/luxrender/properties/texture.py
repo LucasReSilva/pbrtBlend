@@ -39,12 +39,20 @@ class TextureParameterBase(object):
 	name			= None
 	property_group	= None
 	default			= (0.8, 0.8, 0.8)
-	def __init__(self, parent_type, attr, name, property_group, default=(0.8,0.8,0.8)):
+	min				= 0.0
+	max				= 1.0
+	
+	def __init__(self, parent_type, attr, name, property_group, default=None, min=None, max=None):
 		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
 		self.property_group = property_group
-		self.default = default
+		if default is not None:
+			self.default = default
+		if min is not None:
+			self.min = min
+		if max is not None:
+			self.max = max
 	
 	def texture_slot_finder(self):
 		def func(s,c):
@@ -130,6 +138,10 @@ class ColorTextureParameter(TextureParameterBase):
 				'name': '', #self.name,
 				'description': self.name,
 				'default': self.default,
+				'min': self.min,
+				'soft_min': self.min,
+				'max': self.max,
+				'soft_max': self.max,
 				'subtype': 'COLOR',
 			},
 			{
