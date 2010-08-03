@@ -64,7 +64,7 @@ bricktex_c		= ColorTextureParameter('texture', 'bricktex', 'bricktex', 'brick', 
 mortartex_f		= FloatTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=0.0, min=0.0, max=1.0)
 mortartex_c		= ColorTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=(1.0,1.0,1.0))
 
-class ui_panel_brick(luxrender_texture_base):
+class ui_panel_brick(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Brick Texture'
 	
 	LUX_COMPAT = {'brick'}

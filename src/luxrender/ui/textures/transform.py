@@ -45,7 +45,7 @@ class transform(bpy.types.IDPropertyGroup):
 		
 		return transform_params
 
-class ui_panel_transform(luxrender_texture_base):
+class ui_panel_transform(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Texture Transform'
 	bl_default_closed = True
 	bl_show_header = True

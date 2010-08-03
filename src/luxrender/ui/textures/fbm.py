@@ -38,7 +38,7 @@ class fbm(bpy.types.IDPropertyGroup):
 		
 		return {'3DMAPPING'}, fbm_params
 
-class ui_panel_fbm(luxrender_texture_base):
+class ui_panel_fbm(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender fbm Texture'
 	
 	LUX_COMPAT = {'fbm'}

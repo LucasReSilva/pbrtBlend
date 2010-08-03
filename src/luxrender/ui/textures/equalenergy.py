@@ -35,7 +35,7 @@ class equalenergy(bpy.types.IDPropertyGroup):
 		
 		return set(), ParamSet().add_float('energy', self.energy)
 
-class ui_panel_equalenergy(luxrender_texture_base):
+class ui_panel_equalenergy(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Equalenergy Texture'
 	
 	LUX_COMPAT = {'equalenergy'}

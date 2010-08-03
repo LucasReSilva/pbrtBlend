@@ -124,7 +124,7 @@ def material_visibility():
 	
 	return vis
 
-class material_editor(MaterialButtonsPanel, described_layout):
+class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 	'''
 	Material Editor UI Panel
 	'''

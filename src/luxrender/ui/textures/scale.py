@@ -52,7 +52,7 @@ tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'scale', default=(1.0
 tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'scale', default=0.0, min=0.0, max=100.0)
 tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'scale', default=(0.0,0.0,0.0))
 
-class ui_panel_scale(luxrender_texture_base):
+class ui_panel_scale(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender scale Texture'
 	
 	LUX_COMPAT = {'scale'}

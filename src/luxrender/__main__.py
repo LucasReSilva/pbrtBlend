@@ -27,6 +27,9 @@
 # System libs
 import os, time, threading, subprocess, sys
 
+# Blender libs
+import bpy
+
 # Framework libs
 from ef.ef import ef
 from ef.engine import engine_base
@@ -35,6 +38,7 @@ from ef.util import util as efutil
 # Exporter libs
 from .module import LuxManager as LM
 from .module import LuxLog
+
 import luxrender.ui.materials
 from luxrender.ui.textures import main as texture_main
 from luxrender.ui.textures import	bilerp, blackbody, brick, checkerboard, dots, \
@@ -45,6 +49,7 @@ import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
 import luxrender.ui.meshes
+
 #import luxrender.nodes
 
 from .export import get_worldscale
@@ -99,7 +104,7 @@ def compatible(module):
 compatible("properties_data_mesh")
 compatible("properties_data_camera")
 
-class luxrender(engine_base):
+class luxrender(bpy.types.RenderEngine, engine_base):
 
 	'''
 	LuxRender Engine Exporter/Integration class
@@ -112,7 +117,7 @@ class luxrender(engine_base):
 	render_update_timer = None
 	output_file = 'default.png'
 	
-	# This member is read by the ExporterFramework to set up the UI panels
+#	# This member is read by the ExporterFramework to set up the property groups for each UI panel
 	interfaces = [
 		luxrender.ui.render_panels.engine,
 		luxrender.ui.render_panels.sampler,

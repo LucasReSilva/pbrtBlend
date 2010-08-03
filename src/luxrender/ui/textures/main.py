@@ -33,7 +33,7 @@ from ef.ef import ef
 
 from ...properties.texture import luxrender_texture
 
-class ui_panel_main(TextureButtonsPanel, described_layout):
+class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 	'''
 	Texture Editor UI Panel
 	'''

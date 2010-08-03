@@ -48,7 +48,7 @@ class bilerp(bpy.types.IDPropertyGroup):
 				
 		return {'2DMAPPING'}, params
 
-class ui_panel_bilerp(luxrender_texture_base):
+class ui_panel_bilerp(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender BiLerp Texture'
 	
 	LUX_COMPAT = {'bilerp'}

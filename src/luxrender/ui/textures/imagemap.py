@@ -50,7 +50,7 @@ class imagemap(bpy.types.IDPropertyGroup):
 		
 		return {'2DMAPPING'}, params
 
-class ui_panel_imagemap(luxrender_texture_base):
+class ui_panel_imagemap(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Imagemap Texture'
 	
 	LUX_COMPAT = {'imagemap'}

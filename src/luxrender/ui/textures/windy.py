@@ -37,7 +37,7 @@ class windy(bpy.types.IDPropertyGroup):
 		
 		return {'3DMAPPING'}, windy_params
 
-class ui_panel_windy(luxrender_texture_base):
+class ui_panel_windy(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender windy Texture'
 	
 	LUX_COMPAT = {'windy'}

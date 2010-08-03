@@ -34,7 +34,7 @@ from ef.ef import ef
 # Lux API
 import luxrender.properties.mesh
 
-class meshes(DataButtonsPanel, described_layout):
+class meshes(DataButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}
 	

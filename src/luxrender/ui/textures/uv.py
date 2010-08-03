@@ -37,7 +37,7 @@ class uv(bpy.types.IDPropertyGroup):
 			
 		return {'2DMAPPING'}, uv_params
 
-class ui_panel_uv(luxrender_texture_base):
+class ui_panel_uv(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender UV Texture'
 	
 	LUX_COMPAT = {'uv'}

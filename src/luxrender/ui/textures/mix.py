@@ -56,7 +56,7 @@ tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'mix', default=(1.0,1
 tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'mix', default=0.0, min=0.0, max=100.0)
 tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'mix', default=(0.0,0.0,0.0))
 
-class ui_panel_mix(luxrender_texture_base):
+class ui_panel_mix(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Mix Texture'
 	
 	LUX_COMPAT = {'mix'}

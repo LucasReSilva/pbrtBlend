@@ -167,7 +167,7 @@ class lampspectrum(bpy.types.IDPropertyGroup):
 		
 		return set(), ParamSet().add_string('name', self.preset)
 
-class ui_panel_lampspectrum(luxrender_texture_base):
+class ui_panel_lampspectrum(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Lamp spectrum Texture'
 	
 	LUX_COMPAT = {'lampspectrum'}

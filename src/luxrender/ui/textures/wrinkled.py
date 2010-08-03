@@ -38,7 +38,7 @@ class wrinkled(bpy.types.IDPropertyGroup):
 		
 		return {'3DMAPPING'}, wrinkled_params
 
-class ui_panel_wrinkled(luxrender_texture_base):
+class ui_panel_wrinkled(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender wrinkled Texture'
 	
 	LUX_COMPAT = {'wrinkled'}

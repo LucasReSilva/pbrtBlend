@@ -69,7 +69,7 @@ class camera_panel(DataButtonsPanel, described_layout):
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.camera, supercontext=context)
 
-class camera(camera_panel):
+class camera(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Camera'
 	
 	property_group = luxrender.properties.camera.luxrender_camera
@@ -197,7 +197,7 @@ class camera(camera_panel):
 		},	
 	]
 
-class colorspace(camera_panel):
+class colorspace(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Colour Space'
 	
 	property_group = luxrender.properties.camera.luxrender_colorspace
@@ -341,7 +341,7 @@ class tonemapping_live_update(object):
 					0
 				)
 
-class tonemapping(camera_panel):
+class tonemapping(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender ToneMapping'
 	
 	property_group = luxrender.properties.camera.luxrender_tonemapping

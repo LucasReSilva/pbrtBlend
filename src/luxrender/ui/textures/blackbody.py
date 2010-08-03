@@ -35,7 +35,7 @@ class blackbody(bpy.types.IDPropertyGroup):
 		
 		return set(), ParamSet().add_float('temperature', self.temperature)
 
-class ui_panel_blackbody(luxrender_texture_base):
+class ui_panel_blackbody(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Blackbody Texture'
 	
 	LUX_COMPAT = {'blackbody'}

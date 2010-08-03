@@ -57,7 +57,7 @@ class checkerboard(bpy.types.IDPropertyGroup):
 tex1 = FloatTextureParameter('texture', 'tex1', 'Texture 1', 'checkerboard', default=1.0, min=0.0, max=100.0)
 tex2 = FloatTextureParameter('texture', 'tex2', 'Texture 2', 'checkerboard', default=0.0, min=0.0, max=100.0)
 
-class ui_panel_checkerboard(luxrender_texture_base):
+class ui_panel_checkerboard(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Checkerboard Texture'
 	
 	LUX_COMPAT = {'checkerboard'}

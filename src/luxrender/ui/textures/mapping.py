@@ -54,7 +54,7 @@ class mapping(bpy.types.IDPropertyGroup):
 		
 		return mapping_params
 
-class ui_panel_mapping(luxrender_texture_base):
+class ui_panel_mapping(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Texture Mapping'
 	bl_default_closed = True
 	bl_show_header = True

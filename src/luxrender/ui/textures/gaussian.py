@@ -37,7 +37,7 @@ class gaussian(bpy.types.IDPropertyGroup):
 								.add_float('wavelength', self.wavelength) \
 								.add_float('width', self.width)
 
-class ui_panel_gaussian(luxrender_texture_base):
+class ui_panel_gaussian(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Gaussian Texture'
 	
 	LUX_COMPAT = {'gaussian'}

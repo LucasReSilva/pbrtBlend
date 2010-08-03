@@ -71,7 +71,7 @@ def lamp_visibility():
 	
 	return vis
 
-class lamps(DataButtonsPanel, described_layout):
+class lamps(DataButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender Lamps'
 	COMPAT_ENGINES = {'luxrender'}
 	

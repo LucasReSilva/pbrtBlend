@@ -50,7 +50,7 @@ class dots(bpy.types.IDPropertyGroup):
 inside	= FloatTextureParameter('texture', 'inside', 'inside', 'dots', default=1.0, min=0.0, max=100.0)
 outside	= FloatTextureParameter('texture', 'outside', 'outside', 'dots', default=0.0, min=0.0, max=100.0)
 
-class ui_panel_dots(luxrender_texture_base):
+class ui_panel_dots(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Dots Texture'
 	
 	LUX_COMPAT = {'dots'}

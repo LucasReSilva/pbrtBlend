@@ -38,7 +38,7 @@ class marble(bpy.types.IDPropertyGroup):
 										.add_float('scale', self.scale) \
 										.add_float('variation', self.variation)
 
-class ui_panel_marble(luxrender_texture_base):
+class ui_panel_marble(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Marble Texture'
 	
 	LUX_COMPAT = {'marble'}

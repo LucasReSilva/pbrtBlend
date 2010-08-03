@@ -26,6 +26,8 @@
 #
 from properties_render import RenderButtonsPanel
 
+import bpy
+
 import ef.ui
 from ef.util import util as efutil
 from ef.validate import Logic_OR as O, Logic_AND as A
@@ -58,7 +60,7 @@ def find_apis():
 	
 	return apis
 
-class engine(render_described_context):
+class engine(render_described_context, bpy.types.Panel):
 	'''
 	Engine settings UI Panel
 	'''
@@ -205,7 +207,7 @@ class engine(render_described_context):
 		},
 	]
 			
-class sampler(render_described_context):
+class sampler(render_described_context, bpy.types.Panel):
 	'''
 	Sampler settings UI Panel
 	'''
@@ -351,7 +353,7 @@ class sampler(render_described_context):
 
 	]
 				
-class integrator(render_described_context):
+class integrator(render_described_context, bpy.types.Panel):
 	'''
 	Surface Integrator settings UI Panel
 	'''
@@ -934,7 +936,7 @@ class integrator(render_described_context):
 		},
 	]
 
-class volume(render_described_context):
+class volume(render_described_context, bpy.types.Panel):
 	'''
 	Volume Integrator settings UI panel
 	'''
@@ -972,7 +974,7 @@ class volume(render_described_context):
 		}
 	]
 			
-class filter(render_described_context):
+class filter(render_described_context, bpy.types.Panel):
 	'''
 	PixelFilter settings UI Panel
 	'''
@@ -1091,7 +1093,7 @@ class filter(render_described_context):
 		},
 	]
 
-class accelerator(render_described_context):
+class accelerator(render_described_context, bpy.types.Panel):
 	'''
 	Accelerator settings UI Panel
 	'''
