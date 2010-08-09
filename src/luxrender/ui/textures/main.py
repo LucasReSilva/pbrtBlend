@@ -47,12 +47,13 @@ class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 	# prevent creating luxrender_texture property group in Scene
 	property_group_non_global = True
 	
-	def poll(self, context):
+	@classmethod
+	def poll(cls, context):
 		'''
 		Only show LuxRender panel with 'Plugin' texture type
 		'''
 		
-		return TextureButtonsPanel.poll(self, context) # and context.texture.type == 'PLUGIN'
+		return TextureButtonsPanel.poll(context) # and context.texture.type == 'PLUGIN'
 	
 	@classmethod
 	def property_reload(r_class):

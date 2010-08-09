@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-from properties_data_mesh import DataButtonsPanel 
+from properties_data_mesh import MeshButtonsPanel 
 
 # EF API
 from ef.ui import described_layout
@@ -34,7 +34,7 @@ from ef.ef import ef
 # Lux API
 import luxrender.properties.mesh
 
-class meshes(DataButtonsPanel, described_layout, bpy.types.Panel):
+class meshes(MeshButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}
 	

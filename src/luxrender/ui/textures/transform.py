@@ -54,15 +54,16 @@ class ui_panel_transform(luxrender_texture_base, bpy.types.Panel):
 	
 	property_group = transform
 	
-	def poll(self, context):
+	@classmethod
+	def poll(cls, context):
 		'''
 		Lux 3D Mapping applies to Blender textures too
 		'''
 		
-		pp = TextureButtonsPanel.poll(self, context)
+		pp = TextureButtonsPanel.poll(context)
 		
 		if pp and context.texture.type == 'PLUGIN':
-			pp &= context.texture.luxrender_texture.type in self.LUX_COMPAT
+			pp &= context.texture.luxrender_texture.type in cls.LUX_COMPAT
 		
 		return pp
 	

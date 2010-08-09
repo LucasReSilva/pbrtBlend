@@ -26,7 +26,7 @@
 #
 import bpy
 
-from properties_data_camera import DataButtonsPanel
+from properties_data_camera import CameraButtonsPanel
 
 # EF API
 from ef.ui import described_layout
@@ -35,7 +35,7 @@ from ef.ef import ef
 import luxrender.properties.camera
 from ..module import LuxManager as LM
 
-class camera_panel(DataButtonsPanel, described_layout):
+class camera_panel(CameraButtonsPanel, described_layout):
 	COMPAT_ENGINES = {'luxrender'}
 	
 	# prevent creating luxrender_camera property group in Scene

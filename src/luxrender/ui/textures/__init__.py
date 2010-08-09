@@ -69,12 +69,13 @@ class luxrender_texture_base(TextureButtonsPanel, described_layout):
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.texture.luxrender_texture, supercontext=context)
-				
-	def poll(self, context):
+	
+	@classmethod
+	def poll(cls, context):
 		'''
 		Only show LuxRender panel with 'Plugin' texture type, and
 		if luxrender_texture.type in LUX_COMPAT
 		'''
 		
-		return TextureButtonsPanel.poll(self, context) and context.texture.type == 'PLUGIN' and context.texture.luxrender_texture.type in self.LUX_COMPAT
+		return TextureButtonsPanel.poll(context) and context.texture.type == 'PLUGIN' and context.texture.luxrender_texture.type in cls.LUX_COMPAT
 
