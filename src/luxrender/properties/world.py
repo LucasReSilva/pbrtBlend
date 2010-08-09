@@ -26,9 +26,21 @@
 #
 import bpy
 
-class luxrender_engine(bpy.types.IDPropertyGroup):
+class luxrender_volume_data(bpy.types.IDPropertyGroup):
 	'''
-	Storage class for LuxRender Engine settings.
+	Storage class for LuxRender volume data. The
+	luxrender_world object will store 1 or more of
+	these in its CollectionProperty 'volumes'
+	'''
+	
+	p1 = bpy.props.StringProperty(
+		name = 'Prop1',
+		description = 'Prop1 Descr.',
+	)
+
+class luxrender_world(bpy.types.IDPropertyGroup):
+	'''
+	Storage class for LuxRender World settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''

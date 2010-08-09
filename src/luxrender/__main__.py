@@ -49,6 +49,7 @@ import luxrender.ui.render_panels
 import luxrender.ui.camera
 import luxrender.ui.lamps
 import luxrender.ui.meshes
+import luxrender.ui.world
 
 #import luxrender.nodes
 
@@ -129,6 +130,7 @@ class luxrender(bpy.types.RenderEngine, engine_base):
 		# custom object data panels
 		luxrender.ui.lamps.lamps,
 		luxrender.ui.meshes.meshes,
+		luxrender.ui.world.world,
 		
 		luxrender.ui.camera.camera,
 		luxrender.ui.camera.colorspace,
@@ -159,6 +161,11 @@ class luxrender(bpy.types.RenderEngine, engine_base):
 		wrinkled.ui_panel_wrinkled,
 		
 		#luxrender.nodes.test_node
+	]
+	
+	operators = [
+		luxrender.ui.world.LUXRENDER_OT_volume_add,
+		luxrender.ui.world.LUXRENDER_OT_volume_remove
 	]
 	
 	def update_framebuffer(self, xres, yres, fb):
