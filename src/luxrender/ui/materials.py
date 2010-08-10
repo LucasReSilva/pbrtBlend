@@ -122,6 +122,17 @@ def material_visibility():
 	vis.update( TC_Ks3.get_visibility() )
 	vis.update( TC_Kt.get_visibility() )
 	
+	# Add compositing options for distributedpath
+	vis.update({
+		'compositing_label':				{ 'integrator_type': 'distributedpath' },
+		'compo_visible_material':			{ 'integrator_type': 'distributedpath' },
+		'compo_visible_emission':			{ 'integrator_type': 'distributedpath' },
+		'compo_visible_indirect_material':	{ 'integrator_type': 'distributedpath' },
+		'compo_visible_indirect_emission':	{ 'integrator_type': 'distributedpath' },
+		'compo_override_alpha':				{ 'integrator_type': 'distributedpath' },
+		'compo_override_alpha_value':		{ 'integrator_type': 'distributedpath', 'compo_override_alpha': True },
+	})
+	
 	return vis
 
 class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
@@ -160,6 +171,9 @@ class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 	def draw(self, context):
 		if context.material is not None:
 			material_editor.property_create(context.material)
+			
+			# Set the integrator type in this material in order to show compositing options 
+			context.material.luxrender_material.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.material, supercontext=context)
@@ -207,6 +221,15 @@ class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 		# Mix Material
 		'namedmaterial1',
 		'namedmaterial2',
+		
+		# Compositing options for distributedpath
+		'compositing_label',
+		['compo_visible_material',
+		'compo_visible_emission'],
+		['compo_visible_indirect_material',
+		'compo_visible_indirect_emission'],
+		'compo_override_alpha',
+		'compo_override_alpha_value'
 	]
 	
 	visibility = material_visibility()
@@ -284,4 +307,56 @@ class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 	TF_R3.get_properties() + \
 	TF_sigma.get_properties() + \
 	TF_uroughness.get_properties() + \
-	TF_vroughness.get_properties()
+	TF_vroughness.get_properties() + \
+	[
+		# hidden parameter to hold current integrator type - updated on draw()
+		{
+			'type': 'string',
+			'attr': 'integrator_type',
+		},
+		{
+			'type': 'text',
+			'attr': 'compositing_label',
+			'name': 'Compositing options',
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_material',
+			'name': 'Visible Material',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_emission',
+			'name': 'Visible Emission',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_indirect_material',
+			'name': 'Visible Indirect Material',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_indirect_emission',
+			'name': 'Visible Indirect Emission',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_override_alpha',
+			'name': 'Override Alpha',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'compo_override_alpha_value',
+			'name': 'Override Alpha Value',
+			'default': 0.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+		},
+	]

@@ -165,7 +165,7 @@ class FloatTextureParameter(TextureParameterBase):
 	default			= 0.0
 	min				= 0.0
 	max				= 1.0
-	precision		= 4
+	precision		= 6
 	texture_only	= False
 	multiply_float  = False
 	ignore_zero     = False
@@ -175,7 +175,7 @@ class FloatTextureParameter(TextureParameterBase):
 			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
 			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
 			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
-			default = 0.0, min = 0.0, max = 1.0, precision=4
+			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
 		self.parent_type = parent_type
 		self.attr = attr
