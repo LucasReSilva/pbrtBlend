@@ -31,6 +31,7 @@ from properties_texture import TextureButtonsPanel
 from ef.ui import described_layout
 from ef.ef import ef
 
+from ..textures import luxrender_texture_base
 from ...properties.texture import luxrender_texture
 
 class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
@@ -53,7 +54,11 @@ class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 		Only show LuxRender panel with 'Plugin' texture type
 		'''
 		
-		return TextureButtonsPanel.poll(context) # and context.texture.type == 'PLUGIN'
+		tex = context.texture
+		return	tex and \
+				(tex.type != 'NONE' or tex.use_nodes) and \
+				(context.scene.render.engine in cls.COMPAT_ENGINES) and \
+				context.texture.type == 'PLUGIN'
 	
 	@classmethod
 	def property_reload(r_class):

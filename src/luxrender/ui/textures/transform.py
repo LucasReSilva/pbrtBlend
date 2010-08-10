@@ -25,7 +25,6 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-from properties_texture import TextureButtonsPanel
 
 from ef.validate import Logic_OR as O
 
@@ -53,19 +52,6 @@ class ui_panel_transform(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}
 	
 	property_group = transform
-	
-	@classmethod
-	def poll(cls, context):
-		'''
-		Lux 3D Mapping applies to Blender textures too
-		'''
-		
-		pp = TextureButtonsPanel.poll(context)
-		
-		if pp and context.texture.type == 'PLUGIN':
-			pp &= context.texture.luxrender_texture.type in cls.LUX_COMPAT
-		
-		return pp
 	
 	controls = [
 		'translate',
