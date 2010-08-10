@@ -147,44 +147,46 @@ def exportGeometry(ob, me, l, smoothing_enabled):
 # export_mesh(l, scene, object, matrix)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def exportMesh(l, scene, ob, matrix, smoothing_enabled):
+def exportMesh(l, scene, ob, smoothing_enabled):
 	me = ob.create_mesh(scene, True, 'RENDER')
 		
 	if not me:
 		return
+	
+	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
+	# Everything else is set on a per-instance basis
+	l.objectBegin(ob.data.name)
+	exportGeometry(ob, me, l, smoothing_enabled)
+	l.objectEnd()
+	
+	bpy.data.meshes.remove(me)
 
+def exportInstance(l, scene, ob, matrix):
+	l.attributeBegin(comment=ob.name, file=Files.GEOM)
+	# object translation/rotation/scale 
+	l.transform( matrix_to_list(matrix, scene=scene, apply_worldscale=True) )
+	
+	# Export either NamedMaterial stmt or the full material
+	# definition depending on the output type
+	export_object_material(l, ob)
+	
 	# object motion blur
 	is_object_animated = False
 	if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
 		scene.set_frame(scene.frame_current + 1)
-		m1 = Matrix.copy(matrix)
+		m1 = matrix.copy()
 		scene.set_frame(scene.frame_current - 1)
-		if m1 != matrix:				
+		if m1 != matrix:
 			is_object_animated = True
-
-	#if is_object_animated:
-	l.objectBegin(ob.name)
-
-	# Export either NamedMaterial stmt or the full material
-	# definition depending on the output type
-	export_object_material(l, ob)
-
-	exportGeometry(ob, me, l, smoothing_enabled)
-	l.objectEnd() #ob.name)
-
-	l.attributeBegin(comment=ob.name, file=Files.GEOM)
-	
-	# object translation/rotation/scale 
-	l.transform( matrix_to_list(matrix, scene=scene, apply_worldscale=True) )
 	
 	# special case for motion blur since the mesh is already exported before the attribute
 	if is_object_animated:
 		l.transformBegin(comment=ob.name, file=Files.GEOM)
 		l.identity()
 		l.transform(matrix_to_list(m1, scene=scene, apply_worldscale=True))
-		l.coordinateSystem('%s' % ob.name + '_motion')
+		l.coordinateSystem('%s' % ob.data.name + '_motion')
 		l.transformEnd()
-		l.motionInstance(ob.name, 0.0, 1.0, ob.name + '_motion')
+		l.motionInstance(ob.data.name, 0.0, 1.0, ob.data.name + '_motion')
 
 	else:
 		# Export either NamedMaterial stmt or the full material
@@ -192,11 +194,9 @@ def exportMesh(l, scene, ob, matrix, smoothing_enabled):
 		#export_object_material(l, ob)
 
 		#exportGeometry(ob, me, l, smoothing_enabled)
-		l.objectInstance(ob.name)
+		l.objectInstance(ob.data.name)
 
 	l.attributeEnd()
-	
-	bpy.data.meshes.remove(me)
 
 #-------------------------------------------------
 # write_lxo(render_engine, l, scene, smoothing_enabled=True)
@@ -225,7 +225,9 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 	# browse all scene objects for "mesh-convertible" ones
 	# First round: check for duplis
 	duplis = []
-	for ob in sel:		
+	meshes_exported = set()
+	
+	for ob in sel:
 		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 			continue
 		
@@ -248,7 +250,12 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
-				exportMesh(l, scene, dupli_ob.object, dupli_ob.matrix_world, smoothing_enabled)
+				if not dupli_ob.object.data.name in meshes_exported:
+					exportMesh(l, scene, dupli_ob.object, smoothing_enabled)
+					meshes_exported.add(dupli_ob.object.data.name)
+				
+				exportInstance(l, scene, dupli_ob.object, dupli_ob.object.matrix_world)
+				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
 			
@@ -258,7 +265,8 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 
 	# browse all scene objects for "mesh-convertible" ones
 	# skip duplicated objects here
-	for ob in sel:		
+	
+	for ob in sel:
 		if ob.type != 'MESH':
 			continue
 		
@@ -284,7 +292,13 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 
 		# dupli object render rule copied from convertblender.c (blender internal render)		
 		if (not ob.duplis_used or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
-			exportMesh(l, scene, ob, ob.matrix_world, smoothing_enabled)
+			# Export mesh definition once
+			if not ob.data.name in meshes_exported:
+				exportMesh(l, scene, ob, smoothing_enabled)
+				meshes_exported.add(ob.data.name)
+			
+			# Export object instance
+			exportInstance(l, scene, ob, ob.matrix_world)
 
 		# exported another object		
 		ipc += 1.0
