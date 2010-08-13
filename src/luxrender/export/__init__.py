@@ -173,7 +173,7 @@ def get_worldscale(scene=None, as_scalematrix=True):
 		ws = scn_us.scale_length
 	
 	if as_scalematrix:
-		return mathutils.ScaleMatrix(ws, 4)
+		return mathutils.Matrix.Scale(ws, 4)
 	else:
 		return ws
 
