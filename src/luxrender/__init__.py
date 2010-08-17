@@ -34,7 +34,7 @@ bl_addon_info = {
     "location": "Render Engines",
     "warning": '',
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/LuxBlend",
-    "tracker_url": "http://projects.blender.org/tracker/index.php?func=detail&aid=#&group_id=#&atid=#",
+    "tracker_url": "http://projects.blender.org/tracker/index.php?func=detail&aid=23361&group_id=153&atid=514",
     "description": "This Addon will allow you to render your scenes with the LuxRender engine."
 }
 
