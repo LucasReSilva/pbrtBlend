@@ -55,10 +55,10 @@ def getMeshType(mesh):
 
 def exportGeometry(ob, me, l, smoothing_enabled):
 	
-	faces_verts = [f.verts for f in me.faces]
+	faces_verts = [f.vertices for f in me.faces]
 	ffaces = [f for f in me.faces]
 	#faces_normals = [tuple(f.normal) for f in me.faces]
-	#verts_normals = [tuple(v.normal) for v in me.verts]
+	#verts_normals = [tuple(v.normal) for v in me.vertices]
 	
 	# face indices
 	index = 0
@@ -69,19 +69,19 @@ def exportGeometry(ob, me, l, smoothing_enabled):
 		indices.append(index+1)
 		indices.append(index+2)
 		ntris += 3
-		if (len(face.verts)==4):
+		if (len(face.vertices)==4):
 			indices.append(index)
 			indices.append(index+2)
 			indices.append(index+3)
 			ntris += 3
-		index += len(face.verts)
+		index += len(face.vertices)
 		
 	# vertex positions
 	points = []
 	nvertices = 0
 	for face in ffaces:
-		for vertex in face.verts:
-			v = me.verts[vertex]
+		for vertex in face.vertices:
+			v = me.vertices[vertex]
 			nvertices += 1
 			for co in v.co:
 				points.append(co)
@@ -90,9 +90,9 @@ def exportGeometry(ob, me, l, smoothing_enabled):
 	normals = []
 	for face in ffaces:
 		normal = face.normal
-		for vertex in face.verts:
-			if (smoothing_enabled and face.smooth):
-				v = me.verts[vertex]
+		for vertex in face.vertices:
+			if (smoothing_enabled and face.use_smooth):
+				v = me.vertices[vertex]
 				normal = v.normal
 			for no in normal:
 				normals.append(no)
@@ -240,10 +240,10 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if not visible or ob.hide_render:
 			continue
 		
-		if ob.parent and ob.parent.duplis_used:
+		if ob.parent and ob.parent.is_duplicator:
 			continue
 
-		if ob.duplis_used:
+		if ob.is_duplicator:
 			# create dupli objects
 			ob.create_dupli_list(scene)
 
@@ -279,7 +279,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if not visible or ob.hide_render:
 			continue
 		
-		if ob.parent and ob.parent.duplis_used:
+		if ob.parent and ob.parent.is_duplicator:
 			continue
 
 		# special case for objects with particle system: check if emitter should be rendered
@@ -291,7 +291,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 			render_emitter |= psys.settings.emitter
 
 		# dupli object render rule copied from convertblender.c (blender internal render)		
-		if (not ob.duplis_used or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
+		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			# Export mesh definition once
 			if not ob.data.name in meshes_exported:
 				exportMesh(l, scene, ob, smoothing_enabled)

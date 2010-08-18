@@ -187,12 +187,12 @@ def lights(l, scene):
 			continue
 		
 		# skip dupli (child) objects when they are not lamps
-		if (ob.parent and ob.parent.dupli_type != 'NONE') and ob.type != 'LAMP':
+		if (ob.parent and ob.parent.is_duplicator) and ob.type != 'LAMP':
 			continue
 
 		# we have to check for duplis before the "LAMP" ceck 
 		# to support a mesh/object which got lamp as dupli object
-		if ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
+		if ob.is_duplicator and ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
 			# create dupli objects
 			ob.create_dupli_list(scene)
 
