@@ -56,6 +56,25 @@ def MaterialParameter(attr, name, property_group):
 		},
 	]
 
+def VolumeParameter(attr, name, property_group):
+	return [
+		{
+			'attr': '%s_volume' % attr,
+			'type': 'string',
+			'name': '%s_volume' % attr,
+			'description': '%s_volume' % attr,
+		},
+		{
+			'type': 'prop_object',
+			'attr': attr,
+			'src': lambda s,c: s.scene.luxrender_world,
+			'src_attr': 'volumes',
+			'trg': lambda s,c: getattr(c, property_group),
+			'trg_attr': '%s_volume' % attr,
+			'name': name
+		},
+	]
+
 # Float Textures
 TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',				'luxrender_material', add_float_value=True, min=0.0, default=0.5, max=1.0 )
 TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',				'luxrender_material', add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
@@ -131,6 +150,9 @@ def material_visibility():
 		'compo_visible_indirect_emission':	{ 'integrator_type': 'distributedpath' },
 		'compo_override_alpha':				{ 'integrator_type': 'distributedpath' },
 		'compo_override_alpha_value':		{ 'integrator_type': 'distributedpath', 'compo_override_alpha': True },
+		
+		'Interior':							{ 'material': 'glass2' },
+		'Exterior':							{ 'material': 'glass2' },
 	})
 	
 	return vis
@@ -229,7 +251,11 @@ class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 		['compo_visible_indirect_material',
 		'compo_visible_indirect_emission'],
 		'compo_override_alpha',
-		'compo_override_alpha_value'
+		'compo_override_alpha_value',
+		
+		# Glass 2 Volumes
+		'Interior',
+		'Exterior'
 	]
 	
 	visibility = material_visibility()
@@ -359,4 +385,15 @@ class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 			'max': 1.0,
 			'soft_max': 1.0,
 		},
-	]
+	] + \
+	VolumeParameter('Interior', 'Interior', 'luxrender_material') + \
+	VolumeParameter('Exterior', 'Exterior', 'luxrender_material')
+
+class material_emission(MaterialButtonsPanel, described_layout, bpy.types.Panel):
+	'''
+	Material Emission Settings
+	'''
+	
+	bl_label = 'LuxRender Material Emission'
+	COMPAT_ENGINES = {'luxrender'}
+	
