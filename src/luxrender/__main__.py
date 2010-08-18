@@ -248,10 +248,10 @@ class luxrender(bpy.types.RenderEngine, engine_base):
 			LXM = scene.luxrender_engine.write_lxm
 			LXO = scene.luxrender_engine.write_lxo
 			
-			if os.path.isdir(scene.render.output_path):
-				output_dir = scene.render.output_path
+			if os.path.isdir(scene.render.filepath):
+				output_dir = scene.render.filepath
 			else:
-				output_dir = os.path.dirname(scene.render.output_path)
+				output_dir = os.path.dirname(scene.render.filepath)
 			
 			if not os.access( output_dir, os.W_OK):
 				raise Exception('Output path "%s" is not writable' % output_dir)
@@ -275,7 +275,7 @@ class luxrender(bpy.types.RenderEngine, engine_base):
 				raise Exception('Nothing to do! Select at least one of LXM/LXS/LXO')
 		else:
 			# Set export path so that relative paths in export work correctly
-			efutil.export_path = scene.render.output_path
+			efutil.export_path = scene.render.filepath
 			self.output_file = efutil.path_relative_to_export(efutil.export_path) + '.png'
 		
 		# BEGIN!
