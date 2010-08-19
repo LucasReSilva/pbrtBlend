@@ -79,19 +79,32 @@ properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add('luxrender')
 # properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add('luxrender')
 del properties_data_lamp
 
+@classmethod
+def blender_texture_poll(cls, context):
+	tex = context.texture
+	return	tex and \
+			((tex.type == cls.tex_type and not tex.use_nodes) and (context.scene.render.engine in cls.COMPAT_ENGINES)) and \
+			tex.luxrender_texture.type == 'BLENDER'
+
 import properties_texture
 properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_blend.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_clouds.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_distortednoise.COMPAT_ENGINES.add('luxrender')
-#properties_texture.TEXTURE_PT_image.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_magic.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_marble.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_musgrave.COMPAT_ENGINES.add('luxrender')
-#properties_texture.TEXTURE_PT_noise.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_stucci.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_voronoi.COMPAT_ENGINES.add('luxrender')
-properties_texture.TEXTURE_PT_wood.COMPAT_ENGINES.add('luxrender')
+blender_texture_ui_list = [
+	properties_texture.TEXTURE_PT_blend,
+	properties_texture.TEXTURE_PT_clouds,
+	properties_texture.TEXTURE_PT_distortednoise,
+	#properties_texture.TEXTURE_PT_image,
+	properties_texture.TEXTURE_PT_magic,
+	properties_texture.TEXTURE_PT_marble,
+	properties_texture.TEXTURE_PT_musgrave,
+	#properties_texture.TEXTURE_PT_noise,
+	properties_texture.TEXTURE_PT_stucci,
+	properties_texture.TEXTURE_PT_voronoi,
+	properties_texture.TEXTURE_PT_wood,
+]
+for blender_texture_ui in blender_texture_ui_list:
+	blender_texture_ui.COMPAT_ENGINES.add('luxrender')
+	blender_texture_ui.poll = blender_texture_poll
+
 del properties_texture
 
 # compatible() copied from blender repository (netrender)

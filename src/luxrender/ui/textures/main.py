@@ -56,9 +56,9 @@ class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 		
 		tex = context.texture
 		return	tex and \
-				(tex.type != 'NONE' or tex.use_nodes) and \
-				(context.scene.render.engine in cls.COMPAT_ENGINES) and \
-				context.texture.type == 'PLUGIN'
+				(context.scene.render.engine in cls.COMPAT_ENGINES) \
+				and context.texture.luxrender_texture.type is not 'BLENDER'
+				#(tex.type != 'NONE' or tex.use_nodes) and \
 	
 	@classmethod
 	def property_reload(r_class):
@@ -83,7 +83,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 		if context.texture is not None:
 			self.property_create(context.texture)
 			
-			context.texture.luxrender_texture.use_lux_texture = (context.texture.type == 'PLUGIN')
+			context.texture.luxrender_texture.use_lux_texture = (context.texture.luxrender_texture != 'BLENDER')
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.texture, supercontext=context)
@@ -92,7 +92,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 		'type'
 	]
 	visibility = {
-		'type': { 'use_lux_texture': True }
+		#'type': { 'use_lux_texture': True }
 	}
 	properties = [
 		{
@@ -106,6 +106,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 			'type': 'enum',
 			'items': [
 				#('none', 'none', 'none'),
+				('BLENDER', 'Use Blender Texture', 'BLENDER'),
 				('bilerp', 'bilerp', 'bilerp'),
 				('blackbody','blackbody','blackbody'),
 				('brick', 'brick', 'brick'),

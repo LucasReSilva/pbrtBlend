@@ -292,7 +292,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 			if texture_name != '':
 				if texture_name in bpy.data.textures:
 					texture = bpy.data.textures[texture_name]
-					if texture.type == 'PLUGIN':
+					if texture.luxrender_texture.type != 'BLENDER':
 						tex_luxrender_texture = texture.luxrender_texture
 						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()
 						if lux_tex_variant == variant:

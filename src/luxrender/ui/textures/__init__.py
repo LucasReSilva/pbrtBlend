@@ -80,8 +80,8 @@ class luxrender_texture_base(TextureButtonsPanel, described_layout):
 		
 		tex = context.texture
 		return	tex and \
-				(tex.type != 'NONE' or tex.use_nodes) and \
 				(context.scene.render.engine in cls.COMPAT_ENGINES) and \
-				context.texture.type == 'PLUGIN' and \
 				context.texture.luxrender_texture.type in cls.LUX_COMPAT
+				#(tex.type != 'NONE' or tex.use_nodes) and \
+				#context.texture.type == 'PLUGIN' and \
 
