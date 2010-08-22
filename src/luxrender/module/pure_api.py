@@ -31,8 +31,6 @@ try:
 	except:
 		import luxrender.pylux
 		
-		#luxrender.pylux.errorHandler(LuxLog)
-		
 		class Custom_Context(luxrender.pylux.Context):
 			'''
 			This is the 'pure' entry point to the pylux.Context API
@@ -68,4 +66,5 @@ try:
 	
 except ImportError as err:
 	LuxLog('WARNING: Binary pylux module not found! Visit http://www.luxrender.net/ to obtain one.')
+	LuxLog(' (ImportError was: %s)' % err)
 	PYLUX_AVAILABLE = False

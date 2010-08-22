@@ -34,25 +34,6 @@ from ef.ef import ef
 # Lux API
 import luxrender.properties.world
 
-class LUXRENDER_OT_volume_add(bpy.types.Operator):
-	bl_idname = "luxrender.volume_add"
-	bl_label = "Add LuxRender Volume"
-	
-	def invoke(self, context, event):
-		v = context.scene.luxrender_world.volumes
-		v.add()
-		v[len(v)-1].name = 'New Volume'
-		return {'FINISHED'}
-	
-class LUXRENDER_OT_volume_remove(bpy.types.Operator):
-	bl_idname = "luxrender.volume_remove"
-	bl_label = "Remove LuxRender Volume"
-	
-	def invoke(self, context, event):
-		w = context.scene.luxrender_world
-		w.volumes.remove( w.volumes_index )
-		return {'FINISHED'}
-
 class world(WorldButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender World Options'
 	COMPAT_ENGINES = {'luxrender'}
