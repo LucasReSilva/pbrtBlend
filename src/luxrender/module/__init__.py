@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import threading, datetime, time
+import datetime, time
 
 import bpy
 
@@ -46,42 +46,7 @@ import luxrender.module.luxfire_client
 # Access lux only through pylux bindings
 import luxrender.module.pure_api
 
-class LuxTimerThread(threading.Thread):
-	'''
-	Periodically call self.kick()
-	'''
-	KICK_PERIOD = 8
-	
-	active = True
-	timer = None
-	
-	lux_context = None
-	
-	def __init__(self, lux_context):
-		threading.Thread.__init__(self)
-		self.lux_context = lux_context
-	
-	def stop(self):
-		self.active = False
-		if self.timer is not None:
-			self.timer.cancel()
-			
-	def run(self):
-		'''
-		Timed Thread loop
-		'''
-		
-		while self.active:
-			self.timer = threading.Timer(self.KICK_PERIOD, self.kick)
-			self.timer.start()
-			if self.timer.isAlive(): self.timer.join()
-			
-	def kick(self):
-		'''
-		sub-classes do their work here
-		'''
-		pass
-	
+from ef.util.util import TimerThread
 
 def format_elapsed_time(t):
 	td = datetime.timedelta(seconds=t)
@@ -90,7 +55,7 @@ def format_elapsed_time(t):
 	
 	return '%i:%02i:%02i' % (hrs, min%60, td.seconds%60)
 
-class LuxAPIStats(LuxTimerThread):
+class LuxAPIStats(TimerThread):
 	'''
 	Periodically get lux stats
 	'''
@@ -135,31 +100,25 @@ class LuxAPIStats(LuxTimerThread):
 			
 	def kick(self):
 		for k in self.stats_dict.keys():
-			self.stats_dict[k] = self.lux_context.statistics(k)
+			self.stats_dict[k] = self.LocalStorage['lux_context'].statistics(k)
 		
 		self.stats_string = ' | '.join(['%s'%self.stats_format[k](v) for k,v in self.stats_dict.items()])
 			  
-class LuxFilmDisplay(LuxTimerThread):
+class LuxFilmDisplay(TimerThread):
 	'''
 	Periodically update render result with Lux's framebuffer
 	'''
-	RE = None
-			
-	def start(self, RE):
-		self.RE = RE
-		LuxTimerThread.start(self)
-			
 	def kick(self, render_end=False):
-		if self.RE is not None and self.lux_context.statistics('sceneIsReady') > 0.0:
-			self.lux_context.updateFramebuffer()
+		if self.LocalStorage['RE'] is not None and self.LocalStorage['lux_context'].statistics('sceneIsReady') > 0.0:
+			self.LocalStorage['lux_context'].updateFramebuffer()
 			px = [] #self.lux_context.framebuffer()
-			xres = int(self.lux_context.statistics('filmXres'))
-			yres = int(self.lux_context.statistics('filmYres'))
+			xres = int(self.LocalStorage['lux_context'].statistics('filmXres'))
+			yres = int(self.LocalStorage['lux_context'].statistics('filmYres'))
 			if render_end:
 				LuxLog('Final render result %ix%i' % (xres,yres))
 			else:
 				LuxLog('Updating render result %ix%i' % (xres,yres))
-			self.RE.update_framebuffer(xres,yres,px)
+			self.LocalStorage['RE'].update_framebuffer(xres,yres,px)
 
 class LuxManager(object):
 	'''
@@ -245,7 +204,8 @@ class LuxManager(object):
 			time.sleep(0.3)
 		
 		self.stats_thread.start()
-		self.fb_thread.start(RE)
+		self.fb_thread.LocalStorage['RE'] = RE
+		self.fb_thread.start()
 		
 		for i in range(self.thread_count - 1):
 			self.lux_context.addThread()
@@ -263,7 +223,9 @@ class LuxManager(object):
 			self.stats_thread.stop()
 			self.stats_thread.join()
 		
-		self.stats_thread  = LuxAPIStats(self.lux_context)
+		self.stats_thread  = LuxAPIStats(
+			{ 'lux_context': self.lux_context }
+		)
 		
 		if not self.started: return
 		self.started = False
@@ -278,7 +240,9 @@ class LuxManager(object):
 			# Get the last image
 			self.fb_thread.kick(render_end=True)
 		
-		self.fb_thread  = LuxFilmDisplay(self.lux_context)
+		self.fb_thread  = LuxFilmDisplay(
+			{ 'lux_context': self.lux_context }
+		)
 		
 		self.lux_context.cleanup()
 		

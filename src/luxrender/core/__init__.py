@@ -326,8 +326,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# can be controlled.
 				ctx = self.LuxManager.lux_context.parse(self.LuxManager.lux_context.file_names[0], True)
 				self.LuxManager.lux_context = ctx
-				self.LuxManager.stats_thread.lux_context = ctx
-				self.LuxManager.fb_thread.lux_context = ctx
+				self.LuxManager.stats_thread.LocalStorage['lux_context'] = ctx
+				self.LuxManager.fb_thread.LocalStorage['lux_context'] = ctx
 		elif worldEnd:
 			#print('calling pylux.context.worldEnd() (2)')
 			self.LuxManager.lux_context.worldEnd()

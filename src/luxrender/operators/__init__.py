@@ -66,7 +66,7 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 
 class EXPORT_OT_luxrender(bpy.types.Operator):
 	bl_idname = 'export.luxrender'
-	bl_label = 'Export LuxRender Scene...'
+	bl_label = 'Export LuxRender Scene (.lxs)'
 	
 	filename		= bpy.props.StringProperty(name='IGS filename')
 	directory		= bpy.props.StringProperty(name='IGS directory')
