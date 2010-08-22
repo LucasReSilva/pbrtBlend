@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import datetime, time
+import time
 
 import bpy
 
@@ -46,14 +46,7 @@ import luxrender.module.luxfire_client
 # Access lux only through pylux bindings
 import luxrender.module.pure_api
 
-from ef.util.util import TimerThread
-
-def format_elapsed_time(t):
-	td = datetime.timedelta(seconds=t)
-	min = td.days*1440  + td.seconds/60.0
-	hrs = td.days*24	+ td.seconds/3600.0
-	
-	return '%i:%02i:%02i' % (hrs, min%60, td.seconds%60)
+from ef.util.util import TimerThread, format_elapsed_time
 
 class LuxAPIStats(TimerThread):
 	'''
