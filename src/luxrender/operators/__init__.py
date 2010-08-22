@@ -91,6 +91,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			threads = scene.luxrender_engine.threads
 		
 		# Set up the rendering context
+		self.report({'INFO'}, 'Creating LuxRender context')
 		LuxManager = LM(
 			scene.name,
 			api_type = self.properties.api_type,
@@ -113,7 +114,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			
 			if not os.access( self.properties.directory, os.W_OK):
 				self.report({'ERROR'}, 'Output path "%s" is not writable' % self.properties.directory)
-				return {'FINISHED'}
+				return False
 			
 			if self.properties.filename.endswith('.lxs'):
 				self.properties.filename = self.properties.filename[:-4]
@@ -134,7 +135,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				)
 			else:
 				self.report({'ERROR'}, 'Nothing to do! Select at least one of LXM/LXS/LXO')
-				return {'FINISHED'}
+				return False
 		else:
 			# Set export path so that relative paths in export work correctly
 			efutil.export_path = scene.render.filepath
@@ -149,7 +150,10 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	def execute(self, context):
 		scene = context.scene
 		lux_context = self.export_init(scene)
+		if lux_context == False:
+			return {'CANCELLED'}
 		
+		self.report({'INFO'}, 'Exporting render settings')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
 			# Set up render engine parameters
 			lux_context.sampler(			*scene.luxrender_sampler.api_output()		)
@@ -192,16 +196,19 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MAIN)
 			
+			self.report({'INFO'}, 'Exporting lights')
 			if export_lights.lights(lux_context, scene) == False:
 				self.report({'ERROR'}, 'No lights in scene!')
-				return {'FINISHED'}
+				return {'CANCELLED'}
 		
+		self.report({'INFO'}, 'Exporting materials')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxm):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MATS)
 			export_materials.ExportedMaterials.clear()
 			export_materials.write_lxm(lux_context, scene)
 		
+		self.report({'INFO'}, 'Exporting geometry')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxo):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.GEOM)
@@ -210,6 +217,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		if self.properties.write_all_files:
 			lux_context.worldEnd()
 		
+		self.report({'INFO'}, 'Export finished')
 		return {'FINISHED'}
 
 menu_func = lambda self, context: self.layout.operator("export.luxrender", text="Export LuxRender Scene...")

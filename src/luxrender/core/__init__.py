@@ -193,11 +193,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		# TODO: don't read the file whilst it is still being written..
 		# ... however file locking in python seems incomplete/non-portable ?
 		if os.path.exists(self.output_file):
+			bpy.ops.ef.msg(msg_text='Updating RenderResult')
 			lay = result.layers[0]
 			# TODO: use the framebuffer direct from pylux when Blender's API supports it
 			lay.load_from_file(self.output_file)
 		else:
-			LuxLog('ERROR: Could not load render result from %s' % self.output_file)
+			err_msg = 'ERROR: Could not load render result from %s' % self.output_file
+			LuxLog(err_msg)
+			bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
 		self.end_result(result)
 	
 	def render(self, context):
@@ -215,10 +218,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			ui.property_reload()
 		
 		if context.name == 'preview':
-			self.render_preview(context)
+			export_result = self.render_preview(context)
 		else:
-			self.render_scene(context)
+			export_result = self.render_scene(context)
 			
+		if export_result == False:
+			return
+		
 		self.render_start(context)
 	
 	def render_scene(self, scene):
@@ -239,7 +245,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				output_dir = os.path.dirname(scene.render.filepath)
 		
 		output_filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
-		bpy.ops.export.luxrender(
+		export_result = bpy.ops.export.luxrender(
 			directory = output_dir,
 			filename = output_filename,
 			
@@ -248,12 +254,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			write_all_files = False,		# Use UI file write settings
 		)
 		
+		if 'CANCELLED' in export_result:
+			return False
+		
 		if api_type == 'FILE':
 			self.output_file = efutil.path_relative_to_export(
 				os.path.join(output_dir, output_filename) + '.png'
 			)
 		else:
 			self.output_file = efutil.path_relative_to_export(efutil.export_path) + '.png'
+		
+		return True
 	
 	def render_start(self, scene):
 		self.LuxManager = LM.ActiveManager
@@ -323,6 +334,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		# Begin rendering
 		if start_rendering:
+			bpy.ops.ef.msg(msg_text='Starting LuxRender')
 			if internal:
 				self.LuxManager.start(self)
 				self.update_stats('', 'LuxRender: Rendering warmup')
