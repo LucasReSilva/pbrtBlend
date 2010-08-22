@@ -47,10 +47,12 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	bl_idname = "luxrender.volume_add"
 	bl_label = "Add LuxRender Volume"
 	
+	new_volume_name = bpy.props.StringProperty(default='New Volume')
+	
 	def invoke(self, context, event):
 		v = context.scene.luxrender_world.volumes
 		v.add()
-		v[len(v)-1].name = 'New Volume'
+		v[len(v)-1].name = self.properties.new_volume_name
 		return {'FINISHED'}
 	
 class LUXRENDER_OT_volume_remove(bpy.types.Operator):
@@ -130,14 +132,12 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 					LXM = LXM,
 					LXO = LXO
 				)
-				self.output_file = efutil.path_relative_to_export(lxs_filename + '.png')
 			else:
 				self.report({'ERROR'}, 'Nothing to do! Select at least one of LXM/LXS/LXO')
 				return {'FINISHED'}
 		else:
 			# Set export path so that relative paths in export work correctly
 			efutil.export_path = scene.render.filepath
-			self.output_file = efutil.path_relative_to_export(efutil.export_path) + '.png'
 		
 		return lux_context
 	

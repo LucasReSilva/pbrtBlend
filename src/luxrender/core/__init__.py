@@ -237,15 +237,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				output_dir = scene.render.filepath
 			else:
 				output_dir = os.path.dirname(scene.render.filepath)
-			
+		
+		output_filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
 		bpy.ops.export.luxrender(
 			directory = output_dir,
-			filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current),
+			filename = output_filename,
 			
 			api_type = api_type,			# Set export target
 			write_files = write_files,		# Use file write decision from above
 			write_all_files = False,		# Use UI file write settings
 		)
+		
+		if api_type == 'FILE':
+			self.output_file = efutil.path_relative_to_export(
+				os.path.join(output_dir, output_filename) + '.png'
+			)
+		else:
+			self.output_file = efutil.path_relative_to_export(efutil.export_path) + '.png'
 	
 	def render_start(self, scene):
 		self.LuxManager = LM.ActiveManager
