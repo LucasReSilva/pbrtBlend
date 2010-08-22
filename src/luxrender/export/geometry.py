@@ -307,5 +307,9 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		pc = int(100 * ipc/total_objects)
 		if pc not in rpcs:
 			rpcs.append(pc)
-			render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
+			#render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
+			bpy.ops.ef.msg(
+				msg_type='INFO',
+				msg_text='LuxRender: Parsing meshes %i%%' % pc
+			)
 	

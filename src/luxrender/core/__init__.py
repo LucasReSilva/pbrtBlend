@@ -52,13 +52,6 @@ from ..ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
 								lampspectrum, mapping, marble, mix, scale, \
 								transform, uv, windy, wrinkled
 
-from ..export import get_worldscale
-from ..export import film		as export_film
-from ..export import lights		as export_lights
-from ..export import materials	as export_materials
-from ..export import geometry	as export_geometry
-from ..module.file_api			import Files
-
 from ..operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
 
 # Add standard Blender Interface elements
@@ -225,102 +218,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			self.render_preview(context)
 		else:
 			self.render_scene(context)
-		
-	def render_init(self, scene, api_type):
-		
-		# force scene update to current rendering frame
-		scene.set_frame(scene.frame_current)
-		
-		if scene.luxrender_engine.threads_auto:
-			try:
-				import multiprocessing
-				threads = multiprocessing.cpu_count()
-			except:
-				# TODO: when might this fail?
-				threads = 4
-		else:
-			threads = scene.luxrender_engine.threads
-		
-		# Set up the rendering context
-		self.LuxManager = LM(
-			scene.name,
-			api_type = api_type,
-			threads = threads
-		)
-		LM.SetActive(self.LuxManager)
-		
-		lux_context = self.LuxManager.lux_context
-		
-		if api_type == 'FILE':
 			
-			LXS = scene.luxrender_engine.write_lxs
-			LXM = scene.luxrender_engine.write_lxm
-			LXO = scene.luxrender_engine.write_lxo
-			
-			if os.path.isdir(scene.render.filepath):
-				output_dir = scene.render.filepath
-			else:
-				output_dir = os.path.dirname(scene.render.filepath)
-			
-			if not os.access( output_dir, os.W_OK):
-				raise Exception('Output path "%s" is not writable' % output_dir)
-			
-			lxs_filename = os.path.join(
-				output_dir,
-				efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
-			)
-			
-			efutil.export_path = lxs_filename
-			
-			if LXS or LXM or LXO:
-				lux_context.set_filename(
-					lxs_filename,
-					LXS = LXS, 
-					LXM = LXM,
-					LXO = LXO
-				)
-				self.output_file = efutil.path_relative_to_export(lxs_filename + '.png')
-			else:
-				raise Exception('Nothing to do! Select at least one of LXM/LXS/LXO')
-		else:
-			# Set export path so that relative paths in export work correctly
-			efutil.export_path = scene.render.filepath
-			self.output_file = efutil.path_relative_to_export(efutil.export_path) + '.png'
-		
-		# BEGIN!
-		self.update_stats('', 'LuxRender: Parsing Scene')
-		
-		return lux_context
-	
-	def render_preview(self, scene):
-		
-		lux_context = self.render_init(scene, 'API')
-		
-		# Set up render parameters optimised for preview
-		from luxrender.export.preview_scene import preview_scene_setup , preview_scene_lights
-		preview_scene_setup(scene, lux_context)
-		
-		# Set up camera, view and film
-		lux_context.lookAt( *export_film.lookAt(scene) )
-		lux_context.camera( *scene.camera.data.luxrender_camera.api_output(scene, False) )
-		
-		lux_context.worldBegin()
-		preview_scene_lights(lux_context)
-		# Light source iteration and export goes here.
-#		if export_lights.lights(l, scene) == False:
-#			LuxLog('Error - No lights in scene.')
-#			return
-		
-		# No materials as we're using API with no files, export
-		# is handled in geometry iteration
-		
-		# Geometry iteration and export goes here.
-		export_geometry.write_lxo(self, lux_context, scene, smoothing_enabled=False)
-		
-		self.render_start(scene)
+		self.render_start(context)
 	
 	def render_scene(self, scene):
 		
+		output_dir = ''
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
 			api_type = 'API'
 			write_files = scene.luxrender_engine.write_files
@@ -330,69 +233,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		else:
 			api_type = 'FILE'
 			write_files = True
-		
-		lux_context = self.render_init(scene, api_type)
-		
-		if (api_type in ['API', 'LUXFIRE_CLIENT'] and not write_files) or (write_files and scene.luxrender_engine.write_lxs):
-			# Set up render engine parameters
-			lux_context.sampler(			*scene.luxrender_sampler.api_output()		)
-			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()	)
-			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output()	)
-			lux_context.volumeIntegrator(	*scene.luxrender_volume.api_output()		)
-			lux_context.pixelFilter(		*scene.luxrender_filter.api_output()		)
+			if os.path.isdir(scene.render.filepath):
+				output_dir = scene.render.filepath
+			else:
+				output_dir = os.path.dirname(scene.render.filepath)
 			
-			# Set up camera, view and film
-			is_cam_animated = False
-			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
-				scene.set_frame(scene.frame_current + 1)
-				m1 = scene.camera.matrix_world.copy()
-				scene.set_frame(scene.frame_current - 1)
-				if m1 != scene.camera.matrix_world:
-					lux_context.transformBegin(file=Files.MAIN)
-					ws = get_worldscale(scene=scene)
-					matrix *= ws
-					ws = get_worldscale(scene=scene, as_scalematrix=False)
-					matrix[3][0] *= ws
-					matrix[3][1] *= ws
-					matrix[3][2] *= ws
-					pos = m1[3]
-					forwards = -m1[2]
-					target = (pos + forwards)
-					up = m1[1]
-					transform = (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
-					lux_context.lookAt( *transform )
-					lux_context.coordinateSystem('CameraEndTransform')
-					lux_context.transformEnd()
-					is_cam_animated = True
-			lux_context.lookAt(	*export_film.lookAt(scene)	)
-			lux_context.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
-			lux_context.film(	*export_film.film(scene)	)
+		bpy.ops.export.luxrender(
+			directory = output_dir,
+			filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current),
 			
-			lux_context.worldBegin()
-			
-			# Light source iteration and export goes here.
-			export_materials.ExportedTextures.clear()
-			if api_type == 'FILE':
-				lux_context.set_output_file(Files.MAIN)
-			
-			if export_lights.lights(lux_context, scene) == False:
-				LuxLog('Error - No lights in scene.')
-				return
-		
-		if (api_type in ['API', 'LUXFIRE_CLIENT'] and not write_files) or (write_files and scene.luxrender_engine.write_lxm):
-			if api_type == 'FILE':
-				lux_context.set_output_file(Files.MATS)
-			export_materials.ExportedMaterials.clear()
-			export_materials.write_lxm(lux_context, scene)
-		
-		if (api_type in ['API', 'LUXFIRE_CLIENT'] and not write_files) or (write_files and scene.luxrender_engine.write_lxo):
-			if api_type == 'FILE':
-				lux_context.set_output_file(Files.GEOM)
-			export_geometry.write_lxo(self, lux_context, scene, smoothing_enabled=True)
-		
-		self.render_start(scene)
-		
+			api_type = api_type,			# Set export target
+			write_files = write_files,		# Use file write decision from above
+			write_all_files = False,		# Use UI file write settings
+		)
+	
 	def render_start(self, scene):
+		self.LuxManager = LM.ActiveManager
+		
 		# TODO: this will be removed when direct framebuffer
 		# access is implemented in Blender
 		if os.path.exists(self.output_file):
