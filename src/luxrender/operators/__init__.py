@@ -24,24 +24,3 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-
-bl_addon_info = {
-    "name": "LuxBlend",
-    "author": "Doug Hammond (dougal2)",
-    "version": "0.7 2010/08/17",
-    "blender": (2, 5, 3),
-    "category": "Import/Export",
-    "location": "Render Engines",
-    "warning": '',
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/LuxBlend",
-    "tracker_url": "http://projects.blender.org/tracker/index.php?func=detail&aid=23361&group_id=153&atid=514",
-    "description": "This Addon will allow you to render your scenes with the LuxRender engine."
-}
-
-from luxrender.core import RENDERENGINE_luxrender
-
-def register():
-	RENDERENGINE_luxrender.install()
-	
-def unregister():
-	RENDERENGINE_luxrender.uninstall()
