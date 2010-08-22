@@ -55,6 +55,7 @@ def getMeshType(mesh):
 
 def exportGeometry(ob, me, l, smoothing_enabled):
 	
+	LuxLog('Mesh Export: %s' % ob.name)
 	faces_verts = [f.vertices for f in me.faces]
 	ffaces = [f for f in me.faces]
 	#faces_normals = [tuple(f.normal) for f in me.faces]
@@ -312,4 +313,4 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 				msg_type='INFO',
 				msg_text='LuxRender: Parsing meshes %i%%' % pc
 			)
-	
+
