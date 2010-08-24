@@ -31,7 +31,7 @@ from ..module import LuxLog
 from ..module.file_api import Files
 from . import matrix_to_list
 from ..export import ParamSet
-from .materials import export_object_material
+from .materials import export_object_material, get_instance_materials, add_texture_parameter
 
 #-------------------------------------------------
 # getMeshType(mesh)
@@ -169,6 +169,19 @@ def exportInstance(lux_context, scene, ob, matrix):
 	# definition depending on the output type
 	export_object_material(lux_context, ob)
 	
+	# Check for emission material assignment
+	# TODO: re-enable when meshlight instancing supported in lux core
+#	for m in get_instance_materials(ob):
+#		if hasattr(m, 'luxrender_emission') and m.luxrender_emission.use_emission:
+#			lux_context.lightGroup(m.luxrender_emission.lightgroup, [])
+#			arealightsource_params = ParamSet() \
+#					.add_float('gain', m.luxrender_emission.gain) \
+#					.add_float('power', m.luxrender_emission.power) \
+#					.add_float('efficacy', m.luxrender_emission.efficacy)
+#			arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', m.luxrender_emission) )
+#			lux_context.areaLightSource('area', arealightsource_params)
+#			break # just export the first emitting material
+	
 	# object motion blur
 	is_object_animated = False
 	if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
@@ -189,7 +202,7 @@ def exportInstance(lux_context, scene, ob, matrix):
 
 	else:
 		lux_context.objectInstance(ob.data.name)
-
+	
 	lux_context.attributeEnd()
 
 #-------------------------------------------------

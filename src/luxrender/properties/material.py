@@ -78,3 +78,11 @@ class luxrender_material(bpy.types.IDPropertyGroup):
 	
 	pass
 
+class luxrender_emission(bpy.types.IDPropertyGroup):
+	'''
+	Storage class for LuxRender Material emission settings.
+	This class will be instantiated within a Blender Material
+	object.
+	'''
+	
+	pass

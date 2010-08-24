@@ -157,48 +157,49 @@ def material_visibility():
 	
 	return vis
 
-class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
-	'''
-	Material Editor UI Panel
-	'''
-	
-	bl_label = 'LuxRender Materials'
+class _lux_material_base(MaterialButtonsPanel, described_layout):
 	COMPAT_ENGINES = {'luxrender'}
 	
-	
-	property_group = luxrender.properties.material.luxrender_material
-	# prevent creating luxrender_material property group in Scene
+	# prevent creating luxrender_material property groups in Scene
 	property_group_non_global = True
 	
-	
-	@staticmethod
-	def property_reload():
+	@classmethod
+	def property_reload(cls):
 		for mat in bpy.data.materials:
-			material_editor.property_create(mat)
+			cls.property_create(mat)
 	
-	@staticmethod
-	def property_create(mat):
-		if not hasattr(mat, material_editor.property_group.__name__):
+	@classmethod
+	def property_create(cls, mat):
+		if not hasattr(mat, cls.property_group.__name__):
 			#ef.log('Initialising properties in material %s'%context.material.name)
 			ef.init_properties(mat, [{
 				'type': 'pointer',
-				'attr': material_editor.property_group.__name__,
-				'ptype': material_editor.property_group,
-				'name': material_editor.property_group.__name__,
-				'description': material_editor.property_group.__name__
+				'attr': cls.property_group.__name__,
+				'ptype': cls.property_group,
+				'name': cls.property_group.__name__,
+				'description': cls.property_group.__name__
 			}], cache=False)
-			ef.init_properties(material_editor.property_group, material_editor.properties, cache=False)
+			ef.init_properties(cls.property_group, cls.properties, cache=False)
 	
 	# Overridden to provide data storage in the material, not the scene
 	def draw(self, context):
 		if context.material is not None:
-			material_editor.property_create(context.material)
+			self.property_create(context.material)
 			
 			# Set the integrator type in this material in order to show compositing options 
 			context.material.luxrender_material.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
 			
 			for p in self.controls:
 				self.draw_column(p, self.layout, context.material, supercontext=context)
+	
+class material_editor(_lux_material_base, bpy.types.Panel):
+	'''
+	Material Editor UI Panel
+	'''
+	
+	bl_label = 'LuxRender Materials'
+	
+	property_group = luxrender.properties.material.luxrender_material
 	
 	controls = [
 		# Common props
@@ -389,11 +390,92 @@ class material_editor(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 	VolumeParameter('Interior', 'Interior', 'luxrender_material') + \
 	VolumeParameter('Exterior', 'Exterior', 'luxrender_material')
 
-class material_emission(MaterialButtonsPanel, described_layout, bpy.types.Panel):
+
+TC_L = ColorTextureParameter('material', 'L', 'Emission color', 'luxrender_emission', default=(1.0,1.0,1.0) )
+
+class material_emission(_lux_material_base, bpy.types.Panel):
 	'''
 	Material Emission Settings
 	'''
 	
 	bl_label = 'LuxRender Material Emission'
-	COMPAT_ENGINES = {'luxrender'}
+	
+	property_group = luxrender.properties.material.luxrender_emission
+	
+	controls = [
+		'disabled_notice'
+	]
+#	controls = [
+#		'use_emission',
+#		'lightgroup',
+#	] + \
+#	TC_L.get_controls() + \
+#	[
+#		'gain',
+#		'power',
+#		'efficacy',
+#	]
+	
+	visibility = {
+		'lightgroup': 			{ 'use_emission': True },
+		'L_colorlabel': 		{ 'use_emission': True },
+		'L_color': 				{ 'use_emission': True },
+		'L_usecolorrgc':		{ 'use_emission': True },
+		'L_usecolortexture':	{ 'use_emission': True },
+		'L_colortexture':		{ 'use_emission': True, 'L_usecolortexture': True },
+		'gain': 				{ 'use_emission': True },
+		'power': 				{ 'use_emission': True },
+		'efficacy': 			{ 'use_emission': True },
+	}
+	
+	properties = [
+		{
+			'type': 'text',
+			'attr': 'disabled_notice',
+			'name': 'Disabled pending bugfix in LuxRender',
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_emission',
+			'name': 'Use Emission',
+			'default': False
+		},
+		{
+			'type': 'string',
+			'attr': 'lightgroup',
+			'name': 'Light Group',
+			'default': 'default',
+		},
+		{
+			'type': 'float',
+			'attr': 'gain',
+			'name': 'Gain',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e8,
+			'soft_max': 1e8
+		},
+		{
+			'type': 'float',
+			'attr': 'power',
+			'name': 'Power',
+			'default': 100.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e5,
+			'soft_max': 1e5
+		},
+		{
+			'type': 'float',
+			'attr': 'efficacy',
+			'name': 'Efficacy',
+			'default': 17.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e4,
+			'soft_max': 1e4
+		},
+	] + \
+	TC_L.get_properties()
 	

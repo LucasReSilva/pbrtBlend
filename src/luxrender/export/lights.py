@@ -36,39 +36,39 @@ from ..properties import dbo
 from ..export import ParamSet, get_worldscale, matrix_to_list
 
 
-def attr_light(l, name, group, type, params, transform=None):
+def attr_light(lux_context, name, group, type, params, transform=None):
 	'''
-	l				pylux.Context
+	lux_context		pylux.Context
 	name			string
 	type			string
 	params			dict
 	transform		None or list
 	
 	This method outputs a lightSource of the given name and
-	type to context l. The lightSource will be wrapped in a
-	transformBegin...transformEnd block if a transform is
-	given, otherwise it will appear in an attributeBegin...
-	attributeEnd block.
+	type to context lux_context. The lightSource will be
+	wrapped in a transformBegin...transformEnd block if
+	a transform is given, otherwise it will appear in an
+	attributeBegin...attributeEnd block.
 	
 	Returns			None
 	'''
 	
 	if transform is not None:
-		l.transformBegin(comment=name, file=Files.MAIN)
-		l.transform(transform)
+		lux_context.transformBegin(comment=name, file=Files.MAIN)
+		lux_context.transform(transform)
 	else:
-		l.attributeBegin(comment=name, file=Files.MAIN)
+		lux_context.attributeBegin(comment=name, file=Files.MAIN)
 	
 	dbo('LIGHT', (type, params))
-	l.lightGroup(group, [])
-	l.lightSource(type, params)
+	lux_context.lightGroup(group, [])
+	lux_context.lightSource(type, params)
 	
 	if transform is not None:
-		l.transformEnd()
+		lux_context.transformEnd()
 	else:
-		l.attributeEnd()
+		lux_context.attributeEnd()
 
-def exportLights(l, scene, ob, matrix):
+def exportLights(lux_context, scene, ob, matrix):
 	light = ob.data
 		
 	# Params common to all light types
@@ -77,7 +77,6 @@ def exportLights(l, scene, ob, matrix):
 		.add_float('gain', light.energy) \
 		.add_float('importance', light.luxrender_lamp.importance)
 	
-	
 	if light.type == 'SUN':
 		invmatrix = mathutils.Matrix(matrix).invert()
 		light_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
@@ -85,13 +84,12 @@ def exportLights(l, scene, ob, matrix):
 		# nsamples
 		# relsize (sun only)
 		# [a-e]const (sky only)
-		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params)
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params)
 
 		return True
 	
-	
 	# all lights apart from sun + sky have "color L"
-	light_params.update( add_texture_parameter(l, 'L', 'color', light.luxrender_lamp) )
+	light_params.update( add_texture_parameter(lux_context, 'L', 'color', light.luxrender_lamp) )
 	
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5
@@ -100,19 +98,19 @@ def exportLights(l, scene, ob, matrix):
 		light_params.add_point('to', (0,0,-1))
 		light_params.add_float('coneangle', coneangle)
 		light_params.add_float('conedeltaangle', conedeltaangle)
-		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
 
 		return True
 
 	if light.type == 'POINT':
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
 
 		return True
 		
 	if light.type == 'HEMI':
 		if light.luxrender_lamp.infinite_map != '':
-			if l.API_TYPE == 'FILE':
+			if lux_context.API_TYPE == 'FILE':
 				# export relative file path
 				light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
 			else:
@@ -120,7 +118,7 @@ def exportLights(l, scene, ob, matrix):
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
 		# nsamples
 		# gamma
-		attr_light(l, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
 
 		return True
 	
@@ -131,10 +129,10 @@ def exportLights(l, scene, ob, matrix):
 		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
 		light_params.add_float('gain', light.energy * (get_worldscale(scene=scene, as_scalematrix=False)**2))
 		# nsamples
-		l.attributeBegin(ob.name, file=Files.MAIN)
-		l.transform(matrix_to_list(matrix, scene=scene, apply_worldscale=True))
-		l.lightGroup(light.luxrender_lamp.lightgroup, [])
-		l.areaLightSource('area', light_params)
+		lux_context.attributeBegin(ob.name, file=Files.MAIN)
+		lux_context.transform(matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		lux_context.lightGroup(light.luxrender_lamp.lightgroup, [])
+		lux_context.areaLightSource('area', light_params)
 
 		areax = light.size
 
@@ -149,24 +147,24 @@ def exportLights(l, scene, ob, matrix):
 		shape_params = ParamSet() \
 			.add_integer('indices', [0, 1, 2, 0, 2, 3]) \
 			.add_point('P', points)
-		l.shape('trianglemesh', shape_params)
-		l.attributeEnd()
+		lux_context.shape('trianglemesh', shape_params)
+		lux_context.attributeEnd()
 		
 		return True
 
 	return False
 
 #-------------------------------------------------
-# lights(l, scene)
+# lights(lux_context, scene)
 # MAIN export function
 #-------------------------------------------------
-def lights(l, scene):
+def lights(lux_context, scene):
 	'''
-	l				pylux.Context
+	lux_context		pylux.Context
 	scene			bpy.types.scene
 	
 	Iterate over the given scene's light sources,
-	and export the compatible ones to the context l.
+	and export the compatible ones to the context lux_context.
 	
 	Returns Boolean indicating if any light sources
 	were exported.
@@ -199,16 +197,21 @@ def lights(l, scene):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light |= exportLights(l, scene, dupli_ob.object, dupli_ob.matrix_world)
+				have_light |= exportLights(lux_context, scene, dupli_ob.object, dupli_ob.matrix_world)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
 		else:
-			if ob.type != 'LAMP':
-				continue
-
-			have_light |= exportLights(l, scene, ob, ob.matrix_world)
-
-	return have_light
+			if ob.type == 'LAMP':
+				have_light |= exportLights(lux_context, scene, ob, ob.matrix_world)
 		
+		if ob.type == 'MESH':
+			# now check for emissive materials on ob
+			for im in ob.material_slots:
+				have_light |= im.material.luxrender_emission.use_emission
+			for m in ob.data.materials:
+				have_light |= m.luxrender_emission.use_emission 
+	
+	return have_light
+

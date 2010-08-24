@@ -146,6 +146,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		# Materials
 		ui_materials.material_editor,
+		ui_materials.material_emission,
 		
 		# Textures
 		texture_main.ui_panel_main,
