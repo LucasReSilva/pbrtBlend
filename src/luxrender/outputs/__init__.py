@@ -31,14 +31,7 @@ import bpy
 from ef.ef import ef
 from ef.util.util import TimerThread, format_elapsed_time
 
-# CHOOSE API TYPE
-# Write conventional lx* files and use pylux to manage lux process or external process
-from . import file_api
-# Access lux via a remote LuxFire slave
-from . import luxfire_client
-# Access lux only through pylux bindings
-from . import pure_api
-
+# This def ia above the following import statements for a reason!
 def LuxLog(*args, popup=False):
 	'''
 	Send string to EF log, marked as belonging to LuxRender module.
@@ -46,6 +39,14 @@ def LuxLog(*args, popup=False):
 	'''
 	if len(args) > 0:
 		ef.log(' '.join(['%s'%a for a in args]), module_name='Lux', popup=popup)
+
+# CHOOSE API TYPE
+# Write conventional lx* files and use pylux to manage lux process or external process
+from . import file_api
+# Access lux via a remote LuxFire slave
+from . import luxfire_client
+# Access lux only through pylux bindings
+from . import pure_api
 
 class LuxAPIStats(TimerThread):
 	'''
