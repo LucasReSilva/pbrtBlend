@@ -145,12 +145,7 @@ def export_object_material(lux_context, ob):
 	elif lux_context.API_TYPE == 'PURE':
 		materials_direct(lux_context, ob)
 
-def materials_direct(lux_context, ob):
-	for m in ob.data.materials:
-		if hasattr(m, 'luxrender_material'):
-			lux_context.material( *luxrender_material_params(lux_context, m) )
-
-def materials_file(lux_context, ob):
+def get_instance_materials(ob):
 	obmats = []
 	# Grab materials attached to object instances ...
 	for ms in ob.material_slots:
@@ -159,7 +154,18 @@ def materials_file(lux_context, ob):
 	for m in ob.data.materials:
 		obmats.append(m)
 	
-	for m in obmats:
+	# when exporting in direct mode, per instance materials will take precedence
+	# over the base mesh's material definition.
+	return obmats
+	
+def materials_direct(lux_context, ob):
+	for m in get_instance_materials(ob):
+		if hasattr(m, 'luxrender_material'):
+			lux_context.material( *luxrender_material_params(lux_context, m) )
+			break	# just use the first material found
+
+def materials_file(lux_context, ob):
+	for m in get_instance_materials(ob):
 		if hasattr(m, 'luxrender_material') and m.name not in ExportedMaterials.material_names:
 			mat_type, material_params = luxrender_material_params(lux_context, m, add_type=True)
 			ExportedMaterials.makeNamedMaterial(m.name, material_params)
