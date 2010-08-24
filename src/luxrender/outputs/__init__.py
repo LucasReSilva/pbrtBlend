@@ -29,14 +29,7 @@ import time
 import bpy
 
 from ef.ef import ef
-
-def LuxLog(*args, popup=False):
-	'''
-	Send string to EF log, marked as belonging to LuxRender module.
-	Accepts variable args (can be used as pylux.errorHandler)
-	'''
-	if len(args) > 0:
-		ef.log(' '.join(['%s'%a for a in args]), module_name='Lux', popup=popup)
+from ef.util.util import TimerThread, format_elapsed_time
 
 # CHOOSE API TYPE
 # Write conventional lx* files and use pylux to manage lux process or external process
@@ -46,7 +39,13 @@ from . import luxfire_client
 # Access lux only through pylux bindings
 from . import pure_api
 
-from ef.util.util import TimerThread, format_elapsed_time
+def LuxLog(*args, popup=False):
+	'''
+	Send string to EF log, marked as belonging to LuxRender module.
+	Accepts variable args (can be used as pylux.errorHandler)
+	'''
+	if len(args) > 0:
+		ef.log(' '.join(['%s'%a for a in args]), module_name='Lux', popup=popup)
 
 class LuxAPIStats(TimerThread):
 	'''
