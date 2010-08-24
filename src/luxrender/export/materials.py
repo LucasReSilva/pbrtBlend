@@ -189,7 +189,7 @@ def convert_texture(texture):
 			'QUADRATIC_SPHERE':	'halo',
 			'RADIAL':			'radial',
 		}
-		paramset.add_bool('flipxy', texture.flip_axis) \
+		paramset.add_bool('flipxy', texture.use_flip_axis) \
 				.add_string('type', progression_map[texture.progression])
 	
 	if texture.type == 'CLOUDS':
