@@ -24,11 +24,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-
-from ..export import get_worldscale
-from ..export import ParamSet
-
 from ef.util import util as efutil
+
+from luxrender.export import get_worldscale
+from luxrender.export import ParamSet
 
 def lookAt(scene):
 	'''

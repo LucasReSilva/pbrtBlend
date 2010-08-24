@@ -42,11 +42,11 @@ def LuxLog(*args, popup=False):
 
 # CHOOSE API TYPE
 # Write conventional lx* files and use pylux to manage lux process or external process
-from . import file_api
+from luxrender.outputs import file_api
 # Access lux via a remote LuxFire slave
-from . import luxfire_client
+from luxrender.outputs import luxfire_client
 # Access lux only through pylux bindings
-from . import pure_api
+from luxrender.outputs import pure_api
 
 class LuxAPIStats(TimerThread):
 	'''

@@ -32,7 +32,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 # Lux API
-from ..properties.mesh import luxrender_mesh
+from luxrender.properties.mesh import luxrender_mesh
 
 class meshes(MeshButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'

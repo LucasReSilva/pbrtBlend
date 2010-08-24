@@ -28,8 +28,8 @@ import bpy
 
 from ef.util import util as efutil
 
-from ...export import ParamSet
-from ..textures import luxrender_texture_base
+from luxrender.export import ParamSet
+from luxrender.ui.textures import luxrender_texture_base
 
 class imagemap(bpy.types.IDPropertyGroup):
 	

@@ -26,7 +26,7 @@
 #
 
 # TODO: Implement
-from .pure_api import Custom_Context as Pylux_Context
+from luxrender.outputs.pure_api import Custom_Context as Pylux_Context
 
 class Custom_Context(Pylux_Context):
 	'''

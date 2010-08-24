@@ -33,8 +33,8 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.camera
-from ..properties.camera import luxrender_camera, luxrender_colorspace, luxrender_tonemapping
-from ..outputs import LuxManager as LM
+from luxrender.properties.camera import luxrender_camera, luxrender_colorspace, luxrender_tonemapping
+from luxrender.outputs import LuxManager as LM
 
 class camera_panel(CameraButtonsPanel, described_layout):
 	COMPAT_ENGINES = {'luxrender'}

@@ -26,8 +26,8 @@
 #
 import bpy
 
-from .material import has_material_property
-from ..export import ParamSet
+from luxrender.properties.material import has_material_property
+from luxrender.export import ParamSet
 
 def has_property(parent_type, property_name):
 	if parent_type == 'material':

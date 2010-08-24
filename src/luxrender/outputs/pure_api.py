@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from . import LuxLog
+from luxrender.outputs import LuxLog
 try:
 	try:
 		tmp = PYLUX_AVAILABLE

@@ -26,7 +26,7 @@
 #
 import os
 
-from . import LuxLog
+from luxrender.outputs import LuxLog
 
 class Files(object):
 	MAIN = 0

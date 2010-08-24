@@ -33,8 +33,8 @@ from ef.ef import ef
 from ef.validate import Logic_Operator as LO 
 
 # Lux API
-from ..properties.lamp import luxrender_lamp
-from ..properties.texture import ColorTextureParameter
+from luxrender.properties.lamp import luxrender_lamp
+from luxrender.properties.texture import ColorTextureParameter
 
 narrowui = 180
 

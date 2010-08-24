@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from . import LuxLog
+from luxrender.outputs import LuxLog
 try:
 	from .LuxFire.Client import ListLuxFireGroup, ServerLocator
 	from .LuxFire.Client.Renderer import RendererClient

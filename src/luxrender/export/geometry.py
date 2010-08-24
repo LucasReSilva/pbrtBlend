@@ -27,11 +27,11 @@
 import bpy
 from mathutils import Matrix
 
-from ..outputs import LuxLog
-from ..outputs.file_api import Files
-from . import matrix_to_list
-from ..export import ParamSet
-from .materials import export_object_material, get_instance_materials, add_texture_parameter
+from luxrender.outputs import LuxLog
+from luxrender.outputs.file_api import Files
+from luxrender.export import ParamSet
+from luxrender.export import matrix_to_list
+from luxrender.export.materials import export_object_material, get_instance_materials, add_texture_parameter
 
 #-------------------------------------------------
 # getMeshType(mesh)

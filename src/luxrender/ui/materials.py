@@ -33,9 +33,9 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 # Lux API
-from ..properties.material import luxrender_material, luxrender_emission
-from ..properties.texture import has_property 
-from ..properties.texture import FloatTextureParameter, ColorTextureParameter
+from luxrender.properties.material import luxrender_material, luxrender_emission
+from luxrender.properties.texture import has_property 
+from luxrender.properties.texture import FloatTextureParameter, ColorTextureParameter
 
 def MaterialParameter(attr, name, property_group):
 	return [

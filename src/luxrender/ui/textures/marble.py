@@ -26,8 +26,8 @@
 #
 import bpy
 
-from ...export import ParamSet
-from ..textures import luxrender_texture_base
+from luxrender.export import ParamSet
+from luxrender.ui.textures import luxrender_texture_base
 
 class marble(bpy.types.IDPropertyGroup):
 	

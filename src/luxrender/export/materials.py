@@ -28,9 +28,9 @@ import bpy
 
 from ef.validate import Visibility
 
-from ..export import ParamSet
-from ..outputs import LuxLog
-from ..properties.material import material_property_map
+from luxrender.export import ParamSet
+from luxrender.outputs import LuxLog
+from luxrender.properties.material import material_property_map
 
 def write_lxm(lux_context, scene):
 	'''

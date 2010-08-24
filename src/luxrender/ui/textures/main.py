@@ -31,8 +31,8 @@ from properties_texture import TextureButtonsPanel
 from ef.ui import described_layout
 from ef.ef import ef
 
-from ..textures import luxrender_texture_base
-from ...properties.texture import luxrender_texture
+from luxrender.ui.textures import luxrender_texture_base
+from luxrender.properties.texture import luxrender_texture
 
 class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 	'''

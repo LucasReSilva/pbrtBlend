@@ -33,7 +33,7 @@ from ef.ef import ef
 
 # Lux API
 import luxrender.properties.world
-from ..properties.world import luxrender_world
+from luxrender.properties.world import luxrender_world
 
 class world(WorldButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender World Options'

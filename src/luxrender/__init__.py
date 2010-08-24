@@ -38,7 +38,7 @@ bl_addon_info = {
 	"description": "This Addon will allow you to render your scenes with the LuxRender engine."
 }
 
-from .core import RENDERENGINE_luxrender
+from luxrender.core import RENDERENGINE_luxrender
 
 def register():
 	RENDERENGINE_luxrender.install()

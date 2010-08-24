@@ -28,8 +28,8 @@ import bpy
 
 from ef.validate import Logic_OR as O
 
-from ...export import ParamSet
-from ..textures import luxrender_texture_base
+from luxrender.export import ParamSet
+from luxrender.ui.textures import luxrender_texture_base
 
 class mapping(bpy.types.IDPropertyGroup):
 	

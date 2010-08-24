@@ -37,22 +37,41 @@ from ef.engine import engine_base
 from ef.util import util as efutil
 
 # Exporter libs
-from ..outputs import LuxManager as LM
-from ..outputs import LuxLog
+#from ..outputs import LuxManager as LM
+#from ..outputs import LuxLog
+#
+#from ..ui import render_panels	as ui_render_panels
+#from ..ui import camera			as ui_camera
+#from ..ui import lamps			as ui_lamps
+#from ..ui import meshes			as ui_meshes
+#from ..ui import world			as ui_world
+#from ..ui import materials		as ui_materials
+#from ..ui.textures import main	as texture_main
+#from ..ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
+#								equalenergy, fbm, gaussian, harlequin, imagemap, \
+#								lampspectrum, mapping, marble, mix, scale, \
+#								transform, uv, windy, wrinkled
+#
+#from ..operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
 
-from ..ui import render_panels	as ui_render_panels
-from ..ui import camera			as ui_camera
-from ..ui import lamps			as ui_lamps
-from ..ui import meshes			as ui_meshes
-from ..ui import world			as ui_world
-from ..ui import materials		as ui_materials
-from ..ui.textures import main	as texture_main
-from ..ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
-								equalenergy, fbm, gaussian, harlequin, imagemap, \
-								lampspectrum, mapping, marble, mix, scale, \
-								transform, uv, windy, wrinkled
+from luxrender.outputs import LuxManager as LM
+from luxrender.outputs import LuxLog
 
-from ..operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
+from luxrender.ui import render_panels	as ui_render_panels
+from luxrender.ui import camera			as ui_camera
+from luxrender.ui import lamps			as ui_lamps
+from luxrender.ui import meshes			as ui_meshes
+from luxrender.ui import world			as ui_world
+from luxrender.ui import materials		as ui_materials
+from luxrender.ui.textures import main	as texture_main
+from luxrender.ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
+										equalenergy, fbm, gaussian, harlequin, imagemap, \
+										lampspectrum, mapping, marble, mix, scale, \
+										transform, uv, windy, wrinkled
+
+from luxrender.operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
+
+
 
 # Add standard Blender Interface elements
 import properties_render

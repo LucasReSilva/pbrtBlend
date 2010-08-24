@@ -26,8 +26,8 @@
 #
 import bpy
 
-from . import dbo
-from ..export import ParamSet
+from luxrender.properties import dbo
+from luxrender.export import ParamSet
 
 class luxrender_integrator(bpy.types.IDPropertyGroup):
 	'''

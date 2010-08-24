@@ -26,11 +26,11 @@
 #
 import bpy
 
-from ...export import ParamSet
-from ...export.materials import add_texture_parameter
-from ...outputs import LuxManager
-from ...properties.texture import ColorTextureParameter, FloatTextureParameter
-from ..textures import luxrender_texture_base
+from luxrender.export import ParamSet
+from luxrender.export.materials import add_texture_parameter
+from luxrender.outputs import LuxManager
+from luxrender.properties.texture import ColorTextureParameter, FloatTextureParameter
+from luxrender.ui.textures import luxrender_texture_base
 
 class scale(bpy.types.IDPropertyGroup):
 	

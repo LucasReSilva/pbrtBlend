@@ -32,15 +32,15 @@ import ef.ui
 from ef.util import util as efutil
 from ef.validate import Logic_OR as O, Logic_AND as A
 
-from ..outputs.pure_api import PYLUX_AVAILABLE
-from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
+from luxrender.outputs.pure_api import PYLUX_AVAILABLE
+from luxrender.outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
 
-from ..properties.engine import luxrender_engine
-from ..properties.sampler import luxrender_sampler
-from ..properties.integrator import luxrender_integrator
-from ..properties.volume import luxrender_volume
-from ..properties.filter import luxrender_filter
-from ..properties.accelerator import luxrender_accelerator
+from luxrender.properties.engine import luxrender_engine
+from luxrender.properties.sampler import luxrender_sampler
+from luxrender.properties.integrator import luxrender_integrator
+from luxrender.properties.volume import luxrender_volume
+from luxrender.properties.filter import luxrender_filter
+from luxrender.properties.accelerator import luxrender_accelerator
 
 class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
 	'''
