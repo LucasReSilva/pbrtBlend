@@ -151,7 +151,15 @@ def materials_direct(lux_context, ob):
 			lux_context.material( *luxrender_material_params(lux_context, m) )
 
 def materials_file(lux_context, ob):
+	obmats = []
+	# Grab materials attached to object instances ...
+	for ms in ob.material_slots:
+		obmats.append(ms.material)
+	# ... and to the object's mesh data
 	for m in ob.data.materials:
+		obmats.append(m)
+	
+	for m in obmats:
 		if hasattr(m, 'luxrender_material') and m.name not in ExportedMaterials.material_names:
 			mat_type, material_params = luxrender_material_params(lux_context, m, add_type=True)
 			ExportedMaterials.makeNamedMaterial(m.name, material_params)

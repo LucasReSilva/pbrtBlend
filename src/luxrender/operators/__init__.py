@@ -192,7 +192,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			lux_context.worldBegin()
 			
 			# Light source iteration and export goes here.
-			export_materials.ExportedTextures.clear()
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MAIN)
 			

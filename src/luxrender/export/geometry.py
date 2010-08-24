@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import random
-
 import bpy
 from mathutils import Matrix
 
@@ -53,7 +51,7 @@ def getMeshType(mesh):
 	
 	return dstr,params
 
-def exportGeometry(ob, me, l, smoothing_enabled):
+def exportGeometry(ob, me, lux_context, smoothing_enabled):
 	
 	LuxLog('Mesh Export: %s' % ob.name)
 	faces_verts = [f.vertices for f in me.faces]
@@ -123,7 +121,7 @@ def exportGeometry(ob, me, l, smoothing_enabled):
 	# export shape		
 	shape_type, shape_params = getMeshType(ob.data)
 	
-	if l.API_TYPE == 'PURE':
+	if lux_context.API_TYPE == 'PURE':
 		# ntris isn't really the number of tris!!
 		shape_params.add_integer('ntris', ntris)
 		shape_params.add_integer('nvertices', nvertices)
@@ -140,15 +138,15 @@ def exportGeometry(ob, me, l, smoothing_enabled):
 	#print(' %s nvertices: %i' % (ob.name, nvertices))
 	
 	if ob.data.luxrender_mesh.portal:
-		l.portalShape(shape_type, shape_params)
+		lux_context.portalShape(shape_type, shape_params)
 	else:
-		l.shape(shape_type, shape_params)
+		lux_context.shape(shape_type, shape_params)
 
 #-------------------------------------------------
-# export_mesh(l, scene, object, matrix)
+# export_mesh(lux_context, scene, object, matrix)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def exportMesh(l, scene, ob, smoothing_enabled):
+def exportMesh(lux_context, scene, ob, smoothing_enabled):
 	me = ob.create_mesh(scene, True, 'RENDER')
 		
 	if not me:
@@ -156,20 +154,20 @@ def exportMesh(l, scene, ob, smoothing_enabled):
 	
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
-	l.objectBegin(ob.data.name)
-	exportGeometry(ob, me, l, smoothing_enabled)
-	l.objectEnd()
+	lux_context.objectBegin(ob.data.name)
+	exportGeometry(ob, me, lux_context, smoothing_enabled)
+	lux_context.objectEnd()
 	
 	bpy.data.meshes.remove(me)
 
-def exportInstance(l, scene, ob, matrix):
-	l.attributeBegin(comment=ob.name, file=Files.GEOM)
+def exportInstance(lux_context, scene, ob, matrix):
+	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	# object translation/rotation/scale 
-	l.transform( matrix_to_list(matrix, scene=scene, apply_worldscale=True) )
+	lux_context.transform( matrix_to_list(matrix, scene=scene, apply_worldscale=True) )
 	
 	# Export either NamedMaterial stmt or the full material
 	# definition depending on the output type
-	export_object_material(l, ob)
+	export_object_material(lux_context, ob)
 	
 	# object motion blur
 	is_object_animated = False
@@ -182,34 +180,29 @@ def exportInstance(l, scene, ob, matrix):
 	
 	# special case for motion blur since the mesh is already exported before the attribute
 	if is_object_animated:
-		l.transformBegin(comment=ob.name, file=Files.GEOM)
-		l.identity()
-		l.transform(matrix_to_list(m1, scene=scene, apply_worldscale=True))
-		l.coordinateSystem('%s' % ob.data.name + '_motion')
-		l.transformEnd()
-		l.motionInstance(ob.data.name, 0.0, 1.0, ob.data.name + '_motion')
+		lux_context.transformBegin(comment=ob.name, file=Files.GEOM)
+		lux_context.identity()
+		lux_context.transform(matrix_to_list(m1, scene=scene, apply_worldscale=True))
+		lux_context.coordinateSystem('%s' % ob.data.name + '_motion')
+		lux_context.transformEnd()
+		lux_context.motionInstance(ob.data.name, 0.0, 1.0, ob.data.name + '_motion')
 
 	else:
-		# Export either NamedMaterial stmt or the full material
-		# definition depending on the output type
-		#export_object_material(l, ob)
+		lux_context.objectInstance(ob.data.name)
 
-		#exportGeometry(ob, me, l, smoothing_enabled)
-		l.objectInstance(ob.data.name)
-
-	l.attributeEnd()
+	lux_context.attributeEnd()
 
 #-------------------------------------------------
-# write_lxo(render_engine, l, scene, smoothing_enabled=True)
+# write_lxo(render_engine, lux_context, scene, smoothing_enabled=True)
 # MAIN export function
 #-------------------------------------------------
-def write_lxo(render_engine, l, scene, smoothing_enabled=True):
+def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 	'''
-	l			pylux.Context
-	scene		bpy.types.scene
+	lux_context		pylux.Context
+	scene			bpy.types.scene
 	
 	Iterate over the given scene's objects,
-	and export the compatible ones to the context l.
+	and export the compatible ones to the context lux_context.
 	
 	Returns		None
 	'''
@@ -221,7 +214,7 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 	vis_layers = scene.layers
 	
 	sel = scene.objects
-	total_objects = len(sel)	
+	total_objects = len(sel)
 
 	# browse all scene objects for "mesh-convertible" ones
 	# First round: check for duplis
@@ -252,10 +245,10 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 				if dupli_ob.object.type != 'MESH':
 					continue
 				if not dupli_ob.object.data.name in meshes_exported:
-					exportMesh(l, scene, dupli_ob.object, smoothing_enabled)
+					exportMesh(lux_context, scene, dupli_ob.object, smoothing_enabled)
 					meshes_exported.add(dupli_ob.object.data.name)
 				
-				exportInstance(l, scene, dupli_ob.object, dupli_ob.object.matrix_world)
+				exportInstance(lux_context, scene, dupli_ob.object, dupli_ob.object.matrix_world)
 				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
@@ -295,11 +288,11 @@ def write_lxo(render_engine, l, scene, smoothing_enabled=True):
 		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			# Export mesh definition once
 			if not ob.data.name in meshes_exported:
-				exportMesh(l, scene, ob, smoothing_enabled)
+				exportMesh(lux_context, scene, ob, smoothing_enabled)
 				meshes_exported.add(ob.data.name)
 			
 			# Export object instance
-			exportInstance(l, scene, ob, ob.matrix_world)
+			exportInstance(lux_context, scene, ob, ob.matrix_world)
 
 		# exported another object		
 		ipc += 1.0
