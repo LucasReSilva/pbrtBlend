@@ -153,6 +153,9 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		if lux_context == False:
 			return {'CANCELLED'}
 		
+		export_materials.ExportedMaterials.clear()
+		export_materials.ExportedTextures.clear()
+		
 		self.report({'INFO'}, 'Exporting render settings')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
 			# Set up render engine parameters
@@ -204,7 +207,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxm):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MATS)
-			export_materials.ExportedMaterials.clear()
 			export_materials.write_lxm(lux_context, scene)
 		
 		self.report({'INFO'}, 'Exporting geometry')

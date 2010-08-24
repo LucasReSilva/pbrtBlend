@@ -146,7 +146,7 @@ def exportGeometry(ob, me, lux_context, smoothing_enabled):
 # export_mesh(lux_context, scene, object, matrix)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def exportMesh(lux_context, scene, ob, smoothing_enabled):
+def exportMesh(lux_context, scene, ob, smoothing_enabled, object_begin_end=True):
 	me = ob.create_mesh(scene, True, 'RENDER')
 		
 	if not me:
@@ -154,13 +154,13 @@ def exportMesh(lux_context, scene, ob, smoothing_enabled):
 	
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
-	lux_context.objectBegin(ob.data.name)
+	if object_begin_end: lux_context.objectBegin(ob.data.name)
 	exportGeometry(ob, me, lux_context, smoothing_enabled)
-	lux_context.objectEnd()
+	if object_begin_end: lux_context.objectEnd()
 	
 	bpy.data.meshes.remove(me)
 
-def exportInstance(lux_context, scene, ob, matrix):
+def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	# object translation/rotation/scale 
 	lux_context.transform( matrix_to_list(matrix, scene=scene, apply_worldscale=True) )
@@ -170,17 +170,18 @@ def exportInstance(lux_context, scene, ob, matrix):
 	export_object_material(lux_context, ob)
 	
 	# Check for emission material assignment
-	# TODO: re-enable when meshlight instancing supported in lux core
-#	for m in get_instance_materials(ob):
-#		if hasattr(m, 'luxrender_emission') and m.luxrender_emission.use_emission:
-#			lux_context.lightGroup(m.luxrender_emission.lightgroup, [])
-#			arealightsource_params = ParamSet() \
-#					.add_float('gain', m.luxrender_emission.gain) \
-#					.add_float('power', m.luxrender_emission.power) \
-#					.add_float('efficacy', m.luxrender_emission.efficacy)
-#			arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', m.luxrender_emission) )
-#			lux_context.areaLightSource('area', arealightsource_params)
-#			break # just export the first emitting material
+	object_is_emitter = False
+	for m in get_instance_materials(ob):
+		if hasattr(m, 'luxrender_emission') and m.luxrender_emission.use_emission:
+			lux_context.lightGroup(m.luxrender_emission.lightgroup, [])
+			arealightsource_params = ParamSet() \
+					.add_float('gain', m.luxrender_emission.gain) \
+					.add_float('power', m.luxrender_emission.power) \
+					.add_float('efficacy', m.luxrender_emission.efficacy)
+			arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', m.luxrender_emission) )
+			lux_context.areaLightSource('area', arealightsource_params)
+			object_is_emitter = True
+			break # just export the first emitting material
 	
 	# object motion blur
 	is_object_animated = False
@@ -191,8 +192,11 @@ def exportInstance(lux_context, scene, ob, matrix):
 		if m1 != matrix:
 			is_object_animated = True
 	
+	# If the object emits, don't export instance or motioninstance
+	if object_is_emitter:
+		exportMesh(lux_context, scene, ob, smoothing_enabled, object_begin_end=False)
 	# special case for motion blur since the mesh is already exported before the attribute
-	if is_object_animated:
+	elif is_object_animated:
 		lux_context.transformBegin(comment=ob.name, file=Files.GEOM)
 		lux_context.identity()
 		lux_context.transform(matrix_to_list(m1, scene=scene, apply_worldscale=True))
@@ -261,7 +265,7 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 					exportMesh(lux_context, scene, dupli_ob.object, smoothing_enabled)
 					meshes_exported.add(dupli_ob.object.data.name)
 				
-				exportInstance(lux_context, scene, dupli_ob.object, dupli_ob.object.matrix_world)
+				exportInstance(lux_context, scene, dupli_ob.object, dupli_ob.object.matrix_world, smoothing_enabled)
 				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
@@ -305,9 +309,9 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 				meshes_exported.add(ob.data.name)
 			
 			# Export object instance
-			exportInstance(lux_context, scene, ob, ob.matrix_world)
+			exportInstance(lux_context, scene, ob, ob.matrix_world, smoothing_enabled)
 
-		# exported another object		
+		# exported another object
 		ipc += 1.0
 
 		# TODO: this probably isn't very efficient for large scenes

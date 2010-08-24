@@ -209,9 +209,11 @@ def lights(lux_context, scene):
 		if ob.type == 'MESH':
 			# now check for emissive materials on ob
 			for im in ob.material_slots:
-				have_light |= im.material.luxrender_emission.use_emission
+				if hasattr(im.material, 'luxrender_emission'):
+					have_light |= im.material.luxrender_emission.use_emission
 			for m in ob.data.materials:
-				have_light |= m.luxrender_emission.use_emission 
+				if hasattr(m, 'luxrender_emission'):
+					have_light |= m.luxrender_emission.use_emission 
 	
 	return have_light
 

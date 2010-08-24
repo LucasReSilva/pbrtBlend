@@ -403,18 +403,15 @@ class material_emission(_lux_material_base, bpy.types.Panel):
 	property_group = luxrender.properties.material.luxrender_emission
 	
 	controls = [
-		'disabled_notice'
+		'use_emission',
+		'lightgroup',
+	] + \
+	TC_L.get_controls() + \
+	[
+		'gain',
+		'power',
+		'efficacy',
 	]
-#	controls = [
-#		'use_emission',
-#		'lightgroup',
-#	] + \
-#	TC_L.get_controls() + \
-#	[
-#		'gain',
-#		'power',
-#		'efficacy',
-#	]
 	
 	visibility = {
 		'lightgroup': 			{ 'use_emission': True },
@@ -429,11 +426,6 @@ class material_emission(_lux_material_base, bpy.types.Panel):
 	}
 	
 	properties = [
-		{
-			'type': 'text',
-			'attr': 'disabled_notice',
-			'name': 'Disabled pending bugfix in LuxRender',
-		},
 		{
 			'type': 'bool',
 			'attr': 'use_emission',
