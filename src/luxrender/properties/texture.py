@@ -151,7 +151,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'description': '%s Texture' % self.name,
 			},
 			{
-				'type': 'prop_object',
+				'type': 'prop_search',
 				'attr': '%s_colortexture' % self.attr,
 				'src': self.texture_slot_finder(),
 				'src_attr': 'texture_slots',
@@ -259,7 +259,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'description': '%s Texture' % self.name,
 			},
 			{
-				'type': 'prop_object',
+				'type': 'prop_search',
 				'attr': '%s_floattexture' % self.attr,
 				'src': self.texture_slot_finder(),
 				'src_attr': 'texture_slots',

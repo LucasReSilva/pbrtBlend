@@ -46,7 +46,7 @@ def MaterialParameter(attr, name, property_group):
 			'description': '%s_material' % attr,
 		},
 		{
-			'type': 'prop_object',
+			'type': 'prop_search',
 			'attr': attr,
 			'src': lambda s,c: s.object,
 			'src_attr': 'material_slots',
@@ -65,7 +65,7 @@ def VolumeParameter(attr, name, property_group):
 			'description': '%s_volume' % attr,
 		},
 		{
-			'type': 'prop_object',
+			'type': 'prop_search',
 			'attr': attr,
 			'src': lambda s,c: s.scene.luxrender_world,
 			'src_attr': 'volumes',
