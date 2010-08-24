@@ -35,12 +35,12 @@ from ef.validate import Logic_OR as O, Logic_AND as A
 from ..module.pure_api import PYLUX_AVAILABLE
 from ..module.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
 
-import luxrender.properties.engine
-import luxrender.properties.sampler
-import luxrender.properties.integrator
-import luxrender.properties.volume
-import luxrender.properties.filter
-import luxrender.properties.accelerator
+from ..properties.engine import luxrender_engine
+from ..properties.sampler import luxrender_sampler
+from ..properties.integrator import luxrender_integrator
+from ..properties.volume import luxrender_volume
+from ..properties.filter import luxrender_filter
+from ..properties.accelerator import luxrender_accelerator
 
 class render_described_context(RenderButtonsPanel, ef.ui.described_layout):
 	'''
@@ -67,7 +67,7 @@ class engine(render_described_context, bpy.types.Panel):
 	
 	bl_label = 'LuxRender Engine Configuration'
 	
-	property_group = luxrender.properties.engine.luxrender_engine
+	property_group = luxrender_engine
 	
 	controls = [
 		'export_type',
@@ -214,7 +214,7 @@ class sampler(render_described_context, bpy.types.Panel):
 	
 	bl_label = 'Sampler'
 	
-	property_group = luxrender.properties.sampler.luxrender_sampler
+	property_group = luxrender_sampler
 	
 	controls = [
 		[ 0.7, 'sampler', 'advanced'],
@@ -360,7 +360,7 @@ class integrator(render_described_context, bpy.types.Panel):
 	
 	bl_label = 'Surface Integrator'
 	
-	property_group = luxrender.properties.integrator.luxrender_integrator
+	property_group = luxrender_integrator
 	
 	controls = [
 		[ 0.7, 'surfaceintegrator', 'advanced'],
@@ -943,7 +943,7 @@ class volume(render_described_context, bpy.types.Panel):
 	
 	bl_label = 'Volume Integrator'
 	
-	property_group = luxrender.properties.volume.luxrender_volume
+	property_group = luxrender_volume
 	
 	controls = [
 		'volumeintegrator', 'stepsize'
@@ -981,7 +981,7 @@ class filter(render_described_context, bpy.types.Panel):
 	
 	bl_label = 'Filter'
 	
-	property_group = luxrender.properties.filter.luxrender_filter
+	property_group = luxrender_filter
 	
 	controls = [
 		[ 0.7, 'filter', 'advanced'],
@@ -1100,7 +1100,7 @@ class accelerator(render_described_context, bpy.types.Panel):
 	
 	bl_label = 'Accelerator'
 	
-	property_group = luxrender.properties.accelerator.luxrender_accelerator
+	property_group = luxrender_accelerator
 	
 	controls = [
 		[0.7, 'accelerator', 'advanced'],

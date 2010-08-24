@@ -100,12 +100,12 @@ for blender_texture_ui in blender_texture_ui_list:
 del properties_texture
 
 # compatible() copied from blender repository (netrender)
-def compatible(module):
-	module = __import__(module)
-	for subclass in module.__dict__.values():
+def compatible(md):
+	md = __import__(md)
+	for subclass in md.__dict__.values():
 		try:	subclass.COMPAT_ENGINES.add('luxrender')
 		except:	pass
-	del module
+	del md
 
 compatible("properties_data_mesh")
 compatible("properties_data_camera")

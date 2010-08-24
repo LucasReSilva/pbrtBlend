@@ -33,6 +33,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 import luxrender.properties.camera
+from ..properties.camera import luxrender_camera, luxrender_colorspace, luxrender_tonemapping
 from ..module import LuxManager as LM
 
 class camera_panel(CameraButtonsPanel, described_layout):
@@ -72,7 +73,7 @@ class camera_panel(CameraButtonsPanel, described_layout):
 class camera(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Camera'
 	
-	property_group = luxrender.properties.camera.luxrender_camera
+	property_group = luxrender_camera
 	
 	controls = [
 		['autofocus', 'use_dof', 'use_clipping'],
@@ -200,7 +201,7 @@ class camera(camera_panel, bpy.types.Panel):
 class colorspace(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Colour Space'
 	
-	property_group = luxrender.properties.camera.luxrender_colorspace
+	property_group = luxrender_colorspace
 	
 	controls = [
 		'gamma',
@@ -344,7 +345,7 @@ class tonemapping_live_update(object):
 class tonemapping(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender ToneMapping'
 	
-	property_group = luxrender.properties.camera.luxrender_tonemapping
+	property_group = luxrender_tonemapping
 	
 	controls = [
 		'type',

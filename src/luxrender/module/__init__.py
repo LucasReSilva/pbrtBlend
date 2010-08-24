@@ -40,11 +40,11 @@ def LuxLog(*args, popup=False):
 
 # CHOOSE API TYPE
 # Write conventional lx* files and use pylux to manage lux process or external process
-import luxrender.module.file_api
+from ..module import file_api
 # Access lux via a remote LuxFire slave
-import luxrender.module.luxfire_client
+from ..module import luxfire_client
 # Access lux only through pylux bindings
-import luxrender.module.pure_api
+from ..module import pure_api
 
 from ef.util.util import TimerThread, format_elapsed_time
 
@@ -161,11 +161,11 @@ class LuxManager(object):
 		self.thread_count = threads
 		
 		if api_type == 'FILE':
-			Context = luxrender.module.file_api.Custom_Context
+			Context = file_api.Custom_Context
 		elif api_type == 'LUXFIRE_CLIENT':
-			Context = luxrender.module.luxfire_client.Client_Locator
+			Context = luxfire_client.Client_Locator
 		elif api_type == 'API':
-			Context = luxrender.module.pure_api.Custom_Context
+			Context = pure_api.Custom_Context
 		else:
 			raise Exception('Unknown exporter API type')
 		

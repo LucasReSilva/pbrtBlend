@@ -33,12 +33,13 @@ from ef.ef import ef
 
 # Lux API
 import luxrender.properties.world
+from ..properties.world import luxrender_world
 
 class world(WorldButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender World Options'
 	COMPAT_ENGINES = {'luxrender'}
 	
-	property_group = luxrender.properties.world.luxrender_world
+	property_group = luxrender_world
 	
 	controls = [
 		'volumes_label',

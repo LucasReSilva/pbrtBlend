@@ -26,7 +26,7 @@
 #
 import os
 
-import luxrender.module
+from ..module import LuxLog
 
 class Files(object):
 	MAIN = 0
@@ -268,11 +268,11 @@ class Custom_Context(object):
 			self.wf(Files.MAIN, 'WorldEnd')
 		
 		# Close files
-		luxrender.module.LuxLog('Wrote scene files')
+		LuxLog('Wrote scene files')
 		for f in self.files:
 			if f is not None:
 				f.close()
-				luxrender.module.LuxLog(' %s' % f.name)
+				LuxLog(' %s' % f.name)
 	
 	def cleanup(self):
 		self.exit()

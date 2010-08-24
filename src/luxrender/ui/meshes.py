@@ -32,13 +32,13 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 # Lux API
-import luxrender.properties.mesh
+from ..properties.mesh import luxrender_mesh
 
 class meshes(MeshButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}
 	
-	property_group = luxrender.properties.mesh.luxrender_mesh
+	property_group = luxrender_mesh
 
 	# prevent creating luxrender_material property group in Scene
 	property_group_non_global = True

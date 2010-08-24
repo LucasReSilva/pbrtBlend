@@ -29,9 +29,9 @@ try:
 	try:
 		tmp = PYLUX_AVAILABLE
 	except:
-		import luxrender.pylux
+		from .. import pylux
 		
-		class Custom_Context(luxrender.pylux.Context):
+		class Custom_Context(pylux.Context):
 			'''
 			This is the 'pure' entry point to the pylux.Context API
 			
@@ -42,7 +42,7 @@ try:
 			The other Custom_Context APIs are based on this one
 			'''
 			
-			PYLUX = luxrender.pylux
+			PYLUX = pylux
 			API_TYPE = 'PURE'
 			
 			def attributeBegin(self, comment='', file=None):
@@ -50,19 +50,19 @@ try:
 				Added for compatibility with file_api
 				'''
 				
-				luxrender.pylux.Context.attributeBegin(self)
+				pylux.Context.attributeBegin(self)
 			
 			def transformBegin(self, comment='', file=None):
 				'''
 				Added for compatibility with file_api
 				'''
 				
-				luxrender.pylux.Context.transformBegin(self)
+				pylux.Context.transformBegin(self)
 			
 			# no further action required
 		
 		PYLUX_AVAILABLE = True
-		LuxLog('Using pylux version %s' % luxrender.pylux.version())
+		LuxLog('Using pylux version %s' % pylux.version())
 	
 except ImportError as err:
 	LuxLog('WARNING: Binary pylux module not available! Visit http://www.luxrender.net/ to obtain one for your system.')

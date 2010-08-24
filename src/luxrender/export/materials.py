@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import random
-
 import bpy
 
 from ef.validate import Visibility

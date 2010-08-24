@@ -33,7 +33,7 @@ from ef.ef import ef
 from ef.validate import Logic_Operator as LO 
 
 # Lux API
-import luxrender.properties.lamp
+from ..properties.lamp import luxrender_lamp
 from ..properties.texture import ColorTextureParameter
 
 narrowui = 180
@@ -75,7 +75,7 @@ class lamps(DataButtonsPanel, described_layout, bpy.types.Panel):
 	bl_label = 'LuxRender Lamps'
 	COMPAT_ENGINES = {'luxrender'}
 	
-	property_group = luxrender.properties.lamp.luxrender_lamp
+	property_group = luxrender_lamp
 
 	# prevent creating luxrender_material property group in Scene
 	property_group_non_global = True

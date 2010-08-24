@@ -33,7 +33,7 @@ from ef.ui import described_layout
 from ef.ef import ef
 
 # Lux API
-import luxrender.properties.material
+from ..properties.material import luxrender_material, luxrender_emission
 from ..properties.texture import has_property 
 from ..properties.texture import FloatTextureParameter, ColorTextureParameter
 
@@ -199,7 +199,7 @@ class material_editor(_lux_material_base, bpy.types.Panel):
 	
 	bl_label = 'LuxRender Materials'
 	
-	property_group = luxrender.properties.material.luxrender_material
+	property_group = luxrender_material
 	
 	controls = [
 		# Common props
@@ -400,7 +400,7 @@ class material_emission(_lux_material_base, bpy.types.Panel):
 	
 	bl_label = 'LuxRender Material Emission'
 	
-	property_group = luxrender.properties.material.luxrender_emission
+	property_group = luxrender_emission
 	
 	controls = [
 		'use_emission',
