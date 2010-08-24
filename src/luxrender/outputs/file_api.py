@@ -292,9 +292,9 @@ class Custom_Context(object):
 		which must be passed back to LuxManager so that it can control the
 		rendering process.
 		'''
-		from .pure_api import PYLUX_AVAILABLE
+		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
 		if PYLUX_AVAILABLE:
-			from .pure_api import Custom_Context as Pylux_Context
+			from luxrender.outputs.pure_api import Custom_Context as Pylux_Context
 			c = Pylux_Context(self.context_name)
 			c.parse(filename, async)
 			

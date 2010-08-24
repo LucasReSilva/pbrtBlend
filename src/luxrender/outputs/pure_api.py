@@ -29,7 +29,7 @@ try:
 	try:
 		tmp = PYLUX_AVAILABLE
 	except:
-		from .. import pylux
+		from luxrender import pylux
 		
 		class Custom_Context(pylux.Context):
 			'''
