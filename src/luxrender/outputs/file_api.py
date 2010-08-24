@@ -26,7 +26,7 @@
 #
 import os
 
-from ..module import LuxLog
+from . import LuxLog
 
 class Files(object):
 	MAIN = 0

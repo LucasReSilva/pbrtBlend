@@ -27,8 +27,8 @@
 import bpy
 from mathutils import Matrix
 
-from ..module import LuxLog
-from ..module.file_api import Files
+from ..outputs import LuxLog
+from ..outputs.file_api import Files
 from . import matrix_to_list
 from ..export import ParamSet
 from .materials import export_object_material, get_instance_materials, add_texture_parameter

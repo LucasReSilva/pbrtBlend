@@ -31,7 +31,7 @@ import bpy, mathutils
 from ef.util import util as efutil
 
 from ..export.materials import add_texture_parameter
-from ..module.file_api import Files
+from ..outputs.file_api import Files
 from ..properties import dbo
 from ..export import ParamSet, get_worldscale, matrix_to_list
 

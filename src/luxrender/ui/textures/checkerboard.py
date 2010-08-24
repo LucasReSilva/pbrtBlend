@@ -28,7 +28,7 @@ import bpy
 
 from ...export import ParamSet
 from ...export.materials import add_texture_parameter
-from ...module import LuxManager
+from ...outputs import LuxManager
 from ...properties.texture import FloatTextureParameter
 from ..textures import luxrender_texture_base
 

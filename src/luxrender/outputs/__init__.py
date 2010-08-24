@@ -40,11 +40,11 @@ def LuxLog(*args, popup=False):
 
 # CHOOSE API TYPE
 # Write conventional lx* files and use pylux to manage lux process or external process
-from ..module import file_api
+from . import file_api
 # Access lux via a remote LuxFire slave
-from ..module import luxfire_client
+from . import luxfire_client
 # Access lux only through pylux bindings
-from ..module import pure_api
+from . import pure_api
 
 from ef.util.util import TimerThread, format_elapsed_time
 

@@ -37,8 +37,8 @@ from ef.engine import engine_base
 from ef.util import util as efutil
 
 # Exporter libs
-from ..module import LuxManager as LM
-from ..module import LuxLog
+from ..outputs import LuxManager as LM
+from ..outputs import LuxLog
 
 from ..ui import render_panels	as ui_render_panels
 from ..ui import camera			as ui_camera

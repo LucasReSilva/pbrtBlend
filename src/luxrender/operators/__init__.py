@@ -34,14 +34,14 @@ import bpy
 from ef.util import util as efutil
 
 # LuxRender Libs
-from ..module import LuxManager as LM
+from ..outputs import LuxManager as LM
 
 from ..export import get_worldscale
 from ..export import film		as export_film
 from ..export import lights		as export_lights
 from ..export import materials	as export_materials
 from ..export import geometry	as export_geometry
-from ..module.file_api			import Files
+from ..outputs.file_api			import Files
 
 class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	bl_idname = "luxrender.volume_add"

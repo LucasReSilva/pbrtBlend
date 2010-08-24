@@ -32,8 +32,8 @@ import ef.ui
 from ef.util import util as efutil
 from ef.validate import Logic_OR as O, Logic_AND as A
 
-from ..module.pure_api import PYLUX_AVAILABLE
-from ..module.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
+from ..outputs.pure_api import PYLUX_AVAILABLE
+from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
 
 from ..properties.engine import luxrender_engine
 from ..properties.sampler import luxrender_sampler
