@@ -30,7 +30,7 @@ from properties_material import MaterialButtonsPanel
 
 # EF API
 from ef.ui import described_layout
-from ef.ef import ef
+from ef.ef import init_properties
 
 # Lux API
 from luxrender.properties.material import luxrender_material, luxrender_emission
@@ -172,14 +172,14 @@ class _lux_material_base(MaterialButtonsPanel, described_layout):
 	def property_create(cls, mat):
 		if not hasattr(mat, cls.property_group.__name__):
 			#ef.log('Initialising properties in material %s'%context.material.name)
-			ef.init_properties(mat, [{
+			init_properties(mat, [{
 				'type': 'pointer',
 				'attr': cls.property_group.__name__,
 				'ptype': cls.property_group,
 				'name': cls.property_group.__name__,
 				'description': cls.property_group.__name__
 			}], cache=False)
-			ef.init_properties(cls.property_group, cls.properties, cache=False)
+			init_properties(cls.property_group, cls.properties, cache=False)
 	
 	# Overridden to provide data storage in the material, not the scene
 	def draw(self, context):

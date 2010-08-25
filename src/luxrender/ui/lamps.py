@@ -29,7 +29,7 @@ from properties_data_lamp import DataButtonsPanel
 
 # EF API
 from ef.ui import described_layout
-from ef.ef import ef
+from ef.ef import init_properties
 from ef.validate import Logic_Operator as LO 
 
 # Lux API
@@ -88,14 +88,14 @@ class lamps(DataButtonsPanel, described_layout, bpy.types.Panel):
 	@staticmethod
 	def property_create(lamp):
 		if not hasattr(lamp, lamps.property_group.__name__):
-			ef.init_properties(lamp, [{
+			init_properties(lamp, [{
 				'type': 'pointer',
 				'attr': lamps.property_group.__name__,
 				'ptype': lamps.property_group,
 				'name': lamps.property_group.__name__,
 				'description': lamps.property_group.__name__
 			}], cache=False)
-			ef.init_properties(lamps.property_group, lamps.properties, cache=False)
+			init_properties(lamps.property_group, lamps.properties, cache=False)
 	
 	# Overridden to provide data storage in the lamp, not the scene
 	def draw(self, context):

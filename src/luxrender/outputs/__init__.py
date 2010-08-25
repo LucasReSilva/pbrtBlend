@@ -28,7 +28,7 @@ import time
 
 import bpy
 
-from ef.ef import ef
+from ef.ef import log
 from ef.util.util import TimerThread, format_elapsed_time
 
 # This def ia above the following import statements for a reason!
@@ -38,7 +38,7 @@ def LuxLog(*args, popup=False):
 	Accepts variable args (can be used as pylux.errorHandler)
 	'''
 	if len(args) > 0:
-		ef.log(' '.join(['%s'%a for a in args]), module_name='Lux', popup=popup)
+		log(' '.join(['%s'%a for a in args]), module_name='Lux', popup=popup)
 
 # CHOOSE API TYPE
 # Write conventional lx* files and use pylux to manage lux process or external process

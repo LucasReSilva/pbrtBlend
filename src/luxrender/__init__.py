@@ -42,6 +42,6 @@ from luxrender.core import RENDERENGINE_luxrender
 
 def register():
 	RENDERENGINE_luxrender.install()
-	
+
 def unregister():
 	RENDERENGINE_luxrender.uninstall()

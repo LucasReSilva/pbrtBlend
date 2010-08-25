@@ -29,7 +29,7 @@ from properties_data_mesh import MeshButtonsPanel
 
 # EF API
 from ef.ui import described_layout
-from ef.ef import ef
+from ef.ef import init_properties
 
 # Lux API
 from luxrender.properties.mesh import luxrender_mesh
@@ -51,14 +51,14 @@ class meshes(MeshButtonsPanel, described_layout, bpy.types.Panel):
 	@staticmethod
 	def property_create(mesh):
 		if not hasattr(mesh, meshes.property_group.__name__):
-			ef.init_properties(mesh, [{
+			init_properties(mesh, [{
 				'type': 'pointer',
 				'attr': meshes.property_group.__name__,
 				'ptype': meshes.property_group,
 				'name': meshes.property_group.__name__,
 				'description': meshes.property_group.__name__
 			}], cache=False)
-			ef.init_properties(meshes.property_group, meshes.properties, cache=False)
+			init_properties(meshes.property_group, meshes.properties, cache=False)
 	
 	# Overridden to provide data storage in the lamp, not the scene
 	def draw(self, context):

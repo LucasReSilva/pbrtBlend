@@ -29,7 +29,7 @@ import bpy
 from properties_texture import TextureButtonsPanel
 
 from ef.ui import described_layout
-from ef.ef import ef
+from ef.ef import init_properties
 
 class luxrender_texture_base(TextureButtonsPanel, described_layout):
 	'''
@@ -54,14 +54,14 @@ class luxrender_texture_base(TextureButtonsPanel, described_layout):
 	@classmethod
 	def property_create(r_class, lux_tex_property_group):
 		if not hasattr(lux_tex_property_group, r_class.property_group.__name__):
-			ef.init_properties(lux_tex_property_group, [{
+			init_properties(lux_tex_property_group, [{
 				'type': 'pointer',
 				'attr': r_class.property_group.__name__,
 				'ptype': r_class.property_group,
 				'name': r_class.property_group.__name__,
 				'description': r_class.property_group.__name__
 			}], cache=False)
-			ef.init_properties(r_class.property_group, r_class.properties, cache=False)
+			init_properties(r_class.property_group, r_class.properties, cache=False)
 	
 	# Overridden to provide data storage in the material, not the scene
 	def draw(self, context):

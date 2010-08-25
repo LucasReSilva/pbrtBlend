@@ -30,7 +30,7 @@ from properties_data_camera import CameraButtonsPanel
 
 # EF API
 from ef.ui import described_layout
-from ef.ef import ef
+from ef.ef import init_properties
 
 import luxrender.properties.camera
 from luxrender.properties.camera import luxrender_camera, luxrender_colorspace, luxrender_tonemapping
@@ -50,14 +50,14 @@ class camera_panel(CameraButtonsPanel, described_layout):
 	@classmethod
 	def property_create(cls, cam):
 		if not hasattr(cam, cls.property_group.__name__):
-			ef.init_properties(cam, [{
+			init_properties(cam, [{
 				'type': 'pointer',
 				'attr': cls.property_group.__name__,
 				'ptype': cls.property_group,
 				'name': cls.property_group.__name__,
 				'description': cls.property_group.__name__
 			}], cache=False)
-			ef.init_properties(cls.property_group, cls.properties, cache=False)
+			init_properties(cls.property_group, cls.properties, cache=False)
 	
 	# Overridden to provide data storage in the camera, not the scene
 	def draw(self, context):
