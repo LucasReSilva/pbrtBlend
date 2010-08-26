@@ -26,6 +26,8 @@
 #
 import bpy
 
+from ef.ui import declarative_property_group
+
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
@@ -33,12 +35,41 @@ from luxrender.export import ParamSet
 
 # TODO: check parameter completeness against Lux API
 
-class luxrender_volume(bpy.types.IDPropertyGroup):
+class luxrender_volume(bpy.types.IDPropertyGroup, declarative_property_group):
 	'''
 	Storage class for LuxRender Volume Integrator settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	controls = [
+		'volumeintegrator', 'stepsize'
+	]
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'volumeintegrator',
+			'name': 'Volume Integrator',
+			'description': 'Volume Integrator',
+			'default': 'single',
+			'items': [
+				('emission', 'Emission', 'emission'),
+				('single', 'Single', 'single'),
+			]
+		},
+		{
+			'type': 'float',
+			'attr': 'stepsize',
+			'name': 'Step Size',
+			'description': 'Volume Integrator Step Size',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+		}
+	]
 	
 	def api_output(self):
 		'''

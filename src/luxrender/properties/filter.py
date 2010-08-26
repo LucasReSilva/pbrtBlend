@@ -26,15 +26,127 @@
 #
 import bpy
 
+from ef.ui import declarative_property_group
+
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-class luxrender_filter(bpy.types.IDPropertyGroup):
+class luxrender_filter(bpy.types.IDPropertyGroup, declarative_property_group):
 	'''
 	Storage class for LuxRender PixelFilter settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	controls = [
+		[ 0.7, 'filter', 'advanced'],
+		
+		['xwidth', 'ywidth'],
+		'alpha',
+		['b', 'c'],
+		'supersample',
+		'tau'
+	]
+	
+	visibility = {
+		'xwidth':				{ 'advanced': True },
+		'ywidth':				{ 'advanced': True },
+		'alpha':				{ 'advanced': True, 'filter': 'gaussian' },
+		'b':					{ 'advanced': True, 'filter': 'mitchell' },
+		'c':					{ 'advanced': True, 'filter': 'mitchell' },
+		'supersample':			{ 'advanced': True, 'filter': 'mitchell' },
+		'tau':					{ 'advanced': True, 'filter': 'sinc' },
+	}
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'filter',
+			'name': 'Filter',
+			'description': 'Pixel splatting filter',
+			'default': 'mitchell',
+			'items': [
+				('box', 'Box', 'box'),
+				('gaussian', 'Gaussian', 'gaussian'),
+				('mitchell', 'Mitchell', 'mitchell'),
+				('sinc', 'Sinc', 'sinc'),
+				('triangle', 'Triangle', 'triangle'),
+			]
+		},
+		{
+			'type': 'bool',
+			'attr': 'advanced',
+			'name': 'Advanced',
+			'description': 'Configure advanced filter settings',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'xwidth',
+			'name': 'X Width',
+			'description': 'Width of filter in X dimension',
+			'default': 2.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'ywidth',
+			'name': 'Y Width',
+			'description': 'Width of filter in Y dimension',
+			'default': 2.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'alpha',
+			'name': 'Alpha',
+			'description': 'Gaussian Alpha parameter',
+			'default': 2.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'b',
+			'name': 'B',
+			'description': 'Mitchell B parameter',
+			'default': 1/3,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'c',
+			'name': 'C',
+			'description': 'Mitchell C parameter',
+			'default': 1/3,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'tau',
+			'name': 'Tau',
+			'description': 'Sinc Tau parameter',
+			'default': 3.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
+		},
+	]
 	
 	def api_output(self):
 		'''

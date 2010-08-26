@@ -26,15 +26,143 @@
 #
 import bpy
 
+from ef.ui import declarative_property_group
+from ef.validate import Logic_OR as O, Logic_AND as A
+
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-class luxrender_accelerator(bpy.types.IDPropertyGroup):
+class luxrender_accelerator(bpy.types.IDPropertyGroup, declarative_property_group):
 	'''
 	Storage class for LuxRender Accelerator settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	controls = [
+		[0.7, 'accelerator', 'advanced'],
+		
+		'intersectcost',
+		'traversalcost',
+		'emptybonus'
+		'treetype',
+		'costsample',
+		'maxprims',
+		'maxdepth',
+		'refineimmediately',
+		'maxprimsperleaf',
+		'fullsweepthreshold',
+		'skipfactor',
+	]
+	
+	visibility = {
+		'intersectcost':		{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
+		'traversalcost':		{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
+		'emptybonus':			{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
+		'treetype':				{ 'advanced': True, 'accelerator': 'bvh' },
+		'costsample':			{ 'advanced': True, 'accelerator': 'bvh' },
+		'maxprims':				{ 'advanced': True, 'accelerator': 'tabreckdtree' },
+		'maxdepth':				{ 'advanced': True, 'accelerator': 'tabreckdtree' },
+		'refineimmediately':	{ 'advanced': True, 'accelerator': 'grid' },
+		'maxprimsperleaf':		{ 'advanced': True, 'accelerator': 'qbvh' },
+		'fullsweepthreshold':	{ 'advanced': True, 'accelerator': 'qbvh' },
+		'skipfactor':			{ 'advanced': True, 'accelerator': 'qbvh' },
+	}
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'accelerator',
+			'name': 'Accelerator',
+			'description': 'Scene accelerator type',
+			'default': 'tabreckdtree',
+			'items': [
+				#('none', 'none', 'None'),
+				#('bruteforce', 'bruteforce', 'bruteforce'),
+				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
+				('grid', 'Grid', 'grid'),
+				('bvh', 'BVH', 'bvh'),
+				('qbvh', 'QBVH', 'qbvh'),
+			]
+		},
+		{
+			'attr': 'advanced',
+			'type': 'bool',
+			'name': 'Advanced',
+			'default': False,
+		},
+		{
+			'attr': 'intersectcost',
+			'type': 'int',
+			'name': 'Intersect Cost',
+			'default': 80
+		},
+		{
+			'attr': 'traversalcost',
+			'type': 'int',
+			'name': 'Traversal Cost',
+			'default': 1
+		},
+		{
+			'attr': 'emptybonus',
+			'type': 'float',
+			'name': 'Empty Bonus',
+			'default': 0.2
+		},
+		{
+			'attr': 'treetype',
+			'type': 'enum',
+			'name': 'Tree Type',
+			'default': '2',
+			'items': [
+				('2', 'Binary', '2'),
+				('4', 'Quad', '4'),
+				('8', 'Oct', '8'),
+			]
+		},
+		{
+			'attr': 'costsample',
+			'type': 'int',
+			'name': 'Costsample',
+			'default': 0
+		},
+		{
+			'attr': 'maxprims',
+			'type': 'int',
+			'name': 'Max. Prims',
+			'default': 1
+		},
+		{
+			'attr': 'maxdepth',
+			'type': 'int',
+			'name': 'Max. depth',
+			'default': -1
+		},
+		{
+			'attr': 'refineimmediately',
+			'type': 'bool',
+			'name': 'Refine Immediately',
+			'default': False
+		},
+		{
+			'attr': 'maxprimsperleaf',
+			'type': 'int',
+			'name': 'Max. prims per leaf',
+			'default': 4
+		},
+		{
+			'attr': 'fullsweepthreshold',
+			'type': 'int',
+			'name': 'Full sweep threshold',
+			'default': 16,
+		},
+		{
+			'attr': 'skipfactor',
+			'type': 'int',
+			'name': 'Skip factor',
+			'default': 1
+		},
+	]
 	
 	def api_output(self):
 		'''

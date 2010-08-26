@@ -34,6 +34,7 @@ from luxrender.properties import dbo
 from luxrender.export import get_worldscale
 from luxrender.export.film import resolution
 from luxrender.export import ParamSet
+from luxrender.outputs import LuxManager as LM
 
 # TODO: adapt values written to d based on simple/advanced views
 

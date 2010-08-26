@@ -40,11 +40,16 @@ from ef.util import util as efutil
 from luxrender.outputs import LuxManager as LM
 from luxrender.outputs import LuxLog
 
-# Exporter Property Groups
-# from luxrender.properties.camera import luxrender_tonemapping
+# Exporter Scene-based Property Groups
+from luxrender.properties.engine		import luxrender_engine
+from luxrender.properties.sampler		import luxrender_sampler
+from luxrender.properties.integrator	import luxrender_integrator
+from luxrender.properties.volume		import luxrender_volume
+from luxrender.properties.filter		import luxrender_filter
+from luxrender.properties.accelerator	import luxrender_accelerator
 
 # Exporter Interface Panels
-#from luxrender.ui import render_panels	as ui_render_panels
+from luxrender.ui import render_panels	as ui_render_panels
 from luxrender.ui import camera			as ui_camera
 #from luxrender.ui import lamps			as ui_lamps
 #from luxrender.ui import meshes			as ui_meshes
@@ -57,8 +62,6 @@ from luxrender.ui import camera			as ui_camera
 
 # Exporter Operators
 from luxrender.operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
-
-
 
 # Add standard Blender Interface elements
 import properties_render
@@ -132,54 +135,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 #	# This member is read by the ExporterFramework to set up custom property groups
 	property_groups = [
-		# luxrender_tonemapping
+		luxrender_accelerator,
+		luxrender_engine,
+		luxrender_filter,
+		luxrender_integrator,
+		luxrender_sampler,
+		luxrender_volume,
 	]
-	
-#	interfaces = [
-#		 LuxRender configuration and settings
-#		ui_render_panels.engine,
-#		ui_render_panels.sampler,
-#		ui_render_panels.integrator,
-#		ui_render_panels.volume,
-#		ui_render_panels.filter,
-#		ui_render_panels.accelerator,
-#
-#		 Custom object data panels
-#		ui_lamps.lamps,
-#		ui_meshes.meshes,
-#		
-#		 Camera
-#		ui_camera.camera,
-#		ui_camera.colorspace,
-#		ui_camera.tonemapping,
-#		
-#		 Materials
-#		ui_materials.material_editor,
-#		ui_materials.material_emission,
-#		ui_materials.material_volumes,
-#		
-#		 Textures
-#		texture_main.ui_panel_main,
-#		bilerp.ui_panel_bilerp,
-#		blackbody.ui_panel_blackbody,
-#		brick.ui_panel_brick,
-#		checkerboard.ui_panel_checkerboard,
-#		dots.ui_panel_dots,
-#		equalenergy.ui_panel_equalenergy,
-#		fbm.ui_panel_fbm,
-#		gaussian.ui_panel_gaussian,
-#		harlequin.ui_panel_harlequin,
-#		imagemap.ui_panel_imagemap,
-#		lampspectrum.ui_panel_lampspectrum,
-#		mapping.ui_panel_mapping,
-#		marble.ui_panel_marble,
-#		mix.ui_panel_mix,
-#		scale.ui_panel_scale,
-#		transform.ui_panel_transform,
-#		uv.ui_panel_uv,
-#		windy.ui_panel_windy,
-#		wrinkled.ui_panel_wrinkled,
-#	]
 	
 	def update_framebuffer(self, xres, yres, fb):
 		'''

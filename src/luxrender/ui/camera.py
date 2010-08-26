@@ -32,9 +32,7 @@ from properties_data_camera import CameraButtonsPanel
 from ef.ui import property_group_renderer
 from ef.ef import init_properties
 
-import luxrender.properties.camera
 from luxrender.properties.camera import luxrender_camera, luxrender_colorspace, luxrender_tonemapping
-from luxrender.outputs import LuxManager as LM
 
 class camera_panel(CameraButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {'luxrender'}

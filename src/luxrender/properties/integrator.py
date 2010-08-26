@@ -26,15 +26,592 @@
 #
 import bpy
 
+from ef.ui import declarative_property_group
+from ef.validate import Logic_OR as O, Logic_AND as A
+
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-class luxrender_integrator(bpy.types.IDPropertyGroup):
+class luxrender_integrator(bpy.types.IDPropertyGroup, declarative_property_group):
 	'''
 	Storage class for LuxRender SurfaceIntegrator settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	controls = [
+		[ 0.7, 'surfaceintegrator', 'advanced'],
+		
+		# bidir +
+		'strategy',
+		['eyedepth', 'lightdepth'],
+		['eyerrthreshold', 'lightrrthreshold'],
+		
+		# dl +
+		'maxdepth',
+		
+		# dp
+		['lbl_direct',
+		'directsamples'],
+		['directsampleall',
+		'directdiffuse',
+		'directglossy'],
+		['lbl_indirect',
+		'indirectsamples'],
+		['indirectsampleall',
+		'indirectdiffuse',
+		'indirectglossy'],
+		'lbl_diffuse',
+		['diffusereflectsamples',
+		'diffusereflectdepth'],
+		['diffuserefractsamples',
+		'diffuserefractdepth'],
+		'lbl_glossy',
+		['glossyreflectsamples',
+		'glossyreflectdepth'],
+		['glossyrefractsamples',
+		'glossyrefractdepth'],
+		'lbl_specular',
+		['specularreflectdepth',
+		'specularrefractdepth'],
+		'lbl_rejection',
+		['diffusereflectreject',
+		'diffusereflectreject_threshold'],
+		['diffuserefractreject',
+		'diffuserefractreject_threshold'],
+		['glossyreflectreject',
+		'glossyreflectreject_threshold'],
+		['glossyrefractreject',
+		'glossyrefractreject_threshold'],
+		
+		# epm
+		'maxphotondepth',
+		'directphotons',
+		'causticphotons',
+		'indirectphotons',
+		'radiancephotons',
+		'nphotonsused',
+		'maxphotondist',
+		'finalgather',
+		'finalgathersamples',
+		'gatherangle',
+		'renderingmode',
+		'rrstrategy',
+		'rrcontinueprob',
+		# epm advanced
+		'distancethreshold',
+		'photonmapsfile',
+		'dbg_enabledirect',
+		'dbg_enableradiancemap',
+		'dbg_enableindircaustic',
+		'dbg_enableindirdiffuse',
+		'dbg_enableindirspecular',
+		
+		# igi
+		'nsets',
+		'nlights',
+		'mindist',
+		
+		# path
+		'includeenvironment',
+	]
+	
+	visibility = {
+		# bidir +
+		'strategy':							{ 'surfaceintegrator': O(['bidirectional', 'distributedpath']) },
+		'eyedepth':							{ 'surfaceintegrator': 'bidirectional' },
+		'lightdepth':						{ 'surfaceintegrator': 'bidirectional' },
+		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
+		'lightrrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
+		
+		# dl +
+		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path']) },
+		
+		# dp
+		'lbl_direct':						{ 'surfaceintegrator': 'distributedpath' },
+		'directsampleall':					{ 'surfaceintegrator': 'distributedpath' },
+		'directsamples':					{ 'surfaceintegrator': 'distributedpath' },
+		'directdiffuse':					{ 'surfaceintegrator': 'distributedpath' },
+		'directglossy':						{ 'surfaceintegrator': 'distributedpath' },
+		'lbl_indirect':						{ 'surfaceintegrator': 'distributedpath' },
+		'indirectsampleall':				{ 'surfaceintegrator': 'distributedpath' },
+		'indirectsamples':					{ 'surfaceintegrator': 'distributedpath' },
+		'indirectdiffuse':					{ 'surfaceintegrator': 'distributedpath' },
+		'indirectglossy':					{ 'surfaceintegrator': 'distributedpath' },
+		'lbl_diffuse':						{ 'surfaceintegrator': 'distributedpath' },
+		'diffusereflectdepth':				{ 'surfaceintegrator': 'distributedpath' },
+		'diffusereflectsamples':			{ 'surfaceintegrator': 'distributedpath' },
+		'diffuserefractdepth':				{ 'surfaceintegrator': 'distributedpath' },
+		'diffuserefractsamples':			{ 'surfaceintegrator': 'distributedpath' },
+		'lbl_glossy':						{ 'surfaceintegrator': 'distributedpath' },
+		'glossyreflectdepth':				{ 'surfaceintegrator': 'distributedpath' },
+		'glossyreflectsamples':				{ 'surfaceintegrator': 'distributedpath' },
+		'glossyrefractdepth':				{ 'surfaceintegrator': 'distributedpath' },
+		'glossyrefractsamples':				{ 'surfaceintegrator': 'distributedpath' },
+		'lbl_specular':						{ 'surfaceintegrator': 'distributedpath' },
+		'specularreflectdepth':				{ 'surfaceintegrator': 'distributedpath' },
+		'specularrefractdepth':				{ 'surfaceintegrator': 'distributedpath' },
+		'lbl_rejection':					{ 'surfaceintegrator': 'distributedpath' },
+		'diffusereflectreject':				{ 'surfaceintegrator': 'distributedpath' },
+		'diffusereflectreject_threshold':	{ 'diffusereflectreject': True, 'surfaceintegrator': 'distributedpath' },
+		'diffuserefractreject':				{ 'surfaceintegrator': 'distributedpath' },
+		'diffuserefractreject_threshold':	{ 'diffuserefractreject': True, 'surfaceintegrator': 'distributedpath' },
+		'glossyreflectreject':				{ 'surfaceintegrator': 'distributedpath' },
+		'glossyreflectreject_threshold':	{ 'glossyreflectreject': True, 'surfaceintegrator': 'distributedpath' },
+		'glossyrefractreject':				{ 'surfaceintegrator': 'distributedpath' },
+		'glossyrefractreject_threshold':	{ 'glossyrefractreject': True, 'surfaceintegrator': 'distributedpath' },
+		
+		# epm
+		'maxphotondepth':					{ 'surfaceintegrator': 'exphotonmap' },
+		'directphotons':					{ 'surfaceintegrator': 'exphotonmap' },
+		'causticphotons':					{ 'surfaceintegrator': 'exphotonmap' },
+		'indirectphotons':					{ 'surfaceintegrator': 'exphotonmap' },
+		'radiancephotons':					{ 'surfaceintegrator': 'exphotonmap' },
+		'nphotonsused':						{ 'surfaceintegrator': 'exphotonmap' },
+		'maxphotondist':					{ 'surfaceintegrator': 'exphotonmap' },
+		'finalgather':						{ 'surfaceintegrator': 'exphotonmap' },
+		'finalgathersamples':				{ 'finalgather': True, 'surfaceintegrator': 'exphotonmap' },
+		'gatherangle':						{ 'finalgather': True, 'surfaceintegrator': 'exphotonmap' },
+		'renderingmode':					{ 'surfaceintegrator': 'exphotonmap' },
+		'rrstrategy':						{ 'surfaceintegrator': O(['exphotonmap', 'path']) },
+		'rrcontinueprob':					{ 'surfaceintegrator': O(['exphotonmap', 'path']) },
+		# epm advanced
+		'distancethreshold':				{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		'photonmapsfile':					{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enabledirect':					{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableradiancemap':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableindircaustic':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableindirdiffuse':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableindirspecular':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		
+		# igi
+		'nsets':							{ 'surfaceintegrator': 'igi' },
+		'nlights':							{ 'surfaceintegrator': 'igi' },
+		'mindist':							{ 'surfaceintegrator': 'igi' },
+		
+		# path
+		'includeenvironment':				{ 'surfaceintegrator': 'path' },
+	}
+	
+	properties = [
+		{
+			'type': 'enum', 
+			'attr': 'surfaceintegrator',
+			'name': 'Surface Integrator',
+			'description': 'Surface Integrator',
+			'default': 'bidirectional',
+			'items': [
+				('bidirectional', 'Bi-Directional', 'bidirectional'),
+				('path', 'Path', 'path'),
+				('directlighting', 'Direct Lighting', 'directlighting'),
+				('distributedpath', 'Distributed Path', 'distributedpath'),
+				('igi', 'Instant Global Illumination', 'igi',),
+				('exphotonmap', 'Ex-Photon Map', 'exphotonmap'),
+			]
+		},
+		{
+			'type': 'bool',
+			'attr': 'advanced',
+			'name': 'Advanced',
+			'description': 'Configure advanced integrator settings',
+			'default': False
+		},
+		{
+			'type': 'enum',
+			'attr': 'strategy',
+			'name': 'Strategy',
+			'description': 'Strategy',
+			'default': 'auto',
+			'items': [
+				('auto', 'Auto', 'auto'),
+				('one', 'One', 'one'),
+				('all', 'All', 'all'),
+			]
+		},
+		{
+			'type': 'int', 
+			'attr': 'eyedepth',
+			'name': 'Eye Depth',
+			'description': 'Max recursion depth for ray casting from eye',
+			'default': 16,
+			'min': 0,
+			'max': 2048,
+		},
+		{
+			'type': 'int', 
+			'attr': 'lightdepth',
+			'name': 'Light Depth',
+			'description': 'Max recursion depth for ray casting from light',
+			'default': 16,
+			'min': 0,
+			'max': 2048,
+		},
+		{
+			'type': 'float',
+			'attr': 'eyerrthreshold',
+			'name': 'Eye RR Threshold',
+			'default': 0.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'lightrrthreshold',
+			'name': 'Light RR Threshold',
+			'default': 0.0,
+		},
+		{
+			'type': 'int',
+			'attr': 'maxdepth',
+			'name': 'Max. depth',
+			'default': 8,
+		},
+		
+		{
+			'type': 'text',
+			'attr': 'lbl_direct',
+			'name': 'Direct light sampling',
+		},
+		{
+			'type': 'bool',
+			'attr': 'directsampleall',
+			'name': 'Sample all',
+			'default': True
+		},
+		{
+			'type': 'int',
+			'attr': 'directsamples',
+			'name': 'Samples',
+			'default': 1,
+		},
+		{
+			'type': 'bool',
+			'attr': 'directdiffuse',
+			'name': 'Diffuse',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'directglossy',
+			'name': 'Glossy',
+			'default': True
+		},
+		
+		{
+			'type': 'text',
+			'attr': 'lbl_indirect',
+			'name': 'Indirect light sampling',
+		},
+		{
+			'type': 'bool',
+			'attr': 'indirectsampleall',
+			'name': 'Sample all',
+			'default': False
+		},
+		{
+			'type': 'int',
+			'attr': 'indirectsamples',
+			'name': 'Samples',
+			'default': 1,
+		},
+		{
+			'type': 'bool',
+			'attr': 'indirectdiffuse',
+			'name': 'Diffuse',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'indirectglossy',
+			'name': 'Glossy',
+			'default': True
+		},
+		
+		{
+			'type': 'text',
+			'attr': 'lbl_diffuse',
+			'name': 'Diffuse settings',
+		},
+		{
+			'type': 'int',
+			'attr': 'diffusereflectdepth',
+			'name': 'Reflection depth',
+			'default': 3
+		},
+		{
+			'type': 'int',
+			'attr': 'diffusereflectsamples',
+			'name': 'Reflection samples',
+			'default': 1
+		},
+		{
+			'type': 'int',
+			'attr': 'diffuserefractdepth',
+			'name': 'Refraction depth',
+			'default': 5
+		},
+		{
+			'type': 'int',
+			'attr': 'diffuserefractsamples',
+			'name': 'Refraction samples',
+			'default': 1
+		},
+		
+		{
+			'type': 'text',
+			'attr': 'lbl_glossy',
+			'name': 'Glossy settings',
+		},
+		{
+			'type': 'int',
+			'attr': 'glossyreflectdepth',
+			'name': 'Reflection depth',
+			'default': 2
+		},
+		{
+			'type': 'int',
+			'attr': 'glossyreflectsamples',
+			'name': 'Reflection samples',
+			'default': 1
+		},
+		{
+			'type': 'int',
+			'attr': 'glossyrefractdepth',
+			'name': 'Refraction depth',
+			'default': 5
+		},
+		{
+			'type': 'int',
+			'attr': 'glossyrefractsamples',
+			'name': 'Refraction samples',
+			'default': 1
+		},
+		
+		{
+			'type': 'text',
+			'attr': 'lbl_specular',
+			'name': 'Specular settings',
+		},
+		{
+			'type': 'int',
+			'attr': 'specularreflectdepth',
+			'name': 'Reflection depth',
+			'default': 3
+		},
+		{
+			'type': 'int',
+			'attr': 'specularrefractdepth',
+			'name': 'Refraction depth',
+			'default': 5
+		},
+		
+		{
+			'type': 'text',
+			'attr': 'lbl_rejection',
+			'name': 'Rejection settings',
+		},
+		{
+			'type': 'bool',
+			'attr': 'diffusereflectreject',
+			'name': 'Diffuse reflection reject',
+			'default': False,
+		},
+		{
+			'type': 'float',
+			'attr': 'diffusereflectreject_threshold',
+			'name': 'Threshold',
+			'default': 10.0
+		},
+		{
+			'type': 'bool',
+			'attr': 'diffuserefractreject',
+			'name': 'Diffuse refraction reject',
+			'default': False,
+		},
+		{
+			'type': 'float',
+			'attr': 'diffuserefractreject_threshold',
+			'name': 'Threshold',
+			'default': 10.0
+		},
+		{
+			'type': 'bool',
+			'attr': 'glossyreflectreject',
+			'name': 'Glossy reflection reject',
+			'default': False,
+		},
+		{
+			'type': 'float',
+			'attr': 'glossyreflectreject_threshold',
+			'name': 'Threshold',
+			'default': 10.0
+		},
+		{
+			'type': 'bool',
+			'attr': 'glossyrefractreject',
+			'name': 'Glossy refraction reject',
+			'default': False,
+		},
+		{
+			'type': 'float',
+			'attr': 'glossyrefractreject_threshold',
+			'name': 'Threshold',
+			'default': 10.0
+		},
+		
+		{
+			'type': 'int',
+			'attr': 'maxphotondepth',
+			'name': 'Max. photon depth',
+			'default': 10
+		},
+		{
+			'type': 'int',
+			'attr': 'directphotons',
+			'name': 'Direct photons',
+			'default': 1000000
+		},
+		{
+			'type': 'int',
+			'attr': 'causticphotons',
+			'name': 'Caustic photons',
+			'default': 20000,
+		},
+		{
+			'type': 'int',
+			'attr': 'indirectphotons',
+			'name': 'Indirect photons',
+			'default': 200000
+		},
+		{
+			'type': 'int',
+			'attr': 'radiancephotons',
+			'name': 'Radiance photons',
+			'default': 200000
+		},
+		{
+			'type': 'int',
+			'attr': 'nphotonsused',
+			'name': 'Number of photons used',
+			'default': 50
+		},
+		{
+			'type': 'float',
+			'attr': 'maxphotondist',
+			'name': 'Max. photon distance',
+			'default': 0.1,
+		},
+		{
+			'type': 'bool',
+			'attr': 'finalgather',
+			'name': 'Final Gather',
+			'default': True
+		},
+		{
+			'type': 'int',
+			'attr': 'finalgathersamples',
+			'name': 'Final gather samples',
+			'default': 32
+		},
+		{
+			'type': 'float',
+			'attr': 'gatherangle',
+			'name': 'Gather angle',
+			'default': 10.0
+		},
+		{
+			'type': 'enum',
+			'attr': 'renderingmode',
+			'name': 'Rendering mode',
+			'default': 'directlighting',
+			'items': [
+				('directlighting', 'directlighting', 'directlighting'),
+				('path', 'path', 'path'),
+			]
+		},
+		{
+			'type': 'float',
+			'attr': 'distancethreshold',
+			'name': 'Distance threshold',
+			'default': 0.75
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'photonmapsfile',
+			'name': 'Photonmaps file',
+			'default': ''
+		},
+		{
+			'type': 'bool',
+			'attr': 'dbg_enabledirect',
+			'name': 'Debug: Enable direct',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'dbg_enableradiancemap',
+			'name': 'Debug: Enable radiance map',
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'dbg_enableindircaustic',
+			'name': 'Debug: Enable indirect caustics',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'dbg_enableindirdiffuse',
+			'name': 'Debug: Enable indirect diffuse',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'dbg_enableindirspecular',
+			'name': 'Debug: Enable indirect specular',
+			'default': True,
+		},
+		{
+			'type': 'int',
+			'attr': 'nsets',
+			'name': 'Number of sets',
+			'default': 4
+		},
+		{
+			'type': 'int',
+			'attr': 'nlights',
+			'name': 'Number of lights',
+			'default': 64,
+		},
+		{
+			'type': 'float',
+			'attr': 'mindist',
+			'name': 'Min. Distance',
+			'default': 0.1,
+		},
+		{
+			'type': 'float',
+			'attr': 'rrcontinueprob',
+			'name': 'RR continue probability',
+			'default': 0.65,
+		},
+		{
+			'type': 'enum',
+			'attr': 'rrstrategy',
+			'name': 'RR strategy',
+			'default': 'efficiency',
+			'items': [
+				('efficiency', 'efficiency', 'efficiency'),
+				('probability', 'probability', 'probability'),
+				('none', 'none', 'none'),
+			]
+		},
+		{
+			'type': 'bool',
+			'attr': 'includeenvironment',
+			'name': 'Include Environment',
+			'default': True
+		},
+	]
 	
 	def api_output(self):
 		'''
