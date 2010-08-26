@@ -480,10 +480,24 @@ class material_volumes(MaterialButtonsPanel, described_layout, bpy.types.Panel):
 	def draw(self, context):
 		super().draw(context)
 		if len(context.scene.luxrender_volumes.volumes) > 0:
+			current_vol_ind = context.scene.luxrender_volumes.volumes_index
+			current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+			# 'name' is not a member of current_vol.properties,
+			# so we draw it explicitly
 			self.layout.prop(
-				context.scene.luxrender_volumes.volumes[context.scene.luxrender_volumes.volumes_index],
-				'name'
+				current_vol, 'name'
 			)
+			# Here we use a combined (IDPropertyGroup, described_layout) object
+			# that can draw itself to the layout of this panel.
+			for control in current_vol.controls:
+				current_vol.draw_column(
+					control,
+					self.layout,
+					current_vol,
+					current_vol,
+					forced_property_group = current_vol
+				)
+			
 	
 	controls = [
 		'volumes_label',

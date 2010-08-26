@@ -26,6 +26,7 @@
 #
 import bpy
 
+from ef.ui import described_layout
 from ef.validate import Logic_OR as O
 
 def material_property_map():
@@ -87,17 +88,29 @@ class luxrender_emission(bpy.types.IDPropertyGroup):
 	
 	pass
 
-class luxrender_volume_data(bpy.types.IDPropertyGroup):
+class luxrender_volume_data(bpy.types.IDPropertyGroup, described_layout):
 	'''
 	Storage class for LuxRender volume data. The
 	luxrender_volumes object will store 1 or more of
-	these in its CollectionProperty 'volumes'
+	these in its CollectionProperty 'volumes'.
+	
+	This IDPropertyGroup is special because it inherits
+	decribed_layout in order to draw itself within a panel
 	'''
 	
-	p1 = bpy.props.StringProperty(
-		name = 'Prop1',
-		description = 'Prop1 Descr.',
-	)
+	controls = [
+		'name',
+		'test',
+	]
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'test',
+			'name': 'Test Param',
+			'default': 'ABCD 123',
+		},
+	]
 
 class luxrender_volumes(bpy.types.IDPropertyGroup):
 	'''
