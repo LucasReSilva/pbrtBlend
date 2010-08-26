@@ -53,7 +53,7 @@ from luxrender.properties.accelerator	import luxrender_accelerator
 from luxrender.ui import render_panels	as ui_render_panels
 from luxrender.ui import camera			as ui_camera
 from luxrender.ui import lamps			as ui_lamps
-#from luxrender.ui import meshes			as ui_meshes
+from luxrender.ui import meshes			as ui_meshes
 #from luxrender.ui import materials		as ui_materials
 #from luxrender.ui.textures import main	as texture_main
 #from luxrender.ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \

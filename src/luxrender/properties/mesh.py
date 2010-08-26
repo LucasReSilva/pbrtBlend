@@ -26,6 +26,8 @@
 #
 import bpy
 
+from ef.ui import declarative_property_group
+
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
@@ -33,5 +35,59 @@ from luxrender.export import ParamSet
 
 # TODO: check parameter completeness against Lux API
 
-class luxrender_mesh(bpy.types.IDPropertyGroup):
-	pass
+class luxrender_mesh(bpy.types.IDPropertyGroup, declarative_property_group):
+	'''
+	Storage class for LuxRender Camera settings.
+	This class will be instantiated within a Blender
+	mesh object.
+	'''
+	
+	controls = [
+		'portal',
+		['subdiv','sublevels'],
+		['nsmooth', 'sharpbound'],
+	]
+	
+	visibility = {
+		
+		'nsmooth':		{ 'subdiv': True },
+		'sharpbound':	{ 'subdiv': True },
+		'sublevels':	{ 'subdiv': True }
+	}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'portal',
+			'name': 'Exit Portal',
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'subdiv',
+			'name': 'Use Subdivision',
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'nsmooth',
+			'name': 'Use Autosmoothing',
+			'default': True,
+		},
+		{
+			'type': 'bool',
+			'attr': 'sharpbound',
+			'name': 'Sharpen Bounds',
+			'default': False,
+		},
+		{
+			'type': 'int',
+			'attr': 'sublevels',
+			'name': 'Subdivision Levels',
+			'default': 2,
+			'min': 0,
+			'soft_min': 0,
+			'max': 15,
+			'soft_max': 15
+		},
+	]

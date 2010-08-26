@@ -40,7 +40,7 @@ class lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	COMPAT_ENGINES = {'luxrender'}
 	
 	display_property_groups = [
-		'luxrender_lamp'
+		'luxrender_lamp',
 	]
 	
 	object_property_groups = [

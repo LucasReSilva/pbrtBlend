@@ -28,94 +28,48 @@ import bpy
 from properties_data_mesh import MeshButtonsPanel 
 
 # EF API
-from ef.ui import described_layout
+from ef.ui import property_group_renderer
 from ef.ef import init_properties
 
 # Lux API
 from luxrender.properties.mesh import luxrender_mesh
 
-class meshes(MeshButtonsPanel, described_layout, bpy.types.Panel):
+class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}
 	
-	property_group = luxrender_mesh
-
-	# prevent creating luxrender_material property group in Scene
-	property_group_non_global = True
-
-	@staticmethod
-	def property_reload():
+	display_property_groups = [
+		'luxrender_mesh',
+	]
+	
+	object_property_groups = [
+		luxrender_mesh,
+	]
+	
+	@classmethod
+	def property_reload(cls):
 		for mesh in bpy.data.meshes:
-			meshes.property_create(mesh)
+			cls.property_create(mesh)
 	
-	@staticmethod
-	def property_create(mesh):
-		if not hasattr(mesh, meshes.property_group.__name__):
-			init_properties(mesh, [{
-				'type': 'pointer',
-				'attr': meshes.property_group.__name__,
-				'ptype': meshes.property_group,
-				'name': meshes.property_group.__name__,
-				'description': meshes.property_group.__name__
-			}], cache=False)
-			init_properties(meshes.property_group, meshes.properties, cache=False)
+	@classmethod
+	def property_create(cls, mesh):
+		for property_group in cls.object_property_groups:
+			if not hasattr(mesh, property_group.__name__):
+				init_properties(mesh, [{
+					'type': 'pointer',
+					'attr': property_group.__name__,
+					'ptype': property_group,
+					'name': property_group.__name__,
+					'description': property_group.__name__
+				}], cache=False)
+				init_properties(property_group, property_group.properties, cache=False)
 	
-	# Overridden to provide data storage in the lamp, not the scene
+	# Overridden to provide property groups in camera object, not the scene
 	def draw(self, context):
 		if context.mesh is not None:
-
-			# LuxRender properties
-			for p in self.controls:
-				self.draw_column(p, self.layout, context.mesh, supercontext=context)
-	
-	# luxrender properties
-	controls = [
-		'portal',
-		['subdiv','sublevels'],
-		['nsmooth', 'sharpbound'],
-	]
-	
-	visibility = {
-		
-		'nsmooth':		{ 'subdiv': True },
-		'sharpbound':	{ 'subdiv': True },
-		'sublevels':	{ 'subdiv': True }
-	}
-	
-	properties = [
-		{
-			'type': 'bool',
-			'attr': 'portal',
-			'name': 'Exit Portal',
-			'default': False,
-		},
-		{
-			'type': 'bool',
-			'attr': 'subdiv',
-			'name': 'Use Subdivision',
-			'default': False,
-		},
-		{
-			'type': 'bool',
-			'attr': 'nsmooth',
-			'name': 'Use Autosmoothing',
-			'default': True,
-		},
-		{
-			'type': 'bool',
-			'attr': 'sharpbound',
-			'name': 'Sharpen Bounds',
-			'default': False,
-		},
-		{
-			'type': 'int',
-			'attr': 'sublevels',
-			'name': 'Subdivision Levels',
-			'default': 2,
-			'min': 0,
-			'soft_min': 0,
-			'max': 15,
-			'soft_max': 15
-		},
-	]
-
+			self.property_create(context.mesh)
+			
+			for property_group_name in self.display_property_groups:
+				property_group = getattr(context.mesh, property_group_name)
+				for p in property_group.controls:
+					self.draw_column(p, self.layout, context.mesh, supercontext=context, property_group=property_group)
