@@ -40,17 +40,22 @@ from ef.util import util as efutil
 from luxrender.outputs import LuxManager as LM
 from luxrender.outputs import LuxLog
 
-from luxrender.ui import render_panels	as ui_render_panels
-from luxrender.ui import camera			as ui_camera
-from luxrender.ui import lamps			as ui_lamps
-from luxrender.ui import meshes			as ui_meshes
-from luxrender.ui import materials		as ui_materials
-from luxrender.ui.textures import main	as texture_main
-from luxrender.ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
-										equalenergy, fbm, gaussian, harlequin, imagemap, \
-										lampspectrum, mapping, marble, mix, scale, \
-										transform, uv, windy, wrinkled
+# Exporter Property Groups
+# from luxrender.properties.camera import luxrender_tonemapping
 
+# Exporter Interface Panels
+#from luxrender.ui import render_panels	as ui_render_panels
+from luxrender.ui import camera			as ui_camera
+#from luxrender.ui import lamps			as ui_lamps
+#from luxrender.ui import meshes			as ui_meshes
+#from luxrender.ui import materials		as ui_materials
+#from luxrender.ui.textures import main	as texture_main
+#from luxrender.ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
+#										equalenergy, fbm, gaussian, harlequin, imagemap, \
+#										lampspectrum, mapping, marble, mix, scale, \
+#										transform, uv, windy, wrinkled
+
+# Exporter Operators
 from luxrender.operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
 
 
@@ -117,60 +122,64 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	LuxRender Engine Exporter/Integration class
 	'''
 	
-	bl_idname = 'luxrender'
-	bl_label = 'LuxRender'
-	bl_preview = False # blender's preview scene is inadequate, needs custom rebuild
+	bl_idname			= 'luxrender'
+	bl_label			= 'LuxRender'
+	bl_preview			= False			# blender's preview scene is inadequate, needs custom rebuild
 	
-	LuxManager = None
-	render_update_timer = None
-	output_file = 'default.png'
+	LuxManager			= None
+	render_update_timer	= None
+	output_file			= 'default.png'
 	
-#	# This member is read by the ExporterFramework to set up the property groups for each UI panel
-	interfaces = [
-		# LuxRender configuration and settings
-		ui_render_panels.engine,
-		ui_render_panels.sampler,
-		ui_render_panels.integrator,
-		ui_render_panels.volume,
-		ui_render_panels.filter,
-		ui_render_panels.accelerator,
-
-		# Custom object data panels
-		ui_lamps.lamps,
-		ui_meshes.meshes,
-		
-		# Camera
-		ui_camera.camera,
-		ui_camera.colorspace,
-		ui_camera.tonemapping,
-		
-		# Materials
-		ui_materials.material_editor,
-		ui_materials.material_emission,
-		ui_materials.material_volumes,
-		
-		# Textures
-		texture_main.ui_panel_main,
-		bilerp.ui_panel_bilerp,
-		blackbody.ui_panel_blackbody,
-		brick.ui_panel_brick,
-		checkerboard.ui_panel_checkerboard,
-		dots.ui_panel_dots,
-		equalenergy.ui_panel_equalenergy,
-		fbm.ui_panel_fbm,
-		gaussian.ui_panel_gaussian,
-		harlequin.ui_panel_harlequin,
-		imagemap.ui_panel_imagemap,
-		lampspectrum.ui_panel_lampspectrum,
-		mapping.ui_panel_mapping,
-		marble.ui_panel_marble,
-		mix.ui_panel_mix,
-		scale.ui_panel_scale,
-		transform.ui_panel_transform,
-		uv.ui_panel_uv,
-		windy.ui_panel_windy,
-		wrinkled.ui_panel_wrinkled,
+#	# This member is read by the ExporterFramework to set up custom property groups
+	property_groups = [
+		# luxrender_tonemapping
 	]
+	
+#	interfaces = [
+#		 LuxRender configuration and settings
+#		ui_render_panels.engine,
+#		ui_render_panels.sampler,
+#		ui_render_panels.integrator,
+#		ui_render_panels.volume,
+#		ui_render_panels.filter,
+#		ui_render_panels.accelerator,
+#
+#		 Custom object data panels
+#		ui_lamps.lamps,
+#		ui_meshes.meshes,
+#		
+#		 Camera
+#		ui_camera.camera,
+#		ui_camera.colorspace,
+#		ui_camera.tonemapping,
+#		
+#		 Materials
+#		ui_materials.material_editor,
+#		ui_materials.material_emission,
+#		ui_materials.material_volumes,
+#		
+#		 Textures
+#		texture_main.ui_panel_main,
+#		bilerp.ui_panel_bilerp,
+#		blackbody.ui_panel_blackbody,
+#		brick.ui_panel_brick,
+#		checkerboard.ui_panel_checkerboard,
+#		dots.ui_panel_dots,
+#		equalenergy.ui_panel_equalenergy,
+#		fbm.ui_panel_fbm,
+#		gaussian.ui_panel_gaussian,
+#		harlequin.ui_panel_harlequin,
+#		imagemap.ui_panel_imagemap,
+#		lampspectrum.ui_panel_lampspectrum,
+#		mapping.ui_panel_mapping,
+#		marble.ui_panel_marble,
+#		mix.ui_panel_mix,
+#		scale.ui_panel_scale,
+#		transform.ui_panel_transform,
+#		uv.ui_panel_uv,
+#		windy.ui_panel_windy,
+#		wrinkled.ui_panel_wrinkled,
+#	]
 	
 	def update_framebuffer(self, xres, yres, fb):
 		'''
@@ -182,7 +191,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		This will be called by the LuxFilmDisplay thread started by LuxManager
 		
-		TODO: perhaps this class itself is a threaded timer ?
+		TODO: move this method into LuxFilmDisplay
 		
 		Returns None
 		'''
@@ -216,8 +225,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		'''
 		
 		# Force update of all custom properties
-		for ui in self.interfaces:
-			ui.property_reload()
+		#for ui in self.interfaces:
+		#	ui.property_reload()
 		
 		if context.name == 'preview':
 			export_result = self.render_preview(context)
@@ -228,6 +237,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			return
 		
 		self.render_start(context)
+		
+	def render_preview(self, scene):
+		raise NotImplementedError()
 	
 	def render_scene(self, scene):
 		
