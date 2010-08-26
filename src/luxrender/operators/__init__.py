@@ -45,6 +45,8 @@ from luxrender.export import geometry	as export_geometry
 from luxrender.outputs.file_api			import Files
 
 class LUXRENDER_OT_volume_add(bpy.types.Operator):
+	'''Add a new material volume definition to the scene'''
+	
 	bl_idname = "luxrender.volume_add"
 	bl_label = "Add LuxRender Volume"
 	
@@ -59,6 +61,8 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
 		return {'FINISHED'}
 	
 class LUXRENDER_OT_volume_remove(bpy.types.Operator):
+	'''Remove the selected material volume definition'''
+	
 	bl_idname = "luxrender.volume_remove"
 	bl_label = "Remove LuxRender Volume"
 	

@@ -40,8 +40,8 @@ class luxrender_texture_base(TextureButtonsPanel, described_layout):
 	texture type, and may display the choice to the user as a switch,
 	or keep it as a hidden attribute if the texture is mono-typed.
 	'''
+	bl_options = {'HIDE_HEADER'}
 	
-	bl_show_header = False
 	COMPAT_ENGINES = {'luxrender'}
 	LUX_COMPAT = set()
 	property_group_non_global = True

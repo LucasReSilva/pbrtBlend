@@ -40,7 +40,7 @@ class ui_panel_main(TextureButtonsPanel, described_layout, bpy.types.Panel):
 	'''
 	
 	bl_label = 'LuxRender Textures'
-	bl_show_header = False
+	bl_options = {'HIDE_HEADER'}
 	
 	COMPAT_ENGINES = {'luxrender'}
 	
