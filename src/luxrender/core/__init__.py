@@ -47,11 +47,12 @@ from luxrender.properties.integrator	import luxrender_integrator
 from luxrender.properties.volume		import luxrender_volume
 from luxrender.properties.filter		import luxrender_filter
 from luxrender.properties.accelerator	import luxrender_accelerator
+# (Object-based property groups are created by the UI)
 
 # Exporter Interface Panels
 from luxrender.ui import render_panels	as ui_render_panels
 from luxrender.ui import camera			as ui_camera
-#from luxrender.ui import lamps			as ui_lamps
+from luxrender.ui import lamps			as ui_lamps
 #from luxrender.ui import meshes			as ui_meshes
 #from luxrender.ui import materials		as ui_materials
 #from luxrender.ui.textures import main	as texture_main
