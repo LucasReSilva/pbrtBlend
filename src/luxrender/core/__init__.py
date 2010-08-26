@@ -44,7 +44,6 @@ from luxrender.ui import render_panels	as ui_render_panels
 from luxrender.ui import camera			as ui_camera
 from luxrender.ui import lamps			as ui_lamps
 from luxrender.ui import meshes			as ui_meshes
-from luxrender.ui import world			as ui_world
 from luxrender.ui import materials		as ui_materials
 from luxrender.ui.textures import main	as texture_main
 from luxrender.ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
@@ -139,7 +138,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		# Custom object data panels
 		ui_lamps.lamps,
 		ui_meshes.meshes,
-		ui_world.world,
 		
 		# Camera
 		ui_camera.camera,
@@ -149,6 +147,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		# Materials
 		ui_materials.material_editor,
 		ui_materials.material_emission,
+		ui_materials.material_volumes,
 		
 		# Textures
 		texture_main.ui_panel_main,

@@ -33,7 +33,7 @@ from ef.ui import described_layout
 from ef.ef import init_properties
 
 # Lux API
-from luxrender.properties.material import luxrender_material, luxrender_emission
+from luxrender.properties.material import luxrender_material, luxrender_emission, luxrender_volumes, luxrender_volume_data
 from luxrender.properties.texture import has_property 
 from luxrender.properties.texture import FloatTextureParameter, ColorTextureParameter
 
@@ -67,7 +67,7 @@ def VolumeParameter(attr, name, property_group):
 		{
 			'type': 'prop_search',
 			'attr': attr,
-			'src': lambda s,c: s.scene.luxrender_world,
+			'src': lambda s,c: s.scene.luxrender_volumes,
 			'src_attr': 'volumes',
 			'trg': lambda s,c: getattr(c, property_group),
 			'trg_attr': '%s_volume' % attr,
@@ -470,4 +470,72 @@ class material_emission(_lux_material_base, bpy.types.Panel):
 		},
 	] + \
 	TC_L.get_properties()
+
+class material_volumes(MaterialButtonsPanel, described_layout, bpy.types.Panel):
+	bl_label = 'LuxRender Material Volumes'
+	COMPAT_ENGINES = {'luxrender'}
 	
+	property_group = luxrender_volumes
+	
+	def draw(self, context):
+		super().draw(context)
+		if len(context.scene.luxrender_volumes.volumes) > 0:
+			self.layout.prop(
+				context.scene.luxrender_volumes.volumes[context.scene.luxrender_volumes.volumes_index],
+				'name'
+			)
+	
+	controls = [
+		'volumes_label',
+		'volumes_select',
+		['op_vol_add', 'op_vol_rem']
+	]
+	
+	visibility = {
+		
+	}
+	
+	properties = [
+		{
+			'type': 'collection',
+			'ptype': luxrender_volume_data,
+			'name': 'volumes',
+			'attr': 'volumes',
+			'items': [
+				
+			]
+		},
+		{
+			'type': 'text',
+			'attr': 'volumes_label',
+			'name': 'Volumes',
+		},
+		{
+			'type': 'int',
+			'name': 'volumes_index',
+			'attr': 'volumes_index',
+		},
+		{
+			'type': 'template_list',
+			'name': 'volumes_select',
+			'attr': 'volumes_select',
+			'trg': lambda sc,c: c.luxrender_volumes,
+			'trg_attr': 'volumes_index',
+			'src': lambda sc,c: c.luxrender_volumes,
+			'src_attr': 'volumes',
+		},
+		{
+			'type': 'operator',
+			'attr': 'op_vol_add',
+			'operator': 'luxrender.volume_add',
+			'text': 'Add',
+			'icon': 'PLUS',
+		},
+		{
+			'type': 'operator',
+			'attr': 'op_vol_rem',
+			'operator': 'luxrender.volume_remove',
+			'text': 'Remove',
+			'icon': 'X',
+		},
+	]

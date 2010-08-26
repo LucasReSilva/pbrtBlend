@@ -50,7 +50,7 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	new_volume_name = bpy.props.StringProperty(default='New Volume')
 	
 	def invoke(self, context, event):
-		v = context.scene.luxrender_world.volumes
+		v = context.scene.luxrender_volumes.volumes
 		v.add()
 		v[len(v)-1].name = self.properties.new_volume_name
 		return {'FINISHED'}
@@ -60,7 +60,7 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 	bl_label = "Remove LuxRender Volume"
 	
 	def invoke(self, context, event):
-		w = context.scene.luxrender_world
+		w = context.scene.luxrender_volumes
 		w.volumes.remove( w.volumes_index )
 		return {'FINISHED'}
 

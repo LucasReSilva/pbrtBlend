@@ -86,3 +86,24 @@ class luxrender_emission(bpy.types.IDPropertyGroup):
 	'''
 	
 	pass
+
+class luxrender_volume_data(bpy.types.IDPropertyGroup):
+	'''
+	Storage class for LuxRender volume data. The
+	luxrender_volumes object will store 1 or more of
+	these in its CollectionProperty 'volumes'
+	'''
+	
+	p1 = bpy.props.StringProperty(
+		name = 'Prop1',
+		description = 'Prop1 Descr.',
+	)
+
+class luxrender_volumes(bpy.types.IDPropertyGroup):
+	'''
+	Storage class for LuxRender Material volumes.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	pass
