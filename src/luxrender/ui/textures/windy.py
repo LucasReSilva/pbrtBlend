@@ -26,34 +26,13 @@
 #
 import bpy
 
-from luxrender.export import ParamSet
 from luxrender.ui.textures import luxrender_texture_base
-
-class windy(bpy.types.IDPropertyGroup):
-	
-	def get_paramset(self):
-		
-		windy_params = ParamSet()
-		
-		return {'3DMAPPING'}, windy_params
 
 class ui_panel_windy(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender windy Texture'
 	
 	LUX_COMPAT = {'windy'}
 	
-	property_group = windy
-	
-	controls = [
-		# None
-	]
-	
-	visibility = {} 
-	
-	properties = [
-		{
-			'attr': 'variant',
-			'type': 'string',
-			'default': 'float'
-		},
+	display_property_groups = [
+		'windy'
 	]

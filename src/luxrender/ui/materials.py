@@ -38,33 +38,9 @@ from luxrender.properties.material import luxrender_material, luxrender_emission
 class _lux_material_base(MaterialButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {'luxrender'}
 	
-	object_property_groups = [
-		luxrender_emission,
-		luxrender_material,
-	]
-	
-	@classmethod
-	def property_reload(cls):
-		for mat in bpy.data.materials:
-			cls.property_create(mat)
-	
-	@classmethod
-	def property_create(cls, mat):
-		for property_group in cls.object_property_groups:
-			if not hasattr(mat, property_group.__name__):
-				init_properties(mat, [{
-					'type': 'pointer',
-					'attr': property_group.__name__,
-					'ptype': property_group,
-					'name': property_group.__name__,
-					'description': property_group.__name__
-				}], cache=False)
-				init_properties(property_group, property_group.properties, cache=False)
-	
-	# Overridden to provide data storage in the material, not the scene
+	# Overridden to draw property groups from material object, not the scene
 	def draw(self, context):
 		if context.material is not None:
-			self.property_create(context.material)
 			
 			# Set the integrator type in this material in order to show compositing options 
 			context.material.luxrender_material.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
@@ -115,8 +91,7 @@ class material_volumes(MaterialButtonsPanel, property_group_renderer, bpy.types.
 			self.layout.prop(
 				current_vol, 'name'
 			)
-			# Here we use a combined (IDPropertyGroup, described_layout) object
-			# that can draw itself to the layout of this panel.
+			# Here we draw the currently selected luxrender_volumes_data property group
 			for control in current_vol.controls:
 				self.draw_column(
 					control,

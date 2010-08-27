@@ -28,48 +28,30 @@ import bpy
 
 from properties_texture import TextureButtonsPanel
 
-from ef.ui import described_layout
-from ef.ef import init_properties
+from ef.ui import property_group_renderer
 
-class luxrender_texture_base(TextureButtonsPanel, described_layout):
+class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
 	'''
 	This is the base class for all LuxRender texture sub-panels.
 	All subpanels should have their own property_groups, and define
-	a string attribute in thier property_group called 'variant'.
+	a string attribute in their property_group called 'variant'.
 	It should be set to either 'float' or 'color' depending on the
 	texture type, and may display the choice to the user as a switch,
 	or keep it as a hidden attribute if the texture is mono-typed.
 	'''
-	bl_options = {'HIDE_HEADER'}
 	
-	COMPAT_ENGINES = {'luxrender'}
-	LUX_COMPAT = set()
-	property_group_non_global = True
+	bl_options		= {'HIDE_HEADER'}
+	COMPAT_ENGINES	= {'luxrender'}
+	LUX_COMPAT		= set()
 	
-	@classmethod
-	def property_reload(r_class):
-		for tex in bpy.data.textures:
-			r_class.property_create(tex.luxrender_texture)
-	
-	@classmethod
-	def property_create(r_class, lux_tex_property_group):
-		if not hasattr(lux_tex_property_group, r_class.property_group.__name__):
-			init_properties(lux_tex_property_group, [{
-				'type': 'pointer',
-				'attr': r_class.property_group.__name__,
-				'ptype': r_class.property_group,
-				'name': r_class.property_group.__name__,
-				'description': r_class.property_group.__name__
-			}], cache=False)
-			init_properties(r_class.property_group, r_class.properties, cache=False)
-	
-	# Overridden to provide data storage in the material, not the scene
+	# Overridden to draw property groups from texture.luxrender_texture object, not the scene
 	def draw(self, context):
 		if context.texture is not None:
-			self.property_create(context.texture.luxrender_texture)
 			
-			for p in self.controls:
-				self.draw_column(p, self.layout, context.texture.luxrender_texture, supercontext=context)
+			for property_group_name in self.display_property_groups:
+				property_group = getattr(context.texture.luxrender_texture, property_group_name)
+				for p in property_group.controls:
+					self.draw_column(p, self.layout, context.texture.luxrender_texture, supercontext=context, property_group=property_group)
 	
 	@classmethod
 	def poll(cls, context):

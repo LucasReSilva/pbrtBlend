@@ -409,8 +409,6 @@ class luxrender_tonemapping(bpy.types.IDPropertyGroup, declarative_property_grou
 	camera object.
 	'''
 	
-	property_group_non_global = True
-	
 	controls = [
 		'type',
 		

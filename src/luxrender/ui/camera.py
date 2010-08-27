@@ -37,35 +37,9 @@ from luxrender.properties.camera import luxrender_camera, luxrender_colorspace, 
 class camera_panel(CameraButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {'luxrender'}
 	
-	# List of custom property groups to create in each camera object
-	object_property_groups = [
-		luxrender_camera,
-		luxrender_colorspace,
-		luxrender_tonemapping
-	]
-	
-	@classmethod
-	def property_reload(cls):
-		for cam in bpy.data.cameras:
-			cls.property_create(cam)
-	
-	@classmethod
-	def property_create(cls, cam):
-		for property_group in cls.object_property_groups:
-			if not hasattr(cam, property_group.__name__):
-				init_properties(cam, [{
-					'type': 'pointer',
-					'attr': property_group.__name__,
-					'ptype': property_group,
-					'name': property_group.__name__,
-					'description': property_group.__name__
-				}], cache=False)
-				init_properties(property_group, property_group.properties, cache=False)
-	
-	# Overridden to provide property groups in camera object, not the scene
+	# Overridden to draw property groups from camera object, not the scene
 	def draw(self, context):
 		if context.camera is not None:
-			self.property_create(context.camera)
 			
 			# Show only certain controls for Blender's perspective camera type 
 			context.camera.luxrender_camera.is_perspective = (context.camera.type == 'PERSP')

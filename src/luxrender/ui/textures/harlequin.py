@@ -26,34 +26,13 @@
 #
 import bpy
 
-from luxrender.export import ParamSet
 from luxrender.ui.textures import luxrender_texture_base
-
-class harlequin(bpy.types.IDPropertyGroup):
-	
-	def get_paramset(self):
-		
-		harlequin_params = ParamSet()
-		
-		return set(), harlequin_params
 
 class ui_panel_harlequin(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender harlequin Texture'
 	
 	LUX_COMPAT = {'harlequin'}
 	
-	property_group = harlequin
-	
-	controls = [
-		# None
-	]
-	
-	visibility = {} 
-	
-	properties = [
-		{
-			'attr': 'variant',
-			'type': 'string',
-			'default': 'color'
-		},
+	display_property_groups = [
+		'harlequin'
 	]

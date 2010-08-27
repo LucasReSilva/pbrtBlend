@@ -26,56 +26,13 @@
 #
 import bpy
 
-from luxrender.export import ParamSet
 from luxrender.ui.textures import luxrender_texture_base
-
-class fbm(bpy.types.IDPropertyGroup):
-	
-	def get_paramset(self):
-		
-		fbm_params = ParamSet().add_integer('octaves', self.octaves) \
-							   .add_float('roughness', self.roughness)
-		
-		return {'3DMAPPING'}, fbm_params
 
 class ui_panel_fbm(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender fbm Texture'
 	
 	LUX_COMPAT = {'fbm'}
 	
-	property_group = fbm
-	
-	controls = [
-		'octaves',
-		'roughness',
-	]
-	
-	visibility = {} 
-	
-	properties = [
-		{
-			'attr': 'variant',
-			'type': 'string',
-			'default': 'float'
-		},
-		{
-			'type': 'int',
-			'attr': 'octaves',
-			'name': 'Octaves',
-			'default': 8,
-			'min': 1,
-			'soft_min': 1,
-			'max': 100,
-			'soft_max': 100
-		},
-		{
-			'type': 'float',
-			'attr': 'roughness',
-			'name': 'Roughness',
-			'default': 0.5,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1.0,
-			'soft_max': 1.0
-		},
+	display_property_groups = [
+		'fbm'
 	]

@@ -40,27 +40,64 @@ from ef.util import util as efutil
 from luxrender.outputs import LuxManager as LM
 from luxrender.outputs import LuxLog
 
-# Exporter Scene-based Property Groups
-from luxrender.properties.engine		import luxrender_engine
-from luxrender.properties.sampler		import luxrender_sampler
-from luxrender.properties.integrator	import luxrender_integrator
-from luxrender.properties.volume		import luxrender_volume
-from luxrender.properties.filter		import luxrender_filter
-from luxrender.properties.accelerator	import luxrender_accelerator
-from luxrender.properties.material		import luxrender_volumes
-# (Object-based property groups are created by the UI)
+# Exporter Property Groups
+from luxrender.properties.accelerator	import	luxrender_accelerator
+from luxrender.properties.camera 		import	luxrender_camera, luxrender_colorspace, luxrender_tonemapping
+from luxrender.properties.engine		import	luxrender_engine
+from luxrender.properties.filter		import	luxrender_filter
+from luxrender.properties.integrator	import	luxrender_integrator
+from luxrender.properties.lamp			import	luxrender_lamp
+from luxrender.properties.material		import	luxrender_material, luxrender_emission, luxrender_volumes
+from luxrender.properties.mesh			import	luxrender_mesh
+from luxrender.properties.texture		import	luxrender_texture, \
+												bilerp, \
+												blackbody, \
+												brick, \
+												checkerboard, \
+												dots, \
+												equalenergy, \
+												fbm, \
+												gaussian, \
+												harlequin, \
+												imagemap, \
+												lampspectrum, \
+												mapping, \
+												marble, \
+												mix, \
+												scale, \
+												transform, \
+												uv, \
+												windy, \
+												wrinkled
+from luxrender.properties.sampler		import	luxrender_sampler
+from luxrender.properties.volume		import	luxrender_volume
 
 # Exporter Interface Panels
-from luxrender.ui import render_panels	as ui_render_panels
-from luxrender.ui import camera			as ui_camera
-from luxrender.ui import lamps			as ui_lamps
-from luxrender.ui import meshes			as ui_meshes
-from luxrender.ui import materials		as ui_materials
-#from luxrender.ui.textures import main	as texture_main
-#from luxrender.ui.textures import		bilerp, blackbody, brick, checkerboard, dots, \
-#										equalenergy, fbm, gaussian, harlequin, imagemap, \
-#										lampspectrum, mapping, marble, mix, scale, \
-#										transform, uv, windy, wrinkled
+from luxrender.ui			import	render_panels	as ui_render_panels
+from luxrender.ui			import	camera			as ui_camera
+from luxrender.ui			import	lamps			as ui_lamps
+from luxrender.ui			import	meshes			as ui_meshes
+from luxrender.ui			import	materials		as ui_materials
+from luxrender.ui.textures	import	main			as ui_textures
+from luxrender.ui.textures	import	bilerp			as ui_bilerp, \
+									blackbody		as ui_blackbody, \
+									brick			as ui_brick, \
+									checkerboard	as ui_checkerboard, \
+									dots			as ui_dots, \
+									equalenergy		as ui_equalenergy, \
+									fbm				as ui_fbm, \
+									gaussian		as ui_gaussian, \
+									harlequin		as ui_harlequin, \
+									imagemap		as ui_imagemap, \
+									lampspectrum	as ui_lampspectrum, \
+									mapping			as ui_mapping, \
+									marble			as ui_marble, \
+									mix				as ui_mix, \
+									scale			as ui_scale, \
+									transform		as ui_transform, \
+									uv				as ui_uv, \
+									windy			as ui_windy, \
+									wrinkled		as ui_windy
 
 # Exporter Operators
 from luxrender.operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
@@ -137,13 +174,41 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 #	# This member is read by the ExporterFramework to set up custom property groups
 	property_groups = [
-		luxrender_accelerator,
-		luxrender_engine,
-		luxrender_filter,
-		luxrender_integrator,
-		luxrender_sampler,
-		luxrender_volume,		# Volume integrator settings NOT TO BE CONFUSED WITH
-		luxrender_volumes		# Material volume definitions
+		# (<prototype to modify>, <declarative_property_group>)
+		('Scene', luxrender_accelerator),
+		('Scene', luxrender_engine),
+		('Scene', luxrender_filter),
+		('Scene', luxrender_integrator),
+		('Scene', luxrender_sampler),
+		('Scene', luxrender_volume),		# Volume integrator settings NOT TO BE CONFUSED WITH
+		('Scene', luxrender_volumes),		# Material volume definitions
+		('Camera', luxrender_camera),
+		('Camera', luxrender_colorspace),
+		('Camera', luxrender_tonemapping),
+		('Lamp', luxrender_lamp),
+		('Mesh', luxrender_mesh),
+		('Material', luxrender_material),
+		('Material', luxrender_emission),
+		('Texture', luxrender_texture),
+		('luxrender_texture', bilerp),
+		('luxrender_texture', blackbody),
+		('luxrender_texture', brick),
+		('luxrender_texture', checkerboard),
+		('luxrender_texture', dots),
+		('luxrender_texture', equalenergy),
+		('luxrender_texture', fbm),
+		('luxrender_texture', gaussian),
+		('luxrender_texture', harlequin),
+		('luxrender_texture', imagemap),
+		('luxrender_texture', lampspectrum),
+		('luxrender_texture', mapping),
+		('luxrender_texture', marble),
+		('luxrender_texture', mix),
+		('luxrender_texture', scale),
+		('luxrender_texture', transform),
+		('luxrender_texture', uv),
+		('luxrender_texture', windy),
+		('luxrender_texture', wrinkled),
 	]
 	
 	def update_framebuffer(self, xres, yres, fb):

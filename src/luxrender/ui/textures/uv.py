@@ -26,34 +26,13 @@
 #
 import bpy
 
-from luxrender.export import ParamSet
 from luxrender.ui.textures import luxrender_texture_base
-
-class uv(bpy.types.IDPropertyGroup):
-	
-	def get_paramset(self):
-		
-		uv_params = ParamSet()
-			
-		return {'2DMAPPING'}, uv_params
 
 class ui_panel_uv(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender UV Texture'
 	
 	LUX_COMPAT = {'uv'}
 	
-	property_group = uv
-	
-	controls = [
-		# None
-	]
-	
-	visibility = {} 
-	
-	properties = [
-		{
-			'type': 'string',
-			'attr': 'variant',
-			'default': 'color'
-		},
+	display_property_groups = [
+		'uv'
 	]

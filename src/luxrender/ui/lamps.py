@@ -43,33 +43,10 @@ class lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 		'luxrender_lamp',
 	]
 	
-	object_property_groups = [
-		luxrender_lamp,
-	]
-	
-	@classmethod
-	def property_reload(cls):
-		for lamp in bpy.data.lamps:
-			cls.property_create(lamp)
-	
-	@classmethod
-	def property_create(cls, lamp):
-		for property_group in cls.object_property_groups:
-			if not hasattr(lamp, property_group.__name__):
-				init_properties(lamp, [{
-					'type': 'pointer',
-					'attr': property_group.__name__,
-					'ptype': property_group,
-					'name': property_group.__name__,
-					'description': property_group.__name__
-				}], cache=False)
-				init_properties(property_group, property_group.properties, cache=False)
-	
-	# Overridden to provide data storage in the lamp, not the scene
+	# Overridden to draw property groups from lamp object, not the scene
 	def draw(self, context):
 		if context.lamp is not None:
 			layout = self.layout
-			lamps.property_create(context.lamp)
 			
 			lamp = context.lamp
 			wide_ui = context.region.width > narrowui

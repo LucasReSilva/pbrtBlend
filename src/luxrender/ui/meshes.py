@@ -42,32 +42,9 @@ class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
 		'luxrender_mesh',
 	]
 	
-	object_property_groups = [
-		luxrender_mesh,
-	]
-	
-	@classmethod
-	def property_reload(cls):
-		for mesh in bpy.data.meshes:
-			cls.property_create(mesh)
-	
-	@classmethod
-	def property_create(cls, mesh):
-		for property_group in cls.object_property_groups:
-			if not hasattr(mesh, property_group.__name__):
-				init_properties(mesh, [{
-					'type': 'pointer',
-					'attr': property_group.__name__,
-					'ptype': property_group,
-					'name': property_group.__name__,
-					'description': property_group.__name__
-				}], cache=False)
-				init_properties(property_group, property_group.properties, cache=False)
-	
-	# Overridden to provide property groups in camera object, not the scene
+	# Overridden to draw property groups from mesh object, not the scene
 	def draw(self, context):
 		if context.mesh is not None:
-			self.property_create(context.mesh)
 			
 			for property_group_name in self.display_property_groups:
 				property_group = getattr(context.mesh, property_group_name)

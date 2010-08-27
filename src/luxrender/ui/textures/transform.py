@@ -26,23 +26,7 @@
 #
 import bpy
 
-from ef.validate import Logic_OR as O
-
-from luxrender.export import ParamSet, get_worldscale
 from luxrender.ui.textures import luxrender_texture_base
-
-class transform(bpy.types.IDPropertyGroup):
-	
-	def get_paramset(self):
-		transform_params = ParamSet()
-		
-		ws = get_worldscale(as_scalematrix=False)
-		
-		transform_params.add_vector('translate', [i*ws for i in self.translate])
-		transform_params.add_vector('rotate', self.rotate)
-		transform_params.add_vector('scale', [i*ws for i in self.scale])
-		
-		return transform_params
 
 class ui_panel_transform(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Texture Transform'
@@ -50,33 +34,6 @@ class ui_panel_transform(luxrender_texture_base, bpy.types.Panel):
 	
 	LUX_COMPAT = {'BLENDER', 'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}
 	
-	property_group = transform
-	
-	controls = [
-		'translate',
-		'rotate',
-		'scale',
-	]
-	
-	visibility = {}
-	
-	properties = [
-		{
-			'type': 'float_vector',
-			'attr': 'translate',
-			'name': 'Translate',
-			'default': (0.0, 0.0, 0.0),
-		},
-		{
-			'type': 'float_vector',
-			'attr': 'rotate',
-			'name': 'Rotate',
-			'default': (0.0, 0.0, 0.0),
-		},
-		{
-			'type': 'float_vector',
-			'attr': 'scale',
-			'name': 'Scale',
-			'default': (1.0, 1.0, 1.0),
-		},
+	display_property_groups = [
+		'transform'
 	]
