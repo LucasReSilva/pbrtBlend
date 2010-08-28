@@ -174,7 +174,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 #	# This member is read by the ExporterFramework to set up custom property groups
 	property_groups = [
-		# (<prototype to modify>, <declarative_property_group>)
 		('Scene', luxrender_accelerator),
 		('Scene', luxrender_engine),
 		('Scene', luxrender_filter),

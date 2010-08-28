@@ -26,7 +26,7 @@
 #
 import bpy
 
-from ef.ui import declarative_property_group
+from ef.ef import declarative_property_group
 from ef.validate import Logic_Operator as LO
 
 from luxrender.properties import dbo

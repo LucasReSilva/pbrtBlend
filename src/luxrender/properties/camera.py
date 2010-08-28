@@ -28,7 +28,7 @@ import math
 
 import bpy
 
-from ef.ui import declarative_property_group
+from ef.ef import declarative_property_group
 
 from luxrender.properties import dbo
 from luxrender.export import get_worldscale
