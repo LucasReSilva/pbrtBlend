@@ -133,7 +133,8 @@ class ColorTextureParameter(TextureParameterBase):
 		'''
 		if hasattr(c, 'luxrender_material'):
 			if c.luxrender_material.material in self.master_color_map.keys() and self.attr == self.master_color_map[c.luxrender_material.material]:
-				c.diffuse_color = getattr(c.luxrender_material, self.attr+'_color')
+				if c.diffuse_color != getattr(c.luxrender_material, self.attr+'_color'):
+					c.diffuse_color = getattr(c.luxrender_material, self.attr+'_color')
 	
 	def get_properties(self):
 		return [
