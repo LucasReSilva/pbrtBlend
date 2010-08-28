@@ -29,7 +29,6 @@ from properties_data_lamp import DataButtonsPanel
 
 # EF API
 from ef.ui import property_group_renderer
-from ef.ef import init_properties
 
 from luxrender.properties.lamp import luxrender_lamp
 

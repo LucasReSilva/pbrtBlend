@@ -44,7 +44,7 @@ def find_apis():
 	
 	return apis
 
-class luxrender_engine(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_engine(declarative_property_group):
 	'''
 	Storage class for LuxRender Engine settings.
 	This class will be instantiated within a Blender scene

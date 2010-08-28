@@ -32,7 +32,7 @@ from ef.validate import Logic_OR as O, Logic_AND as A
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-class luxrender_integrator(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_integrator(declarative_property_group):
 	'''
 	Storage class for LuxRender SurfaceIntegrator settings.
 	This class will be instantiated within a Blender scene

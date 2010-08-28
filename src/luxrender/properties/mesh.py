@@ -35,7 +35,7 @@ from luxrender.export import ParamSet
 
 # TODO: check parameter completeness against Lux API
 
-class luxrender_mesh(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_mesh(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
 	This class will be instantiated within a Blender

@@ -30,7 +30,6 @@ from properties_data_camera import CameraButtonsPanel
 
 # EF API
 from ef.ui import property_group_renderer
-from ef.ef import init_properties
 
 from luxrender.properties.camera import luxrender_camera, luxrender_colorspace, luxrender_tonemapping
 

@@ -31,7 +31,7 @@ from ef.ui import declarative_property_group
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-class luxrender_filter(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_filter(declarative_property_group):
 	'''
 	Storage class for LuxRender PixelFilter settings.
 	This class will be instantiated within a Blender scene

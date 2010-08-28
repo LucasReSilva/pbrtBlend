@@ -70,7 +70,7 @@ def lamp_visibility():
 # TODO: adapt values written to d based on simple/advanced views
 
 # TODO: check parameter completeness against Lux API
-class luxrender_lamp(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_lamp(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
 	This class will be instantiated within a Blender

@@ -40,7 +40,7 @@ from luxrender.outputs import LuxManager as LM
 
 # TODO: check parameter completeness against Lux API
 
-class luxrender_camera(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_camera(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
 	This class will be instantiated within a Blender
@@ -256,7 +256,7 @@ class luxrender_camera(bpy.types.IDPropertyGroup, declarative_property_group):
 		dbo('CAMERA', out)
 		return out
 
-class luxrender_colorspace(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_colorspace(declarative_property_group):
 	'''
 	Storage class for LuxRender Colour-Space settings.
 	This class will be instantiated within a Blender
@@ -402,7 +402,7 @@ class tonemapping_live_update(object):
 					0
 				)
 
-class luxrender_tonemapping(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.
 	This class will be instantiated within a Blender

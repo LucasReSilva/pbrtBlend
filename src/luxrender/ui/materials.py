@@ -30,7 +30,6 @@ from properties_material import MaterialButtonsPanel
 
 # EF API
 from ef.ui import property_group_renderer
-from ef.ef import init_properties
 
 # Lux API
 from luxrender.properties.material import luxrender_material, luxrender_emission

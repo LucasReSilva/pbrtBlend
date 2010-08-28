@@ -151,7 +151,7 @@ def material_visibility():
 	
 	return vis
 
-class luxrender_material(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
 	This class will be instantiated within a Blender Material
@@ -349,7 +349,7 @@ class luxrender_material(bpy.types.IDPropertyGroup, declarative_property_group):
 
 TC_L = ColorTextureParameter('material', 'L', 'Emission color', 'luxrender_emission', default=(1.0,1.0,1.0) )
 
-class luxrender_emission(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_emission(declarative_property_group):
 	'''
 	Storage class for LuxRender Material emission settings.
 	This class will be instantiated within a Blender Material
@@ -425,7 +425,7 @@ class luxrender_emission(bpy.types.IDPropertyGroup, declarative_property_group):
 	] + \
 	TC_L.get_properties()
 
-class luxrender_volume_data(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_volume_data(declarative_property_group):
 	'''
 	Storage class for LuxRender volume data. The
 	luxrender_volumes object will store 1 or more of
@@ -451,7 +451,7 @@ class luxrender_volume_data(bpy.types.IDPropertyGroup, declarative_property_grou
 		},
 	]
 
-class luxrender_volumes(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_volumes(declarative_property_group):
 	'''
 	Storage class for LuxRender Material volumes.
 	This class will be instantiated within a Blender scene

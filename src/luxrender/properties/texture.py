@@ -305,7 +305,7 @@ class FloatTextureParameter(TextureParameterBase):
 # The main luxrender_texture property group
 #------------------------------------------------------------------------------ 
 
-class luxrender_texture(bpy.types.IDPropertyGroup, declarative_property_group):
+class luxrender_texture(declarative_property_group):
 	'''
 	Storage class for LuxRender Texture settings.
 	This class will be instantiated within a Blender Texture
@@ -382,7 +382,7 @@ class luxrender_texture(bpy.types.IDPropertyGroup, declarative_property_group):
 # Sub property groups of luxrender_texture follow
 #------------------------------------------------------------------------------ 
 
-class bilerp(bpy.types.IDPropertyGroup, declarative_property_group):
+class bilerp(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -496,7 +496,7 @@ class bilerp(bpy.types.IDPropertyGroup, declarative_property_group):
 				
 		return {'2DMAPPING'}, params
 
-class blackbody(bpy.types.IDPropertyGroup, declarative_property_group):
+class blackbody(declarative_property_group):
 	
 	controls = [
 		'temperature'
@@ -529,7 +529,7 @@ bricktex_c		= ColorTextureParameter('texture', 'bricktex', 'bricktex', 'brick', 
 mortartex_f		= FloatTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=0.0, min=0.0, max=1.0)
 mortartex_c		= ColorTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=(1.0,1.0,1.0))
 
-class brick(bpy.types.IDPropertyGroup, declarative_property_group):
+class brick(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -693,7 +693,7 @@ class brick(bpy.types.IDPropertyGroup, declarative_property_group):
 tex1 = FloatTextureParameter('texture', 'tex1', 'Texture 1', 'checkerboard', default=1.0, min=0.0, max=100.0)
 tex2 = FloatTextureParameter('texture', 'tex2', 'Texture 2', 'checkerboard', default=0.0, min=0.0, max=100.0)
 
-class checkerboard(bpy.types.IDPropertyGroup, declarative_property_group):
+class checkerboard(declarative_property_group):
 	
 	controls = [
 		'aamode',
@@ -762,7 +762,7 @@ class checkerboard(bpy.types.IDPropertyGroup, declarative_property_group):
 inside	= FloatTextureParameter('texture', 'inside', 'inside', 'dots', default=1.0, min=0.0, max=100.0)
 outside	= FloatTextureParameter('texture', 'outside', 'outside', 'dots', default=0.0, min=0.0, max=100.0)
 
-class dots(bpy.types.IDPropertyGroup, declarative_property_group):
+class dots(declarative_property_group):
 	
 	controls = [
 		# None
@@ -803,7 +803,7 @@ class dots(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return {'2DMAPPING'}, dots_params
 
-class equalenergy(bpy.types.IDPropertyGroup, declarative_property_group):
+class equalenergy(declarative_property_group):
 	
 	controls = [
 		'energy'
@@ -833,7 +833,7 @@ class equalenergy(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return set(), ParamSet().add_float('energy', self.energy)
 
-class fbm(bpy.types.IDPropertyGroup, declarative_property_group):
+class fbm(declarative_property_group):
 	
 	controls = [
 		'octaves',
@@ -877,7 +877,7 @@ class fbm(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return {'3DMAPPING'}, fbm_params
 
-class gaussian(bpy.types.IDPropertyGroup, declarative_property_group):
+class gaussian(declarative_property_group):
 	
 	controls = [
 		'energy',
@@ -931,7 +931,7 @@ class gaussian(bpy.types.IDPropertyGroup, declarative_property_group):
 								.add_float('wavelength', self.wavelength) \
 								.add_float('width', self.width)
 
-class harlequin(bpy.types.IDPropertyGroup, declarative_property_group):
+class harlequin(declarative_property_group):
 	
 	controls = [
 		# None
@@ -953,7 +953,7 @@ class harlequin(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return set(), harlequin_params
 
-class imagemap(bpy.types.IDPropertyGroup, declarative_property_group):
+class imagemap(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -1077,7 +1077,7 @@ class imagemap(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return {'2DMAPPING'}, params
 
-class lampspectrum(bpy.types.IDPropertyGroup, declarative_property_group):
+class lampspectrum(declarative_property_group):
 	
 	controls = [
 		'preset'
@@ -1103,7 +1103,7 @@ class lampspectrum(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return set(), ParamSet().add_string('name', self.preset)
 
-class mapping(bpy.types.IDPropertyGroup, declarative_property_group):
+class mapping(declarative_property_group):
 	
 	controls = [
 		'type',
@@ -1208,7 +1208,7 @@ class mapping(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return mapping_params
 
-class marble(bpy.types.IDPropertyGroup, declarative_property_group):
+class marble(declarative_property_group):
 	
 	controls = [
 		'octaves',
@@ -1280,7 +1280,7 @@ tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'mix', default=(1.0,1
 tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'mix', default=0.0, min=0.0, max=100.0)
 tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'mix', default=(0.0,0.0,0.0))
 
-class mix(bpy.types.IDPropertyGroup, declarative_property_group):
+class mix(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -1355,7 +1355,7 @@ tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'scale', default=(1.0
 tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'scale', default=0.0, min=0.0, max=100.0)
 tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'scale', default=(0.0,0.0,0.0))
 
-class scale(bpy.types.IDPropertyGroup, declarative_property_group):
+class scale(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -1418,7 +1418,7 @@ class scale(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return set(), scale_params
 
-class transform(bpy.types.IDPropertyGroup, declarative_property_group):
+class transform(declarative_property_group):
 	
 	controls = [
 		'translate',
@@ -1460,7 +1460,7 @@ class transform(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return transform_params
 
-class uv(bpy.types.IDPropertyGroup, declarative_property_group):
+class uv(declarative_property_group):
 	
 	controls = [
 		# None
@@ -1482,7 +1482,7 @@ class uv(bpy.types.IDPropertyGroup, declarative_property_group):
 			
 		return {'2DMAPPING'}, uv_params
 
-class windy(bpy.types.IDPropertyGroup, declarative_property_group):
+class windy(declarative_property_group):
 	
 	controls = [
 		# None
@@ -1504,7 +1504,7 @@ class windy(bpy.types.IDPropertyGroup, declarative_property_group):
 		
 		return {'3DMAPPING'}, windy_params
 
-class wrinkled(bpy.types.IDPropertyGroup, declarative_property_group):
+class wrinkled(declarative_property_group):
 	
 	controls = [
 		'octaves',
