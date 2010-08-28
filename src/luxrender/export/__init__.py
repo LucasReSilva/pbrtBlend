@@ -43,9 +43,6 @@ class ParamSetItem(list):
 		self.append(self.type_name)
 		self.append(self.value)
 	
-	#def __repr__(self):
-	#	return "<%s:%s:%s>" % (self.type, self.name, self.value)
-	
 	def list_wrap(self, lst, cnt, type='f'):
 		fcnt = float(cnt)
 		flen = float(len(lst))

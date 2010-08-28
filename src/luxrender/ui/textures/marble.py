@@ -34,5 +34,5 @@ class ui_panel_marble(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'marble'}
 	
 	display_property_groups = [
-		'marble'
+		( ('texture', 'luxrender_texture'), 'marble' )
 	]

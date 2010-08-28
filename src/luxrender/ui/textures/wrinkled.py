@@ -34,5 +34,5 @@ class ui_panel_wrinkled(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'wrinkled'}
 	
 	display_property_groups = [
-		'wrinkled'
+		( ('texture', 'luxrender_texture'), 'wrinkled' )
 	]

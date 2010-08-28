@@ -37,7 +37,7 @@ class ui_panel_main(luxrender_texture_base, bpy.types.Panel):
 	bl_options = {'HIDE_HEADER'}
 	
 	display_property_groups = [
-		'luxrender_texture'
+		( ('texture',), 'luxrender_texture' )
 	]
 	
 	@classmethod
@@ -51,14 +51,3 @@ class ui_panel_main(luxrender_texture_base, bpy.types.Panel):
 				(context.scene.render.engine in cls.COMPAT_ENGINES) \
 				and context.texture.luxrender_texture.type is not 'BLENDER'
 				#(tex.type != 'NONE' or tex.use_nodes) and \
-	
-	# Overridden to draw property groups from texture object, not the scene
-	def draw(self, context):
-		if context.texture is not None:
-			
-			context.texture.luxrender_texture.use_lux_texture = (context.texture.luxrender_texture != 'BLENDER')
-			
-			for property_group_name in self.display_property_groups:
-				property_group = getattr(context.texture, property_group_name)
-				for p in property_group.controls:
-					self.draw_column(p, self.layout, context.texture, supercontext=context, property_group=property_group)

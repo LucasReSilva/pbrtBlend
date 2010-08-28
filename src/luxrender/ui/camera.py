@@ -28,31 +28,16 @@ import bpy
 
 from properties_data_camera import CameraButtonsPanel
 
-# EF API
 from ef.ui import property_group_renderer
-
-from luxrender.properties.camera import luxrender_camera, luxrender_colorspace, luxrender_tonemapping
 
 class camera_panel(CameraButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {'luxrender'}
 	
-	# Overridden to draw property groups from camera object, not the scene
-	def draw(self, context):
-		if context.camera is not None:
-			
-			# Show only certain controls for Blender's perspective camera type 
-			context.camera.luxrender_camera.is_perspective = (context.camera.type == 'PERSP')
-			
-			for property_group_name in self.display_property_groups:
-				property_group = getattr(context.camera, property_group_name)
-				for p in property_group.controls:
-					self.draw_column(p, self.layout, context.camera, supercontext=context, property_group=property_group)
-
 class camera(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Camera'
 	
 	display_property_groups = [
-		'luxrender_camera'
+		( ('camera',), 'luxrender_camera' )
 	]
 	
 
@@ -60,7 +45,7 @@ class colorspace(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Colour Space'
 	
 	display_property_groups = [
-		'luxrender_colorspace'
+		( ('camera',), 'luxrender_colorspace' )
 	]
 	
 
@@ -68,5 +53,5 @@ class tonemapping(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender ToneMapping'
 	
 	display_property_groups = [
-		'luxrender_tonemapping'
+		( ('camera',), 'luxrender_tonemapping' )
 	]

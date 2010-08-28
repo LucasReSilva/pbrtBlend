@@ -34,5 +34,5 @@ class ui_panel_uv(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'uv'}
 	
 	display_property_groups = [
-		'uv'
+		( ('texture', 'luxrender_texture'), 'uv' )
 	]

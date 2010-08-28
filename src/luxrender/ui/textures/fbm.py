@@ -34,5 +34,5 @@ class ui_panel_fbm(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'fbm'}
 	
 	display_property_groups = [
-		'fbm'
+		( ('texture', 'luxrender_texture'), 'fbm' )
 	]

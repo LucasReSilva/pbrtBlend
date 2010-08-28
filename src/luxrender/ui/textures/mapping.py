@@ -35,5 +35,5 @@ class ui_panel_mapping(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}
 	
 	display_property_groups = [
-		'mapping'
+		( ('texture', 'luxrender_texture'), 'mapping' )
 	]

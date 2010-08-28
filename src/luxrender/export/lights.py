@@ -84,7 +84,6 @@ def exportLights(lux_context, scene, ob, matrix):
 		# relsize (sun only)
 		# [a-e]const (sky only)
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params)
-
 		return True
 	
 	# all lights apart from sun + sky have "color L"
@@ -98,13 +97,11 @@ def exportLights(lux_context, scene, ob, matrix):
 		light_params.add_float('coneangle', coneangle)
 		light_params.add_float('conedeltaangle', conedeltaangle)
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
-
 		return True
 
 	if light.type == 'POINT':
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
-
 		return True
 		
 	if light.type == 'HEMI':
@@ -118,7 +115,6 @@ def exportLights(lux_context, scene, ob, matrix):
 		# nsamples
 		# gamma
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
-
 		return True
 	
 	if light.type == 'AREA':
@@ -148,7 +144,6 @@ def exportLights(lux_context, scene, ob, matrix):
 			.add_point('P', points)
 		lux_context.shape('trianglemesh', shape_params)
 		lux_context.attributeEnd()
-		
 		return True
 
 	return False

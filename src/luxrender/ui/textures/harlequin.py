@@ -34,5 +34,5 @@ class ui_panel_harlequin(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'harlequin'}
 	
 	display_property_groups = [
-		'harlequin'
+		( ('texture', 'luxrender_texture'), 'harlequin' )
 	]

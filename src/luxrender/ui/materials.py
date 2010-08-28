@@ -28,26 +28,10 @@
 import bpy
 from properties_material import MaterialButtonsPanel
 
-# EF API
 from ef.ui import property_group_renderer
-
-# Lux API
-from luxrender.properties.material import luxrender_material, luxrender_emission
 
 class _lux_material_base(MaterialButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {'luxrender'}
-	
-	# Overridden to draw property groups from material object, not the scene
-	def draw(self, context):
-		if context.material is not None:
-			
-			# Set the integrator type in this material in order to show compositing options 
-			context.material.luxrender_material.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
-			
-			for property_group_name in self.display_property_groups:
-				property_group = getattr(context.material, property_group_name)
-				for p in property_group.controls:
-					self.draw_column(p, self.layout, context.material, supercontext=context, property_group=property_group)
 
 class material_editor(_lux_material_base, bpy.types.Panel):
 	'''
@@ -57,7 +41,7 @@ class material_editor(_lux_material_base, bpy.types.Panel):
 	bl_label = 'LuxRender Materials'
 	
 	display_property_groups = [
-		'luxrender_material',
+		( ('material',), 'luxrender_material' )
 	]
 
 class material_emission(_lux_material_base, bpy.types.Panel):
@@ -68,18 +52,17 @@ class material_emission(_lux_material_base, bpy.types.Panel):
 	bl_label = 'LuxRender Material Emission'
 	
 	display_property_groups = [
-		'luxrender_emission',
+		( ('material',), 'luxrender_emission' )
 	]
 
-class material_volumes(MaterialButtonsPanel, property_group_renderer, bpy.types.Panel):
+class material_volumes(_lux_material_base, bpy.types.Panel):
 	bl_label = 'LuxRender Material Volumes'
-	COMPAT_ENGINES = {'luxrender'}
 	
 	display_property_groups = [
-		'luxrender_volumes'
+		( ('scene',), 'luxrender_volumes' )
 	]
 	
-	# overridden in order to draw selected luxrender_volume_data property group
+	# overridden in order to draw the selected luxrender_volume_data property group
 	def draw(self, context):
 		super().draw(context)
 		if len(context.scene.luxrender_volumes.volumes) > 0:

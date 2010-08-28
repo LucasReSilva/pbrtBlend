@@ -44,15 +44,6 @@ class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES	= {'luxrender'}
 	LUX_COMPAT		= set()
 	
-	# Overridden to draw property groups from texture.luxrender_texture object, not the scene
-	def draw(self, context):
-		if context.texture is not None:
-			
-			for property_group_name in self.display_property_groups:
-				property_group = getattr(context.texture.luxrender_texture, property_group_name)
-				for p in property_group.controls:
-					self.draw_column(p, self.layout, context.texture.luxrender_texture, supercontext=context, property_group=property_group)
-	
 	@classmethod
 	def poll(cls, context):
 		'''

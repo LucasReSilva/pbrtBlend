@@ -26,8 +26,6 @@
 #
 import bpy
 
-from ef.util import util as efutil
-
 from luxrender.ui.textures import luxrender_texture_base
 
 class ui_panel_imagemap(luxrender_texture_base, bpy.types.Panel):
@@ -36,5 +34,5 @@ class ui_panel_imagemap(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'imagemap'}
 	
 	display_property_groups = [
-		'imagemap'
+		( ('texture', 'luxrender_texture'), 'imagemap' )
 	]

@@ -225,10 +225,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		Returns None
 		'''
 		
-		#print('fb len: %i' % len(fb))
-		#print('fb max: %i' % max(fb))
-		#print('fb min: %i' % min(fb))
-		
 		result = self.begin_result(0,0,xres,yres)
 		# TODO: don't read the file whilst it is still being written..
 		# ... however file locking in python seems incomplete/non-portable ?
@@ -252,10 +248,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		Returns None
 		'''
-		
-		# Force update of all custom properties
-		#for ui in self.interfaces:
-		#	ui.property_reload()
 		
 		if context.name == 'preview':
 			export_result = self.render_preview(context)

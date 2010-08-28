@@ -24,9 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from properties_render import RenderButtonsPanel
-
 import bpy
+from properties_render import RenderButtonsPanel
 
 from ef.ui import property_group_renderer
 
@@ -45,7 +44,7 @@ class engine(render_described_context, bpy.types.Panel):
 	bl_label = 'LuxRender Engine Configuration'
 	
 	display_property_groups = [
-		'luxrender_engine'
+		( ('scene',), 'luxrender_engine' )
 	]
 
 class sampler(render_described_context, bpy.types.Panel):
@@ -56,7 +55,7 @@ class sampler(render_described_context, bpy.types.Panel):
 	bl_label = 'Sampler'
 	
 	display_property_groups = [
-		'luxrender_sampler'
+		( ('scene',), 'luxrender_sampler' )
 	]
 
 class integrator(render_described_context, bpy.types.Panel):
@@ -67,7 +66,7 @@ class integrator(render_described_context, bpy.types.Panel):
 	bl_label = 'Surface Integrator'
 	
 	display_property_groups = [
-		'luxrender_integrator'
+		( ('scene',), 'luxrender_integrator' )
 	]
 
 class volume(render_described_context, bpy.types.Panel):
@@ -78,7 +77,7 @@ class volume(render_described_context, bpy.types.Panel):
 	bl_label = 'Volume Integrator'
 	
 	display_property_groups = [
-		'luxrender_volume'
+		( ('scene',), 'luxrender_volume' )
 	]
 
 class filter(render_described_context, bpy.types.Panel):
@@ -89,7 +88,7 @@ class filter(render_described_context, bpy.types.Panel):
 	bl_label = 'Filter'
 	
 	display_property_groups = [
-		'luxrender_filter'
+		( ('scene',), 'luxrender_filter' )
 	]
 
 class accelerator(render_described_context, bpy.types.Panel):
@@ -100,5 +99,5 @@ class accelerator(render_described_context, bpy.types.Panel):
 	bl_label = 'Accelerator'
 	
 	display_property_groups = [
-		'luxrender_accelerator'
+		( ('scene',), 'luxrender_accelerator' )
 	]

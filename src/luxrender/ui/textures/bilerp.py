@@ -34,5 +34,5 @@ class ui_panel_bilerp(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'bilerp'}
 	
 	display_property_groups = [
-		'bilerp'
+		( ('texture', 'luxrender_texture'), 'bilerp' )
 	]

@@ -27,10 +27,7 @@
 import bpy
 from properties_data_lamp import DataButtonsPanel 
 
-# EF API
 from ef.ui import property_group_renderer
-
-from luxrender.properties.lamp import luxrender_lamp
 
 narrowui = 180
 
@@ -39,10 +36,10 @@ class lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	COMPAT_ENGINES = {'luxrender'}
 	
 	display_property_groups = [
-		'luxrender_lamp',
+		( ('lamp',), 'luxrender_lamp' )
 	]
 	
-	# Overridden to draw property groups from lamp object, not the scene
+	# Overridden to draw some of blender's lamp controls
 	def draw(self, context):
 		if context.lamp is not None:
 			layout = self.layout
@@ -103,9 +100,4 @@ class lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 				elif wide_ui:
 					col = split.column()
 				
-				# LuxRender properties
-				for property_group_name in self.display_property_groups:
-					property_group = getattr(context.lamp, property_group_name)
-					for p in property_group.controls:
-						self.draw_column(p, self.layout, context.lamp, supercontext=context, property_group=property_group)
-
+				super().draw(context) # draw the display_property_groups

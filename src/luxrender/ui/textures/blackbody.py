@@ -34,5 +34,5 @@ class ui_panel_blackbody(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'blackbody'}
 	
 	display_property_groups = [
-		'blackbody'
+		( ('texture', 'luxrender_texture'), 'blackbody' )
 	]

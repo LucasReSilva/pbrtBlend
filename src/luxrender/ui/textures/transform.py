@@ -35,5 +35,5 @@ class ui_panel_transform(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'BLENDER', 'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}
 	
 	display_property_groups = [
-		'transform'
+		( ('texture', 'luxrender_texture'), 'transform' )
 	]

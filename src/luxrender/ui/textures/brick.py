@@ -34,5 +34,5 @@ class ui_panel_brick(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'brick'}
 	
 	display_property_groups = [
-		'brick'
+		( ('texture', 'luxrender_texture'), 'brick' )
 	]

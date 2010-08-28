@@ -430,9 +430,6 @@ class luxrender_volume_data(declarative_property_group):
 	Storage class for LuxRender volume data. The
 	luxrender_volumes object will store 1 or more of
 	these in its CollectionProperty 'volumes'.
-	
-	This IDPropertyGroup is special because it inherits
-	decribed_layout in order to draw itself within a panel
 	'''
 	
 	controls = [

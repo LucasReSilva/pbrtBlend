@@ -34,5 +34,5 @@ class ui_panel_scale(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'scale'}
 	
 	display_property_groups = [
-		'scale'
+		( ('texture', 'luxrender_texture'), 'scale' )
 	]

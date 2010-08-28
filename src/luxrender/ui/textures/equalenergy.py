@@ -34,5 +34,5 @@ class ui_panel_equalenergy(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'equalenergy'}
 	
 	display_property_groups = [
-		'equalenergy'
+		( ('texture', 'luxrender_texture'), 'equalenergy' )
 	]

@@ -34,5 +34,5 @@ class ui_panel_mix(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'mix'}
 	
 	display_property_groups = [
-		'mix'
+		( ('texture', 'luxrender_texture'), 'mix' )
 	]

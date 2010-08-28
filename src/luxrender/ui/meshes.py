@@ -27,25 +27,12 @@
 import bpy
 from properties_data_mesh import MeshButtonsPanel 
 
-# EF API
 from ef.ui import property_group_renderer
-
-# Lux API
-from luxrender.properties.mesh import luxrender_mesh
 
 class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}
 	
 	display_property_groups = [
-		'luxrender_mesh',
+		( ('mesh',), 'luxrender_mesh' )
 	]
-	
-	# Overridden to draw property groups from mesh object, not the scene
-	def draw(self, context):
-		if context.mesh is not None:
-			
-			for property_group_name in self.display_property_groups:
-				property_group = getattr(context.mesh, property_group_name)
-				for p in property_group.controls:
-					self.draw_column(p, self.layout, context.mesh, supercontext=context, property_group=property_group)
