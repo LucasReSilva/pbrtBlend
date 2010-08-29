@@ -425,6 +425,20 @@ class luxrender_emission(declarative_property_group):
 	] + \
 	TC_L.get_properties()
 
+class VolumeDataFloatTextureParameter(FloatTextureParameter):
+	texture_collection = 'textures'
+	def texture_collection_finder(self):
+		def func(s,c):
+			return s.main
+		return func
+	
+	def texture_slot_set_attr(self):
+		def func2(s,c):
+			return c
+		return func2
+
+TF_IOR = VolumeDataFloatTextureParameter('', 'ior', 'IOR Texture', 'ior', add_float_value=False)
+
 class luxrender_volume_data(declarative_property_group):
 	'''
 	Storage class for LuxRender volume data. The
@@ -433,20 +447,24 @@ class luxrender_volume_data(declarative_property_group):
 	'''
 	
 	controls = [
-		'name',
-		'test',
-	]
+		'type',
+	] + \
+	TF_IOR.get_controls()
 	
-	visibility = {}
+	visibility = {
+	}
 	
 	properties = [
 		{
-			'type': 'string',
-			'attr': 'test',
-			'name': 'Test Param',
-			'default': 'ABCD 123',
+			'type': 'enum',
+			'attr': 'type',
+			'name': 'Type',
+			'items': [
+				('clear', 'clear', 'clear')
+			]
 		},
-	]
+	] + \
+	TF_IOR.get_properties()
 
 class luxrender_volumes(declarative_property_group):
 	'''

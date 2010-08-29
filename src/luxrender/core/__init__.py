@@ -47,7 +47,7 @@ from luxrender.properties.engine		import	luxrender_engine
 from luxrender.properties.filter		import	luxrender_filter
 from luxrender.properties.integrator	import	luxrender_integrator
 from luxrender.properties.lamp			import	luxrender_lamp
-from luxrender.properties.material		import	luxrender_material, luxrender_emission, luxrender_volumes
+from luxrender.properties.material		import	luxrender_material, luxrender_emission, luxrender_volume_data, luxrender_volumes
 from luxrender.properties.mesh			import	luxrender_mesh
 from luxrender.properties.texture		import	luxrender_texture, \
 												bilerp, \
@@ -188,6 +188,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Mesh', luxrender_mesh),
 		('Material', luxrender_material),
 		('Material', luxrender_emission),
+		(None, luxrender_volume_data),		# call init_properties, but don't create instance
 		('Texture', luxrender_texture),
 		('luxrender_texture', bilerp),
 		('luxrender_texture', blackbody),

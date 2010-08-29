@@ -40,13 +40,15 @@ from luxrender.outputs import LuxManager
 #------------------------------------------------------------------------------ 
 
 class TextureParameterBase(object):
-	parent_type		= None
-	attr			= None
-	name			= None
-	property_group	= None
-	default			= (0.8, 0.8, 0.8)
-	min				= 0.0
-	max				= 1.0
+	parent_type			= None
+	attr				= None
+	name				= None
+	property_group		= None
+	default				= (0.8, 0.8, 0.8)
+	min					= 0.0
+	max					= 1.0
+	
+	texture_collection	= 'texture_slots'
 	
 	def __init__(self, parent_type, attr, name, property_group, default=None, min=None, max=None):
 		self.parent_type = parent_type
@@ -60,7 +62,7 @@ class TextureParameterBase(object):
 		if max is not None:
 			self.max = max
 	
-	def texture_slot_finder(self):
+	def texture_collection_finder(self):
 		def func(s,c):
 			if s.object.type == 'LAMP':
 				return s.object.data
@@ -91,6 +93,7 @@ class TextureParameterBase(object):
 		return []
 
 class ColorTextureParameter(TextureParameterBase):
+	
 	def get_controls(self):
 		return [
 			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolorrgc' % self.attr, '%s_usecolortexture' % self.attr ],
@@ -186,8 +189,8 @@ class ColorTextureParameter(TextureParameterBase):
 			{
 				'type': 'prop_search',
 				'attr': '%s_colortexture' % self.attr,
-				'src': self.texture_slot_finder(),
-				'src_attr': 'texture_slots',
+				'src': self.texture_collection_finder(),
+				'src_attr': self.texture_collection,
 				'trg': self.texture_slot_set_attr(),
 				'trg_attr': '%s_colortexturename' % self.attr,
 				'name': self.name
@@ -200,8 +203,8 @@ class FloatTextureParameter(TextureParameterBase):
 	max				= 1.0
 	precision		= 6
 	texture_only	= False
-	multiply_float  = False
-	ignore_zero     = False
+	multiply_float	= False
+	ignore_zero		= False
 	
 	def __init__(self,
 			parent_type, attr, name, property_group,
@@ -294,8 +297,8 @@ class FloatTextureParameter(TextureParameterBase):
 			{
 				'type': 'prop_search',
 				'attr': '%s_floattexture' % self.attr,
-				'src': self.texture_slot_finder(),
-				'src_attr': 'texture_slots',
+				'src': self.texture_collection_finder(),
+				'src_attr': self.texture_collection,
 				'trg': self.texture_slot_set_attr(),
 				'trg_attr': '%s_floattexturename' % self.attr,
 				'name': self.name

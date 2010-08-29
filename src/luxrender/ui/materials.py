@@ -79,6 +79,6 @@ class material_volumes(_lux_material_base, bpy.types.Panel):
 					control,
 					self.layout,
 					current_vol,
-					current_vol,
+					context,
 					property_group = current_vol
 				)

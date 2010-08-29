@@ -35,7 +35,7 @@ from luxrender.export import ParamSet
 from luxrender.properties.texture import ColorTextureParameter
 
 class LampColorTextureParameter(ColorTextureParameter):
-	def texture_slot_finder(self):
+	def texture_collection_finder(self):
 		return lambda s,c: s.object.data
 	
 	def get_visibility(self):
