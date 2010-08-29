@@ -395,7 +395,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					luxrender_path += '/Contents/MacOS/luxrender'
 				
 				if not os.path.exists(luxrender_path):
-					raise
+					LuxLog('LuxRender not found at path: %s' % luxrender_path)
+					return False
 				
 				try:
 					for k,v in config_updates.items():

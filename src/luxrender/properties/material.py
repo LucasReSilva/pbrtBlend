@@ -23,13 +23,17 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 # ***** END GPL LICENCE BLOCK *****
-#
+import math#
+
+
 import bpy
 
 from ef.ef import declarative_property_group
 
 from luxrender.properties import has_property
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
+from luxrender.export import ParamSet
+from luxrender.export.materials import add_texture_parameter
 
 def MaterialParameter(attr, name, property_group):
 	return [
@@ -473,7 +477,10 @@ class luxrender_volume_data(declarative_property_group):
 		'type',
 	] + \
 	TF_IOR.get_controls() + \
-	TC_absorption.get_controls()
+	TC_absorption.get_controls() + \
+	[
+		'depth'
+	]
 	
 	visibility = volume_data_visibility()
 	
@@ -488,7 +495,36 @@ class luxrender_volume_data(declarative_property_group):
 		},
 	] + \
 	TF_IOR.get_properties() + \
-	TC_absorption.get_properties()
+	TC_absorption.get_properties() + \
+	[
+		{
+			'type': 'float',
+			'attr': 'depth',
+			'name': 'Abs. at depth',
+			'description': 'Object will match absorption color at this depth in metres',
+			'default': 1.0,
+			'min': 0.00001,
+			'soft_min': 0.00001,
+			'max': 1000.0,
+			'soft_max': 1000.0,
+			'precision': 6
+		},
+	]
+	
+	def api_output(self, lux_context):
+		vp = ParamSet()
+		
+		scale = 1
+		def absorption_transform(i):
+			# This is copied from the old LuxBlend, I don't pretent to understand it, DH
+			depthed = (-math.log(max([(float(i)),1e-30]))/(self.depth*scale)) * ((float(i))==1.0 and -1 or 1)
+			print('abs xform: %f -> %f' % (i,depthed))
+			return depthed
+		
+		vp.update( add_texture_parameter(lux_context, 'fresnel', 'fresnel', self) )
+		vp.update( add_texture_parameter(lux_context, 'absorption', 'color', self, value_transform=absorption_transform) )
+		
+		return self.type, vp
 
 class luxrender_volumes(declarative_property_group):
 	'''

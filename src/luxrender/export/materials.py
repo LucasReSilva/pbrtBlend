@@ -83,7 +83,6 @@ class ExportedTextures(object):
 			ExportedTextures.texture_types.append(type)
 			ExportedTextures.texture_texts.append(texture)
 			ExportedTextures.texture_psets.append(params)
-			print('stacked %s tex'%name)
 	
 	@staticmethod
 	def calculate_dependencies():
@@ -101,7 +100,6 @@ class ExportedTextures(object):
 				ExportedTextures.calculate_dependencies()
 				lux_context.texture(n, ty, tx, p)
 				ExportedTextures.exported_texture_names.append(n)
-				print('exported %s tex' % n)
 
 class ExportedMaterials(object):
 	# Static class variables
@@ -287,7 +285,10 @@ def RGC(value):
 			ncol = 0.0
 	return ncol
 
-def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
+def value_transform_passthrough(val):
+	return val
+
+def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value_transform=value_transform_passthrough):
 	'''
 	lux_context				pylux.Context - like object
 	lux_prop_name			LuxRender material/texture parameter name
@@ -353,12 +354,12 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 				if use_rgc:
 					params.add_color(
 						lux_prop_name,
-						[RGC(i) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
+						[RGC(value_transform(i)) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
 					)
 				else:
 					params.add_color(
 						lux_prop_name,
-						[float(i) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
+						[float(value_transform(i)) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
 					)
 			elif variant == 'fresnel':
 				# TODO
@@ -367,13 +368,6 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 		LuxLog('WARNING: Texture %s is unsupported variant; needed %s' % (lux_prop_name, variant))
 	
 	return params
-
-def luxrender_volume_params(lux_context, vol):
-	vp = ParamSet()
-	vp.update( add_texture_parameter(lux_context, 'fresnel', 'fresnel', vol) )
-	vp.update( add_texture_parameter(lux_context, 'absorption', 'color', vol) )
-	
-	return vol.type, vp
 
 def luxrender_material_params(lux_context, mat, add_type=False):
 	#print('mat %s'%mat.name)

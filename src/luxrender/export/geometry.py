@@ -169,19 +169,26 @@ def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 	# definition depending on the output type
 	export_object_material(lux_context, ob)
 	
-	# Check for emission material assignment
+	# Check for emission material assignment and volume data
 	object_is_emitter = False
+	object_has_volume = False
 	for m in get_instance_materials(ob):
-		if hasattr(m, 'luxrender_emission') and m.luxrender_emission.use_emission:
-			lux_context.lightGroup(m.luxrender_emission.lightgroup, [])
-			arealightsource_params = ParamSet() \
-					.add_float('gain', m.luxrender_emission.gain) \
-					.add_float('power', m.luxrender_emission.power) \
-					.add_float('efficacy', m.luxrender_emission.efficacy)
-			arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', m.luxrender_emission) )
-			lux_context.areaLightSource('area', arealightsource_params)
-			object_is_emitter = True
-			break # just export the first emitting material
+		# just export the first emitting material
+		if not object_is_emitter:
+			if hasattr(m, 'luxrender_emission') and m.luxrender_emission.use_emission:
+				lux_context.lightGroup(m.luxrender_emission.lightgroup, [])
+				arealightsource_params = ParamSet() \
+						.add_float('gain', m.luxrender_emission.gain) \
+						.add_float('power', m.luxrender_emission.power) \
+						.add_float('efficacy', m.luxrender_emission.efficacy)
+				arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', m.luxrender_emission) )
+				lux_context.areaLightSource('area', arealightsource_params)
+				object_is_emitter = True
+		# just export the first volume interior/exterior
+		if hasattr(m, 'luxrender_material') and m.luxrender_material.material in ['glass2'] and not object_has_volume:
+			lux_context.interior(m.luxrender_material.Interior_volume)
+			lux_context.exterior(m.luxrender_material.Exterior_volume)
+			object_has_volume = True
 	
 	# object motion blur
 	is_object_animated = False

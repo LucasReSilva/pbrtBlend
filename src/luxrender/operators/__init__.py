@@ -223,7 +223,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:
-			lux_context.makeNamedVolume( volume.name, *export_materials.luxrender_volume_params(lux_context, volume) )
+			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 		
 		self.report({'INFO'}, 'Exporting geometry')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxo):

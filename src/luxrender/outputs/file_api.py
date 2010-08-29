@@ -143,7 +143,7 @@ class Custom_Context(object):
 			self.wf(self.current_file, p.to_string(), 1)
 	
 	# Wrapped pylux.Context API calls follow ...
-
+	
 	def objectBegin(self, name, file=None):
 		self._api('ObjectBegin ', [name, []], file=file)
 
@@ -251,6 +251,12 @@ class Custom_Context(object):
 		self.wf(Files.MATS, '\nMakeNamedVolume "%s" "%s"' % (name, type))
 		for p in params:
 			self.wf(Files.MATS, p.to_string(), 1)
+	
+	def interior(self, name):
+		self._api('Interior ', [name, []])
+		
+	def exterior(self, name):
+		self._api('Exterior ', [name, []])
 	
 	def texture(self, name, type, texture, params):
 		self.wf(self.current_file, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
