@@ -31,7 +31,6 @@ import os
 import bpy
 
 # ExporterFramework Libs
-from ef.ef import init_properties
 from ef.util import util as efutil
 
 # LuxRender Libs
@@ -57,10 +56,6 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
 		v.add()
 		new_vol = v[len(v)-1]
 		new_vol.name = self.properties.new_volume_name
-		# TODO: this init_properties should be executed
-		# elsewhere, once, on the luxrender_volume_data type,
-		# not on individual instances
-		init_properties(new_vol, new_vol.properties)
 		return {'FINISHED'}
 	
 class LUXRENDER_OT_volume_remove(bpy.types.Operator):
