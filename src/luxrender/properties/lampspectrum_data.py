@@ -151,8 +151,8 @@ lampspectrum_names  = {
 def lampspectrum_list():
 	ls = []
 	for cat, items in lampspectrum_tree:
+		#ls.append( ('', cat, '') )
 		for name, idx in items:
 			pname = lampspectrum_names[idx]
-			ls.append( (pname, name, pname) )
-	
+			ls.append( (pname, pname, name) )
 	return ls

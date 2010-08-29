@@ -334,7 +334,9 @@ class luxrender_texture(declarative_property_group):
 			'type': 'enum',
 			'items': [
 				#('none', 'none', 'none'),
+				('', 'Blender Textures', ''),
 				('BLENDER', 'Use Blender Texture', 'BLENDER'),
+				('', 'Lux Textures', ''),
 				('bilerp', 'bilerp', 'bilerp'),
 				('blackbody','blackbody','blackbody'),
 				('brick', 'brick', 'brick'),
@@ -352,6 +354,12 @@ class luxrender_texture(declarative_property_group):
 				('uv', 'uv', 'uv'),
 				('windy', 'windy', 'windy'),
 				('wrinkled', 'wrinkled', 'wrinkled'),
+				('', 'Fresnel Textures', ''),
+				('constant', 'constant', 'constant'),
+				('cauchy', 'cauchy', 'cauchy'),
+				('sellmeier', 'sellmeier', 'sellmeier'),
+				('sopra', 'sopra', 'sopra'),
+				('luxpop', 'luxpop', 'luxpop'),
 			],
 		},
 	]
@@ -367,20 +375,23 @@ class luxrender_texture(declarative_property_group):
 		'''
 		
 		# this requires the sub-IDPropertyGroup name to be the same as the texture name
-		lux_texture = getattr(self, self.type) 
-		features, params = lux_texture.get_paramset() 
-		
-		# 2D Mapping options
-		#if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
-		if '2DMAPPING' in features:
-			params.update( self.mapping.get_paramset() )
+		if hasattr(self, self.type):
+			lux_texture = getattr(self, self.type) 
+			features, params = lux_texture.get_paramset() 
 			
-		# 3D Mapping options
-		#if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
-		if '3DMAPPING' in features:
-			params.update( self.transform.get_paramset() )
-			
-		return lux_texture.variant, params
+			# 2D Mapping options
+			#if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
+			if '2DMAPPING' in features:
+				params.update( self.mapping.get_paramset() )
+				
+			# 3D Mapping options
+			#if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
+			if '3DMAPPING' in features:
+				params.update( self.transform.get_paramset() )
+				
+			return lux_texture.variant, params
+		else:
+			return 'float', ParamSet()
 
 #------------------------------------------------------------------------------ 
 # Sub property groups of luxrender_texture follow
