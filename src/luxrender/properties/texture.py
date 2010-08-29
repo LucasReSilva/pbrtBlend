@@ -814,6 +814,76 @@ class brick(declarative_property_group):
 		
 		return {'3DMAPPING'}, brick_params
 
+class cauchy(declarative_property_group):
+	
+	controls = [
+		'use_index',
+		'a', 'ior',
+		'b'
+	]
+	
+	visibility = {
+		'a':	{ 'use_index': False },
+		'ior':	{ 'use_index': True },
+	}
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'fresnel'
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_index',
+			'name': 'Use IOR',
+			'default': True
+		},
+		{
+			'type': 'float',
+			'attr': 'a',
+			'name': 'A',
+			'default': 1.458,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
+			'precision': 6
+		},
+		{
+			'type': 'float',
+			'attr': 'ior',
+			'name': 'IOR',
+			'default': 1.458,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
+			'precision': 6
+		},
+		{
+			'type': 'float',
+			'attr': 'b',
+			'name': 'B',
+			'default': 0.0035,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 6
+		},
+	]
+	
+	def get_paramset(self):
+		cp = ParamSet().add_float('cauchyb', self.b)
+		
+		if self.use_index:
+			cp.add_float('index', self.ior)
+		else:
+			cp.add_float('cauchya', self.a)
+		
+		return set(), cp
+
 tex1 = FloatTextureParameter('texture', 'tex1', 'Texture 1', 'checkerboard', default=1.0, min=0.0, max=100.0)
 tex2 = FloatTextureParameter('texture', 'tex2', 'Texture 2', 'checkerboard', default=0.0, min=0.0, max=100.0)
 
@@ -1505,6 +1575,74 @@ class mix(declarative_property_group):
 		
 		return set(), mix_params
 
+class sellmeier(declarative_property_group):
+	
+	controls = [
+		'advanced',
+		'a',
+		'b',
+		'c',
+	]
+	
+	visibility = {
+		'a':	{ 'advanced': True },
+	}
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'fresnel'
+		},
+		{
+			'type': 'bool',
+			'attr': 'advanced',
+			'name': 'Advanced',
+			'default': False,
+		},
+		{
+			'type': 'float',
+			'attr': 'a',
+			'name': 'A',
+			'default': 1.0,
+			'min': 0.001,
+			'soft_min': 0.001,
+			'max': 10.0,
+			'soft_max': 10.0,
+			'precision': 6
+		},
+		{
+			'type': 'float_vector',
+			'attr': 'b',
+			'name': 'B',
+			'default': (0.696, 0.408, 0.879),
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+			'precision': 6
+		},
+		{
+			'type': 'float_vector',
+			'attr': 'c',
+			'name': 'C',
+			'default': (0.0047, 0.0135, 97.93),
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1000.0,
+			'soft_max': 1000.0,
+			'precision': 6
+		},
+	]
+	
+	def get_paramset(self):
+		sp = ParamSet() \
+				.add_float('A', self.a) \
+				.add_float('B', tuple(self.b)) \
+				.add_float('C', tuple(self.c))
+		
+		return set(), sp
+
 tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', 'scale', default=1.0, min=0.0, max=100.0)
 tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'scale', default=(1.0,1.0,1.0))
 tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'scale', default=0.0, min=0.0, max=100.0)
@@ -1572,6 +1710,35 @@ class scale(declarative_property_group):
 		)
 		
 		return set(), scale_params
+
+class tabulatedfresnel(declarative_property_group):
+	
+	controls = [
+		'filename'
+	]
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'fresnel'
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'filename',
+			'name': 'File name'
+		},
+	]
+	
+	def get_paramset(self):
+		tfp = ParamSet().add_string('filename', self.filename)
+		return set(), tfp
+
+class luxpop(tabulatedfresnel):
+	pass
+class sopra(tabulatedfresnel):
+	pass
 
 class transform(declarative_property_group):
 	

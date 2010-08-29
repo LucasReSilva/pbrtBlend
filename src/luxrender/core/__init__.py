@@ -53,6 +53,7 @@ from luxrender.properties.texture		import	luxrender_texture, \
 												bilerp, \
 												blackbody, \
 												brick, \
+												cauchy, \
 												constant, \
 												checkerboard, \
 												dots, \
@@ -62,10 +63,13 @@ from luxrender.properties.texture		import	luxrender_texture, \
 												harlequin, \
 												imagemap, \
 												lampspectrum, \
+												luxpop, \
 												mapping, \
 												marble, \
 												mix, \
+												sellmeier, \
 												scale, \
+												sopra, \
 												transform, \
 												uv, \
 												windy, \
@@ -79,10 +83,11 @@ from luxrender.ui			import	camera			as ui_camera
 from luxrender.ui			import	lamps			as ui_lamps
 from luxrender.ui			import	meshes			as ui_meshes
 from luxrender.ui			import	materials		as ui_materials
-from luxrender.ui.textures	import	main			as ui_textures
-from luxrender.ui.textures	import	bilerp			as ui_bilerp, \
+from luxrender.ui.textures	import	main			as ui_textures, \
+									bilerp			as ui_bilerp, \
 									blackbody		as ui_blackbody, \
 									brick			as ui_brick, \
+									cauchy			as ui_cauchy, \
 									constant		as ui_constant, \
 									checkerboard	as ui_checkerboard, \
 									dots			as ui_dots, \
@@ -92,17 +97,20 @@ from luxrender.ui.textures	import	bilerp			as ui_bilerp, \
 									harlequin		as ui_harlequin, \
 									imagemap		as ui_imagemap, \
 									lampspectrum	as ui_lampspectrum, \
+									luxpop			as ui_luxpop, \
 									mapping			as ui_mapping, \
 									marble			as ui_marble, \
 									mix				as ui_mix, \
+									sellmeier		as ui_sellmeier, \
 									scale			as ui_scale, \
+									sopra			as ui_sopra, \
 									transform		as ui_transform, \
 									uv				as ui_uv, \
 									windy			as ui_windy, \
-									wrinkled		as ui_windy
+									wrinkled		as ui_wrinkled
 
 # Exporter Operators
-from luxrender.operators import			EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
+from luxrender.operators import		EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
 
 # Add standard Blender Interface elements
 import properties_render
@@ -195,6 +203,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_texture', bilerp),
 		('luxrender_texture', blackbody),
 		('luxrender_texture', brick),
+		('luxrender_texture', cauchy),
 		('luxrender_texture', constant),
 		('luxrender_texture', checkerboard),
 		('luxrender_texture', dots),
@@ -204,10 +213,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_texture', harlequin),
 		('luxrender_texture', imagemap),
 		('luxrender_texture', lampspectrum),
+		('luxrender_texture', luxpop),
 		('luxrender_texture', mapping),
 		('luxrender_texture', marble),
 		('luxrender_texture', mix),
+		('luxrender_texture', sellmeier),
 		('luxrender_texture', scale),
+		('luxrender_texture', sopra),
 		('luxrender_texture', transform),
 		('luxrender_texture', uv),
 		('luxrender_texture', windy),

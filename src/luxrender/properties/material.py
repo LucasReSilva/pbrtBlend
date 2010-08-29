@@ -516,9 +516,9 @@ class luxrender_volume_data(declarative_property_group):
 		
 		scale = 1
 		def absorption_transform(i):
-			# This is copied from the old LuxBlend, I don't pretent to understand it, DH
+			# This is copied from the old LuxBlend, I don't pretend to understand it, DH
 			depthed = (-math.log(max([(float(i)),1e-30]))/(self.depth*scale)) * ((float(i))==1.0 and -1 or 1)
-			print('abs xform: %f -> %f' % (i,depthed))
+			#print('abs xform: %f -> %f' % (i,depthed))
 			return depthed
 		
 		vp.update( add_texture_parameter(lux_context, 'fresnel', 'fresnel', self) )
