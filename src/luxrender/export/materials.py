@@ -38,7 +38,7 @@ def write_lxm(lux_context, scene):
 	scene				bpy.types.scene
 	
 	Iterate over the given scene's objects, and export materials
-	of visible ones to the lux Conext lux_context
+	of visible ones to the lux Context lux_context
 	
 	Returns				None
 	'''
@@ -83,6 +83,7 @@ class ExportedTextures(object):
 			ExportedTextures.texture_types.append(type)
 			ExportedTextures.texture_texts.append(texture)
 			ExportedTextures.texture_psets.append(params)
+			print('stacked %s tex'%name)
 	
 	@staticmethod
 	def calculate_dependencies():
@@ -100,6 +101,7 @@ class ExportedTextures(object):
 				ExportedTextures.calculate_dependencies()
 				lux_context.texture(n, ty, tx, p)
 				ExportedTextures.exported_texture_names.append(n)
+				print('exported %s tex' % n)
 
 class ExportedMaterials(object):
 	# Static class variables
@@ -289,7 +291,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 	'''
 	lux_context				pylux.Context - like object
 	lux_prop_name			LuxRender material/texture parameter name
-	variant					Required variant: 'float' or 'color'
+	variant					Required variant: 'float' or 'color' or 'fresnel'
 	lux_mattex				luxrender_material or luxrender_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
 	
 	Either insert a float parameter or a float texture reference, depending on setup
@@ -346,7 +348,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 						lux_prop_name,
 						fval
 					)
-			else:
+			elif variant == 'color':
 				use_rgc = getattr(lux_mattex, '%s_usecolorrgc' % lux_prop_name)
 				if use_rgc:
 					params.add_color(
@@ -358,10 +360,20 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex):
 						lux_prop_name,
 						[float(i) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
 					)
+			elif variant == 'fresnel':
+				# TODO
+				pass
 	else:
 		LuxLog('WARNING: Texture %s is unsupported variant; needed %s' % (lux_prop_name, variant))
 	
 	return params
+
+def luxrender_volume_params(lux_context, vol):
+	vp = ParamSet()
+	vp.update( add_texture_parameter(lux_context, 'fresnel', 'fresnel', vol) )
+	vp.update( add_texture_parameter(lux_context, 'absorption', 'color', vol) )
+	
+	return vol.type, vp
 
 def luxrender_material_params(lux_context, mat, add_type=False):
 	#print('mat %s'%mat.name)

@@ -247,6 +247,11 @@ class Custom_Context(object):
 		for p in params:
 			self.wf(Files.MATS, p.to_string(), 1)
 	
+	def makeNamedVolume(self, name, type, params):
+		self.wf(Files.MATS, '\nMakeNamedVolume "%s" "%s"' % (name, type))
+		for p in params:
+			self.wf(Files.MATS, p.to_string(), 1)
+	
 	def texture(self, name, type, texture, params):
 		self.wf(self.current_file, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
 		for p in params:

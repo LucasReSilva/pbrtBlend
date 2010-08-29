@@ -53,6 +53,7 @@ from luxrender.properties.texture		import	luxrender_texture, \
 												bilerp, \
 												blackbody, \
 												brick, \
+												constant, \
 												checkerboard, \
 												dots, \
 												equalenergy, \
@@ -82,6 +83,7 @@ from luxrender.ui.textures	import	main			as ui_textures
 from luxrender.ui.textures	import	bilerp			as ui_bilerp, \
 									blackbody		as ui_blackbody, \
 									brick			as ui_brick, \
+									constant		as ui_constant, \
 									checkerboard	as ui_checkerboard, \
 									dots			as ui_dots, \
 									equalenergy		as ui_equalenergy, \
@@ -193,6 +195,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_texture', bilerp),
 		('luxrender_texture', blackbody),
 		('luxrender_texture', brick),
+		('luxrender_texture', constant),
 		('luxrender_texture', checkerboard),
 		('luxrender_texture', dots),
 		('luxrender_texture', equalenergy),

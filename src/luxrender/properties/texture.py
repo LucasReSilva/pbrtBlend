@@ -305,6 +305,114 @@ class FloatTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 
+class FresnelTextureParameter(TextureParameterBase):
+	default			= 0.0
+	min				= 0.0
+	max				= 1.0
+	precision		= 6
+	texture_only	= False
+	multiply_float	= False
+	ignore_zero		= False
+	
+	def __init__(self,
+			parent_type, attr, name, property_group,
+			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
+			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
+			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
+			default = 0.0, min = 0.0, max = 1.0, precision=6
+		):
+		self.parent_type = parent_type
+		self.attr = attr
+		self.name = name
+		self.property_group = property_group
+		self.texture_only = (not add_float_value)
+		self.multiply_float = multiply_float
+		self.ignore_zero = ignore_zero
+		self.default = default
+		self.min = min
+		self.max = max
+		self.precision = precision
+	
+	def get_controls(self):
+		if self.texture_only:
+			return [
+				'%s_fresneltexture' % self.attr,
+			] + self.get_extra_controls()
+		else:
+			return [
+				[0.9, '%s_fresnelvalue' % self.attr, '%s_usefresneltexture' % self.attr],
+				'%s_fresneltexture' % self.attr,
+			] + self.get_extra_controls()
+	
+	def get_visibility(self):
+		if self.texture_only:
+			vis = {
+				'%s_fresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+			}
+		else:
+			vis = {
+				'%s_usefresneltexture' % self.attr:	{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_fresnelvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_fresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefresneltexture' % self.attr: True },
+			}
+		vis.update(self.get_extra_visibility())
+		return vis
+	
+	def get_properties(self):
+		return [
+			{
+				'attr': self.attr,
+				'type': 'string',
+				'default': 'lux_fresnel_texture',
+			},
+			{
+				'attr': '%s_multiplyfloat' % self.attr,
+				'type': 'bool',
+				'default': self.multiply_float
+			},
+			{
+				'attr': '%s_ignorezero' % self.attr,
+				'type': 'bool',
+				'default': self.ignore_zero
+			},
+			{
+				'attr': '%s_usefresneltexture' % self.attr,
+				'type': 'bool',
+				'name': 'T',
+				'description': 'Textured %s' % self.name,
+				'default': False if not self.texture_only else True,
+				'toggle': True,
+			},
+			{
+				'attr': '%s_fresnelvalue' % self.attr,
+				'type': 'float',
+				'name': self.name,
+				'description': '%s Value' % self.name,
+				'default': self.default,
+				'min': self.min,
+				'soft_min': self.min,
+				'max': self.max,
+				'soft_max': self.max,
+				'precision': self.precision,
+				#'slider': True
+			},
+			{
+				'attr': '%s_fresneltexturename' % self.attr,
+				'type': 'string',
+				'name': '%s_fresneltexturename' % self.attr,
+				'description': '%s Texture' % self.name,
+			},
+			{
+				'type': 'prop_search',
+				'attr': '%s_fresneltexture' % self.attr,
+				'src': self.texture_collection_finder(),
+				'src_attr': self.texture_collection,
+				'trg': self.texture_slot_set_attr(),
+				'trg_attr': '%s_fresneltexturename' % self.attr,
+				'name': self.name
+			},
+		] + self.get_extra_properties()
+
 #------------------------------------------------------------------------------
 # The main luxrender_texture property group
 #------------------------------------------------------------------------------ 
@@ -371,7 +479,7 @@ class luxrender_texture(declarative_property_group):
 		We also add in the ParamSets of any panels shared by texture
 		types, eg. 2D/3D mapping and transform params
 		
-		Return		tuple(string('float'|'color'), ParamSet)
+		Return		tuple(string('float'|'color'|'fresnel'), ParamSet)
 		'''
 		
 		# this requires the sub-IDPropertyGroup name to be the same as the texture name
@@ -773,6 +881,37 @@ class checkerboard(declarative_property_group):
 			features = {'3DMAPPING'}
 		
 		return features, checkerboard_params
+
+class constant(declarative_property_group):
+	controls = [
+		'value'
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'fresnel'
+		},
+		{
+			'attr': 'value',
+			'type': 'float',
+			'name': 'Value',
+			'default': 1.51,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
+		},
+	]
+	
+	def get_paramset(self):
+		constant_params = ParamSet()
+		constant_params.add_float('value', self.value)
+		
+		return set(), constant_params
 
 inside	= FloatTextureParameter('texture', 'inside', 'inside', 'dots', default=1.0, min=0.0, max=100.0)
 outside	= FloatTextureParameter('texture', 'outside', 'outside', 'dots', default=0.0, min=0.0, max=100.0)

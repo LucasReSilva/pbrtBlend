@@ -29,7 +29,7 @@ import bpy
 from ef.ef import declarative_property_group
 
 from luxrender.properties import has_property
-from luxrender.properties.texture import FloatTextureParameter, ColorTextureParameter
+from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 
 def MaterialParameter(attr, name, property_group):
 	return [
@@ -425,7 +425,7 @@ class luxrender_emission(declarative_property_group):
 	] + \
 	TC_L.get_properties()
 
-class VolumeDataFloatTextureParameter(FloatTextureParameter):
+class VolumeDataColorTextureParameter(ColorTextureParameter):
 	texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
@@ -437,7 +437,30 @@ class VolumeDataFloatTextureParameter(FloatTextureParameter):
 			return c
 		return func2
 
-TF_IOR = VolumeDataFloatTextureParameter('', 'ior', 'IOR Texture', 'ior', add_float_value=False)
+class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
+	texture_collection = 'textures'
+	def texture_collection_finder(self):
+		def func(s,c):
+			return s.main
+		return func
+	
+	def texture_slot_set_attr(self):
+		def func2(s,c):
+			return c
+		return func2
+
+TF_IOR			= VolumeDataFresnelTextureParameter('', 'fresnel', 'IOR', 'fresnel', add_float_value = False)
+TC_absorption	= VolumeDataColorTextureParameter('', 'absorption', 'Absorption', 'absorption')
+
+def volume_data_visibility():
+	vis = {}
+	
+	vis.update({
+		'ior_floattexture':			{ 'ior_usefloattexture': True },
+		'absorption_colortexture':	{ 'absorption_usecolortexture': True }
+	})
+	
+	return vis
 
 class luxrender_volume_data(declarative_property_group):
 	'''
@@ -449,10 +472,10 @@ class luxrender_volume_data(declarative_property_group):
 	controls = [
 		'type',
 	] + \
-	TF_IOR.get_controls()
+	TF_IOR.get_controls() + \
+	TC_absorption.get_controls()
 	
-	visibility = {
-	}
+	visibility = volume_data_visibility()
 	
 	properties = [
 		{
@@ -464,7 +487,8 @@ class luxrender_volume_data(declarative_property_group):
 			]
 		},
 	] + \
-	TF_IOR.get_properties()
+	TF_IOR.get_properties() + \
+	TC_absorption.get_properties()
 
 class luxrender_volumes(declarative_property_group):
 	'''
@@ -479,9 +503,7 @@ class luxrender_volumes(declarative_property_group):
 		['op_vol_add', 'op_vol_rem']
 	]
 	
-	visibility = {
-		
-	}
+	visibility = {}
 	
 	properties = [
 		{

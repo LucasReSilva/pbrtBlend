@@ -214,11 +214,16 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				self.report({'ERROR'}, 'No lights in scene!')
 				return {'CANCELLED'}
 		
-		self.report({'INFO'}, 'Exporting materials')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxm):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MATS)
+			
+			self.report({'INFO'}, 'Exporting materials')
 			export_materials.write_lxm(lux_context, scene)
+			
+		self.report({'INFO'}, 'Exporting volume data')
+		for volume in scene.luxrender_volumes.volumes:
+			lux_context.makeNamedVolume( volume.name, *export_materials.luxrender_volume_params(lux_context, volume) )
 		
 		self.report({'INFO'}, 'Exporting geometry')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxo):
