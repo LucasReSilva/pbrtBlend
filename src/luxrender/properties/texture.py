@@ -27,6 +27,7 @@
 import bpy
 
 from ef.ef import declarative_property_group
+from ef.util import util as efutil
 from ef.validate import Logic_OR as O
 
 from luxrender.properties import has_property
