@@ -77,7 +77,7 @@ class volume(render_described_context, bpy.types.Panel):
 	bl_label = 'Volume Integrator'
 	
 	display_property_groups = [
-		( ('scene',), 'luxrender_volume' )
+		( ('scene',), 'luxrender_volumeintegrator' )
 	]
 
 class filter(render_described_context, bpy.types.Panel):

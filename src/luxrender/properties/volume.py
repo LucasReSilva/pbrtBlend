@@ -35,7 +35,7 @@ from luxrender.export import ParamSet
 
 # TODO: check parameter completeness against Lux API
 
-class luxrender_volume(declarative_property_group):
+class luxrender_volumeintegrator(declarative_property_group):
 	'''
 	Storage class for LuxRender Volume Integrator settings.
 	This class will be instantiated within a Blender scene

@@ -168,7 +168,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			lux_context.sampler(			*scene.luxrender_sampler.api_output()		)
 			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()	)
 			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output()	)
-			lux_context.volumeIntegrator(	*scene.luxrender_volume.api_output()		)
+			lux_context.volumeIntegrator(	*scene.luxrender_volumeintegrator.api_output()		)
 			lux_context.pixelFilter(		*scene.luxrender_filter.api_output()		)
 			
 			# Set up camera, view and film

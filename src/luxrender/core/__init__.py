@@ -55,32 +55,32 @@ from luxrender.properties.material		import	luxrender_material, \
 												luxrender_volumes
 from luxrender.properties.mesh			import	luxrender_mesh
 from luxrender.properties.texture		import	luxrender_texture, \
-												bilerp, \
-												blackbody, \
-												brick, \
-												cauchy, \
-												constant, \
-												checkerboard, \
-												dots, \
-												equalenergy, \
-												fbm, \
-												gaussian, \
-												harlequin, \
-												imagemap, \
-												lampspectrum, \
-												luxpop, \
-												mapping, \
-												marble, \
-												mix, \
-												sellmeier, \
-												scale, \
-												sopra, \
-												transform, \
-												uv, \
-												windy, \
-												wrinkled
+												bilerp			as luxrender_texture_bilerp, \
+												blackbody		as luxrender_texture_blackbody, \
+												brick			as luxrender_texture_brick, \
+												cauchy			as luxrender_texture_cauchy, \
+												constant		as luxrender_texture_constant, \
+												checkerboard	as luxrender_texture_checkerboard, \
+												dots			as luxrender_texture_dots, \
+												equalenergy		as luxrender_texture_equalenergy, \
+												fbm				as luxrender_texture_fbm, \
+												gaussian		as luxrender_texture_gaussian, \
+												harlequin		as luxrender_texture_harlequin, \
+												imagemap		as luxrender_texture_imagemap, \
+												lampspectrum	as luxrender_texture_lampspectrum, \
+												luxpop			as luxrender_texture_luxpop, \
+												mapping			as luxrender_texture_mapping, \
+												marble			as luxrender_texture_marble, \
+												mix				as luxrender_texture_mix, \
+												sellmeier		as luxrender_texture_sellmeier, \
+												scale			as luxrender_texture_scale, \
+												sopra			as luxrender_texture_sopra, \
+												transform		as luxrender_texture_transform, \
+												uv				as luxrender_texture_uv, \
+												windy			as luxrender_texture_windy, \
+												wrinkled		as luxrender_texture_wrinkled
 from luxrender.properties.sampler		import	luxrender_sampler
-from luxrender.properties.volume		import	luxrender_volume
+from luxrender.properties.volume		import	luxrender_volumeintegrator
 
 # Exporter Interface Panels
 from luxrender.ui			import	render_panels	as ui_render_panels
@@ -196,8 +196,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Scene', luxrender_filter),
 		('Scene', luxrender_integrator),
 		('Scene', luxrender_sampler),
-		('Scene', luxrender_volume),		# Volume integrator settings NOT TO BE CONFUSED WITH
-		('Scene', luxrender_volumes),		# Material volume definitions
+		('Scene', luxrender_volumeintegrator),
+		('Scene', luxrender_volumes),
 		('Camera', luxrender_camera),
 		('Camera', luxrender_colorspace),
 		('Camera', luxrender_tonemapping),
@@ -207,30 +207,30 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Material', luxrender_emission),
 		(None, luxrender_volume_data),		# call init_properties, but don't create instance
 		('Texture', luxrender_texture),
-		('luxrender_texture', bilerp),
-		('luxrender_texture', blackbody),
-		('luxrender_texture', brick),
-		('luxrender_texture', cauchy),
-		('luxrender_texture', constant),
-		('luxrender_texture', checkerboard),
-		('luxrender_texture', dots),
-		('luxrender_texture', equalenergy),
-		('luxrender_texture', fbm),
-		('luxrender_texture', gaussian),
-		('luxrender_texture', harlequin),
-		('luxrender_texture', imagemap),
-		('luxrender_texture', lampspectrum),
-		('luxrender_texture', luxpop),
-		('luxrender_texture', mapping),
-		('luxrender_texture', marble),
-		('luxrender_texture', mix),
-		('luxrender_texture', sellmeier),
-		('luxrender_texture', scale),
-		('luxrender_texture', sopra),
-		('luxrender_texture', transform),
-		('luxrender_texture', uv),
-		('luxrender_texture', windy),
-		('luxrender_texture', wrinkled),
+		('luxrender_texture', luxrender_texture_bilerp),
+		('luxrender_texture', luxrender_texture_blackbody),
+		('luxrender_texture', luxrender_texture_brick),
+		('luxrender_texture', luxrender_texture_cauchy),
+		('luxrender_texture', luxrender_texture_constant),
+		('luxrender_texture', luxrender_texture_checkerboard),
+		('luxrender_texture', luxrender_texture_dots),
+		('luxrender_texture', luxrender_texture_equalenergy),
+		('luxrender_texture', luxrender_texture_fbm),
+		('luxrender_texture', luxrender_texture_gaussian),
+		('luxrender_texture', luxrender_texture_harlequin),
+		('luxrender_texture', luxrender_texture_imagemap),
+		('luxrender_texture', luxrender_texture_lampspectrum),
+		('luxrender_texture', luxrender_texture_luxpop),
+		('luxrender_texture', luxrender_texture_mapping),
+		('luxrender_texture', luxrender_texture_marble),
+		('luxrender_texture', luxrender_texture_mix),
+		('luxrender_texture', luxrender_texture_sellmeier),
+		('luxrender_texture', luxrender_texture_scale),
+		('luxrender_texture', luxrender_texture_sopra),
+		('luxrender_texture', luxrender_texture_transform),
+		('luxrender_texture', luxrender_texture_uv),
+		('luxrender_texture', luxrender_texture_windy),
+		('luxrender_texture', luxrender_texture_wrinkled),
 	]
 	
 	def update_framebuffer(self, xres, yres, fb):
