@@ -31,4 +31,16 @@ from ef.ui import property_group_renderer
 
 class luxrender_material_base(MaterialButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES	= {'luxrender'}
+
+class luxrender_material_sub(MaterialButtonsPanel, property_group_renderer):
 	bl_options		= {'HIDE_HEADER'}
+	COMPAT_ENGINES	= {'luxrender'}
+	LUX_COMPAT		= set()
+	
+	@classmethod
+	def poll(cls, context):
+		'''
+		Only show LuxRender panel if luxrender_material.material in LUX_COMPAT
+		'''
+		
+		return super().poll(context) and context.material.luxrender_material.material in cls.LUX_COMPAT

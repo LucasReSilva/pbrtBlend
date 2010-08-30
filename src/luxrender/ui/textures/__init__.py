@@ -47,8 +47,7 @@ class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
 	@classmethod
 	def poll(cls, context):
 		'''
-		Only show LuxRender panel with 'Plugin' texture type, and
-		if luxrender_texture.type in LUX_COMPAT
+		Only show LuxRender panel if luxrender_texture.type in LUX_COMPAT
 		'''
 		
 		tex = context.texture

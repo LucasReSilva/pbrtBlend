@@ -25,7 +25,6 @@
 # ***** END GPL LICENCE BLOCK *****
 import math#
 
-
 import bpy
 
 from ef.ef import declarative_property_group
@@ -73,6 +72,33 @@ def VolumeParameter(attr, name, property_group):
 		},
 	]
 
+class VolumeDataColorTextureParameter(ColorTextureParameter):
+	texture_collection = 'textures'
+	def texture_collection_finder(self):
+		def func(s,c):
+			return s.main
+		return func
+	
+	def texture_slot_set_attr(self):
+		def func2(s,c):
+			return c
+		return func2
+
+class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
+	texture_collection = 'textures'
+	def texture_collection_finder(self):
+		def func(s,c):
+			return s.main
+		return func
+	
+	def texture_slot_set_attr(self):
+		def func2(s,c):
+			return c
+		return func2
+
+# Fresnel Textures
+TFR_IOR			= VolumeDataFresnelTextureParameter('', 'fresnel', 'IOR', 'fresnel', add_float_value = False)
+
 # Float Textures
 TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',				'luxrender_material', add_float_value=True, min=0.0, default=0.5, max=1.0 )
 TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',				'luxrender_material', add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
@@ -100,6 +126,8 @@ TC_Ks1			= ColorTextureParameter('material', 'Ks1', 'Specular color 1',	'luxrend
 TC_Ks2			= ColorTextureParameter('material', 'Ks2', 'Specular color 2',	'luxrender_material', default=(1.0,1.0,1.0) )
 TC_Ks3			= ColorTextureParameter('material', 'Ks3', 'Specular color 3',	'luxrender_material', default=(1.0,1.0,1.0) )
 TC_Kt			= ColorTextureParameter('material', 'Kt', 'Transmission color',	'luxrender_material', default=(1.0,1.0,1.0) )
+TC_L			= ColorTextureParameter('material', 'L', 'Emission color', 'luxrender_emission', default=(1.0,1.0,1.0) )
+TC_absorption	= VolumeDataColorTextureParameter('', 'absorption', 'Absorption', 'absorption')
 
 def material_visibility():
 	# non-texture properties
@@ -163,10 +191,373 @@ class luxrender_material(declarative_property_group):
 	'''
 	
 	controls = [
-		# Common props
 		'material',
+	]
+	
+	visibility = {}
+	
+	properties = [
+		# Material Type Select
+		{
+			'type': 'enum',
+			'attr': 'material',
+			'name': 'Type',
+			'description': 'LuxRender material type',
+			'default': 'matte',
+			'items': [
+				('carpaint', 'Car Paint', 'carpaint'),
+				('glass', 'Glass', 'glass'),
+				('glass2', 'Glass2', 'glass2'),
+				('roughglass','Rough Glass','roughglass'),
+				('glossy','Glossy','glossy'),
+				('glossy_lossy','Glossy (Lossy)','glossy_lossy'),
+				('matte','Matte','matte'),
+				('mattetranslucent','Matte Translucent','mattetranslucent'),
+				('metal','Metal','metal'),
+				('shinymetal','Shiny Metal','shinymetal'),
+				('mirror','Mirror','mirror'),
+				('mix','Mix','mix'),
+				('null','Null','null'),
+			],
+		},
+	]
+
+class carpaint(declarative_property_group):
+	
+	controls = [
+		#'name'
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_d.get_controls() + \
+	TC_Ka.get_controls() + \
+	TC_Kd.get_controls() + \
+	TC_Ks1.get_controls() + \
+	TC_Ks2.get_controls() + \
+	TC_Ks3.get_controls() + \
+	TF_M1.get_controls() + \
+	TF_M2.get_controls() + \
+	TF_M3.get_controls() + \
+	TF_R1.get_controls() + \
+	TF_R2.get_controls() + \
+	TF_R3.get_controls()
+	
+	visibility = {
+		# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
+	}
+	
+	properties = [
+#		{
+#			'type': 'enum',
+#			'attr': 'name',
+#			'name': 'Preset',
+#			'items': [
+#				#('-', 'Manual settings', '-'),
+#				('white', 'white', 'white'),
+#			]
+#		},
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_d.get_properties() + \
+	TC_Ka.get_properties() + \
+	TC_Kd.get_properties() + \
+	TC_Ks1.get_properties() + \
+	TC_Ks2.get_properties() + \
+	TC_Ks3.get_properties() + \
+	TF_M1.get_properties() + \
+	TF_M2.get_properties() + \
+	TF_M3.get_properties() + \
+	TF_R1.get_properties() + \
+	TF_R2.get_properties() + \
+	TF_R3.get_properties()
+
+class glass(declarative_property_group):
+	
+	controls = [
+		'architectural',
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_cauchyb.get_controls() + \
+	TF_film.get_controls() + \
+	TF_filmindex.get_controls() + \
+	TF_index.get_controls() + \
+	TC_Kr.get_controls() + \
+	TC_Kt.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'architectural',
+			'name': 'Architectural',
+			'default': False
+		},
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_cauchyb.get_properties() + \
+	TF_film.get_properties() + \
+	TF_filmindex.get_properties() + \
+	TF_index.get_properties() + \
+	TC_Kr.get_properties() + \
+	TC_Kt.get_properties()
+
+class glass2(declarative_property_group):
+	
+	controls = [
+		'architectural',
+		'dispersion',
+	] + \
+	TF_bumpmap.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'architectural',
+			'name': 'Architectural',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'dispersion',
+			'name': 'Dispersion',
+			'default': False
+		},
+	] + \
+	TF_bumpmap.get_properties()
+
+class roughglass(declarative_property_group):
+	
+	controls = [
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_cauchyb.get_controls() + \
+	TF_index.get_controls() + \
+	TC_Kr.get_controls() + \
+	TC_Kt.get_controls() + \
+	TF_uroughness.get_controls() + \
+	TF_vroughness.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_cauchyb.get_properties() + \
+	TF_index.get_properties() + \
+	TC_Kr.get_properties() + \
+	TC_Kt.get_properties() + \
+	TF_uroughness.get_properties() + \
+	TF_vroughness.get_properties()
+
+class glossy(declarative_property_group):
+	
+	controls = [
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_d.get_controls() + \
+	TF_index.get_controls() + \
+	TC_Ka.get_controls() + \
+	TC_Kd.get_controls() + \
+	TC_Ks.get_controls() + \
+	TF_uroughness.get_controls() + \
+	TF_vroughness.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_d.get_properties() + \
+	TF_index.get_properties() + \
+	TC_Ka.get_properties() + \
+	TC_Kd.get_properties() + \
+	TC_Ks.get_properties() + \
+	TF_uroughness.get_properties() + \
+	TF_vroughness.get_properties()
+
+class glossy_lossy(declarative_property_group):
+	
+	controls = [
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_d.get_controls() + \
+	TF_index.get_controls() + \
+	TC_Ka.get_controls() + \
+	TC_Kd.get_controls() + \
+	TC_Ks.get_controls() + \
+	TF_uroughness.get_controls() + \
+	TF_vroughness.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_d.get_properties() + \
+	TF_index.get_properties() + \
+	TC_Ka.get_properties() + \
+	TC_Kd.get_properties() + \
+	TC_Ks.get_properties() + \
+	TF_uroughness.get_properties() + \
+	TF_vroughness.get_properties()
+
+class matte(declarative_property_group):
+	
+	controls = [
+	] + \
+	TF_bumpmap.get_controls() + \
+	TC_Kd.get_controls() + \
+	TF_sigma.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_bumpmap.get_properties() + \
+	TC_Kd.get_properties() + \
+	TF_sigma.get_properties()
+
+class mattetranslucent(declarative_property_group):
+	
+	controls = [
+	] + \
+	TF_bumpmap.get_controls() + \
+	TC_Kr.get_controls() + \
+	TC_Kt.get_controls() + \
+	TF_sigma.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_bumpmap.get_properties() + \
+	TC_Kr.get_properties() + \
+	TC_Kt.get_properties() + \
+	TF_sigma.get_properties()
+
+class metal(declarative_property_group):
+	
+	controls = [
+		'name',
+		'filename',
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_uroughness.get_controls() + \
+	TF_vroughness.get_controls()
+	
+	visibility = {
+		'filename':	{ 'name': 'nk' }
+	}
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'name',
+			'name': 'Preset',
+			'items': [
+				('nk', 'Use nk File', 'nk'),
+				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
+				('copper', 'copper', 'copper'),
+				('gold', 'gold', 'gold'),
+				('silver', 'silver', 'silver'),
+			]
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'filename',
+			'name': 'NK file',
+		},
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_uroughness.get_properties() + \
+	TF_vroughness.get_properties()
+
+class shinymetal(declarative_property_group):
+	
+	controls = [
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_film.get_controls() + \
+	TF_filmindex.get_controls() + \
+	TC_Kr.get_controls() + \
+	TC_Ks.get_controls() + \
+	TF_uroughness.get_controls() + \
+	TF_vroughness.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_film.get_properties() + \
+	TF_filmindex.get_properties() + \
+	TC_Kr.get_properties() + \
+	TC_Ks.get_properties() + \
+	TF_uroughness.get_properties() + \
+	TF_vroughness.get_properties()
+
+class mirror(declarative_property_group):
+	
+	controls = [
+	] + \
+	TF_bumpmap.get_controls() + \
+	TF_film.get_controls() + \
+	TF_filmindex.get_controls() + \
+	TC_Kr.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_bumpmap.get_properties() + \
+	TF_film.get_properties() + \
+	TF_filmindex.get_properties() + \
+	TC_Kr.get_properties()
+
+class mix(declarative_property_group):
+	
+	controls = [
+		'namedmaterial1',
+		'namedmaterial2',
+	] + \
+	TF_amount.get_controls()
+	
+	visibility = {
+	}
+	
+	properties = [
+	] + \
+	TF_amount.get_properties() + \
+	MaterialParameter('namedmaterial1', 'Material 1', 'mix') + \
+	MaterialParameter('namedmaterial2', 'Material 2', 'mix')
+
+class null(declarative_property_group):
+	
+	controls = [
+	]
+	
+	visibility = {
+	}
+	
+	properties = [
+	]
+
+class old_mat(object):
+	
+	controls = [
 		
-		# 'preset' options
 		'name',
 		
 	] + \
@@ -223,29 +614,7 @@ class luxrender_material(declarative_property_group):
 	visibility = material_visibility()
 	
 	properties = [
-		# Material Type Select
-		{
-			'type': 'enum',
-			'attr': 'material',
-			'name': 'Type',
-			'description': 'LuxRender material type',
-			'default': 'matte',
-			'items': [
-				('carpaint', 'Car Paint', 'carpaint'),
-				('glass', 'Glass', 'glass'),
-				('glass2', 'Glass2', 'glass2'),
-				('roughglass','Rough Glass','roughglass'),
-				('glossy','Glossy','glossy'),
-				('glossy_lossy','Glossy (Lossy)','glossy_lossy'),
-				('matte','Matte','matte'),
-				('mattetranslucent','Matte Translucent','mattetranslucent'),
-				('metal','Metal','metal'),
-				('shinymetal','Shiny Metal','shinymetal'),
-				('mirror','Mirror','mirror'),
-				('mix','Mix','mix'),
-				('null','Null','null'),
-			],
-		},
+		
 	] + \
 	TF_amount.get_properties() + \
 	[
@@ -351,8 +720,6 @@ class luxrender_material(declarative_property_group):
 	VolumeParameter('Interior', 'Interior', 'luxrender_material') + \
 	VolumeParameter('Exterior', 'Exterior', 'luxrender_material')
 
-TC_L = ColorTextureParameter('material', 'L', 'Emission color', 'luxrender_emission', default=(1.0,1.0,1.0) )
-
 class luxrender_emission(declarative_property_group):
 	'''
 	Storage class for LuxRender Material emission settings.
@@ -429,43 +796,6 @@ class luxrender_emission(declarative_property_group):
 	] + \
 	TC_L.get_properties()
 
-class VolumeDataColorTextureParameter(ColorTextureParameter):
-	texture_collection = 'textures'
-	def texture_collection_finder(self):
-		def func(s,c):
-			return s.main
-		return func
-	
-	def texture_slot_set_attr(self):
-		def func2(s,c):
-			return c
-		return func2
-
-class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
-	texture_collection = 'textures'
-	def texture_collection_finder(self):
-		def func(s,c):
-			return s.main
-		return func
-	
-	def texture_slot_set_attr(self):
-		def func2(s,c):
-			return c
-		return func2
-
-TF_IOR			= VolumeDataFresnelTextureParameter('', 'fresnel', 'IOR', 'fresnel', add_float_value = False)
-TC_absorption	= VolumeDataColorTextureParameter('', 'absorption', 'Absorption', 'absorption')
-
-def volume_data_visibility():
-	vis = {}
-	
-	vis.update({
-		'ior_floattexture':			{ 'ior_usefloattexture': True },
-		'absorption_colortexture':	{ 'absorption_usecolortexture': True }
-	})
-	
-	return vis
-
 class luxrender_volume_data(declarative_property_group):
 	'''
 	Storage class for LuxRender volume data. The
@@ -476,13 +806,16 @@ class luxrender_volume_data(declarative_property_group):
 	controls = [
 		'type',
 	] + \
-	TF_IOR.get_controls() + \
+	TFR_IOR.get_controls() + \
 	TC_absorption.get_controls() + \
 	[
 		'depth'
 	]
 	
-	visibility = volume_data_visibility()
+	visibility = {
+		'ior_floattexture':			{ 'ior_usefloattexture': True },
+		'absorption_colortexture':	{ 'absorption_usecolortexture': True }
+	}
 	
 	properties = [
 		{
@@ -494,7 +827,7 @@ class luxrender_volume_data(declarative_property_group):
 			]
 		},
 	] + \
-	TF_IOR.get_properties() + \
+	TFR_IOR.get_properties() + \
 	TC_absorption.get_properties() + \
 	[
 		{
@@ -585,4 +918,5 @@ class luxrender_volumes(declarative_property_group):
 			'icon': 'X',
 		},
 	]
+
 

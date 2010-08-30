@@ -34,7 +34,6 @@ class main(luxrender_material_base, bpy.types.Panel):
 	'''
 	
 	bl_label	= 'LuxRender Materials'
-	bl_options	= set()
 	
 	display_property_groups = [
 		( ('material',), 'luxrender_material' )

@@ -34,7 +34,6 @@ class volumes(luxrender_material_base, bpy.types.Panel):
 	'''
 	
 	bl_label = 'LuxRender Material Volumes'
-	bl_options	= set()
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_volumes' )

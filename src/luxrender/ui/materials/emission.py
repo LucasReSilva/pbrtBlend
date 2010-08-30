@@ -34,7 +34,6 @@ class emission(luxrender_material_base, bpy.types.Panel):
 	'''
 	
 	bl_label = 'LuxRender Material Emission'
-	bl_options	= set()
 	
 	display_property_groups = [
 		( ('material',), 'luxrender_emission' )
