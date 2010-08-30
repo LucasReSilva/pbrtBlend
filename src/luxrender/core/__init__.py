@@ -42,12 +42,17 @@ from luxrender.outputs import LuxLog
 
 # Exporter Property Groups
 from luxrender.properties.accelerator	import	luxrender_accelerator
-from luxrender.properties.camera 		import	luxrender_camera, luxrender_colorspace, luxrender_tonemapping
+from luxrender.properties.camera 		import	luxrender_camera, \
+												luxrender_colorspace, \
+												luxrender_tonemapping
 from luxrender.properties.engine		import	luxrender_engine
 from luxrender.properties.filter		import	luxrender_filter
 from luxrender.properties.integrator	import	luxrender_integrator
 from luxrender.properties.lamp			import	luxrender_lamp
-from luxrender.properties.material		import	luxrender_material, luxrender_emission, luxrender_volume_data, luxrender_volumes
+from luxrender.properties.material		import	luxrender_material, \
+												luxrender_emission, \
+												luxrender_volume_data, \
+												luxrender_volumes
 from luxrender.properties.mesh			import	luxrender_mesh
 from luxrender.properties.texture		import	luxrender_texture, \
 												bilerp, \
@@ -82,32 +87,34 @@ from luxrender.ui			import	render_panels	as ui_render_panels
 from luxrender.ui			import	camera			as ui_camera
 from luxrender.ui			import	lamps			as ui_lamps
 from luxrender.ui			import	meshes			as ui_meshes
-from luxrender.ui			import	materials		as ui_materials
+from luxrender.ui.materials	import	main			as ui_materials, \
+									emission		as ui_materials_emission, \
+									volumes			as ui_materials_volumes
 from luxrender.ui.textures	import	main			as ui_textures, \
-									bilerp			as ui_bilerp, \
-									blackbody		as ui_blackbody, \
-									brick			as ui_brick, \
-									cauchy			as ui_cauchy, \
-									constant		as ui_constant, \
-									checkerboard	as ui_checkerboard, \
-									dots			as ui_dots, \
-									equalenergy		as ui_equalenergy, \
-									fbm				as ui_fbm, \
-									gaussian		as ui_gaussian, \
-									harlequin		as ui_harlequin, \
-									imagemap		as ui_imagemap, \
-									lampspectrum	as ui_lampspectrum, \
-									luxpop			as ui_luxpop, \
-									mapping			as ui_mapping, \
-									marble			as ui_marble, \
-									mix				as ui_mix, \
-									sellmeier		as ui_sellmeier, \
-									scale			as ui_scale, \
-									sopra			as ui_sopra, \
-									transform		as ui_transform, \
-									uv				as ui_uv, \
-									windy			as ui_windy, \
-									wrinkled		as ui_wrinkled
+									bilerp			as ui_texture_bilerp, \
+									blackbody		as ui_texture_blackbody, \
+									brick			as ui_texture_brick, \
+									cauchy			as ui_texture_cauchy, \
+									constant		as ui_texture_constant, \
+									checkerboard	as ui_texture_checkerboard, \
+									dots			as ui_texture_dots, \
+									equalenergy		as ui_texture_equalenergy, \
+									fbm				as ui_texture_fbm, \
+									gaussian		as ui_texture_gaussian, \
+									harlequin		as ui_texture_harlequin, \
+									imagemap		as ui_texture_imagemap, \
+									lampspectrum	as ui_texture_lampspectrum, \
+									luxpop			as ui_texture_luxpop, \
+									mapping			as ui_texture_mapping, \
+									marble			as ui_texture_marble, \
+									mix				as ui_texture_mix, \
+									sellmeier		as ui_texture_sellmeier, \
+									scale			as ui_texture_scale, \
+									sopra			as ui_texture_sopra, \
+									transform		as ui_texture_transform, \
+									uv				as ui_texture_uv, \
+									windy			as ui_texture_windy, \
+									wrinkled		as ui_texture_wrinkled
 
 # Exporter Operators
 from luxrender.operators import		EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove

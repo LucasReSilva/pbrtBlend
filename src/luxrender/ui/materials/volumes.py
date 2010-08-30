@@ -24,39 +24,17 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-# Blender API
 import bpy
-from properties_material import MaterialButtonsPanel
 
-from ef.ui import property_group_renderer
+from luxrender.ui.materials import luxrender_material_base
 
-class _lux_material_base(MaterialButtonsPanel, property_group_renderer):
-	COMPAT_ENGINES = {'luxrender'}
-
-class material_editor(_lux_material_base, bpy.types.Panel):
+class volumes(luxrender_material_base, bpy.types.Panel):
 	'''
-	Material Editor UI Panel
+	Material Volumes Settings
 	'''
 	
-	bl_label = 'LuxRender Materials'
-	
-	display_property_groups = [
-		( ('material',), 'luxrender_material' )
-	]
-
-class material_emission(_lux_material_base, bpy.types.Panel):
-	'''
-	Material Emission Settings
-	'''
-	
-	bl_label = 'LuxRender Material Emission'
-	
-	display_property_groups = [
-		( ('material',), 'luxrender_emission' )
-	]
-
-class material_volumes(_lux_material_base, bpy.types.Panel):
 	bl_label = 'LuxRender Material Volumes'
+	bl_options	= set()
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_volumes' )
