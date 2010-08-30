@@ -40,7 +40,7 @@ class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
 	or keep it as a hidden attribute if the texture is mono-typed.
 	'''
 	
-	bl_options		= {'HIDE_HEADER'}
+	#bl_options		= {'HIDE_HEADER'}
 	COMPAT_ENGINES	= {'luxrender'}
 	LUX_COMPAT		= set()
 	

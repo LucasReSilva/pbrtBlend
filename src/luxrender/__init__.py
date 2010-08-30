@@ -28,9 +28,9 @@
 bl_addon_info = {
 	"name": "LuxBlend",
 	"author": "Doug Hammond (dougal2)",
-	"version": "0.7 2010/08/26",
-	"blender": (2, 5, 3),
-	"category": "Import/Export",
+	"version": "0.7 2010/08/30",
+	"blender": (2, 5, 4),
+	"category": "Render",
 	"location": "Render Engines",
 	"warning": '',
 	"wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/LuxBlend",

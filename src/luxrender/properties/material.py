@@ -97,37 +97,38 @@ class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 		return func2
 
 # Fresnel Textures
-TFR_IOR			= VolumeDataFresnelTextureParameter('', 'fresnel', 'IOR', 'fresnel', add_float_value = False)
+TFR_IOR			= VolumeDataFresnelTextureParameter('', 'fresnel', 'IOR', add_float_value = False)
 
 # Float Textures
-TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',				'luxrender_material', add_float_value=True, min=0.0, default=0.5, max=1.0 )
-TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',				'luxrender_material', add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
-TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',				'luxrender_material', add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
-TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',			'luxrender_material', add_float_value=True, default=0.15, min=0.0, max=15.0 )
-TF_film			= FloatTextureParameter('material', 'film', 'Thin Film Thickness (nm)',	'luxrender_material', add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
-TF_filmindex	= FloatTextureParameter('material', 'filmindex', 'Film IOR',			'luxrender_material', add_float_value=True, default=1.5, min=1.0, max=6.0 )
-TF_index		= FloatTextureParameter('material', 'index', 'IOR',						'luxrender_material', add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_M1			= FloatTextureParameter('material', 'M1', 'M1',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_M2			= FloatTextureParameter('material', 'M2', 'M2',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_M3			= FloatTextureParameter('material', 'M3', 'M3',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R1			= FloatTextureParameter('material', 'R1', 'R1',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R2			= FloatTextureParameter('material', 'R2', 'R2',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R3			= FloatTextureParameter('material', 'R3', 'R3',							'luxrender_material', add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_sigma		= FloatTextureParameter('material', 'sigma', 'Sigma',					'luxrender_material', add_float_value=True, min=0.0, max=100.0 )
-TF_uroughness	= FloatTextureParameter('material', 'uroughness', 'uroughness',			'luxrender_material', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_vroughness	= FloatTextureParameter('material', 'vroughness', 'vroughness',			'luxrender_material', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
+TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
+TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
+TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',			add_float_value=True, default=0.15, min=0.0, max=15.0 )
+TF_film			= FloatTextureParameter('material', 'film', 'Thin Film Thickness (nm)',	add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
+TF_filmindex	= FloatTextureParameter('material', 'filmindex', 'Film IOR',			add_float_value=True, default=1.5, min=1.0, max=6.0 )
+TF_index		= FloatTextureParameter('material', 'index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_M1			= FloatTextureParameter('material', 'M1', 'M1',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_M2			= FloatTextureParameter('material', 'M2', 'M2',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_M3			= FloatTextureParameter('material', 'M3', 'M3',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R1			= FloatTextureParameter('material', 'R1', 'R1',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R2			= FloatTextureParameter('material', 'R2', 'R2',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R3			= FloatTextureParameter('material', 'R3', 'R3',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_sigma		= FloatTextureParameter('material', 'sigma', 'Sigma',					add_float_value=True, min=0.0, max=100.0 )
+TF_uroughness	= FloatTextureParameter('material', 'uroughness', 'uroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_vroughness	= FloatTextureParameter('material', 'vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 # Color Textures
-TC_Ka			= ColorTextureParameter('material', 'Ka', 'Absorption color',	'luxrender_material', default=(0.2,0.2,0.2) )
-TC_Kd			= ColorTextureParameter('material', 'Kd', 'Diffuse color',		'luxrender_material', default=(0.64,0.64,0.64) )
-TC_Kr			= ColorTextureParameter('material', 'Kr', 'Reflection color',	'luxrender_material', default=(1.0,1.0,1.0) )
-TC_Ks			= ColorTextureParameter('material', 'Ks', 'Specular color',		'luxrender_material', default=(0.25,0.25,0.25) )
-TC_Ks1			= ColorTextureParameter('material', 'Ks1', 'Specular color 1',	'luxrender_material', default=(1.0,1.0,1.0) )
-TC_Ks2			= ColorTextureParameter('material', 'Ks2', 'Specular color 2',	'luxrender_material', default=(1.0,1.0,1.0) )
-TC_Ks3			= ColorTextureParameter('material', 'Ks3', 'Specular color 3',	'luxrender_material', default=(1.0,1.0,1.0) )
-TC_Kt			= ColorTextureParameter('material', 'Kt', 'Transmission color',	'luxrender_material', default=(1.0,1.0,1.0) )
-TC_L			= ColorTextureParameter('material', 'L', 'Emission color', 'luxrender_emission', default=(1.0,1.0,1.0) )
-TC_absorption	= VolumeDataColorTextureParameter('', 'absorption', 'Absorption', 'absorption')
+TC_Ka			= ColorTextureParameter('material', 'Ka', 'Absorption color',	default=(0.2,0.2,0.2) )
+TC_Kd			= ColorTextureParameter('material', 'Kd', 'Diffuse color',		default=(0.64,0.64,0.64) )
+TC_Kr			= ColorTextureParameter('material', 'Kr', 'Reflection color',	default=(1.0,1.0,1.0) )
+TC_Ks			= ColorTextureParameter('material', 'Ks', 'Specular color',		default=(0.25,0.25,0.25) )
+TC_Ks1			= ColorTextureParameter('material', 'Ks1', 'Specular color 1',	default=(1.0,1.0,1.0) )
+TC_Ks2			= ColorTextureParameter('material', 'Ks2', 'Specular color 2',	default=(1.0,1.0,1.0) )
+TC_Ks3			= ColorTextureParameter('material', 'Ks3', 'Specular color 3',	default=(1.0,1.0,1.0) )
+TC_Kt			= ColorTextureParameter('material', 'Kt', 'Transmission color',	default=(1.0,1.0,1.0) )
+TC_L			= ColorTextureParameter('material', 'L', 'Emission color',		default=(1.0,1.0,1.0) )
+
+TC_absorption	= VolumeDataColorTextureParameter('', 'absorption', 'Absorption')
 
 def material_visibility():
 	# non-texture properties
@@ -191,7 +192,7 @@ class luxrender_material(declarative_property_group):
 	'''
 	
 	controls = [
-		'material',
+		'type',
 	]
 	
 	visibility = {}
@@ -200,7 +201,7 @@ class luxrender_material(declarative_property_group):
 		# Material Type Select
 		{
 			'type': 'enum',
-			'attr': 'material',
+			'attr': 'type',
 			'name': 'Type',
 			'description': 'LuxRender material type',
 			'default': 'matte',
@@ -225,7 +226,7 @@ class luxrender_material(declarative_property_group):
 class carpaint(declarative_property_group):
 	
 	controls = [
-		#'name'
+		'name'
 	] + \
 	TF_bumpmap.get_controls() + \
 	TF_d.get_controls() + \
@@ -246,15 +247,15 @@ class carpaint(declarative_property_group):
 	}
 	
 	properties = [
-#		{
-#			'type': 'enum',
-#			'attr': 'name',
-#			'name': 'Preset',
-#			'items': [
-#				#('-', 'Manual settings', '-'),
-#				('white', 'white', 'white'),
-#			]
-#		},
+		{
+			'type': 'enum',
+			'attr': 'name',
+			'name': 'Preset',
+			'items': [
+				#('-', 'Manual settings', '-'),
+				('white', 'white', 'white'),
+			]
+		},
 	] + \
 	TF_bumpmap.get_properties() + \
 	TF_d.get_properties() + \

@@ -44,18 +44,16 @@ class TextureParameterBase(object):
 	parent_type			= None
 	attr				= None
 	name				= None
-	property_group		= None
 	default				= (0.8, 0.8, 0.8)
 	min					= 0.0
 	max					= 1.0
 	
 	texture_collection	= 'texture_slots'
 	
-	def __init__(self, parent_type, attr, name, property_group, default=None, min=None, max=None):
+	def __init__(self, parent_type, attr, name, default=None, min=None, max=None):
 		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
-		self.property_group = property_group
 		if default is not None:
 			self.default = default
 		if min is not None:
@@ -73,7 +71,7 @@ class TextureParameterBase(object):
 		return func
 	
 	def texture_slot_set_attr(self):
-		return lambda s,c: getattr(c, self.property_group)
+		return lambda s,c: getattr(c, c.type)
 	
 	def get_extra_controls(self):
 		'''
@@ -136,7 +134,7 @@ class ColorTextureParameter(TextureParameterBase):
 		they are not both visible in the panel simultaneously.
 		'''
 		if hasattr(c, 'luxrender_material'):
-			if c.luxrender_material.material in self.master_color_map.keys() and self.attr == self.master_color_map[c.luxrender_material.material]:
+			if c.luxrender_material.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.luxrender_material.type]:
 				if c.diffuse_color != getattr(c.luxrender_material, self.attr+'_color'):
 					c.diffuse_color = getattr(c.luxrender_material, self.attr+'_color')
 	
@@ -208,7 +206,7 @@ class FloatTextureParameter(TextureParameterBase):
 	ignore_zero		= False
 	
 	def __init__(self,
-			parent_type, attr, name, property_group,
+			parent_type, attr, name,
 			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
 			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
 			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
@@ -217,7 +215,6 @@ class FloatTextureParameter(TextureParameterBase):
 		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
-		self.property_group = property_group
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
 		self.ignore_zero = ignore_zero
@@ -316,7 +313,7 @@ class FresnelTextureParameter(TextureParameterBase):
 	ignore_zero		= False
 	
 	def __init__(self,
-			parent_type, attr, name, property_group,
+			parent_type, attr, name,
 			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
 			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
 			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
@@ -325,7 +322,6 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
-		self.property_group = property_group
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
 		self.ignore_zero = ignore_zero
@@ -352,8 +348,8 @@ class FresnelTextureParameter(TextureParameterBase):
 			}
 		else:
 			vis = {
-				'%s_usefresneltexture' % self.attr:	{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_fresnelvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_usefresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_fresnelvalue' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
 				'%s_fresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefresneltexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
@@ -646,12 +642,12 @@ class blackbody(declarative_property_group):
 		
 		return set(), ParamSet().add_float('temperature', self.temperature)
 
-brickmodtex_f	= FloatTextureParameter('texture', 'brickmodtex', 'brickmodtex', 'brick', default=0.0, min=0.0, max=1.0)
-brickmodtex_c	= ColorTextureParameter('texture', 'brickmodtex', 'brickmodtex', 'brick', default=(1.0,1.0,1.0))
-bricktex_f		= FloatTextureParameter('texture', 'bricktex', 'bricktex', 'brick', default=0.0, min=0.0, max=1.0)
-bricktex_c		= ColorTextureParameter('texture', 'bricktex', 'bricktex', 'brick', default=(1.0,1.0,1.0))
-mortartex_f		= FloatTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=0.0, min=0.0, max=1.0)
-mortartex_c		= ColorTextureParameter('texture', 'mortartex', 'mortartex', 'brick', default=(1.0,1.0,1.0))
+brickmodtex_f	= FloatTextureParameter('texture', 'brickmodtex', 'brickmodtex', default=0.0, min=0.0, max=1.0)
+brickmodtex_c	= ColorTextureParameter('texture', 'brickmodtex', 'brickmodtex', default=(1.0,1.0,1.0))
+bricktex_f		= FloatTextureParameter('texture', 'bricktex', 'bricktex', default=0.0, min=0.0, max=1.0)
+bricktex_c		= ColorTextureParameter('texture', 'bricktex', 'bricktex', default=(1.0,1.0,1.0))
+mortartex_f		= FloatTextureParameter('texture', 'mortartex', 'mortartex', default=0.0, min=0.0, max=1.0)
+mortartex_c		= ColorTextureParameter('texture', 'mortartex', 'mortartex', default=(1.0,1.0,1.0))
 
 class brick(declarative_property_group):
 	
@@ -884,8 +880,8 @@ class cauchy(declarative_property_group):
 		
 		return set(), cp
 
-tex1 = FloatTextureParameter('texture', 'tex1', 'Texture 1', 'checkerboard', default=1.0, min=0.0, max=100.0)
-tex2 = FloatTextureParameter('texture', 'tex2', 'Texture 2', 'checkerboard', default=0.0, min=0.0, max=100.0)
+tex1 = FloatTextureParameter('texture', 'tex1', 'Texture 1', default=1.0, min=0.0, max=100.0)
+tex2 = FloatTextureParameter('texture', 'tex2', 'Texture 2', default=0.0, min=0.0, max=100.0)
 
 class checkerboard(declarative_property_group):
 	
@@ -984,8 +980,8 @@ class constant(declarative_property_group):
 		
 		return set(), constant_params
 
-inside	= FloatTextureParameter('texture', 'inside', 'inside', 'dots', default=1.0, min=0.0, max=100.0)
-outside	= FloatTextureParameter('texture', 'outside', 'outside', 'dots', default=0.0, min=0.0, max=100.0)
+inside	= FloatTextureParameter('texture', 'inside', 'inside', default=1.0, min=0.0, max=100.0)
+outside	= FloatTextureParameter('texture', 'outside', 'outside', default=0.0, min=0.0, max=100.0)
 
 class dots(declarative_property_group):
 	
@@ -1499,11 +1495,11 @@ class marble(declarative_property_group):
 										.add_float('scale', self.scale) \
 										.add_float('variation', self.variation)
 
-amount_f	= FloatTextureParameter('texture', 'amount', 'amount', 'mix', default=0.5, min=0.0, max=1.0)
-tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', 'mix', default=1.0, min=0.0, max=100.0)
-tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'mix', default=(1.0,1.0,1.0))
-tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'mix', default=0.0, min=0.0, max=100.0)
-tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'mix', default=(0.0,0.0,0.0))
+amount_f	= FloatTextureParameter('texture', 'amount', 'amount', default=0.5, min=0.0, max=1.0)
+tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', default=1.0, min=0.0, max=100.0)
+tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', default=(1.0,1.0,1.0))
+tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', default=0.0, min=0.0, max=100.0)
+tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', default=(0.0,0.0,0.0))
 
 class mix(declarative_property_group):
 	
@@ -1643,10 +1639,10 @@ class sellmeier(declarative_property_group):
 		
 		return set(), sp
 
-tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', 'scale', default=1.0, min=0.0, max=100.0)
-tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', 'scale', default=(1.0,1.0,1.0))
-tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', 'scale', default=0.0, min=0.0, max=100.0)
-tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', 'scale', default=(0.0,0.0,0.0))
+tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', default=1.0, min=0.0, max=100.0)
+tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', default=(1.0,1.0,1.0))
+tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', default=0.0, min=0.0, max=100.0)
+tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', default=(0.0,0.0,0.0))
 
 class scale(declarative_property_group):
 	

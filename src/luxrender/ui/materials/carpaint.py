@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.materials import luxrender_material_sub
 
-class ui_panel_carpaint(luxrender_material_sub, bpy.types.Panel):
+class ui_material_carpaint(luxrender_material_sub, bpy.types.Panel):
 	bl_label = 'LuxRender Carpaint Material'
 	
 	LUX_COMPAT = {'carpaint'}

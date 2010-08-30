@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.textures import luxrender_texture_base
 
-class ui_panel_checkerboard(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_checkerboard(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Checkerboard Texture'
 	
 	LUX_COMPAT = {'checkerboard'}

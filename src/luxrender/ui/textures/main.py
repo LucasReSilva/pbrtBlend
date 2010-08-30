@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.textures import luxrender_texture_base
 
-class ui_panel_main(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_main(luxrender_texture_base, bpy.types.Panel):
 	'''
 	Texture Editor UI Panel
 	'''

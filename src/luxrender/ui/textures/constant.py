@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.textures import luxrender_texture_base
 
-class ui_panel_constant(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_constant(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Constant Texture'
 	
 	LUX_COMPAT = {'constant'}

@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.textures import luxrender_texture_base
 
-class ui_panel_cauchy(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_cauchy(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Cauchy Texture'
 	
 	LUX_COMPAT = {'cauchy'}

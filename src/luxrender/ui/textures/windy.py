@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.textures import luxrender_texture_base
 
-class ui_panel_windy(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_windy(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender windy Texture'
 	
 	LUX_COMPAT = {'windy'}

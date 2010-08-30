@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.textures import luxrender_texture_base
 
-class ui_panel_uv(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_uv(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender UV Texture'
 	
 	LUX_COMPAT = {'uv'}

@@ -26,13 +26,13 @@
 #
 import bpy
 
-from luxrender.ui.textures import luxrender_texture_base
+from luxrender.ui.materials import luxrender_material_sub
 
-class ui_texture_blackbody(luxrender_texture_base, bpy.types.Panel):
-	bl_label = 'LuxRender Blackbody Texture'
+class ui_material_mattetranslucent(luxrender_material_sub, bpy.types.Panel):
+	bl_label = 'LuxRender Matte Translucent Material'
 	
-	LUX_COMPAT = {'blackbody'}
+	LUX_COMPAT = {'mattetranslucent'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'blackbody' )
+		( ('material', 'luxrender_material'), 'mattetranslucent' )
 	]

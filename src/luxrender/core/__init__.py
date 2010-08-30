@@ -101,9 +101,19 @@ from luxrender.ui						import	camera				as ui_camera
 from luxrender.ui						import	lamps				as ui_lamps
 from luxrender.ui						import	meshes				as ui_meshes
 from luxrender.ui.materials				import	main				as ui_materials, \
+												carpaint			as ui_materials_carpaint, \
+												glass				as ui_materials_glass, \
+												glass2				as ui_materials_glass2, \
+												glossy_lossy		as ui_materials_glossy_lossy, \
+												glossy				as ui_materials_glossy, \
+												matte				as ui_materials_matte, \
+												mattetranslucent	as ui_materials_mattetranslucent, \
+												metal				as ui_materials_metal, \
+												mirror				as ui_materials_mirror, \
+												mix					as ui_materials_mix, \
+												shinymetal			as ui_materials_shinymetal, \
 												emission			as ui_materials_emission, \
-												volumes				as ui_materials_volumes , \
-												carpaint			as ui_materials_carpaint
+												volumes				as ui_materials_volumes
 from luxrender.ui.textures				import	main				as ui_textures, \
 												bilerp				as ui_texture_bilerp, \
 												blackbody			as ui_texture_blackbody, \
@@ -119,16 +129,16 @@ from luxrender.ui.textures				import	main				as ui_textures, \
 												imagemap			as ui_texture_imagemap, \
 												lampspectrum		as ui_texture_lampspectrum, \
 												luxpop				as ui_texture_luxpop, \
-												mapping				as ui_texture_mapping, \
 												marble				as ui_texture_marble, \
 												mix					as ui_texture_mix, \
 												sellmeier			as ui_texture_sellmeier, \
 												scale				as ui_texture_scale, \
 												sopra				as ui_texture_sopra, \
-												transform			as ui_texture_transform, \
 												uv					as ui_texture_uv, \
 												windy				as ui_texture_windy, \
-												wrinkled			as ui_texture_wrinkled
+												wrinkled			as ui_texture_wrinkled, \
+												mapping				as ui_texture_mapping, \
+												transform			as ui_texture_transform
 
 # Exporter Operators
 from luxrender.operators import		EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
