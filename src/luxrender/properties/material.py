@@ -247,19 +247,19 @@ class luxrender_material(declarative_property_group):
 def carpaint_visibility():
 	vis = {}
 	
-	vis.update( TF_bumpmap.get_visibility() )
-	vis.update( TF_d.get_visibility() )
-	vis.update( TC_Ka.get_visibility() )
-	vis.update( TC_Kd.get_visibility() )
-	vis.update( TC_Ks1.get_visibility() )
-	vis.update( TC_Ks2.get_visibility() )
-	vis.update( TC_Ks3.get_visibility() )
-	vis.update( TF_M1.get_visibility() )
-	vis.update( TF_M2.get_visibility() )
-	vis.update( TF_M3.get_visibility() )
-	vis.update( TF_R1.get_visibility() )
-	vis.update( TF_R2.get_visibility() )
-	vis.update( TF_R3.get_visibility() )
+	vis.update( TF_bumpmap.visibility )
+	vis.update( TF_d.visibility )
+	vis.update( TC_Ka.visibility )
+	vis.update( TC_Kd.visibility )
+	vis.update( TC_Ks1.visibility )
+	vis.update( TC_Ks2.visibility )
+	vis.update( TC_Ks3.visibility )
+	vis.update( TF_M1.visibility )
+	vis.update( TF_M2.visibility )
+	vis.update( TF_M3.visibility )
+	vis.update( TF_R1.visibility )
+	vis.update( TF_R2.visibility )
+	vis.update( TF_R3.visibility )
 	
 	# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
 	for k in vis.copy().keys(): # copy the dict otherwise iterator complains about dict length modification
@@ -281,19 +281,19 @@ class carpaint(declarative_property_group):
 	controls = [
 		'name'
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_d.get_controls() + \
-	TC_Ka.get_controls() + \
-	TC_Kd.get_controls() + \
-	TC_Ks1.get_controls() + \
-	TC_Ks2.get_controls() + \
-	TC_Ks3.get_controls() + \
-	TF_M1.get_controls() + \
-	TF_M2.get_controls() + \
-	TF_M3.get_controls() + \
-	TF_R1.get_controls() + \
-	TF_R2.get_controls() + \
-	TF_R3.get_controls()
+	TF_bumpmap.controls + \
+	TF_d.controls + \
+	TC_Ka.controls + \
+	TC_Kd.controls + \
+	TC_Ks1.controls + \
+	TC_Ks2.controls + \
+	TC_Ks3.controls + \
+	TF_M1.controls + \
+	TF_M2.controls + \
+	TF_M3.controls + \
+	TF_R1.controls + \
+	TF_R2.controls + \
+	TF_R3.controls
 	
 	visibility = carpaint_visibility()
 	
@@ -304,39 +304,58 @@ class carpaint(declarative_property_group):
 			'name': 'Preset',
 			'items': [
 				('-', 'Manual settings', '-'),
-				('white', 'white', 'white'),
+				('2k acrylack', '2k Bcrylack', '2k acrylack'),
+				('blue', 'Blue', 'blue'),
+				('blue matte', 'Blue Matte', 'blue matte'),
+				('bmw339', 'BMW 339', 'bmw339'),
+				('ford f8', 'Ford F8', 'ford f8'),
+				('opel titan', 'Opel Titan', 'opel titan'),
+				('polaris silber', 'Polaris Silber', 'polaris silber'),
+				('white', 'White', 'white'),
 			]
 		},
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_d.get_properties() + \
-	TC_Ka.get_properties() + \
-	TC_Kd.get_properties() + \
-	TC_Ks1.get_properties() + \
-	TC_Ks2.get_properties() + \
-	TC_Ks3.get_properties() + \
-	TF_M1.get_properties() + \
-	TF_M2.get_properties() + \
-	TF_M3.get_properties() + \
-	TF_R1.get_properties() + \
-	TF_R2.get_properties() + \
-	TF_R3.get_properties()
+	TF_bumpmap.properties + \
+	TF_d.properties + \
+	TC_Ka.properties + \
+	TC_Kd.properties + \
+	TC_Ks1.properties + \
+	TC_Ks2.properties + \
+	TC_Ks3.properties + \
+	TF_M1.properties + \
+	TF_M2.properties + \
+	TF_M3.properties + \
+	TF_R1.properties + \
+	TF_R2.properties + \
+	TF_R3.properties
+
+def glass_visibility():
+	vis = {}
+	
+	vis.update( TF_bumpmap.visibility )
+	vis.update( TF_cauchyb.visibility )
+	vis.update( TF_film.visibility )
+	vis.update( TF_filmindex.visibility )
+	vis.update( TF_index.visibility )
+	vis.update( TC_Kr.visibility )
+	vis.update( TC_Kt.visibility )
+	
+	return vis
 
 class glass(declarative_property_group):
 	
 	controls = [
 		'architectural',
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_cauchyb.get_controls() + \
-	TF_film.get_controls() + \
-	TF_filmindex.get_controls() + \
-	TF_index.get_controls() + \
-	TC_Kr.get_controls() + \
-	TC_Kt.get_controls()
+	TF_bumpmap.controls + \
+	TF_cauchyb.controls + \
+	TF_film.controls + \
+	TF_filmindex.controls + \
+	TF_index.controls + \
+	TC_Kr.controls + \
+	TC_Kt.controls
 	
-	visibility = {
-	}
+	visibility = glass_visibility()
 	
 	properties = [
 		{
@@ -346,13 +365,13 @@ class glass(declarative_property_group):
 			'default': False
 		},
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_cauchyb.get_properties() + \
-	TF_film.get_properties() + \
-	TF_filmindex.get_properties() + \
-	TF_index.get_properties() + \
-	TC_Kr.get_properties() + \
-	TC_Kt.get_properties()
+	TF_bumpmap.properties + \
+	TF_cauchyb.properties + \
+	TF_film.properties + \
+	TF_filmindex.properties + \
+	TF_index.properties + \
+	TC_Kr.properties + \
+	TC_Kt.properties
 
 class glass2(declarative_property_group):
 	
@@ -364,7 +383,7 @@ class glass2(declarative_property_group):
 		'Interior',
 		'Exterior'
 	] + \
-	TF_bumpmap.get_controls()
+	TF_bumpmap.controls
 	
 	visibility = {
 	}
@@ -383,7 +402,7 @@ class glass2(declarative_property_group):
 			'default': False
 		},
 	] + \
-	TF_bumpmap.get_properties() + \
+	TF_bumpmap.properties + \
 	VolumeParameter('Interior', 'Interior') + \
 	VolumeParameter('Exterior', 'Exterior')
 
@@ -391,116 +410,116 @@ class roughglass(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_cauchyb.get_controls() + \
-	TF_index.get_controls() + \
-	TC_Kr.get_controls() + \
-	TC_Kt.get_controls() + \
-	TF_uroughness.get_controls() + \
-	TF_vroughness.get_controls()
+	TF_bumpmap.controls + \
+	TF_cauchyb.controls + \
+	TF_index.controls + \
+	TC_Kr.controls + \
+	TC_Kt.controls + \
+	TF_uroughness.controls + \
+	TF_vroughness.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_cauchyb.get_properties() + \
-	TF_index.get_properties() + \
-	TC_Kr.get_properties() + \
-	TC_Kt.get_properties() + \
-	TF_uroughness.get_properties() + \
-	TF_vroughness.get_properties()
+	TF_bumpmap.properties + \
+	TF_cauchyb.properties + \
+	TF_index.properties + \
+	TC_Kr.properties + \
+	TC_Kt.properties + \
+	TF_uroughness.properties + \
+	TF_vroughness.properties
 
 class glossy(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_d.get_controls() + \
-	TF_index.get_controls() + \
-	TC_Ka.get_controls() + \
-	TC_Kd.get_controls() + \
-	TC_Ks.get_controls() + \
-	TF_uroughness.get_controls() + \
-	TF_vroughness.get_controls()
+	TF_bumpmap.controls + \
+	TF_d.controls + \
+	TF_index.controls + \
+	TC_Ka.controls + \
+	TC_Kd.controls + \
+	TC_Ks.controls + \
+	TF_uroughness.controls + \
+	TF_vroughness.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_d.get_properties() + \
-	TF_index.get_properties() + \
-	TC_Ka.get_properties() + \
-	TC_Kd.get_properties() + \
-	TC_Ks.get_properties() + \
-	TF_uroughness.get_properties() + \
-	TF_vroughness.get_properties()
+	TF_bumpmap.properties + \
+	TF_d.properties + \
+	TF_index.properties + \
+	TC_Ka.properties + \
+	TC_Kd.properties + \
+	TC_Ks.properties + \
+	TF_uroughness.properties + \
+	TF_vroughness.properties
 
 class glossy_lossy(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_d.get_controls() + \
-	TF_index.get_controls() + \
-	TC_Ka.get_controls() + \
-	TC_Kd.get_controls() + \
-	TC_Ks.get_controls() + \
-	TF_uroughness.get_controls() + \
-	TF_vroughness.get_controls()
+	TF_bumpmap.controls + \
+	TF_d.controls + \
+	TF_index.controls + \
+	TC_Ka.controls + \
+	TC_Kd.controls + \
+	TC_Ks.controls + \
+	TF_uroughness.controls + \
+	TF_vroughness.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_d.get_properties() + \
-	TF_index.get_properties() + \
-	TC_Ka.get_properties() + \
-	TC_Kd.get_properties() + \
-	TC_Ks.get_properties() + \
-	TF_uroughness.get_properties() + \
-	TF_vroughness.get_properties()
+	TF_bumpmap.properties + \
+	TF_d.properties + \
+	TF_index.properties + \
+	TC_Ka.properties + \
+	TC_Kd.properties + \
+	TC_Ks.properties + \
+	TF_uroughness.properties + \
+	TF_vroughness.properties
 
 class matte(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.get_controls() + \
-	TC_Kd.get_controls() + \
-	TF_sigma.get_controls()
+	TF_bumpmap.controls + \
+	TC_Kd.controls + \
+	TF_sigma.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_bumpmap.get_properties() + \
-	TC_Kd.get_properties() + \
-	TF_sigma.get_properties()
+	TF_bumpmap.properties + \
+	TC_Kd.properties + \
+	TF_sigma.properties
 
 class mattetranslucent(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.get_controls() + \
-	TC_Kr.get_controls() + \
-	TC_Kt.get_controls() + \
-	TF_sigma.get_controls()
+	TF_bumpmap.controls + \
+	TC_Kr.controls + \
+	TC_Kt.controls + \
+	TF_sigma.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_bumpmap.get_properties() + \
-	TC_Kr.get_properties() + \
-	TC_Kt.get_properties() + \
-	TF_sigma.get_properties()
+	TF_bumpmap.properties + \
+	TC_Kr.properties + \
+	TC_Kt.properties + \
+	TF_sigma.properties
 
 class metal(declarative_property_group):
 	
@@ -508,9 +527,9 @@ class metal(declarative_property_group):
 		'name',
 		'filename',
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_uroughness.get_controls() + \
-	TF_vroughness.get_controls()
+	TF_bumpmap.controls + \
+	TF_uroughness.controls + \
+	TF_vroughness.controls
 	
 	visibility = {
 		'filename':	{ 'name': 'nk' }
@@ -536,53 +555,53 @@ class metal(declarative_property_group):
 			'name': 'NK file',
 		},
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_uroughness.get_properties() + \
-	TF_vroughness.get_properties()
+	TF_bumpmap.properties + \
+	TF_uroughness.properties + \
+	TF_vroughness.properties
 
 class shinymetal(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_film.get_controls() + \
-	TF_filmindex.get_controls() + \
-	TC_Kr.get_controls() + \
-	TC_Ks.get_controls() + \
-	TF_uroughness.get_controls() + \
-	TF_vroughness.get_controls()
+	TF_bumpmap.controls + \
+	TF_film.controls + \
+	TF_filmindex.controls + \
+	TC_Kr.controls + \
+	TC_Ks.controls + \
+	TF_uroughness.controls + \
+	TF_vroughness.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_film.get_properties() + \
-	TF_filmindex.get_properties() + \
-	TC_Kr.get_properties() + \
-	TC_Ks.get_properties() + \
-	TF_uroughness.get_properties() + \
-	TF_vroughness.get_properties()
+	TF_bumpmap.properties + \
+	TF_film.properties + \
+	TF_filmindex.properties + \
+	TC_Kr.properties + \
+	TC_Ks.properties + \
+	TF_uroughness.properties + \
+	TF_vroughness.properties
 
 class mirror(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.get_controls() + \
-	TF_film.get_controls() + \
-	TF_filmindex.get_controls() + \
-	TC_Kr.get_controls()
+	TF_bumpmap.controls + \
+	TF_film.controls + \
+	TF_filmindex.controls + \
+	TC_Kr.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_bumpmap.get_properties() + \
-	TF_film.get_properties() + \
-	TF_filmindex.get_properties() + \
-	TC_Kr.get_properties()
+	TF_bumpmap.properties + \
+	TF_film.properties + \
+	TF_filmindex.properties + \
+	TC_Kr.properties
 
 class mix(declarative_property_group):
 	
@@ -590,14 +609,14 @@ class mix(declarative_property_group):
 		'namedmaterial1',
 		'namedmaterial2',
 	] + \
-	TF_amount.get_controls()
+	TF_amount.controls
 	
 	visibility = {
 	}
 	
 	properties = [
 	] + \
-	TF_amount.get_properties() + \
+	TF_amount.properties + \
 	MaterialParameter('namedmaterial1', 'Material 1', 'mix') + \
 	MaterialParameter('namedmaterial2', 'Material 2', 'mix')
 
@@ -623,7 +642,7 @@ class luxrender_emission(declarative_property_group):
 		'use_emission',
 		'lightgroup',
 	] + \
-	TC_L.get_controls() + \
+	TC_L.controls + \
 	[
 		'gain',
 		'power',
@@ -686,7 +705,7 @@ class luxrender_emission(declarative_property_group):
 			'soft_max': 1e4
 		},
 	] + \
-	TC_L.get_properties()
+	TC_L.properties
 
 class luxrender_volume_data(declarative_property_group):
 	'''
@@ -698,8 +717,8 @@ class luxrender_volume_data(declarative_property_group):
 	controls = [
 		'type',
 	] + \
-	TFR_IOR.get_controls() + \
-	TC_absorption.get_controls() + \
+	TFR_IOR.controls + \
+	TC_absorption.controls + \
 	[
 		'depth'
 	]
@@ -719,8 +738,8 @@ class luxrender_volume_data(declarative_property_group):
 			]
 		},
 	] + \
-	TFR_IOR.get_properties() + \
-	TC_absorption.get_properties() + \
+	TFR_IOR.properties + \
+	TC_absorption.properties + \
 	[
 		{
 			'type': 'float',

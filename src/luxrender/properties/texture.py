@@ -48,6 +48,10 @@ class TextureParameterBase(object):
 	
 	texture_collection	= 'texture_slots'
 	
+	controls			= []
+	visiblilty			= {}
+	properties			= []
+	
 	def __init__(self, attr, name, default=None, min=None, max=None):
 		self.attr = attr
 		self.name = name
@@ -57,12 +61,34 @@ class TextureParameterBase(object):
 			self.min = min
 		if max is not None:
 			self.max = max
+			
+		self.controls = self.get_controls()
+		self.visiblilty = self.get_visibility()
+		self.properties = self.get_properties()
 	
 	def texture_collection_finder(self):
 		return lambda s,c: s.object.material_slots[s.object.active_material_index].material
 	
 	def texture_slot_set_attr(self):
 		return lambda s,c: getattr(c, c.type)
+	
+	def get_controls(self):
+		'''
+		Subclasses can override this for their own needs
+		'''	
+		return []
+	
+	def get_visibility(self):
+		'''
+		Subclasses can override this for their own needs
+		'''	
+		return {}
+	
+	def get_properties(self):
+		'''
+		Subclasses can override this for their own needs
+		'''	
+		return []
 	
 	def get_extra_controls(self):
 		'''
@@ -210,6 +236,10 @@ class FloatTextureParameter(TextureParameterBase):
 		self.min = min
 		self.max = max
 		self.precision = precision
+		
+		self.controls = self.get_controls()
+		self.visiblilty = self.get_visibility()
+		self.properties = self.get_properties()
 	
 	def get_controls(self):
 		if self.texture_only:
@@ -310,6 +340,10 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.min = min
 		self.max = max
 		self.precision = precision
+		
+		self.controls = self.get_controls()
+		self.visiblilty = self.get_visibility()
+		self.properties = self.get_properties()
 	
 	def get_controls(self):
 		if self.texture_only:
@@ -457,7 +491,7 @@ class luxrender_texture(declarative_property_group):
 		# this requires the sub-IDPropertyGroup name to be the same as the texture name
 		if hasattr(self, self.type):
 			lux_texture = getattr(self, self.type) 
-			features, params = lux_texture.get_paramset() 
+			features, params = lux_texture.get_paramset()
 			
 			# 2D Mapping options
 			#if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
@@ -644,12 +678,12 @@ class brick(declarative_property_group):
 		'mortarsize',
 		['brickwidth', 'brickdepth', 'brickheight'],
 	] + \
-	TF_brickmodtex.get_controls() + \
-	TC_brickmodtex.get_controls() + \
-	TF_bricktex.get_controls() + \
-	TC_bricktex.get_controls() + \
-	TF_mortartex.get_controls() + \
-	TC_mortartex.get_controls()
+	TF_brickmodtex.controls + \
+	TC_brickmodtex.controls + \
+	TF_bricktex.controls + \
+	TC_bricktex.controls + \
+	TF_mortartex.controls + \
+	TC_mortartex.controls
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
@@ -765,12 +799,12 @@ class brick(declarative_property_group):
 			'soft_max': 10.0
 		},
 	] + \
-	TF_brickmodtex.get_properties() + \
-	TC_brickmodtex.get_properties() + \
-	TF_bricktex.get_properties() + \
-	TC_bricktex.get_properties() + \
-	TF_mortartex.get_properties() + \
-	TC_mortartex.get_properties()
+	TF_brickmodtex.properties + \
+	TC_brickmodtex.properties + \
+	TF_bricktex.properties + \
+	TC_bricktex.properties + \
+	TF_mortartex.properties + \
+	TC_mortartex.properties
 	
 	def get_paramset(self):
 		
@@ -871,8 +905,8 @@ class checkerboard(declarative_property_group):
 		'aamode',
 		'dimension',
 	] + \
-	TF_tex1.get_controls() + \
-	TF_tex2.get_controls()
+	TF_tex1.controls + \
+	TF_tex2.controls
 	
 	visibility = {
 		'tex1_floattexture':	{ 'tex1_usefloattexture': True },
@@ -908,8 +942,8 @@ class checkerboard(declarative_property_group):
 		},
 		
 	] + \
-	TF_tex1.get_properties() + \
-	TF_tex2.get_properties()
+	TF_tex1.properties + \
+	TF_tex2.properties
 	
 	def get_paramset(self):
 		
@@ -967,8 +1001,8 @@ class dots(declarative_property_group):
 	controls = [
 		# None
 	] + \
-	TF_inside.get_controls() + \
-	TF_outside.get_controls()
+	TF_inside.controls + \
+	TF_outside.controls
 	
 	visibility = {
 		'inside_usefloattexture':		{ 'variant': 'float' },
@@ -987,8 +1021,8 @@ class dots(declarative_property_group):
 			'default': 'float'
 		},
 	] + \
-	TF_inside.get_properties() + \
-	TF_outside.get_properties()
+	TF_inside.properties + \
+	TF_outside.properties
 	
 	def get_paramset(self):
 		
@@ -1480,11 +1514,11 @@ class mix(declarative_property_group):
 		'variant',
 		
 	] + \
-	TF_amount.get_controls() + \
-	TF_tex1.get_controls() + \
-	TC_tex1.get_controls() + \
-	TF_tex2.get_controls() + \
-	TC_tex2.get_controls()
+	TF_amount.controls + \
+	TF_tex1.controls + \
+	TC_tex1.controls + \
+	TF_tex2.controls + \
+	TC_tex2.controls
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
@@ -1522,11 +1556,11 @@ class mix(declarative_property_group):
 			'expand': True
 		},
 	] + \
-	TF_amount.get_properties() + \
-	TF_tex1.get_properties() + \
-	TC_tex1.get_properties() + \
-	TF_tex2.get_properties() + \
-	TC_tex2.get_properties()
+	TF_amount.properties + \
+	TF_tex1.properties + \
+	TC_tex1.properties + \
+	TF_tex2.properties + \
+	TC_tex2.properties
 	
 	def get_paramset(self):
 		
@@ -1618,10 +1652,10 @@ class scale(declarative_property_group):
 		'variant',
 		
 	] + \
-	TF_tex1.get_controls() + \
-	TC_tex1.get_controls() + \
-	TF_tex2.get_controls() + \
-	TC_tex2.get_controls()
+	TF_tex1.controls + \
+	TC_tex1.controls + \
+	TF_tex2.controls + \
+	TC_tex2.controls
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
@@ -1657,10 +1691,10 @@ class scale(declarative_property_group):
 			'expand': True
 		},
 	] + \
-	TF_tex1.get_properties() + \
-	TC_tex1.get_properties() + \
-	TF_tex2.get_properties() + \
-	TC_tex2.get_properties()
+	TF_tex1.properties + \
+	TC_tex1.properties + \
+	TF_tex2.properties + \
+	TC_tex2.properties
 	
 	def get_paramset(self):
 		
