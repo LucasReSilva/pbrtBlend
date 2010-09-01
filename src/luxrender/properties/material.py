@@ -29,7 +29,6 @@ import bpy
 
 from ef.ef import declarative_property_group
 
-from luxrender.properties import has_property
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
 from luxrender.export.materials import add_texture_parameter
@@ -53,7 +52,7 @@ def MaterialParameter(attr, name, property_group):
 		},
 	]
 
-def VolumeParameter(attr, name, property_group):
+def VolumeParameter(attr, name):
 	return [
 		{
 			'attr': '%s_volume' % attr,
@@ -66,7 +65,7 @@ def VolumeParameter(attr, name, property_group):
 			'attr': attr,
 			'src': lambda s,c: s.scene.luxrender_volumes,
 			'src_attr': 'volumes',
-			'trg': lambda s,c: getattr(c, property_group),
+			'trg': lambda s,c: c.glass2,
 			'trg_attr': '%s_volume' % attr,
 			'name': name
 		},
@@ -130,60 +129,6 @@ TC_L			= ColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
 
 TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption')
 
-def material_visibility():
-	# non-texture properties
-	vis = {
-		'architectural':	{ 'material': has_property('', 'architectural') },
-		'dispersion':		{ 'material': has_property('', 'dispersion') },
-		'name':				{ 'material': has_property('', 'name') },
-		'namedmaterial1':	{ 'material': has_property('', 'namedmaterial1') },
-		'namedmaterial2':	{ 'material': has_property('', 'namedmaterial2') },
-	}
-	
-	# Float Texture parameters
-	vis.update( TF_amount.get_visibility() )
-	vis.update( TF_bumpmap.get_visibility() )
-	vis.update( TF_cauchyb.get_visibility() )
-	vis.update( TF_d.get_visibility() )
-	vis.update( TF_film.get_visibility() )
-	vis.update( TF_filmindex.get_visibility() )
-	vis.update( TF_index.get_visibility() )
-	vis.update( TF_M1.get_visibility() )
-	vis.update( TF_M2.get_visibility() )
-	vis.update( TF_M3.get_visibility() )
-	vis.update( TF_R1.get_visibility() )
-	vis.update( TF_R2.get_visibility() )
-	vis.update( TF_R3.get_visibility() )
-	vis.update( TF_sigma.get_visibility() )
-	vis.update( TF_uroughness.get_visibility() )
-	vis.update( TF_vroughness.get_visibility() )
-	
-	# Color Texture parameters
-	vis.update( TC_Ka.get_visibility() )
-	vis.update( TC_Kd.get_visibility() )
-	vis.update( TC_Kr.get_visibility() )
-	vis.update( TC_Ks.get_visibility() )
-	vis.update( TC_Ks1.get_visibility() )
-	vis.update( TC_Ks2.get_visibility() )
-	vis.update( TC_Ks3.get_visibility() )
-	vis.update( TC_Kt.get_visibility() )
-	
-	# Add compositing options for distributedpath
-	vis.update({
-		'compositing_label':				{ 'integrator_type': 'distributedpath' },
-		'compo_visible_material':			{ 'integrator_type': 'distributedpath' },
-		'compo_visible_emission':			{ 'integrator_type': 'distributedpath' },
-		'compo_visible_indirect_material':	{ 'integrator_type': 'distributedpath' },
-		'compo_visible_indirect_emission':	{ 'integrator_type': 'distributedpath' },
-		'compo_override_alpha':				{ 'integrator_type': 'distributedpath' },
-		'compo_override_alpha_value':		{ 'integrator_type': 'distributedpath', 'compo_override_alpha': True },
-		
-		'Interior':							{ 'material': 'glass2' },
-		'Exterior':							{ 'material': 'glass2' },
-	})
-	
-	return vis
-
 class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
@@ -193,9 +138,26 @@ class luxrender_material(declarative_property_group):
 	
 	controls = [
 		'type',
+		
+		# Compositing options for distributedpath
+		'compositing_label',
+		['compo_visible_material',
+		'compo_visible_emission'],
+		['compo_visible_indirect_material',
+		'compo_visible_indirect_emission'],
+		'compo_override_alpha',
+		'compo_override_alpha_value',
 	]
 	
-	visibility = {}
+	visibility = {
+		'compositing_label':				{ 'integrator_type': 'distributedpath' },
+		'compo_visible_material':			{ 'integrator_type': 'distributedpath' },
+		'compo_visible_emission':			{ 'integrator_type': 'distributedpath' },
+		'compo_visible_indirect_material':	{ 'integrator_type': 'distributedpath' },
+		'compo_visible_indirect_emission':	{ 'integrator_type': 'distributedpath' },
+		'compo_override_alpha':				{ 'integrator_type': 'distributedpath' },
+		'compo_override_alpha_value':		{ 'integrator_type': 'distributedpath', 'compo_override_alpha': True },
+	}
 	
 	properties = [
 		# Material Type Select
@@ -221,7 +183,66 @@ class luxrender_material(declarative_property_group):
 				('null','Null','null'),
 			],
 		},
+		
+		# hidden parameter to hold current integrator type - updated on draw()
+		{
+			'type': 'string',
+			'attr': 'integrator_type',
+		},
+		{
+			'type': 'text',
+			'attr': 'compositing_label',
+			'name': 'Compositing options',
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_material',
+			'name': 'Visible Material',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_emission',
+			'name': 'Visible Emission',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_indirect_material',
+			'name': 'Visible Indirect Material',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_visible_indirect_emission',
+			'name': 'Visible Indirect Emission',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'compo_override_alpha',
+			'name': 'Override Alpha',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'compo_override_alpha_value',
+			'name': 'Override Alpha Value',
+			'default': 0.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+		},
 	]
+	
+	def draw_callback(self, context):
+		'''
+		Set the internal integrator_type so that
+		compositing options can be shown for
+		DistributedPath
+		'''
+		self.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
 
 def carpaint_visibility():
 	vis = {}
@@ -240,21 +261,20 @@ def carpaint_visibility():
 	vis.update( TF_R2.get_visibility() )
 	vis.update( TF_R3.get_visibility() )
 	
-	vis2 = vis.copy()
 	# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
-	for k in vis.keys():
+	for k in vis.copy().keys(): # copy the dict otherwise iterator complains about dict length modification
 		for srch in ['Ka','Kd','Ks1','Ks2','Ks3']:
-			vis2['%s_color'%srch] = { 'name': '-' }
-			vis2['%s_usecolortexture'%srch] = { 'name': '-' }
+			vis['%s_color'%srch] = { 'name': '-' }
+			vis['%s_usecolortexture'%srch] = { 'name': '-' }
 			if k.startswith(srch):
-				vis2[k]['name'] = '-'
+				vis[k]['name'] = '-'
 		for srch in ['M1','M2','M3','R1','R2','R3']:
-			vis2['%s_floatvalue'%srch] = { 'name': '-' }
-			vis2['%s_usefloattexture'%srch] = { 'name': '-' }
+			vis['%s_floatvalue'%srch] = { 'name': '-' }
+			vis['%s_usefloattexture'%srch] = { 'name': '-' }
 			if k.startswith(srch):
-				vis2[k]['name'] = '-'
+				vis[k]['name'] = '-'
 	
-	return vis2
+	return vis
 
 class carpaint(declarative_property_group):
 	
@@ -339,6 +359,10 @@ class glass2(declarative_property_group):
 	controls = [
 		'architectural',
 		'dispersion',
+		
+		# Glass 2 Volumes
+		'Interior',
+		'Exterior'
 	] + \
 	TF_bumpmap.get_controls()
 	
@@ -359,7 +383,9 @@ class glass2(declarative_property_group):
 			'default': False
 		},
 	] + \
-	TF_bumpmap.get_properties()
+	TF_bumpmap.get_properties() + \
+	VolumeParameter('Interior', 'Interior') + \
+	VolumeParameter('Exterior', 'Exterior')
 
 class roughglass(declarative_property_group):
 	
@@ -585,172 +611,6 @@ class null(declarative_property_group):
 	
 	properties = [
 	]
-
-class old_mat(object):
-	
-	controls = [
-		
-		'name',
-		
-	] + \
-	TC_Kd.get_controls() + \
-	TF_sigma.get_controls() + \
-	TC_Ka.get_controls() + \
-	TC_Ks.get_controls() + \
-	TF_d.get_controls() + \
-	TF_uroughness.get_controls() + \
-	TF_vroughness.get_controls() + \
-	[
-		# 'Glassy' options
-		'architectural',
-	] + \
-	TF_index.get_controls() + \
-	[
-		'dispersion',
-	] + \
-	TF_cauchyb.get_controls() + \
-	TC_Kr.get_controls() + \
-	TC_Kt.get_controls() + \
-	TF_film.get_controls() + \
-	TF_filmindex.get_controls() + \
-	TC_Ks1.get_controls() + \
-	TC_Ks2.get_controls() + \
-	TC_Ks3.get_controls() + \
-	TF_M1.get_controls() + \
-	TF_M2.get_controls() + \
-	TF_M3.get_controls() + \
-	TF_R1.get_controls() + \
-	TF_R2.get_controls() + \
-	TF_R3.get_controls() + \
-	TF_bumpmap.get_controls() + \
-	TF_amount.get_controls() + \
-	[
-		# Mix Material
-		'namedmaterial1',
-		'namedmaterial2',
-		
-		# Compositing options for distributedpath
-		'compositing_label',
-		['compo_visible_material',
-		'compo_visible_emission'],
-		['compo_visible_indirect_material',
-		'compo_visible_indirect_emission'],
-		'compo_override_alpha',
-		'compo_override_alpha_value',
-		
-		# Glass 2 Volumes
-		'Interior',
-		'Exterior'
-	]
-	
-	visibility = material_visibility()
-	
-	properties = [
-		
-	] + \
-	TF_amount.get_properties() + \
-	[
-		{
-			'type': 'bool',
-			'attr': 'architectural',
-			'name': 'Architectural',
-			'default': False
-		},
-	] + \
-	TF_bumpmap.get_properties() + \
-	TF_cauchyb.get_properties() + \
-	TF_d.get_properties() + \
-	[
-		{
-			'type': 'bool',
-			'attr': 'dispersion',
-			'name': 'Dispersion',
-			'default': False
-		},
-	] + \
-	TF_film.get_properties() + \
-	TF_filmindex.get_properties() + \
-	TF_index.get_properties() + \
-	TC_Ka.get_properties() + \
-	TC_Kd.get_properties() + \
-	TC_Kr.get_properties() + \
-	TC_Ks.get_properties() + \
-	TC_Ks1.get_properties() + \
-	TC_Ks2.get_properties() + \
-	TC_Ks3.get_properties() + \
-	TC_Kt.get_properties() + \
-	TF_M1.get_properties() + \
-	TF_M2.get_properties() + \
-	TF_M3.get_properties() + \
-	[
-		{
-			'type': 'string',
-			'attr': 'name',
-			'name': 'Name'
-		},
-	] + \
-	MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_material') + \
-	MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_material') + \
-	TF_R1.get_properties()+ \
-	TF_R2.get_properties() + \
-	TF_R3.get_properties() + \
-	TF_sigma.get_properties() + \
-	TF_uroughness.get_properties() + \
-	TF_vroughness.get_properties() + \
-	[
-		# hidden parameter to hold current integrator type - updated on draw()
-		{
-			'type': 'string',
-			'attr': 'integrator_type',
-		},
-		{
-			'type': 'text',
-			'attr': 'compositing_label',
-			'name': 'Compositing options',
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_material',
-			'name': 'Visible Material',
-			'default': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_emission',
-			'name': 'Visible Emission',
-			'default': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_indirect_material',
-			'name': 'Visible Indirect Material',
-			'default': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_indirect_emission',
-			'name': 'Visible Indirect Emission',
-			'default': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_override_alpha',
-			'name': 'Override Alpha',
-			'default': False
-		},
-		{
-			'type': 'float',
-			'attr': 'compo_override_alpha_value',
-			'name': 'Override Alpha Value',
-			'default': 0.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1.0,
-			'soft_max': 1.0,
-		},
-	] + \
-	VolumeParameter('Interior', 'Interior', 'luxrender_material') + \
-	VolumeParameter('Exterior', 'Exterior', 'luxrender_material')
 
 class luxrender_emission(declarative_property_group):
 	'''

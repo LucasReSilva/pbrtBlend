@@ -30,7 +30,6 @@ from ef.ef import declarative_property_group
 from ef.util import util as efutil
 from ef.validate import Logic_OR as O
 
-from luxrender.properties import has_property
 from luxrender.properties.lampspectrum_data import lampspectrum_list
 from luxrender.export import ParamSet, get_worldscale
 from luxrender.export.materials import add_texture_parameter
@@ -94,11 +93,7 @@ class ColorTextureParameter(TextureParameterBase):
 	
 	def get_visibility(self):
 		vis = {
-			#'%s_colorlabel' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
-			#'%s_color' % self.attr: 				{ self.parent_type: has_property(self.parent_type, self.attr) },
-			#'%s_usecolorrgc' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
-			#'%s_usecolortexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_colortexture' % self.attr:			{ '%s_usecolortexture' % self.attr: True }, #{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usecolortexture' % self.attr: True },
+			'%s_colortexture' % self.attr:			{ '%s_usecolortexture' % self.attr: True },
 		}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -228,15 +223,9 @@ class FloatTextureParameter(TextureParameterBase):
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
-		if self.texture_only:
+		if not self.texture_only:
 			vis = {
-				#'%s_floattexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-			}
-		else:
-			vis = {
-				#'%s_usefloattexture' % self.attr:	{ self.parent_type: has_property(self.parent_type, self.attr) },
-				#'%s_floatvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_floattexture' % self.attr:		{ '%s_usefloattexture' % self.attr: True }, #{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefloattexture' % self.attr: True },
+				'%s_floattexture' % self.attr:		{ '%s_usefloattexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -334,15 +323,9 @@ class FresnelTextureParameter(TextureParameterBase):
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
-		if self.texture_only:
+		if not self.texture_only:
 			vis = {
-				#'%s_fresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-			}
-		else:
-			vis = {
-				#'%s_usefresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-				#'%s_fresnelvalue' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_fresneltexture' % self.attr:		{ '%s_usefresneltexture' % self.attr: True }, #{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefresneltexture' % self.attr: True },
+				'%s_fresneltexture' % self.attr:		{ '%s_usefresneltexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis

@@ -77,10 +77,3 @@ def material_property_map():
 		'uroughness':		O(['glossy_lossy', 'glossy', 'metal', 'roughglass', 'shinymetal']),
 		'vroughness':		O(['glossy_lossy', 'glossy', 'metal', 'roughglass', 'shinymetal']),
 	}
-	
-def has_material_property(property_name):
-	return material_property_map()[property_name]
-
-def has_property(parent_type, property_name):
-	if parent_type == 'material':
-		return has_material_property(property_name)
