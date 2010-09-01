@@ -13,3 +13,6 @@ syntax: glob
 *.so
 syntax: glob
 *.pyd
+
+syntax: regexp
+^.settings
