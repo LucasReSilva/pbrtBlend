@@ -49,7 +49,7 @@ class TextureParameterBase(object):
 	texture_collection	= 'texture_slots'
 	
 	controls			= []
-	visiblilty			= {}
+	visibility			= {}
 	properties			= []
 	
 	def __init__(self, attr, name, default=None, min=None, max=None):
@@ -63,7 +63,7 @@ class TextureParameterBase(object):
 			self.max = max
 			
 		self.controls = self.get_controls()
-		self.visiblilty = self.get_visibility()
+		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
 	
 	def texture_collection_finder(self):
@@ -238,7 +238,7 @@ class FloatTextureParameter(TextureParameterBase):
 		self.precision = precision
 		
 		self.controls = self.get_controls()
-		self.visiblilty = self.get_visibility()
+		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
 	
 	def get_controls(self):
@@ -342,7 +342,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.precision = precision
 		
 		self.controls = self.get_controls()
-		self.visiblilty = self.get_visibility()
+		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
 	
 	def get_controls(self):
@@ -357,6 +357,7 @@ class FresnelTextureParameter(TextureParameterBase):
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
+		vis = {}
 		if not self.texture_only:
 			vis = {
 				'%s_fresneltexture' % self.attr:		{ '%s_usefresneltexture' % self.attr: True },
