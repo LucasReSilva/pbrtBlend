@@ -97,47 +97,47 @@ class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 		return func2
 
 # Fresnel Textures
-TFR_IOR			= VolumeDataFresnelTextureParameter('', 'fresnel', 'IOR', add_float_value = False)
+TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR', add_float_value = False)
 
 # Float Textures
-TF_amount		= FloatTextureParameter('material', 'amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
-TF_bumpmap		= FloatTextureParameter('material', 'bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
-TF_cauchyb		= FloatTextureParameter('material', 'cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
-TF_d			= FloatTextureParameter('material', 'd', 'Absorption Depth',			add_float_value=True, default=0.15, min=0.0, max=15.0 )
-TF_film			= FloatTextureParameter('material', 'film', 'Thin Film Thickness (nm)',	add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
-TF_filmindex	= FloatTextureParameter('material', 'filmindex', 'Film IOR',			add_float_value=True, default=1.5, min=1.0, max=6.0 )
-TF_index		= FloatTextureParameter('material', 'index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_M1			= FloatTextureParameter('material', 'M1', 'M1',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_M2			= FloatTextureParameter('material', 'M2', 'M2',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_M3			= FloatTextureParameter('material', 'M3', 'M3',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R1			= FloatTextureParameter('material', 'R1', 'R1',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R2			= FloatTextureParameter('material', 'R2', 'R2',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_R3			= FloatTextureParameter('material', 'R3', 'R3',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
-TF_sigma		= FloatTextureParameter('material', 'sigma', 'Sigma',					add_float_value=True, min=0.0, max=100.0 )
-TF_uroughness	= FloatTextureParameter('material', 'uroughness', 'uroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_vroughness	= FloatTextureParameter('material', 'vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_amount		= FloatTextureParameter('amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
+TF_bumpmap		= FloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
+TF_cauchyb		= FloatTextureParameter('cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
+TF_d			= FloatTextureParameter('d', 'Absorption Depth',			add_float_value=True, default=0.15, min=0.0, max=15.0 )
+TF_film			= FloatTextureParameter('film', 'Thin Film Thickness (nm)',	add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
+TF_filmindex	= FloatTextureParameter('filmindex', 'Film IOR',			add_float_value=True, default=1.5, min=1.0, max=6.0 )
+TF_index		= FloatTextureParameter('index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_M1			= FloatTextureParameter('M1', 'M1',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_M2			= FloatTextureParameter('M2', 'M2',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_M3			= FloatTextureParameter('M3', 'M3',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R1			= FloatTextureParameter('R1', 'R1',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R2			= FloatTextureParameter('R2', 'R2',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_R3			= FloatTextureParameter('R3', 'R3',							add_float_value=True, default=1.0, min=0.0, max=0.0 )
+TF_sigma		= FloatTextureParameter('sigma', 'Sigma',					add_float_value=True, min=0.0, max=100.0 )
+TF_uroughness	= FloatTextureParameter('uroughness', 'uroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_vroughness	= FloatTextureParameter('vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 # Color Textures
-TC_Ka			= ColorTextureParameter('material', 'Ka', 'Absorption color',	default=(0.2,0.2,0.2) )
-TC_Kd			= ColorTextureParameter('material', 'Kd', 'Diffuse color',		default=(0.64,0.64,0.64) )
-TC_Kr			= ColorTextureParameter('material', 'Kr', 'Reflection color',	default=(1.0,1.0,1.0) )
-TC_Ks			= ColorTextureParameter('material', 'Ks', 'Specular color',		default=(0.25,0.25,0.25) )
-TC_Ks1			= ColorTextureParameter('material', 'Ks1', 'Specular color 1',	default=(1.0,1.0,1.0) )
-TC_Ks2			= ColorTextureParameter('material', 'Ks2', 'Specular color 2',	default=(1.0,1.0,1.0) )
-TC_Ks3			= ColorTextureParameter('material', 'Ks3', 'Specular color 3',	default=(1.0,1.0,1.0) )
-TC_Kt			= ColorTextureParameter('material', 'Kt', 'Transmission color',	default=(1.0,1.0,1.0) )
-TC_L			= ColorTextureParameter('material', 'L', 'Emission color',		default=(1.0,1.0,1.0) )
+TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',	default=(0.2,0.2,0.2) )
+TC_Kd			= ColorTextureParameter('Kd', 'Diffuse color',		default=(0.64,0.64,0.64) )
+TC_Kr			= ColorTextureParameter('Kr', 'Reflection color',	default=(1.0,1.0,1.0) )
+TC_Ks			= ColorTextureParameter('Ks', 'Specular color',		default=(0.25,0.25,0.25) )
+TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',	default=(1.0,1.0,1.0) )
+TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',	default=(1.0,1.0,1.0) )
+TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',	default=(1.0,1.0,1.0) )
+TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',	default=(1.0,1.0,1.0) )
+TC_L			= ColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
 
-TC_absorption	= VolumeDataColorTextureParameter('', 'absorption', 'Absorption')
+TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption')
 
 def material_visibility():
 	# non-texture properties
 	vis = {
-		'architectural':	{ 'material': has_property('material', 'architectural') },
-		'dispersion':		{ 'material': has_property('material', 'dispersion') },
-		'name':				{ 'material': has_property('material', 'name') },
-		'namedmaterial1':	{ 'material': has_property('material', 'namedmaterial1') },
-		'namedmaterial2':	{ 'material': has_property('material', 'namedmaterial2') },
+		'architectural':	{ 'material': has_property('', 'architectural') },
+		'dispersion':		{ 'material': has_property('', 'dispersion') },
+		'name':				{ 'material': has_property('', 'name') },
+		'namedmaterial1':	{ 'material': has_property('', 'namedmaterial1') },
+		'namedmaterial2':	{ 'material': has_property('', 'namedmaterial2') },
 	}
 	
 	# Float Texture parameters
@@ -223,6 +223,39 @@ class luxrender_material(declarative_property_group):
 		},
 	]
 
+def carpaint_visibility():
+	vis = {}
+	
+	vis.update( TF_bumpmap.get_visibility() )
+	vis.update( TF_d.get_visibility() )
+	vis.update( TC_Ka.get_visibility() )
+	vis.update( TC_Kd.get_visibility() )
+	vis.update( TC_Ks1.get_visibility() )
+	vis.update( TC_Ks2.get_visibility() )
+	vis.update( TC_Ks3.get_visibility() )
+	vis.update( TF_M1.get_visibility() )
+	vis.update( TF_M2.get_visibility() )
+	vis.update( TF_M3.get_visibility() )
+	vis.update( TF_R1.get_visibility() )
+	vis.update( TF_R2.get_visibility() )
+	vis.update( TF_R3.get_visibility() )
+	
+	vis2 = vis.copy()
+	# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
+	for k in vis.keys():
+		for srch in ['Ka','Kd','Ks1','Ks2','Ks3']:
+			vis2['%s_color'%srch] = { 'name': '-' }
+			vis2['%s_usecolortexture'%srch] = { 'name': '-' }
+			if k.startswith(srch):
+				vis2[k]['name'] = '-'
+		for srch in ['M1','M2','M3','R1','R2','R3']:
+			vis2['%s_floatvalue'%srch] = { 'name': '-' }
+			vis2['%s_usefloattexture'%srch] = { 'name': '-' }
+			if k.startswith(srch):
+				vis2[k]['name'] = '-'
+	
+	return vis2
+
 class carpaint(declarative_property_group):
 	
 	controls = [
@@ -242,9 +275,7 @@ class carpaint(declarative_property_group):
 	TF_R2.get_controls() + \
 	TF_R3.get_controls()
 	
-	visibility = {
-		# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
-	}
+	visibility = carpaint_visibility()
 	
 	properties = [
 		{
@@ -252,7 +283,7 @@ class carpaint(declarative_property_group):
 			'attr': 'name',
 			'name': 'Preset',
 			'items': [
-				#('-', 'Manual settings', '-'),
+				('-', 'Manual settings', '-'),
 				('white', 'white', 'white'),
 			]
 		},

@@ -47,7 +47,7 @@ class LampColorTextureParameter(ColorTextureParameter):
 		}
 		return vis
 
-TC_L = LampColorTextureParameter('lamp', 'L', 'Colour')
+TC_L = LampColorTextureParameter('L', 'Colour')
 
 def lamp_visibility():
 	vis = {

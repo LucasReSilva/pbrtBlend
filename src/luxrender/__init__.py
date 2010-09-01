@@ -26,11 +26,11 @@
 #
 
 bl_addon_info = {
-	"name": "LuxBlend",
+	"name": "LuxRender",
 	"author": "Doug Hammond (dougal2)",
-	"version": (0, 7, 0),
+	"version": (0, 7),
 	"blender": (2, 5, 4),
-	"api": 31667,
+	"api": 31671,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",
@@ -39,8 +39,9 @@ bl_addon_info = {
 	"description": "This Addon will allow you to render your scenes with the LuxRender engine."
 }
 
+from .core import RENDERENGINE_luxrender
+
 def register():
-	from .core import RENDERENGINE_luxrender
 	RENDERENGINE_luxrender.install()
 
 def unregister():

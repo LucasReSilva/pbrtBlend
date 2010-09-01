@@ -41,7 +41,6 @@ from luxrender.outputs import LuxManager
 #------------------------------------------------------------------------------ 
 
 class TextureParameterBase(object):
-	parent_type			= None
 	attr				= None
 	name				= None
 	default				= (0.8, 0.8, 0.8)
@@ -50,8 +49,7 @@ class TextureParameterBase(object):
 	
 	texture_collection	= 'texture_slots'
 	
-	def __init__(self, parent_type, attr, name, default=None, min=None, max=None):
-		self.parent_type = parent_type
+	def __init__(self, attr, name, default=None, min=None, max=None):
 		self.attr = attr
 		self.name = name
 		if default is not None:
@@ -62,13 +60,7 @@ class TextureParameterBase(object):
 			self.max = max
 	
 	def texture_collection_finder(self):
-		def func(s,c):
-			if s.object.type == 'LAMP':
-				return s.object.data
-			else:
-				return s.object.material_slots[s.object.active_material_index].material
-		
-		return func
+		return lambda s,c: s.object.material_slots[s.object.active_material_index].material
 	
 	def texture_slot_set_attr(self):
 		return lambda s,c: getattr(c, c.type)
@@ -102,11 +94,11 @@ class ColorTextureParameter(TextureParameterBase):
 	
 	def get_visibility(self):
 		vis = {
-			'%s_colorlabel' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_color' % self.attr: 				{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_usecolorrgc' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_usecolortexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-			'%s_colortexture' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usecolortexture' % self.attr: True },
+			#'%s_colorlabel' % self.attr: 			{ self.parent_type: has_property(self.parent_type, self.attr) },
+			#'%s_color' % self.attr: 				{ self.parent_type: has_property(self.parent_type, self.attr) },
+			#'%s_usecolorrgc' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
+			#'%s_usecolortexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+			'%s_colortexture' % self.attr:			{ '%s_usecolortexture' % self.attr: True }, #{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usecolortexture' % self.attr: True },
 		}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -126,17 +118,19 @@ class ColorTextureParameter(TextureParameterBase):
 		'mirror': 'Kr',
 	}
 	
-	def set_master_colour(self, c):
+	def set_master_colour(self, s, c):
 		'''
 		This neat little hack will set the blender material colour to the value
 		given in the material panel via the property's 'draw' lambda function.
 		we can specify more than one property to be 'master_colour' so long as
 		they are not both visible in the panel simultaneously.
 		'''
-		if hasattr(c, 'luxrender_material'):
-			if c.luxrender_material.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.luxrender_material.type]:
-				if c.diffuse_color != getattr(c.luxrender_material, self.attr+'_color'):
-					c.diffuse_color = getattr(c.luxrender_material, self.attr+'_color')
+		
+		if c.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.type]:
+			submat = getattr(c, c.type)
+			submat_col = getattr(submat, self.attr+'_color')
+			if s.material.diffuse_color != submat_col:
+				s.material.diffuse_color = submat_col
 	
 	def get_properties(self):
 		return [
@@ -177,7 +171,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'subtype': 'COLOR',
-				'draw': lambda s,c: self.set_master_colour(c)
+				'draw': lambda s,c: self.set_master_colour(s, c)
 			},
 			{
 				'attr': '%s_colortexturename' % self.attr,
@@ -206,13 +200,12 @@ class FloatTextureParameter(TextureParameterBase):
 	ignore_zero		= False
 	
 	def __init__(self,
-			parent_type, attr, name,
+			attr, name,
 			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
 			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
 			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
-		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
 		self.texture_only = (not add_float_value)
@@ -237,13 +230,13 @@ class FloatTextureParameter(TextureParameterBase):
 	def get_visibility(self):
 		if self.texture_only:
 			vis = {
-				'%s_floattexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				#'%s_floattexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
 			}
 		else:
 			vis = {
-				'%s_usefloattexture' % self.attr:	{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_floatvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_floattexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefloattexture' % self.attr: True },
+				#'%s_usefloattexture' % self.attr:	{ self.parent_type: has_property(self.parent_type, self.attr) },
+				#'%s_floatvalue' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_floattexture' % self.attr:		{ '%s_usefloattexture' % self.attr: True }, #{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefloattexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -313,13 +306,12 @@ class FresnelTextureParameter(TextureParameterBase):
 	ignore_zero		= False
 	
 	def __init__(self,
-			parent_type, attr, name,
+			attr, name,
 			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
 			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
 			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
-		self.parent_type = parent_type
 		self.attr = attr
 		self.name = name
 		self.texture_only = (not add_float_value)
@@ -344,13 +336,13 @@ class FresnelTextureParameter(TextureParameterBase):
 	def get_visibility(self):
 		if self.texture_only:
 			vis = {
-				'%s_fresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				#'%s_fresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
 			}
 		else:
 			vis = {
-				'%s_usefresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_fresnelvalue' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
-				'%s_fresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefresneltexture' % self.attr: True },
+				#'%s_usefresneltexture' % self.attr:		{ self.parent_type: has_property(self.parent_type, self.attr) },
+				#'%s_fresnelvalue' % self.attr:			{ self.parent_type: has_property(self.parent_type, self.attr) },
+				'%s_fresneltexture' % self.attr:		{ '%s_usefresneltexture' % self.attr: True }, #{ self.parent_type: has_property(self.parent_type, self.attr), '%s_usefresneltexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -502,6 +494,23 @@ class luxrender_texture(declarative_property_group):
 # Sub property groups of luxrender_texture follow
 #------------------------------------------------------------------------------ 
 
+# Float Texture Parameters
+TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'brickmodtex',	default=0.0, min=0.0, max=1.0)
+TF_bricktex		= FloatTextureParameter('bricktex',		'bricktex',		default=0.0, min=0.0, max=1.0)
+TF_mortartex	= FloatTextureParameter('mortartex',	'mortartex',	default=0.0, min=0.0, max=1.0)
+TF_tex1			= FloatTextureParameter('tex1',			'tex1',			default=1.0, min=0.0, max=100.0)
+TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=0.0, max=100.0)
+TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0)
+TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0)
+TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0)
+
+# Color Texture Parameters
+TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'brickmodtex',	default=(1.0,1.0,1.0))
+TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,1.0))
+TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
+TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
+TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
+
 class bilerp(declarative_property_group):
 	
 	controls = [
@@ -642,13 +651,6 @@ class blackbody(declarative_property_group):
 		
 		return set(), ParamSet().add_float('temperature', self.temperature)
 
-brickmodtex_f	= FloatTextureParameter('texture', 'brickmodtex', 'brickmodtex', default=0.0, min=0.0, max=1.0)
-brickmodtex_c	= ColorTextureParameter('texture', 'brickmodtex', 'brickmodtex', default=(1.0,1.0,1.0))
-bricktex_f		= FloatTextureParameter('texture', 'bricktex', 'bricktex', default=0.0, min=0.0, max=1.0)
-bricktex_c		= ColorTextureParameter('texture', 'bricktex', 'bricktex', default=(1.0,1.0,1.0))
-mortartex_f		= FloatTextureParameter('texture', 'mortartex', 'mortartex', default=0.0, min=0.0, max=1.0)
-mortartex_c		= ColorTextureParameter('texture', 'mortartex', 'mortartex', default=(1.0,1.0,1.0))
-
 class brick(declarative_property_group):
 	
 	controls = [
@@ -659,12 +661,12 @@ class brick(declarative_property_group):
 		'mortarsize',
 		['brickwidth', 'brickdepth', 'brickheight'],
 	] + \
-	brickmodtex_f.get_controls() + \
-	brickmodtex_c.get_controls() + \
-	bricktex_f.get_controls() + \
-	bricktex_c.get_controls() + \
-	mortartex_f.get_controls() + \
-	mortartex_c.get_controls()
+	TF_brickmodtex.get_controls() + \
+	TC_brickmodtex.get_controls() + \
+	TF_bricktex.get_controls() + \
+	TC_bricktex.get_controls() + \
+	TF_mortartex.get_controls() + \
+	TC_mortartex.get_controls()
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
@@ -780,12 +782,12 @@ class brick(declarative_property_group):
 			'soft_max': 10.0
 		},
 	] + \
-	brickmodtex_f.get_properties() + \
-	brickmodtex_c.get_properties() + \
-	bricktex_f.get_properties() + \
-	bricktex_c.get_properties() + \
-	mortartex_f.get_properties() + \
-	mortartex_c.get_properties()
+	TF_brickmodtex.get_properties() + \
+	TC_brickmodtex.get_properties() + \
+	TF_bricktex.get_properties() + \
+	TC_bricktex.get_properties() + \
+	TF_mortartex.get_properties() + \
+	TC_mortartex.get_properties()
 	
 	def get_paramset(self):
 		
@@ -880,17 +882,14 @@ class cauchy(declarative_property_group):
 		
 		return set(), cp
 
-tex1 = FloatTextureParameter('texture', 'tex1', 'Texture 1', default=1.0, min=0.0, max=100.0)
-tex2 = FloatTextureParameter('texture', 'tex2', 'Texture 2', default=0.0, min=0.0, max=100.0)
-
 class checkerboard(declarative_property_group):
 	
 	controls = [
 		'aamode',
 		'dimension',
 	] + \
-	tex1.get_controls() + \
-	tex2.get_controls()
+	TF_tex1.get_controls() + \
+	TF_tex2.get_controls()
 	
 	visibility = {
 		'tex1_floattexture':	{ 'tex1_usefloattexture': True },
@@ -926,8 +925,8 @@ class checkerboard(declarative_property_group):
 		},
 		
 	] + \
-	tex1.get_properties() + \
-	tex2.get_properties()
+	TF_tex1.get_properties() + \
+	TF_tex2.get_properties()
 	
 	def get_paramset(self):
 		
@@ -980,16 +979,13 @@ class constant(declarative_property_group):
 		
 		return set(), constant_params
 
-inside	= FloatTextureParameter('texture', 'inside', 'inside', default=1.0, min=0.0, max=100.0)
-outside	= FloatTextureParameter('texture', 'outside', 'outside', default=0.0, min=0.0, max=100.0)
-
 class dots(declarative_property_group):
 	
 	controls = [
 		# None
 	] + \
-	inside.get_controls() + \
-	outside.get_controls()
+	TF_inside.get_controls() + \
+	TF_outside.get_controls()
 	
 	visibility = {
 		'inside_usefloattexture':		{ 'variant': 'float' },
@@ -1008,8 +1004,8 @@ class dots(declarative_property_group):
 			'default': 'float'
 		},
 	] + \
-	inside.get_properties() + \
-	outside.get_properties()
+	TF_inside.get_properties() + \
+	TF_outside.get_properties()
 	
 	def get_paramset(self):
 		
@@ -1495,23 +1491,17 @@ class marble(declarative_property_group):
 										.add_float('scale', self.scale) \
 										.add_float('variation', self.variation)
 
-amount_f	= FloatTextureParameter('texture', 'amount', 'amount', default=0.5, min=0.0, max=1.0)
-tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', default=1.0, min=0.0, max=100.0)
-tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', default=(1.0,1.0,1.0))
-tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', default=0.0, min=0.0, max=100.0)
-tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', default=(0.0,0.0,0.0))
-
 class mix(declarative_property_group):
 	
 	controls = [
 		'variant',
 		
 	] + \
-	amount_f.get_controls() + \
-	tex1_f.get_controls() + \
-	tex1_c.get_controls() + \
-	tex2_f.get_controls() + \
-	tex2_c.get_controls()
+	TF_amount.get_controls() + \
+	TF_tex1.get_controls() + \
+	TC_tex1.get_controls() + \
+	TF_tex2.get_controls() + \
+	TC_tex2.get_controls()
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
@@ -1533,8 +1523,8 @@ class mix(declarative_property_group):
 		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
 		
 		'tex2_usefloattexture':			{ 'variant': 'float' },
-		'tex2_floatvalue':				{ 'variant': 'float' },
-		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'TF_tex2loatvalue':				{ 'variant': 'float' },
+		'TF_tex2loattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
 	}
 	
 	properties = [
@@ -1549,11 +1539,11 @@ class mix(declarative_property_group):
 			'expand': True
 		},
 	] + \
-	amount_f.get_properties() + \
-	tex1_f.get_properties() + \
-	tex1_c.get_properties() + \
-	tex2_f.get_properties() + \
-	tex2_c.get_properties()
+	TF_amount.get_properties() + \
+	TF_tex1.get_properties() + \
+	TC_tex1.get_properties() + \
+	TF_tex2.get_properties() + \
+	TC_tex2.get_properties()
 	
 	def get_paramset(self):
 		
@@ -1639,21 +1629,16 @@ class sellmeier(declarative_property_group):
 		
 		return set(), sp
 
-tex1_f		= FloatTextureParameter('texture', 'tex1', 'tex1', default=1.0, min=0.0, max=100.0)
-tex1_c		= ColorTextureParameter('texture', 'tex1', 'tex1', default=(1.0,1.0,1.0))
-tex2_f		= FloatTextureParameter('texture', 'tex2', 'tex2', default=0.0, min=0.0, max=100.0)
-tex2_c		= ColorTextureParameter('texture', 'tex2', 'tex2', default=(0.0,0.0,0.0))
-
 class scale(declarative_property_group):
 	
 	controls = [
 		'variant',
 		
 	] + \
-	tex1_f.get_controls() + \
-	tex1_c.get_controls() + \
-	tex2_f.get_controls() + \
-	tex2_c.get_controls()
+	TF_tex1.get_controls() + \
+	TC_tex1.get_controls() + \
+	TF_tex2.get_controls() + \
+	TC_tex2.get_controls()
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
@@ -1689,10 +1674,10 @@ class scale(declarative_property_group):
 			'expand': True
 		},
 	] + \
-	tex1_f.get_properties() + \
-	tex1_c.get_properties() + \
-	tex2_f.get_properties() + \
-	tex2_c.get_properties()
+	TF_tex1.get_properties() + \
+	TC_tex1.get_properties() + \
+	TF_tex2.get_properties() + \
+	TC_tex2.get_properties()
 	
 	def get_paramset(self):
 		
