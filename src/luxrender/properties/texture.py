@@ -48,9 +48,9 @@ class TextureParameterBase(object):
 	
 	texture_collection	= 'texture_slots'
 	
-	controls			= []
-	visibility			= {}
-	properties			= []
+	controls			= None
+	visibility			= None
+	properties			= None
 	
 	def __init__(self, attr, name, default=None, min=None, max=None):
 		self.attr = attr
@@ -119,7 +119,7 @@ class ColorTextureParameter(TextureParameterBase):
 	
 	def get_visibility(self):
 		vis = {
-			'%s_colortexture' % self.attr:			{ '%s_usecolortexture' % self.attr: True },
+			'%s_colortexture' % self.attr: { '%s_usecolortexture' % self.attr: True },
 		}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -253,9 +253,10 @@ class FloatTextureParameter(TextureParameterBase):
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
+		vis = {}
 		if not self.texture_only:
 			vis = {
-				'%s_floattexture' % self.attr:		{ '%s_usefloattexture' % self.attr: True },
+				'%s_floattexture' % self.attr: { '%s_usefloattexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -360,7 +361,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		vis = {}
 		if not self.texture_only:
 			vis = {
-				'%s_fresneltexture' % self.attr:		{ '%s_usefresneltexture' % self.attr: True },
+				'%s_fresneltexture' % self.attr: { '%s_usefresneltexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -1541,8 +1542,8 @@ class mix(declarative_property_group):
 		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
 		
 		'tex2_usefloattexture':			{ 'variant': 'float' },
-		'TF_tex2loatvalue':				{ 'variant': 'float' },
-		'TF_tex2loattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_floatvalue':				{ 'variant': 'float' },
+		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
 	}
 	
 	properties = [

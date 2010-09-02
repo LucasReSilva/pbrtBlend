@@ -24,6 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 import math#
+from copy import deepcopy
 
 import bpy
 
@@ -96,7 +97,7 @@ class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 		return func2
 
 # Fresnel Textures
-TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR', add_float_value = False)
+TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR',		add_float_value = False)
 
 # Float Textures
 TF_amount		= FloatTextureParameter('amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
@@ -244,56 +245,62 @@ class luxrender_material(declarative_property_group):
 		'''
 		self.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
 
-def carpaint_visibility():
+def dict_merge(*args):
 	vis = {}
-	
-	vis.update( TF_bumpmap.visibility )
-	vis.update( TF_d.visibility )
-	vis.update( TC_Ka.visibility )
-	vis.update( TC_Kd.visibility )
-	vis.update( TC_Ks1.visibility )
-	vis.update( TC_Ks2.visibility )
-	vis.update( TC_Ks3.visibility )
-	vis.update( TF_M1.visibility )
-	vis.update( TF_M2.visibility )
-	vis.update( TF_M3.visibility )
-	vis.update( TF_R1.visibility )
-	vis.update( TF_R2.visibility )
-	vis.update( TF_R3.visibility )
+	for vis_dict in args:
+		vis.update(deepcopy(vis_dict))	# need a deepcopy since nested dicts return references!
+	return vis
+
+def carpaint_visibility():
+	cp_vis = dict_merge(
+		TF_bumpmap.visibility,
+		TF_d.visibility,
+		TC_Ka.visibility,
+		TC_Kd.visibility,
+		TC_Ks1.visibility,
+		TC_Ks2.visibility,
+		TC_Ks3.visibility,
+		TF_M1.visibility,
+		TF_M2.visibility,
+		TF_M3.visibility,
+		TF_R1.visibility,
+		TF_R2.visibility,
+		TF_R3.visibility
+	)
 	
 	# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
-	for k in vis.copy().keys(): # copy the dict otherwise iterator complains about dict length modification
-		for srch in ['Ka','Kd','Ks1','Ks2','Ks3']:
-			vis['%s_color'%srch] = { 'name': '-' }
-			vis['%s_usecolortexture'%srch] = { 'name': '-' }
+	for k in cp_vis.copy().keys():
+		for srch in ['Kd','Ks1','Ks2','Ks3']:
+			cp_vis['%s_color'%srch] = { 'name': '-' }
+			cp_vis['%s_usecolortexture'%srch] = { 'name': '-' }
 			if k.startswith(srch):
-				vis[k]['name'] = '-'
+				cp_vis[k]['name'] = '-'
 		for srch in ['M1','M2','M3','R1','R2','R3']:
-			vis['%s_floatvalue'%srch] = { 'name': '-' }
-			vis['%s_usefloattexture'%srch] = { 'name': '-' }
+			cp_vis['%s_floatvalue'%srch] = { 'name': '-' }
+			cp_vis['%s_usefloattexture'%srch] = { 'name': '-' }
 			if k.startswith(srch):
-				vis[k]['name'] = '-'
+				cp_vis[k]['name'] = '-'
 	
-	return vis
+	return cp_vis
 
 class carpaint(declarative_property_group):
 	
 	controls = [
 		'name'
 	] + \
-	TF_bumpmap.controls + \
-	TF_d.controls + \
-	TC_Ka.controls + \
-	TC_Kd.controls + \
-	TC_Ks1.controls + \
-	TC_Ks2.controls + \
-	TC_Ks3.controls + \
-	TF_M1.controls + \
-	TF_M2.controls + \
-	TF_M3.controls + \
-	TF_R1.controls + \
-	TF_R2.controls + \
-	TF_R3.controls
+		TF_bumpmap.controls + \
+		TF_d.controls + \
+		TC_Ka.controls + \
+		TC_Kd.controls + \
+		TC_Ks1.controls + \
+		TC_Ks2.controls + \
+		TC_Ks3.controls + \
+		TF_M1.controls + \
+		TF_M2.controls + \
+		TF_M3.controls + \
+		TF_R1.controls + \
+		TF_R2.controls + \
+		TF_R3.controls
 	
 	visibility = carpaint_visibility()
 	
@@ -304,7 +311,7 @@ class carpaint(declarative_property_group):
 			'name': 'Preset',
 			'items': [
 				('-', 'Manual settings', '-'),
-				('2k acrylack', '2k Bcrylack', '2k acrylack'),
+				('2k acrylack', '2k Acrylack', '2k acrylack'),
 				('blue', 'Blue', 'blue'),
 				('blue matte', 'Blue Matte', 'blue matte'),
 				('bmw339', 'BMW 339', 'bmw339'),
@@ -315,47 +322,42 @@ class carpaint(declarative_property_group):
 			]
 		},
 	] + \
-	TF_bumpmap.properties + \
-	TF_d.properties + \
-	TC_Ka.properties + \
-	TC_Kd.properties + \
-	TC_Ks1.properties + \
-	TC_Ks2.properties + \
-	TC_Ks3.properties + \
-	TF_M1.properties + \
-	TF_M2.properties + \
-	TF_M3.properties + \
-	TF_R1.properties + \
-	TF_R2.properties + \
-	TF_R3.properties
-
-def glass_visibility():
-	vis = {}
-	
-	vis.update( TF_bumpmap.visibility )
-	vis.update( TF_cauchyb.visibility )
-	vis.update( TF_film.visibility )
-	vis.update( TF_filmindex.visibility )
-	vis.update( TF_index.visibility )
-	vis.update( TC_Kr.visibility )
-	vis.update( TC_Kt.visibility )
-	
-	return vis
+		TF_bumpmap.properties + \
+		TF_d.properties + \
+		TC_Ka.properties + \
+		TC_Kd.properties + \
+		TC_Ks1.properties + \
+		TC_Ks2.properties + \
+		TC_Ks3.properties + \
+		TF_M1.properties + \
+		TF_M2.properties + \
+		TF_M3.properties + \
+		TF_R1.properties + \
+		TF_R2.properties + \
+		TF_R3.properties
 
 class glass(declarative_property_group):
 	
 	controls = [
 		'architectural',
 	] + \
-	TF_bumpmap.controls + \
-	TF_cauchyb.controls + \
-	TF_film.controls + \
-	TF_filmindex.controls + \
-	TF_index.controls + \
-	TC_Kr.controls + \
-	TC_Kt.controls
+		TF_bumpmap.controls + \
+		TF_cauchyb.controls + \
+		TF_film.controls + \
+		TF_filmindex.controls + \
+		TF_index.controls + \
+		TC_Kr.controls + \
+		TC_Kt.controls
 	
-	visibility = glass_visibility()
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TF_cauchyb.visibility,
+		TF_film.visibility,
+		TF_filmindex.visibility,
+		TF_index.visibility,
+		TC_Kr.visibility,
+		TC_Kt.visibility
+	)
 	
 	properties = [
 		{
@@ -365,13 +367,13 @@ class glass(declarative_property_group):
 			'default': False
 		},
 	] + \
-	TF_bumpmap.properties + \
-	TF_cauchyb.properties + \
-	TF_film.properties + \
-	TF_filmindex.properties + \
-	TF_index.properties + \
-	TC_Kr.properties + \
-	TC_Kt.properties
+		TF_bumpmap.properties + \
+		TF_cauchyb.properties + \
+		TF_film.properties + \
+		TF_filmindex.properties + \
+		TF_index.properties + \
+		TC_Kr.properties + \
+		TC_Kt.properties
 
 class glass2(declarative_property_group):
 	
@@ -383,10 +385,9 @@ class glass2(declarative_property_group):
 		'Interior',
 		'Exterior'
 	] + \
-	TF_bumpmap.controls
+		TF_bumpmap.controls
 	
-	visibility = {
-	}
+	visibility = TF_bumpmap.visibility
 	
 	properties = [
 		{
@@ -402,124 +403,154 @@ class glass2(declarative_property_group):
 			'default': False
 		},
 	] + \
-	TF_bumpmap.properties + \
-	VolumeParameter('Interior', 'Interior') + \
-	VolumeParameter('Exterior', 'Exterior')
+		TF_bumpmap.properties + \
+		VolumeParameter('Interior', 'Interior') + \
+		VolumeParameter('Exterior', 'Exterior')
 
 class roughglass(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.controls + \
-	TF_cauchyb.controls + \
-	TF_index.controls + \
-	TC_Kr.controls + \
-	TC_Kt.controls + \
-	TF_uroughness.controls + \
-	TF_vroughness.controls
+		TF_bumpmap.controls + \
+		TF_cauchyb.controls + \
+		TF_index.controls + \
+		TC_Kr.controls + \
+		TC_Kt.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
 	
-	visibility = {
-	}
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TF_cauchyb.visibility,
+		TF_index.visibility,
+		TC_Kr.visibility,
+		TC_Kt.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
 	
 	properties = [
 	] + \
-	TF_bumpmap.properties + \
-	TF_cauchyb.properties + \
-	TF_index.properties + \
-	TC_Kr.properties + \
-	TC_Kt.properties + \
-	TF_uroughness.properties + \
-	TF_vroughness.properties
+		TF_bumpmap.properties + \
+		TF_cauchyb.properties + \
+		TF_index.properties + \
+		TC_Kr.properties + \
+		TC_Kt.properties + \
+		TF_uroughness.properties + \
+		TF_vroughness.properties
 
 class glossy(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.controls + \
-	TF_d.controls + \
-	TF_index.controls + \
-	TC_Ka.controls + \
-	TC_Kd.controls + \
-	TC_Ks.controls + \
-	TF_uroughness.controls + \
-	TF_vroughness.controls
+		TF_bumpmap.controls + \
+		TF_d.controls + \
+		TF_index.controls + \
+		TC_Ka.controls + \
+		TC_Kd.controls + \
+		TC_Ks.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
 	
-	visibility = {
-	}
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TF_d.visibility,
+		TF_index.visibility,
+		TC_Ka.visibility,
+		TC_Kd.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
 	
 	properties = [
 	] + \
-	TF_bumpmap.properties + \
-	TF_d.properties + \
-	TF_index.properties + \
-	TC_Ka.properties + \
-	TC_Kd.properties + \
-	TC_Ks.properties + \
-	TF_uroughness.properties + \
-	TF_vroughness.properties
+		TF_bumpmap.properties + \
+		TF_d.properties + \
+		TF_index.properties + \
+		TC_Ka.properties + \
+		TC_Kd.properties + \
+		TC_Ks.properties + \
+		TF_uroughness.properties + \
+		TF_vroughness.properties
 
 class glossy_lossy(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.controls + \
-	TF_d.controls + \
-	TF_index.controls + \
-	TC_Ka.controls + \
-	TC_Kd.controls + \
-	TC_Ks.controls + \
-	TF_uroughness.controls + \
-	TF_vroughness.controls
+		TF_bumpmap.controls + \
+		TF_d.controls + \
+		TF_index.controls + \
+		TC_Ka.controls + \
+		TC_Kd.controls + \
+		TC_Ks.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
 	
-	visibility = {
-	}
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TF_d.visibility,
+		TF_index.visibility,
+		TC_Ka.visibility,
+		TC_Kd.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
 	
 	properties = [
 	] + \
-	TF_bumpmap.properties + \
-	TF_d.properties + \
-	TF_index.properties + \
-	TC_Ka.properties + \
-	TC_Kd.properties + \
-	TC_Ks.properties + \
-	TF_uroughness.properties + \
-	TF_vroughness.properties
+		TF_bumpmap.properties + \
+		TF_d.properties + \
+		TF_index.properties + \
+		TC_Ka.properties + \
+		TC_Kd.properties + \
+		TC_Ks.properties + \
+		TF_uroughness.properties + \
+		TF_vroughness.properties
 
 class matte(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.controls + \
-	TC_Kd.controls + \
-	TF_sigma.controls
+		TF_bumpmap.controls + \
+		TC_Kd.controls + \
+		TF_sigma.controls
 	
-	visibility = {
-	}
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TC_Kd.visibility,
+		TF_sigma.visibility
+	)
 	
 	properties = [
 	] + \
-	TF_bumpmap.properties + \
-	TC_Kd.properties + \
-	TF_sigma.properties
+		TF_bumpmap.properties + \
+		TC_Kd.properties + \
+		TF_sigma.properties
 
 class mattetranslucent(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.controls + \
-	TC_Kr.controls + \
-	TC_Kt.controls + \
-	TF_sigma.controls
+		TF_bumpmap.controls + \
+		TC_Kr.controls + \
+		TC_Kt.controls + \
+		TF_sigma.controls
 	
-	visibility = {
-	}
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TC_Kr.visibility,
+		TC_Kt.visibility,
+		TF_sigma.visibility
+	)
 	
 	properties = [
 	] + \
-	TF_bumpmap.properties + \
-	TC_Kr.properties + \
-	TC_Kt.properties + \
-	TF_sigma.properties
+		TF_bumpmap.properties + \
+		TC_Kr.properties + \
+		TC_Kt.properties + \
+		TF_sigma.properties
 
 class metal(declarative_property_group):
 	
@@ -527,13 +558,17 @@ class metal(declarative_property_group):
 		'name',
 		'filename',
 	] + \
-	TF_bumpmap.controls + \
-	TF_uroughness.controls + \
-	TF_vroughness.controls
+		TF_bumpmap.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
 	
-	visibility = {
-		'filename':	{ 'name': 'nk' }
-	}
+	visibility = dict_merge({
+			'filename':	{ 'name': 'nk' }
+		},
+		TF_bumpmap.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
 	
 	properties = [
 		{
@@ -555,53 +590,64 @@ class metal(declarative_property_group):
 			'name': 'NK file',
 		},
 	] + \
-	TF_bumpmap.properties + \
-	TF_uroughness.properties + \
-	TF_vroughness.properties
+		TF_bumpmap.properties + \
+		TF_uroughness.properties + \
+		TF_vroughness.properties
 
 class shinymetal(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.controls + \
-	TF_film.controls + \
-	TF_filmindex.controls + \
-	TC_Kr.controls + \
-	TC_Ks.controls + \
-	TF_uroughness.controls + \
-	TF_vroughness.controls
+		TF_bumpmap.controls + \
+		TF_film.controls + \
+		TF_filmindex.controls + \
+		TC_Kr.controls + \
+		TC_Ks.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
 	
-	visibility = {
-	}
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TF_film.visibility,
+		TF_filmindex.visibility,
+		TC_Kr.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
 	
 	properties = [
 	] + \
-	TF_bumpmap.properties + \
-	TF_film.properties + \
-	TF_filmindex.properties + \
-	TC_Kr.properties + \
-	TC_Ks.properties + \
-	TF_uroughness.properties + \
-	TF_vroughness.properties
+		TF_bumpmap.properties + \
+		TF_film.properties + \
+		TF_filmindex.properties + \
+		TC_Kr.properties + \
+		TC_Ks.properties + \
+		TF_uroughness.properties + \
+		TF_vroughness.properties
 
 class mirror(declarative_property_group):
 	
 	controls = [
 	] + \
-	TF_bumpmap.controls + \
-	TF_film.controls + \
-	TF_filmindex.controls + \
-	TC_Kr.controls
+		TF_bumpmap.controls + \
+		TF_film.controls + \
+		TF_filmindex.controls + \
+		TC_Kr.controls
 	
-	visibility = {
-	}
+	visibility = dict_merge(
+		TF_bumpmap.visibility,
+		TF_film.visibility,
+		TF_filmindex.visibility,
+		TC_Kr.visibility
+	)
 	
 	properties = [
 	] + \
-	TF_bumpmap.properties + \
-	TF_film.properties + \
-	TF_filmindex.properties + \
-	TC_Kr.properties
+		TF_bumpmap.properties + \
+		TF_film.properties + \
+		TF_filmindex.properties + \
+		TC_Kr.properties
 
 class mix(declarative_property_group):
 	
@@ -609,16 +655,15 @@ class mix(declarative_property_group):
 		'namedmaterial1',
 		'namedmaterial2',
 	] + \
-	TF_amount.controls
+		TF_amount.controls
 	
-	visibility = {
-	}
+	visibility = TF_amount.visibility
 	
 	properties = [
 	] + \
-	TF_amount.properties + \
-	MaterialParameter('namedmaterial1', 'Material 1', 'mix') + \
-	MaterialParameter('namedmaterial2', 'Material 2', 'mix')
+		TF_amount.properties + \
+		MaterialParameter('namedmaterial1', 'Material 1', 'mix') + \
+		MaterialParameter('namedmaterial2', 'Material 2', 'mix')
 
 class null(declarative_property_group):
 	

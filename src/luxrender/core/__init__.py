@@ -104,6 +104,7 @@ from luxrender.ui.materials				import	main				as ui_materials, \
 												carpaint			as ui_materials_carpaint, \
 												glass				as ui_materials_glass, \
 												glass2				as ui_materials_glass2, \
+												roughglass			as ui_materials_roughglass, \
 												glossy_lossy		as ui_materials_glossy_lossy, \
 												glossy				as ui_materials_glossy, \
 												matte				as ui_materials_matte, \
