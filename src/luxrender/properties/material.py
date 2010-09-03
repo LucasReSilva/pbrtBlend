@@ -97,12 +97,17 @@ class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 			return c
 		return func2
 
+class BumpMapFloatTextureParameter(FloatTextureParameter):
+	def texture_slot_set_attr(self):
+		# Looks in a different location than other FloatTextureParameters
+		return lambda s,c: c.luxrender_material
+
 # Fresnel Textures
 TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR',		add_float_value = False)
 
 # Float Textures
+TF_bumpmap		= BumpMapFloatTextureParameter('bumpmap', 'Bump Map',		add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
 TF_amount		= FloatTextureParameter('amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
-TF_bumpmap		= FloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
 TF_cauchyb		= FloatTextureParameter('cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
 TF_d			= FloatTextureParameter('d', 'Absorption Depth',			add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
 TF_film			= FloatTextureParameter('film', 'Thin Film Thickness (nm)',	add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
@@ -131,6 +136,12 @@ TC_L			= ColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
 
 TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption')
 
+def dict_merge(*args):
+	vis = {}
+	for vis_dict in args:
+		vis.update(deepcopy(vis_dict))	# need a deepcopy since nested dicts return references!
+	return vis
+
 class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
@@ -140,7 +151,9 @@ class luxrender_material(declarative_property_group):
 	
 	controls = [
 		'type',
-		
+	] + \
+	TF_bumpmap.controls + \
+	[
 		# Compositing options for distributedpath
 		'compositing_label',
 		['compo_visible_material',
@@ -151,7 +164,7 @@ class luxrender_material(declarative_property_group):
 		'compo_override_alpha_value',
 	]
 	
-	visibility = {
+	visibility = dict_merge({
 		'compositing_label':				{ 'integrator_type': 'distributedpath' },
 		'compo_visible_material':			{ 'integrator_type': 'distributedpath' },
 		'compo_visible_emission':			{ 'integrator_type': 'distributedpath' },
@@ -159,7 +172,7 @@ class luxrender_material(declarative_property_group):
 		'compo_visible_indirect_emission':	{ 'integrator_type': 'distributedpath' },
 		'compo_override_alpha':				{ 'integrator_type': 'distributedpath' },
 		'compo_override_alpha_value':		{ 'integrator_type': 'distributedpath', 'compo_override_alpha': True },
-	}
+	}, TF_bumpmap.visibility)
 	
 	properties = [
 		# Material Type Select
@@ -236,7 +249,8 @@ class luxrender_material(declarative_property_group):
 			'max': 1.0,
 			'soft_max': 1.0,
 		},
-	]
+	] + \
+	TF_bumpmap.properties
 	
 	def draw_callback(self, context):
 		'''
@@ -246,21 +260,36 @@ class luxrender_material(declarative_property_group):
 		'''
 		self.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
 		
-	def export(self, lux_context, material, mode='indirect'):
+	def export(self, scene, lux_context, material, mode='indirect'):
 		
 		if self.type == 'mix':
 			# First export the other mix mats
 			m1 = bpy.data.materials[self.mix.namedmaterial1] 
-			m1.luxrender_material.export(lux_context, m1, 'indirect')
+			m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
 			m2 = bpy.data.materials[self.mix.namedmaterial2] 
-			m2.luxrender_material.export(lux_context, m2, 'indirect')
+			m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
 		
 		material_params = ParamSet()
 		
 		sub_type = getattr(self, self.type)
+		
+		# Bump mapping
+		if self.type not in ['mix', 'null']:
+			material_params.update( TF_bumpmap.get_params(self) )
+		
 		material_params.update( sub_type.get_params() )
 		
-		# TODO - add compo* params
+		# DistrubutedPath compositing
+		# Querying the scene will be more reliable than using self.integrator_type
+		# in case the panel has never been drawn
+		if scene.scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+			material_params.add_bool('compo_visible_material', self.compo_visible_material)
+			material_params.add_bool('compo_visible_emission', self.compo_visible_emission)
+			material_params.add_bool('compo_visible_indirect_material', self.compo_visible_indirect_material)
+			material_params.add_bool('compo_visible_indirect_emission', self.compo_visible_indirect_emission)
+			material_params.add_bool('compo_override_alpha', self.compo_override_alpha)
+			if self.compo_override_alpha:
+				material_params.add_float('compo_override_alpha_value', self.compo_override_alpha_value)
 		
 		if mode == 'indirect':
 			material_params.add_string('type', self.type)
@@ -269,15 +298,8 @@ class luxrender_material(declarative_property_group):
 		elif mode == 'direct':
 			lux_context.material(self.type, material_params)
 
-def dict_merge(*args):
-	vis = {}
-	for vis_dict in args:
-		vis.update(deepcopy(vis_dict))	# need a deepcopy since nested dicts return references!
-	return vis
-
 def carpaint_visibility():
 	cp_vis = dict_merge(
-		TF_bumpmap.visibility,
 		TF_d.visibility,
 		TC_Ka.visibility,
 		TC_Kd.visibility,
@@ -312,7 +334,6 @@ class carpaint(declarative_property_group):
 	controls = [
 		'name'
 	] + \
-		TF_bumpmap.controls + \
 		TF_d.controls + \
 		TC_Ka.controls + \
 		TC_Kd.controls + \
@@ -346,7 +367,6 @@ class carpaint(declarative_property_group):
 			]
 		},
 	] + \
-		TF_bumpmap.properties + \
 		TF_d.properties + \
 		TC_Ka.properties + \
 		TC_Kd.properties + \
@@ -363,7 +383,6 @@ class carpaint(declarative_property_group):
 	def get_params(self):
 		carpaint_params = ParamSet()
 		
-		carpaint_params.update( TF_bumpmap.get_params(self) )
 		carpaint_params.update( TF_d.get_params(self) )
 		carpaint_params.update( TC_Ka.get_params(self) )
 		
@@ -388,7 +407,6 @@ class glass(declarative_property_group):
 	controls = [
 		'architectural',
 	] + \
-		TF_bumpmap.controls + \
 		TF_cauchyb.controls + \
 		TF_film.controls + \
 		TF_filmindex.controls + \
@@ -397,7 +415,6 @@ class glass(declarative_property_group):
 		TC_Kt.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TF_cauchyb.visibility,
 		TF_film.visibility,
 		TF_filmindex.visibility,
@@ -414,7 +431,6 @@ class glass(declarative_property_group):
 			'default': False
 		},
 	] + \
-		TF_bumpmap.properties + \
 		TF_cauchyb.properties + \
 		TF_film.properties + \
 		TF_filmindex.properties + \
@@ -427,7 +443,6 @@ class glass(declarative_property_group):
 		
 		glass_params.add_bool('architectural', self.architectural)
 		
-		glass_params.update( TF_bumpmap.get_params(self) )
 		glass_params.update( TF_cauchyb.get_params(self) )
 		glass_params.update( TF_film.get_params(self) )
 		glass_params.update( TF_filmindex.get_params(self) )
@@ -446,10 +461,9 @@ class glass2(declarative_property_group):
 		# Glass 2 Volumes
 		'Interior',
 		'Exterior'
-	] + \
-		TF_bumpmap.controls
+	]
 	
-	visibility = TF_bumpmap.visibility
+	visibility = {}
 	
 	properties = [
 		{
@@ -465,7 +479,6 @@ class glass2(declarative_property_group):
 			'default': False
 		},
 	] + \
-		TF_bumpmap.properties + \
 		VolumeParameter('Interior', 'Interior') + \
 		VolumeParameter('Exterior', 'Exterior')
 	
@@ -481,7 +494,6 @@ class roughglass(declarative_property_group):
 	
 	controls = [
 	] + \
-		TF_bumpmap.controls + \
 		TF_cauchyb.controls + \
 		TF_index.controls + \
 		TC_Kr.controls + \
@@ -490,7 +502,6 @@ class roughglass(declarative_property_group):
 		TF_vroughness.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TF_cauchyb.visibility,
 		TF_index.visibility,
 		TC_Kr.visibility,
@@ -501,7 +512,6 @@ class roughglass(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_bumpmap.properties + \
 		TF_cauchyb.properties + \
 		TF_index.properties + \
 		TC_Kr.properties + \
@@ -512,7 +522,6 @@ class roughglass(declarative_property_group):
 	def get_params(self):
 		roughglass_params = ParamSet()
 		
-		roughglass_params.update( TF_bumpmap.get_params(self) )
 		roughglass_params.update( TF_cauchyb.get_params(self) )
 		roughglass_params.update( TF_index.get_params(self) )
 		roughglass_params.update( TC_Kr.get_params(self) )
@@ -526,7 +535,6 @@ class glossy(declarative_property_group):
 	
 	controls = [
 	] + \
-		TF_bumpmap.controls + \
 		TF_d.controls + \
 		TF_index.controls + \
 		TC_Ka.controls + \
@@ -536,7 +544,6 @@ class glossy(declarative_property_group):
 		TF_vroughness.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TF_d.visibility,
 		TF_index.visibility,
 		TC_Ka.visibility,
@@ -548,7 +555,6 @@ class glossy(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_bumpmap.properties + \
 		TF_d.properties + \
 		TF_index.properties + \
 		TC_Ka.properties + \
@@ -560,7 +566,6 @@ class glossy(declarative_property_group):
 	def get_params(self):
 		glossy_params = ParamSet()
 		
-		glossy_params.update( TF_bumpmap.get_params(self) )
 		glossy_params.update( TF_d.get_params(self) )
 		glossy_params.update( TF_index.get_params(self) )
 		glossy_params.update( TC_Ka.get_params(self) )
@@ -575,7 +580,6 @@ class glossy_lossy(declarative_property_group):
 	
 	controls = [
 	] + \
-		TF_bumpmap.controls + \
 		TF_d.controls + \
 		TF_index.controls + \
 		TC_Ka.controls + \
@@ -585,7 +589,6 @@ class glossy_lossy(declarative_property_group):
 		TF_vroughness.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TF_d.visibility,
 		TF_index.visibility,
 		TC_Ka.visibility,
@@ -597,7 +600,6 @@ class glossy_lossy(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_bumpmap.properties + \
 		TF_d.properties + \
 		TF_index.properties + \
 		TC_Ka.properties + \
@@ -609,7 +611,6 @@ class glossy_lossy(declarative_property_group):
 	def get_params(self):
 		glossy_lossy_params = ParamSet()
 		
-		glossy_lossy_params.update( TF_bumpmap.get_params(self) )
 		glossy_lossy_params.update( TF_d.get_params(self) )
 		glossy_lossy_params.update( TF_index.get_params(self) )
 		glossy_lossy_params.update( TC_Ka.get_params(self) )
@@ -624,26 +625,22 @@ class matte(declarative_property_group):
 	
 	controls = [
 	] + \
-		TF_bumpmap.controls + \
 		TC_Kd.controls + \
 		TF_sigma.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TC_Kd.visibility,
 		TF_sigma.visibility
 	)
 	
 	properties = [
 	] + \
-		TF_bumpmap.properties + \
 		TC_Kd.properties + \
 		TF_sigma.properties
 	
 	def get_params(self):
 		matte_params = ParamSet()
 		
-		matte_params.update( TF_bumpmap.get_params(self) )
 		matte_params.update( TC_Kd.get_params(self) )
 		matte_params.update( TF_sigma.get_params(self) )
 		
@@ -653,13 +650,11 @@ class mattetranslucent(declarative_property_group):
 	
 	controls = [
 	] + \
-		TF_bumpmap.controls + \
 		TC_Kr.controls + \
 		TC_Kt.controls + \
 		TF_sigma.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TC_Kr.visibility,
 		TC_Kt.visibility,
 		TF_sigma.visibility
@@ -667,7 +662,6 @@ class mattetranslucent(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_bumpmap.properties + \
 		TC_Kr.properties + \
 		TC_Kt.properties + \
 		TF_sigma.properties
@@ -675,7 +669,6 @@ class mattetranslucent(declarative_property_group):
 	def get_params(self):
 		mattetranslucent_params = ParamSet()
 		
-		mattetranslucent_params.update( TF_bumpmap.get_params(self) )
 		mattetranslucent_params.update( TC_Kr.get_params(self) )
 		mattetranslucent_params.update( TC_Kt.get_params(self) )
 		mattetranslucent_params.update( TF_sigma.get_params(self) )
@@ -688,14 +681,12 @@ class metal(declarative_property_group):
 		'name',
 		'filename',
 	] + \
-		TF_bumpmap.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
 	visibility = dict_merge({
 			'filename':	{ 'name': 'nk' }
 		},
-		TF_bumpmap.visibility,
 		TF_uroughness.visibility,
 		TF_vroughness.visibility
 	)
@@ -720,14 +711,12 @@ class metal(declarative_property_group):
 			'name': 'NK file',
 		},
 	] + \
-		TF_bumpmap.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
 	def get_params(self):
 		metal_params = ParamSet()
 		
-		metal_params.update( TF_bumpmap.get_params(self) )
 		metal_params.update( TF_uroughness.get_params(self) )
 		metal_params.update( TF_vroughness.get_params(self) )
 		
@@ -742,7 +731,6 @@ class shinymetal(declarative_property_group):
 	
 	controls = [
 	] + \
-		TF_bumpmap.controls + \
 		TF_film.controls + \
 		TF_filmindex.controls + \
 		TC_Kr.controls + \
@@ -751,7 +739,6 @@ class shinymetal(declarative_property_group):
 		TF_vroughness.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TF_film.visibility,
 		TF_filmindex.visibility,
 		TC_Kr.visibility,
@@ -762,7 +749,6 @@ class shinymetal(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_bumpmap.properties + \
 		TF_film.properties + \
 		TF_filmindex.properties + \
 		TC_Kr.properties + \
@@ -773,7 +759,6 @@ class shinymetal(declarative_property_group):
 	def get_params(self):
 		shinymetal_params = ParamSet()
 		
-		shinymetal_params.update( TF_bumpmap.get_params(self) )
 		shinymetal_params.update( TF_film.get_params(self) )
 		shinymetal_params.update( TF_filmindex.get_params(self) )
 		shinymetal_params.update( TC_Kr.get_params(self) )
@@ -787,13 +772,11 @@ class mirror(declarative_property_group):
 	
 	controls = [
 	] + \
-		TF_bumpmap.controls + \
 		TF_film.controls + \
 		TF_filmindex.controls + \
 		TC_Kr.controls
 	
 	visibility = dict_merge(
-		TF_bumpmap.visibility,
 		TF_film.visibility,
 		TF_filmindex.visibility,
 		TC_Kr.visibility
@@ -801,7 +784,6 @@ class mirror(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_bumpmap.properties + \
 		TF_film.properties + \
 		TF_filmindex.properties + \
 		TC_Kr.properties
@@ -809,7 +791,6 @@ class mirror(declarative_property_group):
 	def get_params(self):
 		mirror_params = ParamSet()
 		
-		mirror_params.update( TF_bumpmap.get_params(self) )
 		mirror_params.update( TF_film.get_params(self) )
 		mirror_params.update( TF_filmindex.get_params(self) )
 		mirror_params.update( TC_Kr.get_params(self) )
@@ -1053,5 +1034,3 @@ class luxrender_volumes(declarative_property_group):
 			'icon': 'X',
 		},
 	]
-
-

@@ -167,7 +167,7 @@ def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 	
 	# Export either NamedMaterial stmt or the full material
 	# definition depending on the output type
-	export_object_material(lux_context, ob)
+	export_object_material(scene, lux_context, ob)
 	
 	# Check for emission material assignment and volume data
 	object_is_emitter = False

@@ -217,7 +217,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			# export_materials.write_lxm(lux_context, scene)
 			for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
 				for mat in [m.material for m in object.material_slots]:
-					mat.luxrender_material.export(lux_context, mat, mode='indirect')
+					mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
 			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:
