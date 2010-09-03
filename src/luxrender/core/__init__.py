@@ -302,7 +302,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	def render(self, context):
 		'''
-		scene		bpy.types.scene
+		context: bpy.types.scene
 		
 		Export the given scene to LuxRender.
 		Choose from one of several methods depending on what needs to be rendered.

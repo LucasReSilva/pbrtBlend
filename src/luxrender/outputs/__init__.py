@@ -56,18 +56,18 @@ class LuxAPIStats(TimerThread):
 	KICK_PERIOD = 1
 	
 	stats_dict = {
-		'secElapsed':	   0.0,
-		'samplesSec':	   0.0,
+		'secElapsed':		0.0,
+		'samplesSec':		0.0,
 		'samplesTotSec':	0.0,
 		'samplesPx':		0.0,
-		'efficiency':	   0.0,
-		#'filmXres':		 0.0,
-		#'filmYres':		 0.0,
-		#'displayInterval':  0.0,
-		'filmEV':		   0.0,
-		#'sceneIsReady':	 0.0,
-		#'filmIsReady':	  0.0,
-		#'terminated':	   0.0,
+		'efficiency':		0.0,
+		#'filmXres':		0.0,
+		#'filmYres':		0.0,
+		#'displayInterval':	0.0,
+		'filmEV':			0.0,
+		#'sceneIsReady':	0.0,
+		#'filmIsReady':		0.0,
+		#'terminated':		0.0,
 		#'enoughSamples':	0.0,
 	}
 	
@@ -96,7 +96,7 @@ class LuxAPIStats(TimerThread):
 			self.stats_dict[k] = self.LocalStorage['lux_context'].statistics(k)
 		
 		self.stats_string = ' | '.join(['%s'%self.stats_format[k](v) for k,v in self.stats_dict.items()])
-			  
+	
 class LuxFilmDisplay(TimerThread):
 	'''
 	Periodically update render result with Lux's framebuffer
@@ -132,6 +132,14 @@ class LuxManager(object):
 	@staticmethod
 	def ClearActive():
 		LuxManager.ActiveManager = None
+	
+	CurrentScene = None
+	@staticmethod
+	def SetCurrentScene(scene):
+		LuxManager.CurrentScene = scene
+	@staticmethod
+	def ClearCurrentScene():
+		LuxManager.CurrentScene = None
 	
 	context_count = 0
 	@staticmethod

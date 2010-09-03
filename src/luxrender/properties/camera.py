@@ -26,8 +26,6 @@
 #
 import math
 
-import bpy
-
 from ef.ef import declarative_property_group
 
 from luxrender.properties import dbo
@@ -231,7 +229,7 @@ class luxrender_camera(declarative_property_group):
 			# Do not world-scale this, it is already in meters !
 			params.add_float('lensradius', (cam.lens / 1000.0) / ( 2.0 * self.fstop ))
 		
-		ws = get_worldscale(scene=scene, as_scalematrix=False)
+		ws = get_worldscale(as_scalematrix=False)
 		
 		if self.autofocus:
 			params.add_bool('autofocus', True)

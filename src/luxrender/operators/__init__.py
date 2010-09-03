@@ -82,7 +82,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	write_all_files	= bpy.props.BoolProperty(options={'HIDDEN'}, default=True)		# Force writing all files, don't obey UI settings
 	
 	def export_init(self, scene):
-		
 		# force scene update to current rendering frame
 		scene.set_frame(scene.frame_current)
 		
@@ -104,6 +103,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			threads = threads
 		)
 		LM.SetActive(LuxManager)
+		LM.SetCurrentScene(scene)
 		
 		lux_context = LuxManager.lux_context
 		
@@ -179,9 +179,9 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				scene.set_frame(scene.frame_current - 1)
 				if m1 != scene.camera.matrix_world:
 					lux_context.transformBegin(file=Files.MAIN)
-					ws = get_worldscale(scene=scene)
+					ws = get_worldscale()
 					m1 *= ws
-					ws = get_worldscale(scene=scene, as_scalematrix=False)
+					ws = get_worldscale(as_scalematrix=False)
 					m1[3][0] *= ws
 					m1[3][1] *= ws
 					m1[3][2] *= ws

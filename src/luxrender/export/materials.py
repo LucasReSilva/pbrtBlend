@@ -27,7 +27,7 @@
 import bpy
 
 from luxrender.export import ParamSet
-from luxrender.outputs import LuxLog
+from luxrender.outputs import LuxLog, LuxManager
 
 class ExportedTextures(object):
 	# static class variables
@@ -228,14 +228,15 @@ def convert_texture(texture):
 	return variant, lux_tex_name, paramset
 
 def RGC(value):
-	if bpy.context.scene.luxrender_engine.rgc:
-		gamma = bpy.context.scene.camera.data.luxrender_colorspace.gamma
+	scene = LuxManager.CurrentScene
+	if scene.luxrender_engine.rgc:
+		gamma = scene.camera.data.luxrender_colorspace.gamma
 	else:
 		gamma = 1.0
 	
 	ncol = value**(1/gamma)
 	
-	if bpy.context.scene.luxrender_engine.colclamp:
+	if scene.luxrender_engine.colclamp:
 		ncol = ncol * 0.9
 		if ncol > 0.9:
 			ncol = 0.9

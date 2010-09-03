@@ -67,7 +67,7 @@ def attr_light(lux_context, name, group, type, params, transform=None):
 	else:
 		lux_context.attributeEnd()
 
-def exportLights(lux_context, scene, ob, matrix):
+def exportLights(lux_context, ob, matrix):
 	light = ob.data
 		
 	# Params common to all light types
@@ -96,12 +96,12 @@ def exportLights(lux_context, scene, ob, matrix):
 		light_params.add_point('to', (0,0,-1))
 		light_params.add_float('coneangle', coneangle)
 		light_params.add_float('conedeltaangle', conedeltaangle)
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 
 	if light.type == 'POINT':
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 		
 	if light.type == 'HEMI':
@@ -114,7 +114,7 @@ def exportLights(lux_context, scene, ob, matrix):
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
 		# nsamples
 		# gamma
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 	
 	if light.type == 'AREA':
@@ -122,10 +122,10 @@ def exportLights(lux_context, scene, ob, matrix):
 		light_params.add_float('efficacy', light.luxrender_lamp.efficacy)
 		
 		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
-		light_params.add_float('gain', light.energy * (get_worldscale(scene=scene, as_scalematrix=False)**2))
+		light_params.add_float('gain', light.energy * (get_worldscale(as_scalematrix=False)**2))
 		# nsamples
 		lux_context.attributeBegin(ob.name, file=Files.MAIN)
-		lux_context.transform(matrix_to_list(matrix, scene=scene, apply_worldscale=True))
+		lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
 		lux_context.lightGroup(light.luxrender_lamp.lightgroup, [])
 		lux_context.areaLightSource('area', light_params)
 
@@ -166,16 +166,10 @@ def lights(lux_context, scene):
 	
 	sel = scene.objects
 	have_light = False
-	vis_layers = scene.layers
-
+	
 	for ob in sel:
 		
-		# Check layers
-		visible = False
-		for layer_index, o_layer in enumerate(ob.layers):
-			visible = visible or (o_layer and vis_layers[layer_index])
-		
-		if not visible:
+		if not ob.is_visible(scene) or ob.hide_render:
 			continue
 		
 		# skip dupli (child) objects when they are not lamps
@@ -191,14 +185,14 @@ def lights(lux_context, scene):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light |= exportLights(lux_context, scene, dupli_ob.object, dupli_ob.matrix_world)
+				have_light |= exportLights(lux_context, dupli_ob.object, dupli_ob.matrix_world)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
 		else:
 			if ob.type == 'LAMP':
-				have_light |= exportLights(lux_context, scene, ob, ob.matrix_world)
+				have_light |= exportLights(lux_context, ob, ob.matrix_world)
 		
 		if ob.type == 'MESH':
 			# now check for emissive materials on ob

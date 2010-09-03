@@ -150,8 +150,6 @@ class ColorTextureParameter(TextureParameterBase):
 		'''
 		This neat little hack will set the blender material colour to the value
 		given in the material panel via the property's 'draw' lambda function.
-		we can specify more than one property to be 'master_colour' so long as
-		they are not both visible in the panel simultaneously.
 		'''
 		
 		if c.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.type]:

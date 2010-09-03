@@ -28,6 +28,8 @@ import math
 
 import bpy, mathutils
 
+from luxrender.outputs import LuxManager
+
 class ParamSetItem(list):
 	
 	type		= None
@@ -156,13 +158,10 @@ class ParamSet(list):
 		self.add('texture', name, str(value))
 		return self
 
-def get_worldscale(scene=None, as_scalematrix=True):
+def get_worldscale(as_scalematrix=True):
 	ws = 1.0
 	
-	if scene == None:
-		scn_us = bpy.context.scene.unit_settings
-	else:
-		scn_us = scene.unit_settings
+	scn_us = LuxManager.CurrentScene.unit_settings
 	
 	if scn_us.system in ['METRIC', 'IMPERIAL']:
 		# The units used in modelling are for display only. behind
@@ -174,7 +173,7 @@ def get_worldscale(scene=None, as_scalematrix=True):
 	else:
 		return ws
 
-def matrix_to_list(matrix, scene=None, apply_worldscale=False):
+def matrix_to_list(matrix, apply_worldscale=False):
 	'''
 	matrix		  Matrix
 	
@@ -185,9 +184,9 @@ def matrix_to_list(matrix, scene=None, apply_worldscale=False):
 	
 	if apply_worldscale:
 		matrix = matrix.copy()
-		sm = get_worldscale(scene=scene)
+		sm = get_worldscale()
 		matrix *= sm
-		sm = get_worldscale(scene=scene, as_scalematrix = False)
+		sm = get_worldscale(as_scalematrix = False)
 		matrix[3][0] *= sm
 		matrix[3][1] *= sm
 		matrix[3][2] *= sm

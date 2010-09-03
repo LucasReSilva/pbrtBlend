@@ -163,7 +163,7 @@ def exportMesh(lux_context, scene, ob, smoothing_enabled, object_begin_end=True)
 def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	# object translation/rotation/scale 
-	lux_context.transform( matrix_to_list(matrix, scene=scene, apply_worldscale=True) )
+	lux_context.transform( matrix_to_list(matrix, apply_worldscale=True) )
 	
 	# Export either NamedMaterial stmt or the full material
 	# definition depending on the output type
@@ -206,7 +206,7 @@ def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 	elif is_object_animated:
 		lux_context.transformBegin(comment=ob.name, file=Files.GEOM)
 		lux_context.identity()
-		lux_context.transform(matrix_to_list(m1, scene=scene, apply_worldscale=True))
+		lux_context.transform(matrix_to_list(m1, apply_worldscale=True))
 		lux_context.coordinateSystem('%s' % ob.data.name + '_motion')
 		lux_context.transformEnd()
 		lux_context.motionInstance(ob.data.name, 0.0, 1.0, ob.data.name + '_motion')
@@ -233,8 +233,6 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 
 	rpcs = []
 	ipc = 0.0
-
-	vis_layers = scene.layers
 	
 	sel = scene.objects
 	total_objects = len(sel)
@@ -248,13 +246,8 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
 			continue
 		
-		# Check layers
-		visible = False
-		for layer_index, o_layer in enumerate(ob.layers):
-			visible = visible or (o_layer and vis_layers[layer_index])
-		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-		if not visible or ob.hide_render:
+		if not ob.is_visible(scene) or ob.hide_render:
 			continue
 		
 		if ob.parent and ob.parent.is_duplicator:
@@ -287,13 +280,8 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 		if ob.type != 'MESH':
 			continue
 		
-		# Check layers
-		visible = False
-		for layer_index, o_layer in enumerate(ob.layers):
-			visible = visible or (o_layer and vis_layers[layer_index])
-		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-		if not visible or ob.hide_render:
+		if not ob.is_visible(scene) or ob.hide_render:
 			continue
 		
 		if ob.parent and ob.parent.is_duplicator:
