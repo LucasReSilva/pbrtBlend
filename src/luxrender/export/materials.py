@@ -133,13 +133,14 @@ class ExportedMaterials(object):
 				ExportedMaterials.exported_material_names.append(n)
 
 def export_object_material(lux_context, ob):
-	if lux_context.API_TYPE == 'FILE':
-		if ob.active_material is not None:
+	if ob.active_material is not None:
+		if lux_context.API_TYPE == 'FILE':
 			lux_context.namedMaterial(ob.active_material.name)
-		#else:
-		#	LuxLog('WARNING: Object "%s" has no material assigned' % ob.name)
-	elif lux_context.API_TYPE == 'PURE':
-		materials_direct(lux_context, ob)
+		elif lux_context.API_TYPE == 'PURE':
+			mat = ob.active_material
+			mat.luxrender_material.export(lux_context, mat, mode='direct')
+	#else:
+	#	LuxLog('WARNING: Object "%s" has no material assigned' % ob.name)
 
 def get_instance_materials(ob):
 	obmats = []
