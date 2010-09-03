@@ -28,35 +28,6 @@ import bpy
 
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog
-from luxrender.properties import material_property_map
-
-def write_lxm(lux_context, scene):
-	'''
-	lux_context			pylux.Context
-	scene				bpy.types.scene
-	
-	Iterate over the given scene's objects, and export materials
-	of visible ones to the lux Context lux_context
-	
-	Returns				None
-	'''
-	
-	vis_layers = scene.layers
-	
-	for ob in scene.objects:
-		
-		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
-			continue
-		
-		# Check layers
-		visible = False
-		for layer_index, o_layer in enumerate(ob.layers):
-			visible = visible or (o_layer and vis_layers[layer_index])
-		
-		if not visible:
-			continue
-		
-		materials_file(lux_context, ob)
 
 class ExportedTextures(object):
 	# static class variables
@@ -145,29 +116,17 @@ def export_object_material(scene, lux_context, ob):
 def get_instance_materials(ob):
 	obmats = []
 	# Grab materials attached to object instances ...
-	for ms in ob.material_slots:
-		obmats.append(ms.material)
+	if hasattr(ob, 'material_slots'):
+		for ms in ob.material_slots:
+			obmats.append(ms.material)
 	# ... and to the object's mesh data
-	for m in ob.data.materials:
-		obmats.append(m)
+	if hasattr(ob.data, 'materials'):
+		for m in ob.data.materials:
+			obmats.append(m)
 	
 	# when exporting in direct mode, per instance materials will take precedence
 	# over the base mesh's material definition.
 	return obmats
-	
-def materials_direct(lux_context, ob):
-	for m in get_instance_materials(ob):
-		if hasattr(m, 'luxrender_material'):
-			lux_context.material( *luxrender_material_params(lux_context, m) )
-			break	# just use the first material found
-
-def materials_file(lux_context, ob):
-	for m in get_instance_materials(ob):
-		if hasattr(m, 'luxrender_material') and m.name not in ExportedMaterials.material_names:
-			mat_type, material_params = luxrender_material_params(lux_context, m, add_type=True)
-			ExportedMaterials.makeNamedMaterial(m.name, material_params)
-	
-	ExportedMaterials.export_new_named(lux_context)
 
 def convert_texture(texture):
 	
@@ -367,33 +326,3 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 		LuxLog('WARNING: Texture %s is unsupported variant; needed %s' % (lux_prop_name, variant))
 	
 	return params
-
-def luxrender_material_params(lux_context, mat, add_type=False):
-	#print('mat %s'%mat.name)
-	lux_mat = mat.luxrender_material
-	mp = ParamSet()
-	lux_mat_type = lux_mat.material
-	if add_type:
-		mp.add_string('type', lux_mat_type)
-	
-	mpm = material_property_map()
-	for lux_prop_name in [lp for lp in dir(lux_mat) if lp in mpm.keys()]:
-		if lux_mat_type in mpm[lux_prop_name]:
-			lux_prop = getattr(lux_mat, lux_prop_name)
-			if lux_prop == 'lux_float_texture':
-				mp.update(add_texture_parameter(lux_context, lux_prop_name, 'float', lux_mat))
-			elif lux_prop == 'lux_color_texture':
-				mp.update(add_texture_parameter(lux_context, lux_prop_name, 'color', lux_mat))
-			# TODO: these basic types should cover everything for now ?
-			elif type(lux_prop) is float:
-				mp.add_float(lux_prop_name, lux_prop)
-			elif type(lux_prop) is str:
-				mp.add_string(lux_prop_name, lux_prop)
-			elif type(lux_prop) is bool:
-				mp.add_bool(lux_prop_name, lux_prop)
-			elif type(lux_prop) is int:
-				mp.add_integer(lux_prop_name, lux_prop)
-			elif type(lux_prop).__name__ == 'bpy_prop_array':
-				mp.add_vector(lux_prop_name, lux_prop)
-	
-	return lux_mat_type, mp
