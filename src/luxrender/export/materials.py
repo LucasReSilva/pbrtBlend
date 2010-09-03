@@ -132,13 +132,13 @@ class ExportedMaterials(object):
 				lux_context.makeNamedMaterial(n, p)
 				ExportedMaterials.exported_material_names.append(n)
 
-def export_object_material(lux_context, ob):
+def export_object_material(scene, lux_context, ob):
 	if ob.active_material is not None:
 		if lux_context.API_TYPE == 'FILE':
 			lux_context.namedMaterial(ob.active_material.name)
 		elif lux_context.API_TYPE == 'PURE':
 			mat = ob.active_material
-			mat.luxrender_material.export(lux_context, mat, mode='direct')
+			mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
 	#else:
 	#	LuxLog('WARNING: Object "%s" has no material assigned' % ob.name)
 
