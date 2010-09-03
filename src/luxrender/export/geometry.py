@@ -193,9 +193,11 @@ def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 	# object motion blur
 	is_object_animated = False
 	if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
-		scene.set_frame(scene.frame_current + 1)
+		scene.frame_current += 1
+		scene.update()
 		m1 = matrix.copy()
-		scene.set_frame(scene.frame_current - 1)
+		scene.frame_current -= 1
+		scene.update()
 		if m1 != matrix:
 			is_object_animated = True
 	

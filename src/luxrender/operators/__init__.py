@@ -82,9 +82,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	write_all_files	= bpy.props.BoolProperty(options={'HIDDEN'}, default=True)		# Force writing all files, don't obey UI settings
 	
 	def export_init(self, scene):
-		# force scene update to current rendering frame
-		scene.set_frame(scene.frame_current)
-		
 		if scene.luxrender_engine.threads_auto:
 			try:
 				import multiprocessing
@@ -155,6 +152,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	
 	def execute(self, context):
 		scene = context.scene
+		scene.update()
+		
 		lux_context = self.export_init(scene)
 		if lux_context == False:
 			return {'CANCELLED'}
@@ -174,9 +173,11 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			# Set up camera, view and film
 			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
-				scene.set_frame(scene.frame_current + 1)
+				scene.frame_current += 1
+				scene.update()
 				m1 = scene.camera.matrix_world.copy()
-				scene.set_frame(scene.frame_current - 1)
+				scene.frame_current -= 1
+				scene.update()
 				if m1 != scene.camera.matrix_world:
 					lux_context.transformBegin(file=Files.MAIN)
 					ws = get_worldscale()
