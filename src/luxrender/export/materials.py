@@ -151,7 +151,7 @@ def convert_texture(texture):
 	if texture.type == 'CLOUDS':
 		paramset.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
-				.add_float('noisesize', texture.noise_size) \
+				.add_float('noisesize', texture.noise_scale) \
 				.add_integer('noisedepth', texture.noise_depth) \
 				.add_float('nabla', texture.nabla)
 	
@@ -160,7 +160,7 @@ def convert_texture(texture):
 		paramset.add_string('type', texture.noise_distortion.lower()) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
 				.add_float('distamount', texture.distortion) \
-				.add_float('noisesize', texture.noise_size) \
+				.add_float('noisesize', texture.noise_scale) \
 				.add_float('nabla', texture.nabla)
 	
 	if texture.type == 'MAGIC':
@@ -168,31 +168,31 @@ def convert_texture(texture):
 				.add_float('turbulence', texture.turbulence)
 	
 	if texture.type == 'MARBLE':
-		paramset.add_string('type', texture.stype.lower() ) \
+		paramset.add_string('type', texture.marble_type.lower() ) \
 				.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
-				.add_string('noisebasis2', texture.noisebasis2.lower() ) \
-				.add_float('noisesize', texture.noise_size) \
+				.add_string('noisebasis2', texture.noisebasis_2.lower() ) \
+				.add_float('noisesize', texture.noise_scale) \
 				.add_float('turbulence', texture.turbulence) \
 				.add_integer('noisedepth', texture.noise_depth) \
 				.add_float('nabla', texture.nabla)
 	
 	if texture.type == 'MUSGRAVE':
 		paramset.add_string('type', texture.musgrave_type.lower() ) \
-				.add_float('h', texture.highest_dimension) \
+				.add_float('h', texture.dimension_max) \
 				.add_float('lacu', texture.lacunarity) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
-				.add_float('noisesize', texture.noise_size) \
+				.add_float('noisesize', texture.noise_scale) \
 				.add_float('octs', texture.octaves) \
 				.add_float('nabla', texture.nabla)
 	
 	# NOISE shows no params ?
 	
 	if texture.type == 'STUCCI':
-		paramset.add_string('type', texture.musgrave_type.lower() ) \
+		paramset.add_string('type', texture.stucci_type.lower() ) \
 				.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
-				.add_float('noisesize', texture.noise_size) \
+				.add_float('noisesize', texture.noise_scale) \
 				.add_float('turbulence', texture.turbulence)
 	
 	if texture.type == 'VORONOI':
@@ -207,7 +207,7 @@ def convert_texture(texture):
 		}
 		paramset.add_string('distmetric', distancem_map[texture.distance_metric]) \
 				.add_float('minkowsky_exp', texture.minkovsky_exponent) \
-				.add_float('noisesize', texture.noise_size) \
+				.add_float('noisesize', texture.noise_scale) \
 				.add_float('nabla', texture.nabla) \
 				.add_float('w1', texture.weight_1) \
 				.add_float('w2', texture.weight_2) \
@@ -216,11 +216,11 @@ def convert_texture(texture):
 	
 	if texture.type == 'WOOD':
 		paramset.add_string('noisebasis', texture.noise_basis.lower() ) \
-				.add_string('noisebasis2', texture.noisebasis2.lower() ) \
-				.add_float('noisesize', texture.noise_size) \
+				.add_string('noisebasis2', texture.noisebasis_2.lower() ) \
+				.add_float('noisesize', texture.noise_scale) \
 				.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_float('turbulence', texture.turbulence) \
-				.add_string('type', texture.musgrave_type.lower() ) \
+				.add_string('type', texture.wood_type.lower() ) \
 				.add_float('nabla', texture.nabla)
 	
 	paramset.update( texture.luxrender_texture.transform.get_paramset() )
