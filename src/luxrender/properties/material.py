@@ -23,16 +23,17 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 # ***** END GPL LICENCE BLOCK *****
-import math#
-from copy import deepcopy
+import math
 
 import bpy
+
+from copy import deepcopy
 
 from ef.ef import declarative_property_group
 
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
-from luxrender.export.materials import add_texture_parameter
+from luxrender.export.materials import add_texture_parameter, ExportedMaterials
 
 def MaterialParameter(attr, name, property_group):
 	return [
@@ -103,7 +104,7 @@ TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR',		add_float_value
 TF_amount		= FloatTextureParameter('amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
 TF_bumpmap		= FloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
 TF_cauchyb		= FloatTextureParameter('cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
-TF_d			= FloatTextureParameter('d', 'Absorption Depth',			add_float_value=True, default=0.15, min=0.0, max=15.0 )
+TF_d			= FloatTextureParameter('d', 'Absorption Depth',			add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
 TF_film			= FloatTextureParameter('film', 'Thin Film Thickness (nm)',	add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
 TF_filmindex	= FloatTextureParameter('filmindex', 'Film IOR',			add_float_value=True, default=1.5, min=1.0, max=6.0 )
 TF_index		= FloatTextureParameter('index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.0)
@@ -118,7 +119,7 @@ TF_uroughness	= FloatTextureParameter('uroughness', 'uroughness',			add_float_va
 TF_vroughness	= FloatTextureParameter('vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 # Color Textures
-TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',	default=(0.2,0.2,0.2) )
+TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',	default=(0.0,0.0,0.0) )
 TC_Kd			= ColorTextureParameter('Kd', 'Diffuse color',		default=(0.64,0.64,0.64) )
 TC_Kr			= ColorTextureParameter('Kr', 'Reflection color',	default=(1.0,1.0,1.0) )
 TC_Ks			= ColorTextureParameter('Ks', 'Specular color',		default=(0.25,0.25,0.25) )
@@ -244,6 +245,29 @@ class luxrender_material(declarative_property_group):
 		DistributedPath
 		'''
 		self.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
+		
+	def export(self, lux_context, material, mode='indirect'):
+		
+		if self.type == 'mix':
+			# First export the other mix mats
+			m1 = bpy.data.materials[self.mix.namedmaterial1] 
+			m1.luxrender_material.export(lux_context, m1, 'indirect')
+			m2 = bpy.data.materials[self.mix.namedmaterial2] 
+			m2.luxrender_material.export(lux_context, m2, 'indirect')
+		
+		material_params = ParamSet()
+		
+		sub_type = getattr(self, self.type)
+		material_params.update( sub_type.get_params() )
+		
+		# TODO - add compo* params
+		
+		if mode == 'indirect':
+			material_params.add_string('type', self.type)
+			ExportedMaterials.makeNamedMaterial(material.name, material_params)
+			ExportedMaterials.export_new_named(lux_context)
+		elif mode == 'direct':
+			lux_context.material(self.type, material_params)
 
 def dict_merge(*args):
 	vis = {}
@@ -335,6 +359,29 @@ class carpaint(declarative_property_group):
 		TF_R1.properties + \
 		TF_R2.properties + \
 		TF_R3.properties
+	
+	def get_params(self):
+		carpaint_params = ParamSet()
+		
+		carpaint_params.update( TF_bumpmap.get_params(self) )
+		carpaint_params.update( TF_d.get_params(self) )
+		carpaint_params.update( TC_Ka.get_params(self) )
+		
+		if self.name == '-':	# Use manual settings
+			carpaint_params.update( TC_Kd.get_params(self) )
+			carpaint_params.update( TC_Ks1.get_params(self) )
+			carpaint_params.update( TC_Ks2.get_params(self) )
+			carpaint_params.update( TC_Ks3.get_params(self) )
+			carpaint_params.update( TF_M1.get_params(self) )
+			carpaint_params.update( TF_M2.get_params(self) )
+			carpaint_params.update( TF_M3.get_params(self) )
+			carpaint_params.update( TF_R1.get_params(self) )
+			carpaint_params.update( TF_R2.get_params(self) )
+			carpaint_params.update( TF_R3.get_params(self) )
+		else:					# Use preset
+			carpaint_params.add_string('name', self.name)
+		
+		return carpaint_params
 
 class glass(declarative_property_group):
 	
@@ -374,6 +421,21 @@ class glass(declarative_property_group):
 		TF_index.properties + \
 		TC_Kr.properties + \
 		TC_Kt.properties
+	
+	def get_params(self):
+		glass_params = ParamSet()
+		
+		glass_params.add_bool('architectural', self.architectural)
+		
+		glass_params.update( TF_bumpmap.get_params(self) )
+		glass_params.update( TF_cauchyb.get_params(self) )
+		glass_params.update( TF_film.get_params(self) )
+		glass_params.update( TF_filmindex.get_params(self) )
+		glass_params.update( TF_index.get_params(self) )
+		glass_params.update( TC_Kr.get_params(self) )
+		glass_params.update( TC_Kt.get_params(self) )
+		
+		return glass_params
 
 class glass2(declarative_property_group):
 	
@@ -406,6 +468,14 @@ class glass2(declarative_property_group):
 		TF_bumpmap.properties + \
 		VolumeParameter('Interior', 'Interior') + \
 		VolumeParameter('Exterior', 'Exterior')
+	
+	def get_params(self):
+		glass2_params = ParamSet()
+		
+		glass2_params.add_bool('architectural', self.architectural)
+		glass2_params.add_bool('dispersion', self.dispersion)
+		
+		return glass2_params
 
 class roughglass(declarative_property_group):
 	
@@ -438,6 +508,19 @@ class roughglass(declarative_property_group):
 		TC_Kt.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+	
+	def get_params(self):
+		roughglass_params = ParamSet()
+		
+		roughglass_params.update( TF_bumpmap.get_params(self) )
+		roughglass_params.update( TF_cauchyb.get_params(self) )
+		roughglass_params.update( TF_index.get_params(self) )
+		roughglass_params.update( TC_Kr.get_params(self) )
+		roughglass_params.update( TC_Kt.get_params(self) )
+		roughglass_params.update( TF_uroughness.get_params(self) )
+		roughglass_params.update( TF_vroughness.get_params(self) )
+		
+		return roughglass_params
 
 class glossy(declarative_property_group):
 	
@@ -473,6 +556,20 @@ class glossy(declarative_property_group):
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+	
+	def get_params(self):
+		glossy_params = ParamSet()
+		
+		glossy_params.update( TF_bumpmap.get_params(self) )
+		glossy_params.update( TF_d.get_params(self) )
+		glossy_params.update( TF_index.get_params(self) )
+		glossy_params.update( TC_Ka.get_params(self) )
+		glossy_params.update( TC_Kd.get_params(self) )
+		glossy_params.update( TC_Ks.get_params(self) )
+		glossy_params.update( TF_uroughness.get_params(self) )
+		glossy_params.update( TF_vroughness.get_params(self) )
+		
+		return glossy_params
 
 class glossy_lossy(declarative_property_group):
 	
@@ -508,6 +605,20 @@ class glossy_lossy(declarative_property_group):
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+	
+	def get_params(self):
+		glossy_lossy_params = ParamSet()
+		
+		glossy_lossy_params.update( TF_bumpmap.get_params(self) )
+		glossy_lossy_params.update( TF_d.get_params(self) )
+		glossy_lossy_params.update( TF_index.get_params(self) )
+		glossy_lossy_params.update( TC_Ka.get_params(self) )
+		glossy_lossy_params.update( TC_Kd.get_params(self) )
+		glossy_lossy_params.update( TC_Ks.get_params(self) )
+		glossy_lossy_params.update( TF_uroughness.get_params(self) )
+		glossy_lossy_params.update( TF_vroughness.get_params(self) )
+		
+		return glossy_lossy_params
 
 class matte(declarative_property_group):
 	
@@ -528,7 +639,16 @@ class matte(declarative_property_group):
 		TF_bumpmap.properties + \
 		TC_Kd.properties + \
 		TF_sigma.properties
-
+	
+	def get_params(self):
+		matte_params = ParamSet()
+		
+		matte_params.update( TF_bumpmap.get_params(self) )
+		matte_params.update( TC_Kd.get_params(self) )
+		matte_params.update( TF_sigma.get_params(self) )
+		
+		return matte_params
+	
 class mattetranslucent(declarative_property_group):
 	
 	controls = [
@@ -551,6 +671,16 @@ class mattetranslucent(declarative_property_group):
 		TC_Kr.properties + \
 		TC_Kt.properties + \
 		TF_sigma.properties
+	
+	def get_params(self):
+		mattetranslucent_params = ParamSet()
+		
+		mattetranslucent_params.update( TF_bumpmap.get_params(self) )
+		mattetranslucent_params.update( TC_Kr.get_params(self) )
+		mattetranslucent_params.update( TC_Kt.get_params(self) )
+		mattetranslucent_params.update( TF_sigma.get_params(self) )
+		
+		return mattetranslucent_params
 
 class metal(declarative_property_group):
 	
@@ -593,6 +723,20 @@ class metal(declarative_property_group):
 		TF_bumpmap.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+	
+	def get_params(self):
+		metal_params = ParamSet()
+		
+		metal_params.update( TF_bumpmap.get_params(self) )
+		metal_params.update( TF_uroughness.get_params(self) )
+		metal_params.update( TF_vroughness.get_params(self) )
+		
+		if self.name == 'nk':	# use an NK data file
+			metal_params.add_string('name', self.filename)
+		else:					# use a preset name
+			metal_params.add_string('name', self.name)
+		
+		return metal_params
 
 class shinymetal(declarative_property_group):
 	
@@ -625,6 +769,19 @@ class shinymetal(declarative_property_group):
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+	
+	def get_params(self):
+		shinymetal_params = ParamSet()
+		
+		shinymetal_params.update( TF_bumpmap.get_params(self) )
+		shinymetal_params.update( TF_film.get_params(self) )
+		shinymetal_params.update( TF_filmindex.get_params(self) )
+		shinymetal_params.update( TC_Kr.get_params(self) )
+		shinymetal_params.update( TC_Ks.get_params(self) )
+		shinymetal_params.update( TF_uroughness.get_params(self) )
+		shinymetal_params.update( TF_vroughness.get_params(self) )
+		
+		return shinymetal_params
 
 class mirror(declarative_property_group):
 	
@@ -648,6 +805,16 @@ class mirror(declarative_property_group):
 		TF_film.properties + \
 		TF_filmindex.properties + \
 		TC_Kr.properties
+	
+	def get_params(self):
+		mirror_params = ParamSet()
+		
+		mirror_params.update( TF_bumpmap.get_params(self) )
+		mirror_params.update( TF_film.get_params(self) )
+		mirror_params.update( TF_filmindex.get_params(self) )
+		mirror_params.update( TC_Kr.get_params(self) )
+		
+		return mirror_params
 
 class mix(declarative_property_group):
 	
@@ -664,6 +831,15 @@ class mix(declarative_property_group):
 		TF_amount.properties + \
 		MaterialParameter('namedmaterial1', 'Material 1', 'mix') + \
 		MaterialParameter('namedmaterial2', 'Material 2', 'mix')
+	
+	def get_params(self):
+		mix_params = ParamSet()
+		
+		mix_params.add_string('namedmaterial1', self.namedmaterial1)
+		mix_params.add_string('namedmaterial2', self.namedmaterial2)
+		mix_params.update( TF_amount.get_params(self) )
+		
+		return mix_params
 
 class null(declarative_property_group):
 	
@@ -675,6 +851,9 @@ class null(declarative_property_group):
 	
 	properties = [
 	]
+	
+	def get_params(self):
+		return ParamSet()
 
 class luxrender_emission(declarative_property_group):
 	'''

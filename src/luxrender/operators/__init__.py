@@ -180,11 +180,11 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				if m1 != scene.camera.matrix_world:
 					lux_context.transformBegin(file=Files.MAIN)
 					ws = get_worldscale(scene=scene)
-					matrix *= ws
+					m1 *= ws
 					ws = get_worldscale(scene=scene, as_scalematrix=False)
-					matrix[3][0] *= ws
-					matrix[3][1] *= ws
-					matrix[3][2] *= ws
+					m1[3][0] *= ws
+					m1[3][1] *= ws
+					m1[3][2] *= ws
 					pos = m1[3]
 					forwards = -m1[2]
 					target = (pos + forwards)
@@ -214,7 +214,10 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				lux_context.set_output_file(Files.MATS)
 			
 			self.report({'INFO'}, 'Exporting materials')
-			export_materials.write_lxm(lux_context, scene)
+			# export_materials.write_lxm(lux_context, scene)
+			for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
+				for mat in [m.material for m in object.material_slots]:
+					mat.luxrender_material.export(lux_context, mat, mode='indirect')
 			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:

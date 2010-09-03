@@ -26,8 +26,6 @@
 #
 import bpy
 
-from ef.validate import Visibility
-
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog
 from luxrender.properties import material_property_map

@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-from mathutils import Matrix
+# from mathutils import Matrix
 
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
@@ -185,7 +185,7 @@ def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 				lux_context.areaLightSource('area', arealightsource_params)
 				object_is_emitter = True
 		# just export the first volume interior/exterior
-		if hasattr(m, 'luxrender_material') and m.luxrender_material.material in ['glass2'] and not object_has_volume:
+		if hasattr(m, 'luxrender_material') and m.luxrender_material.type in ['glass2'] and not object_has_volume:
 			lux_context.interior(m.luxrender_material.Interior_volume)
 			lux_context.exterior(m.luxrender_material.Exterior_volume)
 			object_has_volume = True
@@ -231,7 +231,6 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 	Returns		None
 	'''
 
-	objects = []
 	rpcs = []
 	ipc = 0.0
 
@@ -330,4 +329,3 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 				msg_type='INFO',
 				msg_text='LuxRender: Parsing meshes %i%%' % pc
 			)
-

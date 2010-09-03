@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ef.ef import declarative_property_group
 from ef.util import util as efutil
 from ef.validate import Logic_OR as O
@@ -107,6 +105,15 @@ class TextureParameterBase(object):
 		Subclasses can override this for their own needs
 		'''	
 		return []
+	
+	def get_params(self, context):
+		'''
+		Return a LuxRender ParamSet of the properties
+		defined in this Texture, getting parameters
+		from property group 'context'
+		'''
+		
+		return ParamSet()
 
 class ColorTextureParameter(TextureParameterBase):
 	
@@ -210,6 +217,20 @@ class ColorTextureParameter(TextureParameterBase):
 				'name': self.name
 			},
 		] + self.get_extra_properties()
+	
+	def get_params(self, context):
+		TC_params = ParamSet()
+		
+		TC_params.update(
+			add_texture_parameter(
+				LuxManager.ActiveManager.lux_context,
+				self.attr,
+				'color',
+				context
+			)
+		)
+		
+		return TC_params
 
 class FloatTextureParameter(TextureParameterBase):
 	default			= 0.0
@@ -315,6 +336,20 @@ class FloatTextureParameter(TextureParameterBase):
 				'name': self.name
 			},
 		] + self.get_extra_properties()
+	
+	def get_params(self, context):
+		TC_params = ParamSet()
+		
+		TC_params.update(
+			add_texture_parameter(
+				LuxManager.ActiveManager.lux_context,
+				self.attr,
+				'float',
+				context
+			)
+		)
+		
+		return TC_params
 
 class FresnelTextureParameter(TextureParameterBase):
 	default			= 0.0
@@ -420,6 +455,20 @@ class FresnelTextureParameter(TextureParameterBase):
 				'name': self.name
 			},
 		] + self.get_extra_properties()
+	
+	def get_params(self, context):
+		TC_params = ParamSet()
+		
+		TC_params.update(
+			add_texture_parameter(
+				LuxManager.ActiveManager.lux_context,
+				self.attr,
+				'fresnel',
+				context
+			)
+		)
+		
+		return TC_params
 
 #------------------------------------------------------------------------------
 # The main luxrender_texture property group
