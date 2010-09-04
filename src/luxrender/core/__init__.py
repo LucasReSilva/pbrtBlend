@@ -65,7 +65,8 @@ from luxrender.properties.material		import	luxrender_material, \
 												shinymetal			as luxrender_material_shinymetal, \
 												mirror				as luxrender_material_mirror, \
 												mix					as luxrender_material_mix, \
-												null				as luxrender_material_null
+												null				as luxrender_material_null,\
+												velvet				as luxrender_material_velvet
 from luxrender.properties.mesh			import	luxrender_mesh
 from luxrender.properties.texture		import	luxrender_texture, \
 												bilerp				as luxrender_texture_bilerp, \
@@ -113,6 +114,7 @@ from luxrender.ui.materials				import	main				as ui_materials, \
 												mirror				as ui_materials_mirror, \
 												mix					as ui_materials_mix, \
 												shinymetal			as ui_materials_shinymetal, \
+												velvet				as ui_materials_velvet, \
 												emission			as ui_materials_emission, \
 												volumes				as ui_materials_volumes
 from luxrender.ui.textures				import	main				as ui_textures, \
@@ -243,6 +245,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_material', luxrender_material_mirror),
 		('luxrender_material', luxrender_material_mix),
 		('luxrender_material', luxrender_material_null),
+		('luxrender_material', luxrender_material_velvet),
 		(None, luxrender_volume_data),		# call init_properties, but don't create instance
 		('Texture', luxrender_texture),
 		('luxrender_texture', luxrender_texture_bilerp),

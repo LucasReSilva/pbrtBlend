@@ -192,10 +192,11 @@ class luxrender_material(declarative_property_group):
 				('matte','Matte','matte'),
 				('mattetranslucent','Matte Translucent','mattetranslucent'),
 				('metal','Metal','metal'),
-				('shinymetal','Shiny Metal','shinymetal'),
 				('mirror','Mirror','mirror'),
 				('mix','Mix','mix'),
 				('null','Null','null'),
+				('shinymetal','Shiny Metal','shinymetal'),
+				('velvet', 'Velvet', 'velvet'),
 			],
 		},
 		
@@ -836,6 +837,82 @@ class null(declarative_property_group):
 	def get_params(self):
 		return ParamSet()
 
+class velvet(declarative_property_group):
+	
+	controls = TC_Kd.controls + [
+		'thickness',
+		'advanced',
+		'p1', 'p2', 'p3',
+	]
+	
+	visibility = dict_merge({
+		'p1':	{ 'advanced': True },
+		'p2':	{ 'advanced': True },
+		'p3':	{ 'advanced': True },
+	}, TC_Kd.visibility)
+	
+	properties = TC_Kd.properties + [
+		{
+			'type': 'bool',
+			'attr': 'advanced',
+			'name': 'Advanced',
+			'default': False,
+		},
+		{
+			'type': 'float',
+			'attr': 'thickness',
+			'name': 'Thickness',
+			'default': 0.1,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'p1',
+			'name': 'p1',
+			'default': -2.0,
+			'min': -100.0,
+			'soft_min': -100.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'p2',
+			'name': 'p2',
+			'default': 10.0,
+			'min': -100.0,
+			'soft_min': -100.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+		},
+		{
+			'type': 'float',
+			'attr': 'p3',
+			'name': 'p3',
+			'default': 2.0,
+			'min': -100.0,
+			'soft_min': -100.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+		},
+	]
+	
+	def get_params(self):
+		velvet_params = ParamSet()
+		
+		velvet_params.update( TC_Kd.get_params(self) )
+		
+		velvet_params.add_float('thickness', self.thickness)
+		if self.advanced:
+			velvet_params.add_float('p1', self.p1)
+			velvet_params.add_float('p2', self.p2)
+			velvet_params.add_float('p3', self.p3)
+		
+		return velvet_params
+		
 class luxrender_emission(declarative_property_group):
 	'''
 	Storage class for LuxRender Material emission settings.
