@@ -47,5 +47,5 @@ try:
 	
 	LUXFIRE_CLIENT_AVAILABLE = True
 except ImportError as err:
-	LuxLog('WARNING: LuxFire/Pyro library not available.')
+	# LuxLog('WARNING: LuxFire/Pyro library not available.')
 	LUXFIRE_CLIENT_AVAILABLE = False
