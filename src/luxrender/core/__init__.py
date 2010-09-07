@@ -412,10 +412,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		#print('parse %s' % parse)
 		#print('worldEnd %s' % worldEnd)
 		
-		# Set path to export path to launch render
-		# working_path = os.getcwd()
-		# os.chdir( os.path.dirname(efutil.export_path) )
-		
 		if self.LuxManager.lux_context.API_TYPE == 'FILE':
 			#print('calling pylux.context.worldEnd() (1)')
 			self.LuxManager.lux_context.worldEnd()
@@ -478,9 +474,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					if self.render_update_timer.isAlive(): self.render_update_timer.join()
 				
 				# If we exit the wait loop (user cancelled) and renderer still running, then can it
+				# TODO: this should be a user option
 				if luxrender_process.poll() == None:
 					luxrender_process.terminate()
-		# os.chdir(working_path)
 	
 	def process_wait_timer(self):
 		# Nothing to do here
