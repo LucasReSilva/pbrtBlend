@@ -154,6 +154,9 @@ class Custom_Context(object):
 	def objectInstance(self, name):
 		self._api('ObjectInstance ', [name, []])
 	
+	def renderer(self, *args):
+		self._api('Renderer', args)
+	
 	def sampler(self, *args):
 		self._api('Sampler', args)
 	

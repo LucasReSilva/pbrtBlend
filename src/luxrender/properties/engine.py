@@ -30,6 +30,7 @@ from ef.ef import declarative_property_group
 from ef.util import util as efutil
 from ef.validate import Logic_OR as O, Logic_AND as A
 
+from luxrender.export					import ParamSet
 from luxrender.outputs.pure_api			import PYLUX_AVAILABLE
 from luxrender.outputs.luxfire_client	import LUXFIRE_CLIENT_AVAILABLE
 
@@ -59,6 +60,7 @@ class luxrender_engine(declarative_property_group):
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		# 'priority',
 		['threads_auto', 'threads'],
+		'renderer'
 		# ['rgc', 'colclamp'],
 		# ['meshopt', 'nolg'],
 	]
@@ -97,7 +99,7 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'export_type',
-			'name': 'Renderer',
+			'name': 'Rendering Mode',
 			'description': 'Run LuxRender inside or outside of Blender',
 			'default': 'EXT', # if not PYLUX_AVAILABLE else 'INT',
 			'items': find_apis()
@@ -108,6 +110,17 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
 			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+		},
+		{
+			'type': 'enum',
+			'attr': 'renderer',
+			'name': 'Renderer',
+			'description': 'Renderer type',
+			'default': 'sampler',
+			'items': [
+				('sampler', 'Sampler (traditional CPU)', 'sampler'),
+				('hybrid', 'Hybrid (CPU + GPU)', 'hybrid'),
+			],
 		},
 		{
 			'type': 'string',
@@ -187,3 +200,8 @@ class luxrender_engine(declarative_property_group):
 			'default': False,
 		},
 	]
+	
+	def api_output(self):
+		renderer_params = ParamSet()
+		
+		return self.renderer, renderer_params
