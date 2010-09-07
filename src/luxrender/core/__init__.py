@@ -413,8 +413,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		#print('worldEnd %s' % worldEnd)
 		
 		# Set path to export path to launch render
-		working_path = os.getcwd()
-		os.chdir( os.path.dirname(efutil.export_path) )
+		# working_path = os.getcwd()
+		# os.chdir( os.path.dirname(efutil.export_path) )
 		
 		if self.LuxManager.lux_context.API_TYPE == 'FILE':
 			#print('calling pylux.context.worldEnd() (1)')
@@ -463,13 +463,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 						efutil.write_config_value('luxrender', 'defaults', k, v)
 				except Exception as err:
 					LuxLog('Saving LuxRender config failed: %s' % err)
+					return False
 				
 				fn = self.LuxManager.lux_context.file_names[0]
-				LuxLog('Launching LuxRender with scene file "%s"' % fn)
+				cmd_cwd = os.path.dirname(fn)
+				cmd_args = [luxrender_path, fn]
 				# TODO: add support for luxrender command line options
-				subprocess.Popen([luxrender_path + ' "%s"'%fn], shell=True)
+				LuxLog('Launching: %s' % cmd_args)
+				LuxLog(' in %s' % cmd_cwd)
+				subprocess.Popen(cmd_args, cwd=cmd_cwd)
 		
-		os.chdir(working_path)
+		# os.chdir(working_path)
 	
 	def stats_timer(self):
 		'''
