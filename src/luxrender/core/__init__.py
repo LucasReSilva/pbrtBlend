@@ -471,9 +471,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# TODO: add support for luxrender command line options
 				LuxLog('Launching: %s' % cmd_args)
 				LuxLog(' in %s' % cmd_cwd)
-				subprocess.Popen(cmd_args, cwd=cmd_cwd)
-		
+				luxrender_process = subprocess.Popen(cmd_args, cwd=cmd_cwd)
+				while luxrender_process.poll() == None and not self.test_break():
+					self.render_update_timer = threading.Timer(1, self.process_wait_timer)
+					self.render_update_timer.start()
+					if self.render_update_timer.isAlive(): self.render_update_timer.join()
+				
+				# If we exit the wait loop (user cancelled) and renderer still running, then can it
+				if luxrender_process.poll() == None:
+					luxrender_process.terminate()
 		# os.chdir(working_path)
+	
+	def process_wait_timer(self):
+		# Nothing to do here
+		pass
 	
 	def stats_timer(self):
 		'''
