@@ -55,7 +55,7 @@ class luxrender_engine(declarative_property_group):
 		'export_type',
 		'write_files',
 		'render',
-		'exe_path',
+		'install_path',
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		# 'priority',
 		['threads_auto', 'threads'],
@@ -66,7 +66,7 @@ class luxrender_engine(declarative_property_group):
 	visibility = {
 		'write_files':		{ 'export_type': 'INT' },
 		'render':			O([{'write_files': True}, {'export_type': 'EXT'}]),
-		'exe_path':			{ 'render': True, 'export_type': 'EXT' },
+		'install_path':		{ 'render': True, 'export_type': 'EXT' },
 		'write_lxs':		{ 'export_type': 'INT', 'write_files': True },
 		'write_lxm':		{ 'export_type': 'INT', 'write_files': True },
 		'write_lxo':		{ 'export_type': 'INT', 'write_files': True },
@@ -111,11 +111,11 @@ class luxrender_engine(declarative_property_group):
 		},
 		{
 			'type': 'string',
-			'subtype': 'FILE_PATH',
-			'attr': 'exe_path',
-			'name': 'Path to LuxRender',
+			'subtype': 'DIR_PATH',
+			'attr': 'install_path',
+			'name': 'Path to LuxRender Installation',
 			'description': 'Path to LuxRender',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'exe_path', '')
+			'default': efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
 		},
 		{
 			'type': 'bool',

@@ -152,7 +152,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	
 	def execute(self, context):
 		scene = context.scene
-		scene.update()
 		
 		lux_context = self.export_init(scene)
 		if lux_context == False:
@@ -173,10 +172,9 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			# Set up camera, view and film
 			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
-				scene.frame_current += 1
-				scene.update()
+				scene.frame_set(scene.frame_current + 1)
 				m1 = scene.camera.matrix_world.copy()
-				scene.frame_current -= 1
+				scene.frame_set(scene.frame_current - 1)
 				scene.update()
 				if m1 != scene.camera.matrix_world:
 					lux_context.transformBegin(file=Files.MAIN)

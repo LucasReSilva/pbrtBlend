@@ -442,13 +442,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					'auto_start': render
 				}
 				
-				luxrender_path = scene.luxrender_engine.exe_path
+				luxrender_path = scene.luxrender_engine.install_path
 				if os.path.exists(luxrender_path):
-					config_updates['exe_path'] = luxrender_path
+					config_updates['install_path'] = luxrender_path
 				
-				# Get binary from OSX package
+				# TODO: detect animation rendering and switch to luxconsole
+				binary_name = 'luxrender'
+				
 				if sys.platform == 'darwin':
-					luxrender_path += '/Contents/MacOS/luxrender'
+					# Get binary from OSX package
+					luxrender_path += '/Contents/MacOS/%s' % binary_name
+				elif sys.platform == 'win32':
+					luxrender_path += '%s.exe' % binary_name
+				else:
+					luxrender_path += '%s' % binary_name
 				
 				if not os.path.exists(luxrender_path):
 					LuxLog('LuxRender not found at path: %s' % luxrender_path)
@@ -477,6 +484,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# TODO: this should be a user option
 				if luxrender_process.poll() == None:
 					luxrender_process.terminate()
+				
+				from luxrender.export.film import resolution
+				xr, yr = resolution(scene)
+				self.update_framebuffer(xr, yr, [])
 	
 	def process_wait_timer(self):
 		# Nothing to do here
