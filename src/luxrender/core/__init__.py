@@ -449,7 +449,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				luxrender_path = scene.luxrender_engine.exe_path
 				if os.path.exists(luxrender_path):
 					config_updates['exe_path'] = luxrender_path
-
+				
 				# Get binary from OSX package
 				if sys.platform == 'darwin':
 					luxrender_path += '/Contents/MacOS/luxrender'
@@ -467,7 +467,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				fn = self.LuxManager.lux_context.file_names[0]
 				LuxLog('Launching LuxRender with scene file "%s"' % fn)
 				# TODO: add support for luxrender command line options
-				subprocess.Popen([luxrender_path + ' %s'%fn], shell=True)
+				subprocess.Popen([luxrender_path + ' "%s"'%fn], shell=True)
 		
 		os.chdir(working_path)
 	
