@@ -27,6 +27,7 @@
 import os
 
 from luxrender.outputs import LuxLog
+from ef.util.util import path_relative_to_export
 
 class Files(object):
 	MAIN = 0
@@ -273,7 +274,7 @@ class Custom_Context(object):
 			# Include the other files if they exist
 			for idx in [Files.MATS, Files.GEOM]:
 				if os.path.exists(self.file_names[idx]):
-					self.wf(Files.MAIN, '\nInclude "%s"' % self.file_names[idx])
+					self.wf(Files.MAIN, '\nInclude "%s"' % path_relative_to_export(self.file_names[idx]))
 			
 			# End of the world as we know it
 			self.wf(Files.MAIN, 'WorldEnd')
