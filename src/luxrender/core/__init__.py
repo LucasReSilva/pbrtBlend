@@ -456,7 +456,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				if sys.platform == 'darwin':
 					# Get binary from OSX package
-					luxrender_path += '/Contents/MacOS/%s' % binary_name
+					luxrender_path += '%s.app/Contents/MacOS/luxrender' % binary_name
 				elif sys.platform == 'win32':
 					luxrender_path += '%s.exe' % binary_name
 				else:
@@ -485,7 +485,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				# If we exit the wait loop (user cancelled) and renderer still running, then can it
 				# TODO: this should be a user option
-				if luxrender_process.poll() == None:
+				if luxrender_process.poll() == None and binary_name != 'luxrender':
 					luxrender_process.terminate()
 				
 				from luxrender.export.film import resolution
