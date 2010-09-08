@@ -289,7 +289,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		Returns None
 		'''
 		
-		result = self.begin_result(0,0,xres,yres)
+		result = self.begin_result(0, 0, int(xres), int(yres))
 		# TODO: don't read the file whilst it is still being written..
 		# ... however file locking in python seems incomplete/non-portable ?
 		if os.path.exists(self.output_file):
@@ -454,13 +454,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# TODO: detect animation rendering and switch to luxconsole
 				binary_name = 'luxrender'
 				
-				if sys.platform == 'darwin':
+				if sys.platform == 'darwin' and binary_name == 'luxrender':
 					# Get binary from OSX package
-					luxrender_path += '%s.app/Contents/MacOS/luxrender' % binary_name
+					luxrender_path += 'luxrender.app/Contents/MacOS/luxrender'
 				elif sys.platform == 'win32':
 					luxrender_path += '%s.exe' % binary_name
 				else:
-					luxrender_path += '%s' % binary_name
+					luxrender_path += binary_name
 				
 				if not os.path.exists(luxrender_path):
 					LuxLog('LuxRender not found at path: %s' % luxrender_path)
@@ -476,7 +476,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				cmd_args = [luxrender_path, fn]
 				# TODO: add support for luxrender command line options
 				LuxLog('Launching: %s' % cmd_args)
-				LuxLog(' in %s' % cmd_cwd)
+				# LuxLog(' in %s' % cmd_cwd)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=cmd_cwd)
 				while luxrender_process.poll() == None and not self.test_break():
 					self.render_update_timer = threading.Timer(1, self.process_wait_timer)
@@ -487,10 +487,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# TODO: this should be a user option
 				if luxrender_process.poll() == None and binary_name != 'luxrender':
 					luxrender_process.terminate()
-				
-				from luxrender.export.film import resolution
-				xr, yr = resolution(scene)
-				self.update_framebuffer(xr, yr, [])
+				else:
+					from luxrender.export.film import resolution
+					xr, yr = resolution(scene)
+					self.update_framebuffer(xr, yr, [])
 	
 	def process_wait_timer(self):
 		# Nothing to do here

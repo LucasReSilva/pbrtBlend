@@ -36,9 +36,8 @@ class Files(object):
 
 class Custom_Context(object):
 	'''
-	Wrap the real pylux Context object so that we can
-	change the behaviour of certain API calls (ie. write
-	to files and use the Context to monitor rendering)
+	Imitate the real pylux Context object so that we can
+	write to files using the same API
 	'''
 	
 	API_TYPE = 'FILE'
