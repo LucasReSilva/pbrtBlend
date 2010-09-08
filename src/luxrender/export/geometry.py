@@ -160,6 +160,15 @@ def exportMesh(lux_context, scene, ob, smoothing_enabled, object_begin_end=True)
 	
 	bpy.data.meshes.remove(me)
 
+def allow_instancing(scene):
+	# Some situations require full geometry export
+	allow_instancing = True
+	
+	if scene.luxrender_engine.renderer == 'hybrid':
+		allow_instancing = False
+		
+	return allow_instancing
+
 def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	# object translation/rotation/scale 
@@ -201,7 +210,7 @@ def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 			is_object_animated = True
 	
 	# If the object emits, don't export instance or motioninstance
-	if object_is_emitter:
+	if (not allow_instancing(scene)) or object_is_emitter:
 		exportMesh(lux_context, scene, ob, smoothing_enabled, object_begin_end=False)
 	# special case for motion blur since the mesh is already exported before the attribute
 	elif is_object_animated:
@@ -261,7 +270,7 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
-				if not dupli_ob.object.data.name in meshes_exported:
+				if allow_instancing(scene) and (dupli_ob.object.data.name not in meshes_exported):
 					exportMesh(lux_context, scene, dupli_ob.object, smoothing_enabled)
 					meshes_exported.add(dupli_ob.object.data.name)
 				
@@ -299,7 +308,7 @@ def write_lxo(render_engine, lux_context, scene, smoothing_enabled=True):
 		# dupli object render rule copied from convertblender.c (blender internal render)		
 		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			# Export mesh definition once
-			if not ob.data.name in meshes_exported:
+			if allow_instancing(scene) and (ob.data.name not in meshes_exported):
 				exportMesh(lux_context, scene, ob, smoothing_enabled)
 				meshes_exported.add(ob.data.name)
 			
