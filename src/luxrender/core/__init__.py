@@ -451,7 +451,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				if sys.platform == 'darwin':
 					# Get binary from OSX package
-					luxrender_path += '/Contents/MacOS/%s' % binary_name
+					luxrender_path += '%s.app/Contents/MacOS/luxrender' % binary_name
 				elif sys.platform == 'win32':
 					luxrender_path += '%s.exe' % binary_name
 				else:
