@@ -56,6 +56,6 @@ class volumes(luxrender_material_base, bpy.types.Panel):
 					control,
 					self.layout,
 					current_vol,
-					context,
+					context.material,
 					property_group = current_vol
 				)

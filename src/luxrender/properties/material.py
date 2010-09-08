@@ -74,10 +74,10 @@ def VolumeParameter(attr, name):
 	]
 
 class VolumeDataColorTextureParameter(ColorTextureParameter):
-	texture_collection = 'textures'
+	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s.main
+			return s #.main
 		return func
 	
 	def texture_slot_set_attr(self):
@@ -86,10 +86,10 @@ class VolumeDataColorTextureParameter(ColorTextureParameter):
 		return func2
 
 class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
-	texture_collection = 'textures'
+	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s.main
+			return s #.main
 		return func
 	
 	def texture_slot_set_attr(self):

@@ -195,8 +195,8 @@ def exportInstance(lux_context, scene, ob, matrix, smoothing_enabled=True):
 				object_is_emitter = True
 		# just export the first volume interior/exterior
 		if hasattr(m, 'luxrender_material') and m.luxrender_material.type in ['glass2'] and not object_has_volume:
-			lux_context.interior(m.luxrender_material.Interior_volume)
-			lux_context.exterior(m.luxrender_material.Exterior_volume)
+			lux_context.interior(m.luxrender_material.glass2.Interior_volume)
+			lux_context.exterior(m.luxrender_material.glass2.Exterior_volume)
 			object_has_volume = True
 	
 	# object motion blur
