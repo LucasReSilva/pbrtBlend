@@ -490,6 +490,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				else:
 					from luxrender.export.film import resolution
 					xr, yr = resolution(scene)
+					self.output_file = os.path.join(cmd_cwd, self.output_file)
 					self.update_framebuffer(xr, yr, [])
 	
 	def process_wait_timer(self):
