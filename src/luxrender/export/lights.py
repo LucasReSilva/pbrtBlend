@@ -139,9 +139,17 @@ def exportLights(lux_context, ob, matrix):
 			areay = areax # not supported yet
 
 		points = [-areax/2.0, areay/2.0, 0.0, areax/2.0, areay/2.0, 0.0, areax/2.0, -areay/2.0, 0.0, -areax/2.0, -areay/2.0, 0.0]
-		shape_params = ParamSet() \
-			.add_integer('indices', [0, 1, 2, 0, 2, 3]) \
-			.add_point('P', points)
+		
+		shape_params = ParamSet()
+		
+		if lux_context.API_TYPE == 'PURE':
+			# ntris isn't really the number of tris!!
+			shape_params.add_integer('ntris', 6)
+			shape_params.add_integer('nvertices', 4)
+		
+		shape_params.add_integer('indices', [0, 1, 2, 0, 2, 3])
+		shape_params.add_point('P', points)
+		
 		lux_context.shape('trianglemesh', shape_params)
 		lux_context.attributeEnd()
 		return True

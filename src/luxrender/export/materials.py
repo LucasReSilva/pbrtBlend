@@ -124,7 +124,7 @@ def get_instance_materials(ob):
 		for m in ob.data.materials:
 			obmats.append(m)
 	
-	# when exporting in direct mode, per instance materials will take precedence
+	# per instance materials will take precedence
 	# over the base mesh's material definition.
 	return obmats
 
