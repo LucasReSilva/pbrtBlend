@@ -24,14 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ef.ef import declarative_property_group
 from ef.util import util as efutil
 from ef.validate import Logic_OR as O, Logic_AND as A
 
 from luxrender.export					import ParamSet
 from luxrender.outputs.pure_api			import PYLUX_AVAILABLE
+from luxrender.outputs.pure_api			import LUXRENDER_VERSION
 from luxrender.outputs.luxfire_client	import LUXFIRE_CLIENT_AVAILABLE
 
 def find_apis():
@@ -45,14 +44,8 @@ def find_apis():
 	
 	return apis
 
-class luxrender_engine(declarative_property_group):
-	'''
-	Storage class for LuxRender Engine settings.
-	This class will be instantiated within a Blender scene
-	object.
-	'''
-	
-	controls = [
+def engine_controls():
+	ectl = [
 		'export_type',
 		'write_files',
 		'render',
@@ -60,10 +53,23 @@ class luxrender_engine(declarative_property_group):
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		# 'priority',
 		['threads_auto', 'threads'],
-		'renderer'
 		# ['rgc', 'colclamp'],
 		# ['meshopt', 'nolg'],
 	]
+	
+	if LUXRENDER_VERSION >= '0.8':
+		ectl += 'renderer'
+		
+	return ectl
+
+class luxrender_engine(declarative_property_group):
+	'''
+	Storage class for LuxRender Engine settings.
+	This class will be instantiated within a Blender scene
+	object.
+	'''
+	
+	controls = engine_controls()
 	
 	visibility = {
 		'write_files':		{ 'export_type': 'INT' },

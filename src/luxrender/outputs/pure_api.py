@@ -26,6 +26,9 @@
 #
 from luxrender.outputs import LuxLog
 try:
+	# If pylux is not available, revert to 0.7 feature set
+	LUXRENDER_VERSION = '0.7'
+	
 	try:
 		tmp = PYLUX_AVAILABLE
 	except:
@@ -63,6 +66,7 @@ try:
 		
 		PYLUX_AVAILABLE = True
 		LuxLog('Using pylux version %s' % pylux.version())
+		LUXRENDER_VERSION = pylux.version()
 	
 except ImportError as err:
 	LuxLog('WARNING: Binary pylux module not available! Visit http://www.luxrender.net/ to obtain one for your system.')

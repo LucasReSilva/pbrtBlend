@@ -34,6 +34,7 @@ from ef.ef import declarative_property_group
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
 from luxrender.export.materials import add_texture_parameter, ExportedMaterials
+from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
 def MaterialParameter(attr, name, property_group):
 	return [
@@ -142,6 +143,32 @@ def dict_merge(*args):
 		vis.update(deepcopy(vis_dict))	# need a deepcopy since nested dicts return references!
 	return vis
 
+def mat_list():
+	mat_list = [
+		('carpaint', 'Car Paint', 'carpaint'),
+		('glass', 'Glass', 'glass'),
+		('glass2', 'Glass2', 'glass2'),
+		('roughglass','Rough Glass','roughglass'),
+		('glossy','Glossy','glossy'),
+		('glossy_lossy','Glossy (Lossy)','glossy_lossy'),
+		('matte','Matte','matte'),
+		('mattetranslucent','Matte Translucent','mattetranslucent'),
+		('metal','Metal','metal'),
+		('mirror','Mirror','mirror'),
+		('mix','Mix','mix'),
+		('null','Null','null'),
+		('shinymetal','Shiny Metal','shinymetal'),
+	]
+	
+	if LUXRENDER_VERSION >= '0.8':
+		mat_list += [
+			('velvet', 'Velvet', 'velvet'),
+		]
+	
+	mat_list.sort()
+	
+	return mat_list
+
 class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
@@ -182,22 +209,7 @@ class luxrender_material(declarative_property_group):
 			'name': 'Type',
 			'description': 'LuxRender material type',
 			'default': 'matte',
-			'items': [
-				('carpaint', 'Car Paint', 'carpaint'),
-				('glass', 'Glass', 'glass'),
-				('glass2', 'Glass2', 'glass2'),
-				('roughglass','Rough Glass','roughglass'),
-				('glossy','Glossy','glossy'),
-				('glossy_lossy','Glossy (Lossy)','glossy_lossy'),
-				('matte','Matte','matte'),
-				('mattetranslucent','Matte Translucent','mattetranslucent'),
-				('metal','Metal','metal'),
-				('mirror','Mirror','mirror'),
-				('mix','Mix','mix'),
-				('null','Null','null'),
-				('shinymetal','Shiny Metal','shinymetal'),
-				('velvet', 'Velvet', 'velvet'),
-			],
+			'items': mat_list()
 		},
 		
 		# hidden parameter to hold current integrator type - updated on draw()

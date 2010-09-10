@@ -42,6 +42,7 @@ from luxrender.export import lights		as export_lights
 from luxrender.export import materials	as export_materials
 from luxrender.export import geometry	as export_geometry
 from luxrender.outputs.file_api			import Files
+from luxrender.outputs.pure_api			import LUXRENDER_VERSION
 
 class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	'''Add a new material volume definition to the scene'''
@@ -163,7 +164,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		self.report({'INFO'}, 'Exporting render settings')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
 			# Set up render engine parameters
-			lux_context.renderer(			*scene.luxrender_engine.api_output()			)
+			if LUXRENDER_VERSION >= '0.8':
+				lux_context.renderer(			*scene.luxrender_engine.api_output()		)
 			lux_context.sampler(			*scene.luxrender_sampler.api_output()			)
 			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()		)
 			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output()		)
