@@ -47,9 +47,8 @@ def find_apis():
 def engine_controls():
 	ectl = [
 		'export_type',
+		
 		'write_files',
-		'render',
-		'install_path',
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		
 		# Other mesh types disabled because cannot set active object
@@ -57,6 +56,8 @@ def engine_controls():
 		# TODO: find solutions
 		# 'mesh_type',
 		
+		'render',
+		'install_path',
 		# 'priority',
 		['threads_auto', 'threads'],
 		# ['rgc', 'colclamp'],
@@ -81,9 +82,9 @@ class luxrender_engine(declarative_property_group):
 		'write_files':		{ 'export_type': 'INT' },
 		'render':			O([{'write_files': True}, {'export_type': 'EXT'}]),
 		'install_path':		{ 'render': True, 'export_type': 'EXT' },
-		'write_lxs':		{ 'export_type': 'INT', 'write_files': True },
-		'write_lxm':		{ 'export_type': 'INT', 'write_files': True },
-		'write_lxo':		{ 'export_type': 'INT', 'write_files': True },
+		'write_lxs':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
+		'write_lxm':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
+		'write_lxo':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
 		'threads_auto':		A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':			A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
 		'priority':			{ 'export_type': 'EXT', 'render': True },

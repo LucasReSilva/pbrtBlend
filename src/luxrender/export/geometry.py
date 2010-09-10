@@ -54,7 +54,7 @@ def getMeshType(mesh):
 	
 	return dstr,params
 
-def exportNativeMesh(ob, lux_context, smoothing_enabled):
+def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 	
 	LuxLog('Mesh Export: %s' % ob.name)
 	
@@ -148,7 +148,7 @@ def exportNativeMesh(ob, lux_context, smoothing_enabled):
 	
 	exportMeshOrPortal(lux_context, ob, shape_type, shape_params)
 
-def exportPlyMesh(ob, lux_context, smoothing_enabled):
+def exportPlyMesh(scene, ob, lux_context, smoothing_enabled):
 	ply_filename = efutil.export_path + '_' + bpy.path.clean_name(ob.name) + '.ply'
 	
 	# TODO: find out how to set the context object
@@ -184,9 +184,9 @@ def exportMesh(lux_context, scene, ob, smoothing_enabled, object_begin_end=True)
 	if object_begin_end: lux_context.objectBegin(ob.data.name)
 	
 	if scene.luxrender_engine.mesh_type == 'native':
-		exportNativeMesh(ob, lux_context, smoothing_enabled)
+		exportNativeMesh(scene, ob, lux_context, smoothing_enabled)
 	elif scene.luxrender_engine.mesh_type == 'ply':
-		exportPlyMesh(ob, lux_context, smoothing_enabled)
+		exportPlyMesh(scene, ob, lux_context, smoothing_enabled)
 	
 	if object_begin_end: lux_context.objectEnd()
 
