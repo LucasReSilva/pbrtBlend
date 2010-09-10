@@ -58,7 +58,7 @@ def engine_controls():
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
-		ectl += 'renderer'
+		ectl += ['renderer']
 		
 	return ectl
 
