@@ -153,6 +153,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	
 	def execute(self, context):
 		scene = context.scene
+		scene.frame_set( scene.frame_current )	# Force scene update; NB, scene.update() doesn't work
 		
 		lux_context = self.export_init(scene)
 		if lux_context == False:
