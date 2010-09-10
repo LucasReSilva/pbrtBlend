@@ -51,6 +51,12 @@ def engine_controls():
 		'render',
 		'install_path',
 		['write_lxs', 'write_lxm', 'write_lxo'],
+		
+		# Other mesh types disabled because cannot set active object
+		# to pass to PLY operator. Even so, Lux fails to load the PLY
+		# TODO: find solutions
+		# 'mesh_type',
+		
 		# 'priority',
 		['threads_auto', 'threads'],
 		# ['rgc', 'colclamp'],
@@ -163,6 +169,16 @@ class luxrender_engine(declarative_property_group):
 			'name': 'LXO',
 			'description': 'Write objects file',
 			'default': True,
+		},
+		{
+			'type': 'enum',
+			'attr': 'mesh_type',
+			'name': 'Mesh Export type',
+			'description': 'The type of mesh data to export',
+			'items': [
+				('native', 'Lux Mesh', 'native'),
+				('ply', 'Stanford PLY', 'ply'),
+			]
 		},
 		{
 			'type': 'enum',
