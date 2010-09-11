@@ -451,12 +451,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if start_rendering:
 			bpy.ops.ef.msg(msg_text='Starting LuxRender')
 			if internal:
-				self.LuxManager.start(self)
-				
-				# Update the image from disk only as often as it is written
-				self.LuxManager.fb_thread.KICK_PERIOD = scene.luxrender_engine.writeinterval
 				
 				self.update_stats('', 'LuxRender: Rendering warmup')
+				self.LuxManager.start()
+				
+				# Update the image from disk only as often as it is written
+				self.LuxManager.fb_thread.set_kick_period( scene.luxrender_engine.writeinterval )
+				
+				# Start the stats and framebuffer threads
+				self.LuxManager.start_worker_threads(self)
+				
 				while self.LuxManager.started:
 					self.render_update_timer = threading.Timer(1, self.stats_timer)
 					self.render_update_timer.start()

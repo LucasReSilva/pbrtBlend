@@ -101,6 +101,9 @@ class LuxFilmDisplay(TimerThread):
 	'''
 	Periodically update render result with Lux's framebuffer
 	'''
+	
+	STARTUP_DELAY = 2	# Add additional time to first KICK PERIOD
+	
 	def kick(self, render_end=False):
 		if self.LocalStorage['RE'] is not None and self.LocalStorage['lux_context'].statistics('sceneIsReady') > 0.0:
 			self.LocalStorage['lux_context'].updateFramebuffer()
@@ -182,13 +185,10 @@ class LuxManager(object):
 		
 		self.reset()
 
-	def start(self, RE):
+	def start(self):
 		'''
-		RE			bpy.types.RenderEngine
-		
 		Start the pylux.Context object rendering. This is achieved
-		by calling its worldEnd() method. Here we also start the
-		timer threads for stats and framebuffer updates.
+		by calling its worldEnd() method.
 		
 		Returns None
 		'''
@@ -204,12 +204,16 @@ class LuxManager(object):
 			# TODO: such a tight loop is not a good idea
 			time.sleep(0.3)
 		
+		for i in range(self.thread_count - 1):
+			self.lux_context.addThread()
+	
+	def start_worker_threads(self, RE):
+		'''
+		Here we start the timer threads for stats and framebuffer updates.
+		'''
 		self.stats_thread.start()
 		self.fb_thread.LocalStorage['RE'] = RE
 		self.fb_thread.start()
-		
-		for i in range(self.thread_count - 1):
-			self.lux_context.addThread()
 	
 	def reset(self):
 		'''
