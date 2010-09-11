@@ -337,10 +337,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	def render_scene(self, scene):
 		
-		if os.path.isdir(scene.render.filepath):
-			self.output_dir = efutil.filesystem_path(scene.render.filepath)
+		scene_path = efutil.filesystem_path(scene.render.filepath)
+		if os.path.isdir(scene_path):
+			self.output_dir = scene_path
 		else:
-			self.output_dir = os.path.dirname( efutil.filesystem_path(scene.render.filepath) )
+			self.output_dir = os.path.dirname( scene_path )
 		efutil.export_path = self.output_dir
 		print('(1) export_path is %s' % efutil.export_path)
 		os.chdir(self.output_dir)
