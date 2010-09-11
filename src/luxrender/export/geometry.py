@@ -58,19 +58,28 @@ def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 	
 	LuxLog('Mesh Export: %s' % ob.name)
 	
+	#print('-> Create render mesh')
 	me = ob.create_mesh(scene, True, 'RENDER')
 	if not me:
 		return
 	
+	#print('-> Cache face verts')
 	faces_verts = [f.vertices for f in me.faces]
+	#print('-> Cache faces')
 	ffaces = [f for f in me.faces]
 	#faces_normals = [tuple(f.normal) for f in me.faces]
 	#verts_normals = [tuple(v.normal) for v in me.vertices]
+	
+	# Cache vert positions because me.vertices access is very slow
+	#print('-> Cache vert pos and normals')
+	verts_co_no = [tuple(v.co)+tuple(v.normal) for v in me.vertices]
+	
 	
 	# face indices
 	index = 0
 	indices = []
 	ntris = 0
+	#print('-> Collect face indices')
 	for face in ffaces:
 		indices.append(index)
 		indices.append(index+1)
@@ -85,26 +94,36 @@ def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 		
 	# vertex positions
 	points = []
+	#print('-> Collect vert positions')
 	nvertices = 0
 	for face in ffaces:
 		for vertex in face.vertices:
-			v = me.vertices[vertex]
+			v = verts_co_no[vertex][:3]
 			nvertices += 1
-			for co in v.co:
+			for co in v:
 				points.append(co)
 				
 	# vertex normals
-	normals = []
-	for face in ffaces:
-		normal = face.normal
-		for vertex in face.vertices:
-			if (smoothing_enabled and face.use_smooth):
-				v = me.vertices[vertex]
-				normal = v.normal
-			for no in normal:
-				normals.append(no)
+	#print('-> Collect mert normals')
+	if smoothing_enabled:
+		normals = []
+		for face in ffaces:
+			normal = face.normal
+			for vertex in face.vertices:
+				if face.use_smooth:
+					normal = verts_co_no[vertex][3:]
+				for no in normal:
+					normals.append(no)
+	else:
+		normals = []
+		for face in ffaces:
+			normal = face.normal
+			for vertex in face.vertices:
+				for no in normal:
+					normals.append(no)
 				
 	# uv coordinates
+	#print('-> Collect UV layers')
 	try:
 		uv_layer = me.uv_textures.active.data
 	except:
@@ -121,6 +140,7 @@ def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 				for single_uv in uv:
 					uvs.append(single_uv)
 	
+	#print('-> Remove render mesh')
 	bpy.data.meshes.remove(me)
 	
 	#print(' %s num points: %i' % (ob.name, len(points)))
@@ -135,12 +155,16 @@ def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 		shape_params.add_integer('ntris', ntris)
 		shape_params.add_integer('nvertices', nvertices)
 	
+	#print('-> Add indices to paramset')
 	shape_params.add_integer('indices', indices)
+	#print('-> Add verts to paramset')
 	shape_params.add_point('P', points)
+	#print('-> Add normals to paramset')
 	shape_params.add_normal('N', normals)
 	
 	if uv_layer:
 		#print(' %s num uvs: %i' % (ob.name, len(uvs)))
+		#print('-> Add UVs to paramset')
 		shape_params.add_float('uv', uvs)
 	
 	#print(' %s ntris: %i' % (ob.name, ntris))
@@ -168,10 +192,12 @@ def exportPlyMesh(scene, ob, lux_context, smoothing_enabled):
 	exportMeshOrPortal(lux_context, ob, 'plymesh', ply_params)
 
 def exportMeshOrPortal(lux_context, ob, shape_type, shape_params):
+	#print('-> Create shape')
 	if ob.data.luxrender_mesh.portal:
 		lux_context.portalShape(shape_type, shape_params)
 	else:
 		lux_context.shape(shape_type, shape_params)
+	#print('-> Mesh done')
 
 #-------------------------------------------------
 # export_mesh(lux_context, scene, object, matrix)

@@ -49,7 +49,8 @@ class ParamSetItem(list):
 		fcnt = float(cnt)
 		flen = float(len(lst))
 		
-		if flen > fcnt:
+		if False: #flen > fcnt:
+			# LIST WRAPPING DISABLED BECAUSE IT IS HIDEOUSLY EXPENSIVE
 			str = ''
 			if type == 'f':
 				for row in range( math.ceil(flen/fcnt) ):
