@@ -303,7 +303,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
 		self.end_result(result)
 	
-	def render(self, context):
+	def render(self, scene):
 		'''
 		context: bpy.types.scene
 		
@@ -313,15 +313,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		Returns None
 		'''
 		
-		if context.name == 'preview':
-			export_result = self.render_preview(context)
+		if scene is None:
+			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
+			return False
+		
+		# Refresh the scene as early as possible in render process
+		scene.frame_set(scene.frame_current)
+		
+		if scene.name == 'preview':
+			export_result = self.render_preview(scene)
 		else:
-			export_result = self.render_scene(context)
+			export_result = self.render_scene(scene)
 			
 		if export_result == False:
-			return
+			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
+			return False
 		
-		self.render_start(context)
+		self.render_start(scene)
 		
 	def render_preview(self, scene):
 		raise NotImplementedError()
@@ -351,6 +359,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			api_type = api_type,			# Set export target
 			write_files = write_files,		# Use file write decision from above
 			write_all_files = False,		# Use UI file write settings
+			scene = scene.name,				# Export this named scene
 		)
 		
 		if 'CANCELLED' in export_result:
@@ -451,8 +460,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				if os.path.exists(luxrender_path):
 					config_updates['install_path'] = luxrender_path
 				
+				try:
+					for k,v in config_updates.items():
+						efutil.write_config_value('luxrender', 'defaults', k, v)
+				except Exception as err:
+					LuxLog('Saving LuxRender config failed: %s' % err)
+					return False
+				
 				# TODO: detect animation rendering and switch to luxconsole
-				binary_name = 'luxrender'
+				binary_name = 'luxconsole'
 				
 				if sys.platform == 'darwin' and binary_name == 'luxrender':
 					# Get binary from OSX package
@@ -464,13 +480,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				if not os.path.exists(luxrender_path):
 					LuxLog('LuxRender not found at path: %s' % luxrender_path)
-					return False
-				
-				try:
-					for k,v in config_updates.items():
-						efutil.write_config_value('luxrender', 'defaults', k, v)
-				except Exception as err:
-					LuxLog('Saving LuxRender config failed: %s' % err)
 					return False
 				
 				cmd_args = [luxrender_path, fn]

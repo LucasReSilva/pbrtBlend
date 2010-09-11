@@ -75,14 +75,34 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	bl_idname = 'export.luxrender'
 	bl_label = 'Export LuxRender Scene (.lxs)'
 	
-	filename		= bpy.props.StringProperty(name='IGS filename')
-	directory		= bpy.props.StringProperty(name='IGS directory')
+	filename		= bpy.props.StringProperty(name='LXS filename')
+	directory		= bpy.props.StringProperty(name='LXS directory')
 	
 	api_type		= bpy.props.StringProperty(options={'HIDDEN'}, default='FILE')	# Export target ['FILE','API',...]
 	write_files		= bpy.props.BoolProperty(options={'HIDDEN'}, default=True)		# Write any files ?
 	write_all_files	= bpy.props.BoolProperty(options={'HIDDEN'}, default=True)		# Force writing all files, don't obey UI settings
 	
-	def export_init(self, scene):
+	scene			= bpy.props.StringProperty(options={'HIDDEN'}, default='')		# Specify scene to export
+	
+	
+	def invoke(self, context, event):
+		wm = context.manager
+		wm.add_fileselect(self)
+		return {'RUNNING_MODAL'}
+	
+	def execute(self, context):
+		if self.properties.scene == '':
+			scene = context.scene
+		else:
+			scene = bpy.data.scenes[self.properties.scene]
+		
+		if scene is None:
+			self.report({'ERROR'}, 'Scene is not valid for export to %s'%self.properties.filename)
+			return {'CANCELLED'}
+		
+		# Force scene update; NB, scene.update() doesn't work
+		scene.frame_set( scene.frame_current )
+		
 		if scene.luxrender_engine.threads_auto:
 			try:
 				import multiprocessing
@@ -144,19 +164,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			# Set export path so that relative paths in export work correctly
 			efutil.export_path = scene.render.filepath
 		
-		return lux_context
-	
-	def invoke(self, context, event):
-		wm = context.manager
-		wm.add_fileselect(self)
-		return {'RUNNING_MODAL'}
-	
-	def execute(self, context):
-		scene = context.scene
-		scene.frame_set( scene.frame_current )	# Force scene update; NB, scene.update() doesn't work
-		
-		lux_context = self.export_init(scene)
 		if lux_context == False:
+			self.report({'ERROR'}, 'Lux context is not valid for export to %s'%self.properties.filename)
 			return {'CANCELLED'}
 		
 		export_materials.ExportedMaterials.clear()
@@ -166,7 +175,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
 			# Set up render engine parameters
 			if LUXRENDER_VERSION >= '0.8':
-				lux_context.renderer(			*scene.luxrender_engine.api_output()		)
+				lux_context.renderer(		*scene.luxrender_engine.api_output()			)
 			lux_context.sampler(			*scene.luxrender_sampler.api_output()			)
 			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()		)
 			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output()		)
@@ -219,7 +228,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			self.report({'INFO'}, 'Exporting materials')
 			for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
 				for mat in export_materials.get_instance_materials(object):
-					mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
+					if mat is not None: mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
 			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:
