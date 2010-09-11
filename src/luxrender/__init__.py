@@ -29,7 +29,7 @@ bl_addon_info = {
 	"name": "LuxRender",
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 7),
-	"blender": (2, 5, 3),
+	"blender": (2, 5, 4),
 	"api": 31817,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",

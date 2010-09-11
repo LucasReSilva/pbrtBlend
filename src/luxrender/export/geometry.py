@@ -54,25 +54,20 @@ def getMeshType(mesh):
 	
 	return dstr,params
 
-def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
+def exportNativeMesh(scene, mesh, lux_context, smoothing_enabled):
 	
-	LuxLog('Mesh Export: %s' % ob.name)
-	
-	#print('-> Create render mesh')
-	me = ob.create_mesh(scene, True, 'RENDER')
-	if not me:
-		return
+	LuxLog('Mesh Export: %s' % mesh.name)
 	
 	#print('-> Cache face verts')
-	faces_verts = [f.vertices for f in me.faces]
+	faces_verts = [f.vertices for f in mesh.faces]
 	#print('-> Cache faces')
-	ffaces = [f for f in me.faces]
+	ffaces = [f for f in mesh.faces]
 	#faces_normals = [tuple(f.normal) for f in me.faces]
 	#verts_normals = [tuple(v.normal) for v in me.vertices]
 	
 	# Cache vert positions because me.vertices access is very slow
 	#print('-> Cache vert pos and normals')
-	verts_co_no = [tuple(v.co)+tuple(v.normal) for v in me.vertices]
+	verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
 	
 	
 	# face indices
@@ -125,7 +120,7 @@ def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 	# uv coordinates
 	#print('-> Collect UV layers')
 	try:
-		uv_layer = me.uv_textures.active.data
+		uv_layer = mesh.uv_textures.active.data
 	except:
 		uv_layer = None
 		
@@ -140,15 +135,12 @@ def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 				for single_uv in uv:
 					uvs.append(single_uv)
 	
-	#print('-> Remove render mesh')
-	bpy.data.meshes.remove(me)
-	
 	#print(' %s num points: %i' % (ob.name, len(points)))
 	#print(' %s num normals: %i' % (ob.name, len(normals)))
 	#print(' %s num idxs: %i' % (ob.name, len(indices)))
 	
 	# export shape
-	shape_type, shape_params = getMeshType(ob.data)
+	shape_type, shape_params = getMeshType(mesh)
 	
 	if lux_context.API_TYPE == 'PURE':
 		# ntris isn't really the number of tris!!
@@ -170,10 +162,10 @@ def exportNativeMesh(scene, ob, lux_context, smoothing_enabled):
 	#print(' %s ntris: %i' % (ob.name, ntris))
 	#print(' %s nvertices: %i' % (ob.name, nvertices))
 	
-	exportMeshOrPortal(lux_context, ob, shape_type, shape_params)
+	return shape_type, shape_params
 
-def exportPlyMesh(scene, ob, lux_context, smoothing_enabled):
-	ply_filename = efutil.export_path + '_' + bpy.path.clean_name(ob.name) + '.ply'
+def exportPlyMesh(scene, mesh, lux_context, smoothing_enabled):
+	ply_filename = efutil.export_path + '_' + bpy.path.clean_name(mesh.name) + '.ply'
 	
 	# TODO: find out how to set the context object
 	# bpy.context.object = ob
@@ -187,17 +179,9 @@ def exportPlyMesh(scene, ob, lux_context, smoothing_enabled):
 	
 	ply_params = ParamSet()
 	ply_params.add_string('filename', efutil.path_relative_to_export(ply_filename))
-	ply_params.add_bool('smooth', ob.data.use_auto_smooth and smoothing_enabled)
+	ply_params.add_bool('smooth', mesh.use_auto_smooth and smoothing_enabled)
 	
-	exportMeshOrPortal(lux_context, ob, 'plymesh', ply_params)
-
-def exportMeshOrPortal(lux_context, ob, shape_type, shape_params):
-	#print('-> Create shape')
-	if ob.data.luxrender_mesh.portal:
-		lux_context.portalShape(shape_type, shape_params)
-	else:
-		lux_context.shape(shape_type, shape_params)
-	#print('-> Mesh done')
+	return 'plymesh', ply_params
 
 #-------------------------------------------------
 # export_mesh(lux_context, scene, object, matrix)
@@ -205,14 +189,29 @@ def exportMeshOrPortal(lux_context, ob, shape_type, shape_params):
 #-------------------------------------------------
 def exportMesh(lux_context, scene, ob, smoothing_enabled, object_begin_end=True):
 	
+	#print('-> Create render mesh')
+	mesh = ob.create_mesh(scene, True, 'RENDER')
+	if mesh is None:
+		return
+	
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
-	if object_begin_end: lux_context.objectBegin(ob.data.name)
+	if object_begin_end: lux_context.objectBegin(mesh.name)
 	
 	if scene.luxrender_engine.mesh_type == 'native':
-		exportNativeMesh(scene, ob, lux_context, smoothing_enabled)
+		shape_type, shape_params = exportNativeMesh(scene, mesh, lux_context, smoothing_enabled)
 	elif scene.luxrender_engine.mesh_type == 'ply':
-		exportPlyMesh(scene, ob, lux_context, smoothing_enabled)
+		shape_type, shape_params = exportPlyMesh(scene, mesh, lux_context, smoothing_enabled)
+	
+	#print('-> Create shape')
+	if ob.data.luxrender_mesh.portal:
+		lux_context.portalShape(shape_type, shape_params)
+	else:
+		lux_context.shape(shape_type, shape_params)
+	#print('-> Mesh done')
+	
+	#print('-> Remove render mesh')
+	bpy.data.meshes.remove(mesh)
 	
 	if object_begin_end: lux_context.objectEnd()
 
