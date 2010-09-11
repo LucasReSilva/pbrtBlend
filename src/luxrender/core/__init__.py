@@ -342,6 +342,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			self.output_dir = scene_path
 		else:
 			self.output_dir = os.path.dirname( scene_path )
+		
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
 		
@@ -459,7 +460,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				}
 				
 				luxrender_path = efutil.filesystem_path( scene.luxrender_engine.install_path )
-				if os.path.exists(luxrender_path):
+				if luxrender_path[-1] != '/':
+					luxrender_path += '/'
+				
+				if os.path.isdir(luxrender_path) and os.path.exists(luxrender_path):
 					config_updates['install_path'] = luxrender_path
 				
 				try:
