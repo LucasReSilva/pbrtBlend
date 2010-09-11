@@ -125,7 +125,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		
 		lux_context = LuxManager.lux_context
 		
-		
 		if self.properties.filename.endswith('.lxs'):
 			self.properties.filename = self.properties.filename[:-4]
 		

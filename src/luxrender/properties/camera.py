@@ -248,7 +248,7 @@ class luxrender_camera(declarative_property_group):
 			params.add_string('shutterdistribution', self.shutterdistribution)
 
 			if self.cammblur and is_cam_animated:
-				   params.add_string('endtransform', 'CameraEndTransform')
+				params.add_string('endtransform', 'CameraEndTransform')
 		
 		out = self.type, params
 		dbo('CAMERA', out)

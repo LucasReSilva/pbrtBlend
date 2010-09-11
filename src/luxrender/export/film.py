@@ -176,9 +176,8 @@ def film(scene):
 	params.add_bool('write_tga', False)
 	params.add_bool('write_resume_flm', False)
 	
-	# TODO: add UI controls for update intervals, and sync with LuxTimerThread.KICK_PERIODs
-	params.add_integer('displayinterval', 5)
-	params.add_integer('writeinterval', 8)
+	params.add_integer('displayinterval', scene.luxrender_engine.displayinterval)
+	params.add_integer('writeinterval', scene.luxrender_engine.writeinterval)
 	
 	# Halt conditions
 	if scene.luxrender_sampler.haltspp > 0:
