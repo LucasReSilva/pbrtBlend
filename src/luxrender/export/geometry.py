@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import os
-
 import bpy
 
 from ef.util import util as efutil
@@ -55,9 +53,6 @@ def getMeshType(mesh):
 	return dstr,params
 
 def exportNativeMesh(scene, mesh, lux_context):
-	
-	LuxLog('Mesh Export: %s' % mesh.name)
-	
 	#print('-> Cache face verts')
 	faces_verts = [f.vertices for f in mesh.faces]
 	#print('-> Cache faces')
@@ -180,6 +175,8 @@ def exportPlyMesh(scene, mesh, lux_context):
 # create mesh from object and export it to file
 #-------------------------------------------------
 def exportMesh(lux_context, scene, ob, object_begin_end=True):
+	
+	LuxLog('Mesh Export: %s' % ob.data.name)
 	
 	#print('-> Create render mesh')
 	mesh = ob.create_mesh(scene, True, 'RENDER')

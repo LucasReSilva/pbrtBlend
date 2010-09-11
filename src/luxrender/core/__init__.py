@@ -342,6 +342,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			self.output_dir = scene_path
 		else:
 			self.output_dir = os.path.dirname( scene_path )
+		if self.output_dir[-1] != '/':
+			self.output_dir += '/'
+		
 		efutil.export_path = self.output_dir
 		print('(1) export_path is %s' % efutil.export_path)
 		os.chdir(self.output_dir)
