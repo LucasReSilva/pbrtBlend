@@ -188,7 +188,7 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True):
 	
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
-	if object_begin_end: lux_context.objectBegin(mesh.name)
+	if object_begin_end: lux_context.objectBegin(ob.data.name)
 	
 	if scene.luxrender_engine.mesh_type == 'native':
 		shape_type, shape_params = exportNativeMesh(scene, mesh, lux_context)
