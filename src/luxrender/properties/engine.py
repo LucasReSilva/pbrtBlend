@@ -47,7 +47,7 @@ def find_apis():
 def engine_controls():
 	ectl = [
 		'export_type',
-		
+		'binary_name',
 		'write_files',
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		
@@ -80,6 +80,7 @@ class luxrender_engine(declarative_property_group):
 	
 	visibility = {
 		'write_files':		{ 'export_type': 'INT' },
+		'binary_name':		{ 'export_type': 'EXT' },
 		'render':			O([{'write_files': True}, {'export_type': 'EXT'}]),
 		'install_path':		{ 'render': True, 'export_type': 'EXT' },
 		'write_lxs':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
@@ -134,6 +135,17 @@ class luxrender_engine(declarative_property_group):
 				('sampler', 'Sampler (traditional CPU)', 'sampler'),
 				('hybrid', 'Hybrid (CPU + GPU)', 'hybrid'),
 			],
+		},
+		{
+			'type': 'enum',
+			'attr': 'binary_name',
+			'name': 'External type',
+			'description': 'Choose full GUI or console renderer',
+			'default': 'luxrender',
+			'items': [
+				('luxrender', 'LuxRender GUI', 'luxrender'),
+				('luxconsole', 'LuxConsole', 'luxconsole'),
+			]
 		},
 		{
 			'type': 'string',

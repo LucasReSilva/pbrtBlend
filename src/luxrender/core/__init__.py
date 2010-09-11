@@ -473,16 +473,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					LuxLog('Saving LuxRender config failed: %s' % err)
 					return False
 				
-				# TODO: detect animation rendering and switch to luxconsole
-				binary_name = 'luxconsole'
-				
-				if sys.platform == 'darwin' and binary_name == 'luxrender':
+				if sys.platform == 'darwin' and scene.luxrender_engine.binary_name == 'luxrender':
 					# Get binary from OSX package
 					luxrender_path += 'luxrender.app/Contents/MacOS/luxrender'
 				elif sys.platform == 'win32':
-					luxrender_path += '%s.exe' % binary_name
+					luxrender_path += '%s.exe' % scene.luxrender_engine.binary_name
 				else:
-					luxrender_path += binary_name
+					luxrender_path += scene.luxrender_engine.binary_name
 				
 				if not os.path.exists(luxrender_path):
 					LuxLog('LuxRender not found at path: %s' % luxrender_path)
@@ -500,7 +497,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				# If we exit the wait loop (user cancelled) and renderer still running, then can it
 				# TODO: this should be a user option
-				if luxrender_process.poll() == None and binary_name != 'luxrender':
+				if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
 					luxrender_process.terminate()
 				else:
 					from luxrender.export.film import resolution
