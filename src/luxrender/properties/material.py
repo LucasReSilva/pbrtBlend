@@ -734,7 +734,7 @@ class metal(declarative_property_group):
 		metal_params.update( TF_vroughness.get_params(self) )
 		
 		if self.name == 'nk':	# use an NK data file
-			metal_params.add_string('name', self.filename)
+			metal_params.add_string('name', efutil.path_relative_to_export(self.filename) )
 		else:					# use a preset name
 			metal_params.add_string('name', self.name)
 		

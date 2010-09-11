@@ -106,11 +106,7 @@ def exportLights(lux_context, ob, matrix):
 		
 	if light.type == 'HEMI':
 		if light.luxrender_lamp.infinite_map != '':
-			if lux_context.API_TYPE == 'FILE':
-				# export relative file path
-				light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
-			else:
-				light_params.add_string('mapname', light.luxrender_lamp.infinite_map)
+			light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
 		# nsamples
 		# gamma

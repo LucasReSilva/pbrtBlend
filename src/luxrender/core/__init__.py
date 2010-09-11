@@ -214,6 +214,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	LuxManager			= None
 	render_update_timer	= None
+	output_dir			= './'
 	output_file			= 'default.png'
 	
 #	# This member is read by the ExporterFramework to set up custom property groups
@@ -336,7 +337,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	def render_scene(self, scene):
 		
-		output_dir = ''
+		if os.path.isdir(scene.render.filepath):
+			self.output_dir = efutil.filesystem_path(scene.render.filepath)
+		else:
+			self.output_dir = os.path.dirname( efutil.filesystem_path(scene.render.filepath) )
+		efutil.export_path = self.output_dir
+		print('(1) export_path is %s' % efutil.export_path)
+		os.chdir(self.output_dir)
+		
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
 			api_type = 'API'
 			write_files = scene.luxrender_engine.write_files
@@ -346,14 +354,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		else:
 			api_type = 'FILE'
 			write_files = True
-			if os.path.isdir(scene.render.filepath):
-				output_dir = scene.render.filepath
-			else:
-				output_dir = os.path.dirname(scene.render.filepath)
 		
 		output_filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
 		export_result = bpy.ops.export.luxrender(
-			directory = output_dir,
+			directory = self.output_dir,
 			filename = output_filename,
 			
 			api_type = api_type,			# Set export target
@@ -365,12 +369,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		if api_type == 'FILE':
-			self.output_file = efutil.path_relative_to_export(
-				os.path.join(output_dir, output_filename) + '.png'
-			)
-		else:
-			self.output_file = efutil.path_relative_to_export(efutil.export_path) + '.png'
+		self.output_file = efutil.path_relative_to_export(
+			os.path.join(self.output_dir, output_filename) + '.png'
+		)
 		
 		return True
 	
@@ -422,9 +423,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		#print('worldEnd %s' % worldEnd)
 		
 		if self.LuxManager.lux_context.API_TYPE == 'FILE':
-			
 			fn = self.LuxManager.lux_context.file_names[0]
-			cmd_cwd = os.path.dirname(fn)
 			
 			#print('calling pylux.context.worldEnd() (1)')
 			self.LuxManager.lux_context.worldEnd()
@@ -432,7 +431,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# file_api.parse() creates a real pylux context. we must replace
 				# LuxManager's context with that one so that the running renderer
 				# can be controlled.
-				os.chdir(cmd_cwd)
 				ctx = self.LuxManager.lux_context.parse(fn, True)
 				self.LuxManager.lux_context = ctx
 				self.LuxManager.stats_thread.LocalStorage['lux_context'] = ctx
@@ -456,7 +454,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					'auto_start': render
 				}
 				
-				luxrender_path = scene.luxrender_engine.install_path
+				luxrender_path = efutil.filesystem_path( scene.luxrender_engine.install_path )
 				if os.path.exists(luxrender_path):
 					config_updates['install_path'] = luxrender_path
 				
@@ -485,8 +483,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				cmd_args = [luxrender_path, fn]
 				# TODO: add support for luxrender command line options
 				LuxLog('Launching: %s' % cmd_args)
-				# LuxLog(' in %s' % cmd_cwd)
-				luxrender_process = subprocess.Popen(cmd_args, cwd=cmd_cwd)
+				# LuxLog(' in %s' % self.outout_dir)
+				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 				while luxrender_process.poll() == None and not self.test_break():
 					self.render_update_timer = threading.Timer(1, self.process_wait_timer)
 					self.render_update_timer.start()
@@ -499,7 +497,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				else:
 					from luxrender.export.film import resolution
 					xr, yr = resolution(scene)
-					self.output_file = os.path.join(cmd_cwd, self.output_file)
 					self.update_framebuffer(xr, yr, [])
 	
 	def process_wait_timer(self):

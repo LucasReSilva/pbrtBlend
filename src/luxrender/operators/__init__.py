@@ -125,6 +125,18 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		
 		lux_context = LuxManager.lux_context
 		
+		
+		if self.properties.filename.endswith('.lxs'):
+			self.properties.filename = self.properties.filename[:-4]
+		
+		lxs_filename = os.path.join(
+			self.properties.directory,
+			self.properties.filename
+		)
+		
+		efutil.export_path = lxs_filename
+		print('(2) export_path is %s' % efutil.export_path)
+		
 		if self.properties.api_type == 'FILE':
 			
 			if self.properties.write_all_files:
@@ -140,16 +152,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				self.report({'ERROR'}, 'Output path "%s" is not writable' % self.properties.directory)
 				return False
 			
-			if self.properties.filename.endswith('.lxs'):
-				self.properties.filename = self.properties.filename[:-4]
-			
-			lxs_filename = os.path.join(
-				self.properties.directory,
-				self.properties.filename
-			)
-			
-			efutil.export_path = lxs_filename
-			
 			if LXS or LXM or LXO:
 				lux_context.set_filename(
 					lxs_filename,
@@ -160,9 +162,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			else:
 				self.report({'ERROR'}, 'Nothing to do! Select at least one of LXM/LXS/LXO')
 				return False
-		else:
-			# Set export path so that relative paths in export work correctly
-			efutil.export_path = scene.render.filepath
 		
 		if lux_context == False:
 			self.report({'ERROR'}, 'Lux context is not valid for export to %s'%self.properties.filename)

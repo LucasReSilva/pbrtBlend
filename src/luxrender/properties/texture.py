@@ -1779,7 +1779,7 @@ class tabulatedfresnel(declarative_property_group):
 	]
 	
 	def get_paramset(self):
-		tfp = ParamSet().add_string('filename', self.filename)
+		tfp = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
 		return set(), tfp
 
 class luxpop(tabulatedfresnel):
