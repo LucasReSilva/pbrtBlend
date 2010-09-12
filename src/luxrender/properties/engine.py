@@ -266,3 +266,41 @@ class luxrender_engine(declarative_property_group):
 		renderer_params = ParamSet()
 		
 		return self.renderer, renderer_params
+
+class luxrender_networking(declarative_property_group):
+	
+	controls = [
+		'use_network_servers',
+		'servers',
+		'serverinterval'
+	]
+	
+	visibility = {
+		'servers':			{ 'use_network_servers': True },
+		'serverinterval':	{ 'use_network_servers': True },
+	}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'use_network_servers',
+			'name': 'Use Networking',
+			'default': efutil.find_config_value('luxrender', 'defaults', 'use_network_servers', False),
+		},
+		{
+			'type': 'string',
+			'attr': 'servers',
+			'name': 'Servers',
+			'description': 'Comma separated list of Lux server IP addresses',
+			'default': efutil.find_config_value('luxrender', 'defaults', 'servers', ''),
+		},
+		{
+			'type': 'int',
+			'attr': 'serverinterval',
+			'name': 'Upload interval',
+			'description': 'Interval for server image transfers (seconds)',
+			'default': int(efutil.find_config_value('luxrender', 'defaults', 'serverinterval', '180')),
+			'min': 10,
+			'soft_min': 10
+		},
+	]

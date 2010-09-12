@@ -45,7 +45,7 @@ from luxrender.properties.accelerator	import	luxrender_accelerator
 from luxrender.properties.camera 		import	luxrender_camera, \
 												luxrender_colorspace, \
 												luxrender_tonemapping
-from luxrender.properties.engine		import	luxrender_engine
+from luxrender.properties.engine		import	luxrender_engine, luxrender_networking
 from luxrender.properties.filter		import	luxrender_filter
 from luxrender.properties.integrator	import	luxrender_integrator
 from luxrender.properties.lamp			import	luxrender_lamp
@@ -221,6 +221,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	property_groups = [
 		('Scene', luxrender_accelerator),
 		('Scene', luxrender_engine),
+		('Scene', luxrender_networking),
 		('Scene', luxrender_filter),
 		('Scene', luxrender_integrator),
 		('Scene', luxrender_sampler),
@@ -477,13 +478,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				if os.path.isdir(luxrender_path) and os.path.exists(luxrender_path):
 					config_updates['install_path'] = luxrender_path
 				
-				try:
-					for k,v in config_updates.items():
-						efutil.write_config_value('luxrender', 'defaults', k, v)
-				except Exception as err:
-					LuxLog('Saving LuxRender config failed: %s' % err)
-					return False
-				
 				if sys.platform == 'darwin' and scene.luxrender_engine.binary_name == 'luxrender':
 					# Get binary from OSX package
 					luxrender_path += 'luxrender.app/Contents/MacOS/luxrender'
@@ -497,7 +491,38 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					return False
 				
 				cmd_args = [luxrender_path, fn]
-				# TODO: add support for luxrender command line options
+				
+				if scene.luxrender_engine.binary_name == 'luxrender':
+					# Copy the GUI log to the console
+					cmd_args.append('--logconsole')
+				
+				# Set number of threads for external processes
+				if not scene.luxrender_engine.threads_auto:
+					cmd_args.append('--threads %i' % scene.luxrender_engine.threads)
+				
+				if scene.luxrender_networking.use_network_servers:
+					for server in scene.luxrender_networking.servers.split(','):
+						cmd_args.append('--useserver')
+						cmd_args.append(server.strip())
+					
+					cmd_args.append('--serverinterval')
+					cmd_args.append('%i' % scene.luxrender_networking.serverinterval)
+					
+					config_updates['servers'] = scene.luxrender_networking.servers
+					config_updates['serverinterval'] = '%i'%scene.luxrender_networking.serverinterval
+				
+				config_updates['use_network_servers'] = scene.luxrender_networking.use_network_servers
+				
+				# Save changed config items and then launch Lux
+				
+				try:
+					for k,v in config_updates.items():
+						efutil.write_config_value('luxrender', 'defaults', k, v)
+				except Exception as err:
+					LuxLog('Saving LuxRender config failed: %s' % err)
+					return False
+				
+				
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)

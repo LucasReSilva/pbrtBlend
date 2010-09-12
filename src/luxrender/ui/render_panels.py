@@ -47,6 +47,17 @@ class engine(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_engine' )
 	]
 
+class networking(render_described_context, bpy.types.Panel):
+	'''
+	Networking settings UI Panel
+	'''
+	
+	bl_label = 'LuxRender Networking'
+	
+	display_property_groups = [
+		( ('scene',), 'luxrender_networking' )
+	]
+
 class sampler(render_described_context, bpy.types.Panel):
 	'''
 	Sampler settings UI Panel
