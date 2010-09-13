@@ -1,0 +1,18 @@
+
+syntax: regexp
+^__init__\.py$
+syntax: regexp
+^__main__\.py$
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$
+syntax: glob
+*.pyc
+syntax: glob
+*.so
+syntax: glob
+*.pyd
+
+syntax: regexp
+^.settings
