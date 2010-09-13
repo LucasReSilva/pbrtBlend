@@ -37,7 +37,9 @@ from ef.engine import engine_base
 from ef.util import util as efutil
 
 # Exporter libs
-from luxrender.outputs import LuxManager as LM
+from luxrender.export.film import resolution
+
+from luxrender.outputs import LuxManager as LM, LuxFilmDisplay
 from luxrender.outputs import LuxLog
 
 # Exporter Property Groups
@@ -276,35 +278,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_texture', luxrender_texture_wrinkled),
 	]
 	
-	def update_framebuffer(self, xres, yres, fb):
-		'''
-		xres		int
-		yres		int
-		fb			list
-		
-		Update the current RenderResult with the current render image.
-		
-		This will be called by the LuxFilmDisplay thread started by LuxManager
-		
-		TODO: move this method into LuxFilmDisplay
-		
-		Returns None
-		'''
-		
-		result = self.begin_result(0, 0, int(xres), int(yres))
-		# TODO: don't read the file whilst it is still being written..
-		# ... however file locking in python seems incomplete/non-portable ?
-		if os.path.exists(self.output_file):
-			bpy.ops.ef.msg(msg_text='Updating RenderResult')
-			lay = result.layers[0]
-			# TODO: use the framebuffer direct from pylux when Blender's API supports it
-			lay.load_from_file(self.output_file)
-		else:
-			err_msg = 'ERROR: Could not load render result from %s' % self.output_file
-			LuxLog(err_msg)
-			bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
-		self.end_result(result)
-	
 	def render(self, scene):
 		'''
 		context: bpy.types.scene
@@ -526,19 +499,25 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
+				framebuffer_thread = LuxFilmDisplay({
+					'resolution': resolution(scene),
+					'RE': self,
+				})
+				framebuffer_thread.set_kick_period( scene.luxrender_engine.writeinterval ) 
+				framebuffer_thread.start()
 				while luxrender_process.poll() == None and not self.test_break():
 					self.render_update_timer = threading.Timer(1, self.process_wait_timer)
 					self.render_update_timer.start()
 					if self.render_update_timer.isAlive(): self.render_update_timer.join()
 				
-				# If we exit the wait loop (user cancelled) and renderer still running, then can it
-				# TODO: this should be a user option
+				# If we exit the wait loop (user cancelled) and luxconsole is still running, then SIGINT it
 				if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
-					luxrender_process.terminate()
-				else:
-					from luxrender.export.film import resolution
-					xr, yr = resolution(scene)
-					self.update_framebuffer(xr, yr, [])
+					luxrender_process.send_signal(subprocess.signal.SIGHUP)
+				
+				# Stop updating the render result and load the final image
+				framebuffer_thread.stop()
+				framebuffer_thread.join()
+				framebuffer_thread.kick(render_end=True)
 	
 	def process_wait_timer(self):
 		# Nothing to do here
