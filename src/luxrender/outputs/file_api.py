@@ -302,6 +302,20 @@ class Custom_Context(object):
 	def wait(self):
 		pass
 	
+	
+	# Emulate networking options to pass to real pylux context in parse()
+	
+	use_network_servers = False
+	serverinterval = 180
+	servers = []
+	
+	def setNetworkServerUpdateInterval(self, int):
+		self.serverinterval = int
+	
+	def addServer(self, s):
+		self.use_network_servers = True
+		self.servers.append(s)
+	
 	def parse(self, filename, async):
 		'''
 		In a deviation from the API, this function returns a new context,
@@ -312,6 +326,13 @@ class Custom_Context(object):
 		if PYLUX_AVAILABLE:
 			from luxrender.outputs.pure_api import Custom_Context as Pylux_Context
 			c = Pylux_Context(self.context_name)
+			
+			# propagate networking settings
+			if self.use_network_servers:
+				c.setNetworkServerUpdateInterval(self.serverinterval)
+				for s in self.servers:
+					c.addServer(s)
+			
 			c.parse(filename, async)
 			
 			return c

@@ -330,26 +330,26 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
 			api_type = 'API'
 			write_files = scene.luxrender_engine.write_files
-			
-			# Pre-allocate the LuxManager so that we can set up the network servers before export
-			LM = LuxManager(
-				scene.name,
-				api_type = api_type,
-			)
-			LuxManager.SetActive(LM)
-			
-			# Set up networking before export so that we get better server usage
-			if scene.luxrender_networking.use_network_servers:
-				LM.lux_context.setNetworkServerUpdateInterval( scene.luxrender_networking.serverinterval )
-				for server in scene.luxrender_networking.servers.split(','):
-					LM.lux_context.addServer(server.strip())
-		
 		elif scene.luxrender_engine.export_type == 'LFC':
 			api_type = 'LUXFIRE_CLIENT'
 			write_files = False
 		else:
 			api_type = 'FILE'
 			write_files = True
+		
+		# Pre-allocate the LuxManager so that we can set up the network servers before export
+		LM = LuxManager(
+			scene.name,
+			api_type = api_type,
+		)
+		LuxManager.SetActive(LM)
+		
+		if scene.luxrender_engine.export_type == 'INT':
+			# Set up networking before export so that we get better server usage
+			if scene.luxrender_networking.use_network_servers:
+				LM.lux_context.setNetworkServerUpdateInterval( scene.luxrender_networking.serverinterval )
+				for server in scene.luxrender_networking.servers.split(','):
+					LM.lux_context.addServer(server.strip())
 		
 		output_filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
 		export_result = bpy.ops.export.luxrender(
