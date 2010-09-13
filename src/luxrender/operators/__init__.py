@@ -34,7 +34,7 @@ import bpy
 from ef.util import util as efutil
 
 # LuxRender Libs
-from luxrender.outputs import LuxManager as LM
+from luxrender.outputs import LuxManager
 
 from luxrender.export import get_worldscale
 from luxrender.export import film		as export_film
@@ -86,8 +86,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	
 	
 	def invoke(self, context, event):
-		wm = context.manager
-		wm.add_fileselect(self)
+		context.window_manager.add_fileselect(self)
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
@@ -115,15 +114,16 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		
 		# Set up the rendering context
 		self.report({'INFO'}, 'Creating LuxRender context')
-		LuxManager = LM(
-			scene.name,
-			api_type = self.properties.api_type,
-			threads = threads
-		)
-		LM.SetActive(LuxManager)
-		LM.SetCurrentScene(scene)
+		if LuxManager.ActiveManager is None:
+			LM = LuxManager(
+				scene.name,
+				api_type = self.properties.api_type,
+				threads = threads
+			)
+			LuxManager.SetActive(LM)
 		
-		lux_context = LuxManager.lux_context
+		LuxManager.SetCurrentScene(scene)
+		lux_context = LM.lux_context
 		
 		if self.properties.filename.endswith('.lxs'):
 			self.properties.filename = self.properties.filename[:-4]
