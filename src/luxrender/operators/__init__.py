@@ -102,28 +102,19 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		# Force scene update; NB, scene.update() doesn't work
 		scene.frame_set( scene.frame_current )
 		
-		if scene.luxrender_engine.threads_auto:
-			try:
-				import multiprocessing
-				threads = multiprocessing.cpu_count()
-			except:
-				# TODO: when might this fail?
-				threads = 4
-		else:
-			threads = scene.luxrender_engine.threads
-		
 		# Set up the rendering context
 		self.report({'INFO'}, 'Creating LuxRender context')
+		created_lux_manager = False
 		if LuxManager.ActiveManager is None:
 			LM = LuxManager(
 				scene.name,
 				api_type = self.properties.api_type,
-				threads = threads
 			)
 			LuxManager.SetActive(LM)
+			created_lux_manager = True
 		
-		LuxManager.SetCurrentScene(scene)
-		lux_context = LM.lux_context
+		LuxManager.ActiveManager.SetCurrentScene(scene)
+		lux_context = LuxManager.ActiveManager.lux_context
 		
 		if self.properties.filename.endswith('.lxs'):
 			self.properties.filename = self.properties.filename[:-4]
@@ -240,6 +231,9 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		
 		if self.properties.write_all_files:
 			lux_context.worldEnd()
+		
+		if created_lux_manager:
+			LM.reset()
 		
 		self.report({'INFO'}, 'Export finished')
 		return {'FINISHED'}

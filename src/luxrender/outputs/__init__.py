@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import time, os
+import time, threading, os
 
 import bpy
 
@@ -188,20 +188,16 @@ class LuxManager(object):
 		return LuxManager.context_count
 	
 	lux_context		= None
-	thread_count	= 1
 	stats_thread	= None
 	fb_thread		= None
 	started			= True  # unintuitive, but reset() is called in the constructor !
 	
-	def __init__(self, manager_name = '', api_type='FILE', threads=1):
+	def __init__(self, manager_name = '', api_type='FILE'):
 		'''
-		Initialise the LuxManager by setting its name, the pylux API
-		type, and number of threads to render with.
+		Initialise the LuxManager by setting its name, the pylux API type.
 		
 		Returns LuxManager object
 		'''
-		
-		self.thread_count = threads
 		
 		if api_type == 'FILE':
 			Context = file_api.Custom_Context
@@ -210,7 +206,7 @@ class LuxManager(object):
 		elif api_type == 'API':
 			Context = pure_api.Custom_Context
 		else:
-			raise Exception('Unknown exporter API type')
+			raise Exception('Unknown exporter API type "%s"' % api_type)
 		
 		if manager_name is not '': manager_name = ' (%s)' % manager_name
 		self.lux_context = Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
@@ -231,10 +227,14 @@ class LuxManager(object):
 		
 		self.started = True
 		
-		# Wait until scene is fully parsed before adding more render threads
+		# Wait until scene is fully parsed before returning control
 		while self.lux_context.statistics('sceneIsReady') != 1.0:
-			# TODO: such a tight loop is not a good idea
-			time.sleep(0.3)
+			wait_timer = threading.Timer(0.3, self.null_wait)
+			wait_timer.start()
+			if wait_timer.isAlive(): wait_timer.join()
+	
+	def null_wait(self):
+		pass
 	
 	def start_worker_threads(self, RE):
 		'''
@@ -243,10 +243,6 @@ class LuxManager(object):
 		self.stats_thread.start()
 		self.fb_thread.LocalStorage['RE'] = RE
 		self.fb_thread.start()
-		
-		# Run rendering with specified number of threads
-		for i in range(self.thread_count - 1):
-			self.lux_context.addThread()
 	
 	def reset(self):
 		'''
@@ -255,6 +251,11 @@ class LuxManager(object):
 		
 		Returns None
 		'''
+		
+		# Firstly stop the renderer
+		if self.lux_context is not None:
+			self.lux_context.exit()
+			self.lux_context.wait()
 		
 		# Stop the stats thread
 		if self.stats_thread is not None and self.stats_thread.isAlive():
@@ -268,9 +269,6 @@ class LuxManager(object):
 		if not self.started: return
 		self.started = False
 		
-		self.lux_context.exit()
-		self.lux_context.wait()
-		
 		# Stop the framebuffer update thread
 		if self.fb_thread is not None and self.fb_thread.isAlive():
 			self.fb_thread.stop()
@@ -278,11 +276,16 @@ class LuxManager(object):
 			# Get the last image
 			self.fb_thread.kick(render_end=True)
 		
+		# Clean up after last framebuffer update
+		if self.lux_context is not None:
+			self.lux_context.cleanup()
+		
 		self.fb_thread  = LuxFilmDisplay(
 			{ 'lux_context': self.lux_context }
 		)
 		
-		self.lux_context.cleanup()
+		self.ClearActive()
+		self.ClearCurrentScene()
 		
 	def __del__(self):
 		'''

@@ -39,7 +39,7 @@ from ef.util import util as efutil
 # Exporter libs
 from luxrender.export.film import resolution
 
-from luxrender.outputs import LuxManager as LM, LuxFilmDisplay
+from luxrender.outputs import LuxManager, LuxFilmDisplay
 from luxrender.outputs import LuxLog
 
 # Exporter Property Groups
@@ -330,6 +330,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
 			api_type = 'API'
 			write_files = scene.luxrender_engine.write_files
+			
+			# Pre-allocate the LuxManager so that we can set up the network servers before export
+			LM = LuxManager(
+				scene.name,
+				api_type = api_type,
+			)
+			LuxManager.SetActive(LM)
+			
+			# Set up networking before export so that we get better server usage
+			if scene.luxrender_networking.use_network_servers:
+				LM.lux_context.setNetworkServerUpdateInterval( scene.luxrender_networking.serverinterval )
+				for server in scene.luxrender_networking.servers.split(','):
+					LM.lux_context.addServer(server.strip())
+		
 		elif scene.luxrender_engine.export_type == 'LFC':
 			api_type = 'LUXFIRE_CLIENT'
 			write_files = False
@@ -358,7 +372,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		return True
 	
 	def render_start(self, scene):
-		self.LuxManager = LM.ActiveManager
+		self.LuxManager = LuxManager.ActiveManager
 		
 		# TODO: this will be removed when direct framebuffer
 		# access is implemented in Blender
@@ -426,13 +440,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			bpy.ops.ef.msg(msg_text='Starting LuxRender')
 			if internal:
 				
-				# Set up networking
-				if scene.luxrender_networking.use_network_servers:
-					lux_context = self.LuxManager.lux_context
-					lux_context.setNetworkServerUpdateInterval( scene.luxrender_networking.serverinterval )
-					for server in scene.luxrender_networking.servers.split(','):
-						lux_context.addServer(server.strip())
-				
 				self.update_stats('', 'LuxRender: Rendering warmup')
 				self.LuxManager.start()
 				
@@ -441,6 +448,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				# Start the stats and framebuffer threads and add additional threads to Lux renderer
 				self.LuxManager.start_worker_threads(self)
+				
+				if scene.luxrender_engine.threads_auto:
+					try:
+						import multiprocessing
+						thread_count = multiprocessing.cpu_count()
+					except:
+						# TODO: when might this fail?
+						thread_count = 1
+				else:
+					thread_count = scene.luxrender_engine.threads
+				
+				# Run rendering with specified number of threads
+				for i in range(thread_count - 1):
+					self.LuxManager.lux_context.addThread()
 				
 				while self.LuxManager.started:
 					self.render_update_timer = threading.Timer(1, self.stats_timer)
@@ -543,5 +564,4 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			self.LuxManager.lux_context.statistics('terminated') == 1.0 or \
 			self.LuxManager.lux_context.statistics('enoughSamples') == 1.0:
 			self.LuxManager.reset()
-			LM.ClearActive()
 			self.update_stats('', '')

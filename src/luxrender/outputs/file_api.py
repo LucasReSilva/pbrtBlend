@@ -108,6 +108,8 @@ class Custom_Context(object):
 		else:
 			self.files.append(None)
 		
+		self.set_output_file(Files.MAIN)
+		
 	def set_output_file(self, file):
 		'''
 		file				int
