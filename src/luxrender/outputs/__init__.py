@@ -96,6 +96,9 @@ class LuxAPIStats(TimerThread):
 			self.stats_dict[k] = self.LocalStorage['lux_context'].statistics(k)
 		
 		self.stats_string = ' | '.join(['%s'%self.stats_format[k](v) for k,v in self.stats_dict.items()])
+		network_servers = self.LocalStorage['lux_context'].getServerCount()
+		if network_servers > 0:
+			self.stats_string += ' | %i Network Servers Active' % network_servers
 	
 class LuxFilmDisplay(TimerThread):
 	'''
@@ -232,9 +235,6 @@ class LuxManager(object):
 		while self.lux_context.statistics('sceneIsReady') != 1.0:
 			# TODO: such a tight loop is not a good idea
 			time.sleep(0.3)
-		
-		for i in range(self.thread_count - 1):
-			self.lux_context.addThread()
 	
 	def start_worker_threads(self, RE):
 		'''
@@ -243,6 +243,10 @@ class LuxManager(object):
 		self.stats_thread.start()
 		self.fb_thread.LocalStorage['RE'] = RE
 		self.fb_thread.start()
+		
+		# Run rendering with specified number of threads
+		for i in range(self.thread_count - 1):
+			self.lux_context.addThread()
 	
 	def reset(self):
 		'''

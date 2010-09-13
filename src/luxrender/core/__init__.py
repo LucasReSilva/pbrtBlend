@@ -426,13 +426,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			bpy.ops.ef.msg(msg_text='Starting LuxRender')
 			if internal:
 				
+				# Set up networking
+				if scene.luxrender_networking.use_network_servers:
+					lux_context = self.LuxManager.lux_context
+					lux_context.setNetworkServerUpdateInterval( scene.luxrender_networking.serverinterval )
+					for server in scene.luxrender_networking.servers.split(','):
+						lux_context.addServer(server.strip())
+				
 				self.update_stats('', 'LuxRender: Rendering warmup')
 				self.LuxManager.start()
 				
 				# Update the image from disk only as often as it is written
 				self.LuxManager.fb_thread.set_kick_period( scene.luxrender_engine.writeinterval )
 				
-				# Start the stats and framebuffer threads
+				# Start the stats and framebuffer threads and add additional threads to Lux renderer
 				self.LuxManager.start_worker_threads(self)
 				
 				while self.LuxManager.started:
@@ -510,9 +517,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					self.render_update_timer.start()
 					if self.render_update_timer.isAlive(): self.render_update_timer.join()
 				
-				# If we exit the wait loop (user cancelled) and luxconsole is still running, then SIGINT it
+				# If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
 				if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
-					luxrender_process.send_signal(subprocess.signal.SIGHUP)
+					luxrender_process.send_signal(subprocess.signal.SIGINT)
 				
 				# Stop updating the render result and load the final image
 				framebuffer_thread.stop()
