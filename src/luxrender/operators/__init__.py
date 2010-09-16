@@ -119,10 +119,10 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		if self.properties.filename.endswith('.lxs'):
 			self.properties.filename = self.properties.filename[:-4]
 		
-		lxs_filename = os.path.join(
+		lxs_filename = '/'.join([
 			self.properties.directory,
 			self.properties.filename
-		)
+		])
 		
 		efutil.export_path = lxs_filename
 		print('(2) export_path is %s' % efutil.export_path)

@@ -366,7 +366,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			return False
 		
 		self.output_file = efutil.path_relative_to_export(
-			os.path.join(self.output_dir, output_filename) + '.png'
+			'%s/%s.png' % (self.output_dir, output_filename)
 		)
 		
 		return True
