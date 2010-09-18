@@ -30,6 +30,7 @@ import bpy
 from copy import deepcopy
 
 from ef.ef import declarative_property_group
+from ef.util import util as efutil
 
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
