@@ -168,9 +168,14 @@ del properties_data_lamp
 @classmethod
 def blender_texture_poll(cls, context):
 	tex = context.texture
-	return	tex and \
-			((tex.type == cls.tex_type and not tex.use_nodes) and (context.scene.render.engine in cls.COMPAT_ENGINES)) and \
-			tex.luxrender_texture.type == 'BLENDER'
+	show = tex and \
+		   ((tex.type == cls.tex_type and not tex.use_nodes) and \
+		   (context.scene.render.engine in cls.COMPAT_ENGINES))
+	
+	if context.scene.render.engine == 'luxrender':
+		show = show and tex.luxrender_texture.type == 'BLENDER'
+	
+	return show
 
 import properties_texture
 properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
