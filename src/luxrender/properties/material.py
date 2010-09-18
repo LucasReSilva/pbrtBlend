@@ -98,16 +98,23 @@ class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 			return c
 		return func2
 
-class BumpMapFloatTextureParameter(FloatTextureParameter):
+# TODO: add override props to *TextureParameter instead of using these sub-types
+
+class SubGroupFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other FloatTextureParameters
 		return lambda s,c: c.luxrender_material
+
+class EmissionColorTextureParameter(ColorTextureParameter):
+	def texture_slot_set_attr(self):
+		# Looks in a different location than other ColorTextureParameters
+		return lambda s,c: c.luxrender_emission
 
 # Fresnel Textures
 TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR',		add_float_value = False)
 
 # Float Textures
-TF_bumpmap		= BumpMapFloatTextureParameter('bumpmap', 'Bump Map',		add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
+TF_bumpmap		= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',		add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
 TF_amount		= FloatTextureParameter('amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
 TF_cauchyb		= FloatTextureParameter('cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
 TF_d			= FloatTextureParameter('d', 'Absorption Depth',			add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
@@ -133,7 +140,7 @@ TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',	default=(1.0,1.0,1.0
 TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',	default=(1.0,1.0,1.0) )
 TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',	default=(1.0,1.0,1.0) )
 TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',	default=(1.0,1.0,1.0) )
-TC_L			= ColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
+TC_L			= EmissionColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
 
 TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption')
 
