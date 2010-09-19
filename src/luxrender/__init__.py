@@ -24,6 +24,9 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+'''
+LuxRender Addon for Blender 2.5
+'''
 
 bl_addon_info = {
 	"name": "LuxRender",
@@ -42,7 +45,13 @@ bl_addon_info = {
 from .core import RENDERENGINE_luxrender
 
 def register():
+	'''
+	Register the LuxRender Addon
+	'''
 	RENDERENGINE_luxrender.install()
 
 def unregister():
+	'''
+	Un-register the LuxRender Addon
+	'''
 	RENDERENGINE_luxrender.uninstall()

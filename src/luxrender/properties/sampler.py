@@ -24,9 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
-from ef.ef import declarative_property_group
+from ef import declarative_property_group
 from ef.validate import Logic_OR as O, Logic_AND as A
 
 from luxrender.properties import dbo

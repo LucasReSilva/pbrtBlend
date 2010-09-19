@@ -28,7 +28,7 @@ import time, threading, os
 
 import bpy
 
-from ef.ef import log
+from ef import log
 from ef.util.util import TimerThread, format_elapsed_time
 
 # This def ia above the following import statements for a reason!

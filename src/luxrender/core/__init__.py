@@ -24,6 +24,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+'''
+Main LuxRender plugin class definition
+'''
+
 # System libs
 import os, time, threading, subprocess, sys
 
@@ -32,7 +36,6 @@ import bpy
 from mathutils import Matrix
 
 # Framework libs
-from ef.ef import ef
 from ef.engine import engine_base
 from ef.util import util as efutil
 

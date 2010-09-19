@@ -24,13 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
-from ef.ef import declarative_property_group
+from ef import declarative_property_group
 from ef.validate import Logic_Operator as LO
-
-from luxrender.properties import dbo
-from luxrender.export import ParamSet
 
 from luxrender.properties.texture import ColorTextureParameter
 

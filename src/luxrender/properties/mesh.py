@@ -24,12 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
-from ef.ef import declarative_property_group
-
-from luxrender.properties import dbo
-from luxrender.export import ParamSet
+from ef import declarative_property_group
 
 # TODO: adapt values written to d based on simple/advanced views
 
