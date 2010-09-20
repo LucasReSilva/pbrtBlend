@@ -26,7 +26,7 @@
 #
 from math import degrees
 
-import bpy, mathutils
+import mathutils
 
 from ef.util import util as efutil
 
