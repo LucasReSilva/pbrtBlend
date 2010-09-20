@@ -29,11 +29,10 @@ Main LuxRender plugin class definition
 '''
 
 # System libs
-import os, time, threading, subprocess, sys
+import os, threading, subprocess, sys
 
 # Blender libs
 import bpy
-from mathutils import Matrix
 
 # Framework libs
 from ef.engine import engine_base
@@ -202,12 +201,14 @@ for blender_texture_ui in blender_texture_ui_list:
 del properties_texture
 
 # compatible() copied from blender repository (netrender)
-def compatible(md):
-	md = __import__(md)
-	for subclass in md.__dict__.values():
-		try:	subclass.COMPAT_ENGINES.add('luxrender')
-		except:	pass
-	del md
+def compatible(mod):
+	mod = __import__(mod)
+	for subclass in mod.__dict__.values():
+		try:
+			subclass.COMPAT_ENGINES.add('luxrender')
+		except:
+			pass
+	del mod
 
 compatible("properties_data_mesh")
 compatible("properties_data_camera")
@@ -518,14 +519,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					cmd_args.append('%i' % scene.luxrender_networking.serverinterval)
 					
 					config_updates['servers'] = scene.luxrender_networking.servers
-					config_updates['serverinterval'] = '%i'%scene.luxrender_networking.serverinterval
+					config_updates['serverinterval'] = '%i' % scene.luxrender_networking.serverinterval
 				
 				config_updates['use_network_servers'] = scene.luxrender_networking.use_network_servers
 				
 				# Save changed config items and then launch Lux
 				
 				try:
-					for k,v in config_updates.items():
+					for k, v in config_updates.items():
 						efutil.write_config_value('luxrender', 'defaults', k, v)
 				except Exception as err:
 					LuxLog('Saving LuxRender config failed: %s' % err)
