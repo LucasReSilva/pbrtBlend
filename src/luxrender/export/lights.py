@@ -82,7 +82,12 @@ def exportLights(lux_context, ob, matrix):
 		light_params.add_float('turbidity', light.luxrender_lamp.turbidity)
 		# nsamples
 		# relsize (sun only)
-		# [a-e]const (sky only)
+		if light.luxrender_lamp.sunsky_advanced:
+			light_params.add_float('horizonbrightness', light.luxrender_lamp.horizonbrightness)
+			light_params.add_float('horizonsize', light.luxrender_lamp.horizonsize)
+			light_params.add_float('sunhalobrightness', light.luxrender_lamp.sunhalobrightness)
+			light_params.add_float('sunhalosize', light.luxrender_lamp.sunhalosize)
+			light_params.add_float('backscattering', light.luxrender_lamp.backscattering)
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params)
 		return True
 	

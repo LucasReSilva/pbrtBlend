@@ -51,6 +51,12 @@ def lamp_visibility():
 		
 		'turbidity':			{ 'type': 'SUN' },
 		'sunsky_type':			{ 'type': 'SUN' },
+		'sunsky_advanced':		{ 'type': 'SUN' },
+		'horizonbrightness':	{ 'type': 'SUN', 'sunsky_advanced': True },
+		'horizonsize':			{ 'type': 'SUN', 'sunsky_advanced': True },
+		'sunhalobrightness':	{ 'type': 'SUN', 'sunsky_advanced': True },
+		'sunhalosize':			{ 'type': 'SUN', 'sunsky_advanced': True },
+		'backscattering':		{ 'type': 'SUN', 'sunsky_advanced': True },
 		
 		'infinite_map':			{ 'type': 'HEMI' },
 		'mapping_type':			{ 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
@@ -78,7 +84,16 @@ class luxrender_lamp(declarative_property_group):
 	controls = TC_L.get_controls() + [
 		'importance', 'lightgroup',
 		['power','efficacy'],
-		'turbidity', 'sunsky_type',
+		
+		'sunsky_type',
+		'turbidity',
+		'sunsky_advanced',
+		'horizonbrightness',
+		'horizonsize',
+		'sunhalobrightness',
+		'sunhalosize',
+		'backscattering',
+		
 		'infinite_map',
 		'mapping_type',
 	]
@@ -153,6 +168,64 @@ class luxrender_lamp(declarative_property_group):
 				#('sky', 'Sky Only', 'sky'),	# sky only doesn't work
 			]
 		},
+		
+		{
+			'type': 'bool',
+			'attr': 'sunsky_advanced',
+			'name': 'Advanced',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'horizonbrightness',
+			'name': 'Horizon brightness',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
+		},
+		{
+			'type': 'float',
+			'attr': 'horizonsize',
+			'name': 'Horizon size',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
+		},
+		{
+			'type': 'float',
+			'attr': 'sunhalobrightness',
+			'name': 'Sun halo brightness',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
+		},
+		{
+			'type': 'float',
+			'attr': 'sunhalosize',
+			'name': 'Sun halo size',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
+		},
+		{
+			'type': 'float',
+			'attr': 'backscattering',
+			'name': 'Back scattering',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0
+		},
+		
 		
 		# HEMI / INFINITE
 		{
