@@ -165,7 +165,7 @@ class luxrender_lamp(declarative_property_group):
 			'items': [
 				('sunsky', 'Sun & Sky', 'sunsky'),
 				('sun', 'Sun Only', 'sun'),
-				#('sky', 'Sky Only', 'sky'),	# sky only doesn't work
+				('sky', 'Sky Only', 'sky'),
 			]
 		},
 		
@@ -182,8 +182,8 @@ class luxrender_lamp(declarative_property_group):
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
-			'max': 10.0,
-			'soft_max': 10.0
+			'max': 1.32,		# anything greater than this causes sky to break
+			'soft_max': 1.32
 		},
 		{
 			'type': 'float',
