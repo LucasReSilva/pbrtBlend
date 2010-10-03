@@ -442,7 +442,8 @@ class luxrender_tonemapping(declarative_property_group):
 			'default': 'reinhard',
 			'items': [
 				('reinhard', 'Reinhard', 'reinhard'),
-				('linear', 'Linear', 'linear'),
+				('linear', 'Linear (manual)', 'linear'),
+				('autolinear', 'Linear (auto-exposure)', 'autolinear'),
 				('contrast', 'Contrast', 'contrast'),
 				('maxwhite', 'Maxwhite', 'maxwhite')
 			],
