@@ -58,7 +58,7 @@ class LUXRENDER_MT_base(object):
 
 class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Engine Presets"
-	preset_subdir = "luxrender_engine"
+	preset_subdir = "luxrender/engine"
 
 class LUXRENDER_OT_preset_engine_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
@@ -66,11 +66,11 @@ class LUXRENDER_OT_preset_engine_add(AddPresetBase, bpy.types.Operator):
 	bl_label = 'Add LuxRender Engine settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_engine'
 	preset_values = ['bpy.context.scene.luxrender_engine.%s'%v['attr'] for v in bpy.types.luxrender_engine.properties]
-	preset_subdir = 'luxrender_engine'
+	preset_subdir = 'luxrender/engine'
 
 class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Networking Presets"
-	preset_subdir = "luxrender_networking"
+	preset_subdir = "luxrender/networking"
 
 class LUXRENDER_OT_preset_networking_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
@@ -78,7 +78,7 @@ class LUXRENDER_OT_preset_networking_add(AddPresetBase, bpy.types.Operator):
 	bl_label = 'Add LuxRender Networking settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_networking'
 	preset_values = ['bpy.context.scene.luxrender_networking.%s'%v['attr'] for v in bpy.types.luxrender_engine.properties]
-	preset_subdir = 'luxrender_networking'
+	preset_subdir = 'luxrender/networking'
 
 # Volume data handling
 
