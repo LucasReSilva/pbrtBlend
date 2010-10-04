@@ -1122,13 +1122,13 @@ class luxrender_volumes(declarative_property_group):
 			'attr': 'op_vol_add',
 			'operator': 'luxrender.volume_add',
 			'text': 'Add',
-			'icon': 'PLUS',
+			'icon': 'ZOOMIN',
 		},
 		{
 			'type': 'operator',
 			'attr': 'op_vol_rem',
 			'operator': 'luxrender.volume_remove',
 			'text': 'Remove',
-			'icon': 'X',
+			'icon': 'ZOOMOUT',
 		},
 	]

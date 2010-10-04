@@ -29,6 +29,7 @@ import os
 
 # Blender Libs
 import bpy
+from presets import AddPresetBase
 
 # ExporterFramework Libs
 from ef.util import util as efutil
@@ -43,6 +44,43 @@ from luxrender.export import materials	as export_materials
 from luxrender.export import geometry	as export_geometry
 from luxrender.outputs.file_api			import Files
 from luxrender.outputs.pure_api			import LUXRENDER_VERSION
+
+# Per-IDPropertyGroup preset handling
+
+class LUXRENDER_MT_base(object):
+	preset_operator = "script.execute_preset"
+	
+	def draw(self, context):
+		target_path = os.path.join(bpy.utils.preset_paths('')[0], self.preset_subdir)
+		if not os.path.exists(target_path):
+			os.makedirs(target_path)
+		bpy.types.Menu.draw_preset(self, context)
+
+class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base, bpy.types.Menu):
+	bl_label = "LuxRender Engine Presets"
+	preset_subdir = "luxrender_engine"
+
+class LUXRENDER_OT_preset_engine_add(AddPresetBase, bpy.types.Operator):
+	'''Save the current settings as a preset'''
+	bl_idname = 'luxrender.preset_engine_add'
+	bl_label = 'Add LuxRender Engine settings preset'
+	preset_menu = 'LUXRENDER_MT_presets_engine'
+	preset_values = ['bpy.context.scene.luxrender_engine.%s'%v['attr'] for v in bpy.types.luxrender_engine.properties]
+	preset_subdir = 'luxrender_engine'
+
+class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base, bpy.types.Menu):
+	bl_label = "LuxRender Networking Presets"
+	preset_subdir = "luxrender_networking"
+
+class LUXRENDER_OT_preset_networking_add(AddPresetBase, bpy.types.Operator):
+	'''Save the current settings as a preset'''
+	bl_idname = 'luxrender.preset_networking_add'
+	bl_label = 'Add LuxRender Networking settings preset'
+	preset_menu = 'LUXRENDER_MT_presets_networking'
+	preset_values = ['bpy.context.scene.luxrender_networking.%s'%v['attr'] for v in bpy.types.luxrender_engine.properties]
+	preset_subdir = 'luxrender_networking'
+
+# Volume data handling
 
 class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	'''Add a new material volume definition to the scene'''
@@ -70,6 +108,8 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 		w.volumes.remove( w.volumes_index )
 		w.volumes_index = len(w.volumes)-1
 		return {'FINISHED'}
+
+# Export process
 
 class EXPORT_OT_luxrender(bpy.types.Operator):
 	bl_idname = 'export.luxrender'

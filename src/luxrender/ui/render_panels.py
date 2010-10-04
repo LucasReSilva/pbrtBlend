@@ -46,6 +46,14 @@ class engine(render_described_context, bpy.types.Panel):
 	display_property_groups = [
 		( ('scene',), 'luxrender_engine' )
 	]
+	
+	def draw(self, context):
+		row = self.layout.row(align=True)
+		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
+		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
+		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
+		
+		super().draw(context)
 
 class networking(render_described_context, bpy.types.Panel):
 	'''
@@ -57,6 +65,14 @@ class networking(render_described_context, bpy.types.Panel):
 	display_property_groups = [
 		( ('scene',), 'luxrender_networking' )
 	]
+	
+	def draw(self, context):
+		row = self.layout.row(align=True)
+		row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
+		row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
+		row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
+		
+		super().draw(context)
 
 class sampler(render_described_context, bpy.types.Panel):
 	'''
