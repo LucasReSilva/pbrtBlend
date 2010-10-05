@@ -34,5 +34,5 @@ class ui_material_mirror(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'mirror'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'mirror' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_mirror' )
 	]

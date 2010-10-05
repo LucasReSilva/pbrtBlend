@@ -34,5 +34,5 @@ class ui_texture_imagemap(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'imagemap'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'imagemap' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_imagemap' )
 	]

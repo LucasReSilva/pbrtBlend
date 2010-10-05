@@ -34,5 +34,5 @@ class ui_material_mattetranslucent(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'mattetranslucent'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'mattetranslucent' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_mattetranslucent' )
 	]

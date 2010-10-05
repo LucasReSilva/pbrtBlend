@@ -34,5 +34,5 @@ class ui_material_roughglass(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'roughglass'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'roughglass' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_roughglass' )
 	]

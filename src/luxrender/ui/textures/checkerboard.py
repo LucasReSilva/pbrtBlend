@@ -34,5 +34,5 @@ class ui_texture_checkerboard(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'checkerboard'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'checkerboard' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_checkerboard' )
 	]

@@ -34,5 +34,5 @@ class ui_material_glossy(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'glossy'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'glossy' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_glossy' )
 	]

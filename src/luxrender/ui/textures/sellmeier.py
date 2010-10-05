@@ -34,5 +34,5 @@ class ui_texture_sellmeier(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'sellmeier'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'sellmeier' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_sellmeier' )
 	]

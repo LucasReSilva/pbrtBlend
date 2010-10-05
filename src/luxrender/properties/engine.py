@@ -124,7 +124,8 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Rendering Mode',
 			'description': 'Run LuxRender inside or outside of Blender',
 			'default': 'EXT', # if not PYLUX_AVAILABLE else 'INT',
-			'items': find_apis()
+			'items': find_apis(),
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -143,6 +144,7 @@ class luxrender_engine(declarative_property_group):
 				('sampler', 'Sampler (traditional CPU)', 'sampler'),
 				('hybrid', 'Hybrid (CPU + GPU)', 'hybrid'),
 			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -153,7 +155,8 @@ class luxrender_engine(declarative_property_group):
 			'items': [
 				('luxrender', 'LuxRender GUI', 'luxrender'),
 				('luxconsole', 'LuxConsole', 'luxconsole'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'string',
@@ -169,6 +172,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Write to disk',
 			'description': 'Write scene files to disk',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -176,6 +180,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'LXS',
 			'description': 'Write master scene file',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -183,6 +188,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'LXM',
 			'description': 'Write materials file',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -190,6 +196,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'LXO',
 			'description': 'Write objects file',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -199,7 +206,8 @@ class luxrender_engine(declarative_property_group):
 			'items': [
 				('native', 'Lux Mesh', 'native'),
 				('ply', 'Stanford PLY', 'ply'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -220,6 +228,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'RGC',
 			'description': 'Reverse Gamma Colour Correction',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -227,6 +236,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Colour Clamp',
 			'description': 'Clamp all colours to range 0 - 0.9',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -234,6 +244,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Optimise Meshes',
 			'description': 'Output optimised mesh data',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -241,6 +252,7 @@ class luxrender_engine(declarative_property_group):
 			'name': 'No Lightgroups',
 			'description': 'Combine all light groups',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
@@ -249,7 +261,8 @@ class luxrender_engine(declarative_property_group):
 			'description': 'Period for writing images to disk (seconds)',
 			'default': 10,
 			'min': 2,
-			'soft_min': 2
+			'soft_min': 2,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
@@ -258,7 +271,8 @@ class luxrender_engine(declarative_property_group):
 			'description': 'Period for updating rendering on screen (seconds)',
 			'default': 10,
 			'min': 2,
-			'soft_min': 2
+			'soft_min': 2,
+			'save_in_preset': True
 		},
 	]
 	
@@ -286,6 +300,7 @@ class luxrender_networking(declarative_property_group):
 			'attr': 'use_network_servers',
 			'name': 'Use Networking',
 			'default': efutil.find_config_value('luxrender', 'defaults', 'use_network_servers', False),
+			'save_in_preset': True
 		},
 		{
 			'type': 'string',
@@ -293,6 +308,7 @@ class luxrender_networking(declarative_property_group):
 			'name': 'Servers',
 			'description': 'Comma separated list of Lux server IP addresses',
 			'default': efutil.find_config_value('luxrender', 'defaults', 'servers', ''),
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
@@ -301,6 +317,7 @@ class luxrender_networking(declarative_property_group):
 			'description': 'Interval for server image transfers (seconds)',
 			'default': int(efutil.find_config_value('luxrender', 'defaults', 'serverinterval', '180')),
 			'min': 10,
-			'soft_min': 10
+			'soft_min': 10,
+			'save_in_preset': True
 		},
 	]

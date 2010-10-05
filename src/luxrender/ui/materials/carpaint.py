@@ -34,5 +34,5 @@ class ui_material_carpaint(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'carpaint'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'carpaint' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_carpaint' )
 	]

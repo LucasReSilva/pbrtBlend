@@ -153,7 +153,7 @@ class ColorTextureParameter(TextureParameterBase):
 		'''
 		
 		if c.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.type]:
-			submat = getattr(c, c.type)
+			submat = getattr(c, 'luxrender_mat_%s'%c.type)
 			submat_col = getattr(submat, self.attr+'_color')
 			if s.material.diffuse_color != submat_col:
 				s.material.diffuse_color = submat_col
@@ -163,7 +163,7 @@ class ColorTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_color_texture',
+				'default': 'lux_color_texture'
 			},
 			{
 				'attr': '%s_usecolortexture' % self.attr,
@@ -172,6 +172,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'description': 'Textured %s' % self.name,
 				'default': False,
 				'toggle': True,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_usecolorrgc' % self.attr,
@@ -180,6 +181,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'description': 'Reverse Gamma Correct %s' % self.name,
 				'default': False,
 				'toggle': True,
+				'save_in_preset': True
 			},
 			{
 				'type': 'text',
@@ -197,13 +199,15 @@ class ColorTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'subtype': 'COLOR',
-				'draw': lambda s,c: self.set_master_colour(s, c)
+				'draw': lambda s,c: self.set_master_colour(s, c),
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_colortexturename' % self.attr,
 				'type': 'string',
 				'name': '%s_colortexturename' % self.attr,
 				'description': '%s Texture' % self.name,
+				'save_in_preset': True
 			},
 			{
 				'type': 'prop_search',
@@ -285,17 +289,19 @@ class FloatTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_float_texture',
+				'default': 'lux_float_texture'
 			},
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
 				'type': 'bool',
-				'default': self.multiply_float
+				'default': self.multiply_float,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_ignorezero' % self.attr,
 				'type': 'bool',
-				'default': self.ignore_zero
+				'default': self.ignore_zero,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_usefloattexture' % self.attr,
@@ -304,6 +310,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'description': 'Textured %s' % self.name,
 				'default': False if not self.texture_only else True,
 				'toggle': True,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_floatvalue' % self.attr,
@@ -316,13 +323,15 @@ class FloatTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'precision': self.precision,
-				#'slider': True
+				#'slider': True,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_floattexturename' % self.attr,
 				'type': 'string',
 				'name': '%s_floattexturename' % self.attr,
 				'description': '%s Texture' % self.name,
+				'save_in_preset': True
 			},
 			{
 				'type': 'prop_search',
@@ -404,17 +413,19 @@ class FresnelTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_fresnel_texture',
+				'default': 'lux_fresnel_texture'
 			},
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
 				'type': 'bool',
-				'default': self.multiply_float
+				'default': self.multiply_float,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_ignorezero' % self.attr,
 				'type': 'bool',
-				'default': self.ignore_zero
+				'default': self.ignore_zero,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_usefresneltexture' % self.attr,
@@ -423,6 +434,7 @@ class FresnelTextureParameter(TextureParameterBase):
 				'description': 'Textured %s' % self.name,
 				'default': False if not self.texture_only else True,
 				'toggle': True,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_fresnelvalue' % self.attr,
@@ -435,13 +447,15 @@ class FresnelTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'precision': self.precision,
-				#'slider': True
+				#'slider': True,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_fresneltexturename' % self.attr,
 				'type': 'string',
 				'name': '%s_fresneltexturename' % self.attr,
 				'description': '%s Texture' % self.name,
+				'save_in_preset': True
 			},
 			{
 				'type': 'prop_search',
@@ -524,6 +538,7 @@ class luxrender_texture(declarative_property_group):
 				('sopra', 'sopra', 'sopra'),
 				('luxpop', 'luxpop', 'luxpop'),
 			],
+			'save_in_preset': True
 		},
 	]
 	
@@ -539,7 +554,7 @@ class luxrender_texture(declarative_property_group):
 		
 		# this requires the sub-IDPropertyGroup name to be the same as the texture name
 		if hasattr(self, self.type):
-			lux_texture = getattr(self, self.type) 
+			lux_texture = getattr(self, 'luxrender_tex_%s'%self.type) 
 			features, params = lux_texture.get_paramset()
 			
 			# 2D Mapping options
@@ -577,7 +592,7 @@ TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,
 TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
 
-class bilerp(declarative_property_group):
+class luxrender_tex_bilerp(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -609,31 +624,36 @@ class bilerp(declarative_property_group):
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
 			],
-			'expand': True
+			'expand': True,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v00_f',
 			'type': 'float',
 			'name': '(0,0)',
-			'default': 0.0
+			'default': 0.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v01_f',
 			'type': 'float',
 			'name': '(0,1)',
-			'default': 1.0
+			'default': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v10_f',
 			'type': 'float',
 			'name': '(1,0)',
-			'default': 0.0
+			'default': 0.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v11_f',
 			'type': 'float',
 			'name': '(1,1)',
-			'default': 1.0
+			'default': 1.0,
+			'save_in_preset': True
 		},
 		
 		{
@@ -643,7 +663,8 @@ class bilerp(declarative_property_group):
 			'name': '(0,0)',
 			'default': (0.0, 0.0, 0.0),
 			'min': 0.0,
-			'max': 1.0
+			'max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v01_c',
@@ -652,7 +673,8 @@ class bilerp(declarative_property_group):
 			'name': '(0,1)',
 			'default': (1.0, 1.0, 1.0),
 			'min': 0.0,
-			'max': 1.0
+			'max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v10_c',
@@ -661,7 +683,8 @@ class bilerp(declarative_property_group):
 			'name': '(1,0)',
 			'default': (0.0, 0.0, 0.0),
 			'min': 0.0,
-			'max': 1.0
+			'max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v11_c',
@@ -670,7 +693,8 @@ class bilerp(declarative_property_group):
 			'name': '(1,1)',
 			'default': (1.0, 1.0, 1.0),
 			'min': 0.0,
-			'max': 1.0
+			'max': 1.0,
+			'save_in_preset': True
 		},
 	]
 	
@@ -691,7 +715,7 @@ class bilerp(declarative_property_group):
 				
 		return {'2DMAPPING'}, params
 
-class blackbody(declarative_property_group):
+class luxrender_tex_blackbody(declarative_property_group):
 	
 	controls = [
 		'temperature'
@@ -709,7 +733,8 @@ class blackbody(declarative_property_group):
 			'type': 'float',
 			'attr': 'temperature',
 			'name': 'Temperature',
-			'default': 6500.0
+			'default': 6500.0,
+			'save_in_preset': True
 		}
 	]
 	
@@ -717,7 +742,7 @@ class blackbody(declarative_property_group):
 		
 		return set(), ParamSet().add_float('temperature', self.temperature)
 
-class brick(declarative_property_group):
+class luxrender_tex_brick(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -775,7 +800,8 @@ class brick(declarative_property_group):
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
 			],
-			'expand': True
+			'expand': True,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'brickbond',
@@ -789,13 +815,15 @@ class brick(declarative_property_group):
 				('herringbone', 'herringbone', 'herringbone'),
 				('basket', 'basket', 'basket'),
 				('chain link', 'chain link', 'chain link')
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'attr': 'brickbevel',
 			'type': 'float',
 			'name': 'Bevel',
 			'default': 0.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'brickrun',
@@ -805,7 +833,8 @@ class brick(declarative_property_group):
 			'min': -10.0,
 			'soft_min': -10.0,
 			'max': 10.0,
-			'soft_max': 10.0
+			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'mortarsize',
@@ -815,7 +844,8 @@ class brick(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1.0,
-			'soft_max': 1.0
+			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'brickwidth',
@@ -825,7 +855,8 @@ class brick(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 10.0,
-			'soft_max': 10.0
+			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'brickdepth',
@@ -835,7 +866,8 @@ class brick(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 10.0,
-			'soft_max': 10.0
+			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'brickheight',
@@ -845,7 +877,8 @@ class brick(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 10.0,
-			'soft_max': 10.0
+			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 	] + \
 	TF_brickmodtex.properties + \
@@ -878,7 +911,7 @@ class brick(declarative_property_group):
 		
 		return {'3DMAPPING'}, brick_params
 
-class cauchy(declarative_property_group):
+class luxrender_tex_cauchy(declarative_property_group):
 	
 	controls = [
 		'use_index',
@@ -901,7 +934,8 @@ class cauchy(declarative_property_group):
 			'type': 'bool',
 			'attr': 'use_index',
 			'name': 'Use IOR',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -912,7 +946,8 @@ class cauchy(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
-			'precision': 6
+			'precision': 6,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -923,7 +958,8 @@ class cauchy(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
-			'precision': 6
+			'precision': 6,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -934,7 +970,8 @@ class cauchy(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
-			'precision': 6
+			'precision': 6,
+			'save_in_preset': True
 		},
 	]
 	
@@ -948,7 +985,7 @@ class cauchy(declarative_property_group):
 		
 		return set(), cp
 
-class checkerboard(declarative_property_group):
+class luxrender_tex_checkerboard(declarative_property_group):
 	
 	controls = [
 		'aamode',
@@ -977,7 +1014,8 @@ class checkerboard(declarative_property_group):
 				('closedform', 'closedform', 'closedform'),
 				('supersample', 'supersample', 'supersample'),
 				('none', 'none', 'none')
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'attr': 'dimension',
@@ -988,6 +1026,7 @@ class checkerboard(declarative_property_group):
 			'soft_min': 2,
 			'max': 3,
 			'soft_max': 3,
+			'save_in_preset': True
 		},
 		
 	] + \
@@ -1014,7 +1053,7 @@ class checkerboard(declarative_property_group):
 		
 		return features, checkerboard_params
 
-class constant(declarative_property_group):
+class luxrender_tex_constant(declarative_property_group):
 	controls = [
 		'value'
 	]
@@ -1035,7 +1074,8 @@ class constant(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 10.0,
-			'soft_max': 10.0
+			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 	]
 	
@@ -1045,7 +1085,7 @@ class constant(declarative_property_group):
 		
 		return set(), constant_params
 
-class dots(declarative_property_group):
+class luxrender_tex_dots(declarative_property_group):
 	
 	controls = [
 		# None
@@ -1086,7 +1126,7 @@ class dots(declarative_property_group):
 		
 		return {'2DMAPPING'}, dots_params
 
-class equalenergy(declarative_property_group):
+class luxrender_tex_equalenergy(declarative_property_group):
 	
 	controls = [
 		'energy'
@@ -1108,7 +1148,8 @@ class equalenergy(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1.0,
-			'soft_max': 1.0
+			'soft_max': 1.0,
+			'save_in_preset': True
 		}
 	]
 	
@@ -1116,7 +1157,7 @@ class equalenergy(declarative_property_group):
 		
 		return set(), ParamSet().add_float('energy', self.energy)
 
-class fbm(declarative_property_group):
+class luxrender_tex_fbm(declarative_property_group):
 	
 	controls = [
 		'octaves',
@@ -1139,7 +1180,8 @@ class fbm(declarative_property_group):
 			'min': 1,
 			'soft_min': 1,
 			'max': 100,
-			'soft_max': 100
+			'soft_max': 100,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1149,7 +1191,8 @@ class fbm(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1.0,
-			'soft_max': 1.0
+			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 	]
 	
@@ -1160,7 +1203,7 @@ class fbm(declarative_property_group):
 		
 		return {'3DMAPPING'}, fbm_params
 
-class gaussian(declarative_property_group):
+class luxrender_tex_gaussian(declarative_property_group):
 	
 	controls = [
 		'energy',
@@ -1184,7 +1227,8 @@ class gaussian(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1.0,
-			'soft_max': 1.0
+			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1195,6 +1239,7 @@ class gaussian(declarative_property_group):
 			'soft_min': 380.0,
 			'max': 720.0,
 			'soft_max': 720.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1205,6 +1250,7 @@ class gaussian(declarative_property_group):
 			'soft_min': 20.0,
 			'max': 300.0,
 			'soft_max': 300.0,
+			'save_in_preset': True
 		},
 	]
 	
@@ -1214,7 +1260,7 @@ class gaussian(declarative_property_group):
 								.add_float('wavelength', self.wavelength) \
 								.add_float('width', self.width)
 
-class harlequin(declarative_property_group):
+class luxrender_tex_harlequin(declarative_property_group):
 	
 	controls = [
 		# None
@@ -1236,7 +1282,7 @@ class harlequin(declarative_property_group):
 		
 		return set(), harlequin_params
 
-class imagemap(declarative_property_group):
+class luxrender_tex_imagemap(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -1263,14 +1309,16 @@ class imagemap(declarative_property_group):
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
 			],
-			'expand': True
+			'expand': True,
+			'save_in_preset': True
 		},
 		
 		{
 			'type': 'string',
 			'subtype': 'FILE_PATH',
 			'attr': 'filename',
-			'name': 'File Name'
+			'name': 'File Name',
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -1283,7 +1331,8 @@ class imagemap(declarative_property_group):
 				('blue', 'blue', 'blue'),
 				('alpha', 'alpha', 'alpha'),
 				('colored_mean', 'colored_mean', 'colored_mean')
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
@@ -1291,7 +1340,8 @@ class imagemap(declarative_property_group):
 			'name': 'Discard MipMaps below',
 			'description': 'Set to 0 to disable',
 			'default': 0,
-			'min': 0
+			'min': 0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -1303,6 +1353,7 @@ class imagemap(declarative_property_group):
 				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
 				('nearest', 'nearest', 'nearest'),
 			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1312,7 +1363,8 @@ class imagemap(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 10.0,
-			'soft_max': 10.0
+			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1322,13 +1374,15 @@ class imagemap(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 6.0,
-			'soft_max': 6.0
+			'soft_max': 6.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'maxanisotropy',
 			'name': 'Max. Anisotropy',
 			'default': 8.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -1339,7 +1393,8 @@ class imagemap(declarative_property_group):
 				('black', 'black', 'black'),
 				('white', 'white', 'white'),
 				('clamp', 'clamp', 'clamp')
-			]
+			],
+			'save_in_preset': True
 		},
 	]
 	
@@ -1360,7 +1415,7 @@ class imagemap(declarative_property_group):
 		
 		return {'2DMAPPING'}, params
 
-class lampspectrum(declarative_property_group):
+class luxrender_tex_lampspectrum(declarative_property_group):
 	
 	controls = [
 		'preset'
@@ -1378,7 +1433,8 @@ class lampspectrum(declarative_property_group):
 			'type': 'enum',
 			'attr': 'preset',
 			'name': 'Name',
-			'items': lampspectrum_list()
+			'items': lampspectrum_list(),
+			'save_in_preset': True
 		}
 	]
 	
@@ -1386,7 +1442,7 @@ class lampspectrum(declarative_property_group):
 		
 		return set(), ParamSet().add_string('name', self.preset)
 
-class mapping(declarative_property_group):
+class luxrender_tex_mapping(declarative_property_group):
 	
 	controls = [
 		'type',
@@ -1414,7 +1470,8 @@ class mapping(declarative_property_group):
 				('planar','planar','planar'),
 				('spherical','spherical','spherical'),
 				('cylindrical','cylindrical','cylindrical'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'attr': 'uscale',
@@ -1424,7 +1481,8 @@ class mapping(declarative_property_group):
 			'min': -100.0,
 			'soft_min': -100.0,
 			'max': 100.0,
-			'soft_max': 100.0
+			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'vscale',
@@ -1434,7 +1492,8 @@ class mapping(declarative_property_group):
 			'min': -100.0,
 			'soft_min': -100.0,
 			'max': 100.0,
-			'soft_max': 100.0
+			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'udelta',
@@ -1444,7 +1503,8 @@ class mapping(declarative_property_group):
 			'min': -100.0,
 			'soft_min': -100.0,
 			'max': 100.0,
-			'soft_max': 100.0
+			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'vdelta',
@@ -1454,19 +1514,22 @@ class mapping(declarative_property_group):
 			'min': -100.0,
 			'soft_min': -100.0,
 			'max': 100.0,
-			'soft_max': 100.0
+			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v1',
 			'type': 'float_vector',
 			'name': 'V1',
 			'default': (1.0, 0.0, 0.0),
+			'save_in_preset': True
 		},
 		{
 			'attr': 'v2',
 			'type': 'float_vector',
 			'name': 'V2',
 			'default': (0.0, 1.0, 0.0),
+			'save_in_preset': True
 		},
 	]
 	
@@ -1491,7 +1554,7 @@ class mapping(declarative_property_group):
 		
 		return mapping_params
 
-class marble(declarative_property_group):
+class luxrender_tex_marble(declarative_property_group):
 	
 	controls = [
 		'octaves',
@@ -1516,7 +1579,8 @@ class marble(declarative_property_group):
 			'min': 1,
 			'soft_min': 1,
 			'max': 100,
-			'soft_max': 100
+			'soft_max': 100,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1526,7 +1590,8 @@ class marble(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1.0,
-			'soft_max': 1.0
+			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1536,7 +1601,8 @@ class marble(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 100.0,
-			'soft_max': 100.0
+			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1546,7 +1612,8 @@ class marble(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 100.0,
-			'soft_max': 100.0
+			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 	]
 	
@@ -1557,7 +1624,7 @@ class marble(declarative_property_group):
 										.add_float('scale', self.scale) \
 										.add_float('variation', self.variation)
 
-class mix(declarative_property_group):
+class luxrender_tex_mix(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -1602,7 +1669,8 @@ class mix(declarative_property_group):
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
 			],
-			'expand': True
+			'expand': True,
+			'save_in_preset': True
 		},
 	] + \
 	TF_amount.properties + \
@@ -1627,7 +1695,7 @@ class mix(declarative_property_group):
 		
 		return set(), mix_params
 
-class sellmeier(declarative_property_group):
+class luxrender_tex_sellmeier(declarative_property_group):
 	
 	controls = [
 		'advanced',
@@ -1651,6 +1719,7 @@ class sellmeier(declarative_property_group):
 			'attr': 'advanced',
 			'name': 'Advanced',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1661,7 +1730,8 @@ class sellmeier(declarative_property_group):
 			'soft_min': 0.001,
 			'max': 10.0,
 			'soft_max': 10.0,
-			'precision': 6
+			'precision': 6,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float_vector',
@@ -1672,7 +1742,8 @@ class sellmeier(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 100.0,
 			'soft_max': 100.0,
-			'precision': 6
+			'precision': 6,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float_vector',
@@ -1683,7 +1754,8 @@ class sellmeier(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1000.0,
 			'soft_max': 1000.0,
-			'precision': 6
+			'precision': 6,
+			'save_in_preset': True
 		},
 	]
 	
@@ -1695,7 +1767,7 @@ class sellmeier(declarative_property_group):
 		
 		return set(), sp
 
-class scale(declarative_property_group):
+class luxrender_tex_scale(declarative_property_group):
 	
 	controls = [
 		'variant',
@@ -1737,7 +1809,8 @@ class scale(declarative_property_group):
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
 			],
-			'expand': True
+			'expand': True,
+			'save_in_preset': True
 		},
 	] + \
 	TF_tex1.properties + \
@@ -1774,7 +1847,8 @@ class tabulatedfresnel(declarative_property_group):
 			'type': 'string',
 			'subtype': 'FILE_PATH',
 			'attr': 'filename',
-			'name': 'File name'
+			'name': 'File name',
+			'save_in_preset': True
 		},
 	]
 	
@@ -1782,12 +1856,12 @@ class tabulatedfresnel(declarative_property_group):
 		tfp = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
 		return set(), tfp
 
-class luxpop(tabulatedfresnel):
+class luxrender_tex_luxpop(tabulatedfresnel):
 	pass
-class sopra(tabulatedfresnel):
+class luxrender_tex_sopra(tabulatedfresnel):
 	pass
 
-class transform(declarative_property_group):
+class luxrender_tex_transform(declarative_property_group):
 	
 	controls = [
 		'translate',
@@ -1803,18 +1877,21 @@ class transform(declarative_property_group):
 			'attr': 'translate',
 			'name': 'Translate',
 			'default': (0.0, 0.0, 0.0),
+			'save_in_preset': True
 		},
 		{
 			'type': 'float_vector',
 			'attr': 'rotate',
 			'name': 'Rotate',
 			'default': (0.0, 0.0, 0.0),
+			'save_in_preset': True
 		},
 		{
 			'type': 'float_vector',
 			'attr': 'scale',
 			'name': 'Scale',
 			'default': (1.0, 1.0, 1.0),
+			'save_in_preset': True
 		},
 	]
 	
@@ -1829,7 +1906,7 @@ class transform(declarative_property_group):
 		
 		return transform_params
 
-class uv(declarative_property_group):
+class luxrender_tex_uv(declarative_property_group):
 	
 	controls = [
 		# None
@@ -1851,7 +1928,7 @@ class uv(declarative_property_group):
 			
 		return {'2DMAPPING'}, uv_params
 
-class windy(declarative_property_group):
+class luxrender_tex_windy(declarative_property_group):
 	
 	controls = [
 		# None
@@ -1873,7 +1950,7 @@ class windy(declarative_property_group):
 		
 		return {'3DMAPPING'}, windy_params
 
-class wrinkled(declarative_property_group):
+class luxrender_tex_wrinkled(declarative_property_group):
 	
 	controls = [
 		'octaves',
@@ -1896,7 +1973,8 @@ class wrinkled(declarative_property_group):
 			'min': 1,
 			'soft_min': 1,
 			'max': 100,
-			'soft_max': 100
+			'soft_max': 100,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1906,7 +1984,8 @@ class wrinkled(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1.0,
-			'soft_max': 1.0
+			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 	]
 	

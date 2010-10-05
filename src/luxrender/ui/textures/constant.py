@@ -34,5 +34,5 @@ class ui_texture_constant(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'constant'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'constant' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_constant' )
 	]

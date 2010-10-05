@@ -34,5 +34,5 @@ class ui_texture_windy(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'windy'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'windy' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_windy' )
 	]

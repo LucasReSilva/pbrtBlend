@@ -34,5 +34,5 @@ class ui_texture_sopra(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'sopra'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'sopra' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_sopra' )
 	]

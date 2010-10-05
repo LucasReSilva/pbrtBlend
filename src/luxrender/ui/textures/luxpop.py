@@ -34,5 +34,5 @@ class ui_texture_luxpop(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'luxpop'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'luxpop' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_luxpop' )
 	]

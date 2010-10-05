@@ -34,5 +34,5 @@ class ui_material_velvet(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'velvet'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'velvet' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_velvet' )
 	]

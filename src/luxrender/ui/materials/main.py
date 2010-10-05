@@ -38,3 +38,11 @@ class main(luxrender_material_base, bpy.types.Panel):
 	display_property_groups = [
 		( ('material',), 'luxrender_material' )
 	]
+	
+	def draw(self, context):
+		row = self.layout.row(align=True)
+		row.menu("LUXRENDER_MT_presets_material", text=bpy.types.LUXRENDER_MT_presets_material.bl_label)
+		row.operator("luxrender.preset_material_add", text="", icon="ZOOMIN")
+		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
+		
+		super().draw(context)

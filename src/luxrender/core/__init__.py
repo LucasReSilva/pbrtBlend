@@ -57,46 +57,46 @@ from luxrender.properties.material		import	luxrender_material, \
 												luxrender_emission, \
 												luxrender_volume_data, \
 												luxrender_volumes, \
-												carpaint			as luxrender_material_carpaint, \
-												glass				as luxrender_material_glass, \
-												glass2				as luxrender_material_glass2, \
-												roughglass			as luxrender_material_roughglass, \
-												glossy				as luxrender_material_glossy, \
-												glossy_lossy		as luxrender_material_glossy_lossy, \
-												matte				as luxrender_material_matte, \
-												mattetranslucent	as luxrender_material_mattetranslucent, \
-												metal				as luxrender_material_metal, \
-												shinymetal			as luxrender_material_shinymetal, \
-												mirror				as luxrender_material_mirror, \
-												mix					as luxrender_material_mix, \
-												null				as luxrender_material_null,\
-												velvet				as luxrender_material_velvet
+												luxrender_mat_carpaint, \
+												luxrender_mat_glass, \
+												luxrender_mat_glass2, \
+												luxrender_mat_roughglass, \
+												luxrender_mat_glossy, \
+												luxrender_mat_glossy_lossy, \
+												luxrender_mat_matte, \
+												luxrender_mat_mattetranslucent, \
+												luxrender_mat_metal, \
+												luxrender_mat_shinymetal, \
+												luxrender_mat_mirror, \
+												luxrender_mat_mix, \
+												luxrender_mat_null,\
+												luxrender_mat_velvet
 from luxrender.properties.mesh			import	luxrender_mesh
 from luxrender.properties.texture		import	luxrender_texture, \
-												bilerp				as luxrender_texture_bilerp, \
-												blackbody			as luxrender_texture_blackbody, \
-												brick				as luxrender_texture_brick, \
-												cauchy				as luxrender_texture_cauchy, \
-												constant			as luxrender_texture_constant, \
-												checkerboard		as luxrender_texture_checkerboard, \
-												dots				as luxrender_texture_dots, \
-												equalenergy			as luxrender_texture_equalenergy, \
-												fbm					as luxrender_texture_fbm, \
-												gaussian			as luxrender_texture_gaussian, \
-												harlequin			as luxrender_texture_harlequin, \
-												imagemap			as luxrender_texture_imagemap, \
-												lampspectrum		as luxrender_texture_lampspectrum, \
-												luxpop				as luxrender_texture_luxpop, \
-												mapping				as luxrender_texture_mapping, \
-												marble				as luxrender_texture_marble, \
-												mix					as luxrender_texture_mix, \
-												sellmeier			as luxrender_texture_sellmeier, \
-												scale				as luxrender_texture_scale, \
-												sopra				as luxrender_texture_sopra, \
-												transform			as luxrender_texture_transform, \
-												uv					as luxrender_texture_uv, \
-												windy				as luxrender_texture_windy, \
-												wrinkled			as luxrender_texture_wrinkled
+												luxrender_tex_bilerp, \
+												luxrender_tex_blackbody, \
+												luxrender_tex_brick, \
+												luxrender_tex_cauchy, \
+												luxrender_tex_constant, \
+												luxrender_tex_checkerboard, \
+												luxrender_tex_dots, \
+												luxrender_tex_equalenergy, \
+												luxrender_tex_fbm, \
+												luxrender_tex_gaussian, \
+												luxrender_tex_harlequin, \
+												luxrender_tex_imagemap, \
+												luxrender_tex_lampspectrum, \
+												luxrender_tex_luxpop, \
+												luxrender_tex_mapping, \
+												luxrender_tex_marble, \
+												luxrender_tex_mix, \
+												luxrender_tex_sellmeier, \
+												luxrender_tex_scale, \
+												luxrender_tex_sopra, \
+												luxrender_tex_transform, \
+												luxrender_tex_uv, \
+												luxrender_tex_windy, \
+												luxrender_tex_wrinkled
 from luxrender.properties.sampler		import	luxrender_sampler
 from luxrender.properties.volume		import	luxrender_volumeintegrator
 
@@ -245,46 +245,46 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Mesh', luxrender_mesh),
 		('Material', luxrender_emission),
 		('Material', luxrender_material),
-		('luxrender_material', luxrender_material_carpaint),
-		('luxrender_material', luxrender_material_glass),
-		('luxrender_material', luxrender_material_glass2),
-		('luxrender_material', luxrender_material_roughglass),
-		('luxrender_material', luxrender_material_glossy),
-		('luxrender_material', luxrender_material_glossy_lossy),
-		('luxrender_material', luxrender_material_matte),
-		('luxrender_material', luxrender_material_mattetranslucent),
-		('luxrender_material', luxrender_material_metal),
-		('luxrender_material', luxrender_material_shinymetal),
-		('luxrender_material', luxrender_material_mirror),
-		('luxrender_material', luxrender_material_mix),
-		('luxrender_material', luxrender_material_null),
-		('luxrender_material', luxrender_material_velvet),
+		('luxrender_material', luxrender_mat_carpaint),
+		('luxrender_material', luxrender_mat_glass),
+		('luxrender_material', luxrender_mat_glass2),
+		('luxrender_material', luxrender_mat_roughglass),
+		('luxrender_material', luxrender_mat_glossy),
+		('luxrender_material', luxrender_mat_glossy_lossy),
+		('luxrender_material', luxrender_mat_matte),
+		('luxrender_material', luxrender_mat_mattetranslucent),
+		('luxrender_material', luxrender_mat_metal),
+		('luxrender_material', luxrender_mat_shinymetal),
+		('luxrender_material', luxrender_mat_mirror),
+		('luxrender_material', luxrender_mat_mix),
+		('luxrender_material', luxrender_mat_null),
+		('luxrender_material', luxrender_mat_velvet),
 		(None, luxrender_volume_data),		# call init_properties, but don't create instance
 		('Texture', luxrender_texture),
-		('luxrender_texture', luxrender_texture_bilerp),
-		('luxrender_texture', luxrender_texture_blackbody),
-		('luxrender_texture', luxrender_texture_brick),
-		('luxrender_texture', luxrender_texture_cauchy),
-		('luxrender_texture', luxrender_texture_constant),
-		('luxrender_texture', luxrender_texture_checkerboard),
-		('luxrender_texture', luxrender_texture_dots),
-		('luxrender_texture', luxrender_texture_equalenergy),
-		('luxrender_texture', luxrender_texture_fbm),
-		('luxrender_texture', luxrender_texture_gaussian),
-		('luxrender_texture', luxrender_texture_harlequin),
-		('luxrender_texture', luxrender_texture_imagemap),
-		('luxrender_texture', luxrender_texture_lampspectrum),
-		('luxrender_texture', luxrender_texture_luxpop),
-		('luxrender_texture', luxrender_texture_mapping),
-		('luxrender_texture', luxrender_texture_marble),
-		('luxrender_texture', luxrender_texture_mix),
-		('luxrender_texture', luxrender_texture_sellmeier),
-		('luxrender_texture', luxrender_texture_scale),
-		('luxrender_texture', luxrender_texture_sopra),
-		('luxrender_texture', luxrender_texture_transform),
-		('luxrender_texture', luxrender_texture_uv),
-		('luxrender_texture', luxrender_texture_windy),
-		('luxrender_texture', luxrender_texture_wrinkled),
+		('luxrender_texture', luxrender_tex_bilerp),
+		('luxrender_texture', luxrender_tex_blackbody),
+		('luxrender_texture', luxrender_tex_brick),
+		('luxrender_texture', luxrender_tex_cauchy),
+		('luxrender_texture', luxrender_tex_constant),
+		('luxrender_texture', luxrender_tex_checkerboard),
+		('luxrender_texture', luxrender_tex_dots),
+		('luxrender_texture', luxrender_tex_equalenergy),
+		('luxrender_texture', luxrender_tex_fbm),
+		('luxrender_texture', luxrender_tex_gaussian),
+		('luxrender_texture', luxrender_tex_harlequin),
+		('luxrender_texture', luxrender_tex_imagemap),
+		('luxrender_texture', luxrender_tex_lampspectrum),
+		('luxrender_texture', luxrender_tex_luxpop),
+		('luxrender_texture', luxrender_tex_mapping),
+		('luxrender_texture', luxrender_tex_marble),
+		('luxrender_texture', luxrender_tex_mix),
+		('luxrender_texture', luxrender_tex_sellmeier),
+		('luxrender_texture', luxrender_tex_scale),
+		('luxrender_texture', luxrender_tex_sopra),
+		('luxrender_texture', luxrender_tex_transform),
+		('luxrender_texture', luxrender_tex_uv),
+		('luxrender_texture', luxrender_tex_windy),
+		('luxrender_texture', luxrender_tex_wrinkled),
 	]
 	
 	def render(self, scene):

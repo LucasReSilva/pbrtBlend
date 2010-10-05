@@ -34,5 +34,5 @@ class ui_texture_lampspectrum(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'lampspectrum'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'lampspectrum' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_lampspectrum' )
 	]

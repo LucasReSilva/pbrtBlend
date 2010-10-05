@@ -34,5 +34,5 @@ class ui_texture_cauchy(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'cauchy'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'cauchy' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_cauchy' )
 	]

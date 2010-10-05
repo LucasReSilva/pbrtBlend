@@ -44,6 +44,7 @@ def MaterialParameter(attr, name, property_group):
 			'type': 'string',
 			'name': '%s_material' % attr,
 			'description': '%s_material' % attr,
+			'save_in_preset': True
 		},
 		{
 			'type': 'prop_search',
@@ -63,6 +64,7 @@ def VolumeParameter(attr, name):
 			'type': 'string',
 			'name': '%s_volume' % attr,
 			'description': '%s_volume' % attr,
+			'save_in_preset': True
 		},
 		{
 			'type': 'prop_search',
@@ -217,7 +219,8 @@ class luxrender_material(declarative_property_group):
 			'name': 'Type',
 			'description': 'LuxRender material type',
 			'default': 'matte',
-			'items': mat_list()
+			'items': mat_list(),
+			'save_in_preset': True
 		},
 		
 		# hidden parameter to hold current integrator type - updated on draw()
@@ -234,31 +237,36 @@ class luxrender_material(declarative_property_group):
 			'type': 'bool',
 			'attr': 'compo_visible_material',
 			'name': 'Visible Material',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'compo_visible_emission',
 			'name': 'Visible Emission',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'compo_visible_indirect_material',
 			'name': 'Visible Indirect Material',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'compo_visible_indirect_emission',
 			'name': 'Visible Indirect Emission',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'compo_override_alpha',
 			'name': 'Override Alpha',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -269,6 +277,7 @@ class luxrender_material(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 	] + \
 	TF_bumpmap.properties
@@ -292,7 +301,7 @@ class luxrender_material(declarative_property_group):
 		
 		material_params = ParamSet()
 		
-		sub_type = getattr(self, self.type)
+		sub_type = getattr(self, 'luxrender_material_%s'%self.type)
 		
 		# Bump mapping
 		if self.type not in ['mix', 'null']:
@@ -350,7 +359,7 @@ def carpaint_visibility():
 	
 	return cp_vis
 
-class carpaint(declarative_property_group):
+class luxrender_mat_carpaint(declarative_property_group):
 	
 	controls = [
 		'name'
@@ -385,7 +394,8 @@ class carpaint(declarative_property_group):
 				('opel titan', 'Opel Titan', 'opel titan'),
 				('polaris silber', 'Polaris Silber', 'polaris silber'),
 				('white', 'White', 'white'),
-			]
+			],
+			'save_in_preset': True
 		},
 	] + \
 		TF_d.properties + \
@@ -423,7 +433,7 @@ class carpaint(declarative_property_group):
 		
 		return carpaint_params
 
-class glass(declarative_property_group):
+class luxrender_mat_glass(declarative_property_group):
 	
 	controls = [
 		'architectural',
@@ -449,7 +459,8 @@ class glass(declarative_property_group):
 			'type': 'bool',
 			'attr': 'architectural',
 			'name': 'Architectural',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 	] + \
 		TF_cauchyb.properties + \
@@ -473,7 +484,7 @@ class glass(declarative_property_group):
 		
 		return glass_params
 
-class glass2(declarative_property_group):
+class luxrender_mat_glass2(declarative_property_group):
 	
 	controls = [
 		'architectural',
@@ -491,13 +502,15 @@ class glass2(declarative_property_group):
 			'type': 'bool',
 			'attr': 'architectural',
 			'name': 'Architectural',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'dispersion',
 			'name': 'Dispersion',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 	] + \
 		VolumeParameter('Interior', 'Interior') + \
@@ -511,7 +524,7 @@ class glass2(declarative_property_group):
 		
 		return glass2_params
 
-class roughglass(declarative_property_group):
+class luxrender_mat_roughglass(declarative_property_group):
 	
 	controls = [
 	] + \
@@ -552,7 +565,7 @@ class roughglass(declarative_property_group):
 		
 		return roughglass_params
 
-class glossy(declarative_property_group):
+class luxrender_mat_glossy(declarative_property_group):
 	
 	controls = [
 	] + \
@@ -597,7 +610,7 @@ class glossy(declarative_property_group):
 		
 		return glossy_params
 
-class glossy_lossy(declarative_property_group):
+class luxrender_mat_glossy_lossy(declarative_property_group):
 	
 	controls = [
 	] + \
@@ -642,7 +655,7 @@ class glossy_lossy(declarative_property_group):
 		
 		return glossy_lossy_params
 
-class matte(declarative_property_group):
+class luxrender_mat_matte(declarative_property_group):
 	
 	controls = [
 	] + \
@@ -667,7 +680,7 @@ class matte(declarative_property_group):
 		
 		return matte_params
 	
-class mattetranslucent(declarative_property_group):
+class luxrender_mat_mattetranslucent(declarative_property_group):
 	
 	controls = [
 	] + \
@@ -696,7 +709,7 @@ class mattetranslucent(declarative_property_group):
 		
 		return mattetranslucent_params
 
-class metal(declarative_property_group):
+class luxrender_mat_metal(declarative_property_group):
 	
 	controls = [
 		'name',
@@ -724,13 +737,15 @@ class metal(declarative_property_group):
 				('gold', 'gold', 'gold'),
 				('silver', 'silver', 'silver'),
 				('aluminium', 'aluminium', 'aluminium')
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'string',
 			'subtype': 'FILE_PATH',
 			'attr': 'filename',
 			'name': 'NK file',
+			'save_in_preset': True
 		},
 	] + \
 		TF_uroughness.properties + \
@@ -749,7 +764,7 @@ class metal(declarative_property_group):
 		
 		return metal_params
 
-class shinymetal(declarative_property_group):
+class luxrender_mat_shinymetal(declarative_property_group):
 	
 	controls = [
 	] + \
@@ -790,7 +805,7 @@ class shinymetal(declarative_property_group):
 		
 		return shinymetal_params
 
-class mirror(declarative_property_group):
+class luxrender_mat_mirror(declarative_property_group):
 	
 	controls = [
 	] + \
@@ -819,7 +834,7 @@ class mirror(declarative_property_group):
 		
 		return mirror_params
 
-class mix(declarative_property_group):
+class luxrender_mat_mix(declarative_property_group):
 	
 	controls = [
 		'namedmaterial1',
@@ -832,8 +847,8 @@ class mix(declarative_property_group):
 	properties = [
 	] + \
 		TF_amount.properties + \
-		MaterialParameter('namedmaterial1', 'Material 1', 'mix') + \
-		MaterialParameter('namedmaterial2', 'Material 2', 'mix')
+		MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_mat_mix') + \
+		MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_mat_mix')
 	
 	def get_params(self):
 		mix_params = ParamSet()
@@ -844,7 +859,7 @@ class mix(declarative_property_group):
 		
 		return mix_params
 
-class null(declarative_property_group):
+class luxrender_mat_null(declarative_property_group):
 	
 	controls = [
 	]
@@ -858,7 +873,7 @@ class null(declarative_property_group):
 	def get_params(self):
 		return ParamSet()
 
-class velvet(declarative_property_group):
+class luxrender_mat_velvet(declarative_property_group):
 	
 	controls = TC_Kd.controls + [
 		'thickness',
@@ -878,6 +893,7 @@ class velvet(declarative_property_group):
 			'attr': 'advanced',
 			'name': 'Advanced',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -888,6 +904,7 @@ class velvet(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -898,6 +915,7 @@ class velvet(declarative_property_group):
 			'soft_min': -100.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -908,6 +926,7 @@ class velvet(declarative_property_group):
 			'soft_min': -100.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -918,6 +937,7 @@ class velvet(declarative_property_group):
 			'soft_min': -100.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'save_in_preset': True
 		},
 	]
 	
@@ -969,13 +989,15 @@ class luxrender_emission(declarative_property_group):
 			'type': 'bool',
 			'attr': 'use_emission',
 			'name': 'Use Emission',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'string',
 			'attr': 'lightgroup',
 			'name': 'Light Group',
 			'default': 'default',
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -985,7 +1007,8 @@ class luxrender_emission(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1e8,
-			'soft_max': 1e8
+			'soft_max': 1e8,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -995,7 +1018,8 @@ class luxrender_emission(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1e5,
-			'soft_max': 1e5
+			'soft_max': 1e5,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -1005,7 +1029,8 @@ class luxrender_emission(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1e4,
-			'soft_max': 1e4
+			'soft_max': 1e4,
+			'save_in_preset': True
 		},
 	] + \
 	TC_L.properties
@@ -1038,7 +1063,8 @@ class luxrender_volume_data(declarative_property_group):
 			'name': 'Type',
 			'items': [
 				('clear', 'clear', 'clear')
-			]
+			],
+			'save_in_preset': True
 		},
 	] + \
 	TFR_IOR.properties + \
@@ -1054,7 +1080,8 @@ class luxrender_volume_data(declarative_property_group):
 			'soft_min': 0.00001,
 			'max': 1000.0,
 			'soft_max': 1000.0,
-			'precision': 6
+			'precision': 6,
+			'save_in_preset': True
 		},
 	]
 	

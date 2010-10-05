@@ -34,5 +34,5 @@ class ui_texture_gaussian(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'gaussian'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'gaussian' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_gaussian' )
 	]

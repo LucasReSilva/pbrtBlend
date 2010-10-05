@@ -34,5 +34,5 @@ class ui_texture_dots(luxrender_texture_base, bpy.types.Panel):
 	LUX_COMPAT = {'dots'}
 	
 	display_property_groups = [
-		( ('texture', 'luxrender_texture'), 'dots' )
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_dots' )
 	]

@@ -34,5 +34,5 @@ class ui_material_mix(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'mix'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'mix' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_mix' )
 	]

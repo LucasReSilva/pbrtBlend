@@ -34,5 +34,5 @@ class ui_material_metal(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'metal'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'metal' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_metal' )
 	]

@@ -65,7 +65,9 @@ class LUXRENDER_OT_preset_engine_add(AddPresetBase, bpy.types.Operator):
 	bl_idname = 'luxrender.preset_engine_add'
 	bl_label = 'Add LuxRender Engine settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_engine'
-	preset_values = ['bpy.context.scene.luxrender_engine.%s'%v['attr'] for v in bpy.types.luxrender_engine.properties]
+	preset_values = [
+		'bpy.context.scene.luxrender_engine.%s'%v['attr'] for v in bpy.types.luxrender_engine.get_exportable_properties()
+	]
 	preset_subdir = 'luxrender/engine'
 
 class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base, bpy.types.Menu):
@@ -77,8 +79,38 @@ class LUXRENDER_OT_preset_networking_add(AddPresetBase, bpy.types.Operator):
 	bl_idname = 'luxrender.preset_networking_add'
 	bl_label = 'Add LuxRender Networking settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_networking'
-	preset_values = ['bpy.context.scene.luxrender_networking.%s'%v['attr'] for v in bpy.types.luxrender_engine.properties]
+	preset_values = [
+		'bpy.context.scene.luxrender_networking.%s'%v['attr'] for v in bpy.types.luxrender_networking.get_exportable_properties()
+	]
 	preset_subdir = 'luxrender/networking'
+
+class LUXRENDER_MT_presets_material(LUXRENDER_MT_base, bpy.types.Menu):
+	bl_label = "LuxRender Material Presets"
+	preset_subdir = "luxrender/material"
+
+class LUXRENDER_OT_preset_material_add(AddPresetBase, bpy.types.Operator):
+	'''Save the current settings as a preset'''
+	bl_idname = 'luxrender.preset_material_add'
+	bl_label = 'Add LuxRender Material settings preset'
+	preset_menu = 'LUXRENDER_MT_presets_material'
+	preset_values =  []
+	preset_subdir = 'luxrender/material'
+	
+	def execute(self, context):
+		pv = [
+			'bpy.context.material.luxrender_material.%s'%v['attr'] for v in bpy.types.luxrender_material.get_exportable_properties()
+		]
+		
+		# store only the sub-properties of the selected lux material type
+		lux_type = context.material.luxrender_material.type
+		sub_type = getattr(bpy.types, 'luxrender_mat_%s' % lux_type)
+		
+		pv.extend([
+			'bpy.context.material.luxrender_material.luxrender_mat_%s.%s'%(lux_type, v['attr']) for v in sub_type.get_exportable_properties()
+		])
+		
+		self.preset_values = pv
+		return super().execute(context)
 
 # Volume data handling
 

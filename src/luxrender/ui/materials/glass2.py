@@ -34,5 +34,5 @@ class ui_material_glass2(luxrender_material_sub, bpy.types.Panel):
 	LUX_COMPAT = {'glass2'}
 	
 	display_property_groups = [
-		( ('material', 'luxrender_material'), 'glass2' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_glass2' )
 	]
