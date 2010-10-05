@@ -76,14 +76,16 @@ class luxrender_sampler(declarative_property_group):
 				('erpt', 'ERPT', 'erpt'),
 				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
 				('random', 'Random', 'random')
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced sampler settings',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
@@ -95,6 +97,7 @@ class luxrender_sampler(declarative_property_group):
 			'soft_min': 0,
 			'max': 65535,
 			'soft_max': 65535,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -104,6 +107,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 0.4,
 			'min': 0,
 			'max': 1,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int', 
@@ -113,6 +117,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 512,
 			'min': 0,
 			'max': 32768,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -120,6 +125,7 @@ class luxrender_sampler(declarative_property_group):
 			'name': 'Use Variance',
 			'description': 'Use Variance',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -129,7 +135,8 @@ class luxrender_sampler(declarative_property_group):
 				('random','random', 'random'),
 				('lowdiscrepancy', 'lowdiscrepancy', 'lowdiscrepancy'),
 				('metropolis', 'metropolis', 'metropolis')
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'int', 
@@ -139,6 +146,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 512,
 			'min': 1,
 			'max': 32768,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int', 
@@ -147,6 +155,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 256,
 			'min': 1,
 			'max': 32768,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -160,7 +169,8 @@ class luxrender_sampler(declarative_property_group):
 				('vegas', 'Vegas', 'vegas'),
 				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
 				('hilbert', 'Hilbert', 'hilbert'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'int', 
@@ -170,6 +180,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 4,
 			'min': 1,
 			'max': 8192,
+			'save_in_preset': True
 		},
 	]
 	

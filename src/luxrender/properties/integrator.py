@@ -205,14 +205,16 @@ class luxrender_integrator(declarative_property_group):
 				('distributedpath', 'Distributed Path', 'distributedpath'),
 				('igi', 'Instant Global Illumination', 'igi',),
 				('exphotonmap', 'Ex-Photon Map', 'exphotonmap'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced integrator settings',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -224,7 +226,8 @@ class luxrender_integrator(declarative_property_group):
 				('auto', 'Auto', 'auto'),
 				('one', 'One', 'one'),
 				('all', 'All', 'all'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'int', 
@@ -234,6 +237,7 @@ class luxrender_integrator(declarative_property_group):
 			'default': 16,
 			'min': 0,
 			'max': 2048,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int', 
@@ -243,24 +247,28 @@ class luxrender_integrator(declarative_property_group):
 			'default': 16,
 			'min': 0,
 			'max': 2048,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'eyerrthreshold',
 			'name': 'Eye RR Threshold',
 			'default': 0.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'lightrrthreshold',
 			'name': 'Light RR Threshold',
 			'default': 0.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'maxdepth',
 			'name': 'Max. depth',
 			'default': 8,
+			'save_in_preset': True
 		},
 		
 		{
@@ -272,25 +280,29 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'bool',
 			'attr': 'directsampleall',
 			'name': 'Sample all',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'directsamples',
 			'name': 'Samples',
 			'default': 1,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'directdiffuse',
 			'name': 'Diffuse',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'directglossy',
 			'name': 'Glossy',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		
 		{
@@ -302,25 +314,29 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'bool',
 			'attr': 'indirectsampleall',
 			'name': 'Sample all',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'indirectsamples',
 			'name': 'Samples',
 			'default': 1,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'indirectdiffuse',
 			'name': 'Diffuse',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'indirectglossy',
 			'name': 'Glossy',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		
 		{
@@ -332,25 +348,29 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'diffusereflectdepth',
 			'name': 'Reflection depth',
-			'default': 3
+			'default': 3,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'diffusereflectsamples',
 			'name': 'Reflection samples',
-			'default': 1
+			'default': 1,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'diffuserefractdepth',
 			'name': 'Refraction depth',
-			'default': 5
+			'default': 5,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'diffuserefractsamples',
 			'name': 'Refraction samples',
-			'default': 1
+			'default': 1,
+			'save_in_preset': True
 		},
 		
 		{
@@ -362,25 +382,29 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'glossyreflectdepth',
 			'name': 'Reflection depth',
-			'default': 2
+			'default': 2,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'glossyreflectsamples',
 			'name': 'Reflection samples',
-			'default': 1
+			'default': 1,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'glossyrefractdepth',
 			'name': 'Refraction depth',
-			'default': 5
+			'default': 5,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'glossyrefractsamples',
 			'name': 'Refraction samples',
-			'default': 1
+			'default': 1,
+			'save_in_preset': True
 		},
 		
 		{
@@ -392,13 +416,15 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'specularreflectdepth',
 			'name': 'Reflection depth',
-			'default': 3
+			'default': 3,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'specularrefractdepth',
 			'name': 'Refraction depth',
-			'default': 5
+			'default': 5,
+			'save_in_preset': True
 		},
 		
 		{
@@ -411,109 +437,127 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'diffusereflectreject',
 			'name': 'Diffuse reflection reject',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'diffusereflectreject_threshold',
 			'name': 'Threshold',
-			'default': 10.0
+			'default': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'diffuserefractreject',
 			'name': 'Diffuse refraction reject',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'diffuserefractreject_threshold',
 			'name': 'Threshold',
-			'default': 10.0
+			'default': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'glossyreflectreject',
 			'name': 'Glossy reflection reject',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'glossyreflectreject_threshold',
 			'name': 'Threshold',
-			'default': 10.0
+			'default': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'glossyrefractreject',
 			'name': 'Glossy refraction reject',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'glossyrefractreject_threshold',
 			'name': 'Threshold',
-			'default': 10.0
+			'default': 10.0,
+			'save_in_preset': True
 		},
 		
 		{
 			'type': 'int',
 			'attr': 'maxphotondepth',
 			'name': 'Max. photon depth',
-			'default': 10
+			'default': 10,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'directphotons',
 			'name': 'Direct photons',
-			'default': 1000000
+			'default': 1000000,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'causticphotons',
 			'name': 'Caustic photons',
 			'default': 20000,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'indirectphotons',
 			'name': 'Indirect photons',
-			'default': 200000
+			'default': 200000,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'radiancephotons',
 			'name': 'Radiance photons',
-			'default': 200000
+			'default': 200000,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'nphotonsused',
 			'name': 'Number of photons used',
-			'default': 50
+			'default': 50,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'maxphotondist',
 			'name': 'Max. photon distance',
 			'default': 0.1,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'finalgather',
 			'name': 'Final Gather',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'finalgathersamples',
 			'name': 'Final gather samples',
-			'default': 32
+			'default': 32,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'gatherangle',
 			'name': 'Gather angle',
-			'default': 10.0
+			'default': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -523,74 +567,86 @@ class luxrender_integrator(declarative_property_group):
 			'items': [
 				('directlighting', 'directlighting', 'directlighting'),
 				('path', 'path', 'path'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'distancethreshold',
 			'name': 'Distance threshold',
-			'default': 0.75
+			'default': 0.75,
+			'save_in_preset': True
 		},
 		{
 			'type': 'string',
 			'subtype': 'FILE_PATH',
 			'attr': 'photonmapsfile',
 			'name': 'Photonmaps file',
-			'default': ''
+			'default': '',
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'dbg_enabledirect',
 			'name': 'Debug: Enable direct',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'dbg_enableradiancemap',
 			'name': 'Debug: Enable radiance map',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'dbg_enableindircaustic',
 			'name': 'Debug: Enable indirect caustics',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'dbg_enableindirdiffuse',
 			'name': 'Debug: Enable indirect diffuse',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'dbg_enableindirspecular',
 			'name': 'Debug: Enable indirect specular',
 			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'nsets',
 			'name': 'Number of sets',
-			'default': 4
+			'default': 4,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
 			'attr': 'nlights',
 			'name': 'Number of lights',
 			'default': 64,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'mindist',
 			'name': 'Min. Distance',
 			'default': 0.1,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'rrcontinueprob',
 			'name': 'RR continue probability',
 			'default': 0.65,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',
@@ -601,13 +657,15 @@ class luxrender_integrator(declarative_property_group):
 				('efficiency', 'efficiency', 'efficiency'),
 				('probability', 'probability', 'probability'),
 				('none', 'none', 'none'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'includeenvironment',
 			'name': 'Include Environment',
-			'default': True
+			'default': True,
+			'save_in_preset': True
 		},
 	]
 	

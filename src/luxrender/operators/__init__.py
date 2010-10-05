@@ -67,6 +67,16 @@ class LUXRENDER_OT_preset_engine_add(AddPresetBase, bpy.types.Operator):
 	preset_menu = 'LUXRENDER_MT_presets_engine'
 	preset_values = [
 		'bpy.context.scene.luxrender_engine.%s'%v['attr'] for v in bpy.types.luxrender_engine.get_exportable_properties()
+	] + [
+		'bpy.context.scene.luxrender_sampler.%s'%v['attr'] for v in bpy.types.luxrender_sampler.get_exportable_properties()
+	] + [
+		'bpy.context.scene.luxrender_integrator.%s'%v['attr'] for v in bpy.types.luxrender_integrator.get_exportable_properties()
+	] + [
+		'bpy.context.scene.luxrender_volumeintegrator.%s'%v['attr'] for v in bpy.types.luxrender_volumeintegrator.get_exportable_properties()
+	] + [
+		'bpy.context.scene.luxrender_filter.%s'%v['attr'] for v in bpy.types.luxrender_filter.get_exportable_properties()
+	] + [
+		'bpy.context.scene.luxrender_accelerator.%s'%v['attr'] for v in bpy.types.luxrender_accelerator.get_exportable_properties()
 	]
 	preset_subdir = 'luxrender/engine'
 
@@ -99,6 +109,8 @@ class LUXRENDER_OT_preset_material_add(AddPresetBase, bpy.types.Operator):
 	def execute(self, context):
 		pv = [
 			'bpy.context.material.luxrender_material.%s'%v['attr'] for v in bpy.types.luxrender_material.get_exportable_properties()
+		] + [
+			'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
 		]
 		
 		# store only the sub-properties of the selected lux material type
@@ -107,6 +119,44 @@ class LUXRENDER_OT_preset_material_add(AddPresetBase, bpy.types.Operator):
 		
 		pv.extend([
 			'bpy.context.material.luxrender_material.luxrender_mat_%s.%s'%(lux_type, v['attr']) for v in sub_type.get_exportable_properties()
+		])
+		
+		self.preset_values = pv
+		return super().execute(context)
+
+class LUXRENDER_MT_presets_texture(LUXRENDER_MT_base, bpy.types.Menu):
+	bl_label = "LuxRender Texture Presets"
+	preset_subdir = "luxrender/texture"
+
+class LUXRENDER_OT_preset_texture_add(AddPresetBase, bpy.types.Operator):
+	'''Save the current settings as a preset'''
+	bl_idname = 'luxrender.preset_texture_add'
+	bl_label = 'Add LuxRender Texture settings preset'
+	preset_menu = 'LUXRENDER_MT_presets_texture'
+	preset_values =  []
+	preset_subdir = 'luxrender/texture'
+	
+	def execute(self, context):
+		pv = [
+			'bpy.context.texture.luxrender_texture.%s'%v['attr'] for v in bpy.types.luxrender_texture.get_exportable_properties()
+		]
+		
+		# store only the sub-properties of the selected lux texture type
+		lux_type = context.texture.luxrender_texture.type
+		sub_type = getattr(bpy.types, 'luxrender_tex_%s' % lux_type)
+		
+		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset()
+		if '2DMAPPING' in features:
+			pv.extend([
+				'bpy.context.texture.luxrender_texture.luxrender_tex_mapping.%s'%v['attr'] for v in bpy.types.luxrender_tex_mapping.get_exportable_properties()
+			])
+		if '3DMAPPING' in features:
+			pv.extend([
+				'bpy.context.texture.luxrender_texture.luxrender_tex_transform.%s'%v['attr'] for v in bpy.types.luxrender_tex_transform.get_exportable_properties()
+			])
+		
+		pv.extend([
+			'bpy.context.texture.luxrender_texture.luxrender_tex_%s.%s'%(lux_type, v['attr']) for v in sub_type.get_exportable_properties()
 		])
 		
 		self.preset_values = pv

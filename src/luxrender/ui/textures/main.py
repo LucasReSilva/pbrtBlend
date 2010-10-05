@@ -51,3 +51,11 @@ class ui_texture_main(luxrender_texture_base, bpy.types.Panel):
 				(context.scene.render.engine in cls.COMPAT_ENGINES) \
 				and context.texture.luxrender_texture.type is not 'BLENDER'
 				#(tex.type != 'NONE' or tex.use_nodes) and \
+	
+	def draw(self, context):
+		row = self.layout.row(align=True)
+		row.menu("LUXRENDER_MT_presets_texture", text=bpy.types.LUXRENDER_MT_presets_texture.bl_label)
+		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMIN")
+		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMOUT").remove_active = True
+		
+		super().draw(context)

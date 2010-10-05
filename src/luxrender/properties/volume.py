@@ -54,7 +54,8 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'items': [
 				('emission', 'Emission', 'emission'),
 				('single', 'Single', 'single'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -66,6 +67,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'save_in_preset': True
 		}
 	]
 	

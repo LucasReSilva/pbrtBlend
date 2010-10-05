@@ -223,14 +223,15 @@ class ColorTextureParameter(TextureParameterBase):
 	def get_params(self, context):
 		TC_params = ParamSet()
 		
-		TC_params.update(
-			add_texture_parameter(
-				LuxManager.ActiveManager.lux_context,
-				self.attr,
-				'color',
-				context
+		if LuxManager.ActiveManager is not None:
+			TC_params.update(
+				add_texture_parameter(
+					LuxManager.ActiveManager.lux_context,
+					self.attr,
+					'color',
+					context
+				)
 			)
-		)
 		
 		return TC_params
 
@@ -347,14 +348,15 @@ class FloatTextureParameter(TextureParameterBase):
 	def get_params(self, context):
 		TC_params = ParamSet()
 		
-		TC_params.update(
-			add_texture_parameter(
-				LuxManager.ActiveManager.lux_context,
-				self.attr,
-				'float',
-				context
+		if LuxManager.ActiveManager is not None:
+			TC_params.update(
+				add_texture_parameter(
+					LuxManager.ActiveManager.lux_context,
+					self.attr,
+					'float',
+					context
+				)
 			)
-		)
 		
 		return TC_params
 
@@ -471,14 +473,15 @@ class FresnelTextureParameter(TextureParameterBase):
 	def get_params(self, context):
 		TC_params = ParamSet()
 		
-		TC_params.update(
-			add_texture_parameter(
-				LuxManager.ActiveManager.lux_context,
-				self.attr,
-				'fresnel',
-				context
+		if LuxManager.ActiveManager is not None:
+			TC_params.update(
+				add_texture_parameter(
+					LuxManager.ActiveManager.lux_context,
+					self.attr,
+					'fresnel',
+					context
+				)
 			)
-		)
 		
 		return TC_params
 
@@ -898,16 +901,17 @@ class luxrender_tex_brick(declarative_property_group):
 			.add_float('brickwidth', self.brickwidth) \
 			.add_float('brickrun', self.brickrun) \
 			.add_float('mortarsize', self.mortarsize)
-			
-		brick_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'brickmodtex', self.variant, self)
-		)
-		brick_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'bricktex', self.variant, self)
-		)
-		brick_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'mortartex', self.variant, self)
-		)
+		
+		if LuxManager.ActiveManager is not None:
+			brick_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'brickmodtex', self.variant, self)
+			)
+			brick_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'bricktex', self.variant, self)
+			)
+			brick_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'mortartex', self.variant, self)
+			)
 		
 		return {'3DMAPPING'}, brick_params
 
@@ -1039,12 +1043,13 @@ class luxrender_tex_checkerboard(declarative_property_group):
 			.add_string('aamode', self.aamode) \
 			.add_integer('dimension', self.dimension)
 		
-		checkerboard_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
-		)
-		checkerboard_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
-		)
+		if LuxManager.ActiveManager is not None:
+			checkerboard_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
+			)
+			checkerboard_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
+			)
 		
 		if self.dimension == 2:
 			features = {'2DMAPPING'}
@@ -1116,13 +1121,14 @@ class luxrender_tex_dots(declarative_property_group):
 	def get_paramset(self):
 		
 		dots_params = ParamSet()
-			
-		dots_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'inside', self.variant, self)
-		)
-		dots_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'outside', self.variant, self)
-		)
+		
+		if LuxManager.ActiveManager is not None:
+			dots_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'inside', self.variant, self)
+			)
+			dots_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'outside', self.variant, self)
+			)
 		
 		return {'2DMAPPING'}, dots_params
 
@@ -1683,15 +1689,16 @@ class luxrender_tex_mix(declarative_property_group):
 		
 		mix_params = ParamSet()
 		
-		mix_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'amount', 'float', self)
-		)
-		mix_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
-		)
-		mix_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
-		)
+		if LuxManager.ActiveManager is not None:
+			mix_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'amount', 'float', self)
+			)
+			mix_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
+			)
+			mix_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
+			)
 		
 		return set(), mix_params
 
@@ -1822,12 +1829,13 @@ class luxrender_tex_scale(declarative_property_group):
 		
 		scale_params = ParamSet()
 		
-		scale_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
-		)
-		scale_params.update(
-			add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
-		)
+		if LuxManager.ActiveManager is not None:
+			scale_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
+			)
+			scale_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
+			)
 		
 		return set(), scale_params
 

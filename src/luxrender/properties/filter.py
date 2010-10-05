@@ -69,14 +69,16 @@ class luxrender_filter(declarative_property_group):
 				('mitchell', 'Mitchell', 'mitchell'),
 				('sinc', 'Sinc', 'sinc'),
 				('triangle', 'Triangle', 'triangle'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
 			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced filter settings',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -88,6 +90,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -99,6 +102,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -110,6 +114,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -121,6 +126,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -132,6 +138,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'save_in_preset': True
 		},
 		{
 			'type': 'float',
@@ -143,6 +150,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'save_in_preset': True
 		},
 	]
 	

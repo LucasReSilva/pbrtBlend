@@ -71,7 +71,7 @@ def VolumeParameter(attr, name):
 			'attr': attr,
 			'src': lambda s,c: s.scene.luxrender_volumes,
 			'src_attr': 'volumes',
-			'trg': lambda s,c: c.glass2,
+			'trg': lambda s,c: c.luxrender_mat_glass2,
 			'trg_attr': '%s_volume' % attr,
 			'name': name
 		},

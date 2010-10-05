@@ -73,7 +73,7 @@ class luxrender_accelerator(declarative_property_group):
 			'attr': 'accelerator',
 			'name': 'Accelerator',
 			'description': 'Scene accelerator type',
-			'default': 'tabreckdtree',
+			'default': 'qbvh',
 			'items': [
 				#('none', 'none', 'None'),
 				#('bruteforce', 'bruteforce', 'bruteforce'),
@@ -81,31 +81,36 @@ class luxrender_accelerator(declarative_property_group):
 				('grid', 'Grid', 'grid'),
 				('bvh', 'BVH', 'bvh'),
 				('qbvh', 'QBVH', 'qbvh'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'attr': 'advanced',
 			'type': 'bool',
 			'name': 'Advanced',
 			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'intersectcost',
 			'type': 'int',
 			'name': 'Intersect Cost',
-			'default': 80
+			'default': 80,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'traversalcost',
 			'type': 'int',
 			'name': 'Traversal Cost',
-			'default': 1
+			'default': 1,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'emptybonus',
 			'type': 'float',
 			'name': 'Empty Bonus',
-			'default': 0.2
+			'default': 0.2,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'treetype',
@@ -116,49 +121,57 @@ class luxrender_accelerator(declarative_property_group):
 				('2', 'Binary', '2'),
 				('4', 'Quad', '4'),
 				('8', 'Oct', '8'),
-			]
+			],
+			'save_in_preset': True
 		},
 		{
 			'attr': 'costsample',
 			'type': 'int',
 			'name': 'Costsample',
-			'default': 0
+			'default': 0,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'maxprims',
 			'type': 'int',
 			'name': 'Max. Prims',
-			'default': 1
+			'default': 1,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'maxdepth',
 			'type': 'int',
 			'name': 'Max. depth',
-			'default': -1
+			'default': -1,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'refineimmediately',
 			'type': 'bool',
 			'name': 'Refine Immediately',
-			'default': False
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'maxprimsperleaf',
 			'type': 'int',
 			'name': 'Max. prims per leaf',
-			'default': 4
+			'default': 4,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'fullsweepthreshold',
 			'type': 'int',
 			'name': 'Full sweep threshold',
 			'default': 16,
+			'save_in_preset': True
 		},
 		{
 			'attr': 'skipfactor',
 			'type': 'int',
 			'name': 'Skip factor',
-			'default': 1
+			'default': 1,
+			'save_in_preset': True
 		},
 	]
 	
