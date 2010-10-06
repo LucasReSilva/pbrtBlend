@@ -180,7 +180,7 @@ class luxrender_camera(declarative_property_group):
 		'''
 		
 		shiftX = cam.shift_x
-		shiftY = cam.shift_x
+		shiftY = cam.shift_y
 		
 		# TODO:
 		scale = 1.0
