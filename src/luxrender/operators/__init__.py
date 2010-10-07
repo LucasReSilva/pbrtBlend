@@ -254,7 +254,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		])
 		
 		efutil.export_path = lxs_filename
-		print('(2) export_path is %s' % efutil.export_path)
+		#print('(2) export_path is %s' % efutil.export_path)
 		
 		if self.properties.api_type == 'FILE':
 			

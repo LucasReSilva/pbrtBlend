@@ -556,7 +556,7 @@ class luxrender_texture(declarative_property_group):
 		'''
 		
 		# this requires the sub-IDPropertyGroup name to be the same as the texture name
-		if hasattr(self, self.type):
+		if hasattr(self, 'luxrender_tex_%s'%self.type):
 			lux_texture = getattr(self, 'luxrender_tex_%s'%self.type) 
 			features, params = lux_texture.get_paramset()
 			

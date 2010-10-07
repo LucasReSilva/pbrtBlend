@@ -334,7 +334,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			self.output_dir += '/'
 		
 		efutil.export_path = self.output_dir
-		print('(1) export_path is %s' % efutil.export_path)
+		#print('(1) export_path is %s' % efutil.export_path)
 		os.chdir(self.output_dir)
 		
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
