@@ -212,6 +212,7 @@ def compatible(mod):
 
 compatible("properties_data_mesh")
 compatible("properties_data_camera")
+compatible("properties_particle")
 
 class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 
@@ -299,7 +300,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		if scene is None:
 			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
-			return False
+			return
 		
 		# Refresh the scene as early as possible in render process
 		scene.frame_set(scene.frame_current)
@@ -313,8 +314,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			export_result = self.render_scene(scene)
 			
 		if export_result == False:
-			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
-			return False
+			#bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
+			return
 		
 		self.render_start(scene)
 		

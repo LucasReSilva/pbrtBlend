@@ -301,7 +301,7 @@ class luxrender_material(declarative_property_group):
 		
 		material_params = ParamSet()
 		
-		sub_type = getattr(self, 'luxrender_material_%s'%self.type)
+		sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
 		
 		# Bump mapping
 		if self.type not in ['mix', 'null']:

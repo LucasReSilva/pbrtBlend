@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
+import bpy, mathutils
 
 from ef.util import util as efutil
 
@@ -174,7 +174,7 @@ def exportPlyMesh(scene, mesh, lux_context):
 # export_mesh(lux_context, scene, object, matrix)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def exportMesh(lux_context, scene, ob, object_begin_end=True):
+def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None):
 	
 	LuxLog('Mesh Export: %s' % ob.data.name)
 	
@@ -186,6 +186,8 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True):
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
 	if object_begin_end: lux_context.objectBegin(ob.data.name)
+	
+	if scale is not None: lux_context.scale(*scale)
 	
 	if scene.luxrender_engine.mesh_type == 'native':
 		shape_type, shape_params = exportNativeMesh(scene, mesh, lux_context)
@@ -215,6 +217,7 @@ def allow_instancing(scene):
 
 def exportInstance(lux_context, scene, ob, matrix):
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
+	
 	# object translation/rotation/scale 
 	lux_context.transform( matrix_to_list(matrix, apply_worldscale=True) )
 	
@@ -307,7 +310,7 @@ def write_lxo(render_engine, lux_context, scene):
 		if ob.parent and ob.parent.is_duplicator:
 			continue
 
-		if ob.is_duplicator:
+		if ob.is_duplicator and len(ob.particle_systems) < 1:
 			# create dupli objects
 			ob.create_dupli_list(scene)
 
@@ -326,6 +329,25 @@ def write_lxo(render_engine, lux_context, scene):
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
+		
+		for psys in ob.particle_systems:
+			psys_settings = psys.settings
+			allowed_particle_states = {'ALIVE'}
+			if psys_settings.render_type == 'OBJECT':
+				scene.update()
+				particle_object = psys_settings.dupli_object
+				for mat in get_instance_materials(particle_object):
+					mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
+				for particle in psys.particles:
+					if particle.is_visible and (particle.alive_state in allowed_particle_states):
+						if allow_instancing(scene) and (particle_object.data.name not in meshes_exported):
+							exportMesh(lux_context, scene, particle_object, scale=[particle.size]*3)
+							meshes_exported.add(particle_object.data.name)
+						particle_matrix = mathutils.Matrix.Translation( particle.location )
+						particle_matrix *= particle.rotation.to_matrix().to_4x4()
+						#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
+						exportInstance(lux_context, scene, particle_object, particle_matrix)
+						del particle_matrix
 
 	# browse all scene objects for "mesh-convertible" ones
 	# skip duplicated objects here
@@ -347,7 +369,7 @@ def write_lxo(render_engine, lux_context, scene):
 		else:
 			render_emitter = True
 		for psys in ob.particle_systems:
-			render_emitter |= psys.settings.emitter
+			render_emitter |= psys.settings.use_render_emitter
 
 		# dupli object render rule copied from convertblender.c (blender internal render)		
 		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):

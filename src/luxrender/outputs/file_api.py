@@ -231,10 +231,16 @@ class Custom_Context(object):
 	
 	def transformEnd(self):
 		self._api('TransformEnd #', ['', []])
-		
+	
+	def concatTransform(self, values):
+		self.wf(self.current_file, '\nConcatTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
+	
 	def transform(self, values):
 		self.wf(self.current_file, '\nTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
-		
+	
+	def scale(self, x,y,z):
+		self.wf(self.current_file, '\nScale %s' % ' '.join(['%0.15f'%i for i in [x,y,z]]))
+	
 	def shape(self, *args):
 		self._api('Shape', args, file=self.current_file)
 	
