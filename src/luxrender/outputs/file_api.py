@@ -322,6 +322,12 @@ class Custom_Context(object):
 		self.use_network_servers = True
 		self.servers.append(s)
 	
+	def getRenderingServersStatus(self):
+		return [(i, 0) for i in self.servers]
+	
+	def removeServer(self, s):
+		self.servers.remove(s)
+	
 	def parse(self, filename, async):
 		'''
 		In a deviation from the API, this function returns a new context,

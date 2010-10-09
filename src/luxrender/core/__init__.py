@@ -550,7 +550,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				# If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
 				if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
-					luxrender_process.send_signal(subprocess.signal.SIGINT)
+					# Use SIGTERM because that's the only one supported on Windows
+					luxrender_process.send_signal(subprocess.signal.SIGTERM)
 				
 				# Stop updating the render result and load the final image
 				framebuffer_thread.stop()

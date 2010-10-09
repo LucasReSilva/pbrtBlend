@@ -174,9 +174,9 @@ def exportPlyMesh(scene, mesh, lux_context):
 # export_mesh(lux_context, scene, object, matrix)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None):
+def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=True):
 	
-	LuxLog('Mesh Export: %s' % ob.data.name)
+	if log: LuxLog('Mesh Export: %s' % ob.data.name)
 	
 	#print('-> Create render mesh')
 	mesh = ob.create_mesh(scene, True, 'RENDER')
@@ -258,7 +258,7 @@ def exportInstance(lux_context, scene, ob, matrix):
 	
 	# If the object emits, don't export instance or motioninstance
 	if (not allow_instancing(scene)) or object_is_emitter:
-		exportMesh(lux_context, scene, ob, object_begin_end=False)
+		exportMesh(lux_context, scene, ob, object_begin_end=False, log=False)
 	# special case for motion blur since the mesh is already exported before the attribute
 	elif is_object_animated:
 		lux_context.transformBegin(comment=ob.name, file=Files.GEOM)
@@ -341,7 +341,7 @@ def write_lxo(render_engine, lux_context, scene):
 				for particle in psys.particles:
 					if particle.is_visible and (particle.alive_state in allowed_particle_states):
 						if allow_instancing(scene) and (particle_object.data.name not in meshes_exported):
-							exportMesh(lux_context, scene, particle_object, scale=[particle.size]*3)
+							exportMesh(lux_context, scene, particle_object, scale=[particle.size]*3, log=False)
 							meshes_exported.add(particle_object.data.name)
 						particle_matrix = mathutils.Matrix.Translation( particle.location )
 						particle_matrix *= particle.rotation.to_matrix().to_4x4()

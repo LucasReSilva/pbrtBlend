@@ -279,6 +279,9 @@ class LuxManager(object):
 		# Clean up after last framebuffer update
 		if self.lux_context is not None:
 			self.lux_context.cleanup()
+			# and disconnect all servers
+			for name, port in self.lux_context.getRenderingServersStatus():
+				self.lux_context.removeServer(name)
 		
 		self.fb_thread  = LuxFilmDisplay(
 			{ 'lux_context': self.lux_context }
