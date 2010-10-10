@@ -68,7 +68,7 @@ class TextureParameterBase(object):
 		return lambda s,c: s.object.material_slots[s.object.active_material_index].material
 	
 	def texture_slot_set_attr(self):
-		return lambda s,c: getattr(c, c.type)
+		return lambda s,c: getattr(c, 'luxrender_mat_%s'%c.type)
 	
 	def get_controls(self):
 		'''
