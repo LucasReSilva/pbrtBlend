@@ -34,6 +34,18 @@ class Files(object):
 	MATS = 1
 	GEOM = 2
 
+class RenderingServerInfo(object):
+	'''
+	Emulate pylux.RenderingServerInfo
+	'''
+	name = None
+	port = None
+	secsSinceLastContact = None
+	serverIndex = None
+	sid = None
+	def __init__(self, name):
+		self.name = name
+
 class Custom_Context(object):
 	'''
 	Imitate the real pylux Context object so that we can
@@ -318,12 +330,12 @@ class Custom_Context(object):
 	def setNetworkServerUpdateInterval(self, int):
 		self.serverinterval = int
 	
-	def addServer(self, s):
+	def addServer(self, name):
 		self.use_network_servers = True
-		self.servers.append(s)
+		self.servers.append(name)
 	
 	def getRenderingServersStatus(self):
-		return [(i, 0) for i in self.servers]
+		return [RenderingServerInfo(name) for name in self.servers]
 	
 	def removeServer(self, s):
 		self.servers.remove(s)
