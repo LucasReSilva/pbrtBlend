@@ -568,12 +568,12 @@ class luxrender_texture(declarative_property_group):
 			# 2D Mapping options
 			#if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
 			if '2DMAPPING' in features:
-				params.update( self.mapping.get_paramset() )
+				params.update( self.luxrender_tex_mapping.get_paramset() )
 				
 			# 3D Mapping options
 			#if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
 			if '3DMAPPING' in features:
-				params.update( self.transform.get_paramset() )
+				params.update( self.luxrender_tex_transform.get_paramset() )
 				
 			return lux_texture.variant, params
 		else:
