@@ -34,6 +34,8 @@ try:
 	except:
 		from luxrender import pylux
 		
+		LUXRENDER_VERSION = pylux.version()
+		
 		class Custom_Context(pylux.Context):
 			'''
 			This is the 'pure' entry point to the pylux.Context API
@@ -64,9 +66,38 @@ try:
 			
 			# no further action required
 		
+		if LUXRENDER_VERSION < '0.8':
+			from ef.util.util import format_elapsed_time
+			
+			def printableStatistics(self, add_total):
+				stats_dict = {
+					'secElapsed': 0.0,
+					'samplesSec': 0.0,
+					'samplesTotSec': 0.0,
+					'samplesPx': 0.0,
+					'efficiency': 0.0,
+				}
+				stats_format = {
+					'secElapsed':		format_elapsed_time,
+					'samplesSec':		lambda x: 'Samples/Sec: %0.2f'%x,
+					'samplesTotSec':	lambda x: 'Total Samples/Sec: %0.2f'%x,
+					'samplesPx':		lambda x: 'Samples/Px: %0.2f'%x,
+					'efficiency':		lambda x: 'Efficiency: %0.2f %%'%x,
+				}
+				for k in stats_dict.keys():
+					stats_dict[k] = self.statistics(k)
+				
+					stats_string = ' | '.join(['%s'%stats_format[k](v) for k,v in stats_dict.items()])
+					network_servers = self.getServerCount()
+					if network_servers > 0:
+						stats_string += ' | %i Network Servers Active' % network_servers
+				
+				return stats_string
+			
+			Custom_Context.printableStatistics = printableStatistics
+		
 		PYLUX_AVAILABLE = True
-		LuxLog('Using pylux version %s' % pylux.version())
-		LUXRENDER_VERSION = pylux.version()
+		LuxLog('Using pylux version %s' % LUXRENDER_VERSION)
 	
 except ImportError as err:
 	LuxLog('WARNING: Binary pylux module not available! Visit http://www.luxrender.net/ to obtain one for your system.')
