@@ -223,7 +223,7 @@ def convert_texture(texture):
 				.add_string('type', texture.wood_type.lower() ) \
 				.add_float('nabla', texture.nabla)
 	
-	paramset.update( texture.luxrender_texture.transform.get_paramset() )
+	paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset() )
 	
 	return variant, lux_tex_name, paramset
 
