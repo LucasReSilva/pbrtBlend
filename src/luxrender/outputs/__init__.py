@@ -55,35 +55,6 @@ class LuxAPIStats(TimerThread):
 	
 	KICK_PERIOD = 1
 	
-	stats_dict = {
-		'secElapsed':		0.0,
-		'samplesSec':		0.0,
-		'samplesTotSec':	0.0,
-		'samplesPx':		0.0,
-		'efficiency':		0.0,
-		#'filmXres':		0.0,
-		#'filmYres':		0.0,
-		#'displayInterval':	0.0,
-		'filmEV':			0.0,
-		#'sceneIsReady':	0.0,
-		#'filmIsReady':		0.0,
-		#'terminated':		0.0,
-		#'enoughSamples':	0.0,
-	}
-	
-	stats_format = {
-		'secElapsed':		format_elapsed_time,
-		'samplesSec':		lambda x: 'Samples/Sec: %0.2f'%x,
-		'samplesTotSec':	lambda x: 'Total Samples/Sec: %0.2f'%x,
-		'samplesPx':		lambda x: 'Samples/Px: %0.2f'%x,
-		'efficiency':		lambda x: 'Efficiency: %0.2f %%'%x,
-		'filmEV':			lambda x: 'EV: %0.2f'%x,
-		#'sceneIsReady':	lambda x: 'SIR: '+ ('True' if x else 'False'),
-		#'filmIsReady':		lambda x: 'FIR: %f'%x,
-		#'terminated':		lambda x: 'TERM: %f'%x,
-		#'enoughSamples':	lambda x: 'HALT: '+ ('True' if x else 'False'),
-	}
-	
 	stats_string = ''
 	
 	def stop(self):
@@ -92,13 +63,8 @@ class LuxAPIStats(TimerThread):
 			self.timer.cancel()
 			
 	def kick(self):
-		for k in self.stats_dict.keys():
-			self.stats_dict[k] = self.LocalStorage['lux_context'].statistics(k)
-		
-		self.stats_string = ' | '.join(['%s'%self.stats_format[k](v) for k,v in self.stats_dict.items()])
-		network_servers = self.LocalStorage['lux_context'].getServerCount()
-		if network_servers > 0:
-			self.stats_string += ' | %i Network Servers Active' % network_servers
+		ctx = self.LocalStorage['lux_context']
+		self.stats_string = ctx.printableStatistics(True)
 	
 class LuxFilmDisplay(TimerThread):
 	'''
@@ -112,8 +78,8 @@ class LuxFilmDisplay(TimerThread):
 			if 'lux_context' in self.LocalStorage.keys() and self.LocalStorage['lux_context'].statistics('sceneIsReady') > 0.0:
 				self.LocalStorage['lux_context'].updateFramebuffer()
 				# px = self.lux_context.framebuffer()
-				xres = int(self.LocalStorage['lux_context'].statistics('filmXres'))
-				yres = int(self.LocalStorage['lux_context'].statistics('filmYres'))
+				xres = int(self.LocalStorage['lux_context'].getAttribute('film', 'xResolution'))
+				yres = int(self.LocalStorage['lux_context'].getAttribute('film', 'yResolution'))
 			elif 'resolution' in self.LocalStorage.keys():
 				xres, yres = self.LocalStorage['resolution']
 			else:
