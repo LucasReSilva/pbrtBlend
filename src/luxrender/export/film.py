@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef.util import util as efutil
+from addon_framework import util as afutil
 
 from luxrender.export import get_worldscale
 from luxrender.export import ParamSet
@@ -170,7 +170,7 @@ def film(scene):
 	params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
 	
 	# Output types
-	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
+	params.add_string('filename', afutil.path_relative_to_export(afutil.export_path))
 	params.add_bool('write_exr', False)
 	params.add_bool('write_png', True)
 	params.add_bool('write_tga', False)

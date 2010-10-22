@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -28,13 +28,13 @@ import time, threading, os
 
 import bpy
 
-from ef import log
-from ef.util.util import TimerThread, format_elapsed_time
+from addon_framework import log
+from addon_framework.util import TimerThread, format_elapsed_time
 
 # This def ia above the following import statements for a reason!
 def LuxLog(*args, popup=False):
 	'''
-	Send string to EF log, marked as belonging to LuxRender module.
+	Send string to AF log, marked as belonging to LuxRender module.
 	Accepts variable args (can be used as pylux.errorHandler)
 	'''
 	if len(args) > 0:
@@ -85,7 +85,7 @@ class LuxFilmDisplay(TimerThread):
 			else:
 				err_msg = 'ERROR: Cannot not load render result: resolution unknown. LuxFilmThread will terminate'
 				LuxLog(err_msg)
-				bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
+				bpy.ops.af.msg(msg_type='ERROR', msg_text=err_msg)
 				self.stop()
 				return
 			
@@ -98,19 +98,19 @@ class LuxFilmDisplay(TimerThread):
 			# TODO: don't read the file whilst it is still being written..
 			# ... however file locking in python seems incomplete/non-portable ?
 			if os.path.exists(self.LocalStorage['RE'].output_file):
-				bpy.ops.ef.msg(msg_text='Updating RenderResult')
+				bpy.ops.af.msg(msg_text='Updating RenderResult')
 				lay = result.layers[0]
 				# TODO: use the framebuffer direct from pylux when Blender's API supports it
 				lay.load_from_file(self.LocalStorage['RE'].output_file)
 			else:
 				err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
 				LuxLog(err_msg)
-				bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
+				bpy.ops.af.msg(msg_type='ERROR', msg_text=err_msg)
 			self.LocalStorage['RE'].end_result(result)
 		else:
 			err_msg = 'ERROR: LuxFilmThread started with insufficient parameters. LuxFilmThread will terminate'
 			LuxLog(err_msg)
-			bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
+			bpy.ops.af.msg(msg_type='ERROR', msg_text=err_msg)
 			self.stop()
 			return
 

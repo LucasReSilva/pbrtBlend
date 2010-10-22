@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -27,7 +27,7 @@
 import bpy
 from properties_render import RenderButtonsPanel
 
-from ef.ui import property_group_renderer
+from addon_framework.ui import property_group_renderer
 
 class render_described_context(RenderButtonsPanel, property_group_renderer):
 	'''

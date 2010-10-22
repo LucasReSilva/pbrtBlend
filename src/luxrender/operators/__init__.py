@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -31,8 +31,8 @@ import os
 import bpy
 from presets import AddPresetBase
 
-# ExporterFramework Libs
-from ef.util import util as efutil
+# Addon_Framework Libs
+from addon_framework import util as afutil
 
 # LuxRender Libs
 from luxrender.outputs import LuxManager
@@ -253,8 +253,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			self.properties.filename
 		])
 		
-		efutil.export_path = lxs_filename
-		#print('(2) export_path is %s' % efutil.export_path)
+		afutil.export_path = lxs_filename
+		#print('(2) export_path is %s' % afutil.export_path)
 		
 		if self.properties.api_type == 'FILE':
 			

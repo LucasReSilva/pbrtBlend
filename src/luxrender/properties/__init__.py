@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -26,7 +26,7 @@
 #
 import bpy
 
-from ef.validate import Logic_OR as O
+from addon_framework.validate import Logic_OR as O
 
 DEBUG = False
 

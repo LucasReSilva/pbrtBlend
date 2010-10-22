@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -24,9 +24,9 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef import declarative_property_group
-from ef.util import util as efutil
-from ef.validate import Logic_OR as O
+from addon_framework import declarative_property_group
+from addon_framework import util as afutil
+from addon_framework.validate import Logic_OR as O
 
 from luxrender.properties.lampspectrum_data import lampspectrum_list
 from luxrender.export import ParamSet, get_worldscale
@@ -1413,7 +1413,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 		
 		params = ParamSet()
 		
-		params.add_string('filename', efutil.path_relative_to_export(self.filename) ) \
+		params.add_string('filename', afutil.path_relative_to_export(self.filename) ) \
 			  .add_integer('discardmipmaps', self.discardmipmaps) \
 			  .add_string('filtertype', self.filtertype) \
 			  .add_float('gain', self.gain) \
@@ -1866,7 +1866,7 @@ class tabulatedfresnel(declarative_property_group):
 	]
 	
 	def get_paramset(self):
-		tfp = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
+		tfp = ParamSet().add_string('filename', afutil.path_relative_to_export(self.filename) )
 		return set(), tfp
 
 class luxrender_tex_luxpop(tabulatedfresnel):

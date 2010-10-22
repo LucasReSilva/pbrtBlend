@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -24,9 +24,9 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef import declarative_property_group
-from ef.util import util as efutil
-from ef.validate import Logic_OR as O, Logic_AND as A
+from addon_framework import declarative_property_group
+from addon_framework import util as afutil
+from addon_framework.validate import Logic_OR as O, Logic_AND as A
 
 from luxrender.export					import ParamSet
 from luxrender.outputs.pure_api			import PYLUX_AVAILABLE
@@ -132,7 +132,7 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'render',
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+			'default': afutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
 		},
 		{
 			'type': 'enum',
@@ -164,7 +164,7 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'install_path',
 			'name': 'Path to LuxRender Installation',
 			'description': 'Path to LuxRender',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+			'default': afutil.find_config_value('luxrender', 'defaults', 'install_path', '')
 		},
 		{
 			'type': 'bool',
@@ -299,7 +299,7 @@ class luxrender_networking(declarative_property_group):
 			'type': 'bool',
 			'attr': 'use_network_servers',
 			'name': 'Use Networking',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'use_network_servers', False),
+			'default': afutil.find_config_value('luxrender', 'defaults', 'use_network_servers', False),
 			'save_in_preset': True
 		},
 		{
@@ -307,7 +307,7 @@ class luxrender_networking(declarative_property_group):
 			'attr': 'servers',
 			'name': 'Servers',
 			'description': 'Comma separated list of Lux server IP addresses',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'servers', ''),
+			'default': afutil.find_config_value('luxrender', 'defaults', 'servers', ''),
 			'save_in_preset': True
 		},
 		{
@@ -315,7 +315,7 @@ class luxrender_networking(declarative_property_group):
 			'attr': 'serverinterval',
 			'name': 'Upload interval',
 			'description': 'Interval for server image transfers (seconds)',
-			'default': int(efutil.find_config_value('luxrender', 'defaults', 'serverinterval', '180')),
+			'default': int(afutil.find_config_value('luxrender', 'defaults', 'serverinterval', '180')),
 			'min': 10,
 			'soft_min': 10,
 			'save_in_preset': True

@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -24,8 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef import declarative_property_group
-from ef.validate import Logic_Operator as LO
+from addon_framework import declarative_property_group
+from addon_framework.validate import Logic_Operator as LO
 
 from luxrender.properties.texture import ColorTextureParameter
 

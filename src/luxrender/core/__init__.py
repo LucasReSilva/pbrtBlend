@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -35,8 +35,8 @@ import os, threading, subprocess, sys
 import bpy
 
 # Framework libs
-from ef.engine import engine_base
-from ef.util import util as efutil
+from addon_framework.engine import engine_base
+from addon_framework import util as afutil
 
 # Exporter libs
 from luxrender.export.film import resolution
@@ -229,7 +229,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	output_dir			= './'
 	output_file			= 'default.png'
 	
-#	# This member is read by the ExporterFramework to set up custom property groups
+#	# This member is read by the Addon_Framework to set up custom property groups
 	property_groups = [
 		('Scene', luxrender_accelerator),
 		('Scene', luxrender_engine),
@@ -299,7 +299,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		'''
 		
 		if scene is None:
-			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
+			bpy.ops.af.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
 			return
 		
 		# Refresh the scene as early as possible in render process
@@ -314,7 +314,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			export_result = self.render_scene(scene)
 			
 		if export_result == False:
-			#bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
+			#bpy.ops.af.msg(msg_type='ERROR', msg_text='Export failed')
 			return
 		
 		self.render_start(scene)
@@ -324,7 +324,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	def render_scene(self, scene):
 		
-		scene_path = efutil.filesystem_path(scene.render.filepath)
+		scene_path = afutil.filesystem_path(scene.render.filepath)
 		if os.path.isdir(scene_path):
 			self.output_dir = scene_path
 		else:
@@ -333,8 +333,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
 		
-		efutil.export_path = self.output_dir
-		#print('(1) export_path is %s' % efutil.export_path)
+		afutil.export_path = self.output_dir
+		#print('(1) export_path is %s' % afutil.export_path)
 		os.chdir(self.output_dir)
 		
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
@@ -361,7 +361,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				for server in scene.luxrender_networking.servers.split(','):
 					LM.lux_context.addServer(server.strip())
 		
-		output_filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
+		output_filename = afutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
 		export_result = bpy.ops.export.luxrender(
 			directory = self.output_dir,
 			filename = output_filename,
@@ -375,7 +375,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		self.output_file = efutil.path_relative_to_export(
+		self.output_file = afutil.path_relative_to_export(
 			'%s/%s.png' % (self.output_dir, output_filename)
 		)
 		
@@ -447,7 +447,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		# Begin rendering
 		if start_rendering:
-			bpy.ops.ef.msg(msg_text='Starting LuxRender')
+			bpy.ops.af.msg(msg_text='Starting LuxRender')
 			if internal:
 				
 				self.update_stats('', 'LuxRender: Rendering warmup')
@@ -482,7 +482,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					'auto_start': render
 				}
 				
-				luxrender_path = efutil.filesystem_path( scene.luxrender_engine.install_path )
+				luxrender_path = afutil.filesystem_path( scene.luxrender_engine.install_path )
 				if luxrender_path[-1] != '/':
 					luxrender_path += '/'
 				
@@ -528,7 +528,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				try:
 					for k, v in config_updates.items():
-						efutil.write_config_value('luxrender', 'defaults', k, v)
+						afutil.write_config_value('luxrender', 'defaults', k, v)
 				except Exception as err:
 					LuxLog('Saving LuxRender config failed: %s' % err)
 					return False

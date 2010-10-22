@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -29,8 +29,8 @@ import bpy
 
 from copy import deepcopy
 
-from ef import declarative_property_group
-from ef.util import util as efutil
+from addon_framework import declarative_property_group
+from addon_framework import util as afutil
 
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
@@ -758,7 +758,7 @@ class luxrender_mat_metal(declarative_property_group):
 		metal_params.update( TF_vroughness.get_params(self) )
 		
 		if self.name == 'nk':	# use an NK data file
-			metal_params.add_string('name', efutil.path_relative_to_export(self.filename) )
+			metal_params.add_string('name', afutil.path_relative_to_export(self.filename) )
 		else:					# use a preset name
 			metal_params.add_string('name', self.name)
 		

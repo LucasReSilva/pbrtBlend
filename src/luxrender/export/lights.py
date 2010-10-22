@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -28,7 +28,7 @@ from math import degrees
 
 import mathutils
 
-from ef.util import util as efutil
+from addon_framework import util as afutil
 
 from luxrender.outputs.file_api import Files
 from luxrender.properties import dbo
@@ -111,7 +111,7 @@ def exportLights(lux_context, ob, matrix):
 		
 	if light.type == 'HEMI':
 		if light.luxrender_lamp.infinite_map != '':
-			light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
+			light_params.add_string('mapname', afutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
 		# nsamples
 		# gamma
