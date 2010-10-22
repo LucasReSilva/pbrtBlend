@@ -568,6 +568,7 @@ class luxrender_mat_roughglass(declarative_property_group):
 class luxrender_mat_glossy(declarative_property_group):
 	
 	controls = [
+		'multibounce'
 	] + \
 		TF_d.controls + \
 		TF_index.controls + \
@@ -588,6 +589,14 @@ class luxrender_mat_glossy(declarative_property_group):
 	)
 	
 	properties = [
+		{
+			'type': 'bool',
+			'attr': 'multibounce',
+			'name': 'multibounce',
+			'description': 'Enable surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		}
 	] + \
 		TF_d.properties + \
 		TF_index.properties + \
@@ -599,6 +608,8 @@ class luxrender_mat_glossy(declarative_property_group):
 	
 	def get_params(self):
 		glossy_params = ParamSet()
+		
+		glossy_params.add_bool('multibounce', self.multibounce)
 		
 		glossy_params.update( TF_d.get_params(self) )
 		glossy_params.update( TF_index.get_params(self) )
