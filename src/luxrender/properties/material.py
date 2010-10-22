@@ -710,7 +710,7 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'energyconserving',
-			'name': 'Evergy conserving',
+			'name': 'Energy conserving',
 			'description': 'Force energy conservation with regards to reflection and transmittion',
 			'default': False
 		},
