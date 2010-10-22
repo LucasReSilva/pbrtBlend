@@ -694,6 +694,7 @@ class luxrender_mat_matte(declarative_property_group):
 class luxrender_mat_mattetranslucent(declarative_property_group):
 	
 	controls = [
+		'energyconserving'
 	] + \
 		TC_Kr.controls + \
 		TC_Kt.controls + \
@@ -706,6 +707,13 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 	)
 	
 	properties = [
+		{
+			'type': 'bool',
+			'attr': 'energyconserving',
+			'name': 'Evergy conserving',
+			'description': 'Force energy conservation with regards to reflection and transmittion',
+			'default': False
+		},
 	] + \
 		TC_Kr.properties + \
 		TC_Kt.properties + \
@@ -713,6 +721,8 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 	
 	def get_params(self):
 		mattetranslucent_params = ParamSet()
+		
+		mattetranslucent_params.add_bool('energyconserving', self.energyconserving)
 		
 		mattetranslucent_params.update( TC_Kr.get_params(self) )
 		mattetranslucent_params.update( TC_Kt.get_params(self) )
