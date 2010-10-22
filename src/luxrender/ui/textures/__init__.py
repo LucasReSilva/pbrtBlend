@@ -28,7 +28,7 @@ import bpy
 
 from properties_texture import TextureButtonsPanel
 
-from addon_framework.ui import property_group_renderer
+from extensions_framework.ui import property_group_renderer
 
 class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
 	'''

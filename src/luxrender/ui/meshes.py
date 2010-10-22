@@ -27,7 +27,7 @@
 import bpy
 from properties_data_mesh import MeshButtonsPanel 
 
-from addon_framework.ui import property_group_renderer
+from extensions_framework.ui import property_group_renderer
 
 class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'

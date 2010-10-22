@@ -27,7 +27,7 @@
 import os
 
 from luxrender.outputs import LuxLog
-from addon_framework.util import path_relative_to_export
+from extensions_framework.util import path_relative_to_export
 
 class Files(object):
 	MAIN = 0

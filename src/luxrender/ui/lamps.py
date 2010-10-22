@@ -27,7 +27,7 @@
 import bpy
 from properties_data_lamp import DataButtonsPanel 
 
-from addon_framework.ui import property_group_renderer
+from extensions_framework.ui import property_group_renderer
 
 narrowui = 180
 

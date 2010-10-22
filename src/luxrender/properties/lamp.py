@@ -24,8 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from addon_framework import declarative_property_group
-from addon_framework.validate import Logic_Operator as LO
+from extensions_framework import declarative_property_group
+from extensions_framework.validate import Logic_Operator as LO
 
 from luxrender.properties.texture import ColorTextureParameter
 

@@ -28,7 +28,7 @@ import bpy
 
 from properties_data_camera import CameraButtonsPanel
 
-from addon_framework.ui import property_group_renderer
+from extensions_framework.ui import property_group_renderer
 
 class camera_panel(CameraButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {'luxrender'}

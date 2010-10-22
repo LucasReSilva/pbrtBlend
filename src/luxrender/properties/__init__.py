@@ -26,7 +26,7 @@
 #
 import bpy
 
-from addon_framework.validate import Logic_OR as O
+from extensions_framework.validate import Logic_OR as O
 
 DEBUG = False
 

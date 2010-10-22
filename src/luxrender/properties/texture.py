@@ -24,9 +24,9 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from addon_framework import declarative_property_group
-from addon_framework import util as afutil
-from addon_framework.validate import Logic_OR as O
+from extensions_framework import declarative_property_group
+from extensions_framework import util as afutil
+from extensions_framework.validate import Logic_OR as O
 
 from luxrender.properties.lampspectrum_data import lampspectrum_list
 from luxrender.export import ParamSet, get_worldscale

@@ -28,7 +28,7 @@ from math import degrees
 
 import mathutils
 
-from addon_framework import util as afutil
+from extensions_framework import util as afutil
 
 from luxrender.outputs.file_api import Files
 from luxrender.properties import dbo

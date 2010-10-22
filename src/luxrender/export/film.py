@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from addon_framework import util as afutil
+from extensions_framework import util as afutil
 
 from luxrender.export import get_worldscale
 from luxrender.export import ParamSet

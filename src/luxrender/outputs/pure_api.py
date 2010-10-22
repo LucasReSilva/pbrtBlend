@@ -67,7 +67,7 @@ try:
 			# no further action required
 		
 		if LUXRENDER_VERSION < '0.8':
-			from addon_framework.util import format_elapsed_time
+			from extensions_framework.util import format_elapsed_time
 			
 			def printableStatistics(self, add_total):
 				stats_dict = {

@@ -29,8 +29,8 @@ import bpy
 
 from copy import deepcopy
 
-from addon_framework import declarative_property_group
-from addon_framework import util as afutil
+from extensions_framework import declarative_property_group
+from extensions_framework import util as afutil
 
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet

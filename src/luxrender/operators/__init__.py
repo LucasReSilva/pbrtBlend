@@ -31,8 +31,8 @@ import os
 import bpy
 from presets import AddPresetBase
 
-# Addon_Framework Libs
-from addon_framework import util as afutil
+# extensions_Framework Libs
+from extensions_framework import util as afutil
 
 # LuxRender Libs
 from luxrender.outputs import LuxManager

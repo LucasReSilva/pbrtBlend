@@ -27,7 +27,7 @@
 import bpy
 from properties_render import RenderButtonsPanel
 
-from addon_framework.ui import property_group_renderer
+from extensions_framework.ui import property_group_renderer
 
 class render_described_context(RenderButtonsPanel, property_group_renderer):
 	'''

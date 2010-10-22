@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from addon_framework import declarative_property_group
+from extensions_framework import declarative_property_group
 
 # TODO: adapt values written to d based on simple/advanced views
 

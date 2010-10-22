@@ -26,7 +26,7 @@
 #
 import bpy, mathutils
 
-from addon_framework import util as afutil
+from extensions_framework import util as afutil
 
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
@@ -389,7 +389,7 @@ def write_lxo(render_engine, lux_context, scene):
 		if pc not in rpcs:
 			rpcs.append(pc)
 			#render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
-			bpy.ops.af.msg(
+			bpy.ops.ef.msg(
 				msg_type='INFO',
 				msg_text='LuxRender: Parsing meshes %i%%' % pc
 			)

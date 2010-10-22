@@ -35,8 +35,8 @@ import os, threading, subprocess, sys
 import bpy
 
 # Framework libs
-from addon_framework.engine import engine_base
-from addon_framework import util as afutil
+from extensions_framework.engine import engine_base
+from extensions_framework import util as afutil
 
 # Exporter libs
 from luxrender.export.film import resolution
@@ -229,7 +229,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	output_dir			= './'
 	output_file			= 'default.png'
 	
-#	# This member is read by the Addon_Framework to set up custom property groups
+#	# This member is read by the extensions_Framework to set up custom property groups
 	property_groups = [
 		('Scene', luxrender_accelerator),
 		('Scene', luxrender_engine),
@@ -299,7 +299,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		'''
 		
 		if scene is None:
-			bpy.ops.af.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
+			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
 			return
 		
 		# Refresh the scene as early as possible in render process
@@ -314,7 +314,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			export_result = self.render_scene(scene)
 			
 		if export_result == False:
-			#bpy.ops.af.msg(msg_type='ERROR', msg_text='Export failed')
+			#bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
 			return
 		
 		self.render_start(scene)
@@ -447,7 +447,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		# Begin rendering
 		if start_rendering:
-			bpy.ops.af.msg(msg_text='Starting LuxRender')
+			bpy.ops.ef.msg(msg_text='Starting LuxRender')
 			if internal:
 				
 				self.update_stats('', 'LuxRender: Rendering warmup')

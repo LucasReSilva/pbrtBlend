@@ -24,8 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from addon_framework import declarative_property_group
-from addon_framework.validate import Logic_OR as O, Logic_AND as A
+from extensions_framework import declarative_property_group
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from luxrender.properties import dbo
 from luxrender.export import ParamSet

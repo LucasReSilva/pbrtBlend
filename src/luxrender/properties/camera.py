@@ -26,7 +26,7 @@
 #
 import math
 
-from addon_framework import declarative_property_group
+from extensions_framework import declarative_property_group
 
 from luxrender.properties import dbo
 from luxrender.export import get_worldscale
