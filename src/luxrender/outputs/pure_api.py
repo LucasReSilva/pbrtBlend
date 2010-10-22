@@ -95,6 +95,7 @@ try:
 				return stats_string
 			
 			Custom_Context.printableStatistics = printableStatistics
+			Custom_Context.getAttribute = Custom_Context.getOption
 		
 		PYLUX_AVAILABLE = True
 		LuxLog('Using pylux version %s' % LUXRENDER_VERSION)
