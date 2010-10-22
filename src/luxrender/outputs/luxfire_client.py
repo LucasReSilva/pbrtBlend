@@ -24,28 +24,5 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from luxrender.outputs import LuxLog
-try:
-	from .LuxFire.Client import ListLuxFireGroup, ServerLocator
-	from .LuxFire.Client.Renderer import RendererClient
-	
-	def Client_Locator(context_name):
-		LuxSlavesNames = ListLuxFireGroup()
-		
-		if len(LuxSlavesNames) > 0:
-			#slaves = {}
-			for LN, i in LuxSlavesNames.items():
-				RS = ServerLocator.get_by_name(LN)
-				LS = RendererClient(RS)
-				#slaves[LN] = (LS, RS)
-				LuxLog('Found LuxFire server %s' % LN)
-				break
-			
-			return LS
-		else:
-			raise Exception('No remote Lux components available')
-	
-	LUXFIRE_CLIENT_AVAILABLE = True
-except ImportError as err:
-	# LuxLog('WARNING: LuxFire/Pyro library not available.')
-	LUXFIRE_CLIENT_AVAILABLE = False
+
+LUXFIRE_CLIENT_AVAILABLE = False
