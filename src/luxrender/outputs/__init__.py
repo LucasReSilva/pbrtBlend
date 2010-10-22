@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -28,13 +28,13 @@ import time, threading, os
 
 import bpy
 
-from ef import log
-from ef.util.util import TimerThread, format_elapsed_time
+from extensions_framework import log
+from extensions_framework.util import TimerThread, format_elapsed_time
 
 # This def ia above the following import statements for a reason!
 def LuxLog(*args, popup=False):
 	'''
-	Send string to EF log, marked as belonging to LuxRender module.
+	Send string to AF log, marked as belonging to LuxRender module.
 	Accepts variable args (can be used as pylux.errorHandler)
 	'''
 	if len(args) > 0:

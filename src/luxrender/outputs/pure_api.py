@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -67,7 +67,7 @@ try:
 			# no further action required
 		
 		if LUXRENDER_VERSION < '0.8':
-			from ef.util.util import format_elapsed_time
+			from extensions_framework.util import format_elapsed_time
 			
 			def printableStatistics(self, add_total):
 				stats_dict = {

@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -24,8 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ef import declarative_property_group
-from ef.validate import Logic_OR as O
+from extensions_framework import declarative_property_group
+from extensions_framework.validate import Logic_OR as O
 
 from luxrender.properties import dbo
 from luxrender.export import ParamSet

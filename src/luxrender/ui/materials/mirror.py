@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:

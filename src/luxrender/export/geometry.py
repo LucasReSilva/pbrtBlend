@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -26,7 +26,7 @@
 #
 import bpy, mathutils
 
-from ef.util import util as efutil
+from extensions_framework import util as afutil
 
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
@@ -152,7 +152,7 @@ def exportNativeMesh(scene, mesh, lux_context):
 	return shape_type, shape_params
 
 def exportPlyMesh(scene, mesh, lux_context):
-	ply_filename = efutil.export_path + '_' + bpy.path.clean_name(mesh.name) + '.ply'
+	ply_filename = afutil.export_path + '_' + bpy.path.clean_name(mesh.name) + '.ply'
 	
 	# TODO: find out how to set the context object
 	# bpy.context.object = ob
@@ -165,7 +165,7 @@ def exportPlyMesh(scene, mesh, lux_context):
 	)
 	
 	ply_params = ParamSet()
-	ply_params.add_string('filename', efutil.path_relative_to_export(ply_filename))
+	ply_params.add_string('filename', afutil.path_relative_to_export(ply_filename))
 	ply_params.add_bool('smooth', mesh.use_auto_smooth)
 	
 	return 'plymesh', ply_params

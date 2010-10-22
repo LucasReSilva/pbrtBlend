@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -27,7 +27,7 @@
 import os
 
 from luxrender.outputs import LuxLog
-from ef.util.util import path_relative_to_export
+from extensions_framework.util import path_relative_to_export
 
 class Files(object):
 	MAIN = 0

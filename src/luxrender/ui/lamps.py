@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 Exporter Framework - LuxRender Plug-in
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -27,7 +27,7 @@
 import bpy
 from properties_data_lamp import DataButtonsPanel 
 
-from ef.ui import property_group_renderer
+from extensions_framework.ui import property_group_renderer
 
 narrowui = 180
 
