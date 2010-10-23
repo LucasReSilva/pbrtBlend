@@ -96,6 +96,14 @@ try:
 			
 			Custom_Context.printableStatistics = printableStatistics
 			Custom_Context.getAttribute = Custom_Context.getOption
+			def getRenderingServersStatus(self):
+				server_list = []
+				for i in range(self.getServerCount()):
+					rsi = pylux.RenderingServerInfo()
+					pylux.Context.getRenderingServersStatus(self, rsi, i+1)
+					server_list.append(rsi)
+				return server_list
+			Custom_Context.getRenderingServersStatus = getRenderingServersStatus
 		
 		PYLUX_AVAILABLE = True
 		LuxLog('Using pylux version %s' % LUXRENDER_VERSION)
