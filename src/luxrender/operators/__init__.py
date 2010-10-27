@@ -293,12 +293,12 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
 			# Set up render engine parameters
 			if LUXRENDER_VERSION >= '0.8':
-				lux_context.renderer(		*scene.luxrender_engine.api_output()			)
-			lux_context.sampler(			*scene.luxrender_sampler.api_output()			)
-			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()		)
-			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output()		)
-			lux_context.volumeIntegrator(	*scene.luxrender_volumeintegrator.api_output()	)
-			lux_context.pixelFilter(		*scene.luxrender_filter.api_output()			)
+				lux_context.renderer(		*scene.luxrender_engine.api_output()							)
+			lux_context.sampler(			*scene.luxrender_sampler.api_output()							)
+			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()						)
+			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output(scene.luxrender_engine)	)
+			lux_context.volumeIntegrator(	*scene.luxrender_volumeintegrator.api_output()					)
+			lux_context.pixelFilter(		*scene.luxrender_filter.api_output()							)
 			
 			# Set up camera, view and film
 			is_cam_animated = False

@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
@@ -677,7 +675,7 @@ class luxrender_integrator(declarative_property_group):
 		},
 	]
 	
-	def api_output(self):
+	def api_output(self, engine_properties):
 		'''
 		Format this class's members into a LuxRender ParamSet
 		
@@ -686,7 +684,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		params = ParamSet()
 		
-		if bpy.context.scene.luxrender_engine.renderer == 'hybrid' and self.lightstrategy != 'one':
+		if engine_properties.renderer == 'hybrid' and self.lightstrategy != 'one':
 			LuxLog('Incompatible lightstrategy for Hybrid renderer. Changing to "One".')
 			self.advanced = True
 			self.lightstrategy = 'one'
