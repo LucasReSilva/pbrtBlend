@@ -24,11 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
+
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
+from luxrender.outputs import LuxLog 
 
 class luxrender_integrator(declarative_property_group):
 	'''
@@ -40,8 +43,9 @@ class luxrender_integrator(declarative_property_group):
 	controls = [
 		[ 0.7, 'surfaceintegrator', 'advanced'],
 		
+		'lightstrategy',
+		
 		# bidir +
-		'strategy',
 		['eyedepth', 'lightdepth'],
 		['eyerrthreshold', 'lightrrthreshold'],
 		
@@ -116,7 +120,7 @@ class luxrender_integrator(declarative_property_group):
 	
 	visibility = {
 		# bidir +
-		'strategy':							{ 'surfaceintegrator': O(['bidirectional', 'distributedpath']) },
+		'lightstrategy':					{ 'advanced': True },
 		'eyedepth':							{ 'surfaceintegrator': 'bidirectional' },
 		'lightdepth':						{ 'surfaceintegrator': 'bidirectional' },
 		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
@@ -218,14 +222,18 @@ class luxrender_integrator(declarative_property_group):
 		},
 		{
 			'type': 'enum',
-			'attr': 'strategy',
-			'name': 'Strategy',
-			'description': 'Strategy',
+			'attr': 'lightstrategy',
+			'name': 'Light Strategy',
+			'description': 'Light Sampling Strategy',
 			'default': 'auto',
 			'items': [
 				('auto', 'Auto', 'auto'),
 				('one', 'One', 'one'),
 				('all', 'All', 'all'),
+				('importance', 'Importance', 'importance'),
+				('powerimp', 'Power', 'powerimp'),
+				('allpowerimp', 'All Power', 'allpowerimp'),
+				('logpowerimp', 'Log Power', 'logpowerimp')
 			],
 			'save_in_preset': True
 		},
@@ -678,9 +686,13 @@ class luxrender_integrator(declarative_property_group):
 		
 		params = ParamSet()
 		
+		if bpy.context.scene.luxrender_engine.renderer == 'hybrid' and self.lightstrategy != 'one':
+			LuxLog('Incompatible lightstrategy for Hybrid renderer. Changing to "One".')
+			self.advanced = True
+			self.lightstrategy = 'one'
+		
 		if self.surfaceintegrator == 'bidirectional':
-			params.add_string('strategy', self.strategy) \
-				  .add_integer('eyedepth', self.eyedepth) \
+			params.add_integer('eyedepth', self.eyedepth) \
 				  .add_integer('lightdepth', self.lightdepth)
 			if self.advanced:
 				params.add_float('eyerrthreshold', self.eyerrthreshold)
@@ -690,8 +702,7 @@ class luxrender_integrator(declarative_property_group):
 			params.add_integer('maxdepth', self.maxdepth)
 		
 		if self.surfaceintegrator == 'distributedpath':
-			params.add_string('strategy', self.strategy) \
-				  .add_bool('directsampleall', self.directsampleall) \
+			params.add_bool('directsampleall', self.directsampleall) \
 				  .add_integer('directsamples', self.directsamples) \
 				  .add_bool('directdiffuse', self.directdiffuse) \
 				  .add_bool('directglossy', self.directglossy) \
@@ -753,6 +764,9 @@ class luxrender_integrator(declarative_property_group):
 				  .add_float('rrcontinueprob', self.rrcontinueprob) \
 				  .add_string('rrstrategy', self.rrstrategy) \
 				  .add_bool('includeenvironment', self.includeenvironment)
+		
+		if self.advanced:
+			params.add_string('lightstrategy', self.lightstrategy)
 		
 		out = self.surfaceintegrator, params
 		dbo('SURFACE INTEGRATOR', out)
