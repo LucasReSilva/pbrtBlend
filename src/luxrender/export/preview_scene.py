@@ -1,6 +1,34 @@
+# -*- coding: utf8 -*-
+#
+# ***** BEGIN GPL LICENSE BLOCK *****
+#
+# --------------------------------------------------------------------------
+# Blender 2.5 LuxRender Add-On
+# --------------------------------------------------------------------------
+#
+# Authors:
+# Doug Hammond
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# ***** END GPL LICENCE BLOCK *****
+#
+import bpy
 
 from luxrender.export import ParamSet
 from luxrender.export.film import resolution
+from luxrender.outputs import LuxManager
 
 def preview_scene(scene, lux_context, obj=None, mat=None):
 	
@@ -139,6 +167,14 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.shape('loopsubdiv', bd_shape_params)
 	lux_context.attributeEnd()
 	
+	# Collect volumes from all scenes *sigh*
+	preview_scene = LuxManager.CurrentScene
+	for scn in bpy.data.scenes:
+		LuxManager.SetCurrentScene(scn)
+		for volume in scn.luxrender_volumes.volumes:
+			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
+	LuxManager.SetCurrentScene(preview_scene)
+	
 	if obj is not None and mat is not None:
 		# preview object
 		lux_context.attributeBegin()
@@ -149,8 +185,14 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			0.0, 0.0, 0.5, 1.0
 		])
 		mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
+		
+		if mat.luxrender_material.type in ['glass2']:
+			lux_context.interior(mat.luxrender_material.luxrender_mat_glass2.Interior_volume)
+			lux_context.exterior(mat.luxrender_material.luxrender_mat_glass2.Exterior_volume)
+		
 		sphere_params = ParamSet().add_float('radius', 1.0)
 		lux_context.shape('sphere', sphere_params)
+		
 		lux_context.attributeEnd()
 	
 	return int(xr), int(yr)

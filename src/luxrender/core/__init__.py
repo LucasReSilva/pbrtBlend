@@ -332,9 +332,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Material previews require pylux')
 			return
 		
-		from luxrender.outputs.pure_api import pylux
-		from luxrender.outputs.file_api import Custom_Context as lxs_writer
-		from luxrender.export import preview_scene
 		from luxrender.export import materials as export_materials
 		
 		# Iterate through the preview scene, finding objects with materials attached
@@ -365,11 +362,19 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		LuxManager.SetCurrentScene(scene)
 		LuxManager.SetActive(LM)
 		
-		preview_context = LM.lux_context
+		if False:
+			# Dump to file in temp dir for debugging
+			from luxrender.outputs.file_api import Custom_Context as lxs_writer
+			preview_context = lxs_writer(scene.name)
+			preview_context.set_filename('luxblend25-preview', LXS=True, LXM=False, LXO=False)
+			LM.lux_context = preview_context
+		else:
+			preview_context = LM.lux_context
 		
 		export_materials.ExportedMaterials.clear()
 		export_materials.ExportedTextures.clear()
 		
+		from luxrender.export import preview_scene
 		xres, yres = preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm)
 		
 		# render !

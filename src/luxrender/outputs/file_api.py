@@ -78,6 +78,10 @@ class Custom_Context(object):
 		if len(self.files) == 0:
 			self.set_filename('default')
 		
+		# Prevent trying to write to a file that isn't open
+		if self.files[ind] == None:
+			ind = 0
+		
 		self.files[ind].write('%s%s\n' % ('\t'*tabs, st))
 		self.files[ind].flush()
 		

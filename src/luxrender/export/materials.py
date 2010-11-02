@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog, LuxManager
 
@@ -259,10 +257,6 @@ def get_texture_from_scene(scene, tex_name):
 	return False
 
 def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value_transform=value_transform_passthrough):
-	
-	scene = LuxManager.CurrentScene
-	
-	
 	'''
 	lux_context				pylux.Context - like object
 	lux_prop_name			LuxRender material/texture parameter name
