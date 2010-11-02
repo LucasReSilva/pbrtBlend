@@ -247,7 +247,22 @@ def RGC(value):
 def value_transform_passthrough(val):
 	return val
 
+def get_texture_from_scene(scene, tex_name):
+	
+	for obj in scene.objects:
+		if obj.active_material != None:
+			for tex_slot in obj.active_material.texture_slots:
+				if tex_slot != None and tex_slot.texture.name == tex_name:
+					return tex_slot.texture
+	
+	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
+	return False
+
 def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value_transform=value_transform_passthrough):
+	
+	scene = LuxManager.CurrentScene
+	
+	
 	'''
 	lux_context				pylux.Context - like object
 	lux_prop_name			LuxRender material/texture parameter name
@@ -264,8 +279,8 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 		if getattr(lux_mattex, '%s_use%stexture' % (lux_prop_name, variant)):
 			texture_name = getattr(lux_mattex, '%s_%stexturename' % (lux_prop_name, variant))
 			if texture_name != '':
-				if texture_name in bpy.data.textures:
-					texture = bpy.data.textures[texture_name]
+				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+				if texture != False:
 					if texture.luxrender_texture.type != 'BLENDER':
 						tex_luxrender_texture = texture.luxrender_texture
 						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()

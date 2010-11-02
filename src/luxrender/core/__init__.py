@@ -29,14 +29,14 @@ Main LuxRender plugin class definition
 '''
 
 # System libs
-import os, threading, subprocess, sys
+import os, time, threading, subprocess, sys
 
 # Blender libs
 import bpy
 
 # Framework libs
 from extensions_framework.engine import engine_base
-from extensions_framework import util as afutil
+from extensions_framework import util as efutil
 
 # Exporter libs
 from luxrender.export.film import resolution
@@ -222,7 +222,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	bl_idname			= 'luxrender'
 	bl_label			= 'LuxRender'
-	bl_preview			= False			# blender's preview scene is inadequate, needs custom rebuild
+	bl_use_preview		= True			# blender's preview scene is inadequate, needs custom rebuild
 	
 	LuxManager			= None
 	render_update_timer	= None
@@ -288,6 +288,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_texture', luxrender_tex_wrinkled),
 	]
 	
+	render_lock = threading.Lock()
+	
 	def render(self, scene):
 		'''
 		context: bpy.types.scene
@@ -298,33 +300,103 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		Returns None
 		'''
 		
-		if scene is None:
-			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
-			return
+		with self.render_lock:	# just render one thing at a time
 		
-		# Refresh the scene as early as possible in render process
-		scene.frame_set(scene.frame_current)
-		
-		if scene.render.use_color_management == False:
-			LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
-		
-		if scene.name == 'preview':
-			export_result = self.render_preview(scene)
-		else:
-			export_result = self.render_scene(scene)
+			if scene is None:
+				bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
+				return
 			
-		if export_result == False:
-			#bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
+			# Refresh the scene as early as possible in render process
+			scene.frame_set(scene.frame_current)
+			
+			if scene.render.use_color_management == False:
+				LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
+			
+			if scene.name == 'preview':
+				self.render_preview(scene)
+				return
+			
+			if self.render_scene(scene) == False:
+				#bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
+				return
+			
+			self.render_start(scene)
+	
+	def render_preview(self, scene):
+		prev_dir = os.getcwd()
+		os.chdir( efutil.temp_directory() )
+		
+		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
+		if not PYLUX_AVAILABLE:
+			self.bl_use_preview = False
+			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Material previews require pylux')
 			return
 		
-		self.render_start(scene)
+		from luxrender.outputs.pure_api import pylux
+		from luxrender.outputs.file_api import Custom_Context as lxs_writer
+		from luxrender.export import preview_scene
+		from luxrender.export import materials as export_materials
 		
-	def render_preview(self, scene):
-		raise NotImplementedError()
+		# Iterate through the preview scene, finding objects with materials attached
+		objects_mats = {}
+		for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
+			for mat in export_materials.get_instance_materials(object):
+				if mat is not None:
+					if not object.name in objects_mats.keys(): objects_mats[object] = []
+					objects_mats[object].append(mat)
+		
+		# find objects that are likely to be the preview objects
+		preview_objects = [o for o in objects_mats.keys() if o.name.startswith('preview')]
+		if len(preview_objects) < 1:
+			return
+		
+		# find the materials attached to the likely preview object
+		likely_materials = objects_mats[preview_objects[0]]
+		if len(likely_materials) < 1:
+			return
+		
+		pm = likely_materials[0]
+		LuxLog('Rendering material preview: %s' % pm.name)
+		
+		LM = LuxManager(
+			scene.name,
+			api_type = 'API',
+		)
+		LuxManager.SetCurrentScene(scene)
+		LuxManager.SetActive(LM)
+		
+		preview_context = LM.lux_context
+		
+		export_materials.ExportedMaterials.clear()
+		export_materials.ExportedTextures.clear()
+		
+		xres, yres = preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm)
+		
+		# render !
+		preview_context.worldEnd()
+		time.sleep(0.2)
+		preview_context.wait()
+		#time.sleep(0.2)
+		preview_context.exit()
+		#time.sleep(0.2)
+		preview_context.cleanup()
+		
+		del preview_context
+		
+		LuxLog('Updating preview (%ix%i)' % (xres, yres))
+		result = self.begin_result(0, 0, xres, yres)
+		lay = result.layers[0]
+		# TODO: use the framebuffer direct from pylux when Blender's API supports it
+		lay.load_from_file('luxblend25-preview.png')
+		self.end_result(result)
+		
+		LuxManager.ClearActive()
+		LuxManager.ClearCurrentScene()
+		os.chdir(prev_dir)
 	
 	def render_scene(self, scene):
 		
-		scene_path = afutil.filesystem_path(scene.render.filepath)
+		scene_path = efutil.filesystem_path(scene.render.filepath)
 		if os.path.isdir(scene_path):
 			self.output_dir = scene_path
 		else:
@@ -333,8 +405,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
 		
-		afutil.export_path = self.output_dir
-		#print('(1) export_path is %s' % afutil.export_path)
+		efutil.export_path = self.output_dir
+		#print('(1) export_path is %s' % efutil.export_path)
 		os.chdir(self.output_dir)
 		
 		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
@@ -361,7 +433,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				for server in scene.luxrender_networking.servers.split(','):
 					LM.lux_context.addServer(server.strip())
 		
-		output_filename = afutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
+		output_filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
 		export_result = bpy.ops.export.luxrender(
 			directory = self.output_dir,
 			filename = output_filename,
@@ -375,7 +447,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		self.output_file = afutil.path_relative_to_export(
+		self.output_file = efutil.path_relative_to_export(
 			'%s/%s.png' % (self.output_dir, output_filename)
 		)
 		
@@ -482,7 +554,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					'auto_start': render
 				}
 				
-				luxrender_path = afutil.filesystem_path( scene.luxrender_engine.install_path )
+				luxrender_path = efutil.filesystem_path( scene.luxrender_engine.install_path )
 				if luxrender_path[-1] != '/':
 					luxrender_path += '/'
 				
@@ -528,7 +600,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				try:
 					for k, v in config_updates.items():
-						afutil.write_config_value('luxrender', 'defaults', k, v)
+						efutil.write_config_value('luxrender', 'defaults', k, v)
 				except Exception as err:
 					LuxLog('Saving LuxRender config failed: %s' % err)
 					return False

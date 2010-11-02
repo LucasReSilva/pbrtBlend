@@ -309,7 +309,7 @@ class luxrender_material(declarative_property_group):
 		
 		material_params.update( sub_type.get_params() )
 		
-		# DistrubutedPath compositing
+		# DistributedPath compositing
 		# Querying the scene will be more reliable than using self.integrator_type
 		# in case the panel has never been drawn
 		if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
