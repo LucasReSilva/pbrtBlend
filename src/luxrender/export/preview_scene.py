@@ -89,7 +89,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	
 	lux_context.worldBegin()
 	
-#def preview_scene_lights(lux_context):
 	# Light
 	lux_context.transformBegin()
 	lux_context.transform([

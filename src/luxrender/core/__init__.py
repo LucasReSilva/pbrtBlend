@@ -380,6 +380,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		# render !
 		preview_context.worldEnd()
 		time.sleep(0.2)
+		preview_context.addThread()
 		preview_context.wait()
 		#time.sleep(0.2)
 		preview_context.exit()
