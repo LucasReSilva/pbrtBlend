@@ -268,7 +268,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			
 			if not os.access( self.properties.directory, os.W_OK):
 				self.report({'ERROR'}, 'Output path "%s" is not writable' % self.properties.directory)
-				return False
+				return {'CANCELLED'}
 			
 			if LXS or LXM or LXO:
 				lux_context.set_filename(
@@ -279,7 +279,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				)
 			else:
 				self.report({'ERROR'}, 'Nothing to do! Select at least one of LXM/LXS/LXO')
-				return False
+				return {'CANCELLED'}
 		
 		if lux_context == False:
 			self.report({'ERROR'}, 'Lux context is not valid for export to %s'%self.properties.filename)
