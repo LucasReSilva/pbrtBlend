@@ -374,32 +374,6 @@ class luxrender_colorspace(declarative_property_group):
 			'default': 0.07
 		},
 	]
-
-class tonemapping_live_update(object):
-	prop_lookup = {
-		#'type':				 'LUX_FILM_TM_TONEMAPKERNEL',
-		'reinhard_prescale':	'LUX_FILM_TM_REINHARD_PRESCALE',
-		'reinhard_postscale':	'LUX_FILM_TM_REINHARD_POSTSCALE',
-		'reinhard_burn':		'LUX_FILM_TM_REINHARD_BURN',
-	}
-	prop_vals = {}
-	@staticmethod
-	def update(context, scene, property):
-		if LM.ActiveManager is not None and LM.ActiveManager.started:
-			prop_val = getattr(scene.camera.data.luxrender_tonemapping, property)
-			if property not in tonemapping_live_update.prop_vals.keys():
-				tonemapping_live_update.prop_vals[property] = prop_val
-			
-			if tonemapping_live_update.prop_vals[property] != prop_val:
-				tonemapping_live_update.prop_vals[property] = prop_val
-				c = LM.ActiveManager.lux_context
-				c.setParameterValue(
-					c.PYLUX.luxComponent.LUX_FILM,
-					getattr(c.PYLUX.luxComponentParameters, tonemapping_live_update.prop_lookup[property]),
-					prop_val,
-					0
-				)
-
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.

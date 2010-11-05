@@ -363,6 +363,7 @@ class Custom_Context(object):
 			
 			c.parse(filename, async)
 			
+			self.PYLUX = c.PYLUX
 			return c
 		else:
 			raise Exception('This method requires pylux')

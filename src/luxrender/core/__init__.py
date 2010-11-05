@@ -103,6 +103,7 @@ from luxrender.properties.volume		import	luxrender_volumeintegrator
 # Exporter Interface Panels
 from luxrender.ui						import	render_panels		as ui_render_panels
 from luxrender.ui						import	camera				as ui_camera
+from luxrender.ui						import	image				as ui_image
 from luxrender.ui						import	lamps				as ui_lamps
 from luxrender.ui						import	meshes				as ui_meshes
 from luxrender.ui.materials				import	main				as ui_materials, \
