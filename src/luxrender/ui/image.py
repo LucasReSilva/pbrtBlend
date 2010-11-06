@@ -61,6 +61,13 @@ class luxrender_ui_rendering_controls(property_group_renderer, bpy.types.Panel):
 		property_group_renderer.draw(self, context)
 		
 		# ... and live-update the parameters !
+		
+		# TODO: Strategy:
+		# 1. Detect which parameters have changed
+		# 2. Add those to an update queue in tuple form (component, parameter, value)
+		# 3. Give queue to FrameBuffer thread, replacing values as needed
+		# 4. FB will empty its own queue into the Context upon the next image update call
+		
 		if self.ctx != None and self.ctx.API_TYPE == 'PURE':
 			pylux = self.ctx.PYLUX
 			tm_data = context.scene.camera.data.luxrender_tonemapping
@@ -73,5 +80,3 @@ class luxrender_ui_rendering_controls(property_group_renderer, bpy.types.Panel):
 			}
 			
 			self.ctx.setAttribute('film', 'TonemapKernel', tm_map[tm_data.type])
-			
-			

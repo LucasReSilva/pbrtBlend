@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
-from extensions_framework import util as afutil
+from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from luxrender.export					import ParamSet
@@ -132,7 +132,7 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'render',
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
-			'default': afutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
 		},
 		{
 			'type': 'enum',
@@ -164,7 +164,7 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'install_path',
 			'name': 'Path to LuxRender Installation',
 			'description': 'Path to LuxRender',
-			'default': afutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+			'default': efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
 		},
 		{
 			'type': 'bool',
@@ -299,7 +299,7 @@ class luxrender_networking(declarative_property_group):
 			'type': 'bool',
 			'attr': 'use_network_servers',
 			'name': 'Use Networking',
-			'default': afutil.find_config_value('luxrender', 'defaults', 'use_network_servers', False),
+			'default': efutil.find_config_value('luxrender', 'defaults', 'use_network_servers', False),
 			'save_in_preset': True
 		},
 		{
@@ -307,7 +307,7 @@ class luxrender_networking(declarative_property_group):
 			'attr': 'servers',
 			'name': 'Servers',
 			'description': 'Comma separated list of Lux server IP addresses',
-			'default': afutil.find_config_value('luxrender', 'defaults', 'servers', ''),
+			'default': efutil.find_config_value('luxrender', 'defaults', 'servers', ''),
 			'save_in_preset': True
 		},
 		{
@@ -315,7 +315,7 @@ class luxrender_networking(declarative_property_group):
 			'attr': 'serverinterval',
 			'name': 'Upload interval',
 			'description': 'Interval for server image transfers (seconds)',
-			'default': int(afutil.find_config_value('luxrender', 'defaults', 'serverinterval', '180')),
+			'default': int(efutil.find_config_value('luxrender', 'defaults', 'serverinterval', '180')),
 			'min': 10,
 			'soft_min': 10,
 			'save_in_preset': True

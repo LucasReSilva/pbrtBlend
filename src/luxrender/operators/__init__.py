@@ -31,8 +31,8 @@ import os
 import bpy
 from presets import AddPresetBase
 
-# extensions_Framework Libs
-from extensions_framework import util as afutil
+# Extensions_Framework Libs
+from extensions_framework import util as efutil
 
 # LuxRender Libs
 from luxrender.outputs import LuxManager
@@ -252,8 +252,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			self.properties.filename
 		])
 		
-		afutil.export_path = lxs_filename
-		#print('(2) export_path is %s' % afutil.export_path)
+		efutil.export_path = lxs_filename
+		#print('(2) export_path is %s' % efutil.export_path)
 		
 		if self.properties.api_type == 'FILE':
 			

@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
-from extensions_framework import util as afutil
+from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O
 
 from luxrender.properties.lampspectrum_data import lampspectrum_list
@@ -1413,7 +1413,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 		
 		params = ParamSet()
 		
-		params.add_string('filename', afutil.path_relative_to_export(self.filename) ) \
+		params.add_string('filename', efutil.path_relative_to_export(self.filename) ) \
 			  .add_integer('discardmipmaps', self.discardmipmaps) \
 			  .add_string('filtertype', self.filtertype) \
 			  .add_float('gain', self.gain) \
@@ -1866,7 +1866,7 @@ class tabulatedfresnel(declarative_property_group):
 	]
 	
 	def get_paramset(self):
-		tfp = ParamSet().add_string('filename', afutil.path_relative_to_export(self.filename) )
+		tfp = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
 		return set(), tfp
 
 class luxrender_tex_luxpop(tabulatedfresnel):

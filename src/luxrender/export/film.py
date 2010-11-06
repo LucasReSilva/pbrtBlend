@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import util as afutil
+from extensions_framework import util as efutil
 
 from luxrender.export import get_worldscale
 from luxrender.export import ParamSet
@@ -169,8 +169,12 @@ def film(scene):
 	params.add_float('colorspace_green',	[cs_object.cs_greenX,	cs_object.cs_greenY])
 	params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
 	
+	# Camera Response Function
+	if cso.use_crf:
+		params.add_string('cameraresponse', efutil.path_relative_to_export(cso.crf_file) )
+	
 	# Output types
-	params.add_string('filename', afutil.path_relative_to_export(afutil.export_path))
+	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 	params.add_bool('write_exr', False)
 	params.add_bool('write_png', True)
 	params.add_bool('write_tga', False)

@@ -32,7 +32,6 @@ from luxrender.properties import dbo
 from luxrender.export import get_worldscale
 from luxrender.export.film import resolution
 from luxrender.export import ParamSet
-from luxrender.outputs import LuxManager as LM
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -262,13 +261,17 @@ class luxrender_colorspace(declarative_property_group):
 	'''
 	
 	controls = [
-		'gamma',
 		
 		[0.1, 'preset', 'preset_name'],
 		['cs_whiteX', 'cs_whiteY'],
 		['cs_redX', 'cs_redY'],
 		['cs_greenX', 'cs_greenY'],
 		['cs_blueX', 'cs_blueY'],
+		
+		'gamma',
+		
+		'use_crf',
+		'crf_file'
 	]
 	
 	visibility = {
@@ -281,6 +284,7 @@ class luxrender_colorspace(declarative_property_group):
 		'cs_greenY':	{ 'preset': False },
 		'cs_blueX':		{ 'preset': False },
 		'cs_blueY':		{ 'preset': False },
+		'crf_file':		{ 'use_crf': True },
 	}
 	
 	properties = [
@@ -373,7 +377,23 @@ class luxrender_colorspace(declarative_property_group):
 			'precision': 6,
 			'default': 0.07
 		},
+		
+		# Camera Response Functions
+		{
+			'attr': 'use_crf',
+			'type': 'bool',
+			'name': 'Use Camera Response Function',
+			'default': False
+		},
+		{
+			'attr': 'crf_file',
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'name': 'CRF File',
+			'default': '',
+		},
 	]
+
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.
