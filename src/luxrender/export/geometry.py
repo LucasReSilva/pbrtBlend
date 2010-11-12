@@ -273,6 +273,26 @@ def exportInstance(lux_context, scene, ob, matrix):
 	
 	lux_context.attributeEnd()
 
+class MeshExportProgressThread(efutil.TimerThread):
+	KICK_PERIOD = 1
+	total_objects = 0
+	exported_objects = 0
+	last_update = 0
+	def start(self, number_of_meshes):
+		self.total_objects = number_of_meshes
+		self.exported_objects = 0
+		self.last_update = 0
+		super().start()
+	def kick(self):
+		if self.exported_objects != self.last_update:
+			self.last_update = self.exported_objects
+			pc = int(100 * self.exported_objects/self.total_objects)
+			#render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
+			bpy.ops.ef.msg(
+				msg_type='INFO',
+				msg_text='LuxRender: Parsing meshes %i%%' % pc
+			)
+
 #-------------------------------------------------
 # write_lxo(render_engine, lux_context, scene)
 # MAIN export function
@@ -287,9 +307,6 @@ def write_lxo(render_engine, lux_context, scene):
 	
 	Returns		None
 	'''
-
-	rpcs = []
-	ipc = 0.0
 	
 	sel = scene.objects
 	total_objects = len(sel)
@@ -352,6 +369,9 @@ def write_lxo(render_engine, lux_context, scene):
 	# browse all scene objects for "mesh-convertible" ones
 	# skip duplicated objects here
 	
+	progress_thread = MeshExportProgressThread()
+	progress_thread.start(total_objects)
+	
 	for ob in sel:
 		if ob.type != 'MESH':
 			continue
@@ -371,7 +391,7 @@ def write_lxo(render_engine, lux_context, scene):
 		for psys in ob.particle_systems:
 			render_emitter |= psys.settings.use_render_emitter
 
-		# dupli object render rule copied from convertblender.c (blender internal render)		
+		# dupli object render rule copied from convertblender.c (blender internal render)
 		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			# Export mesh definition once
 			if allow_instancing(scene) and (ob.data.name not in meshes_exported):
@@ -381,15 +401,7 @@ def write_lxo(render_engine, lux_context, scene):
 			# Export object instance
 			exportInstance(lux_context, scene, ob, ob.matrix_world)
 
-		# exported another object
-		ipc += 1.0
-
-		# TODO: this probably isn't very efficient for large scenes
-		pc = int(100 * ipc/total_objects)
-		if pc not in rpcs:
-			rpcs.append(pc)
-			#render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
-			bpy.ops.ef.msg(
-				msg_type='INFO',
-				msg_text='LuxRender: Parsing meshes %i%%' % pc
-			)
+		progress_thread.exported_objects += 1
+	
+	progress_thread.stop()
+	progress_thread.join()
