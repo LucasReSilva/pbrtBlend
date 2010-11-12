@@ -34,6 +34,10 @@ from luxrender.export import ParamSet
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import export_object_material, get_instance_materials, add_texture_parameter
 
+
+class InvalidGeometryException(Exception):
+	pass
+
 #-------------------------------------------------
 # getMeshType(mesh)
 # returns type of mesh as string to use depending on thresholds
@@ -81,7 +85,10 @@ def exportNativeMesh(scene, mesh, lux_context):
 			indices.append(index+3)
 			ntris += 3
 		index += len(face.vertices)
-		
+	
+	if ntris == 0:
+		raise InvalidGeometryException()
+	
 	# vertex positions
 	points = []
 	#print('-> Collect vert positions')
@@ -92,7 +99,10 @@ def exportNativeMesh(scene, mesh, lux_context):
 			nvertices += 1
 			for co in v:
 				points.append(co)
-				
+	
+	if nvertices == 0:
+		raise InvalidGeometryException()
+	
 	# vertex normals
 	#print('-> Collect mert normals')
 	normals = []
@@ -189,22 +199,25 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=Tr
 	
 	if scale is not None: lux_context.scale(*scale)
 	
-	if scene.luxrender_engine.mesh_type == 'native':
-		shape_type, shape_params = exportNativeMesh(scene, mesh, lux_context)
-	elif scene.luxrender_engine.mesh_type == 'ply':
-		shape_type, shape_params = exportPlyMesh(scene, mesh, lux_context)
+	try:
+		if scene.luxrender_engine.mesh_type == 'native':
+			shape_type, shape_params = exportNativeMesh(scene, mesh, lux_context)
+		elif scene.luxrender_engine.mesh_type == 'ply':
+			shape_type, shape_params = exportPlyMesh(scene, mesh, lux_context)
+		
+		#print('-> Create shape')
+		if ob.data.luxrender_mesh.portal:
+			lux_context.portalShape(shape_type, shape_params)
+		else:
+			lux_context.shape(shape_type, shape_params)
+		#print('-> Mesh done')
+	except InvalidGeometryException:
+		pass
 	
-	#print('-> Create shape')
-	if ob.data.luxrender_mesh.portal:
-		lux_context.portalShape(shape_type, shape_params)
-	else:
-		lux_context.shape(shape_type, shape_params)
-	#print('-> Mesh done')
+	if object_begin_end: lux_context.objectEnd()
 	
 	#print('-> Remove render mesh')
 	bpy.data.meshes.remove(mesh)
-	
-	if object_begin_end: lux_context.objectEnd()
 
 def allow_instancing(scene):
 	# Some situations require full geometry export
