@@ -175,10 +175,10 @@ def film(scene):
 	
 	# Output types
 	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
-	params.add_bool('write_exr', False)
-	params.add_bool('write_png', True)
-	params.add_bool('write_tga', False)
-	params.add_bool('write_resume_flm', False)
+	params.add_bool('write_exr', scene.camera.data.luxrender_camera.write_exr)
+	params.add_bool('write_png', scene.camera.data.luxrender_camera.write_png)
+	params.add_bool('write_tga', scene.camera.data.luxrender_camera.write_tga)
+	params.add_bool('write_resume_flm', scene.camera.data.luxrender_camera.write_flm)
 	
 	params.add_integer('displayinterval', scene.luxrender_engine.displayinterval)
 	params.add_integer('writeinterval', scene.luxrender_engine.writeinterval)

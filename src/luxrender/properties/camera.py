@@ -52,7 +52,11 @@ class luxrender_camera(declarative_property_group):
 		'exposure',
 		'usemblur',
 		'shutterdistribution', 
-		['cammblur', 'objectmblur'], 
+		['cammblur', 'objectmblur'],
+		
+		'lbl_outputs',
+		#['write_png',
+		['write_exr','write_tga','write_flm'],
 	]
 	
 	visibility = {
@@ -164,7 +168,36 @@ class luxrender_camera(declarative_property_group):
 			'attr': 'objectmblur',
 			'name': 'Object Motion Blur',
 			'default': True
-		},	
+		},
+		{
+			'type': 'text',
+			'attr': 'lbl_outputs',
+			'name': 'Output formats'
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_png',
+			'name': 'PNG',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_exr',
+			'name': 'EXR',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_tga',
+			'name': 'TGA',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_flm',
+			'name': 'FLM',
+			'default': False
+		},
 	]
 	
 	def screenwindow(self, xr, yr, cam):
