@@ -185,6 +185,7 @@ def film(scene):
 		params.add_bool('write_exr_halftype', False)
 		params.add_bool('write_exr_applyimaging', True)
 		params.add_bool('write_exr_ZBuf', True)
+		params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 		params.add_float('gamma', 1.0) # Linear workflow !
 	else:
 		write_exr = scene.camera.data.luxrender_camera.write_exr
