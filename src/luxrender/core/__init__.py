@@ -186,7 +186,7 @@ blender_texture_ui_list = [
 	properties_texture.TEXTURE_PT_blend,
 	properties_texture.TEXTURE_PT_clouds,
 	properties_texture.TEXTURE_PT_distortednoise,
-	#properties_texture.TEXTURE_PT_image,
+	properties_texture.TEXTURE_PT_image,
 	properties_texture.TEXTURE_PT_magic,
 	properties_texture.TEXTURE_PT_marble,
 	properties_texture.TEXTURE_PT_musgrave,

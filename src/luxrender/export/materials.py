@@ -24,6 +24,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
+
+from extensions_framework import util as efutil
+
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog, LuxManager
 
@@ -220,6 +224,14 @@ def convert_texture(texture):
 				.add_float('turbulence', texture.turbulence) \
 				.add_string('type', texture.wood_type.lower() ) \
 				.add_float('nabla', texture.nabla)
+	
+	# Translate Blender Image/movie into lux tex
+	if texture.type == 'IMAGE' and texture.image and texture.image.source not in ['MOVIE', 'SEQUENCE']:
+		baked_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
+		texture.image.save_render(baked_image)
+		lux_tex_name = 'imagemap'
+		variant = 'color'
+		paramset.add_string('filename', baked_image)
 	
 	paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset() )
 	
