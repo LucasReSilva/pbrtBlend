@@ -181,7 +181,7 @@ def film(scene):
 	if scene.luxrender_engine.export_type == 'INT':
 		# EXR is used to bring the image back into blender
 		write_exr = True
-		params.add_bool('write_exr_channels', 'RGBA')
+		params.add_string('write_exr_channels', 'RGBA')
 		params.add_bool('write_exr_halftype', False)
 		params.add_bool('write_exr_applyimaging', True)
 		params.add_bool('write_exr_ZBuf', True)

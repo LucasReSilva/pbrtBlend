@@ -49,7 +49,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_bool('write_exr', True) \
 		.add_bool('write_exr_ZBuf', True) \
 		.add_bool('write_exr_applyimaging', True) \
-		.add_bool('write_exr_channels', 'RGBA') \
+		.add_string('write_exr_channels', 'RGBA') \
 		.add_bool('write_exr_halftype', False) \
 		.add_bool('write_png', False) \
 		.add_bool('write_tga', False) \

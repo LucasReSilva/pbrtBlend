@@ -552,9 +552,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				for i in range(thread_count - 1):
 					self.LuxManager.lux_context.addThread()
 				
-				# Set output image options
-				self.LuxManager.lux_context.setAttribute('film', 'write_EXR_channels', 3)	# RGBA
-				
 				while self.LuxManager.started:
 					self.render_update_timer = threading.Timer(1, self.stats_timer)
 					self.render_update_timer.start()
