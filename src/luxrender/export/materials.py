@@ -230,7 +230,7 @@ def convert_texture(texture):
 	# Translate Blender Image/movie into lux tex
 	if texture.type == 'IMAGE' and texture.image and texture.image.source not in ['MOVIE', 'SEQUENCE']:
 		baked_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
-		texture.image.save_render(baked_image)
+		texture.image.save_render(baked_image, LuxManager.CurrentScene)
 		lux_tex_name = 'imagemap'
 		variant = 'color'
 		paramset.add_string('filename', baked_image)
