@@ -32,6 +32,7 @@ from luxrender.properties import dbo
 from luxrender.export import get_worldscale
 from luxrender.export.film import resolution
 from luxrender.export import ParamSet
+from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
 # TODO: adapt values written to d based on simple/advanced views
 
@@ -427,6 +428,23 @@ class luxrender_colorspace(declarative_property_group):
 		},
 	]
 
+def get_tonemaps():
+	
+	items =  [
+		('reinhard', 'Reinhard', 'reinhard'),
+		('linear', 'Linear (manual)', 'linear'),
+		# put autolinear in this space for supported versions
+		('contrast', 'Contrast', 'contrast'),
+		('maxwhite', 'Maxwhite', 'maxwhite')
+	]
+	
+	if LUXRENDER_VERSION >= '0.8':
+		items.insert(2,
+			('autolinear', 'Linear (auto-exposure)', 'autolinear')
+		)
+	
+	return items
+
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.
@@ -467,13 +485,7 @@ class luxrender_tonemapping(declarative_property_group):
 			'name': 'Tonemapper',
 			'description': 'Choose tonemapping type',
 			'default': 'reinhard',
-			'items': [
-				('reinhard', 'Reinhard', 'reinhard'),
-				('linear', 'Linear (manual)', 'linear'),
-				('autolinear', 'Linear (auto-exposure)', 'autolinear'),
-				('contrast', 'Contrast', 'contrast'),
-				('maxwhite', 'Maxwhite', 'maxwhite')
-			],
+			'items': get_tonemaps(),
 			#'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'type')
 		},
 		
