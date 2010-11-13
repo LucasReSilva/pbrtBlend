@@ -28,6 +28,7 @@ import bpy
 
 from luxrender.export import ParamSet
 from luxrender.export.film import resolution
+from luxrender.export.geometry import exportNativeMesh
 from luxrender.outputs import LuxManager
 
 def preview_scene(scene, lux_context, obj=None, mat=None):
@@ -51,6 +52,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_bool('write_exr_applyimaging', True) \
 		.add_string('write_exr_channels', 'RGBA') \
 		.add_bool('write_exr_halftype', False) \
+		.add_float('gamma', 1.0) \
 		.add_bool('write_png', False) \
 		.add_bool('write_tga', False) \
 		.add_bool('write_resume_flm', False) \
@@ -181,21 +183,52 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	if obj is not None and mat is not None:
 		# preview object
 		lux_context.attributeBegin()
-		lux_context.transform([
+		pv_transform = [
 			0.5, 0.0, 0.0, 0.0,
 			0.0, 0.5, 0.0, 0.0,
 			0.0, 0.0, 0.5, 0.0,
 			0.0, 0.0, 0.5, 1.0
-		])
+		]
+		pv_export_shape = True
+		
+		if mat.preview_render_type == 'FLAT':
+			pv_export_shape = False
+		if mat.preview_render_type == 'SPHERE':
+			pv_transform = [
+				0.1, 0.0, 0.0, 0.0,
+				0.0, 0.1, 0.0, 0.0,
+				0.0, 0.0, 0.1, 0.0,
+				0.0, 0.0, 0.5, 1.0
+			]
+		if mat.preview_render_type == 'CUBE':
+			lux_context.scale(0.8, 0.8, 0.8)
+			lux_context.rotate(-35, 0,0,1)
+		if mat.preview_render_type == 'MONKEY':
+			pv_transform = [
+				1.0573405027389526, 0.6340668201446533, 0.0, 0.0,
+				-0.36082395911216736, 0.601693332195282, 1.013795018196106, 0.0,
+				0.5213892459869385, -0.8694445490837097, 0.7015902996063232, 0.0,
+				0.0, 0.0, 0.5, 1.0
+			]
+		if mat.preview_render_type == 'HAIR':
+			pv_export_shape = False
+		if mat.preview_render_type == 'SPHERE_A':
+			pv_export_shape = False
+		
+		lux_context.concatTransform(pv_transform)
+		
 		mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
 		
 		if mat.luxrender_material.type in ['glass2']:
 			lux_context.interior(mat.luxrender_material.luxrender_mat_glass2.Interior_volume)
 			lux_context.exterior(mat.luxrender_material.luxrender_mat_glass2.Exterior_volume)
 		
-		sphere_params = ParamSet().add_float('radius', 1.0)
-		lux_context.shape('sphere', sphere_params)
-		
+		if pv_export_shape:
+			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
+			lux_context.shape( *exportNativeMesh(scene, pv_mesh, lux_context) )
+			bpy.data.meshes.remove(pv_mesh)
+		else:
+			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))
 		lux_context.attributeEnd()
 	
 	return int(xr), int(yr)
