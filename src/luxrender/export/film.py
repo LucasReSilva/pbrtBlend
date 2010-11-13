@@ -28,6 +28,7 @@ from extensions_framework import util as efutil
 
 from luxrender.export import get_worldscale
 from luxrender.export import ParamSet
+from luxrender.outputs import LuxManager as LM
 
 def lookAt(scene):
 	'''
@@ -175,10 +176,23 @@ def film(scene):
 	
 	# Output types
 	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
-	params.add_bool('write_exr', scene.camera.data.luxrender_camera.write_exr)
+	params.add_bool('write_resume_flm', scene.camera.data.luxrender_camera.write_flm)
+	
+	if scene.luxrender_engine.export_type == 'INT':
+		# EXR is used to bring the image back into blender
+		write_exr = True
+		params.add_bool('write_exr_channels', 'RGBA')
+		params.add_bool('write_exr_halftype', False)
+		params.add_bool('write_exr_applyimaging', True)
+		params.add_bool('write_exr_ZBuf', True)
+		params.add_float('gamma', 1.0) # Linear workflow !
+	else:
+		write_exr = scene.camera.data.luxrender_camera.write_exr
+	
+	params.add_bool('write_exr', write_exr)
 	params.add_bool('write_png', scene.camera.data.luxrender_camera.write_png)
 	params.add_bool('write_tga', scene.camera.data.luxrender_camera.write_tga)
-	params.add_bool('write_resume_flm', scene.camera.data.luxrender_camera.write_flm)
+	
 	
 	params.add_integer('displayinterval', scene.luxrender_engine.displayinterval)
 	params.add_integer('writeinterval', scene.luxrender_engine.writeinterval)

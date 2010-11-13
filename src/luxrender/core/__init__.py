@@ -228,7 +228,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	LuxManager			= None
 	render_update_timer	= None
 	output_dir			= './'
-	output_file			= 'default.png'
+	output_file			= 'default.exr'
 	
 #	# This member is read by the extensions_Framework to set up custom property groups
 	property_groups = [
@@ -394,7 +394,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		result = self.begin_result(0, 0, xres, yres)
 		lay = result.layers[0]
 		# TODO: use the framebuffer direct from pylux when Blender's API supports it
-		lay.load_from_file('luxblend25-preview.png')
+		lay.load_from_file('luxblend25-preview.exr')
 		self.end_result(result)
 		
 		LuxManager.ClearActive()
@@ -455,7 +455,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			return False
 		
 		self.output_file = efutil.path_relative_to_export(
-			'%s/%s.png' % (self.output_dir, output_filename)
+			'%s/%s.exr' % (self.output_dir, output_filename)
 		)
 		
 		return True

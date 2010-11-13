@@ -46,8 +46,12 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_integer('xresolution', int(xr)) \
 		.add_integer('yresolution', int(yr)) \
 		.add_string('filename', 'luxblend25-preview') \
-		.add_bool('write_exr', False) \
-		.add_bool('write_png', True) \
+		.add_bool('write_exr', True) \
+		.add_bool('write_exr_ZBuf', True) \
+		.add_bool('write_exr_applyimaging', True) \
+		.add_bool('write_exr_channels', 'RGBA') \
+		.add_bool('write_exr_halftype', False) \
+		.add_bool('write_png', False) \
 		.add_bool('write_tga', False) \
 		.add_bool('write_resume_flm', False) \
 		.add_integer('displayinterval', 3) \

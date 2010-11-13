@@ -56,8 +56,7 @@ class luxrender_camera(declarative_property_group):
 		['cammblur', 'objectmblur'],
 		
 		'lbl_outputs',
-		#['write_png',
-		['write_exr','write_tga','write_flm'],
+		['write_png', 'write_exr','write_tga','write_flm'],
 	]
 	
 	visibility = {
