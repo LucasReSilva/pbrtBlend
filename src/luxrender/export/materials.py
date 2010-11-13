@@ -137,6 +137,8 @@ def convert_texture(texture):
 	paramset = ParamSet()
 	lux_tex_name = 'blender_%s' % texture.type.lower()
 	
+	mapping_type = '3D'
+	
 	if texture.type == 'BLEND':
 		progression_map = {
 			'LINEAR':			'lin',
@@ -232,8 +234,12 @@ def convert_texture(texture):
 		lux_tex_name = 'imagemap'
 		variant = 'color'
 		paramset.add_string('filename', baked_image)
+		mapping_type = '2D'
 	
-	paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset() )
+	if mapping_type == '3D':
+		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset() )
+	else:
+		paramset.update( texture.luxrender_texture.luxrender_tex_mapping.get_paramset() )
 	
 	return variant, lux_tex_name, paramset
 
