@@ -310,12 +310,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			# Refresh the scene as early as possible in render process
 			scene.frame_set(scene.frame_current)
 			
-			if scene.render.use_color_management == False:
-				LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
-			
 			if scene.name == 'preview':
 				self.render_preview(scene)
 				return
+			
+			if scene.render.use_color_management == False:
+				LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
 			
 			if self.render_scene(scene) == False:
 				#bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
