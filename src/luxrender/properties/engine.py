@@ -65,12 +65,12 @@ def engine_controls():
 		
 		'writeinterval',
 		'displayinterval',
+		'linearimaging'
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
 		# Insert 'renderer' before 'binary_name'
 		ectl.insert(ectl.index('binary_name'), 'renderer')
-	
 	
 	return ectl
 
@@ -97,6 +97,7 @@ class luxrender_engine(declarative_property_group):
 		
 		# displayinterval is applicable only to the Lux GUI
 		'displayinterval':	{ 'export_type': 'EXT', 'binary_name': 'luxrender' },
+		'linearimaging':	{ 'export_type': 'INT' },
 	}
 	
 	properties = [
@@ -273,6 +274,13 @@ class luxrender_engine(declarative_property_group):
 			'min': 2,
 			'soft_min': 2,
 			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'linearimaging',
+			'name': 'Linear Imaging workflow',
+			'description': 'Use linear imaging workflow for internal rendering using EXR images',
+			'default': False
 		},
 	]
 	

@@ -228,7 +228,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	LuxManager			= None
 	render_update_timer	= None
 	output_dir			= './'
-	output_file			= 'default.exr'
+	output_file			= 'default.png'
 	
 #	# This member is read by the extensions_Framework to set up custom property groups
 	property_groups = [
@@ -454,9 +454,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		self.output_file = efutil.path_relative_to_export(
-			'%s/%s.exr' % (self.output_dir, output_filename)
-		)
+		if scene.luxrender_engine.export_type == 'INT' and scene.luxrender_engine.linearimaging:
+			self.output_file = efutil.path_relative_to_export(
+				'%s/%s.exr' % (self.output_dir, output_filename)
+			)
+		else:
+			self.output_file = efutil.path_relative_to_export(
+				'%s/%s.png' % (self.output_dir, output_filename)
+			)
 		
 		return True
 	

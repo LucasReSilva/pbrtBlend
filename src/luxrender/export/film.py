@@ -178,8 +178,8 @@ def film(scene):
 	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 	params.add_bool('write_resume_flm', scene.camera.data.luxrender_camera.write_flm)
 	
-	if scene.luxrender_engine.export_type == 'INT':
-		# EXR is used to bring the image back into blender
+	if scene.luxrender_engine.export_type == 'INT' and scene.luxrender_engine.linearimaging:
+		# EXR is used to bring the image back into blender with linear workflow
 		write_exr = True
 		params.add_string('write_exr_channels', 'RGBA')
 		params.add_bool('write_exr_halftype', False)
