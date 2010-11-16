@@ -35,7 +35,7 @@ from luxrender.properties import dbo
 from luxrender.export import ParamSet, get_worldscale, matrix_to_list
 from luxrender.export.materials import add_texture_parameter
 
-def attr_light(lux_context, name, group, type, params, transform=None):
+def attr_light(lux_context, name, group, type, params, transform=None, portals=[]):
 	'''
 	lux_context		pylux.Context
 	name			string
@@ -61,13 +61,16 @@ def attr_light(lux_context, name, group, type, params, transform=None):
 	dbo('LIGHT', (type, params))
 	lux_context.lightGroup(group, [])
 	lux_context.lightSource(type, params)
+
+	for portal in portals:
+		lux_context.portalInstance(portal)
 	
 	if transform is not None:
 		lux_context.transformEnd()
 	else:
 		lux_context.attributeEnd()
 
-def exportLights(lux_context, ob, matrix):
+def exportLights(lux_context, ob, matrix, portals = []):
 	light = ob.data
 		
 	# Params common to all light types
@@ -88,7 +91,7 @@ def exportLights(lux_context, ob, matrix):
 			light_params.add_float('sunhalobrightness', light.luxrender_lamp.sunhalobrightness)
 			light_params.add_float('sunhalosize', light.luxrender_lamp.sunhalosize)
 			light_params.add_float('backscattering', light.luxrender_lamp.backscattering)
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params)
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params, portals=portals)
 		return True
 	
 	# all lights apart from sun + sky have "color L"
@@ -115,7 +118,7 @@ def exportLights(lux_context, ob, matrix):
 			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
 		# nsamples
 		# gamma
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'AREA':
@@ -176,6 +179,15 @@ def lights(lux_context, scene):
 	sel = scene.objects
 	have_light = False
 	
+	portal_shapes = []
+	
+	for ob in sel:
+		if ob.type != 'MESH':
+		  continue
+		
+		if ob.data.luxrender_mesh.portal:
+			portal_shapes.append(ob.data.name)
+	
 	for ob in sel:
 		
 		if not ob.is_visible(scene) or ob.hide_render:
@@ -201,7 +213,7 @@ def lights(lux_context, scene):
 				ob.free_dupli_list()
 		else:
 			if ob.type == 'LAMP':
-				have_light |= exportLights(lux_context, ob, ob.matrix_world)
+				have_light |= exportLights(lux_context, ob, ob.matrix_world, portal_shapes)
 		
 		if ob.type == 'MESH':
 			# now check for emissive materials on ob

@@ -184,7 +184,7 @@ def exportPlyMesh(scene, mesh, lux_context):
 # export_mesh(lux_context, scene, object, matrix)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=True):
+def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=True, transformed=False):
 	
 	if log: LuxLog('Mesh Export: %s' % ob.data.name)
 	
@@ -199,6 +199,8 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=Tr
 	
 	if scale is not None: lux_context.scale(*scale)
 	
+	if transformed: lux_context.transform( matrix_to_list(ob.matrix_world, apply_worldscale=True) )
+	
 	try:
 		if scene.luxrender_engine.mesh_type == 'native':
 			shape_type, shape_params = exportNativeMesh(scene, mesh, lux_context)
@@ -206,10 +208,7 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=Tr
 			shape_type, shape_params = exportPlyMesh(scene, mesh, lux_context)
 		
 		#print('-> Create shape')
-		if ob.data.luxrender_mesh.portal:
-			lux_context.portalShape(shape_type, shape_params)
-		else:
-			lux_context.shape(shape_type, shape_params)
+		lux_context.shape(shape_type, shape_params)
 		#print('-> Mesh done')
 	except InvalidGeometryException:
 		pass
@@ -408,11 +407,12 @@ def write_lxo(render_engine, lux_context, scene):
 		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			# Export mesh definition once
 			if allow_instancing(scene) and (ob.data.name not in meshes_exported):
-				exportMesh(lux_context, scene, ob)
+				exportMesh(lux_context, scene, ob, transformed=ob.data.luxrender_mesh.portal)
 				meshes_exported.add(ob.data.name)
 			
 			# Export object instance
-			exportInstance(lux_context, scene, ob, ob.matrix_world)
+			if not ob.data.luxrender_mesh.portal:
+				exportInstance(lux_context, scene, ob, ob.matrix_world)
 
 		progress_thread.exported_objects += 1
 	

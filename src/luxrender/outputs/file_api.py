@@ -126,6 +126,7 @@ class Custom_Context(object):
 		
 		self.set_output_file(Files.MAIN)
 		
+		
 	def set_output_file(self, file):
 		'''
 		file				int
@@ -171,6 +172,9 @@ class Custom_Context(object):
 	def objectInstance(self, name):
 		self._api('ObjectInstance ', [name, []])
 	
+	def portalInstance(self, name):
+		self._api('PortalInstance ', [name, []])
+	
 	def renderer(self, *args):
 		self._api('Renderer', args)
 	
@@ -206,6 +210,11 @@ class Custom_Context(object):
 	
 	def worldBegin(self, *args):
 		self.wf(Files.MAIN, '\nWorldBegin')
+		if self.files[Files.MAIN] is not None:
+			# Include the other files if they exist
+			for idx in [Files.MATS, Files.GEOM]:
+				if os.path.exists(self.file_names[idx]):
+					self.wf(Files.MAIN, '\nInclude "%s"' % path_relative_to_export(self.file_names[idx]))
 	
 	def lightGroup(self, *args):
 		self._api('LightGroup', args)
@@ -297,11 +306,6 @@ class Custom_Context(object):
 		'''
 		
 		if self.files[Files.MAIN] is not None:
-			# Include the other files if they exist
-			for idx in [Files.MATS, Files.GEOM]:
-				if os.path.exists(self.file_names[idx]):
-					self.wf(Files.MAIN, '\nInclude "%s"' % path_relative_to_export(self.file_names[idx]))
-			
 			# End of the world as we know it
 			self.wf(Files.MAIN, 'WorldEnd')
 		

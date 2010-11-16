@@ -333,11 +333,6 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MAIN)
 			
-			self.report({'INFO'}, 'Exporting lights')
-			if export_lights.lights(lux_context, scene) == False:
-				self.report({'ERROR'}, 'No lights in scene!')
-				return {'CANCELLED'}
-		
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxm):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MATS)
@@ -356,6 +351,12 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.GEOM)
 			export_geometry.write_lxo(self, lux_context, scene)
+		
+		self.report({'INFO'}, 'Exporting lights')
+		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
+			if export_lights.lights(lux_context, scene) == False:
+				self.report({'ERROR'}, 'No lights in scene!')
+				return {'CANCELLED'}
 		
 		if self.properties.write_all_files:
 			lux_context.worldEnd()
