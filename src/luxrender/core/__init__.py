@@ -35,121 +35,123 @@ import os, time, threading, subprocess, sys
 import bpy
 
 # Framework libs
-from extensions_framework.engine import engine_base
-from extensions_framework import util as efutil
+from extensions_framework.engine		import ( engine_base )
+from extensions_framework				import ( util as efutil )
 
 # Exporter libs
-from luxrender.export.film import resolution
+from luxrender.export.film				import ( resolution )
 
-from luxrender.outputs import LuxManager, LuxFilmDisplay
-from luxrender.outputs import LuxLog
+from luxrender.outputs					import ( LuxManager, LuxFilmDisplay )
+from luxrender.outputs					import ( LuxLog )
 
 # Exporter Property Groups
-from luxrender.properties.accelerator	import	luxrender_accelerator
-from luxrender.properties.camera 		import	luxrender_camera, \
-												luxrender_colorspace, \
-												luxrender_tonemapping
-from luxrender.properties.engine		import	luxrender_engine, luxrender_networking
-from luxrender.properties.filter		import	luxrender_filter
-from luxrender.properties.integrator	import	luxrender_integrator
-from luxrender.properties.lamp			import	luxrender_lamp
-from luxrender.properties.material		import	luxrender_material, \
-												luxrender_emission, \
-												luxrender_volume_data, \
-												luxrender_volumes, \
-												luxrender_mat_carpaint, \
-												luxrender_mat_glass, \
-												luxrender_mat_glass2, \
-												luxrender_mat_roughglass, \
-												luxrender_mat_glossy, \
-												luxrender_mat_glossy_lossy, \
-												luxrender_mat_matte, \
-												luxrender_mat_mattetranslucent, \
-												luxrender_mat_metal, \
-												luxrender_mat_shinymetal, \
-												luxrender_mat_mirror, \
-												luxrender_mat_mix, \
-												luxrender_mat_null,\
-												luxrender_mat_velvet
-from luxrender.properties.mesh			import	luxrender_mesh
-from luxrender.properties.texture		import	luxrender_texture, \
-												luxrender_tex_bilerp, \
-												luxrender_tex_blackbody, \
-												luxrender_tex_brick, \
-												luxrender_tex_cauchy, \
-												luxrender_tex_constant, \
-												luxrender_tex_checkerboard, \
-												luxrender_tex_dots, \
-												luxrender_tex_equalenergy, \
-												luxrender_tex_fbm, \
-												luxrender_tex_gaussian, \
-												luxrender_tex_harlequin, \
-												luxrender_tex_imagemap, \
-												luxrender_tex_lampspectrum, \
-												luxrender_tex_luxpop, \
-												luxrender_tex_mapping, \
-												luxrender_tex_marble, \
-												luxrender_tex_mix, \
-												luxrender_tex_sellmeier, \
-												luxrender_tex_scale, \
-												luxrender_tex_sopra, \
-												luxrender_tex_transform, \
-												luxrender_tex_uv, \
-												luxrender_tex_windy, \
-												luxrender_tex_wrinkled
-from luxrender.properties.sampler		import	luxrender_sampler
-from luxrender.properties.volume		import	luxrender_volumeintegrator
+from luxrender.properties.accelerator	import ( luxrender_accelerator )
+from luxrender.properties.camera 		import ( luxrender_camera,
+												 luxrender_colorspace,
+												 luxrender_tonemapping )
+from luxrender.properties.engine		import ( luxrender_engine, luxrender_networking )
+from luxrender.properties.filter		import ( luxrender_filter )
+from luxrender.properties.integrator	import ( luxrender_integrator )
+from luxrender.properties.lamp			import ( luxrender_lamp )
+from luxrender.properties.material		import ( luxrender_material,
+												 luxrender_emission,
+												 luxrender_volume_data,
+												 luxrender_volumes,
+												 luxrender_mat_carpaint,
+												 luxrender_mat_glass,
+												 luxrender_mat_glass2,
+												 luxrender_mat_roughglass,
+												 luxrender_mat_glossy,
+												 luxrender_mat_glossy_lossy,
+												 luxrender_mat_matte,
+												 luxrender_mat_mattetranslucent,
+												 luxrender_mat_metal,
+												 luxrender_mat_shinymetal,
+												 luxrender_mat_mirror,
+												 luxrender_mat_mix,
+												 luxrender_mat_null,
+												 luxrender_mat_velvet )
+from luxrender.properties.mesh			import ( luxrender_mesh )
+from luxrender.properties.texture		import ( luxrender_texture,
+												 luxrender_tex_bilerp,
+												 luxrender_tex_blackbody,
+												 luxrender_tex_brick,
+												 luxrender_tex_cauchy,
+												 luxrender_tex_constant,
+												 luxrender_tex_checkerboard,
+												 luxrender_tex_dots,
+												 luxrender_tex_equalenergy,
+												 luxrender_tex_fbm,
+												 luxrender_tex_gaussian,
+												 luxrender_tex_harlequin,
+												 luxrender_tex_imagemap,
+												 luxrender_tex_lampspectrum,
+												 luxrender_tex_luxpop,
+												 luxrender_tex_mapping,
+												 luxrender_tex_marble,
+												 luxrender_tex_mix,
+												 luxrender_tex_sellmeier,
+												 luxrender_tex_scale,
+												 luxrender_tex_sopra,
+												 luxrender_tex_transform,
+												 luxrender_tex_uv,
+												 luxrender_tex_windy,
+												 luxrender_tex_wrinkled )
+from luxrender.properties.sampler		import ( luxrender_sampler )
+from luxrender.properties.volume		import ( luxrender_volumeintegrator )
 
 # Exporter Interface Panels
-from luxrender.ui						import	render_panels		as ui_render_panels
-from luxrender.ui						import	camera				as ui_camera
-from luxrender.ui						import	image				as ui_image
-from luxrender.ui						import	lamps				as ui_lamps
-from luxrender.ui						import	meshes				as ui_meshes
-from luxrender.ui.materials				import	main				as ui_materials, \
-												carpaint			as ui_materials_carpaint, \
-												glass				as ui_materials_glass, \
-												glass2				as ui_materials_glass2, \
-												roughglass			as ui_materials_roughglass, \
-												glossy_lossy		as ui_materials_glossy_lossy, \
-												glossy				as ui_materials_glossy, \
-												matte				as ui_materials_matte, \
-												mattetranslucent	as ui_materials_mattetranslucent, \
-												metal				as ui_materials_metal, \
-												mirror				as ui_materials_mirror, \
-												mix					as ui_materials_mix, \
-												shinymetal			as ui_materials_shinymetal, \
-												velvet				as ui_materials_velvet, \
-												emission			as ui_materials_emission, \
-												volumes				as ui_materials_volumes
-from luxrender.ui.textures				import	main				as ui_textures, \
-												bilerp				as ui_texture_bilerp, \
-												blackbody			as ui_texture_blackbody, \
-												brick				as ui_texture_brick, \
-												cauchy				as ui_texture_cauchy, \
-												constant			as ui_texture_constant, \
-												checkerboard		as ui_texture_checkerboard, \
-												dots				as ui_texture_dots, \
-												equalenergy			as ui_texture_equalenergy, \
-												fbm					as ui_texture_fbm, \
-												gaussian			as ui_texture_gaussian, \
-												harlequin			as ui_texture_harlequin, \
-												imagemap			as ui_texture_imagemap, \
-												lampspectrum		as ui_texture_lampspectrum, \
-												luxpop				as ui_texture_luxpop, \
-												marble				as ui_texture_marble, \
-												mix					as ui_texture_mix, \
-												sellmeier			as ui_texture_sellmeier, \
-												scale				as ui_texture_scale, \
-												sopra				as ui_texture_sopra, \
-												uv					as ui_texture_uv, \
-												windy				as ui_texture_windy, \
-												wrinkled			as ui_texture_wrinkled, \
-												mapping				as ui_texture_mapping, \
-												transform			as ui_texture_transform
+from luxrender.ui						import ( render_panels		as ui_render_panels )
+from luxrender.ui						import ( camera				as ui_camera )
+from luxrender.ui						import ( image				as ui_image )
+from luxrender.ui						import ( lamps				as ui_lamps )
+from luxrender.ui						import ( meshes				as ui_meshes )
+from luxrender.ui.materials				import ( main				as ui_materials,
+												 carpaint			as ui_materials_carpaint,
+												 glass				as ui_materials_glass,
+												 glass2				as ui_materials_glass2,
+												 roughglass			as ui_materials_roughglass,
+												 glossy_lossy		as ui_materials_glossy_lossy,
+												 glossy				as ui_materials_glossy,
+												 matte				as ui_materials_matte,
+												 mattetranslucent	as ui_materials_mattetranslucent,
+												 metal				as ui_materials_metal,
+												 mirror				as ui_materials_mirror,
+												 mix				as ui_materials_mix,
+												 shinymetal			as ui_materials_shinymetal,
+												 velvet				as ui_materials_velvet,
+												 emission			as ui_materials_emission,
+												 volumes			as ui_materials_volumes )
+from luxrender.ui.textures				import ( main				as ui_textures,
+												 bilerp				as ui_texture_bilerp,
+												 blackbody			as ui_texture_blackbody,
+												 brick				as ui_texture_brick,
+												 cauchy				as ui_texture_cauchy,
+												 constant			as ui_texture_constant,
+												 checkerboard		as ui_texture_checkerboard,
+												 dots				as ui_texture_dots,
+												 equalenergy		as ui_texture_equalenergy,
+												 fbm				as ui_texture_fbm,
+												 gaussian			as ui_texture_gaussian,
+												 harlequin			as ui_texture_harlequin,
+												 imagemap			as ui_texture_imagemap,
+												 lampspectrum		as ui_texture_lampspectrum,
+												 luxpop				as ui_texture_luxpop,
+												 marble				as ui_texture_marble,
+												 mix				as ui_texture_mix,
+												 sellmeier			as ui_texture_sellmeier,
+												 scale				as ui_texture_scale,
+												 sopra				as ui_texture_sopra,
+												 uv					as ui_texture_uv,
+												 windy				as ui_texture_windy,
+												 wrinkled			as ui_texture_wrinkled,
+												 mapping			as ui_texture_mapping,
+												 transform			as ui_texture_transform )
 
 # Exporter Operators
-from luxrender.operators import		EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
+from luxrender.operators				import ( EXPORT_OT_luxrender,
+												 LUXRENDER_OT_volume_add,
+												 LUXRENDER_OT_volume_remove )
 
 # Add standard Blender Interface elements
 import properties_render
