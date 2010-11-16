@@ -42,14 +42,14 @@ class luxrender_sampler(declarative_property_group):
 		'haltspp',
 		
 		'chainlength',
-		'mutationrange',
-		'basesampler',
 		
+		'basesampler',
 		'pixelsampler',
 		'pixelsamples',
 		
-		'maxconsecrejects',
 		'largemutationprob',
+		#'mutationrange',
+		'maxconsecrejects',
 		'usevariance',
 	]
 	
@@ -208,8 +208,8 @@ class luxrender_sampler(declarative_property_group):
 		if self.advanced:
 			if self.sampler == 'metropolis' or (self.sampler == 'erpt' and self.basesampler == 'metropolis'):
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
-			if self.sampler in ['metropolis', 'erpt']:
-				params.add_integer('mutationrange', self.mutationrange)
+			#if self.sampler in ['metropolis', 'erpt']:
+			#	params.add_integer('mutationrange', self.mutationrange)
 		
 		out = self.sampler, params
 		dbo('SAMPLER', out)
