@@ -201,7 +201,7 @@ def lights(lux_context, scene):
 		if (ob.parent and ob.parent.is_duplicator) and ob.type != 'LAMP':
 			continue
 
-		# we have to check for duplis before the "LAMP" ceck 
+		# we have to check for duplis before the "LAMP" check 
 		# to support a mesh/object which got lamp as dupli object
 		if ob.is_duplicator and ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
 			# create dupli objects
@@ -210,7 +210,7 @@ def lights(lux_context, scene):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light |= exportLights(lux_context, dupli_ob.object, dupli_ob.matrix_world)
+				have_light |= exportLights(lux_context, dupli_ob.object, dupli_ob.matrix_world, portal_shapes)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
