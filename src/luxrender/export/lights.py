@@ -183,7 +183,11 @@ def lights(lux_context, scene):
 	
 	for ob in sel:
 		if ob.type != 'MESH':
-		  continue
+			continue
+		
+		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
+		if not ob.is_visible(scene) or ob.hide_render:
+			continue
 		
 		if ob.data.luxrender_mesh.portal:
 			portal_shapes.append(ob.data.name)
