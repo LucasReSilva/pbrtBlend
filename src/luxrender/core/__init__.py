@@ -28,6 +28,7 @@
 
 # System libs
 import os
+import multiprocessing
 import time
 import threading
 import subprocess
@@ -219,6 +220,7 @@ compatible("properties_data_mesh")
 compatible("properties_data_camera")
 compatible("properties_particle")
 
+
 class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 
 	'''
@@ -383,27 +385,36 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		from luxrender.export import preview_scene
 		xres, yres = preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm)
 		
-		# render !
-		preview_context.worldEnd()
-		time.sleep(0.2)
-		preview_context.addThread()
-		preview_context.wait()
-		#time.sleep(0.2)
-		preview_context.exit()
-		#time.sleep(0.2)
-		preview_context.cleanup()
+		try:
+			# Don't render the tiny images
+			if xres <= 96:
+				raise Exception('Preview image too small (%ix%i)' % (xres,yres))
+			
+			# render !
+			preview_context.worldEnd()
+			while not preview_context.statistics('sceneIsReady'):
+				time.sleep(0.1)
+			for i in range(multiprocessing.cpu_count()-2):
+				# -2 since 1 thread already created and leave 1 spare
+				if not preview_context.statistics('terminated'):
+					preview_context.addThread()
+			
+			preview_context.wait()
+			#time.sleep(0.2)
+			preview_context.exit()
+			#time.sleep(0.2)
+			preview_context.cleanup()
+			
+			LuxLog('Updating preview (%ix%i)' % (xres, yres))
+			result = self.begin_result(0, 0, xres, yres)
+			lay = result.layers[0]
+			# TODO: use the framebuffer direct from pylux when Blender's API supports it
+			lay.load_from_file('luxblend25-preview.exr')
+			self.end_result(result)
+		except Exception as exc:
+			LuxLog('Error with preview render: %s' % exc)
 		
-		del preview_context
-		
-		LuxLog('Updating preview (%ix%i)' % (xres, yres))
-		result = self.begin_result(0, 0, xres, yres)
-		lay = result.layers[0]
-		# TODO: use the framebuffer direct from pylux when Blender's API supports it
-		lay.load_from_file('luxblend25-preview.exr')
-		self.end_result(result)
-		
-		LuxManager.ClearActive()
-		LuxManager.ClearCurrentScene()
+		LM.reset()
 		os.chdir(prev_dir)
 	
 	def render_scene(self, scene):
@@ -550,7 +561,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				if scene.luxrender_engine.threads_auto:
 					try:
-						import multiprocessing
 						thread_count = multiprocessing.cpu_count()
 					except:
 						# TODO: when might this fail?
