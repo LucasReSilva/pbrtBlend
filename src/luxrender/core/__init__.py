@@ -370,7 +370,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		LuxManager.SetCurrentScene(scene)
 		LuxManager.SetActive(LM)
 		
-		if False:
+		file_based_preview = False
+		
+		if file_based_preview:
 			# Dump to file in temp dir for debugging
 			from luxrender.outputs.file_api import Custom_Context as lxs_writer
 			preview_context = lxs_writer(scene.name)
@@ -392,17 +394,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			
 			# render !
 			preview_context.worldEnd()
+			
+			if file_based_preview:
+				preview_context = preview_context.parse('luxblend25-preview.lxs', True)
+				LM.lux_context = preview_context
+			
 			while not preview_context.statistics('sceneIsReady'):
 				time.sleep(0.1)
-			for i in range(multiprocessing.cpu_count()-2):
+			
+			for i in range(min(multiprocessing.cpu_count()-2, 4)):
 				# -2 since 1 thread already created and leave 1 spare
 				if not preview_context.statistics('terminated'):
 					preview_context.addThread()
 			
 			preview_context.wait()
-			#time.sleep(0.2)
+			time.sleep(0.1)
 			preview_context.exit()
-			#time.sleep(0.2)
+			time.sleep(0.1)
 			preview_context.cleanup()
 			
 			LuxLog('Updating preview (%ix%i)' % (xres, yres))
