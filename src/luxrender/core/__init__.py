@@ -24,12 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-'''
-Main LuxRender plugin class definition
-'''
+"""Main LuxRender extension class definition"""
 
 # System libs
-import os, time, threading, subprocess, sys
+import os
+import time
+import threading
+import subprocess
+import sys
 
 # Blender libs
 import bpy
@@ -310,7 +312,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				return
 			
 			# Refresh the scene as early as possible in render process
-			scene.frame_set(scene.frame_current)
+			# Removed - causes material preview infinite loop
+			# scene.frame_set(scene.frame_current)
 			
 			if scene.name == 'preview':
 				self.render_preview(scene)

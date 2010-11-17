@@ -228,7 +228,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			return {'CANCELLED'}
 		
 		# Force scene update; NB, scene.update() doesn't work
-		scene.frame_set( scene.frame_current )
+		# Removed - causes material preview infinite loop
+		# scene.frame_set( scene.frame_current )
 		
 		# Set up the rendering context
 		self.report({'INFO'}, 'Creating LuxRender context')
