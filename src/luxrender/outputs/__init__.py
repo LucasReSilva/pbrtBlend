@@ -57,11 +57,6 @@ class LuxAPIStats(TimerThread):
 	
 	stats_string = ''
 	
-	def stop(self):
-		self.active = False
-		if self.timer is not None:
-			self.timer.cancel()
-			
 	def kick(self):
 		ctx = self.LocalStorage['lux_context']
 		self.stats_string = ctx.printableStatistics(True)
