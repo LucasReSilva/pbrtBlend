@@ -381,16 +381,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		else:
 			preview_context = LM.lux_context
 		
-		export_materials.ExportedMaterials.clear()
-		export_materials.ExportedTextures.clear()
-		
-		from luxrender.export import preview_scene
-		xres, yres = preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm)
-		
 		try:
+			export_materials.ExportedMaterials.clear()
+			export_materials.ExportedTextures.clear()
+			
+			from luxrender.export import preview_scene
+			xres, yres = resolution(scene)
+			
 			# Don't render the tiny images
 			if xres <= 96:
 				raise Exception('Preview image too small (%ix%i)' % (xres,yres))
+			
+			preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm)
 			
 			# render !
 			preview_context.worldEnd()
@@ -400,27 +402,40 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				LM.lux_context = preview_context
 			
 			while not preview_context.statistics('sceneIsReady'):
-				time.sleep(0.1)
+				time.sleep(0.05)
 			
-			for i in range(min(multiprocessing.cpu_count()-2, 4)):
+			def is_finished(ctx):
+				#future
+				#return ctx.getAttribute('renderer', 'state') == ctx.PYLUX.Renderer.State.TERMINATE
+				return ctx.statistics('enoughSamples') == 1.0
+			
+			for i in range(multiprocessing.cpu_count()-2):
 				# -2 since 1 thread already created and leave 1 spare
-				if not preview_context.statistics('terminated'):
-					preview_context.addThread()
+				if is_finished(preview_context):
+					break
+				preview_context.addThread()
 			
-			preview_context.wait()
-			time.sleep(0.1)
-			preview_context.exit()
-			time.sleep(0.1)
-			preview_context.cleanup()
-			
-			LuxLog('Updating preview (%ix%i)' % (xres, yres))
-			result = self.begin_result(0, 0, xres, yres)
-			lay = result.layers[0]
-			# TODO: use the framebuffer direct from pylux when Blender's API supports it
-			lay.load_from_file('luxblend25-preview.exr')
-			self.end_result(result)
+			while not is_finished(preview_context):
+				if self.test_break():
+					raise Exception('Render interrupted')
+				
+				# progressively update the preview every 2 sec 
+				time.sleep(2)
+				
+				LuxLog('Updating preview (%ix%i @ %0.2f S/Px)' % (xres, yres, preview_context.statistics('samplesPx')))
+				preview_context.saveEXR('luxblend25-preview.exr', False, False, True)
+				
+				result = self.begin_result(0, 0, xres, yres)
+				lay = result.layers[0]
+				# TODO: use the framebuffer direct from pylux when Blender's API supports it
+				lay.load_from_file('luxblend25-preview.exr')
+				self.end_result(result)
 		except Exception as exc:
-			LuxLog('Error with preview render: %s' % exc)
+			LuxLog('Preview aborted: %s' % exc)
+		
+		preview_context.exit()
+		preview_context.wait()
+		preview_context.cleanup()
 		
 		LM.reset()
 		os.chdir(prev_dir)

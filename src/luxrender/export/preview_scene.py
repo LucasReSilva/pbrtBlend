@@ -33,7 +33,7 @@ from luxrender.outputs import LuxManager
 
 def preview_scene(scene, lux_context, obj=None, mat=None):
 	
-	HALTSPP = 8
+	HALTSPP = 512
 	
 	# Camera
 	lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
@@ -47,7 +47,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_integer('xresolution', int(xr)) \
 		.add_integer('yresolution', int(yr)) \
 		.add_string('filename', 'luxblend25-preview') \
-		.add_bool('write_exr', True) \
+		.add_bool('write_exr', False) \
 		.add_bool('write_exr_ZBuf', True) \
 		.add_bool('write_exr_applyimaging', True) \
 		.add_string('write_exr_channels', 'RGBA') \
@@ -58,7 +58,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_bool('write_resume_flm', False) \
 		.add_integer('displayinterval', 3) \
 		.add_integer('writeinterval', 3600) \
-		.add_integer('haltspp', 1) \
+		.add_integer('haltspp', HALTSPP) \
 		.add_string('tonemapkernel', 'linear') \
 		.add_integer('reject_warmup', 64)
 	lux_context.film('fleximage', film_params)
@@ -75,7 +75,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	# Sampler
 	sampler_params = ParamSet() \
 		.add_string('pixelsampler', 'hilbert') \
-		.add_integer('pixelsamples', HALTSPP)
+		.add_integer('pixelsamples', 4)
 	lux_context.sampler('lowdiscrepancy', sampler_params)
 	
 	# Surface Integrator
