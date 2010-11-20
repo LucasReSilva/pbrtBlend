@@ -419,9 +419,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				if self.test_break():
 					raise Exception('Render interrupted')
 				
-				# progressively update the preview every 2 sec 
-				time.sleep(2)
-				
+				# progressively update the preview
+				if preview_context.statistics('samplesPx') < 24:
+					time.sleep(0.2) # immmidiate with safety-sleep
+				else:
+					time.sleep(2) # up to HALTSPP every 2 seconds
+					
 				LuxLog('Updating preview (%ix%i @ %0.2f S/Px)' % (xres, yres, preview_context.statistics('samplesPx')))
 				preview_context.saveEXR('luxblend25-preview.exr', False, False, True)
 				

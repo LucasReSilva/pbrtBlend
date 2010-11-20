@@ -33,7 +33,7 @@ from luxrender.outputs import LuxManager
 
 def preview_scene(scene, lux_context, obj=None, mat=None):
 	
-	HALTSPP = 512
+	HALTSPP = 256
 	
 	# Camera
 	lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
