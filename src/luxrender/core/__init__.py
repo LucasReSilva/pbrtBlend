@@ -409,6 +409,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				#return ctx.getAttribute('renderer', 'state') == ctx.PYLUX.Renderer.State.TERMINATE
 				return ctx.statistics('enoughSamples') == 1.0
 			
+			def interruptible_sleep(sec, increment=0.05):
+				sec_elapsed = 0.0
+				while not self.test_break() and sec_elapsed<=sec:
+					sec_elapsed += increment
+					time.sleep(increment)
+			
 			for i in range(multiprocessing.cpu_count()-2):
 				# -2 since 1 thread already created and leave 1 spare
 				if is_finished(preview_context):
@@ -421,9 +427,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				# progressively update the preview
 				if preview_context.statistics('samplesPx') < 24:
-					time.sleep(0.2) # immmidiate with safety-sleep
+					#time.sleep(0.2) # immmidiate with safety-sleep
+					interruptible_sleep(0.2)
 				else:
-					time.sleep(2) # up to HALTSPP every 2 seconds
+					#time.sleep(2) # up to HALTSPP every 2 seconds
+					interruptible_sleep(2.0)
 					
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.printableStatistics(False)))
 				preview_context.saveEXR('luxblend25-preview.exr', False, False, True)
