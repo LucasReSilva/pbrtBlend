@@ -425,7 +425,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				else:
 					time.sleep(2) # up to HALTSPP every 2 seconds
 					
-				LuxLog('Updating preview (%ix%i @ %0.2f S/Px)' % (xres, yres, preview_context.statistics('samplesPx')))
+				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.printableStatistics(False)))
 				preview_context.saveEXR('luxblend25-preview.exr', False, False, True)
 				
 				result = self.begin_result(0, 0, xres, yres)
