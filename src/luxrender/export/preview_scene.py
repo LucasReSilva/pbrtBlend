@@ -75,7 +75,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	# Sampler
 	sampler_params = ParamSet() \
 		.add_string('pixelsampler', 'hilbert') \
-		.add_integer('pixelsamples', 4)
+		.add_integer('pixelsamples', 2)
 	lux_context.sampler('lowdiscrepancy', sampler_params)
 	
 	# Surface Integrator
@@ -96,20 +96,37 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.worldBegin()
 	
 	# Light
-	lux_context.transformBegin()
+	lux_context.attributeBegin()
 	lux_context.transform([
-		1.0, 0.0, 0.0, 0.0,
-		0.0, 1.0, 0.0, 0.0,
-		0.0, 0.0, 1.0, 0.0,
-		1.0, -1.0, 4.0, 1.0
+#		1.0, 0.0, 0.0, 0.0,
+#		0.0, 1.0, 0.0, 0.0,
+#		0.0, 0.0, 1.0, 0.0,
+#		1.0, -1.0, 4.0, 1.0
+
+		0.5996068120002747, 0.800294816493988, 2.980232594040899e-08, 0.0,
+		-0.6059534549713135, 0.45399996638298035, 0.6532259583473206, 0.0,
+		0.5227733850479126, -0.3916787803173065, 0.7571629285812378, 0.0,
+		4.076245307922363, -3.0540552139282227, 5.903861999511719, 1.0
+
 	])
 	light_bb_params = ParamSet().add_float('temperature', 6500.0)
 	lux_context.texture('pL', 'color', 'blackbody', light_bb_params)
 	light_params = ParamSet() \
 		.add_texture('L', 'pL') \
-		.add_float('gain', 0.002)
-	lux_context.lightSource('point', light_params)
-	lux_context.transformEnd()
+		.add_float('gain', 1.002)
+	lux_context.areaLightSource('area', light_params)
+
+	areax = 1
+	areay = 1
+	points = [-areax/2.0, areay/2.0, 0.0, areax/2.0, areay/2.0, 0.0, areax/2.0, -areay/2.0, 0.0, -areax/2.0, -areay/2.0, 0.0]
+	
+	shape_params = ParamSet()
+	shape_params.add_integer('ntris', 6)
+	shape_params.add_integer('nvertices', 4)
+	shape_params.add_integer('indices', [0, 1, 2, 0, 2, 3])
+	shape_params.add_point('P', points)
+	lux_context.shape('trianglemesh', shape_params)
+	lux_context.attributeEnd()
 	
 	# back drop
 	lux_context.attributeBegin()
