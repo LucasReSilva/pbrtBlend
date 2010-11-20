@@ -81,16 +81,16 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	# Surface Integrator
 	surfaceintegrator_params = ParamSet() \
 		.add_integer('directsamples', 1) \
-		.add_integer('diffusereflectdepth', 1) \
+		.add_integer('diffusereflectdepth', 2) \
 		.add_integer('diffusereflectsamples', 4) \
-		.add_integer('diffuserefractdepth', 4) \
+		.add_integer('diffuserefractdepth', 8) \
 		.add_integer('diffuserefractsamples', 1) \
-		.add_integer('glossyreflectdepth', 1) \
+		.add_integer('glossyreflectdepth', 2) \
 		.add_integer('glossyreflectsamples', 2) \
-		.add_integer('glossyrefractdepth', 4) \
+		.add_integer('glossyrefractdepth', 8) \
 		.add_integer('glossyrefractsamples', 1) \
-		.add_integer('specularreflectdepth', 2) \
-		.add_integer('specularrefractdepth', 4)
+		.add_integer('specularreflectdepth', 4) \
+		.add_integer('specularrefractdepth', 8)
 	lux_context.surfaceIntegrator('distributedpath', surfaceintegrator_params)
 	
 	lux_context.worldBegin()
@@ -128,6 +128,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.shape('trianglemesh', shape_params)
 	lux_context.attributeEnd()
 	
+	# Add a background color (light)
+	lux_context.lightSource('infinite', ParamSet().add_float('gain', 0.2))
+	
 	# back drop
 	lux_context.attributeBegin()
 	lux_context.transform([
@@ -136,11 +139,12 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		0.0, 0.0, 5.0, 0.0,
 		0.0, 0.0, 0.0, 1.0
 	])
+	lux_context.scale(4,1,1)
 	checks_pattern_params = ParamSet() \
 		.add_integer('dimension', 2) \
 		.add_string('mapping', 'uv') \
 		.add_float('uscale', 36.8) \
-		.add_float('vscale', 36.0) #.add_string('aamode', 'supersample') \
+		.add_float('vscale', 36.0*4) #.add_string('aamode', 'supersample') \
 	lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
 	checks_params = ParamSet() \
 		.add_texture('amount', 'checks::pattern') \
