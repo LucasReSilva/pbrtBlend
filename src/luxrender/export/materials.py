@@ -156,8 +156,8 @@ def convert_texture(texture):
 		paramset.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
-				.add_integer('noisedepth', texture.noise_depth) \
-				.add_float('nabla', texture.nabla)
+				.add_integer('noisedepth', texture.noise_depth)# \
+				#.add_float('nabla', texture.nabla)
 	
 	if texture.type == 'DISTORTED_NOISE':
 		lux_tex_name = 'blender_distortednoise'
@@ -178,8 +178,8 @@ def convert_texture(texture):
 				.add_string('noisebasis2', texture.noisebasis_2.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
 				.add_float('turbulence', texture.turbulence) \
-				.add_integer('noisedepth', texture.noise_depth) \
-				.add_float('nabla', texture.nabla)
+				.add_integer('noisedepth', texture.noise_depth)# \
+				#.add_float('nabla', texture.nabla)
 	
 	if texture.type == 'MUSGRAVE':
 		paramset.add_string('type', texture.musgrave_type.lower() ) \
@@ -187,8 +187,8 @@ def convert_texture(texture):
 				.add_float('lacu', texture.lacunarity) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
-				.add_float('octs', texture.octaves) \
-				.add_float('nabla', texture.nabla)
+				.add_float('octs', texture.octaves)# \
+				#.add_float('nabla', texture.nabla)
 	
 	# NOISE shows no params ?
 	
@@ -224,8 +224,8 @@ def convert_texture(texture):
 				.add_float('noisesize', texture.noise_scale) \
 				.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_float('turbulence', texture.turbulence) \
-				.add_string('type', texture.wood_type.lower() ) \
-				.add_float('nabla', texture.nabla)
+				.add_string('type', texture.wood_type.lower() )# \
+				#.add_float('nabla', texture.nabla)
 	
 	# Translate Blender Image/movie into lux tex
 	if texture.type == 'IMAGE' and texture.image and texture.image.source not in ['MOVIE', 'SEQUENCE']:
