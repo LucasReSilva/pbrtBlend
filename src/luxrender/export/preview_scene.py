@@ -73,25 +73,34 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.pixelFilter('mitchell', pixelfilter_params)
 	
 	# Sampler
-	sampler_params = ParamSet() \
-		.add_string('pixelsampler', 'hilbert') \
-		.add_integer('pixelsamples', 2)
-	lux_context.sampler('lowdiscrepancy', sampler_params)
+	if True:
+		sampler_params = ParamSet() \
+			.add_string('pixelsampler', 'hilbert') \
+			.add_integer('pixelsamples', 2)
+		lux_context.sampler('lowdiscrepancy', sampler_params)
+	else:
+		lux_context.sampler('metropolis', ParamSet())
 	
 	# Surface Integrator
-	surfaceintegrator_params = ParamSet() \
-		.add_integer('directsamples', 1) \
-		.add_integer('diffusereflectdepth', 2) \
-		.add_integer('diffusereflectsamples', 4) \
-		.add_integer('diffuserefractdepth', 8) \
-		.add_integer('diffuserefractsamples', 1) \
-		.add_integer('glossyreflectdepth', 2) \
-		.add_integer('glossyreflectsamples', 2) \
-		.add_integer('glossyrefractdepth', 8) \
-		.add_integer('glossyrefractsamples', 1) \
-		.add_integer('specularreflectdepth', 4) \
-		.add_integer('specularrefractdepth', 8)
-	lux_context.surfaceIntegrator('distributedpath', surfaceintegrator_params)
+	if True:
+		surfaceintegrator_params = ParamSet() \
+			.add_integer('directsamples', 1) \
+			\
+			.add_integer('diffusereflectdepth', 1) \
+			.add_integer('diffusereflectsamples', 4) \
+			.add_integer('diffuserefractdepth', 4) \
+			.add_integer('diffuserefractsamples', 1) \
+			\
+			.add_integer('glossyreflectdepth', 1) \
+			.add_integer('glossyreflectsamples', 2) \
+			.add_integer('glossyrefractdepth', 4) \
+			.add_integer('glossyrefractsamples', 1) \
+			\
+			.add_integer('specularreflectdepth', 2) \
+			.add_integer('specularrefractdepth', 4)
+		lux_context.surfaceIntegrator('distributedpath', surfaceintegrator_params)
+	else:
+		lux_context.surfaceIntegrator('bidirectional', ParamSet())
 	
 	lux_context.worldBegin()
 	
@@ -113,7 +122,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.texture('pL', 'color', 'blackbody', light_bb_params)
 	light_params = ParamSet() \
 		.add_texture('L', 'pL') \
-		.add_float('gain', 1.002)
+		.add_float('gain', 1.002) \
+		.add_float('importance', 1.0)
 	lux_context.areaLightSource('area', light_params)
 
 	areax = 1
@@ -129,7 +139,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.attributeEnd()
 	
 	# Add a background color (light)
-	lux_context.lightSource('infinite', ParamSet().add_float('gain', 0.2))
+	lux_context.lightSource('infinite', ParamSet().add_float('gain', 0.1).add_float('importance', 0.1))
 	
 	# back drop
 	lux_context.attributeBegin()
