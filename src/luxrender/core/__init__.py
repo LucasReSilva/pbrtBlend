@@ -46,6 +46,7 @@ from luxrender.export.film				import ( resolution )
 
 from luxrender.outputs					import ( LuxManager, LuxFilmDisplay )
 from luxrender.outputs					import ( LuxLog )
+from luxrender.outputs.pure_api			import ( LUXRENDER_VERSION )
 
 # Exporter Property Groups
 from luxrender.properties.accelerator	import ( luxrender_accelerator )
@@ -229,7 +230,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	bl_idname			= 'luxrender'
 	bl_label			= 'LuxRender'
-	bl_use_preview		= True			# blender's preview scene is inadequate, needs custom rebuild
+	bl_use_preview		= (LUXRENDER_VERSION >= '0.8')
 	
 	LuxManager			= None
 	render_update_timer	= None
