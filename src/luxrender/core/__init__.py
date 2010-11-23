@@ -237,7 +237,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	output_dir			= './'
 	output_file			= 'default.png'
 	
-#	# This member is read by the extensions_Framework to set up custom property groups
+#	# This member is read by the extensions_framework to set up custom property groups
 	property_groups = [
 		('Scene', luxrender_accelerator),
 		('Scene', luxrender_engine),

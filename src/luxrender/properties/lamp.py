@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_Operator as LO
+from extensions_framework.validate import Logic_Operator as LO, Logic_OR as O, Logic_AND as A
 
 from luxrender.properties.texture import ColorTextureParameter
 
@@ -61,12 +61,12 @@ def lamp_visibility():
 		'infinite_map':			{ 'type': 'HEMI' },
 		'mapping_type':			{ 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
 		
-		'L_color':				{ 'type': LO({'!=': 'SUN'}) },
-		'L_usecolortexture':	{ 'type': LO({'!=': 'SUN'}) },
-		'L_colortexture':		{ 'type': LO({'!=': 'SUN'}), 'L_usecolortexture': True }
+		'L_color':				{ 'type': O(['POINT', 'SPOT', 'HEMI', 'AREA']) },
+		'L_usecolortexture':	{ 'type': O(['POINT', 'SPOT', 'AREA']) },
+		'L_colortexture':		{ 'type': O(['POINT', 'SPOT', 'AREA']), 'L_usecolortexture': True }
 	}
 	
-	# Add TC_L manually, because we need to exclude it from SUN
+	# Add TC_L manually, because we need to exclude it from SUN, and bits of it from HEMI
 	#vis.update(TC_L.get_visibility())
 	
 	return vis

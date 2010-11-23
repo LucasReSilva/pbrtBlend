@@ -94,8 +94,23 @@ def exportLights(lux_context, ob, matrix, portals = []):
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params, portals=portals)
 		return True
 	
-	# all lights apart from sun + sky have "color L"
-	light_params.update( add_texture_parameter(lux_context, 'L', 'color', light.luxrender_lamp) )
+	# all lights apart from sun + sky have "color L", but HEMI/infinite cannot be textured L
+	write_textured_L = True
+	
+	if light.type == 'HEMI':
+		# don't apply texture to L color for HEMI/infinite
+		write_textured_L = False
+		light_params.add_color('L', light.luxrender_lamp.L_color)
+		if light.luxrender_lamp.infinite_map != '':
+			light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
+			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
+		# nsamples
+		# gamma
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		return True
+	
+	if write_textured_L:
+		light_params.update( add_texture_parameter(lux_context, 'L', 'color', light.luxrender_lamp) )
 	
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5
@@ -110,15 +125,6 @@ def exportLights(lux_context, ob, matrix, portals = []):
 	if light.type == 'POINT':
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
-		return True
-		
-	if light.type == 'HEMI':
-		if light.luxrender_lamp.infinite_map != '':
-			light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
-			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
-		# nsamples
-		# gamma
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'AREA':
