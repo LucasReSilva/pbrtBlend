@@ -270,6 +270,10 @@ def get_texture_from_scene(scene, tex_name):
 			for tex_slot in obj.active_material.texture_slots:
 				if tex_slot != None and tex_slot.texture.name == tex_name:
 					return tex_slot.texture
+		if obj.type == 'LAMP':
+			for tex_slot in obj.data.texture_slots:
+				if tex_slot != None and tex_slot.texture.name == tex_name:
+					return tex_slot.texture
 	
 	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
 	return False
