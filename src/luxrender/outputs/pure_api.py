@@ -95,7 +95,10 @@ try:
 				return stats_string
 			
 			Custom_Context.printableStatistics = printableStatistics
+			
+			Custom_Context.setAttribute = Custom_Context.setOption
 			Custom_Context.getAttribute = Custom_Context.getOption
+			
 			def getRenderingServersStatus(self):
 				server_list = []
 				for i in range(self.getServerCount()):
@@ -104,6 +107,10 @@ try:
 					server_list.append(rsi)
 				return server_list
 			Custom_Context.getRenderingServersStatus = getRenderingServersStatus
+			
+			def saveEXR(self, filename, useHalfFloat, includeZBuffer, tonemapped):
+				pass # can't do anything
+			Custom_Context.saveEXR = saveEXR
 		
 		PYLUX_AVAILABLE = True
 		LuxLog('Using pylux version %s' % LUXRENDER_VERSION)

@@ -230,7 +230,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	bl_idname			= 'luxrender'
 	bl_label			= 'LuxRender'
-	bl_use_preview		= (LUXRENDER_VERSION >= '0.8')
+	bl_use_preview		= True #(LUXRENDER_VERSION >= '0.8')
 	
 	LuxManager			= None
 	render_update_timer	= None
@@ -428,7 +428,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				# progressively update the preview
 				time.sleep(0.2) # safety-sleep
-				if preview_context.statistics('samplesPx') > 24:
+				if LUXRENDER_VERSION < '0.8' or preview_context.statistics('samplesPx') > 24:
 					interruptible_sleep(1.8) # up to HALTSPP every 2 seconds in sum
 					
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.printableStatistics(False)))

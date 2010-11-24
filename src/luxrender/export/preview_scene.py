@@ -30,6 +30,7 @@ from luxrender.export import ParamSet
 from luxrender.export.film import resolution
 from luxrender.export.geometry import exportNativeMesh
 from luxrender.outputs import LuxManager
+from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
 def preview_scene(scene, lux_context, obj=None, mat=None):
 	
@@ -47,7 +48,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_integer('xresolution', int(xr)) \
 		.add_integer('yresolution', int(yr)) \
 		.add_string('filename', 'luxblend25-preview') \
-		.add_bool('write_exr', False) \
 		.add_bool('write_exr_ZBuf', True) \
 		.add_bool('write_exr_applyimaging', True) \
 		.add_string('write_exr_channels', 'RGBA') \
@@ -57,10 +57,18 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_bool('write_tga', False) \
 		.add_bool('write_resume_flm', False) \
 		.add_integer('displayinterval', 3) \
-		.add_integer('writeinterval', 3600) \
 		.add_integer('haltspp', HALTSPP) \
 		.add_string('tonemapkernel', 'linear') \
 		.add_integer('reject_warmup', 64)
+	
+	if LUXRENDER_VERSION >= '0.8':
+		film_params \
+			.add_bool('write_exr', False) \
+			.add_integer('writeinterval', 3600)
+	else:
+		film_params \
+			.add_bool('write_exr', True) \
+			.add_integer('writeinterval', 2)
 	lux_context.film('fleximage', film_params)
 	
 	# Pixel Filter
