@@ -333,7 +333,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	def render_preview(self, scene):
 		prev_dir = os.getcwd()
-		os.chdir( efutil.temp_directory() )
+		tmp_path = efutil.temp_directory()
+		efutil.export_path = tmp_path
+		os.chdir( tmp_path )
 		
 		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
 		if not PYLUX_AVAILABLE:
