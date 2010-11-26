@@ -286,14 +286,8 @@ class luxrender_camera(declarative_property_group):
 		dbo('CAMERA', out)
 		return out
 
-class luxrender_colorspace(declarative_property_group):
-	'''
-	Storage class for LuxRender Colour-Space settings.
-	This class will be instantiated within a Blender
-	camera object.
-	'''
-	
-	controls = [
+def luxrender_colorspace_controls():
+	ctl = [
 		
 		[0.1, 'preset', 'preset_name'],
 		['cs_whiteX', 'cs_whiteY'],
@@ -302,10 +296,24 @@ class luxrender_colorspace(declarative_property_group):
 		['cs_blueX', 'cs_blueY'],
 		
 		'gamma',
-		
-		'use_crf',
-		'crf_file'
 	]
+	
+	if LUXRENDER_VERSION >= '0.8':
+		ctl.extend([
+			'use_crf',
+			'crf_file'
+		])
+	
+	return ctl
+
+class luxrender_colorspace(declarative_property_group):
+	'''
+	Storage class for LuxRender Colour-Space settings.
+	This class will be instantiated within a Blender
+	camera object.
+	'''
+	
+	controls = luxrender_colorspace_controls()
 	
 	visibility = {
 		'preset_name':	{ 'preset': True },
@@ -580,7 +588,7 @@ class luxrender_tonemapping(declarative_property_group):
 			params.add_float('linear_gamma', self.linear_gamma)
 			
 		if self.type == 'contrast':
-			params.add_float('ywa', self.ywa)
+			params.add_float('contrast_ywa', self.ywa)
 			
 		out = self.type, params
 		dbo('TONEMAPPING', out)

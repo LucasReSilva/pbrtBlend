@@ -27,6 +27,7 @@
 import os
 
 from luxrender.outputs import LuxLog
+from luxrender.outputs.pure_api import LUXRENDER_VERSION 
 from extensions_framework.util import path_relative_to_export
 
 class Files(object):
@@ -173,7 +174,12 @@ class Custom_Context(object):
 		self._api('ObjectInstance ', [name, []])
 	
 	def portalInstance(self, name):
-		self._api('PortalInstance ', [name, []])
+		# Backwards compatibility
+		if LUXRENDER_VERSION < '0.8':
+			LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
+			self._api('ObjectInstance ', [name, []])
+		else:
+			self._api('PortalInstance ', [name, []])
 	
 	def renderer(self, *args):
 		self._api('Renderer', args)

@@ -66,6 +66,7 @@ try:
 			
 			# no further action required
 		
+		# Backwards-compatibility Context method substitution
 		if LUXRENDER_VERSION < '0.8':
 			from extensions_framework.util import format_elapsed_time
 			
@@ -111,6 +112,11 @@ try:
 			def saveEXR(self, filename, useHalfFloat, includeZBuffer, tonemapped):
 				pass # can't do anything
 			Custom_Context.saveEXR = saveEXR
+			
+			def portalInstance(self, name):
+				LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
+				self.objectInstance(name)
+			Custom_Context.portalInstace = portalInstance
 		
 		PYLUX_AVAILABLE = True
 		LuxLog('Using pylux version %s' % LUXRENDER_VERSION)

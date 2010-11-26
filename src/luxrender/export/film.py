@@ -29,6 +29,7 @@ from extensions_framework import util as efutil
 from luxrender.export import get_worldscale
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxManager as LM
+from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
 def lookAt(scene):
 	'''
@@ -171,7 +172,7 @@ def film(scene):
 	params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
 	
 	# Camera Response Function
-	if cso.use_crf:
+	if LUXRENDER_VERSION >= '0.8' and cso.use_crf:
 		params.add_string('cameraresponse', efutil.path_relative_to_export(cso.crf_file) )
 	
 	# Output types
