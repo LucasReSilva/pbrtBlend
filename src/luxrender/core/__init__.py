@@ -332,9 +332,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			self.render_start(scene)
 	
 	def render_preview(self, scene):
+		from extensions_framework.util import path_relative_to_export
 		prev_dir = os.getcwd()
 		tmp_path = efutil.temp_directory()
-		efutil.export_path = tmp_path
+		efutil.export_path = path_relative_to_export(tmp_path)
 		self.output_dir = tmp_path
 		os.chdir( tmp_path )
 		
