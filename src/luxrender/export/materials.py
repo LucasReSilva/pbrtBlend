@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+
 import bpy
 
 from extensions_framework import util as efutil
@@ -228,14 +230,22 @@ def convert_texture(texture):
 				#.add_float('nabla', texture.nabla)
 	
 	# Translate Blender Image/movie into lux tex
-	if texture.type == 'IMAGE' and texture.image and texture.image.source not in ['MOVIE', 'SEQUENCE']:
-		baked_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
-		texture.image.save_render(baked_image, LuxManager.CurrentScene)
+	if texture.type == 'IMAGE' and texture.image:
+		if texture.image.source == 'GENERATED':
+			tex_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
+			texture.image.save_render(tex_image, LuxManager.CurrentScene)
+		
+		if texture.image.source == 'FILE':
+			if not os.path.exists( efutil.filesystem_path( texture.image.filepath )):
+				raise Exception('Image referenced in blender texture %s doesn\'t exist!' % texture.name)
+			tex_image = efutil.path_relative_to_export( texture.image.filepath )
+		
 		lux_tex_name = 'imagemap'
 		variant = 'color'
-		paramset.add_string('filename', baked_image)
+		paramset.add_string('filename', tex_image)
 		paramset.add_float('gamma', 2.2)
 		mapping_type = '2D'
+	
 	
 	if mapping_type == '3D':
 		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset() )
