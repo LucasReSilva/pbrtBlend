@@ -234,6 +234,7 @@ def convert_texture(texture):
 		lux_tex_name = 'imagemap'
 		variant = 'color'
 		paramset.add_string('filename', baked_image)
+		paramset.add_float('gamma', 2.2)
 		mapping_type = '2D'
 	
 	if mapping_type == '3D':
