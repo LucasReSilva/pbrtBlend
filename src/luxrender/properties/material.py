@@ -173,6 +173,7 @@ def mat_list():
 	if LUXRENDER_VERSION >= '0.7.1':
 		mat_list += [
 			('velvet', 'Velvet', 'velvet'),
+			('glossytranslucent', 'Glossytranslucent', 'glossytranslucent'),
 		]
 	
 	mat_list.sort()
@@ -729,6 +730,66 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 		mattetranslucent_params.update( TF_sigma.get_params(self) )
 		
 		return mattetranslucent_params
+
+class luxrender_mat_glossytranslucent(declarative_property_group):
+	
+	controls = [
+		'multibounce'
+	] + \
+		TF_d.controls + \
+		TF_index.controls + \
+		TC_Ka.controls + \
+		TC_Kt.controls + \
+		TC_Kd.controls + \
+		TC_Ks.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
+	
+	visibility = dict_merge(
+		TF_d.visibility,
+		TF_index.visibility,
+		TC_Ka.visibility,
+		TC_Kt.visibility,
+		TC_Kd.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'multibounce',
+			'name': 'multibounce',
+			'description': 'Enable surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		}
+	] + \
+		TF_d.properties + \
+		TF_index.properties + \
+		TC_Ka.properties + \
+		TC_Kt.properties + \
+		TC_Kd.properties + \
+		TC_Ks.properties + \
+		TF_uroughness.properties + \
+		TF_vroughness.properties
+	
+	def get_params(self):
+		glossytranslucent_params = ParamSet()
+		
+		glossytranslucent_params.add_bool('multibounce', self.multibounce)
+		
+		glossytranslucent_params.update( TF_d.get_params(self) )
+		glossytranslucent_params.update( TF_index.get_params(self) )
+		glossytranslucent_params.update( TC_Ka.get_params(self) )
+		glossytranslucent_params.update( TC_Kt.get_params(self) )
+		glossytranslucent_params.update( TC_Kd.get_params(self) )
+		glossytranslucent_params.update( TC_Ks.get_params(self) )
+		glossytranslucent_params.update( TF_uroughness.get_params(self) )
+		glossytranslucent_params.update( TF_vroughness.get_params(self) )
+		
+		return glossytranslucent_params
 
 class luxrender_mat_metal(declarative_property_group):
 	
