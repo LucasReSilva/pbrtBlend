@@ -312,14 +312,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		'''
 		
 		with self.render_lock:	# just render one thing at a time
-		
+			prev_dir = os.getcwd()
+			
 			if scene is None:
 				bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
 				return
-			
-			# Refresh the scene as early as possible in render process
-			# Removed - causes material preview infinite loop
-			# scene.frame_set(scene.frame_current)
 			
 			if scene.name == 'preview':
 				self.render_preview(scene)
@@ -333,14 +330,19 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				return
 			
 			self.render_start(scene)
+			os.chdir(prev_dir)
 	
 	def render_preview(self, scene):
-		from extensions_framework.util import path_relative_to_export
-		prev_dir = os.getcwd()
-		tmp_path = efutil.temp_directory()
-		efutil.export_path = path_relative_to_export(tmp_path)
-		self.output_dir = tmp_path
-		os.chdir( tmp_path )
+		from extensions_framework.util import path_relative_to_export, filesystem_path
+		
+		self.output_dir = filesystem_path( bpy.app.tempdir )
+		
+		if self.output_dir[-1] != '/':
+			self.output_dir += '/'
+		
+		efutil.export_path = self.output_dir
+		#print('(2) export_path is %s' % efutil.export_path)
+		os.chdir( self.output_dir )
 		
 		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
 		if not PYLUX_AVAILABLE:
@@ -454,10 +456,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		preview_context.cleanup()
 		
 		LM.reset()
-		os.chdir(prev_dir)
 	
 	def render_scene(self, scene):
-		
 		scene_path = efutil.filesystem_path(scene.render.filepath)
 		if os.path.isdir(scene_path):
 			self.output_dir = scene_path

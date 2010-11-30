@@ -228,8 +228,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			return {'CANCELLED'}
 		
 		# Force scene update; NB, scene.update() doesn't work
-		# Removed - causes material preview infinite loop
-		# scene.frame_set( scene.frame_current )
+		scene.frame_set( scene.frame_current )
 		
 		# Set up the rendering context
 		self.report({'INFO'}, 'Creating LuxRender context')
@@ -254,7 +253,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		])
 		
 		efutil.export_path = lxs_filename
-		#print('(2) export_path is %s' % efutil.export_path)
+		#print('(3) export_path is %s' % efutil.export_path)
 		
 		if self.properties.api_type == 'FILE':
 			
