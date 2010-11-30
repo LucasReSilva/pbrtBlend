@@ -303,10 +303,14 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 	params = ParamSet()
 	
 	if hasattr(lux_mattex, '%s_use%stexture' % (lux_prop_name, variant)):
+		
+		export_param_name = getattr(lux_mattex, lux_prop_name)
+		
 		if getattr(lux_mattex, '%s_use%stexture' % (lux_prop_name, variant)):
 			texture_name = getattr(lux_mattex, '%s_%stexturename' % (lux_prop_name, variant))
 			if texture_name != '':
 				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+				
 				if texture != False:
 					if texture.luxrender_texture.type != 'BLENDER':
 						tex_luxrender_texture = texture.luxrender_texture
@@ -336,7 +340,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 					ExportedTextures.export_new(lux_context)
 					
 					params.add_texture(
-						lux_prop_name,
+						export_param_name,
 						texture_name
 					)
 					
@@ -347,19 +351,19 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 				fval = float(getattr(lux_mattex, '%s_floatvalue' % lux_prop_name))
 				if not (getattr(lux_mattex, '%s_ignorezero' % lux_prop_name) and fval==0.0):
 					params.add_float(
-						lux_prop_name,
+						export_param_name,
 						fval
 					)
 			elif variant == 'color':
 				use_rgc = getattr(lux_mattex, '%s_usecolorrgc' % lux_prop_name)
 				if use_rgc:
 					params.add_color(
-						lux_prop_name,
+						export_param_name,
 						[RGC(value_transform(i)) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
 					)
 				else:
 					params.add_color(
-						lux_prop_name,
+						export_param_name,
 						[float(value_transform(i)) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
 					)
 			elif variant == 'fresnel':

@@ -134,6 +134,10 @@ TF_sigma		= FloatTextureParameter('sigma', 'Sigma',					add_float_value=True, mi
 TF_uroughness	= FloatTextureParameter('uroughness', 'uroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_vroughness	= FloatTextureParameter('vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
+# Example long name workaround - Jens, remove this when you merge ;)
+TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Back-face uroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+
+
 # Color Textures
 TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
 TC_Kd			= ColorTextureParameter('Kd', 'Diffuse color',				default=(0.64,0.64,0.64) )
@@ -743,7 +747,8 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Kd.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
-		TF_vroughness.controls
+		TF_vroughness.controls + \
+		TF_backface_uroughness.controls
 	
 	visibility = dict_merge(
 		TF_d.visibility,
@@ -753,7 +758,8 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Kd.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
-		TF_vroughness.visibility
+		TF_vroughness.visibility,
+		TF_backface_uroughness.visibility
 	)
 	
 	properties = [
@@ -773,7 +779,8 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Kd.properties + \
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
-		TF_vroughness.properties
+		TF_vroughness.properties + \
+		TF_backface_uroughness.properties
 	
 	def get_params(self):
 		glossytranslucent_params = ParamSet()

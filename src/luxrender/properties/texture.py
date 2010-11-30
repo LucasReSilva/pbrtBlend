@@ -38,6 +38,7 @@ from luxrender.outputs import LuxManager
 #------------------------------------------------------------------------------ 
 
 class TextureParameterBase(object):
+	real_attr			= None
 	attr				= None
 	name				= None
 	default				= (0.8, 0.8, 0.8)
@@ -50,7 +51,7 @@ class TextureParameterBase(object):
 	visibility			= None
 	properties			= None
 	
-	def __init__(self, attr, name, default=None, min=None, max=None):
+	def __init__(self, attr, name, default=None, min=None, max=None, real_attr=None):
 		self.attr = attr
 		self.name = name
 		if default is not None:
@@ -59,7 +60,9 @@ class TextureParameterBase(object):
 			self.min = min
 		if max is not None:
 			self.max = max
-			
+		if real_attr is not None:
+			self.real_attr = real_attr
+		
 		self.controls = self.get_controls()
 		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
@@ -119,6 +122,12 @@ class TextureParameterBase(object):
 		'''
 		
 		return ParamSet()
+	
+	def get_real_param_name(self):
+		if self.real_attr is not None:
+			return self.real_attr
+		else:
+			return self.attr
 
 class ColorTextureParameter(TextureParameterBase):
 	
@@ -168,7 +177,7 @@ class ColorTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_color_texture'
+				'default': self.get_real_param_name()
 			},
 			{
 				'attr': '%s_usecolortexture' % self.attr,
@@ -251,9 +260,10 @@ class FloatTextureParameter(TextureParameterBase):
 	
 	def __init__(self,
 			attr, name,
-			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
-			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
-			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
+			add_float_value = True,		# True: Show float value input, and [T] button; False: Just show texture slot
+			multiply_float = False,		# Specify that when texture is in use, it should be scaled by the float value
+			ignore_zero = False,		# Don't export this parameter if the float value == 0.0
+			real_attr = None,			# translate self.attr into something else at export time (overcome 31 char RNA limit)
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
 		self.attr = attr
@@ -261,6 +271,7 @@ class FloatTextureParameter(TextureParameterBase):
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
 		self.ignore_zero = ignore_zero
+		self.real_attr = real_attr
 		self.default = default
 		self.min = min
 		self.max = max
@@ -295,7 +306,7 @@ class FloatTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_float_texture'
+				'default': self.get_real_param_name()
 			},
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
@@ -376,9 +387,10 @@ class FresnelTextureParameter(TextureParameterBase):
 	
 	def __init__(self,
 			attr, name,
-			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
-			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
-			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
+			add_float_value = True,		# True: Show float value input, and [T] button; False: Just show texture slot
+			multiply_float = False,		# Specify that when texture is in use, it should be scaled by the float value
+			ignore_zero = False,		# Don't export this parameter if the float value == 0.0
+			real_attr = None,			# translate self.attr into something else at export time (overcome 31 char RNA limit)
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
 		self.attr = attr
@@ -386,6 +398,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
 		self.ignore_zero = ignore_zero
+		self.real_attr = real_attr
 		self.default = default
 		self.min = min
 		self.max = max
@@ -420,7 +433,7 @@ class FresnelTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_fresnel_texture'
+				'default': self.get_real_param_name()
 			},
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
