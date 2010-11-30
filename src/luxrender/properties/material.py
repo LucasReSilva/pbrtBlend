@@ -114,42 +114,48 @@ class EmissionColorTextureParameter(ColorTextureParameter):
 		return lambda s,c: c.luxrender_emission
 
 # Fresnel Textures
-TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR',		add_float_value = False)
+TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'IOR',				add_float_value = False)
 
 # Float Textures
-TF_bumpmap		= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',		add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
-TF_amount		= FloatTextureParameter('amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
-TF_cauchyb		= FloatTextureParameter('cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
-TF_d			= FloatTextureParameter('d', 'Absorption Depth',			add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
-TF_film			= FloatTextureParameter('film', 'Thin Film Thickness (nm)',	add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
-TF_filmindex	= FloatTextureParameter('filmindex', 'Film IOR',			add_float_value=True, default=1.5, min=1.0, max=6.0 )
-TF_index		= FloatTextureParameter('index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_M1			= FloatTextureParameter('M1', 'M1',							add_float_value=True, default=1.0, min=0.0, max=1.0 )
-TF_M2			= FloatTextureParameter('M2', 'M2',							add_float_value=True, default=1.0, min=0.0, max=1.0 )
-TF_M3			= FloatTextureParameter('M3', 'M3',							add_float_value=True, default=1.0, min=0.0, max=1.0 )
-TF_R1			= FloatTextureParameter('R1', 'R1',							add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_R2			= FloatTextureParameter('R2', 'R2',							add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_R3			= FloatTextureParameter('R3', 'R3',							add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_sigma		= FloatTextureParameter('sigma', 'Sigma',					add_float_value=True, min=0.0, max=100.0 )
-TF_uroughness	= FloatTextureParameter('uroughness', 'uroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_vroughness	= FloatTextureParameter('vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-
+TF_bumpmap				= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
+TF_amount				= FloatTextureParameter('amount', 'Mix Amount',						add_float_value=True, min=0.0, default=0.5, max=1.0 )
+TF_cauchyb				= FloatTextureParameter('cauchyb', 'Cauchy B',						add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
+TF_d					= FloatTextureParameter('d', 'Absorption Depth',					add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
+TF_film					= FloatTextureParameter('film', 'Thin Film Thickness (nm)',			add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
+TF_filmindex			= FloatTextureParameter('filmindex', 'Film IOR',					add_float_value=True, default=1.5, min=1.0, max=6.0 )
+TF_index				= FloatTextureParameter('index', 'IOR',								add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_M1					= FloatTextureParameter('M1', 'M1',									add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_M2					= FloatTextureParameter('M2', 'M2',									add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_M3					= FloatTextureParameter('M3', 'M3',									add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_R1					= FloatTextureParameter('R1', 'R1',									add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
+TF_uroughness			= FloatTextureParameter('uroughness', 'uroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_vroughness			= FloatTextureParameter('vroughness', 'vroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_backface_d			= FloatTextureParameter('bf_d', 'Back-face Absorption Depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
+TF_backface_index		= FloatTextureParameter('bf_index', 'Back-face IOR',				real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Back-face uroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Back-face vroughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
+
 # Color Textures
-TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
-TC_Kd			= ColorTextureParameter('Kd', 'Diffuse color',				default=(0.64,0.64,0.64) )
-TC_Kr			= ColorTextureParameter('Kr', 'Reflection color',			default=(1.0,1.0,1.0) )
-TC_Ks			= ColorTextureParameter('Ks', 'Specular color',				default=(0.25,0.25,0.25) )
-TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',			default=(1.0,1.0,1.0) )
-TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',			default=(1.0,1.0,1.0) )
-TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',			default=(1.0,1.0,1.0) )
-TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',			default=(1.0,1.0,1.0) )
+TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',						default=(0.0,0.0,0.0) )
+TC_Kd			= ColorTextureParameter('Kd', 'Diffuse color',							default=(0.64,0.64,0.64) )
+TC_Kr			= ColorTextureParameter('Kr', 'Reflection color',						default=(1.0,1.0,1.0) )
+TC_Ks			= ColorTextureParameter('Ks', 'Specular color',							default=(0.25,0.25,0.25) )
+TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',						default=(1.0,1.0,1.0) )
+TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',						default=(1.0,1.0,1.0) )
+TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',						default=(1.0,1.0,1.0) )
+TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',						default=(1.0,1.0,1.0) )
+TC_backface_Ka	= ColorTextureParameter('backface_Ka', 'Back-face Absorption color',	default=(0.0,0.0,0.0) )
+TC_backface_Kd	= ColorTextureParameter('backface_Kd', 'Back-face Diffuse color',		default=(0.64,0.64,0.64) )
+TC_backface_Ks	= ColorTextureParameter('backface_Ks', 'Back-face Specular color',		default=(0.25,0.25,0.25) )
+
 TC_L			= EmissionColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
 
 TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption',	default=(1.0,1.0,1.0))
-TC_backface_Ks	= ColorTextureParameter('backface_Ks', 'Backface Specular color',				default=(0.25,0.25,0.25) )
+
 
 def dict_merge(*args):
 	vis = {}
@@ -353,6 +359,7 @@ def carpaint_visibility():
 	for k in cp_vis.copy().keys():
 		for srch in ['Kd','Ks1','Ks2','Ks3']:
 			cp_vis['%s_color'%srch] = { 'name': '-' }
+			cp_vis['%s_colorlabel'%srch] = { 'name': '-' }
 			cp_vis['%s_usecolortexture'%srch] = { 'name': '-' }
 			if k.startswith(srch):
 				cp_vis[k]['name'] = '-'
@@ -575,19 +582,19 @@ class luxrender_mat_glossy(declarative_property_group):
 	controls = [
 		'multibounce'
 	] + \
+		TC_Kd.controls + \
 		TF_d.controls + \
 		TC_Ka.controls + \
-		TC_Kd.controls + \
 		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
 	visibility = dict_merge(
-		TF_d.visibility,
-		TF_index.visibility,
-		TC_Ka.visibility,
 		TC_Kd.visibility,
+		TF_d.visibility,
+		TC_Ka.visibility,
+		TF_index.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
 		TF_vroughness.visibility
@@ -603,10 +610,10 @@ class luxrender_mat_glossy(declarative_property_group):
 			'save_in_preset': True
 		}
 	] + \
-		TF_d.properties + \
-		TF_index.properties + \
-		TC_Ka.properties + \
 		TC_Kd.properties + \
+		TF_d.properties + \
+		TC_Ka.properties + \
+		TF_index.properties + \
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
@@ -616,10 +623,10 @@ class luxrender_mat_glossy(declarative_property_group):
 		
 		glossy_params.add_bool('multibounce', self.multibounce)
 		
-		glossy_params.update( TF_d.get_params(self) )
-		glossy_params.update( TF_index.get_params(self) )
-		glossy_params.update( TC_Ka.get_params(self) )
 		glossy_params.update( TC_Kd.get_params(self) )
+		glossy_params.update( TF_d.get_params(self) )
+		glossy_params.update( TC_Ka.get_params(self) )
+		glossy_params.update( TF_index.get_params(self) )
 		glossy_params.update( TC_Ks.get_params(self) )
 		glossy_params.update( TF_uroughness.get_params(self) )
 		glossy_params.update( TF_vroughness.get_params(self) )
@@ -630,19 +637,19 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	
 	controls = [
 	] + \
+		TC_Kd.controls + \
 		TF_d.controls + \
 		TC_Ka.controls + \
-		TC_Kd.controls + \
 		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
 	visibility = dict_merge(
-		TF_d.visibility,
-		TF_index.visibility,
-		TC_Ka.visibility,
 		TC_Kd.visibility,
+		TF_d.visibility,
+		TC_Ka.visibility,
+		TF_index.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
 		TF_vroughness.visibility
@@ -650,10 +657,10 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_d.properties + \
-		TF_index.properties + \
-		TC_Ka.properties + \
 		TC_Kd.properties + \
+		TF_d.properties + \
+		TC_Ka.properties + \
+		TF_index.properties + \
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
@@ -661,10 +668,10 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	def get_params(self):
 		glossy_lossy_params = ParamSet()
 		
-		glossy_lossy_params.update( TF_d.get_params(self) )
-		glossy_lossy_params.update( TF_index.get_params(self) )
-		glossy_lossy_params.update( TC_Ka.get_params(self) )
 		glossy_lossy_params.update( TC_Kd.get_params(self) )
+		glossy_lossy_params.update( TF_d.get_params(self) )
+		glossy_lossy_params.update( TC_Ka.get_params(self) )
+		glossy_lossy_params.update( TF_index.get_params(self) )
 		glossy_lossy_params.update( TC_Ks.get_params(self) )
 		glossy_lossy_params.update( TF_uroughness.get_params(self) )
 		glossy_lossy_params.update( TF_vroughness.get_params(self) )
@@ -735,45 +742,76 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 		
 		return mattetranslucent_params
 
+def glossytranslucent_visibility():
+	gt_vis = dict_merge(
+		TC_Kt.visibility,
+		TC_Kd.visibility,
+		TF_d.visibility,
+		TC_Ka.visibility,
+		TF_index.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility,
+		
+		TF_backface_d.visibility,
+		TC_backface_Ka.visibility,
+		TF_backface_index.visibility,
+		TC_backface_Ks.visibility,
+		TF_backface_uroughness.visibility,
+		TF_backface_vroughness.visibility,
+		{
+			'backface_multibounce': { 'two_sided': True }
+		}
+	)
+	
+	# only show backface properties is two_sided == True
+	for k in gt_vis.copy().keys():
+		for srch in ['backface_Ka','backface_Kd','backface_Ks']:
+			gt_vis['%s_color'%srch] = { 'two_sided': True }
+			gt_vis['%s_colorlabel'%srch] = { 'two_sided': True }
+			gt_vis['%s_usecolortexture'%srch] = { 'two_sided': True }
+			if k.startswith(srch):
+				gt_vis[k]['two_sided'] = True
+		for srch in ['bf_d','bf_index','bf_uroughness','bf_vroughness']:
+			gt_vis['%s_floatvalue'%srch] = { 'two_sided': True }
+			gt_vis['%s_usefloattexture'%srch] = { 'two_sided': True }
+			if k.startswith(srch):
+				gt_vis[k]['two_sided'] = True
+	
+	return gt_vis
+
+
 class luxrender_mat_glossytranslucent(declarative_property_group):
 	
 	controls = [
 		'multibounce',
 	] + \
-		TF_d.controls + \
-		TC_Ka.controls + \
 		TC_Kt.controls + \
 		TC_Kd.controls + \
+		TF_d.controls + \
+		TC_Ka.controls + \
 		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls + \
 	[
-		'two_sided'
+		'two_sided',
+		'backface_multibounce',
 	] + \
+		TF_backface_d.controls + \
+		TC_backface_Ka.controls + \
+		TF_backface_index.controls + \
 		TC_backface_Ks.controls + \
 		TF_backface_uroughness.controls + \
 		TF_backface_vroughness.controls
 	
-	visibility = dict_merge(
-		TF_d.visibility,
-		TF_index.visibility,
-		TC_Ka.visibility,
-		TC_Kt.visibility,
-		TC_Kd.visibility,
-		TC_Ks.visibility,
-		TF_uroughness.visibility,
-		TF_vroughness.visibility,
-		TC_backface_Ks.visibility,
-		TF_backface_uroughness.visibility,
-		TF_backface_vroughness.visibility
-	)
+	visibility = glossytranslucent_visibility()
 	
 	properties = [
 		{
 			'type': 'bool',
 			'attr': 'multibounce',
-			'name': 'multibounce',
+			'name': 'Multi-bounce',
 			'description': 'Enable surface layer multi-bounce',
 			'default': False,
 			'save_in_preset': True
@@ -782,19 +820,30 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'type': 'bool',
 			'attr': 'two_sided',
 			'name': 'Two sided',
-			'description': 'Different specularity for backface and frontface',
+			'description': 'Different surface properties for back-face and front-face',
 			'default': False,
 			'save_in_preset': True
-		}
+		},
+		{
+			'type': 'bool',
+			'attr': 'backface_multibounce',
+			'name': 'Back-face Multi-bounce',
+			'description': 'Enable back-surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		},
 	] + \
-		TF_d.properties + \
-		TF_index.properties + \
-		TC_Ka.properties + \
 		TC_Kt.properties + \
 		TC_Kd.properties + \
+		TF_d.properties + \
+		TC_Ka.properties + \
+		TF_index.properties + \
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties + \
+		TF_backface_d.properties + \
+		TC_backface_Ka.properties + \
+		TF_backface_index.properties + \
 		TC_backface_Ks.properties + \
 		TF_backface_uroughness.properties + \
 		TF_backface_vroughness.properties
@@ -802,19 +851,23 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 	def get_params(self):
 		glossytranslucent_params = ParamSet()
 		
-		glossytranslucent_params.add_bool('multibounce', self.multibounce)
+		glossytranslucent_params.add_bool('onesided', not self.two_sided)
 		
-		glossytranslucent_params.update( TF_d.get_params(self) )
-		glossytranslucent_params.update( TF_index.get_params(self) )
-		glossytranslucent_params.update( TC_Ka.get_params(self) )
+		glossytranslucent_params.add_bool('multibounce', self.multibounce)
 		glossytranslucent_params.update( TC_Kt.get_params(self) )
 		glossytranslucent_params.update( TC_Kd.get_params(self) )
+		glossytranslucent_params.update( TF_d.get_params(self) )
+		glossytranslucent_params.update( TC_Ka.get_params(self) )
+		glossytranslucent_params.update( TF_index.get_params(self) )
 		glossytranslucent_params.update( TC_Ks.get_params(self) )
 		glossytranslucent_params.update( TF_uroughness.get_params(self) )
 		glossytranslucent_params.update( TF_vroughness.get_params(self) )
 		
 		if self.two_sided:
-			glossytranslucent_params.add_bool('backface_useior', self.two_sided)
+			glossytranslucent_params.add_bool('backface_multibounce', self.backface_multibounce)
+			glossytranslucent_params.update( TF_backface_d.get_params(self) )
+			glossytranslucent_params.update( TF_backface_index.get_params(self) )
+			glossytranslucent_params.update( TC_backface_Ka.get_params(self) )
 			glossytranslucent_params.update( TC_backface_Ks.get_params(self) )
 			glossytranslucent_params.update( TF_backface_uroughness.get_params(self) )
 			glossytranslucent_params.update( TF_backface_vroughness.get_params(self) )
