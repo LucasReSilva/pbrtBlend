@@ -134,9 +134,8 @@ TF_sigma		= FloatTextureParameter('sigma', 'Sigma',					add_float_value=True, mi
 TF_uroughness	= FloatTextureParameter('uroughness', 'uroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_vroughness	= FloatTextureParameter('vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
-# Example long name workaround - Jens, remove this when you merge ;)
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Back-face uroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-
+TF_backface_vroughness	= FloatTextureParameter('bf_uroughness', 'Back-face vroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 # Color Textures
 TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
@@ -150,6 +149,7 @@ TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',			default=(1.0,1.0,1
 TC_L			= EmissionColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
 
 TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption',	default=(1.0,1.0,1.0))
+TC_backface_Ks	= ColorTextureParameter('backface_Ks', 'Backface Specular color',				default=(0.25,0.25,0.25) )
 
 def dict_merge(*args):
 	vis = {}
@@ -738,7 +738,8 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 class luxrender_mat_glossytranslucent(declarative_property_group):
 	
 	controls = [
-		'multibounce'
+		'multibounce',
+		'two sided'
 	] + \
 		TF_d.controls + \
 		TF_index.controls + \
@@ -748,7 +749,10 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls + \
-		TF_backface_uroughness.controls
+		TF_backface_uroughness.controls + \
+		TC_backface_Ks.controls + \
+		TF_backface_uroughness.controls + \
+		TF_backface_vroughness.controls
 	
 	visibility = dict_merge(
 		TF_d.visibility,
@@ -759,7 +763,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
 		TF_vroughness.visibility,
-		TF_backface_uroughness.visibility
+		TC_backface_Ks.visibility,
+		TF_backface_uroughness.visibility,
+		TF_backface_vroughness.visibility
 	)
 	
 	properties = [
@@ -768,6 +774,14 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'attr': 'multibounce',
 			'name': 'multibounce',
 			'description': 'Enable surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'two sided',
+			'name': 'two sided',
+			'description': 'Different specularity for backface and frontface',
 			'default': False,
 			'save_in_preset': True
 		}
@@ -780,13 +794,19 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties + \
-		TF_backface_uroughness.properties
-	
+		TC_backface_Ks.properties + \
+		TF_backface_uroughness.properties + \
+		TF_backface_vroughness.properties
+		
 	def get_params(self):
 		glossytranslucent_params = ParamSet()
 		
 		glossytranslucent_params.add_bool('multibounce', self.multibounce)
+		glossytranslucent_params.add_bool('two sided', self.backface_useior)
 		
+		glossytranslucent_params.update( TC_backface_Ks.get_params(self) )
+		glossytranslucent_params.update( TF_backface_uroughness.get_params(self) )
+		glossytranslucent_params.update( TF_backface_vroughness.get_params(self) )		
 		glossytranslucent_params.update( TF_d.get_params(self) )
 		glossytranslucent_params.update( TF_index.get_params(self) )
 		glossytranslucent_params.update( TC_Ka.get_params(self) )
