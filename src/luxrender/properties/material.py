@@ -135,7 +135,7 @@ TF_uroughness	= FloatTextureParameter('uroughness', 'uroughness',			add_float_va
 TF_vroughness	= FloatTextureParameter('vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Back-face uroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_backface_vroughness	= FloatTextureParameter('bf_uroughness', 'Back-face vroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_backface_vroughness	= FloatTextureParameter('bf_uroughness', 'Back-face vroughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 # Color Textures
 TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
@@ -749,7 +749,6 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls + \
-		TF_backface_uroughness.controls + \
 		TC_backface_Ks.controls + \
 		TF_backface_uroughness.controls + \
 		TF_backface_vroughness.controls
