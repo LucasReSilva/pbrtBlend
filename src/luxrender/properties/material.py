@@ -576,9 +576,9 @@ class luxrender_mat_glossy(declarative_property_group):
 		'multibounce'
 	] + \
 		TF_d.controls + \
-		TF_index.controls + \
 		TC_Ka.controls + \
 		TC_Kd.controls + \
+		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
@@ -631,9 +631,9 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	controls = [
 	] + \
 		TF_d.controls + \
-		TF_index.controls + \
 		TC_Ka.controls + \
 		TC_Kd.controls + \
+		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
@@ -739,16 +739,18 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 	
 	controls = [
 		'multibounce',
-		'two sided'
 	] + \
 		TF_d.controls + \
-		TF_index.controls + \
 		TC_Ka.controls + \
 		TC_Kt.controls + \
 		TC_Kd.controls + \
+		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls + \
+	[
+		'two_sided'
+	] + \
 		TC_backface_Ks.controls + \
 		TF_backface_uroughness.controls + \
 		TF_backface_vroughness.controls
@@ -778,8 +780,8 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		},
 		{
 			'type': 'bool',
-			'attr': 'two sided',
-			'name': 'two sided',
+			'attr': 'two_sided',
+			'name': 'Two sided',
 			'description': 'Different specularity for backface and frontface',
 			'default': False,
 			'save_in_preset': True
@@ -801,11 +803,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		glossytranslucent_params = ParamSet()
 		
 		glossytranslucent_params.add_bool('multibounce', self.multibounce)
-		glossytranslucent_params.add_bool('two sided', self.backface_useior)
 		
-		glossytranslucent_params.update( TC_backface_Ks.get_params(self) )
-		glossytranslucent_params.update( TF_backface_uroughness.get_params(self) )
-		glossytranslucent_params.update( TF_backface_vroughness.get_params(self) )		
 		glossytranslucent_params.update( TF_d.get_params(self) )
 		glossytranslucent_params.update( TF_index.get_params(self) )
 		glossytranslucent_params.update( TC_Ka.get_params(self) )
@@ -814,6 +812,12 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		glossytranslucent_params.update( TC_Ks.get_params(self) )
 		glossytranslucent_params.update( TF_uroughness.get_params(self) )
 		glossytranslucent_params.update( TF_vroughness.get_params(self) )
+		
+		if self.two_sided:
+			glossytranslucent_params.add_bool('backface_useior', self.two_sided)
+			glossytranslucent_params.update( TC_backface_Ks.get_params(self) )
+			glossytranslucent_params.update( TF_backface_uroughness.get_params(self) )
+			glossytranslucent_params.update( TF_backface_vroughness.get_params(self) )
 		
 		return glossytranslucent_params
 
