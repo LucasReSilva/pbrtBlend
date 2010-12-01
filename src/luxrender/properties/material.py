@@ -183,7 +183,7 @@ def mat_list():
 	if LUXRENDER_VERSION >= '0.7.1':
 		mat_list += [
 			('velvet', 'Velvet', 'velvet'),
-			('glossytranslucent', 'Glossytranslucent', 'glossytranslucent'),
+			('glossytranslucent', 'Glossy Translucent', 'glossytranslucent'),
 		]
 	
 	mat_list.sort()
@@ -578,6 +578,33 @@ class luxrender_mat_roughglass(declarative_property_group):
 		
 		return roughglass_params
 
+def glossy_visibility():
+	g_vis = dict_merge(
+		TF_d.visibility,
+		TF_index.visibility,
+		TC_Ka.visibility,
+		TC_Kd.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
+	
+	# show either specularity by color or IOR
+	for k in g_vis.copy().keys():
+		for srch in ['Ks']:
+			g_vis['%s_color'%srch] = { 'useior': False }
+			g_vis['%s_colorlabel'%srch] = { 'useior': False }
+			g_vis['%s_usecolortexture'%srch] = { 'useior': False }
+			if k.startswith(srch):
+				g_vis[k]['useior'] = False
+		for srch in ['index']:
+			g_vis['%s_floatvalue'%srch] = { 'useior': True }
+			g_vis['%s_usefloattexture'%srch] = { 'useior': True }
+			if k.startswith(srch):
+				g_vis[k]['useior'] = True
+	
+	return g_vis
+	
 class luxrender_mat_glossy(declarative_property_group):
 	
 	controls = [
@@ -586,27 +613,116 @@ class luxrender_mat_glossy(declarative_property_group):
 		TC_Kd.controls + \
 		TF_d.controls + \
 		TC_Ka.controls + \
+	[
+		'useior'
+	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
-	visibility = dict_merge(
-		TC_Kd.visibility,
-		TF_d.visibility,
-		TC_Ka.visibility,
-		TF_index.visibility,
-		TC_Ks.visibility,
-		TF_uroughness.visibility,
-		TF_vroughness.visibility
-	)
+	visibility = glossy_visibility()
 	
 	properties = [
 		{
 			'type': 'bool',
 			'attr': 'multibounce',
-			'name': 'multibounce',
+			'name': 'Multibounce',
 			'description': 'Enable surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
+			'default': False,
+			'save_in_preset': True
+		}
+	] + \
+		TF_d.properties + \
+		TF_index.properties + \
+		TC_Ka.properties + \
+		TC_Kd.properties + \
+		TC_Ks.properties + \
+		TF_uroughness.properties + \
+		TF_vroughness.properties
+	
+	def get_params(self):
+		glossy_params = ParamSet()
+		
+		glossy_params.add_bool('multibounce', self.multibounce)
+		glossy_params.add_bool('useior', self.useior)
+		
+		if self.d_floatvalue > 0:
+			glossy_params.update( TF_d.get_params(self) )
+			glossy_params.update( TC_Ka.get_params(self) )
+		
+		glossy_params.update( TC_Kd.get_params(self) )
+		
+		if self.useior:
+			glossy_params.update( TF_index.get_params(self) )
+		else:
+			glossy_params.update( TC_Ks.get_params(self) )
+			
+		glossy_params.update( TF_uroughness.get_params(self) )
+		glossy_params.update( TF_vroughness.get_params(self) )
+		
+		return glossy_params
+
+def glossy_lossy_visibility():
+	gl_vis = dict_merge(
+		TF_d.visibility,
+		TF_index.visibility,
+		TC_Ka.visibility,
+	[
+		'useior'
+	] + \
+		TC_Kd.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility
+	)
+	
+	# show either specularity by color or IOR
+	for k in gl_vis.copy().keys():
+		for srch in ['Ks']:
+			gl_vis['%s_color'%srch] = { 'useior': False }
+			gl_vis['%s_colorlabel'%srch] = { 'useior': False }
+			gl_vis['%s_usecolortexture'%srch] = { 'useior': False }
+			if k.startswith(srch):
+				gl_vis[k]['useior'] = False
+		for srch in ['index']:
+			gl_vis['%s_floatvalue'%srch] = { 'useior': True }
+			gl_vis['%s_usefloattexture'%srch] = { 'useior': True }
+			if k.startswith(srch):
+				gl_vis[k]['useior'] = True
+	
+	return gl_vis
+class luxrender_mat_glossy_lossy(declarative_property_group):
+	
+	controls = [
+	] + \
+		TC_Kd.controls + \
+		TF_d.controls + \
+		TC_Ka.controls + \
+	[
+		'useior'
+	] + \
+		TF_index.controls + \
+		TC_Ks.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
+	
+	visibility = glossy_visibility()
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
 			'default': False,
 			'save_in_preset': True
 		}
@@ -620,64 +736,21 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_vroughness.properties
 	
 	def get_params(self):
-		glossy_params = ParamSet()
-		
-		glossy_params.add_bool('multibounce', self.multibounce)
-		
-		if self.d_floatvalue > 0:
-			glossy_params.update( TF_d.get_params(self) )
-			glossy_params.update( TC_Ka.get_params(self) )
-		
-		glossy_params.update( TC_Kd.get_params(self) )
-		glossy_params.update( TF_index.get_params(self) )
-		glossy_params.update( TC_Ks.get_params(self) )
-		glossy_params.update( TF_uroughness.get_params(self) )
-		glossy_params.update( TF_vroughness.get_params(self) )
-		
-		return glossy_params
-
-class luxrender_mat_glossy_lossy(declarative_property_group):
-	
-	controls = [
-	] + \
-		TC_Kd.controls + \
-		TF_d.controls + \
-		TC_Ka.controls + \
-		TF_index.controls + \
-		TC_Ks.controls + \
-		TF_uroughness.controls + \
-		TF_vroughness.controls
-	
-	visibility = dict_merge(
-		TC_Kd.visibility,
-		TF_d.visibility,
-		TC_Ka.visibility,
-		TF_index.visibility,
-		TC_Ks.visibility,
-		TF_uroughness.visibility,
-		TF_vroughness.visibility
-	)
-	
-	properties = [
-	] + \
-		TC_Kd.properties + \
-		TF_d.properties + \
-		TC_Ka.properties + \
-		TF_index.properties + \
-		TC_Ks.properties + \
-		TF_uroughness.properties + \
-		TF_vroughness.properties
-	
-	def get_params(self):
 		glossy_lossy_params = ParamSet()
+		
+		glossy_lossy_params.add_bool('useior', self.useior)
 		
 		if self.d_floatvalue > 0:
 			glossy_lossy_params.update( TF_d.get_params(self) )
 			glossy_lossy_params.update( TC_Ka.get_params(self) )
 		
 		glossy_lossy_params.update( TC_Kd.get_params(self) )
-		glossy_lossy_params.update( TF_index.get_params(self) )
-		glossy_lossy_params.update( TC_Ks.get_params(self) )
+		
+		if self.useior:
+			glossy_lossy_params.update( TF_index.get_params(self) )
+		else:
+			glossy_lossy_params.update( TC_Ks.get_params(self) )
+			
 		glossy_lossy_params.update( TF_uroughness.get_params(self) )
 		glossy_lossy_params.update( TF_vroughness.get_params(self) )
 		
@@ -765,12 +838,25 @@ def glossytranslucent_visibility():
 		TF_backface_uroughness.visibility,
 		TF_backface_vroughness.visibility,
 		{
-			'backface_multibounce': { 'two_sided': True }
+			'backface_multibounce': { 'two_sided': True },
+			'bf_useior': { 'two_sided': True }
 		}
 	)
-	
-	# only show backface properties is two_sided == True
+	# show either specularity by color or IOR
 	for k in gt_vis.copy().keys():
+		for srch in ['Ks']:
+			gt_vis['%s_color'%srch] = { 'useior': False }
+			gt_vis['%s_colorlabel'%srch] = { 'useior': False }
+			gt_vis['%s_usecolortexture'%srch] = { 'useior': False }
+			if k.startswith(srch):
+				gt_vis[k]['useior'] = False
+		for srch in ['index']:
+			gt_vis['%s_floatvalue'%srch] = { 'useior': True }
+			gt_vis['%s_usefloattexture'%srch] = { 'useior': True }
+			if k.startswith(srch):
+				gt_vis[k]['useior'] = True
+				
+	# only show backface properties is two_sided == True
 		for srch in ['backface_Ka','backface_Kd','backface_Ks']:
 			gt_vis['%s_color'%srch] = { 'two_sided': True }
 			gt_vis['%s_colorlabel'%srch] = { 'two_sided': True }
@@ -782,6 +868,18 @@ def glossytranslucent_visibility():
 			gt_vis['%s_usefloattexture'%srch] = { 'two_sided': True }
 			if k.startswith(srch):
 				gt_vis[k]['two_sided'] = True
+		# show either specularity by color or IOR Backface		
+		for srch in ['backface_Ks']:
+			gt_vis['%s_color'%srch] = { 'bf_useior': False }
+			gt_vis['%s_colorlabel'%srch] = { 'bf_useior': False }
+			gt_vis['%s_usecolortexture'%srch] = { 'bf_useior': False }
+			if k.startswith(srch):
+				gt_vis[k]['bf_useior'] = False
+		for srch in ['bf_index']:
+			gt_vis['%s_floatvalue'%srch] = { 'bf_useior': True }
+			gt_vis['%s_usefloattexture'%srch] = { 'bf_useior': True }
+			if k.startswith(srch):
+				gt_vis[k]['bf_useior'] = True
 	
 	return gt_vis
 
@@ -795,6 +893,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Kd.controls + \
 		TF_d.controls + \
 		TC_Ka.controls + \
+	[
+		'useior'
+	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
@@ -805,6 +906,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 	] + \
 		TF_backface_d.controls + \
 		TC_backface_Ka.controls + \
+	[
+		'bf_useior'
+	] + \
 		TF_backface_index.controls + \
 		TC_backface_Ks.controls + \
 		TF_backface_uroughness.controls + \
@@ -837,6 +941,22 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'default': False,
 			'save_in_preset': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'bf_useior',
+			'name': 'Backface Use IOR',
+			'description': 'Use IOR/Reflective index input',
+			'default': False,
+			'save_in_preset': True
+		}
 	] + \
 		TC_Kt.properties + \
 		TC_Kd.properties + \
@@ -862,19 +982,28 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		
 		glossytranslucent_params.add_bool('onesided', not self.two_sided)
 		glossytranslucent_params.add_bool('multibounce', self.multibounce)
+		glossytranslucent_params.add_bool('useior', self.useior)
+		glossytranslucent_params.add_bool('bf_useior', self.bf_useior)
 		
 		glossytranslucent_params.update( TC_Kt.get_params(self) )
 		glossytranslucent_params.update( TC_Kd.get_params(self) )
-		glossytranslucent_params.update( TF_index.get_params(self) )
-		glossytranslucent_params.update( TC_Ks.get_params(self) )
+		
+		if self.useior:
+			glossytranslucent_params.update( TF_index.get_params(self) )
+		else:
+			glossytranslucent_params.update( TC_Ks.get_params(self) )
+			
 		glossytranslucent_params.update( TF_uroughness.get_params(self) )
 		glossytranslucent_params.update( TF_vroughness.get_params(self) )
 		
 		if self.two_sided:
 			glossytranslucent_params.add_bool('backface_multibounce', self.backface_multibounce)
 			glossytranslucent_params.update( TF_backface_d.get_params(self) )
-			glossytranslucent_params.update( TF_backface_index.get_params(self) )
-			glossytranslucent_params.update( TC_backface_Ka.get_params(self) )
+			
+			if self.bf_useior:
+				glossytranslucent_params.update( TF_backface_index.get_params(self) )
+			else:
+				glossytranslucent_params.update( TC_backface_Ka.get_params(self) )
 			glossytranslucent_params.update( TC_backface_Ks.get_params(self) )
 			glossytranslucent_params.update( TF_backface_uroughness.get_params(self) )
 			glossytranslucent_params.update( TF_backface_vroughness.get_params(self) )
