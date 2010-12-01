@@ -426,8 +426,9 @@ class luxrender_mat_carpaint(declarative_property_group):
 	def get_params(self):
 		carpaint_params = ParamSet()
 		
-		carpaint_params.update( TF_d.get_params(self) )
-		carpaint_params.update( TC_Ka.get_params(self) )
+		if self.d_floatvalue > 0:
+			carpaint_params.update( TF_d.get_params(self) )
+			carpaint_params.update( TC_Ka.get_params(self) )
 		
 		if self.name == '-':	# Use manual settings
 			carpaint_params.update( TC_Kd.get_params(self) )
@@ -623,9 +624,11 @@ class luxrender_mat_glossy(declarative_property_group):
 		
 		glossy_params.add_bool('multibounce', self.multibounce)
 		
+		if self.d_floatvalue > 0:
+			glossy_params.update( TF_d.get_params(self) )
+			glossy_params.update( TC_Ka.get_params(self) )
+		
 		glossy_params.update( TC_Kd.get_params(self) )
-		glossy_params.update( TF_d.get_params(self) )
-		glossy_params.update( TC_Ka.get_params(self) )
 		glossy_params.update( TF_index.get_params(self) )
 		glossy_params.update( TC_Ks.get_params(self) )
 		glossy_params.update( TF_uroughness.get_params(self) )
@@ -668,9 +671,11 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	def get_params(self):
 		glossy_lossy_params = ParamSet()
 		
+		if self.d_floatvalue > 0:
+			glossy_lossy_params.update( TF_d.get_params(self) )
+			glossy_lossy_params.update( TC_Ka.get_params(self) )
+		
 		glossy_lossy_params.update( TC_Kd.get_params(self) )
-		glossy_lossy_params.update( TF_d.get_params(self) )
-		glossy_lossy_params.update( TC_Ka.get_params(self) )
 		glossy_lossy_params.update( TF_index.get_params(self) )
 		glossy_lossy_params.update( TC_Ks.get_params(self) )
 		glossy_lossy_params.update( TF_uroughness.get_params(self) )
@@ -851,13 +856,15 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 	def get_params(self):
 		glossytranslucent_params = ParamSet()
 		
-		glossytranslucent_params.add_bool('onesided', not self.two_sided)
+		if self.d_floatvalue > 0:
+			glossytranslucent_params.update( TF_d.get_params(self) )
+			glossytranslucent_params.update( TC_Ka.get_params(self) )
 		
+		glossytranslucent_params.add_bool('onesided', not self.two_sided)
 		glossytranslucent_params.add_bool('multibounce', self.multibounce)
+		
 		glossytranslucent_params.update( TC_Kt.get_params(self) )
 		glossytranslucent_params.update( TC_Kd.get_params(self) )
-		glossytranslucent_params.update( TF_d.get_params(self) )
-		glossytranslucent_params.update( TC_Ka.get_params(self) )
 		glossytranslucent_params.update( TF_index.get_params(self) )
 		glossytranslucent_params.update( TC_Ks.get_params(self) )
 		glossytranslucent_params.update( TF_uroughness.get_params(self) )
