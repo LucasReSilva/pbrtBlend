@@ -763,7 +763,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_string('rrstrategy', self.rrstrategy) \
 				  .add_bool('includeenvironment', self.includeenvironment)
 		
-		if self.advanced:
+		if self.advanced and self.surfaceintegrator != 'bidirectional':
 			params.add_string('lightstrategy', self.lightstrategy)
 		
 		out = self.surfaceintegrator, params
