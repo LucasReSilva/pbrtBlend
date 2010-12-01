@@ -676,9 +676,6 @@ def glossy_lossy_visibility():
 		TF_d.visibility,
 		TF_index.visibility,
 		TC_Ka.visibility,
-	[
-		'useior'
-	] + \
 		TC_Kd.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
@@ -715,7 +712,7 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
-	visibility = glossy_visibility()
+	visibility = glossy_lossy_visibility()
 	
 	properties = [
 		{
@@ -870,9 +867,9 @@ def glossytranslucent_visibility():
 				gt_vis[k]['two_sided'] = True
 		# show either specularity by color or IOR Backface		
 		for srch in ['backface_Ks']:
-			gt_vis['%s_color'%srch] = { 'bf_useior': False }
-			gt_vis['%s_colorlabel'%srch] = { 'bf_useior': False }
-			gt_vis['%s_usecolortexture'%srch] = { 'bf_useior': False }
+			gt_vis['%s_color'%srch] = { 'bf_useior': False } and { 'two_sided': True }
+			gt_vis['%s_colorlabel'%srch] = { 'bf_useior': False } and { 'two_sided': True }
+			gt_vis['%s_usecolortexture'%srch] = { 'bf_useior': False } and { 'two_sided': True }
 			if k.startswith(srch):
 				gt_vis[k]['bf_useior'] = False
 		for srch in ['bf_index']:
