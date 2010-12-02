@@ -232,7 +232,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	bl_idname			= 'luxrender'
 	bl_label			= 'LuxRender'
-	bl_use_preview		= True #(LUXRENDER_VERSION >= '0.8')
+	bl_use_preview		= True
 	
 	LuxManager			= None
 	render_update_timer	= None
