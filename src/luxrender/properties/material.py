@@ -921,7 +921,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'multibounce',
-			'name': 'Multi-bounce',
+			'name': 'Multibounce',
 			'description': 'Enable surface layer multi-bounce',
 			'default': False,
 			'save_in_preset': True
@@ -937,7 +937,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'backface_multibounce',
-			'name': 'Back-face Multi-bounce',
+			'name': 'Backface Multibounce',
 			'description': 'Enable back-surface layer multi-bounce',
 			'default': False,
 			'save_in_preset': True
@@ -953,7 +953,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'bf_useior',
-			'name': 'Backface Use IOR',
+			'name': 'Backface use IOR',
 			'description': 'Use IOR/Reflective index input',
 			'default': False,
 			'save_in_preset': True
