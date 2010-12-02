@@ -133,10 +133,10 @@ TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=
 TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
 TF_uroughness			= FloatTextureParameter('uroughness', 'uroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_vroughness			= FloatTextureParameter('vroughness', 'vroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_backface_d			= FloatTextureParameter('bf_d', 'Back-face Absorption Depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
-TF_backface_index		= FloatTextureParameter('bf_index', 'Back-face IOR',				real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Back-face uroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Back-face vroughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_backface_d			= FloatTextureParameter('bf_d', 'Backface Absorption Depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
+TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',				real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 
 
 # Color Textures
@@ -148,9 +148,9 @@ TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',						default=(1.0,1.
 TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',						default=(1.0,1.0,1.0) )
 TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',						default=(1.0,1.0,1.0) )
 TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',						default=(1.0,1.0,1.0) )
-TC_backface_Ka	= ColorTextureParameter('backface_Ka', 'Back-face Absorption color',	default=(0.0,0.0,0.0) )
-TC_backface_Kd	= ColorTextureParameter('backface_Kd', 'Back-face Diffuse color',		default=(0.64,0.64,0.64) )
-TC_backface_Ks	= ColorTextureParameter('backface_Ks', 'Back-face Specular color',		default=(0.25,0.25,0.25) )
+TC_backface_Ka	= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
+TC_backface_Kd	= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',		default=(0.64,0.64,0.64) )
+TC_backface_Ks	= ColorTextureParameter('backface_Ks', 'Backface Specular color',		default=(0.25,0.25,0.25) )
 
 TC_L			= EmissionColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
 
