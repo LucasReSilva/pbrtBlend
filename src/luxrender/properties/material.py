@@ -339,6 +339,15 @@ class luxrender_material(declarative_property_group):
 		elif mode == 'direct':
 			lux_context.material(self.type, material_params)
 
+def texture_append_visibility(vis_main, textureparam_object, vis_append):
+	for prop in textureparam_object.properties:
+		if 'attr' in prop.keys():
+			if not prop['attr'] in vis_main.keys():
+				vis_main[prop['attr']] = {}
+			for vk, vi in vis_append.items():
+				vis_main[prop['attr']][vk] = vi
+	return vis_main
+
 def carpaint_visibility():
 	cp_vis = dict_merge(
 		TF_d.visibility,
@@ -355,19 +364,18 @@ def carpaint_visibility():
 		TF_R3.visibility
 	)
 	
-	# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
-	for k in cp_vis.copy().keys():
-		for srch in ['Kd','Ks1','Ks2','Ks3']:
-			cp_vis['%s_color'%srch] = { 'name': '-' }
-			cp_vis['%s_colorlabel'%srch] = { 'name': '-' }
-			cp_vis['%s_usecolortexture'%srch] = { 'name': '-' }
-			if k.startswith(srch):
-				cp_vis[k]['name'] = '-'
-		for srch in ['M1','M2','M3','R1','R2','R3']:
-			cp_vis['%s_floatvalue'%srch] = { 'name': '-' }
-			cp_vis['%s_usefloattexture'%srch] = { 'name': '-' }
-			if k.startswith(srch):
-				cp_vis[k]['name'] = '-'
+	vis_append = { 'name': '-' }
+	cp_vis = texture_append_visibility(cp_vis, TC_Kd, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TC_Ks1, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TC_Ks2, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TC_Ks3, vis_append)
+	
+	cp_vis = texture_append_visibility(cp_vis, TF_M1, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_M2, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_M3, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_R1, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_R2, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_R3, vis_append)
 	
 	return cp_vis
 
@@ -589,19 +597,8 @@ def glossy_visibility():
 		TF_vroughness.visibility
 	)
 	
-	# show either specularity by color or IOR
-	for k in g_vis.copy().keys():
-		for srch in ['Ks']:
-			g_vis['%s_color'%srch] = { 'useior': False }
-			g_vis['%s_colorlabel'%srch] = { 'useior': False }
-			g_vis['%s_usecolortexture'%srch] = { 'useior': False }
-			if k.startswith(srch):
-				g_vis[k]['useior'] = False
-		for srch in ['index']:
-			g_vis['%s_floatvalue'%srch] = { 'useior': True }
-			g_vis['%s_usefloattexture'%srch] = { 'useior': True }
-			if k.startswith(srch):
-				g_vis[k]['useior'] = True
+	g_vis = texture_append_visibility(g_vis, TC_Ks, { 'useior': False })
+	g_vis = texture_append_visibility(g_vis, TF_index, { 'useior': True })
 	
 	return g_vis
 	
@@ -653,7 +650,6 @@ class luxrender_mat_glossy(declarative_property_group):
 		glossy_params = ParamSet()
 		
 		glossy_params.add_bool('multibounce', self.multibounce)
-		glossy_params.add_bool('useior', self.useior)
 		
 		if self.d_floatvalue > 0:
 			glossy_params.update( TF_d.get_params(self) )
@@ -663,8 +659,10 @@ class luxrender_mat_glossy(declarative_property_group):
 		
 		if self.useior:
 			glossy_params.update( TF_index.get_params(self) )
+			glossy_params.add_color('Ks', (1.0, 1.0, 1.0))
 		else:
 			glossy_params.update( TC_Ks.get_params(self) )
+			glossy_params.add_float('index', 0.0)
 			
 		glossy_params.update( TF_uroughness.get_params(self) )
 		glossy_params.update( TF_vroughness.get_params(self) )
@@ -682,21 +680,11 @@ def glossy_lossy_visibility():
 		TF_vroughness.visibility
 	)
 	
-	# show either specularity by color or IOR
-	for k in gl_vis.copy().keys():
-		for srch in ['Ks']:
-			gl_vis['%s_color'%srch] = { 'useior': False }
-			gl_vis['%s_colorlabel'%srch] = { 'useior': False }
-			gl_vis['%s_usecolortexture'%srch] = { 'useior': False }
-			if k.startswith(srch):
-				gl_vis[k]['useior'] = False
-		for srch in ['index']:
-			gl_vis['%s_floatvalue'%srch] = { 'useior': True }
-			gl_vis['%s_usefloattexture'%srch] = { 'useior': True }
-			if k.startswith(srch):
-				gl_vis[k]['useior'] = True
+	gl_vis = texture_append_visibility(gl_vis, TC_Ks, { 'useior': False })
+	gl_vis = texture_append_visibility(gl_vis, TF_index, { 'useior': True })
 	
 	return gl_vis
+
 class luxrender_mat_glossy_lossy(declarative_property_group):
 	
 	controls = [
@@ -735,8 +723,6 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	def get_params(self):
 		glossy_lossy_params = ParamSet()
 		
-		glossy_lossy_params.add_bool('useior', self.useior)
-		
 		if self.d_floatvalue > 0:
 			glossy_lossy_params.update( TF_d.get_params(self) )
 			glossy_lossy_params.update( TC_Ka.get_params(self) )
@@ -745,8 +731,10 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		
 		if self.useior:
 			glossy_lossy_params.update( TF_index.get_params(self) )
+			glossy_lossy_params.add_color('Ks', (1.0, 1.0, 1.0))
 		else:
 			glossy_lossy_params.update( TC_Ks.get_params(self) )
+			glossy_lossy_params.add_float('index', 0.0)
 			
 		glossy_lossy_params.update( TF_uroughness.get_params(self) )
 		glossy_lossy_params.update( TF_vroughness.get_params(self) )
@@ -830,60 +818,30 @@ def glossytranslucent_visibility():
 		
 		TF_backface_d.visibility,
 		TC_backface_Ka.visibility,
+		TC_backface_Kd.visibility,
 		TF_backface_index.visibility,
 		TC_backface_Ks.visibility,
 		TF_backface_uroughness.visibility,
 		TF_backface_vroughness.visibility,
 		{
-			'backface_multibounce': { 'two_sided': True },
-			'bf_useior': { 'two_sided': True }
+			'backface_multibounce':	{ 'two_sided': True },
+			'bf_useior': 			{ 'two_sided': True }
 		}
 	)
-	# show either specularity by color or IOR
-	for k in gt_vis.copy().keys():
-		for srch in ['Ks']:
-			gt_vis['%s_color'%srch] = { 'useior': False }
-			gt_vis['%s_colorlabel'%srch] = { 'useior': False }
-			gt_vis['%s_usecolortexture'%srch] = { 'useior': False }
-			if k.startswith(srch):
-				gt_vis[k]['useior'] = False
-				
-		for srch in ['index']:
-			gt_vis['%s_floatvalue'%srch] = { 'useior': True }
-			gt_vis['%s_usefloattexture'%srch] = { 'useior': True }
-			if k.startswith(srch):
-				gt_vis[k]['useior'] = True
-				
-	# only show backface properties is two_sided == True
-		for srch in ['backface_Ka','backface_Kd']:
-			gt_vis['%s_color'%srch] = { 'two_sided': True }
-			gt_vis['%s_colorlabel'%srch] = { 'two_sided': True }
-			gt_vis['%s_usecolortexture'%srch] = { 'two_sided': True }
-			if k.startswith(srch):
-				gt_vis[k]['two_sided'] = True
+	
+	gt_vis = texture_append_visibility(gt_vis, TC_Ks,					{ 'useior': False })
+	gt_vis = texture_append_visibility(gt_vis, TF_index,				{ 'useior': True  })
+	
+	gt_vis = texture_append_visibility(gt_vis, TC_backface_Ka,			{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TC_backface_Kd,			{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_d,			{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_uroughness,	{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_vroughness,	{ 'two_sided': True })
 
-		for srch in ['bf_d','bf_uroughness','bf_vroughness']:
-			gt_vis['%s_floatvalue'%srch] = { 'two_sided': True }
-			gt_vis['%s_usefloattexture'%srch] = { 'two_sided': True }
-			if k.startswith(srch):
-				gt_vis[k]['two_sided'] = True
-
-		# show either specularity by color or IOR Backface		
-		for srch in ['backface_Ks']:
-			gt_vis['%s_color'%srch] = { 'bf_useior': False, 'two_sided': True }
-			gt_vis['%s_colorlabel'%srch] = { 'bf_useior': False, 'two_sided': True }
-			gt_vis['%s_usecolortexture'%srch] = { 'bf_useior': False, 'two_sided': True }
-			if k.startswith(srch):
-				gt_vis[k]['bf_useior'] = False
-
-		for srch in ['bf_index']:
-			gt_vis['%s_floatvalue'%srch] = { 'bf_useior': True, 'two_sided': True }
-			gt_vis['%s_usefloattexture'%srch] = { 'bf_useior': True, 'two_sided': True }
-			if k.startswith(srch):
-				gt_vis[k]['bf_useior'] = True
-				
+	gt_vis = texture_append_visibility(gt_vis, TC_backface_Ks,			{ 'two_sided': True, 'bf_useior': False })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_index,		{ 'two_sided': True, 'bf_useior': True  })
+	
 	return gt_vis
-
 
 class luxrender_mat_glossytranslucent(declarative_property_group):
 	
@@ -983,29 +941,34 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		
 		glossytranslucent_params.add_bool('onesided', not self.two_sided)
 		glossytranslucent_params.add_bool('multibounce', self.multibounce)
-		glossytranslucent_params.add_bool('useior', self.useior)
-		glossytranslucent_params.add_bool('bf_useior', self.bf_useior)
 		
 		glossytranslucent_params.update( TC_Kt.get_params(self) )
 		glossytranslucent_params.update( TC_Kd.get_params(self) )
 		
 		if self.useior:
 			glossytranslucent_params.update( TF_index.get_params(self) )
+			glossytranslucent_params.add_color('Ks', (1.0, 1.0, 1.0))
 		else:
 			glossytranslucent_params.update( TC_Ks.get_params(self) )
+			glossytranslucent_params.add_float('index', 0.0)
 			
 		glossytranslucent_params.update( TF_uroughness.get_params(self) )
 		glossytranslucent_params.update( TF_vroughness.get_params(self) )
 		
 		if self.two_sided:
 			glossytranslucent_params.add_bool('backface_multibounce', self.backface_multibounce)
-			glossytranslucent_params.update( TF_backface_d.get_params(self) )
+			
+			if self.bf_d_floatvalue > 0:
+				glossytranslucent_params.update( TF_backface_d.get_params(self) )
+				glossytranslucent_params.update( TC_backface_Ka.get_params(self) )
 			
 			if self.bf_useior:
 				glossytranslucent_params.update( TF_backface_index.get_params(self) )
+				glossytranslucent_params.add_color('backface_Ks', (1.0, 1.0, 1.0))
 			else:
-				glossytranslucent_params.update( TC_backface_Ka.get_params(self) )
-			glossytranslucent_params.update( TC_backface_Ks.get_params(self) )
+				glossytranslucent_params.update( TC_backface_Ks.get_params(self) )
+				glossytranslucent_params.add_float('backface_index', 0.0)
+			
 			glossytranslucent_params.update( TF_backface_uroughness.get_params(self) )
 			glossytranslucent_params.update( TF_backface_vroughness.get_params(self) )
 		
@@ -1255,7 +1218,7 @@ class luxrender_mat_velvet(declarative_property_group):
 			velvet_params.add_float('p3', self.p3)
 		
 		return velvet_params
-		
+
 class luxrender_emission(declarative_property_group):
 	'''
 	Storage class for LuxRender Material emission settings.
