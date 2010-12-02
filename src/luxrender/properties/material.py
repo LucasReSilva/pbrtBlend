@@ -847,6 +847,7 @@ def glossytranslucent_visibility():
 			gt_vis['%s_usecolortexture'%srch] = { 'useior': False }
 			if k.startswith(srch):
 				gt_vis[k]['useior'] = False
+				
 		for srch in ['index']:
 			gt_vis['%s_floatvalue'%srch] = { 'useior': True }
 			gt_vis['%s_usefloattexture'%srch] = { 'useior': True }
@@ -854,30 +855,33 @@ def glossytranslucent_visibility():
 				gt_vis[k]['useior'] = True
 				
 	# only show backface properties is two_sided == True
-		for srch in ['backface_Ka','backface_Kd','backface_Ks']:
+		for srch in ['backface_Ka','backface_Kd']:
 			gt_vis['%s_color'%srch] = { 'two_sided': True }
 			gt_vis['%s_colorlabel'%srch] = { 'two_sided': True }
 			gt_vis['%s_usecolortexture'%srch] = { 'two_sided': True }
 			if k.startswith(srch):
 				gt_vis[k]['two_sided'] = True
-		for srch in ['bf_d','bf_index','bf_uroughness','bf_vroughness']:
+
+		for srch in ['bf_d','bf_uroughness','bf_vroughness']:
 			gt_vis['%s_floatvalue'%srch] = { 'two_sided': True }
 			gt_vis['%s_usefloattexture'%srch] = { 'two_sided': True }
 			if k.startswith(srch):
 				gt_vis[k]['two_sided'] = True
+
 		# show either specularity by color or IOR Backface		
 		for srch in ['backface_Ks']:
-			gt_vis['%s_color'%srch] = { 'bf_useior': False } and { 'two_sided': True }
-			gt_vis['%s_colorlabel'%srch] = { 'bf_useior': False } and { 'two_sided': True }
-			gt_vis['%s_usecolortexture'%srch] = { 'bf_useior': False } and { 'two_sided': True }
+			gt_vis['%s_color'%srch] = { 'bf_useior': False, 'two_sided': True }
+			gt_vis['%s_colorlabel'%srch] = { 'bf_useior': False, 'two_sided': True }
+			gt_vis['%s_usecolortexture'%srch] = { 'bf_useior': False, 'two_sided': True }
 			if k.startswith(srch):
 				gt_vis[k]['bf_useior'] = False
+
 		for srch in ['bf_index']:
-			gt_vis['%s_floatvalue'%srch] = { 'bf_useior': True }
-			gt_vis['%s_usefloattexture'%srch] = { 'bf_useior': True }
+			gt_vis['%s_floatvalue'%srch] = { 'bf_useior': True, 'two_sided': True }
+			gt_vis['%s_usefloattexture'%srch] = { 'bf_useior': True, 'two_sided': True }
 			if k.startswith(srch):
 				gt_vis[k]['bf_useior'] = True
-	
+				
 	return gt_vis
 
 
