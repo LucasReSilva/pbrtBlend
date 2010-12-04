@@ -280,7 +280,7 @@ def get_texture_from_scene(scene, tex_name):
 		for mat_slot in obj.material_slots:
 			if mat_slot != None and mat_slot.material != None:
 				for tex_slot in mat_slot.material.texture_slots:
-					if tex_slot != None and tex_slot.texture.name == tex_name:
+					if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
 						return tex_slot.texture
 		if obj.type == 'LAMP':
 			for tex_slot in obj.data.texture_slots:
