@@ -237,7 +237,7 @@ def exportInstance(lux_context, scene, ob, matrix):
 	# definition depending on the output type
 	export_object_material(scene, lux_context, ob)
 	
-	# Check for emission material assignment and volume data
+	# Check for emission and volume data
 	object_is_emitter = hasattr(ob, 'luxrender_emission') and ob.luxrender_emission.use_emission
 	if object_is_emitter:
 		lux_context.lightGroup(ob.luxrender_emission.lightgroup, [])
