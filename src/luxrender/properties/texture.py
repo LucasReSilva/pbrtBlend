@@ -166,6 +166,8 @@ class ColorTextureParameter(TextureParameterBase):
 		given in the material panel via the property's 'draw' lambda function.
 		'''
 		
+		return # Disabled due to forbidden RNA write in UI draw methods
+		
 		if c.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.type]:
 			submat = getattr(c, 'luxrender_mat_%s'%c.type)
 			submat_col = getattr(submat, self.attr+'_color')
