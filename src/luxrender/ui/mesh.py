@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-from properties_data_mesh import MeshButtonsPanel 
+from properties_data_mesh import MeshButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 

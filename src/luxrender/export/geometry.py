@@ -243,13 +243,13 @@ def exportInstance(lux_context, scene, ob, matrix):
 	for m in get_instance_materials(ob):
 		# just export the first emitting material
 		if not object_is_emitter:
-			if hasattr(m, 'luxrender_emission') and m.luxrender_emission.use_emission:
-				lux_context.lightGroup(m.luxrender_emission.lightgroup, [])
+			if hasattr(ob, 'luxrender_emission') and ob.luxrender_emission.use_emission:
+				lux_context.lightGroup(ob.luxrender_emission.lightgroup, [])
 				arealightsource_params = ParamSet() \
-						.add_float('gain', m.luxrender_emission.gain) \
-						.add_float('power', m.luxrender_emission.power) \
-						.add_float('efficacy', m.luxrender_emission.efficacy)
-				arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', m.luxrender_emission) )
+						.add_float('gain', ob.luxrender_emission.gain) \
+						.add_float('power', ob.luxrender_emission.power) \
+						.add_float('efficacy', ob.luxrender_emission.efficacy)
+				arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', ob.luxrender_emission) )
 				lux_context.areaLightSource('area', arealightsource_params)
 				object_is_emitter = True
 		# just export the first volume interior/exterior
