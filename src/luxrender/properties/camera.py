@@ -57,6 +57,7 @@ class luxrender_camera(declarative_property_group):
 		
 		'lbl_outputs',
 		['write_png', 'write_exr','write_tga','write_flm'],
+		'outlierrejection_k'
 	]
 	
 	visibility = {
@@ -198,6 +199,15 @@ class luxrender_camera(declarative_property_group):
 			'name': 'FLM',
 			'default': False
 		},
+		{
+			'type': 'int',
+			'attr': 'outlierrejection_k',
+			'name': 'Firefly rejection',
+			'description': 'Firefly (outlier) rejection k parameter',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+		}
 	]
 	
 	def screenwindow(self, xr, yr, cam):

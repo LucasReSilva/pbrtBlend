@@ -202,6 +202,9 @@ def film(scene):
 	# Halt conditions
 	if scene.luxrender_sampler.haltspp > 0:
 		params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
+		
+	if scene.camera.data.luxrender_camera.outlierrejection_k > 0:
+		params.add_integer('outlierrejection_k', scene.camera.data.luxrender_camera.outlierrejection_k)
 	
 	# update the film settings with tonemapper settings
 	tonemapping_type, tonemapping_params = scene.camera.data.luxrender_tonemapping.api_output(scene)
