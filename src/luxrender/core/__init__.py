@@ -666,9 +666,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					for k, v in config_updates.items():
 						efutil.write_config_value('luxrender', 'defaults', k, v)
 				except Exception as err:
-					LuxLog('Saving LuxRender config failed: %s' % err)
-					return False
-				
+					LuxLog('WARNING: Saving LuxRender config failed, please set your user scripts dir: %s' % err)
 				
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)
