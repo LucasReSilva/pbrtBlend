@@ -1,6 +1,32 @@
-# yEnc Encoder implementation in python
-
-# GPL, Doug Hammond / LuxRender
+# -*- coding: utf8 -*-
+#
+# ***** BEGIN GPL LICENSE BLOCK *****
+#
+# --------------------------------------------------------------------------
+# Blender 2.5 LuxRender Add-On
+# --------------------------------------------------------------------------
+#
+# Authors:
+# Doug Hammond
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# ***** END GPL LICENCE BLOCK *****
+#
+"""
+Combined Base64 + zlib encoder/decoder for embedded file data
+"""
 
 import base64, io, os, time, zlib
 
@@ -65,6 +91,7 @@ class bDecoder(object):
 	"""
 	Decode binary files from text using base64(zlib.compress(file))
 	"""
+	
 	def Decode_File2File(self, fSrc_name, fDes_name):
 		with open(fSrc_name, 'rb') as fSrc:
 			with open(fDes_name, 'wb') as fDes:

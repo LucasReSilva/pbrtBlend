@@ -248,9 +248,9 @@ def convert_texture(texture):
 	
 	
 	if mapping_type == '3D':
-		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset() )
+		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset(LuxManager.CurrentScene) )
 	else:
-		paramset.update( texture.luxrender_texture.luxrender_tex_mapping.get_paramset() )
+		paramset.update( texture.luxrender_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 	
 	return variant, lux_tex_name, paramset
 
@@ -315,7 +315,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 				if texture != False:
 					if texture.luxrender_texture.type != 'BLENDER':
 						tex_luxrender_texture = texture.luxrender_texture
-						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()
+						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene)
 						if lux_tex_variant == variant:
 							ExportedTextures.texture(texture_name, variant, tex_luxrender_texture.type, paramset)
 						else:

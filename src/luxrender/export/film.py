@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+
 from extensions_framework import util as efutil
 
 from luxrender.export import get_worldscale
@@ -173,7 +175,13 @@ def film(scene):
 	
 	# Camera Response Function
 	if LUXRENDER_VERSION >= '0.8' and cso.use_crf:
-		params.add_string('cameraresponse', efutil.path_relative_to_export(cso.crf_file) )
+		if scene.luxrender_engine.embed_filedata:
+			from luxrender.util import bencode_file2string
+			fn = efutil.filesystem_path(cso.crf_file)
+			params.add_string('cameraresponse', os.path.basename(fn))
+			params.add_string('cameraresponse_data', bencode_file2string(fn) )
+		else:
+			params.add_string('cameraresponse', efutil.path_relative_to_export(cso.crf_file) )
 	
 	# Output types
 	params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))

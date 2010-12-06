@@ -152,7 +152,7 @@ class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operat
 		lux_type = context.texture.luxrender_texture.type
 		sub_type = getattr(bpy.types, 'luxrender_tex_%s' % lux_type)
 		
-		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset()
+		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset(context.scene)
 		if '2DMAPPING' in features:
 			pv.extend([
 				'bpy.context.texture.luxrender_texture.luxrender_tex_mapping.%s'%v['attr'] for v in bpy.types.luxrender_tex_mapping.get_exportable_properties()
@@ -340,7 +340,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			self.report({'INFO'}, 'Exporting materials')
 			for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
 				for mat in export_materials.get_instance_materials(object):
-					if mat is not None: mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
+					if mat is not None and mat.name not in export_materials.ExportedMaterials.exported_material_names:
+						mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
 			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:

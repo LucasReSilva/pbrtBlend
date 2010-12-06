@@ -50,6 +50,7 @@ def engine_controls():
 		'binary_name',
 		'write_files',
 		['write_lxs', 'write_lxm', 'write_lxo'],
+		# 'embed_filedata', # Disabled pending acceptance into LuxRender core
 		
 		# Other mesh types disabled because cannot set active object
 		# to pass to PLY operator. Even so, Lux fails to load the PLY
@@ -61,7 +62,7 @@ def engine_controls():
 		# 'priority',
 		['threads_auto', 'threads'],
 		# ['rgc', 'colclamp'],
-		# ['meshopt', 'nolg'],
+		# 'nolg',
 		
 		'writeinterval',
 		'displayinterval',
@@ -200,6 +201,14 @@ class luxrender_engine(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'bool',
+			'attr': 'embed_filedata',
+			'name': 'Embed File data',
+			'description': 'Embed all external files (images etc) inline into the exporter output',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
 			'type': 'enum',
 			'attr': 'mesh_type',
 			'name': 'Mesh Export type',
@@ -237,14 +246,6 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Colour Clamp',
 			'description': 'Clamp all colours to range 0 - 0.9',
 			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'meshopt',
-			'name': 'Optimise Meshes',
-			'description': 'Output optimised mesh data',
-			'default': True,
 			'save_in_preset': True
 		},
 		{
