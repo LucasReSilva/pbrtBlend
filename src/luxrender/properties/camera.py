@@ -57,6 +57,7 @@ class luxrender_camera(declarative_property_group):
 		
 		'lbl_outputs',
 		['write_png', 'write_exr','write_tga','write_flm'],
+		'outlierrejection_k'
 	]
 	
 	visibility = {
@@ -67,7 +68,7 @@ class luxrender_camera(declarative_property_group):
 	}
 	
 	properties = [
-		# hidden property set via draw() method
+		# hidden property can be changed in future linked to blender camera type
 		{
 			'type': 'bool',
 			'attr': 'is_perspective',
@@ -198,6 +199,15 @@ class luxrender_camera(declarative_property_group):
 			'name': 'FLM',
 			'default': False
 		},
+		{
+			'type': 'int',
+			'attr': 'outlierrejection_k',
+			'name': 'Firefly rejection',
+			'description': 'Firefly (outlier) rejection k parameter',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+		}
 	]
 	
 	def screenwindow(self, xr, yr, cam):
@@ -493,7 +503,6 @@ class luxrender_tonemapping(declarative_property_group):
 			'description': 'Choose tonemapping type',
 			'default': 'reinhard',
 			'items': get_tonemaps(),
-			#'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'type')
 		},
 		
 		# Reinhard
@@ -506,8 +515,7 @@ class luxrender_tonemapping(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 25.0,
-			'soft_max': 25.0,
-			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_prescale') 
+			'soft_max': 25.0, 
 		},
 		{
 			'type': 'float',
@@ -519,7 +527,6 @@ class luxrender_tonemapping(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 25.0,
 			'soft_max': 25.0,
-			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_postscale')
 		},
 		{
 			'type': 'float',
@@ -531,7 +538,6 @@ class luxrender_tonemapping(declarative_property_group):
 			'soft_min': 0.01,
 			'max': 25.0,
 			'soft_max': 25.0,
-			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_burn')
 		},
 		
 		#Linear

@@ -58,9 +58,7 @@ from luxrender.properties.filter		import ( luxrender_filter )
 from luxrender.properties.integrator	import ( luxrender_integrator )
 from luxrender.properties.lamp			import ( luxrender_lamp )
 from luxrender.properties.material		import ( luxrender_material,
-												 luxrender_emission,
-												 luxrender_volume_data,
-												 luxrender_volumes,
+												 luxrender_mat_compositing,
 												 luxrender_mat_carpaint,
 												 luxrender_mat_glass,
 												 luxrender_mat_glass2,
@@ -75,8 +73,11 @@ from luxrender.properties.material		import ( luxrender_material,
 												 luxrender_mat_mirror,
 												 luxrender_mat_mix,
 												 luxrender_mat_null,
-												 luxrender_mat_velvet )
+												 luxrender_mat_velvet,
+												 luxrender_volume_data,
+												 luxrender_volumes )
 from luxrender.properties.mesh			import ( luxrender_mesh )
+from luxrender.properties.object		import ( luxrender_emission )
 from luxrender.properties.texture		import ( luxrender_texture,
 												 luxrender_tex_bilerp,
 												 luxrender_tex_blackbody,
@@ -110,8 +111,10 @@ from luxrender.ui						import ( render_panels		as ui_render_panels )
 from luxrender.ui						import ( camera				as ui_camera )
 from luxrender.ui						import ( image				as ui_image )
 from luxrender.ui						import ( lamps				as ui_lamps )
-from luxrender.ui						import ( meshes				as ui_meshes )
+from luxrender.ui						import ( mesh				as ui_mesh )
+from luxrender.ui						import ( object				as ui_object )
 from luxrender.ui.materials				import ( main				as ui_materials,
+												 compositing		as ui_materials_compositing,
 												 carpaint			as ui_materials_carpaint,
 												 glass				as ui_materials_glass,
 												 glass2				as ui_materials_glass2,
@@ -126,7 +129,6 @@ from luxrender.ui.materials				import ( main				as ui_materials,
 												 mix				as ui_materials_mix,
 												 shinymetal			as ui_materials_shinymetal,
 												 velvet				as ui_materials_velvet,
-												 emission			as ui_materials_emission,
 												 volumes			as ui_materials_volumes )
 from luxrender.ui.textures				import ( main				as ui_textures,
 												 bilerp				as ui_texture_bilerp,
@@ -254,8 +256,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Camera', luxrender_tonemapping),
 		('Lamp', luxrender_lamp),
 		('Mesh', luxrender_mesh),
-		('Material', luxrender_emission),
 		('Material', luxrender_material),
+		('luxrender_material', luxrender_mat_compositing),
 		('luxrender_material', luxrender_mat_carpaint),
 		('luxrender_material', luxrender_mat_glass),
 		('luxrender_material', luxrender_mat_glass2),
@@ -271,6 +273,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_material', luxrender_mat_mix),
 		('luxrender_material', luxrender_mat_null),
 		('luxrender_material', luxrender_mat_velvet),
+		('Object', luxrender_emission),
 		(None, luxrender_volume_data),		# call init_properties, but don't create instance
 		('Texture', luxrender_texture),
 		('luxrender_texture', luxrender_tex_bilerp),
@@ -666,9 +669,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					for k, v in config_updates.items():
 						efutil.write_config_value('luxrender', 'defaults', k, v)
 				except Exception as err:
-					LuxLog('Saving LuxRender config failed: %s' % err)
-					return False
-				
+					LuxLog('WARNING: Saving LuxRender config failed, please set your user scripts dir: %s' % err)
 				
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)

@@ -108,10 +108,7 @@ class SubGroupFloatTextureParameter(FloatTextureParameter):
 		# Looks in a different location than other FloatTextureParameters
 		return lambda s,c: c.luxrender_material
 
-class EmissionColorTextureParameter(ColorTextureParameter):
-	def texture_slot_set_attr(self):
-		# Looks in a different location than other ColorTextureParameters
-		return lambda s,c: c.luxrender_emission
+
 
 # Fresnel Textures
 TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'IOR',				add_float_value = False)
@@ -148,14 +145,11 @@ TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',						default=(1.0,1.
 TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',						default=(1.0,1.0,1.0) )
 TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',						default=(1.0,1.0,1.0) )
 TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',						default=(1.0,1.0,1.0) )
-TC_backface_Ka	= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
+TC_backface_Ka	= ColorTextureParameter('backface_Ka', 'Backface Absorption color',		default=(0.0,0.0,0.0) )
 TC_backface_Kd	= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',		default=(0.64,0.64,0.64) )
 TC_backface_Ks	= ColorTextureParameter('backface_Ks', 'Backface Specular color',		default=(0.25,0.25,0.25) )
 
-TC_L			= EmissionColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
-
 TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption',	default=(1.0,1.0,1.0))
-
 
 def dict_merge(*args):
 	vis = {}
@@ -200,27 +194,9 @@ class luxrender_material(declarative_property_group):
 	controls = [
 		'type',
 	] + \
-	TF_bumpmap.controls + \
-	[
-		# Compositing options for distributedpath
-		'compositing_label',
-		['compo_visible_material',
-		'compo_visible_emission'],
-		['compo_visible_indirect_material',
-		'compo_visible_indirect_emission'],
-		'compo_override_alpha',
-		'compo_override_alpha_value',
-	]
+	TF_bumpmap.controls
 	
-	visibility = dict_merge({
-		'compositing_label':				{ 'integrator_type': 'distributedpath' },
-		'compo_visible_material':			{ 'integrator_type': 'distributedpath' },
-		'compo_visible_emission':			{ 'integrator_type': 'distributedpath' },
-		'compo_visible_indirect_material':	{ 'integrator_type': 'distributedpath' },
-		'compo_visible_indirect_emission':	{ 'integrator_type': 'distributedpath' },
-		'compo_override_alpha':				{ 'integrator_type': 'distributedpath' },
-		'compo_override_alpha_value':		{ 'integrator_type': 'distributedpath', 'compo_override_alpha': True },
-	}, TF_bumpmap.visibility)
+	visibility = dict_merge({}, TF_bumpmap.visibility)
 	
 	properties = [
 		# Material Type Select
@@ -233,74 +209,9 @@ class luxrender_material(declarative_property_group):
 			'items': mat_list(),
 			'save_in_preset': True
 		},
-		
-		# hidden parameter to hold current integrator type - updated on draw()
-		{
-			'type': 'string',
-			'attr': 'integrator_type',
-		},
-		{
-			'type': 'text',
-			'attr': 'compositing_label',
-			'name': 'Compositing options',
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_material',
-			'name': 'Visible Material',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_emission',
-			'name': 'Visible Emission',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_indirect_material',
-			'name': 'Visible Indirect Material',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_visible_indirect_emission',
-			'name': 'Visible Indirect Emission',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'compo_override_alpha',
-			'name': 'Override Alpha',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'compo_override_alpha_value',
-			'name': 'Override Alpha Value',
-			'default': 0.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1.0,
-			'soft_max': 1.0,
-			'save_in_preset': True
-		},
 	] + \
 	TF_bumpmap.properties
 	
-	def draw_callback(self, context):
-		'''
-		Set the internal integrator_type so that
-		compositing options can be shown for
-		DistributedPath
-		'''
-		self.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
-		
 	def export(self, scene, lux_context, material, mode='indirect'):
 		
 		if self.type == 'mix':
@@ -321,16 +232,8 @@ class luxrender_material(declarative_property_group):
 		material_params.update( sub_type.get_params() )
 		
 		# DistributedPath compositing
-		# Querying the scene will be more reliable than using self.integrator_type
-		# in case the panel has never been drawn
 		if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-			material_params.add_bool('compo_visible_material', self.compo_visible_material)
-			material_params.add_bool('compo_visible_emission', self.compo_visible_emission)
-			material_params.add_bool('compo_visible_indirect_material', self.compo_visible_indirect_material)
-			material_params.add_bool('compo_visible_indirect_emission', self.compo_visible_indirect_emission)
-			material_params.add_bool('compo_override_alpha', self.compo_override_alpha)
-			if self.compo_override_alpha:
-				material_params.add_float('compo_override_alpha_value', self.compo_override_alpha_value)
+			material_params.update( self.luxrender_mat_compositing.get_params() )
 		
 		if mode == 'indirect':
 			material_params.add_string('type', self.type)
@@ -338,6 +241,101 @@ class luxrender_material(declarative_property_group):
 			ExportedMaterials.export_new_named(lux_context)
 		elif mode == 'direct':
 			lux_context.material(self.type, material_params)
+
+class luxrender_mat_compositing(declarative_property_group):
+	'''
+	Storage class for LuxRender Material compositing settings
+	for DistributedPath integrator.
+	'''
+	
+	controls = [
+		'enabled',
+		['visible_material',
+		'visible_emission'],
+		['visible_indirect_material',
+		'visible_indirect_emission'],
+		'override_alpha',
+		'override_alpha_value',
+	]
+	
+	visibility = {
+		'visible_material':					{ 'enabled': True },
+		'visible_emission':					{ 'enabled': True },
+		'visible_indirect_material':		{ 'enabled': True },
+		'visible_indirect_emission':		{ 'enabled': True },
+		'override_alpha':					{ 'enabled': True },
+		'override_alpha_value':				{ 'enabled': True, 'override_alpha': True },
+	}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'enabled',
+			'name': 'Use compositing settings',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'visible_material',
+			'name': 'Visible Material',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'visible_emission',
+			'name': 'Visible Emission',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'visible_indirect_material',
+			'name': 'Visible Indirect Material',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'visible_indirect_emission',
+			'name': 'Visible Indirect Emission',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'override_alpha',
+			'name': 'Override Alpha',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'override_alpha_value',
+			'name': 'Override Alpha Value',
+			'default': 0.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'save_in_preset': True
+		},
+	]
+	
+	def get_params(self):
+		compo_params = ParamSet()
+		
+		if self.enabled:
+			compo_params.add_bool('compo_visible_material', self.visible_material)
+			compo_params.add_bool('compo_visible_emission', self.visible_emission)
+			compo_params.add_bool('compo_visible_indirect_material', self.visible_indirect_material)
+			compo_params.add_bool('compo_visible_indirect_emission', self.visible_indirect_emission)
+			compo_params.add_bool('compo_override_alpha', self.override_alpha)
+			if self.override_alpha:
+				compo_params.add_float('compo_override_alpha_value', self.override_alpha_value)
+		
+		return compo_params
 
 def texture_append_visibility(vis_main, textureparam_object, vis_append):
 	for prop in textureparam_object.properties:
@@ -1219,86 +1217,7 @@ class luxrender_mat_velvet(declarative_property_group):
 		
 		return velvet_params
 
-class luxrender_emission(declarative_property_group):
-	'''
-	Storage class for LuxRender Material emission settings.
-	This class will be instantiated within a Blender Material
-	object.
-	'''
-	
-	controls = [
-		'use_emission',
-		'lightgroup',
-	] + \
-	TC_L.controls + \
-	[
-		'gain',
-		'power',
-		'efficacy',
-	]
-	
-	visibility = {
-		'lightgroup': 			{ 'use_emission': True },
-		'L_colorlabel': 		{ 'use_emission': True },
-		'L_color': 				{ 'use_emission': True },
-		'L_usecolorrgc':		{ 'use_emission': True },
-		'L_usecolortexture':	{ 'use_emission': True },
-		'L_colortexture':		{ 'use_emission': True, 'L_usecolortexture': True },
-		'gain': 				{ 'use_emission': True },
-		'power': 				{ 'use_emission': True },
-		'efficacy': 			{ 'use_emission': True },
-	}
-	
-	properties = [
-		{
-			'type': 'bool',
-			'attr': 'use_emission',
-			'name': 'Use Emission',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'string',
-			'attr': 'lightgroup',
-			'name': 'Light Group',
-			'default': 'default',
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'gain',
-			'name': 'Gain',
-			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e8,
-			'soft_max': 1e8,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'power',
-			'name': 'Power',
-			'default': 100.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e5,
-			'soft_max': 1e5,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'efficacy',
-			'name': 'Efficacy',
-			'default': 17.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e4,
-			'soft_max': 1e4,
-			'save_in_preset': True
-		},
-	] + \
-	TC_L.properties
+
 
 class luxrender_volume_data(declarative_property_group):
 	'''

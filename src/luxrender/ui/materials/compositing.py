@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond, Daniel Genrich
+# Doug Hammond
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -25,14 +25,19 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-from properties_data_mesh import MeshButtonsPanel 
 
-from extensions_framework.ui import property_group_renderer
+from luxrender.ui.materials import luxrender_material_base
 
-class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
-	bl_label = 'LuxRender Mesh Options'
-	COMPAT_ENGINES = {'luxrender'}
+class ui_luxrender_mat_compositing(luxrender_material_base, bpy.types.Panel):
+	
+	bl_label	= 'LuxRender Material Compositing'
 	
 	display_property_groups = [
-		( ('mesh',), 'luxrender_mesh' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_compositing' )
 	]
+	
+	@classmethod
+	def poll(cls, context):
+		if not hasattr(context.scene, 'luxrender_integrator'):
+			return False
+		return context.scene.luxrender_integrator.surfaceintegrator == 'distributedpath' and super().poll(context)

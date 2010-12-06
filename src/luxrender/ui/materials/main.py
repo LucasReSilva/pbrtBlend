@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.ui.materials import luxrender_material_base
 
-class main(luxrender_material_base, bpy.types.Panel):
+class ui_luxrender_material(luxrender_material_base, bpy.types.Panel):
 	'''
 	Material Editor UI Panel
 	'''
