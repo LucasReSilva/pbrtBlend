@@ -214,7 +214,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	scene			= bpy.props.StringProperty(options={'HIDDEN'}, default='')		# Specify scene to export
 	
 	def invoke(self, context, event):
-		context.window_manager.add_fileselect(self)
+		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
