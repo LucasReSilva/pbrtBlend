@@ -31,7 +31,7 @@ from extensions_framework.ui import property_group_renderer
 
 narrowui = 180
 
-class lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
+class ui_luxrender_lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Lamps'
 	COMPAT_ENGINES = {'luxrender'}
 	
@@ -39,65 +39,111 @@ class lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 		( ('lamp',), 'luxrender_lamp' )
 	]
 	
-	# Overridden to draw some of blender's lamp controls
+	# Overridden here and in each sub-type UI to draw some of blender's lamp controls
 	def draw(self, context):
 		if context.lamp is not None:
-			layout = self.layout
-			
-			lamp = context.lamp
 			wide_ui = context.region.width > narrowui
 			
 			if wide_ui:
-				layout.prop(lamp, "type", expand=True)
+				self.layout.prop(context.lamp, "type", expand=True)
 			else:
-				layout.prop(lamp, "type", text="")
+				self.layout.prop(context.lamp, "type", text="")
 			
-			# Show only certain controls for Blender's lamp types
-			if context.lamp.type not in ['POINT', 'SUN', 'SPOT', 'HEMI', 'AREA']:
-				context.lamp.luxrender_lamp.type = 'UNSUPPORTED'
-				layout.label(text="Lamp type not supported by LuxRender.")
-			else:
-				context.lamp.luxrender_lamp.type = context.lamp.type
+			self.layout.prop(context.lamp, "energy", text="Gain")
+			
+			super().draw(context)
+
+class ui_luxrender_lamp_point(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
+	bl_label = 'LuxRender Point Lamp'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	display_property_groups = [
+		( ('lamp','luxrender_lamp'), 'luxrender_lamp_point' )
+	]
+	
+	@classmethod
+	def poll(cls, context):
+		return super().poll(context) and context.lamp.type == 'POINT'
+
+class ui_luxrender_lamp_spot(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
+	bl_label = 'LuxRender Spot Lamp'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	display_property_groups = [
+		( ('lamp','luxrender_lamp'), 'luxrender_lamp_spot' )
+	]
+	
+	@classmethod
+	def poll(cls, context):
+		return super().poll(context) and context.lamp.type == 'SPOT'
+	
+	def draw(self, context):
+		if context.lamp is not None:
+			wide_ui = context.region.width > narrowui
+			super().draw(context)
+			# SPOT LAMP: Blender Properties
+			if context.lamp.type == 'SPOT':
+				if wide_ui:
+					#col = split.column()
+					col = self.layout.row()
+				else:
+					col = self.layout.column()
+				col.prop(context.lamp, "spot_size", text="Size")
+				col.prop(context.lamp, "spot_blend", text="Blend", slider=True)
+
+class ui_luxrender_lamp_sun(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
+	bl_label = 'LuxRender Sun + Sky'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	display_property_groups = [
+		( ('lamp','luxrender_lamp'), 'luxrender_lamp_sun' )
+	]
+	
+	@classmethod
+	def poll(cls, context):
+		return super().poll(context) and context.lamp.type == 'SUN'
+
+class ui_luxrender_lamp_hemi(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
+	bl_label = 'LuxRender Infinite Lamp'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	display_property_groups = [
+		( ('lamp','luxrender_lamp'), 'luxrender_lamp_hemi' )
+	]
+	
+	@classmethod
+	def poll(cls, context):
+		return super().poll(context) and context.lamp.type == 'HEMI'
+
+class ui_luxrender_lamp_area(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
+	bl_label = 'LuxRender Area Lamp'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	display_property_groups = [
+		( ('lamp','luxrender_lamp'), 'luxrender_lamp_area' )
+	]
+	
+	@classmethod
+	def poll(cls, context):
+		return super().poll(context) and context.lamp.type == 'AREA'
+	
+	def draw(self, context):
+		if context.lamp is not None:
+			wide_ui = context.region.width > narrowui
+			super().draw(context)
+			# AREA LAMP: Blender Properties
+			if context.lamp.type == 'AREA':
 				
-				split = layout.split()
+				if wide_ui:
+					#col = split.column()
+					col = self.layout.row()
+				else:
+					col = self.layout.column()
+				col.row().prop(context.lamp, "shape", expand=True)
 				
-				# TODO: check which properties are supported by which light type
-				col = split.column()
-				#sub = col.column()
-				
-				# color is handled by Lux's L ColorTexture
-				#sub.prop(lamp, "color", text="")
-				layout.prop(lamp, "energy", text="Gain")
-				
-				# SPOT LAMP: Blender Properties
-				if lamp.type == 'SPOT':
-					wide_ui = context.region.width > narrowui
-					
-					if wide_ui:
-						#col = split.column()
-						col=layout.row()
-					else:
-						col=layout.column()
-					col.prop(lamp, "spot_size", text="Size")
-					col.prop(lamp, "spot_blend", text="Blend", slider=True)
-				
-				# AREA LAMP: Blender Properties
-				elif lamp.type == 'AREA':
-					
-					if wide_ui:
-						#col = split.column()
-						col=layout.row()
-					else:
-						col=layout.column()
-					col.row().prop(lamp, "shape", expand=True)
-					
-					sub = col.column(align=True)
-					if (lamp.shape == 'SQUARE'):
-						sub.prop(lamp, "size")
-					elif (lamp.shape == 'RECTANGLE'):
-						sub.prop(lamp, "size", text="Size X")
-						sub.prop(lamp, "size_y", text="Size Y")
-				elif wide_ui:
-					col = split.column()
-				
-				super().draw(context) # draw the display_property_groups
+				sub = col.column(align=True)
+				if (context.lamp.shape == 'SQUARE'):
+					sub.prop(context.lamp, "size")
+				elif (context.lamp.shape == 'RECTANGLE'):
+					sub.prop(context.lamp, "size", text="Size X")
+					sub.prop(context.lamp, "size_y", text="Size Y")

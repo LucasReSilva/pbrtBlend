@@ -56,7 +56,12 @@ from luxrender.properties.camera 		import ( luxrender_camera,
 from luxrender.properties.engine		import ( luxrender_engine, luxrender_networking )
 from luxrender.properties.filter		import ( luxrender_filter )
 from luxrender.properties.integrator	import ( luxrender_integrator )
-from luxrender.properties.lamp			import ( luxrender_lamp )
+from luxrender.properties.lamp			import ( luxrender_lamp,
+												 luxrender_lamp_point,
+												 luxrender_lamp_sun,
+												 luxrender_lamp_spot,
+												 luxrender_lamp_hemi,
+												 luxrender_lamp_area )
 from luxrender.properties.material		import ( luxrender_material,
 												 luxrender_mat_compositing,
 												 luxrender_mat_carpaint,
@@ -255,6 +260,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Camera', luxrender_colorspace),
 		('Camera', luxrender_tonemapping),
 		('Lamp', luxrender_lamp),
+		('luxrender_lamp', luxrender_lamp_point),
+		('luxrender_lamp', luxrender_lamp_sun),
+		('luxrender_lamp', luxrender_lamp_spot),
+		('luxrender_lamp', luxrender_lamp_hemi),
+		('luxrender_lamp', luxrender_lamp_area),
 		('Mesh', luxrender_mesh),
 		('Material', luxrender_material),
 		('luxrender_material', luxrender_mat_compositing),

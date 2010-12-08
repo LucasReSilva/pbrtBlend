@@ -82,16 +82,16 @@ def exportLights(lux_context, ob, matrix, portals = []):
 	if light.type == 'SUN':
 		invmatrix = mathutils.Matrix(matrix).invert()
 		light_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
-		light_params.add_float('turbidity', light.luxrender_lamp.turbidity)
+		light_params.add_float('turbidity', light.luxrender_lamp.luxrender_lamp_sun.turbidity)
 		# nsamples
 		# relsize (sun only)
-		if light.luxrender_lamp.sunsky_advanced:
-			light_params.add_float('horizonbrightness', light.luxrender_lamp.horizonbrightness)
-			light_params.add_float('horizonsize', light.luxrender_lamp.horizonsize)
-			light_params.add_float('sunhalobrightness', light.luxrender_lamp.sunhalobrightness)
-			light_params.add_float('sunhalosize', light.luxrender_lamp.sunhalosize)
-			light_params.add_float('backscattering', light.luxrender_lamp.backscattering)
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params, portals=portals)
+		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_advanced:
+			light_params.add_float('horizonbrightness', light.luxrender_lamp.luxrender_lamp_sun.horizonbrightness)
+			light_params.add_float('horizonsize', light.luxrender_lamp.luxrender_lamp_sun.horizonsize)
+			light_params.add_float('sunhalobrightness', light.luxrender_lamp.luxrender_lamp_sun.sunhalobrightness)
+			light_params.add_float('sunhalosize', light.luxrender_lamp.luxrender_lamp_sun.sunhalosize)
+			light_params.add_float('backscattering', light.luxrender_lamp.luxrender_lamp_sun.backscattering)
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
 		return True
 	
 	# all lights apart from sun + sky have "color L", but HEMI/infinite cannot be textured L
@@ -100,17 +100,17 @@ def exportLights(lux_context, ob, matrix, portals = []):
 	if light.type == 'HEMI':
 		# don't apply texture to L color for HEMI/infinite
 		write_textured_L = False
-		light_params.add_color('L', light.luxrender_lamp.L_color)
-		if light.luxrender_lamp.infinite_map != '':
-			light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
-			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
+		light_params.add_color('L', light.luxrender_lamp.luxrender_lamp_hemi.L_color)
+		if light.luxrender_lamp.luxrender_lamp_hemi.infinite_map != '':
+			light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.luxrender_lamp_hemi.infinite_map) )
+			light_params.add_string('mapping', light.luxrender_lamp.luxrender_lamp_hemi.mapping_type)
 		# nsamples
 		# gamma
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if write_textured_L:
-		light_params.update( add_texture_parameter(lux_context, 'L', 'color', light.luxrender_lamp) )
+		light_params.update( add_texture_parameter(lux_context, 'L', 'color', getattr(light.luxrender_lamp, 'luxrender_lamp_%s'%light.type.lower())) )
 	
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5
@@ -128,8 +128,8 @@ def exportLights(lux_context, ob, matrix, portals = []):
 		return True
 	
 	if light.type == 'AREA':
-		light_params.add_float('power', light.luxrender_lamp.power)
-		light_params.add_float('efficacy', light.luxrender_lamp.efficacy)
+		light_params.add_float('power', light.luxrender_lamp.luxrender_lamp_area.power)
+		light_params.add_float('efficacy', light.luxrender_lamp.luxrender_lamp_area.efficacy)
 		
 		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
 		light_params.add_float('gain', light.energy * (get_worldscale(as_scalematrix=False)**2))
