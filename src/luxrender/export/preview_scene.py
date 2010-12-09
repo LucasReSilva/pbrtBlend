@@ -28,7 +28,7 @@ import bpy
 
 from luxrender.export import ParamSet
 from luxrender.export.film import resolution
-from luxrender.export.geometry import exportNativeMesh
+from luxrender.export.geometry import exportNativeMesh, get_material_volume_defs
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
@@ -258,9 +258,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
 		
-		if mat.luxrender_material.type in ['glass2']:
-			lux_context.interior(mat.luxrender_material.luxrender_mat_glass2.Interior_volume)
-			lux_context.exterior(mat.luxrender_material.luxrender_mat_glass2.Exterior_volume)
+		int_v, ext_v = get_material_volume_defs(mat)
+		if int_v != '' or ext_v != '':
+			lux_context.interior(int_v)
+			lux_context.exterior(ext_v)
 		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')

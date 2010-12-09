@@ -132,6 +132,7 @@ from luxrender.ui.materials				import ( main				as ui_materials,
 												 metal				as ui_materials_metal,
 												 mirror				as ui_materials_mirror,
 												 mix				as ui_materials_mix,
+												 null				as ui_materials_null,
 												 shinymetal			as ui_materials_shinymetal,
 												 velvet				as ui_materials_velvet,
 												 volumes			as ui_materials_volumes )

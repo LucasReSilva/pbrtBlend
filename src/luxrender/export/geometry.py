@@ -227,6 +227,13 @@ def allow_instancing(scene):
 		
 	return allow_instancing
 
+def get_material_volume_defs(m):
+	sub_m = getattr(m.luxrender_material, 'luxrender_mat_%s'%m.luxrender_material.type)
+	if hasattr(sub_m, 'Interior_volume'):	# detecting just one of int/ext is enough to assume both are present
+		return sub_m.Interior_volume, sub_m.Exterior_volume
+	
+	return '', ''
+
 def exportInstance(lux_context, scene, ob, matrix):
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	
@@ -248,13 +255,15 @@ def exportInstance(lux_context, scene, ob, matrix):
 		arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', ob.luxrender_emission) )
 		lux_context.areaLightSource('area', arealightsource_params)
 	
-	object_has_volume = False
 	for m in get_instance_materials(ob):
 		# just export the first volume interior/exterior
-		if hasattr(m, 'luxrender_material') and m.luxrender_material.type in ['glass2'] and not object_has_volume:
-			lux_context.interior(m.luxrender_material.luxrender_mat_glass2.Interior_volume)
-			lux_context.exterior(m.luxrender_material.luxrender_mat_glass2.Exterior_volume)
-			object_has_volume = True
+		if hasattr(m, 'luxrender_material'):
+			int_v, ext_v = get_material_volume_defs(m)
+			if int_v != '' or ext_v != '':
+				# Always use a matched pair of int_v/ext_v so that materials don't get mismatched
+				lux_context.interior(int_v)
+				lux_context.exterior(ext_v)
+				break
 	
 	# object motion blur
 	is_object_animated = False
