@@ -265,7 +265,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
-			lux_context.shape( *exportNativeMesh(scene, pv_mesh, lux_context) )
+			lux_context.shape( 'trianglemesh', exportNativeMesh(scene, pv_mesh, lux_context) )
 			bpy.data.meshes.remove(pv_mesh)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))
