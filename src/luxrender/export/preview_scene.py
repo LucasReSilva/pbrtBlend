@@ -260,8 +260,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		int_v, ext_v = get_material_volume_defs(mat)
 		if int_v != '' or ext_v != '':
-			lux_context.interior(int_v)
-			lux_context.exterior(ext_v)
+			if int_v != '': lux_context.interior(int_v)
+			if ext_v != '': lux_context.exterior(ext_v)
 		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')

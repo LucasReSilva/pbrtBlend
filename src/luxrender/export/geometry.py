@@ -228,9 +228,8 @@ def allow_instancing(scene):
 	return allow_instancing
 
 def get_material_volume_defs(m):
-	sub_m = getattr(m.luxrender_material, 'luxrender_mat_%s'%m.luxrender_material.type)
-	if hasattr(sub_m, 'Interior_volume'):	# detecting just one of int/ext is enough to assume both are present
-		return sub_m.Interior_volume, sub_m.Exterior_volume
+	if hasattr(m.luxrender_material, 'Interior_volume'):	# detecting just one of int/ext is enough to assume both are present
+		return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 	
 	return '', ''
 
@@ -261,8 +260,8 @@ def exportInstance(lux_context, scene, ob, matrix):
 			int_v, ext_v = get_material_volume_defs(m)
 			if int_v != '' or ext_v != '':
 				# Always use a matched pair of int_v/ext_v so that materials don't get mismatched
-				lux_context.interior(int_v)
-				lux_context.exterior(ext_v)
+				if int_v != '': lux_context.interior(int_v)
+				if ext_v != '': lux_context.exterior(ext_v)
 				break
 	
 	# object motion blur

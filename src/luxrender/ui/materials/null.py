@@ -24,15 +24,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
+#import bpy
+#
+#from luxrender.ui.materials import luxrender_material_sub
 
-from luxrender.ui.materials import luxrender_material_sub
-
-class ui_material_null(luxrender_material_sub, bpy.types.Panel):
-	bl_label = 'LuxRender Null Material'
-	
-	LUX_COMPAT = {'null'}
-	
-	display_property_groups = [
-		( ('material', 'luxrender_material'), 'luxrender_mat_null' )
-	]
+#class ui_material_null(luxrender_material_sub, bpy.types.Panel):
+#	bl_label = 'LuxRender Null Material'
+#	
+#	LUX_COMPAT = {'null'}
+#	
+#	display_property_groups = [
+#		( ('material', 'luxrender_material'), 'luxrender_mat_null' )
+#	]

@@ -57,7 +57,7 @@ def MaterialParameter(attr, name, property_group):
 		},
 	]
 
-def VolumeParameter(attr, name, basemat):
+def VolumeParameter(attr, name):
 	return [
 		{
 			'attr': '%s_volume' % attr,
@@ -71,7 +71,7 @@ def VolumeParameter(attr, name, basemat):
 			'attr': attr,
 			'src': lambda s,c: s.scene.luxrender_volumes,
 			'src_attr': 'volumes',
-			'trg': lambda s,c: getattr(c, 'luxrender_mat_%s'%basemat),
+			'trg': lambda s,c: c.luxrender_material,
 			'trg_attr': '%s_volume' % attr,
 			'name': name
 		},
@@ -193,6 +193,8 @@ class luxrender_material(declarative_property_group):
 	
 	controls = [
 		'type',
+		'Interior',
+		'Exterior'
 	] + \
 	TF_bumpmap.controls
 	
@@ -210,7 +212,9 @@ class luxrender_material(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-	TF_bumpmap.properties
+		TF_bumpmap.properties + \
+		VolumeParameter('Interior', 'Interior') + \
+		VolumeParameter('Exterior', 'Exterior')
 	
 	def export(self, scene, lux_context, material, mode='indirect'):
 		
@@ -510,11 +514,7 @@ class luxrender_mat_glass2(declarative_property_group):
 	
 	controls = [
 		'architectural',
-		'dispersion',
-		
-		# Glass 2 Volumes
-		'Interior',
-		'Exterior'
+		'dispersion'
 	]
 	
 	visibility = {}
@@ -534,9 +534,7 @@ class luxrender_mat_glass2(declarative_property_group):
 			'default': False,
 			'save_in_preset': True
 		},
-	] + \
-		VolumeParameter('Interior', 'Interior', 'glass2') + \
-		VolumeParameter('Exterior', 'Exterior', 'glass2')
+	]
 	
 	def get_paramset(self, scene):
 		glass2_params = ParamSet()
@@ -1128,17 +1126,13 @@ class luxrender_mat_mix(declarative_property_group):
 class luxrender_mat_null(declarative_property_group):
 	
 	controls = [
-		'Interior',
-		'Exterior'
 	]
 	
 	visibility = {
 	}
 	
 	properties = [
-	]+ \
-		VolumeParameter('Interior', 'Interior', 'null') + \
-		VolumeParameter('Exterior', 'Exterior', 'null')
+	]
 	
 	def get_paramset(self, scene):
 		return ParamSet()
