@@ -353,6 +353,10 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				lux_context.set_output_file(Files.GEOM)
 			export_geometry.write_lxo(self, lux_context, scene)
 		
+		# Make sure lamp textures go back into main file, not geom file
+		if self.properties.api_type in ['FILE']:
+			lux_context.set_output_file(Files.MAIN)
+		
 		self.report({'INFO'}, 'Exporting lights')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
 			if export_lights.lights(lux_context, scene) == False:
