@@ -25,10 +25,25 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
+from extensions_framework.validate import Logic_Operator as LO
 
-# TODO: adapt values written to d based on simple/advanced views
+from luxrender.export import ParamSet
+from luxrender.properties.material import dict_merge
+from luxrender.properties.texture import FloatTextureParameter
 
-# TODO: check parameter completeness against Lux API
+#TF_amount = FloatTextureParameter('amount', 'Mix Amount', add_float_value=True, min=0.0, default=0.5, max=1.0 )
+
+class MeshFloatTextureParameter(FloatTextureParameter):
+	def texture_slot_set_attr(self):
+		# Looks in a different location than other FloatTextureParameters
+		return lambda s,c: c.luxrender_mesh
+
+TF_displacementmap = MeshFloatTextureParameter(
+	'dm',
+	'Displacement Map',
+	real_attr='displacementmap',
+	add_float_value=False
+)
 
 class luxrender_mesh(declarative_property_group):
 	'''
@@ -41,14 +56,19 @@ class luxrender_mesh(declarative_property_group):
 		'portal',
 		['subdiv','sublevels'],
 		['nsmooth', 'sharpbound'],
+	] + \
+		TF_displacementmap.controls + \
+	[
+		['dmscale', 'dmoffset']
 	]
 	
-	visibility = {
-		
+	visibility = dict_merge({
 		'nsmooth':		{ 'subdiv': True },
 		'sharpbound':	{ 'subdiv': True },
-		'sublevels':	{ 'subdiv': True }
-	}
+		'sublevels':	{ 'subdiv': True },
+		'dmscale':		{ 'dm_floattexturename': LO({'!=': ''}) },
+		'dmoffset':		{ 'dm_floattexturename': LO({'!=': ''}) },
+	}, TF_displacementmap.visibility )
 	
 	properties = [
 		{
@@ -85,4 +105,48 @@ class luxrender_mesh(declarative_property_group):
 			'max': 15,
 			'soft_max': 15
 		},
+	] + \
+		TF_displacementmap.properties + \
+	[
+		{
+			'type': 'float',
+			'attr': 'dmscale',
+			'name': 'Scale',
+			'description': 'Displacement Map Scale',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0
+		},
+		{
+			'type': 'float',
+			'attr': 'dmoffset',
+			'name': 'Offset',
+			'description': 'Displacement Map Offset',
+			'default': 0.0
+		},
 	]
+	
+	def get_shape_type(self):
+		if self.subdiv:
+			return 'loopsubdiv'
+		else:
+			return 'trianglemesh'
+	
+	def get_paramset(self, scene):
+		params = ParamSet()
+		
+		# check if subdivision is used
+		if self.subdiv:
+			params.add_integer('nlevels',self.sublevels)
+			params.add_bool('dmnormalsmooth', self.nsmooth)
+			params.add_bool('dmsharpboundary', self.sharpbound)
+			
+		
+		export_dm = TF_displacementmap.get_paramset(self)
+		
+		if self.dm_floattexturename != '' and len(export_dm) > 0:
+			params.add_string('displacementmap', self.dm_floattexturename)
+			params.add_float('dmscale', self.dmscale)
+			params.add_float('dmoffset', self.dmoffset)
+		
+		return params

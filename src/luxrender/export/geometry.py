@@ -34,27 +34,8 @@ from luxrender.export import ParamSet
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import export_object_material, get_instance_materials, add_texture_parameter
 
-
 class InvalidGeometryException(Exception):
 	pass
-
-#-------------------------------------------------
-# getMeshType(mesh)
-# returns type of mesh as string to use depending on thresholds
-#-------------------------------------------------
-def getMeshType(mesh):
-	
-	params = ParamSet()
-	dstr = 'trianglemesh'
-
-	# check if subdivision is used
-	if mesh.luxrender_mesh.subdiv == True:
-		dstr = 'loopsubdiv'
-		params.add_integer('nlevels', mesh.luxrender_mesh.sublevels)
-		params.add_bool('dmnormalsmooth', mesh.luxrender_mesh.nsmooth)
-		params.add_bool('dmsharpboundary', mesh.luxrender_mesh.sharpbound)
-	
-	return dstr,params
 
 def exportNativeMesh(scene, mesh, lux_context):
 	#print('-> Cache face verts')
@@ -137,7 +118,7 @@ def exportNativeMesh(scene, mesh, lux_context):
 	#print(' %s num idxs: %i' % (ob.name, len(indices)))
 	
 	# export shape
-	shape_type, shape_params = getMeshType(mesh)
+	shape_params = ParamSet()
 	
 	if lux_context.API_TYPE == 'PURE':
 		# ntris isn't really the number of tris!!
@@ -159,7 +140,7 @@ def exportNativeMesh(scene, mesh, lux_context):
 	#print(' %s ntris: %i' % (ob.name, ntris))
 	#print(' %s nvertices: %i' % (ob.name, nvertices))
 	
-	return shape_type, shape_params
+	return shape_params
 
 def exportPlyMesh(scene, mesh, lux_context):
 	ply_filename = efutil.export_path + '_' + bpy.path.clean_name(mesh.name) + '.ply'
@@ -178,7 +159,7 @@ def exportPlyMesh(scene, mesh, lux_context):
 	ply_params.add_string('filename', efutil.path_relative_to_export(ply_filename))
 	ply_params.add_bool('smooth', mesh.use_auto_smooth)
 	
-	return 'plymesh', ply_params
+	return ply_params
 
 #-------------------------------------------------
 # export_mesh(lux_context, scene, object, matrix)
@@ -203,9 +184,12 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=Tr
 	
 	try:
 		if scene.luxrender_engine.mesh_type == 'native':
-			shape_type, shape_params = exportNativeMesh(scene, mesh, lux_context)
+			shape_type = ob.data.luxrender_mesh.get_shape_type()
+			shape_params = exportNativeMesh(scene, mesh, lux_context)
+			shape_params.update( ob.data.luxrender_mesh.get_paramset(scene) )
 		elif scene.luxrender_engine.mesh_type == 'ply':
-			shape_type, shape_params = exportPlyMesh(scene, mesh, lux_context)
+			shape_type = 'plymesh'
+			shape_params = exportPlyMesh(scene, mesh, lux_context)
 		
 		#print('-> Create shape')
 		lux_context.shape(shape_type, shape_params)

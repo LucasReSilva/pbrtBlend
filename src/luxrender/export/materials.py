@@ -345,8 +345,8 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 						texture_name
 					)
 					
-			elif lux_prop_name != 'bumpmap':
-				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, lux_prop_name))
+			elif export_param_name not in ['bumpmap', 'displacementmap']:
+				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, export_param_name))
 		else:
 			if variant == 'float':
 				fval = float(getattr(lux_mattex, '%s_floatvalue' % lux_prop_name))
