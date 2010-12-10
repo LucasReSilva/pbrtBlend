@@ -224,8 +224,10 @@ class luxrender_camera(declarative_property_group):
 		shiftX = cam.shift_x
 		shiftY = cam.shift_y
 		
-		# TODO:
-		scale = 1.0
+		if cam.type == 'ORTHO':
+			scale = cam.ortho_scale / 2.0
+		else:
+			scale = 1.0
 		
 		aspect = xr/yr
 		invaspect = 1.0/aspect
@@ -261,7 +263,9 @@ class luxrender_camera(declarative_property_group):
 		
 		params = ParamSet()
 		
-		params.add_float('fov', math.degrees(scene.camera.data.angle))
+		if cam.type == 'PERSP' and self.type == 'perspective':
+			params.add_float('fov', math.degrees(scene.camera.data.angle))
+		
 		params.add_float('screenwindow', self.screenwindow(xr, yr, cam))
 		params.add_bool('autofocus', False)
 		params.add_float('shutteropen', 0.0)
@@ -292,7 +296,8 @@ class luxrender_camera(declarative_property_group):
 			if self.cammblur and is_cam_animated:
 				params.add_string('endtransform', 'CameraEndTransform')
 		
-		out = self.type, params
+		cam_type = 'orthographic' if cam.type == 'ORTHO' else self.type
+		out = cam_type, params
 		dbo('CAMERA', out)
 		return out
 
