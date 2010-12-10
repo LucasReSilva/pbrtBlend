@@ -76,6 +76,9 @@ class luxrender_lamp(declarative_property_group):
 			'soft_max': 1e3,
 		},
 	]
+	
+	def get_paramset(self):
+		pass
 
 class luxrender_lamp_basic(declarative_property_group):
 	controls = TC_L.controls

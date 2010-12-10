@@ -257,7 +257,7 @@ class luxrender_camera(declarative_property_group):
 		'''
 		
 		cam = scene.camera.data
-		xr, yr = resolution(scene)
+		xr, yr = resolution()
 		
 		params = ParamSet()
 		

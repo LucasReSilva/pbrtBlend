@@ -116,11 +116,11 @@ class TextureParameterBase(object):
 		'''	
 		return []
 	
-	def get_paramset(self, context):
+	def get_paramset(self, property_group):
 		'''
 		Return a LuxRender ParamSet of the properties
 		defined in this Texture, getting parameters
-		from property group 'context'
+		from the property_group
 		'''
 		
 		return ParamSet()
@@ -238,7 +238,7 @@ class ColorTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 	
-	def get_paramset(self, context):
+	def get_paramset(self, property_group):
 		TC_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -247,7 +247,7 @@ class ColorTextureParameter(TextureParameterBase):
 					LuxManager.ActiveManager.lux_context,
 					self.attr,
 					'color',
-					context
+					property_group
 				)
 			)
 		
@@ -365,7 +365,7 @@ class FloatTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 	
-	def get_paramset(self, context):
+	def get_paramset(self, property_group):
 		TC_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -374,7 +374,7 @@ class FloatTextureParameter(TextureParameterBase):
 					LuxManager.ActiveManager.lux_context,
 					self.attr,
 					'float',
-					context
+					property_group
 				)
 			)
 		
@@ -492,7 +492,7 @@ class FresnelTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 	
-	def get_paramset(self, context):
+	def get_paramset(self, property_group):
 		TC_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -501,7 +501,7 @@ class FresnelTextureParameter(TextureParameterBase):
 					LuxManager.ActiveManager.lux_context,
 					self.attr,
 					'fresnel',
-					context
+					property_group
 				)
 			)
 		

@@ -33,14 +33,13 @@ from luxrender.export import ParamSet
 from luxrender.outputs import LuxManager as LM
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
-def lookAt(scene):
+def lookAt():
 	'''
-	scene		bpy.types.scene
-	
 	Derive a list describing 3 points for a LuxRender LookAt statement
 	
 	Returns		tuple(9) (floats)
 	'''
+	scene = LM.CurrentScene
 	
 	matrix = scene.camera.matrix_world.copy()
 	ws = get_worldscale()
@@ -55,14 +54,13 @@ def lookAt(scene):
 	up = matrix[1]
 	return (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
 	
-def resolution(scene):
+def resolution():
 	'''
-	scene		bpy.types.scene
-	
 	Calculate the output render resolution
 	
 	Returns		tuple(2) (floats)
 	'''
+	scene = LM.CurrentScene
 	
 	xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
 	yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
@@ -143,16 +141,15 @@ class colorspace_presets(object):
 		cs_blueX	= 0.1666
 		cs_blueY	= 0.0089
 
-def film(scene):
+def film():
 	'''
-	scene		bpy.types.scene
-	
 	Calculate type and parameters for LuxRender Film statement
 	
 	Returns		tuple(2) (string, list) 
 	'''
+	scene = LM.CurrentScene
 	
-	xr, yr = resolution(scene)
+	xr, yr = resolution()
 	
 	params = ParamSet()
 	

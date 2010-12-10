@@ -42,7 +42,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.camera('perspective', camera_params)
 	
 	# Film
-	xr, yr = resolution(scene)
+	xr, yr = resolution()
 	
 	film_params = ParamSet() \
 		.add_integer('xresolution', int(xr)) \
@@ -256,7 +256,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		lux_context.concatTransform(pv_transform)
 		
-		mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
+		mat.luxrender_material.export(lux_context, mat, mode='direct')
 		
 		int_v, ext_v = get_material_volume_defs(mat)
 		if int_v != '' or ext_v != '':
@@ -265,7 +265,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
-			lux_context.shape( 'trianglemesh', exportNativeMesh(scene, pv_mesh, lux_context) )
+			lux_context.shape( 'trianglemesh', exportNativeMesh(pv_mesh, lux_context) )
 			bpy.data.meshes.remove(pv_mesh)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))

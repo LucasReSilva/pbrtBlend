@@ -35,6 +35,7 @@ from extensions_framework import util as efutil
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
 from luxrender.export.materials import add_texture_parameter, ExportedMaterials
+from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
 def MaterialParameter(attr, name, property_group):
@@ -216,17 +217,16 @@ class luxrender_material(declarative_property_group):
 		VolumeParameter('Interior', 'Interior') + \
 		VolumeParameter('Exterior', 'Exterior')
 	
-	def export(self, scene, lux_context, material, mode='indirect'):
-		
+	def export(self, lux_context, material, mode='indirect'):
 		if mode=='indirect' and material.name in ExportedMaterials.exported_material_names:
 			return
 		
 		if self.type == 'mix':
 			# First export the other mix mats
 			m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material] 
-			m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
+			m1.luxrender_material.export(lux_context, m1, 'indirect')
 			m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material] 
-			m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
+			m2.luxrender_material.export(lux_context, m2, 'indirect')
 		
 		material_params = ParamSet()
 		
@@ -236,11 +236,11 @@ class luxrender_material(declarative_property_group):
 		if self.type not in ['mix', 'null']:
 			material_params.update( TF_bumpmap.get_paramset(self) )
 		
-		material_params.update( sub_type.get_paramset(scene) )
+		material_params.update( sub_type.get_paramset() )
 		
 		# DistributedPath compositing
-		if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-			material_params.update( self.luxrender_mat_compositing.get_paramset(scene) )
+		if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+			material_params.update( self.luxrender_mat_compositing.get_paramset() )
 		
 		if mode == 'indirect':
 			material_params.add_string('type', self.type)
@@ -330,7 +330,7 @@ class luxrender_mat_compositing(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		compo_params = ParamSet()
 		
 		if self.enabled:
@@ -436,7 +436,7 @@ class luxrender_mat_carpaint(declarative_property_group):
 		TF_R2.properties + \
 		TF_R3.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		carpaint_params = ParamSet()
 		
 		if self.d_floatvalue > 0:
@@ -496,7 +496,7 @@ class luxrender_mat_glass(declarative_property_group):
 		TC_Kr.properties + \
 		TC_Kt.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		glass_params = ParamSet()
 		
 		glass_params.add_bool('architectural', self.architectural)
@@ -536,7 +536,7 @@ class luxrender_mat_glass2(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		glass2_params = ParamSet()
 		
 		glass2_params.add_bool('architectural', self.architectural)
@@ -573,7 +573,7 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		roughglass_params = ParamSet()
 		
 		roughglass_params.update( TF_cauchyb.get_paramset(self) )
@@ -645,7 +645,7 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		glossy_params = ParamSet()
 		
 		glossy_params.add_bool('multibounce', self.multibounce)
@@ -719,7 +719,7 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		glossy_lossy_params = ParamSet()
 		
 		if self.d_floatvalue > 0:
@@ -757,7 +757,7 @@ class luxrender_mat_matte(declarative_property_group):
 		TC_Kd.properties + \
 		TF_sigma.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		matte_params = ParamSet()
 		
 		matte_params.update( TC_Kd.get_paramset(self) )
@@ -793,7 +793,7 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 		TC_Kt.properties + \
 		TF_sigma.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		mattetranslucent_params = ParamSet()
 		
 		mattetranslucent_params.add_bool('energyconserving', self.energyconserving)
@@ -931,7 +931,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_backface_uroughness.properties + \
 		TF_backface_vroughness.properties
 		
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		glossytranslucent_params = ParamSet()
 		
 		if self.d_floatvalue > 0:
@@ -1015,7 +1015,7 @@ class luxrender_mat_metal(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		metal_params = ParamSet()
 		
 		metal_params.update( TF_uroughness.get_paramset(self) )
@@ -1057,7 +1057,7 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		shinymetal_params = ParamSet()
 		
 		shinymetal_params.update( TF_film.get_paramset(self) )
@@ -1089,7 +1089,7 @@ class luxrender_mat_mirror(declarative_property_group):
 		TF_filmindex.properties + \
 		TC_Kr.properties
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		mirror_params = ParamSet()
 		
 		mirror_params.update( TF_film.get_paramset(self) )
@@ -1114,7 +1114,7 @@ class luxrender_mat_mix(declarative_property_group):
 		MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_mat_mix') + \
 		MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_mat_mix')
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		mix_params = ParamSet()
 		
 		mix_params.add_string('namedmaterial1', self.namedmaterial1_material)
@@ -1134,7 +1134,7 @@ class luxrender_mat_null(declarative_property_group):
 	properties = [
 	]
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		return ParamSet()
 
 class luxrender_mat_velvet(declarative_property_group):
@@ -1205,7 +1205,7 @@ class luxrender_mat_velvet(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		velvet_params = ParamSet()
 		
 		velvet_params.update( TC_Kd.get_paramset(self) )

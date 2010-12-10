@@ -317,7 +317,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	def render(self, scene):
 		'''
-		context: bpy.types.scene
+		scene:	bpy.types.Scene
 		
 		Export the given scene to LuxRender.
 		Choose from one of several methods depending on what needs to be rendered.
@@ -408,7 +408,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			export_materials.ExportedTextures.clear()
 			
 			from luxrender.export import preview_scene
-			xres, yres = resolution(scene)
+			xres, yres = resolution()
 			
 			# Don't render the tiny images
 			if xres <= 96:
@@ -686,7 +686,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 				framebuffer_thread = LuxFilmDisplay({
-					'resolution': resolution(scene),
+					'resolution': resolution(),
 					'RE': self,
 				})
 				framebuffer_thread.set_kick_period( scene.luxrender_engine.writeinterval ) 

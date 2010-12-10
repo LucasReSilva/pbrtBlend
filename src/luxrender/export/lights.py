@@ -30,6 +30,7 @@ import mathutils
 
 from extensions_framework import util as efutil
 
+from luxrender.outputs import LuxManager
 from luxrender.outputs.file_api import Files
 from luxrender.properties import dbo
 from luxrender.export import ParamSet, get_worldscale, matrix_to_list
@@ -170,17 +171,16 @@ def exportLights(lux_context, ob, matrix, portals = []):
 # lights(lux_context, scene)
 # MAIN export function
 #-------------------------------------------------
-def lights(lux_context, scene):
+def lights(lux_context):
 	'''
 	lux_context		pylux.Context
-	scene			bpy.types.scene
-	
 	Iterate over the given scene's light sources,
 	and export the compatible ones to the context lux_context.
 	
 	Returns Boolean indicating if any light sources
 	were exported.
 	'''
+	scene = LuxManager.CurrentScene
 	
 	sel = scene.objects
 	have_light = False

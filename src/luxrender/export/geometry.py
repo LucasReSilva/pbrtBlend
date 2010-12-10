@@ -30,14 +30,14 @@ from extensions_framework import util as efutil
 
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
-from luxrender.export import ParamSet
+from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import export_object_material, get_instance_materials, add_texture_parameter
 
 class InvalidGeometryException(Exception):
 	pass
 
-def exportNativeMesh(scene, mesh, lux_context):
+def exportNativeMesh(mesh, lux_context):
 	#print('-> Cache face verts')
 	faces_verts = [f.vertices for f in mesh.faces]
 	#print('-> Cache faces')
@@ -97,11 +97,13 @@ def exportNativeMesh(scene, mesh, lux_context):
 	
 	# uv coordinates
 	#print('-> Collect UV layers')
-	try:
-		uv_layer = mesh.uv_textures.active.data
-	except:
+	
+	if len(mesh.uv_textures) > 0:
+		if mesh.uv_textures.active and mesh.uv_textures.active.data:
+			uv_layer = mesh.uv_textures.active.data
+	else:
 		uv_layer = None
-		
+	
 	if uv_layer:
 		uvs = []
 		for fi, uv in enumerate(uv_layer):
@@ -142,7 +144,7 @@ def exportNativeMesh(scene, mesh, lux_context):
 	
 	return shape_params
 
-def exportPlyMesh(scene, mesh, lux_context):
+def exportPlyMesh(mesh, lux_context):
 	ply_filename = efutil.export_path + '_' + bpy.path.clean_name(mesh.name) + '.ply'
 	
 	# TODO: find out how to set the context object
@@ -162,10 +164,11 @@ def exportPlyMesh(scene, mesh, lux_context):
 	return ply_params
 
 #-------------------------------------------------
-# export_mesh(lux_context, scene, object, matrix)
+# export_mesh(lux_context, object, object_begin_end=True, scale=None, log=True, transformed=False)
 # create mesh from object and export it to file
 #-------------------------------------------------
-def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=True, transformed=False):
+def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, transformed=False):
+	scene = LuxManager.CurrentScene
 	
 	if log: LuxLog('Mesh Export: %s' % ob.data.name)
 	
@@ -185,11 +188,11 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=Tr
 	try:
 		if scene.luxrender_engine.mesh_type == 'native':
 			shape_type = ob.data.luxrender_mesh.get_shape_type()
-			shape_params = exportNativeMesh(scene, mesh, lux_context)
-			shape_params.update( ob.data.luxrender_mesh.get_paramset(scene) )
+			shape_params = exportNativeMesh(mesh, lux_context)
+			shape_params.update( ob.data.luxrender_mesh.get_paramset() )
 		elif scene.luxrender_engine.mesh_type == 'ply':
 			shape_type = 'plymesh'
-			shape_params = exportPlyMesh(scene, mesh, lux_context)
+			shape_params = exportPlyMesh(mesh, lux_context)
 		
 		#print('-> Create shape')
 		lux_context.shape(shape_type, shape_params)
@@ -202,14 +205,12 @@ def exportMesh(lux_context, scene, ob, object_begin_end=True, scale=None, log=Tr
 	#print('-> Remove render mesh')
 	bpy.data.meshes.remove(mesh)
 
-def allow_instancing(scene):
+def allow_instancing():
 	# Some situations require full geometry export
-	allow_instancing = True
-	
-	if scene.luxrender_engine.renderer == 'hybrid':
-		allow_instancing = False
+	if LuxManager.CurrentScene.luxrender_engine.renderer == 'hybrid':
+		return False
 		
-	return allow_instancing
+	return True
 
 def get_material_volume_defs(m):
 	if hasattr(m.luxrender_material, 'Interior_volume'):	# detecting just one of int/ext is enough to assume both are present
@@ -217,7 +218,8 @@ def get_material_volume_defs(m):
 	
 	return '', ''
 
-def exportInstance(lux_context, scene, ob, matrix):
+def exportInstance(lux_context, ob, matrix):
+	scene = LuxManager.CurrentScene
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	
 	# object translation/rotation/scale 
@@ -225,7 +227,7 @@ def exportInstance(lux_context, scene, ob, matrix):
 	
 	# Export either NamedMaterial stmt or the full material
 	# definition depending on the output type
-	export_object_material(scene, lux_context, ob)
+	export_object_material(lux_context, ob)
 	
 	# Check for emission and volume data
 	object_is_emitter = hasattr(ob, 'luxrender_emission') and ob.luxrender_emission.use_emission
@@ -259,8 +261,8 @@ def exportInstance(lux_context, scene, ob, matrix):
 			is_object_animated = True
 	
 	# If the object emits, don't export instance or motioninstance
-	if (not allow_instancing(scene)) or object_is_emitter:
-		exportMesh(lux_context, scene, ob, object_begin_end=False, log=False)
+	if (not allow_instancing()) or object_is_emitter:
+		exportMesh(lux_context, ob, object_begin_end=False, log=False)
 	# special case for motion blur since the mesh is already exported before the attribute
 	elif is_object_animated:
 		lux_context.transformBegin(comment=ob.name, file=Files.GEOM)
@@ -296,13 +298,12 @@ class MeshExportProgressThread(efutil.TimerThread):
 			)
 
 #-------------------------------------------------
-# write_lxo(lux_context, scene)
+# write_lxo(lux_context)
 # MAIN export function
 #-------------------------------------------------
-def write_lxo(lux_context, scene):
+def write_lxo(lux_context):
 	'''
 	lux_context		pylux.Context
-	scene			bpy.types.scene
 	
 	Iterate over the given scene's objects,
 	and export the compatible ones to the context lux_context.
@@ -310,6 +311,7 @@ def write_lxo(lux_context, scene):
 	Returns		None
 	'''
 	
+	scene = LuxManager.CurrentScene
 	sel = scene.objects
 	total_objects = len(sel)
 
@@ -336,11 +338,10 @@ def write_lxo(lux_context, scene):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
-				if allow_instancing(scene) and (dupli_ob.object.data.name not in meshes_exported):
-					exportMesh(lux_context, scene, dupli_ob.object)
+				if allow_instancing() and (dupli_ob.object.data.name not in meshes_exported):
+					exportMesh(lux_context, dupli_ob.object)
 					meshes_exported.add(dupli_ob.object.data.name)
-				
-				exportInstance(lux_context, scene, dupli_ob.object, dupli_ob.object.matrix_world)
+				exportInstance(lux_context, dupli_ob.object, dupli_ob.object.matrix_world)
 				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
@@ -356,16 +357,16 @@ def write_lxo(lux_context, scene):
 				scene.update()
 				particle_object = psys_settings.dupli_object
 				for mat in get_instance_materials(particle_object):
-					mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
+					mat.luxrender_material.export(lux_context, mat, mode='indirect')
 				for particle in psys.particles:
 					if particle.is_visible and (particle.alive_state in allowed_particle_states):
-						if allow_instancing(scene) and (particle_object.data.name not in meshes_exported):
-							exportMesh(lux_context, scene, particle_object, scale=[particle.size]*3, log=False)
+						if allow_instancing() and (particle_object.data.name not in meshes_exported):
+							exportMesh(lux_context, particle_object, scale=[particle.size]*3, log=False)
 							meshes_exported.add(particle_object.data.name)
 						particle_matrix = mathutils.Matrix.Translation( particle.location )
 						particle_matrix *= particle.rotation.to_matrix().to_4x4()
 						#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
-						exportInstance(lux_context, scene, particle_object, particle_matrix)
+						exportInstance(lux_context, particle_object, particle_matrix)
 						del particle_matrix
 
 	# browse all scene objects for "mesh-convertible" ones
@@ -396,13 +397,13 @@ def write_lxo(lux_context, scene):
 		# dupli object render rule copied from convertblender.c (blender internal render)
 		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			# Export mesh definition once
-			if allow_instancing(scene) and (ob.data.name not in meshes_exported):
-				exportMesh(lux_context, scene, ob, transformed=ob.data.luxrender_mesh.portal)
+			if allow_instancing() and (ob.data.name not in meshes_exported):
+				exportMesh(lux_context, ob, transformed=ob.data.luxrender_mesh.portal)
 				meshes_exported.add(ob.data.name)
 			
 			# Export object instance
 			if not ob.data.luxrender_mesh.portal:
-				exportInstance(lux_context, scene, ob, ob.matrix_world)
+				exportInstance(lux_context, ob, ob.matrix_world)
 
 		progress_thread.exported_objects += 1
 	

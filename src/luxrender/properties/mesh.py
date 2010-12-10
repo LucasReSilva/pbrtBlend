@@ -134,7 +134,7 @@ class luxrender_mesh(declarative_property_group):
 		else:
 			return 'trianglemesh'
 	
-	def get_paramset(self, scene):
+	def get_paramset(self):
 		params = ParamSet()
 		
 		# check if subdivision is used
