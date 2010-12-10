@@ -144,7 +144,7 @@ def exportNativeMesh(mesh, lux_context):
 	
 	return shape_params
 
-def exportPlyMesh(mesh, lux_context):
+def exportPlyMesh(mesh):
 	ply_filename = efutil.export_path + '_' + bpy.path.clean_name(mesh.name) + '.ply'
 	
 	# TODO: find out how to set the context object
@@ -192,7 +192,7 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 			shape_params.update( ob.data.luxrender_mesh.get_paramset() )
 		elif scene.luxrender_engine.mesh_type == 'ply':
 			shape_type = 'plymesh'
-			shape_params = exportPlyMesh(mesh, lux_context)
+			shape_params = exportPlyMesh(mesh)
 		
 		#print('-> Create shape')
 		lux_context.shape(shape_type, shape_params)
@@ -213,10 +213,7 @@ def allow_instancing():
 	return True
 
 def get_material_volume_defs(m):
-	if hasattr(m.luxrender_material, 'Interior_volume'):	# detecting just one of int/ext is enough to assume both are present
-		return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
-	
-	return '', ''
+	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
 def exportInstance(lux_context, ob, matrix):
 	scene = LuxManager.CurrentScene

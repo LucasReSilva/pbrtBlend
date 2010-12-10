@@ -112,7 +112,7 @@ class SubGroupFloatTextureParameter(FloatTextureParameter):
 
 
 # Fresnel Textures
-TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'IOR',				add_float_value = False)
+TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',				add_float_value = False)
 
 # Float Textures
 TF_bumpmap				= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )

@@ -40,6 +40,7 @@ def attr_light(lux_context, name, group, type, params, transform=None, portals=[
 	'''
 	lux_context		pylux.Context
 	name			string
+	group			string LightGroup name
 	type			string
 	params			dict
 	transform		None or list
