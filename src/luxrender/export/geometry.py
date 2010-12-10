@@ -117,7 +117,7 @@ def exportNativeMesh(scene, mesh, lux_context):
 	#print(' %s num normals: %i' % (ob.name, len(normals)))
 	#print(' %s num idxs: %i' % (ob.name, len(indices)))
 	
-	# export shape
+	# build shape ParamSet
 	shape_params = ParamSet()
 	
 	if lux_context.API_TYPE == 'PURE':
@@ -296,10 +296,10 @@ class MeshExportProgressThread(efutil.TimerThread):
 			)
 
 #-------------------------------------------------
-# write_lxo(render_engine, lux_context, scene)
+# write_lxo(lux_context, scene)
 # MAIN export function
 #-------------------------------------------------
-def write_lxo(render_engine, lux_context, scene):
+def write_lxo(lux_context, scene):
 	'''
 	lux_context		pylux.Context
 	scene			bpy.types.scene
