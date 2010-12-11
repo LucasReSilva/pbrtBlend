@@ -319,13 +319,14 @@ class luxrender_camera(declarative_property_group):
 
 def luxrender_colorspace_controls():
 	ctl = [
-		
+		'cs_label',
 		[0.1, 'preset', 'preset_name'],
 		['cs_whiteX', 'cs_whiteY'],
 		['cs_redX', 'cs_redY'],
 		['cs_greenX', 'cs_greenY'],
 		['cs_blueX', 'cs_blueY'],
 		
+		'gamma_label',
 		'gamma',
 	]
 	
@@ -360,6 +361,16 @@ class luxrender_colorspace(declarative_property_group):
 	}
 	
 	properties = [
+		{
+			'attr': 'cs_label',
+			'type': 'text',
+			'name': 'Color Space'
+		},
+		{
+			'attr': 'gamma_label',
+			'type': 'text',
+			'name': 'Gamma'
+		},
 		{
 			'attr': 'gamma',
 			'type': 'float',
@@ -671,6 +682,7 @@ class luxrender_tonemapping(declarative_property_group):
 	'''
 	
 	controls = [
+		'tm_label',
 		'type',
 		
 		# Reinhard
@@ -697,6 +709,11 @@ class luxrender_tonemapping(declarative_property_group):
 	}
 	
 	properties = [
+		{
+			'attr': 'tm_label',
+			'type': 'text',
+			'name': 'Tonemapping'
+		},
 		{
 			'type': 'enum',
 			'attr': 'type',
