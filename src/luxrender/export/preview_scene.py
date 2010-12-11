@@ -27,7 +27,6 @@
 import bpy
 
 from luxrender.export import ParamSet
-from luxrender.export.film import resolution
 from luxrender.export.geometry import exportNativeMesh, get_material_volume_defs
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
@@ -42,7 +41,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.camera('perspective', camera_params)
 	
 	# Film
-	xr, yr = resolution()
+	xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution()
 	
 	film_params = ParamSet() \
 		.add_integer('xresolution', int(xr)) \

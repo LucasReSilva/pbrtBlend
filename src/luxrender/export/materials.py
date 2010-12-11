@@ -257,7 +257,7 @@ def convert_texture(texture):
 def RGC(value):
 	scene = LuxManager.CurrentScene
 	if scene.luxrender_engine.rgc:
-		gamma = scene.camera.data.luxrender_colorspace.gamma
+		gamma = scene.camera.data.luxrender_camera.luxrender_film.luxrender_colorspace.gamma
 	else:
 		gamma = 1.0
 	

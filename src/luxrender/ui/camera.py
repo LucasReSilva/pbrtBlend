@@ -39,19 +39,12 @@ class camera(camera_panel, bpy.types.Panel):
 	display_property_groups = [
 		( ('camera',), 'luxrender_camera' )
 	]
-	
 
-class colorspace(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Colour Space'
+class film(camera_panel, bpy.types.Panel):
+	bl_label = 'LuxRender Film'
 	
 	display_property_groups = [
-		( ('camera',), 'luxrender_colorspace' )
-	]
-	
-
-class tonemapping(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender ToneMapping'
-	
-	display_property_groups = [
-		( ('camera',), 'luxrender_tonemapping' )
+		( ('camera','luxrender_camera'), 'luxrender_film' ),
+		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_colorspace' ),
+		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_tonemapping' ),
 	]

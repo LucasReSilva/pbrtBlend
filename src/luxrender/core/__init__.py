@@ -42,8 +42,6 @@ from extensions_framework.engine		import ( engine_base )
 from extensions_framework				import ( util as efutil )
 
 # Exporter libs
-from luxrender.export.film				import ( resolution )
-
 from luxrender.outputs					import ( LuxManager, LuxFilmDisplay )
 from luxrender.outputs					import ( LuxLog )
 from luxrender.outputs.pure_api			import ( LUXRENDER_VERSION )
@@ -52,6 +50,7 @@ from luxrender.outputs.pure_api			import ( LUXRENDER_VERSION )
 from luxrender.properties.accelerator	import ( luxrender_accelerator )
 from luxrender.properties.camera 		import ( luxrender_camera,
 												 luxrender_colorspace,
+												 luxrender_film,
 												 luxrender_tonemapping )
 from luxrender.properties.engine		import ( luxrender_engine, luxrender_networking )
 from luxrender.properties.filter		import ( luxrender_filter )
@@ -258,8 +257,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Scene', luxrender_volumeintegrator),
 		('Scene', luxrender_volumes),
 		('Camera', luxrender_camera),
-		('Camera', luxrender_colorspace),
-		('Camera', luxrender_tonemapping),
+		('luxrender_camera', luxrender_film),
+		('luxrender_film', luxrender_colorspace),
+		('luxrender_film', luxrender_tonemapping),
 		('Lamp', luxrender_lamp),
 		('luxrender_lamp', luxrender_lamp_point),
 		('luxrender_lamp', luxrender_lamp_sun),
@@ -408,7 +408,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			export_materials.ExportedTextures.clear()
 			
 			from luxrender.export import preview_scene
-			xres, yres = resolution()
+			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution()
 			
 			# Don't render the tiny images
 			if xres <= 96:
@@ -521,7 +521,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		if scene.luxrender_engine.export_type == 'INT' and scene.luxrender_engine.linearimaging:
+		if scene.luxrender_engine.export_type == 'INT' and scene.camera.data.luxrender_camera.luxrender_film.linearimaging:
 			self.output_file = efutil.path_relative_to_export(
 				'%s/%s.exr' % (self.output_dir, output_filename)
 			)
@@ -686,7 +686,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 				framebuffer_thread = LuxFilmDisplay({
-					'resolution': resolution(),
+					'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
 					'RE': self,
 				})
 				framebuffer_thread.set_kick_period( scene.luxrender_engine.writeinterval ) 

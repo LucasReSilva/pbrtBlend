@@ -323,9 +323,9 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 					lux_context.coordinateSystem('CameraEndTransform')
 					lux_context.transformEnd()
 					is_cam_animated = True
-			lux_context.lookAt(	*export_film.lookAt()	)
+			lux_context.lookAt(	*scene.camera.data.luxrender_camera.lookAt(scene.camera) )
 			lux_context.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
-			lux_context.film(	*export_film.film()	)
+			lux_context.film(	*scene.camera.data.luxrender_camera.luxrender_film.api_output()	)
 			
 			lux_context.worldBegin()
 			
