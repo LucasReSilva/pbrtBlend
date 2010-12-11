@@ -665,7 +665,10 @@ class luxrender_film(declarative_property_group):
 		# Halt conditions
 		if scene.luxrender_sampler.haltspp > 0:
 			params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
-			
+		
+		if scene.luxrender_sampler.halttime > 0:
+			params.add_integer('halttime', scene.luxrender_sampler.halttime)
+		
 		if self.outlierrejection_k > 0:
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)
 		

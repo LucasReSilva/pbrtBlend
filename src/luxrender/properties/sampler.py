@@ -39,7 +39,7 @@ class luxrender_sampler(declarative_property_group):
 	
 	controls = [
 		[ 0.7, 'sampler', 'advanced'],
-		'haltspp',
+		['haltspp','halttime'],
 		
 		'chainlength',
 		
@@ -92,6 +92,18 @@ class luxrender_sampler(declarative_property_group):
 			'attr': 'haltspp',
 			'name': 'Halt SPP',
 			'description': 'Halt the rendering at this number of samples/px (0=disabled)',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+			'max': 65535,
+			'soft_max': 65535,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'halttime',
+			'name': 'Halt time',
+			'description': 'Halt the rendering at this number seconds (0=disabled)',
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
