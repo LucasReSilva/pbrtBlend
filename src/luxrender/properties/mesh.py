@@ -31,8 +31,6 @@ from luxrender.export import ParamSet
 from luxrender.properties.material import dict_merge
 from luxrender.properties.texture import FloatTextureParameter
 
-#TF_amount = FloatTextureParameter('amount', 'Mix Amount', add_float_value=True, min=0.0, default=0.5, max=1.0 )
-
 class MeshFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other FloatTextureParameters
