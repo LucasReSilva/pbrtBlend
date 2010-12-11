@@ -327,18 +327,18 @@ def write_lxo(lux_context):
 		
 		if ob.parent and ob.parent.is_duplicator:
 			continue
-
+		
 		if ob.is_duplicator and len(ob.particle_systems) < 1:
 			# create dupli objects
 			ob.create_dupli_list(scene)
-
+			
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
 				if allow_instancing() and (dupli_ob.object.data.name not in meshes_exported):
 					exportMesh(lux_context, dupli_ob.object)
 					meshes_exported.add(dupli_ob.object.data.name)
-				exportInstance(lux_context, dupli_ob.object, dupli_ob.object.matrix_world)
+				exportInstance(lux_context, dupli_ob.object, dupli_ob.matrix)
 				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
@@ -365,7 +365,7 @@ def write_lxo(lux_context):
 						#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
 						exportInstance(lux_context, particle_object, particle_matrix)
 						del particle_matrix
-
+	
 	# browse all scene objects for "mesh-convertible" ones
 	# skip duplicated objects here
 	
@@ -382,7 +382,7 @@ def write_lxo(lux_context):
 		
 		if ob.parent and ob.parent.is_duplicator:
 			continue
-
+		
 		# special case for objects with particle system: check if emitter should be rendered
 		if len(ob.particle_systems) > 0:
 			render_emitter = False
@@ -390,7 +390,7 @@ def write_lxo(lux_context):
 			render_emitter = True
 		for psys in ob.particle_systems:
 			render_emitter |= psys.settings.use_render_emitter
-
+			
 		# dupli object render rule copied from convertblender.c (blender internal render)
 		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
 			# Export mesh definition once
@@ -401,7 +401,7 @@ def write_lxo(lux_context):
 			# Export object instance
 			if not ob.data.luxrender_mesh.portal:
 				exportInstance(lux_context, ob, ob.matrix_world)
-
+			
 		progress_thread.exported_objects += 1
 	
 	progress_thread.stop()
