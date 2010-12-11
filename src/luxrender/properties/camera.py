@@ -673,8 +673,7 @@ class luxrender_film(declarative_property_group):
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)
 		
 		# update the film settings with tonemapper settings
-		tonemapping_type, tonemapping_params = self.luxrender_tonemapping.api_output(scene)
-		params.update(tonemapping_params)
+		params.update( self.luxrender_tonemapping.get_paramset() )
 		
 		return ('fleximage', params)
 
@@ -806,16 +805,8 @@ class luxrender_tonemapping(declarative_property_group):
 		}
 	]
 	
-	def api_output(self, scene):
-		'''
-		scene			bpy.types.scene
-		
-		Format this class's members into a LuxRender ParamSet
-		
-		Returns tuple
-		'''
-		
-		cam = scene.camera.data
+	def get_paramset(self):
+		cam = LuxManager.CurrentScene.camera.data
 		
 		params = ParamSet()
 		
@@ -834,8 +825,5 @@ class luxrender_tonemapping(declarative_property_group):
 			
 		if self.type == 'contrast':
 			params.add_float('contrast_ywa', self.ywa)
-			
-		out = self.type, params
-		dbo('TONEMAPPING', out)
-		return out
-
+		
+		return params
