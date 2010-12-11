@@ -230,7 +230,7 @@ def convert_texture(texture):
 				#.add_float('nabla', texture.nabla)
 	
 	# Translate Blender Image/movie into lux tex
-	if texture.type == 'IMAGE' and texture.image:
+	if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE']:
 		if texture.image.source == 'GENERATED':
 			tex_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
 			texture.image.save_render(tex_image, LuxManager.CurrentScene)
