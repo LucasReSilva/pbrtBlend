@@ -64,8 +64,6 @@ def engine_controls():
 		# ['rgc', 'colclamp'],
 		# 'nolg',
 		
-		'writeinterval',
-		'displayinterval',
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
@@ -94,9 +92,6 @@ class luxrender_engine(declarative_property_group):
 		'threads_auto':		A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':			A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
 		'priority':			{ 'export_type': 'EXT', 'render': True },
-		
-		# displayinterval is applicable only to the Lux GUI
-		'displayinterval':	{ 'export_type': 'EXT', 'binary_name': 'luxrender' },
 	}
 	
 	properties = [
@@ -252,26 +247,6 @@ class luxrender_engine(declarative_property_group):
 			'name': 'No Lightgroups',
 			'description': 'Combine all light groups',
 			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'writeinterval',
-			'name': 'Save interval',
-			'description': 'Period for writing images to disk (seconds)',
-			'default': 10,
-			'min': 2,
-			'soft_min': 2,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'displayinterval',
-			'name': 'GUI refresh interval',
-			'description': 'Period for updating rendering on screen (seconds)',
-			'default': 10,
-			'min': 2,
-			'soft_min': 2,
 			'save_in_preset': True
 		},
 	]

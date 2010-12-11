@@ -605,7 +605,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				self.LuxManager.start()
 				
 				# Update the image from disk only as often as it is written
-				self.LuxManager.fb_thread.set_kick_period( scene.luxrender_engine.writeinterval )
+				self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval )
 				
 				# Start the stats and framebuffer threads and add additional threads to Lux renderer
 				self.LuxManager.start_worker_threads(self)
@@ -689,7 +689,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
 					'RE': self,
 				})
-				framebuffer_thread.set_kick_period( scene.luxrender_engine.writeinterval ) 
+				framebuffer_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval ) 
 				framebuffer_thread.start()
 				while luxrender_process.poll() == None and not self.test_break():
 					self.render_update_timer = threading.Timer(1, self.process_wait_timer)

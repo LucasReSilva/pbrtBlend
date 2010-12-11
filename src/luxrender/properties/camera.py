@@ -52,26 +52,16 @@ class luxrender_camera(declarative_property_group):
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
 		
-		'lbl_outputs',
-		['write_png', 'write_exr','write_tga','write_flm'],
-		'outlierrejection_k'
+		
 	]
 	
 	visibility = {
-		'type':						{ 'is_perspective': True }, 
 		'shutterdistribution':		{ 'usemblur': True },
 		'cammblur':					{ 'usemblur': True },
 		'objectmblur':				{ 'usemblur': True },
 	}
 	
 	properties = [
-		# hidden property can be changed in future linked to blender camera type
-		{
-			'type': 'bool',
-			'attr': 'is_perspective',
-			'name': 'is_perspective',
-			'default': True
-		},
 		{
 			'type': 'bool',
 			'attr': 'use_clipping',
@@ -167,44 +157,7 @@ class luxrender_camera(declarative_property_group):
 			'name': 'Object Motion Blur',
 			'default': True
 		},
-		{
-			'type': 'text',
-			'attr': 'lbl_outputs',
-			'name': 'Output formats'
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_png',
-			'name': 'PNG',
-			'default': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_exr',
-			'name': 'EXR',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_tga',
-			'name': 'TGA',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_flm',
-			'name': 'FLM',
-			'default': False
-		},
-		{
-			'type': 'int',
-			'attr': 'outlierrejection_k',
-			'name': 'Firefly rejection',
-			'description': 'Firefly (outlier) rejection k parameter',
-			'default': 0,
-			'min': 0,
-			'soft_min': 0,
-		}
+		
 	]
 	
 	def lookAt(self, camera):
@@ -555,16 +508,82 @@ class colorspace_presets(object):
 
 class luxrender_film(declarative_property_group):
 	controls = [
-		'linearimaging'
+		'writeinterval',
+		'displayinterval',
+		'lbl_outputs',
+		'linearimaging',
+		['write_png', 'write_exr','write_tga','write_flm'],
+		'outlierrejection_k',
 	]
+	
 	visibility = {}
+	
 	properties = [
+		
+		{
+			'type': 'int',
+			'attr': 'writeinterval',
+			'name': 'Save interval',
+			'description': 'Period for writing images to disk (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'displayinterval',
+			'name': 'GUI refresh interval',
+			'description': 'Period for updating rendering on screen (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text',
+			'attr': 'lbl_outputs',
+			'name': 'Output formats'
+		},
 		{
 			'type': 'bool',
 			'attr': 'linearimaging',
 			'name': 'Linear Imaging workflow',
 			'description': 'Use linear imaging workflow for internal rendering using EXR images',
 			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_png',
+			'name': 'PNG',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_exr',
+			'name': 'EXR',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_tga',
+			'name': 'TGA',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_flm',
+			'name': 'FLM',
+			'default': False
+		},
+		{
+			'type': 'int',
+			'attr': 'outlierrejection_k',
+			'name': 'Firefly rejection',
+			'description': 'Firefly (outlier) rejection k parameter',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
 		},
 	]
 	
@@ -622,7 +641,7 @@ class luxrender_film(declarative_property_group):
 		
 		# Output types
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
-		params.add_bool('write_resume_flm', scene.camera.data.luxrender_camera.write_flm)
+		params.add_bool('write_resume_flm', self.write_flm)
 		
 		if scene.luxrender_engine.export_type == 'INT' and self.linearimaging:
 			# EXR is used to bring the image back into blender with linear workflow
@@ -634,22 +653,21 @@ class luxrender_film(declarative_property_group):
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 			params.add_float('gamma', 1.0) # Linear workflow !
 		else:
-			write_exr = scene.camera.data.luxrender_camera.write_exr
+			write_exr = self.write_exr
 		
 		params.add_bool('write_exr', write_exr)
-		params.add_bool('write_png', scene.camera.data.luxrender_camera.write_png)
-		params.add_bool('write_tga', scene.camera.data.luxrender_camera.write_tga)
+		params.add_bool('write_png', self.write_png)
+		params.add_bool('write_tga', self.write_tga)
 		
-		
-		params.add_integer('displayinterval', scene.luxrender_engine.displayinterval)
-		params.add_integer('writeinterval', scene.luxrender_engine.writeinterval)
+		params.add_integer('displayinterval', self.displayinterval)
+		params.add_integer('writeinterval', self.writeinterval)
 		
 		# Halt conditions
 		if scene.luxrender_sampler.haltspp > 0:
 			params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
 			
-		if scene.camera.data.luxrender_camera.outlierrejection_k > 0:
-			params.add_integer('outlierrejection_k', scene.camera.data.luxrender_camera.outlierrejection_k)
+		if self.outlierrejection_k > 0:
+			params.add_integer('outlierrejection_k', self.outlierrejection_k)
 		
 		# update the film settings with tonemapper settings
 		tonemapping_type, tonemapping_params = self.luxrender_tonemapping.api_output(scene)
