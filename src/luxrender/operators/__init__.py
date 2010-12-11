@@ -38,7 +38,6 @@ from extensions_framework import util as efutil
 from luxrender.outputs import LuxManager
 
 from luxrender.export import get_worldscale
-from luxrender.export import film		as export_film
 from luxrender.export import lights		as export_lights
 from luxrender.export import materials	as export_materials
 from luxrender.export import geometry	as export_geometry
