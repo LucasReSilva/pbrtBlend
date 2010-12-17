@@ -87,7 +87,7 @@ class LuxFilmDisplay(TimerThread):
 			if render_end:
 				LuxLog('Final render result %ix%i' % (xres,yres))
 			else:
-				LuxLog('Updating render result %ix%i' % (xres,yres))
+				LuxLog('Updating render result (%ix%i - %s)' % (xres,yres,self.LocalStorage['lux_context'].printableStatistics(True)))
 			
 			result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
 			
@@ -99,34 +99,11 @@ class LuxFilmDisplay(TimerThread):
 			
 			if os.path.exists(self.LocalStorage['RE'].output_file):
 				lay.load_from_file(self.LocalStorage['RE'].output_file)
-				
 			elif direct_transfer:
-				# use the framebuffer direct from pylux
-				#print('updating framebuffer')
-				self.LocalStorage['lux_context'].updateFramebuffer()
-				
-				#print('fetching framebuffers')
-				fb = self.LocalStorage['lux_context'].floatFramebuffer()
-				ab = self.LocalStorage['lux_context'].alphaBuffer()
-				zb = self.LocalStorage['lux_context'].zBuffer()
-				
-				#print('allocating rect')
-				combined_rect = []
-				depth_rect = []
-				
-				#print('calculating rect')
-				# Need to scan rows in reverse order for blender
-				for y in range(yres-1,-1,-1):
-					for x in range(xres):
-						i = (y*xres + x)
-						j = i*3
-						combined_rect.append( [fb[j], fb[1+j], fb[2+j], ab[i]] )
-						depth_rect.append( [zb[i]] )
-				
-				#print('assigning rect')
-				lay.rect = combined_rect
-				lay.passes[0].rect = depth_rect
-				
+				# use the framebuffer direct from pylux using a special method
+				# for this purpose, which saves doing a lot of array processing
+				# in python
+				lay.rect, lay.passes[0].rect  = self.LocalStorage['lux_context'].blenderCombinedDepthRects()
 			else:
 				err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
 				LuxLog(err_msg)

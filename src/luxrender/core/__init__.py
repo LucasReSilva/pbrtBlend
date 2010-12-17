@@ -457,14 +457,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				
 				result = self.begin_result(0, 0, xres, yres)
 				lay = result.layers[0]
-				preview_context.updateFramebuffer()
-				fb = preview_context.floatFramebuffer()
-				rect = []
-				for y in range(yres-1,-1,-1):
-					for x in range(xres):
-						i = (y*xres + x)*3
-						rect.append( [fb[i], fb[1+i], fb[2+i], 1.0] )
-				lay.rect = rect
+				
+				lay.rect, no_z_buffer  = preview_context.blenderCombinedDepthRects()
+				
 				self.end_result(result)
 		except Exception as exc:
 			LuxLog('Preview aborted: %s' % exc)
