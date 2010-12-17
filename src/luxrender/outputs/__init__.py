@@ -118,8 +118,9 @@ class LuxFilmDisplay(TimerThread):
 				# Need to scan rows in reverse order for blender
 				for y in range(yres-1,-1,-1):
 					for x in range(xres):
-						i = y*xres + x
-						combined_rect.append( [fb[i*3], fb[1+i*3], fb[2+i*3], ab[i]] )
+						i = (y*xres + x)
+						j = i*3
+						combined_rect.append( [fb[j], fb[1+j], fb[2+j], ab[i]] )
 						depth_rect.append( [zb[i]] )
 				
 				#print('assigning rect')

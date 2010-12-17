@@ -409,6 +409,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			
 			from luxrender.export import preview_scene
 			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution()
+			xres, yres = int(xres), int(yres)
 			
 			# Don't render the tiny images
 			if xres <= 96:
@@ -453,12 +454,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					interruptible_sleep(1.8) # up to HALTSPP every 2 seconds in sum
 					
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.printableStatistics(False)))
-				preview_context.saveEXR('luxblend25-preview.exr', False, False, True)
 				
 				result = self.begin_result(0, 0, xres, yres)
 				lay = result.layers[0]
-				# TODO: use the framebuffer direct from pylux when Blender's API supports it
-				lay.load_from_file('luxblend25-preview.exr')
+				preview_context.updateFramebuffer()
+				fb = preview_context.floatFramebuffer()
+				rect = []
+				for y in range(yres-1,-1,-1):
+					for x in range(xres):
+						i = (y*xres + x)*3
+						rect.append( [fb[i], fb[1+i], fb[2+i], 1.0] )
+				lay.rect = rect
 				self.end_result(result)
 		except Exception as exc:
 			LuxLog('Preview aborted: %s' % exc)
