@@ -483,9 +483,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		#print('(1) export_path is %s' % efutil.export_path)
 		os.chdir(self.output_dir)
 		
-		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
-			api_type = 'API'
+		if scene.luxrender_engine.export_type == 'INT': # and not scene.luxrender_engine.write_files:
 			write_files = scene.luxrender_engine.write_files
+			if write_files:
+				api_type = 'FILE'
+			else:
+				api_type = 'API'
 		elif scene.luxrender_engine.export_type == 'LFC':
 			api_type = 'LUXFIRE_CLIENT'
 			write_files = False
@@ -521,11 +524,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		if scene.luxrender_engine.export_type == 'INT' and scene.camera.data.luxrender_camera.luxrender_film.linearimaging:
-			self.output_file = efutil.path_relative_to_export(
-				'%s/%s.exr' % (self.output_dir, output_filename)
-			)
-		else:
+		if not scene.camera.data.luxrender_camera.luxrender_film.integratedimaging:
 			self.output_file = efutil.path_relative_to_export(
 				'%s/%s.png' % (self.output_dir, output_filename)
 			)
@@ -542,8 +541,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			os.remove(self.output_file)
 		
 		internal	= (scene.luxrender_engine.export_type in ['INT', 'LFC'])
-		write_files	= scene.luxrender_engine.write_files
-		render		= scene.luxrender_engine.render
+		write_files	= scene.luxrender_engine.write_files and (scene.luxrender_engine.export_type in ['INT', 'EXT'])
+		render		= scene.luxrender_engine.render or (scene.luxrender_engine.export_type in ['LFC'])
 		
 		# Handle various option combinations using simplified variable names !
 		if internal:
@@ -604,8 +603,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				self.update_stats('', 'LuxRender: Rendering warmup')
 				self.LuxManager.start()
 				
-				# Update the image from disk only as often as it is written
-				self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval )
+				self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.camera.data.luxrender_camera.luxrender_film.integratedimaging
+				
+				if scene.camera.data.luxrender_camera.luxrender_film.integratedimaging:
+					# Use the GUI update interval
+					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.displayinterval )
+				else:
+					# Update the image from disk only as often as it is written
+					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval )
 				
 				# Start the stats and framebuffer threads and add additional threads to Lux renderer
 				self.LuxManager.start_worker_threads(self)

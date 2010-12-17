@@ -23,6 +23,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 # ***** END GPL LICENCE BLOCK *****
+#
 from extensions_framework import declarative_property_group
 
 from luxrender.properties.texture import ColorTextureParameter
@@ -32,7 +33,7 @@ class EmissionColorTextureParameter(ColorTextureParameter):
 		# Looks in a different location than other ColorTextureParameters
 		return lambda s,c: c.luxrender_emission
 
-TC_L = EmissionColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
+TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0,1.0,1.0) )
 
 class luxrender_emission(declarative_property_group):
 	'''

@@ -26,7 +26,7 @@
 #
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
 from luxrender.export					import ParamSet
 from luxrender.outputs.pure_api			import PYLUX_AVAILABLE
@@ -83,12 +83,12 @@ class luxrender_engine(declarative_property_group):
 	
 	visibility = {
 		'write_files':		{ 'export_type': 'INT' },
+		'write_lxs':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'write_lxm':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'write_lxo':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':		{ 'export_type': 'EXT' },
 		'render':			O([{'write_files': True}, {'export_type': 'EXT'}]),
 		'install_path':		{ 'render': True, 'export_type': 'EXT' },
-		'write_lxs':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
-		'write_lxm':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
-		'write_lxo':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
 		'threads_auto':		A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':			A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
 		'priority':			{ 'export_type': 'EXT', 'render': True },

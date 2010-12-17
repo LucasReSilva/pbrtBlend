@@ -90,13 +90,42 @@ class LuxFilmDisplay(TimerThread):
 				LuxLog('Updating render result %ix%i' % (xres,yres))
 			
 			result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
-			# TODO: don't read the file whilst it is still being written..
-			# ... however file locking in python seems incomplete/non-portable ?
+			
+			direct_transfer = 'floatFramebuffer' in dir(self.LocalStorage['lux_context'])
+			direct_transfer &= 'integratedimaging' in self.LocalStorage.keys() and self.LocalStorage['integratedimaging']
+			
+			bpy.ops.ef.msg(msg_text='Updating RenderResult')
+			lay = result.layers[0]
+			
 			if os.path.exists(self.LocalStorage['RE'].output_file):
-				bpy.ops.ef.msg(msg_text='Updating RenderResult')
-				lay = result.layers[0]
-				# TODO: use the framebuffer direct from pylux when Blender's API supports it
 				lay.load_from_file(self.LocalStorage['RE'].output_file)
+				
+			elif direct_transfer:
+				# use the framebuffer direct from pylux
+				#print('updating framebuffer')
+				self.LocalStorage['lux_context'].updateFramebuffer()
+				
+				#print('fetching framebuffers')
+				fb = self.LocalStorage['lux_context'].floatFramebuffer()
+				ab = self.LocalStorage['lux_context'].alphaBuffer()
+				zb = self.LocalStorage['lux_context'].zBuffer()
+				
+				#print('allocating rect')
+				combined_rect = []
+				depth_rect = []
+				
+				#print('calculating rect')
+				# Need to scan rows in reverse order for blender
+				for y in range(yres-1,-1,-1):
+					for x in range(xres):
+						i = y*xres + x
+						combined_rect.append( [fb[i*3], fb[1+i*3], fb[2+i*3], ab[i]] )
+						depth_rect.append( [zb[i]] )
+				
+				#print('assigning rect')
+				lay.rect = combined_rect
+				lay.passes[0].rect = depth_rect
+				
 			else:
 				err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
 				LuxLog(err_msg)

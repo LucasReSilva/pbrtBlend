@@ -511,7 +511,7 @@ class luxrender_film(declarative_property_group):
 		'writeinterval',
 		'displayinterval',
 		'lbl_outputs',
-		'linearimaging',
+		'integratedimaging',
 		['write_png', 'write_exr','write_tga','write_flm'],
 		'outlierrejection_k',
 	]
@@ -547,9 +547,9 @@ class luxrender_film(declarative_property_group):
 		},
 		{
 			'type': 'bool',
-			'attr': 'linearimaging',
-			'name': 'Linear Imaging workflow',
-			'description': 'Use linear imaging workflow for internal rendering using EXR images',
+			'attr': 'integratedimaging',
+			'name': 'Integrated Imaging workflow',
+			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
 			'default': False
 		},
 		{
@@ -643,19 +643,16 @@ class luxrender_film(declarative_property_group):
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 		params.add_bool('write_resume_flm', self.write_flm)
 		
-		if scene.luxrender_engine.export_type == 'INT' and self.linearimaging:
-			# EXR is used to bring the image back into blender with linear workflow
-			write_exr = True
+		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
+			# Set up params to enable z buffer and set gamma=1.0
 			params.add_string('write_exr_channels', 'RGBA')
 			params.add_bool('write_exr_halftype', False)
 			params.add_bool('write_exr_applyimaging', True)
 			params.add_bool('write_exr_ZBuf', True)
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 			params.add_float('gamma', 1.0) # Linear workflow !
-		else:
-			write_exr = self.write_exr
 		
-		params.add_bool('write_exr', write_exr)
+		params.add_bool('write_exr', self.write_exr)
 		params.add_bool('write_png', self.write_png)
 		params.add_bool('write_tga', self.write_tga)
 		
