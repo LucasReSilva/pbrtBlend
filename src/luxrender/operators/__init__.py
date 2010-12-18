@@ -46,21 +46,13 @@ from luxrender.outputs.pure_api			import LUXRENDER_VERSION
 
 # Per-IDPropertyGroup preset handling
 
-def try_preset_path_create(preset_subdir):
-	target_path = os.path.join(bpy.utils.preset_paths('')[0], preset_subdir)
-	if not os.path.exists(target_path):
-		os.makedirs(target_path)
-
 class LUXRENDER_MT_base(object):
 	preset_operator = "script.execute_preset"
 	def draw(self, context):
-		try_preset_path_create(self.preset_subdir)
 		return bpy.types.Menu.draw_preset(self, context)
 
 class LUXRENDER_OT_preset_base(AddPresetBase):
-	def execute(self, context):
-		try_preset_path_create(self.preset_subdir)
-		return super().execute(context)
+	pass
 
 class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Engine Presets"
@@ -115,9 +107,10 @@ class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Opera
 	def execute(self, context):
 		pv = [
 			'bpy.context.material.luxrender_material.%s'%v['attr'] for v in bpy.types.luxrender_material.get_exportable_properties()
-		] + [
-			'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
 		]
+		# + [
+		#	'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
+		#]
 		
 		# store only the sub-properties of the selected lux material type
 		lux_type = context.material.luxrender_material.type
