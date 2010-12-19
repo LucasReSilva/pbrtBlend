@@ -71,12 +71,15 @@ class LuxFilmDisplay(TimerThread):
 	def kick(self, render_end=False):
 		if 'RE' in self.LocalStorage.keys():
 			p_stats = ''
+			direct_transfer = False
 			if 'lux_context' in self.LocalStorage.keys() and self.LocalStorage['lux_context'].statistics('sceneIsReady') > 0.0:
 				self.LocalStorage['lux_context'].updateFramebuffer()
 				# px = self.lux_context.framebuffer()
 				xres = int(self.LocalStorage['lux_context'].getAttribute('film', 'xResolution'))
 				yres = int(self.LocalStorage['lux_context'].getAttribute('film', 'yResolution'))
 				p_stats = ' - %s' % self.LocalStorage['lux_context'].printableStatistics(True)
+				direct_transfer = 'blenderCombinedDepthRects' in dir(self.LocalStorage['lux_context'])
+				direct_transfer &= 'integratedimaging' in self.LocalStorage.keys() and self.LocalStorage['integratedimaging']
 			elif 'resolution' in self.LocalStorage.keys():
 				xres, yres = self.LocalStorage['resolution']
 			else:
@@ -92,9 +95,6 @@ class LuxFilmDisplay(TimerThread):
 				LuxLog('Updating render result (%ix%i%s)' % (xres,yres,p_stats))
 			
 			result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
-			
-			direct_transfer = 'blenderCombinedDepthRects' in dir(self.LocalStorage['lux_context'])
-			direct_transfer &= 'integratedimaging' in self.LocalStorage.keys() and self.LocalStorage['integratedimaging']
 			
 			bpy.ops.ef.msg(msg_text='Updating RenderResult')
 			lay = result.layers[0]
