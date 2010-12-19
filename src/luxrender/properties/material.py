@@ -132,10 +132,10 @@ TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True
 TF_uroughness			= FloatTextureParameter('uroughness', 'uroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_vroughness			= FloatTextureParameter('vroughness', 'vroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_backface_d			= FloatTextureParameter('bf_d', 'Backface Absorption Depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
-TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',				real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-
+TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',		real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',		real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_g					= FloatTextureParameter('g', 'Scatter phase function',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 
 # Color Textures
 TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',						default=(0.0,0.0,0.0) )
@@ -179,6 +179,7 @@ def mat_list():
 		mat_list += [
 			('velvet', 'Velvet', 'velvet'),
 			('glossytranslucent', 'Glossy Translucent', 'glossytranslucent'),
+			('scatter', 'Scatterer', 'scatter'),
 		]
 	
 	mat_list.sort()
@@ -1027,6 +1028,30 @@ class luxrender_mat_metal(declarative_property_group):
 			metal_params.add_string('name', self.name)
 		
 		return metal_params
+
+class luxrender_mat_scatter(declarative_property_group):
+	controls = [
+	] + \
+		TC_Kd.controls + \
+		TF_g.controls
+	
+	visibility = dict_merge(
+		TC_Kd.visibility,
+		TF_g.visibility
+	)
+	
+	properties = [
+	] + \
+		TC_Kd.properties + \
+		TF_g.properties
+	
+	def get_paramset(self):
+		scatter_params = ParamSet()
+		
+		scatter_params.update( TC_Kd.get_paramset(self) )
+		scatter_params.update( TF_g.get_paramset(self) )
+		
+		return scatter_params
 
 class luxrender_mat_shinymetal(declarative_property_group):
 	
