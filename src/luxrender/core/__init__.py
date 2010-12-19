@@ -528,9 +528,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		if not scene.camera.data.luxrender_camera.luxrender_film.integratedimaging:
+		# Look for an output image to load
+		if scene.camera.data.luxrender_camera.luxrender_film.write_png:
 			self.output_file = efutil.path_relative_to_export(
 				'%s/%s.png' % (self.output_dir, output_filename)
+			)
+		elif scene.camera.data.luxrender_camera.luxrender_film.write_tga:
+			self.output_file = efutil.path_relative_to_export(
+				'%s/%s.tga' % (self.output_dir, output_filename)
+			)
+		elif scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+			self.output_file = efutil.path_relative_to_export(
+				'%s/%s.exr' % (self.output_dir, output_filename)
 			)
 		
 		return True
