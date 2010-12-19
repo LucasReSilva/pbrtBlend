@@ -318,7 +318,8 @@ def write_lxo(lux_context):
 	meshes_exported = set()
 	
 	for ob in sel:
-		if ob.type in ('LAMP', 'CAMERA', 'EMPTY', 'META', 'ARMATURE', 'LATTICE'):
+		# EMPTY is allowed because it is used as GROUP containers
+		if ob.type in ('LAMP', 'CAMERA', 'META', 'ARMATURE', 'LATTICE'):
 			continue
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
