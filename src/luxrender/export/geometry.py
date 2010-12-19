@@ -34,6 +34,8 @@ from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import export_object_material, get_instance_materials, add_texture_parameter
 
+OBJECT_ANALYSIS = False
+
 class InvalidGeometryException(Exception):
 	pass
 
@@ -318,18 +320,25 @@ def write_lxo(lux_context):
 	meshes_exported = set()
 	
 	for ob in sel:
+		if OBJECT_ANALYSIS: print('Parsing objects pass 1: %s' % ob.name)
 		# EMPTY is allowed because it is used as GROUP containers
 		if ob.type in ('LAMP', 'CAMERA', 'META', 'ARMATURE', 'LATTICE'):
+			if OBJECT_ANALYSIS: print(' -> disallowed type: %s' % ob.type)
 			continue
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
 		if not ob.is_visible(scene) or ob.hide_render:
+			if OBJECT_ANALYSIS: print(' -> not visible: %s / %s' % (ob.is_visible(scene), ob.hide_render))
 			continue
 		
 		if ob.parent and ob.parent.is_duplicator:
+			if OBJECT_ANALYSIS: print(' -> parent is duplicator')
 			continue
 		
-		if ob.is_duplicator and len(ob.particle_systems) < 1:
+		number_psystems = len(ob.particle_systems)
+		
+		if ob.is_duplicator and number_psystems < 1:
+			if OBJECT_ANALYSIS: print(' -> is duplicator without particle systems')
 			# create dupli objects
 			ob.create_dupli_list(scene)
 			
@@ -345,27 +354,30 @@ def write_lxo(lux_context):
 					duplis.append(dupli_ob.object.name)
 			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
+			if OBJECT_ANALYSIS: print(' -> parsed %i dupli objects' % len(ob.dupli_list))
 			if ob.dupli_list: 
 				ob.free_dupli_list()
 		
-		for psys in ob.particle_systems:
-			psys_settings = psys.settings
-			allowed_particle_states = {'ALIVE'}
-			if psys_settings.render_type == 'OBJECT':
-				scene.update()
-				particle_object = psys_settings.dupli_object
-				for mat in get_instance_materials(particle_object):
-					mat.luxrender_material.export(lux_context, mat, mode='indirect')
-				for particle in psys.particles:
-					if particle.is_visible and (particle.alive_state in allowed_particle_states):
-						if allow_instancing() and (particle_object.data.name not in meshes_exported):
-							exportMesh(lux_context, particle_object, scale=[particle.size]*3, log=False)
-							meshes_exported.add(particle_object.data.name)
-						particle_matrix = mathutils.Matrix.Translation( particle.location )
-						particle_matrix *= particle.rotation.to_matrix().to_4x4()
-						#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
-						exportInstance(lux_context, particle_object, particle_matrix)
-						del particle_matrix
+		if number_psystems > 0:
+			if OBJECT_ANALYSIS: print(' -> has %i particle systems' % number_psystems)
+			for psys in ob.particle_systems:
+				psys_settings = psys.settings
+				allowed_particle_states = {'ALIVE'}
+				if psys_settings.render_type == 'OBJECT':
+					scene.update()
+					particle_object = psys_settings.dupli_object
+					for mat in get_instance_materials(particle_object):
+						mat.luxrender_material.export(lux_context, mat, mode='indirect')
+					for particle in psys.particles:
+						if particle.is_visible and (particle.alive_state in allowed_particle_states):
+							if allow_instancing() and (particle_object.data.name not in meshes_exported):
+								exportMesh(lux_context, particle_object, scale=[particle.size]*3, log=False)
+								meshes_exported.add(particle_object.data.name)
+							particle_matrix = mathutils.Matrix.Translation( particle.location )
+							particle_matrix *= particle.rotation.to_matrix().to_4x4()
+							#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
+							exportInstance(lux_context, particle_object, particle_matrix)
+							del particle_matrix
 	
 	# browse all scene objects for "mesh-convertible" ones
 	# skip duplicated objects here
@@ -374,14 +386,19 @@ def write_lxo(lux_context):
 	progress_thread.start(total_objects)
 	
 	for ob in sel:
+		if OBJECT_ANALYSIS: print('Parsing objects pass 2: %s' % ob.name)
+		
 		if ob.type != 'MESH':
+			if OBJECT_ANALYSIS: print(' -> not a MESH')
 			continue
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
 		if not ob.is_visible(scene) or ob.hide_render:
+			if OBJECT_ANALYSIS: print(' -> not visible: %s / %s' % (ob.is_visible(scene), ob.hide_render))
 			continue
 		
 		if ob.parent and ob.parent.is_duplicator:
+			if OBJECT_ANALYSIS: print(' -> parent is duplicator')
 			continue
 		
 		# special case for objects with particle system: check if emitter should be rendered
@@ -389,11 +406,20 @@ def write_lxo(lux_context):
 			render_emitter = False
 		else:
 			render_emitter = True
+		
 		for psys in ob.particle_systems:
 			render_emitter |= psys.settings.use_render_emitter
+		
+		if OBJECT_ANALYSIS: print(' -> render_emitter: %s' % render_emitter)
 			
 		# dupli object render rule copied from convertblender.c (blender internal render)
-		if (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES') and render_emitter and (ob.name not in duplis):
+		
+		dupli_check = (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES')
+		if OBJECT_ANALYSIS: print(' -> dupli_check: %s' % dupli_check)
+		ob_in_duplis = (ob.name not in duplis)
+		if OBJECT_ANALYSIS: print(' -> ob_in_duplis: %s' % ob_in_duplis)
+		if (dupli_check or render_emitter) and ob_in_duplis:
+			if OBJECT_ANALYSIS: print(' -> checks passed, exporting')
 			# Export mesh definition once
 			if allow_instancing() and (ob.data.name not in meshes_exported):
 				exportMesh(lux_context, ob, transformed=ob.data.luxrender_mesh.portal)
