@@ -238,7 +238,7 @@ class ColorTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 	
-	def get_paramset(self, property_group):
+	def get_paramset(self, property_group, value_transform_function = None):
 		TC_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -247,7 +247,8 @@ class ColorTextureParameter(TextureParameterBase):
 					LuxManager.ActiveManager.lux_context,
 					self.attr,
 					'color',
-					property_group
+					property_group,
+					value_transform_function = value_transform_function
 				)
 			)
 		

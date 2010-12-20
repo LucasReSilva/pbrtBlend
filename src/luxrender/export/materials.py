@@ -290,7 +290,7 @@ def get_texture_from_scene(scene, tex_name):
 	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
 	return False
 
-def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, value_transform=value_transform_passthrough):
+def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, value_transform_function=None):
 	'''
 	lux_context				pylux.Context - like object
 	lux_prop_name			LuxRender material/texture parameter name
@@ -356,16 +356,19 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 						fval
 					)
 			elif variant == 'color':
+				if value_transform_function == None:
+					value_transform_function = value_transform_passthrough
+				
 				use_rgc = getattr(property_group, '%s_usecolorrgc' % lux_prop_name)
 				if use_rgc:
 					params.add_color(
 						export_param_name,
-						[RGC(value_transform(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
+						[RGC(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
 					)
 				else:
 					params.add_color(
 						export_param_name,
-						[float(value_transform(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
+						[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
 					)
 			elif variant == 'fresnel':
 				# TODO

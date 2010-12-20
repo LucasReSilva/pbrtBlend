@@ -90,6 +90,18 @@ class VolumeDataColorTextureParameter(ColorTextureParameter):
 			return c
 		return func2
 
+class VolumeDataFloatTextureParameter(FloatTextureParameter):
+	#texture_collection = 'textures'
+	def texture_collection_finder(self):
+		def func(s,c):
+			return s #.main
+		return func
+	
+	def texture_slot_set_attr(self):
+		def func2(s,c):
+			return c
+		return func2
+
 class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
@@ -112,7 +124,7 @@ class SubGroupFloatTextureParameter(FloatTextureParameter):
 
 
 # Fresnel Textures
-TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',				add_float_value = False)
+TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',		add_float_value = False)
 
 # Float Textures
 TF_bumpmap				= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
@@ -136,21 +148,24 @@ TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',		real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',		real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_g					= FloatTextureParameter('g', 'Scatter phase function',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
+VTF_g					= VolumeDataFloatTextureParameter('g', 'Scatter phase function',	add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 
 # Color Textures
-TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',						default=(0.0,0.0,0.0) )
-TC_Kd			= ColorTextureParameter('Kd', 'Diffuse color',							default=(0.64,0.64,0.64) )
-TC_Kr			= ColorTextureParameter('Kr', 'Reflection color',						default=(1.0,1.0,1.0) )
-TC_Ks			= ColorTextureParameter('Ks', 'Specular color',							default=(0.25,0.25,0.25) )
-TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',						default=(1.0,1.0,1.0) )
-TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',						default=(1.0,1.0,1.0) )
-TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',						default=(1.0,1.0,1.0) )
-TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',						default=(1.0,1.0,1.0) )
-TC_backface_Ka	= ColorTextureParameter('backface_Ka', 'Backface Absorption color',		default=(0.0,0.0,0.0) )
-TC_backface_Kd	= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',		default=(0.64,0.64,0.64) )
-TC_backface_Ks	= ColorTextureParameter('backface_Ks', 'Backface Specular color',		default=(0.25,0.25,0.25) )
+TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
+TC_Kd					= ColorTextureParameter('Kd', 'Diffuse color',						default=(0.64,0.64,0.64) )
+TC_Kr					= ColorTextureParameter('Kr', 'Reflection color',					default=(1.0,1.0,1.0) )
+TC_Ks					= ColorTextureParameter('Ks', 'Specular color',						default=(0.25,0.25,0.25) )
+TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(1.0,1.0,1.0) )
+TC_Ks2					= ColorTextureParameter('Ks2', 'Specular color 2',					default=(1.0,1.0,1.0) )
+TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(1.0,1.0,1.0) )
+TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
+TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
+TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',	default=(0.64,0.64,0.64) )
+TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
 
-TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption',	default=(1.0,1.0,1.0))
+TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		default=(1.0,1.0,1.0))
+TC_sigma_a				= VolumeDataColorTextureParameter('sigma_a', 'Absorption',			default=(0.0,0.0,0.0))
+TC_sigma_s				= VolumeDataColorTextureParameter('sigma_s', 'Scattering',			default=(0.0,0.0,0.0))
 
 def dict_merge(*args):
 	vis = {}
@@ -1243,7 +1258,41 @@ class luxrender_mat_velvet(declarative_property_group):
 		
 		return velvet_params
 
+def volume_types():
+	v_types =  [
+		('clear', 'Clear', 'clear')
+	]
+	
+	if LUXRENDER_VERSION >= '0.8':
+		v_types.extend([
+			('homogeneous', 'Homogeneous', 'homogeneous')
+		])
+	
+	return v_types
 
+def volume_visibility():
+	v_vis = dict_merge({
+		#'ior_floattexture':			{ 'ior_usefloattexture': True },
+		#'absorption_colortexture':	{ 'absorption_usecolortexture': True },
+		'depth':	{ 'type': 'clear' }
+	},
+	TFR_IOR.visibility,
+	TC_absorption.visibility,
+	VTF_g.visibility,
+	TC_sigma_a.visibility,
+	TC_sigma_s.visibility
+	)
+	
+	vis_append = { 'type': 'clear' }
+	v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
+	v_vis = texture_append_visibility(v_vis, TC_absorption, vis_append)
+	
+	vis_append = { 'type': 'homogeneous' }
+	v_vis = texture_append_visibility(v_vis, VTF_g, vis_append)
+	v_vis = texture_append_visibility(v_vis, TC_sigma_a, vis_append)
+	v_vis = texture_append_visibility(v_vis, TC_sigma_s, vis_append)
+	
+	return v_vis
 
 class luxrender_volume_data(declarative_property_group):
 	'''
@@ -1257,28 +1306,29 @@ class luxrender_volume_data(declarative_property_group):
 	] + \
 	TFR_IOR.controls + \
 	TC_absorption.controls + \
+	VTF_g.controls + \
+	TC_sigma_a.controls + \
+	TC_sigma_s.controls + \
 	[
 		'depth'
 	]
 	
-	visibility = {
-		'ior_floattexture':			{ 'ior_usefloattexture': True },
-		'absorption_colortexture':	{ 'absorption_usecolortexture': True }
-	}
+	visibility = volume_visibility()
 	
 	properties = [
 		{
 			'type': 'enum',
 			'attr': 'type',
 			'name': 'Type',
-			'items': [
-				('clear', 'clear', 'clear')
-			],
+			'items': volume_types(),
 			'save_in_preset': True
 		},
 	] + \
 	TFR_IOR.properties + \
 	TC_absorption.properties + \
+	VTF_g.properties + \
+	TC_sigma_a.properties + \
+	TC_sigma_s.properties + \
 	[
 		{
 			'type': 'float',
@@ -1305,8 +1355,16 @@ class luxrender_volume_data(declarative_property_group):
 			#print('abs xform: %f -> %f' % (i,depthed))
 			return depthed
 		
-		vp.update( add_texture_parameter(lux_context, 'fresnel', 'fresnel', self) )
-		vp.update( add_texture_parameter(lux_context, 'absorption', 'color', self, value_transform=absorption_transform) )
+		if self.type == 'clear':
+			vp.update( TFR_IOR.get_paramset(self) )
+			#add_texture_parameter(lux_context, 'fresnel', 'fresnel', self) )
+			vp.update( TC_absorption.get_paramset(self, value_transform_function=absorption_transform) )
+			#add_texture_parameter(lux_context, 'absorption', 'color', self, value_transform=absorption_transform) )
+		
+		if self.type == 'homogeneous':
+			vp.update( VTF_g.get_paramset(self) )
+			vp.update( TC_sigma_a.get_paramset(self) )
+			vp.update( TC_sigma_s.get_paramset(self) )
 		
 		return self.type, vp
 
