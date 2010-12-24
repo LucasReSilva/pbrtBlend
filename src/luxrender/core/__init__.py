@@ -104,6 +104,7 @@ from luxrender.properties.texture		import ( luxrender_texture,
 												 luxrender_tex_sellmeier,
 												 luxrender_tex_scale,
 												 luxrender_tex_sopra,
+												 luxrender_tex_tabulateddata,
 												 luxrender_tex_transform,
 												 luxrender_tex_uv,
 												 luxrender_tex_windy,
@@ -161,6 +162,7 @@ from luxrender.ui.textures				import ( main				as ui_textures,
 												 windy				as ui_texture_windy,
 												 wrinkled			as ui_texture_wrinkled,
 												 mapping			as ui_texture_mapping,
+												 tabulateddata		as ui_texture_tabulateddata,
 												 transform			as ui_texture_transform )
 
 # Exporter Operators
@@ -310,6 +312,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_texture', luxrender_tex_sellmeier),
 		('luxrender_texture', luxrender_tex_scale),
 		('luxrender_texture', luxrender_tex_sopra),
+		('luxrender_texture', luxrender_tex_tabulateddata),
 		('luxrender_texture', luxrender_tex_transform),
 		('luxrender_texture', luxrender_tex_uv),
 		('luxrender_texture', luxrender_tex_windy),

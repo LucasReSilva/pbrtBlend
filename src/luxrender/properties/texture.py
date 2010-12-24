@@ -554,6 +554,7 @@ class luxrender_texture(declarative_property_group):
 				('marble', 'marble', 'marble'),
 				('mix', 'mix', 'mix'),
 				('scale', 'scale', 'scale'),
+				('tabulateddata', 'tabulateddata', 'tabulateddata'),
 				('uv', 'uv', 'uv'),
 				('windy', 'windy', 'windy'),
 				('wrinkled', 'wrinkled', 'wrinkled'),
@@ -1855,12 +1856,32 @@ class luxrender_tex_scale(declarative_property_group):
 		
 		return set(), scale_params
 
-class tabulatedfresnel(declarative_property_group):
-	
+class tabulatedbase(declarative_property_group):
 	controls = [
 		'filename'
 	]
 	
+	def get_paramset(self, scene):
+		td = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
+		return set(), td
+
+class tabulatedcolor(tabulatedbase):
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'color'
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'filename',
+			'name': 'File name',
+			'save_in_preset': True
+		},
+	]
+
+class tabulatedfresnel(tabulatedbase):
 	properties = [
 		{
 			'type': 'string',
@@ -1875,11 +1896,9 @@ class tabulatedfresnel(declarative_property_group):
 			'save_in_preset': True
 		},
 	]
-	
-	def get_paramset(self, scene):
-		tfp = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
-		return set(), tfp
 
+class luxrender_tex_tabulateddata(tabulatedcolor):
+	pass
 class luxrender_tex_luxpop(tabulatedfresnel):
 	pass
 class luxrender_tex_sopra(tabulatedfresnel):
