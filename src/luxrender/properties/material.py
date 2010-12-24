@@ -147,8 +147,8 @@ TF_backface_d			= FloatTextureParameter('bf_d', 'Backface Absorption Depth',		re
 TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',		real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',		real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_g					= FloatTextureParameter('g', 'Scatter phase function',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
-VTF_g					= VolumeDataFloatTextureParameter('g', 'Scatter phase function',	add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
+TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
+VTF_g					= VolumeDataFloatTextureParameter('g', 'Scattering asymmetry',		add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 
 # Color Textures
 TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
@@ -1272,9 +1272,7 @@ def volume_types():
 
 def volume_visibility():
 	v_vis = dict_merge({
-		#'ior_floattexture':			{ 'ior_usefloattexture': True },
-		#'absorption_colortexture':	{ 'absorption_usecolortexture': True },
-		'depth':	{ 'type': 'clear' }
+		'scattering_scale': { 'type': 'homogeneous' }
 	},
 	TFR_IOR.visibility,
 	TC_absorption.visibility,
@@ -1306,12 +1304,15 @@ class luxrender_volume_data(declarative_property_group):
 	] + \
 	TFR_IOR.controls + \
 	TC_absorption.controls + \
-	VTF_g.controls + \
 	TC_sigma_a.controls + \
+	[
+		'depth',
+	] + \
 	TC_sigma_s.controls + \
 	[
-		'depth'
-	]
+		'scattering_scale'
+	] + \
+	VTF_g.controls
 	
 	visibility = volume_visibility()
 	
@@ -1343,13 +1344,26 @@ class luxrender_volume_data(declarative_property_group):
 			'precision': 6,
 			'save_in_preset': True
 		},
+		{
+			'type': 'float',
+			'attr': 'scattering_scale',
+			'name': 'Scattering scale factor',
+			'description': 'Scattering colour will be multiplied by this value',
+			'default': 1.0,
+			'min': 0.00001,
+			'soft_min': 0.00001,
+			'max': 10000.0,
+			'soft_max': 10000.0,
+			'precision': 6,
+			'save_in_preset': True
+		},
 	]
 	
 	def api_output(self, lux_context):
 		vp = ParamSet()
 		
 		scale = 1
-		def absorption_transform(i):
+		def absorption_at_depth(i):
 			# This is copied from the old LuxBlend, I don't pretend to understand it, DH
 			depthed = (-math.log(max([(float(i)),1e-30]))/(self.depth*scale)) * ((float(i))==1.0 and -1 or 1)
 			#print('abs xform: %f -> %f' % (i,depthed))
@@ -1357,14 +1371,14 @@ class luxrender_volume_data(declarative_property_group):
 		
 		if self.type == 'clear':
 			vp.update( TFR_IOR.get_paramset(self) )
-			#add_texture_parameter(lux_context, 'fresnel', 'fresnel', self) )
-			vp.update( TC_absorption.get_paramset(self, value_transform_function=absorption_transform) )
-			#add_texture_parameter(lux_context, 'absorption', 'color', self, value_transform=absorption_transform) )
+			vp.update( TC_absorption.get_paramset(self, value_transform_function=absorption_at_depth) )
 		
 		if self.type == 'homogeneous':
+			def scattering_scale(i):
+				return i * self.scattering_scale
 			vp.update( VTF_g.get_paramset(self) )
-			vp.update( TC_sigma_a.get_paramset(self) )
-			vp.update( TC_sigma_s.get_paramset(self) )
+			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth) )
+			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
 		
 		return self.type, vp
 
