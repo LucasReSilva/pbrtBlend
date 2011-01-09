@@ -26,7 +26,7 @@
 #
 from extensions_framework import declarative_property_group
 import extensions_framework.util as efutil
-from extensions_framework.validate import Logic_Operator as LO, Logic_OR as O, Logic_AND as A
+from extensions_framework.validate import Logic_Operator as LO
 
 from luxrender.properties.texture import ColorTextureParameter
 from luxrender.export import ParamSet

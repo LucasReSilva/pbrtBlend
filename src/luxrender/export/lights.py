@@ -28,13 +28,10 @@ from math import degrees
 
 import mathutils
 
-from extensions_framework import util as efutil
-
 from luxrender.outputs import LuxManager
 from luxrender.outputs.file_api import Files
 from luxrender.properties import dbo
 from luxrender.export import ParamSet, get_worldscale, matrix_to_list
-from luxrender.export.materials import add_texture_parameter
 
 def attr_light(lux_context, name, group, type, params, transform=None, portals=[]):
 	'''
