@@ -201,6 +201,7 @@ def blender_texture_poll(cls, context):
 
 import properties_texture
 properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
+# properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add('luxrender')
 blender_texture_ui_list = [
 	properties_texture.TEXTURE_PT_blend,
 	properties_texture.TEXTURE_PT_clouds,
@@ -378,14 +379,26 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					if not object.name in objects_mats.keys(): objects_mats[object] = []
 					objects_mats[object].append(mat)
 		
+		PREVIEW_TYPE = None		# 'MATERIAL' or 'TEXTURE'
+		
 		# find objects that are likely to be the preview objects
 		preview_objects = [o for o in objects_mats.keys() if o.name.startswith('preview')]
-		if len(preview_objects) < 1:
+		if len(preview_objects) > 0:
+			PREVIEW_TYPE = 'MATERIAL'
+		else:
+			preview_objects = [o for o in objects_mats.keys() if o.name.startswith('texture')]
+			if len(preview_objects) > 0:
+				PREVIEW_TYPE = 'TEXTURE'
+		
+		if PREVIEW_TYPE == None:
 			return
+		
+		# TODO: scene setup based on PREVIEW_TYPE
 		
 		# find the materials attached to the likely preview object
 		likely_materials = objects_mats[preview_objects[0]]
 		if len(likely_materials) < 1:
+			print('no preview materials')
 			return
 		
 		pm = likely_materials[0]
