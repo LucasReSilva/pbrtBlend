@@ -148,7 +148,6 @@ TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',		real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',		real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
-VTF_g					= VolumeDataFloatTextureParameter('g', 'Scattering asymmetry',		add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 
 # Color Textures
 TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
@@ -1272,21 +1271,23 @@ def volume_types():
 
 def volume_visibility():
 	v_vis = dict_merge({
-		'scattering_scale': { 'type': 'homogeneous' }
+		'scattering_scale': { 'type': 'homogeneous' },
+		'g_r': { 'type': 'homogeneous' },
+		'g_g': { 'type': 'homogeneous' },
+		'g_b': { 'type': 'homogeneous' },
 	},
 	TFR_IOR.visibility,
 	TC_absorption.visibility,
-	VTF_g.visibility,
 	TC_sigma_a.visibility,
 	TC_sigma_s.visibility
 	)
 	
 	vis_append = { 'type': 'clear' }
-	v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
+	#v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
 	v_vis = texture_append_visibility(v_vis, TC_absorption, vis_append)
 	
 	vis_append = { 'type': 'homogeneous' }
-	v_vis = texture_append_visibility(v_vis, VTF_g, vis_append)
+	#v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
 	v_vis = texture_append_visibility(v_vis, TC_sigma_a, vis_append)
 	v_vis = texture_append_visibility(v_vis, TC_sigma_s, vis_append)
 	
@@ -1310,9 +1311,11 @@ class luxrender_volume_data(declarative_property_group):
 	] + \
 	TC_sigma_s.controls + \
 	[
-		'scattering_scale'
-	] + \
-	VTF_g.controls
+		'scattering_scale',
+		'g_r',
+		'g_g',
+		'g_b',
+	]
 	
 	visibility = volume_visibility()
 	
@@ -1327,7 +1330,6 @@ class luxrender_volume_data(declarative_property_group):
 	] + \
 	TFR_IOR.properties + \
 	TC_absorption.properties + \
-	VTF_g.properties + \
 	TC_sigma_a.properties + \
 	TC_sigma_s.properties + \
 	[
@@ -1357,6 +1359,45 @@ class luxrender_volume_data(declarative_property_group):
 			'precision': 6,
 			'save_in_preset': True
 		},
+		{
+			'type': 'float',
+			'attr': 'g_r',
+			'name': 'Red asymmetry',
+			'description': 'Scattering asymmetry, red component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'default': 0.0,
+			'min': -1.0,
+			'soft_min': -1.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 4,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'g_g',
+			'name': 'Green asymmetry',
+			'description': 'Scattering asymmetry, green component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'default': 0.0,
+			'min': -1.0,
+			'soft_min': -1.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 4,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'g_b',
+			'name': 'Blue asymmetry',
+			'description': 'Scattering asymmetry, blue component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'default': 0.0,
+			'min': -1.0,
+			'soft_min': -1.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 4,
+			'save_in_preset': True
+		},
 	]
 	
 	def api_output(self, lux_context):
@@ -1376,7 +1417,8 @@ class luxrender_volume_data(declarative_property_group):
 		if self.type == 'homogeneous':
 			def scattering_scale(i):
 				return i * self.scattering_scale
-			vp.update( VTF_g.get_paramset(self) )
+			vp.update( TFR_IOR.get_paramset(self) )
+			vp.add_color('g', [self.g_r, self.g_g, self.g_b])
 			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth) )
 			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
 		
