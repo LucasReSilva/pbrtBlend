@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O
+from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
@@ -118,7 +118,7 @@ class luxrender_integrator(declarative_property_group):
 	
 	visibility = {
 		# bidir +
-		'lightstrategy':					{ 'advanced': True },
+		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': LO({'!=': 'bidirectional'}) },
 		'eyedepth':							{ 'surfaceintegrator': 'bidirectional' },
 		'lightdepth':						{ 'surfaceintegrator': 'bidirectional' },
 		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
@@ -763,7 +763,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_string('rrstrategy', self.rrstrategy) \
 				  .add_bool('includeenvironment', self.includeenvironment)
 		
-		if self.advanced:
+		if self.advanced and self.surfaceintegrator != 'bidirectional':
 			params.add_string('lightstrategy', self.lightstrategy)
 		
 		out = self.surfaceintegrator, params

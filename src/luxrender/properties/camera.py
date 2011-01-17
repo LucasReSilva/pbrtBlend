@@ -25,18 +25,15 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import math
+import os
 
+from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
 
 from luxrender.properties import dbo
 from luxrender.export import get_worldscale
-from luxrender.export.film import resolution
-from luxrender.export import ParamSet
+from luxrender.export import ParamSet, LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
-
-# TODO: adapt values written to d based on simple/advanced views
-
-# TODO: check parameter completeness against Lux API
 
 class luxrender_camera(declarative_property_group):
 	'''
@@ -55,25 +52,16 @@ class luxrender_camera(declarative_property_group):
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
 		
-		'lbl_outputs',
-		['write_png', 'write_exr','write_tga','write_flm'],
+		
 	]
 	
 	visibility = {
-		'type':						{ 'is_perspective': True }, 
 		'shutterdistribution':		{ 'usemblur': True },
 		'cammblur':					{ 'usemblur': True },
 		'objectmblur':				{ 'usemblur': True },
 	}
 	
 	properties = [
-		# hidden property set via draw() method
-		{
-			'type': 'bool',
-			'attr': 'is_perspective',
-			'name': 'is_perspective',
-			'default': True
-		},
 		{
 			'type': 'bool',
 			'attr': 'use_clipping',
@@ -169,36 +157,27 @@ class luxrender_camera(declarative_property_group):
 			'name': 'Object Motion Blur',
 			'default': True
 		},
-		{
-			'type': 'text',
-			'attr': 'lbl_outputs',
-			'name': 'Output formats'
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_png',
-			'name': 'PNG',
-			'default': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_exr',
-			'name': 'EXR',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_tga',
-			'name': 'TGA',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_flm',
-			'name': 'FLM',
-			'default': False
-		},
+		
 	]
+	
+	def lookAt(self, camera):
+		'''
+		Derive a list describing 3 points for a LuxRender LookAt statement
+		
+		Returns		tuple(9) (floats)
+		'''
+		matrix = camera.matrix_world.copy()
+		ws = get_worldscale()
+		matrix *= ws
+		ws = get_worldscale(as_scalematrix=False)
+		matrix[3][0] *= ws
+		matrix[3][1] *= ws
+		matrix[3][2] *= ws
+		pos = matrix[3]
+		forwards = -matrix[2]
+		target = (pos + forwards)
+		up = matrix[1]
+		return (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
 	
 	def screenwindow(self, xr, yr, cam):
 		'''
@@ -214,8 +193,10 @@ class luxrender_camera(declarative_property_group):
 		shiftX = cam.shift_x
 		shiftY = cam.shift_y
 		
-		# TODO:
-		scale = 1.0
+		if cam.type == 'ORTHO':
+			scale = cam.ortho_scale / 2.0
+		else:
+			scale = 1.0
 		
 		aspect = xr/yr
 		invaspect = 1.0/aspect
@@ -247,11 +228,13 @@ class luxrender_camera(declarative_property_group):
 		'''
 		
 		cam = scene.camera.data
-		xr, yr = resolution(scene)
+		xr, yr = self.luxrender_film.resolution()
 		
 		params = ParamSet()
 		
-		params.add_float('fov', math.degrees(scene.camera.data.angle))
+		if cam.type == 'PERSP' and self.type == 'perspective':
+			params.add_float('fov', math.degrees(scene.camera.data.angle))
+		
 		params.add_float('screenwindow', self.screenwindow(xr, yr, cam))
 		params.add_bool('autofocus', False)
 		params.add_float('shutteropen', 0.0)
@@ -282,19 +265,21 @@ class luxrender_camera(declarative_property_group):
 			if self.cammblur and is_cam_animated:
 				params.add_string('endtransform', 'CameraEndTransform')
 		
-		out = self.type, params
+		cam_type = 'orthographic' if cam.type == 'ORTHO' else self.type
+		out = cam_type, params
 		dbo('CAMERA', out)
 		return out
 
 def luxrender_colorspace_controls():
 	ctl = [
-		
+		'cs_label',
 		[0.1, 'preset', 'preset_name'],
 		['cs_whiteX', 'cs_whiteY'],
 		['cs_redX', 'cs_redY'],
 		['cs_greenX', 'cs_greenY'],
 		['cs_blueX', 'cs_blueY'],
 		
+		'gamma_label',
 		'gamma',
 	]
 	
@@ -329,6 +314,16 @@ class luxrender_colorspace(declarative_property_group):
 	}
 	
 	properties = [
+		{
+			'attr': 'cs_label',
+			'type': 'text',
+			'name': 'Color Space'
+		},
+		{
+			'attr': 'gamma_label',
+			'type': 'text',
+			'name': 'Gamma'
+		},
 		{
 			'attr': 'gamma',
 			'type': 'float',
@@ -435,6 +430,250 @@ class luxrender_colorspace(declarative_property_group):
 		},
 	]
 
+class colorspace_presets(object):
+	class sRGB(object):
+		cs_whiteX	= 0.314275
+		cs_whiteY	= 0.329411
+		cs_redX		= 0.63
+		cs_redY		= 0.34
+		cs_greenX	= 0.31
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class romm_rgb(object):
+		cs_whiteX	= 0.346
+		cs_whiteY	= 0.359
+		cs_redX		= 0.7347
+		cs_redY		= 0.2653
+		cs_greenX	= 0.1596
+		cs_greenY	= 0.8404
+		cs_blueX	= 0.0366
+		cs_blueY	= 0.0001
+	class adobe_rgb_98(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.64
+		cs_redY		= 0.34
+		cs_greenX	= 0.21
+		cs_greenY	= 0.71
+		cs_blueX	= 0.15
+		cs_blueY	= 0.06
+	class apple_rgb(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.625
+		cs_redY		= 0.34
+		cs_greenX	= 0.28
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class ntsc_1953(object):
+		cs_whiteX	= 0.31
+		cs_whiteY	= 0.316
+		cs_redX		= 0.67
+		cs_redY		= 0.33
+		cs_greenX	= 0.21
+		cs_greenY	= 0.71
+		cs_blueX	= 0.14
+		cs_blueY	= 0.08
+	class ntsc_1979(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.63
+		cs_redY		= 0.34
+		cs_greenX	= 0.31
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class pal_secam(object):
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.64
+		cs_redY		= 0.33
+		cs_greenX	= 0.29
+		cs_greenY	= 0.6
+		cs_blueX	= 0.15
+		cs_blueY	= 0.06
+	class cie_e(object):
+		cs_whiteX	= 0.333
+		cs_whiteY	= 0.333
+		cs_redX		= 0.7347
+		cs_redY		= 0.2653
+		cs_greenX	= 0.2738
+		cs_greenY	= 0.7174
+		cs_blueX	= 0.1666
+		cs_blueY	= 0.0089
+
+# TODO, move all film properties into this property group
+
+class luxrender_film(declarative_property_group):
+	controls = [
+		'writeinterval',
+		'displayinterval',
+		'lbl_outputs',
+		'integratedimaging',
+		['write_png', 'write_exr','write_tga','write_flm'],
+		'outlierrejection_k',
+	]
+	
+	visibility = {}
+	
+	properties = [
+		
+		{
+			'type': 'int',
+			'attr': 'writeinterval',
+			'name': 'Save interval',
+			'description': 'Period for writing images to disk (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'displayinterval',
+			'name': 'GUI refresh interval',
+			'description': 'Period for updating rendering on screen (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text',
+			'attr': 'lbl_outputs',
+			'name': 'Output formats'
+		},
+		{
+			'type': 'bool',
+			'attr': 'integratedimaging',
+			'name': 'Integrated Imaging workflow',
+			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_png',
+			'name': 'PNG',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_exr',
+			'name': 'EXR',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_tga',
+			'name': 'TGA',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_flm',
+			'name': 'FLM',
+			'default': False
+		},
+		{
+			'type': 'int',
+			'attr': 'outlierrejection_k',
+			'name': 'Firefly rejection',
+			'description': 'Firefly (outlier) rejection k parameter',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+		},
+	]
+	
+	def resolution(self):
+		'''
+		Calculate the output render resolution
+		
+		Returns		tuple(2) (floats)
+		'''
+		scene = LuxManager.CurrentScene
+		
+		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
+		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
+		
+		return xr, yr
+	
+	def api_output(self):
+		'''
+		Calculate type and parameters for LuxRender Film statement
+		
+		Returns		tuple(2) (string, list) 
+		'''
+		scene = LuxManager.CurrentScene
+		
+		xr, yr = self.resolution()
+		
+		params = ParamSet()
+		
+		# Set resolution
+		params.add_integer('xresolution', int(xr))
+		params.add_integer('yresolution', int(yr))
+		
+		# ColourSpace
+		cso = self.luxrender_colorspace
+		params.add_float('gamma', cso.gamma)
+		if cso.preset:
+			cs_object = getattr(colorspace_presets, cso.preset_name)
+		else:
+			cs_object = cso
+		
+		params.add_float('colorspace_white',	[cs_object.cs_whiteX,	cs_object.cs_whiteY])
+		params.add_float('colorspace_red',		[cs_object.cs_redX,		cs_object.cs_redY])
+		params.add_float('colorspace_green',	[cs_object.cs_greenX,	cs_object.cs_greenY])
+		params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
+		
+		# Camera Response Function
+		if LUXRENDER_VERSION >= '0.8' and cso.use_crf:
+			if scene.luxrender_engine.embed_filedata:
+				from luxrender.util import bencode_file2string
+				fn = efutil.filesystem_path(cso.crf_file)
+				params.add_string('cameraresponse', os.path.basename(fn))
+				params.add_string('cameraresponse_data', bencode_file2string(fn) )
+			else:
+				params.add_string('cameraresponse', efutil.path_relative_to_export(cso.crf_file) )
+		
+		# Output types
+		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
+		params.add_bool('write_resume_flm', self.write_flm)
+		
+		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
+			# Set up params to enable z buffer and set gamma=1.0
+			params.add_string('write_exr_channels', 'RGBA')
+			params.add_bool('write_exr_halftype', False)
+			params.add_bool('write_exr_applyimaging', True)
+			params.add_bool('write_exr_ZBuf', True)
+			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
+			params.add_float('gamma', 1.0) # Linear workflow !
+		
+		params.add_bool('write_exr', self.write_exr)
+		params.add_bool('write_png', self.write_png)
+		params.add_bool('write_tga', self.write_tga)
+		
+		params.add_integer('displayinterval', self.displayinterval)
+		params.add_integer('writeinterval', self.writeinterval)
+		
+		# Halt conditions
+		if scene.luxrender_sampler.haltspp > 0:
+			params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
+		
+		if scene.luxrender_sampler.halttime > 0:
+			params.add_integer('halttime', scene.luxrender_sampler.halttime)
+		
+		if self.outlierrejection_k > 0:
+			params.add_integer('outlierrejection_k', self.outlierrejection_k)
+		
+		# update the film settings with tonemapper settings
+		params.update( self.luxrender_tonemapping.get_paramset() )
+		
+		return ('fleximage', params)
+
 def get_tonemaps():
 	
 	items =  [
@@ -460,6 +699,7 @@ class luxrender_tonemapping(declarative_property_group):
 	'''
 	
 	controls = [
+		'tm_label',
 		'type',
 		
 		# Reinhard
@@ -487,13 +727,17 @@ class luxrender_tonemapping(declarative_property_group):
 	
 	properties = [
 		{
+			'attr': 'tm_label',
+			'type': 'text',
+			'name': 'Tonemapping'
+		},
+		{
 			'type': 'enum',
 			'attr': 'type',
 			'name': 'Tonemapper',
 			'description': 'Choose tonemapping type',
 			'default': 'reinhard',
 			'items': get_tonemaps(),
-			#'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'type')
 		},
 		
 		# Reinhard
@@ -506,8 +750,7 @@ class luxrender_tonemapping(declarative_property_group):
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 25.0,
-			'soft_max': 25.0,
-			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_prescale') 
+			'soft_max': 25.0, 
 		},
 		{
 			'type': 'float',
@@ -519,7 +762,6 @@ class luxrender_tonemapping(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 25.0,
 			'soft_max': 25.0,
-			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_postscale')
 		},
 		{
 			'type': 'float',
@@ -531,7 +773,6 @@ class luxrender_tonemapping(declarative_property_group):
 			'soft_min': 0.01,
 			'max': 25.0,
 			'soft_max': 25.0,
-			# 'draw': lambda context, scene: tonemapping_live_update.update(context, scene, 'reinhard_burn')
 		},
 		
 		#Linear
@@ -561,16 +802,8 @@ class luxrender_tonemapping(declarative_property_group):
 		}
 	]
 	
-	def api_output(self, scene):
-		'''
-		scene			bpy.types.scene
-		
-		Format this class's members into a LuxRender ParamSet
-		
-		Returns tuple
-		'''
-		
-		cam = scene.camera.data
+	def get_paramset(self):
+		cam = LuxManager.CurrentScene.camera.data
 		
 		params = ParamSet()
 		
@@ -589,8 +822,5 @@ class luxrender_tonemapping(declarative_property_group):
 			
 		if self.type == 'contrast':
 			params.add_float('contrast_ywa', self.ywa)
-			
-		out = self.type, params
-		dbo('TONEMAPPING', out)
-		return out
-
+		
+		return params

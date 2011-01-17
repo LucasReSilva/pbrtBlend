@@ -42,8 +42,6 @@ from extensions_framework.engine		import ( engine_base )
 from extensions_framework				import ( util as efutil )
 
 # Exporter libs
-from luxrender.export.film				import ( resolution )
-
 from luxrender.outputs					import ( LuxManager, LuxFilmDisplay )
 from luxrender.outputs					import ( LuxLog )
 from luxrender.outputs.pure_api			import ( LUXRENDER_VERSION )
@@ -52,15 +50,19 @@ from luxrender.outputs.pure_api			import ( LUXRENDER_VERSION )
 from luxrender.properties.accelerator	import ( luxrender_accelerator )
 from luxrender.properties.camera 		import ( luxrender_camera,
 												 luxrender_colorspace,
+												 luxrender_film,
 												 luxrender_tonemapping )
 from luxrender.properties.engine		import ( luxrender_engine, luxrender_networking )
 from luxrender.properties.filter		import ( luxrender_filter )
 from luxrender.properties.integrator	import ( luxrender_integrator )
-from luxrender.properties.lamp			import ( luxrender_lamp )
+from luxrender.properties.lamp			import ( luxrender_lamp,
+												 luxrender_lamp_point,
+												 luxrender_lamp_sun,
+												 luxrender_lamp_spot,
+												 luxrender_lamp_hemi,
+												 luxrender_lamp_area )
 from luxrender.properties.material		import ( luxrender_material,
-												 luxrender_emission,
-												 luxrender_volume_data,
-												 luxrender_volumes,
+												 luxrender_mat_compositing,
 												 luxrender_mat_carpaint,
 												 luxrender_mat_glass,
 												 luxrender_mat_glass2,
@@ -71,12 +73,16 @@ from luxrender.properties.material		import ( luxrender_material,
 												 luxrender_mat_matte,
 												 luxrender_mat_mattetranslucent,
 												 luxrender_mat_metal,
+												 luxrender_mat_scatter,
 												 luxrender_mat_shinymetal,
 												 luxrender_mat_mirror,
 												 luxrender_mat_mix,
 												 luxrender_mat_null,
-												 luxrender_mat_velvet )
+												 luxrender_mat_velvet,
+												 luxrender_volume_data,
+												 luxrender_volumes )
 from luxrender.properties.mesh			import ( luxrender_mesh )
+from luxrender.properties.object		import ( luxrender_emission )
 from luxrender.properties.texture		import ( luxrender_texture,
 												 luxrender_tex_bilerp,
 												 luxrender_tex_blackbody,
@@ -98,6 +104,7 @@ from luxrender.properties.texture		import ( luxrender_texture,
 												 luxrender_tex_sellmeier,
 												 luxrender_tex_scale,
 												 luxrender_tex_sopra,
+												 luxrender_tex_tabulateddata,
 												 luxrender_tex_transform,
 												 luxrender_tex_uv,
 												 luxrender_tex_windy,
@@ -110,8 +117,10 @@ from luxrender.ui						import ( render_panels		as ui_render_panels )
 from luxrender.ui						import ( camera				as ui_camera )
 from luxrender.ui						import ( image				as ui_image )
 from luxrender.ui						import ( lamps				as ui_lamps )
-from luxrender.ui						import ( meshes				as ui_meshes )
+from luxrender.ui						import ( mesh				as ui_mesh )
+from luxrender.ui						import ( object				as ui_object )
 from luxrender.ui.materials				import ( main				as ui_materials,
+												 compositing		as ui_materials_compositing,
 												 carpaint			as ui_materials_carpaint,
 												 glass				as ui_materials_glass,
 												 glass2				as ui_materials_glass2,
@@ -124,9 +133,10 @@ from luxrender.ui.materials				import ( main				as ui_materials,
 												 metal				as ui_materials_metal,
 												 mirror				as ui_materials_mirror,
 												 mix				as ui_materials_mix,
+												 null				as ui_materials_null,
+												 scatter			as ui_materials_scatter,
 												 shinymetal			as ui_materials_shinymetal,
 												 velvet				as ui_materials_velvet,
-												 emission			as ui_materials_emission,
 												 volumes			as ui_materials_volumes )
 from luxrender.ui.textures				import ( main				as ui_textures,
 												 bilerp				as ui_texture_bilerp,
@@ -152,6 +162,7 @@ from luxrender.ui.textures				import ( main				as ui_textures,
 												 windy				as ui_texture_windy,
 												 wrinkled			as ui_texture_wrinkled,
 												 mapping			as ui_texture_mapping,
+												 tabulateddata		as ui_texture_tabulateddata,
 												 transform			as ui_texture_transform )
 
 # Exporter Operators
@@ -190,6 +201,7 @@ def blender_texture_poll(cls, context):
 
 import properties_texture
 properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
+# properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add('luxrender')
 blender_texture_ui_list = [
 	properties_texture.TEXTURE_PT_blend,
 	properties_texture.TEXTURE_PT_clouds,
@@ -232,7 +244,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	bl_idname			= 'luxrender'
 	bl_label			= 'LuxRender'
-	bl_use_preview		= True #(LUXRENDER_VERSION >= '0.8')
+	bl_use_preview		= True
 	
 	LuxManager			= None
 	render_update_timer	= None
@@ -250,12 +262,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Scene', luxrender_volumeintegrator),
 		('Scene', luxrender_volumes),
 		('Camera', luxrender_camera),
-		('Camera', luxrender_colorspace),
-		('Camera', luxrender_tonemapping),
+		('luxrender_camera', luxrender_film),
+		('luxrender_film', luxrender_colorspace),
+		('luxrender_film', luxrender_tonemapping),
 		('Lamp', luxrender_lamp),
+		('luxrender_lamp', luxrender_lamp_point),
+		('luxrender_lamp', luxrender_lamp_sun),
+		('luxrender_lamp', luxrender_lamp_spot),
+		('luxrender_lamp', luxrender_lamp_hemi),
+		('luxrender_lamp', luxrender_lamp_area),
 		('Mesh', luxrender_mesh),
-		('Material', luxrender_emission),
 		('Material', luxrender_material),
+		('luxrender_material', luxrender_mat_compositing),
 		('luxrender_material', luxrender_mat_carpaint),
 		('luxrender_material', luxrender_mat_glass),
 		('luxrender_material', luxrender_mat_glass2),
@@ -266,11 +284,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_material', luxrender_mat_matte),
 		('luxrender_material', luxrender_mat_mattetranslucent),
 		('luxrender_material', luxrender_mat_metal),
+		('luxrender_material', luxrender_mat_scatter),
 		('luxrender_material', luxrender_mat_shinymetal),
 		('luxrender_material', luxrender_mat_mirror),
 		('luxrender_material', luxrender_mat_mix),
 		('luxrender_material', luxrender_mat_null),
 		('luxrender_material', luxrender_mat_velvet),
+		('Object', luxrender_emission),
 		(None, luxrender_volume_data),		# call init_properties, but don't create instance
 		('Texture', luxrender_texture),
 		('luxrender_texture', luxrender_tex_bilerp),
@@ -293,6 +313,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_texture', luxrender_tex_sellmeier),
 		('luxrender_texture', luxrender_tex_scale),
 		('luxrender_texture', luxrender_tex_sopra),
+		('luxrender_texture', luxrender_tex_tabulateddata),
 		('luxrender_texture', luxrender_tex_transform),
 		('luxrender_texture', luxrender_tex_uv),
 		('luxrender_texture', luxrender_tex_windy),
@@ -303,7 +324,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 	
 	def render(self, scene):
 		'''
-		context: bpy.types.scene
+		scene:	bpy.types.Scene
 		
 		Export the given scene to LuxRender.
 		Choose from one of several methods depending on what needs to be rendered.
@@ -312,14 +333,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		'''
 		
 		with self.render_lock:	# just render one thing at a time
-		
+			prev_dir = os.getcwd()
+			
 			if scene is None:
 				bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
 				return
-			
-			# Refresh the scene as early as possible in render process
-			# Removed - causes material preview infinite loop
-			# scene.frame_set(scene.frame_current)
 			
 			if scene.name == 'preview':
 				self.render_preview(scene)
@@ -333,14 +351,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				return
 			
 			self.render_start(scene)
+			os.chdir(prev_dir)
 	
 	def render_preview(self, scene):
-		from extensions_framework.util import path_relative_to_export
-		prev_dir = os.getcwd()
-		tmp_path = efutil.temp_directory()
-		efutil.export_path = path_relative_to_export(tmp_path)
-		self.output_dir = tmp_path
-		os.chdir( tmp_path )
+		self.output_dir = efutil.filesystem_path( bpy.app.tempdir )
+		
+		if self.output_dir[-1] != '/':
+			self.output_dir += '/'
+		
+		efutil.export_path = self.output_dir
+		#print('(2) export_path is %s' % efutil.export_path)
+		os.chdir( self.output_dir )
 		
 		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
 		if not PYLUX_AVAILABLE:
@@ -358,14 +379,26 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					if not object.name in objects_mats.keys(): objects_mats[object] = []
 					objects_mats[object].append(mat)
 		
+		PREVIEW_TYPE = None		# 'MATERIAL' or 'TEXTURE'
+		
 		# find objects that are likely to be the preview objects
 		preview_objects = [o for o in objects_mats.keys() if o.name.startswith('preview')]
-		if len(preview_objects) < 1:
+		if len(preview_objects) > 0:
+			PREVIEW_TYPE = 'MATERIAL'
+		else:
+			preview_objects = [o for o in objects_mats.keys() if o.name.startswith('texture')]
+			if len(preview_objects) > 0:
+				PREVIEW_TYPE = 'TEXTURE'
+		
+		if PREVIEW_TYPE == None:
 			return
+		
+		# TODO: scene setup based on PREVIEW_TYPE
 		
 		# find the materials attached to the likely preview object
 		likely_materials = objects_mats[preview_objects[0]]
 		if len(likely_materials) < 1:
+			print('no preview materials')
 			return
 		
 		pm = likely_materials[0]
@@ -394,7 +427,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			export_materials.ExportedTextures.clear()
 			
 			from luxrender.export import preview_scene
-			xres, yres = resolution(scene)
+			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution()
+			xres, yres = int(xres), int(yres)
 			
 			# Don't render the tiny images
 			if xres <= 96:
@@ -439,12 +473,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					interruptible_sleep(1.8) # up to HALTSPP every 2 seconds in sum
 					
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.printableStatistics(False)))
-				preview_context.saveEXR('luxblend25-preview.exr', False, False, True)
 				
 				result = self.begin_result(0, 0, xres, yres)
 				lay = result.layers[0]
-				# TODO: use the framebuffer direct from pylux when Blender's API supports it
-				lay.load_from_file('luxblend25-preview.exr')
+				
+				lay.rect, no_z_buffer  = preview_context.blenderCombinedDepthRects()
+				
 				self.end_result(result)
 		except Exception as exc:
 			LuxLog('Preview aborted: %s' % exc)
@@ -454,10 +488,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		preview_context.cleanup()
 		
 		LM.reset()
-		os.chdir(prev_dir)
 	
 	def render_scene(self, scene):
-		
 		scene_path = efutil.filesystem_path(scene.render.filepath)
 		if os.path.isdir(scene_path):
 			self.output_dir = scene_path
@@ -471,9 +503,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		#print('(1) export_path is %s' % efutil.export_path)
 		os.chdir(self.output_dir)
 		
-		if scene.luxrender_engine.export_type == 'INT' and not scene.luxrender_engine.write_files:
-			api_type = 'API'
+		if scene.luxrender_engine.export_type == 'INT': # and not scene.luxrender_engine.write_files:
 			write_files = scene.luxrender_engine.write_files
+			if write_files:
+				api_type = 'FILE'
+			else:
+				api_type = 'API'
 		elif scene.luxrender_engine.export_type == 'LFC':
 			api_type = 'LUXFIRE_CLIENT'
 			write_files = False
@@ -509,13 +544,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		if 'CANCELLED' in export_result:
 			return False
 		
-		if scene.luxrender_engine.export_type == 'INT' and scene.luxrender_engine.linearimaging:
-			self.output_file = efutil.path_relative_to_export(
-				'%s/%s.exr' % (self.output_dir, output_filename)
-			)
-		else:
+		# Look for an output image to load
+		if scene.camera.data.luxrender_camera.luxrender_film.write_png:
 			self.output_file = efutil.path_relative_to_export(
 				'%s/%s.png' % (self.output_dir, output_filename)
+			)
+		elif scene.camera.data.luxrender_camera.luxrender_film.write_tga:
+			self.output_file = efutil.path_relative_to_export(
+				'%s/%s.tga' % (self.output_dir, output_filename)
+			)
+		elif scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+			self.output_file = efutil.path_relative_to_export(
+				'%s/%s.exr' % (self.output_dir, output_filename)
 			)
 		
 		return True
@@ -530,8 +570,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			os.remove(self.output_file)
 		
 		internal	= (scene.luxrender_engine.export_type in ['INT', 'LFC'])
-		write_files	= scene.luxrender_engine.write_files
-		render		= scene.luxrender_engine.render
+		write_files	= scene.luxrender_engine.write_files and (scene.luxrender_engine.export_type in ['INT', 'EXT'])
+		render		= scene.luxrender_engine.render or (scene.luxrender_engine.export_type in ['LFC'])
 		
 		# Handle various option combinations using simplified variable names !
 		if internal:
@@ -592,8 +632,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				self.update_stats('', 'LuxRender: Rendering warmup')
 				self.LuxManager.start()
 				
-				# Update the image from disk only as often as it is written
-				self.LuxManager.fb_thread.set_kick_period( scene.luxrender_engine.writeinterval )
+				self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.camera.data.luxrender_camera.luxrender_film.integratedimaging
+				
+				if scene.camera.data.luxrender_camera.luxrender_film.integratedimaging:
+					# Use the GUI update interval
+					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.displayinterval )
+				else:
+					# Update the image from disk only as often as it is written
+					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval )
 				
 				# Start the stats and framebuffer threads and add additional threads to Lux renderer
 				self.LuxManager.start_worker_threads(self)
@@ -668,18 +714,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					for k, v in config_updates.items():
 						efutil.write_config_value('luxrender', 'defaults', k, v)
 				except Exception as err:
-					LuxLog('Saving LuxRender config failed: %s' % err)
-					return False
-				
+					LuxLog('WARNING: Saving LuxRender config failed, please set your user scripts dir: %s' % err)
 				
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 				framebuffer_thread = LuxFilmDisplay({
-					'resolution': resolution(scene),
+					'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
 					'RE': self,
 				})
-				framebuffer_thread.set_kick_period( scene.luxrender_engine.writeinterval ) 
+				framebuffer_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval ) 
 				framebuffer_thread.start()
 				while luxrender_process.poll() == None and not self.test_break():
 					self.render_update_timer = threading.Timer(1, self.process_wait_timer)

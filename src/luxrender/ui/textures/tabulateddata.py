@@ -26,25 +26,13 @@
 #
 import bpy
 
-from properties_data_camera import CameraButtonsPanel
+from luxrender.ui.textures import luxrender_texture_base
 
-from extensions_framework.ui import property_group_renderer
-
-class camera_panel(CameraButtonsPanel, property_group_renderer):
-	COMPAT_ENGINES = {'luxrender'}
+class ui_texture_tabulateddata(luxrender_texture_base, bpy.types.Panel):
+	bl_label = 'LuxRender Tabulated Data Texture'
 	
-class camera(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Camera'
+	LUX_COMPAT = {'tabulateddata'}
 	
 	display_property_groups = [
-		( ('camera',), 'luxrender_camera' )
-	]
-
-class film(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Film'
-	
-	display_property_groups = [
-		( ('camera','luxrender_camera'), 'luxrender_film' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_colorspace' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_tonemapping' ),
+		( ('texture', 'luxrender_texture'), 'luxrender_tex_tabulateddata' )
 	]

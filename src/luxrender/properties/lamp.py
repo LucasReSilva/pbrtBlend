@@ -25,13 +25,15 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_Operator as LO, Logic_OR as O, Logic_AND as A
+import extensions_framework.util as efutil
+from extensions_framework.validate import Logic_Operator as LO
 
 from luxrender.properties.texture import ColorTextureParameter
+from luxrender.export import ParamSet
 
 class LampColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):
-		return lambda s,c: getattr(c, 'luxrender_lamp')
+		return lambda s,c: getattr(c, 'luxrender_lamp_%s'%s.lamp.type.lower())
 	
 	def texture_collection_finder(self):
 		return lambda s,c: s.object.data
@@ -44,36 +46,6 @@ class LampColorTextureParameter(ColorTextureParameter):
 
 TC_L = LampColorTextureParameter('L', 'Colour')
 
-def lamp_visibility():
-	vis = {
-		'power':				{ 'type': 'AREA'},
-		'efficacy':				{ 'type': 'AREA'},
-		
-		'turbidity':			{ 'type': 'SUN' },
-		'sunsky_type':			{ 'type': 'SUN' },
-		'sunsky_advanced':		{ 'type': 'SUN' },
-		'horizonbrightness':	{ 'type': 'SUN', 'sunsky_advanced': True },
-		'horizonsize':			{ 'type': 'SUN', 'sunsky_advanced': True },
-		'sunhalobrightness':	{ 'type': 'SUN', 'sunsky_advanced': True },
-		'sunhalosize':			{ 'type': 'SUN', 'sunsky_advanced': True },
-		'backscattering':		{ 'type': 'SUN', 'sunsky_advanced': True },
-		
-		'infinite_map':			{ 'type': 'HEMI' },
-		'mapping_type':			{ 'type': 'HEMI', 'infinite_map': LO({'!=': ''}) },
-		
-		'L_color':				{ 'type': O(['POINT', 'SPOT', 'HEMI', 'AREA']) },
-		'L_usecolortexture':	{ 'type': O(['POINT', 'SPOT', 'AREA']) },
-		'L_colortexture':		{ 'type': O(['POINT', 'SPOT', 'AREA']), 'L_usecolortexture': True }
-	}
-	
-	# Add TC_L manually, because we need to exclude it from SUN, and bits of it from HEMI
-	#vis.update(TC_L.get_visibility())
-	
-	return vis
-
-# TODO: adapt values written to d based on simple/advanced views
-
-# TODO: check parameter completeness against Lux API
 class luxrender_lamp(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
@@ -81,10 +53,54 @@ class luxrender_lamp(declarative_property_group):
 	lamp object.
 	'''
 	
-	controls = TC_L.get_controls() + [
+	controls = [
 		'importance', 'lightgroup',
-		['power','efficacy'],
+	]
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'lightgroup',
+			'name': 'Light Group',
+			'description': 'Name of group to put this light in',
+			'default': 'default'
+		},
 		
+		{
+			'type': 'float',
+			'attr': 'importance',
+			'name': 'Importance',
+			'description': 'Light source importance',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e3,
+			'soft_max': 1e3,
+		},
+	]
+	
+	def get_paramset(self):
+		params = ParamSet()
+		params.add_float('importance', self.importance)
+		return params
+
+class luxrender_lamp_basic(declarative_property_group):
+	controls = TC_L.controls
+	visibility = TC_L.visibility
+	properties = TC_L.properties
+	
+	def get_paramset(self):
+		params = ParamSet()
+		params.update( TC_L.get_paramset(self) )
+		return params
+
+class luxrender_lamp_point(luxrender_lamp_basic):
+	pass
+class luxrender_lamp_spot(luxrender_lamp_basic):
+	pass
+
+class luxrender_lamp_sun(declarative_property_group):
+	controls = [
 		'sunsky_type',
 		'turbidity',
 		'sunsky_advanced',
@@ -93,60 +109,17 @@ class luxrender_lamp(declarative_property_group):
 		'sunhalobrightness',
 		'sunhalosize',
 		'backscattering',
-		
-		'infinite_map',
-		'mapping_type',
 	]
 	
-	visibility = lamp_visibility()
+	visibility = {
+		'horizonbrightness':	{ 'sunsky_advanced': True },
+		'horizonsize':			{ 'sunsky_advanced': True },
+		'sunhalobrightness':	{ 'sunsky_advanced': True },
+		'sunhalosize':			{ 'sunsky_advanced': True },
+		'backscattering':		{ 'sunsky_advanced': True },
+	}
 	
-	properties = TC_L.get_properties() + [
-		{
-			# hidden value for visibility control
-			'type': 'string',
-			'attr': 'type',
-			'default': 'UNSUPPORTED',
-		},
-		{
-			'type': 'string',
-			'attr': 'lightgroup',
-			'name': 'Light Group',
-			'description': 'Name of group to put this light in',
-			'default': 'default'
-		},
-		{
-			'type': 'float',
-			'attr': 'power',
-			'name': 'Power',
-			'default': 100.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e6,
-			'soft_max': 1e6,
-		},   
-		{
-			'type': 'float',
-			'attr': 'efficacy',
-			'name': 'Efficacy',
-			'default': 17.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e6,
-			'soft_max': 1e6,
-		},
-		{
-			'type': 'float',
-			'attr': 'importance',
-			'name': 'Importance',
-			'description': 'Light source importance',
-			'default': 0.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e3,
-			'soft_max': 1e3,
-		},
-		
-		# Sun
+	properties = [
 		{
 			'type': 'float',
 			'attr': 'turbidity',
@@ -225,9 +198,84 @@ class luxrender_lamp(declarative_property_group):
 			'max': 10.0,
 			'soft_max': 10.0
 		},
+	]
+	
+	def get_paramset(self):
+		params = ParamSet()
 		
+		params.add_float('turbidity', self.turbidity)
 		
-		# HEMI / INFINITE
+		if self.sunsky_advanced:
+			params.add_float('horizonbrightness', self.horizonbrightness)
+			params.add_float('horizonsize', self.horizonsize)
+			params.add_float('sunhalobrightness', self.sunhalobrightness)
+			params.add_float('sunhalosize', self.sunhalosize)
+			params.add_float('backscattering', self.backscattering)
+		
+		return params
+
+class luxrender_lamp_area(declarative_property_group):
+	controls = TC_L.controls + [
+		'power',
+		'efficacy',
+	]
+	
+	visibility = TC_L.visibility
+	
+	properties = TC_L.properties + [
+		# nsamples
+		{
+			'type': 'float',
+			'attr': 'power',
+			'name': 'Power',
+			'default': 100.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e6,
+			'soft_max': 1e6,
+		},
+		{
+			'type': 'float',
+			'attr': 'efficacy',
+			'name': 'Efficacy',
+			'default': 17.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e6,
+			'soft_max': 1e6,
+		},
+	]
+	
+	def get_paramset(self):
+		params = ParamSet()
+		params.add_float('power', self.power)
+		params.add_float('efficacy', self.efficacy)
+		params.update( TC_L.get_paramset(self) )
+		return params
+
+class luxrender_lamp_hemi(declarative_property_group):
+	controls = [
+		[0.323, 'L_colorlabel', 'L_color'],
+		'infinite_map',
+		'mapping_type',
+		'hdri_multiply'
+	]
+	
+	visibility = {
+		'mapping_type':		{ 'infinite_map': LO({'!=': ''}) },
+		'hdri_multiply':	{ 'infinite_map': LO({'!=': ''}) },
+	}
+	
+	properties = TC_L.properties + [
+		# nsamples
+		# gamma
+		{
+			'type': 'bool',
+			'attr': 'hdri_multiply',
+			'name': 'Multiply by colour',
+			'description': 'Mutiply the HDRI map by the lamp colour',
+			'default': False
+		},
 		{
 			'type': 'string',
 			'subtype': 'FILE_PATH',
@@ -248,3 +296,15 @@ class luxrender_lamp(declarative_property_group):
 			]
 		},
 	]
+	
+	def get_paramset(self):
+		params = ParamSet()
+		
+		if self.infinite_map != '':
+			params.add_string('mapname', efutil.path_relative_to_export(self.infinite_map) )
+			params.add_string('mapping', self.mapping_type)
+			
+		if self.infinite_map == '' or self.hdri_multiply:
+			params.add_color('L', self.L_color)
+		
+		return params

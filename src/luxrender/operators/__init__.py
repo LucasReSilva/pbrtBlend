@@ -38,7 +38,6 @@ from extensions_framework import util as efutil
 from luxrender.outputs import LuxManager
 
 from luxrender.export import get_worldscale
-from luxrender.export import film		as export_film
 from luxrender.export import lights		as export_lights
 from luxrender.export import materials	as export_materials
 from luxrender.export import geometry	as export_geometry
@@ -47,21 +46,13 @@ from luxrender.outputs.pure_api			import LUXRENDER_VERSION
 
 # Per-IDPropertyGroup preset handling
 
-def try_preset_path_create(preset_subdir):
-	target_path = os.path.join(bpy.utils.preset_paths('')[0], preset_subdir)
-	if not os.path.exists(target_path):
-		os.makedirs(target_path)
-
 class LUXRENDER_MT_base(object):
 	preset_operator = "script.execute_preset"
 	def draw(self, context):
-		try_preset_path_create(self.preset_subdir)
 		return bpy.types.Menu.draw_preset(self, context)
 
 class LUXRENDER_OT_preset_base(AddPresetBase):
-	def execute(self, context):
-		try_preset_path_create(self.preset_subdir)
-		return super().execute(context)
+	pass
 
 class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Engine Presets"
@@ -116,9 +107,10 @@ class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Opera
 	def execute(self, context):
 		pv = [
 			'bpy.context.material.luxrender_material.%s'%v['attr'] for v in bpy.types.luxrender_material.get_exportable_properties()
-		] + [
-			'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
 		]
+		# + [
+		#	'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
+		#]
 		
 		# store only the sub-properties of the selected lux material type
 		lux_type = context.material.luxrender_material.type
@@ -152,7 +144,7 @@ class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operat
 		lux_type = context.texture.luxrender_texture.type
 		sub_type = getattr(bpy.types, 'luxrender_tex_%s' % lux_type)
 		
-		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset()
+		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset(context.scene)
 		if '2DMAPPING' in features:
 			pv.extend([
 				'bpy.context.texture.luxrender_texture.luxrender_tex_mapping.%s'%v['attr'] for v in bpy.types.luxrender_tex_mapping.get_exportable_properties()
@@ -214,7 +206,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	scene			= bpy.props.StringProperty(options={'HIDDEN'}, default='')		# Specify scene to export
 	
 	def invoke(self, context, event):
-		context.window_manager.add_fileselect(self)
+		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
@@ -228,8 +220,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			return {'CANCELLED'}
 		
 		# Force scene update; NB, scene.update() doesn't work
-		# Removed - causes material preview infinite loop
-		# scene.frame_set( scene.frame_current )
+		scene.frame_set( scene.frame_current )
 		
 		# Set up the rendering context
 		self.report({'INFO'}, 'Creating LuxRender context')
@@ -254,7 +245,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		])
 		
 		efutil.export_path = lxs_filename
-		#print('(2) export_path is %s' % efutil.export_path)
+		#print('(3) export_path is %s' % efutil.export_path)
 		
 		if self.properties.api_type == 'FILE':
 			
@@ -324,9 +315,9 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 					lux_context.coordinateSystem('CameraEndTransform')
 					lux_context.transformEnd()
 					is_cam_animated = True
-			lux_context.lookAt(	*export_film.lookAt(scene)	)
+			lux_context.lookAt(	*scene.camera.data.luxrender_camera.lookAt(scene.camera) )
 			lux_context.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
-			lux_context.film(	*export_film.film(scene)	)
+			lux_context.film(	*scene.camera.data.luxrender_camera.luxrender_film.api_output()	)
 			
 			lux_context.worldBegin()
 			
@@ -341,7 +332,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			self.report({'INFO'}, 'Exporting materials')
 			for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
 				for mat in export_materials.get_instance_materials(object):
-					if mat is not None: mat.luxrender_material.export(scene, lux_context, mat, mode='indirect')
+					if mat is not None and mat.name not in export_materials.ExportedMaterials.exported_material_names:
+						mat.luxrender_material.export(lux_context, mat, mode='indirect')
 			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:
@@ -351,11 +343,15 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxo):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.GEOM)
-			export_geometry.write_lxo(self, lux_context, scene)
+			export_geometry.write_lxo(lux_context)
+		
+		# Make sure lamp textures go back into main file, not geom file
+		if self.properties.api_type in ['FILE']:
+			lux_context.set_output_file(Files.MAIN)
 		
 		self.report({'INFO'}, 'Exporting lights')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
-			if export_lights.lights(lux_context, scene) == False:
+			if export_lights.lights(lux_context) == False:
 				self.report({'ERROR'}, 'No lights in scene!')
 				return {'CANCELLED'}
 		

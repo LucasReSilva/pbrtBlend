@@ -26,7 +26,7 @@
 #
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
 from luxrender.export					import ParamSet
 from luxrender.outputs.pure_api			import PYLUX_AVAILABLE
@@ -50,6 +50,7 @@ def engine_controls():
 		'binary_name',
 		'write_files',
 		['write_lxs', 'write_lxm', 'write_lxo'],
+		# 'embed_filedata', # Disabled pending acceptance into LuxRender core
 		
 		# Other mesh types disabled because cannot set active object
 		# to pass to PLY operator. Even so, Lux fails to load the PLY
@@ -61,11 +62,8 @@ def engine_controls():
 		# 'priority',
 		['threads_auto', 'threads'],
 		# ['rgc', 'colclamp'],
-		# ['meshopt', 'nolg'],
+		# 'nolg',
 		
-		'writeinterval',
-		'displayinterval',
-		'linearimaging'
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
@@ -85,19 +83,15 @@ class luxrender_engine(declarative_property_group):
 	
 	visibility = {
 		'write_files':		{ 'export_type': 'INT' },
+		'write_lxs':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'write_lxm':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'write_lxo':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':		{ 'export_type': 'EXT' },
 		'render':			O([{'write_files': True}, {'export_type': 'EXT'}]),
 		'install_path':		{ 'render': True, 'export_type': 'EXT' },
-		'write_lxs':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
-		'write_lxm':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
-		'write_lxo':		O([{ 'export_type': 'EXT' }, { 'write_files': True }]),
 		'threads_auto':		A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':			A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
 		'priority':			{ 'export_type': 'EXT', 'render': True },
-		
-		# displayinterval is applicable only to the Lux GUI
-		'displayinterval':	{ 'export_type': 'EXT', 'binary_name': 'luxrender' },
-		'linearimaging':	{ 'export_type': 'INT' },
 	}
 	
 	properties = [
@@ -200,6 +194,14 @@ class luxrender_engine(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'bool',
+			'attr': 'embed_filedata',
+			'name': 'Embed File data',
+			'description': 'Embed all external files (images etc) inline into the exporter output',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
 			'type': 'enum',
 			'attr': 'mesh_type',
 			'name': 'Mesh Export type',
@@ -241,46 +243,11 @@ class luxrender_engine(declarative_property_group):
 		},
 		{
 			'type': 'bool',
-			'attr': 'meshopt',
-			'name': 'Optimise Meshes',
-			'description': 'Output optimised mesh data',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
 			'attr': 'nolg',
 			'name': 'No Lightgroups',
 			'description': 'Combine all light groups',
 			'default': False,
 			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'writeinterval',
-			'name': 'Save interval',
-			'description': 'Period for writing images to disk (seconds)',
-			'default': 10,
-			'min': 2,
-			'soft_min': 2,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'displayinterval',
-			'name': 'GUI refresh interval',
-			'description': 'Period for updating rendering on screen (seconds)',
-			'default': 10,
-			'min': 2,
-			'soft_min': 2,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'linearimaging',
-			'name': 'Linear Imaging workflow',
-			'description': 'Use linear imaging workflow for internal rendering using EXR images',
-			'default': False
 		},
 	]
 	

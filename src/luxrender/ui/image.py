@@ -53,7 +53,7 @@ class luxrender_ui_rendering_controls(property_group_renderer, bpy.types.Panel):
 		return False
 
 	display_property_groups = [
-		( ('scene', 'camera', 'data'), 'luxrender_tonemapping' )
+		( ('scene', 'camera', 'data', 'luxrender_camera', 'luxrender_film'), 'luxrender_tonemapping' )
 	]
 	
 	def draw(self, context):
@@ -70,7 +70,7 @@ class luxrender_ui_rendering_controls(property_group_renderer, bpy.types.Panel):
 		
 		if self.ctx != None and self.ctx.API_TYPE == 'PURE':
 			pylux = self.ctx.PYLUX
-			tm_data = context.scene.camera.data.luxrender_tonemapping
+			tm_data = context.scene.camera.data.luxrender_camera.luxrender_film.luxrender_tonemapping
 			tm_map = {
 				'reinhard':		pylux.FlexImageFilm.TonemapKernels.Reinhard,
 				'linear':		pylux.FlexImageFilm.TonemapKernels.Linear,

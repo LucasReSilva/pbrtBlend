@@ -141,6 +141,14 @@ class luxrender_filter(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'bool',
+			'attr': 'supersample',
+			'name': 'Supersample',
+			'description': 'Use filter super-sampling',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
 			'type': 'float',
 			'attr': 'tau',
 			'name': 'Tau',
@@ -162,6 +170,9 @@ class luxrender_filter(declarative_property_group):
 		'''
 		
 		params = ParamSet()
+		
+		if self.filter == 'mitchell':
+			params.add_bool('supersample', self.supersample)
 		
 		if self.advanced:
 			params.add_float('xwidth', self.xwidth)

@@ -28,17 +28,16 @@ from math import degrees
 
 import mathutils
 
-from extensions_framework import util as efutil
-
+from luxrender.outputs import LuxManager
 from luxrender.outputs.file_api import Files
 from luxrender.properties import dbo
 from luxrender.export import ParamSet, get_worldscale, matrix_to_list
-from luxrender.export.materials import add_texture_parameter
 
 def attr_light(lux_context, name, group, type, params, transform=None, portals=[]):
 	'''
 	lux_context		pylux.Context
 	name			string
+	group			string LightGroup name
 	type			string
 	params			dict
 	transform		None or list
@@ -70,47 +69,27 @@ def attr_light(lux_context, name, group, type, params, transform=None, portals=[
 	else:
 		lux_context.attributeEnd()
 
-def exportLights(lux_context, ob, matrix, portals = []):
+def exportLight(lux_context, ob, matrix, portals = []):
 	light = ob.data
 		
 	# Params common to all light types
-	
 	light_params = ParamSet() \
 		.add_float('gain', light.energy) \
 		.add_float('importance', light.luxrender_lamp.importance)
 	
+	# Params from light sub-types
+	light_params.update( getattr(light.luxrender_lamp, 'luxrender_lamp_%s'%light.type.lower() ).get_paramset() )
+	
+	# Other lamp params from lamp object
 	if light.type == 'SUN':
 		invmatrix = mathutils.Matrix(matrix).invert()
 		light_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
-		light_params.add_float('turbidity', light.luxrender_lamp.turbidity)
-		# nsamples
-		# relsize (sun only)
-		if light.luxrender_lamp.sunsky_advanced:
-			light_params.add_float('horizonbrightness', light.luxrender_lamp.horizonbrightness)
-			light_params.add_float('horizonsize', light.luxrender_lamp.horizonsize)
-			light_params.add_float('sunhalobrightness', light.luxrender_lamp.sunhalobrightness)
-			light_params.add_float('sunhalosize', light.luxrender_lamp.sunhalosize)
-			light_params.add_float('backscattering', light.luxrender_lamp.backscattering)
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.sunsky_type, light_params, portals=portals)
+		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
 		return True
-	
-	# all lights apart from sun + sky have "color L", but HEMI/infinite cannot be textured L
-	write_textured_L = True
 	
 	if light.type == 'HEMI':
-		# don't apply texture to L color for HEMI/infinite
-		write_textured_L = False
-		light_params.add_color('L', light.luxrender_lamp.L_color)
-		if light.luxrender_lamp.infinite_map != '':
-			light_params.add_string('mapname', efutil.path_relative_to_export(light.luxrender_lamp.infinite_map) )
-			light_params.add_string('mapping', light.luxrender_lamp.mapping_type)
-		# nsamples
-		# gamma
 		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
-	
-	if write_textured_L:
-		light_params.update( add_texture_parameter(lux_context, 'L', 'color', light.luxrender_lamp) )
 	
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5
@@ -128,12 +107,8 @@ def exportLights(lux_context, ob, matrix, portals = []):
 		return True
 	
 	if light.type == 'AREA':
-		light_params.add_float('power', light.luxrender_lamp.power)
-		light_params.add_float('efficacy', light.luxrender_lamp.efficacy)
-		
 		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
 		light_params.add_float('gain', light.energy * (get_worldscale(as_scalematrix=False)**2))
-		# nsamples
 		lux_context.attributeBegin(ob.name, file=Files.MAIN)
 		lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
 		lux_context.lightGroup(light.luxrender_lamp.lightgroup, [])
@@ -170,11 +145,9 @@ def exportLights(lux_context, ob, matrix, portals = []):
 # lights(lux_context, scene)
 # MAIN export function
 #-------------------------------------------------
-def lights(lux_context, scene):
+def lights(lux_context):
 	'''
 	lux_context		pylux.Context
-	scene			bpy.types.scene
-	
 	Iterate over the given scene's light sources,
 	and export the compatible ones to the context lux_context.
 	
@@ -182,25 +155,25 @@ def lights(lux_context, scene):
 	were exported.
 	'''
 	
-	sel = scene.objects
 	have_light = False
-	
 	portal_shapes = []
 	
-	for ob in sel:
+	# First gather info about portals
+	for ob in LuxManager.CurrentScene.objects:
 		if ob.type != 'MESH':
 			continue
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-		if not ob.is_visible(scene) or ob.hide_render:
+		if not ob.is_visible(LuxManager.CurrentScene) or ob.hide_render:
 			continue
 		
 		if ob.data.luxrender_mesh.portal:
 			portal_shapes.append(ob.data.name)
 	
-	for ob in sel:
+	# Then iterate for lights
+	for ob in LuxManager.CurrentScene.objects:
 		
-		if not ob.is_visible(scene) or ob.hide_render:
+		if not ob.is_visible(LuxManager.CurrentScene) or ob.hide_render:
 			continue
 		
 		# skip dupli (child) objects when they are not lamps
@@ -211,28 +184,24 @@ def lights(lux_context, scene):
 		# to support a mesh/object which got lamp as dupli object
 		if ob.is_duplicator and ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
 			# create dupli objects
-			ob.create_dupli_list(scene)
+			ob.create_dupli_list(LuxManager.CurrentScene)
 
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light |= exportLights(lux_context, dupli_ob.object, dupli_ob.matrix_world, portal_shapes)
+				have_light |= exportLight(lux_context, dupli_ob.object, dupli_ob.matrix_world, portal_shapes)
 
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
 		else:
 			if ob.type == 'LAMP':
-				have_light |= exportLights(lux_context, ob, ob.matrix_world, portal_shapes)
+				have_light |= exportLight(lux_context, ob, ob.matrix_world, portal_shapes)
 		
 		if ob.type == 'MESH':
 			# now check for emissive materials on ob
-			for im in ob.material_slots:
-				if hasattr(im.material, 'luxrender_emission'):
-					have_light |= im.material.luxrender_emission.use_emission
-			for m in ob.data.materials:
-				if hasattr(m, 'luxrender_emission'):
-					have_light |= m.luxrender_emission.use_emission 
+			if hasattr(ob, 'luxrender_emission'):
+				have_light |= ob.luxrender_emission.use_emission 
 	
 	return have_light
 

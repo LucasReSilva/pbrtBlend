@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond, Daniel Genrich
+# Doug Hammond
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -24,15 +24,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-from properties_data_mesh import MeshButtonsPanel 
+#import bpy
+#
+#from luxrender.ui.materials import luxrender_material_sub
 
-from extensions_framework.ui import property_group_renderer
-
-class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
-	bl_label = 'LuxRender Mesh Options'
-	COMPAT_ENGINES = {'luxrender'}
-	
-	display_property_groups = [
-		( ('mesh',), 'luxrender_mesh' )
-	]
+#class ui_material_null(luxrender_material_sub, bpy.types.Panel):
+#	bl_label = 'LuxRender Null Material'
+#	
+#	LUX_COMPAT = {'null'}
+#	
+#	display_property_groups = [
+#		( ('material', 'luxrender_material'), 'luxrender_mat_null' )
+#	]

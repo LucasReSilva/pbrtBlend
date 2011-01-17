@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+
 import bpy
 
 from extensions_framework import util as efutil
@@ -105,13 +107,13 @@ class ExportedMaterials(object):
 				lux_context.makeNamedMaterial(n, p)
 				ExportedMaterials.exported_material_names.append(n)
 
-def export_object_material(scene, lux_context, ob):
+def export_object_material(lux_context, ob):
 	if ob.active_material is not None:
 		if lux_context.API_TYPE == 'FILE':
 			lux_context.namedMaterial(ob.active_material.name)
 		elif lux_context.API_TYPE == 'PURE':
 			mat = ob.active_material
-			mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
+			mat.luxrender_material.export(lux_context, mat, mode='direct')
 	#else:
 	#	LuxLog('WARNING: Object "%s" has no material assigned' % ob.name)
 
@@ -228,25 +230,34 @@ def convert_texture(texture):
 				#.add_float('nabla', texture.nabla)
 	
 	# Translate Blender Image/movie into lux tex
-	if texture.type == 'IMAGE' and texture.image and texture.image.source not in ['MOVIE', 'SEQUENCE']:
-		baked_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
-		texture.image.save_render(baked_image, LuxManager.CurrentScene)
+	if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE']:
+		if texture.image.source == 'GENERATED':
+			tex_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
+			texture.image.save_render(tex_image, LuxManager.CurrentScene)
+		
+		if texture.image.source == 'FILE':
+			if not os.path.exists( efutil.filesystem_path( texture.image.filepath )):
+				raise Exception('Image referenced in blender texture %s doesn\'t exist!' % texture.name)
+			tex_image = efutil.path_relative_to_export( texture.image.filepath )
+		
 		lux_tex_name = 'imagemap'
 		variant = 'color'
-		paramset.add_string('filename', baked_image)
+		paramset.add_string('filename', tex_image)
+		paramset.add_float('gamma', 2.2)
 		mapping_type = '2D'
 	
+	
 	if mapping_type == '3D':
-		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset() )
+		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset(LuxManager.CurrentScene) )
 	else:
-		paramset.update( texture.luxrender_texture.luxrender_tex_mapping.get_paramset() )
+		paramset.update( texture.luxrender_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 	
 	return variant, lux_tex_name, paramset
 
 def RGC(value):
 	scene = LuxManager.CurrentScene
 	if scene.luxrender_engine.rgc:
-		gamma = scene.camera.data.luxrender_colorspace.gamma
+		gamma = scene.camera.data.luxrender_camera.luxrender_film.luxrender_colorspace.gamma
 	else:
 		gamma = 1.0
 	
@@ -266,10 +277,11 @@ def value_transform_passthrough(val):
 def get_texture_from_scene(scene, tex_name):
 	
 	for obj in scene.objects:
-		if obj.active_material != None:
-			for tex_slot in obj.active_material.texture_slots:
-				if tex_slot != None and tex_slot.texture.name == tex_name:
-					return tex_slot.texture
+		for mat_slot in obj.material_slots:
+			if mat_slot != None and mat_slot.material != None:
+				for tex_slot in mat_slot.material.texture_slots:
+					if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
+						return tex_slot.texture
 		if obj.type == 'LAMP':
 			for tex_slot in obj.data.texture_slots:
 				if tex_slot != None and tex_slot.texture.name == tex_name:
@@ -278,12 +290,12 @@ def get_texture_from_scene(scene, tex_name):
 	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
 	return False
 
-def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value_transform=value_transform_passthrough):
+def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, value_transform_function=None):
 	'''
 	lux_context				pylux.Context - like object
 	lux_prop_name			LuxRender material/texture parameter name
 	variant					Required variant: 'float' or 'color' or 'fresnel'
-	lux_mattex				luxrender_material or luxrender_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
+	property_group			luxrender_material or luxrender_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
 	
 	Either insert a float parameter or a float texture reference, depending on setup
 	
@@ -291,15 +303,19 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 	'''
 	params = ParamSet()
 	
-	if hasattr(lux_mattex, '%s_use%stexture' % (lux_prop_name, variant)):
-		if getattr(lux_mattex, '%s_use%stexture' % (lux_prop_name, variant)):
-			texture_name = getattr(lux_mattex, '%s_%stexturename' % (lux_prop_name, variant))
+	if hasattr(property_group, '%s_use%stexture' % (lux_prop_name, variant)):
+		
+		export_param_name = getattr(property_group, lux_prop_name)
+		
+		if getattr(property_group, '%s_use%stexture' % (lux_prop_name, variant)):
+			texture_name = getattr(property_group, '%s_%stexturename' % (lux_prop_name, variant))
 			if texture_name != '':
 				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+				
 				if texture != False:
 					if texture.luxrender_texture.type != 'BLENDER':
 						tex_luxrender_texture = texture.luxrender_texture
-						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset()
+						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene)
 						if lux_tex_variant == variant:
 							ExportedTextures.texture(texture_name, variant, tex_luxrender_texture.type, paramset)
 						else:
@@ -311,13 +327,13 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 						else:
 							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 					
-					if hasattr(lux_mattex, '%s_multiplyfloat' % lux_prop_name) and getattr(lux_mattex, '%s_multiplyfloat' % lux_prop_name):
+					if hasattr(property_group, '%s_multiplyfloat' % lux_prop_name) and getattr(property_group, '%s_multiplyfloat' % lux_prop_name):
 						ExportedTextures.texture(
 							texture_name + '_scaled',
 							variant,
 							'scale',
 							ParamSet() \
-								.add_float('tex1', float(getattr(lux_mattex, '%s_floatvalue' % lux_prop_name))) \
+								.add_float('tex1', float(getattr(property_group, '%s_floatvalue' % lux_prop_name))) \
 								.add_texture('tex2', texture_name)
 						)
 						texture_name += '_scaled'
@@ -325,31 +341,34 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, lux_mattex, value
 					ExportedTextures.export_new(lux_context)
 					
 					params.add_texture(
-						lux_prop_name,
+						export_param_name,
 						texture_name
 					)
 					
-			elif lux_prop_name != 'bumpmap':
-				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, lux_prop_name))
+			elif export_param_name not in ['bumpmap', 'displacementmap']:
+				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, export_param_name))
 		else:
 			if variant == 'float':
-				fval = float(getattr(lux_mattex, '%s_floatvalue' % lux_prop_name))
-				if not (getattr(lux_mattex, '%s_ignorezero' % lux_prop_name) and fval==0.0):
+				fval = float(getattr(property_group, '%s_floatvalue' % lux_prop_name))
+				if not (getattr(property_group, '%s_ignorezero' % lux_prop_name) and fval==0.0):
 					params.add_float(
-						lux_prop_name,
+						export_param_name,
 						fval
 					)
 			elif variant == 'color':
-				use_rgc = getattr(lux_mattex, '%s_usecolorrgc' % lux_prop_name)
+				if value_transform_function == None:
+					value_transform_function = value_transform_passthrough
+				
+				use_rgc = getattr(property_group, '%s_usecolorrgc' % lux_prop_name)
 				if use_rgc:
 					params.add_color(
-						lux_prop_name,
-						[RGC(value_transform(i)) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
+						export_param_name,
+						[RGC(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
 					)
 				else:
 					params.add_color(
-						lux_prop_name,
-						[float(value_transform(i)) for i in getattr(lux_mattex, '%s_color' % lux_prop_name)]
+						export_param_name,
+						[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
 					)
 			elif variant == 'fresnel':
 				# TODO

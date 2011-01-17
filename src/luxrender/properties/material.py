@@ -35,6 +35,7 @@ from extensions_framework import util as efutil
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
 from luxrender.export.materials import add_texture_parameter, ExportedMaterials
+from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
 def MaterialParameter(attr, name, property_group):
@@ -71,13 +72,25 @@ def VolumeParameter(attr, name):
 			'attr': attr,
 			'src': lambda s,c: s.scene.luxrender_volumes,
 			'src_attr': 'volumes',
-			'trg': lambda s,c: c.luxrender_mat_glass2,
+			'trg': lambda s,c: c.luxrender_material,
 			'trg_attr': '%s_volume' % attr,
 			'name': name
 		},
 	]
 
 class VolumeDataColorTextureParameter(ColorTextureParameter):
+	#texture_collection = 'textures'
+	def texture_collection_finder(self):
+		def func(s,c):
+			return s #.main
+		return func
+	
+	def texture_slot_set_attr(self):
+		def func2(s,c):
+			return c
+		return func2
+
+class VolumeDataFloatTextureParameter(FloatTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
@@ -108,44 +121,50 @@ class SubGroupFloatTextureParameter(FloatTextureParameter):
 		# Looks in a different location than other FloatTextureParameters
 		return lambda s,c: c.luxrender_material
 
-class EmissionColorTextureParameter(ColorTextureParameter):
-	def texture_slot_set_attr(self):
-		# Looks in a different location than other ColorTextureParameters
-		return lambda s,c: c.luxrender_emission
+
 
 # Fresnel Textures
-TFR_IOR			= VolumeDataFresnelTextureParameter('fresnel', 'IOR',		add_float_value = False)
+TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',		add_float_value = False)
 
 # Float Textures
-TF_bumpmap		= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',		add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
-TF_amount		= FloatTextureParameter('amount', 'Mix Amount',				add_float_value=True, min=0.0, default=0.5, max=1.0 )
-TF_cauchyb		= FloatTextureParameter('cauchyb', 'Cauchy B',				add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
-TF_d			= FloatTextureParameter('d', 'Absorption Depth',			add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
-TF_film			= FloatTextureParameter('film', 'Thin Film Thickness (nm)',	add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
-TF_filmindex	= FloatTextureParameter('filmindex', 'Film IOR',			add_float_value=True, default=1.5, min=1.0, max=6.0 )
-TF_index		= FloatTextureParameter('index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_M1			= FloatTextureParameter('M1', 'M1',							add_float_value=True, default=1.0, min=0.0, max=1.0 )
-TF_M2			= FloatTextureParameter('M2', 'M2',							add_float_value=True, default=1.0, min=0.0, max=1.0 )
-TF_M3			= FloatTextureParameter('M3', 'M3',							add_float_value=True, default=1.0, min=0.0, max=1.0 )
-TF_R1			= FloatTextureParameter('R1', 'R1',							add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_R2			= FloatTextureParameter('R2', 'R2',							add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_R3			= FloatTextureParameter('R3', 'R3',							add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_sigma		= FloatTextureParameter('sigma', 'Sigma',					add_float_value=True, min=0.0, max=100.0 )
-TF_uroughness	= FloatTextureParameter('uroughness', 'uroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
-TF_vroughness	= FloatTextureParameter('vroughness', 'vroughness',			add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_bumpmap				= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
+TF_amount				= FloatTextureParameter('amount', 'Mix Amount',						add_float_value=True, min=0.0, default=0.5, max=1.0 )
+TF_cauchyb				= FloatTextureParameter('cauchyb', 'Cauchy B',						add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
+TF_d					= FloatTextureParameter('d', 'Absorption Depth',					add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
+TF_film					= FloatTextureParameter('film', 'Thin Film Thickness (nm)',			add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
+TF_filmindex			= FloatTextureParameter('filmindex', 'Film IOR',					add_float_value=True, default=1.5, min=1.0, max=6.0 )
+TF_index				= FloatTextureParameter('index', 'IOR',								add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_M1					= FloatTextureParameter('M1', 'M1',									add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_M2					= FloatTextureParameter('M2', 'M2',									add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_M3					= FloatTextureParameter('M3', 'M3',									add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_R1					= FloatTextureParameter('R1', 'R1',									add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
+TF_uroughness			= FloatTextureParameter('uroughness', 'uroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_vroughness			= FloatTextureParameter('vroughness', 'vroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_backface_d			= FloatTextureParameter('bf_d', 'Backface Absorption Depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
+TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',		real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',		real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
+TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 
 # Color Textures
-TC_Ka			= ColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
-TC_Kd			= ColorTextureParameter('Kd', 'Diffuse color',				default=(0.64,0.64,0.64) )
-TC_Kr			= ColorTextureParameter('Kr', 'Reflection color',			default=(1.0,1.0,1.0) )
-TC_Ks			= ColorTextureParameter('Ks', 'Specular color',				default=(0.25,0.25,0.25) )
-TC_Ks1			= ColorTextureParameter('Ks1', 'Specular color 1',			default=(1.0,1.0,1.0) )
-TC_Ks2			= ColorTextureParameter('Ks2', 'Specular color 2',			default=(1.0,1.0,1.0) )
-TC_Ks3			= ColorTextureParameter('Ks3', 'Specular color 3',			default=(1.0,1.0,1.0) )
-TC_Kt			= ColorTextureParameter('Kt', 'Transmission color',			default=(1.0,1.0,1.0) )
-TC_L			= EmissionColorTextureParameter('L', 'Emission color',		default=(1.0,1.0,1.0) )
+TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
+TC_Kd					= ColorTextureParameter('Kd', 'Diffuse color',						default=(0.64,0.64,0.64) )
+TC_Kr					= ColorTextureParameter('Kr', 'Reflection color',					default=(1.0,1.0,1.0) )
+TC_Ks					= ColorTextureParameter('Ks', 'Specular color',						default=(0.25,0.25,0.25) )
+TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(1.0,1.0,1.0) )
+TC_Ks2					= ColorTextureParameter('Ks2', 'Specular color 2',					default=(1.0,1.0,1.0) )
+TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(1.0,1.0,1.0) )
+TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
+TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
+TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',	default=(0.64,0.64,0.64) )
+TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
 
-TC_absorption	= VolumeDataColorTextureParameter('absorption', 'Absorption',	default=(1.0,1.0,1.0))
+TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		default=(1.0,1.0,1.0))
+TC_sigma_a				= VolumeDataColorTextureParameter('sigma_a', 'Absorption',			default=(0.0,0.0,0.0))
+TC_sigma_s				= VolumeDataColorTextureParameter('sigma_s', 'Scattering',			default=(0.0,0.0,0.0))
 
 def dict_merge(*args):
 	vis = {}
@@ -173,7 +192,8 @@ def mat_list():
 	if LUXRENDER_VERSION >= '0.7.1':
 		mat_list += [
 			('velvet', 'Velvet', 'velvet'),
-			('glossytranslucent', 'Glossytranslucent', 'glossytranslucent'),
+			('glossytranslucent', 'Glossy Translucent', 'glossytranslucent'),
+			('scatter', 'Scatterer', 'scatter'),
 		]
 	
 	mat_list.sort()
@@ -189,28 +209,12 @@ class luxrender_material(declarative_property_group):
 	
 	controls = [
 		'type',
+		'Interior',
+		'Exterior'
 	] + \
-	TF_bumpmap.controls + \
-	[
-		# Compositing options for distributedpath
-		'compositing_label',
-		['compo_visible_material',
-		'compo_visible_emission'],
-		['compo_visible_indirect_material',
-		'compo_visible_indirect_emission'],
-		'compo_override_alpha',
-		'compo_override_alpha_value',
-	]
+	TF_bumpmap.controls
 	
-	visibility = dict_merge({
-		'compositing_label':				{ 'integrator_type': 'distributedpath' },
-		'compo_visible_material':			{ 'integrator_type': 'distributedpath' },
-		'compo_visible_emission':			{ 'integrator_type': 'distributedpath' },
-		'compo_visible_indirect_material':	{ 'integrator_type': 'distributedpath' },
-		'compo_visible_indirect_emission':	{ 'integrator_type': 'distributedpath' },
-		'compo_override_alpha':				{ 'integrator_type': 'distributedpath' },
-		'compo_override_alpha_value':		{ 'integrator_type': 'distributedpath', 'compo_override_alpha': True },
-	}, TF_bumpmap.visibility)
+	visibility = dict_merge({}, TF_bumpmap.visibility)
 	
 	properties = [
 		# Material Type Select
@@ -223,55 +227,114 @@ class luxrender_material(declarative_property_group):
 			'items': mat_list(),
 			'save_in_preset': True
 		},
+	] + \
+		TF_bumpmap.properties + \
+		VolumeParameter('Interior', 'Interior') + \
+		VolumeParameter('Exterior', 'Exterior')
+	
+	def export(self, lux_context, material, mode='indirect'):
+		if mode=='indirect' and material.name in ExportedMaterials.exported_material_names:
+			return
 		
-		# hidden parameter to hold current integrator type - updated on draw()
+		if self.type == 'mix':
+			# First export the other mix mats
+			m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material] 
+			m1.luxrender_material.export(lux_context, m1, 'indirect')
+			m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material] 
+			m2.luxrender_material.export(lux_context, m2, 'indirect')
+		
+		material_params = ParamSet()
+		
+		sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
+		
+		# Bump mapping
+		if self.type not in ['mix', 'null']:
+			material_params.update( TF_bumpmap.get_paramset(self) )
+		
+		material_params.update( sub_type.get_paramset() )
+		
+		# DistributedPath compositing
+		if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+			material_params.update( self.luxrender_mat_compositing.get_paramset() )
+		
+		if mode == 'indirect':
+			material_params.add_string('type', self.type)
+			ExportedMaterials.makeNamedMaterial(material.name, material_params)
+			ExportedMaterials.export_new_named(lux_context)
+		elif mode == 'direct':
+			lux_context.material(self.type, material_params)
+
+class luxrender_mat_compositing(declarative_property_group):
+	'''
+	Storage class for LuxRender Material compositing settings
+	for DistributedPath integrator.
+	'''
+	
+	controls = [
+		'enabled',
+		['visible_material',
+		'visible_emission'],
+		['visible_indirect_material',
+		'visible_indirect_emission'],
+		'override_alpha',
+		'override_alpha_value',
+	]
+	
+	visibility = {
+		'visible_material':					{ 'enabled': True },
+		'visible_emission':					{ 'enabled': True },
+		'visible_indirect_material':		{ 'enabled': True },
+		'visible_indirect_emission':		{ 'enabled': True },
+		'override_alpha':					{ 'enabled': True },
+		'override_alpha_value':				{ 'enabled': True, 'override_alpha': True },
+	}
+	
+	properties = [
 		{
-			'type': 'string',
-			'attr': 'integrator_type',
-		},
-		{
-			'type': 'text',
-			'attr': 'compositing_label',
-			'name': 'Compositing options',
+			'type': 'bool',
+			'attr': 'enabled',
+			'name': 'Use compositing settings',
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
-			'attr': 'compo_visible_material',
+			'attr': 'visible_material',
 			'name': 'Visible Material',
 			'default': True,
 			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
-			'attr': 'compo_visible_emission',
+			'attr': 'visible_emission',
 			'name': 'Visible Emission',
 			'default': True,
 			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
-			'attr': 'compo_visible_indirect_material',
+			'attr': 'visible_indirect_material',
 			'name': 'Visible Indirect Material',
 			'default': True,
 			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
-			'attr': 'compo_visible_indirect_emission',
+			'attr': 'visible_indirect_emission',
 			'name': 'Visible Indirect Emission',
 			'default': True,
 			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
-			'attr': 'compo_override_alpha',
+			'attr': 'override_alpha',
 			'name': 'Override Alpha',
 			'default': False,
 			'save_in_preset': True
 		},
 		{
 			'type': 'float',
-			'attr': 'compo_override_alpha_value',
+			'attr': 'override_alpha_value',
 			'name': 'Override Alpha Value',
 			'default': 0.0,
 			'min': 0.0,
@@ -280,54 +343,30 @@ class luxrender_material(declarative_property_group):
 			'soft_max': 1.0,
 			'save_in_preset': True
 		},
-	] + \
-	TF_bumpmap.properties
+	]
 	
-	def draw_callback(self, context):
-		'''
-		Set the internal integrator_type so that
-		compositing options can be shown for
-		DistributedPath
-		'''
-		self.integrator_type = context.scene.luxrender_integrator.surfaceintegrator
+	def get_paramset(self):
+		compo_params = ParamSet()
 		
-	def export(self, scene, lux_context, material, mode='indirect'):
+		if self.enabled:
+			compo_params.add_bool('compo_visible_material', self.visible_material)
+			compo_params.add_bool('compo_visible_emission', self.visible_emission)
+			compo_params.add_bool('compo_visible_indirect_material', self.visible_indirect_material)
+			compo_params.add_bool('compo_visible_indirect_emission', self.visible_indirect_emission)
+			compo_params.add_bool('compo_override_alpha', self.override_alpha)
+			if self.override_alpha:
+				compo_params.add_float('compo_override_alpha_value', self.override_alpha_value)
 		
-		if self.type == 'mix':
-			# First export the other mix mats
-			m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material] 
-			m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
-			m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material] 
-			m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
-		
-		material_params = ParamSet()
-		
-		sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
-		
-		# Bump mapping
-		if self.type not in ['mix', 'null']:
-			material_params.update( TF_bumpmap.get_params(self) )
-		
-		material_params.update( sub_type.get_params() )
-		
-		# DistributedPath compositing
-		# Querying the scene will be more reliable than using self.integrator_type
-		# in case the panel has never been drawn
-		if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-			material_params.add_bool('compo_visible_material', self.compo_visible_material)
-			material_params.add_bool('compo_visible_emission', self.compo_visible_emission)
-			material_params.add_bool('compo_visible_indirect_material', self.compo_visible_indirect_material)
-			material_params.add_bool('compo_visible_indirect_emission', self.compo_visible_indirect_emission)
-			material_params.add_bool('compo_override_alpha', self.compo_override_alpha)
-			if self.compo_override_alpha:
-				material_params.add_float('compo_override_alpha_value', self.compo_override_alpha_value)
-		
-		if mode == 'indirect':
-			material_params.add_string('type', self.type)
-			ExportedMaterials.makeNamedMaterial(material.name, material_params)
-			ExportedMaterials.export_new_named(lux_context)
-		elif mode == 'direct':
-			lux_context.material(self.type, material_params)
+		return compo_params
+
+def texture_append_visibility(vis_main, textureparam_object, vis_append):
+	for prop in textureparam_object.properties:
+		if 'attr' in prop.keys():
+			if not prop['attr'] in vis_main.keys():
+				vis_main[prop['attr']] = {}
+			for vk, vi in vis_append.items():
+				vis_main[prop['attr']][vk] = vi
+	return vis_main
 
 def carpaint_visibility():
 	cp_vis = dict_merge(
@@ -345,18 +384,18 @@ def carpaint_visibility():
 		TF_R3.visibility
 	)
 	
-	# only show Ka/Kd/Ks1/Ks2/Ks3/M1/M2/M3/R1/R2/R3 if name=='-'
-	for k in cp_vis.copy().keys():
-		for srch in ['Kd','Ks1','Ks2','Ks3']:
-			cp_vis['%s_color'%srch] = { 'name': '-' }
-			cp_vis['%s_usecolortexture'%srch] = { 'name': '-' }
-			if k.startswith(srch):
-				cp_vis[k]['name'] = '-'
-		for srch in ['M1','M2','M3','R1','R2','R3']:
-			cp_vis['%s_floatvalue'%srch] = { 'name': '-' }
-			cp_vis['%s_usefloattexture'%srch] = { 'name': '-' }
-			if k.startswith(srch):
-				cp_vis[k]['name'] = '-'
+	vis_append = { 'name': '-' }
+	cp_vis = texture_append_visibility(cp_vis, TC_Kd, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TC_Ks1, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TC_Ks2, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TC_Ks3, vis_append)
+	
+	cp_vis = texture_append_visibility(cp_vis, TF_M1, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_M2, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_M3, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_R1, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_R2, vis_append)
+	cp_vis = texture_append_visibility(cp_vis, TF_R3, vis_append)
 	
 	return cp_vis
 
@@ -412,23 +451,24 @@ class luxrender_mat_carpaint(declarative_property_group):
 		TF_R2.properties + \
 		TF_R3.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		carpaint_params = ParamSet()
 		
-		carpaint_params.update( TF_d.get_params(self) )
-		carpaint_params.update( TC_Ka.get_params(self) )
+		if self.d_floatvalue > 0:
+			carpaint_params.update( TF_d.get_paramset(self) )
+			carpaint_params.update( TC_Ka.get_paramset(self) )
 		
 		if self.name == '-':	# Use manual settings
-			carpaint_params.update( TC_Kd.get_params(self) )
-			carpaint_params.update( TC_Ks1.get_params(self) )
-			carpaint_params.update( TC_Ks2.get_params(self) )
-			carpaint_params.update( TC_Ks3.get_params(self) )
-			carpaint_params.update( TF_M1.get_params(self) )
-			carpaint_params.update( TF_M2.get_params(self) )
-			carpaint_params.update( TF_M3.get_params(self) )
-			carpaint_params.update( TF_R1.get_params(self) )
-			carpaint_params.update( TF_R2.get_params(self) )
-			carpaint_params.update( TF_R3.get_params(self) )
+			carpaint_params.update( TC_Kd.get_paramset(self) )
+			carpaint_params.update( TC_Ks1.get_paramset(self) )
+			carpaint_params.update( TC_Ks2.get_paramset(self) )
+			carpaint_params.update( TC_Ks3.get_paramset(self) )
+			carpaint_params.update( TF_M1.get_paramset(self) )
+			carpaint_params.update( TF_M2.get_paramset(self) )
+			carpaint_params.update( TF_M3.get_paramset(self) )
+			carpaint_params.update( TF_R1.get_paramset(self) )
+			carpaint_params.update( TF_R2.get_paramset(self) )
+			carpaint_params.update( TF_R3.get_paramset(self) )
 		else:					# Use preset
 			carpaint_params.add_string('name', self.name)
 		
@@ -471,17 +511,17 @@ class luxrender_mat_glass(declarative_property_group):
 		TC_Kr.properties + \
 		TC_Kt.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		glass_params = ParamSet()
 		
 		glass_params.add_bool('architectural', self.architectural)
 		
-		glass_params.update( TF_cauchyb.get_params(self) )
-		glass_params.update( TF_film.get_params(self) )
-		glass_params.update( TF_filmindex.get_params(self) )
-		glass_params.update( TF_index.get_params(self) )
-		glass_params.update( TC_Kr.get_params(self) )
-		glass_params.update( TC_Kt.get_params(self) )
+		glass_params.update( TF_cauchyb.get_paramset(self) )
+		glass_params.update( TF_film.get_paramset(self) )
+		glass_params.update( TF_filmindex.get_paramset(self) )
+		glass_params.update( TF_index.get_paramset(self) )
+		glass_params.update( TC_Kr.get_paramset(self) )
+		glass_params.update( TC_Kt.get_paramset(self) )
 		
 		return glass_params
 
@@ -489,11 +529,7 @@ class luxrender_mat_glass2(declarative_property_group):
 	
 	controls = [
 		'architectural',
-		'dispersion',
-		
-		# Glass 2 Volumes
-		'Interior',
-		'Exterior'
+		'dispersion'
 	]
 	
 	visibility = {}
@@ -513,11 +549,9 @@ class luxrender_mat_glass2(declarative_property_group):
 			'default': False,
 			'save_in_preset': True
 		},
-	] + \
-		VolumeParameter('Interior', 'Interior') + \
-		VolumeParameter('Exterior', 'Exterior')
+	]
 	
-	def get_params(self):
+	def get_paramset(self):
 		glass2_params = ParamSet()
 		
 		glass2_params.add_bool('architectural', self.architectural)
@@ -554,32 +588,20 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		roughglass_params = ParamSet()
 		
-		roughglass_params.update( TF_cauchyb.get_params(self) )
-		roughglass_params.update( TF_index.get_params(self) )
-		roughglass_params.update( TC_Kr.get_params(self) )
-		roughglass_params.update( TC_Kt.get_params(self) )
-		roughglass_params.update( TF_uroughness.get_params(self) )
-		roughglass_params.update( TF_vroughness.get_params(self) )
+		roughglass_params.update( TF_cauchyb.get_paramset(self) )
+		roughglass_params.update( TF_index.get_paramset(self) )
+		roughglass_params.update( TC_Kr.get_paramset(self) )
+		roughglass_params.update( TC_Kt.get_paramset(self) )
+		roughglass_params.update( TF_uroughness.get_paramset(self) )
+		roughglass_params.update( TF_vroughness.get_paramset(self) )
 		
 		return roughglass_params
 
-class luxrender_mat_glossy(declarative_property_group):
-	
-	controls = [
-		'multibounce'
-	] + \
-		TF_d.controls + \
-		TF_index.controls + \
-		TC_Ka.controls + \
-		TC_Kd.controls + \
-		TC_Ks.controls + \
-		TF_uroughness.controls + \
-		TF_vroughness.controls
-	
-	visibility = dict_merge(
+def glossy_visibility():
+	g_vis = dict_merge(
 		TF_d.visibility,
 		TF_index.visibility,
 		TC_Ka.visibility,
@@ -589,12 +611,43 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_vroughness.visibility
 	)
 	
+	g_vis = texture_append_visibility(g_vis, TC_Ks, { 'useior': False })
+	g_vis = texture_append_visibility(g_vis, TF_index, { 'useior': True })
+	
+	return g_vis
+	
+class luxrender_mat_glossy(declarative_property_group):
+	
+	controls = [
+		'multibounce'
+	] + \
+		TC_Kd.controls + \
+		TF_d.controls + \
+		TC_Ka.controls + \
+	[
+		'useior'
+	] + \
+		TF_index.controls + \
+		TC_Ks.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
+	
+	visibility = glossy_visibility()
+	
 	properties = [
 		{
 			'type': 'bool',
 			'attr': 'multibounce',
-			'name': 'multibounce',
+			'name': 'Multibounce',
 			'description': 'Enable surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
 			'default': False,
 			'save_in_preset': True
 		}
@@ -607,34 +660,31 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		glossy_params = ParamSet()
 		
 		glossy_params.add_bool('multibounce', self.multibounce)
 		
-		glossy_params.update( TF_d.get_params(self) )
-		glossy_params.update( TF_index.get_params(self) )
-		glossy_params.update( TC_Ka.get_params(self) )
-		glossy_params.update( TC_Kd.get_params(self) )
-		glossy_params.update( TC_Ks.get_params(self) )
-		glossy_params.update( TF_uroughness.get_params(self) )
-		glossy_params.update( TF_vroughness.get_params(self) )
+		if self.d_floatvalue > 0:
+			glossy_params.update( TF_d.get_paramset(self) )
+			glossy_params.update( TC_Ka.get_paramset(self) )
+		
+		glossy_params.update( TC_Kd.get_paramset(self) )
+		
+		if self.useior:
+			glossy_params.update( TF_index.get_paramset(self) )
+			glossy_params.add_color('Ks', (1.0, 1.0, 1.0))
+		else:
+			glossy_params.update( TC_Ks.get_paramset(self) )
+			glossy_params.add_float('index', 0.0)
+			
+		glossy_params.update( TF_uroughness.get_paramset(self) )
+		glossy_params.update( TF_vroughness.get_paramset(self) )
 		
 		return glossy_params
 
-class luxrender_mat_glossy_lossy(declarative_property_group):
-	
-	controls = [
-	] + \
-		TF_d.controls + \
-		TF_index.controls + \
-		TC_Ka.controls + \
-		TC_Kd.controls + \
-		TC_Ks.controls + \
-		TF_uroughness.controls + \
-		TF_vroughness.controls
-	
-	visibility = dict_merge(
+def glossy_lossy_visibility():
+	gl_vis = dict_merge(
 		TF_d.visibility,
 		TF_index.visibility,
 		TC_Ka.visibility,
@@ -644,26 +694,64 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TF_vroughness.visibility
 	)
 	
-	properties = [
+	gl_vis = texture_append_visibility(gl_vis, TC_Ks, { 'useior': False })
+	gl_vis = texture_append_visibility(gl_vis, TF_index, { 'useior': True })
+	
+	return gl_vis
+
+class luxrender_mat_glossy_lossy(declarative_property_group):
+	
+	controls = [
 	] + \
-		TF_d.properties + \
-		TF_index.properties + \
-		TC_Ka.properties + \
+		TC_Kd.controls + \
+		TF_d.controls + \
+		TC_Ka.controls + \
+	[
+		'useior'
+	] + \
+		TF_index.controls + \
+		TC_Ks.controls + \
+		TF_uroughness.controls + \
+		TF_vroughness.controls
+	
+	visibility = glossy_lossy_visibility()
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
+			'default': False,
+			'save_in_preset': True
+		}
+	] + \
 		TC_Kd.properties + \
+		TF_d.properties + \
+		TC_Ka.properties + \
+		TF_index.properties + \
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		glossy_lossy_params = ParamSet()
 		
-		glossy_lossy_params.update( TF_d.get_params(self) )
-		glossy_lossy_params.update( TF_index.get_params(self) )
-		glossy_lossy_params.update( TC_Ka.get_params(self) )
-		glossy_lossy_params.update( TC_Kd.get_params(self) )
-		glossy_lossy_params.update( TC_Ks.get_params(self) )
-		glossy_lossy_params.update( TF_uroughness.get_params(self) )
-		glossy_lossy_params.update( TF_vroughness.get_params(self) )
+		if self.d_floatvalue > 0:
+			glossy_lossy_params.update( TF_d.get_paramset(self) )
+			glossy_lossy_params.update( TC_Ka.get_paramset(self) )
+		
+		glossy_lossy_params.update( TC_Kd.get_paramset(self) )
+		
+		if self.useior:
+			glossy_lossy_params.update( TF_index.get_paramset(self) )
+			glossy_lossy_params.add_color('Ks', (1.0, 1.0, 1.0))
+		else:
+			glossy_lossy_params.update( TC_Ks.get_paramset(self) )
+			glossy_lossy_params.add_float('index', 0.0)
+			
+		glossy_lossy_params.update( TF_uroughness.get_paramset(self) )
+		glossy_lossy_params.update( TF_vroughness.get_paramset(self) )
 		
 		return glossy_lossy_params
 
@@ -684,11 +772,11 @@ class luxrender_mat_matte(declarative_property_group):
 		TC_Kd.properties + \
 		TF_sigma.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		matte_params = ParamSet()
 		
-		matte_params.update( TC_Kd.get_params(self) )
-		matte_params.update( TF_sigma.get_params(self) )
+		matte_params.update( TC_Kd.get_paramset(self) )
+		matte_params.update( TF_sigma.get_paramset(self) )
 		
 		return matte_params
 	
@@ -720,74 +808,183 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 		TC_Kt.properties + \
 		TF_sigma.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		mattetranslucent_params = ParamSet()
 		
 		mattetranslucent_params.add_bool('energyconserving', self.energyconserving)
 		
-		mattetranslucent_params.update( TC_Kr.get_params(self) )
-		mattetranslucent_params.update( TC_Kt.get_params(self) )
-		mattetranslucent_params.update( TF_sigma.get_params(self) )
+		mattetranslucent_params.update( TC_Kr.get_paramset(self) )
+		mattetranslucent_params.update( TC_Kt.get_paramset(self) )
+		mattetranslucent_params.update( TF_sigma.get_paramset(self) )
 		
 		return mattetranslucent_params
+
+def glossytranslucent_visibility():
+	gt_vis = dict_merge(
+		TC_Kt.visibility,
+		TC_Kd.visibility,
+		TF_d.visibility,
+		TC_Ka.visibility,
+		TF_index.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_vroughness.visibility,
+		
+		TF_backface_d.visibility,
+		TC_backface_Ka.visibility,
+		TC_backface_Kd.visibility,
+		TF_backface_index.visibility,
+		TC_backface_Ks.visibility,
+		TF_backface_uroughness.visibility,
+		TF_backface_vroughness.visibility,
+		{
+			'backface_multibounce':	{ 'two_sided': True },
+			'bf_useior': 			{ 'two_sided': True }
+		}
+	)
+	
+	gt_vis = texture_append_visibility(gt_vis, TC_Ks,					{ 'useior': False })
+	gt_vis = texture_append_visibility(gt_vis, TF_index,				{ 'useior': True  })
+	
+	gt_vis = texture_append_visibility(gt_vis, TC_backface_Ka,			{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TC_backface_Kd,			{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_d,			{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_uroughness,	{ 'two_sided': True })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_vroughness,	{ 'two_sided': True })
+
+	gt_vis = texture_append_visibility(gt_vis, TC_backface_Ks,			{ 'two_sided': True, 'bf_useior': False })
+	gt_vis = texture_append_visibility(gt_vis, TF_backface_index,		{ 'two_sided': True, 'bf_useior': True  })
+	
+	return gt_vis
 
 class luxrender_mat_glossytranslucent(declarative_property_group):
 	
 	controls = [
-		'multibounce'
+		'multibounce',
 	] + \
-		TF_d.controls + \
-		TF_index.controls + \
-		TC_Ka.controls + \
 		TC_Kt.controls + \
 		TC_Kd.controls + \
+		TF_d.controls + \
+		TC_Ka.controls + \
+	[
+		'useior'
+	] + \
+		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
-		TF_vroughness.controls
+		TF_vroughness.controls + \
+	[
+		'two_sided',
+		'backface_multibounce',
+	] + \
+		TF_backface_d.controls + \
+		TC_backface_Ka.controls + \
+	[
+		'bf_useior'
+	] + \
+		TF_backface_index.controls + \
+		TC_backface_Ks.controls + \
+		TF_backface_uroughness.controls + \
+		TF_backface_vroughness.controls
 	
-	visibility = dict_merge(
-		TF_d.visibility,
-		TF_index.visibility,
-		TC_Ka.visibility,
-		TC_Kt.visibility,
-		TC_Kd.visibility,
-		TC_Ks.visibility,
-		TF_uroughness.visibility,
-		TF_vroughness.visibility
-	)
+	visibility = glossytranslucent_visibility()
 	
 	properties = [
 		{
 			'type': 'bool',
 			'attr': 'multibounce',
-			'name': 'multibounce',
+			'name': 'Multibounce',
 			'description': 'Enable surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'two_sided',
+			'name': 'Two sided',
+			'description': 'Different surface properties for back-face and front-face',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'backface_multibounce',
+			'name': 'Backface Multibounce',
+			'description': 'Enable back-surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'bf_useior',
+			'name': 'Backface use IOR',
+			'description': 'Use IOR/Reflective index input',
 			'default': False,
 			'save_in_preset': True
 		}
 	] + \
-		TF_d.properties + \
-		TF_index.properties + \
-		TC_Ka.properties + \
 		TC_Kt.properties + \
 		TC_Kd.properties + \
+		TF_d.properties + \
+		TC_Ka.properties + \
+		TF_index.properties + \
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
-		TF_vroughness.properties
-	
-	def get_params(self):
+		TF_vroughness.properties + \
+		TF_backface_d.properties + \
+		TC_backface_Ka.properties + \
+		TF_backface_index.properties + \
+		TC_backface_Ks.properties + \
+		TF_backface_uroughness.properties + \
+		TF_backface_vroughness.properties
+		
+	def get_paramset(self):
 		glossytranslucent_params = ParamSet()
 		
+		if self.d_floatvalue > 0:
+			glossytranslucent_params.update( TF_d.get_paramset(self) )
+			glossytranslucent_params.update( TC_Ka.get_paramset(self) )
+		
+		glossytranslucent_params.add_bool('onesided', not self.two_sided)
 		glossytranslucent_params.add_bool('multibounce', self.multibounce)
 		
-		glossytranslucent_params.update( TF_d.get_params(self) )
-		glossytranslucent_params.update( TF_index.get_params(self) )
-		glossytranslucent_params.update( TC_Ka.get_params(self) )
-		glossytranslucent_params.update( TC_Kt.get_params(self) )
-		glossytranslucent_params.update( TC_Kd.get_params(self) )
-		glossytranslucent_params.update( TC_Ks.get_params(self) )
-		glossytranslucent_params.update( TF_uroughness.get_params(self) )
-		glossytranslucent_params.update( TF_vroughness.get_params(self) )
+		glossytranslucent_params.update( TC_Kt.get_paramset(self) )
+		glossytranslucent_params.update( TC_Kd.get_paramset(self) )
+		
+		if self.useior:
+			glossytranslucent_params.update( TF_index.get_paramset(self) )
+			glossytranslucent_params.add_color('Ks', (1.0, 1.0, 1.0))
+		else:
+			glossytranslucent_params.update( TC_Ks.get_paramset(self) )
+			glossytranslucent_params.add_float('index', 0.0)
+			
+		glossytranslucent_params.update( TF_uroughness.get_paramset(self) )
+		glossytranslucent_params.update( TF_vroughness.get_paramset(self) )
+		
+		if self.two_sided:
+			glossytranslucent_params.add_bool('backface_multibounce', self.backface_multibounce)
+			
+			if self.bf_d_floatvalue > 0:
+				glossytranslucent_params.update( TF_backface_d.get_paramset(self) )
+				glossytranslucent_params.update( TC_backface_Ka.get_paramset(self) )
+			
+			if self.bf_useior:
+				glossytranslucent_params.update( TF_backface_index.get_paramset(self) )
+				glossytranslucent_params.add_color('backface_Ks', (1.0, 1.0, 1.0))
+			else:
+				glossytranslucent_params.update( TC_backface_Ks.get_paramset(self) )
+				glossytranslucent_params.add_float('backface_index', 0.0)
+			
+			glossytranslucent_params.update( TF_backface_uroughness.get_paramset(self) )
+			glossytranslucent_params.update( TF_backface_vroughness.get_paramset(self) )
 		
 		return glossytranslucent_params
 
@@ -833,11 +1030,11 @@ class luxrender_mat_metal(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		metal_params = ParamSet()
 		
-		metal_params.update( TF_uroughness.get_params(self) )
-		metal_params.update( TF_vroughness.get_params(self) )
+		metal_params.update( TF_uroughness.get_paramset(self) )
+		metal_params.update( TF_vroughness.get_paramset(self) )
 		
 		if self.name == 'nk':	# use an NK data file
 			metal_params.add_string('filename', efutil.path_relative_to_export(self.filename) )
@@ -845,6 +1042,30 @@ class luxrender_mat_metal(declarative_property_group):
 			metal_params.add_string('name', self.name)
 		
 		return metal_params
+
+class luxrender_mat_scatter(declarative_property_group):
+	controls = [
+	] + \
+		TC_Kd.controls + \
+		TF_g.controls
+	
+	visibility = dict_merge(
+		TC_Kd.visibility,
+		TF_g.visibility
+	)
+	
+	properties = [
+	] + \
+		TC_Kd.properties + \
+		TF_g.properties
+	
+	def get_paramset(self):
+		scatter_params = ParamSet()
+		
+		scatter_params.update( TC_Kd.get_paramset(self) )
+		scatter_params.update( TF_g.get_paramset(self) )
+		
+		return scatter_params
 
 class luxrender_mat_shinymetal(declarative_property_group):
 	
@@ -875,15 +1096,15 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TF_uroughness.properties + \
 		TF_vroughness.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		shinymetal_params = ParamSet()
 		
-		shinymetal_params.update( TF_film.get_params(self) )
-		shinymetal_params.update( TF_filmindex.get_params(self) )
-		shinymetal_params.update( TC_Kr.get_params(self) )
-		shinymetal_params.update( TC_Ks.get_params(self) )
-		shinymetal_params.update( TF_uroughness.get_params(self) )
-		shinymetal_params.update( TF_vroughness.get_params(self) )
+		shinymetal_params.update( TF_film.get_paramset(self) )
+		shinymetal_params.update( TF_filmindex.get_paramset(self) )
+		shinymetal_params.update( TC_Kr.get_paramset(self) )
+		shinymetal_params.update( TC_Ks.get_paramset(self) )
+		shinymetal_params.update( TF_uroughness.get_paramset(self) )
+		shinymetal_params.update( TF_vroughness.get_paramset(self) )
 		
 		return shinymetal_params
 
@@ -907,12 +1128,12 @@ class luxrender_mat_mirror(declarative_property_group):
 		TF_filmindex.properties + \
 		TC_Kr.properties
 	
-	def get_params(self):
+	def get_paramset(self):
 		mirror_params = ParamSet()
 		
-		mirror_params.update( TF_film.get_params(self) )
-		mirror_params.update( TF_filmindex.get_params(self) )
-		mirror_params.update( TC_Kr.get_params(self) )
+		mirror_params.update( TF_film.get_paramset(self) )
+		mirror_params.update( TF_filmindex.get_paramset(self) )
+		mirror_params.update( TC_Kr.get_paramset(self) )
 		
 		return mirror_params
 
@@ -932,12 +1153,12 @@ class luxrender_mat_mix(declarative_property_group):
 		MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_mat_mix') + \
 		MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_mat_mix')
 	
-	def get_params(self):
+	def get_paramset(self):
 		mix_params = ParamSet()
 		
 		mix_params.add_string('namedmaterial1', self.namedmaterial1_material)
 		mix_params.add_string('namedmaterial2', self.namedmaterial2_material)
-		mix_params.update( TF_amount.get_params(self) )
+		mix_params.update( TF_amount.get_paramset(self) )
 		
 		return mix_params
 
@@ -952,7 +1173,7 @@ class luxrender_mat_null(declarative_property_group):
 	properties = [
 	]
 	
-	def get_params(self):
+	def get_paramset(self):
 		return ParamSet()
 
 class luxrender_mat_velvet(declarative_property_group):
@@ -1023,10 +1244,10 @@ class luxrender_mat_velvet(declarative_property_group):
 		},
 	]
 	
-	def get_params(self):
+	def get_paramset(self):
 		velvet_params = ParamSet()
 		
-		velvet_params.update( TC_Kd.get_params(self) )
+		velvet_params.update( TC_Kd.get_paramset(self) )
 		
 		velvet_params.add_float('thickness', self.thickness)
 		if self.advanced:
@@ -1035,87 +1256,42 @@ class luxrender_mat_velvet(declarative_property_group):
 			velvet_params.add_float('p3', self.p3)
 		
 		return velvet_params
-		
-class luxrender_emission(declarative_property_group):
-	'''
-	Storage class for LuxRender Material emission settings.
-	This class will be instantiated within a Blender Material
-	object.
-	'''
-	
-	controls = [
-		'use_emission',
-		'lightgroup',
-	] + \
-	TC_L.controls + \
-	[
-		'gain',
-		'power',
-		'efficacy',
+
+def volume_types():
+	v_types =  [
+		('clear', 'Clear', 'clear')
 	]
 	
-	visibility = {
-		'lightgroup': 			{ 'use_emission': True },
-		'L_colorlabel': 		{ 'use_emission': True },
-		'L_color': 				{ 'use_emission': True },
-		'L_usecolorrgc':		{ 'use_emission': True },
-		'L_usecolortexture':	{ 'use_emission': True },
-		'L_colortexture':		{ 'use_emission': True, 'L_usecolortexture': True },
-		'gain': 				{ 'use_emission': True },
-		'power': 				{ 'use_emission': True },
-		'efficacy': 			{ 'use_emission': True },
-	}
+	if LUXRENDER_VERSION >= '0.8':
+		v_types.extend([
+			('homogeneous', 'Homogeneous', 'homogeneous')
+		])
 	
-	properties = [
-		{
-			'type': 'bool',
-			'attr': 'use_emission',
-			'name': 'Use Emission',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'string',
-			'attr': 'lightgroup',
-			'name': 'Light Group',
-			'default': 'default',
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'gain',
-			'name': 'Gain',
-			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e8,
-			'soft_max': 1e8,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'power',
-			'name': 'Power',
-			'default': 100.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e5,
-			'soft_max': 1e5,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'efficacy',
-			'name': 'Efficacy',
-			'default': 17.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e4,
-			'soft_max': 1e4,
-			'save_in_preset': True
-		},
-	] + \
-	TC_L.properties
+	return v_types
+
+def volume_visibility():
+	v_vis = dict_merge({
+		'scattering_scale': { 'type': 'homogeneous' },
+		'g_r': { 'type': 'homogeneous' },
+		'g_g': { 'type': 'homogeneous' },
+		'g_b': { 'type': 'homogeneous' },
+	},
+	TFR_IOR.visibility,
+	TC_absorption.visibility,
+	TC_sigma_a.visibility,
+	TC_sigma_s.visibility
+	)
+	
+	vis_append = { 'type': 'clear' }
+	#v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
+	v_vis = texture_append_visibility(v_vis, TC_absorption, vis_append)
+	
+	vis_append = { 'type': 'homogeneous' }
+	#v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
+	v_vis = texture_append_visibility(v_vis, TC_sigma_a, vis_append)
+	v_vis = texture_append_visibility(v_vis, TC_sigma_s, vis_append)
+	
+	return v_vis
 
 class luxrender_volume_data(declarative_property_group):
 	'''
@@ -1129,28 +1305,33 @@ class luxrender_volume_data(declarative_property_group):
 	] + \
 	TFR_IOR.controls + \
 	TC_absorption.controls + \
+	TC_sigma_a.controls + \
 	[
-		'depth'
+		'depth',
+	] + \
+	TC_sigma_s.controls + \
+	[
+		'scattering_scale',
+		'g_r',
+		'g_g',
+		'g_b',
 	]
 	
-	visibility = {
-		'ior_floattexture':			{ 'ior_usefloattexture': True },
-		'absorption_colortexture':	{ 'absorption_usecolortexture': True }
-	}
+	visibility = volume_visibility()
 	
 	properties = [
 		{
 			'type': 'enum',
 			'attr': 'type',
 			'name': 'Type',
-			'items': [
-				('clear', 'clear', 'clear')
-			],
+			'items': volume_types(),
 			'save_in_preset': True
 		},
 	] + \
 	TFR_IOR.properties + \
 	TC_absorption.properties + \
+	TC_sigma_a.properties + \
+	TC_sigma_s.properties + \
 	[
 		{
 			'type': 'float',
@@ -1165,20 +1346,81 @@ class luxrender_volume_data(declarative_property_group):
 			'precision': 6,
 			'save_in_preset': True
 		},
+		{
+			'type': 'float',
+			'attr': 'scattering_scale',
+			'name': 'Scattering scale factor',
+			'description': 'Scattering colour will be multiplied by this value',
+			'default': 1.0,
+			'min': 0.00001,
+			'soft_min': 0.00001,
+			'max': 10000.0,
+			'soft_max': 10000.0,
+			'precision': 6,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'g_r',
+			'name': 'Red asymmetry',
+			'description': 'Scattering asymmetry, red component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'default': 0.0,
+			'min': -1.0,
+			'soft_min': -1.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 4,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'g_g',
+			'name': 'Green asymmetry',
+			'description': 'Scattering asymmetry, green component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'default': 0.0,
+			'min': -1.0,
+			'soft_min': -1.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 4,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'g_b',
+			'name': 'Blue asymmetry',
+			'description': 'Scattering asymmetry, blue component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'default': 0.0,
+			'min': -1.0,
+			'soft_min': -1.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 4,
+			'save_in_preset': True
+		},
 	]
 	
 	def api_output(self, lux_context):
 		vp = ParamSet()
 		
 		scale = 1
-		def absorption_transform(i):
+		def absorption_at_depth(i):
 			# This is copied from the old LuxBlend, I don't pretend to understand it, DH
 			depthed = (-math.log(max([(float(i)),1e-30]))/(self.depth*scale)) * ((float(i))==1.0 and -1 or 1)
 			#print('abs xform: %f -> %f' % (i,depthed))
 			return depthed
 		
-		vp.update( add_texture_parameter(lux_context, 'fresnel', 'fresnel', self) )
-		vp.update( add_texture_parameter(lux_context, 'absorption', 'color', self, value_transform=absorption_transform) )
+		if self.type == 'clear':
+			vp.update( TFR_IOR.get_paramset(self) )
+			vp.update( TC_absorption.get_paramset(self, value_transform_function=absorption_at_depth) )
+		
+		if self.type == 'homogeneous':
+			def scattering_scale(i):
+				return i * self.scattering_scale
+			vp.update( TFR_IOR.get_paramset(self) )
+			vp.add_color('g', [self.g_r, self.g_g, self.g_b])
+			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth) )
+			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
 		
 		return self.type, vp
 

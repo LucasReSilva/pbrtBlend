@@ -70,11 +70,16 @@ class LuxFilmDisplay(TimerThread):
 	
 	def kick(self, render_end=False):
 		if 'RE' in self.LocalStorage.keys():
+			p_stats = ''
+			direct_transfer = False
 			if 'lux_context' in self.LocalStorage.keys() and self.LocalStorage['lux_context'].statistics('sceneIsReady') > 0.0:
 				self.LocalStorage['lux_context'].updateFramebuffer()
 				# px = self.lux_context.framebuffer()
 				xres = int(self.LocalStorage['lux_context'].getAttribute('film', 'xResolution'))
 				yres = int(self.LocalStorage['lux_context'].getAttribute('film', 'yResolution'))
+				p_stats = ' - %s' % self.LocalStorage['lux_context'].printableStatistics(True)
+				direct_transfer = 'blenderCombinedDepthRects' in dir(self.LocalStorage['lux_context'])
+				direct_transfer &= 'integratedimaging' in self.LocalStorage.keys() and self.LocalStorage['integratedimaging']
 			elif 'resolution' in self.LocalStorage.keys():
 				xres, yres = self.LocalStorage['resolution']
 			else:
@@ -85,17 +90,21 @@ class LuxFilmDisplay(TimerThread):
 				return
 			
 			if render_end:
-				LuxLog('Final render result %ix%i' % (xres,yres))
+				LuxLog('Final render result (%ix%i%s)' % (xres,yres,p_stats))
 			else:
-				LuxLog('Updating render result %ix%i' % (xres,yres))
+				LuxLog('Updating render result (%ix%i%s)' % (xres,yres,p_stats))
 			
 			result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
-			# TODO: don't read the file whilst it is still being written..
-			# ... however file locking in python seems incomplete/non-portable ?
-			if os.path.exists(self.LocalStorage['RE'].output_file):
-				bpy.ops.ef.msg(msg_text='Updating RenderResult')
-				lay = result.layers[0]
-				# TODO: use the framebuffer direct from pylux when Blender's API supports it
+			
+			bpy.ops.ef.msg(msg_text='Updating RenderResult')
+			lay = result.layers[0]
+			
+			if direct_transfer:
+				# use the framebuffer direct from pylux using a special method
+				# for this purpose, which saves doing a lot of array processing
+				# in python
+				lay.rect, lay.passes[0].rect  = self.LocalStorage['lux_context'].blenderCombinedDepthRects()
+			elif os.path.exists(self.LocalStorage['RE'].output_file):
 				lay.load_from_file(self.LocalStorage['RE'].output_file)
 			else:
 				err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file

@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond
+# Doug Hammond, Daniel Genrich
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -25,26 +25,14 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-
-from properties_data_camera import CameraButtonsPanel
+from properties_data_mesh import MeshButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
-class camera_panel(CameraButtonsPanel, property_group_renderer):
+class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
+	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}
 	
-class camera(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Camera'
-	
 	display_property_groups = [
-		( ('camera',), 'luxrender_camera' )
-	]
-
-class film(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Film'
-	
-	display_property_groups = [
-		( ('camera','luxrender_camera'), 'luxrender_film' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_colorspace' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_tonemapping' ),
+		( ('mesh',), 'luxrender_mesh' )
 	]

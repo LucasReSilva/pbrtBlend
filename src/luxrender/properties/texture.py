@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O
@@ -38,6 +40,7 @@ from luxrender.outputs import LuxManager
 #------------------------------------------------------------------------------ 
 
 class TextureParameterBase(object):
+	real_attr			= None
 	attr				= None
 	name				= None
 	default				= (0.8, 0.8, 0.8)
@@ -50,7 +53,7 @@ class TextureParameterBase(object):
 	visibility			= None
 	properties			= None
 	
-	def __init__(self, attr, name, default=None, min=None, max=None):
+	def __init__(self, attr, name, default=None, min=None, max=None, real_attr=None):
 		self.attr = attr
 		self.name = name
 		if default is not None:
@@ -59,7 +62,9 @@ class TextureParameterBase(object):
 			self.min = min
 		if max is not None:
 			self.max = max
-			
+		if real_attr is not None:
+			self.real_attr = real_attr
+		
 		self.controls = self.get_controls()
 		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
@@ -111,14 +116,20 @@ class TextureParameterBase(object):
 		'''	
 		return []
 	
-	def get_params(self, context):
+	def get_paramset(self, property_group):
 		'''
 		Return a LuxRender ParamSet of the properties
 		defined in this Texture, getting parameters
-		from property group 'context'
+		from the property_group
 		'''
 		
 		return ParamSet()
+	
+	def get_real_param_name(self):
+		if self.real_attr is not None:
+			return self.real_attr
+		else:
+			return self.attr
 
 class ColorTextureParameter(TextureParameterBase):
 	
@@ -157,6 +168,8 @@ class ColorTextureParameter(TextureParameterBase):
 		given in the material panel via the property's 'draw' lambda function.
 		'''
 		
+		return # Disabled due to forbidden RNA write in UI draw methods
+		
 		if c.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.type]:
 			submat = getattr(c, 'luxrender_mat_%s'%c.type)
 			submat_col = getattr(submat, self.attr+'_color')
@@ -168,7 +181,7 @@ class ColorTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_color_texture'
+				'default': self.get_real_param_name()
 			},
 			{
 				'attr': '%s_usecolortexture' % self.attr,
@@ -225,7 +238,7 @@ class ColorTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 	
-	def get_params(self, context):
+	def get_paramset(self, property_group, value_transform_function = None):
 		TC_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -234,7 +247,8 @@ class ColorTextureParameter(TextureParameterBase):
 					LuxManager.ActiveManager.lux_context,
 					self.attr,
 					'color',
-					context
+					property_group,
+					value_transform_function = value_transform_function
 				)
 			)
 		
@@ -251,9 +265,10 @@ class FloatTextureParameter(TextureParameterBase):
 	
 	def __init__(self,
 			attr, name,
-			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
-			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
-			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
+			add_float_value = True,		# True: Show float value input, and [T] button; False: Just show texture slot
+			multiply_float = False,		# Specify that when texture is in use, it should be scaled by the float value
+			ignore_zero = False,		# Don't export this parameter if the float value == 0.0
+			real_attr = None,			# translate self.attr into something else at export time (overcome 31 char RNA limit)
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
 		self.attr = attr
@@ -261,6 +276,7 @@ class FloatTextureParameter(TextureParameterBase):
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
 		self.ignore_zero = ignore_zero
+		self.real_attr = real_attr
 		self.default = default
 		self.min = min
 		self.max = max
@@ -295,7 +311,7 @@ class FloatTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_float_texture'
+				'default': self.get_real_param_name()
 			},
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
@@ -350,7 +366,7 @@ class FloatTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 	
-	def get_params(self, context):
+	def get_paramset(self, property_group):
 		TC_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -359,7 +375,7 @@ class FloatTextureParameter(TextureParameterBase):
 					LuxManager.ActiveManager.lux_context,
 					self.attr,
 					'float',
-					context
+					property_group
 				)
 			)
 		
@@ -376,9 +392,10 @@ class FresnelTextureParameter(TextureParameterBase):
 	
 	def __init__(self,
 			attr, name,
-			add_float_value = True,      # True: Show float value input, and [T] button; False: Just show texture slot
-			multiply_float = False,      # Specify that when texture is in use, it should be scaled by the float value
-			ignore_zero = False,         # Don't export this parameter if the float value == 0.0
+			add_float_value = True,		# True: Show float value input, and [T] button; False: Just show texture slot
+			multiply_float = False,		# Specify that when texture is in use, it should be scaled by the float value
+			ignore_zero = False,		# Don't export this parameter if the float value == 0.0
+			real_attr = None,			# translate self.attr into something else at export time (overcome 31 char RNA limit)
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
 		self.attr = attr
@@ -386,6 +403,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
 		self.ignore_zero = ignore_zero
+		self.real_attr = real_attr
 		self.default = default
 		self.min = min
 		self.max = max
@@ -420,7 +438,7 @@ class FresnelTextureParameter(TextureParameterBase):
 			{
 				'attr': self.attr,
 				'type': 'string',
-				'default': 'lux_fresnel_texture'
+				'default': self.get_real_param_name()
 			},
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
@@ -475,7 +493,7 @@ class FresnelTextureParameter(TextureParameterBase):
 			},
 		] + self.get_extra_properties()
 	
-	def get_params(self, context):
+	def get_paramset(self, property_group):
 		TC_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -484,7 +502,7 @@ class FresnelTextureParameter(TextureParameterBase):
 					LuxManager.ActiveManager.lux_context,
 					self.attr,
 					'fresnel',
-					context
+					property_group
 				)
 			)
 		
@@ -536,6 +554,7 @@ class luxrender_texture(declarative_property_group):
 				('marble', 'marble', 'marble'),
 				('mix', 'mix', 'mix'),
 				('scale', 'scale', 'scale'),
+				('tabulateddata', 'tabulateddata', 'tabulateddata'),
 				('uv', 'uv', 'uv'),
 				('windy', 'windy', 'windy'),
 				('wrinkled', 'wrinkled', 'wrinkled'),
@@ -550,7 +569,7 @@ class luxrender_texture(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, scene):
 		'''
 		Discover the type of this LuxRender texture, and return its
 		variant name and its ParamSet.
@@ -560,20 +579,20 @@ class luxrender_texture(declarative_property_group):
 		Return		tuple(string('float'|'color'|'fresnel'), ParamSet)
 		'''
 		
-		# this requires the sub-IDPropertyGroup name to be the same as the texture name
+		# this requires part of the sub-IDPropertyGroup name to be the same as the texture name
 		if hasattr(self, 'luxrender_tex_%s'%self.type):
 			lux_texture = getattr(self, 'luxrender_tex_%s'%self.type) 
-			features, params = lux_texture.get_paramset()
+			features, params = lux_texture.get_paramset(scene)
 			
 			# 2D Mapping options
 			#if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
 			if '2DMAPPING' in features:
-				params.update( self.luxrender_tex_mapping.get_paramset() )
+				params.update( self.luxrender_tex_mapping.get_paramset(scene) )
 				
 			# 3D Mapping options
 			#if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
 			if '3DMAPPING' in features:
-				params.update( self.luxrender_tex_transform.get_paramset() )
+				params.update( self.luxrender_tex_transform.get_paramset(scene) )
 				
 			return lux_texture.variant, params
 		else:
@@ -706,8 +725,7 @@ class luxrender_tex_bilerp(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		if self.variant == 'float':
 			params = ParamSet() \
 				.add_float('v00', self.v00_f) \
@@ -746,8 +764,7 @@ class luxrender_tex_blackbody(declarative_property_group):
 		}
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		return set(), ParamSet().add_float('temperature', self.temperature)
 
 class luxrender_tex_brick(declarative_property_group):
@@ -896,8 +913,7 @@ class luxrender_tex_brick(declarative_property_group):
 	TF_mortartex.properties + \
 	TC_mortartex.properties
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		brick_params = ParamSet() \
 			.add_float('brickbevel', self.brickbevel) \
 			.add_string('brickbond', self.brickbond) \
@@ -984,7 +1000,7 @@ class luxrender_tex_cauchy(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, scene):
 		cp = ParamSet().add_float('cauchyb', self.b)
 		
 		if self.use_index:
@@ -1042,8 +1058,7 @@ class luxrender_tex_checkerboard(declarative_property_group):
 	TF_tex1.properties + \
 	TF_tex2.properties
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		checkerboard_params = ParamSet() \
 			.add_string('aamode', self.aamode) \
 			.add_integer('dimension', self.dimension)
@@ -1089,7 +1104,7 @@ class luxrender_tex_constant(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, scene):
 		constant_params = ParamSet()
 		constant_params.add_float('value', self.value)
 		
@@ -1123,8 +1138,7 @@ class luxrender_tex_dots(declarative_property_group):
 	TF_inside.properties + \
 	TF_outside.properties
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		dots_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -1164,8 +1178,7 @@ class luxrender_tex_equalenergy(declarative_property_group):
 		}
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		return set(), ParamSet().add_float('energy', self.energy)
 
 class luxrender_tex_fbm(declarative_property_group):
@@ -1207,8 +1220,7 @@ class luxrender_tex_fbm(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		fbm_params = ParamSet().add_integer('octaves', self.octaves) \
 							   .add_float('roughness', self.roughness)
 		
@@ -1265,8 +1277,7 @@ class luxrender_tex_gaussian(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		return set(), ParamSet().add_float('energy', self.energy) \
 								.add_float('wavelength', self.wavelength) \
 								.add_float('width', self.width)
@@ -1287,8 +1298,7 @@ class luxrender_tex_harlequin(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		harlequin_params = ParamSet()
 		
 		return set(), harlequin_params
@@ -1409,12 +1419,18 @@ class luxrender_tex_imagemap(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		params = ParamSet()
 		
-		params.add_string('filename', efutil.path_relative_to_export(self.filename) ) \
-			  .add_integer('discardmipmaps', self.discardmipmaps) \
+		if scene.luxrender_engine.embed_filedata:
+			from luxrender.util import bencode_file2string
+			fn = efutil.filesystem_path(self.filename)
+			params.add_string('filename', os.path.basename(fn))
+			params.add_string('filename_data', bencode_file2string(fn) )
+		else:
+			params.add_string('filename', efutil.path_relative_to_export(self.filename) )
+		
+		params.add_integer('discardmipmaps', self.discardmipmaps) \
 			  .add_string('filtertype', self.filtertype) \
 			  .add_float('gain', self.gain) \
 			  .add_float('gamma', self.gamma) \
@@ -1449,8 +1465,7 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 		}
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		return set(), ParamSet().add_string('name', self.preset)
 
 class luxrender_tex_mapping(declarative_property_group):
@@ -1544,7 +1559,7 @@ class luxrender_tex_mapping(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, scene):
 		mapping_params = ParamSet()
 		
 		mapping_params.add_string('mapping', self.type)
@@ -1628,8 +1643,7 @@ class luxrender_tex_marble(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		return {'3DMAPPING'}, ParamSet().add_integer('octaves', self.octaves) \
 										.add_float('roughness', self.roughness) \
 										.add_float('scale', self.scale) \
@@ -1690,8 +1704,7 @@ class luxrender_tex_mix(declarative_property_group):
 	TF_tex2.properties + \
 	TC_tex2.properties
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		mix_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -1771,7 +1784,7 @@ class luxrender_tex_sellmeier(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, scene):
 		sp = ParamSet() \
 				.add_float('A', self.a) \
 				.add_float('B', tuple(self.b)) \
@@ -1830,8 +1843,7 @@ class luxrender_tex_scale(declarative_property_group):
 	TF_tex2.properties + \
 	TC_tex2.properties
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		scale_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
@@ -1844,12 +1856,32 @@ class luxrender_tex_scale(declarative_property_group):
 		
 		return set(), scale_params
 
-class tabulatedfresnel(declarative_property_group):
-	
+class tabulatedbase(declarative_property_group):
 	controls = [
 		'filename'
 	]
 	
+	def get_paramset(self, scene):
+		td = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
+		return set(), td
+
+class tabulatedcolor(tabulatedbase):
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'color'
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'filename',
+			'name': 'File name',
+			'save_in_preset': True
+		},
+	]
+
+class tabulatedfresnel(tabulatedbase):
 	properties = [
 		{
 			'type': 'string',
@@ -1864,11 +1896,9 @@ class tabulatedfresnel(declarative_property_group):
 			'save_in_preset': True
 		},
 	]
-	
-	def get_paramset(self):
-		tfp = ParamSet().add_string('filename', efutil.path_relative_to_export(self.filename) )
-		return set(), tfp
 
+class luxrender_tex_tabulateddata(tabulatedcolor):
+	pass
 class luxrender_tex_luxpop(tabulatedfresnel):
 	pass
 class luxrender_tex_sopra(tabulatedfresnel):
@@ -1908,7 +1938,7 @@ class luxrender_tex_transform(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, scene):
 		transform_params = ParamSet()
 		
 		ws = get_worldscale(as_scalematrix=False)
@@ -1935,10 +1965,9 @@ class luxrender_tex_uv(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		uv_params = ParamSet()
-			
+		
 		return {'2DMAPPING'}, uv_params
 
 class luxrender_tex_windy(declarative_property_group):
@@ -1957,8 +1986,7 @@ class luxrender_tex_windy(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		windy_params = ParamSet()
 		
 		return {'3DMAPPING'}, windy_params
@@ -2002,8 +2030,7 @@ class luxrender_tex_wrinkled(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
-		
+	def get_paramset(self, scene):
 		wrinkled_params = ParamSet().add_integer('octaves', self.octaves) \
 									.add_float('roughness', self.roughness)
 		

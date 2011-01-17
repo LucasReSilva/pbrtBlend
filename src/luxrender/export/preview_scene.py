@@ -27,8 +27,7 @@
 import bpy
 
 from luxrender.export import ParamSet
-from luxrender.export.film import resolution
-from luxrender.export.geometry import exportNativeMesh
+from luxrender.export.geometry import exportNativeMesh, get_material_volume_defs
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
@@ -42,7 +41,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.camera('perspective', camera_params)
 	
 	# Film
-	xr, yr = resolution(scene)
+	xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution()
 	
 	film_params = ParamSet() \
 		.add_integer('xresolution', int(xr)) \
@@ -256,15 +255,16 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		lux_context.concatTransform(pv_transform)
 		
-		mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
+		mat.luxrender_material.export(lux_context, mat, mode='direct')
 		
-		if mat.luxrender_material.type in ['glass2']:
-			lux_context.interior(mat.luxrender_material.luxrender_mat_glass2.Interior_volume)
-			lux_context.exterior(mat.luxrender_material.luxrender_mat_glass2.Exterior_volume)
+		int_v, ext_v = get_material_volume_defs(mat)
+		if int_v != '' or ext_v != '':
+			if int_v != '': lux_context.interior(int_v)
+			if ext_v != '': lux_context.exterior(ext_v)
 		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
-			lux_context.shape( *exportNativeMesh(scene, pv_mesh, lux_context) )
+			lux_context.shape( 'trianglemesh', exportNativeMesh(pv_mesh, lux_context) )
 			bpy.data.meshes.remove(pv_mesh)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))

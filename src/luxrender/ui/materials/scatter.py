@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# LuxFire Distributed Rendering System
+# Blender 2.5 LuxRender Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -24,18 +24,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from Client import ServerLocator, ListLuxFireGroup
+import bpy
 
-def RendererGroup():
-    LuxSlavesNames = ListLuxFireGroup('Renderer')
-    
-    if len(LuxSlavesNames) > 0:
-        from Client.Renderer import RendererClient
-        slaves = {}
-        for LN, i in LuxSlavesNames:
-            LS = RendererClient(ServerLocator.get_by_name('Lux.Renderer.%s' % LN))
-            slaves[LS.name] = LS
-        
-        return slaves
-    else:
-        return {}
+from luxrender.ui.materials import luxrender_material_sub
+
+class ui_material_scatter(luxrender_material_sub, bpy.types.Panel):
+	bl_label = 'LuxRender Scatter Material'
+	
+	LUX_COMPAT = {'scatter'}
+	
+	display_property_groups = [
+		( ('material', 'luxrender_material'), 'luxrender_mat_scatter' )
+	]

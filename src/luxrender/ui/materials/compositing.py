@@ -26,25 +26,18 @@
 #
 import bpy
 
-from properties_data_camera import CameraButtonsPanel
+from luxrender.ui.materials import luxrender_material_base
 
-from extensions_framework.ui import property_group_renderer
-
-class camera_panel(CameraButtonsPanel, property_group_renderer):
-	COMPAT_ENGINES = {'luxrender'}
+class ui_luxrender_mat_compositing(luxrender_material_base, bpy.types.Panel):
 	
-class camera(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Camera'
+	bl_label	= 'LuxRender Material Compositing'
 	
 	display_property_groups = [
-		( ('camera',), 'luxrender_camera' )
+		( ('material', 'luxrender_material'), 'luxrender_mat_compositing' )
 	]
-
-class film(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Film'
 	
-	display_property_groups = [
-		( ('camera','luxrender_camera'), 'luxrender_film' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_colorspace' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_tonemapping' ),
-	]
+	@classmethod
+	def poll(cls, context):
+		if not hasattr(context.scene, 'luxrender_integrator'):
+			return False
+		return context.scene.luxrender_integrator.surfaceintegrator == 'distributedpath' and super().poll(context)

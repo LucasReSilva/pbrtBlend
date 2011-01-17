@@ -26,25 +26,23 @@
 #
 import bpy
 
-from properties_data_camera import CameraButtonsPanel
+from properties_object import ObjectButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
-class camera_panel(CameraButtonsPanel, property_group_renderer):
+class emission(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
+	'''
+	Object Emission Settings
+	'''
+	
+	bl_label = 'LuxRender Emission'
 	COMPAT_ENGINES = {'luxrender'}
 	
-class camera(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Camera'
+	@classmethod
+	def poll(cls, context):
+		engine = context.scene.render.engine
+		return context.object and context.object.type == 'MESH' and (engine in cls.COMPAT_ENGINES)
 	
 	display_property_groups = [
-		( ('camera',), 'luxrender_camera' )
-	]
-
-class film(camera_panel, bpy.types.Panel):
-	bl_label = 'LuxRender Film'
-	
-	display_property_groups = [
-		( ('camera','luxrender_camera'), 'luxrender_film' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_colorspace' ),
-		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_tonemapping' ),
+		( ('object',), 'luxrender_emission' )
 	]
