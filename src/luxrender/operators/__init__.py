@@ -330,7 +330,9 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				lux_context.set_output_file(Files.MATS)
 			
 			self.report({'INFO'}, 'Exporting materials')
-			for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
+			# Export materials from all objects because mats from
+			# potentially hidden DupliGroup objects are needed
+			for object in scene.objects: #[ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
 				for mat in export_materials.get_instance_materials(object):
 					if mat is not None and mat.name not in export_materials.ExportedMaterials.exported_material_names:
 						mat.luxrender_material.export(lux_context, mat, mode='indirect')
