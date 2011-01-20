@@ -80,7 +80,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.pixelFilter('mitchell', pixelfilter_params)
 	
 	# Sampler
-	if True:
+	if False:
 		sampler_params = ParamSet() \
 			.add_string('pixelsampler', 'hilbert') \
 			.add_integer('pixelsamples', 2)
@@ -89,7 +89,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		lux_context.sampler('metropolis', ParamSet())
 	
 	# Surface Integrator
-	if True:
+	if False:
 		surfaceintegrator_params = ParamSet() \
 			.add_integer('directsamples', 1) \
 			\

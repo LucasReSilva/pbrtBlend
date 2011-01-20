@@ -161,8 +161,8 @@ TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color
 # Volume related Textures
 TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',		add_float_value = False)
 
-TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		default=(0.0,0.0,0.0))
-TC_sigma_a				= VolumeDataColorTextureParameter('sigma_a', 'Absorption',			default=(0.0,0.0,0.0))
+TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		default=(1.0,1.0,1.0))
+TC_sigma_a				= VolumeDataColorTextureParameter('sigma_a', 'Absorption',			default=(1.0,1.0,1.0))
 TC_sigma_s				= VolumeDataColorTextureParameter('sigma_s', 'Scattering',			default=(0.0,0.0,0.0))
 
 def dict_merge(*args):
