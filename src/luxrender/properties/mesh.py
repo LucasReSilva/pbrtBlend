@@ -90,7 +90,7 @@ class luxrender_mesh(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'nsmooth',
-			'name': 'Use Autosmoothing',
+			'name': 'Normal smoothing',
 			'default': True,
 		},
 		{
