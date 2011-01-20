@@ -111,6 +111,7 @@ from luxrender.properties.texture		import ( luxrender_texture,
 												 luxrender_tex_wrinkled )
 from luxrender.properties.sampler		import ( luxrender_sampler )
 from luxrender.properties.volume		import ( luxrender_volumeintegrator )
+from luxrender.properties.world			import ( luxrender_world )
 
 # Exporter Interface Panels
 from luxrender.ui						import ( render_panels		as ui_render_panels )
@@ -136,8 +137,7 @@ from luxrender.ui.materials				import ( main				as ui_materials,
 												 null				as ui_materials_null,
 												 scatter			as ui_materials_scatter,
 												 shinymetal			as ui_materials_shinymetal,
-												 velvet				as ui_materials_velvet,
-												 volumes			as ui_materials_volumes )
+												 velvet				as ui_materials_velvet )
 from luxrender.ui.textures				import ( main				as ui_textures,
 												 bilerp				as ui_texture_bilerp,
 												 blackbody			as ui_texture_blackbody,
@@ -164,6 +164,8 @@ from luxrender.ui.textures				import ( main				as ui_textures,
 												 mapping			as ui_texture_mapping,
 												 tabulateddata		as ui_texture_tabulateddata,
 												 transform			as ui_texture_transform )
+from luxrender.ui.volumes				import ( volumes as ui_volumes )
+from luxrender.ui.world					import ( world as ui_world )
 
 # Exporter Operators
 from luxrender.operators				import ( EXPORT_OT_luxrender,
@@ -261,6 +263,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('Scene', luxrender_sampler),
 		('Scene', luxrender_volumeintegrator),
 		('Scene', luxrender_volumes),
+		('Scene', luxrender_world),
 		('Camera', luxrender_camera),
 		('luxrender_camera', luxrender_film),
 		('luxrender_film', luxrender_colorspace),

@@ -31,6 +31,26 @@ from extensions_framework.validate import Logic_Operator as LO
 from luxrender.properties.texture import ColorTextureParameter
 from luxrender.export import ParamSet
 
+def LampVolumeParameter(attr, name):
+	return [
+		{
+			'attr': '%s_volume' % attr,
+			'type': 'string',
+			'name': '%s_volume' % attr,
+			'description': '%s volume; leave blank to use World default' % attr,
+			'save_in_preset': True
+		},
+		{
+			'type': 'prop_search',
+			'attr': attr,
+			'src': lambda s,c: s.scene.luxrender_volumes,
+			'src_attr': 'volumes',
+			'trg': lambda s,c: c.luxrender_lamp,
+			'trg_attr': '%s_volume' % attr,
+			'name': name
+		},
+	]
+
 class LampColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):
 		return lambda s,c: getattr(c, 'luxrender_lamp_%s'%s.lamp.type.lower())
@@ -54,7 +74,7 @@ class luxrender_lamp(declarative_property_group):
 	'''
 	
 	controls = [
-		'importance', 'lightgroup',
+		'importance', 'lightgroup', 'Exterior'
 	]
 	
 	properties = [
@@ -77,7 +97,8 @@ class luxrender_lamp(declarative_property_group):
 			'max': 1e3,
 			'soft_max': 1e3,
 		},
-	]
+	] + \
+		LampVolumeParameter('Exterior', 'Exterior')
 	
 	def get_paramset(self):
 		params = ParamSet()

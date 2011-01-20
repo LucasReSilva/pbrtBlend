@@ -355,6 +355,12 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 				self.report({'ERROR'}, 'No lights in scene!')
 				return {'CANCELLED'}
 		
+		# Default 'Camera' Exterior
+		if scene.camera.data.luxrender_camera.Exterior_volume != '':
+			lux_context.exterior(scene.camera.data.luxrender_camera.Exterior_volume)
+		elif scene.luxrender_world.default_exterior_volume != '':
+			lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+		
 		if self.properties.write_all_files:
 			lux_context.worldEnd()
 		

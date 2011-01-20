@@ -35,6 +35,26 @@ from luxrender.export import get_worldscale
 from luxrender.export import ParamSet, LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
+def CameraVolumeParameter(attr, name):
+	return [
+		{
+			'attr': '%s_volume' % attr,
+			'type': 'string',
+			'name': '%s_volume' % attr,
+			'description': '%s volume; leave blank to use World default' % attr,
+			'save_in_preset': True
+		},
+		{
+			'type': 'prop_search',
+			'attr': attr,
+			'src': lambda s,c: s.scene.luxrender_volumes,
+			'src_attr': 'volumes',
+			'trg': lambda s,c: c.luxrender_camera,
+			'trg_attr': '%s_volume' % attr,
+			'name': name
+		},
+	]
+
 class luxrender_camera(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
@@ -43,6 +63,7 @@ class luxrender_camera(declarative_property_group):
 	'''
 	
 	controls = [
+		'Exterior',
 		['autofocus', 'use_dof', 'use_clipping'],
 		'type',
 		'fstop',
@@ -61,7 +82,7 @@ class luxrender_camera(declarative_property_group):
 		'objectmblur':				{ 'usemblur': True },
 	}
 	
-	properties = [
+	properties = CameraVolumeParameter('Exterior', 'Exterior') + [
 		{
 			'type': 'bool',
 			'attr': 'use_clipping',

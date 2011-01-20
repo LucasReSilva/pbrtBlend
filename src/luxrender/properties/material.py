@@ -34,7 +34,7 @@ from extensions_framework import util as efutil
 
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
-from luxrender.export.materials import add_texture_parameter, ExportedMaterials
+from luxrender.export.materials import ExportedMaterials
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
@@ -64,7 +64,7 @@ def VolumeParameter(attr, name):
 			'attr': '%s_volume' % attr,
 			'type': 'string',
 			'name': '%s_volume' % attr,
-			'description': '%s_volume' % attr,
+			'description': '%s volume; leave blank to use World default' % attr,
 			'save_in_preset': True
 		},
 		{
@@ -82,7 +82,7 @@ class VolumeDataColorTextureParameter(ColorTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s #.main
+			return s
 		return func
 	
 	def texture_slot_set_attr(self):
@@ -94,7 +94,7 @@ class VolumeDataFloatTextureParameter(FloatTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s #.main
+			return s
 		return func
 	
 	def texture_slot_set_attr(self):
@@ -106,7 +106,7 @@ class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s #.main
+			return s
 		return func
 	
 	def texture_slot_set_attr(self):
@@ -121,10 +121,6 @@ class SubGroupFloatTextureParameter(FloatTextureParameter):
 		# Looks in a different location than other FloatTextureParameters
 		return lambda s,c: c.luxrender_material
 
-
-
-# Fresnel Textures
-TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',		add_float_value = False)
 
 # Float Textures
 TF_bumpmap				= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, precision=6, multiply_float=True, ignore_zero=True )
@@ -162,7 +158,10 @@ TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption col
 TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',	default=(0.64,0.64,0.64) )
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
 
-TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		default=(1.0,1.0,1.0))
+# Volume related Textures
+TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',		add_float_value = False)
+
+TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		default=(0.0,0.0,0.0))
 TC_sigma_a				= VolumeDataColorTextureParameter('sigma_a', 'Absorption',			default=(0.0,0.0,0.0))
 TC_sigma_s				= VolumeDataColorTextureParameter('sigma_s', 'Scattering',			default=(0.0,0.0,0.0))
 
@@ -1272,9 +1271,7 @@ def volume_types():
 def volume_visibility():
 	v_vis = dict_merge({
 		'scattering_scale': { 'type': 'homogeneous' },
-		'g_r': { 'type': 'homogeneous' },
-		'g_g': { 'type': 'homogeneous' },
-		'g_b': { 'type': 'homogeneous' },
+		'g': { 'type': 'homogeneous' },
 	},
 	TFR_IOR.visibility,
 	TC_absorption.visibility,
@@ -1283,11 +1280,9 @@ def volume_visibility():
 	)
 	
 	vis_append = { 'type': 'clear' }
-	#v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
 	v_vis = texture_append_visibility(v_vis, TC_absorption, vis_append)
 	
 	vis_append = { 'type': 'homogeneous' }
-	#v_vis = texture_append_visibility(v_vis, TFR_IOR, vis_append)
 	v_vis = texture_append_visibility(v_vis, TC_sigma_a, vis_append)
 	v_vis = texture_append_visibility(v_vis, TC_sigma_s, vis_append)
 	
@@ -1312,9 +1307,7 @@ class luxrender_volume_data(declarative_property_group):
 	TC_sigma_s.controls + \
 	[
 		'scattering_scale',
-		'g_r',
-		'g_g',
-		'g_b',
+		'g',
 	]
 	
 	visibility = volume_visibility()
@@ -1360,37 +1353,11 @@ class luxrender_volume_data(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
-			'type': 'float',
-			'attr': 'g_r',
-			'name': 'Red asymmetry',
-			'description': 'Scattering asymmetry, red component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
-			'default': 0.0,
-			'min': -1.0,
-			'soft_min': -1.0,
-			'max': 1.0,
-			'soft_max': 1.0,
-			'precision': 4,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'g_g',
-			'name': 'Green asymmetry',
-			'description': 'Scattering asymmetry, green component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
-			'default': 0.0,
-			'min': -1.0,
-			'soft_min': -1.0,
-			'max': 1.0,
-			'soft_max': 1.0,
-			'precision': 4,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'g_b',
-			'name': 'Blue asymmetry',
-			'description': 'Scattering asymmetry, blue component. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
-			'default': 0.0,
+			'type': 'float_vector',
+			'attr': 'g',
+			'name': 'Asymmetry',
+			'description': 'Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'default': (0.0, 0.0, 0.0),
 			'min': -1.0,
 			'soft_min': -1.0,
 			'max': 1.0,
@@ -1418,7 +1385,7 @@ class luxrender_volume_data(declarative_property_group):
 			def scattering_scale(i):
 				return i * self.scattering_scale
 			vp.update( TFR_IOR.get_paramset(self) )
-			vp.add_color('g', [self.g_r, self.g_g, self.g_b])
+			vp.add_color('g', self.g)
 			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth) )
 			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
 		
@@ -1432,7 +1399,6 @@ class luxrender_volumes(declarative_property_group):
 	'''
 	
 	controls = [
-		'volumes_label',
 		'volumes_select',
 		['op_vol_add', 'op_vol_rem']
 	]
@@ -1448,11 +1414,6 @@ class luxrender_volumes(declarative_property_group):
 			'items': [
 				
 			]
-		},
-		{
-			'type': 'text',
-			'attr': 'volumes_label',
-			'name': 'Volumes',
 		},
 		{
 			'type': 'int',

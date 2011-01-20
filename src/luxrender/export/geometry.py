@@ -239,15 +239,25 @@ def exportInstance(lux_context, ob, matrix):
 		arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', ob.luxrender_emission) )
 		lux_context.areaLightSource('area', arealightsource_params)
 	
+	exported_interior = exported_exterior = False
 	for m in get_instance_materials(ob):
 		# just export the first volume interior/exterior
 		if hasattr(m, 'luxrender_material'):
 			int_v, ext_v = get_material_volume_defs(m)
 			if int_v != '' or ext_v != '':
 				# Always use a matched pair of int_v/ext_v so that materials don't get mismatched
-				if int_v != '': lux_context.interior(int_v)
-				if ext_v != '': lux_context.exterior(ext_v)
+				if int_v != '':
+					lux_context.interior(int_v)
+					exported_interior = True
+				if ext_v != '':
+					lux_context.exterior(ext_v)
+					exported_exterior = True
 				break
+	
+	if not exported_interior and LuxManager.CurrentScene.luxrender_world.default_interior_volume != '':
+		lux_context.interior(LuxManager.CurrentScene.luxrender_world.default_interior_volume)
+	if not exported_exterior and LuxManager.CurrentScene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(LuxManager.CurrentScene.luxrender_world.default_exterior_volume)
 	
 	# object motion blur
 	is_object_animated = False

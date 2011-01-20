@@ -33,7 +33,7 @@ from luxrender.outputs.file_api import Files
 from luxrender.properties import dbo
 from luxrender.export import ParamSet, get_worldscale, matrix_to_list
 
-def attr_light(lux_context, name, group, type, params, transform=None, portals=[]):
+def attr_light(lux_context, light, name, group, type, params, transform=None, portals=[]):
 	'''
 	lux_context		pylux.Context
 	name			string
@@ -59,8 +59,14 @@ def attr_light(lux_context, name, group, type, params, transform=None, portals=[
 	
 	dbo('LIGHT', (type, params))
 	lux_context.lightGroup(group, [])
+	
+	if light.luxrender_lamp.Exterior_volume != '':
+		lux_context.exterior(light.luxrender_lamp.Exterior_volume)
+	elif LuxManager.CurrentScene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(LuxManager.CurrentScene.luxrender_world.default_exterior_volume)
+	
 	lux_context.lightSource(type, params)
-
+	
 	for portal in portals:
 		lux_context.portalInstance(portal)
 	
@@ -84,11 +90,11 @@ def exportLight(lux_context, ob, matrix, portals = []):
 	if light.type == 'SUN':
 		invmatrix = mathutils.Matrix(matrix).invert()
 		light_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
+		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
 		return True
 	
 	if light.type == 'HEMI':
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'SPOT':
@@ -98,12 +104,12 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		light_params.add_point('to', (0,0,-1))
 		light_params.add_float('coneangle', coneangle)
 		light_params.add_float('conedeltaangle', conedeltaangle)
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 
 	if light.type == 'POINT':
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(lux_context, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 	
 	if light.type == 'AREA':
@@ -112,17 +118,23 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		lux_context.attributeBegin(ob.name, file=Files.MAIN)
 		lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
 		lux_context.lightGroup(light.luxrender_lamp.lightgroup, [])
+		
+		if light.luxrender_lamp.Exterior_volume != '':
+			lux_context.exterior(light.luxrender_lamp.Exterior_volume)
+		elif LuxManager.CurrentScene.luxrender_world.default_exterior_volume != '':
+			lux_context.exterior(LuxManager.CurrentScene.luxrender_world.default_exterior_volume)
+		
 		lux_context.areaLightSource('area', light_params)
-
+		
 		areax = light.size
-
+		
 		if light.shape == 'SQUARE':
 			areay = areax
 		elif light.shape == 'RECTANGLE':
 			areay = light.size_y
 		else:
 			areay = areax # not supported yet
-
+		
 		points = [-areax/2.0, areay/2.0, 0.0, areax/2.0, areay/2.0, 0.0, areax/2.0, -areay/2.0, 0.0, -areax/2.0, -areay/2.0, 0.0]
 		
 		shape_params = ParamSet()
@@ -136,7 +148,12 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		shape_params.add_point('P', points)
 		
 		lux_context.shape('trianglemesh', shape_params)
+		
+		for portal in portals:
+			lux_context.portalInstance(portal)
+		
 		lux_context.attributeEnd()
+		
 		return True
 
 	return False

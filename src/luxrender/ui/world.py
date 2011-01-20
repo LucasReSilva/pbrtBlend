@@ -26,36 +26,16 @@
 #
 import bpy
 
-from luxrender.ui.materials import luxrender_material_base
+from properties_world import WorldButtonsPanel
+from extensions_framework.ui import property_group_renderer
 
-class volumes(luxrender_material_base, bpy.types.Panel):
+class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
-	Material Volumes Settings
+	LuxRender World Settings
 	'''
-	
-	bl_label = 'LuxRender Material Volumes'
+	COMPAT_ENGINES = {'luxrender'}
+	bl_label = 'LuxRender World Settings'
 	
 	display_property_groups = [
-		( ('scene',), 'luxrender_volumes' )
+		( ('scene',), 'luxrender_world' )
 	]
-	
-	# overridden in order to draw the selected luxrender_volume_data property group
-	def draw(self, context):
-		super().draw(context)
-		if len(context.scene.luxrender_volumes.volumes) > 0:
-			current_vol_ind = context.scene.luxrender_volumes.volumes_index
-			current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
-			# 'name' is not a member of current_vol.properties,
-			# so we draw it explicitly
-			self.layout.prop(
-				current_vol, 'name'
-			)
-			# Here we draw the currently selected luxrender_volumes_data property group
-			for control in current_vol.controls:
-				self.draw_column(
-					control,
-					self.layout,
-					current_vol,
-					context.material,
-					property_group = current_vol
-				)
