@@ -130,7 +130,7 @@ def exportNativeMesh(mesh, lux_context):
 		shape_params.add_integer('nvertices', nvertices)
 	
 	#print('-> Add indices to paramset')
-	shape_params.add_integer('indices', indices)
+	shape_params.add_integer('triindices', indices)
 	#print('-> Add verts to paramset')
 	shape_params.add_point('P', points)
 	#print('-> Add normals to paramset')

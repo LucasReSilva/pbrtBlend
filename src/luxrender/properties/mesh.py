@@ -52,7 +52,8 @@ class luxrender_mesh(declarative_property_group):
 	
 	controls = [
 		'portal',
-		['subdiv','sublevels'],
+		'subdiv',
+		'sublevels',
 		['nsmooth', 'sharpbound'],
 	] + \
 		TF_displacementmap.controls + \
@@ -61,9 +62,9 @@ class luxrender_mesh(declarative_property_group):
 	]
 	
 	visibility = dict_merge({
-		'nsmooth':		{ 'subdiv': True },
-		'sharpbound':	{ 'subdiv': True },
-		'sublevels':	{ 'subdiv': True },
+		'nsmooth':		{ 'subdiv': LO({'!=': 'None'}) },
+		'sharpbound':	{ 'subdiv': LO({'!=': 'None'}) },
+		'sublevels':	{ 'subdiv': LO({'!=': 'None'}) },
 		'dmscale':		{ 'dm_floattexturename': LO({'!=': ''}) },
 		'dmoffset':		{ 'dm_floattexturename': LO({'!=': ''}) },
 	}, TF_displacementmap.visibility )
@@ -76,10 +77,15 @@ class luxrender_mesh(declarative_property_group):
 			'default': False,
 		},
 		{
-			'type': 'bool',
+			'type': 'enum',
 			'attr': 'subdiv',
-			'name': 'Use Subdivision',
-			'default': False,
+			'name': 'Subdivision Scheme',
+			'default': 'None',
+			'items': [
+				('None', 'None', 'None'),
+				('loop', 'loop', 'loop'),
+				('microdisplacement', 'microdisplacement', 'microdisplacement')
+			]
 		},
 		{
 			'type': 'bool',
@@ -127,17 +133,15 @@ class luxrender_mesh(declarative_property_group):
 	]
 	
 	def get_shape_type(self):
-		if self.subdiv:
-			return 'loopsubdiv'
-		else:
-			return 'trianglemesh'
+		return 'mesh'
 	
 	def get_paramset(self):
 		params = ParamSet()
 		
 		# check if subdivision is used
-		if self.subdiv:
-			params.add_integer('nlevels',self.sublevels)
+		if self.subdiv != 'None':
+			params.add_string('subdivscheme', self.subdiv)
+			params.add_integer('nsubdivlevels',self.sublevels)
 			params.add_bool('dmnormalsmooth', self.nsmooth)
 			params.add_bool('dmsharpboundary', self.sharpbound)
 			
