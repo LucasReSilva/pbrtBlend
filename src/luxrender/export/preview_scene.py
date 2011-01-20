@@ -111,6 +111,14 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	
 	lux_context.worldBegin()
 	
+	# Collect volumes from all scenes *sigh*
+	preview_scene = LuxManager.CurrentScene
+	for scn in bpy.data.scenes:
+		LuxManager.SetCurrentScene(scn)
+		for volume in scn.luxrender_volumes.volumes:
+			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
+	LuxManager.SetCurrentScene(preview_scene)
+	
 	# Light
 	lux_context.attributeBegin()
 	lux_context.transform([
@@ -131,6 +139,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_texture('L', 'pL') \
 		.add_float('gain', 1.002) \
 		.add_float('importance', 1.0)
+	
+	if preview_scene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
 	lux_context.areaLightSource('area', light_params)
 
 	areax = 1
@@ -146,6 +157,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.attributeEnd()
 	
 	# Add a background color (light)
+	
+	if preview_scene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
 	lux_context.lightSource('infinite', ParamSet().add_float('gain', 0.1).add_float('importance', 0.1))
 	
 	# back drop
@@ -208,15 +222,13 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			1.000000, 0.333333,
 		])
 	lux_context.shape('loopsubdiv', bd_shape_params)
-	lux_context.attributeEnd()
 	
-	# Collect volumes from all scenes *sigh*
-	preview_scene = LuxManager.CurrentScene
-	for scn in bpy.data.scenes:
-		LuxManager.SetCurrentScene(scn)
-		for volume in scn.luxrender_volumes.volumes:
-			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
-	LuxManager.SetCurrentScene(preview_scene)
+	if preview_scene.luxrender_world.default_interior_volume != '':
+			lux_context.interior(preview_scene.luxrender_world.default_interior_volume)
+	if preview_scene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
+	
+	lux_context.attributeEnd()
 	
 	if obj is not None and mat is not None:
 		# preview object
@@ -262,6 +274,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			if int_v != '': lux_context.interior(int_v)
 			if ext_v != '': lux_context.exterior(ext_v)
 		
+		if int_v == '' and preview_scene.luxrender_world.default_interior_volume != '':
+			lux_context.interior(preview_scene.luxrender_world.default_interior_volume)
+		if ext_v == '' and preview_scene.luxrender_world.default_exterior_volume != '':
+			lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
+		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
 			lux_context.shape( 'trianglemesh', exportNativeMesh(pv_mesh, lux_context) )
@@ -269,6 +286,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))
 		lux_context.attributeEnd()
+		
+		
+	# Default 'Camera' Exterior, just before WorldEnd
+	if preview_scene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
 	
 	return int(xr), int(yr)
 	
