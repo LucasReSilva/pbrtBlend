@@ -118,8 +118,6 @@ class luxrender_mesh(declarative_property_group):
 			'name': 'Scale',
 			'description': 'Displacement Map Scale',
 			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
 			'precision': 6,
 		},
 		{
