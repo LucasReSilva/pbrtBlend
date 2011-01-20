@@ -43,29 +43,24 @@ class volumes(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	# overridden in order to draw the selected luxrender_volume_data property group
 	def draw(self, context):
 		super().draw(context)
-		# Since the volume data searches for textures in the active object, first
-		# make sure that an object is selected and that it has a material assigned
-		# TODO: can we search the global bpy.data for all textures and not require a selection ?
-		if context.active_object and context.active_object.type == 'MESH':
-			if context.active_object.active_material:
-				if len(context.scene.luxrender_volumes.volumes) > 0:
-					current_vol_ind = context.scene.luxrender_volumes.volumes_index
-					current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
-					# 'name' is not a member of current_vol.properties,
-					# so we draw it explicitly
-					self.layout.prop(
-						current_vol, 'name'
+		
+		if context.world:
+			if len(context.scene.luxrender_volumes.volumes) > 0:
+				current_vol_ind = context.scene.luxrender_volumes.volumes_index
+				current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+				# 'name' is not a member of current_vol.properties,
+				# so we draw it explicitly
+				self.layout.prop(
+					current_vol, 'name'
+				)
+				# Here we draw the currently selected luxrender_volumes_data property group
+				for control in current_vol.controls:
+					self.draw_column(
+						control,
+						self.layout,
+						current_vol,
+						context.world,	# Look in the current world object for fresnel textures
+						property_group = current_vol
 					)
-					# Here we draw the currently selected luxrender_volumes_data property group
-					for control in current_vol.controls:
-						self.draw_column(
-							control,
-							self.layout,
-							current_vol,
-							context.active_object.active_material,
-							property_group = current_vol
-						)
-			else:
-				self.layout.label('Assign a material to the selected object')
 		else:
-			self.layout.label('Select a MESH object')
+			self.layout.label('No active World available!')

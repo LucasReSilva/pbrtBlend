@@ -276,6 +276,9 @@ def value_transform_passthrough(val):
 
 def get_texture_from_scene(scene, tex_name):
 	
+	for tex_slot in scene.world.texture_slots:
+		if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
+			return tex_slot.texture
 	for obj in scene.objects:
 		for mat_slot in obj.material_slots:
 			if mat_slot != None and mat_slot.material != None:
@@ -284,7 +287,7 @@ def get_texture_from_scene(scene, tex_name):
 						return tex_slot.texture
 		if obj.type == 'LAMP':
 			for tex_slot in obj.data.texture_slots:
-				if tex_slot != None and tex_slot.texture.name == tex_name:
+				if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
 					return tex_slot.texture
 	
 	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
