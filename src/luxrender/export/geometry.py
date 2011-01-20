@@ -207,17 +207,18 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 	#print('-> Remove render mesh')
 	bpy.data.meshes.remove(mesh)
 
-def allow_instancing():
+def allow_instancing(dupli):
 	# Some situations require full geometry export
 	if LuxManager.CurrentScene.luxrender_engine.renderer == 'hybrid':
 		return False
-		
-	return True
+	
+	# Only allow instancing for duplis and particles in non-hybrid mode
+	return dupli
 
 def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
-def exportInstance(lux_context, ob, matrix):
+def exportInstance(lux_context, ob, matrix, dupli=False):
 	scene = LuxManager.CurrentScene
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	
@@ -270,7 +271,7 @@ def exportInstance(lux_context, ob, matrix):
 			is_object_animated = True
 	
 	# If the object emits, don't export instance or motioninstance
-	if (not allow_instancing()) or object_is_emitter:
+	if (not allow_instancing(dupli)) or object_is_emitter:
 		exportMesh(lux_context, ob, object_begin_end=False, log=False)
 	# special case for motion blur since the mesh is already exported before the attribute
 	elif is_object_animated:
@@ -355,10 +356,10 @@ def write_lxo(lux_context):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
-				if allow_instancing() and (dupli_ob.object.data.name not in meshes_exported):
+				if allow_instancing(dupli=True) and (dupli_ob.object.data.name not in meshes_exported):
 					exportMesh(lux_context, dupli_ob.object)
 					meshes_exported.add(dupli_ob.object.data.name)
-				exportInstance(lux_context, dupli_ob.object, dupli_ob.matrix)
+				exportInstance(lux_context, dupli_ob.object, dupli_ob.matrix, dupli=True)
 				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
@@ -380,13 +381,13 @@ def write_lxo(lux_context):
 						mat.luxrender_material.export(lux_context, mat, mode='indirect')
 					for particle in psys.particles:
 						if particle.is_visible and (particle.alive_state in allowed_particle_states):
-							if allow_instancing() and (particle_object.data.name not in meshes_exported):
+							if allow_instancing(dupli=True) and (particle_object.data.name not in meshes_exported):
 								exportMesh(lux_context, particle_object, scale=[particle.size]*3, log=False)
 								meshes_exported.add(particle_object.data.name)
 							particle_matrix = mathutils.Matrix.Translation( particle.location )
 							particle_matrix *= particle.rotation.to_matrix().to_4x4()
 							#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
-							exportInstance(lux_context, particle_object, particle_matrix)
+							exportInstance(lux_context, particle_object, particle_matrix, dupli=True)
 							del particle_matrix
 	
 	# browse all scene objects for "mesh-convertible" ones
@@ -431,13 +432,13 @@ def write_lxo(lux_context):
 		if (dupli_check or render_emitter) and ob_in_duplis:
 			if OBJECT_ANALYSIS: print(' -> checks passed, exporting')
 			# Export mesh definition once
-			if allow_instancing() and (ob.data.name not in meshes_exported):
-				exportMesh(lux_context, ob, transformed=ob.data.luxrender_mesh.portal)
-				meshes_exported.add(ob.data.name)
+#			if allow_instancing(dupli=False) and (ob.data.name not in meshes_exported):
+#				exportMesh(lux_context, ob, transformed=ob.data.luxrender_mesh.portal)
+#				meshes_exported.add(ob.data.name)
 			
 			# Export object instance
 			if not ob.data.luxrender_mesh.portal:
-				exportInstance(lux_context, ob, ob.matrix_world)
+				exportInstance(lux_context, ob, ob.matrix_world, dupli=False)
 			
 		progress_thread.exported_objects += 1
 	
