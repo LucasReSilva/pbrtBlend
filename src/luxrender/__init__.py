@@ -32,7 +32,7 @@ bl_info = {
 	"name": "LuxRender",
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 7, 1),
-	"blender": (2, 5, 5),
+	"blender": (2, 5, 6),
 	"api": 33600,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",

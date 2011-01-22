@@ -28,6 +28,40 @@ from extensions_framework import declarative_property_group
 
 from luxrender.properties.texture import ColorTextureParameter
 
+class luxrender_object(declarative_property_group):
+	controls = [
+		'append_external_mesh',
+		'use_smoothing',
+		'external_mesh'
+	]
+	visibility = {
+		'use_smoothing':	{ 'append_external_mesh': True },
+		'external_mesh':	{ 'append_external_mesh': True },
+	}
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'append_external_mesh',
+			'name': 'External PLY Mesh',
+			'description': 'Use this object to place an external PLY mesh file in the scene',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_smoothing',
+			'name': 'Use smoothing',
+			'description': 'Smooth the external mesh data',
+			'default': False
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'external_mesh',
+			'name': 'Mesh file',
+			'description': 'External PLY mesh file to place in scene',
+		}
+	]
+
 class EmissionColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other ColorTextureParameters

@@ -30,6 +30,23 @@ from properties_object import ObjectButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+class object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
+	'''
+	Object settings
+	'''
+	
+	bl_label = 'LuxRender Object Settings'
+	COMPAT_ENGINES = {'luxrender'}
+	
+	@classmethod
+	def poll(cls, context):
+		engine = context.scene.render.engine
+		return context.object and context.object.type == 'MESH' and (engine in cls.COMPAT_ENGINES)
+	
+	display_property_groups = [
+		( ('object',), 'luxrender_object' )
+	]
+
 class emission(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	Object Emission Settings

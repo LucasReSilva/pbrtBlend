@@ -218,7 +218,7 @@ def allow_instancing(dupli):
 def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
-def exportInstance(lux_context, ob, matrix, dupli=False):
+def exportInstance(lux_context, ob, matrix, dupli=False, append_objects=None):
 	scene = LuxManager.CurrentScene
 	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
 	
@@ -281,9 +281,12 @@ def exportInstance(lux_context, ob, matrix, dupli=False):
 		lux_context.coordinateSystem('%s' % ob.data.name + '_motion')
 		lux_context.transformEnd()
 		lux_context.motionInstance(ob.data.name, 0.0, 1.0, ob.data.name + '_motion')
-
 	else:
 		lux_context.objectInstance(ob.data.name)
+	
+	if append_objects is not None:
+		for append_object in append_objects:
+			lux_context.objectInstance(append_object)
 	
 	lux_context.attributeEnd()
 
@@ -431,14 +434,21 @@ def write_lxo(lux_context):
 		if OBJECT_ANALYSIS: print(' -> ob_in_duplis: %s' % ob_in_duplis)
 		if (dupli_check or render_emitter) and ob_in_duplis:
 			if OBJECT_ANALYSIS: print(' -> checks passed, exporting')
-			# Export mesh definition once
-#			if allow_instancing(dupli=False) and (ob.data.name not in meshes_exported):
-#				exportMesh(lux_context, ob, transformed=ob.data.luxrender_mesh.portal)
-#				meshes_exported.add(ob.data.name)
+			
+			# Find out if referencing external mesh data
+			append_objects = None
+			if ob.luxrender_object.append_external_mesh:
+				lux_context.objectBegin(ob.name)
+				ply_params = ParamSet()
+				ply_params.add_string('filename', efutil.path_relative_to_export(ob.luxrender_object.external_mesh))
+				ply_params.add_bool('smooth', ob.luxrender_object.use_smoothing)
+				lux_context.shape('plymesh', ply_params)
+				lux_context.objectEnd()
+				append_objects = [ob.name]
 			
 			# Export object instance
 			if not ob.data.luxrender_mesh.portal:
-				exportInstance(lux_context, ob, ob.matrix_world, dupli=False)
+				exportInstance(lux_context, ob, ob.matrix_world, dupli=False, append_objects=append_objects)
 			
 		progress_thread.exported_objects += 1
 	
