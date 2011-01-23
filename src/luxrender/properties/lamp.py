@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import bpy
+
 from extensions_framework import declarative_property_group
 import extensions_framework.util as efutil
 from extensions_framework.validate import Logic_Operator as LO
@@ -110,7 +112,7 @@ class luxrender_lamp_basic(declarative_property_group):
 	visibility = TC_L.visibility
 	properties = TC_L.properties
 	
-	def get_paramset(self):
+	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		params.update( TC_L.get_paramset(self) )
 		return params
@@ -221,7 +223,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		
 		params.add_float('turbidity', self.turbidity)
@@ -267,7 +269,7 @@ class luxrender_lamp_area(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		params.add_float('power', self.power)
 		params.add_float('efficacy', self.efficacy)
@@ -318,11 +320,15 @@ class luxrender_lamp_hemi(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self):
+	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		
 		if self.infinite_map != '':
-			params.add_string('mapname', efutil.path_relative_to_export(self.infinite_map) )
+			if lamp_object.library is not None:
+				hdri_path = bpy.path.abspath(self.infinite_map, lamp_object.library.filepath)
+			else:
+				hdri_path = self.infinite_map
+			params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
 			params.add_string('mapping', self.mapping_type)
 			
 		if self.infinite_map == '' or self.hdri_multiply:

@@ -27,6 +27,8 @@
 import math
 import os
 
+import bpy
+
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
 
@@ -652,13 +654,17 @@ class luxrender_film(declarative_property_group):
 		
 		# Camera Response Function
 		if LUXRENDER_VERSION >= '0.8' and cso.use_crf:
+			if scene.camera.library is not None:
+				local_crf_filepath = bpy.path.abspath(cso.crf_file, scene.camera.library.filepath)
+			else:
+				local_crf_filepath = cso.crf_file
+			local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
 			if scene.luxrender_engine.embed_filedata:
 				from luxrender.util import bencode_file2string
-				fn = efutil.filesystem_path(cso.crf_file)
-				params.add_string('cameraresponse', os.path.basename(fn))
-				params.add_string('cameraresponse_data', bencode_file2string(fn) )
+				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
+				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath) )
 			else:
-				params.add_string('cameraresponse', efutil.path_relative_to_export(cso.crf_file) )
+				params.add_string('cameraresponse', local_crf_filepath)
 		
 		# Output types
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))

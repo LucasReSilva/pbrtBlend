@@ -236,9 +236,13 @@ def convert_texture(texture):
 			texture.image.save_render(tex_image, LuxManager.CurrentScene)
 		
 		if texture.image.source == 'FILE':
-			if not os.path.exists( efutil.filesystem_path( texture.image.filepath )):
-				raise Exception('Image referenced in blender texture %s doesn\'t exist!' % texture.name)
-			tex_image = efutil.path_relative_to_export( texture.image.filepath )
+			if texture.library is not None:
+				f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
+			else:
+				f_path = efutil.filesystem_path(texture.image.filepath)
+			if not os.path.exists(f_path):
+				raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+			tex_image = efutil.path_relative_to_export(f_path)
 		
 		lux_tex_name = 'imagemap'
 		variant = 'color'
@@ -290,6 +294,10 @@ def get_texture_from_scene(scene, tex_name):
 				if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
 					return tex_slot.texture
 	
+	# Last but not least, look in global bpy.data
+	if tex_name in bpy.data.textures:
+		return bpy.data.textures[tex_name]
+	
 	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
 	return False
 
@@ -318,7 +326,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 				if texture != False:
 					if texture.luxrender_texture.type != 'BLENDER':
 						tex_luxrender_texture = texture.luxrender_texture
-						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene)
+						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
 						if lux_tex_variant == variant:
 							ExportedTextures.texture(texture_name, variant, tex_luxrender_texture.type, paramset)
 						else:

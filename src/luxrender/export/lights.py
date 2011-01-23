@@ -84,7 +84,7 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		.add_float('importance', light.luxrender_lamp.importance)
 	
 	# Params from light sub-types
-	light_params.update( getattr(light.luxrender_lamp, 'luxrender_lamp_%s'%light.type.lower() ).get_paramset() )
+	light_params.update( getattr(light.luxrender_lamp, 'luxrender_lamp_%s'%light.type.lower() ).get_paramset(ob) )
 	
 	# Other lamp params from lamp object
 	if light.type == 'SUN':
