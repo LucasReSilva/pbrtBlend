@@ -62,6 +62,8 @@ def exportNativeMesh(mesh, lux_context):
 	for i in range(len(mesh.materials)):
 		
 		if mesh.materials[i] is None: continue
+		if i not in faces_verts_mats.keys(): continue
+		if i not in ffaces_mats.keys(): continue
 		
 		if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh.materials[i])
 		
