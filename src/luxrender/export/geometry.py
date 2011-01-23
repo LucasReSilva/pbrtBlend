@@ -49,6 +49,13 @@ def exportNativeMesh(mesh, lux_context):
 	#print('-> Cache vert pos and normals')
 	verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
 	
+	# collate faces and face verts by mat index
+	faces_verts_mats = {}
+	ffaces_mats = {}
+	for f in mesh.faces:
+		faces_verts_mats[f.material_index] = f.vertices
+		ffaces_mats[f.material_index] = f
+	
 	for i in range(len(mesh.materials)):
 		
 		if mesh.materials[i] is None: continue
@@ -57,19 +64,14 @@ def exportNativeMesh(mesh, lux_context):
 		
 		mesh_name = ('%s_%s' % (mesh.name, mesh.materials[i].name)).replace(' ','_')
 		
-		if OBJECT_ANALYSIS: print('   -> derived mesh name: %s' % mesh_name)
-		
-		#print('-> Cache face verts')
-		faces_verts = [f.vertices for f in mesh.faces if f.material_index==i]
-		#print('-> Cache faces')
-		ffaces = [f for f in mesh.faces if f.material_index==i]
+		if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
 		
 		# face indices
 		index = 0
 		indices = []
 		ntris = 0
 		#print('-> Collect face indices')
-		for face in ffaces:
+		for face in ffaces_mats[i]:
 			indices.append(index)
 			indices.append(index+1)
 			indices.append(index+2)
@@ -88,7 +90,7 @@ def exportNativeMesh(mesh, lux_context):
 		points = []
 		#print('-> Collect vert positions')
 		nvertices = 0
-		for face in ffaces:
+		for face in ffaces_mats[i]:
 			for vertex in face.vertices:
 				v = verts_co_no[vertex][:3]
 				nvertices += 1
@@ -101,7 +103,7 @@ def exportNativeMesh(mesh, lux_context):
 		# vertex normals
 		#print('-> Collect mert normals')
 		normals = []
-		for face in ffaces:
+		for face in ffaces_mats[i]:
 			normal = face.normal
 			for vertex in face.vertices:
 				if face.use_smooth:
@@ -121,7 +123,7 @@ def exportNativeMesh(mesh, lux_context):
 		if uv_layer:
 			uvs = []
 			for fi, uv in enumerate(uv_layer):
-				if fi in range(len(faces_verts)) and len(faces_verts[fi]) == 4:
+				if fi in range(len(faces_verts_mats[i])) and len(faces_verts_mats[i][fi]) == 4:
 					face_uvs = uv.uv1, uv.uv2, uv.uv3, uv.uv4
 				else:
 					face_uvs = uv.uv1, uv.uv2, uv.uv3
@@ -333,7 +335,7 @@ class MeshExportProgressThread(efutil.TimerThread):
 		if self.exported_objects != self.last_update:
 			self.last_update = self.exported_objects
 			pc = int(100 * self.exported_objects/self.total_objects)
-			#render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
+			render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
 			bpy.ops.ef.msg(
 				msg_type='INFO',
 				msg_text='LuxRender: Parsing meshes %i%%' % pc
