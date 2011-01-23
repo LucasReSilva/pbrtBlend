@@ -32,14 +32,16 @@ from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
 from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
-from luxrender.export.materials import export_object_material, get_instance_materials, add_texture_parameter
+from luxrender.export.materials import get_instance_materials, add_texture_parameter
 
-OBJECT_ANALYSIS = False
+OBJECT_ANALYSIS = True
 
 class InvalidGeometryException(Exception):
 	pass
 
 def exportNativeMesh(mesh, lux_context):
+	
+	if OBJECT_ANALYSIS: print(' -> NativeMesh:')
 	
 	mesh_definitions = []
 	
@@ -48,7 +50,11 @@ def exportNativeMesh(mesh, lux_context):
 	verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
 	
 	for i in range(len(mesh.materials)):
-		mesh_name = ('%s_%s' % (mesh.name, mesh.materials[0].name)).replace(' ','_')
+		if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh.materials[i])
+		
+		mesh_name = ('%s_%s' % (mesh.name, mesh.materials[i].name)).replace(' ','_')
+		
+		if OBJECT_ANALYSIS: print('   -> derived mesh name: %s' % mesh_name)
 		
 		#print('-> Cache face verts')
 		faces_verts = [f.vertices for f in mesh.faces if f.material_index==i]
@@ -177,12 +183,12 @@ def exportPlyMesh(mesh):
 def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, transformed=False):
 	scene = LuxManager.CurrentScene
 	
-	if log: LuxLog('Mesh Export: %s' % ob.data.name)
-	
 	#print('-> Create render mesh')
 	mesh = ob.create_mesh(scene, True, 'RENDER')
 	if mesh is None:
 		return
+	
+	if log: LuxLog('Mesh Export: %s' % ob.data.name)
 	
 	try:
 		mesh_definitions = []
@@ -243,10 +249,6 @@ def exportInstance(lux_context, ob, matrix, dupli=False, append_objects=None):
 	# object translation/rotation/scale 
 	lux_context.transform( matrix_to_list(matrix, apply_worldscale=True) )
 	
-	# Export either NamedMaterial stmt or the full material
-	# definition depending on the output type
-	#export_object_material(lux_context, ob)
-	
 	# Check for emission and volume data
 	object_is_emitter = hasattr(ob, 'luxrender_emission') and ob.luxrender_emission.use_emission
 	if object_is_emitter:
@@ -299,13 +301,13 @@ def exportInstance(lux_context, ob, matrix, dupli=False, append_objects=None):
 		lux_context.coordinateSystem('%s' % ob.data.name + '_motion')
 		lux_context.transformEnd()
 		lux_context.motionInstance(ob.data.name, 0.0, 1.0, ob.data.name + '_motion')
-	else:
+	elif not dupli:
 		lux_context.objectInstance(ob.data.name)
 	
 	if append_objects is not None:
 		for append_object, append_mat in append_objects:
 			if append_object != ob.data.name:
-				if append_mat != None: lux_context.namedMaterial(append_mat)
+				if append_mat != None: lux_context.namedMaterial(append_mat.name)
 				lux_context.objectInstance(append_object)
 	
 	lux_context.attributeEnd()
@@ -376,13 +378,17 @@ def write_lxo(lux_context):
 			# create dupli objects
 			ob.create_dupli_list(scene)
 			
+			mesh_names = []
+			
+			
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
-				mesh_names = []
+				
 				if allow_instancing(dupli=True) and (dupli_ob.object.data.name not in meshes_exported):
-					mesh_names = exportMesh(lux_context, dupli_ob.object)
+					mesh_names.extend( exportMesh(lux_context, dupli_ob.object) )
 					meshes_exported.add(dupli_ob.object.data.name)
+				
 				exportInstance(lux_context, dupli_ob.object, dupli_ob.matrix, dupli=True, append_objects=mesh_names)
 				
 				if dupli_ob.object.name not in duplis:
@@ -452,9 +458,9 @@ def write_lxo(lux_context):
 		
 		dupli_check = (not ob.is_duplicator or ob.dupli_type == 'DUPLIFRAMES')
 		if OBJECT_ANALYSIS: print(' -> dupli_check: %s' % dupli_check)
-		ob_in_duplis = (ob.name not in duplis)
-		if OBJECT_ANALYSIS: print(' -> ob_in_duplis: %s' % ob_in_duplis)
-		if (dupli_check or render_emitter) and ob_in_duplis:
+		ob_not_in_duplis = (ob.name not in duplis)
+		if OBJECT_ANALYSIS: print(' -> ob_not_in_duplis: %s' % ob_not_in_duplis)
+		if (dupli_check or render_emitter) and ob_not_in_duplis:
 			if OBJECT_ANALYSIS: print(' -> checks passed, exporting')
 			
 			# Find out if referencing external mesh data
