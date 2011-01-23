@@ -320,9 +320,9 @@ def exportInstance(lux_context, ob, matrix, dupli=False, append_objects=None):
 	
 	if append_objects is not None:
 		for append_object, append_mat in append_objects:
-			if append_object != ob.data.name:
-				if append_mat != None: lux_context.namedMaterial(append_mat.name)
-				lux_context.objectInstance(append_object)
+			#if append_object != ob.data.name:
+			if append_mat != None: lux_context.namedMaterial(append_mat.name)
+			lux_context.objectInstance(append_object)
 	
 	lux_context.attributeEnd()
 
@@ -478,7 +478,7 @@ def write_lxo(lux_context):
 			if OBJECT_ANALYSIS: print(' -> checks passed, exporting')
 			
 			# Find out if referencing external mesh data
-			append_objects = None
+			append_objects = []
 			if ob.luxrender_object.append_external_mesh:
 				lux_context.objectBegin(ob.name)
 				ply_params = ParamSet()
@@ -486,7 +486,7 @@ def write_lxo(lux_context):
 				ply_params.add_bool('smooth', ob.luxrender_object.use_smoothing)
 				lux_context.shape('plymesh', ply_params)
 				lux_context.objectEnd()
-				append_objects = [ (ob.name, None) ]
+				append_objects.append( (ob.name, ob.active_material) )
 			
 			# Export object instance
 			if not ob.data.luxrender_mesh.portal:

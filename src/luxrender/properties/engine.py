@@ -69,6 +69,7 @@ def engine_controls():
 	if LUXRENDER_VERSION >= '0.8':
 		# Insert 'renderer' before 'binary_name'
 		ectl.insert(ectl.index('binary_name'), 'renderer')
+		ectl.insert(ectl.index('binary_name'), 'opencl_platform_index')
 	
 	return ectl
 
@@ -82,16 +83,17 @@ class luxrender_engine(declarative_property_group):
 	controls = engine_controls()
 	
 	visibility = {
-		'write_files':		{ 'export_type': 'INT' },
-		'write_lxs':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'write_lxm':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'write_lxo':		O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'binary_name':		{ 'export_type': 'EXT' },
-		'render':			O([{'write_files': True}, {'export_type': 'EXT'}]),
-		'install_path':		{ 'render': True, 'export_type': 'EXT' },
-		'threads_auto':		A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
-		'threads':			A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
-		'priority':			{ 'export_type': 'EXT', 'render': True },
+		'opencl_platform_index':	{ 'renderer': 'hybrid' },
+		'write_files':				{ 'export_type': 'INT' },
+		'write_lxs':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'write_lxm':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'write_lxo':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'binary_name':				{ 'export_type': 'EXT' },
+		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
+		'install_path':				{ 'render': True, 'export_type': 'EXT' },
+		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
+		'threads':					A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
+		'priority':					{ 'export_type': 'EXT', 'render': True },
 	}
 	
 	properties = [
@@ -139,6 +141,18 @@ class luxrender_engine(declarative_property_group):
 				('sampler', 'Sampler (traditional CPU)', 'sampler'),
 				('hybrid', 'Hybrid (CPU + GPU)', 'hybrid'),
 			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'opencl_platform_index',
+			'name': 'OpenCL Platform Index',
+			'description': 'Try increasing this value 1 at a time if LuxRender fails to use your GPU',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+			'max': 16,
+			'soft_max': 16,
 			'save_in_preset': True
 		},
 		{
@@ -253,6 +267,9 @@ class luxrender_engine(declarative_property_group):
 	
 	def api_output(self):
 		renderer_params = ParamSet()
+		
+		if self.renderer == 'hybrid':
+			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
 		
 		return self.renderer, renderer_params
 
