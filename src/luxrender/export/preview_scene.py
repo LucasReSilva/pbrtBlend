@@ -267,8 +267,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		lux_context.concatTransform(pv_transform)
 		
-		mat.luxrender_material.export(lux_context, mat, mode='direct')
-		
 		int_v, ext_v = get_material_volume_defs(mat)
 		if int_v != '' or ext_v != '':
 			if int_v != '': lux_context.interior(int_v)
@@ -281,7 +279,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
-			lux_context.shape( 'mesh', exportNativeMesh(pv_mesh, lux_context) )
+			mesh_definitions = exportNativeMesh(pv_mesh, lux_context)
+			for mesh_mat, mesh_name, mesh_params in mesh_definitions:
+				mat.luxrender_material.export(lux_context, mat, mode='direct')
+				lux_context.shape( 'mesh', mesh_params )
 			bpy.data.meshes.remove(pv_mesh)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))
