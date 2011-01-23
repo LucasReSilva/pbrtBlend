@@ -53,8 +53,11 @@ def exportNativeMesh(mesh, lux_context):
 	faces_verts_mats = {}
 	ffaces_mats = {}
 	for f in mesh.faces:
-		faces_verts_mats[f.material_index] = f.vertices
-		ffaces_mats[f.material_index] = f
+		mi = f.material_index
+		if mi not in faces_verts_mats.keys(): faces_verts_mats[mi] = []
+		faces_verts_mats[mi].append( f.vertices )
+		if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
+		ffaces_mats[mi].append( f )
 	
 	for i in range(len(mesh.materials)):
 		
