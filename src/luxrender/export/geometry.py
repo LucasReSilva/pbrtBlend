@@ -191,6 +191,8 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 	if mesh is None:
 		return
 	
+	mesh.name = ob.data.name + '_render'
+	
 	try:
 		mesh_definitions = []
 		if scene.luxrender_engine.mesh_type == 'native':
