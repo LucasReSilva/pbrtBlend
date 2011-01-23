@@ -50,6 +50,9 @@ def exportNativeMesh(mesh, lux_context):
 	verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
 	
 	for i in range(len(mesh.materials)):
+		
+		if mesh.materials[i] is None: continue
+		
 		if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh.materials[i])
 		
 		mesh_name = ('%s_%s' % (mesh.name, mesh.materials[i].name)).replace(' ','_')
@@ -118,7 +121,7 @@ def exportNativeMesh(mesh, lux_context):
 		if uv_layer:
 			uvs = []
 			for fi, uv in enumerate(uv_layer):
-				if len(faces_verts[fi]) == 4:
+				if fi in range(len(faces_verts)) and len(faces_verts[fi]) == 4:
 					face_uvs = uv.uv1, uv.uv2, uv.uv3, uv.uv4
 				else:
 					face_uvs = uv.uv1, uv.uv2, uv.uv3
@@ -188,8 +191,6 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 	if mesh is None:
 		return
 	
-	if log: LuxLog('Mesh Export: %s' % ob.data.name)
-	
 	try:
 		mesh_definitions = []
 		if scene.luxrender_engine.mesh_type == 'native':
@@ -207,7 +208,11 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 	
 	mesh_names_mats = []
 	for me_mat, me_name, me_shape_type, me_shape_params in mesh_definitions:
-	
+		
+		if len(me_shape_params) == 0: continue
+		
+		if log: LuxLog('Mesh Exported: %s' % me_name)
+		
 		# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 		# Everything else is set on a per-instance basis
 		if object_begin_end: lux_context.objectBegin(me_name)
