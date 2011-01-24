@@ -1947,7 +1947,7 @@ class luxrender_tex_transform(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self, scene, texture):
+	def get_paramset(self, scene):
 		transform_params = ParamSet()
 		
 		ws = get_worldscale(as_scalematrix=False)
