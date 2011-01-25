@@ -34,7 +34,7 @@ from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import get_instance_materials, add_texture_parameter
 
-OBJECT_ANALYSIS = True
+OBJECT_ANALYSIS = False
 
 class InvalidGeometryException(Exception):
 	pass
@@ -418,12 +418,12 @@ def write_lxo(lux_context):
 				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
-					
+				
 				append_objects.extend( dupli_object_mesh_names[dupli_ob.object.name] )
 			
 			# Export instances second
 			if OBJECT_ANALYSIS: print('  exporting instance(s) for %s: %s' % (ob.name, append_objects) )
-			exportInstance(lux_context, ob, mathutils.Matrix(), dupli=True, append_objects=append_objects)
+			exportInstance(lux_context, ob, ob.matrix_world, dupli=True, append_objects=append_objects)
 			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if OBJECT_ANALYSIS: print(' -> parsed %i dupli objects' % len(ob.dupli_list))
