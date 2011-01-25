@@ -39,7 +39,7 @@ OBJECT_ANALYSIS = False
 class InvalidGeometryException(Exception):
 	pass
 
-def exportNativeMesh(mesh, lux_context):
+def exportNativeMesh(mesh_name, mesh, lux_context):
 	
 	if OBJECT_ANALYSIS: print(' -> NativeMesh:')
 	
@@ -67,7 +67,7 @@ def exportNativeMesh(mesh, lux_context):
 		
 		if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh.materials[i])
 		
-		mesh_name = ('%s_%s' % (mesh.name, mesh.materials[i].name)).replace(' ','_')
+		mesh_name = ('%s_%s' % (mesh_name, mesh.materials[i].name)).replace(' ','_')
 		
 		if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
 		
@@ -198,13 +198,11 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 	if mesh is None:
 		return
 	
-	mesh.name = ob.data.name + '_render'
-	
 	try:
 		mesh_definitions = []
 		if scene.luxrender_engine.mesh_type == 'native':
 			shape_type = ob.data.luxrender_mesh.get_shape_type()
-			for mesh_mat, mesh_name, mesh_paramset in exportNativeMesh(mesh, lux_context):
+			for mesh_mat, mesh_name, mesh_paramset in exportNativeMesh(ob.data.name, mesh, lux_context):
 				mesh_paramset.update( ob.data.luxrender_mesh.get_paramset() )
 				mesh_definitions.append( (mesh_mat, mesh_name, shape_type, mesh_paramset) )
 			
