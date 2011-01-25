@@ -34,7 +34,7 @@ from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import get_instance_materials, add_texture_parameter
 
-OBJECT_ANALYSIS = False
+OBJECT_ANALYSIS = True
 
 class InvalidGeometryException(Exception):
 	pass
@@ -218,7 +218,7 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 		
 		if len(me_shape_params) == 0: continue
 		
-		if log: LuxLog('Mesh Exported: %s' % me_name)
+		if log or OBJECT_ANALYSIS: LuxLog('Mesh Exported: %s' % me_name)
 		
 		# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 		# Everything else is set on a per-instance basis
@@ -236,7 +236,7 @@ def exportMesh(lux_context, ob, object_begin_end=True, scale=None, log=True, tra
 		lux_context.shape(me_shape_type, me_shape_params)
 		
 		if object_begin_end: lux_context.objectEnd()
-		mesh_names_mats.append( (me_name, me_mat) )
+		mesh_names_mats.append( (me_name, me_mat, None) )
 	
 	#print('-> Remove render mesh')
 	bpy.data.meshes.remove(mesh)
@@ -313,12 +313,13 @@ def exportInstance(lux_context, ob, matrix, dupli=False, append_objects=None):
 		lux_context.coordinateSystem('%s' % ob.data.name + '_motion')
 		lux_context.transformEnd()
 		lux_context.motionInstance(ob.data.name, 0.0, 1.0, ob.data.name + '_motion')
-	elif not dupli:
+	elif not dupli and (append_objects is None or ob.data.name not in [i[0] for i in append_objects]):
 		lux_context.objectInstance(ob.data.name)
 	
 	if append_objects is not None:
-		for append_object, append_mat in append_objects:
-			#if append_object != ob.data.name:
+		for append_object, append_mat, append_transform in append_objects:
+			#if not dupli and append_object != ob.data.name:
+			if append_transform != None: lux_context.transform( matrix_to_list(append_transform, apply_worldscale=True) )
 			if append_mat != None: lux_context.namedMaterial(append_mat.name)
 			lux_context.objectInstance(append_object)
 	
@@ -367,6 +368,8 @@ def write_lxo(lux_context):
 	duplis = []
 	meshes_exported = set()
 	
+	dupli_object_mesh_names = {}
+	
 	for ob in sel:
 		if OBJECT_ANALYSIS: print('Parsing objects pass 1: %s' % ob.name)
 		# EMPTY is allowed because it is used as GROUP containers
@@ -390,21 +393,37 @@ def write_lxo(lux_context):
 			# create dupli objects
 			ob.create_dupli_list(scene)
 			
-			mesh_names = []
+			#import pdb
+			#pdb.set_trace()
 			
-			
+			# Scan meshes first
+			append_objects = []
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'MESH':
 					continue
 				
-				if allow_instancing(dupli=True) and (dupli_ob.object.data.name not in meshes_exported):
-					mesh_names.extend( exportMesh(lux_context, dupli_ob.object) )
-					meshes_exported.add(dupli_ob.object.data.name)
+				if dupli_ob.object.name not in dupli_object_mesh_names.keys():
+					dupli_object_mesh_names[dupli_ob.object.name] = []
 				
-				exportInstance(lux_context, dupli_ob.object, dupli_ob.matrix, dupli=True, append_objects=mesh_names)
+				if allow_instancing(dupli=True) and (dupli_ob.object.data.name not in meshes_exported):
+					mesh_names = exportMesh(lux_context, dupli_ob.object)
+					mesh_names_transforms = []
+					for mn, mm, mt in mesh_names:
+						mesh_names_transforms.append( (mn, mm, dupli_ob.object.matrix_world) )
+					if OBJECT_ANALYSIS: print('  %s' % mesh_names_transforms)
+					
+					dupli_object_mesh_names[dupli_ob.object.name].extend( mesh_names_transforms )
+					
+					meshes_exported.add(dupli_ob.object.data.name)
 				
 				if dupli_ob.object.name not in duplis:
 					duplis.append(dupli_ob.object.name)
+					
+				append_objects.extend( dupli_object_mesh_names[dupli_ob.object.name] )
+			
+			# Export instances second
+			if OBJECT_ANALYSIS: print('  exporting instance(s) for %s: %s' % (ob.name, append_objects) )
+			exportInstance(lux_context, ob, mathutils.Matrix(), dupli=True, append_objects=append_objects)
 			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if OBJECT_ANALYSIS: print(' -> parsed %i dupli objects' % len(ob.dupli_list))
@@ -419,14 +438,19 @@ def write_lxo(lux_context):
 				if psys_settings.render_type == 'OBJECT':
 					scene.update()
 					particle_object = psys_settings.dupli_object
-					for mat in get_instance_materials(particle_object):
-						mat.luxrender_material.export(lux_context, mat, mode='indirect')
+					
+					mesh_names = []
+					
+					# Scan meshes first
 					for particle in psys.particles:
 						if particle.is_visible and (particle.alive_state in allowed_particle_states):
-							mesh_names = []
 							if allow_instancing(dupli=True) and (particle_object.data.name not in meshes_exported):
 								mesh_names = exportMesh(lux_context, particle_object, scale=[particle.size]*3, log=False)
 								meshes_exported.add(particle_object.data.name)
+					
+					# Export instances second
+					for particle in psys.particles:
+						if particle.is_visible and (particle.alive_state in allowed_particle_states):
 							particle_matrix = mathutils.Matrix.Translation( particle.location )
 							particle_matrix *= particle.rotation.to_matrix().to_4x4()
 							#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
@@ -484,7 +508,7 @@ def write_lxo(lux_context):
 				ply_params.add_bool('smooth', ob.luxrender_object.use_smoothing)
 				lux_context.shape('plymesh', ply_params)
 				lux_context.objectEnd()
-				append_objects.append( (ob.name, ob.active_material) )
+				append_objects.append( (ob.name, ob.active_material, None) )
 			
 			# Export object instance
 			if not ob.data.luxrender_mesh.portal:
