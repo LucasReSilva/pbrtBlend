@@ -279,7 +279,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		if pv_export_shape:
 			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
-			mesh_definitions = exportNativeMesh(pv_mesh, lux_context)
+			mesh_definitions = exportNativeMesh(obj.data.name, pv_mesh, lux_context)
 			for mesh_mat, mesh_name, mesh_params in mesh_definitions:
 				mat.luxrender_material.export(lux_context, mat, mode='direct')
 				lux_context.shape( 'mesh', mesh_params )
