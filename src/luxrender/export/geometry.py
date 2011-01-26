@@ -339,7 +339,7 @@ class MeshExportProgressThread(efutil.TimerThread):
 		if self.exported_objects != self.last_update:
 			self.last_update = self.exported_objects
 			pc = int(100 * self.exported_objects/self.total_objects)
-			render_engine.update_stats('', 'LuxRender: Parsing meshes %i%%' % pc)
+			LuxLog('LuxRender: Parsing meshes %i%%' % pc)
 			bpy.ops.ef.msg(
 				msg_type='INFO',
 				msg_text='LuxRender: Parsing meshes %i%%' % pc
