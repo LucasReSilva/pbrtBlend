@@ -24,6 +24,144 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+
+
+"""
+
+This file needs re-writing, according to the following outline plan.
+Current implementation has become bloated with overloads in order to
+try and match blender's internal behaviour, but proceeding like this
+is doomed to failure. Moreover, the current code doesn't fully implement
+all of Blender's object features, and to do so will create much more
+hideous mess.
+I'm also planning to drop the experimental PLY mesh export type, as
+it is technically not possible at the minute and is complicating the
+code unnecessarily.
+
+DH 26/1/11
+
+
+def buildNativeMesh:
+ purpose:
+  Split up a blender MESH into parts according to vertex material assignment,
+  and construct a mesh_name and ParamSet for each part which will become a
+  LuxRender Shape statement.
+  The current implementation of this method in exportNativeMesh is more or less
+  already correct.
+ input: mesh
+ process:
+  split mesh by material
+  construct (mesh_name, mesh_mat, mesh_type, mesh_params) object for each part
+  update mesh_params with luxrender_mesh.get_paramset()
+  append object to list
+ return: list of mesh part objects
+
+def exportMeshDefinition:
+ purpose:
+  If the mesh is valid and instancing is allowed for this object, export
+  an objectBegin..objectEnd block containing the Shape definition.
+  This is a simplified version of the existing exportMesh method.
+ input: mesh part object from buildNativeMesh
+ process:
+  if mesh_name in exported meshes list: return	# skip duplicates
+  if len(mesh_params) < 1: return				# skip empty meshes
+  if not allow_instancing(): return				# don't do anything if we cannot instance
+  objectBegin mesh_name
+  shape(mesh_type, mesh_params)
+  objectEnd
+  update exported meshes list with mesh_name
+ return: None
+
+def exportMeshInstance:
+ purpose:
+  Export an instance of a Mesh (full Shape or objectInstance statement)
+  wrapped in an attibuteBegin..attributeEnd block, along with the object's
+  transform, emission and materials info.
+ input: mesh part object from buildNativeMesh, Object
+ attributeBegin mesh_name
+ transform(*matrix)
+ export emission data
+ export int/ext statement from mesh_mat
+ detect if Object is animated
+ if not allow_instancing() or emitter (or mesh_name not in exported meshes list?):
+  shape(mesh_type, mesh_params)
+ elif animated:
+  export transform + motionInstance
+ else:
+  objectInstance(mesh_name)
+ attributeEnd
+ return: None
+
+def iterateScene:
+ purpose:
+  Scan the input scene for objects that LuxRender can handle, and output
+  them to the lux_context provided.
+  It might also be wise to construct a map of {object types:handler functions}
+  so that the iteration loops don't get clogged with implementation details
+  and it is clear to see how each object type is handled.
+  We probably also need some kind of tracking object (like ExportedMeshes in
+  materials.py) to construct per-export lists of known mesh definitions (or
+  parts thereof) and objects already exported in order to avoid duplicate
+  work or output.
+ input: lux_context, scene
+ process:
+  set up object handler callbacks:
+   callbacks = {
+    'duplis': {
+     'GROUP': handler_Duplis_GROUP,
+     'VERTS': handler_Duplis_VERTS,
+     # etc
+    },
+    'particles': {
+     'TYPE1': handler_Particles_TYPE1,
+     # etc
+    }
+    'objects': {
+     'MESH': handler_MESH,
+     'EMPTY': handler_EMPTY,
+     # etc
+    }
+   }
+   valid_duplis_types = callbacks['duplis'].keys()
+   valid_particles_types = callbacks['particles'].keys()
+   valid_objects_types = callbacks['objects'].keys()
+  for object in scene:
+   if object_type in valid_objects_types:
+    if is dupli without particles and dupli_type in valid_duplis_types:
+     callbacks['duplis'][dupli_type](lux_context, scene, object)
+    if has particle systems and particles_type in valid_particles_types:
+     callbacks['particles'][particles_type](lux_context, scene, object)
+    
+    if object is a proxy for external PLYShape:
+     export a PLYShape + instance with this object's transform
+    
+    if original object should still be exported, according to dupli, particles and override rules:
+     callbacks['objects'][object_type](lux_context, scene, object)
+ return: None
+
+
+# Example callback:
+
+handler_Duplis_GROUP:
+ purpose:
+  Handle DupliGroups
+ input: lux_context, scene, object
+ process:
+  construct dupli list for this object
+  export mesh definitions for the group being duplicated
+  export instances of each mesh definition at each dupli location
+ return: None
+
+
+"""
+
+
+
+
+
+
+
+
 import bpy, mathutils
 
 from extensions_framework import util as efutil
