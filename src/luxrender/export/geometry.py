@@ -390,6 +390,10 @@ def handler_Duplis_GENERIC(lux_context, scene, object):
 	
 	return dupli_object_names
 
+def handler_Duplis_FACES(lux_context, scene, object):
+	if OBJECT_ANALYSIS: print(' -> handler_Duplis_FACES: %s' % object)
+	return handler_Duplis_GENERIC(lux_context, scene, object)
+
 def handler_Duplis_GROUP(lux_context, scene, object):
 	if OBJECT_ANALYSIS: print(' -> handler_Duplis_GROUP: %s' % object)
 	return handler_Duplis_GENERIC(lux_context, scene, object)
@@ -441,6 +445,7 @@ def iterateScene(lux_context, scene):
 	
 	callbacks = {
 		'duplis': {
+			'FACES': handler_Duplis_FACES,
 			'GROUP': handler_Duplis_GROUP,
 			'VERTS': handler_Duplis_VERTS,
 		},
