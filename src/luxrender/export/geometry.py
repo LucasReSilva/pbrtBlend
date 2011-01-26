@@ -369,30 +369,34 @@ def handler_Duplis_GENERIC(lux_context, scene, object):
 	object.create_dupli_list(scene)
 	
 	if object.dupli_list:
-		
+		dupli_object_names = set()
 		for dupli_ob in object.dupli_list:
 			if dupli_ob.object.type != 'MESH':
 				continue
 			
 			#if OBJECT_ANALYSIS: print('  -> exporting dupli mesh(s) for %s' % object.name )
 			dupli_meshes = buildNativeMesh(lux_context, dupli_ob.object)
-		
+			
 			#if OBJECT_ANALYSIS: print('  -> exporting dupli instance(s) for %s' % object.name )
 			for mesh_definition in dupli_meshes:
 				exportMeshInstance(lux_context, object, mesh_definition, matrix=dupli_ob.matrix)
+		
+			dupli_object_names.add( dupli_ob.object.name )
 		
 		# free object dupli list again. Warning: all dupli objects are INVALID now!
 		if OBJECT_ANALYSIS: print(' -> parsed %i dupli objects' % len(object.dupli_list))
 		
 		object.free_dupli_list()
+	
+	return dupli_object_names
 
 def handler_Duplis_GROUP(lux_context, scene, object):
 	if OBJECT_ANALYSIS: print(' -> handler_Duplis_GROUP: %s' % object)
-	handler_Duplis_GENERIC(lux_context, scene, object)
+	return handler_Duplis_GENERIC(lux_context, scene, object)
 
 def handler_Duplis_VERTS(lux_context, scene, object):
 	if OBJECT_ANALYSIS: print(' -> handler_Duplis_VERTS: %s' % object)
-	handler_Duplis_GENERIC(lux_context, scene, object)
+	return handler_Duplis_GENERIC(lux_context, scene, object)
 
 #def handler_Particles_OBJECT(lux_context, scene, object):
 #	if OBJECT_ANALYSIS: print(' -> handler_Particles_OBJECT: %s' % object)
@@ -455,8 +459,12 @@ def iterateScene(lux_context, scene):
 	progress_thread = MeshExportProgressThread()
 	progress_thread.start(len(scene.objects))
 	
+	dupli_names = set()
+	export_bare_object = {}
+	
+	# Phase 1 - export duplis and particle systems on this object
 	for object in scene.objects:
-		ExportedMeshes.instancing_allowed = True
+		export_bare_object[object.name] = False
 		
 		if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (object, object.type))
 		
@@ -469,14 +477,18 @@ def iterateScene(lux_context, scene):
 			if OBJECT_ANALYSIS: print(' -> parent is duplicator')
 			continue
 		
+		export_bare_object[object.name] = True
+		
 		number_psystems = len(object.particle_systems)
 		
 		if object.is_duplicator and number_psystems < 1:
 			if OBJECT_ANALYSIS: print(' -> is duplicator without particle systems')
 			if object.dupli_type in valid_duplis_callbacks:
-				callbacks['duplis'][object.dupli_type](lux_context, scene, object)
+				dupli_names.update( callbacks['duplis'][object.dupli_type](lux_context, scene, object) )
 			elif OBJECT_ANALYSIS:
 				print(' -> Unsupported Dupli type: %s' % object.dupli_type)
+		
+		export_bare_object[object.name] &= (not object.is_duplicator or object.dupli_type == 'DUPLIFRAMES')
 		
 		render_particle_emitter = True
 		if number_psystems > 0:
@@ -488,23 +500,23 @@ def iterateScene(lux_context, scene):
 				elif OBJECT_ANALYSIS:
 					print(' -> Unsupported Particle system type: %s' % object.dupli_type)
 		
-		export_bare_object = True
-		export_bare_object &= (not object.is_duplicator or object.dupli_type == 'DUPLIFRAMES')
-		export_bare_object &= render_particle_emitter
-		# the last check (object.names not in dupli_names) requires splitting this loop into two pieces
+		export_bare_object[object.name] &= render_particle_emitter
 		
-		# For normal objects, don't use instancing, since each object may have
-		# different modifiers applied against the same shared base mesh. This is
-		# how blender internal works. However, if there are no modifiers, it
-		# should be safe to use instancing
-		ExportedMeshes.instancing_allowed = len(object.modifiers) == 0
-		
-		if export_bare_object and object.type in valid_objects_callbacks:
-			callbacks['objects'][object.type](lux_context, scene, object)
-		elif OBJECT_ANALYSIS:
-			print(' -> Unexportable object: %s : %s' % (object, object.type))
-			
 		progress_thread.exported_objects += 1
+	
+	# Phase 2 - see if we can export the bare object
+	for object in scene.objects:
+		if export_bare_object[object.name]:
+			export_bare_object[object.name] &= object.name not in dupli_names
+			
+			# For normal objects, don't use instancing, if the object has modifiers
+			# applied against the same shared base mesh.
+			ExportedMeshes.instancing_allowed = len(object.modifiers) == 0
+			
+			if export_bare_object[object.name] and object.type in valid_objects_callbacks:
+				callbacks['objects'][object.type](lux_context, scene, object)
+			elif OBJECT_ANALYSIS:
+				print(' -> Unexportable object: %s : %s' % (object, object.type))
 	
 	progress_thread.stop()
 	progress_thread.join()
