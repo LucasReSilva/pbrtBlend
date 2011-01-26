@@ -68,15 +68,26 @@ def buildNativeMesh(lux_context, object):
 		if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
 		ffaces_mats[mi].append( f )
 	
-	for i in range(len(mesh.materials)):
+	number_of_mats = len(mesh.materials)
+	if number_of_mats > 0:
+		iterator_range = range(number_of_mats)
+	else:
+		iterator_range = [0]
+	
+	for i in iterator_range:
 		try:
-			if mesh.materials[i] is None:
-				raise InvalidGeometryException('Mesh has no material assigned')
+			try:
+				mesh_mat = mesh.materials[i]
+			except IndexError:
+				mesh_mat = None
 			
 			if i not in faces_verts_mats.keys(): continue
 			if i not in ffaces_mats.keys(): continue
 			
-			mesh_name = ('%s_%s' % (object.data.name, mesh.materials[i].name)).replace(' ','_')
+			if mesh_mat is not None:
+				mesh_name = ('%s_%s' % (object.data.name, mesh_mat.name)).replace(' ','_')
+			else:
+				mesh_name = object.data.name.replace(' ','_')
 			
 			# If this mesh/mat combo has already been processed, get it from the cache
 			if allow_instancing() and ExportedMeshes.have(mesh_name):
@@ -84,7 +95,7 @@ def buildNativeMesh(lux_context, object):
 				continue
 			
 			if OBJECT_ANALYSIS: print(' -> NativeMesh:')
-			if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh.materials[i])
+			if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh_mat)
 			if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
 			
 			# face indices
@@ -185,7 +196,7 @@ def buildNativeMesh(lux_context, object):
 			
 			mesh_definition = (
 				mesh_name,
-				mesh.materials[i],
+				mesh_mat,
 				object.data.luxrender_mesh.get_shape_type(),
 				shape_params
 			)
@@ -256,21 +267,22 @@ def exportMeshInstance(lux_context, ob, mesh_definition, matrix=None):
 		arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', ob.luxrender_emission) )
 		lux_context.areaLightSource('area', arealightsource_params)
 	
-	if hasattr(me_mat, 'luxrender_material'):
-		int_v, ext_v = get_material_volume_defs(me_mat)
-		if int_v != '':
-			lux_context.interior(int_v)
-		elif scene.luxrender_world.default_interior_volume != '':
-			lux_context.interior(scene.luxrender_world.default_interior_volume)
-		if ext_v != '':
-			lux_context.exterior(ext_v)
-		elif scene.luxrender_world.default_exterior_volume != '':
-			lux_context.exterior(scene.luxrender_world.default_exterior_volume)
-	
-	if lux_context.API_TYPE == 'FILE':
-		lux_context.namedMaterial(me_mat.name)
-	elif lux_context.API_TYPE == 'PURE':
-		me_mat.luxrender_material.export(lux_context, me_mat, mode='direct')
+	if me_mat is not None:
+		if hasattr(me_mat, 'luxrender_material'):
+			int_v, ext_v = get_material_volume_defs(me_mat)
+			if int_v != '':
+				lux_context.interior(int_v)
+			elif scene.luxrender_world.default_interior_volume != '':
+				lux_context.interior(scene.luxrender_world.default_interior_volume)
+			if ext_v != '':
+				lux_context.exterior(ext_v)
+			elif scene.luxrender_world.default_exterior_volume != '':
+				lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+		
+		if lux_context.API_TYPE == 'FILE':
+			lux_context.namedMaterial(me_mat.name)
+		elif lux_context.API_TYPE == 'PURE':
+			me_mat.luxrender_material.export(lux_context, me_mat, mode='direct')
 	
 	# object motion blur
 	is_object_animated = False
@@ -356,20 +368,22 @@ class ExportedMeshes(object):
 def handler_Duplis_GENERIC(lux_context, scene, object):
 	object.create_dupli_list(scene)
 	
-	for dupli_ob in object.dupli_list:
-		if dupli_ob.object.type != 'MESH':
-			continue
+	if object.dupli_list:
 		
-		if OBJECT_ANALYSIS: print('  -> exporting dupli mesh(s) for %s' % object.name )
-		dupli_meshes = buildNativeMesh(lux_context, dupli_ob.object)
-	
-		if OBJECT_ANALYSIS: print('  -> exporting dupli instance(s) for %s' % object.name )
-		for mesh_definition in dupli_meshes:
-			exportMeshInstance(lux_context, object, mesh_definition, matrix=dupli_ob.matrix)
-	
-	# free object dupli list again. Warning: all dupli objects are INVALID now!
-	if OBJECT_ANALYSIS: print(' -> parsed %i dupli objects' % len(object.dupli_list))
-	if object.dupli_list: 
+		for dupli_ob in object.dupli_list:
+			if dupli_ob.object.type != 'MESH':
+				continue
+			
+			#if OBJECT_ANALYSIS: print('  -> exporting dupli mesh(s) for %s' % object.name )
+			dupli_meshes = buildNativeMesh(lux_context, dupli_ob.object)
+		
+			#if OBJECT_ANALYSIS: print('  -> exporting dupli instance(s) for %s' % object.name )
+			for mesh_definition in dupli_meshes:
+				exportMeshInstance(lux_context, object, mesh_definition, matrix=dupli_ob.matrix)
+		
+		# free object dupli list again. Warning: all dupli objects are INVALID now!
+		if OBJECT_ANALYSIS: print(' -> parsed %i dupli objects' % len(object.dupli_list))
+		
 		object.free_dupli_list()
 
 def handler_Duplis_GROUP(lux_context, scene, object):
@@ -442,6 +456,8 @@ def iterateScene(lux_context, scene):
 	progress_thread.start(len(scene.objects))
 	
 	for object in scene.objects:
+		ExportedMeshes.instancing_allowed = True
+		
 		if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (object, object.type))
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
