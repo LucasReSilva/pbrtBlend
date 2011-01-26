@@ -27,7 +27,7 @@
 import bpy
 
 from luxrender.export import ParamSet
-from luxrender.export.geometry import exportNativeMesh, get_material_volume_defs
+from luxrender.export.geometry import buildNativeMesh, get_material_volume_defs
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
@@ -278,12 +278,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
 		
 		if pv_export_shape:
-			pv_mesh = obj.create_mesh(scene, True, 'RENDER')
-			mesh_definitions = exportNativeMesh(obj.data.name, pv_mesh, lux_context)
-			for mesh_mat, mesh_name, mesh_params in mesh_definitions:
+			mesh_definitions = buildNativeMesh(lux_context, obj)
+			for mesh_mat, mesh_name, mesh_type, mesh_params in mesh_definitions:
 				mat.luxrender_material.export(lux_context, mat, mode='direct')
-				lux_context.shape( 'mesh', mesh_params )
-			bpy.data.meshes.remove(pv_mesh)
+				lux_context.shape(mesh_type, mesh_params)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))
 		lux_context.attributeEnd()
