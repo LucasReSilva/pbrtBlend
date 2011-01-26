@@ -31,11 +31,12 @@ from luxrender.properties.texture import ColorTextureParameter
 class luxrender_object(declarative_property_group):
 	controls = [
 		'append_external_mesh',
-		'use_smoothing',
+		['use_smoothing', 'hide_proxy_mesh'],
 		'external_mesh'
 	]
 	visibility = {
 		'use_smoothing':	{ 'append_external_mesh': True },
+		'hide_proxy_mesh':	{ 'append_external_mesh': True },
 		'external_mesh':	{ 'append_external_mesh': True },
 	}
 	properties = [
@@ -52,6 +53,13 @@ class luxrender_object(declarative_property_group):
 			'name': 'Use smoothing',
 			'description': 'Smooth the external mesh data',
 			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'hide_proxy_mesh',
+			'name': 'Hide proxy',
+			'description': 'Don\'t export this object\'s data',
+			'default': True
 		},
 		{
 			'type': 'string',

@@ -191,10 +191,14 @@ def buildNativeMesh(lux_context, object):
 			)
 			mesh_definitions.append( mesh_definition )
 			exportMeshDefinition(lux_context, mesh_definition)
+			
+			# Only cache this mesh_definition if we plan to use instancing
 			if allow_instancing(): ExportedMeshes.add(mesh_name, mesh_definition)
+			
+			LuxLog('Mesh Exported: %s' % mesh_name)
 		
 		except InvalidGeometryException as err:
-			LuxLog('Mesh export failed: %s' % err)
+			LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 	
 	return mesh_definitions
 
@@ -203,7 +207,9 @@ def allow_instancing():
 	if LuxManager.CurrentScene.luxrender_engine.renderer == 'hybrid':
 		return False
 	
-	# Only allow instancing for duplis and particles in non-hybrid mode
+	# Only allow instancing for duplis and particles in non-hybrid mode,
+	# or if objects with shared meshs have no modifiers attached
+	#(this is all worked out in iterateScene() below)
 	return ExportedMeshes.instancing_allowed
 
 def exportMeshDefinition(lux_context, mesh_definition):
@@ -216,8 +222,6 @@ def exportMeshDefinition(lux_context, mesh_definition):
 	
 	if len(me_shape_params) == 0: return
 	if not allow_instancing(): return
-	
-	LuxLog('Mesh Exported: %s' % me_name)
 	
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
@@ -401,19 +405,18 @@ def handler_Duplis_VERTS(lux_context, scene, object):
 def handler_MESH(lux_context, scene, object):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
 	
-	# TODO: add in PLY proxy switch
-#	if ob.luxrender_object.append_external_mesh:
-#		lux_context.objectBegin(ob.name)
-#		ply_params = ParamSet()
-#		ply_params.add_string('filename', efutil.path_relative_to_export(ob.luxrender_object.external_mesh))
-#		ply_params.add_bool('smooth', ob.luxrender_object.use_smoothing)
-#		lux_context.shape('plymesh', ply_params)
-#		lux_context.objectEnd()
-#		append_objects.append( (ob.name, ob.active_material, None) )
+	export_mesh_data = True
+	if object.luxrender_object.append_external_mesh:
+		ply_params = ParamSet()
+		ply_params.add_string('filename', efutil.path_relative_to_export(object.luxrender_object.external_mesh))
+		ply_params.add_bool('smooth', object.luxrender_object.use_smoothing)
+		exportMeshInstance(lux_context, object, (object.data.name, object.active_material, 'plymesh', ply_params))
+		export_mesh_data = not object.luxrender_object.hide_proxy_mesh
 	
-	split_meshes = buildNativeMesh(lux_context, object)
-	for mesh_definition in split_meshes:
-		exportMeshInstance(lux_context, object, mesh_definition)
+	if export_mesh_data:
+		split_meshes = buildNativeMesh(lux_context, object)
+		for mesh_definition in split_meshes:
+			exportMeshInstance(lux_context, object, mesh_definition)
 
 def iterateScene(lux_context, scene):
 	ExportedMeshes.reset()
@@ -475,8 +478,10 @@ def iterateScene(lux_context, scene):
 		# the last check (object.names not in dupli_names) requires splitting this loop into two pieces
 		
 		# For normal objects, don't use instancing, since each object may have
-		# different modifiers applied agaist the same shared base mesh
-		ExportedMeshes.instancing_allowed = False
+		# different modifiers applied against the same shared base mesh. This is
+		# how blender internal works. However, if there are no modifiers, it
+		# should be safe to use instancing
+		ExportedMeshes.instancing_allowed = len(object.modifiers) == 0
 		
 		if export_bare_object and object.type in valid_objects_callbacks:
 			callbacks['objects'][object.type](lux_context, scene, object)
