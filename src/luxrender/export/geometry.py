@@ -432,6 +432,7 @@ def handler_MESH(lux_context, scene, object):
 		ply_params = ParamSet()
 		ply_params.add_string('filename', efutil.path_relative_to_export(object.luxrender_object.external_mesh))
 		ply_params.add_bool('smooth', object.luxrender_object.use_smoothing)
+		exportMeshDefinition(lux_context, (object.data.name, object.active_material, 'plymesh', ply_params))
 		exportMeshInstance(lux_context, object, (object.data.name, object.active_material, 'plymesh', ply_params))
 		export_mesh_data = not object.luxrender_object.hide_proxy_mesh
 	
