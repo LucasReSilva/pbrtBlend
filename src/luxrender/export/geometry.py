@@ -34,7 +34,7 @@ from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import add_texture_parameter
 
-OBJECT_ANALYSIS = True
+OBJECT_ANALYSIS = False
 
 class InvalidGeometryException(Exception):
 	pass
