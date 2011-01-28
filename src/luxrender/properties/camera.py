@@ -536,6 +536,7 @@ class luxrender_film(declarative_property_group):
 		'lbl_outputs',
 		'integratedimaging',
 		['write_png', 'write_exr','write_tga','write_flm'],
+		'output_alpha',
 		'outlierrejection_k',
 	]
 	
@@ -597,6 +598,12 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_flm',
 			'name': 'FLM',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'output_alpha',
+			'name': 'Enable alpha channel',
 			'default': False
 		},
 		{
@@ -679,9 +686,17 @@ class luxrender_film(declarative_property_group):
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 			params.add_float('gamma', 1.0) # Linear workflow !
 		
+		if self.output_alpha:
+			output_channels = 'RGBA'
+		else:
+			output_channels = 'RGB'
+		
 		params.add_bool('write_exr', self.write_exr)
+		params.add_string('write_exr_channels', output_channels)
 		params.add_bool('write_png', self.write_png)
+		params.add_string('write_png_channels', output_channels)
 		params.add_bool('write_tga', self.write_tga)
+		params.add_string('write_tga_channels', output_channels)
 		
 		params.add_integer('displayinterval', self.displayinterval)
 		params.add_integer('writeinterval', self.writeinterval)
