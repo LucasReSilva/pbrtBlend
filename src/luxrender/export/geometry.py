@@ -267,7 +267,7 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 	
 	# object translation/rotation/scale
 	if matrix is not None:
-		lux_context.transform( matrix_to_list(matrix, apply_worldscale=True) )
+		lux_context.transform( matrix_to_list(matrix[0], apply_worldscale=True) )
 	else:
 		lux_context.transform( matrix_to_list(ob.matrix_world, apply_worldscale=True) )
 	
@@ -281,6 +281,27 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 				.add_float('efficacy', ob.luxrender_emission.efficacy)
 		arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', ob.luxrender_emission) )
 		lux_context.areaLightSource('area', arealightsource_params)
+	
+	
+	# object motion blur
+	is_object_animated = False
+	if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
+		if matrix is not None and matrix[1] is not None:
+			m1 = matrix[1]
+			is_object_animated = True
+		else:
+			scene.frame_set(scene.frame_current + 1)
+			m1 = ob.matrix_world.copy()
+			scene.frame_set(scene.frame_current - 1)
+			scene.update()
+			is_object_animated =  m1 != ob.matrix_world
+	
+	if is_object_animated:
+		lux_context.transformBegin(comment=ob.name, file=Files.GEOM)
+		lux_context.identity()
+		lux_context.transform(matrix_to_list(m1, apply_worldscale=True))
+		lux_context.coordinateSystem('%s' % ob.name + '_motion')
+		lux_context.transformEnd()
 	
 	for me_name, me_mat, me_shape_type, me_shape_params in mesh_definitions:
 		lux_context.attributeBegin()
@@ -302,32 +323,12 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 			elif lux_context.API_TYPE == 'PURE':
 				me_mat.luxrender_material.export(lux_context, me_mat, mode='direct')
 		
-		# object motion blur
-		is_object_animated = False
-		if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
-			scene.frame_set(scene.frame_current + 1)
-			if matrix is not None:
-				m1 = matrix.copy()
-			else:
-				m1 = object.matrix_world.copy()
-			scene.frame_set(scene.frame_current - 1)
-			scene.update()
-			if matrix is not None:
-				is_object_animated =  m1 != matrix
-			else:
-				is_object_animated =  m1 != object.matrix_world
-		
 		# If the object emits, don't export instance or motioninstance, just the Shape
 		if (not allow_instancing()) or object_is_emitter:
 			lux_context.shape(me_shape_type, me_shape_params)
 		# motionInstance for motion blur
 		elif is_object_animated:
-			lux_context.transformBegin(comment=me_name, file=Files.GEOM)
-			lux_context.identity()
-			lux_context.transform(matrix_to_list(m1, apply_worldscale=True))
-			lux_context.coordinateSystem('%s' % me_name + '_motion')
-			lux_context.transformEnd()
-			lux_context.motionInstance(me_name, 0.0, 1.0, me_name + '_motion')
+			lux_context.motionInstance(me_name, 0.0, 1.0, ob.name + '_motion')
 		# ordinary mesh instance
 		else:
 			lux_context.objectInstance(me_name)
@@ -398,7 +399,7 @@ def handler_Duplis_GENERIC(lux_context, scene, object):
 			dupli_meshes = buildNativeMesh(lux_context, scene, dupli_ob.object)
 			
 			#if OBJECT_ANALYSIS: print('  -> exporting dupli instance(s) for %s' % object.name )
-			exportMeshInstances(lux_context, object, dupli_meshes, matrix=dupli_ob.matrix)
+			exportMeshInstances(lux_context, object, dupli_meshes, matrix=[dupli_ob.matrix,None])
 		
 			dupli_object_names.add( dupli_ob.object.name )
 		
@@ -435,14 +436,27 @@ def handler_Particles_OBJECT(lux_context, scene, object, particle_system):
 	if particle_system.settings.use_dead:
 		allowed_particle_states.add('DEAD')
 	
+	particle_motion_blur = scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur
+	
 	exported_particles = 0
 	for particle in particle_system.particles:
 		if (particle.alive_state in allowed_particle_states):
 			exported_particles += 1
-			particle_matrix = mathutils.Matrix.Translation( particle.location )
-			particle_matrix *= particle.rotation.to_matrix().to_4x4()
-			particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
-			exportMeshInstances(lux_context, particle_object, split_meshes, matrix=particle_matrix)
+			
+			if particle_motion_blur:
+				particle_matrix_1 = mathutils.Matrix.Translation( particle.prev_location )
+				particle_matrix_1 *= particle.prev_rotation.to_matrix().to_4x4()
+				particle_matrix_1 *= mathutils.Matrix.Scale(particle.size, 4)
+				
+				particle_matrix_2 = mathutils.Matrix.Translation( particle.location )
+				particle_matrix_2 *= particle.rotation.to_matrix().to_4x4()
+				particle_matrix_2 *= mathutils.Matrix.Scale(particle.size, 4)
+			else:
+				particle_matrix_1 = mathutils.Matrix.Translation( particle.location )
+				particle_matrix_1 *= particle.rotation.to_matrix().to_4x4()
+				particle_matrix_1 *= mathutils.Matrix.Scale(particle.size, 4)
+				particle_matrix_2 = None
+			exportMeshInstances(lux_context, particle_object, split_meshes, matrix=[particle_matrix_1,particle_matrix_2])
 	
 	if OBJECT_ANALYSIS: print(' -> exported %s particle instances' % exported_particles)
 	
