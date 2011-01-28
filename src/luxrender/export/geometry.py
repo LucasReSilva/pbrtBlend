@@ -34,7 +34,7 @@ from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import add_texture_parameter
 
-OBJECT_ANALYSIS = True
+OBJECT_ANALYSIS = False
 
 class InvalidGeometryException(Exception):
 	pass
@@ -447,24 +447,6 @@ def handler_Particles_OBJECT(lux_context, scene, object, particle_system):
 	if OBJECT_ANALYSIS: print(' -> exported %s particle instances' % exported_particles)
 	
 	return set([particle_object.name])
-#
-#	mesh_names = []
-#	
-#	# Scan meshes first
-#	for particle in psys.particles:
-#		if particle.is_visible and (particle.alive_state in allowed_particle_states):
-#			if allow_instancing(dupli=True) and (particle_object.data.name not in meshes_exported):
-#				mesh_names = exportMesh(lux_context, particle_object, scale=[particle.size]*3, log=False)
-#				meshes_exported.add(particle_object.data.name)
-#	
-#	# Export instances second
-#	for particle in psys.particles:
-#		if particle.is_visible and (particle.alive_state in allowed_particle_states):
-#			particle_matrix = mathutils.Matrix.Translation( particle.location )
-#			particle_matrix *= particle.rotation.to_matrix().to_4x4()
-#			#particle_matrix *= mathutils.Matrix.Scale(particle.size, 4)
-#			exportInstance(lux_context, particle_object, particle_matrix, dupli=True, append_objects=mesh_names)
-#			del particle_matrix
 
 def handler_MESH(lux_context, scene, object):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
