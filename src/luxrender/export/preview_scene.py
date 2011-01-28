@@ -278,7 +278,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
 		
 		if pv_export_shape:
-			mesh_definitions = buildNativeMesh(lux_context, obj)
+			mesh_definitions = buildNativeMesh(lux_context, scene, obj)
 			for mesh_mat, mesh_name, mesh_type, mesh_params in mesh_definitions:
 				mat.luxrender_material.export(lux_context, mat, mode='direct')
 				lux_context.shape(mesh_type, mesh_params)
