@@ -68,19 +68,21 @@ try:
 				'''
 				verbose, default, quiet, very-quiet
 				'''
-				filterMap = {
-					'verbose': pylux.ErrorSeverity.LUX_DEBUG, 
-					'default': pylux.ErrorSeverity.LUX_INFO, 
-					'quiet': pylux.ErrorSeverity.LUX_WARNING, 
-					'very-quiet': pylux.ErrorSeverity.LUX_ERROR,
-					}
-				
 				try:
+					filterMap = {
+						'verbose': pylux.ErrorSeverity.LUX_DEBUG, 
+						'default': pylux.ErrorSeverity.LUX_INFO, 
+						'quiet': pylux.ErrorSeverity.LUX_WARNING, 
+						'very-quiet': pylux.ErrorSeverity.LUX_ERROR,
+						}
+					
 					pylux.errorFilter(filterMap[verbosity])
-				except NameError:
-					# backwards compatibility
-					pass
 				except ValueError:
+					pass
+				# backwards compatibility
+				except NameError:
+					pass
+				except AttributeError:
 					pass
 				
 			
