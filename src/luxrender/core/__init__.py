@@ -696,7 +696,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				cmd_args = [luxrender_path, fn]
 				
 				# set log verbosity
-				cmd_args.append('--' + scene.luxrender_engine.log_verbosity)
+				if scene.luxrender_engine.log_verbosity != 'default':
+					cmd_args.append('--' + scene.luxrender_engine.log_verbosity)
 				
 				if scene.luxrender_engine.binary_name == 'luxrender':
 					# Copy the GUI log to the console
