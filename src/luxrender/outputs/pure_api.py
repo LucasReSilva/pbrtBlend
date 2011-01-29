@@ -64,6 +64,23 @@ try:
 				
 				pylux.Context.transformBegin(self)
 			
+			def logVerbosity(self, verbosity):
+				'''
+				verbose, default, quiet, very-quiet
+				'''
+				filterMap = {
+					'verbose': pylux.ErrorSeverity.LUX_DEBUG, 
+					'default': pylux.ErrorSeverity.LUX_INFO, 
+					'quiet': pylux.ErrorSeverity.LUX_WARNING, 
+					'very-quiet': pylux.ErrorSeverity.LUX_ERROR,
+					}
+				
+				try:
+					pylux.errorFilter(filterMap[verbosity])
+				except ValueError:
+					pass
+				
+			
 			# no further action required
 		
 		# Backwards-compatibility Context method substitution

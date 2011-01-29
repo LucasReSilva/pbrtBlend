@@ -426,6 +426,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			LM.lux_context = preview_context
 		else:
 			preview_context = LM.lux_context
+			preview_context.logVerbosity('quiet')
 		
 		try:
 			export_materials.ExportedMaterials.clear()
@@ -634,6 +635,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			bpy.ops.ef.msg(msg_text='Starting LuxRender')
 			if internal:
 				
+				self.LuxManager.lux_context.logVerbosity(scene.luxrender_engine.log_verbosity)
+				
 				self.update_stats('', 'LuxRender: Rendering warmup')
 				self.LuxManager.start()
 				
@@ -691,6 +694,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					return False
 				
 				cmd_args = [luxrender_path, fn]
+				
+				# set log verbosity
+				cmd_args.append('--' + scene.luxrender_engine.log_verbosity)
 				
 				if scene.luxrender_engine.binary_name == 'luxrender':
 					# Copy the GUI log to the console

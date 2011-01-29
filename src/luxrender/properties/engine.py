@@ -70,6 +70,7 @@ def engine_controls():
 		# Insert 'renderer' before 'binary_name'
 		ectl.insert(ectl.index('binary_name'), 'renderer')
 		ectl.insert(ectl.index('binary_name'), 'opencl_platform_index')
+		ectl.append('log_verbosity')
 	
 	return ectl
 
@@ -238,6 +239,20 @@ class luxrender_engine(declarative_property_group):
 				('normal', 'Normal', 'normal'),
 				('abovenormal', 'Above Normal', 'abovenormal'),
 			]
+		},
+		{
+			'type': 'enum',
+			'attr': 'log_verbosity',
+			'name': 'Log verbosity',
+			'description': 'Logging verbosity',
+			'default': 'default',
+			'items': [
+				('verbose', 'Verbose', 'verbose'),
+				('default', 'Default', 'default'),
+				('quiet', 'Quiet', 'quiet'),
+				('very-quiet', 'Very quiet', 'very-quiet'),
+			],
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
