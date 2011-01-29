@@ -415,10 +415,7 @@ class ExportedObjects(ExportList):
 def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 	object.create_dupli_list(scene)
 	
-	import time
-	
 	if object.dupli_list:
-		start_time = time.time()
 		LuxLog('Exporting Duplis...')
 		dupli_object_names = set()
 		
@@ -442,9 +439,8 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 		
 		det.stop()
 		det.join()
-		end_time = time.time()
+		
 		LuxLog('... done, exported %s instances' % len(object.dupli_list))
-		LuxLog('took %0.2f secs' % (end_time-start_time))
 	
 	# free object dupli list again. Warning: all dupli objects are INVALID now!
 	object.free_dupli_list()
