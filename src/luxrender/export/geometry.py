@@ -386,7 +386,7 @@ class ExportedMeshes(object):
 		else:
 			raise InvalidGeometryException('Mesh definition not found in cache!')
 
-def handler_Duplis_GENERIC(lux_context, scene, object):
+def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 	object.create_dupli_list(scene)
 	
 	if object.dupli_list:
@@ -404,65 +404,67 @@ def handler_Duplis_GENERIC(lux_context, scene, object):
 			dupli_object_names.add( dupli_ob.object.name )
 		
 		# free object dupli list again. Warning: all dupli objects are INVALID now!
-		if OBJECT_ANALYSIS: print(' -> parsed %i dupli objects' % len(object.dupli_list))
+		if OBJECT_ANALYSIS: print(' -> exported %i dupli objects' % len(object.dupli_list))
 		
 		object.free_dupli_list()
 	
 	return dupli_object_names
 
-def handler_Duplis_FACES(lux_context, scene, object):
-	if OBJECT_ANALYSIS: print(' -> handler_Duplis_FACES: %s' % object)
-	return handler_Duplis_GENERIC(lux_context, scene, object)
+#def handler_Duplis_FACES(lux_context, scene, object, *args, **kwargs):
+#	if OBJECT_ANALYSIS: print(' -> handler_Duplis_FACES: %s' % object)
+#	return handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs)
+#
+#def handler_Duplis_GROUP(lux_context, scene, object, *args, **kwargs):
+#	if OBJECT_ANALYSIS: print(' -> handler_Duplis_GROUP: %s' % object)
+#	return handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs)
+#
+#def handler_Duplis_VERTS(lux_context, scene, object, *args, **kwargs):
+#	if OBJECT_ANALYSIS: print(' -> handler_Duplis_VERTS: %s' % object)
+#	return handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs)
+#
+#def handler_Particles_OBJECT(lux_context, scene, object, particle_system):
+#	if OBJECT_ANALYSIS: print(' -> handler_Particles_OBJECT: %s' % object)
+#	
+#	scene.update()
+#	
+#	particle_object = particle_system.settings.dupli_object
+#	
+#	split_meshes = buildNativeMesh(lux_context, scene, particle_object)
+#	
+#	allowed_particle_states = set(['ALIVE'])
+#	if particle_system.settings.show_unborn:
+#		allowed_particle_states.add('UNBORN')
+#	if particle_system.settings.use_dead:
+#		allowed_particle_states.add('DEAD')
+#	
+#	particle_motion_blur = scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur
+#	
+#	exported_particles = 0
+#	for particle in particle_system.particles:
+#		
+#		if (particle.alive_state in allowed_particle_states):
+#			exported_particles += 1
+#			
+#			if particle_motion_blur:
+#				particle_matrix_1 = mathutils.Matrix.Translation( particle.prev_location )
+#				particle_matrix_1 *= particle.prev_rotation.to_matrix().to_4x4()
+#				particle_matrix_1 *= mathutils.Matrix.Scale(particle.size, 4)
+#				
+#				particle_matrix_2 = mathutils.Matrix.Translation( particle.location )
+#				particle_matrix_2 *= particle.rotation.to_matrix().to_4x4()
+#				particle_matrix_2 *= mathutils.Matrix.Scale(particle.size, 4)
+#			else:
+#				particle_matrix_1 = mathutils.Matrix.Translation( particle.location )
+#				particle_matrix_1 *= particle.rotation.to_matrix().to_4x4()
+#				particle_matrix_1 *= mathutils.Matrix.Scale(particle.size, 4)
+#				particle_matrix_2 = None
+#			exportMeshInstances(lux_context, particle_object, split_meshes, matrix=[particle_matrix_1,particle_matrix_2])
+#	
+#	if OBJECT_ANALYSIS: print(' -> exported %s particle instances' % exported_particles)
+#	
+#	return set([particle_object.name])
 
-def handler_Duplis_GROUP(lux_context, scene, object):
-	if OBJECT_ANALYSIS: print(' -> handler_Duplis_GROUP: %s' % object)
-	return handler_Duplis_GENERIC(lux_context, scene, object)
-
-def handler_Duplis_VERTS(lux_context, scene, object):
-	if OBJECT_ANALYSIS: print(' -> handler_Duplis_VERTS: %s' % object)
-	return handler_Duplis_GENERIC(lux_context, scene, object)
-
-def handler_Particles_OBJECT(lux_context, scene, object, particle_system):
-	if OBJECT_ANALYSIS: print(' -> handler_Particles_OBJECT: %s' % object)
-	
-	scene.update()
-	
-	particle_object = particle_system.settings.dupli_object
-	split_meshes = buildNativeMesh(lux_context, scene, particle_object)
-	
-	allowed_particle_states = set(['ALIVE'])
-	if particle_system.settings.show_unborn:
-		allowed_particle_states.add('UNBORN')
-	if particle_system.settings.use_dead:
-		allowed_particle_states.add('DEAD')
-	
-	particle_motion_blur = scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur
-	
-	exported_particles = 0
-	for particle in particle_system.particles:
-		if (particle.alive_state in allowed_particle_states):
-			exported_particles += 1
-			
-			if particle_motion_blur:
-				particle_matrix_1 = mathutils.Matrix.Translation( particle.prev_location )
-				particle_matrix_1 *= particle.prev_rotation.to_matrix().to_4x4()
-				particle_matrix_1 *= mathutils.Matrix.Scale(particle.size, 4)
-				
-				particle_matrix_2 = mathutils.Matrix.Translation( particle.location )
-				particle_matrix_2 *= particle.rotation.to_matrix().to_4x4()
-				particle_matrix_2 *= mathutils.Matrix.Scale(particle.size, 4)
-			else:
-				particle_matrix_1 = mathutils.Matrix.Translation( particle.location )
-				particle_matrix_1 *= particle.rotation.to_matrix().to_4x4()
-				particle_matrix_1 *= mathutils.Matrix.Scale(particle.size, 4)
-				particle_matrix_2 = None
-			exportMeshInstances(lux_context, particle_object, split_meshes, matrix=[particle_matrix_1,particle_matrix_2])
-	
-	if OBJECT_ANALYSIS: print(' -> exported %s particle instances' % exported_particles)
-	
-	return set([particle_object.name])
-
-def handler_MESH(lux_context, scene, object):
+def handler_MESH(lux_context, scene, object, *args, **kwargs):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
 	
 	split_meshes = buildNativeMesh(lux_context, scene, object)
@@ -476,12 +478,13 @@ def iterateScene(lux_context, scene):
 	
 	callbacks = {
 		'duplis': {
-			'FACES': handler_Duplis_FACES,
-			'GROUP': handler_Duplis_GROUP,
-			'VERTS': handler_Duplis_VERTS,
+			'FACES': handler_Duplis_GENERIC,
+			'GROUP': handler_Duplis_GENERIC,
+			'VERTS': handler_Duplis_GENERIC,
 		},
 		'particles': {
-			'OBJECT': handler_Particles_OBJECT,
+			'OBJECT': handler_Duplis_GENERIC,
+			'GROUP': handler_Duplis_GENERIC,
 		},
 		'objects': {
 			'MESH': handler_MESH
@@ -535,7 +538,7 @@ def iterateScene(lux_context, scene):
 				if psys.settings.render_type in valid_particles_callbacks:
 					dupli_names.update( callbacks['particles'][psys.settings.render_type](lux_context, scene, object, psys) )
 				elif OBJECT_ANALYSIS:
-					print(' -> Unsupported Particle system type: %s' % object.dupli_type)
+					print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
 		
 		export_bare_object[object.name] &= render_particle_emitter
 		
