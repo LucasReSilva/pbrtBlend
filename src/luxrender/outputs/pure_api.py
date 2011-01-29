@@ -77,6 +77,9 @@ try:
 				
 				try:
 					pylux.errorFilter(filterMap[verbosity])
+				except NameError:
+					# backwards compatibility
+					pass
 				except ValueError:
 					pass
 				
