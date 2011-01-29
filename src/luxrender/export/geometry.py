@@ -47,6 +47,9 @@ def buildNativeMesh(lux_context, scene, object):
 	in an attributeBegin..attributeEnd scope.
 	"""
 	
+	# Using a cache on object massively speeds up dupli instance export
+	if ExportedObjects.have(object): return ExportedObjects.get(object)
+	
 	mesh_definitions = []
 	
 	ply_mesh_name = '%s_ply' % object.data.name
@@ -228,6 +231,8 @@ def buildNativeMesh(lux_context, scene, object):
 			except InvalidGeometryException as err:
 				LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 	
+	ExportedObjects.add(object, mesh_definitions)
+	
 	return mesh_definitions
 
 def allow_instancing():
@@ -357,71 +362,95 @@ class MeshExportProgressThread(efutil.TimerThread):
 				msg_text='LuxRender: Parsing meshes %i%%' % pc
 			)
 
-class ExportedMeshes(object):
+class DupliExportProgressThread(efutil.TimerThread):
+	KICK_PERIOD = 0.2
+	total_objects = 0
+	exported_objects = 0
+	last_update = 0
+	def start(self, number_of_meshes):
+		self.total_objects = number_of_meshes
+		self.exported_objects = 0
+		self.last_update = 0
+		super().start()
+	def kick(self):
+		if self.exported_objects != self.last_update:
+			self.last_update = self.exported_objects
+			pc = int(100 * self.exported_objects/self.total_objects)
+			LuxLog('...  %i%% ...' % pc)
+
+class ExportList(object):
 	
 	instancing_allowed = True
 	
-	mesh_names = set()
-	mesh_definitions = {}
+	cache_keys = set()
+	cache_items = {}
 	
 	@classmethod
 	def reset(cls):
 		cls.instancing_allowed = True
-		cls.mesh_names = set()
-		cls.mesh_definitions = {}
+		cls.cache_keys = set()
+		cls.cache_items = {}
 	
 	@classmethod
-	def have(cls, mesh_name):
-		return mesh_name in cls.mesh_names
+	def have(cls, ck):
+		return ck in cls.cache_keys
 	
 	@classmethod
-	def add(cls, mesh_name, mesh_definition):
-		cls.mesh_names.add(mesh_name)
-		cls.mesh_definitions[mesh_name] = mesh_definition
+	def add(cls, ck, ci):
+		cls.cache_keys.add(ck)
+		cls.cache_items[ck] = ci
 		
 	@classmethod
-	def get(cls, mesh_name):
-		if cls.have(mesh_name):
-			return cls.mesh_definitions[mesh_name]
+	def get(cls, ck):
+		if cls.have(ck):
+			return cls.cache_items[ck]
 		else:
-			raise InvalidGeometryException('Mesh definition not found in cache!')
+			raise InvalidGeometryException('Item %s not found in %s cache!' % (ck, cls))
+
+class ExportedMeshes(ExportList):
+	pass
+class ExportedObjects(ExportList):
+	pass
 
 def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 	object.create_dupli_list(scene)
 	
+	import time
+	
 	if object.dupli_list:
+		start_time = time.time()
+		LuxLog('Exporting Duplis...')
 		dupli_object_names = set()
+		
+		det = DupliExportProgressThread()
+		det.start(len(object.dupli_list))
+		
 		for dupli_ob in object.dupli_list:
 			if dupli_ob.object.type != 'MESH':
 				continue
 			
-			#if OBJECT_ANALYSIS: print('  -> exporting dupli mesh(s) for %s' % object.name )
-			dupli_meshes = buildNativeMesh(lux_context, scene, dupli_ob.object)
+			exportMeshInstances(
+				lux_context,
+				object,
+				buildNativeMesh(lux_context, scene, dupli_ob.object),
+				matrix=[dupli_ob.matrix,None]
+			)
 			
-			#if OBJECT_ANALYSIS: print('  -> exporting dupli instance(s) for %s' % object.name )
-			exportMeshInstances(lux_context, object, dupli_meshes, matrix=[dupli_ob.matrix,None])
-		
 			dupli_object_names.add( dupli_ob.object.name )
+			
+			det.exported_objects += 1
 		
-		# free object dupli list again. Warning: all dupli objects are INVALID now!
-		if OBJECT_ANALYSIS: print(' -> exported %i dupli objects' % len(object.dupli_list))
-		
-		object.free_dupli_list()
+		det.stop()
+		det.join()
+		end_time = time.time()
+		LuxLog('... done, exported %s instances' % len(object.dupli_list))
+		LuxLog('took %0.2f secs' % (end_time-start_time))
+	
+	# free object dupli list again. Warning: all dupli objects are INVALID now!
+	object.free_dupli_list()
 	
 	return dupli_object_names
 
-#def handler_Duplis_FACES(lux_context, scene, object, *args, **kwargs):
-#	if OBJECT_ANALYSIS: print(' -> handler_Duplis_FACES: %s' % object)
-#	return handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs)
-#
-#def handler_Duplis_GROUP(lux_context, scene, object, *args, **kwargs):
-#	if OBJECT_ANALYSIS: print(' -> handler_Duplis_GROUP: %s' % object)
-#	return handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs)
-#
-#def handler_Duplis_VERTS(lux_context, scene, object, *args, **kwargs):
-#	if OBJECT_ANALYSIS: print(' -> handler_Duplis_VERTS: %s' % object)
-#	return handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs)
-#
 #def handler_Particles_OBJECT(lux_context, scene, object, particle_system):
 #	if OBJECT_ANALYSIS: print(' -> handler_Particles_OBJECT: %s' % object)
 #	
@@ -467,14 +496,18 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 def handler_MESH(lux_context, scene, object, *args, **kwargs):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
 	
-	split_meshes = buildNativeMesh(lux_context, scene, object)
-	exportMeshInstances(lux_context, object, split_meshes)
+	exportMeshInstances(
+		lux_context,
+		object,
+		buildNativeMesh(lux_context, scene, object)
+	)
 
 class UnexportableObjectException(Exception):
 	pass
 
 def iterateScene(lux_context, scene):
 	ExportedMeshes.reset()
+	ExportedObjects.reset()
 	
 	callbacks = {
 		'duplis': {
