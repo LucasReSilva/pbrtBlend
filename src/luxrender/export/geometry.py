@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy, mathutils
-
 from extensions_framework import util as efutil
 
 from luxrender.outputs import LuxLog
@@ -44,10 +42,11 @@ class UnexportableObjectException(Exception):
 
 def buildNativeMesh(lux_context, scene, object):
 	"""
-	Split up a blender MESH into parts according to vertex material assignment,
-	and construct a mesh_name and ParamSet for each part which will become a
-	LuxRender Shape statement wrapped within objectBegin..objectEnd or placed
-	in an attributeBegin..attributeEnd scope.
+	Convert supported blender objects into a MESH, and then split into parts
+	according to vertex material assignment, and construct a mesh_name and
+	ParamSet for each part which will become a LuxRender Shape statement
+	wrapped within objectBegin..objectEnd or placed in an
+	attributeBegin..attributeEnd scope, depending if instancing is allowed.
 	"""
 	
 	# Using a cache on object massively speeds up dupli instance export
@@ -72,7 +71,7 @@ def buildNativeMesh(lux_context, scene, object):
 			if allow_instancing(lux_context): lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 	
 	try:
-		#if (not a) or (a and not b) == not (a and b)
+		#(not a) or (a and not b) == not (a and b)
 		if not (object.luxrender_object.append_external_mesh and object.luxrender_object.hide_proxy_mesh):
 			mesh = object.create_mesh(scene, True, 'RENDER')
 			if mesh is None:
