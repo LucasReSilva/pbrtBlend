@@ -27,7 +27,7 @@
 import bpy
 
 from luxrender.export import ParamSet
-from luxrender.export.geometry import buildNativeMesh, get_material_volume_defs
+from luxrender.export.geometry import ExportCache, buildNativeMesh, get_material_volume_defs
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 
@@ -277,7 +277,16 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		if ext_v == '' and preview_scene.luxrender_world.default_exterior_volume != '':
 			lux_context.exterior(preview_scene.luxrender_world.default_exterior_volume)
 		
+		object_is_emitter = hasattr(mat, 'luxrender_emission') and mat.luxrender_emission.use_emission
+		if object_is_emitter:
+			lux_context.lightGroup(mat.luxrender_emission.lightgroup, [])
+			lux_context.areaLightSource( *mat.luxrender_emission.api_output() )
+		
 		if pv_export_shape:
+			lux_context.ExportedMeshes = ExportCache('ExportedMeshes')
+			lux_context.ExportedObjects = ExportCache('ExportedObjects')
+			lux_context.ExportedMeshes.instancing_allowed = False
+			
 			mesh_definitions = buildNativeMesh(lux_context, scene, obj)
 			for mesh_mat, mesh_name, mesh_type, mesh_params in mesh_definitions:
 				mat.luxrender_material.export(lux_context, mat, mode='direct')

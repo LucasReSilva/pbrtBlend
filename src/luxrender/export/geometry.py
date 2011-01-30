@@ -311,12 +311,7 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 			object_is_emitter = hasattr(me_mat, 'luxrender_emission') and me_mat.luxrender_emission.use_emission
 			if object_is_emitter:
 				lux_context.lightGroup(me_mat.luxrender_emission.lightgroup, [])
-				arealightsource_params = ParamSet() \
-						.add_float('gain', me_mat.luxrender_emission.gain) \
-						.add_float('power', me_mat.luxrender_emission.power) \
-						.add_float('efficacy', me_mat.luxrender_emission.efficacy)
-				arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', me_mat.luxrender_emission) )
-				lux_context.areaLightSource('area', arealightsource_params)
+				lux_context.areaLightSource( *me_mat.luxrender_emission.api_output() )
 			
 			if hasattr(me_mat, 'luxrender_material'):
 				int_v, ext_v = get_material_volume_defs(me_mat)

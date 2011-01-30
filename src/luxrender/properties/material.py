@@ -1535,3 +1535,11 @@ class luxrender_emission(declarative_property_group):
 		},
 	] + \
 	TC_L.properties
+	
+	def api_output(self):
+		arealightsource_params = ParamSet() \
+				.add_float('gain', self.gain) \
+				.add_float('power', self.power) \
+				.add_float('efficacy', self.efficacy)
+		arealightsource_params.update( TC_L.get_paramset(self) )
+		return 'area', arealightsource_params
