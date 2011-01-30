@@ -34,7 +34,7 @@ from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import add_texture_parameter
 
-OBJECT_ANALYSIS = False
+OBJECT_ANALYSIS = True
 
 class InvalidGeometryException(Exception):
 	pass
@@ -516,7 +516,9 @@ def iterateScene(lux_context, scene):
 			'GROUP': handler_Duplis_GENERIC,
 		},
 		'objects': {
-			'MESH': handler_MESH
+			'MESH': handler_MESH,
+			'SURFACE': handler_MESH,
+			'FONT': handler_MESH
 		}
 	}
 	

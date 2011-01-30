@@ -41,7 +41,7 @@ class object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
 	@classmethod
 	def poll(cls, context):
 		engine = context.scene.render.engine
-		return context.object and context.object.type == 'MESH' and (engine in cls.COMPAT_ENGINES)
+		return context.object and context.object.type in ['MESH','SURFACE','FONT'] and (engine in cls.COMPAT_ENGINES)
 	
 	display_property_groups = [
 		( ('object',), 'luxrender_object' )

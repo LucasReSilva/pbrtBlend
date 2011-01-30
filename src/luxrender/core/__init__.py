@@ -276,6 +276,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_lamp', luxrender_lamp_hemi),
 		('luxrender_lamp', luxrender_lamp_area),
 		('Mesh', luxrender_mesh),
+		('SurfaceCurve', luxrender_mesh),
+		('TextCurve', luxrender_mesh),
 		('Material', luxrender_material),
 		('luxrender_material', luxrender_mat_compositing),
 		('luxrender_material', luxrender_mat_carpaint),
