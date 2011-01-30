@@ -80,10 +80,10 @@ from luxrender.properties.material		import ( luxrender_material,
 												 luxrender_mat_null,
 												 luxrender_mat_velvet,
 												 luxrender_volume_data,
-												 luxrender_volumes )
-from luxrender.properties.mesh			import ( luxrender_mesh )
-from luxrender.properties.object		import ( luxrender_object,
+												 luxrender_volumes,
 												 luxrender_emission )
+from luxrender.properties.mesh			import ( luxrender_mesh )
+from luxrender.properties.object		import ( luxrender_object )
 from luxrender.properties.texture		import ( luxrender_texture,
 												 luxrender_tex_bilerp,
 												 luxrender_tex_blackbody,
@@ -279,6 +279,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('SurfaceCurve', luxrender_mesh),
 		('TextCurve', luxrender_mesh),
 		('Material', luxrender_material),
+		('Material', luxrender_emission),
 		('luxrender_material', luxrender_mat_compositing),
 		('luxrender_material', luxrender_mat_carpaint),
 		('luxrender_material', luxrender_mat_glass),
@@ -297,7 +298,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('luxrender_material', luxrender_mat_null),
 		('luxrender_material', luxrender_mat_velvet),
 		('Object', luxrender_object),
-		('Object', luxrender_emission),
 		(None, luxrender_volume_data),		# call init_properties, but don't create instance
 		('Texture', luxrender_texture),
 		('luxrender_texture', luxrender_tex_bilerp),

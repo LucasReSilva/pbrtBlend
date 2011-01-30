@@ -276,18 +276,6 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 	else:
 		lux_context.transform( matrix_to_list(ob.matrix_world, apply_worldscale=True) )
 	
-	# Check for emission and volume data
-	object_is_emitter = hasattr(ob, 'luxrender_emission') and ob.luxrender_emission.use_emission
-	if object_is_emitter:
-		lux_context.lightGroup(ob.luxrender_emission.lightgroup, [])
-		arealightsource_params = ParamSet() \
-				.add_float('gain', ob.luxrender_emission.gain) \
-				.add_float('power', ob.luxrender_emission.power) \
-				.add_float('efficacy', ob.luxrender_emission.efficacy)
-		arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', ob.luxrender_emission) )
-		lux_context.areaLightSource('area', arealightsource_params)
-	
-	
 	# object motion blur
 	is_object_animated = False
 	if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.objectmblur:
@@ -312,6 +300,18 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 		lux_context.attributeBegin()
 		
 		if me_mat is not None:
+			
+			# Check for emission and volume data
+			object_is_emitter = hasattr(me_mat, 'luxrender_emission') and me_mat.luxrender_emission.use_emission
+			if object_is_emitter:
+				lux_context.lightGroup(me_mat.luxrender_emission.lightgroup, [])
+				arealightsource_params = ParamSet() \
+						.add_float('gain', me_mat.luxrender_emission.gain) \
+						.add_float('power', me_mat.luxrender_emission.power) \
+						.add_float('efficacy', me_mat.luxrender_emission.efficacy)
+				arealightsource_params.update( add_texture_parameter(lux_context, 'L', 'color', me_mat.luxrender_emission) )
+				lux_context.areaLightSource('area', arealightsource_params)
+			
 			if hasattr(me_mat, 'luxrender_material'):
 				int_v, ext_v = get_material_volume_defs(me_mat)
 				if int_v != '':
@@ -327,6 +327,9 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 				lux_context.namedMaterial(me_mat.name)
 			elif lux_context.API_TYPE == 'PURE':
 				me_mat.luxrender_material.export(lux_context, me_mat, mode='direct')
+		
+		else:
+			object_is_emitter = False
 		
 		# If the object emits, don't export instance or motioninstance, just the Shape
 		if (not allow_instancing()) or object_is_emitter:
@@ -423,7 +426,7 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 		det.start(len(object.dupli_list))
 		
 		for dupli_ob in object.dupli_list:
-			if dupli_ob.object.type != 'MESH':
+			if dupli_ob.object.type not in  ['MESH', 'SURFACE', 'FONT']:
 				continue
 			
 			exportMeshInstances(

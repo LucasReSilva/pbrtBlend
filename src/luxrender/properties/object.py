@@ -26,8 +26,6 @@
 #
 from extensions_framework import declarative_property_group
 
-from luxrender.properties.texture import ColorTextureParameter
-
 class luxrender_object(declarative_property_group):
 	controls = [
 		'append_external_mesh',
@@ -69,90 +67,3 @@ class luxrender_object(declarative_property_group):
 			'description': 'External PLY mesh file to place in scene',
 		}
 	]
-
-class EmissionColorTextureParameter(ColorTextureParameter):
-	def texture_slot_set_attr(self):
-		# Looks in a different location than other ColorTextureParameters
-		return lambda s,c: c.luxrender_emission
-
-TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0,1.0,1.0) )
-
-class luxrender_emission(declarative_property_group):
-	'''
-	Storage class for LuxRender Material emission settings.
-	This class will be instantiated within a Blender Object.
-	'''
-	
-	controls = [
-		'use_emission',
-		'lightgroup',
-	] + \
-	TC_L.controls + \
-	[
-		'gain',
-		'power',
-		'efficacy',
-	]
-	
-	visibility = {
-		'lightgroup': 			{ 'use_emission': True },
-		'L_colorlabel': 		{ 'use_emission': True },
-		'L_color': 				{ 'use_emission': True },
-		'L_usecolorrgc':		{ 'use_emission': True },
-		'L_usecolortexture':	{ 'use_emission': True },
-		'L_colortexture':		{ 'use_emission': True, 'L_usecolortexture': True },
-		'gain': 				{ 'use_emission': True },
-		'power': 				{ 'use_emission': True },
-		'efficacy': 			{ 'use_emission': True },
-	}
-	
-	properties = [
-		{
-			'type': 'bool',
-			'attr': 'use_emission',
-			'name': 'Use Emission',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'string',
-			'attr': 'lightgroup',
-			'name': 'Light Group',
-			'default': 'default',
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'gain',
-			'name': 'Gain',
-			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e8,
-			'soft_max': 1e8,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'power',
-			'name': 'Power',
-			'default': 100.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e5,
-			'soft_max': 1e5,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'efficacy',
-			'name': 'Efficacy',
-			'default': 17.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 1e4,
-			'soft_max': 1e4,
-			'save_in_preset': True
-		},
-	] + \
-	TC_L.properties

@@ -46,3 +46,14 @@ class ui_luxrender_material(luxrender_material_base, bpy.types.Panel):
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		super().draw(context)
+
+class ui_luxrender_material_emission(luxrender_material_base, bpy.types.Panel):
+	'''
+	Material Emission Settings
+	'''
+	
+	bl_label = 'LuxRender Emission'
+	
+	display_property_groups = [
+		( ('material',), 'luxrender_emission' )
+	]

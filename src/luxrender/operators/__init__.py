@@ -324,7 +324,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			# Light source iteration and export goes here.
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MAIN)
-			
+		
+		emitting_mats = False
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxm):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MATS)
@@ -332,11 +333,10 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 			self.report({'INFO'}, 'Exporting materials')
 			# Export materials from all objects because mats from
 			# potentially hidden DupliGroup objects are needed
-			#for object in scene.objects: #[ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
-			#	for mat in export_materials.get_instance_materials(object):
 			for mat in bpy.data.materials:
 				if mat is not None and mat.name not in export_materials.ExportedMaterials.exported_material_names:
 					mat.luxrender_material.export(lux_context, mat, mode='indirect')
+					emitting_mats |= mat.luxrender_emission.use_emission
 			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:
@@ -355,7 +355,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		
 		self.report({'INFO'}, 'Exporting lights')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
-			if export_lights.lights(lux_context) == False:
+			if export_lights.lights(lux_context) == False and not emitting_mats:
 				self.report({'ERROR'}, 'No lights in scene!')
 				return {'CANCELLED'}
 		
