@@ -579,8 +579,8 @@ def iterateScene(lux_context, scene):
 			if not export_bare_object[object.name]:
 				raise UnexportableObjectException('export_bare_object=False')
 				
-			if object.name in dupli_names:
-				raise UnexportableObjectException('Object was exported as dupli')
+			#if object.name in dupli_names:
+			#	raise UnexportableObjectException('Object was exported as dupli')
 			
 			if not object.type in valid_objects_callbacks:
 				raise UnexportableObjectException('Unsupported object type')
