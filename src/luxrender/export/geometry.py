@@ -399,6 +399,13 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 	dupli_object_names = set()
 	
 	try:
+		# ridiculous work-around for exporting every particle
+		if 'particle_system' in kwargs.keys():
+			prev_display_pc = kwargs['particle_system'].settings.draw_percentage
+			kwargs['particle_system'].settings.draw_percentage = 100
+			object.tag = True
+			scene.update()
+		
 		object.create_dupli_list(scene)
 		
 		if object.dupli_list:
@@ -425,39 +432,45 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 			det.stop()
 			det.join()
 			
-			LuxLog('... done, exported %s instances' % len(object.dupli_list))
+			LuxLog('... done, exported %s duplis' % len(object.dupli_list))
 		
 		# free object dupli list again. Warning: all dupli objects are INVALID now!
 		object.free_dupli_list()
+		
+		if 'particle_system' in kwargs.keys():
+			kwargs['particle_system'].settings.draw_percentage = prev_display_pc
+			object.tag = True
+			scene.update()
+		
 	except SystemError as err:
 		LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (object, err))
 	
 	return dupli_object_names
 
-def handler_Duplis_PATH(lux_context, scene, object, *args, **kwargs):
-	if not 'particle_system' in kwargs.keys(): return
-	
-	import mathutils
-	
-	cyl = ParamSet()\
-			.add_float('radius', 0.0005) \
-			.add_float('zmin', 0.0) \
-			.add_float('zmax', 1.0)
-	
-	strand = ('%s_hair'%object.name, object.active_material, 'cylinder', cyl)
-	
-	exportMeshDefinition(lux_context, strand)
-	
-	scale_z = mathutils.Vector([0.0, 0.0, 1.0])
-	
-	for particle in kwargs['particle_system'].particles:
-		for i in range(len(particle.hair)-1):
-			segment_length = (particle.hair[i].co - particle.hair[i+1].co).length
-			segment_matrix = mathutils.Matrix.Translation( particle.hair[i].co_hair_space + particle.location )
-			segment_matrix *= mathutils.Matrix.Scale(segment_length, 4, scale_z)
-			segment_matrix *= particle.rotation.to_matrix().resize4x4()
-			
-			exportMeshInstances(lux_context, object, [strand], matrix=[segment_matrix,None])
+#def handler_Duplis_PATH(lux_context, scene, object, *args, **kwargs):
+#	if not 'particle_system' in kwargs.keys(): return
+#	
+#	import mathutils
+#	
+#	cyl = ParamSet()\
+#			.add_float('radius', 0.0005) \
+#			.add_float('zmin', 0.0) \
+#			.add_float('zmax', 1.0)
+#	
+#	strand = ('%s_hair'%object.name, object.active_material, 'cylinder', cyl)
+#	
+#	exportMeshDefinition(lux_context, strand)
+#	
+#	scale_z = mathutils.Vector([0.0, 0.0, 1.0])
+#	
+#	for particle in kwargs['particle_system'].particles:
+#		for i in range(len(particle.hair)-1):
+#			segment_length = (particle.hair[i].co - particle.hair[i+1].co).length
+#			segment_matrix = mathutils.Matrix.Translation( particle.hair[i].co_hair_space + particle.location )
+#			segment_matrix *= mathutils.Matrix.Scale(segment_length, 4, scale_z)
+#			segment_matrix *= particle.rotation.to_matrix().resize4x4()
+#			
+#			exportMeshInstances(lux_context, object, [strand], matrix=[segment_matrix,None])
 
 def handler_MESH(lux_context, scene, object, *args, **kwargs):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
@@ -468,27 +481,27 @@ def handler_MESH(lux_context, scene, object, *args, **kwargs):
 		buildNativeMesh(lux_context, scene, object)
 	)
 
+callbacks = {
+	'duplis': {
+		'FACES': handler_Duplis_GENERIC,
+		'GROUP': handler_Duplis_GENERIC,
+		'VERTS': handler_Duplis_GENERIC,
+	},
+	'particles': {
+		'OBJECT': handler_Duplis_GENERIC,
+		'GROUP': handler_Duplis_GENERIC,
+		#'PATH': handler_Duplis_PATH,
+	},
+	'objects': {
+		'MESH': handler_MESH,
+		'SURFACE': handler_MESH,
+		'FONT': handler_MESH
+	}
+}
+
 def iterateScene(lux_context, scene):
 	lux_context.ExportedMeshes = ExportCache('ExportedMeshes')
 	lux_context.ExportedObjects = ExportCache('ExportedObjects')
-	
-	callbacks = {
-		'duplis': {
-			'FACES': handler_Duplis_GENERIC,
-			'GROUP': handler_Duplis_GENERIC,
-			'VERTS': handler_Duplis_GENERIC,
-		},
-		'particles': {
-			'OBJECT': handler_Duplis_GENERIC,
-			'GROUP': handler_Duplis_GENERIC,
-			#'PATH': handler_Duplis_PATH,
-		},
-		'objects': {
-			'MESH': handler_MESH,
-			'SURFACE': handler_MESH,
-			'FONT': handler_MESH
-		}
-	}
 	
 	valid_duplis_callbacks = callbacks['duplis'].keys()
 	valid_particles_callbacks = callbacks['particles'].keys()
@@ -499,7 +512,7 @@ def iterateScene(lux_context, scene):
 	
 	for object in scene.objects:
 		if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (object, object.type))
-		
+			
 		try:
 			# Export only objects which are enabled for render (in the outliner) and visible on a render layer
 			if not object.is_visible(scene) or object.hide_render:
@@ -547,3 +560,6 @@ def iterateScene(lux_context, scene):
 	
 	progress_thread.stop()
 	progress_thread.join()
+	
+	del lux_context.ExportedMeshes
+	del lux_context.ExportedObjects
