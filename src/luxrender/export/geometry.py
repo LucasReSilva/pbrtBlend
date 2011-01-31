@@ -56,7 +56,7 @@ def buildNativeMesh(lux_context, scene, object):
 	
 	ply_mesh_name = '%s_ply' % object.data.name
 	if object.luxrender_object.append_external_mesh:
-		if allow_instancing(lux_context) and lux_context.ExportedMeshes.have(ply_mesh_name):
+		if allow_instancing(lux_context, object) and lux_context.ExportedMeshes.have(ply_mesh_name):
 			mesh_definitions.append( lux_context.ExportedMeshes.get(ply_mesh_name) )
 		else:
 			ply_params = ParamSet()
@@ -68,7 +68,7 @@ def buildNativeMesh(lux_context, scene, object):
 			exportMeshDefinition(lux_context, mesh_definition)
 			
 			# Only cache this mesh_definition if we plan to use instancing
-			if allow_instancing(lux_context): lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
+			if allow_instancing(lux_context, object): lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 	
 	try:
 		#(not a) or (a and not b) == not (a and b)
@@ -113,7 +113,7 @@ def buildNativeMesh(lux_context, scene, object):
 						mesh_name = object.data.name.replace(' ','_')
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
-					if allow_instancing(lux_context) and lux_context.ExportedMeshes.have(mesh_name):
+					if allow_instancing(lux_context, object) and lux_context.ExportedMeshes.have(mesh_name):
 						mesh_definitions.append( lux_context.ExportedMeshes.get(mesh_name) )
 						continue
 					
@@ -227,7 +227,7 @@ def buildNativeMesh(lux_context, scene, object):
 					exportMeshDefinition(lux_context, mesh_definition)
 					
 					# Only cache this mesh_definition if we plan to use instancing
-					if allow_instancing(lux_context): lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
+					if allow_instancing(lux_context, object): lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
 					
 					LuxLog('Mesh Exported: %s' % mesh_name)
 					
@@ -241,15 +241,15 @@ def buildNativeMesh(lux_context, scene, object):
 	
 	return mesh_definitions
 
-def allow_instancing(lux_context):
+def allow_instancing(lux_context, object=None):
 	# Some situations require full geometry export
 	if LuxManager.CurrentScene.luxrender_engine.renderer == 'hybrid':
 		return False
 	
-	# Only allow instancing for duplis and particles in non-hybrid mode,
-	# or if objects with shared meshs have no modifiers attached
-	#(this is all worked out in iterateScene() below)
-	return lux_context.ExportedMeshes.instancing_allowed
+	# Only allow instancing for duplis and particles in non-hybrid mode, or
+	# for normal objects if the object has modifiers applied against the same
+	# shared base mesh.
+	return (len(object.modifiers) == 0) if object is not None else True
 
 def exportMeshDefinition(lux_context, mesh_definition):
 	"""
@@ -333,7 +333,7 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 			object_is_emitter = False
 		
 		# If the object emits, don't export instance or motioninstance, just the Shape
-		if (not allow_instancing(lux_context)) or object_is_emitter:
+		if (not allow_instancing(lux_context, object)) or object_is_emitter:
 			lux_context.shape(me_shape_type, me_shape_params)
 		# motionInstance for motion blur
 		elif is_object_animated:
@@ -372,13 +372,11 @@ class DupliExportProgressThread(ExportProgressThread):
 class ExportCache(object):
 	
 	name = 'Cache'
-	instancing_allowed = True
 	cache_keys = set()
 	cache_items = {}
 	
 	def __init__(self, name):
 		self.name = name
-		self.instancing_allowed = True
 		self.cache_keys = set()
 		self.cache_items = {}
 	
@@ -523,8 +521,6 @@ def iterateScene(lux_context, scene):
 			
 			number_psystems = len(object.particle_systems)
 			
-			lux_context.ExportedMeshes.instancing_allowed = True
-			
 			if object.is_duplicator and number_psystems < 1:
 				if OBJECT_ANALYSIS: print(' -> is duplicator without particle systems')
 				if object.dupli_type in valid_duplis_callbacks:
@@ -548,9 +544,6 @@ def iterateScene(lux_context, scene):
 			if not object.type in valid_objects_callbacks:
 				raise UnexportableObjectException('Unsupported object type')
 			
-			# For normal objects, don't use instancing, if the object has modifiers
-			# applied against the same shared base mesh.
-			lux_context.ExportedMeshes.instancing_allowed = len(object.modifiers) == 0
 			callbacks['objects'][object.type](lux_context, scene, object)
 		
 		except UnexportableObjectException as err:
