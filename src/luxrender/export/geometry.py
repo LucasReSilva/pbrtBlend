@@ -249,7 +249,7 @@ def allow_instancing(lux_context, obj=None):
 	# Only allow instancing for duplis and particles in non-hybrid mode, or
 	# for normal objects if the object has modifiers applied against the same
 	# shared base mesh.
-	return (len(obj.modifiers) == 0) if obj is not None else True
+	return (len(obj.modifiers) == 0) if (obj is not None and hasattr(obj, 'modifiers')) else True
 
 def exportMeshDefinition(lux_context, mesh_definition):
 	"""
