@@ -40,7 +40,7 @@ class InvalidGeometryException(Exception):
 class UnexportableObjectException(Exception):
 	pass
 
-def buildNativeMesh(lux_context, scene, object):
+def buildNativeMesh(lux_context, scene, obj):
 	"""
 	Convert supported blender objects into a MESH, and then split into parts
 	according to vertex material assignment, and construct a mesh_name and
@@ -50,30 +50,30 @@ def buildNativeMesh(lux_context, scene, object):
 	"""
 	
 	# Using a cache on object massively speeds up dupli instance export
-	if lux_context.ExportedObjects.have(object): return lux_context.ExportedObjects.get(object)
+	if lux_context.ExportedObjects.have(obj): return lux_context.ExportedObjects.get(obj)
 	
 	mesh_definitions = []
 	
-	ply_mesh_name = '%s_ply' % object.data.name
-	if object.luxrender_object.append_external_mesh:
-		if allow_instancing(lux_context, object) and lux_context.ExportedMeshes.have(ply_mesh_name):
+	ply_mesh_name = '%s_ply' % obj.data.name
+	if obj.luxrender_object.append_external_mesh:
+		if allow_instancing(lux_context, obj) and lux_context.ExportedMeshes.have(ply_mesh_name):
 			mesh_definitions.append( lux_context.ExportedMeshes.get(ply_mesh_name) )
 		else:
 			ply_params = ParamSet()
-			ply_params.add_string('filename', efutil.path_relative_to_export(object.luxrender_object.external_mesh))
-			ply_params.add_bool('smooth', object.luxrender_object.use_smoothing)
+			ply_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
+			ply_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
 			
-			mesh_definition = (ply_mesh_name, object.active_material, 'plymesh', ply_params)
+			mesh_definition = (ply_mesh_name, obj.active_material, 'plymesh', ply_params)
 			mesh_definitions.append( mesh_definition )
 			exportMeshDefinition(lux_context, mesh_definition)
 			
 			# Only cache this mesh_definition if we plan to use instancing
-			if allow_instancing(lux_context, object): lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
+			if allow_instancing(lux_context, obj): lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 	
 	try:
 		#(not a) or (a and not b) == not (a and b)
-		if not (object.luxrender_object.append_external_mesh and object.luxrender_object.hide_proxy_mesh):
-			mesh = object.create_mesh(scene, True, 'RENDER')
+		if not (obj.luxrender_object.append_external_mesh and obj.luxrender_object.hide_proxy_mesh):
+			mesh = obj.create_mesh(scene, True, 'RENDER')
 			if mesh is None:
 				raise UnexportableObjectException('Cannot create render/export mesh')
 			
@@ -108,12 +108,12 @@ def buildNativeMesh(lux_context, scene, object):
 					if i not in ffaces_mats.keys(): continue
 					
 					if mesh_mat is not None:
-						mesh_name = ('%s_%s' % (object.data.name, mesh_mat.name)).replace(' ','_')
+						mesh_name = ('%s_%s' % (obj.data.name, mesh_mat.name)).replace(' ','_')
 					else:
-						mesh_name = object.data.name.replace(' ','_')
+						mesh_name = obj.data.name.replace(' ','_')
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
-					if allow_instancing(lux_context, object) and lux_context.ExportedMeshes.have(mesh_name):
+					if allow_instancing(lux_context, obj) and lux_context.ExportedMeshes.have(mesh_name):
 						mesh_definitions.append( lux_context.ExportedMeshes.get(mesh_name) )
 						continue
 					
@@ -187,9 +187,9 @@ def buildNativeMesh(lux_context, scene, object):
 								for single_uv in uv:
 									uvs.append(single_uv)
 					
-					#print(' %s num points: %i' % (ob.name, len(points)))
-					#print(' %s num normals: %i' % (ob.name, len(normals)))
-					#print(' %s num idxs: %i' % (ob.name, len(indices)))
+					#print(' %s num points: %i' % (obj.name, len(points)))
+					#print(' %s num normals: %i' % (obj.name, len(normals)))
+					#print(' %s num idxs: %i' % (obj.name, len(indices)))
 					
 					# build shape ParamSet
 					shape_params = ParamSet()
@@ -207,41 +207,41 @@ def buildNativeMesh(lux_context, scene, object):
 					shape_params.add_normal('N', normals)
 					
 					if uv_layer:
-						#print(' %s num uvs: %i' % (ob.name, len(uvs)))
+						#print(' %s num uvs: %i' % (obj.name, len(uvs)))
 						#print('-> Add UVs to paramset')
 						shape_params.add_float('uv', uvs)
 					
-					#print(' %s ntris: %i' % (ob.name, ntris))
-					#print(' %s nvertices: %i' % (ob.name, nvertices))
+					#print(' %s ntris: %i' % (obj.name, ntris))
+					#print(' %s nvertices: %i' % (obj.name, nvertices))
 					
 					# Add other properties from LuxRender Mesh panel
-					shape_params.update( object.data.luxrender_mesh.get_paramset() )
+					shape_params.update( obj.data.luxrender_mesh.get_paramset() )
 					
 					mesh_definition = (
 						mesh_name,
 						mesh_mat,
-						object.data.luxrender_mesh.get_shape_type(),
+						obj.data.luxrender_mesh.get_shape_type(),
 						shape_params
 					)
 					mesh_definitions.append( mesh_definition )
 					exportMeshDefinition(lux_context, mesh_definition)
 					
 					# Only cache this mesh_definition if we plan to use instancing
-					if allow_instancing(lux_context, object): lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
+					if allow_instancing(lux_context, obj): lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
 					
 					LuxLog('Mesh Exported: %s' % mesh_name)
 					
 				except InvalidGeometryException as err:
 					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 		
-		lux_context.ExportedObjects.add(object, mesh_definitions)
+		lux_context.ExportedObjects.add(obj, mesh_definitions)
 	
 	except UnexportableObjectException as err:
 		LuxLog('Object export failed, skipping this object: %s' % err)
 	
 	return mesh_definitions
 
-def allow_instancing(lux_context, object=None):
+def allow_instancing(lux_context, obj=None):
 	# Some situations require full geometry export
 	if LuxManager.CurrentScene.luxrender_engine.renderer == 'hybrid':
 		return False
@@ -249,7 +249,7 @@ def allow_instancing(lux_context, object=None):
 	# Only allow instancing for duplis and particles in non-hybrid mode, or
 	# for normal objects if the object has modifiers applied against the same
 	# shared base mesh.
-	return (len(object.modifiers) == 0) if object is not None else True
+	return (len(obj.modifiers) == 0) if obj is not None else True
 
 def exportMeshDefinition(lux_context, mesh_definition):
 	"""
@@ -271,16 +271,16 @@ def exportMeshDefinition(lux_context, mesh_definition):
 def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
-def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
+def exportMeshInstances(lux_context, obj, mesh_definitions, matrix=None):
 	scene = LuxManager.CurrentScene
 	
-	lux_context.attributeBegin(comment=ob.name, file=Files.GEOM)
+	lux_context.attributeBegin(comment=obj.name, file=Files.GEOM)
 	
 	# object translation/rotation/scale
 	if matrix is not None:
 		lux_context.transform( matrix_to_list(matrix[0], apply_worldscale=True) )
 	else:
-		lux_context.transform( matrix_to_list(ob.matrix_world, apply_worldscale=True) )
+		lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
 	
 	# object motion blur
 	is_object_animated = False
@@ -290,16 +290,16 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 			is_object_animated = True
 		else:
 			scene.frame_set(scene.frame_current + 1)
-			m1 = ob.matrix_world.copy()
+			m1 = obj.matrix_world.copy()
 			scene.frame_set(scene.frame_current - 1)
 			scene.update()
-			is_object_animated =  m1 != ob.matrix_world
+			is_object_animated =  m1 != obj.matrix_world
 	
 	if is_object_animated:
-		lux_context.transformBegin(comment=ob.name, file=Files.GEOM)
+		lux_context.transformBegin(comment=obj.name, file=Files.GEOM)
 		lux_context.identity()
 		lux_context.transform(matrix_to_list(m1, apply_worldscale=True))
-		lux_context.coordinateSystem('%s' % ob.name + '_motion')
+		lux_context.coordinateSystem('%s' % obj.name + '_motion')
 		lux_context.transformEnd()
 	
 	for me_name, me_mat, me_shape_type, me_shape_params in mesh_definitions:
@@ -333,11 +333,11 @@ def exportMeshInstances(lux_context, ob, mesh_definitions, matrix=None):
 			object_is_emitter = False
 		
 		# If the object emits, don't export instance or motioninstance, just the Shape
-		if (not allow_instancing(lux_context, object)) or object_is_emitter:
+		if (not allow_instancing(lux_context, obj)) or object_is_emitter:
 			lux_context.shape(me_shape_type, me_shape_params)
 		# motionInstance for motion blur
 		elif is_object_animated:
-			lux_context.motionInstance(me_name, 0.0, 1.0, ob.name + '_motion')
+			lux_context.motionInstance(me_name, 0.0, 1.0, obj.name + '_motion')
 		# ordinary mesh instance
 		else:
 			lux_context.objectInstance(me_name)
@@ -393,7 +393,7 @@ class ExportCache(object):
 		else:
 			raise InvalidGeometryException('Item %s not found in %s!' % (ck, self.name))
 
-def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
+def handler_Duplis_GENERIC(lux_context, scene, obj, *args, **kwargs):
 	dupli_object_names = set()
 	
 	try:
@@ -401,24 +401,24 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 		if 'particle_system' in kwargs.keys():
 			prev_display_pc = kwargs['particle_system'].settings.draw_percentage
 			kwargs['particle_system'].settings.draw_percentage = 100
-			object.tag = True
+			obj.tag = True
 			scene.update()
 		
-		object.create_dupli_list(scene)
+		obj.create_dupli_list(scene)
 		
-		if object.dupli_list:
+		if obj.dupli_list:
 			LuxLog('Exporting Duplis...')
 			
 			det = DupliExportProgressThread()
-			det.start(len(object.dupli_list))
+			det.start(len(obj.dupli_list))
 			
-			for dupli_ob in object.dupli_list:
+			for dupli_ob in obj.dupli_list:
 				if dupli_ob.object.type not in  ['MESH', 'SURFACE', 'FONT']:
 					continue
 				
 				exportMeshInstances(
 					lux_context,
-					object,
+					obj,
 					buildNativeMesh(lux_context, scene, dupli_ob.object),
 					matrix=[dupli_ob.matrix,None]
 				)
@@ -430,22 +430,22 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 			det.stop()
 			det.join()
 			
-			LuxLog('... done, exported %s duplis' % len(object.dupli_list))
+			LuxLog('... done, exported %s duplis' % len(obj.dupli_list))
 		
 		# free object dupli list again. Warning: all dupli objects are INVALID now!
-		object.free_dupli_list()
+		obj.free_dupli_list()
 		
 		if 'particle_system' in kwargs.keys():
 			kwargs['particle_system'].settings.draw_percentage = prev_display_pc
-			object.tag = True
+			obj.tag = True
 			scene.update()
 		
 	except SystemError as err:
-		LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (object, err))
+		LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
 	
 	return dupli_object_names
 
-#def handler_Duplis_PATH(lux_context, scene, object, *args, **kwargs):
+#def handler_Duplis_PATH(lux_context, scene, obj, *args, **kwargs):
 #	if not 'particle_system' in kwargs.keys(): return
 #	
 #	import mathutils
@@ -455,7 +455,7 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 #			.add_float('zmin', 0.0) \
 #			.add_float('zmax', 1.0)
 #	
-#	strand = ('%s_hair'%object.name, object.active_material, 'cylinder', cyl)
+#	strand = ('%s_hair'%obj.name, obj.active_material, 'cylinder', cyl)
 #	
 #	exportMeshDefinition(lux_context, strand)
 #	
@@ -468,15 +468,15 @@ def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
 #			segment_matrix *= mathutils.Matrix.Scale(segment_length, 4, scale_z)
 #			segment_matrix *= particle.rotation.to_matrix().resize4x4()
 #			
-#			exportMeshInstances(lux_context, object, [strand], matrix=[segment_matrix,None])
+#			exportMeshInstances(lux_context, obj, [strand], matrix=[segment_matrix,None])
 
-def handler_MESH(lux_context, scene, object, *args, **kwargs):
+def handler_MESH(lux_context, scene, obj, *args, **kwargs):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
 	
 	exportMeshInstances(
 		lux_context,
-		object,
-		buildNativeMesh(lux_context, scene, object)
+		obj,
+		buildNativeMesh(lux_context, scene, obj)
 	)
 
 callbacks = {
@@ -508,46 +508,46 @@ def iterateScene(lux_context, scene):
 	progress_thread = MeshExportProgressThread()
 	progress_thread.start(len(scene.objects))
 	
-	for object in scene.objects:
-		if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (object, object.type))
+	for obj in scene.objects:
+		if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (obj, obj.type))
 			
 		try:
 			# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-			if not object.is_visible(scene) or object.hide_render:
-				raise UnexportableObjectException(' -> not visible: %s / %s' % (object.is_visible(scene), object.hide_render))
+			if not obj.is_visible(scene) or obj.hide_render:
+				raise UnexportableObjectException(' -> not visible: %s / %s' % (obj.is_visible(scene), obj.hide_render))
 			
-			if object.parent and object.parent.is_duplicator:
+			if obj.parent and obj.parent.is_duplicator:
 				raise UnexportableObjectException(' -> parent is duplicator')
 			
-			number_psystems = len(object.particle_systems)
+			number_psystems = len(obj.particle_systems)
 			
-			if object.is_duplicator and number_psystems < 1:
+			if obj.is_duplicator and number_psystems < 1:
 				if OBJECT_ANALYSIS: print(' -> is duplicator without particle systems')
-				if object.dupli_type in valid_duplis_callbacks:
-					callbacks['duplis'][object.dupli_type](lux_context, scene, object)
-				elif OBJECT_ANALYSIS: print(' -> Unsupported Dupli type: %s' % object.dupli_type)
+				if obj.dupli_type in valid_duplis_callbacks:
+					callbacks['duplis'][obj.dupli_type](lux_context, scene, obj)
+				elif OBJECT_ANALYSIS: print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
 			
 			export_original_object = True
 			
 			if number_psystems > 0:
 				export_original_object = False
 				if OBJECT_ANALYSIS: print(' -> has %i particle systems' % number_psystems)
-				for psys in object.particle_systems:
+				for psys in obj.particle_systems:
 					export_original_object = export_original_object or psys.settings.use_render_emitter
 					if psys.settings.render_type in valid_particles_callbacks:
-						callbacks['particles'][psys.settings.render_type](lux_context, scene, object, particle_system=psys)
+						callbacks['particles'][psys.settings.render_type](lux_context, scene, obj, particle_system=psys)
 					elif OBJECT_ANALYSIS: print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
 			
 			if not export_original_object:
 				raise UnexportableObjectException('export_original_object=False')
 			
-			if not object.type in valid_objects_callbacks:
+			if not obj.type in valid_objects_callbacks:
 				raise UnexportableObjectException('Unsupported object type')
 			
-			callbacks['objects'][object.type](lux_context, scene, object)
+			callbacks['objects'][obj.type](lux_context, scene, obj)
 		
 		except UnexportableObjectException as err:
-			if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (object, object.type, err))
+			if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
 		
 		progress_thread.exported_objects += 1
 	
