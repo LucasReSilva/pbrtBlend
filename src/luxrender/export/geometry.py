@@ -24,14 +24,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
+
 from extensions_framework import util as efutil
 
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
 from luxrender.export import ParamSet, LuxManager
 from luxrender.export import matrix_to_list
-
-OBJECT_ANALYSIS = False
 
 class InvalidGeometryException(Exception):
 	pass
@@ -395,39 +396,68 @@ class ExportCache(object):
 			raise InvalidGeometryException('Item %s not found in %s!' % (ck, self.name))
 
 def handler_Duplis_GENERIC(lux_context, scene, object, *args, **kwargs):
-	object.create_dupli_list(scene)
+	dupli_object_names = set()
 	
-	if object.dupli_list:
-		LuxLog('Exporting Duplis...')
-		dupli_object_names = set()
+	try:
+		object.create_dupli_list(scene)
 		
-		det = DupliExportProgressThread()
-		det.start(len(object.dupli_list))
-		
-		for dupli_ob in object.dupli_list:
-			if dupli_ob.object.type not in  ['MESH', 'SURFACE', 'FONT']:
-				continue
+		if object.dupli_list:
+			LuxLog('Exporting Duplis...')
 			
-			exportMeshInstances(
-				lux_context,
-				object,
-				buildNativeMesh(lux_context, scene, dupli_ob.object),
-				matrix=[dupli_ob.matrix,None]
-			)
+			det = DupliExportProgressThread()
+			det.start(len(object.dupli_list))
 			
-			dupli_object_names.add( dupli_ob.object.name )
+			for dupli_ob in object.dupli_list:
+				if dupli_ob.object.type not in  ['MESH', 'SURFACE', 'FONT']:
+					continue
+				
+				exportMeshInstances(
+					lux_context,
+					object,
+					buildNativeMesh(lux_context, scene, dupli_ob.object),
+					matrix=[dupli_ob.matrix,None]
+				)
+				
+				dupli_object_names.add( dupli_ob.object.name )
+				
+				det.exported_objects += 1
 			
-			det.exported_objects += 1
+			det.stop()
+			det.join()
+			
+			LuxLog('... done, exported %s instances' % len(object.dupli_list))
 		
-		det.stop()
-		det.join()
-		
-		LuxLog('... done, exported %s instances' % len(object.dupli_list))
-	
-	# free object dupli list again. Warning: all dupli objects are INVALID now!
-	object.free_dupli_list()
+		# free object dupli list again. Warning: all dupli objects are INVALID now!
+		object.free_dupli_list()
+	except SystemError as err:
+		LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (object, err))
 	
 	return dupli_object_names
+
+def handler_Duplis_PATH(lux_context, scene, object, *args, **kwargs):
+	if not 'particle_system' in kwargs.keys(): return
+	
+	import mathutils
+	
+	cyl = ParamSet()\
+			.add_float('radius', 0.0005) \
+			.add_float('zmin', 0.0) \
+			.add_float('zmax', 1.0)
+	
+	strand = ('%s_hair'%object.name, object.active_material, 'cylinder', cyl)
+	
+	exportMeshDefinition(lux_context, strand)
+	
+	scale_z = mathutils.Vector([0.0, 0.0, 1.0])
+	
+	for particle in kwargs['particle_system'].particles:
+		for i in range(len(particle.hair)-1):
+			segment_length = (particle.hair[i].co - particle.hair[i+1].co).length
+			segment_matrix = mathutils.Matrix.Translation( particle.hair[i].co_hair_space + particle.location )
+			segment_matrix *= mathutils.Matrix.Scale(segment_length, 4, scale_z)
+			segment_matrix *= particle.rotation.to_matrix().resize4x4()
+			
+			exportMeshInstances(lux_context, object, [strand], matrix=[segment_matrix,None])
 
 def handler_MESH(lux_context, scene, object, *args, **kwargs):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
@@ -451,6 +481,7 @@ def iterateScene(lux_context, scene):
 		'particles': {
 			'OBJECT': handler_Duplis_GENERIC,
 			'GROUP': handler_Duplis_GENERIC,
+			#'PATH': handler_Duplis_PATH,
 		},
 		'objects': {
 			'MESH': handler_MESH,
@@ -495,7 +526,7 @@ def iterateScene(lux_context, scene):
 				for psys in object.particle_systems:
 					export_original_object = export_original_object or psys.settings.use_render_emitter
 					if psys.settings.render_type in valid_particles_callbacks:
-						callbacks['particles'][psys.settings.render_type](lux_context, scene, object, psys)
+						callbacks['particles'][psys.settings.render_type](lux_context, scene, object, particle_system=psys)
 					elif OBJECT_ANALYSIS: print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
 			
 			if not export_original_object:
