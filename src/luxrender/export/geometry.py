@@ -65,10 +65,11 @@ def buildNativeMesh(lux_context, scene, obj):
 			
 			mesh_definition = (ply_mesh_name, obj.active_material, 'plymesh', ply_params)
 			mesh_definitions.append( mesh_definition )
-			exportMeshDefinition(lux_context, mesh_definition)
 			
-			# Only cache this mesh_definition if we plan to use instancing
-			if allow_instancing(lux_context, obj): lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
+			# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
+			if allow_instancing(lux_context, obj):
+				exportMeshDefinition(lux_context, mesh_definition)
+				lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 	
 	try:
 		#(not a) or (a and not b) == not (a and b)
@@ -99,13 +100,13 @@ def buildNativeMesh(lux_context, scene, obj):
 			
 			for i in iterator_range:
 				try:
+					if i not in faces_verts_mats.keys(): continue
+					if i not in ffaces_mats.keys(): continue
+					
 					try:
 						mesh_mat = mesh.materials[i]
 					except IndexError:
 						mesh_mat = None
-					
-					if i not in faces_verts_mats.keys(): continue
-					if i not in ffaces_mats.keys(): continue
 					
 					if mesh_mat is not None:
 						mesh_name = ('%s_%s' % (obj.data.name, mesh_mat.name)).replace(' ','_')
@@ -224,10 +225,11 @@ def buildNativeMesh(lux_context, scene, obj):
 						shape_params
 					)
 					mesh_definitions.append( mesh_definition )
-					exportMeshDefinition(lux_context, mesh_definition)
 					
-					# Only cache this mesh_definition if we plan to use instancing
-					if allow_instancing(lux_context, obj): lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
+					# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
+					if allow_instancing(lux_context, obj):
+						exportMeshDefinition(lux_context, mesh_definition)
+						lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
 					
 					LuxLog('Mesh Exported: %s' % mesh_name)
 					
@@ -247,9 +249,19 @@ def allow_instancing(lux_context, obj=None):
 		return False
 	
 	# Only allow instancing for duplis and particles in non-hybrid mode, or
-	# for normal objects if the object has modifiers applied against the same
-	# shared base mesh.
-	return (len(obj.modifiers) == 0) if (obj is not None and hasattr(obj, 'modifiers')) else True
+	# for normal objects if the object has certain modifiers applied against
+	# the same shared base mesh.
+	if obj is not None and hasattr(obj, 'modifiers') and len(obj.modifiers) > 0 and obj.data.users > 1:
+		#if OBJECT_ANALYSIS: print(' -> Instancing check on %s' % obj)
+		instance = False
+		for mod in obj.modifiers:
+			#if OBJECT_ANALYSIS: print(' -> MODIFIER %s' % mod.type)
+			# Allow non-deforming modifiers
+			instance |= mod.type in ('COLLISION','PARTICLE_INSTANCE','PARTICLE_SYSTEM','SMOKE')
+		#if OBJECT_ANALYSIS: print(' -> INSTANCING == %s'%instance)
+		return instance
+	else:
+		return True
 
 def exportMeshDefinition(lux_context, mesh_definition):
 	"""
@@ -260,7 +272,7 @@ def exportMeshDefinition(lux_context, mesh_definition):
 	me_name, me_mat, me_shape_type, me_shape_params = mesh_definition
 	
 	if len(me_shape_params) == 0: return
-	if not allow_instancing(lux_context): return
+	#if not allow_instancing(lux_context): return
 	
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
@@ -332,8 +344,14 @@ def exportMeshInstances(lux_context, obj, mesh_definitions, matrix=None):
 		else:
 			object_is_emitter = False
 		
+		instance = allow_instancing(lux_context, obj)
+		
+		#if OBJECT_ANALYSIS: print(' -> instance? %s' % instance)
+		#if OBJECT_ANALYSIS: print(' -> emitter?  %s' % object_is_emitter)
+		#if OBJECT_ANALYSIS: print(' -> animated? %s' % is_object_animated)
+		
 		# If the object emits, don't export instance or motioninstance, just the Shape
-		if (not allow_instancing(lux_context, obj)) or object_is_emitter:
+		if (not instance) or object_is_emitter:
 			lux_context.shape(me_shape_type, me_shape_params)
 		# motionInstance for motion blur
 		elif is_object_animated:
@@ -471,7 +489,7 @@ def handler_Duplis_GENERIC(lux_context, scene, obj, *args, **kwargs):
 #			exportMeshInstances(lux_context, obj, [strand], matrix=[segment_matrix,None])
 
 def handler_MESH(lux_context, scene, obj, *args, **kwargs):
-	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % object)
+	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % obj)
 	
 	exportMeshInstances(
 		lux_context,
