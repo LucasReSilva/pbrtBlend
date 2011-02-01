@@ -85,7 +85,6 @@ class LuxFilmDisplay(TimerThread):
 			else:
 				err_msg = 'ERROR: Cannot not load render result: resolution unknown. LuxFilmThread will terminate'
 				LuxLog(err_msg)
-				bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
 				self.stop()
 				return
 			
@@ -96,7 +95,7 @@ class LuxFilmDisplay(TimerThread):
 			
 			result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
 			
-			bpy.ops.ef.msg(msg_text='Updating RenderResult')
+			LuxLog('Updating RenderResult')
 			lay = result.layers[0]
 			
 			if direct_transfer:
@@ -109,12 +108,10 @@ class LuxFilmDisplay(TimerThread):
 			else:
 				err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
 				LuxLog(err_msg)
-				bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
 			self.LocalStorage['RE'].end_result(result)
 		else:
 			err_msg = 'ERROR: LuxFilmThread started with insufficient parameters. LuxFilmThread will terminate'
 			LuxLog(err_msg)
-			bpy.ops.ef.msg(msg_type='ERROR', msg_text=err_msg)
 			self.stop()
 			return
 

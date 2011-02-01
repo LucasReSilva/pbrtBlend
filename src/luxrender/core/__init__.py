@@ -345,7 +345,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 			prev_dir = os.getcwd()
 			
 			if scene is None:
-				bpy.ops.ef.msg(msg_type='ERROR', msg_text='Scene to render is not valid')
+				LuxLog('ERROR: Scene to render is not valid')
 				return
 			
 			if scene.name == 'preview':
@@ -356,7 +356,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 				LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
 			
 			if self.render_scene(scene) == False:
-				#bpy.ops.ef.msg(msg_type='ERROR', msg_text='Export failed')
 				return
 			
 			self.render_start(scene)
@@ -375,7 +374,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
 		if not PYLUX_AVAILABLE:
 			self.bl_use_preview = False
-			bpy.ops.ef.msg(msg_type='ERROR', msg_text='Material previews require pylux')
+			LuxLog('ERROR: Material previews require pylux')
 			return
 		
 		from luxrender.export import materials as export_materials
@@ -637,7 +636,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		
 		# Begin rendering
 		if start_rendering:
-			bpy.ops.ef.msg(msg_text='Starting LuxRender')
+			LuxLog('Starting LuxRender')
 			if internal:
 				
 				self.LuxManager.lux_context.logVerbosity(scene.luxrender_engine.log_verbosity)
