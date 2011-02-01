@@ -173,6 +173,8 @@ from luxrender.operators				import ( EXPORT_OT_luxrender,
 												 LUXRENDER_OT_volume_add,
 												 LUXRENDER_OT_volume_remove )
 
+from luxrender.export.scene				import SceneExporter
+
 # Add standard Blender Interface elements
 import properties_render
 properties_render.RENDER_PT_render.COMPAT_ENGINES.add('luxrender')
@@ -539,15 +541,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 					LM.lux_context.addServer(server.strip())
 		
 		output_filename = efutil.scene_filename() + '.%s.%05i' % (scene.name, scene.frame_current)
-		export_result = bpy.ops.export.luxrender(
-			directory = self.output_dir,
-			filename = output_filename,
-			
-			api_type = api_type,			# Set export target
-			write_files = write_files,		# Use file write decision from above
-			write_all_files = False,		# Use UI file write settings
-			scene = scene.name,				# Export this named scene
-		)
+		
+		scene_exporter = SceneExporter()
+		scene_exporter.properties.directory = self.output_dir
+		scene_exporter.properties.filename = output_filename
+		scene_exporter.properties.api_type = api_type			# Set export target
+		scene_exporter.properties.write_files = write_files		# Use file write decision from above
+		scene_exporter.properties.write_all_files = False		# Use UI file write settings
+		scene_exporter.set_scene(scene)
+		
+		export_result = scene_exporter.export()
 		
 		if 'CANCELLED' in export_result:
 			return False
