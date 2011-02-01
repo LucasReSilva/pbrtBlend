@@ -31,7 +31,7 @@ from extensions_framework import util as efutil
 
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
-from luxrender.export import ParamSet, LuxManager
+from luxrender.export import ParamSet
 from luxrender.export import matrix_to_list
 
 class InvalidGeometryException(Exception):
@@ -56,7 +56,7 @@ def buildNativeMesh(lux_context, scene, obj):
 	
 	ply_mesh_name = '%s_ply' % obj.data.name
 	if obj.luxrender_object.append_external_mesh:
-		if allow_instancing(lux_context, obj) and lux_context.ExportedMeshes.have(ply_mesh_name):
+		if allow_instancing(lux_context, scene, obj) and lux_context.ExportedMeshes.have(ply_mesh_name):
 			mesh_definitions.append( lux_context.ExportedMeshes.get(ply_mesh_name) )
 		else:
 			ply_params = ParamSet()
@@ -67,7 +67,7 @@ def buildNativeMesh(lux_context, scene, obj):
 			mesh_definitions.append( mesh_definition )
 			
 			# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
-			if allow_instancing(lux_context, obj):
+			if allow_instancing(lux_context, scene, obj):
 				exportMeshDefinition(lux_context, obj, mesh_definition)
 				lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 	
@@ -114,7 +114,7 @@ def buildNativeMesh(lux_context, scene, obj):
 						mesh_name = obj.data.name.replace(' ','_')
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
-					if allow_instancing(lux_context, obj) and lux_context.ExportedMeshes.have(mesh_name):
+					if allow_instancing(lux_context, scene, obj) and lux_context.ExportedMeshes.have(mesh_name):
 						mesh_definitions.append( lux_context.ExportedMeshes.get(mesh_name) )
 						continue
 					
@@ -227,7 +227,7 @@ def buildNativeMesh(lux_context, scene, obj):
 					mesh_definitions.append( mesh_definition )
 					
 					# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
-					if allow_instancing(lux_context, obj):
+					if allow_instancing(lux_context, scene, obj):
 						exportMeshDefinition(lux_context, obj, mesh_definition)
 						lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
 					
@@ -243,9 +243,9 @@ def buildNativeMesh(lux_context, scene, obj):
 	
 	return mesh_definitions
 
-def allow_instancing(lux_context, obj=None):
+def allow_instancing(lux_context, scene, obj=None):
 	# Some situations require full geometry export
-	if LuxManager.CurrentScene.luxrender_engine.renderer == 'hybrid':
+	if scene.luxrender_engine.renderer == 'hybrid':
 		return False
 	
 	# Only allow instancing for duplis and particles in non-hybrid mode, or
@@ -272,7 +272,6 @@ def exportMeshDefinition(lux_context, obj, mesh_definition):
 	me_name, me_mat, me_shape_type, me_shape_params = mesh_definition
 	
 	if len(me_shape_params) == 0: return
-	#if not allow_instancing(lux_context): return
 	
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
@@ -289,8 +288,7 @@ def exportMeshDefinition(lux_context, obj, mesh_definition):
 def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
-def exportMeshInstances(lux_context, obj, mesh_definitions, matrix=None):
-	scene = LuxManager.CurrentScene
+def exportMeshInstances(lux_context, scene, obj, mesh_definitions, matrix=None):
 	
 	# Don't export instances of portal meshes
 	if obj.type == 'MESH' and obj.data.luxrender_mesh.portal: return
@@ -353,7 +351,7 @@ def exportMeshInstances(lux_context, obj, mesh_definitions, matrix=None):
 		else:
 			object_is_emitter = False
 		
-		instance = allow_instancing(lux_context, obj)
+		instance = allow_instancing(lux_context, scene, obj)
 		
 		#if OBJECT_ANALYSIS: print(' -> instance? %s' % instance)
 		#if OBJECT_ANALYSIS: print(' -> emitter?  %s' % object_is_emitter)
@@ -445,6 +443,7 @@ def handler_Duplis_GENERIC(lux_context, scene, obj, *args, **kwargs):
 				
 				exportMeshInstances(
 					lux_context,
+					scene,
 					obj,
 					buildNativeMesh(lux_context, scene, dupli_ob.object),
 					matrix=[dupli_ob.matrix,None]
@@ -495,13 +494,14 @@ def handler_Duplis_GENERIC(lux_context, scene, obj, *args, **kwargs):
 #			segment_matrix *= mathutils.Matrix.Scale(segment_length, 4, scale_z)
 #			segment_matrix *= particle.rotation.to_matrix().resize4x4()
 #			
-#			exportMeshInstances(lux_context, obj, [strand], matrix=[segment_matrix,None])
+#			exportMeshInstances(lux_context, scene, obj, [strand], matrix=[segment_matrix,None])
 
 def handler_MESH(lux_context, scene, obj, *args, **kwargs):
 	if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % obj)
 	
 	exportMeshInstances(
 		lux_context,
+		scene,
 		obj,
 		buildNativeMesh(lux_context, scene, obj)
 	)
@@ -583,7 +583,7 @@ def iterateScene(lux_context, scene):
 	
 	# we keep a copy of the mesh_names exported for use as portalInstances
 	# when we export the lights
-	mesh_names = lux_context.ExportedMeshes.cache_keys
+	mesh_names = lux_context.ExportedMeshes.cache_keys.copy()
 	
 	del lux_context.ExportedMeshes
 	del lux_context.ExportedObjects
