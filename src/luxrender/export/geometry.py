@@ -572,5 +572,11 @@ def iterateScene(lux_context, scene):
 	progress_thread.stop()
 	progress_thread.join()
 	
+	# we keep a copy of the mesh_names exported for use as portalInstances
+	# when we export the lights
+	mesh_names = lux_context.ExportedMeshes.cache_keys
+	
 	del lux_context.ExportedMeshes
 	del lux_context.ExportedObjects
+	
+	return mesh_names

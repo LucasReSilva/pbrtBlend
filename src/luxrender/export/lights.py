@@ -162,7 +162,7 @@ def exportLight(lux_context, ob, matrix, portals = []):
 # lights(lux_context, scene)
 # MAIN export function
 #-------------------------------------------------
-def lights(lux_context):
+def lights(lux_context, mesh_names):
 	'''
 	lux_context		pylux.Context
 	Iterate over the given scene's light sources,
@@ -184,8 +184,12 @@ def lights(lux_context):
 		if not ob.is_visible(LuxManager.CurrentScene) or ob.hide_render:
 			continue
 		
+		# match the mesh data name against the combined mesh-mat name exported
+		# by geometry.iterateScene
 		if ob.data.luxrender_mesh.portal:
-			portal_shapes.append(ob.data.name)
+			for mesh_name in mesh_names:
+				if mesh_name.startswith(ob.data.name):
+					portal_shapes.append(mesh_name)
 	
 	# Then iterate for lights
 	for ob in LuxManager.CurrentScene.objects:
@@ -196,29 +200,24 @@ def lights(lux_context):
 		# skip dupli (child) objects when they are not lamps
 		if (ob.parent and ob.parent.is_duplicator) and ob.type != 'LAMP':
 			continue
-
+		
 		# we have to check for duplis before the "LAMP" check 
 		# to support a mesh/object which got lamp as dupli object
 		if ob.is_duplicator and ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
 			# create dupli objects
 			ob.create_dupli_list(LuxManager.CurrentScene)
-
+			
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light |= exportLight(lux_context, dupli_ob.object, dupli_ob.matrix_world, portal_shapes)
-
+				have_light |= exportLight(lux_context, dupli_ob.object, dupli_ob.matrix, portal_shapes)
+			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.free_dupli_list()
 		else:
 			if ob.type == 'LAMP':
 				have_light |= exportLight(lux_context, ob, ob.matrix_world, portal_shapes)
-		
-		if ob.type == 'MESH':
-			# now check for emissive materials on ob
-			if hasattr(ob, 'luxrender_emission'):
-				have_light |= ob.luxrender_emission.use_emission 
 	
 	return have_light
 

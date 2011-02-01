@@ -198,12 +198,13 @@ class SceneExporter(object):
 		for volume in scene.luxrender_volumes.volumes:
 			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 		
+		mesh_names = set()
 		self.report({'INFO'}, 'Exporting geometry')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxo):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.GEOM)
 			#export_geometry.write_lxo(lux_context)
-			export_geometry.iterateScene(lux_context, scene)
+			mesh_names = export_geometry.iterateScene(lux_context, scene)
 		
 		# Make sure lamp textures go back into main file, not geom file
 		if self.properties.api_type in ['FILE']:
@@ -211,7 +212,7 @@ class SceneExporter(object):
 		
 		self.report({'INFO'}, 'Exporting lights')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
-			if export_lights.lights(lux_context) == False and not emitting_mats:
+			if export_lights.lights(lux_context, mesh_names) == False and not emitting_mats:
 				self.report({'ERROR'}, 'No lights in scene!')
 				return {'CANCELLED'}
 		
