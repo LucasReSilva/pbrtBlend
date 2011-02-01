@@ -286,6 +286,9 @@ def get_material_volume_defs(m):
 def exportMeshInstances(lux_context, obj, mesh_definitions, matrix=None):
 	scene = LuxManager.CurrentScene
 	
+	# Don't export instances of portal meshes
+	if obj.type == 'MESH' and obj.data.luxrender_mesh.portal: return
+	
 	lux_context.attributeBegin(comment=obj.name, file=Files.GEOM)
 	
 	# object translation/rotation/scale
