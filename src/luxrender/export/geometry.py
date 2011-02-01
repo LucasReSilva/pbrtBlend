@@ -68,7 +68,7 @@ def buildNativeMesh(lux_context, scene, obj):
 			
 			# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
 			if allow_instancing(lux_context, obj):
-				exportMeshDefinition(lux_context, mesh_definition)
+				exportMeshDefinition(lux_context, obj, mesh_definition)
 				lux_context.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 	
 	try:
@@ -228,7 +228,7 @@ def buildNativeMesh(lux_context, scene, obj):
 					
 					# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
 					if allow_instancing(lux_context, obj):
-						exportMeshDefinition(lux_context, mesh_definition)
+						exportMeshDefinition(lux_context, obj, mesh_definition)
 						lux_context.ExportedMeshes.add(mesh_name, mesh_definition)
 					
 					LuxLog('Mesh Exported: %s' % mesh_name)
@@ -263,7 +263,7 @@ def allow_instancing(lux_context, obj=None):
 	else:
 		return True
 
-def exportMeshDefinition(lux_context, mesh_definition):
+def exportMeshDefinition(lux_context, obj, mesh_definition):
 	"""
 	If the mesh is valid and instancing is allowed for this object, export
 	an objectBegin..objectEnd block containing the Shape definition.
@@ -277,6 +277,12 @@ def exportMeshDefinition(lux_context, mesh_definition):
 	# Shape is the only thing to go into the ObjectBegin..ObjectEnd definition
 	# Everything else is set on a per-instance basis
 	lux_context.objectBegin(me_name)
+	
+	# We need the transform in the object definition if this is a portal, since
+	# an objectInstance won't be exported for it.
+	if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
+		lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
+	
 	lux_context.shape(me_shape_type, me_shape_params)
 	lux_context.objectEnd()
 
@@ -478,7 +484,7 @@ def handler_Duplis_GENERIC(lux_context, scene, obj, *args, **kwargs):
 #	
 #	strand = ('%s_hair'%obj.name, obj.active_material, 'cylinder', cyl)
 #	
-#	exportMeshDefinition(lux_context, strand)
+#	exportMeshDefinition(lux_context, obj, strand)
 #	
 #	scale_z = mathutils.Vector([0.0, 0.0, 1.0])
 #	
