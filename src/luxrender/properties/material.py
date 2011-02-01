@@ -1509,6 +1509,7 @@ class luxrender_emission(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1e8,
 			'soft_max': 1e8,
+			'precision': 6,
 			'save_in_preset': True
 		},
 		{
