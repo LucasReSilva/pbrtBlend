@@ -28,7 +28,50 @@ import math
 
 import bpy, mathutils
 
-from luxrender.outputs import LuxManager
+from extensions_framework import util as efutil
+
+from luxrender.outputs import LuxManager, LuxLog
+
+class ExportProgressThread(efutil.TimerThread):
+	message = '%i%%'
+	KICK_PERIOD = 0.2
+	total_objects = 0
+	exported_objects = 0
+	last_update = 0
+	def start(self, number_of_meshes):
+		self.total_objects = number_of_meshes
+		self.exported_objects = 0
+		self.last_update = 0
+		super().start()
+	def kick(self):
+		if self.exported_objects != self.last_update:
+			self.last_update = self.exported_objects
+			pc = int(100 * self.exported_objects/self.total_objects)
+			LuxLog(self.message % pc)
+
+class ExportCache(object):
+	
+	name = 'Cache'
+	cache_keys = set()
+	cache_items = {}
+	
+	def __init__(self, name):
+		self.name = name
+		self.cache_keys = set()
+		self.cache_items = {}
+	
+	def have(self, ck):
+		return ck in self.cache_keys
+	
+	def add(self, ck, ci):
+		self.cache_keys.add(ck)
+		self.cache_items[ck] = ci
+		
+	def get(self, ck):
+		if self.have(ck):
+			return self.cache_items[ck]
+		else:
+			raise InvalidGeometryException('Item %s not found in %s!' % (ck, self.name))
 
 class ParamSetItem(list):
 	

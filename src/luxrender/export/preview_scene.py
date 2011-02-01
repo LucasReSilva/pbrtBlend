@@ -27,7 +27,8 @@
 import bpy
 
 from luxrender.export import ParamSet
-from luxrender.export.geometry import ExportCache, buildNativeMesh, get_material_volume_defs
+from luxrender.export.geometry import ExportCache, buildNativeMesh
+from luxrender.export.materials import get_material_volume_defs
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
 

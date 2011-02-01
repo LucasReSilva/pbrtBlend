@@ -33,15 +33,20 @@ import bpy
 # Extensions_Framework Libs
 from extensions_framework import util as efutil
 
+# LuxRender libs
 from luxrender.export 			import get_worldscale
 from luxrender.export			import lights		as export_lights
 from luxrender.export			import materials	as export_materials
-from luxrender.export			import geometry	as export_geometry
+from luxrender.export			import geometry		as export_geometry
 from luxrender.outputs			import LuxManager, LuxLog
 from luxrender.outputs.file_api	import Files
 from luxrender.outputs.pure_api	import LUXRENDER_VERSION
 
 class SceneExporterProperties(object):
+	"""
+	Mimics the properties member conatined within EXPORT_OT_LuxRender operator
+	"""
+	
 	filename		= ''
 	directory		= ''
 	api_type		= ''

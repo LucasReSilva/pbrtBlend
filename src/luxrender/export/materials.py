@@ -33,6 +33,7 @@ from extensions_framework import util as efutil
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog, LuxManager
 
+# TODO: convert this into ExportCache instance
 class ExportedTextures(object):
 	# static class variables
 	texture_names = []	# Name
@@ -74,6 +75,7 @@ class ExportedTextures(object):
 				lux_context.texture(n, ty, tx, p)
 				ExportedTextures.exported_texture_names.append(n)
 
+# TODO: convert this into ExportCache instance
 class ExportedMaterials(object):
 	# Static class variables
 	material_names = []
@@ -131,6 +133,9 @@ def get_instance_materials(ob):
 	# per instance materials will take precedence
 	# over the base mesh's material definition.
 	return obmats
+
+def get_material_volume_defs(m):
+	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
 def convert_texture(texture):
 	
