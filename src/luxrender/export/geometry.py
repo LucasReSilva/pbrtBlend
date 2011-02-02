@@ -228,15 +228,17 @@ class GeometryExporter(object):
 						
 						if uv_layer:
 							uvs = []
-							for fi, uv in enumerate(uv_layer):
-								# TODO: The following line is iffy
-								if fi in range(len(faces_verts_mats[i])) and len(faces_verts_mats[i][fi]) == 4:
-									face_uvs = uv.uv1, uv.uv2, uv.uv3, uv.uv4
-								else:
-									face_uvs = uv.uv1, uv.uv2, uv.uv3
-								for uv in face_uvs:
-									for single_uv in uv:
-										uvs.append(single_uv)
+							try:
+								for face in ffaces_mats[i]:
+									for uv in uv_layer[face.index].uv:
+										for uv_coord in uv:
+											uvs.append(uv_coord)
+							
+							except IndexError:
+								import pdb
+								pdb.set_trace()
+								LuxLog('ERROR: Incomplete UV map for %s, skipping UV export' % obj)
+								uv_layer = None
 						
 						#print(' %s num points: %i' % (obj.name, len(points)))
 						#print(' %s num normals: %i' % (obj.name, len(normals)))
