@@ -1102,6 +1102,7 @@ class luxrender_tex_constant(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 4,
 			'save_in_preset': True
 		},
 	]
