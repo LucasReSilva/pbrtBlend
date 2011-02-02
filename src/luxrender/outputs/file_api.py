@@ -272,6 +272,9 @@ class Custom_Context(object):
 	def scale(self, x,y,z):
 		self.wf(self.current_file, '\nScale %s' % ' '.join(['%0.15f'%i for i in [x,y,z]]))
 	
+	def rotate(self, a,x,y,z):
+		self.wf(self.current_file, '\nRotate %s' % ' '.join(['%0.15f'%i for i in [a,x,y,z]]))
+	
 	def shape(self, *args):
 		self._api('Shape', args, file=self.current_file)
 	

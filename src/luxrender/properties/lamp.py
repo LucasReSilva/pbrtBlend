@@ -120,7 +120,33 @@ class luxrender_lamp_basic(declarative_property_group):
 class luxrender_lamp_point(luxrender_lamp_basic):
 	pass
 class luxrender_lamp_spot(luxrender_lamp_basic):
-	pass
+	def get_paramset(self, lamp_object):
+		params = super().get_paramset(lamp_object)
+		if self.projector:
+			params.add_string('mapname', self.mapname)
+		return params
+
+luxrender_lamp_spot.controls.extend([
+	'projector',
+	'mapname'
+])
+luxrender_lamp_spot.visibility['mapname'] = { 'projector': True }
+luxrender_lamp_spot.properties.extend([
+	{
+		'type': 'bool',
+		'attr': 'projector',
+		'name': 'Projector',
+		'default': False
+	},
+	{
+		'type': 'string',
+		'subtype': 'FILE_PATH',
+		'attr': 'mapname',
+		'name': 'Projector image',
+		'description': 'Image to project from this lamp',
+		'default': ''
+	},
+])
 
 class luxrender_lamp_sun(declarative_property_group):
 	controls = [

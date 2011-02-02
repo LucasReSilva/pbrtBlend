@@ -83,13 +83,18 @@ class ui_luxrender_lamp_spot(DataButtonsPanel, property_group_renderer, bpy.type
 			super().draw(context)
 			# SPOT LAMP: Blender Properties
 			if context.lamp.type == 'SPOT':
-				if wide_ui:
+				
+				projector = context.lamp.luxrender_lamp.luxrender_lamp_spot.projector
+				
+				if wide_ui and not projector:
 					#col = split.column()
 					col = self.layout.row()
 				else:
 					col = self.layout.column()
 				col.prop(context.lamp, "spot_size", text="Size")
-				col.prop(context.lamp, "spot_blend", text="Blend", slider=True)
+				
+				if not projector:
+					col.prop(context.lamp, "spot_blend", text="Blend", slider=True)
 
 class ui_luxrender_lamp_sun(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Sun + Sky'

@@ -57,6 +57,9 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	else:
 		lux_context.attributeBegin(comment=name, file=Files.MAIN)
 	
+	if light.type == 'SPOT' and light.luxrender_lamp.luxrender_lamp_spot.projector:
+		lux_context.rotate(180, 0,1,0)
+	
 	dbo('LIGHT', (type, params))
 	lux_context.lightGroup(group, [])
 	
@@ -100,11 +103,18 @@ def exportLight(lux_context, ob, matrix, portals = []):
 	if light.type == 'SPOT':
 		coneangle = degrees(light.spot_size) * 0.5
 		conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
-		light_params.add_point('from', (0,0,0))
-		light_params.add_point('to', (0,0,-1))
-		light_params.add_float('coneangle', coneangle)
-		light_params.add_float('conedeltaangle', conedeltaangle)
-		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, 'spot', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		
+		if light.luxrender_lamp.luxrender_lamp_spot.projector:
+			light_type = 'projection'
+			light_params.add_float('fov', coneangle*2)
+		else:
+			light_type = 'spot'
+			light_params.add_point('from', (0,0,0))
+			light_params.add_point('to', (0,0,-1))
+			light_params.add_float('coneangle', coneangle)
+			light_params.add_float('conedeltaangle', conedeltaangle)
+		
+		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 
 	if light.type == 'POINT':
