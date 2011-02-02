@@ -27,6 +27,8 @@
 import os
 OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
+import mathutils
+
 from extensions_framework import util as efutil
 
 from luxrender.outputs import LuxLog
@@ -352,22 +354,36 @@ class GeometryExporter(object):
 		is_object_animated = False
 		if self.scene.camera.data.luxrender_camera.usemblur and self.scene.camera.data.luxrender_camera.objectmblur:
 			if matrix is not None and matrix[1] is not None:
-				m1 = matrix[1]
+				next_matrix = matrix[1]
 				is_object_animated = True
-			else:
-				self.scene.frame_set(self.scene.frame_current + 1)
-				obj.tag = True
-				self.scene.update()
-				m1 = obj.matrix_world.copy()
-				self.scene.frame_set(self.scene.frame_current - 1)
-				obj.tag = True
-				self.scene.update()
-				is_object_animated =  m1 != obj.matrix_world
+			
+			elif obj.animation_data != None and obj.animation_data.action != None and len(obj.animation_data.action.fcurves)>0:
+				next_frame = self.scene.frame_current + 1
+				
+				anim_location = [0,0,0]
+				anim_rotation = [0,0,0]
+				anim_scale    = [1,1,1]
+				
+				for fc in obj.animation_data.action.fcurves:
+					if fc.data_path == 'location':
+						anim_location[fc.array_index] = fc.evaluate(next_frame)
+					if fc.data_path == 'rotation_euler':
+						anim_rotation[fc.array_index] = fc.evaluate(next_frame)
+					if fc.data_path == 'scale':
+						anim_scale[fc.array_index] = fc.evaluate(next_frame)
+				
+				next_matrix  = mathutils.Matrix.Translation( mathutils.Vector(anim_location) )
+				next_matrix *= mathutils.Euler(anim_rotation).to_matrix().resize4x4()
+				next_matrix *= mathutils.Matrix.Scale(anim_scale[0], 4, mathutils.Vector([1,0,0]))
+				next_matrix *= mathutils.Matrix.Scale(anim_scale[1], 4, mathutils.Vector([0,1,0]))
+				next_matrix *= mathutils.Matrix.Scale(anim_scale[2], 4, mathutils.Vector([0,0,1]))
+				
+				is_object_animated = True
 		
 		if is_object_animated:
 			self.lux_context.transformBegin(comment=obj.name)
 			self.lux_context.identity()
-			self.lux_context.transform(matrix_to_list(m1, apply_worldscale=True))
+			self.lux_context.transform(matrix_to_list(next_matrix, apply_worldscale=True))
 			self.lux_context.coordinateSystem('%s' % obj.name + '_motion')
 			self.lux_context.transformEnd()
 		
