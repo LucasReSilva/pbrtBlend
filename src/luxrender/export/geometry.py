@@ -235,8 +235,6 @@ class GeometryExporter(object):
 											uvs.append(uv_coord)
 							
 							except IndexError:
-								import pdb
-								pdb.set_trace()
 								LuxLog('ERROR: Incomplete UV map for %s, skipping UV export' % obj)
 								uv_layer = None
 						
