@@ -232,36 +232,36 @@ class luxrender_material(declarative_property_group):
 		VolumeParameter('Exterior', 'Exterior')
 	
 	def export(self, lux_context, material, mode='indirect'):
-		if mode=='indirect' and material.name in ExportedMaterials.exported_material_names:
-			return
+		if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
+			if self.type == 'mix':
+				# First export the other mix mats
+				m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material]
+				m1.luxrender_material.export(lux_context, m1, 'indirect')
+				m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material]
+				m2.luxrender_material.export(lux_context, m2, 'indirect')
+			
+			material_params = ParamSet()
+			
+			sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
+			
+			# Bump mapping
+			if self.type not in ['mix', 'null']:
+				material_params.update( TF_bumpmap.get_paramset(self) )
+			
+			material_params.update( sub_type.get_paramset(material) )
+			
+			# DistributedPath compositing
+			if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+				material_params.update( self.luxrender_mat_compositing.get_paramset() )
+			
+			if mode == 'indirect':
+				material_params.add_string('type', self.type)
+				ExportedMaterials.makeNamedMaterial(material.name, material_params)
+				ExportedMaterials.export_new_named(lux_context)
+			elif mode == 'direct':
+				lux_context.material(self.type, material_params)
 		
-		if self.type == 'mix':
-			# First export the other mix mats
-			m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material]
-			m1.luxrender_material.export(lux_context, m1, 'indirect')
-			m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material]
-			m2.luxrender_material.export(lux_context, m2, 'indirect')
-		
-		material_params = ParamSet()
-		
-		sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
-		
-		# Bump mapping
-		if self.type not in ['mix', 'null']:
-			material_params.update( TF_bumpmap.get_paramset(self) )
-		
-		material_params.update( sub_type.get_paramset(material) )
-		
-		# DistributedPath compositing
-		if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-			material_params.update( self.luxrender_mat_compositing.get_paramset() )
-		
-		if mode == 'indirect':
-			material_params.add_string('type', self.type)
-			ExportedMaterials.makeNamedMaterial(material.name, material_params)
-			ExportedMaterials.export_new_named(lux_context)
-		elif mode == 'direct':
-			lux_context.material(self.type, material_params)
+		return material.luxrender_emission.use_emission
 
 class luxrender_mat_compositing(declarative_property_group):
 	'''

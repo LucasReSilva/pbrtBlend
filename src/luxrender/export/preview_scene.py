@@ -27,7 +27,7 @@
 import bpy
 
 from luxrender.export import ParamSet
-from luxrender.export.geometry import ExportCache, buildNativeMesh
+from luxrender.export.geometry import GeometryExporter
 from luxrender.export.materials import get_material_volume_defs
 from luxrender.outputs import LuxManager
 from luxrender.outputs.pure_api import LUXRENDER_VERSION
@@ -284,11 +284,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			lux_context.areaLightSource( *mat.luxrender_emission.api_output() )
 		
 		if pv_export_shape:
-			lux_context.ExportedMeshes = ExportCache('ExportedMeshes')
-			lux_context.ExportedObjects = ExportCache('ExportedObjects')
-			
-			mesh_definitions = buildNativeMesh(lux_context, scene, obj)
-			for mesh_mat, mesh_name, mesh_type, mesh_params in mesh_definitions:
+			for mesh_mat, mesh_name, mesh_type, mesh_params in GeometryExporter(lux_context, scene).buildNativeMesh(obj):
 				mat.luxrender_material.export(lux_context, mat, mode='direct')
 				lux_context.shape(mesh_type, mesh_params)
 		else:

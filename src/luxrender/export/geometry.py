@@ -59,6 +59,8 @@ class GeometryExporter(object):
 	valid_particles_callbacks = []
 	valid_objects_callbacks = []
 	
+	have_emitting_object = False
+	
 	def __init__(self, lux_context, scene):
 		self.lux_context = lux_context
 		self.scene = scene
@@ -363,7 +365,7 @@ class GeometryExporter(object):
 				is_object_animated =  m1 != obj.matrix_world
 		
 		if is_object_animated:
-			self.lux_context.transformBegin(comment=obj.name, file=Files.GEOM)
+			self.lux_context.transformBegin(comment=obj.name)
 			self.lux_context.identity()
 			self.lux_context.transform(matrix_to_list(m1, apply_worldscale=True))
 			self.lux_context.coordinateSystem('%s' % obj.name + '_motion')
@@ -374,30 +376,33 @@ class GeometryExporter(object):
 			
 			if me_mat is not None:
 				
-				# Check for emission and volume data
-				object_is_emitter = hasattr(me_mat, 'luxrender_emission') and me_mat.luxrender_emission.use_emission
+				# Export material definition && check for emission
+				if self.lux_context.API_TYPE == 'FILE':
+					self.lux_context.set_output_file(Files.MATS)
+					object_is_emitter = me_mat.luxrender_material.export(self.lux_context, me_mat, mode='indirect')
+					self.lux_context.set_output_file(Files.GEOM)
+					self.lux_context.namedMaterial(me_mat.name)
+				elif self.lux_context.API_TYPE == 'PURE':
+					object_is_emitter = me_mat.luxrender_material.export(self.lux_context, me_mat, mode='direct')
+				
 				if object_is_emitter:
 					self.lux_context.lightGroup(me_mat.luxrender_emission.lightgroup, [])
 					self.lux_context.areaLightSource( *me_mat.luxrender_emission.api_output() )
 				
-				if hasattr(me_mat, 'luxrender_material'):
-					int_v, ext_v = get_material_volume_defs(me_mat)
-					if int_v != '':
-						self.lux_context.interior(int_v)
-					elif self.scene.luxrender_world.default_interior_volume != '':
-						self.lux_context.interior(self.scene.luxrender_world.default_interior_volume)
-					if ext_v != '':
-						self.lux_context.exterior(ext_v)
-					elif self.scene.luxrender_world.default_exterior_volume != '':
-						self.lux_context.exterior(self.scene.luxrender_world.default_exterior_volume)
+				int_v, ext_v = get_material_volume_defs(me_mat)
+				if int_v != '':
+					self.lux_context.interior(int_v)
+				elif self.scene.luxrender_world.default_interior_volume != '':
+					self.lux_context.interior(self.scene.luxrender_world.default_interior_volume)
+				if ext_v != '':
+					self.lux_context.exterior(ext_v)
+				elif self.scene.luxrender_world.default_exterior_volume != '':
+					self.lux_context.exterior(self.scene.luxrender_world.default_exterior_volume)
 				
-				if self.lux_context.API_TYPE == 'FILE':
-					self.lux_context.namedMaterial(me_mat.name)
-				elif self.lux_context.API_TYPE == 'PURE':
-					me_mat.luxrender_material.export(self.lux_context, me_mat, mode='direct')
-			
 			else:
 				object_is_emitter = False
+			
+			self.have_emitting_object |= object_is_emitter
 			
 			# If the object emits, don't export instance or motioninstance, just the Shape
 			if (not self.allow_instancing(obj)) or object_is_emitter:
@@ -563,4 +568,4 @@ def iterateScene(lux_context, scene):
 	# we keep a copy of the mesh_names exported for use as portalInstances when we export the lights
 	mesh_names = geometry_exporter.ExportedMeshes.cache_keys.copy()
 	
-	return mesh_names
+	return mesh_names, geometry_exporter.have_emitting_object

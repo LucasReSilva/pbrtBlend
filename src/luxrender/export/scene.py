@@ -71,7 +71,7 @@ class SceneExporter(object):
 		return self
 	
 	def report(self, type, message):
-		LuxLog(message)
+		LuxLog('%s: %s' % ('|'.join([('%s'%i).upper() for i in type]), message))
 	
 	def export(self):
 		scene = self.scene
@@ -141,8 +141,8 @@ class SceneExporter(object):
 		export_materials.ExportedMaterials.clear()
 		export_materials.ExportedTextures.clear()
 		
-		self.report({'INFO'}, 'Exporting render settings')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
+			self.report({'INFO'}, 'Exporting render settings')
 			# Set up render engine parameters
 			if LUXRENDER_VERSION >= '0.8':
 				lux_context.renderer(		*scene.luxrender_engine.api_output()							)
@@ -186,37 +186,25 @@ class SceneExporter(object):
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.MAIN)
 		
-		emitting_mats = False
-		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxm):
-			if self.properties.api_type == 'FILE':
-				lux_context.set_output_file(Files.MATS)
-			
-			self.report({'INFO'}, 'Exporting materials')
-			# Export materials from all objects because mats from
-			# potentially hidden DupliGroup objects are needed
-			for mat in bpy.data.materials:
-				if mat is not None and mat.name not in export_materials.ExportedMaterials.exported_material_names:
-					mat.luxrender_material.export(lux_context, mat, mode='indirect')
-					emitting_mats |= mat.luxrender_emission.use_emission
-			
 		self.report({'INFO'}, 'Exporting volume data')
 		for volume in scene.luxrender_volumes.volumes:
 			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 		
 		mesh_names = set()
-		self.report({'INFO'}, 'Exporting geometry')
+		
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxo):
+			self.report({'INFO'}, 'Exporting geometry')
 			if self.properties.api_type == 'FILE':
 				lux_context.set_output_file(Files.GEOM)
 			#export_geometry.write_lxo(lux_context)
-			mesh_names = export_geometry.iterateScene(lux_context, scene)
+			mesh_names, emitting_mats = export_geometry.iterateScene(lux_context, scene)
 		
 		# Make sure lamp textures go back into main file, not geom file
 		if self.properties.api_type in ['FILE']:
 			lux_context.set_output_file(Files.MAIN)
 		
-		self.report({'INFO'}, 'Exporting lights')
 		if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
+			self.report({'INFO'}, 'Exporting lights')
 			if export_lights.lights(lux_context, mesh_names) == False and not emitting_mats:
 				self.report({'ERROR'}, 'No lights in scene!')
 				return {'CANCELLED'}
