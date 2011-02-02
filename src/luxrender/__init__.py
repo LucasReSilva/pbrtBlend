@@ -55,16 +55,20 @@ bl_addon_info = {
 	"description": "This Addon will allow you to render your scenes with the LuxRender engine."
 }
 
-from .core import RENDERENGINE_luxrender
+if 'core' in locals():
+	import imp
+	imp.reload(core)
+else:
+	from . import core
 
 def register():
 	'''
 	Register the LuxRender Addon
 	'''
-	RENDERENGINE_luxrender.install()
+	core.RENDERENGINE_luxrender.install()
 
 def unregister():
 	'''
 	Un-register the LuxRender Addon
 	'''
-	RENDERENGINE_luxrender.uninstall()
+	core.RENDERENGINE_luxrender.uninstall()
