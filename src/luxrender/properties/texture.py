@@ -264,6 +264,8 @@ class FloatTextureParameter(TextureParameterBase):
 	texture_only	= False
 	multiply_float	= False
 	ignore_zero		= False
+	sub_type		= 'NONE'
+	unit			= 'NONE'
 	
 	def __init__(self,
 			attr, name,
@@ -271,6 +273,8 @@ class FloatTextureParameter(TextureParameterBase):
 			multiply_float = False,		# Specify that when texture is in use, it should be scaled by the float value
 			ignore_zero = False,		# Don't export this parameter if the float value == 0.0
 			real_attr = None,			# translate self.attr into something else at export time (overcome 31 char RNA limit)
+			sub_type = 'NONE',
+			unit = 'NONE',
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
 		self.attr = attr
@@ -278,6 +282,8 @@ class FloatTextureParameter(TextureParameterBase):
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
 		self.ignore_zero = ignore_zero
+		self.sub_type = sub_type
+		self.unit = unit
 		self.real_attr = real_attr
 		self.default = default
 		self.min = min
@@ -339,6 +345,8 @@ class FloatTextureParameter(TextureParameterBase):
 			{
 				'attr': '%s_floatvalue' % self.attr,
 				'type': 'float',
+				'subtype': self.sub_type,
+				'unit': self.unit,
 				'name': self.name,
 				'description': '%s Value' % self.name,
 				'default': self.default,
