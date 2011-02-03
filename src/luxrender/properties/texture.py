@@ -551,23 +551,24 @@ class luxrender_texture(declarative_property_group):
 				('BLENDER', 'Use Blender Texture', 'BLENDER'),
 				('', 'Lux Textures', ''),
 				('bilerp', 'bilerp', 'bilerp'),
-				('blackbody','blackbody','blackbody'),
 				('brick', 'brick', 'brick'),
 				('checkerboard', 'checkerboard', 'checkerboard'),
 				('dots', 'dots', 'dots'),
-				('equalenergy', 'equalenergy', 'equalenergy'),
 				('fbm', 'fbm', 'fbm'),
-				('gaussian', 'gaussian', 'gaussian'),
 				('harlequin', 'harlequin', 'harlequin'),
 				('imagemap', 'imagemap', 'imagemap'),
-				('lampspectrum', 'lampspectrum', 'lampspectrum'),
 				('marble', 'marble', 'marble'),
 				('mix', 'mix', 'mix'),
 				('scale', 'scale', 'scale'),
-				('tabulateddata', 'tabulateddata', 'tabulateddata'),
 				('uv', 'uv', 'uv'),
 				('windy', 'windy', 'windy'),
 				('wrinkled', 'wrinkled', 'wrinkled'),
+				('', 'Emission & Spectrum Textures', ''),
+				('blackbody','blackbody','blackbody'),
+				('equalenergy', 'equalenergy', 'equalenergy'),
+				('lampspectrum', 'lampspectrum', 'lampspectrum'),
+				('gaussian', 'gaussian', 'gaussian'),
+				('tabulateddata', 'tabulateddata', 'tabulateddata'),
 				('', 'Fresnel Textures', ''),
 				('constant', 'constant', 'constant'),
 				('cauchy', 'cauchy', 'cauchy'),
@@ -1430,13 +1431,17 @@ class luxrender_tex_imagemap(declarative_property_group):
 		},
 	]
 	
-	def get_paramset(self, scene, texture):
-		params = ParamSet()
+	def get_filename(self, texture):
 		if texture.library is not None:
 			fn = bpy.path.abspath(self.filename, texture.library.filepath)
 		else:
 			fn = self.filename
-		fn = efutil.filesystem_path(fn)
+		return efutil.filesystem_path(fn)
+
+	
+	def get_paramset(self, scene, texture):
+		params = ParamSet()
+		fn = self.get_filename(texture)
 		if scene.luxrender_engine.embed_filedata:
 			from luxrender.util import bencode_file2string
 			params.add_string('filename', os.path.basename(fn))
