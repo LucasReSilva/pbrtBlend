@@ -403,6 +403,7 @@ def transparency_visibility():
 		{
 			'alpha_source': { 'transparent': True },
 			'alpha_value': { 'transparent': True, 'alpha_source': 'constant' },
+			'inverse': { 'transparent': True, 'alpha_source': 'texture' },
 		},
 		TF_alpha.visibility
 	)
@@ -422,7 +423,11 @@ class luxrender_transparency(declarative_property_group):
 		'alpha_source',
 		'alpha_value',
 	] + \
-		TF_alpha.controls
+		TF_alpha.controls + \
+	[
+		'inverse',
+	]
+
 
 	
 	visibility = transparency_visibility()
@@ -462,6 +467,14 @@ class luxrender_transparency(declarative_property_group):
 			'soft_max': 1.0,
 			'save_in_preset': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'inverse',
+			'name': 'Inverse',
+			'description': 'Use the inverse of the alpha source',
+			'default': False,
+			'save_in_preset': True
+		},
 	] + \
 		TF_alpha.properties
 	
@@ -490,6 +503,23 @@ class luxrender_transparency(declarative_property_group):
 			alpha_amount = self.alpha_floattexturename
 			# export texture
 			TF_alpha.get_paramset(self)
+			
+			if self.inverse:
+				params = ParamSet() \
+					.add_float('tex1', 1.0) \
+					.add_float('tex2', 0.0) \
+					.add_texture('amount', alpha_amount)
+				
+				alpha_amount = alpha_amount + '_alpha'
+				
+				ExportedTextures.texture(
+					alpha_amount,
+					'float',
+					'mix',
+					params
+				)
+				ExportedTextures.export_new(lux_context)
+			
 		elif self.alpha_source == 'constant':
 			alpha_type = 'float'
 			alpha_amount = self.alpha_value
