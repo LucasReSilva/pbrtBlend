@@ -144,7 +144,6 @@ TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',		real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',		real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.0002 )
 TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
-TF_alpha				= FloatTextureParameter('alpha', 'Alpha',					add_float_value=False, min=0.0, max=1.0 )
 
 # Color Textures
 TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
@@ -245,47 +244,10 @@ class luxrender_material(declarative_property_group):
 			
 			sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
 			
-			alpha_texture = ''
+			alpha_type = None
 			# find alpha texture if material should be transparent
-			if hasattr(sub_type, 'transparent') and getattr(sub_type, 'transparent'):
-				if sub_type.alpha_source != 'separate':
-					texture_name = self.luxrender_mat_glossy.Kd_colortexturename
-					if texture_name != '':
-						texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
-						lux_texture = texture.luxrender_texture
-						if lux_texture.type == 'imagemap':
-							src_texture = lux_texture.luxrender_tex_imagemap
-							
-							channelMap = { 
-								'diffusealpha': 'alpha', 
-								'diffusemean': 'mean',
-								'diffuseintensity': 'colored_mean',
-							}
-							
-							params = ParamSet() \
-								.add_string('filename', efutil.path_relative_to_export(src_texture.get_filename(texture))) \
-								.add_string('channel', channelMap[sub_type.alpha_source]) \
-								.add_integer('discardmipmaps', src_texture.discardmipmaps) \
-								.add_string('filtertype', src_texture.filtertype) \
-								.add_float('maxanisotropy', src_texture.maxanisotropy) \
-								.add_string('wrap', src_texture.wrap)
-							params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
-							
-							alpha_texture = texture_name + '_alpha'
-							
-							ExportedTextures.texture(
-								alpha_texture,
-								'float',
-								'imagemap',
-								params
-							)
-							ExportedTextures.export_new(lux_context)
-							
-				elif hasattr(sub_type, 'alpha_floattexturename'):
-					alpha_texture = sub_type.alpha_floattexturename
-				
-				if alpha_texture == '':
-					LuxLog('WARNING: Invalid alpha texture for material %s, disabling transparency' % self.name)
+			if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
+				alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
 
 			# Bump mapping
 			if self.type not in ['mix', 'null']:
@@ -297,7 +259,7 @@ class luxrender_material(declarative_property_group):
 			if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
 				material_params.update( self.luxrender_mat_compositing.get_paramset() )
 			
-			if alpha_texture == '':
+			if alpha_type == None:
 				mat_type = self.type
 			else: # export mix for transparency
 				material_params.add_string('type', self.type)
@@ -309,8 +271,11 @@ class luxrender_material(declarative_property_group):
 				mat_type = 'mix'
 				material_params = ParamSet() \
 					.add_string('namedmaterial1', material.name + '_null') \
-					.add_string('namedmaterial2', material.name + '_base') \
-					.add_texture('amount', alpha_texture)
+					.add_string('namedmaterial2', material.name + '_base')
+				if alpha_type == 'float':
+					material_params.add_float('amount', alpha_amount)
+				else:
+					material_params.add_texture('amount', alpha_amount)
 				
 			if mode == 'indirect':
 				material_params.add_string('type', mat_type)
@@ -416,6 +381,7 @@ class luxrender_mat_compositing(declarative_property_group):
 		
 		return compo_params
 
+
 def texture_append_visibility(vis_main, textureparam_object, vis_append):
 	for prop in textureparam_object.properties:
 		if 'attr' in prop.keys():
@@ -424,6 +390,150 @@ def texture_append_visibility(vis_main, textureparam_object, vis_append):
 			for vk, vi in vis_append.items():
 				vis_main[prop['attr']][vk] = vi
 	return vis_main
+
+class TransparencyFloatTextureParameter(FloatTextureParameter):
+	def texture_slot_set_attr(self):
+		# Looks in a different location than other ColorTextureParameters
+		return lambda s,c: c.luxrender_transparency
+
+TF_alpha = TransparencyFloatTextureParameter('alpha', 'Alpha', add_float_value=False, default=1.0, min=0.0, max=1.0 )
+
+def transparency_visibility():
+	t_vis = dict_merge(
+		{
+			'alpha_source': { 'transparent': True },
+			'alpha_value': { 'transparent': True, 'alpha_source': 'constant' },
+		},
+		TF_alpha.visibility
+	)
+	
+	t_vis = texture_append_visibility(t_vis, TF_alpha, { 'transparent': True, 'alpha_source': 'texture' })
+	
+	return t_vis
+	
+class luxrender_transparency(declarative_property_group):
+	'''
+	Storage class for LuxRender Material alpha transparency settings.
+	This class will be instantiated within a Blender Object.
+	'''
+	
+	controls = [
+		'transparent', 
+		'alpha_source',
+		'alpha_value',
+	] + \
+		TF_alpha.controls
+
+	
+	visibility = transparency_visibility()
+
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'transparent',
+			'name': 'Transparent',
+			'description': 'Enable alpha transparency',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'alpha_source',
+			'name': 'Alpha source',
+			'default': 'diffusealpha',
+			'items': [
+				('texture', 'texture', 'texture'),
+				('diffuseintensity', 'diffuse/reflection intensity', 'diffuseintensity'),
+				('diffusemean', 'diffuse/reflection mean', 'diffusemean'),
+				('diffusealpha', 'diffuse/reflection alpha', 'diffusealpha'),
+				('constant', 'constant', 'constant')
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'alpha_value',
+			'name': 'Alpha value',
+			'default': 0.5,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'save_in_preset': True
+		},
+	] + \
+		TF_alpha.properties
+	
+	sourceMap = {
+		'carpaint': 'Kd',
+		'glass': 'Kr',
+		'glossy': 'Kd',
+		'glossy_lossy': 'Kd',
+		'glossytranslucent': 'Kd',
+		'matte': 'Kd',
+		'mattetranslucent': 'Kr',
+		'mirror': 'Kr',
+		'roughglass': 'Kr',
+		'scatter': 'Kd',
+		'shinymetal': 'Kr',
+		'velvet': 'Kd'
+	}
+	
+	def export(self, lux_context, material):
+		lux_material = getattr(material.luxrender_material, 'luxrender_mat_%s'%material.luxrender_material.type)
+		
+		alpha_type = None
+		
+		if self.alpha_source == 'texture':
+			alpha_type = 'texture'
+			alpha_amount = self.alpha_floattexturename
+			# export texture
+			TF_alpha.get_paramset(self)
+		elif self.alpha_source == 'constant':
+			alpha_type = 'float'
+			alpha_amount = self.alpha_value
+		elif material.luxrender_material.type in self.sourceMap:
+			# grab base texture in case it's not diffuse channel
+			texture_name = getattr(lux_material, '%s_colortexturename' % self.sourceMap[material.luxrender_material.type])
+			if texture_name != '':
+				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+				lux_texture = texture.luxrender_texture
+				if lux_texture.type == 'imagemap':
+					src_texture = lux_texture.luxrender_tex_imagemap
+					
+					channelMap = {
+						'diffusealpha': 'alpha', 
+						'diffusemean': 'mean',
+						'diffuseintensity': 'colored_mean',
+					}
+					
+					params = ParamSet() \
+						.add_string('filename', efutil.path_relative_to_export(src_texture.get_filename(texture))) \
+						.add_string('channel', channelMap[self.alpha_source]) \
+						.add_integer('discardmipmaps', src_texture.discardmipmaps) \
+						.add_string('filtertype', src_texture.filtertype) \
+						.add_float('maxanisotropy', src_texture.maxanisotropy) \
+						.add_string('wrap', src_texture.wrap)
+					params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
+					
+					alpha_type = 'texture'
+					alpha_amount = texture_name + '_alpha'
+					
+					ExportedTextures.texture(
+						alpha_amount,
+						'float',
+						'imagemap',
+						params
+					)
+					ExportedTextures.export_new(lux_context)
+		
+		if alpha_type == None:
+			LuxLog('WARNING: Invalid alpha texture for material ''%s'', disabling transparency' % material.name)
+			return None, None
+		
+		return alpha_type, alpha_amount
+
 
 def carpaint_visibility():
 	cp_vis = dict_merge(
@@ -693,12 +803,7 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_index.controls + \
 		TC_Ks.controls + \
 		TF_uroughness.controls + \
-		TF_vroughness.controls + \
-	[
-		'transparent', 
-		'alpha_source',
-	] + \
-		TF_alpha.controls
+		TF_vroughness.controls
 	
 	
 	visibility = glossy_visibility()
@@ -718,27 +823,6 @@ class luxrender_mat_glossy(declarative_property_group):
 			'name': 'Use IOR',
 			'description': 'Use IOR/Reflective index input',
 			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'transparent',
-			'name': 'Transparent',
-			'description': 'Enable transparency',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'enum',
-			'attr': 'alpha_source',
-			'name': 'Alpha source',
-			'default': 'diffusealpha',
-			'items': [
-				('diffusealpha', 'diffuse alpha', 'diffusealpha'),
-				('diffusemean', 'diffuse mean', 'diffusemean'),
-				('diffuseintensity', 'diffuse intensity', 'diffuseintensity'),
-				('separate', 'separate', 'separate')
-			],
 			'save_in_preset': True
 		},
 	] + \
@@ -771,10 +855,6 @@ class luxrender_mat_glossy(declarative_property_group):
 			
 		glossy_params.update( TF_uroughness.get_paramset(self) )
 		glossy_params.update( TF_vroughness.get_paramset(self) )
-		
-		if self.alpha_source == 'separate':
-			# just want to export texture, not add it as a parameter
-			TF_alpha.get_paramset(self)
 		
 		return glossy_params
 

@@ -81,7 +81,8 @@ from luxrender.properties.material		import ( luxrender_material,
 												 luxrender_mat_velvet,
 												 luxrender_volume_data,
 												 luxrender_volumes,
-												 luxrender_emission )
+												 luxrender_emission,
+												 luxrender_transparency )
 from luxrender.properties.mesh			import ( luxrender_mesh )
 from luxrender.properties.object		import ( luxrender_object )
 from luxrender.properties.texture		import ( luxrender_texture,
@@ -282,6 +283,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine, engine_base):
 		('TextCurve', luxrender_mesh),
 		('Material', luxrender_material),
 		('Material', luxrender_emission),
+		('Material', luxrender_transparency),
 		('luxrender_material', luxrender_mat_compositing),
 		('luxrender_material', luxrender_mat_carpaint),
 		('luxrender_material', luxrender_mat_glass),

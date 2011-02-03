@@ -57,3 +57,24 @@ class ui_luxrender_material_emission(luxrender_material_base, bpy.types.Panel):
 	display_property_groups = [
 		( ('material',), 'luxrender_emission' )
 	]
+
+class ui_luxrender_material_transparency(luxrender_material_base, bpy.types.Panel):
+	'''
+	Material Transparency Settings
+	'''
+	
+	bl_label = 'LuxRender Alpha Transparency'
+	
+	display_property_groups = [
+		( ('material',), 'luxrender_transparency' )
+	]
+	
+	# only textures with Kd (or similar) for now
+	#LUX_COMPAT = {'carpaint', 'glass', 'glossy', 'glossy_lossy', 'mattetranslucent', 'glossytranslucent', 'scatter', 'matte', 'mirror', 'velvet'}
+	
+	@classmethod
+	def poll(cls, context):
+		if not hasattr(context.material, 'luxrender_transparency'):
+			return False
+		#return super().poll(context) and context.material.luxrender_material.type in cls.LUX_COMPAT
+		return super().poll(context) and context.material.luxrender_material.type != 'null'
