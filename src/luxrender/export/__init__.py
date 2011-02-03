@@ -221,9 +221,9 @@ def object_anim_matrix(scene, obj, frame_offset=1, ignore_scale=False):
 	if obj.animation_data != None and obj.animation_data.action != None and len(obj.animation_data.action.fcurves)>0:
 		next_frame = scene.frame_current + frame_offset
 		
-		anim_location = [0,0,0]
-		anim_rotation = [0,0,0]
-		anim_scale    = [1,1,1]
+		anim_location = obj.location.copy()
+		anim_rotation = obj.rotation_euler.copy()
+		anim_scale    = obj.scale.copy()
 		
 		for fc in obj.animation_data.action.fcurves:
 			if fc.data_path == 'location':
