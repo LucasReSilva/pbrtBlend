@@ -200,7 +200,7 @@ class luxrender_camera(declarative_property_group):
 		forwards = -matrix[2]
 		target = (pos + forwards)
 		up = matrix[1]
-		return (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
+		return pos[:3] + target[:3] + up[:3]
 	
 	def screenwindow(self, xr, yr, cam):
 		'''

@@ -27,13 +27,11 @@
 import os
 OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
-import mathutils
-
 from extensions_framework import util as efutil
 
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
-from luxrender.export import ParamSet, ExportProgressThread, ExportCache
+from luxrender.export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import get_material_volume_defs
 
@@ -357,28 +355,10 @@ class GeometryExporter(object):
 				next_matrix = matrix[1]
 				is_object_animated = True
 			
-			elif obj.animation_data != None and obj.animation_data.action != None and len(obj.animation_data.action.fcurves)>0:
-				next_frame = self.scene.frame_current + 1
-				
-				anim_location = [0,0,0]
-				anim_rotation = [0,0,0]
-				anim_scale    = [1,1,1]
-				
-				for fc in obj.animation_data.action.fcurves:
-					if fc.data_path == 'location':
-						anim_location[fc.array_index] = fc.evaluate(next_frame)
-					if fc.data_path == 'rotation_euler':
-						anim_rotation[fc.array_index] = fc.evaluate(next_frame)
-					if fc.data_path == 'scale':
-						anim_scale[fc.array_index] = fc.evaluate(next_frame)
-				
-				next_matrix  = mathutils.Matrix.Translation( mathutils.Vector(anim_location) )
-				next_matrix *= mathutils.Euler(anim_rotation).to_matrix().resize4x4()
-				next_matrix *= mathutils.Matrix.Scale(anim_scale[0], 4, mathutils.Vector([1,0,0]))
-				next_matrix *= mathutils.Matrix.Scale(anim_scale[1], 4, mathutils.Vector([0,1,0]))
-				next_matrix *= mathutils.Matrix.Scale(anim_scale[2], 4, mathutils.Vector([0,0,1]))
-				
+			fcurve_matrix = object_anim_matrix(self.scene, obj)
+			if fcurve_matrix != False:
 				is_object_animated = True
+				next_matrix = fcurve_matrix
 		
 		if is_object_animated:
 			self.lux_context.transformBegin(comment=obj.name)

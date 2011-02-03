@@ -34,7 +34,7 @@ import bpy
 from extensions_framework import util as efutil
 
 # LuxRender libs
-from luxrender.export 			import get_worldscale
+from luxrender.export 			import get_worldscale, object_anim_matrix
 from luxrender.export			import lights		as export_lights
 from luxrender.export			import materials	as export_materials
 from luxrender.export			import geometry		as export_geometry
@@ -159,27 +159,28 @@ class SceneExporter(object):
 			# Set up camera, view and film
 			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
-				scene.frame_set(scene.frame_current + 1)
-				m1 = scene.camera.matrix_world.copy()
-				scene.frame_set(scene.frame_current - 1)
-				scene.update()
-				if m1 != scene.camera.matrix_world:
+				
+				next_matrix = object_anim_matrix(scene, scene.camera, ignore_scale=True)
+				
+				if next_matrix != False:
 					lux_context.transformBegin(file=Files.MAIN)
+					
 					ws = get_worldscale()
-					m1 *= ws
+					next_matrix *= ws
 					ws = get_worldscale(as_scalematrix=False)
-					m1[3][0] *= ws
-					m1[3][1] *= ws
-					m1[3][2] *= ws
-					pos = m1[3]
-					forwards = -m1[2]
+					next_matrix[3][0] *= ws
+					next_matrix[3][1] *= ws
+					next_matrix[3][2] *= ws
+					
+					pos = next_matrix[3]
+					forwards = -next_matrix[2]
 					target = (pos + forwards)
-					up = m1[1]
-					transform = (pos[0], pos[1], pos[2], target[0], target[1], target[2], up[0], up[1], up[2])
-					lux_context.lookAt( *transform )
+					up = next_matrix[1]
+					lux_context.lookAt( * pos[:3] + target[:3] + up[:3] )
 					lux_context.coordinateSystem('CameraEndTransform')
 					lux_context.transformEnd()
 					is_cam_animated = True
+					
 			lux_context.lookAt(	*scene.camera.data.luxrender_camera.lookAt(scene.camera) )
 			lux_context.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
 			lux_context.film(	*scene.camera.data.luxrender_camera.luxrender_film.api_output()	)

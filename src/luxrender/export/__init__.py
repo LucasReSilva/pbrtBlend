@@ -217,6 +217,34 @@ def get_worldscale(as_scalematrix=True):
 	else:
 		return ws
 
+def object_anim_matrix(scene, obj, frame_offset=1, ignore_scale=False):
+	if obj.animation_data != None and obj.animation_data.action != None and len(obj.animation_data.action.fcurves)>0:
+		next_frame = scene.frame_current + frame_offset
+		
+		anim_location = [0,0,0]
+		anim_rotation = [0,0,0]
+		anim_scale    = [1,1,1]
+		
+		for fc in obj.animation_data.action.fcurves:
+			if fc.data_path == 'location':
+				anim_location[fc.array_index] = fc.evaluate(next_frame)
+			if fc.data_path == 'rotation_euler':
+				anim_rotation[fc.array_index] = fc.evaluate(next_frame)
+			if fc.data_path == 'scale':
+				anim_scale[fc.array_index] = fc.evaluate(next_frame)
+		
+		next_matrix  = mathutils.Matrix.Translation( mathutils.Vector(anim_location) )
+		next_matrix *= mathutils.Euler(anim_rotation).make_compatible(obj.rotation_euler).to_matrix().resize4x4()
+		
+		if not ignore_scale:
+			next_matrix *= mathutils.Matrix.Scale(anim_scale[0], 4, mathutils.Vector([1,0,0]))
+			next_matrix *= mathutils.Matrix.Scale(anim_scale[1], 4, mathutils.Vector([0,1,0]))
+			next_matrix *= mathutils.Matrix.Scale(anim_scale[2], 4, mathutils.Vector([0,0,1]))
+		
+		return next_matrix
+	else:
+		return False
+
 def matrix_to_list(matrix, apply_worldscale=False):
 	'''
 	matrix		  Matrix
