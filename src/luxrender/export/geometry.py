@@ -352,20 +352,30 @@ class GeometryExporter(object):
 		is_object_animated = False
 		if self.scene.camera.data.luxrender_camera.usemblur and self.scene.camera.data.luxrender_camera.objectmblur:
 			if matrix is not None and matrix[1] is not None:
-				next_matrix = matrix[1]
+				next_matrices = [matrix[1]]
 				is_object_animated = True
 			
-			fcurve_matrix = object_anim_matrix(self.scene, obj)
-			if fcurve_matrix != False:
-				is_object_animated = True
-				next_matrix = fcurve_matrix
+			else:
+				next_matrices = []
+				# grab a bunch of fractional-frame fcurve_matrices and export
+				# several motionInstances for non-linear motion blur
+				STEPS = 1
+				for i in range(STEPS,0,-1):
+					fcurve_matrix = object_anim_matrix(self.scene, obj, frame_offset=i/float(STEPS))
+					if fcurve_matrix == False:
+						break
+					
+					next_matrices.append(fcurve_matrix)
+				
+				is_object_animated = len(next_matrices) > 0
 		
 		if is_object_animated:
-			self.lux_context.transformBegin(comment=obj.name)
-			self.lux_context.identity()
-			self.lux_context.transform(matrix_to_list(next_matrix, apply_worldscale=True))
-			self.lux_context.coordinateSystem('%s' % obj.name + '_motion')
-			self.lux_context.transformEnd()
+			for i, next_matrix in enumerate(next_matrices):
+				self.lux_context.transformBegin(comment=obj.name)
+				self.lux_context.identity()
+				self.lux_context.transform(matrix_to_list(next_matrix, apply_worldscale=True))
+				self.lux_context.coordinateSystem('%s_motion_%i' % (obj.name, i))
+				self.lux_context.transformEnd()
 		
 		for me_name, me_mat, me_shape_type, me_shape_params in mesh_definitions:
 			self.lux_context.attributeBegin()
@@ -405,7 +415,10 @@ class GeometryExporter(object):
 				self.lux_context.shape(me_shape_type, me_shape_params)
 			# motionInstance for motion blur
 			elif is_object_animated:
-				self.lux_context.motionInstance(me_name, 0.0, 1.0, obj.name + '_motion')
+				num_instances = len(next_matrices)
+				for i in range(num_instances):
+					fni = float(num_instances)
+					self.lux_context.motionInstance(me_name, i/fni, (i+1)/fni, '%s_motion_%i' % (obj.name, i))
 			# ordinary mesh instance
 			else:
 				self.lux_context.objectInstance(me_name)
