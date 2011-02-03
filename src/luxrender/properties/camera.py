@@ -31,6 +31,7 @@ import bpy
 
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
+from extensions_framework.validate import Logic_OR as O
 
 from luxrender.properties import dbo
 from luxrender.export import get_worldscale
@@ -70,7 +71,9 @@ class luxrender_camera(declarative_property_group):
 		'type',
 		'fstop',
 		'sensitivity',
-		'exposure',
+		'exposure_mode',
+		['exposure_start', 'exposure_end'],
+		['exposure_degrees_start', 'exposure_degrees_end'],
 		'usemblur',
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
@@ -79,6 +82,10 @@ class luxrender_camera(declarative_property_group):
 	]
 	
 	visibility = {
+		'exposure_start':			{ 'exposure_mode': O(['normalised','absolute']) },
+		'exposure_end':				{ 'exposure_mode': O(['normalised','absolute']) },
+		'exposure_degrees_start':	{ 'exposure_mode': 'degrees' },
+		'exposure_degrees_end':		{ 'exposure_mode': 'degrees' },
 		'shutterdistribution':		{ 'usemblur': True },
 		'cammblur':					{ 'usemblur': True },
 		'objectmblur':				{ 'usemblur': True },
@@ -140,18 +147,69 @@ class luxrender_camera(declarative_property_group):
 			'max': 6400.0,
 			'soft_max': 6400.0
 		},
+		
+		{
+			'type': 'enum',
+			'attr': 'exposure_mode',
+			'name': 'Exposure timing',
+			'items': [
+				('normalised', 'normalised', 'normalised'),
+				('absolute', 'absolute', 'absolute'),
+				('degrees', 'degrees', 'degrees'),
+			],
+			'default': 'normalised'
+		},
+		
 		{
 			'type': 'float',
-			'attr': 'exposure',
-			'name': 'Exposure',
-			'description': 'Exposure time (secs)',
+			'attr': 'exposure_start',
+			'name': 'Open',
+			'description': 'Shutter open time',
+			'precision': 6,
+			'default': 0.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
+		{
+			'type': 'float',
+			'attr': 'exposure_end',
+			'name': 'Close',
+			'description': 'Shutter close time',
 			'precision': 6,
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
-			'max': 25.0,
-			'soft_max': 25.0
+			'max': 1.0,
+			'soft_max': 1.0
 		},
+		{
+			'type': 'float',
+			'attr': 'exposure_degrees_start',
+			'name': 'Open angle',
+			'description': 'Shutter open angle',
+			'precision': 1,
+			'default': 0.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 360.0,
+			'soft_max': 360.0
+		},
+		{
+			'type': 'float',
+			'attr': 'exposure_degrees_end',
+			'name': 'Close angle',
+			'description': 'Shutter close angle',
+			'precision': 1,
+			'default': 360.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 360.0,
+			'soft_max': 360.0
+		},
+		
+		
 		{
 			'type': 'bool',
 			'attr': 'usemblur',
@@ -241,6 +299,22 @@ class luxrender_camera(declarative_property_group):
 				
 		return sw
 	
+	def exposure_time(self):
+		"""
+		Calculate the camera exposure time in seconds
+		"""
+		fps = LuxManager.CurrentScene.render.fps
+		
+		time = 1.0
+		if self.exposure_mode == 'normalised':
+			time = (self.exposure_end - self.exposure_start) / fps
+		if self.exposure_mode == 'absolute':
+			time = (self.exposure_end - self.exposure_start)
+		if self.exposure_mode == 'degrees':
+			time = (self.exposure_degrees_end - self.exposure_degrees_start) / (fps * 360.0)
+		
+		return time
+	
 	def api_output(self, scene, is_cam_animated):
 		'''
 		scene			bpy.types.scene
@@ -260,8 +334,17 @@ class luxrender_camera(declarative_property_group):
 		
 		params.add_float('screenwindow', self.screenwindow(xr, yr, cam))
 		params.add_bool('autofocus', False)
-		params.add_float('shutteropen', 0.0)
-		params.add_float('shutterclose', self.exposure)
+		
+		fps = scene.render.fps
+		if self.exposure_mode == 'normalised':
+			params.add_float('shutteropen', self.exposure_start / fps)
+			params.add_float('shutterclose', self.exposure_end / fps)
+		if self.exposure_mode == 'absolute':
+			params.add_float('shutteropen', self.exposure_start)
+			params.add_float('shutterclose', self.exposure_end)
+		if self.exposure_mode == 'degrees':
+			params.add_float('shutteropen', self.exposure_degrees_start / (fps*360.0))
+			params.add_float('shutterclose', self.exposure_degrees_end / (fps*360.0))
 		
 		if self.use_dof:
 			# Do not world-scale this, it is already in meters !
@@ -692,11 +775,11 @@ class luxrender_film(declarative_property_group):
 			output_channels = 'RGB'
 		
 		params.add_bool('write_exr', self.write_exr)
-		params.add_string('write_exr_channels', output_channels)
+		if self.write_exr: params.add_string('write_exr_channels', output_channels)
 		params.add_bool('write_png', self.write_png)
-		params.add_string('write_png_channels', output_channels)
+		if self.write_png: params.add_string('write_png_channels', output_channels)
 		params.add_bool('write_tga', self.write_tga)
-		params.add_string('write_tga_channels', output_channels)
+		if self.write_tga: params.add_string('write_tga_channels', output_channels)
 		
 		params.add_integer('displayinterval', self.displayinterval)
 		params.add_integer('writeinterval', self.writeinterval)
@@ -858,7 +941,7 @@ class luxrender_tonemapping(declarative_property_group):
 			
 		if self.type == 'linear':
 			params.add_float('linear_sensitivity', cam.luxrender_camera.sensitivity)
-			params.add_float('linear_exposure', cam.luxrender_camera.exposure)
+			params.add_float('linear_exposure', cam.luxrender_camera.exposure_time())
 			params.add_float('linear_fstop', cam.luxrender_camera.fstop)
 			params.add_float('linear_gamma', self.linear_gamma)
 			

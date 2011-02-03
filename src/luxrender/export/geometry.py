@@ -417,7 +417,7 @@ class GeometryExporter(object):
 			elif is_object_animated:
 				num_instances = len(next_matrices)
 				for i in range(num_instances):
-					fni = float(num_instances)
+					fni = float(num_instances) * self.scene.render.fps
 					self.lux_context.motionInstance(me_name, i/fni, (i+1)/fni, '%s_motion_%i' % (obj.name, i))
 			# ordinary mesh instance
 			else:

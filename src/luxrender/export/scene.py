@@ -27,9 +27,6 @@
 # System Libs
 import os
 
-# Blender Libs
-import bpy
-
 # Extensions_Framework Libs
 from extensions_framework import util as efutil
 
