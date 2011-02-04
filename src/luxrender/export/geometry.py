@@ -434,9 +434,15 @@ class GeometryExporter(object):
 			# ridiculous work-around for exporting every particle
 			if 'particle_system' in kwargs.keys():
 				prev_display_pc = kwargs['particle_system'].settings.draw_percentage
-				kwargs['particle_system'].settings.draw_percentage = 100
-				obj.tag = True
-				self.scene.update()
+				if prev_display_pc < 100:
+					LuxLog(
+						'WARNING: Due to a limitation in blender only %s%% of particle system "%s" will be exported. '
+						'Set the DISPLAY percentage to 100%% before exporting' % (prev_display_pc, kwargs['particle_system'].name)
+					)
+				# The rest of this workaround is disabled due to RNA write restriction
+#				kwargs['particle_system'].settings.draw_percentage = 100
+#				obj.tag = True
+#				self.scene.update()
 			
 			obj.create_dupli_list(self.scene)
 			
@@ -468,10 +474,10 @@ class GeometryExporter(object):
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			obj.free_dupli_list()
 			
-			if 'particle_system' in kwargs.keys():
-				kwargs['particle_system'].settings.draw_percentage = prev_display_pc
-				obj.tag = True
-				self.scene.update()
+#			if 'particle_system' in kwargs.keys():
+#				kwargs['particle_system'].settings.draw_percentage = prev_display_pc
+#				obj.tag = True
+#				self.scene.update()
 			
 		except SystemError as err:
 			LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
