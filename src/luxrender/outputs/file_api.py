@@ -304,9 +304,9 @@ class Custom_Context(object):
 		self._api('Exterior ', [name, []])
 	
 	def texture(self, name, type, texture, params):
-		self.wf(self.current_file, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
+		self.wf(Files.MATS, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
 		for p in params:
-			self.wf(self.current_file, p.to_string(), 1)
+			self.wf(Files.MATS, p.to_string(), 1)
 	
 	def worldEnd(self):
 		'''
