@@ -505,7 +505,7 @@ class GeometryExporter(object):
 	#			segment_length = (particle.hair[i].co - particle.hair[i+1].co).length
 	#			segment_matrix = mathutils.Matrix.Translation( particle.hair[i].co_hair_space + particle.location )
 	#			segment_matrix *= mathutils.Matrix.Scale(segment_length, 4, scale_z)
-	#			segment_matrix *= particle.rotation.to_matrix().resize4x4()
+	#			segment_matrix *= particle.rotation.to_matrix().resize_4x4()
 	#			
 	#			exportShapeInstances(lux_context, scene, obj, [strand], matrix=[segment_matrix,None])
 	
