@@ -302,7 +302,7 @@ class FloatTextureParameter(TextureParameterBase):
 		else:
 			return [
 				[0.9, '%s_floatvalue' % self.attr, '%s_usefloattexture' % self.attr],
-				'%s_floattexture' % self.attr,
+				[0.9, '%s_floattexture' % self.attr,'%s_multiplyfloat' % self.attr],
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
@@ -310,6 +310,7 @@ class FloatTextureParameter(TextureParameterBase):
 		if not self.texture_only:
 			vis = {
 				'%s_floattexture' % self.attr: { '%s_usefloattexture' % self.attr: True },
+				'%s_multiplyfloat' % self.attr: { '%s_usefloattexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -324,7 +325,10 @@ class FloatTextureParameter(TextureParameterBase):
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
 				'type': 'bool',
+				'name': 'M',
+				'description': 'Multiply texture by value',
 				'default': self.multiply_float,
+				'toggle': True,
 				'save_in_preset': True
 			},
 			{
