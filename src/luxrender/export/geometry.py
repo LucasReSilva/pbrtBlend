@@ -35,6 +35,16 @@ from luxrender.export import ParamSet, ExportProgressThread, ExportCache, object
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import get_material_volume_defs
 
+def time_export(func):
+	import time
+	def _wrap(*args, **kwargs):
+		start = time.time()
+		result = func(*args, **kwargs)
+		end = time.time()
+		print('Calling %s took %0.4f seconds' % (func, (end-start)))
+		return result
+	return _wrap
+
 class InvalidGeometryException(Exception):
 	pass
 
@@ -92,12 +102,12 @@ class GeometryExporter(object):
 	
 	def buildMesh(self, obj):
 		"""
-		Decide which mesh format to output
+		Decide which mesh format to output, if any, since the given object
+		may be an external PLY proxy.
 		"""
 		
 		# Using a cache on object massively speeds up dupli instance export
 		if self.ExportedObjects.have(obj): return self.ExportedObjects.get(obj)
-		
 		
 		mesh_definitions = []
 		
@@ -123,6 +133,7 @@ class GeometryExporter(object):
 					self.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 		
 		if export_original:
+			# Choose the mesh export type, if set, or use the default
 			mesh_type = obj.data.luxrender_mesh.mesh_type
 			global_type = self.scene.luxrender_engine.mesh_type
 			if mesh_type == 'native' or (mesh_type == 'global' and global_type == 'native'):
@@ -133,6 +144,7 @@ class GeometryExporter(object):
 		self.ExportedObjects.add(obj, mesh_definitions)
 		return mesh_definitions
 	
+	#@time_export
 	def buildBinaryPLYMesh(self, obj):
 		"""
 		Convert supported blender objects into a MESH, and then split into parts
@@ -267,6 +279,7 @@ class GeometryExporter(object):
 		
 		return mesh_definitions
 	
+	#@time_export
 	def buildNativeMesh(self, obj):
 		"""
 		Convert supported blender objects into a MESH, and then split into parts
