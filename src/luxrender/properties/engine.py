@@ -55,7 +55,7 @@ def engine_controls():
 		# Other mesh types disabled because cannot set active object
 		# to pass to PLY operator. Even so, Lux fails to load the PLY
 		# TODO: find solutions
-		# 'mesh_type',
+		'mesh_type',
 		
 		'render',
 		'install_path',
@@ -219,13 +219,12 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'mesh_type',
-			'name': 'Mesh Export type',
-			'description': 'The type of mesh data to export',
+			'name': 'Default mesh format',
 			'items': [
-				('native', 'Lux Mesh', 'native'),
-				('ply', 'Stanford PLY', 'ply'),
+				('native', 'LuxRender mesh', 'native'),
+				('binary_ply', 'Binary PLY', 'binary_ply')
 			],
-			'save_in_preset': True
+			'default': 'native'
 		},
 		{
 			'type': 'enum',
