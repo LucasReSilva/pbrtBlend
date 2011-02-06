@@ -387,8 +387,11 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 						[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
 					)
 			elif variant == 'fresnel':
-				# TODO
-				pass
+				fval = float(getattr(property_group, '%s_fresnelvalue' % lux_prop_name))
+				params.add_float(
+					export_param_name,
+					fval
+				)
 	else:
 		LuxLog('WARNING: Texture %s is unsupported variant; needed %s' % (lux_prop_name, variant))
 	
