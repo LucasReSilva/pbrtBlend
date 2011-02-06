@@ -1688,6 +1688,7 @@ class luxrender_emission(declarative_property_group):
 		'L_usecolorrgc':		{ 'use_emission': True },
 		'L_usecolortexture':	{ 'use_emission': True },
 		'L_colortexture':		{ 'use_emission': True, 'L_usecolortexture': True },
+		'L_multiplycolor':		{ 'use_emission': True, 'L_usecolortexture': True },
 		'gain': 				{ 'use_emission': True },
 		'power': 				{ 'use_emission': True },
 		'efficacy': 			{ 'use_emission': True },

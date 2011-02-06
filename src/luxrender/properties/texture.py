@@ -139,12 +139,13 @@ class ColorTextureParameter(TextureParameterBase):
 		return [
 			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolorrgc' % self.attr, '%s_usecolortexture' % self.attr ],
 			[ 0.9, [0.375,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
-			'%s_colortexture' % self.attr
+			[ 0.9, '%s_colortexture' % self.attr, '%s_multiplycolor' % self.attr ],
 		] + self.get_extra_controls()
 	
 	def get_visibility(self):
 		vis = {
 			'%s_colortexture' % self.attr: { '%s_usecolortexture' % self.attr: True },
+			'%s_multiplycolor' % self.attr: { '%s_usecolortexture' % self.attr: True },
 		}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -184,6 +185,15 @@ class ColorTextureParameter(TextureParameterBase):
 				'attr': self.attr,
 				'type': 'string',
 				'default': self.get_real_param_name()
+			},
+			{
+				'attr': '%s_multiplycolor' % self.attr,
+				'type': 'bool',
+				'name': 'M',
+				'description': 'Multiply texture by color',
+				'default': False,
+				'toggle': True,
+				'save_in_preset': True
 			},
 			{
 				'attr': '%s_usecolortexture' % self.attr,
