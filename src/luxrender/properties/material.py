@@ -159,7 +159,7 @@ TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color'
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
 
 # Volume related Textures
-TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'Fresnel Tex',		add_float_value = False)
+TFR_IOR					= VolumeDataFresnelTextureParameter('fresnel', 'IOR',		add_float_value = True, min=0.0, max=25.0, default=1.0)
 
 TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		default=(1.0,1.0,1.0))
 TC_sigma_a				= VolumeDataColorTextureParameter('sigma_a', 'Absorption',			default=(1.0,1.0,1.0))
