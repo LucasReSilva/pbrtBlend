@@ -90,6 +90,22 @@ class GeometryExporter(object):
 		self.valid_particles_callbacks = self.callbacks['particles'].keys()
 		self.valid_objects_callbacks = self.callbacks['objects'].keys()
 	
+	def buildMesh(self, obj):
+		"""
+		Decide which mesh format to output
+		"""
+		
+		# Using a cache on object massively speeds up dupli instance export
+		if self.ExportedObjects.have(obj): return self.ExportedObjects.get(obj)
+		
+		mesh_definitions = self.buildNativeMesh(obj)
+		self.ExportedObjects.add(obj, mesh_definitions)
+		
+		return mesh_definitions
+	
+	def buildBinaryPLYMesh(self, obj):
+		pass
+	
 	def buildNativeMesh(self, obj):
 		"""
 		Convert supported blender objects into a MESH, and then split into parts
@@ -98,9 +114,6 @@ class GeometryExporter(object):
 		wrapped within objectBegin..objectEnd or placed in an
 		attributeBegin..attributeEnd scope, depending if instancing is allowed.
 		"""
-		
-		# Using a cache on object massively speeds up dupli instance export
-		if self.ExportedObjects.have(obj): return self.ExportedObjects.get(obj)
 		
 		mesh_definitions = []
 		
@@ -285,8 +298,6 @@ class GeometryExporter(object):
 						
 					except InvalidGeometryException as err:
 						LuxLog('Mesh export failed, skipping this mesh: %s' % err)
-			
-			self.ExportedObjects.add(obj, mesh_definitions)
 		
 		except UnexportableObjectException as err:
 			LuxLog('Object export failed, skipping this object: %s' % err)
@@ -458,7 +469,7 @@ class GeometryExporter(object):
 					
 					self.exportShapeInstances(
 						obj,
-						self.buildNativeMesh(dupli_ob.object),
+						self.buildMesh(dupli_ob.object),
 						matrix=[dupli_ob.matrix,None]
 					)
 					
@@ -515,13 +526,13 @@ class GeometryExporter(object):
 		if 'matrix' in kwargs.keys():
 			self.exportShapeInstances(
 				obj,
-				self.buildNativeMesh(obj),
+				self.buildMesh(obj),
 				matrix=kwargs['matrix']
 			)
 		else:
 			self.exportShapeInstances(
 				obj,
-				self.buildNativeMesh(obj)
+				self.buildMesh(obj)
 			)
 	
 
