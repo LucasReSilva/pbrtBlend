@@ -236,7 +236,11 @@ class GeometryExporter(object):
 						# dump vertices and normals
 						for face in ffaces_mats[i]:
 							for j, vertex in enumerate(face.vertices):
-								ply.write( struct.pack('<6f', *verts_co_no[vertex]) )
+								if face.use_smooth:
+									ply.write( struct.pack('<6f', *verts_co_no[vertex]) )
+								else:
+									ply.write( struct.pack('<3f', *verts_co_no[vertex][:3]) )
+									ply.write( struct.pack('<3f', *face.normal) )
 								if uv_layer:
 									uv = uv_layer[face.index].uv[j]
 									ply.write( struct.pack('<2f', *uv ) )
