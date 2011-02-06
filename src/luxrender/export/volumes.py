@@ -47,7 +47,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 		if sys.platform == 'darwin':
 			# Get lzo library for OSX
 			# print('darwin')
-			lzodll = cdll.LoadLibrary('lzo.so')
+			lzodll = cdll.LoadLibrary('liblzo2.dylib')
 		elif sys.platform == 'win32':
 			# Get lzo library for windows
 			#print('win32')
@@ -70,7 +70,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 		if sys.platform == 'darwin':
 			# Get lzo library for OSX
 			# print('darwin')
-			lzmadll = cdll.LoadLibrary('lzma.so')
+			lzmadll = cdll.LoadLibrary('liblzmadec.dylib')
 		elif sys.platform == 'win32':
 			# Get lzo library for windows
 			#print('win32')
