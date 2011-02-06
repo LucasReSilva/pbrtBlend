@@ -31,6 +31,7 @@ from copy import deepcopy
 
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
 from luxrender.properties.texture import FresnelTextureParameter, FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
@@ -1480,8 +1481,9 @@ def volume_types():
 
 def volume_visibility():
 	v_vis = dict_merge({
-		'scattering_scale': { 'type': 'homogeneous' },
+		'scattering_scale': { 'type': 'homogeneous', 'sigma_s_usecolortexture': False },
 		'g': { 'type': 'homogeneous' },
+		'depth': O([ A([{ 'type': 'clear' }, { 'absorption_usecolortexture': False }]), A([{'type': 'homogeneous' }, { 'sigma_a_usecolortexture': False }]) ])
 	},
 	TFR_IOR.visibility,
 	TC_absorption.visibility,
