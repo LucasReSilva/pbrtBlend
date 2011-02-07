@@ -88,7 +88,7 @@ class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Opera
 	bl_idname = 'luxrender.preset_material_add'
 	bl_label = 'Add LuxRender Material settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_material'
-	preset_values =  []
+	preset_values = []
 	preset_subdir = 'luxrender/material'
 	
 	def execute(self, context):
@@ -120,7 +120,7 @@ class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operat
 	bl_idname = 'luxrender.preset_texture_add'
 	bl_label = 'Add LuxRender Texture settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_texture'
-	preset_values =  []
+	preset_values = []
 	preset_subdir = 'luxrender/texture'
 	
 	def execute(self, context):
@@ -150,6 +150,26 @@ class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operat
 		return super().execute(context)
 
 # Volume data handling
+class LUXRENDER_MT_presets_volume(LUXRENDER_MT_base, bpy.types.Menu):
+	bl_label = "LuxRender Volume Presets"
+	preset_subdir = "luxrender/volume"
+
+class LUXRENDER_OT_preset_volume_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
+	'''Save the current settings as a preset'''
+	bl_idname = 'luxrender.preset_volume_add'
+	bl_label = 'Add LuxRender Volume settings preset'
+	preset_menu = 'LUXRENDER_MT_presets_volume'
+	preset_values = []
+	preset_subdir = 'luxrender/volume'
+	
+	def execute(self, context):
+		ks = 'bpy.context.scene.luxrender_volumes.volumes[bpy.context.scene.luxrender_volumes.volumes_index].%s'
+		pv = [
+			ks%v['attr'] for v in bpy.types.luxrender_volume_data.get_exportable_properties()
+		]
+		
+		self.preset_values = pv
+		return super().execute(context)
 
 class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	'''Add a new material volume definition to the scene'''
