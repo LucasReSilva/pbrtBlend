@@ -137,7 +137,7 @@ class ColorTextureParameter(TextureParameterBase):
 	
 	def get_controls(self):
 		return [
-			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolorrgc' % self.attr, '%s_usecolortexture' % self.attr ],
+			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
 			[ 0.9, [0.375,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
 			[ 0.9, '%s_colortexture' % self.attr, '%s_multiplycolor' % self.attr ],
 		] + self.get_extra_controls()
@@ -200,15 +200,6 @@ class ColorTextureParameter(TextureParameterBase):
 				'type': 'bool',
 				'name': 'T',
 				'description': 'Textured %s' % self.name,
-				'default': False,
-				'toggle': True,
-				'save_in_preset': True
-			},
-			{
-				'attr': '%s_usecolorrgc' % self.attr,
-				'type': 'bool',
-				'name': 'R',
-				'description': 'Reverse Gamma Correct %s' % self.name,
 				'default': False,
 				'toggle': True,
 				'save_in_preset': True

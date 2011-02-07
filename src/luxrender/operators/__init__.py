@@ -94,10 +94,11 @@ class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Opera
 	def execute(self, context):
 		pv = [
 			'bpy.context.material.luxrender_material.%s'%v['attr'] for v in bpy.types.luxrender_material.get_exportable_properties()
+		] + [
+			'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
+		] + [
+			'bpy.context.material.luxrender_transparency.%s'%v['attr'] for v in bpy.types.luxrender_transparency.get_exportable_properties()
 		]
-		# + [
-		#	'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
-		#]
 		
 		# store only the sub-properties of the selected lux material type
 		lux_type = context.material.luxrender_material.type

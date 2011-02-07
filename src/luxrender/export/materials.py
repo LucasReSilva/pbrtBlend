@@ -270,23 +270,6 @@ def convert_texture(texture):
 	
 	return variant, lux_tex_name, paramset
 
-def RGC(value):
-	scene = LuxManager.CurrentScene
-	if scene.luxrender_engine.rgc:
-		gamma = scene.camera.data.luxrender_camera.luxrender_film.luxrender_colorspace.gamma
-	else:
-		gamma = 1.0
-	
-	ncol = value**(1/gamma)
-	
-	if scene.luxrender_engine.colclamp:
-		ncol = ncol * 0.9
-		if ncol > 0.9:
-			ncol = 0.9
-		if ncol < 0.0:
-			ncol = 0.0
-	return ncol
-
 def value_transform_passthrough(val):
 	return val
 
@@ -398,18 +381,10 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 						fval
 					)
 			elif variant == 'color':
-				
-				use_rgc = getattr(property_group, '%s_usecolorrgc' % lux_prop_name)
-				if use_rgc:
-					params.add_color(
-						export_param_name,
-						[RGC(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
-					)
-				else:
-					params.add_color(
-						export_param_name,
-						[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
-					)
+				params.add_color(
+					export_param_name,
+					[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
+				)
 			elif variant == 'fresnel':
 				fval = float(getattr(property_group, '%s_fresnelvalue' % lux_prop_name))
 				params.add_float(
