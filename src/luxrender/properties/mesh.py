@@ -45,19 +45,15 @@ TF_displacementmap = MeshFloatTextureParameter(
 
 def mesh_visibility():
 	
-	vis_append = { 'mesh_type': O(['global','native']) }
-	
 	vis = dict_merge({
-		'portal':		vis_append,
-		'subdiv':		vis_append,
-		'nsmooth':		{ 'mesh_type': O(['global','native']), 'subdiv': LO({'!=': 'None'}) },
-		'sharpbound':	{ 'mesh_type': O(['global','native']), 'subdiv': LO({'!=': 'None'}) },
-		'sublevels':	{ 'mesh_type': O(['global','native']), 'subdiv': LO({'!=': 'None'}) },
-		'dmscale':		{ 'mesh_type': O(['global','native']), 'dm_floattexturename': LO({'!=': ''}) },
-		'dmoffset':		{ 'mesh_type': O(['global','native']), 'dm_floattexturename': LO({'!=': ''}) },
+		'nsmooth':		{ 'subdiv': LO({'!=': 'None'}) },
+		'sharpbound':	{ 'subdiv': LO({'!=': 'None'}) },
+		'sublevels':	{ 'subdiv': LO({'!=': 'None'}) },
+		'dmscale':		{ 'dm_floattexturename': LO({'!=': ''}) },
+		'dmoffset':		{ 'dm_floattexturename': LO({'!=': ''}) },
 	}, TF_displacementmap.visibility )
 	
-	vis = texture_append_visibility(vis, TF_displacementmap, vis_append)
+	vis = texture_append_visibility(vis, TF_displacementmap, { 'subdiv': LO({'!=': 'None'}) })
 	
 	return vis
 
@@ -154,9 +150,6 @@ class luxrender_mesh(declarative_property_group):
 			'precision': 6,
 		},
 	]
-	
-	def get_shape_type(self):
-		return 'mesh'
 	
 	def get_paramset(self):
 		params = ParamSet()

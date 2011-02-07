@@ -52,9 +52,6 @@ def engine_controls():
 		['write_lxs', 'write_lxm', 'write_lxo'],
 		# 'embed_filedata', # Disabled pending acceptance into LuxRender core
 		
-		# Other mesh types disabled because cannot set active object
-		# to pass to PLY operator. Even so, Lux fails to load the PLY
-		# TODO: find solutions
 		'mesh_type',
 		
 		'render',
@@ -224,7 +221,7 @@ class luxrender_engine(declarative_property_group):
 				('native', 'LuxRender mesh', 'native'),
 				('binary_ply', 'Binary PLY', 'binary_ply')
 			],
-			'default': 'native'
+			'default': 'binary_ply'
 		},
 		{
 			'type': 'enum',

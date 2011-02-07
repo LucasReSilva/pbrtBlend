@@ -233,7 +233,7 @@ class GeometryExporter(object):
 						
 						ply.write(b'end_header\n')
 						
-						# dump vertices and normals
+						# dump vertices and normals and uvs if present
 						for face in ffaces_mats[i]:
 							for j, vertex in enumerate(face.vertices):
 								if face.use_smooth:
@@ -259,6 +259,9 @@ class GeometryExporter(object):
 						'filename',
 						ply_filename
 					)
+					
+					# Add subdiv etc options
+					shape_params.update( obj.data.luxrender_mesh.get_paramset() )
 					
 					mesh_definition = (
 						mesh_name,
@@ -438,7 +441,7 @@ class GeometryExporter(object):
 					mesh_definition = (
 						mesh_name,
 						mesh_mat,
-						obj.data.luxrender_mesh.get_shape_type(),
+						'mesh',
 						shape_params
 					)
 					mesh_definitions.append( mesh_definition )
