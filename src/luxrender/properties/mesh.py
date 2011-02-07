@@ -49,8 +49,8 @@ def mesh_visibility():
 		'nsmooth':		{ 'subdiv': LO({'!=': 'None'}) },
 		'sharpbound':	{ 'subdiv': LO({'!=': 'None'}) },
 		'sublevels':	{ 'subdiv': LO({'!=': 'None'}) },
-		'dmscale':		{ 'dm_floattexturename': LO({'!=': ''}) },
-		'dmoffset':		{ 'dm_floattexturename': LO({'!=': ''}) },
+		'dmscale':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
+		'dmoffset':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
 	}, TF_displacementmap.visibility )
 	
 	vis = texture_append_visibility(vis, TF_displacementmap, { 'subdiv': LO({'!=': 'None'}) })
