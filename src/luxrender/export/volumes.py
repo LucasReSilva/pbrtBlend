@@ -47,7 +47,11 @@ def read_cache(smokecache, is_high_res, amplifier):
 		if sys.platform == 'darwin':
 			# Get lzo library for OSX
 			# print('darwin')
-			lzodll = cdll.LoadLibrary('liblzo2.dylib')
+			try: # look in user_scripts_path
+				lzodll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ))
+			except: # look in blender application scripts_path
+				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.dylib')
+				
 		elif sys.platform == 'win32':
 			# Get lzo library for windows
 			#print('win32')
@@ -70,7 +74,11 @@ def read_cache(smokecache, is_high_res, amplifier):
 		if sys.platform == 'darwin':
 			# Get lzo library for OSX
 			# print('darwin')
-			lzmadll = cdll.LoadLibrary('liblzmadec.dylib')
+			try: # look in user_scripts_path
+				lzmadll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'))
+			except: # look in user_scripts_path
+				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib')
+					
 		elif sys.platform == 'win32':
 			# Get lzo library for windows
 			#print('win32')
