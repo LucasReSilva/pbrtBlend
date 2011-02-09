@@ -726,7 +726,7 @@ class luxrender_film(declarative_property_group):
 		if self.luxrender_colorspace.preset:
 			return getattr(colorspace_presets, self.luxrender_colorspace.preset_name).gamma
 		else:
-			self.luxrender_colorspace.gamma
+			return self.luxrender_colorspace.gamma
 	
 	def api_output(self):
 		'''
