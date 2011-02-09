@@ -76,7 +76,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 			# print('darwin')
 			try: # look in user_scripts_path
 				lzmadll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'))
-			except: # look in user_scripts_path
+			except: # look in blender application scripts_path
 				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib')
 					
 		elif sys.platform == 'win32':
