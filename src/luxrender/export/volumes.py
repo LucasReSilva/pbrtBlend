@@ -39,64 +39,64 @@ from luxrender.outputs.file_api import Files
 
 def read_cache(smokecache, is_high_res, amplifier):
 	scene = LuxManager.CurrentScene
-	
+
 	# import compression libraries
 	has_lzo = True
 	has_lzma = True
 	try:
 		if sys.platform == 'darwin':
 			# Get lzo library for OSX
-			# print('darwin')
 			try: # look in user_scripts_path
 				lzodll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ))
 			except: # look in blender application scripts_path
 				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.dylib')
-				
+
 		elif sys.platform == 'win32':
 			# Get lzo library for windows
-			#print('win32')
-			lzodll = cdll.LoadLibrary('lzo.dll')
+			try: # look in windows search path
+				lzodll = cdll.LoadLibrary('lzo.dll')
+			except: # look in blender application scripts_path
+				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzo.dll')
 		else:
 			# Get lzo library for Linux
-			# print('linux')
 			lzodll = cdll.LoadLibrary('/usr/lib/liblzo2.so.2')
-	
+
 		LuxLog('Volumes: LZO Library found')
-			
+
 	except BaseException as err:
 		if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
 			LuxLog('Volumes: LZO Library not found')
 			has_lzo = False
 		else:
 			raise #other error
-		
+
 	try:
 		if sys.platform == 'darwin':
-			# Get lzo library for OSX
-			# print('darwin')
+			# Get lzma library for OSX
 			try: # look in user_scripts_path
 				lzmadll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'))
 			except: # look in blender application scripts_path
 				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib')
-					
+
 		elif sys.platform == 'win32':
-			# Get lzo library for windows
-			#print('win32')
-			lzmadll = cdll.LoadLibrary('lzma.dll')
+			# Get lzma library for windows
+			try: # look in windows search path
+				lzmadll = cdll.LoadLibrary('lzma.dll')
+			except: # look in blender application scripts_path
+				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzma.dll')
 		else:
-			# Get lzo library for Linux
-			# print('linux')
+			# Get lzma library for Linux
 			lzmadll = cdll.LoadLibrary('/usr/lib/liblzma.so.2')
-		
+
 		LuxLog('Volumes: LZMA Library found')
-	
+
 	except BaseException as err:
 		if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
 			LuxLog('Volumes: LZMA Library not found')
 			has_lzma = False
 		else:
 			raise #other error
-	
+
 	###################################################################################################
 	# Read cache
 	# Pointcache file format:
@@ -108,9 +108,9 @@ def read_cache(smokecache, is_high_res, amplifier):
 	#	data_segment for density,old values	( cell_count * sizeof(float) Bytes)
 	#	data_segment for heat values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for heat, old values	( cell_count * sizeof(float) Bytes)
-	#	data_segment for vx values			( cell_count * sizeof(float) Bytes)
-	#	data_segment for vy values			( cell_count * sizeof(float) Bytes)
-	#	data_segment for vz values			( cell_count * sizeof(float) Bytes)
+	#	data_segment for vx values		( cell_count * sizeof(float) Bytes)
+	#	data_segment for vy values		( cell_count * sizeof(float) Bytes)
+	#	data_segment for vz values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for vx, old values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for vy, old values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for vz, old values		( cell_count * sizeof(float) Bytes)
@@ -118,32 +118,32 @@ def read_cache(smokecache, is_high_res, amplifier):
 	# if simulation is high resolution additionally:
 	#	data_segment for density values		( big_cell_count * sizeof(float) Bytes)
 	#	data_segment for density,old values	( big_cell_count * sizeof(float) Bytes)
-	#	data_segment for tcu values			( cell_count * sizeof(u_int) Bytes)
-	#	data_segment for tcv values			( cell_count * sizeof(u_int) Bytes)
-	#	data_segment for tcw values			( cell_count * sizeof(u_int) Bytes)
+	#	data_segment for tcu values		( cell_count * sizeof(u_int) Bytes)
+	#	data_segment for tcv values		( cell_count * sizeof(u_int) Bytes)
+	#	data_segment for tcw values		( cell_count * sizeof(u_int) Bytes)
 	#
 	# header format:
 	#	BPHYSICS		(Tag-String, 8 Bytes)
-	#	data type		(u_int, 4 Bytes)			=> 3 - PTCACHE_TYPE_SMOKE_DOMAIN
-	#	cell count		(u_int, 4 Bytes)			Resolution of the smoke simulation
-	#	user data type	(u_int int, 4 Bytes)		not used by smoke simulation
+	#	data type		(u_int, 4 Bytes)		=> 3 - PTCACHE_TYPE_SMOKE_DOMAIN
+	#	cell count		(u_int, 4 Bytes)		Resolution of the smoke simulation
+	#	user data type	(u_int int, 4 Bytes)                    not used by smoke simulation
 	#
 	# data segment format:
-	#	compressed flag	(u_char, 1 Byte)			=>	0 - uncompressed data,
-	#													1 - LZO compressed data,
-	#													2 - LZMA compressed data
-	#	stream size		(u_int, 4 Bytes)				size of data stream
+	#	compressed flag	(u_char, 1 Byte)			=> 0 - uncompressed data,
+	#								   1 - LZO compressed data,
+	#								   2 - LZMA compressed data
+	#	stream size		(u_int, 4 Bytes)		size of data stream
 	#	data stream		(u_char, (stream_size) Bytes)	data stream
 	# if lzma-compressed additionally:
-	#	props size		(u_int, 4 Bytes)				size of props ( has to be 5 Bytes)
+	#	props size		(u_int, 4 Bytes)		size of props ( has to be 5 Bytes)
 	#	props			(u_char, (props_size) Bytes)	props data for lzma decompressor
-	#	
+	#
 	###################################################################################################
 	density = []
 	cachefilepath = []
 	cachefilename = []
 	if not smokecache.is_baked:
-		print("Smoke data has to be baked for export")
+		LuxLog('Volumes: Smoke data has to be baked for export')
 	else:
 		cachefilepath = os.path.join(
 			os.path.splitext(os.path.dirname(bpy.data.filepath))[0],
@@ -162,14 +162,14 @@ def read_cache(smokecache, is_high_res, amplifier):
 			props_size = c_uint()
 			outlen = c_uint()
 			compressed = 0
-			
+
 			for i in range(len(buffer)):
 				temp = temp + chr(buffer[i])
-			
+
 			SZ_LONG  = sizeof(c_long)
 			SZ_FLOAT = sizeof(c_float)
 			SZ_UINT  = sizeof(c_uint)
-			
+
 			if temp == "BPHYSICS":	#valid cache file
 				data_type = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 				#print("Data type: {0:1d}".format(data_type))
@@ -325,7 +325,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 								props = cachefile.read(props_size)
 
 					if compressed == 1 and has_lzo:
-						print("Compressed LZO stream of length {0:0d} Bytes".format(stream_size))
+						LuxLog('Volumes: Compressed LZO stream of length {0:0d} Bytes'.format(stream_size))
 						#print("Cell count: %d"%cell_count)
 						uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
 						p_dens = cast(uncomp_stream, POINTER(c_float))
@@ -337,7 +337,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 							density.append(p_dens[i])
 
 					elif compressed == 2 and has_lzma:
-						print("Compressed LZMA stream of length {0:0d} Bytes".format(stream_size))
+						LuxLog('Volumes: Compressed LZMA stream of length {0:0d} Bytes'.format(stream_size))
 						#print("Cell count: %d"%cell_count)
 						uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
 						p_dens = cast(uncomp_stream, POINTER(c_float))
@@ -348,7 +348,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 
 						for i in range(cell_count):
 							density.append(p_dens[i])
-						
+
 			cachefile.close()
 			#endif cachefile exists
 			return density
@@ -370,12 +370,12 @@ def export_smoke(lux_context, scene):
 					resolution = set.resolution_max
 					smokecache = set.point_cache
 					density = read_cache(smokecache, set.use_high_resolution, set.amplify+1)
-					
+
 					#standard values for volume material
 					sigma_s = [1.0, 1.0, 1.0]
 					sigma_a = [1.0, 1.0, 1.0]
 					g = 0.0
-					
+
 					if hasattr(domain.active_material,'luxrender_material'):
 						int_v = object.active_material.luxrender_material.Interior_volume
 						for volume in scene.luxrender_volumes.volumes:
@@ -395,7 +395,7 @@ def export_smoke(lux_context, scene):
 
 					big_res = [int(resolution/max*x),int(resolution/max*y),int(resolution/max*z)]
 					if set.use_high_resolution: big_res = [big_res[0]*(set.amplify+1), big_res[1]*(set.amplify+1), big_res[2]*(set.amplify+1)]
-					
+
 					if len(density) == big_res[0]*big_res[1]*big_res[2]:
 						lux_context.attributeBegin(comment=domain.name, file=Files.VOLM)
 						lux_context.transform(matrix_to_list(domain.matrix_world, apply_worldscale=True))
@@ -411,7 +411,7 @@ def export_smoke(lux_context, scene):
 										.add_float('g', g)
 						lux_context.volume('volumegrid', volume_params)
 						lux_context.attributeEnd()
-						
+
 						LuxLog('Volumes: Volume Exported: %s' % domain.name)
 					else:
-						LuxLog('Volumes: Volumeexport failed: %s' % domain.name)
+						LuxLog('Volumes: Volume Export failed: %s' % domain.name)
