@@ -30,6 +30,7 @@ from extensions_framework import declarative_property_group
 import extensions_framework.util as efutil
 from extensions_framework.validate import Logic_Operator as LO
 
+from luxrender.properties.material import dict_merge
 from luxrender.properties.texture import ColorTextureParameter
 from luxrender.export import ParamSet
 
@@ -63,6 +64,7 @@ class LampColorTextureParameter(ColorTextureParameter):
 	def get_visibility(self):
 		vis = {
 			'%s_colortexture' % self.attr:	{ '%s_usecolortexture' % self.attr: True },
+			'%s_multiplycolor' % self.attr:	{ '%s_usecolortexture' % self.attr: True },
 		}
 		return vis
 
@@ -119,34 +121,40 @@ class luxrender_lamp_basic(declarative_property_group):
 
 class luxrender_lamp_point(luxrender_lamp_basic):
 	pass
+
+def spot_visibility():
+	return dict_merge(
+		luxrender_lamp_basic.visibility,
+		{ 'mapname': { 'projector': True } },
+	)
+
 class luxrender_lamp_spot(luxrender_lamp_basic):
+	controls = luxrender_lamp_basic.controls[:] + [
+		'projector',
+		'mapname'
+	]
+	visibility = spot_visibility()
+	properties = luxrender_lamp_basic.properties[:] + [
+		{
+			'type': 'bool',
+			'attr': 'projector',
+			'name': 'Projector',
+			'default': False
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'mapname',
+			'name': 'Projector image',
+			'description': 'Image to project from this lamp',
+			'default': ''
+		},
+	]
 	def get_paramset(self, lamp_object):
 		params = super().get_paramset(lamp_object)
 		if self.projector:
 			params.add_string('mapname', self.mapname)
 		return params
-
-luxrender_lamp_spot.controls.extend([
-	'projector',
-	'mapname'
-])
-luxrender_lamp_spot.visibility['mapname'] = { 'projector': True }
-luxrender_lamp_spot.properties.extend([
-	{
-		'type': 'bool',
-		'attr': 'projector',
-		'name': 'Projector',
-		'default': False
-	},
-	{
-		'type': 'string',
-		'subtype': 'FILE_PATH',
-		'attr': 'mapname',
-		'name': 'Projector image',
-		'description': 'Image to project from this lamp',
-		'default': ''
-	},
-])
 
 class luxrender_lamp_sun(declarative_property_group):
 	controls = [
