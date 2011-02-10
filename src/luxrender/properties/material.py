@@ -204,8 +204,6 @@ def mat_list():
 class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
-	This class will be instantiated within a Blender Material
-	object.
 	'''
 	
 	ef_attach_to = ['Material']
@@ -1651,8 +1649,6 @@ class luxrender_volume_data(declarative_property_group):
 class luxrender_volumes(declarative_property_group):
 	'''
 	Storage class for LuxRender Material volumes.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
 	
 	ef_attach_to = ['Scene']

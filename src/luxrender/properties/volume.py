@@ -33,8 +33,6 @@ from luxrender.export import ParamSet
 class luxrender_volumeintegrator(declarative_property_group):
 	'''
 	Storage class for LuxRender Volume Integrator settings.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
 	
 	ef_attach_to = ['Scene']

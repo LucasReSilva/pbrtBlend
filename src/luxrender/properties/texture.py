@@ -530,8 +530,6 @@ class FresnelTextureParameter(TextureParameterBase):
 class luxrender_texture(declarative_property_group):
 	'''
 	Storage class for LuxRender Texture settings.
-	This class will be instantiated within a Blender Texture
-	object.
 	'''
 	
 	ef_attach_to = ['Texture']

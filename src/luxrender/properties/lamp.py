@@ -74,8 +74,6 @@ TC_L = LampColorTextureParameter('L', 'Colour')
 class luxrender_lamp(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
-	This class will be instantiated within a Blender
-	lamp object.
 	'''
 	
 	ef_attach_to = ['Lamp']

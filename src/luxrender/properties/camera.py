@@ -62,8 +62,6 @@ def CameraVolumeParameter(attr, name):
 class luxrender_camera(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
-	This class will be instantiated within a Blender
-	camera object.
 	'''
 	
 	ef_attach_to = ['Camera']
@@ -599,8 +597,6 @@ def luxrender_colorspace_controls():
 class luxrender_colorspace(declarative_property_group):
 	'''
 	Storage class for LuxRender Colour-Space settings.
-	This class will be instantiated within a Blender
-	camera object.
 	'''
 	
 	ef_attach_to = ['luxrender_film']
@@ -843,8 +839,6 @@ def get_tonemaps():
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.
-	This class will be instantiated within a Blender
-	camera object.
 	'''
 	
 	ef_attach_to = ['luxrender_film']

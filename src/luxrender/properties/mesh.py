@@ -61,8 +61,6 @@ def mesh_visibility():
 class luxrender_mesh(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
-	This class will be instantiated within a Blender
-	mesh object.
 	'''
 	
 	ef_attach_to = ['Mesh', 'SurfaceCurve', 'TextCurve']

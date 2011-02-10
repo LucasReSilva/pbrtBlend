@@ -34,8 +34,6 @@ from luxrender.export import ParamSet
 class luxrender_accelerator(declarative_property_group):
 	'''
 	Storage class for LuxRender Accelerator settings.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
 	
 	ef_attach_to = ['Scene']

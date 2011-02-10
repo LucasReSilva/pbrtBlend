@@ -34,8 +34,6 @@ from luxrender.export import ParamSet
 class luxrender_sampler(declarative_property_group):
 	'''
 	Storage class for LuxRender Sampler settings.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
 	
 	ef_attach_to = ['Scene']

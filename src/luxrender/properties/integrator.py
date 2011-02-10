@@ -35,8 +35,6 @@ from luxrender.outputs import LuxLog
 class luxrender_integrator(declarative_property_group):
 	'''
 	Storage class for LuxRender SurfaceIntegrator settings.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
 	
 	ef_attach_to = ['Scene']

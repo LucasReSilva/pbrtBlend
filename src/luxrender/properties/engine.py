@@ -71,8 +71,6 @@ def engine_controls():
 class luxrender_engine(declarative_property_group):
 	'''
 	Storage class for LuxRender Engine settings.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
 	
 	ef_attach_to = ['Scene']
