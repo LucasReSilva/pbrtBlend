@@ -182,15 +182,7 @@ class GeometryExporter(object):
 				try:
 					if i not in ffaces_mats.keys(): continue
 					
-					try:
-						mesh_mat = mesh.materials[i]
-					except IndexError:
-						mesh_mat = None
-					
-					if mesh_mat is not None:
-						mesh_name = ('%s_%s' % (obj.data.name, mesh_mat.name)).replace(' ','_')
-					else:
-						mesh_name = obj.data.name.replace(' ','_')
+					mesh_name = ('%s_%03d' % (obj.data.name, i)).replace(' ','_')
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
 					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
@@ -265,7 +257,7 @@ class GeometryExporter(object):
 					
 					mesh_definition = (
 						mesh_name,
-						mesh_mat,
+						i,
 						'plymesh',
 						shape_params
 					)
@@ -323,23 +315,15 @@ class GeometryExporter(object):
 				try:
 					if i not in ffaces_mats.keys(): continue
 					
-					try:
-						mesh_mat = mesh.materials[i]
-					except IndexError:
-						mesh_mat = None
+					mesh_name = ('%s_%03d' % (obj.data.name, i)).replace(' ','_')
 					
-					if mesh_mat is not None:
-						mesh_name = ('%s_%s' % (obj.data.name, mesh_mat.name)).replace(' ','_')
-					else:
-						mesh_name = obj.data.name.replace(' ','_')
-					
-					# If this mesh/mat combo has already been processed, get it from the cache
+					# If this mesh/mat-index combo has already been processed, get it from the cache
 					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
 						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
 						continue
 					
 					if OBJECT_ANALYSIS: print(' -> NativeMesh:')
-					if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh_mat)
+					if OBJECT_ANALYSIS: print('  -> Material index: %d' % i)
 					if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
 					
 					# face indices
@@ -440,7 +424,7 @@ class GeometryExporter(object):
 					
 					mesh_definition = (
 						mesh_name,
-						mesh_mat,
+						i,
 						'mesh',
 						shape_params
 					)
@@ -487,7 +471,7 @@ class GeometryExporter(object):
 		an objectBegin..objectEnd block containing the Shape definition.
 		"""
 		
-		me_name, me_mat, me_shape_type, me_shape_params = mesh_definition
+		me_name, me_mat_index, me_shape_type, me_shape_params = mesh_definition
 		
 		if len(me_shape_params) == 0: return
 		
@@ -545,25 +529,26 @@ class GeometryExporter(object):
 				self.lux_context.coordinateSystem('%s_motion_%i' % (obj.name, i))
 				self.lux_context.transformEnd()
 		
-		for me_name, me_mat, me_shape_type, me_shape_params in mesh_definitions:
+		for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
 			self.lux_context.attributeBegin()
 			
-			if me_mat is not None:
+			ob_mat = obj.material_slots[me_mat_index].material
+			if ob_mat is not None:
 				
 				# Export material definition && check for emission
 				if self.lux_context.API_TYPE == 'FILE':
 					self.lux_context.set_output_file(Files.MATS)
-					object_is_emitter = me_mat.luxrender_material.export(self.lux_context, me_mat, mode='indirect')
+					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='indirect')
 					self.lux_context.set_output_file(Files.GEOM)
-					self.lux_context.namedMaterial(me_mat.name)
+					self.lux_context.namedMaterial(ob_mat.name)
 				elif self.lux_context.API_TYPE == 'PURE':
-					object_is_emitter = me_mat.luxrender_material.export(self.lux_context, me_mat, mode='direct')
+					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='direct')
 				
 				if object_is_emitter:
-					self.lux_context.lightGroup(me_mat.luxrender_emission.lightgroup, [])
-					self.lux_context.areaLightSource( *me_mat.luxrender_emission.api_output() )
+					self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output() )
 				
-				int_v, ext_v = get_material_volume_defs(me_mat)
+				int_v, ext_v = get_material_volume_defs(ob_mat)
 				if int_v != '':
 					self.lux_context.interior(int_v)
 				elif self.scene.luxrender_world.default_interior_volume != '':
