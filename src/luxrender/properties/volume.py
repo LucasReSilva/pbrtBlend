@@ -24,21 +24,20 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-# TODO: adapt values written to d based on simple/advanced views
-
-# TODO: check parameter completeness against Lux API
-
+@ef_initialise_properties
 class luxrender_volumeintegrator(declarative_property_group):
 	'''
 	Storage class for LuxRender Volume Integrator settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		'volumeintegrator', 'stepsize'

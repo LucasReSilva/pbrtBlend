@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from luxrender.export import ParamSet
@@ -57,12 +57,15 @@ def mesh_visibility():
 	
 	return vis
 
+@ef_initialise_properties
 class luxrender_mesh(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
 	This class will be instantiated within a Blender
 	mesh object.
 	'''
+	
+	ef_attach_to = ['Mesh', 'SurfaceCurve', 'TextCurve']
 	
 	controls = [
 		'mesh_type',

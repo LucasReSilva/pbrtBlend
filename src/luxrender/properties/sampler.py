@@ -24,18 +24,21 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
+@ef_initialise_properties
 class luxrender_sampler(declarative_property_group):
 	'''
 	Storage class for LuxRender Sampler settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		[ 0.7, 'sampler', 'advanced'],

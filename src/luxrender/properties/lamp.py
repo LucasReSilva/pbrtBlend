@@ -26,7 +26,7 @@
 #
 import bpy
 
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 import extensions_framework.util as efutil
 from extensions_framework.validate import Logic_Operator as LO
 
@@ -70,12 +70,15 @@ class LampColorTextureParameter(ColorTextureParameter):
 
 TC_L = LampColorTextureParameter('L', 'Colour')
 
+@ef_initialise_properties
 class luxrender_lamp(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
 	This class will be instantiated within a Blender
 	lamp object.
 	'''
+	
+	ef_attach_to = ['Lamp']
 	
 	controls = [
 		'importance', 'lightgroup', 'Exterior'
@@ -119,21 +122,22 @@ class luxrender_lamp_basic(declarative_property_group):
 		params.update( TC_L.get_paramset(self) )
 		return params
 
+@ef_initialise_properties
 class luxrender_lamp_point(luxrender_lamp_basic):
-	pass
+	ef_attach_to = ['luxrender_lamp']
 
-def spot_visibility():
-	return dict_merge(
-		luxrender_lamp_basic.visibility,
-		{ 'mapname': { 'projector': True } },
-	)
-
+@ef_initialise_properties
 class luxrender_lamp_spot(luxrender_lamp_basic):
+	ef_attach_to = ['luxrender_lamp']
+	
 	controls = luxrender_lamp_basic.controls[:] + [
 		'projector',
 		'mapname'
 	]
-	visibility = spot_visibility()
+	visibility = dict_merge(
+		luxrender_lamp_basic.visibility,
+		{ 'mapname': { 'projector': True } },
+	)
 	properties = luxrender_lamp_basic.properties[:] + [
 		{
 			'type': 'bool',
@@ -156,7 +160,10 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
 			params.add_string('mapname', self.mapname)
 		return params
 
+@ef_initialise_properties
 class luxrender_lamp_sun(declarative_property_group):
+	ef_attach_to = ['luxrender_lamp']
+	
 	controls = [
 		'sunsky_type',
 		'turbidity',
@@ -271,7 +278,10 @@ class luxrender_lamp_sun(declarative_property_group):
 		
 		return params
 
+@ef_initialise_properties
 class luxrender_lamp_area(declarative_property_group):
+	ef_attach_to = ['luxrender_lamp']
+	
 	controls = TC_L.controls + [
 		'power',
 		'efficacy',
@@ -310,7 +320,10 @@ class luxrender_lamp_area(declarative_property_group):
 		params.update( TC_L.get_paramset(self) )
 		return params
 
+@ef_initialise_properties
 class luxrender_lamp_hemi(declarative_property_group):
+	ef_attach_to = ['luxrender_lamp']
+	
 	controls = [
 		[0.323, 'L_colorlabel', 'L_color'],
 		'infinite_map',

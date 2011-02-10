@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 
 from .material import VolumeParameter
 
@@ -48,7 +48,10 @@ def WorldVolumeParameter(attr, name):
 		},
 	]
 
+@ef_initialise_properties
 class luxrender_world(declarative_property_group):
+	ef_attach_to = ['Scene']
+	
 	controls = [
 		'default_interior',
 		'default_exterior'

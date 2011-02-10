@@ -30,7 +30,7 @@ import os
 import bpy
 
 from extensions_framework import util as efutil
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework.validate import Logic_OR as O
 
 from luxrender.properties import dbo
@@ -58,12 +58,15 @@ def CameraVolumeParameter(attr, name):
 		},
 	]
 
+@ef_initialise_properties
 class luxrender_camera(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
 	This class will be instantiated within a Blender
 	camera object.
 	'''
+	
+	ef_attach_to = ['Camera']
 	
 	controls = [
 		'Exterior',
@@ -374,6 +377,203 @@ class luxrender_camera(declarative_property_group):
 		dbo('CAMERA', out)
 		return out
 
+# TODO, move all film properties into this property group
+@ef_initialise_properties
+class luxrender_film(declarative_property_group):
+	
+	ef_attach_to = ['luxrender_camera']
+	
+	controls = [
+		'writeinterval',
+		'displayinterval',
+		'lbl_outputs',
+		'integratedimaging',
+		['write_png', 'write_exr','write_tga','write_flm'],
+		'output_alpha',
+		'outlierrejection_k',
+	]
+	
+	visibility = {}
+	
+	properties = [
+		
+		{
+			'type': 'int',
+			'attr': 'writeinterval',
+			'name': 'Save interval',
+			'description': 'Period for writing images to disk (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'displayinterval',
+			'name': 'GUI refresh interval',
+			'description': 'Period for updating rendering on screen (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text',
+			'attr': 'lbl_outputs',
+			'name': 'Output formats'
+		},
+		{
+			'type': 'bool',
+			'attr': 'integratedimaging',
+			'name': 'Integrated Imaging workflow',
+			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_png',
+			'name': 'PNG',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_exr',
+			'name': 'EXR',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_tga',
+			'name': 'TGA',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_flm',
+			'name': 'FLM',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'output_alpha',
+			'name': 'Enable alpha channel',
+			'default': False
+		},
+		{
+			'type': 'int',
+			'attr': 'outlierrejection_k',
+			'name': 'Firefly rejection',
+			'description': 'Firefly (outlier) rejection k parameter',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+		},
+	]
+	
+	def resolution(self):
+		'''
+		Calculate the output render resolution
+		
+		Returns		tuple(2) (floats)
+		'''
+		scene = LuxManager.CurrentScene
+		
+		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
+		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
+		
+		return xr, yr
+	
+	def get_gamma(self):
+		if self.luxrender_colorspace.preset:
+			return getattr(colorspace_presets, self.luxrender_colorspace.preset_name).gamma
+		else:
+			return self.luxrender_colorspace.gamma
+	
+	def api_output(self):
+		'''
+		Calculate type and parameters for LuxRender Film statement
+		
+		Returns		tuple(2) (string, list) 
+		'''
+		scene = LuxManager.CurrentScene
+		
+		xr, yr = self.resolution()
+		
+		params = ParamSet()
+		
+		# Set resolution
+		params.add_integer('xresolution', int(xr))
+		params.add_integer('yresolution', int(yr))
+		
+		# ColourSpace
+		if self.luxrender_colorspace.preset:
+			cs_object = getattr(colorspace_presets, self.luxrender_colorspace.preset_name)
+		else:
+			cs_object = self.luxrender_colorspace
+			
+		params.add_float('gamma', self.get_gamma())
+		params.add_float('colorspace_white',	[cs_object.cs_whiteX,	cs_object.cs_whiteY])
+		params.add_float('colorspace_red',		[cs_object.cs_redX,		cs_object.cs_redY])
+		params.add_float('colorspace_green',	[cs_object.cs_greenX,	cs_object.cs_greenY])
+		params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
+		
+		# Camera Response Function
+		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf:
+			if scene.camera.library is not None:
+				local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
+			else:
+				local_crf_filepath = self.luxrender_colorspace.crf_file
+			local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
+			if scene.luxrender_engine.embed_filedata:
+				from luxrender.util import bencode_file2string
+				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
+				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath) )
+			else:
+				params.add_string('cameraresponse', local_crf_filepath)
+		
+		# Output types
+		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
+		params.add_bool('write_resume_flm', self.write_flm)
+		
+		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
+			# Set up params to enable z buffer and set gamma=1.0
+			params.add_string('write_exr_channels', 'RGBA')
+			params.add_bool('write_exr_halftype', False)
+			params.add_bool('write_exr_applyimaging', True)
+			params.add_bool('write_exr_ZBuf', True)
+			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
+			params.add_float('gamma', 1.0) # Linear workflow !
+		
+		if self.output_alpha:
+			output_channels = 'RGBA'
+		else:
+			output_channels = 'RGB'
+		
+		params.add_bool('write_exr', self.write_exr)
+		if self.write_exr: params.add_string('write_exr_channels', output_channels)
+		params.add_bool('write_png', self.write_png)
+		if self.write_png: params.add_string('write_png_channels', output_channels)
+		params.add_bool('write_tga', self.write_tga)
+		if self.write_tga: params.add_string('write_tga_channels', output_channels)
+		
+		params.add_integer('displayinterval', self.displayinterval)
+		params.add_integer('writeinterval', self.writeinterval)
+		
+		# Halt conditions
+		if scene.luxrender_sampler.haltspp > 0:
+			params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
+		
+		if scene.luxrender_sampler.halttime > 0:
+			params.add_integer('halttime', scene.luxrender_sampler.halttime)
+		
+		if self.outlierrejection_k > 0:
+			params.add_integer('outlierrejection_k', self.outlierrejection_k)
+		
+		# update the film settings with tonemapper settings
+		params.update( self.luxrender_tonemapping.get_paramset() )
+		
+		return ('fleximage', params)
+
 def luxrender_colorspace_controls():
 	ctl = [
 		'cs_label',
@@ -395,12 +595,15 @@ def luxrender_colorspace_controls():
 	
 	return ctl
 
+@ef_initialise_properties
 class luxrender_colorspace(declarative_property_group):
 	'''
 	Storage class for LuxRender Colour-Space settings.
 	This class will be instantiated within a Blender
 	camera object.
 	'''
+	
+	ef_attach_to = ['luxrender_film']
 	
 	controls = luxrender_colorspace_controls()
 	
@@ -619,200 +822,6 @@ class colorspace_presets(object):
 		cs_blueX	= 0.1666
 		cs_blueY	= 0.0089
 
-# TODO, move all film properties into this property group
-
-class luxrender_film(declarative_property_group):
-	controls = [
-		'writeinterval',
-		'displayinterval',
-		'lbl_outputs',
-		'integratedimaging',
-		['write_png', 'write_exr','write_tga','write_flm'],
-		'output_alpha',
-		'outlierrejection_k',
-	]
-	
-	visibility = {}
-	
-	properties = [
-		
-		{
-			'type': 'int',
-			'attr': 'writeinterval',
-			'name': 'Save interval',
-			'description': 'Period for writing images to disk (seconds)',
-			'default': 10,
-			'min': 2,
-			'soft_min': 2,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'displayinterval',
-			'name': 'GUI refresh interval',
-			'description': 'Period for updating rendering on screen (seconds)',
-			'default': 10,
-			'min': 2,
-			'soft_min': 2,
-			'save_in_preset': True
-		},
-		{
-			'type': 'text',
-			'attr': 'lbl_outputs',
-			'name': 'Output formats'
-		},
-		{
-			'type': 'bool',
-			'attr': 'integratedimaging',
-			'name': 'Integrated Imaging workflow',
-			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_png',
-			'name': 'PNG',
-			'default': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_exr',
-			'name': 'EXR',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_tga',
-			'name': 'TGA',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_flm',
-			'name': 'FLM',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'output_alpha',
-			'name': 'Enable alpha channel',
-			'default': False
-		},
-		{
-			'type': 'int',
-			'attr': 'outlierrejection_k',
-			'name': 'Firefly rejection',
-			'description': 'Firefly (outlier) rejection k parameter',
-			'default': 0,
-			'min': 0,
-			'soft_min': 0,
-		},
-	]
-	
-	def resolution(self):
-		'''
-		Calculate the output render resolution
-		
-		Returns		tuple(2) (floats)
-		'''
-		scene = LuxManager.CurrentScene
-		
-		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
-		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
-		
-		return xr, yr
-	
-	def get_gamma(self):
-		if self.luxrender_colorspace.preset:
-			return getattr(colorspace_presets, self.luxrender_colorspace.preset_name).gamma
-		else:
-			return self.luxrender_colorspace.gamma
-	
-	def api_output(self):
-		'''
-		Calculate type and parameters for LuxRender Film statement
-		
-		Returns		tuple(2) (string, list) 
-		'''
-		scene = LuxManager.CurrentScene
-		
-		xr, yr = self.resolution()
-		
-		params = ParamSet()
-		
-		# Set resolution
-		params.add_integer('xresolution', int(xr))
-		params.add_integer('yresolution', int(yr))
-		
-		# ColourSpace
-		if self.luxrender_colorspace.preset:
-			cs_object = getattr(colorspace_presets, self.luxrender_colorspace.preset_name)
-		else:
-			cs_object = self.luxrender_colorspace
-			
-		params.add_float('gamma', self.get_gamma())
-		params.add_float('colorspace_white',	[cs_object.cs_whiteX,	cs_object.cs_whiteY])
-		params.add_float('colorspace_red',		[cs_object.cs_redX,		cs_object.cs_redY])
-		params.add_float('colorspace_green',	[cs_object.cs_greenX,	cs_object.cs_greenY])
-		params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
-		
-		# Camera Response Function
-		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf:
-			if scene.camera.library is not None:
-				local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
-			else:
-				local_crf_filepath = self.luxrender_colorspace.crf_file
-			local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
-			if scene.luxrender_engine.embed_filedata:
-				from luxrender.util import bencode_file2string
-				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
-				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath) )
-			else:
-				params.add_string('cameraresponse', local_crf_filepath)
-		
-		# Output types
-		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
-		params.add_bool('write_resume_flm', self.write_flm)
-		
-		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
-			# Set up params to enable z buffer and set gamma=1.0
-			params.add_string('write_exr_channels', 'RGBA')
-			params.add_bool('write_exr_halftype', False)
-			params.add_bool('write_exr_applyimaging', True)
-			params.add_bool('write_exr_ZBuf', True)
-			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
-			params.add_float('gamma', 1.0) # Linear workflow !
-		
-		if self.output_alpha:
-			output_channels = 'RGBA'
-		else:
-			output_channels = 'RGB'
-		
-		params.add_bool('write_exr', self.write_exr)
-		if self.write_exr: params.add_string('write_exr_channels', output_channels)
-		params.add_bool('write_png', self.write_png)
-		if self.write_png: params.add_string('write_png_channels', output_channels)
-		params.add_bool('write_tga', self.write_tga)
-		if self.write_tga: params.add_string('write_tga_channels', output_channels)
-		
-		params.add_integer('displayinterval', self.displayinterval)
-		params.add_integer('writeinterval', self.writeinterval)
-		
-		# Halt conditions
-		if scene.luxrender_sampler.haltspp > 0:
-			params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
-		
-		if scene.luxrender_sampler.halttime > 0:
-			params.add_integer('halttime', scene.luxrender_sampler.halttime)
-		
-		if self.outlierrejection_k > 0:
-			params.add_integer('outlierrejection_k', self.outlierrejection_k)
-		
-		# update the film settings with tonemapper settings
-		params.update( self.luxrender_tonemapping.get_paramset() )
-		
-		return ('fleximage', params)
-
 def get_tonemaps():
 	
 	items =  [
@@ -830,12 +839,15 @@ def get_tonemaps():
 	
 	return items
 
+@ef_initialise_properties
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.
 	This class will be instantiated within a Blender
 	camera object.
 	'''
+	
+	ef_attach_to = ['luxrender_film']
 	
 	controls = [
 		'tm_label',

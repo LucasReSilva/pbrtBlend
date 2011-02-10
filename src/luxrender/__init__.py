@@ -33,7 +33,7 @@ bl_info = {
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 7, 1),
 	"blender": (2, 5, 6),
-	"api": 33600,
+	"api": 34764,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",
@@ -46,7 +46,7 @@ bl_addon_info = {
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 7, 1),
 	"blender": (2, 5, 6),
-	"api": 33600,
+	"api": 34764,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",
@@ -62,13 +62,7 @@ else:
 	from . import core
 
 def register():
-	'''
-	Register the LuxRender Addon
-	'''
-	core.RENDERENGINE_luxrender.install()
+	pass
 
 def unregister():
-	'''
-	Un-register the LuxRender Addon
-	'''
-	core.RENDERENGINE_luxrender.uninstall()
+	pass

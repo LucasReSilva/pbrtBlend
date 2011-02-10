@@ -24,9 +24,12 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 
+@ef_initialise_properties
 class luxrender_object(declarative_property_group):
+	ef_attach_to = ['Object']
+	
 	controls = [
 		'append_external_mesh',
 		['use_smoothing', 'hide_proxy_mesh'],

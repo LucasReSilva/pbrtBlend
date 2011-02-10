@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
@@ -67,12 +67,15 @@ def engine_controls():
 	
 	return ectl
 
+@ef_initialise_properties
 class luxrender_engine(declarative_property_group):
 	'''
 	Storage class for LuxRender Engine settings.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	ef_attach_to = ['Scene']
 	
 	controls = engine_controls()
 	
@@ -244,7 +247,10 @@ class luxrender_engine(declarative_property_group):
 		
 		return self.renderer, renderer_params
 
+@ef_initialise_properties
 class luxrender_networking(declarative_property_group):
+	
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		'use_network_servers',

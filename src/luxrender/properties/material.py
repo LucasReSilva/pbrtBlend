@@ -29,7 +29,7 @@ import bpy
 
 from copy import deepcopy
 
-from extensions_framework import declarative_property_group
+from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
@@ -200,12 +200,15 @@ def mat_list():
 	
 	return mat_list
 
+@ef_initialise_properties
 class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
 	This class will be instantiated within a Blender Material
 	object.
 	'''
+	
+	ef_attach_to = ['Material']
 	
 	controls = [
 		'type',
@@ -287,11 +290,14 @@ class luxrender_material(declarative_property_group):
 		
 		return material.luxrender_emission.use_emission
 
+@ef_initialise_properties
 class luxrender_mat_compositing(declarative_property_group):
 	'''
 	Storage class for LuxRender Material compositing settings
 	for DistributedPath integrator.
 	'''
+	
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'enabled',
@@ -412,12 +418,14 @@ def transparency_visibility():
 	t_vis = texture_append_visibility(t_vis, TF_alpha, { 'transparent': True, 'alpha_source': 'texture' })
 	
 	return t_vis
-	
+
+@ef_initialise_properties
 class luxrender_transparency(declarative_property_group):
 	'''
 	Storage class for LuxRender Material alpha transparency settings.
-	This class will be instantiated within a Blender Object.
 	'''
+	
+	ef_attach_to = ['Material']
 	
 	controls = [
 		'transparent', 
@@ -597,7 +605,9 @@ def carpaint_visibility():
 	
 	return cp_vis
 
+@ef_initialise_properties
 class luxrender_mat_carpaint(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'name'
@@ -672,7 +682,9 @@ class luxrender_mat_carpaint(declarative_property_group):
 		
 		return carpaint_params
 
+@ef_initialise_properties
 class luxrender_mat_glass(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'architectural',
@@ -723,7 +735,9 @@ class luxrender_mat_glass(declarative_property_group):
 		
 		return glass_params
 
+@ef_initialise_properties
 class luxrender_mat_glass2(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'architectural',
@@ -757,7 +771,9 @@ class luxrender_mat_glass2(declarative_property_group):
 		
 		return glass2_params
 
+@ef_initialise_properties
 class luxrender_mat_roughglass(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 	] + \
@@ -819,8 +835,10 @@ def glossy_visibility():
 	g_vis = texture_append_visibility(g_vis, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
 	
 	return g_vis
-	
+
+@ef_initialise_properties
 class luxrender_mat_glossy(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'multibounce'
@@ -905,7 +923,9 @@ def glossy_lossy_visibility():
 	
 	return gl_vis
 
+@ef_initialise_properties
 class luxrender_mat_glossy_lossy(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 	] + \
@@ -961,7 +981,9 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		
 		return glossy_lossy_params
 
+@ef_initialise_properties
 class luxrender_mat_matte(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 	] + \
@@ -985,8 +1007,10 @@ class luxrender_mat_matte(declarative_property_group):
 		matte_params.update( TF_sigma.get_paramset(self) )
 		
 		return matte_params
-	
+
+@ef_initialise_properties
 class luxrender_mat_mattetranslucent(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'energyconserving'
@@ -1063,7 +1087,9 @@ def glossytranslucent_visibility():
 	
 	return gt_vis
 
+@ef_initialise_properties
 class luxrender_mat_glossytranslucent(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'multibounce',
@@ -1194,7 +1220,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		
 		return glossytranslucent_params
 
+@ef_initialise_properties
 class luxrender_mat_metal(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'name',
@@ -1253,7 +1281,10 @@ class luxrender_mat_metal(declarative_property_group):
 		
 		return metal_params
 
+@ef_initialise_properties
 class luxrender_mat_scatter(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
+	
 	controls = [
 	] + \
 		TC_Kd.controls + \
@@ -1277,7 +1308,9 @@ class luxrender_mat_scatter(declarative_property_group):
 		
 		return scatter_params
 
+@ef_initialise_properties
 class luxrender_mat_shinymetal(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 	] + \
@@ -1318,7 +1351,9 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		
 		return shinymetal_params
 
+@ef_initialise_properties
 class luxrender_mat_mirror(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 	] + \
@@ -1347,7 +1382,9 @@ class luxrender_mat_mirror(declarative_property_group):
 		
 		return mirror_params
 
+@ef_initialise_properties
 class luxrender_mat_mix(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 		'namedmaterial1',
@@ -1372,7 +1409,9 @@ class luxrender_mat_mix(declarative_property_group):
 		
 		return mix_params
 
+@ef_initialise_properties
 class luxrender_mat_null(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = [
 	]
@@ -1386,7 +1425,9 @@ class luxrender_mat_null(declarative_property_group):
 	def get_paramset(self, material):
 		return ParamSet()
 
+@ef_initialise_properties
 class luxrender_mat_velvet(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
 	
 	controls = TC_Kd.controls + [
 		'thickness',
@@ -1500,12 +1541,15 @@ def volume_visibility():
 	
 	return v_vis
 
+@ef_initialise_properties
 class luxrender_volume_data(declarative_property_group):
 	'''
 	Storage class for LuxRender volume data. The
 	luxrender_volumes object will store 1 or more of
 	these in its CollectionProperty 'volumes'.
 	'''
+	
+	ef_attach_to = []	# not attached
 	
 	controls = [
 		'type',
@@ -1603,12 +1647,15 @@ class luxrender_volume_data(declarative_property_group):
 		
 		return self.type, vp
 
+@ef_initialise_properties
 class luxrender_volumes(declarative_property_group):
 	'''
 	Storage class for LuxRender Material volumes.
 	This class will be instantiated within a Blender scene
 	object.
 	'''
+	
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		'volumes_select',
@@ -1664,11 +1711,13 @@ class EmissionColorTextureParameter(ColorTextureParameter):
 
 TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0,1.0,1.0) )
 
+@ef_initialise_properties
 class luxrender_emission(declarative_property_group):
 	'''
 	Storage class for LuxRender Material emission settings.
-	This class will be instantiated within a Blender Object.
 	'''
+	
+	ef_attach_to = ['Material']
 	
 	controls = [
 		'use_emission',
