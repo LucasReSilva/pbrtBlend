@@ -135,7 +135,9 @@ class GeometryExporter(object):
 		if export_original:
 			# Choose the mesh export type, if set, or use the default
 			mesh_type = obj.data.luxrender_mesh.mesh_type
-			global_type = self.scene.luxrender_engine.mesh_type
+			# If the rendering is INT and not writing to disk, we must use native mesh format
+			internal_nofiles = self.scene.luxrender_engine.export_type=='INT' and not self.scene.luxrender_engine.write_files
+			global_type = 'native' if internal_nofiles else self.scene.luxrender_engine.mesh_type
 			if mesh_type == 'native' or (mesh_type == 'global' and global_type == 'native'):
 				mesh_definitions.extend( self.buildNativeMesh(obj) )
 			if mesh_type == 'binary_ply' or (mesh_type == 'global' and global_type == 'binary_ply'):
