@@ -426,7 +426,7 @@ class luxrender_transparency(declarative_property_group):
 	ef_attach_to = ['Material']
 	
 	controls = [
-		'transparent', 
+		# 'transparent', # drawn in header 
 		'alpha_source',
 		'alpha_value',
 	] + \
@@ -1716,7 +1716,7 @@ class luxrender_emission(declarative_property_group):
 	ef_attach_to = ['Material']
 	
 	controls = [
-		'use_emission',
+		#'use_emission', # drawn in header
 		'lightgroup',
 	] + \
 	TC_L.controls + \

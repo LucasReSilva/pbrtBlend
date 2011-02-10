@@ -53,10 +53,14 @@ class ui_luxrender_material_emission(luxrender_material_base, bpy.types.Panel):
 	'''
 	
 	bl_label = 'LuxRender Emission'
+	bl_options = 'DEFAULT_CLOSED'
 	
 	display_property_groups = [
 		( ('material',), 'luxrender_emission' )
 	]
+	
+	def draw_header(self, context):
+		self.layout.prop(context.material.luxrender_emission, "use_emission", text="")
 
 class ui_luxrender_material_transparency(luxrender_material_base, bpy.types.Panel):
 	'''
@@ -64,6 +68,7 @@ class ui_luxrender_material_transparency(luxrender_material_base, bpy.types.Pane
 	'''
 	
 	bl_label = 'LuxRender Alpha Transparency'
+	bl_options = 'DEFAULT_CLOSED'
 	
 	display_property_groups = [
 		( ('material',), 'luxrender_transparency' )
@@ -71,6 +76,9 @@ class ui_luxrender_material_transparency(luxrender_material_base, bpy.types.Pane
 	
 	# only textures with Kd (or similar) for now
 	#LUX_COMPAT = {'carpaint', 'glass', 'glossy', 'glossy_lossy', 'mattetranslucent', 'glossytranslucent', 'scatter', 'matte', 'mirror', 'velvet'}
+	
+	def draw_header(self, context):
+		self.layout.prop(context.material.luxrender_transparency, "transparent", text="")
 	
 	@classmethod
 	def poll(cls, context):
