@@ -489,7 +489,7 @@ class GeometryExporter(object):
 		self.lux_context.shape(me_shape_type, me_shape_params)
 		self.lux_context.objectEnd()
 	
-	def exportShapeInstances(self, obj, mesh_definitions, matrix=None):
+	def exportShapeInstances(self, obj, mesh_definitions, matrix=None, parent=None):
 		
 		# Don't export instances of portal meshes
 		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal: return
@@ -534,8 +534,13 @@ class GeometryExporter(object):
 		for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
 			self.lux_context.attributeBegin()
 			
+			if parent != None:
+				mat_object = parent
+			else:
+				mat_object = obj
+			
 			try:
-				ob_mat = obj.material_slots[me_mat_index].material
+				ob_mat = mat_object.material_slots[me_mat_index].material
 			except IndexError:
 				ob_mat = None
 				LuxLog('WARNING: material slot %d on object "%s" is unassigned!' %(me_mat_index+1, obj.name))
@@ -619,7 +624,8 @@ class GeometryExporter(object):
 					self.exportShapeInstances(
 						obj,
 						self.buildMesh(dupli_ob.object),
-						matrix=[dupli_ob.matrix,None]
+						matrix=[dupli_ob.matrix,None],
+						parent=dupli_ob.object
 					)
 					
 					dupli_object_names.add( dupli_ob.object.name )
