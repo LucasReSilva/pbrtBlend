@@ -534,7 +534,12 @@ class GeometryExporter(object):
 		for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
 			self.lux_context.attributeBegin()
 			
-			ob_mat = obj.material_slots[me_mat_index].material
+			try:
+				ob_mat = obj.material_slots[me_mat_index].material
+			except IndexError:
+				ob_mat = None
+				LuxLog('WARNING: material slot %d on object "%s" is unassigned!' %(me_mat_index+1, obj.name))
+			
 			if ob_mat is not None:
 				
 				# Export material definition && check for emission
