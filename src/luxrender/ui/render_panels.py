@@ -36,21 +36,6 @@ class render_described_context(RenderButtonsPanel, property_group_renderer):
 	
 	COMPAT_ENGINES = {'luxrender'}
 
-class setup_preset(render_described_context, bpy.types.Panel):
-	'''
-	Engine settings presets UI Panel
-	'''
-	
-	bl_label = 'LuxRender Engine Presets'
-	
-	def draw(self, context):
-		row = self.layout.row(align=True)
-		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
-		
-		super().draw(context)
-
 class engine(render_described_context, bpy.types.Panel):
 	'''
 	Engine settings UI Panel
@@ -61,6 +46,14 @@ class engine(render_described_context, bpy.types.Panel):
 	display_property_groups = [
 		( ('scene',), 'luxrender_engine' )
 	]
+	
+	def draw(self, context):
+		row = self.layout.row(align=True)
+		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
+		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
+		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
+		
+		super().draw(context)
 
 class sampler(render_described_context, bpy.types.Panel):
 	'''

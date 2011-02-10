@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import os
+import os, struct
 OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
 from extensions_framework import util as efutil
@@ -35,6 +35,16 @@ from luxrender.export import ParamSet, ExportProgressThread, ExportCache, object
 from luxrender.export import matrix_to_list
 from luxrender.export.materials import get_material_volume_defs
 
+
+def time_export(func):
+	import time
+	def _wrap(*args, **kwargs):
+		start = time.time()
+		result = func(*args, **kwargs)
+		end = time.time()
+		print('Calling %s took %0.4f seconds' % (func, (end-start)))
+		return result
+	return _wrap
 
 class InvalidGeometryException(Exception):
 	pass
@@ -91,13 +101,10 @@ class GeometryExporter(object):
 		self.valid_particles_callbacks = self.callbacks['particles'].keys()
 		self.valid_objects_callbacks = self.callbacks['objects'].keys()
 	
-	def buildNativeMesh(self, obj):
+	def buildMesh(self, obj):
 		"""
-		Convert supported blender objects into a MESH, and then split into parts
-		according to vertex material assignment, and construct a mesh_name and
-		ParamSet for each part which will become a LuxRender Shape statement
-		wrapped within objectBegin..objectEnd or placed in an
-		attributeBegin..attributeEnd scope, depending if instancing is allowed.
+		Decide which mesh format to output, if any, since the given object
+		may be an external PLY proxy.
 		"""
 		
 		# Using a cache on object massively speeds up dupli instance export
@@ -105,8 +112,12 @@ class GeometryExporter(object):
 		
 		mesh_definitions = []
 		
+		export_original = True
 		ply_mesh_name = '%s_ply' % obj.data.name
 		if obj.luxrender_object.append_external_mesh:
+			if obj.luxrender_object.hide_proxy_mesh:
+				export_original = False
+			
 			if self.allow_instancing(obj) and self.ExportedMeshes.have(ply_mesh_name):
 				mesh_definitions.append( self.ExportedMeshes.get(ply_mesh_name) )
 			else:
@@ -122,104 +133,83 @@ class GeometryExporter(object):
 					self.exportShapeDefinition(obj, mesh_definition)
 					self.ExportedMeshes.add(ply_mesh_name, mesh_definition)
 		
+		if export_original:
+			# Choose the mesh export type, if set, or use the default
+			mesh_type = obj.data.luxrender_mesh.mesh_type
+			global_type = self.scene.luxrender_engine.mesh_type
+			if mesh_type == 'native' or (mesh_type == 'global' and global_type == 'native'):
+				mesh_definitions.extend( self.buildNativeMesh(obj) )
+			if mesh_type == 'binary_ply' or (mesh_type == 'global' and global_type == 'binary_ply'):
+				mesh_definitions.extend( self.buildBinaryPLYMesh(obj) )
+		
+		self.ExportedObjects.add(obj, mesh_definitions)
+		return mesh_definitions
+	
+	#@time_export
+	def buildBinaryPLYMesh(self, obj):
+		"""
+		Convert supported blender objects into a MESH, and then split into parts
+		according to vertex material assignment, and construct a mesh_name and
+		ParamSet for each part which will become a LuxRender PLYShape statement
+		wrapped within objectBegin..objectEnd or placed in an
+		attributeBegin..attributeEnd scope, depending if instancing is allowed.
+		The actual geometry will be dumped to a binary ply file.
+		"""
+		
 		try:
-			#(not a) or (a and not b) == not (a and b)
-			if not (obj.luxrender_object.append_external_mesh and obj.luxrender_object.hide_proxy_mesh):
-				mesh = obj.create_mesh(self.scene, True, 'RENDER')
-				if mesh is None:
-					raise UnexportableObjectException('Cannot create render/export mesh')
-				
-				# Cache vert positions because me.vertices access is very slow
-				#print('-> Cache vert pos and normals')
-				verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
-				
-				# collate faces and face verts by mat index
-				faces_verts_mats = {}
-				ffaces_mats = {}
-				for f in mesh.faces:
-					mi = f.material_index
-					if mi not in faces_verts_mats.keys(): faces_verts_mats[mi] = []
-					faces_verts_mats[mi].append( f.vertices )
-					if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
-					ffaces_mats[mi].append( f )
-				
-				number_of_mats = len(mesh.materials)
-				if number_of_mats > 0:
-					iterator_range = range(number_of_mats)
-				else:
-					iterator_range = [0]
-				
-				for i in iterator_range:
-					try:
-						if i not in faces_verts_mats.keys(): continue
-						if i not in ffaces_mats.keys(): continue
+			mesh_definitions = []
+			mesh = obj.create_mesh(self.scene, True, 'RENDER')
+			if mesh is None:
+				raise UnexportableObjectException('Cannot create render/export mesh')
+			
+			# Cache vert positions because me.vertices access is very slow
+			#print('-> Cache vert pos and normals')
+			verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
+			
+			# collate faces by mat index
+			ffaces_mats = {}
+			for f in mesh.faces:
+				mi = f.material_index
+				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
+				ffaces_mats[mi].append( f )
+			
+			number_of_mats = len(mesh.materials)
+			if number_of_mats > 0:
+				iterator_range = range(number_of_mats)
+			else:
+				iterator_range = [0]
+			
+			for i in iterator_range:
+				try:
+					if i not in ffaces_mats.keys(): continue
+					
+					mesh_name = ('%s_%03d' % (obj.data.name, i)).replace(' ','_')
+					
+					# If this mesh/mat combo has already been processed, get it from the cache
+					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
+						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
+						continue
+					
+					ply_filename = '%s.ply' % mesh_name
+					# Binary PLY mesh translation goes in here
+					with open(ply_filename, 'wb') as ply:
 						
-						try:
-							mesh_mat = mesh.materials[i]
-						except IndexError:
-							mesh_mat = None
+						ply.write(b'ply\n')
+						ply.write(b'format binary_little_endian 1.0\n')
+						ply.write(b'comment Created by LuxBlend 2.5 exporter for LuxRender - www.luxrender.net\n')
 						
-						if mesh_mat is not None:
-							mesh_name = ('%s_%s' % (obj.data.name, mesh_mat.name)).replace(' ','_')
-						else:
-							mesh_name = obj.data.name.replace(' ','_')
-						
-						# If this mesh/mat combo has already been processed, get it from the cache
-						if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
-							mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
-							continue
-						
-						if OBJECT_ANALYSIS: print(' -> NativeMesh:')
-						if OBJECT_ANALYSIS: print('  -> Material: %s' % mesh_mat)
-						if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
-						
-						# face indices
-						index = 0
-						indices = []
-						ntris = 0
-						#print('-> Collect face indices')
+						total_verts = 0
 						for face in ffaces_mats[i]:
-							indices.append(index)
-							indices.append(index+1)
-							indices.append(index+2)
-							ntris += 3
-							if (len(face.vertices)==4):
-								indices.append(index)
-								indices.append(index+2)
-								indices.append(index+3)
-								ntris += 3
-							index += len(face.vertices)
+							total_verts += len(face.vertices)
 						
-						if ntris == 0:
-							raise InvalidGeometryException('Mesh has no tris')
+						ply.write( ('element vertex %d\n' % total_verts).encode() )
+						ply.write(b'property float x\n')
+						ply.write(b'property float y\n')
+						ply.write(b'property float z\n')
 						
-						# vertex positions
-						points = []
-						#print('-> Collect vert positions')
-						nvertices = 0
-						for face in ffaces_mats[i]:
-							for vertex in face.vertices:
-								v = verts_co_no[vertex][:3]
-								nvertices += 1
-								for co in v:
-									points.append(co)
-						
-						if nvertices == 0:
-							raise InvalidGeometryException('Mesh has no verts')
-						
-						# vertex normals
-						#print('-> Collect mert normals')
-						normals = []
-						for face in ffaces_mats[i]:
-							normal = face.normal
-							for vertex in face.vertices:
-								if face.use_smooth:
-									normal = verts_co_no[vertex][3:]
-								for no in normal:
-									normals.append(no)
-						
-						# uv coordinates
-						#print('-> Collect UV layers')
+						ply.write(b'property float nx\n')
+						ply.write(b'property float ny\n')
+						ply.write(b'property float nz\n')
 						
 						if len(mesh.uv_textures) > 0:
 							if mesh.uv_textures.active and mesh.uv_textures.active.data:
@@ -228,66 +218,228 @@ class GeometryExporter(object):
 							uv_layer = None
 						
 						if uv_layer:
-							uvs = []
-							try:
-								for face in ffaces_mats[i]:
-									for uv in uv_layer[face.index].uv:
-										for uv_coord in uv:
-											uvs.append(uv_coord)
-							
-							except IndexError:
-								LuxLog('ERROR: Incomplete UV map for %s, skipping UV export' % obj)
-								uv_layer = None
+							ply.write(b'property float s\n')
+							ply.write(b'property float t\n')
 						
-						#print(' %s num points: %i' % (obj.name, len(points)))
-						#print(' %s num normals: %i' % (obj.name, len(normals)))
-						#print(' %s num idxs: %i' % (obj.name, len(indices)))
+						ply.write( ('element face %d\n' % len(ffaces_mats[i])).encode() )
+						ply.write(b'property list uchar uint vertex_indices\n')
 						
-						# build shape ParamSet
-						shape_params = ParamSet()
+						ply.write(b'end_header\n')
 						
-						if self.lux_context.API_TYPE == 'PURE':
-							# ntris isn't really the number of tris!!
-							shape_params.add_integer('ntris', ntris)
-							shape_params.add_integer('nvertices', nvertices)
+						# dump vertices and normals and uvs if present
+						for face in ffaces_mats[i]:
+							for j, vertex in enumerate(face.vertices):
+								if face.use_smooth:
+									ply.write( struct.pack('<6f', *verts_co_no[vertex]) )
+								else:
+									ply.write( struct.pack('<3f', *verts_co_no[vertex][:3]) )
+									ply.write( struct.pack('<3f', *face.normal) )
+								if uv_layer:
+									uv = uv_layer[face.index].uv[j]
+									ply.write( struct.pack('<2f', *uv ) )
 						
-						#print('-> Add indices to paramset')
-						shape_params.add_integer('triindices', indices)
-						#print('-> Add verts to paramset')
-						shape_params.add_point('P', points)
-						#print('-> Add normals to paramset')
-						shape_params.add_normal('N', normals)
-						
-						if uv_layer:
-							#print(' %s num uvs: %i' % (obj.name, len(uvs)))
-							#print('-> Add UVs to paramset')
-							shape_params.add_float('uv', uvs)
-						
-						#print(' %s ntris: %i' % (obj.name, ntris))
-						#print(' %s nvertices: %i' % (obj.name, nvertices))
-						
-						# Add other properties from LuxRender Mesh panel
-						shape_params.update( obj.data.luxrender_mesh.get_paramset() )
-						
-						mesh_definition = (
-							mesh_name,
-							mesh_mat,
-							obj.data.luxrender_mesh.get_shape_type(),
-							shape_params
-						)
-						mesh_definitions.append( mesh_definition )
-						
-						# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
-						if self.allow_instancing(obj):
-							self.exportShapeDefinition(obj, mesh_definition)
-							self.ExportedMeshes.add(mesh_name, mesh_definition)
-						
-						LuxLog('Mesh Exported: %s' % mesh_name)
-						
-					except InvalidGeometryException as err:
-						LuxLog('Mesh export failed, skipping this mesh: %s' % err)
+						index = 0
+						# dump face vert indices
+						for face in ffaces_mats[i]:
+							num_verts = len(face.vertices)
+							ply.write( struct.pack('<B', num_verts) )
+							for j in range(num_verts):
+								ply.write( struct.pack('<I',index+j) )
+							index += num_verts
+					
+					# Export the shape definition to LXO
+					shape_params = ParamSet().add_string(
+						'filename',
+						ply_filename
+					)
+					
+					# Add subdiv etc options
+					shape_params.update( obj.data.luxrender_mesh.get_paramset() )
+					
+					mesh_definition = (
+						mesh_name,
+						i,
+						'plymesh',
+						shape_params
+					)
+					mesh_definitions.append( mesh_definition )
+					
+					# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
+					if self.allow_instancing(obj):
+						self.exportShapeDefinition(obj, mesh_definition)
+						self.ExportedMeshes.add(mesh_name, mesh_definition)
+					
+					LuxLog('Binary PLY Mesh Exported: %s' % mesh_name)
+					
+				except InvalidGeometryException as err:
+					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
+		
+		except UnexportableObjectException as err:
+			LuxLog('Object export failed, skipping this object: %s' % err)
+		
+		return mesh_definitions
+	
+	#@time_export
+	def buildNativeMesh(self, obj):
+		"""
+		Convert supported blender objects into a MESH, and then split into parts
+		according to vertex material assignment, and construct a mesh_name and
+		ParamSet for each part which will become a LuxRender Shape statement
+		wrapped within objectBegin..objectEnd or placed in an
+		attributeBegin..attributeEnd scope, depending if instancing is allowed.
+		"""
+		
+		try:
+			mesh_definitions = []
+			mesh = obj.create_mesh(self.scene, True, 'RENDER')
+			if mesh is None:
+				raise UnexportableObjectException('Cannot create render/export mesh')
 			
-			self.ExportedObjects.add(obj, mesh_definitions)
+			# Cache vert positions because me.vertices access is very slow
+			#print('-> Cache vert pos and normals')
+			verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
+			
+			# collate faces by mat index
+			ffaces_mats = {}
+			for f in mesh.faces:
+				mi = f.material_index
+				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
+				ffaces_mats[mi].append( f )
+			
+			number_of_mats = len(mesh.materials)
+			if number_of_mats > 0:
+				iterator_range = range(number_of_mats)
+			else:
+				iterator_range = [0]
+			
+			for i in iterator_range:
+				try:
+					if i not in ffaces_mats.keys(): continue
+					
+					mesh_name = ('%s_%03d' % (obj.data.name, i)).replace(' ','_')
+					
+					# If this mesh/mat-index combo has already been processed, get it from the cache
+					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
+						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
+						continue
+					
+					if OBJECT_ANALYSIS: print(' -> NativeMesh:')
+					if OBJECT_ANALYSIS: print('  -> Material index: %d' % i)
+					if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
+					
+					# face indices
+					index = 0
+					indices = []
+					ntris = 0
+					#print('-> Collect face indices')
+					for face in ffaces_mats[i]:
+						indices.append(index)
+						indices.append(index+1)
+						indices.append(index+2)
+						ntris += 3
+						if (len(face.vertices)==4):
+							indices.append(index)
+							indices.append(index+2)
+							indices.append(index+3)
+							ntris += 3
+						index += len(face.vertices)
+					
+					if ntris == 0:
+						raise InvalidGeometryException('Mesh has no tris')
+					
+					# vertex positions
+					points = []
+					#print('-> Collect vert positions')
+					nvertices = 0
+					for face in ffaces_mats[i]:
+						for vertex in face.vertices:
+							v = verts_co_no[vertex][:3]
+							nvertices += 1
+							for co in v:
+								points.append(co)
+					
+					if nvertices == 0:
+						raise InvalidGeometryException('Mesh has no verts')
+					
+					# vertex normals
+					#print('-> Collect mert normals')
+					normals = []
+					for face in ffaces_mats[i]:
+						normal = face.normal
+						for vertex in face.vertices:
+							if face.use_smooth:
+								normal = verts_co_no[vertex][3:]
+							for no in normal:
+								normals.append(no)
+					
+					# uv coordinates
+					#print('-> Collect UV layers')
+					
+					if len(mesh.uv_textures) > 0:
+						if mesh.uv_textures.active and mesh.uv_textures.active.data:
+							uv_layer = mesh.uv_textures.active.data
+					else:
+						uv_layer = None
+					
+					if uv_layer:
+						uvs = []
+						try:
+							for face in ffaces_mats[i]:
+								for uv in uv_layer[face.index].uv:
+									for uv_coord in uv:
+										uvs.append(uv_coord)
+						
+						except IndexError:
+							LuxLog('ERROR: Incomplete UV map for %s, skipping UV export' % obj)
+							uv_layer = None
+					
+					#print(' %s num points: %i' % (obj.name, len(points)))
+					#print(' %s num normals: %i' % (obj.name, len(normals)))
+					#print(' %s num idxs: %i' % (obj.name, len(indices)))
+					
+					# build shape ParamSet
+					shape_params = ParamSet()
+					
+					if self.lux_context.API_TYPE == 'PURE':
+						# ntris isn't really the number of tris!!
+						shape_params.add_integer('ntris', ntris)
+						shape_params.add_integer('nvertices', nvertices)
+					
+					#print('-> Add indices to paramset')
+					shape_params.add_integer('triindices', indices)
+					#print('-> Add verts to paramset')
+					shape_params.add_point('P', points)
+					#print('-> Add normals to paramset')
+					shape_params.add_normal('N', normals)
+					
+					if uv_layer:
+						#print(' %s num uvs: %i' % (obj.name, len(uvs)))
+						#print('-> Add UVs to paramset')
+						shape_params.add_float('uv', uvs)
+					
+					#print(' %s ntris: %i' % (obj.name, ntris))
+					#print(' %s nvertices: %i' % (obj.name, nvertices))
+					
+					# Add other properties from LuxRender Mesh panel
+					shape_params.update( obj.data.luxrender_mesh.get_paramset() )
+					
+					mesh_definition = (
+						mesh_name,
+						i,
+						'mesh',
+						shape_params
+					)
+					mesh_definitions.append( mesh_definition )
+					
+					# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
+					if self.allow_instancing(obj):
+						self.exportShapeDefinition(obj, mesh_definition)
+						self.ExportedMeshes.add(mesh_name, mesh_definition)
+					
+					LuxLog('LuxRender Mesh Exported: %s' % mesh_name)
+					
+				except InvalidGeometryException as err:
+					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 		
 		except UnexportableObjectException as err:
 			LuxLog('Object export failed, skipping this object: %s' % err)
@@ -320,7 +472,7 @@ class GeometryExporter(object):
 		an objectBegin..objectEnd block containing the Shape definition.
 		"""
 		
-		me_name, me_mat, me_shape_type, me_shape_params = mesh_definition
+		me_name, me_mat_index, me_shape_type, me_shape_params = mesh_definition
 		
 		if len(me_shape_params) == 0: return
 		
@@ -378,25 +530,26 @@ class GeometryExporter(object):
 				self.lux_context.coordinateSystem('%s_motion_%i' % (obj.name, i))
 				self.lux_context.transformEnd()
 		
-		for me_name, me_mat, me_shape_type, me_shape_params in mesh_definitions:
+		for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
 			self.lux_context.attributeBegin()
 			
-			if me_mat is not None:
+			ob_mat = obj.material_slots[me_mat_index].material
+			if ob_mat is not None:
 				
 				# Export material definition && check for emission
 				if self.lux_context.API_TYPE == 'FILE':
 					self.lux_context.set_output_file(Files.MATS)
-					object_is_emitter = me_mat.luxrender_material.export(self.lux_context, me_mat, mode='indirect')
+					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='indirect')
 					self.lux_context.set_output_file(Files.GEOM)
-					self.lux_context.namedMaterial(me_mat.name)
+					self.lux_context.namedMaterial(ob_mat.name)
 				elif self.lux_context.API_TYPE == 'PURE':
-					object_is_emitter = me_mat.luxrender_material.export(self.lux_context, me_mat, mode='direct')
+					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='direct')
 				
 				if object_is_emitter:
-					self.lux_context.lightGroup(me_mat.luxrender_emission.lightgroup, [])
-					self.lux_context.areaLightSource( *me_mat.luxrender_emission.api_output() )
+					self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output() )
 				
-				int_v, ext_v = get_material_volume_defs(me_mat)
+				int_v, ext_v = get_material_volume_defs(ob_mat)
 				if int_v != '':
 					self.lux_context.interior(int_v)
 				elif self.scene.luxrender_world.default_interior_volume != '':
@@ -459,7 +612,7 @@ class GeometryExporter(object):
 					
 					self.exportShapeInstances(
 						obj,
-						self.buildNativeMesh(dupli_ob.object),
+						self.buildMesh(dupli_ob.object),
 						matrix=[dupli_ob.matrix,None]
 					)
 					
@@ -516,13 +669,13 @@ class GeometryExporter(object):
 		if 'matrix' in kwargs.keys():
 			self.exportShapeInstances(
 				obj,
-				self.buildNativeMesh(obj),
+				self.buildMesh(obj),
 				matrix=kwargs['matrix']
 			)
 		else:
 			self.exportShapeInstances(
 				obj,
-				self.buildNativeMesh(obj)
+				self.buildMesh(obj)
 			)
 	
 

@@ -77,8 +77,6 @@ class luxrender_camera(declarative_property_group):
 		'usemblur',
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
-		
-		
 	]
 	
 	visibility = {
@@ -417,6 +415,9 @@ class luxrender_colorspace(declarative_property_group):
 		'cs_blueX':		{ 'preset': False },
 		'cs_blueY':		{ 'preset': False },
 		'crf_file':		{ 'use_crf': True },
+		
+		'gamma_label':	{ 'preset': False },
+		'gamma':		{ 'preset': False },
 	}
 	
 	properties = [
@@ -538,6 +539,7 @@ class luxrender_colorspace(declarative_property_group):
 
 class colorspace_presets(object):
 	class sRGB(object):
+		gamma		= 2.4
 		cs_whiteX	= 0.314275
 		cs_whiteY	= 0.329411
 		cs_redX		= 0.63
@@ -547,6 +549,7 @@ class colorspace_presets(object):
 		cs_blueX	= 0.155
 		cs_blueY	= 0.07
 	class romm_rgb(object):
+		gamma		= 1.8
 		cs_whiteX	= 0.346
 		cs_whiteY	= 0.359
 		cs_redX		= 0.7347
@@ -556,6 +559,7 @@ class colorspace_presets(object):
 		cs_blueX	= 0.0366
 		cs_blueY	= 0.0001
 	class adobe_rgb_98(object):
+		gamma		= 2.2
 		cs_whiteX	= 0.313
 		cs_whiteY	= 0.329
 		cs_redX		= 0.64
@@ -565,6 +569,7 @@ class colorspace_presets(object):
 		cs_blueX	= 0.15
 		cs_blueY	= 0.06
 	class apple_rgb(object):
+		gamma		= 1.8		# TODO: verify
 		cs_whiteX	= 0.313
 		cs_whiteY	= 0.329
 		cs_redX		= 0.625
@@ -574,6 +579,7 @@ class colorspace_presets(object):
 		cs_blueX	= 0.155
 		cs_blueY	= 0.07
 	class ntsc_1953(object):
+		gamma		= 2.2		# TODO: verify
 		cs_whiteX	= 0.31
 		cs_whiteY	= 0.316
 		cs_redX		= 0.67
@@ -583,6 +589,7 @@ class colorspace_presets(object):
 		cs_blueX	= 0.14
 		cs_blueY	= 0.08
 	class ntsc_1979(object):
+		gamma		= 2.2		# TODO: verify
 		cs_whiteX	= 0.313
 		cs_whiteY	= 0.329
 		cs_redX		= 0.63
@@ -592,6 +599,7 @@ class colorspace_presets(object):
 		cs_blueX	= 0.155
 		cs_blueY	= 0.07
 	class pal_secam(object):
+		gamma		= 2.8
 		cs_whiteX	= 0.313
 		cs_whiteY	= 0.329
 		cs_redX		= 0.64
@@ -601,6 +609,7 @@ class colorspace_presets(object):
 		cs_blueX	= 0.15
 		cs_blueY	= 0.06
 	class cie_e(object):
+		gamma		= 2.2
 		cs_whiteX	= 0.333
 		cs_whiteY	= 0.333
 		cs_redX		= 0.7347
@@ -713,6 +722,12 @@ class luxrender_film(declarative_property_group):
 		
 		return xr, yr
 	
+	def get_gamma(self):
+		if self.luxrender_colorspace.preset:
+			return getattr(colorspace_presets, self.luxrender_colorspace.preset_name).gamma
+		else:
+			return self.luxrender_colorspace.gamma
+	
 	def api_output(self):
 		'''
 		Calculate type and parameters for LuxRender Film statement
@@ -730,24 +745,23 @@ class luxrender_film(declarative_property_group):
 		params.add_integer('yresolution', int(yr))
 		
 		# ColourSpace
-		cso = self.luxrender_colorspace
-		params.add_float('gamma', cso.gamma)
-		if cso.preset:
-			cs_object = getattr(colorspace_presets, cso.preset_name)
+		if self.luxrender_colorspace.preset:
+			cs_object = getattr(colorspace_presets, self.luxrender_colorspace.preset_name)
 		else:
-			cs_object = cso
-		
+			cs_object = self.luxrender_colorspace
+			
+		params.add_float('gamma', self.get_gamma())
 		params.add_float('colorspace_white',	[cs_object.cs_whiteX,	cs_object.cs_whiteY])
 		params.add_float('colorspace_red',		[cs_object.cs_redX,		cs_object.cs_redY])
 		params.add_float('colorspace_green',	[cs_object.cs_greenX,	cs_object.cs_greenY])
 		params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
 		
 		# Camera Response Function
-		if LUXRENDER_VERSION >= '0.8' and cso.use_crf:
+		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf:
 			if scene.camera.library is not None:
-				local_crf_filepath = bpy.path.abspath(cso.crf_file, scene.camera.library.filepath)
+				local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
 			else:
-				local_crf_filepath = cso.crf_file
+				local_crf_filepath = self.luxrender_colorspace.crf_file
 			local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
 			if scene.luxrender_engine.embed_filedata:
 				from luxrender.util import bencode_file2string
@@ -830,9 +844,6 @@ class luxrender_tonemapping(declarative_property_group):
 		# Reinhard
 		['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
 		
-		# Linear
-		'linear_gamma',
-		
 		# Contrast
 		'ywa',
 	]
@@ -844,7 +855,7 @@ class luxrender_tonemapping(declarative_property_group):
 		'reinhard_burn':		{ 'type': 'reinhard' },
 		
 		# Linear
-		'linear_gamma':			{ 'type': 'linear' },
+		# all params are taken from camera/colorspace settings
 		
 		# Contrast
 		'ywa':					{ 'type': 'contrast' },
@@ -900,19 +911,6 @@ class luxrender_tonemapping(declarative_property_group):
 			'soft_max': 25.0,
 		},
 		
-		#Linear
-		{
-			'type': 'float',
-			'attr': 'linear_gamma',
-			'name': 'Gamma',
-			'description': 'Linear gamma',
-			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 5.0,
-			'soft_max': 5.0
-		},
-		
 		#Contrast
 		{
 			'type': 'float',
@@ -943,7 +941,7 @@ class luxrender_tonemapping(declarative_property_group):
 			params.add_float('linear_sensitivity', cam.luxrender_camera.sensitivity)
 			params.add_float('linear_exposure', cam.luxrender_camera.exposure_time())
 			params.add_float('linear_fstop', cam.luxrender_camera.fstop)
-			params.add_float('linear_gamma', self.linear_gamma)
+			params.add_float('linear_gamma', cam.luxrender_camera.luxrender_film.get_gamma())
 			
 		if self.type == 'contrast':
 			params.add_float('contrast_ywa', self.ywa)

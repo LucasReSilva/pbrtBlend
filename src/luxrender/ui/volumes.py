@@ -45,6 +45,11 @@ class volumes(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 		super().draw(context)
 		
 		if context.world:
+			row = self.layout.row(align=True)
+			row.menu("LUXRENDER_MT_presets_volume", text=bpy.types.LUXRENDER_MT_presets_volume.bl_label)
+			row.operator("luxrender.preset_volume_add", text="", icon="ZOOMIN")
+			row.operator("luxrender.preset_volume_add", text="", icon="ZOOMOUT").remove_active = True
+			
 			if len(context.scene.luxrender_volumes.volumes) > 0:
 				current_vol_ind = context.scene.luxrender_volumes.volumes_index
 				current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]

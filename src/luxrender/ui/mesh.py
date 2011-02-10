@@ -36,3 +36,13 @@ class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
 	display_property_groups = [
 		( ('mesh',), 'luxrender_mesh' )
 	]
+	
+	def draw(self, context):
+		if context.object.luxrender_object.append_external_mesh and context.object.luxrender_object.hide_proxy_mesh:
+			msg = 'Mesh options not available when\n' \
+				'object is using external PLY mesh\n' \
+				'and hide proxy mesh is set.'
+			for t in msg.split('\n'):
+				self.layout.label(t)
+		else:
+			super().draw(context)

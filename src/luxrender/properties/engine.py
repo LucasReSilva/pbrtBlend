@@ -26,7 +26,7 @@
 #
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from luxrender.export					import ParamSet
 from luxrender.outputs.pure_api			import PYLUX_AVAILABLE
@@ -50,20 +50,13 @@ def engine_controls():
 		'binary_name',
 		'write_files',
 		['write_lxs', 'write_lxm', 'write_lxo', 'write_lxv'],
+		
 		# 'embed_filedata', # Disabled pending acceptance into LuxRender core
 		
-		# Other mesh types disabled because cannot set active object
-		# to pass to PLY operator. Even so, Lux fails to load the PLY
-		# TODO: find solutions
-		# 'mesh_type',
-		
+		'mesh_type',
 		'render',
 		'install_path',
-		# 'priority',
 		['threads_auto', 'threads'],
-		# ['rgc', 'colclamp'],
-		# 'nolg',
-		
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
@@ -95,7 +88,6 @@ class luxrender_engine(declarative_property_group):
 		'install_path':				{ 'render': True, 'export_type': 'EXT' },
 		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':					A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
-		'priority':					{ 'export_type': 'EXT', 'render': True },
 	}
 	
 	properties = [
@@ -228,26 +220,13 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'mesh_type',
-			'name': 'Mesh Export type',
-			'description': 'The type of mesh data to export',
+			'name': 'Default mesh format',
 			'items': [
-				('native', 'Lux Mesh', 'native'),
-				('ply', 'Stanford PLY', 'ply'),
+				('native', 'LuxRender mesh', 'native'),
+				('binary_ply', 'Binary PLY', 'binary_ply')
 			],
+			'default': 'binary_ply',
 			'save_in_preset': True
-		},
-		{
-			'type': 'enum',
-			'attr': 'priority',
-			'name': 'Process Priority',
-			'description': 'Set the process priority for LuxRender',
-			'default': 'belownormal',
-			'items': [
-				('low','Low','low'),
-				('belownormal', 'Below Normal', 'belownormal'),
-				('normal', 'Normal', 'normal'),
-				('abovenormal', 'Above Normal', 'abovenormal'),
-			]
 		},
 		{
 			'type': 'enum',
@@ -262,31 +241,7 @@ class luxrender_engine(declarative_property_group):
 				('very-quiet', 'Very quiet', 'very-quiet'),
 			],
 			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'rgc',
-			'name': 'RGC',
-			'description': 'Reverse Gamma Colour Correction',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'colclamp',
-			'name': 'Colour Clamp',
-			'description': 'Clamp all colours to range 0 - 0.9',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'nolg',
-			'name': 'No Lightgroups',
-			'description': 'Combine all light groups',
-			'default': False,
-			'save_in_preset': True
-		},
+		}
 	]
 	
 	def api_output(self):

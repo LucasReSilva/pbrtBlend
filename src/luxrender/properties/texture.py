@@ -137,14 +137,15 @@ class ColorTextureParameter(TextureParameterBase):
 	
 	def get_controls(self):
 		return [
-			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolorrgc' % self.attr, '%s_usecolortexture' % self.attr ],
+			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
 			[ 0.9, [0.375,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
-			'%s_colortexture' % self.attr
+			[ 0.9, '%s_colortexture' % self.attr, '%s_multiplycolor' % self.attr ],
 		] + self.get_extra_controls()
 	
 	def get_visibility(self):
 		vis = {
 			'%s_colortexture' % self.attr: { '%s_usecolortexture' % self.attr: True },
+			'%s_multiplycolor' % self.attr: { '%s_usecolortexture' % self.attr: True },
 		}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -186,19 +187,19 @@ class ColorTextureParameter(TextureParameterBase):
 				'default': self.get_real_param_name()
 			},
 			{
-				'attr': '%s_usecolortexture' % self.attr,
+				'attr': '%s_multiplycolor' % self.attr,
 				'type': 'bool',
-				'name': 'T',
-				'description': 'Textured %s' % self.name,
+				'name': 'M',
+				'description': 'Multiply texture by color',
 				'default': False,
 				'toggle': True,
 				'save_in_preset': True
 			},
 			{
-				'attr': '%s_usecolorrgc' % self.attr,
+				'attr': '%s_usecolortexture' % self.attr,
 				'type': 'bool',
-				'name': 'R',
-				'description': 'Reverse Gamma Correct %s' % self.name,
+				'name': 'T',
+				'description': 'Textured %s' % self.name,
 				'default': False,
 				'toggle': True,
 				'save_in_preset': True
@@ -302,7 +303,7 @@ class FloatTextureParameter(TextureParameterBase):
 		else:
 			return [
 				[0.9, '%s_floatvalue' % self.attr, '%s_usefloattexture' % self.attr],
-				'%s_floattexture' % self.attr,
+				[0.9, '%s_floattexture' % self.attr,'%s_multiplyfloat' % self.attr],
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
@@ -310,6 +311,7 @@ class FloatTextureParameter(TextureParameterBase):
 		if not self.texture_only:
 			vis = {
 				'%s_floattexture' % self.attr: { '%s_usefloattexture' % self.attr: True },
+				'%s_multiplyfloat' % self.attr: { '%s_usefloattexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -324,7 +326,10 @@ class FloatTextureParameter(TextureParameterBase):
 			{
 				'attr': '%s_multiplyfloat' % self.attr,
 				'type': 'bool',
+				'name': 'M',
+				'description': 'Multiply texture by value',
 				'default': self.multiply_float,
+				'toggle': True,
 				'save_in_preset': True
 			},
 			{
@@ -801,30 +806,34 @@ class luxrender_tex_brick(declarative_property_group):
 		'brickmodtex_color': 				{ 'variant': 'color' },
 		'brickmodtex_usecolortexture':		{ 'variant': 'color' },
 		'brickmodtex_colortexture':			{ 'variant': 'color', 'brickmodtex_usecolortexture': True },
+		'brickmodtex_multiplycolor':		{ 'variant': 'color', 'brickmodtex_usecolortexture': True },
 		
 		'brickmodtex_usefloattexture':		{ 'variant': 'float' },
 		'brickmodtex_floatvalue':			{ 'variant': 'float' },
 		'brickmodtex_floattexture':			{ 'variant': 'float', 'brickmodtex_usefloattexture': True },
-		
+		'brickmodtex_multiplyfloat':		{ 'variant': 'float', 'brickmodtex_usefloattexture': True },
 		
 		'bricktex_colorlabel':				{ 'variant': 'color' },
 		'bricktex_color': 					{ 'variant': 'color' },
 		'bricktex_usecolortexture':			{ 'variant': 'color' },
 		'bricktex_colortexture':			{ 'variant': 'color', 'bricktex_usecolortexture': True },
+		'bricktex_multiplycolor':			{ 'variant': 'color', 'bricktex_usecolortexture': True },
 		
 		'bricktex_usefloattexture':			{ 'variant': 'float' },
 		'bricktex_floatvalue':				{ 'variant': 'float' },
 		'bricktex_floattexture':			{ 'variant': 'float', 'bricktex_usefloattexture': True },
-		
+		'bricktex_multiplyfloat':			{ 'variant': 'float', 'bricktex_usefloattexture': True },
 		
 		'mortartex_colorlabel':				{ 'variant': 'color' },
 		'mortartex_color': 					{ 'variant': 'color' },
 		'mortartex_usecolortexture':		{ 'variant': 'color' },
 		'mortartex_colortexture':			{ 'variant': 'color', 'mortartex_usecolortexture': True },
+		'mortartex_multiplycolor':			{ 'variant': 'color', 'mortartex_usecolortexture': True },
 		
 		'mortartex_usefloattexture':		{ 'variant': 'float' },
 		'mortartex_floatvalue':				{ 'variant': 'float' },
 		'mortartex_floattexture':			{ 'variant': 'float', 'mortartex_usefloattexture': True },
+		'mortartex_multiplyfloat':			{ 'variant': 'float', 'mortartex_usefloattexture': True },
 	}
 	
 	properties = [
@@ -1032,7 +1041,9 @@ class luxrender_tex_checkerboard(declarative_property_group):
 	
 	visibility = {
 		'tex1_floattexture':	{ 'tex1_usefloattexture': True },
+		'tex1_multiplyfloat':	{ 'tex1_usefloattexture': True },
 		'tex2_floattexture':	{ 'tex2_usefloattexture': True },
+		'tex2_multiplyfloat':	{ 'tex2_usefloattexture': True },
 	}
 	
 	properties = [
@@ -1134,10 +1145,12 @@ class luxrender_tex_dots(declarative_property_group):
 		'inside_usefloattexture':		{ 'variant': 'float' },
 		'inside_floatvalue':			{ 'variant': 'float' },
 		'inside_floattexture':			{ 'variant': 'float', 'inside_usefloattexture': True },
+		'inside_multiplyfloat':			{ 'variant': 'float', 'inside_usefloattexture': True },
 		
 		'outside_usefloattexture':		{ 'variant': 'float' },
 		'outside_floatvalue':			{ 'variant': 'float' },
 		'outside_floattexture':			{ 'variant': 'float', 'outside_usefloattexture': True },
+		'outside_multiplyfloat':		{ 'variant': 'float', 'outside_usefloattexture': True },
 	} 
 	
 	properties = [
@@ -1683,25 +1696,29 @@ class luxrender_tex_mix(declarative_property_group):
 	# Visibility we do manually because of the variant switch
 	visibility = {
 		'amount_floattexture':			{ 'amount_usefloattexture': True },
+		'amount_multiplyfloat':			{ 'amount_usefloattexture': True },
 		
 		'tex1_colorlabel':				{ 'variant': 'color' },
 		'tex1_color': 					{ 'variant': 'color' },
 		'tex1_usecolortexture':			{ 'variant': 'color' },
 		'tex1_colortexture':			{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_multiplycolor':			{ 'variant': 'color', 'tex1_usecolortexture': True },
 		
 		'tex1_usefloattexture':			{ 'variant': 'float' },
 		'tex1_floatvalue':				{ 'variant': 'float' },
 		'tex1_floattexture':			{ 'variant': 'float', 'tex1_usefloattexture': True },
-		
+		'tex1_multiplyfloat':			{ 'variant': 'float', 'tex1_usefloattexture': True },
 		
 		'tex2_colorlabel':				{ 'variant': 'color' },
 		'tex2_color': 					{ 'variant': 'color' },
 		'tex2_usecolortexture':			{ 'variant': 'color' },
 		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex2_multiplycolor':			{ 'variant': 'color', 'tex2_usecolortexture': True },
 		
 		'tex2_usefloattexture':			{ 'variant': 'float' },
 		'tex2_floatvalue':				{ 'variant': 'float' },
 		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_multiplyfloat':			{ 'variant': 'float', 'tex2_usefloattexture': True },
 	}
 	
 	properties = [
@@ -1828,20 +1845,23 @@ class luxrender_tex_scale(declarative_property_group):
 		'tex1_color': 					{ 'variant': 'color' },
 		'tex1_usecolortexture':			{ 'variant': 'color' },
 		'tex1_colortexture':			{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_multiplycolor':			{ 'variant': 'color', 'tex1_usecolortexture': True },
 		
 		'tex1_usefloattexture':			{ 'variant': 'float' },
 		'tex1_floatvalue':				{ 'variant': 'float' },
 		'tex1_floattexture':			{ 'variant': 'float', 'tex1_usefloattexture': True },
-		
+		'tex1_multiplyfloat':			{ 'variant': 'float', 'tex1_usefloattexture': True },
 		
 		'tex2_colorlabel':				{ 'variant': 'color' },
 		'tex2_color': 					{ 'variant': 'color' },
 		'tex2_usecolortexture':			{ 'variant': 'color' },
 		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex2_multiplycolor':			{ 'variant': 'color', 'tex2_usecolortexture': True },
 		
 		'tex2_usefloattexture':			{ 'variant': 'float' },
 		'tex2_floatvalue':				{ 'variant': 'float' },
 		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_multiplyfloat':			{ 'variant': 'float', 'tex2_usefloattexture': True },
 	}
 	
 	properties = [

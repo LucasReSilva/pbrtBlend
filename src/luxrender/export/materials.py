@@ -41,6 +41,7 @@ class ExportedTextures(object):
 	texture_texts = []	# Texture plugin name
 	texture_psets = []	# ParamSets
 	exported_texture_names = []
+	scalers_count = 0
 	
 	@staticmethod
 	def clear():
@@ -49,7 +50,13 @@ class ExportedTextures(object):
 		ExportedTextures.texture_texts = []
 		ExportedTextures.texture_psets = []
 		ExportedTextures.exported_texture_names = []
-		
+		ExportedTextures.scalers_count = 0
+	
+	@staticmethod
+	def next_scale_value():
+		ExportedTextures.scalers_count+=1
+		return ExportedTextures.scalers_count
+	
 	@staticmethod
 	def texture(name, type, texture, params):
 		if name not in ExportedTextures.exported_texture_names:
@@ -263,23 +270,6 @@ def convert_texture(texture):
 	
 	return variant, lux_tex_name, paramset
 
-def RGC(value):
-	scene = LuxManager.CurrentScene
-	if scene.luxrender_engine.rgc:
-		gamma = scene.camera.data.luxrender_camera.luxrender_film.luxrender_colorspace.gamma
-	else:
-		gamma = 1.0
-	
-	ncol = value**(1/gamma)
-	
-	if scene.luxrender_engine.colclamp:
-		ncol = ncol * 0.9
-		if ncol > 0.9:
-			ncol = 0.9
-		if ncol < 0.0:
-			ncol = 0.0
-	return ncol
-
 def value_transform_passthrough(val):
 	return val
 
@@ -323,6 +313,9 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 		
 		export_param_name = getattr(property_group, lux_prop_name)
 		
+		if value_transform_function == None:
+			value_transform_function = value_transform_passthrough
+		
 		if getattr(property_group, '%s_use%stexture' % (lux_prop_name, variant)):
 			texture_name = getattr(property_group, '%s_%stexturename' % (lux_prop_name, variant))
 			if texture_name != '':
@@ -344,15 +337,31 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 					
 					if hasattr(property_group, '%s_multiplyfloat' % lux_prop_name) and getattr(property_group, '%s_multiplyfloat' % lux_prop_name):
+						sv = ExportedTextures.next_scale_value()
 						ExportedTextures.texture(
-							texture_name + '_scaled',
+							'%s_scaled_%i' % (texture_name, sv),
 							variant,
 							'scale',
 							ParamSet() \
 								.add_float('tex1', float(getattr(property_group, '%s_floatvalue' % lux_prop_name))) \
 								.add_texture('tex2', texture_name)
 						)
-						texture_name += '_scaled'
+						texture_name += '_scaled_%i' % sv
+					
+					if hasattr(property_group, '%s_multiplycolor' % lux_prop_name) and getattr(property_group, '%s_multiplycolor' % lux_prop_name):
+						sv = ExportedTextures.next_scale_value()
+						ExportedTextures.texture(
+							'%s_scaled_%i' % (texture_name, sv),
+							variant,
+							'scale',
+							ParamSet() \
+								.add_color(
+									'tex1',
+									[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
+								) \
+								.add_texture('tex2', texture_name)
+						)
+						texture_name += '_scaled_%i' % sv
 					
 					ExportedTextures.export_new(lux_context)
 					
@@ -372,20 +381,10 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 						fval
 					)
 			elif variant == 'color':
-				if value_transform_function == None:
-					value_transform_function = value_transform_passthrough
-				
-				use_rgc = getattr(property_group, '%s_usecolorrgc' % lux_prop_name)
-				if use_rgc:
-					params.add_color(
-						export_param_name,
-						[RGC(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
-					)
-				else:
-					params.add_color(
-						export_param_name,
-						[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
-					)
+				params.add_color(
+					export_param_name,
+					[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
+				)
 			elif variant == 'fresnel':
 				fval = float(getattr(property_group, '%s_fresnelvalue' % lux_prop_name))
 				params.add_float(

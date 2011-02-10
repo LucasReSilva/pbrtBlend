@@ -25,10 +25,10 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_Operator as LO
+from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from luxrender.export import ParamSet
-from luxrender.properties.material import dict_merge
+from luxrender.properties.material import dict_merge, texture_append_visibility
 from luxrender.properties.texture import FloatTextureParameter
 
 class MeshFloatTextureParameter(FloatTextureParameter):
@@ -43,6 +43,20 @@ TF_displacementmap = MeshFloatTextureParameter(
 	add_float_value=False
 )
 
+def mesh_visibility():
+	
+	vis = dict_merge({
+		'nsmooth':		{ 'subdiv': LO({'!=': 'None'}) },
+		'sharpbound':	{ 'subdiv': LO({'!=': 'None'}) },
+		'sublevels':	{ 'subdiv': LO({'!=': 'None'}) },
+		'dmscale':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
+		'dmoffset':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
+	}, TF_displacementmap.visibility )
+	
+	vis = texture_append_visibility(vis, TF_displacementmap, { 'subdiv': LO({'!=': 'None'}) })
+	
+	return vis
+
 class luxrender_mesh(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
@@ -51,6 +65,8 @@ class luxrender_mesh(declarative_property_group):
 	'''
 	
 	controls = [
+		'mesh_type',
+		
 		'portal',
 		'subdiv',
 		'sublevels',
@@ -61,15 +77,20 @@ class luxrender_mesh(declarative_property_group):
 		['dmscale', 'dmoffset']
 	]
 	
-	visibility = dict_merge({
-		'nsmooth':		{ 'subdiv': LO({'!=': 'None'}) },
-		'sharpbound':	{ 'subdiv': LO({'!=': 'None'}) },
-		'sublevels':	{ 'subdiv': LO({'!=': 'None'}) },
-		'dmscale':		{ 'dm_floattexturename': LO({'!=': ''}) },
-		'dmoffset':		{ 'dm_floattexturename': LO({'!=': ''}) },
-	}, TF_displacementmap.visibility )
+	visibility = mesh_visibility()
 	
 	properties = [
+		{
+			'type': 'enum',
+			'attr': 'mesh_type',
+			'name': 'Export as',
+			'items': [
+				('global', 'Use default setting', 'global'),
+				('native', 'LuxRender mesh', 'native'),
+				('binary_ply', 'Binary PLY', 'binary_ply')
+			],
+			'default': 'global'
+		},
 		{
 			'type': 'bool',
 			'attr': 'portal',
@@ -129,9 +150,6 @@ class luxrender_mesh(declarative_property_group):
 			'precision': 6,
 		},
 	]
-	
-	def get_shape_type(self):
-		return 'mesh'
 	
 	def get_paramset(self):
 		params = ParamSet()

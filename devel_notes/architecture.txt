@@ -1,0 +1,176 @@
+-----------------------
+LuxBlend25 architecture
+-----------------------
+
+Custom properties
+=================
+
+When the addon is loaded, it creates a whole load of custom 'property groups'
+in various types within Blender as a way to store custom properties for
+LuxRender specific settings.
+
+The property groups and the properties they contain are defined in the files
+in the properties/ package. The property groups are defined by inheriting
+from the declarative_property_group type found in the extensions_framework.
+The 3 key class members used are 'controls', 'visibility' and 'properties'.
+
+The 'properties' member defines a list of properties in the group. Each
+property has a type, attribute name (attr), UI name (name), description, and
+perhaps also default/min/max values.
+
+The 'controls' list defines the order of layout of the properties in a UI panel.
+Items in a nested list are displayed on the same row, otherwise the panel is
+drawn as a column.
+
+The 'visibility' dict allows the UI controls for properties to be displayed or
+hidden depending on the value of other properties.
+
+Most property groups also contain a method which formats its own properties
+into a LuxRender ParamSet, which is then either written to file or passed to
+the integrated rendering context.
+
+
+User Interface panels
+=====================
+
+Each UI panel is defined as a class in the ui/ package. Each panel class
+inherits from property_group_renderer found in extensions_framework and uses
+a member 'display_property_groups' to determine which property group to display
+in the panel. Some panels also define their own poll() and draw() methods for
+more direct control of when and how to display the panel.
+
+
+Property and Panel initialisation
+=================================
+
+In order to get the custom property groups and panels loaded, they are first
+imported in the core/ package. Importing UI modules alone is enough to register
+the panel with Blender.
+
+Property groups require a little more work, as they need to be added to the
+RENDERENGINE_luxrender member 'property_groups', which tell the
+extensions_framework which Blender type each propery group should be attached to.
+Some property groups are attached to (nested in) other property groups.
+Some property groups are not attached to a type, but still need to be in the
+list so that Blender can create the properties in the group itself.
+
+
+Operators
+=========
+
+LuxBlend25 also defines several Blender operators to perform tasks.
+The most important one is EXPORT_OT_luxrender, which exports the current scene
+to an .lxs file. This is registered as an operator in order to add it to the 
+File -> Export menu. The actual implementation of the export process is defined
+elsewhere.
+
+Any operators in the operators/ package need to be imported into core/ in order
+to be registered when the addon is loaded.
+
+
+RenderEngine
+============
+
+LuxBlend25 primarily registers itself as a Render Engine within Blender. The
+RENDERENGINE_luxrender class in the core/ package is the implementation of
+this interface. The render() method of that class is called when the user
+presses the Render button in blender (or, more precisely, when Blender calls
+it's bpy.ops.render.render() operator).
+
+Note that at the present time, Blender makes no distinction to the RenderEngine
+whether it is rendering a single frame, animation or a material preview. It is
+RENDERENGINE_luxrender that has to do the guesswork and act accordingly.
+
+The RENDERENGINE_luxrender class contains all the process-management needed to
+run LuxRender either as an external process, or fully integrated via the pylux
+python module. It also calls the same scene-export process as is used by the
+EXPORT_OT_luxrender operator.
+
+
+How the Scene is exported
+=========================
+
+The output of data from Blender to LuxRender is abstracted through a lux_context
+object. This object may be writing to file, or calling API methods on pylux.
+It should not be assumed at any time that either of these methods is being used,
+though occasionally checks need to be made in order to perform tasks specific
+to one method or the other. The classes which implement the lux_context
+interface are defined in the outputs/ package. In fact, the interface is the
+same as the pylux.Context API - the file_api module emulates this in order to
+write .lx* files.
+
+
+The export process
+==================
+
+The process of exporting a Blender Scene to a lux_context starts in the export/
+package. This package defines classes and functions which translate various
+Blender objects/types into the format needed by LuxRender. The entire process
+starts with export/scene. The SceneExporter class has an export() method,
+which does the following:
+* Check that the scene to be exported is valid
+* Create a lux_context object the required type (file output or api calls)
+* For file output, construct the correct file path and file names
+* Export the custom render engine settings to the context
+* Export the Camera and Film settings
+* Export the Volume (media) definitions, if any
+* Export the Geometry (deferred to export/geometry)
+* Export the (non-emitting mesh) light sources (deferred to export/lights)
+
+Most of these export processes call upon the custom property groups to return
+an Identifier and a ParamSet to be passed to the lux_context. Geometry and
+lights in particular defer to other modules which perform additional tasks
+to export the correct items.
+
+Note that no materials are explicitly exported here, they are exported as
+needed from within the export/geometry module.
+
+
+Light source export
+===================
+
+The export/lights module iterates over the objects in the Scene and translates
+all Lamp objects into light sources for LuxRender. The implementation is a
+fairly simple loop in the lights() function.
+
+Note that the geometry export has to be performed first, because of the Portals
+system in LuxRender. Each light source exported needs to be told about Portal
+mesh instances.
+
+
+Geometry export
+===============
+
+The export/geometry module contains the majority of the useful code used in the
+export process. It is responsible for detecting exportable meshes in the scene,
+and translating them into LuxRender format Shapes. It also ensures that objects
+with 'duplis' or particle systems enabled have all their child objects exported
+as well.
+
+The process starts with the iterateScene function. This function loops over all
+the objects in the Scene, and passes anything interesting to the GeometryExporter
+class, which then handles that object.
+
+
+GeometryExporter
+................
+
+This class contains a set of methods which deal with converting certain Blender
+objects into meshes. LuxRender also requires that meshes with multiple materials
+assigned are split into separate parts. This class also deals with deciding
+whether to export meshes as ObjectBegin..ObjectEnd/ObjectInstance definitions
+for geometry instancing, or whether each mesh instance should be exported in full.
+Material assignments for meshes are detected, and the materials are exported
+as needed.
+
+Further logic is performed in order to detect and override object instancing
+for emitting objects, and for motion blurred objects.
+
+An additional mesh-material part and object caching system is also implemented
+in order to prevent processing the same data more than once per export.
+
+
+Material export
+===============
+
+TODO
