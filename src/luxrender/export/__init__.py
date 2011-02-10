@@ -234,7 +234,10 @@ def object_anim_matrix(scene, obj, frame_offset=1, ignore_scale=False):
 				anim_scale[fc.array_index] = fc.evaluate(next_frame)
 		
 		next_matrix  = mathutils.Matrix.Translation( mathutils.Vector(anim_location) )
-		next_matrix *= mathutils.Euler(anim_rotation).make_compatible(obj.rotation_euler).to_matrix().resize_4x4()
+		anim_rotn_e = mathutils.Euler(anim_rotation)
+		anim_rotn_e.make_compatible(obj.rotation_euler)
+		anim_rotn_e = anim_rotn_e.to_matrix().to_4x4()
+		next_matrix *= anim_rotn_e
 		
 		if not ignore_scale:
 			next_matrix *= mathutils.Matrix.Scale(anim_scale[0], 4, mathutils.Vector([1,0,0]))
