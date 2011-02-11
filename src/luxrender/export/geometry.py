@@ -231,6 +231,9 @@ class GeometryExporter(object):
 									vert_use_vno.add(vertex)
 									
 									co_no_cache.append( (v.co, v.normal) )
+									if uv_layer:
+										uv_cache.append( uv_layer[face.index].uv[j] )
+									
 									vert_vno_indices[vertex] = vert_index
 									fvi.append(vert_index)
 									
@@ -244,15 +247,15 @@ class GeometryExporter(object):
 									vert_use_fno.add(vertex)
 									
 									co_no_cache.append( (v.co, face.normal) )
+									if uv_layer:
+										uv_cache.append( uv_layer[face.index].uv[j] )
+									
 									vert_fno_indices[vertex] = vert_index
 									fvi.append(vert_index)
 									
 									vert_index += 1
 								else:
 									fvi.append(vert_fno_indices[vertex])
-							
-							if uv_layer:
-								uv_cache.append( uv_layer[face.index].uv[j] )
 						
 						face_vert_indices[face.index] = fvi
 					
@@ -355,7 +358,7 @@ class GeometryExporter(object):
 			
 			# Cache vert positions because me.vertices access is very slow
 			#print('-> Cache vert pos and normals')
-			verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
+			#verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
 			
 			# collate faces by mat index
 			ffaces_mats = {}
@@ -385,53 +388,6 @@ class GeometryExporter(object):
 					if OBJECT_ANALYSIS: print('  -> Material index: %d' % i)
 					if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
 					
-					# face indices
-					index = 0
-					indices = []
-					ntris = 0
-					#print('-> Collect face indices')
-					for face in ffaces_mats[i]:
-						indices.append(index)
-						indices.append(index+1)
-						indices.append(index+2)
-						ntris += 3
-						if (len(face.vertices)==4):
-							indices.append(index)
-							indices.append(index+2)
-							indices.append(index+3)
-							ntris += 3
-						index += len(face.vertices)
-					
-					if ntris == 0:
-						raise InvalidGeometryException('Mesh has no tris')
-					
-					# vertex positions
-					points = []
-					#print('-> Collect vert positions')
-					nvertices = 0
-					for face in ffaces_mats[i]:
-						for vertex in face.vertices:
-							v = verts_co_no[vertex][:3]
-							nvertices += 1
-							for co in v:
-								points.append(co)
-					
-					if nvertices == 0:
-						raise InvalidGeometryException('Mesh has no verts')
-					
-					# vertex normals
-					#print('-> Collect mert normals')
-					normals = []
-					for face in ffaces_mats[i]:
-						normal = face.normal
-						for vertex in face.vertices:
-							if face.use_smooth:
-								normal = verts_co_no[vertex][3:]
-							for no in normal:
-								normals.append(no)
-					
-					# uv coordinates
-					#print('-> Collect UV layers')
 					
 					if len(mesh.uv_textures) > 0:
 						if mesh.uv_textures.active and mesh.uv_textures.active.data:
@@ -439,17 +395,71 @@ class GeometryExporter(object):
 					else:
 						uv_layer = None
 					
-					if uv_layer:
-						uvs = []
-						try:
-							for face in ffaces_mats[i]:
-								for uv in uv_layer[face.index].uv:
-									for uv_coord in uv:
-										uvs.append(uv_coord)
+					# Export data
+					points = []
+					normals = []
+					uvs = []
+					ntris = 0
+					face_vert_indices = []		# list of face vert indices
+					
+					
+					# Caches
+					vert_vno_indices = {}		# mapping of vert index to exported vert index for verts with vert normals
+					vert_fno_indices = {}		# mapping of vert index to exported vert index for verts with face normals
+					vert_use_vno = set()		# Set of vert indices that use vert normals
+					vert_use_fno = set()		# Set of vert indices that use face normals
+					
+					vert_index = 0				# exported vert index
+					for face in mesh.faces:
+						fvi = []
+						for j, vertex in enumerate(face.vertices):
+							v = mesh.vertices[vertex]
+							
+							if face.use_smooth:
+								
+								if vertex not in vert_use_vno:
+									vert_use_vno.add(vertex)
+									
+									points.extend(v.co)
+									normals.extend(v.normal)
+									if uv_layer:
+										uvs.extend( uv_layer[face.index].uv[j] )
+									
+									vert_vno_indices[vertex] = vert_index
+									fvi.append(vert_index)
+									
+									vert_index += 1
+								else:
+									fvi.append(vert_vno_indices[vertex])
+								
+							else:
+								
+								if vertex not in vert_use_fno:
+									vert_use_fno.add(vertex)
+									
+									points.extend(v.co)
+									normals.extend(face.normal)
+									if uv_layer:
+										uvs.extend( uv_layer[face.index].uv[j] )
+									
+									vert_fno_indices[vertex] = vert_index
+									fvi.append(vert_index)
+									
+									vert_index += 1
+								else:
+									fvi.append(vert_fno_indices[vertex])
 						
-						except IndexError:
-							LuxLog('ERROR: Incomplete UV map for %s, skipping UV export' % obj)
-							uv_layer = None
+						face_vert_indices.extend( fvi[0:3] )
+						ntris += 3
+						if len(fvi) == 4:
+							face_vert_indices.extend([ fvi[0], fvi[2], fvi[3] ])
+							ntris += 3
+					
+					del vert_vno_indices
+					del vert_fno_indices
+					del vert_use_vno
+					del vert_use_fno
+					
 					
 					#print(' %s num points: %i' % (obj.name, len(points)))
 					#print(' %s num normals: %i' % (obj.name, len(normals)))
@@ -461,10 +471,10 @@ class GeometryExporter(object):
 					if self.lux_context.API_TYPE == 'PURE':
 						# ntris isn't really the number of tris!!
 						shape_params.add_integer('ntris', ntris)
-						shape_params.add_integer('nvertices', nvertices)
+						shape_params.add_integer('nvertices', vert_index)
 					
 					#print('-> Add indices to paramset')
-					shape_params.add_integer('triindices', indices)
+					shape_params.add_integer('triindices', face_vert_indices)
 					#print('-> Add verts to paramset')
 					shape_params.add_point('P', points)
 					#print('-> Add normals to paramset')
