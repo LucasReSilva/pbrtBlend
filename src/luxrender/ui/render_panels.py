@@ -87,6 +87,7 @@ class volume(render_described_context, bpy.types.Panel):
 	'''
 	
 	bl_label = 'Volume Integrator'
+	bl_options = 'DEFAULT_CLOSED'
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_volumeintegrator' )
@@ -99,6 +100,7 @@ class filter(render_described_context, bpy.types.Panel):
 	'''
 	
 	bl_label = 'Filter'
+	bl_options = 'DEFAULT_CLOSED'
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_filter' )
@@ -111,6 +113,7 @@ class accelerator(render_described_context, bpy.types.Panel):
 	'''
 	
 	bl_label = 'Accelerator'
+	bl_options = 'DEFAULT_CLOSED'
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_accelerator' )
@@ -123,10 +126,14 @@ class networking(render_described_context, bpy.types.Panel):
 	'''
 	
 	bl_label = 'LuxRender Networking'
+	bl_options = 'DEFAULT_CLOSED'
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_networking' )
 	]
+	
+	def draw_header(self, context):
+		self.layout.prop(context.scene.luxrender_networking, "use_network_servers", text="")
 	
 	def draw(self, context):
 		row = self.layout.row(align=True)

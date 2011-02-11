@@ -251,7 +251,7 @@ class luxrender_networking(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'use_network_servers',
+		# 'use_network_servers', # drawn in panel header
 		'servers',
 		'serverinterval'
 	]
