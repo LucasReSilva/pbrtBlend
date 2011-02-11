@@ -29,6 +29,7 @@ from properties_data_mesh import MeshButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+@bpy.utils.register_class
 class meshes(MeshButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {'luxrender'}

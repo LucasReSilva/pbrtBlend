@@ -32,7 +32,8 @@ from extensions_framework.ui import property_group_renderer
 
 class camera_panel(CameraButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {'luxrender'}
-	
+
+@bpy.utils.register_class
 class camera(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Camera'
 	
@@ -40,6 +41,7 @@ class camera(camera_panel, bpy.types.Panel):
 		( ('camera',), 'luxrender_camera' )
 	]
 
+@bpy.utils.register_class
 class film(camera_panel, bpy.types.Panel):
 	bl_label = 'LuxRender Film'
 	

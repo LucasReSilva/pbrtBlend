@@ -69,7 +69,6 @@ import luxrender.ui.image
 import luxrender.ui.lamps
 import luxrender.ui.mesh
 import luxrender.ui.object
-import luxrender.ui.volumes
 import luxrender.ui.world
 
 import luxrender.ui.materials.main
@@ -190,6 +189,7 @@ compatible("properties_data_mesh")
 compatible("properties_data_camera")
 compatible("properties_particle")
 
+@bpy.utils.register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	'''
 	LuxRender Engine Exporter/Integration class

@@ -30,6 +30,7 @@ from properties_object import ObjectButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+@bpy.utils.register_class
 class object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	Object settings

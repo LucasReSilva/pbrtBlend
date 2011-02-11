@@ -28,6 +28,7 @@ import bpy
 
 from luxrender.ui.materials import luxrender_material_base
 
+@bpy.utils.register_class
 class ui_luxrender_mat_compositing(luxrender_material_base, bpy.types.Panel):
 	
 	bl_label	= 'LuxRender Material Compositing'

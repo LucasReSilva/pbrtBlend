@@ -28,6 +28,7 @@ import bpy
 
 from luxrender.ui.textures import luxrender_texture_base
 
+@bpy.utils.register_class
 class ui_texture_mix(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Mix Texture'
 	
