@@ -117,10 +117,7 @@ import luxrender.ui.textures.tabulateddata
 import luxrender.ui.textures.transform
 
 # Exporter Operators need to be imported to ensure initialisation
-from luxrender.operators import (
-	EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
-)
-
+import luxrender.operators
 
 # Add standard Blender Interface elements
 import properties_render
