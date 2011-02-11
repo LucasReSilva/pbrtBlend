@@ -32,6 +32,60 @@ from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog 
 
 @ef_initialise_properties
+class luxrender_volumeintegrator(declarative_property_group):
+	'''
+	Storage class for LuxRender Volume Integrator settings.
+	'''
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
+		'volumeintegrator', 'stepsize'
+	]
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'volumeintegrator',
+			'name': 'Volume Integrator',
+			'description': 'Volume Integrator',
+			'default': 'single',
+			'items': [
+				('emission', 'Emission', 'emission'),
+				('single', 'Single', 'single'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'stepsize',
+			'name': 'Step Size',
+			'description': 'Volume Integrator Step Size',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+			'save_in_preset': True
+		}
+	]
+	
+	def api_output(self):
+		'''
+		Format this class's members into a LuxRender ParamSet
+		
+		Returns dict
+		'''
+		
+		params = ParamSet()
+		
+		params.add_float('stepsize', self.stepsize)
+		
+		out = self.volumeintegrator, params
+		dbo('VOLUME INTEGRATOR', out)
+		return out
+
+@ef_initialise_properties
 class luxrender_integrator(declarative_property_group):
 	'''
 	Storage class for LuxRender SurfaceIntegrator settings.

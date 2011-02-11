@@ -59,7 +59,6 @@ import luxrender.properties.mesh
 import luxrender.properties.object
 import luxrender.properties.sampler
 import luxrender.properties.texture
-import luxrender.properties.volume
 import luxrender.properties.world
 
 # Exporter Interface Panels need to be imported to ensure initialisation
