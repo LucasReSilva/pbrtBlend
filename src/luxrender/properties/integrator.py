@@ -739,10 +739,13 @@ class luxrender_integrator(declarative_property_group):
 		
 		params = ParamSet()
 		
-		if engine_properties.renderer == 'hybrid' and self.lightstrategy != 'one':
-			LuxLog('Incompatible lightstrategy for Hybrid renderer. Changing to "One".')
-			self.advanced = True
-			self.lightstrategy = 'one'
+		if engine_properties.renderer == 'hybrid':
+			if self.surfaceintegrator != 'path':
+				LuxLog('Incompatible surface integrator for Hybrid renderer (use "path").')
+				raise Exception('Incompatible render settings')
+			if self.lightstrategy != 'one':
+				LuxLog('Incompatible lightstrategy for Hybrid renderer (use "one").')
+				raise Exception('Incompatible render settings')
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \
