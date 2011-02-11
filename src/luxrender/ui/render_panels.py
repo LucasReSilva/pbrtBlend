@@ -29,6 +29,8 @@ from properties_render import RenderButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+from luxrender import addon_register_class
+
 class render_described_context(RenderButtonsPanel, property_group_renderer):
 	'''
 	Base class for render engine settings panels
@@ -36,7 +38,7 @@ class render_described_context(RenderButtonsPanel, property_group_renderer):
 	
 	COMPAT_ENGINES = {'luxrender'}
 
-@bpy.utils.register_class
+@addon_register_class
 class engine(render_described_context, bpy.types.Panel):
 	'''
 	Engine settings UI Panel
@@ -56,7 +58,7 @@ class engine(render_described_context, bpy.types.Panel):
 		
 		super().draw(context)
 
-@bpy.utils.register_class
+@addon_register_class
 class sampler(render_described_context, bpy.types.Panel):
 	'''
 	Sampler settings UI Panel
@@ -68,7 +70,7 @@ class sampler(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_sampler' )
 	]
 
-@bpy.utils.register_class
+@addon_register_class
 class integrator(render_described_context, bpy.types.Panel):
 	'''
 	Surface Integrator settings UI Panel
@@ -80,7 +82,7 @@ class integrator(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_integrator' )
 	]
 
-@bpy.utils.register_class
+@addon_register_class
 class volume(render_described_context, bpy.types.Panel):
 	'''
 	Volume Integrator settings UI panel
@@ -93,7 +95,7 @@ class volume(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_volumeintegrator' )
 	]
 
-@bpy.utils.register_class
+@addon_register_class
 class filter(render_described_context, bpy.types.Panel):
 	'''
 	PixelFilter settings UI Panel
@@ -106,7 +108,7 @@ class filter(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_filter' )
 	]
 
-@bpy.utils.register_class
+@addon_register_class
 class accelerator(render_described_context, bpy.types.Panel):
 	'''
 	Accelerator settings UI Panel
@@ -119,7 +121,7 @@ class accelerator(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_accelerator' )
 	]
 
-@bpy.utils.register_class
+@addon_register_class
 class networking(render_described_context, bpy.types.Panel):
 	'''
 	Networking settings UI Panel

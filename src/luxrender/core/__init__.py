@@ -38,14 +38,14 @@ import sys
 import bpy
 
 # Framework libs
-from extensions_framework				import ( util as efutil,
-												 plugin as efplugin
-												)
+from extensions_framework import util as efutil
 
 # Exporter libs
-from luxrender.outputs					import ( LuxManager, LuxFilmDisplay )
-from luxrender.outputs					import ( LuxLog )
-from luxrender.outputs.pure_api			import ( LUXRENDER_VERSION )
+from luxrender							import addon_register_class
+from luxrender.export.scene				import SceneExporter
+from luxrender.outputs					import LuxManager, LuxFilmDisplay
+from luxrender.outputs					import LuxLog
+from luxrender.outputs.pure_api			import LUXRENDER_VERSION
 
 # Exporter Property Groups need to be imported to ensure initialisation
 import luxrender.properties.accelerator
@@ -117,11 +117,10 @@ import luxrender.ui.textures.tabulateddata
 import luxrender.ui.textures.transform
 
 # Exporter Operators need to be imported to ensure initialisation
-from luxrender.operators				import ( EXPORT_OT_luxrender,
-												 LUXRENDER_OT_volume_add,
-												 LUXRENDER_OT_volume_remove )
+from luxrender.operators import (
+	EXPORT_OT_luxrender, LUXRENDER_OT_volume_add, LUXRENDER_OT_volume_remove
+)
 
-from luxrender.export.scene				import SceneExporter
 
 # Add standard Blender Interface elements
 import properties_render
@@ -188,7 +187,7 @@ compatible("properties_data_mesh")
 compatible("properties_data_camera")
 compatible("properties_particle")
 
-@bpy.utils.register_class
+@addon_register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	'''
 	LuxRender Engine Exporter/Integration class

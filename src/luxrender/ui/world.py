@@ -29,7 +29,9 @@ import bpy
 from properties_world import WorldButtonsPanel
 from extensions_framework.ui import property_group_renderer
 
-@bpy.utils.register_class
+from luxrender import addon_register_class
+
+@addon_register_class
 class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	LuxRender World Settings
@@ -41,7 +43,7 @@ class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 		( ('scene',), 'luxrender_world' )
 	]
 
-@bpy.utils.register_class
+@addon_register_class
 class volumes(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	Interior/Exterior Volumes Settings

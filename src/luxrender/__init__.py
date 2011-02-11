@@ -59,10 +59,19 @@ if 'core' in locals():
 	import imp
 	imp.reload(core)
 else:
+	registered_classes = []
+	def addon_register_class(cls):
+		registered_classes.append( cls )
+		return cls
+	import bpy
+	from extensions_framework import ef_initialise_properties
 	from . import core
 
 def register():
-	pass
+	for cls in registered_classes:
+		bpy.utils.register_class(cls)
+		if hasattr(cls, 'ef_attach_to'): ef_initialise_properties(cls)
 
 def unregister():
-	pass
+	for cls in registered_classes[::-1]:	# unregister in reverse order
+		bpy.utils.unregister_class(cls)

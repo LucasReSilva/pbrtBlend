@@ -27,10 +27,11 @@
 from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_sampler(declarative_property_group):
 	'''
 	Storage class for LuxRender Sampler settings.

@@ -27,11 +27,12 @@
 from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog 
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_volumeintegrator(declarative_property_group):
 	'''
 	Storage class for LuxRender Volume Integrator settings.
@@ -85,7 +86,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 		dbo('VOLUME INTEGRATOR', out)
 		return out
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_integrator(declarative_property_group):
 	'''
 	Storage class for LuxRender SurfaceIntegrator settings.

@@ -27,6 +27,7 @@
 from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
+from luxrender import addon_register_class
 from luxrender.export import ParamSet
 from luxrender.properties.material import dict_merge, texture_append_visibility
 from luxrender.properties.texture import FloatTextureParameter
@@ -57,7 +58,7 @@ def mesh_visibility():
 	
 	return vis
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mesh(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.

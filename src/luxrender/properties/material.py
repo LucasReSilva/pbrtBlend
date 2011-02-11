@@ -30,6 +30,7 @@ from copy import deepcopy
 from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework import util as efutil
 
+from luxrender import addon_register_class
 from luxrender.properties.texture import FloatTextureParameter, ColorTextureParameter
 from luxrender.export import ParamSet
 from luxrender.export.materials import ExportedMaterials, ExportedTextures, get_texture_from_scene
@@ -155,7 +156,7 @@ def mat_list():
 	
 	return mat_list
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
@@ -243,7 +244,7 @@ class luxrender_material(declarative_property_group):
 		
 		return material.luxrender_emission.use_emission
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_compositing(declarative_property_group):
 	'''
 	Storage class for LuxRender Material compositing settings
@@ -372,7 +373,7 @@ def transparency_visibility():
 	
 	return t_vis
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_transparency(declarative_property_group):
 	'''
 	Storage class for LuxRender Material alpha transparency settings.
@@ -558,7 +559,7 @@ def carpaint_visibility():
 	
 	return cp_vis
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -635,7 +636,7 @@ class luxrender_mat_carpaint(declarative_property_group):
 		
 		return carpaint_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_glass(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -688,7 +689,7 @@ class luxrender_mat_glass(declarative_property_group):
 		
 		return glass_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_glass2(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -724,7 +725,7 @@ class luxrender_mat_glass2(declarative_property_group):
 		
 		return glass2_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_roughglass(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -789,7 +790,7 @@ def glossy_visibility():
 	
 	return g_vis
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_glossy(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -876,7 +877,7 @@ def glossy_lossy_visibility():
 	
 	return gl_vis
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_glossy_lossy(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -934,7 +935,7 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		
 		return glossy_lossy_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_matte(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -961,7 +962,7 @@ class luxrender_mat_matte(declarative_property_group):
 		
 		return matte_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_mattetranslucent(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1040,7 +1041,7 @@ def glossytranslucent_visibility():
 	
 	return gt_vis
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_glossytranslucent(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1173,7 +1174,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		
 		return glossytranslucent_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_metal(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1234,7 +1235,7 @@ class luxrender_mat_metal(declarative_property_group):
 		
 		return metal_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_scatter(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1261,7 +1262,7 @@ class luxrender_mat_scatter(declarative_property_group):
 		
 		return scatter_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_shinymetal(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1304,7 +1305,7 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		
 		return shinymetal_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_mirror(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1335,7 +1336,7 @@ class luxrender_mat_mirror(declarative_property_group):
 		
 		return mirror_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_mix(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1362,7 +1363,7 @@ class luxrender_mat_mix(declarative_property_group):
 		
 		return mix_params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_null(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1378,7 +1379,7 @@ class luxrender_mat_null(declarative_property_group):
 	def get_paramset(self, material):
 		return ParamSet()
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_mat_velvet(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1468,7 +1469,7 @@ class EmissionColorTextureParameter(ColorTextureParameter):
 
 TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0,1.0,1.0) )
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_emission(declarative_property_group):
 	'''
 	Storage class for LuxRender Material emission settings.

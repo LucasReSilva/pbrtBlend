@@ -26,10 +26,11 @@
 #
 from extensions_framework import declarative_property_group, ef_initialise_properties
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_filter(declarative_property_group):
 	'''
 	Storage class for LuxRender PixelFilter settings.

@@ -26,7 +26,9 @@
 #
 from extensions_framework import declarative_property_group, ef_initialise_properties
 
-@ef_initialise_properties
+from luxrender import addon_register_class
+
+@addon_register_class
 class luxrender_object(declarative_property_group):
 	ef_attach_to = ['Object']
 	

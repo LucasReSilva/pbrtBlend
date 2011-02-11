@@ -24,13 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group, ef_initialise_properties
+from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_accelerator(declarative_property_group):
 	'''
 	Storage class for LuxRender Accelerator settings.

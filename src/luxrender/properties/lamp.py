@@ -30,6 +30,7 @@ from extensions_framework import declarative_property_group, ef_initialise_prope
 import extensions_framework.util as efutil
 from extensions_framework.validate import Logic_Operator as LO
 
+from luxrender import addon_register_class
 from luxrender.properties.material import dict_merge
 from luxrender.properties.texture import ColorTextureParameter
 from luxrender.export import ParamSet
@@ -70,7 +71,7 @@ class LampColorTextureParameter(ColorTextureParameter):
 
 TC_L = LampColorTextureParameter('L', 'Colour')
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_lamp(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
@@ -120,11 +121,11 @@ class luxrender_lamp_basic(declarative_property_group):
 		params.update( TC_L.get_paramset(self) )
 		return params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_lamp_point(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_lamp_spot(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
 	
@@ -158,7 +159,7 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
 			params.add_string('mapname', self.mapname)
 		return params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_lamp_sun(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	
@@ -276,7 +277,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		
 		return params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_lamp_area(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	
@@ -318,7 +319,7 @@ class luxrender_lamp_area(declarative_property_group):
 		params.update( TC_L.get_paramset(self) )
 		return params
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_lamp_hemi(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	

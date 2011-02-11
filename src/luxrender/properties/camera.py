@@ -33,6 +33,7 @@ from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group, ef_initialise_properties
 from extensions_framework.validate import Logic_OR as O
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import get_worldscale
 from luxrender.export import ParamSet, LuxManager
@@ -58,7 +59,7 @@ def CameraVolumeParameter(attr, name):
 		},
 	]
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_camera(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
@@ -375,8 +376,7 @@ class luxrender_camera(declarative_property_group):
 		dbo('CAMERA', out)
 		return out
 
-# TODO, move all film properties into this property group
-@ef_initialise_properties
+@addon_register_class
 class luxrender_film(declarative_property_group):
 	
 	ef_attach_to = ['luxrender_camera']
@@ -593,7 +593,7 @@ def luxrender_colorspace_controls():
 	
 	return ctl
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_colorspace(declarative_property_group):
 	'''
 	Storage class for LuxRender Colour-Space settings.
@@ -835,7 +835,7 @@ def get_tonemaps():
 	
 	return items
 
-@ef_initialise_properties
+@addon_register_class
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.

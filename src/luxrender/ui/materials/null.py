@@ -26,9 +26,10 @@
 #
 #import bpy
 #
+#from luxrender import addon_register_class
 #from luxrender.ui.materials import luxrender_material_sub
 
-#@bpy.utils.register_class
+#@addon_register_class
 #class ui_material_null(luxrender_material_sub, bpy.types.Panel):
 #	bl_label = 'LuxRender Null Material'
 #	
