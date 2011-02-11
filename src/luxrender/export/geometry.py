@@ -165,10 +165,6 @@ class GeometryExporter(object):
 			if mesh is None:
 				raise UnexportableObjectException('Cannot create render/export mesh')
 			
-			# Cache vert positions because me.vertices access is very slow
-			#print('-> Cache vert pos and normals')
-			#verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
-			
 			# collate faces by mat index
 			ffaces_mats = {}
 			for f in mesh.faces:
@@ -207,19 +203,18 @@ class GeometryExporter(object):
 					# number of verts needed needs to be written in the header
 					# and that number is not known before this is done.
 					
+					# Export data
+					co_no_cache = []
+					uv_cache = []
 					face_vert_indices = {}		# mapping of face index to list of exported vert indices for that face
+					
+					# Caches
 					vert_vno_indices = {}		# mapping of vert index to exported vert index for verts with vert normals
 					vert_fno_indices = {}		# mapping of vert index to exported vert index for verts with face normals
 					vert_use_vno = set()		# Set of vert indices that use vert normals
 					vert_use_fno = set()		# Set of vert indices that use face normals
 					
 					vert_index = 0				# exported vert index
-					
-					# We have to cache the entire co/no/uv data because we don't yet
-					# know how many verts there will be
-					co_no_cache = []
-					uv_cache = []
-					
 					for face in ffaces_mats[i]:
 						fvi = []
 						for j, vertex in enumerate(face.vertices):
@@ -299,14 +294,15 @@ class GeometryExporter(object):
 								ply.write( struct.pack('<3f', *co) )
 								ply.write( struct.pack('<3f', *no) )
 						
-						del co_no_cache
-						del uv_cache
-						
 						# dump face vert indices
 						for face in ffaces_mats[i]:
 							lfvi = len(face_vert_indices[face.index])
 							ply.write( struct.pack('<B', lfvi) )
 							ply.write( struct.pack('<%dI'%lfvi, *face_vert_indices[face.index]) )
+						
+						del co_no_cache
+						del uv_cache
+						del face_vert_indices
 						
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
@@ -356,10 +352,6 @@ class GeometryExporter(object):
 			if mesh is None:
 				raise UnexportableObjectException('Cannot create render/export mesh')
 			
-			# Cache vert positions because me.vertices access is very slow
-			#print('-> Cache vert pos and normals')
-			#verts_co_no = [tuple(v.co)+tuple(v.normal) for v in mesh.vertices]
-			
 			# collate faces by mat index
 			ffaces_mats = {}
 			for f in mesh.faces:
@@ -401,7 +393,6 @@ class GeometryExporter(object):
 					uvs = []
 					ntris = 0
 					face_vert_indices = []		# list of face vert indices
-					
 					
 					# Caches
 					vert_vno_indices = {}		# mapping of vert index to exported vert index for verts with vert normals
@@ -449,6 +440,7 @@ class GeometryExporter(object):
 								else:
 									fvi.append(vert_fno_indices[vertex])
 						
+						# For Lux, we need to triangulate quad faces
 						face_vert_indices.extend( fvi[0:3] )
 						ntris += 3
 						if len(fvi) == 4:
@@ -459,7 +451,6 @@ class GeometryExporter(object):
 					del vert_fno_indices
 					del vert_use_vno
 					del vert_use_fno
-					
 					
 					#print(' %s num points: %i' % (obj.name, len(points)))
 					#print(' %s num normals: %i' % (obj.name, len(normals)))
@@ -710,31 +701,6 @@ class GeometryExporter(object):
 		
 		return dupli_object_names
 	
-	#def handler_Duplis_PATH(lux_context, scene, obj, *args, **kwargs):
-	#	if not 'particle_system' in kwargs.keys(): return
-	#	
-	#	import mathutils
-	#	
-	#	cyl = ParamSet()\
-	#			.add_float('radius', 0.0005) \
-	#			.add_float('zmin', 0.0) \
-	#			.add_float('zmax', 1.0)
-	#	
-	#	strand = ('%s_hair'%obj.name, obj.active_material, 'cylinder', cyl)
-	#	
-	#	exportShapeDefinition(lux_context, obj, strand)
-	#	
-	#	scale_z = mathutils.Vector([0.0, 0.0, 1.0])
-	#	
-	#	for particle in kwargs['particle_system'].particles:
-	#		for i in range(len(particle.hair)-1):
-	#			segment_length = (particle.hair[i].co - particle.hair[i+1].co).length
-	#			segment_matrix = mathutils.Matrix.Translation( particle.hair[i].co_hair_space + particle.location )
-	#			segment_matrix *= mathutils.Matrix.Scale(segment_length, 4, scale_z)
-	#			segment_matrix *= particle.rotation.to_matrix().resize_4x4()
-	#			
-	#			exportShapeInstances(lux_context, scene, obj, [strand], matrix=[segment_matrix,None])
-	
 	def handler_MESH(self, obj, *args, **kwargs):
 		if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % obj)
 		
@@ -749,10 +715,7 @@ class GeometryExporter(object):
 				obj,
 				self.buildMesh(obj)
 			)
-	
 
-# TODO: allow swapping out geometry_exporter for some other handler
-# in order to make this function re-usable for other scene elements ?
 def iterateScene(lux_context, scene):
 	
 	geometry_exporter = GeometryExporter(lux_context, scene)
