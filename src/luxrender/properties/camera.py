@@ -738,7 +738,7 @@ class luxrender_colorspace(declarative_property_group):
 
 class colorspace_presets(object):
 	class sRGB(object):
-		gamma		= 2.4
+		gamma		= 2.2		# This is still approximate
 		cs_whiteX	= 0.314275
 		cs_whiteY	= 0.329411
 		cs_redX		= 0.63
