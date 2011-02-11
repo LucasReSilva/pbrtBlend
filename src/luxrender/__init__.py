@@ -55,23 +55,28 @@ bl_addon_info = {
 	"description": "This Addon will allow you to render your scenes with the LuxRender engine."
 }
 
+
+
 if 'core' in locals():
 	import imp
 	imp.reload(core)
 else:
-	registered_classes = []
-	def addon_register_class(cls):
-		registered_classes.append( cls )
-		return cls
 	import bpy
-	from extensions_framework import ef_initialise_properties
-	from . import core
+	from extensions_framework import ef_initialise_properties, ef_remove_properties
+	
+	addon_classes = []
+	def addon_register_class(cls):
+		addon_classes.append( cls )
+		return cls
+
+	from luxrender import core
 
 def register():
-	for cls in registered_classes:
+	for cls in addon_classes:
 		bpy.utils.register_class(cls)
 		if hasattr(cls, 'ef_attach_to'): ef_initialise_properties(cls)
 
 def unregister():
-	for cls in registered_classes[::-1]:	# unregister in reverse order
+	for cls in addon_classes[::-1]:	# unregister in reverse order
+		if hasattr(cls, 'ef_attach_to'): ef_remove_properties(cls)
 		bpy.utils.unregister_class(cls)
