@@ -33,6 +33,7 @@ from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import get_worldscale
 from luxrender.export import ParamSet, LuxManager
@@ -58,12 +59,13 @@ def CameraVolumeParameter(attr, name):
 		},
 	]
 
+@addon_register_class
 class luxrender_camera(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
-	This class will be instantiated within a Blender
-	camera object.
 	'''
+	
+	ef_attach_to = ['Camera']
 	
 	controls = [
 		'Exterior',
@@ -374,254 +376,11 @@ class luxrender_camera(declarative_property_group):
 		dbo('CAMERA', out)
 		return out
 
-def luxrender_colorspace_controls():
-	ctl = [
-		'cs_label',
-		[0.1, 'preset', 'preset_name'],
-		['cs_whiteX', 'cs_whiteY'],
-		['cs_redX', 'cs_redY'],
-		['cs_greenX', 'cs_greenY'],
-		['cs_blueX', 'cs_blueY'],
-		
-		'gamma_label',
-		'gamma',
-	]
-	
-	if LUXRENDER_VERSION >= '0.8':
-		ctl.extend([
-			'use_crf',
-			'crf_file'
-		])
-	
-	return ctl
-
-class luxrender_colorspace(declarative_property_group):
-	'''
-	Storage class for LuxRender Colour-Space settings.
-	This class will be instantiated within a Blender
-	camera object.
-	'''
-	
-	controls = luxrender_colorspace_controls()
-	
-	visibility = {
-		'preset_name':	{ 'preset': True },
-		'cs_whiteX':	{ 'preset': False },
-		'cs_whiteY':	{ 'preset': False },
-		'cs_redX':		{ 'preset': False },
-		'cs_redY':		{ 'preset': False },
-		'cs_greenX':	{ 'preset': False },
-		'cs_greenY':	{ 'preset': False },
-		'cs_blueX':		{ 'preset': False },
-		'cs_blueY':		{ 'preset': False },
-		'crf_file':		{ 'use_crf': True },
-		
-		'gamma_label':	{ 'preset': False },
-		'gamma':		{ 'preset': False },
-	}
-	
-	properties = [
-		{
-			'attr': 'cs_label',
-			'type': 'text',
-			'name': 'Color Space'
-		},
-		{
-			'attr': 'gamma_label',
-			'type': 'text',
-			'name': 'Gamma'
-		},
-		{
-			'attr': 'gamma',
-			'type': 'float',
-			'name': 'Gamma',
-			'default': 2.2
-		},
-		{
-			'attr': 'preset',
-			'type': 'bool',
-			'name': 'P',
-			'default': True,
-			'toggle': True
-		},
-		# TODO - change actual parameter values when user chooses a preset
-		{
-			'attr': 'preset_name',
-			'type': 'enum',
-			'name': 'Preset',
-			'default': 'sRGB',
-			'items': [
-				('sRGB', 'sRGB - HDTV (ITU-R BT.709-5)', 'sRGB'),
-				('romm_rgb', 'ROMM RGB', 'romm_rgb'),
-				('adobe_rgb_98', 'Adobe RGB 98', 'adobe_rgb_98'),
-				('apple_rgb', 'Apple RGB', 'apple_rgb'),
-				('ntsc_1953', 'NTSC (FCC 1953, ITU-R BT.470-2 System M)', 'ntsc_1953'),
-				('ntsc_1979', 'NTSC (1979) (SMPTE C, SMPTE-RP 145)', 'ntsc_1979'),
-				('pal_secam', 'PAL/SECAM (EBU 3213, ITU-R BT.470-6)', 'pal_secam'),
-				('cie_e', 'CIE (1931) E', 'cie_e'),
-			]
-		},
-		{
-			'attr': 'cs_whiteX',
-			'type': 'float',
-			'name': 'White X',
-			'precision': 6,
-			'default': 0.314275
-		},
-		{
-			'attr': 'cs_whiteY',
-			'type': 'float',
-			'name': 'White Y',
-			'precision': 6,
-			'default': 0.329411
-		},
-		
-		{
-			'attr': 'cs_redX',
-			'type': 'float',
-			'name': 'Red X',
-			'precision': 6,
-			'default': 0.63
-		},
-		{
-			'attr': 'cs_redY',
-			'type': 'float',
-			'name': 'Red Y',
-			'precision': 6,
-			'default': 0.34
-		},
-		
-		{
-			'attr': 'cs_greenX',
-			'type': 'float',
-			'name': 'Green X',
-			'precision': 6,
-			'default': 0.31
-		},
-		{
-			'attr': 'cs_greenY',
-			'type': 'float',
-			'name': 'Green Y',
-			'precision': 6,
-			'default': 0.595
-		},
-		
-		{
-			'attr': 'cs_blueX',
-			'type': 'float',
-			'name': 'Blue X',
-			'precision': 6,
-			'default': 0.155
-		},
-		{
-			'attr': 'cs_blueY',
-			'type': 'float',
-			'name': 'Blue Y',
-			'precision': 6,
-			'default': 0.07
-		},
-		
-		# Camera Response Functions
-		{
-			'attr': 'use_crf',
-			'type': 'bool',
-			'name': 'Use Camera Response Function',
-			'default': False
-		},
-		{
-			'attr': 'crf_file',
-			'type': 'string',
-			'subtype': 'FILE_PATH',
-			'name': 'CRF File',
-			'default': '',
-		},
-	]
-
-class colorspace_presets(object):
-	class sRGB(object):
-		gamma		= 2.4
-		cs_whiteX	= 0.314275
-		cs_whiteY	= 0.329411
-		cs_redX		= 0.63
-		cs_redY		= 0.34
-		cs_greenX	= 0.31
-		cs_greenY	= 0.595
-		cs_blueX	= 0.155
-		cs_blueY	= 0.07
-	class romm_rgb(object):
-		gamma		= 1.8
-		cs_whiteX	= 0.346
-		cs_whiteY	= 0.359
-		cs_redX		= 0.7347
-		cs_redY		= 0.2653
-		cs_greenX	= 0.1596
-		cs_greenY	= 0.8404
-		cs_blueX	= 0.0366
-		cs_blueY	= 0.0001
-	class adobe_rgb_98(object):
-		gamma		= 2.2
-		cs_whiteX	= 0.313
-		cs_whiteY	= 0.329
-		cs_redX		= 0.64
-		cs_redY		= 0.34
-		cs_greenX	= 0.21
-		cs_greenY	= 0.71
-		cs_blueX	= 0.15
-		cs_blueY	= 0.06
-	class apple_rgb(object):
-		gamma		= 1.8		# TODO: verify
-		cs_whiteX	= 0.313
-		cs_whiteY	= 0.329
-		cs_redX		= 0.625
-		cs_redY		= 0.34
-		cs_greenX	= 0.28
-		cs_greenY	= 0.595
-		cs_blueX	= 0.155
-		cs_blueY	= 0.07
-	class ntsc_1953(object):
-		gamma		= 2.2		# TODO: verify
-		cs_whiteX	= 0.31
-		cs_whiteY	= 0.316
-		cs_redX		= 0.67
-		cs_redY		= 0.33
-		cs_greenX	= 0.21
-		cs_greenY	= 0.71
-		cs_blueX	= 0.14
-		cs_blueY	= 0.08
-	class ntsc_1979(object):
-		gamma		= 2.2		# TODO: verify
-		cs_whiteX	= 0.313
-		cs_whiteY	= 0.329
-		cs_redX		= 0.63
-		cs_redY		= 0.34
-		cs_greenX	= 0.31
-		cs_greenY	= 0.595
-		cs_blueX	= 0.155
-		cs_blueY	= 0.07
-	class pal_secam(object):
-		gamma		= 2.8
-		cs_whiteX	= 0.313
-		cs_whiteY	= 0.329
-		cs_redX		= 0.64
-		cs_redY		= 0.33
-		cs_greenX	= 0.29
-		cs_greenY	= 0.6
-		cs_blueX	= 0.15
-		cs_blueY	= 0.06
-	class cie_e(object):
-		gamma		= 2.2
-		cs_whiteX	= 0.333
-		cs_whiteY	= 0.333
-		cs_redX		= 0.7347
-		cs_redY		= 0.2653
-		cs_greenX	= 0.2738
-		cs_greenY	= 0.7174
-		cs_blueX	= 0.1666
-		cs_blueY	= 0.0089
-
-# TODO, move all film properties into this property group
-
+@addon_register_class
 class luxrender_film(declarative_property_group):
+	
+	ef_attach_to = ['luxrender_camera']
+	
 	controls = [
 		'writeinterval',
 		'displayinterval',
@@ -813,6 +572,252 @@ class luxrender_film(declarative_property_group):
 		
 		return ('fleximage', params)
 
+def luxrender_colorspace_controls():
+	ctl = [
+		'cs_label',
+		[0.1, 'preset', 'preset_name'],
+		['cs_whiteX', 'cs_whiteY'],
+		['cs_redX', 'cs_redY'],
+		['cs_greenX', 'cs_greenY'],
+		['cs_blueX', 'cs_blueY'],
+		
+		'gamma_label',
+		'gamma',
+	]
+	
+	if LUXRENDER_VERSION >= '0.8':
+		ctl.extend([
+			'use_crf',
+			'crf_file'
+		])
+	
+	return ctl
+
+@addon_register_class
+class luxrender_colorspace(declarative_property_group):
+	'''
+	Storage class for LuxRender Colour-Space settings.
+	'''
+	
+	ef_attach_to = ['luxrender_film']
+	
+	controls = luxrender_colorspace_controls()
+	
+	visibility = {
+		'preset_name':	{ 'preset': True },
+		'cs_whiteX':	{ 'preset': False },
+		'cs_whiteY':	{ 'preset': False },
+		'cs_redX':		{ 'preset': False },
+		'cs_redY':		{ 'preset': False },
+		'cs_greenX':	{ 'preset': False },
+		'cs_greenY':	{ 'preset': False },
+		'cs_blueX':		{ 'preset': False },
+		'cs_blueY':		{ 'preset': False },
+		'crf_file':		{ 'use_crf': True },
+		
+		'gamma_label':	{ 'preset': False },
+		'gamma':		{ 'preset': False },
+	}
+	
+	properties = [
+		{
+			'attr': 'cs_label',
+			'type': 'text',
+			'name': 'Color Space'
+		},
+		{
+			'attr': 'gamma_label',
+			'type': 'text',
+			'name': 'Gamma'
+		},
+		{
+			'attr': 'gamma',
+			'type': 'float',
+			'name': 'Gamma',
+			'default': 2.2
+		},
+		{
+			'attr': 'preset',
+			'type': 'bool',
+			'name': 'P',
+			'default': True,
+			'toggle': True
+		},
+		# TODO - change actual parameter values when user chooses a preset
+		{
+			'attr': 'preset_name',
+			'type': 'enum',
+			'name': 'Preset',
+			'default': 'sRGB',
+			'items': [
+				('sRGB', 'sRGB - HDTV (ITU-R BT.709-5)', 'sRGB'),
+				('romm_rgb', 'ROMM RGB', 'romm_rgb'),
+				('adobe_rgb_98', 'Adobe RGB 98', 'adobe_rgb_98'),
+				('apple_rgb', 'Apple RGB', 'apple_rgb'),
+				('ntsc_1953', 'NTSC (FCC 1953, ITU-R BT.470-2 System M)', 'ntsc_1953'),
+				('ntsc_1979', 'NTSC (1979) (SMPTE C, SMPTE-RP 145)', 'ntsc_1979'),
+				('pal_secam', 'PAL/SECAM (EBU 3213, ITU-R BT.470-6)', 'pal_secam'),
+				('cie_e', 'CIE (1931) E', 'cie_e'),
+			]
+		},
+		{
+			'attr': 'cs_whiteX',
+			'type': 'float',
+			'name': 'White X',
+			'precision': 6,
+			'default': 0.314275
+		},
+		{
+			'attr': 'cs_whiteY',
+			'type': 'float',
+			'name': 'White Y',
+			'precision': 6,
+			'default': 0.329411
+		},
+		
+		{
+			'attr': 'cs_redX',
+			'type': 'float',
+			'name': 'Red X',
+			'precision': 6,
+			'default': 0.63
+		},
+		{
+			'attr': 'cs_redY',
+			'type': 'float',
+			'name': 'Red Y',
+			'precision': 6,
+			'default': 0.34
+		},
+		
+		{
+			'attr': 'cs_greenX',
+			'type': 'float',
+			'name': 'Green X',
+			'precision': 6,
+			'default': 0.31
+		},
+		{
+			'attr': 'cs_greenY',
+			'type': 'float',
+			'name': 'Green Y',
+			'precision': 6,
+			'default': 0.595
+		},
+		
+		{
+			'attr': 'cs_blueX',
+			'type': 'float',
+			'name': 'Blue X',
+			'precision': 6,
+			'default': 0.155
+		},
+		{
+			'attr': 'cs_blueY',
+			'type': 'float',
+			'name': 'Blue Y',
+			'precision': 6,
+			'default': 0.07
+		},
+		
+		# Camera Response Functions
+		{
+			'attr': 'use_crf',
+			'type': 'bool',
+			'name': 'Use Camera Response Function',
+			'default': False
+		},
+		{
+			'attr': 'crf_file',
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'name': 'CRF File',
+			'default': '',
+		},
+	]
+
+class colorspace_presets(object):
+	class sRGB(object):
+		gamma		= 2.2		# This is still approximate
+		cs_whiteX	= 0.314275
+		cs_whiteY	= 0.329411
+		cs_redX		= 0.63
+		cs_redY		= 0.34
+		cs_greenX	= 0.31
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class romm_rgb(object):
+		gamma		= 1.8
+		cs_whiteX	= 0.346
+		cs_whiteY	= 0.359
+		cs_redX		= 0.7347
+		cs_redY		= 0.2653
+		cs_greenX	= 0.1596
+		cs_greenY	= 0.8404
+		cs_blueX	= 0.0366
+		cs_blueY	= 0.0001
+	class adobe_rgb_98(object):
+		gamma		= 2.2
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.64
+		cs_redY		= 0.34
+		cs_greenX	= 0.21
+		cs_greenY	= 0.71
+		cs_blueX	= 0.15
+		cs_blueY	= 0.06
+	class apple_rgb(object):
+		gamma		= 1.8		# TODO: verify
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.625
+		cs_redY		= 0.34
+		cs_greenX	= 0.28
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class ntsc_1953(object):
+		gamma		= 2.2		# TODO: verify
+		cs_whiteX	= 0.31
+		cs_whiteY	= 0.316
+		cs_redX		= 0.67
+		cs_redY		= 0.33
+		cs_greenX	= 0.21
+		cs_greenY	= 0.71
+		cs_blueX	= 0.14
+		cs_blueY	= 0.08
+	class ntsc_1979(object):
+		gamma		= 2.2		# TODO: verify
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.63
+		cs_redY		= 0.34
+		cs_greenX	= 0.31
+		cs_greenY	= 0.595
+		cs_blueX	= 0.155
+		cs_blueY	= 0.07
+	class pal_secam(object):
+		gamma		= 2.8
+		cs_whiteX	= 0.313
+		cs_whiteY	= 0.329
+		cs_redX		= 0.64
+		cs_redY		= 0.33
+		cs_greenX	= 0.29
+		cs_greenY	= 0.6
+		cs_blueX	= 0.15
+		cs_blueY	= 0.06
+	class cie_e(object):
+		gamma		= 2.2
+		cs_whiteX	= 0.333
+		cs_whiteY	= 0.333
+		cs_redX		= 0.7347
+		cs_redY		= 0.2653
+		cs_greenX	= 0.2738
+		cs_greenY	= 0.7174
+		cs_blueX	= 0.1666
+		cs_blueY	= 0.0089
+
 def get_tonemaps():
 	
 	items =  [
@@ -830,12 +835,13 @@ def get_tonemaps():
 	
 	return items
 
+@addon_register_class
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.
-	This class will be instantiated within a Blender
-	camera object.
 	'''
+	
+	ef_attach_to = ['luxrender_film']
 	
 	controls = [
 		'tm_label',

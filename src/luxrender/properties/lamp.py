@@ -30,6 +30,8 @@ from extensions_framework import declarative_property_group
 import extensions_framework.util as efutil
 from extensions_framework.validate import Logic_Operator as LO
 
+from luxrender import addon_register_class
+from luxrender.properties.material import dict_merge
 from luxrender.properties.texture import ColorTextureParameter
 from luxrender.export import ParamSet
 
@@ -63,17 +65,19 @@ class LampColorTextureParameter(ColorTextureParameter):
 	def get_visibility(self):
 		vis = {
 			'%s_colortexture' % self.attr:	{ '%s_usecolortexture' % self.attr: True },
+			'%s_multiplycolor' % self.attr:	{ '%s_usecolortexture' % self.attr: True },
 		}
 		return vis
 
 TC_L = LampColorTextureParameter('L', 'Colour')
 
+@addon_register_class
 class luxrender_lamp(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
-	This class will be instantiated within a Blender
-	lamp object.
 	'''
+	
+	ef_attach_to = ['Lamp']
 	
 	controls = [
 		'importance', 'lightgroup', 'Exterior'
@@ -117,38 +121,48 @@ class luxrender_lamp_basic(declarative_property_group):
 		params.update( TC_L.get_paramset(self) )
 		return params
 
+@addon_register_class
 class luxrender_lamp_point(luxrender_lamp_basic):
-	pass
+	ef_attach_to = ['luxrender_lamp']
+
+@addon_register_class
 class luxrender_lamp_spot(luxrender_lamp_basic):
+	ef_attach_to = ['luxrender_lamp']
+	
+	controls = luxrender_lamp_basic.controls[:] + [
+		'projector',
+		'mapname'
+	]
+	visibility = dict_merge(
+		luxrender_lamp_basic.visibility,
+		{ 'mapname': { 'projector': True } },
+	)
+	properties = luxrender_lamp_basic.properties[:] + [
+		{
+			'type': 'bool',
+			'attr': 'projector',
+			'name': 'Projector',
+			'default': False
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'mapname',
+			'name': 'Projector image',
+			'description': 'Image to project from this lamp',
+			'default': ''
+		},
+	]
 	def get_paramset(self, lamp_object):
 		params = super().get_paramset(lamp_object)
 		if self.projector:
 			params.add_string('mapname', self.mapname)
 		return params
 
-luxrender_lamp_spot.controls.extend([
-	'projector',
-	'mapname'
-])
-luxrender_lamp_spot.visibility['mapname'] = { 'projector': True }
-luxrender_lamp_spot.properties.extend([
-	{
-		'type': 'bool',
-		'attr': 'projector',
-		'name': 'Projector',
-		'default': False
-	},
-	{
-		'type': 'string',
-		'subtype': 'FILE_PATH',
-		'attr': 'mapname',
-		'name': 'Projector image',
-		'description': 'Image to project from this lamp',
-		'default': ''
-	},
-])
-
+@addon_register_class
 class luxrender_lamp_sun(declarative_property_group):
+	ef_attach_to = ['luxrender_lamp']
+	
 	controls = [
 		'sunsky_type',
 		'turbidity',
@@ -263,7 +277,10 @@ class luxrender_lamp_sun(declarative_property_group):
 		
 		return params
 
+@addon_register_class
 class luxrender_lamp_area(declarative_property_group):
+	ef_attach_to = ['luxrender_lamp']
+	
 	controls = TC_L.controls + [
 		'power',
 		'efficacy',
@@ -302,7 +319,10 @@ class luxrender_lamp_area(declarative_property_group):
 		params.update( TC_L.get_paramset(self) )
 		return params
 
+@addon_register_class
 class luxrender_lamp_hemi(declarative_property_group):
+	ef_attach_to = ['luxrender_lamp']
+	
 	controls = [
 		[0.323, 'L_colorlabel', 'L_color'],
 		'infinite_map',

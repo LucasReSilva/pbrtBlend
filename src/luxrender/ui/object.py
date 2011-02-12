@@ -30,6 +30,9 @@ from properties_object import ObjectButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+from luxrender import addon_register_class
+
+@addon_register_class
 class object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	Object settings

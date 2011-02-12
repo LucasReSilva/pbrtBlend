@@ -29,6 +29,7 @@ import bpy
 from presets import AddPresetBase
 
 # LuxRender Libs
+from luxrender import addon_register_class
 from luxrender.export.scene import SceneExporter
 
 # Per-IDPropertyGroup preset handling
@@ -41,48 +42,62 @@ class LUXRENDER_MT_base(object):
 class LUXRENDER_OT_preset_base(AddPresetBase):
 	pass
 
+@addon_register_class
 class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Engine Presets"
 	preset_subdir = "luxrender/engine"
 
+@addon_register_class
 class LUXRENDER_OT_preset_engine_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_engine_add'
 	bl_label = 'Add LuxRender Engine settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_engine'
-	preset_values = [
-		'bpy.context.scene.luxrender_engine.%s'%v['attr'] for v in bpy.types.luxrender_engine.get_exportable_properties()
-	] + [
-		'bpy.context.scene.luxrender_sampler.%s'%v['attr'] for v in bpy.types.luxrender_sampler.get_exportable_properties()
-	] + [
-		'bpy.context.scene.luxrender_integrator.%s'%v['attr'] for v in bpy.types.luxrender_integrator.get_exportable_properties()
-	] + [
-		'bpy.context.scene.luxrender_volumeintegrator.%s'%v['attr'] for v in bpy.types.luxrender_volumeintegrator.get_exportable_properties()
-	] + [
-		'bpy.context.scene.luxrender_filter.%s'%v['attr'] for v in bpy.types.luxrender_filter.get_exportable_properties()
-	] + [
-		'bpy.context.scene.luxrender_accelerator.%s'%v['attr'] for v in bpy.types.luxrender_accelerator.get_exportable_properties()
-	]
+	preset_values = []
 	preset_subdir = 'luxrender/engine'
+	
+	def execute(self, context):
+		self.preset_values = [
+			'bpy.context.scene.luxrender_engine.%s'%v['attr'] for v in bpy.types.luxrender_engine.get_exportable_properties()
+		] + [
+			'bpy.context.scene.luxrender_sampler.%s'%v['attr'] for v in bpy.types.luxrender_sampler.get_exportable_properties()
+		] + [
+			'bpy.context.scene.luxrender_integrator.%s'%v['attr'] for v in bpy.types.luxrender_integrator.get_exportable_properties()
+		] + [
+			'bpy.context.scene.luxrender_volumeintegrator.%s'%v['attr'] for v in bpy.types.luxrender_volumeintegrator.get_exportable_properties()
+		] + [
+			'bpy.context.scene.luxrender_filter.%s'%v['attr'] for v in bpy.types.luxrender_filter.get_exportable_properties()
+		] + [
+			'bpy.context.scene.luxrender_accelerator.%s'%v['attr'] for v in bpy.types.luxrender_accelerator.get_exportable_properties()
+		]
+		return super().execute(context)
 
+@addon_register_class
 class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Networking Presets"
 	preset_subdir = "luxrender/networking"
 
+@addon_register_class
 class LUXRENDER_OT_preset_networking_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_networking_add'
 	bl_label = 'Add LuxRender Networking settings preset'
 	preset_menu = 'LUXRENDER_MT_presets_networking'
-	preset_values = [
-		'bpy.context.scene.luxrender_networking.%s'%v['attr'] for v in bpy.types.luxrender_networking.get_exportable_properties()
-	]
+	preset_values = []
 	preset_subdir = 'luxrender/networking'
+	
+	def execute(self, context):
+		self.preset_values = [
+			'bpy.context.scene.luxrender_networking.%s'%v['attr'] for v in bpy.types.luxrender_networking.get_exportable_properties()
+		]
+		return super().execute(context)
 
+@addon_register_class
 class LUXRENDER_MT_presets_material(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Material Presets"
 	preset_subdir = "luxrender/material"
 
+@addon_register_class
 class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_material_add'
@@ -111,10 +126,12 @@ class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Opera
 		self.preset_values = pv
 		return super().execute(context)
 
+@addon_register_class
 class LUXRENDER_MT_presets_texture(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Texture Presets"
 	preset_subdir = "luxrender/texture"
 
+@addon_register_class
 class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_texture_add'
@@ -150,10 +167,13 @@ class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operat
 		return super().execute(context)
 
 # Volume data handling
+
+@addon_register_class
 class LUXRENDER_MT_presets_volume(LUXRENDER_MT_base, bpy.types.Menu):
 	bl_label = "LuxRender Volume Presets"
 	preset_subdir = "luxrender/volume"
 
+@addon_register_class
 class LUXRENDER_OT_preset_volume_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_volume_add'
@@ -171,6 +191,7 @@ class LUXRENDER_OT_preset_volume_add(LUXRENDER_OT_preset_base, bpy.types.Operato
 		self.preset_values = pv
 		return super().execute(context)
 
+@addon_register_class
 class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	'''Add a new material volume definition to the scene'''
 	
@@ -185,7 +206,8 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
 		new_vol = v[len(v)-1]
 		new_vol.name = self.properties.new_volume_name
 		return {'FINISHED'}
-	
+
+@addon_register_class
 class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 	'''Remove the selected material volume definition'''
 	
@@ -200,6 +222,7 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 
 # Export process
 
+@addon_register_class
 class EXPORT_OT_luxrender(bpy.types.Operator):
 	bl_idname = 'export.luxrender'
 	bl_label = 'Export LuxRender Scene (.lxs)'

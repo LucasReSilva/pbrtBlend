@@ -26,8 +26,10 @@
 #
 import bpy
 
+from luxrender import addon_register_class
 from luxrender.ui.materials import luxrender_material_sub
 
+@addon_register_class
 class ui_material_matte(luxrender_material_sub, bpy.types.Panel):
 	bl_label = 'LuxRender Matte Material'
 	

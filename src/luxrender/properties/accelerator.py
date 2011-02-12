@@ -27,15 +27,17 @@
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 
+@addon_register_class
 class luxrender_accelerator(declarative_property_group):
 	'''
 	Storage class for LuxRender Accelerator settings.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
+	
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		[0.7, 'accelerator', 'advanced'],

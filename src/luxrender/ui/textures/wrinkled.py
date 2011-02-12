@@ -26,8 +26,10 @@
 #
 import bpy
 
+from luxrender import addon_register_class
 from luxrender.ui.textures import luxrender_texture_base
 
+@addon_register_class
 class ui_texture_wrinkled(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender wrinkled Texture'
 	

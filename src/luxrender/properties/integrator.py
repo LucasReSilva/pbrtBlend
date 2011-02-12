@@ -27,16 +27,72 @@
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
+from luxrender import addon_register_class
 from luxrender.properties import dbo
 from luxrender.export import ParamSet
 from luxrender.outputs import LuxLog 
 
+@addon_register_class
+class luxrender_volumeintegrator(declarative_property_group):
+	'''
+	Storage class for LuxRender Volume Integrator settings.
+	'''
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
+		'volumeintegrator', 'stepsize'
+	]
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'volumeintegrator',
+			'name': 'Volume Integrator',
+			'description': 'Volume Integrator',
+			'default': 'single',
+			'items': [
+				('emission', 'Emission', 'emission'),
+				('single', 'Single', 'single'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'stepsize',
+			'name': 'Step Size',
+			'description': 'Volume Integrator Step Size',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+			'save_in_preset': True
+		}
+	]
+	
+	def api_output(self):
+		'''
+		Format this class's members into a LuxRender ParamSet
+		
+		Returns dict
+		'''
+		
+		params = ParamSet()
+		
+		params.add_float('stepsize', self.stepsize)
+		
+		out = self.volumeintegrator, params
+		dbo('VOLUME INTEGRATOR', out)
+		return out
+
+@addon_register_class
 class luxrender_integrator(declarative_property_group):
 	'''
 	Storage class for LuxRender SurfaceIntegrator settings.
-	This class will be instantiated within a Blender scene
-	object.
 	'''
+	
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		[ 0.7, 'surfaceintegrator', 'advanced'],
@@ -684,10 +740,13 @@ class luxrender_integrator(declarative_property_group):
 		
 		params = ParamSet()
 		
-		if engine_properties.renderer == 'hybrid' and self.lightstrategy != 'one':
-			LuxLog('Incompatible lightstrategy for Hybrid renderer. Changing to "One".')
-			self.advanced = True
-			self.lightstrategy = 'one'
+		if engine_properties.renderer == 'hybrid':
+			if self.surfaceintegrator != 'path':
+				LuxLog('Incompatible surface integrator for Hybrid renderer (use "path").')
+				raise Exception('Incompatible render settings')
+			if self.lightstrategy != 'one':
+				LuxLog('Incompatible lightstrategy for Hybrid renderer (use "one").')
+				raise Exception('Incompatible render settings')
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \

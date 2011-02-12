@@ -29,8 +29,11 @@ from properties_data_lamp import DataButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+from luxrender import addon_register_class
+
 narrowui = 180
 
+@addon_register_class
 class ui_luxrender_lamps(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Lamps'
 	COMPAT_ENGINES = {'luxrender'}
@@ -53,6 +56,7 @@ class ui_luxrender_lamps(DataButtonsPanel, property_group_renderer, bpy.types.Pa
 			
 			super().draw(context)
 
+@addon_register_class
 class ui_luxrender_lamp_point(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Point Lamp'
 	COMPAT_ENGINES = {'luxrender'}
@@ -65,6 +69,7 @@ class ui_luxrender_lamp_point(DataButtonsPanel, property_group_renderer, bpy.typ
 	def poll(cls, context):
 		return super().poll(context) and context.lamp.type == 'POINT'
 
+@addon_register_class
 class ui_luxrender_lamp_spot(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Spot Lamp'
 	COMPAT_ENGINES = {'luxrender'}
@@ -96,6 +101,7 @@ class ui_luxrender_lamp_spot(DataButtonsPanel, property_group_renderer, bpy.type
 				if not projector:
 					col.prop(context.lamp, "spot_blend", text="Blend", slider=True)
 
+@addon_register_class
 class ui_luxrender_lamp_sun(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Sun + Sky'
 	COMPAT_ENGINES = {'luxrender'}
@@ -108,6 +114,7 @@ class ui_luxrender_lamp_sun(DataButtonsPanel, property_group_renderer, bpy.types
 	def poll(cls, context):
 		return super().poll(context) and context.lamp.type == 'SUN'
 
+@addon_register_class
 class ui_luxrender_lamp_hemi(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Infinite Lamp'
 	COMPAT_ENGINES = {'luxrender'}
@@ -120,6 +127,7 @@ class ui_luxrender_lamp_hemi(DataButtonsPanel, property_group_renderer, bpy.type
 	def poll(cls, context):
 		return super().poll(context) and context.lamp.type == 'HEMI'
 
+@addon_register_class
 class ui_luxrender_lamp_area(DataButtonsPanel, property_group_renderer, bpy.types.Panel):
 	bl_label = 'LuxRender Area Lamp'
 	COMPAT_ENGINES = {'luxrender'}

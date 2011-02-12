@@ -29,6 +29,9 @@ import bpy
 from properties_world import WorldButtonsPanel
 from extensions_framework.ui import property_group_renderer
 
+from luxrender import addon_register_class
+
+@addon_register_class
 class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	LuxRender World Settings
@@ -39,3 +42,45 @@ class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	display_property_groups = [
 		( ('scene',), 'luxrender_world' )
 	]
+
+@addon_register_class
+class volumes(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
+	'''
+	Interior/Exterior Volumes Settings
+	'''
+	COMPAT_ENGINES = {'luxrender'}
+	bl_label = 'LuxRender Volumes'
+	
+	display_property_groups = [
+		( ('scene',), 'luxrender_volumes' )
+	]
+	
+	# overridden in order to draw the selected luxrender_volume_data property group
+	def draw(self, context):
+		super().draw(context)
+		
+		if context.world:
+			row = self.layout.row(align=True)
+			row.menu("LUXRENDER_MT_presets_volume", text=bpy.types.LUXRENDER_MT_presets_volume.bl_label)
+			row.operator("luxrender.preset_volume_add", text="", icon="ZOOMIN")
+			row.operator("luxrender.preset_volume_add", text="", icon="ZOOMOUT").remove_active = True
+			
+			if len(context.scene.luxrender_volumes.volumes) > 0:
+				current_vol_ind = context.scene.luxrender_volumes.volumes_index
+				current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+				# 'name' is not a member of current_vol.properties,
+				# so we draw it explicitly
+				self.layout.prop(
+					current_vol, 'name'
+				)
+				# Here we draw the currently selected luxrender_volumes_data property group
+				for control in current_vol.controls:
+					self.draw_column(
+						control,
+						self.layout,
+						current_vol,
+						context.world,	# Look in the current world object for fresnel textures
+						property_group = current_vol
+					)
+		else:
+			self.layout.label('No active World available!')

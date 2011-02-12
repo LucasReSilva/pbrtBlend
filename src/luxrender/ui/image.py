@@ -28,9 +28,11 @@ import bpy
 
 from extensions_framework.ui import property_group_renderer
 
+from luxrender import addon_register_class
 from luxrender.outputs import LuxManager as LM
 from luxrender.outputs.pure_api import PYLUX_AVAILABLE
 
+@addon_register_class
 class luxrender_ui_rendering_controls(property_group_renderer, bpy.types.Panel):
 	bl_space_type = 'IMAGE_EDITOR'
 	bl_region_type = 'UI'
