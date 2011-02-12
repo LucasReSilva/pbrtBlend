@@ -30,7 +30,7 @@ from ctypes import cdll, c_uint, c_float, cast, POINTER, byref, sizeof, c_long
 import errno, os, struct, sys
 
 # Blender Libs
-import bpy, mathutils
+import bpy
 
 # LuxRender libs
 from luxrender.export import ParamSet, matrix_to_list, LuxManager
@@ -39,10 +39,11 @@ from luxrender.outputs.file_api import Files
 
 def read_cache(smokecache, is_high_res, amplifier):
 	scene = LuxManager.CurrentScene
-
+	
 	# import compression libraries
 	has_lzo = True
 	has_lzma = True
+	
 	try:
 		if sys.platform == 'darwin':
 			# Get lzo library for OSX
@@ -50,7 +51,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 				lzodll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ))
 			except: # look in blender application scripts_path
 				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.dylib')
-
+		
 		elif sys.platform == 'win32':
 			# Get lzo library for windows
 			try: # look in windows search path
@@ -59,10 +60,13 @@ def read_cache(smokecache, is_high_res, amplifier):
 				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzo.dll')
 		else:
 			# Get lzo library for Linux
-			lzodll = cdll.LoadLibrary('/usr/lib/liblzo2.so.2')
-
+			try: # look in system lib path
+				lzodll = cdll.LoadLibrary('/usr/lib/liblzo2.so')
+			except: # look in blender application scripts_path
+				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.so')
+		
 		LuxLog('Volumes: LZO Library found')
-
+	
 	except BaseException as err:
 		if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
 			LuxLog('Volumes: LZO Library not found')
@@ -77,19 +81,23 @@ def read_cache(smokecache, is_high_res, amplifier):
 				lzmadll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'))
 			except: # look in blender application scripts_path
 				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib')
-
+		
 		elif sys.platform == 'win32':
 			# Get lzma library for windows
 			try: # look in windows search path
 				lzmadll = cdll.LoadLibrary('lzma.dll')
 			except: # look in blender application scripts_path
 				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzma.dll')
+		
 		else:
 			# Get lzma library for Linux
-			lzmadll = cdll.LoadLibrary('/usr/lib/liblzma.so.2')
-
+			try: # look in system lib path
+				lzmadll = cdll.LoadLibrary('/usr/lib/liblzma.so')
+			except: # look in blender application scripts_path
+				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzma.so')
+		
 		LuxLog('Volumes: LZMA Library found')
-
+	
 	except BaseException as err:
 		if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
 			LuxLog('Volumes: LZMA Library not found')
