@@ -30,16 +30,16 @@ from properties_object import ObjectButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
-from luxrender import addon_register_class
+from .. import LuxRenderAddon
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	Object settings
 	'''
 	
 	bl_label = 'LuxRender Object Settings'
-	COMPAT_ENGINES = {'luxrender'}
+	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 	
 	@classmethod
 	def poll(cls, context):

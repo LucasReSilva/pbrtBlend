@@ -29,11 +29,11 @@ OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
 from extensions_framework import util as efutil
 
-from luxrender.outputs import LuxLog
-from luxrender.outputs.file_api import Files
-from luxrender.export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix
-from luxrender.export import matrix_to_list
-from luxrender.export.materials import get_material_volume_defs
+from ..outputs import LuxLog
+from ..outputs.file_api import Files
+from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix
+from ..export import matrix_to_list
+from ..export.materials import get_material_volume_defs
 
 def time_export(func):
 	if not OBJECT_ANALYSIS: return func

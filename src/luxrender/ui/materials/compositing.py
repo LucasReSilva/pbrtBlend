@@ -26,10 +26,10 @@
 #
 import bpy
 
-from luxrender import addon_register_class
-from luxrender.ui.materials import luxrender_material_base
+from ... import LuxRenderAddon
+from ...ui.materials import luxrender_material_base
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class ui_luxrender_mat_compositing(luxrender_material_base, bpy.types.Panel):
 	
 	bl_label	= 'LuxRender Material Compositing'

@@ -26,10 +26,10 @@
 #
 import bpy
 
-from luxrender import addon_register_class
-from luxrender.ui.materials import luxrender_material_base
+from ... import LuxRenderAddon
+from ...ui.materials import luxrender_material_base
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class ui_luxrender_material(luxrender_material_base, bpy.types.Panel):
 	'''
 	Material Editor UI Panel
@@ -49,7 +49,7 @@ class ui_luxrender_material(luxrender_material_base, bpy.types.Panel):
 		
 		super().draw(context)
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class ui_luxrender_material_emission(luxrender_material_base, bpy.types.Panel):
 	'''
 	Material Emission Settings
@@ -65,7 +65,7 @@ class ui_luxrender_material_emission(luxrender_material_base, bpy.types.Panel):
 	def draw_header(self, context):
 		self.layout.prop(context.material.luxrender_emission, "use_emission", text="")
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class ui_luxrender_material_transparency(luxrender_material_base, bpy.types.Panel):
 	'''
 	Material Transparency Settings

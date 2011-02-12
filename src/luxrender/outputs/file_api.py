@@ -26,9 +26,10 @@
 #
 import os
 
-from luxrender.outputs import LuxLog
-from luxrender.outputs.pure_api import LUXRENDER_VERSION 
 from extensions_framework.util import path_relative_to_export
+
+from ..outputs import LuxLog
+from ..outputs.pure_api import LUXRENDER_VERSION 
 
 class Files(object):
 	MAIN = 0
@@ -363,9 +364,9 @@ class Custom_Context(object):
 		which must be passed back to LuxManager so that it can control the
 		rendering process.
 		'''
-		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
+		from ..outputs.pure_api import PYLUX_AVAILABLE
 		if PYLUX_AVAILABLE:
-			from luxrender.outputs.pure_api import Custom_Context as Pylux_Context
+			from ..outputs.pure_api import Custom_Context as Pylux_Context
 			c = Pylux_Context(self.context_name)
 			
 			# propagate networking settings

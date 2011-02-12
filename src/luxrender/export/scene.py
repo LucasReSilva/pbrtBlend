@@ -31,13 +31,13 @@ import os
 from extensions_framework import util as efutil
 
 # LuxRender libs
-from luxrender.export 			import get_worldscale, object_anim_matrix
-from luxrender.export			import lights		as export_lights
-from luxrender.export			import materials	as export_materials
-from luxrender.export			import geometry		as export_geometry
-from luxrender.outputs			import LuxManager, LuxLog
-from luxrender.outputs.file_api	import Files
-from luxrender.outputs.pure_api	import LUXRENDER_VERSION
+from ..export 			import get_worldscale, object_anim_matrix
+from ..export			import lights		as export_lights
+from ..export			import materials	as export_materials
+from ..export			import geometry		as export_geometry
+from ..outputs			import LuxManager, LuxLog
+from ..outputs.file_api	import Files
+from ..outputs.pure_api	import LUXRENDER_VERSION
 
 class SceneExporterProperties(object):
 	"""

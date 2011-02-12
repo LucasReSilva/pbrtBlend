@@ -24,14 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from luxrender.outputs import LuxLog
+from ..outputs import LuxLog
 
 if not 'PYLUX_AVAILABLE' in locals():
 	# If pylux is not available, revert to 0.7 feature set
 	LUXRENDER_VERSION = '0.7.1'
 	
 	try:
-		from luxrender import pylux
+		from .. import pylux
 		
 		LUXRENDER_VERSION = pylux.version()
 		

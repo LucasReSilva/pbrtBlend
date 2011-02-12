@@ -30,8 +30,8 @@ import bpy
 
 from extensions_framework import util as efutil
 
-from luxrender.export import ParamSet
-from luxrender.outputs import LuxLog, LuxManager
+from ..export import ParamSet
+from ..outputs import LuxLog, LuxManager
 
 # TODO: convert this into ExportCache instance
 class ExportedTextures(object):

@@ -26,11 +26,11 @@
 #
 import bpy
 
-from luxrender.export import ParamSet
-from luxrender.export.geometry import GeometryExporter
-from luxrender.export.materials import get_material_volume_defs
-from luxrender.outputs import LuxManager
-from luxrender.outputs.pure_api import LUXRENDER_VERSION
+from ..export import ParamSet
+from ..export.geometry import GeometryExporter
+from ..export.materials import get_material_volume_defs
+from ..outputs import LuxManager
+from ..outputs.pure_api import LUXRENDER_VERSION
 
 def preview_scene(scene, lux_context, obj=None, mat=None):
 	

@@ -30,7 +30,7 @@ import bpy, mathutils
 
 from extensions_framework import util as efutil
 
-from luxrender.outputs import LuxManager, LuxLog
+from ..outputs import LuxManager, LuxLog
 
 class ExportProgressThread(efutil.TimerThread):
 	message = '%i%%'

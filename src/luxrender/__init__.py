@@ -24,16 +24,12 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-'''
-LuxRender Addon for Blender 2.5
-'''
-
 bl_info = {
 	"name": "LuxRender",
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 8, 0, 'RC1'),
 	"blender": (2, 5, 6),
-	"api": 34784,
+	"api": 34804,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",
@@ -41,30 +37,17 @@ bl_info = {
 	"tracker_url": "http://projects.blender.org/tracker/index.php?func=detail&aid=23361&group_id=153&atid=514",
 	"description": "This Addon will allow you to render your scenes with the LuxRender engine."
 }
-bl_addon_info = {
-	"name": "LuxRender",
-	"author": "Doug Hammond (dougal2)",
-	"version": (0, 8, 0, 'RC1'),
-	"blender": (2, 5, 6),
-	"api": 34784,
-	"category": "Render",
-	"location": "Render > Engine > LuxRender",
-	"warning": "",
-	"wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/LuxBlend",
-	"tracker_url": "http://projects.blender.org/tracker/index.php?func=detail&aid=23361&group_id=153&atid=514",
-	"description": "This Addon will allow you to render your scenes with the LuxRender engine."
-}
-
-
 
 if 'core' in locals():
 	import imp
 	imp.reload(core)
 else:
 	import bpy
-	from extensions_framework import Addon
-	addon_register_class, register, unregister = Addon().init_functions()
 	
-	# Importing the core package causes class registration magic with the
-	# above Addon() instance, due to the addon_register_class decorator
-	from luxrender import core
+	from extensions_framework import Addon
+	LuxRenderAddon = Addon(bl_info)
+	register, unregister = LuxRenderAddon.init_functions()
+	
+	# Importing the core package causes extensions_framework managed
+	# RNA class registration via @LuxRenderAddon.addon_register_class
+	from . import core

@@ -27,10 +27,10 @@
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
-from luxrender import addon_register_class
-from luxrender.export import ParamSet
-from luxrender.properties.material import dict_merge, texture_append_visibility
-from luxrender.properties.texture import FloatTextureParameter
+from .. import LuxRenderAddon
+from ..export import ParamSet
+from ..properties.material import dict_merge, texture_append_visibility
+from ..properties.texture import FloatTextureParameter
 
 class MeshFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
@@ -58,7 +58,7 @@ def mesh_visibility():
 	
 	return vis
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mesh(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.

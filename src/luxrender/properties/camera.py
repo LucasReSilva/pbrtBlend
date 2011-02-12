@@ -33,11 +33,11 @@ from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
-from luxrender import addon_register_class
-from luxrender.properties import dbo
-from luxrender.export import get_worldscale
-from luxrender.export import ParamSet, LuxManager
-from luxrender.outputs.pure_api import LUXRENDER_VERSION
+from .. import LuxRenderAddon
+from ..properties import dbo
+from ..export import get_worldscale
+from ..export import ParamSet, LuxManager
+from ..outputs.pure_api import LUXRENDER_VERSION
 
 def CameraVolumeParameter(attr, name):
 	return [
@@ -59,7 +59,7 @@ def CameraVolumeParameter(attr, name):
 		},
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_camera(declarative_property_group):
 	'''
 	Storage class for LuxRender Camera settings.
@@ -376,7 +376,7 @@ class luxrender_camera(declarative_property_group):
 		dbo('CAMERA', out)
 		return out
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_film(declarative_property_group):
 	
 	ef_attach_to = ['luxrender_camera']
@@ -523,7 +523,7 @@ class luxrender_film(declarative_property_group):
 				local_crf_filepath = self.luxrender_colorspace.crf_file
 			local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
 			if scene.luxrender_engine.embed_filedata:
-				from luxrender.util import bencode_file2string
+				from ..util import bencode_file2string
 				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
 				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath) )
 			else:
@@ -593,7 +593,7 @@ def luxrender_colorspace_controls():
 	
 	return ctl
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_colorspace(declarative_property_group):
 	'''
 	Storage class for LuxRender Colour-Space settings.
@@ -835,7 +835,7 @@ def get_tonemaps():
 	
 	return items
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_tonemapping(declarative_property_group):
 	'''
 	Storage class for LuxRender ToneMapping settings.

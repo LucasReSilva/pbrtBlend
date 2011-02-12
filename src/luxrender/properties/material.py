@@ -30,12 +30,12 @@ from copy import deepcopy
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
 
-from luxrender import addon_register_class
-from luxrender.properties.texture import FloatTextureParameter, ColorTextureParameter
-from luxrender.export import ParamSet
-from luxrender.export.materials import ExportedMaterials, ExportedTextures, get_texture_from_scene
-from luxrender.outputs import LuxManager, LuxLog
-from luxrender.outputs.pure_api import LUXRENDER_VERSION
+from .. import LuxRenderAddon
+from ..properties.texture import FloatTextureParameter, ColorTextureParameter
+from ..export import ParamSet
+from ..export.materials import ExportedMaterials, ExportedTextures, get_texture_from_scene
+from ..outputs import LuxManager, LuxLog
+from ..outputs.pure_api import LUXRENDER_VERSION
 
 def MaterialParameter(attr, name, property_group):
 	return [
@@ -156,7 +156,7 @@ def mat_list():
 	
 	return mat_list
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_material(declarative_property_group):
 	'''
 	Storage class for LuxRender Material settings.
@@ -244,7 +244,7 @@ class luxrender_material(declarative_property_group):
 		
 		return material.luxrender_emission.use_emission
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_compositing(declarative_property_group):
 	'''
 	Storage class for LuxRender Material compositing settings
@@ -373,7 +373,7 @@ def transparency_visibility():
 	
 	return t_vis
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_transparency(declarative_property_group):
 	'''
 	Storage class for LuxRender Material alpha transparency settings.
@@ -559,7 +559,7 @@ def carpaint_visibility():
 	
 	return cp_vis
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -636,7 +636,7 @@ class luxrender_mat_carpaint(declarative_property_group):
 		
 		return carpaint_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_glass(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -689,7 +689,7 @@ class luxrender_mat_glass(declarative_property_group):
 		
 		return glass_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_glass2(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -725,7 +725,7 @@ class luxrender_mat_glass2(declarative_property_group):
 		
 		return glass2_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_roughglass(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -790,7 +790,7 @@ def glossy_visibility():
 	
 	return g_vis
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_glossy(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -877,7 +877,7 @@ def glossy_lossy_visibility():
 	
 	return gl_vis
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_glossy_lossy(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -935,7 +935,7 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		
 		return glossy_lossy_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_matte(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -962,7 +962,7 @@ class luxrender_mat_matte(declarative_property_group):
 		
 		return matte_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_mattetranslucent(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1041,7 +1041,7 @@ def glossytranslucent_visibility():
 	
 	return gt_vis
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_glossytranslucent(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1174,7 +1174,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		
 		return glossytranslucent_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_metal(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1235,7 +1235,7 @@ class luxrender_mat_metal(declarative_property_group):
 		
 		return metal_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_scatter(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1262,7 +1262,7 @@ class luxrender_mat_scatter(declarative_property_group):
 		
 		return scatter_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_shinymetal(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1305,7 +1305,7 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		
 		return shinymetal_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_mirror(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1336,7 +1336,7 @@ class luxrender_mat_mirror(declarative_property_group):
 		
 		return mirror_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_mix(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1363,7 +1363,7 @@ class luxrender_mat_mix(declarative_property_group):
 		
 		return mix_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_null(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1379,7 +1379,7 @@ class luxrender_mat_null(declarative_property_group):
 	def get_paramset(self, material):
 		return ParamSet()
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_mat_velvet(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
@@ -1469,7 +1469,7 @@ class EmissionColorTextureParameter(ColorTextureParameter):
 
 TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0,1.0,1.0) )
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_emission(declarative_property_group):
 	'''
 	Storage class for LuxRender Material emission settings.
