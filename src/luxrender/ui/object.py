@@ -33,7 +33,7 @@ from extensions_framework.ui import property_group_renderer
 from .. import LuxRenderAddon
 
 @LuxRenderAddon.addon_register_class
-class object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
+class ui_object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	Object settings
 	'''
