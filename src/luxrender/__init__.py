@@ -31,7 +31,7 @@ LuxRender Addon for Blender 2.5
 bl_info = {
 	"name": "LuxRender",
 	"author": "Doug Hammond (dougal2)",
-	"version": (0, 8, 0, 'RC1'),
+	"version": (0, 8, 0, 'RC1-smoke'),
 	"blender": (2, 5, 6),
 	"api": 34784,
 	"category": "Render",
@@ -44,7 +44,7 @@ bl_info = {
 bl_addon_info = {
 	"name": "LuxRender",
 	"author": "Doug Hammond (dougal2)",
-	"version": (0, 8, 0, 'RC1'),
+	"version": (0, 8, 0, 'RC1-smoke'),
 	"blender": (2, 5, 6),
 	"api": 34784,
 	"category": "Render",
