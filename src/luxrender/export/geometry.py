@@ -210,9 +210,7 @@ class GeometryExporter(object):
 					
 					# Caches
 					vert_vno_indices = {}		# mapping of vert index to exported vert index for verts with vert normals
-					vert_fno_indices = {}		# mapping of vert index to exported vert index for verts with face normals
 					vert_use_vno = set()		# Set of vert indices that use vert normals
-					vert_use_fno = set()		# Set of vert indices that use face normals
 					
 					vert_index = 0				# exported vert index
 					for face in ffaces_mats[i]:
@@ -237,28 +235,21 @@ class GeometryExporter(object):
 									fvi.append(vert_vno_indices[vertex])
 								
 							else:
+								# All face-vert-co-no are unique, we cannot
+								# cache them
+								co_no_cache.append( (v.co, face.normal) )
+								if uv_layer:
+									uv_cache.append( uv_layer[face.index].uv[j] )
 								
-								if vertex not in vert_use_fno:
-									vert_use_fno.add(vertex)
-									
-									co_no_cache.append( (v.co, face.normal) )
-									if uv_layer:
-										uv_cache.append( uv_layer[face.index].uv[j] )
-									
-									vert_fno_indices[vertex] = vert_index
-									fvi.append(vert_index)
-									
-									vert_index += 1
-								else:
-									fvi.append(vert_fno_indices[vertex])
+								fvi.append(vert_index)
+								
+								vert_index += 1
 						
 						face_vert_indices[face.index] = fvi
 					
 					del vert_vno_indices
-					del vert_fno_indices
 					del vert_use_vno
-					del vert_use_fno
-						
+					
 					with open(ply_filename, 'wb') as ply:
 						ply.write(b'ply\n')
 						ply.write(b'format binary_little_endian 1.0\n')
@@ -396,9 +387,7 @@ class GeometryExporter(object):
 					
 					# Caches
 					vert_vno_indices = {}		# mapping of vert index to exported vert index for verts with vert normals
-					vert_fno_indices = {}		# mapping of vert index to exported vert index for verts with face normals
 					vert_use_vno = set()		# Set of vert indices that use vert normals
-					vert_use_fno = set()		# Set of vert indices that use face normals
 					
 					vert_index = 0				# exported vert index
 					for face in mesh.faces:
@@ -424,21 +413,16 @@ class GeometryExporter(object):
 									fvi.append(vert_vno_indices[vertex])
 								
 							else:
+								# all face-vert-co-no are unique, we cannot
+								# cache them
+								points.extend(v.co)
+								normals.extend(face.normal)
+								if uv_layer:
+									uvs.extend( uv_layer[face.index].uv[j] )
 								
-								if vertex not in vert_use_fno:
-									vert_use_fno.add(vertex)
-									
-									points.extend(v.co)
-									normals.extend(face.normal)
-									if uv_layer:
-										uvs.extend( uv_layer[face.index].uv[j] )
-									
-									vert_fno_indices[vertex] = vert_index
-									fvi.append(vert_index)
-									
-									vert_index += 1
-								else:
-									fvi.append(vert_fno_indices[vertex])
+								fvi.append(vert_index)
+								
+								vert_index += 1
 						
 						# For Lux, we need to triangulate quad faces
 						face_vert_indices.extend( fvi[0:3] )
@@ -448,9 +432,7 @@ class GeometryExporter(object):
 							ntris += 3
 					
 					del vert_vno_indices
-					del vert_fno_indices
 					del vert_use_vno
-					del vert_use_fno
 					
 					#print(' %s num points: %i' % (obj.name, len(points)))
 					#print(' %s num normals: %i' % (obj.name, len(normals)))
