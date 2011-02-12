@@ -362,7 +362,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 					if compressed == 1:
 						has_lzo, lzodll = library_loader.load_lzo()
 						if has_lzo:
-							LuxLog('Volumes: Compressed LZO stream of length {0:0d} Bytes'.format(stream_size))
+							LuxLog('Volumes: De-compressing LZO stream of length {0:0d} bytes...'.format(stream_size))
 							#print("Cell count: %d"%cell_count)
 							uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
 							p_dens = cast(uncomp_stream, POINTER(c_float))
@@ -378,7 +378,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 					elif compressed == 2:
 						has_lzma, lzmadll = library_loader.load_lzma()
 						if has_lzma:
-							LuxLog('Volumes: Compressed LZMA stream of length {0:0d} Bytes'.format(stream_size))
+							LuxLog('Volumes: De-compressing LZMA stream of length {0:0d} bytes...'.format(stream_size))
 							#print("Cell count: %d"%cell_count)
 							uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
 							p_dens = cast(uncomp_stream, POINTER(c_float))
