@@ -30,7 +30,7 @@ import os
 import bpy
 
 from extensions_framework import util as efutil
-from extensions_framework import declarative_property_group, ef_initialise_properties
+from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
 from luxrender import addon_register_class

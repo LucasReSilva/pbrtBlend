@@ -33,7 +33,7 @@ bl_info = {
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 7, 1),
 	"blender": (2, 5, 6),
-	"api": 34765,
+	"api": 34784,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",
@@ -46,7 +46,7 @@ bl_addon_info = {
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 7, 1),
 	"blender": (2, 5, 6),
-	"api": 34765,
+	"api": 34784,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",
@@ -62,21 +62,9 @@ if 'core' in locals():
 	imp.reload(core)
 else:
 	import bpy
-	from extensions_framework import ef_initialise_properties, ef_remove_properties
+	from extensions_framework import Addon
+	addon_register_class, register, unregister = Addon().init_functions()
 	
-	addon_classes = []
-	def addon_register_class(cls):
-		addon_classes.append( cls )
-		return cls
-
+	# Importing the core package causes class registration magic with the
+	# above Addon() instance, due to the addon_register_class decorator
 	from luxrender import core
-
-def register():
-	for cls in addon_classes:
-		bpy.utils.register_class(cls)
-		if hasattr(cls, 'ef_attach_to'): ef_initialise_properties(cls)
-
-def unregister():
-	for cls in addon_classes[::-1]:	# unregister in reverse order
-		if hasattr(cls, 'ef_attach_to'): ef_remove_properties(cls)
-		bpy.utils.unregister_class(cls)
