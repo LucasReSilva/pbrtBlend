@@ -37,74 +37,103 @@ from luxrender.export import ParamSet, matrix_to_list, LuxManager
 from luxrender.outputs import LuxLog
 from luxrender.outputs.file_api import Files
 
+class library_loader():
+	
+	load_lzo_attempted = False
+	load_lzma_attempted = False
+	
+	# imported compression libraries
+	has_lzo = False
+	lzodll = None
+	
+	has_lzma = False
+	lzmadll = None
+	
+	platform_search = {
+		'lzo': {
+			'darwin': [
+				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ),
+				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.dylib'
+			],
+			'win32': [
+				'lzo.dll',
+				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzo.dll'
+			],
+			'linux': [
+				'/usr/lib/liblzo2.so',
+				'/usr/lib/liblzo2.so.2',
+				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.so'
+			],
+		},
+		'lzma': {
+			'darwin': [
+				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'),
+				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib'
+			],
+			'win32': [
+				'lzma.dll',
+				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzma.dll'
+			],
+			'linux': [
+				'/usr/lib/liblzma.so',
+				'/usr/lib/liblzma.so.2',
+				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzma.so'
+			]
+		}
+	}
+	
+	@classmethod
+	def load_lzo(cls):
+		# Only attempt load once per session
+		if not cls.load_lzo_attempted:
+			
+			for sp in cls.platform_search['lzo'][sys.platform]:
+				try:
+					cls.lzodll = cdll.LoadLibrary(sp)
+					cls.has_lzo = True
+					break
+				except Exception as err:
+					if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
+						continue
+					else:
+						raise
+			
+			if cls.has_lzo:
+				LuxLog('Volumes: LZO Library found')
+			else:
+				LuxLog('Volumes: LZO Library not found')
+		
+		return cls.has_lzo, cls.lzodll
+	
+	@classmethod
+	def load_lzma(cls):
+		# Only attempt load once per session
+		if not cls.load_lzma_attempted:
+			
+			for sp in cls.platform_search['lzma'][sys.platform]:
+				try:
+					cls.lzmadll = cdll.LoadLibrary(sp)
+					cls.has_lzma = True
+					break
+				except Exception as err:
+					if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
+						continue
+					else:
+						raise
+			
+			if cls.has_lzma:
+				LuxLog('Volumes: LZMA Library found')
+			else:
+				LuxLog('Volumes: LZMA Library not found')
+		
+		return cls.has_lzma, cls.lzmadll
+
 def read_cache(smokecache, is_high_res, amplifier):
 	scene = LuxManager.CurrentScene
 	
-	# import compression libraries
-	has_lzo = True
-	has_lzma = True
+	# NOTE - dynamic libraries are not loaded until needed, further down
+	# the script...
 	
-	try:
-		if sys.platform == 'darwin':
-			# Get lzo library for OSX
-			try: # look in user_scripts_path
-				lzodll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ))
-			except: # look in blender application scripts_path
-				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.dylib')
-		
-		elif sys.platform == 'win32':
-			# Get lzo library for windows
-			try: # look in windows search path
-				lzodll = cdll.LoadLibrary('lzo.dll')
-			except: # look in blender application scripts_path
-				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzo.dll')
-		else:
-			# Get lzo library for Linux
-			try: # look in system lib path
-				lzodll = cdll.LoadLibrary('/usr/lib/liblzo2.so')
-			except: # look in blender application scripts_path
-				lzodll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.so')
-		
-		LuxLog('Volumes: LZO Library found')
-	
-	except BaseException as err:
-		if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
-			LuxLog('Volumes: LZO Library not found')
-			has_lzo = False
-		else:
-			raise #other error
-
-	try:
-		if sys.platform == 'darwin':
-			# Get lzma library for OSX
-			try: # look in user_scripts_path
-				lzmadll = cdll.LoadLibrary(bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'))
-			except: # look in blender application scripts_path
-				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib')
-		
-		elif sys.platform == 'win32':
-			# Get lzma library for windows
-			try: # look in windows search path
-				lzmadll = cdll.LoadLibrary('lzma.dll')
-			except: # look in blender application scripts_path
-				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzma.dll')
-		
-		else:
-			# Get lzma library for Linux
-			try: # look in system lib path
-				lzmadll = cdll.LoadLibrary('/usr/lib/liblzma.so')
-			except: # look in blender application scripts_path
-				lzmadll = cdll.LoadLibrary(bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzma.so')
-		
-		LuxLog('Volumes: LZMA Library found')
-	
-	except BaseException as err:
-		if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
-			LuxLog('Volumes: LZMA Library not found')
-			has_lzma = False
-		else:
-			raise #other error
-
 	###################################################################################################
 	# Read cache
 	# Pointcache file format:
@@ -165,19 +194,17 @@ def read_cache(smokecache, is_high_res, amplifier):
 			cachefile = open(fullpath, "rb")
 			buffer = cachefile.read(8)
 			temp = ""
-			datatype = 0
 			stream_size = c_uint()
 			props_size = c_uint()
 			outlen = c_uint()
 			compressed = 0
-
+			
 			for i in range(len(buffer)):
 				temp = temp + chr(buffer[i])
-
-			SZ_LONG  = sizeof(c_long)
+			
 			SZ_FLOAT = sizeof(c_float)
 			SZ_UINT  = sizeof(c_uint)
-
+			
 			if temp == "BPHYSICS":	#valid cache file
 				data_type = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 				#print("Data type: {0:1d}".format(data_type))
@@ -185,7 +212,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 					cell_count = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 					#print("Cell count: {0:1d}".format(cell_count))
 					usr_data_type = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-
+					
 					# Shadow values
 					compressed = struct.unpack("1B", cachefile.read(1))[0]
 					if not compressed:
@@ -196,7 +223,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 						if compressed == 2:
 							props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 							cachefile.read(props_size)
-
+					
 					# Density values
 					compressed = struct.unpack("1B", cachefile.read(1))[0]
 					if not compressed:
@@ -207,7 +234,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 						if compressed == 2:
 							props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 							props = cachefile.read(props_size)
-
+					
 					if is_high_res:
 						# Densitiy, old values
 						compressed = struct.unpack("1B", cachefile.read(1))[0]
@@ -219,7 +246,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 							if compressed == 2:
 								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								cachefile.read(props_size)
-
+						
 						# Heat values
 						compressed = struct.unpack("1B", cachefile.read(1))[0]
 						if not compressed:
@@ -230,7 +257,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 							if compressed == 2:
 								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								cachefile.read(props_size)
-
+						
 						# Heat, old values
 						compressed = struct.unpack("1B", cachefile.read(1))[0]
 						if not compressed:
@@ -311,17 +338,17 @@ def read_cache(smokecache, is_high_res, amplifier):
 							if compressed == 2:
 								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								cachefile.read(props_size)
-
+						
 						# dt value
 						cachefile.read(4)
 						# dx value
 						cachefile.read(4)
-
+						
 						# High resolution
 						# Density values
-
+						
 						cell_count = cell_count * amplifier * amplifier * amplifier
-
+						
 						compressed = struct.unpack("1B", cachefile.read(1))[0]
 						if not compressed:
 							cachefile.read(SZ_FLOAT*cell_count)
@@ -331,32 +358,40 @@ def read_cache(smokecache, is_high_res, amplifier):
 							if compressed == 2:
 								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								props = cachefile.read(props_size)
-
-					if compressed == 1 and has_lzo:
-						LuxLog('Volumes: Compressed LZO stream of length {0:0d} Bytes'.format(stream_size))
-						#print("Cell count: %d"%cell_count)
-						uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
-						p_dens = cast(uncomp_stream, POINTER(c_float))
-
-						#call lzo decompressor
-						lReturn = lzodll.lzo1x_decompress(stream,stream_size,p_dens,byref(outlen), None)
-
-						for i in range(cell_count):
-							density.append(p_dens[i])
-
-					elif compressed == 2 and has_lzma:
-						LuxLog('Volumes: Compressed LZMA stream of length {0:0d} Bytes'.format(stream_size))
-						#print("Cell count: %d"%cell_count)
-						uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
-						p_dens = cast(uncomp_stream, POINTER(c_float))
-						outlen = c_uint(cell_count*SZ_FLOAT)
-
-						#call lzma decompressor
-						lReturn = lzmadll.LzmaUncompress(p_dens, byref(outlen), stream, byref(c_uint(stream_size)), props, props_size)
-
-						for i in range(cell_count):
-							density.append(p_dens[i])
-
+					
+					if compressed == 1:
+						has_lzo, lzodll = library_loader.load_lzo()
+						if has_lzo:
+							LuxLog('Volumes: Compressed LZO stream of length {0:0d} Bytes'.format(stream_size))
+							#print("Cell count: %d"%cell_count)
+							uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
+							p_dens = cast(uncomp_stream, POINTER(c_float))
+							
+							#call lzo decompressor
+							lReturn = lzodll.lzo1x_decompress(stream,stream_size,p_dens,byref(outlen), None)
+							
+							for i in range(cell_count):
+								density.append(p_dens[i])
+						else:
+							LuxLog('Volumes: Cannot read compressed LZO stream; no library loaded')
+					
+					elif compressed == 2:
+						has_lzma, lzmadll = library_loader.load_lzma()
+						if has_lzma:
+							LuxLog('Volumes: Compressed LZMA stream of length {0:0d} Bytes'.format(stream_size))
+							#print("Cell count: %d"%cell_count)
+							uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
+							p_dens = cast(uncomp_stream, POINTER(c_float))
+							outlen = c_uint(cell_count*SZ_FLOAT)
+							
+							#call lzma decompressor
+							lReturn = lzmadll.LzmaUncompress(p_dens, byref(outlen), stream, byref(c_uint(stream_size)), props, props_size)
+							
+							for i in range(cell_count):
+								density.append(p_dens[i])
+						else:
+							LuxLog('Volumes: Cannot read compressed LZMA stream; no library loaded')
+			
 			cachefile.close()
 			#endif cachefile exists
 			return density
