@@ -25,13 +25,12 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from luxrender.outputs import LuxLog
-try:
+
+if not 'PYLUX_AVAILABLE' in locals():
 	# If pylux is not available, revert to 0.7 feature set
-	LUXRENDER_VERSION = '0.7'
+	LUXRENDER_VERSION = '0.7.1'
 	
 	try:
-		tmp = PYLUX_AVAILABLE
-	except:
 		from luxrender import pylux
 		
 		LUXRENDER_VERSION = pylux.version()
@@ -142,8 +141,8 @@ try:
 		
 		PYLUX_AVAILABLE = True
 		LuxLog('Using pylux version %s' % LUXRENDER_VERSION)
-	
-except ImportError as err:
-	LuxLog('WARNING: Binary pylux module not available! Visit http://www.luxrender.net/ to obtain one for your system.')
-	LuxLog(' (ImportError was: %s)' % err)
-	PYLUX_AVAILABLE = False
+		
+	except ImportError as err:
+		LuxLog('WARNING: Binary pylux module not available! Visit http://www.luxrender.net/ to obtain one for your system.')
+		LuxLog(' (ImportError was: %s)' % err)
+		PYLUX_AVAILABLE = False

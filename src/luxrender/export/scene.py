@@ -194,7 +194,6 @@ class SceneExporter(object):
 				self.report({'INFO'}, 'Exporting geometry')
 				if self.properties.api_type == 'FILE':
 					lux_context.set_output_file(Files.GEOM)
-				#export_geometry.write_lxo(lux_context)
 				mesh_names, emitting_mats = export_geometry.iterateScene(lux_context, scene)
 			
 			# Make sure lamp textures go back into main file, not geom file
