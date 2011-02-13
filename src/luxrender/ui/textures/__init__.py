@@ -30,6 +30,8 @@ from properties_texture import TextureButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+from ... import LuxRenderAddon
+
 class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
 	'''
 	This is the base class for all LuxRender texture sub-panels.
@@ -41,7 +43,7 @@ class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
 	'''
 	
 	#bl_options		= {'HIDE_HEADER'}
-	COMPAT_ENGINES	= {'luxrender'}
+	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
 	LUX_COMPAT		= set()
 	
 	@classmethod

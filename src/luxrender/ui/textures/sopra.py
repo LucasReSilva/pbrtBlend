@@ -26,10 +26,10 @@
 #
 import bpy
 
-from luxrender import addon_register_class
-from luxrender.ui.textures import luxrender_texture_base
+from ... import LuxRenderAddon
+from ...ui.textures import luxrender_texture_base
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class ui_texture_sopra(luxrender_texture_base, bpy.types.Panel):
 	bl_label = 'LuxRender Sopra Texture'
 	

@@ -29,11 +29,11 @@ import math
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
-from luxrender import addon_register_class
-from luxrender.export import ParamSet
-from luxrender.outputs.pure_api import LUXRENDER_VERSION
-from luxrender.properties.material import texture_append_visibility, dict_merge
-from luxrender.properties.texture import (
+from .. import LuxRenderAddon
+from ..export import ParamSet
+from ..outputs.pure_api import LUXRENDER_VERSION
+from ..properties.material import texture_append_visibility, dict_merge
+from ..properties.texture import (
 	ColorTextureParameter, FloatTextureParameter, FresnelTextureParameter
 )
 
@@ -57,7 +57,7 @@ def WorldVolumeParameter(attr, name):
 		},
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_world(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
@@ -146,7 +146,7 @@ def volume_types():
 	
 	return v_types
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_volume_data(declarative_property_group):
 	'''
 	Storage class for LuxRender volume data. The
@@ -252,7 +252,7 @@ class luxrender_volume_data(declarative_property_group):
 		
 		return self.type, vp
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_volumes(declarative_property_group):
 	'''
 	Storage class for LuxRender Material volumes.

@@ -29,12 +29,14 @@ from properties_material import MaterialButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
+from ... import LuxRenderAddon
+
 class luxrender_material_base(MaterialButtonsPanel, property_group_renderer):
-	COMPAT_ENGINES	= {'luxrender'}
+	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
 
 class luxrender_material_sub(MaterialButtonsPanel, property_group_renderer):
 	#bl_options		= {'HIDE_HEADER'}
-	COMPAT_ENGINES	= {'luxrender'}
+	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
 	LUX_COMPAT		= set()
 	
 	@classmethod

@@ -26,12 +26,10 @@
 #
 from math import degrees
 
-import mathutils
-
-from luxrender.outputs import LuxManager
-from luxrender.outputs.file_api import Files
-from luxrender.properties import dbo
-from luxrender.export import ParamSet, get_worldscale, matrix_to_list
+from ..outputs import LuxManager
+from ..outputs.file_api import Files
+from ..properties import dbo
+from ..export import ParamSet, get_worldscale, matrix_to_list
 
 def attr_light(lux_context, light, name, group, type, params, transform=None, portals=[]):
 	'''

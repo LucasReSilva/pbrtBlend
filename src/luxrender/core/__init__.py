@@ -41,99 +41,54 @@ import bpy
 from extensions_framework import util as efutil
 
 # Exporter libs
-from luxrender							import addon_register_class
-from luxrender.export.scene				import SceneExporter
-from luxrender.outputs					import LuxManager, LuxFilmDisplay
-from luxrender.outputs					import LuxLog
-from luxrender.outputs.pure_api			import LUXRENDER_VERSION
+from .. import LuxRenderAddon
+from ..export.scene import SceneExporter
+from ..outputs import LuxManager, LuxFilmDisplay
+from ..outputs import LuxLog
+from ..outputs.pure_api import LUXRENDER_VERSION
 
 # Exporter Property Groups need to be imported to ensure initialisation
-import luxrender.properties.accelerator
-import luxrender.properties.camera
-import luxrender.properties.engine
-import luxrender.properties.filter
-import luxrender.properties.integrator
-import luxrender.properties.lamp
-import luxrender.properties.material
-import luxrender.properties.mesh
-import luxrender.properties.object
-import luxrender.properties.sampler
-import luxrender.properties.texture
-import luxrender.properties.world
+from ..properties import (
+	accelerator, camera, engine, filter, integrator, lamp, material,
+	mesh, object as prop_object, sampler, texture, world
+)
 
 # Exporter Interface Panels need to be imported to ensure initialisation
-import luxrender.ui.render_panels
-import luxrender.ui.camera
-import luxrender.ui.image
-import luxrender.ui.lamps
-import luxrender.ui.mesh
-import luxrender.ui.object
-import luxrender.ui.world
+from ..ui import (
+	render_panels, camera, image, lamps, mesh, object as ui_object, world
+)
 
-import luxrender.ui.materials.main
-import luxrender.ui.materials.compositing
-import luxrender.ui.materials.carpaint
-import luxrender.ui.materials.glass
-import luxrender.ui.materials.glass2
-import luxrender.ui.materials.roughglass
-import luxrender.ui.materials.glossytranslucent
-import luxrender.ui.materials.glossy_lossy
-import luxrender.ui.materials.glossy
-import luxrender.ui.materials.matte
-import luxrender.ui.materials.mattetranslucent
-import luxrender.ui.materials.metal
-import luxrender.ui.materials.mirror
-import luxrender.ui.materials.mix
-import luxrender.ui.materials.null
-import luxrender.ui.materials.scatter
-import luxrender.ui.materials.shinymetal
-import luxrender.ui.materials.velvet
+from ..ui.materials import (
+	main, compositing, carpaint, glass, glass2, roughglass, glossytranslucent,
+	glossy_lossy, glossy, matte, mattetranslucent, metal, mirror, mix, null,
+	scatter, shinymetal, velvet
+)
 
-import luxrender.ui.textures.main
-import luxrender.ui.textures.bilerp
-import luxrender.ui.textures.blackbody
-import luxrender.ui.textures.brick
-import luxrender.ui.textures.cauchy
-import luxrender.ui.textures.constant
-import luxrender.ui.textures.checkerboard
-import luxrender.ui.textures.dots
-import luxrender.ui.textures.equalenergy
-import luxrender.ui.textures.fbm
-import luxrender.ui.textures.gaussian
-import luxrender.ui.textures.harlequin
-import luxrender.ui.textures.imagemap
-import luxrender.ui.textures.lampspectrum
-import luxrender.ui.textures.luxpop
-import luxrender.ui.textures.marble
-import luxrender.ui.textures.mix
-import luxrender.ui.textures.sellmeier
-import luxrender.ui.textures.scale
-import luxrender.ui.textures.sopra
-import luxrender.ui.textures.uv
-import luxrender.ui.textures.windy
-import luxrender.ui.textures.wrinkled
-import luxrender.ui.textures.mapping
-import luxrender.ui.textures.tabulateddata
-import luxrender.ui.textures.transform
+from ..ui.textures import (
+	main, bilerp, blackbody, brick, cauchy, constant, checkerboard, dots,
+	equalenergy, fbm, gaussian, harlequin, imagemap, lampspectrum, luxpop,
+	marble, mix, sellmeier, scale, sopra, uv, windy, wrinkled, mapping,
+	tabulateddata, transform
+)
 
 # Exporter Operators need to be imported to ensure initialisation
-import luxrender.operators
+from .. import operators
 
 # Add standard Blender Interface elements
 import properties_render
-properties_render.RENDER_PT_render.COMPAT_ENGINES.add('luxrender')
-properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('luxrender')
-properties_render.RENDER_PT_output.COMPAT_ENGINES.add('luxrender')
+properties_render.RENDER_PT_render.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+properties_render.RENDER_PT_output.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 del properties_render
 
 import properties_material
-properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('luxrender')
-properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('luxrender')
+properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 del properties_material
 
 import properties_data_lamp
-properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add('luxrender')
-# properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add('luxrender')
+properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+# properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 del properties_data_lamp
 
 @classmethod
@@ -143,14 +98,14 @@ def blender_texture_poll(cls, context):
 		   ((tex.type == cls.tex_type and not tex.use_nodes) and \
 		   (context.scene.render.engine in cls.COMPAT_ENGINES))
 	
-	if context.scene.render.engine == 'luxrender':
+	if context.scene.render.engine == LuxRenderAddon.BL_IDNAME:
 		show = show and tex.luxrender_texture.type == 'BLENDER'
 	
 	return show
 
 import properties_texture
-properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add('luxrender')
-# properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add('luxrender')
+properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+# properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 blender_texture_ui_list = [
 	properties_texture.TEXTURE_PT_blend,
 	properties_texture.TEXTURE_PT_clouds,
@@ -165,7 +120,7 @@ blender_texture_ui_list = [
 	properties_texture.TEXTURE_PT_wood,
 ]
 for blender_texture_ui in blender_texture_ui_list:
-	blender_texture_ui.COMPAT_ENGINES.add('luxrender')
+	blender_texture_ui.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 	blender_texture_ui.poll = blender_texture_poll
 
 del properties_texture
@@ -175,7 +130,7 @@ def compatible(mod):
 	mod = __import__(mod)
 	for subclass in mod.__dict__.values():
 		try:
-			subclass.COMPAT_ENGINES.add('luxrender')
+			subclass.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 		except:
 			pass
 	del mod
@@ -184,13 +139,13 @@ compatible("properties_data_mesh")
 compatible("properties_data_camera")
 compatible("properties_particle")
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	'''
 	LuxRender Engine Exporter/Integration class
 	'''
 	
-	bl_idname			= 'luxrender'
+	bl_idname			= LuxRenderAddon.BL_IDNAME
 	bl_label			= 'LuxRender'
 	bl_use_preview		= True
 	
@@ -241,21 +196,21 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		#print('(2) export_path is %s' % efutil.export_path)
 		os.chdir( self.output_dir )
 		
-		from luxrender.outputs.pure_api import PYLUX_AVAILABLE
+		from ..outputs.pure_api import PYLUX_AVAILABLE
 		if not PYLUX_AVAILABLE:
 			self.bl_use_preview = False
 			LuxLog('ERROR: Material previews require pylux')
 			return
 		
-		from luxrender.export import materials as export_materials
+		from ..export import materials as export_materials
 		
 		# Iterate through the preview scene, finding objects with materials attached
 		objects_mats = {}
-		for object in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
-			for mat in export_materials.get_instance_materials(object):
+		for obj in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
+			for mat in export_materials.get_instance_materials(obj):
 				if mat is not None:
-					if not object.name in objects_mats.keys(): objects_mats[object] = []
-					objects_mats[object].append(mat)
+					if not obj.name in objects_mats.keys(): objects_mats[obj] = []
+					objects_mats[obj].append(mat)
 		
 		PREVIEW_TYPE = None		# 'MATERIAL' or 'TEXTURE'
 		
@@ -293,7 +248,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		if file_based_preview:
 			# Dump to file in temp dir for debugging
-			from luxrender.outputs.file_api import Custom_Context as lxs_writer
+			from ..outputs.file_api import Custom_Context as lxs_writer
 			preview_context = lxs_writer(scene.name)
 			preview_context.set_filename('luxblend25-preview', LXS=True, LXM=False, LXO=False)
 			LM.lux_context = preview_context
@@ -305,7 +260,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
 			
-			from luxrender.export import preview_scene
+			from ..export import preview_scene
 			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution()
 			xres, yres = int(xres), int(yres)
 			

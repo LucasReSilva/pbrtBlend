@@ -28,11 +28,11 @@ from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
-from luxrender							import addon_register_class
-from luxrender.export					import ParamSet
-from luxrender.outputs.pure_api			import PYLUX_AVAILABLE
-from luxrender.outputs.pure_api			import LUXRENDER_VERSION
-from luxrender.outputs.luxfire_client	import LUXFIRE_CLIENT_AVAILABLE
+from .. import LuxRenderAddon
+from ..export import ParamSet
+from ..outputs.pure_api import PYLUX_AVAILABLE
+from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
 
 def find_apis():
 	apis = [
@@ -68,7 +68,7 @@ def engine_controls():
 	
 	return ectl
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_engine(declarative_property_group):
 	'''
 	Storage class for LuxRender Engine settings.
@@ -255,7 +255,7 @@ class luxrender_engine(declarative_property_group):
 		
 		return self.renderer, renderer_params
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class luxrender_networking(declarative_property_group):
 	
 	ef_attach_to = ['Scene']

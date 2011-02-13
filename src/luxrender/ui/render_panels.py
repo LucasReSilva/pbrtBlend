@@ -29,16 +29,16 @@ from properties_render import RenderButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
 
-from luxrender import addon_register_class
+from .. import LuxRenderAddon
 
 class render_described_context(RenderButtonsPanel, property_group_renderer):
 	'''
 	Base class for render engine settings panels
 	'''
 	
-	COMPAT_ENGINES = {'luxrender'}
+	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class engine(render_described_context, bpy.types.Panel):
 	'''
 	Engine settings UI Panel
@@ -58,7 +58,7 @@ class engine(render_described_context, bpy.types.Panel):
 		
 		super().draw(context)
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class sampler(render_described_context, bpy.types.Panel):
 	'''
 	Sampler settings UI Panel
@@ -70,7 +70,7 @@ class sampler(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_sampler' )
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class integrator(render_described_context, bpy.types.Panel):
 	'''
 	Surface Integrator settings UI Panel
@@ -82,7 +82,7 @@ class integrator(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_integrator' )
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class volume(render_described_context, bpy.types.Panel):
 	'''
 	Volume Integrator settings UI panel
@@ -95,7 +95,7 @@ class volume(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_volumeintegrator' )
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class filter(render_described_context, bpy.types.Panel):
 	'''
 	PixelFilter settings UI Panel
@@ -108,7 +108,7 @@ class filter(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_filter' )
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class accelerator(render_described_context, bpy.types.Panel):
 	'''
 	Accelerator settings UI Panel
@@ -121,7 +121,7 @@ class accelerator(render_described_context, bpy.types.Panel):
 		( ('scene',), 'luxrender_accelerator' )
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class networking(render_described_context, bpy.types.Panel):
 	'''
 	Networking settings UI Panel

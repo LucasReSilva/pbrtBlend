@@ -29,26 +29,26 @@ import bpy
 from properties_world import WorldButtonsPanel
 from extensions_framework.ui import property_group_renderer
 
-from luxrender import addon_register_class
+from .. import LuxRenderAddon
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	LuxRender World Settings
 	'''
-	COMPAT_ENGINES = {'luxrender'}
+	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 	bl_label = 'LuxRender World Settings'
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_world' )
 	]
 
-@addon_register_class
+@LuxRenderAddon.addon_register_class
 class volumes(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	'''
 	Interior/Exterior Volumes Settings
 	'''
-	COMPAT_ENGINES = {'luxrender'}
+	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 	bl_label = 'LuxRender Volumes'
 	
 	display_property_groups = [
