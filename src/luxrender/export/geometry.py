@@ -492,6 +492,10 @@ class GeometryExporter(object):
 		if self.scene.luxrender_engine.renderer == 'hybrid':
 			return False
 		
+		# If the mesh is only used once, instancing is a waste of memory
+		if obj.data.users == 1:
+			return False
+		
 		# Only allow instancing for duplis and particles in non-hybrid mode, or
 		# for normal objects if the object has certain modifiers applied against
 		# the same shared base mesh.
