@@ -102,6 +102,8 @@ class library_loader():
 				LuxLog('Volumes: LZO Library found')
 			else:
 				LuxLog('Volumes: LZO Library not found')
+			
+			cls.load_lzo_attempted = True
 		
 		return cls.has_lzo, cls.lzodll
 	
@@ -125,6 +127,8 @@ class library_loader():
 				LuxLog('Volumes: LZMA Library found')
 			else:
 				LuxLog('Volumes: LZMA Library not found')
+			
+			cls.load_lzma_attempted = True
 		
 		return cls.has_lzma, cls.lzmadll
 
