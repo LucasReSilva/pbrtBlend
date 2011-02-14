@@ -27,6 +27,8 @@
 import os, struct
 OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
+import bpy
+
 from extensions_framework import util as efutil
 
 from ..outputs import LuxLog
@@ -189,7 +191,7 @@ class GeometryExporter(object):
 						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
 						continue
 					
-					ply_filename = '%s.ply' % mesh_name
+					ply_filename = bpy.path.clean_name('%s.ply' % mesh_name)
 					
 					if len(mesh.uv_textures) > 0:
 						if mesh.uv_textures.active and mesh.uv_textures.active.data:
