@@ -75,6 +75,8 @@ class GeometryExporter(object):
 	
 	have_emitting_object = False
 	
+	exporting_duplis = False
+	
 	def __init__(self, lux_context, scene):
 		self.lux_context = lux_context
 		self.scene = scene
@@ -495,7 +497,7 @@ class GeometryExporter(object):
 			return False
 		
 		# If the mesh is only used once, instancing is a waste of memory
-		if obj.data.users == 1:
+		if (not self.exporting_duplis) and obj.data.users == 1:
 			return False
 		
 		# Only allow instancing for duplis and particles in non-hybrid mode, or
@@ -661,6 +663,8 @@ class GeometryExporter(object):
 				det = DupliExportProgressThread()
 				det.start(len(obj.dupli_list))
 				
+				self.exporting_duplis = True
+				
 				for dupli_ob in obj.dupli_list:
 					if dupli_ob.object.type not in  ['MESH', 'SURFACE', 'FONT']:
 						continue
@@ -675,6 +679,8 @@ class GeometryExporter(object):
 					dupli_object_names.add( dupli_ob.object.name )
 					
 					det.exported_objects += 1
+				
+				self.exporting_duplis = False
 				
 				det.stop()
 				det.join()
