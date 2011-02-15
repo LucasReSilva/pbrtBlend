@@ -47,6 +47,9 @@ class ui_luxrender_material(luxrender_material_base, bpy.types.Panel):
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMIN")
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
 		
+		row = self.layout.row(align=True)
+		row.operator("material.convert_to_luxrender", text="Convert Blender material")
+		
 		super().draw(context)
 
 @LuxRenderAddon.addon_register_class

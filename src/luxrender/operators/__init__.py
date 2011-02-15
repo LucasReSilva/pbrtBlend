@@ -254,3 +254,22 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 
 menu_func = lambda self, context: self.layout.operator("export.luxrender", text="Export LuxRender Scene...")
 bpy.types.INFO_MT_file_export.append(menu_func)
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_convert_material(bpy.types.Operator):
+	bl_idname = 'material.convert_to_luxrender'
+	bl_label = 'Export LuxRender Scene (.lxs)'
+	
+	def execute(self, context):
+		
+		try:
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			# TODO - implementation
+			self.report({'INFO'}, 'Converting blender material "%s"' % blender_mat.name)
+		
+			return {'FINISHED'}
+		
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot convert material: %s' % err)
+			return {'CANCELLED'}
