@@ -144,7 +144,7 @@ def get_instance_materials(ob):
 def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
-def convert_texture(texture):
+def convert_texture(scene, texture):
 	
 	# Lux only supports blender's textures in float variant
 	variant = 'float'
@@ -245,7 +245,7 @@ def convert_texture(texture):
 	if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE']:
 		if texture.image.source == 'GENERATED':
 			tex_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
-			texture.image.save_render(tex_image, LuxManager.CurrentScene)
+			texture.image.save_render(tex_image, scene)
 		
 		if texture.image.source == 'FILE':
 			if texture.library is not None:
@@ -264,9 +264,9 @@ def convert_texture(texture):
 	
 	
 	if mapping_type == '3D':
-		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset(LuxManager.CurrentScene) )
+		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset(scene) )
 	else:
-		paramset.update( texture.luxrender_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
+		paramset.update( texture.luxrender_texture.luxrender_tex_mapping.get_paramset(scene) )
 	
 	return variant, lux_tex_name, paramset
 
@@ -330,7 +330,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 						else:
 							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 					else:
-						lux_tex_variant, lux_tex_name, paramset = convert_texture(texture)
+						lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture)
 						if lux_tex_variant == variant:
 							ExportedTextures.texture(texture_name, lux_tex_variant, lux_tex_name, paramset)
 						else:

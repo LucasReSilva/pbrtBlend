@@ -379,4 +379,6 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 			return {'FINISHED'}
 		except Exception as err:
 			self.report({'ERROR'}, 'Cannot convert material: %s' % err)
+			import pdb
+			pdb.set_trace()
 			return {'CANCELLED'}

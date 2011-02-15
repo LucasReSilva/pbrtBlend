@@ -35,7 +35,7 @@ from extensions_framework.validate import Logic_OR as O
 from .. import LuxRenderAddon
 from ..properties.lampspectrum_data import lampspectrum_list
 from ..export import ParamSet, get_worldscale
-from ..export.materials import add_texture_parameter
+from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs import LuxManager
 
 #------------------------------------------------------------------------------ 
@@ -613,7 +613,8 @@ class luxrender_texture(declarative_property_group):
 				
 			return lux_texture.variant, params
 		else:
-			return 'float', ParamSet()
+			variant, lux_tex_name, paramset = convert_texture(scene, texture)
+			return variant, paramset
 
 #------------------------------------------------------------------------------ 
 # Sub property groups of luxrender_texture follow
