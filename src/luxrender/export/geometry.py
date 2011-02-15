@@ -191,7 +191,7 @@ class GeometryExporter(object):
 						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
 						continue
 					
-					ply_filename = bpy.path.clean_name('%s.ply' % mesh_name)
+					ply_filename = bpy.path.clean_name(mesh_name) + '.ply'
 					
 					if len(mesh.uv_textures) > 0:
 						if mesh.uv_textures.active and mesh.uv_textures.active.data:
