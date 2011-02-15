@@ -257,19 +257,126 @@ bpy.types.INFO_MT_file_export.append(menu_func)
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_material(bpy.types.Operator):
-	bl_idname = 'material.convert_to_luxrender'
-	bl_label = 'Export LuxRender Scene (.lxs)'
+	bl_idname = 'luxrender.convert_material'
+	bl_label = 'Convert Blender material to LuxRender'
 	
 	def execute(self, context):
 		
 		try:
 			blender_mat = context.material
 			luxrender_mat = context.material.luxrender_material
-			# TODO - implementation
-			self.report({'INFO'}, 'Converting blender material "%s"' % blender_mat.name)
-		
+			
+			# TODO - check values marked #ASV - Arbitrary Scale Value
+			
+			luxrender_mat.Interior_volume = ''
+			luxrender_mat.Exterior_volume = ''
+			
+			# Basic glossy translation
+			luxrender_mat.type = 'glossy'
+			lmg = luxrender_mat.luxrender_mat_glossy
+			lmg.multibounce = False
+			lmg.useior = False
+			lmg.Kd_color = [blender_mat.diffuse_intensity*i for i in blender_mat.diffuse_color]
+			lmg.Ks_color = [blender_mat.specular_intensity*i for i in blender_mat.specular_color]
+			lmg.uroughness_floatvalue = lmg.vroughness_floatvalue = 1/blender_mat.specular_hardness
+			lmg.uroughness_usefloattexture = lmg.vroughness_usefloattexture = False
+			
+			# Emission
+			lme = context.material.luxrender_emission
+			if blender_mat.emit > 0:
+				lme.use_emission = True
+				lme.L_color = [1.0, 1.0, 1.0]
+				lme.gain = blender_mat.emit
+			else:
+				lme.use_emission = False
+			
+			# Transparency
+			lmt = context.material.luxrender_transparency
+			if blender_mat.use_transparency:
+				lmt.transparent = True
+				lmt.alpha_source = 'constant'
+				lmt.alpha_value = blender_mat.alpha
+			else:
+				lmt.transparent = False
+			
+			# iterate textures and build mix stacks according to influences
+			Kd_stack = []
+			Ks_stack = []
+			bump_tex = None
+			for tex_slot in blender_mat.texture_slots:
+				if tex_slot != None:
+					tex_slot.texture.luxrender_texture.type = 'BLENDER'
+					if tex_slot.use_map_color_diffuse:
+						dcf = tex_slot.diffuse_color_factor
+						if tex_slot.use_map_diffuse:
+							dcf *= tex_slot.diffuse_factor
+						Kd_stack.append( (tex_slot.texture, dcf) )
+					if tex_slot.use_map_color_spec:
+						scf = tex_slot.specular_color_factor
+						if tex_slot.use_map_specular:
+							scf *= tex_slot.specular_factor
+						Ks_stack.append( (tex_slot.texture, scf) )
+					if tex_slot.use_map_normal:
+						bump_tex = (tex_slot.texture, tex_slot.normal_factor)
+			
+			if len(Kd_stack) == 1:
+				tex = Kd_stack[0][0]
+				variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+				if variant == 'color':
+					# assign the texture directly
+					lmg.Kd_usecolortexture = True
+					lmg.Kd_colortexturename = tex.name
+					lmg.Kd_color = [i*Kd_stack[0][1] for i in lmg.Kd_color]
+					lmg.Kd_multiplycolor = True
+				else:
+					# TODO - insert mix texture
+					# check there are enough free empty texture slots !
+					pass
+			elif len(Kd_stack) > 1:
+				# TODO - set up a mix stack.
+				# check there are enough free empty texture slots !
+				pass
+			else:
+				lmg.Kd_usecolortexture = False
+			
+			if len(Ks_stack) == 1:
+				tex = Ks_stack[0][0]
+				variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+				if variant == 'color':
+					# assign the texture directly
+					lmg.Ks_usecolortexture = True
+					lmg.Ks_colortexturename = tex.name
+					lmg.Ks_color = [i*Ks_stack[0][1] for i in lmg.Ks_color]
+					lmg.Ks_multiplycolor = True
+				else:
+					# TODO - insert mix texture
+					# check there are enough free empty texture slots !
+					pass
+			elif len(Ks_stack) > 1:
+				# TODO - set up a mix stack.
+				# check there are enough free empty texture slots !
+				pass
+			else:
+				lmg.Ks_usecolortexture = False
+			
+			if bump_tex != None:
+				tex = bump_tex[0]
+				variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+				if variant == 'float':
+					luxrender_mat.bumpmap_usefloattexture = True
+					luxrender_mat.bumpmap_floattexturename = tex.name
+					luxrender_mat.bumpmap_floatvalue = bump_tex[1] / 50.0 #ASV
+					luxrender_mat.bumpmap_multipyfloat = True
+				else:
+					# TODO - insert mix texture
+					# check there are enough free empty texture slots !
+					pass
+			else:
+				luxrender_mat.bumpmap_floatvalue = 0.0
+				luxrender_mat.bumpmap_usefloattexture = False
+			
+			self.report({'INFO'}, 'Converted blender material "%s"' % blender_mat.name)
 			return {'FINISHED'}
-		
 		except Exception as err:
 			self.report({'ERROR'}, 'Cannot convert material: %s' % err)
 			return {'CANCELLED'}
