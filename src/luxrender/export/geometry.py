@@ -196,7 +196,7 @@ class GeometryExporter(object):
 					ply_filename = bpy.path.clean_name(mesh_name) + '.ply'
 					
 					# skip writing the PLY file if the box is checked
-					if not self.scene.luxrender_engine.partial_ply:
+					if os.path.exists(ply_filename) and not self.scene.luxrender_engine.partial_ply:
 						if len(mesh.uv_textures) > 0:
 							if mesh.uv_textures.active and mesh.uv_textures.active.data:
 								uv_layer = mesh.uv_textures.active.data
