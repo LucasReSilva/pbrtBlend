@@ -55,6 +55,7 @@ def engine_controls():
 		# 'embed_filedata', # Disabled pending acceptance into LuxRender core
 		
 		'mesh_type',
+		'partial_ply',
 		'render',
 		'install_path',
 		['threads_auto', 'threads'],
@@ -87,6 +88,7 @@ class luxrender_engine(declarative_property_group):
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
 		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
+		'partial_ply':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'install_path':				{ 'render': True, 'export_type': 'EXT' },
 		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':					A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
@@ -126,6 +128,14 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
 			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+		},
+		{
+			'type': 'bool',
+			'attr': 'partial_ply',
+			'name': 'Partial PLY Export',
+			'description': 'Skip PLY file write',
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'enum',

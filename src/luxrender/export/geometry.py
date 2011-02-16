@@ -254,50 +254,52 @@ class GeometryExporter(object):
 					del vert_vno_indices
 					del vert_use_vno
 					
-					with open(ply_filename, 'wb') as ply:
-						ply.write(b'ply\n')
-						ply.write(b'format binary_little_endian 1.0\n')
-						ply.write(b'comment Created by LuxBlend 2.5 exporter for LuxRender - www.luxrender.net\n')
-						
-						# vert_index == the number of actual verts needed
-						ply.write( ('element vertex %d\n' % vert_index).encode() )
-						ply.write(b'property float x\n')
-						ply.write(b'property float y\n')
-						ply.write(b'property float z\n')
-						
-						ply.write(b'property float nx\n')
-						ply.write(b'property float ny\n')
-						ply.write(b'property float nz\n')
-						
-						if uv_layer:
-							ply.write(b'property float s\n')
-							ply.write(b'property float t\n')
-						
-						ply.write( ('element face %d\n' % len(ffaces_mats[i])).encode() )
-						ply.write(b'property list uchar uint vertex_indices\n')
-						
-						ply.write(b'end_header\n')
-						
-						# dump cached co/no/uv
-						if uv_layer:
-							for j, (co,no) in enumerate(co_no_cache):
-								ply.write( struct.pack('<3f', *co) )
-								ply.write( struct.pack('<3f', *no) )
-								ply.write( struct.pack('<2f', *uv_cache[j] ) )
-						else:
-							for co,no in co_no_cache:
-								ply.write( struct.pack('<3f', *co) )
-								ply.write( struct.pack('<3f', *no) )
-						
-						# dump face vert indices
-						for face in ffaces_mats[i]:
-							lfvi = len(face_vert_indices[face.index])
-							ply.write( struct.pack('<B', lfvi) )
-							ply.write( struct.pack('<%dI'%lfvi, *face_vert_indices[face.index]) )
-						
-						del co_no_cache
-						del uv_cache
-						del face_vert_indices
+					skip_ply_write = self.scene.luxrender_engine.partial_ply
+					if not skip_ply_write:					
+						with open(ply_filename, 'wb') as ply:
+							ply.write(b'ply\n')
+							ply.write(b'format binary_little_endian 1.0\n')
+							ply.write(b'comment Created by LuxBlend 2.5 exporter for LuxRender - www.luxrender.net\n')
+							
+							# vert_index == the number of actual verts needed
+							ply.write( ('element vertex %d\n' % vert_index).encode() )
+							ply.write(b'property float x\n')
+							ply.write(b'property float y\n')
+							ply.write(b'property float z\n')
+							
+							ply.write(b'property float nx\n')
+							ply.write(b'property float ny\n')
+							ply.write(b'property float nz\n')
+							
+							if uv_layer:
+								ply.write(b'property float s\n')
+								ply.write(b'property float t\n')
+							
+							ply.write( ('element face %d\n' % len(ffaces_mats[i])).encode() )
+							ply.write(b'property list uchar uint vertex_indices\n')
+							
+							ply.write(b'end_header\n')
+							
+							# dump cached co/no/uv
+							if uv_layer:
+								for j, (co,no) in enumerate(co_no_cache):
+									ply.write( struct.pack('<3f', *co) )
+									ply.write( struct.pack('<3f', *no) )
+									ply.write( struct.pack('<2f', *uv_cache[j] ) )
+							else:
+								for co,no in co_no_cache:
+									ply.write( struct.pack('<3f', *co) )
+									ply.write( struct.pack('<3f', *no) )
+							
+							# dump face vert indices
+							for face in ffaces_mats[i]:
+								lfvi = len(face_vert_indices[face.index])
+								ply.write( struct.pack('<B', lfvi) )
+								ply.write( struct.pack('<%dI'%lfvi, *face_vert_indices[face.index]) )
+							
+							del co_no_cache
+							del uv_cache
+							del face_vert_indices
 						
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
