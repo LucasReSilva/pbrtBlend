@@ -319,6 +319,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		preview_context.exit()
 		preview_context.wait()
+		
+		# cleanup() destroys the pylux Context
 		preview_context.cleanup()
 		
 		LM.reset()
