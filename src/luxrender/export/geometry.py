@@ -597,7 +597,7 @@ class GeometryExporter(object):
 				ob_mat = mat_object.material_slots[me_mat_index].material
 			except IndexError:
 				ob_mat = None
-				LuxLog('WARNING: material slot %d on object "%s" is unassigned!' %(me_mat_index+1, obj.name))
+				LuxLog('WARNING: material slot %d on object "%s" is unassigned!' %(me_mat_index+1, mat_object.name))
 			
 			if ob_mat is not None:
 				

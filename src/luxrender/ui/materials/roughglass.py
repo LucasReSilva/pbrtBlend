@@ -24,13 +24,11 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_sub
 
 @LuxRenderAddon.addon_register_class
-class ui_material_roughglass(luxrender_material_sub, bpy.types.Panel):
+class ui_material_roughglass(luxrender_material_sub):
 	bl_label = 'LuxRender Rough Glass Material'
 	
 	LUX_COMPAT = {'roughglass'}

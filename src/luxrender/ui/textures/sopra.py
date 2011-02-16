@@ -24,13 +24,11 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ... import LuxRenderAddon
 from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
-class ui_texture_sopra(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_sopra(luxrender_texture_base):
 	bl_label = 'LuxRender Sopra Texture'
 	
 	LUX_COMPAT = {'sopra'}

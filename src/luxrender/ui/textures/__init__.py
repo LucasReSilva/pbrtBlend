@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from properties_texture import TextureButtonsPanel
 
 from extensions_framework.ui import property_group_renderer

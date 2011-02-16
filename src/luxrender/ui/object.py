@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from properties_object import ObjectButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
@@ -33,7 +31,7 @@ from extensions_framework.ui import property_group_renderer
 from .. import LuxRenderAddon
 
 @LuxRenderAddon.addon_register_class
-class ui_object(ObjectButtonsPanel, property_group_renderer, bpy.types.Panel):
+class ui_object(ObjectButtonsPanel, property_group_renderer):
 	'''
 	Object settings
 	'''

@@ -24,13 +24,11 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ... import LuxRenderAddon
 from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
-class ui_texture_marble(luxrender_texture_base, bpy.types.Panel):
+class ui_texture_marble(luxrender_texture_base):
 	bl_label = 'LuxRender Marble Texture'
 	
 	LUX_COMPAT = {'marble'}
