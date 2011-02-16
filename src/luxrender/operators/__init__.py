@@ -279,7 +279,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 			    lmm = luxrender_mat.luxrender_mat_mirror
 			    lmm.Kr_color = [i for i in blender_mat.mirror_color]
 			    luxmat = lmm
-			else if blender_mat.specular_intensity < 0.01:
+			elif blender_mat.specular_intensity < 0.01:
 			    # use matte as glossy mat with very low specular is not equal matte
 			    luxrender_mat.type = 'matte'
 			    lms = luxrender_mat.luxrender_mat_matte
