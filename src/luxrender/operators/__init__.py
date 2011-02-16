@@ -40,16 +40,13 @@ class LUXRENDER_MT_base(bpy.types.Menu):
 	def draw(self, context):
 		return bpy.types.Menu.draw_preset(self, context)
 
-class LUXRENDER_OT_preset_base(AddPresetBase, bpy.types.Operator):
-	pass
-
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base):
 	bl_label = "LuxRender Engine Presets"
 	preset_subdir = "luxrender/engine"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_engine_add(LUXRENDER_OT_preset_base):
+class LUXRENDER_OT_preset_engine_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_engine_add'
 	bl_label = 'Add LuxRender Engine settings preset'
@@ -79,7 +76,7 @@ class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base):
 	preset_subdir = "luxrender/networking"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_networking_add(LUXRENDER_OT_preset_base):
+class LUXRENDER_OT_preset_networking_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_networking_add'
 	bl_label = 'Add LuxRender Networking settings preset'
@@ -99,7 +96,7 @@ class LUXRENDER_MT_presets_material(LUXRENDER_MT_base):
 	preset_subdir = "luxrender/material"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base):
+class LUXRENDER_OT_preset_material_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_material_add'
 	bl_label = 'Add LuxRender Material settings preset'
@@ -133,7 +130,7 @@ class LUXRENDER_MT_presets_texture(LUXRENDER_MT_base):
 	preset_subdir = "luxrender/texture"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base):
+class LUXRENDER_OT_preset_texture_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_texture_add'
 	bl_label = 'Add LuxRender Texture settings preset'
@@ -175,7 +172,7 @@ class LUXRENDER_MT_presets_volume(LUXRENDER_MT_base):
 	preset_subdir = "luxrender/volume"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_volume_add(LUXRENDER_OT_preset_base):
+class LUXRENDER_OT_preset_volume_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_volume_add'
 	bl_label = 'Add LuxRender Volume settings preset'
