@@ -196,7 +196,7 @@ class GeometryExporter(object):
 					ply_filename = bpy.path.clean_name(mesh_name) + '.ply'
 					
 					# skip writing the PLY file if the box is checked
-					if os.path.exists(ply_filename) and not self.scene.luxrender_engine.partial_ply:
+					if not (os.path.exists(ply_filename) and self.scene.luxrender_engine.partial_ply):
 						if len(mesh.uv_textures) > 0:
 							if mesh.uv_textures.active and mesh.uv_textures.active.data:
 								uv_layer = mesh.uv_textures.active.data
@@ -300,6 +300,8 @@ class GeometryExporter(object):
 							del co_no_cache
 							del uv_cache
 							del face_vert_indices
+						
+						LuxLog('Binary PLY Mesh Exported: %s/%s' % (os.getcwd(),ply_filename))
 					
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
@@ -323,11 +325,11 @@ class GeometryExporter(object):
 						self.exportShapeDefinition(obj, mesh_definition)
 						self.ExportedMeshes.add(mesh_name, mesh_definition)
 					
-					LuxLog('Binary PLY Mesh Exported: %s' % mesh_name)
-					
 				except InvalidGeometryException as err:
 					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
-		
+			
+			del ffaces_mats
+			
 		except UnexportableObjectException as err:
 			LuxLog('Object export failed, skipping this object: %s' % err)
 		
@@ -396,7 +398,7 @@ class GeometryExporter(object):
 					vert_use_vno = set()		# Set of vert indices that use vert normals
 					
 					vert_index = 0				# exported vert index
-					for face in mesh.faces:
+					for face in ffaces_mats[i]:
 						fvi = []
 						for j, vertex in enumerate(face.vertices):
 							v = mesh.vertices[vertex]
@@ -487,7 +489,9 @@ class GeometryExporter(object):
 					
 				except InvalidGeometryException as err:
 					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
-		
+			
+			del ffaces_mats
+			
 		except UnexportableObjectException as err:
 			LuxLog('Object export failed, skipping this object: %s' % err)
 		
