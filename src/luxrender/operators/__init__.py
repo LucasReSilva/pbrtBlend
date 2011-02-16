@@ -27,6 +27,7 @@
 # Blender Libs
 import bpy
 from presets import AddPresetBase
+import math
 
 # LuxRender Libs
 from .. import LuxRenderAddon
@@ -271,15 +272,43 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 			luxrender_mat.Interior_volume = ''
 			luxrender_mat.Exterior_volume = ''
 			
-			# Basic glossy translation
-			luxrender_mat.type = 'glossy'
-			lmg = luxrender_mat.luxrender_mat_glossy
-			lmg.multibounce = False
-			lmg.useior = False
-			lmg.Kd_color = [blender_mat.diffuse_intensity*i for i in blender_mat.diffuse_color]
-			lmg.Ks_color = [blender_mat.specular_intensity*i for i in blender_mat.specular_color]
-			lmg.uroughness_floatvalue = lmg.vroughness_floatvalue = 1/blender_mat.specular_hardness
-			lmg.uroughness_usefloattexture = lmg.vroughness_usefloattexture = False
+			
+			if blender_mat.raytrace_mirror.use and blender_mat.raytrace_mirror.reflect_factor >= 0.9:
+			    # for high mirror reflection values switch to mirror material
+			    luxrender_mat.type = 'mirror'
+			    lmm = luxrender_mat.luxrender_mat_mirror
+			    lmm.Kr_color = [i for i in blender_mat.mirror_color]
+			    luxmat = lmm
+			else if blender_mat.specular_intensity < 0.01:
+			    # use matte as glossy mat with very low specular is not equal matte
+			    luxrender_mat.type = 'matte'
+			    lms = luxrender_mat.luxrender_mat_matte
+			    lms.Kd_color = [blender_mat.diffuse_intensity*i for i in blender_mat.diffuse_color]
+			    lmg.sigma_floatvalue = 0.0
+			    luxmat = lms
+			else:
+			    luxrender_mat.type = 'glossy'
+			    lmg = luxrender_mat.luxrender_mat_glossy
+			    lmg.multibounce = False
+			    lmg.useior = False
+			    lmg.Kd_color = [blender_mat.diffuse_intensity*i for i in blender_mat.diffuse_color]
+			    
+			    logHardness = math.log(blender_mat.specular_hardness)
+			    
+			    # fit based on empirical measurements
+			    # measurements based on intensity of 0.5, use linear scale for other intensities
+			    specular_scale = 2.0 * max(0.0128415*logHardness**2 - 0.171266*logHardness + 0.575631, 0.0)
+			    
+			    lmg.Ks_color = [min(specular_scale * blender_mat.specular_intensity * i, 0.25) for i in blender_mat.specular_color]
+			    
+			    # fit based on empirical measurements
+			    roughness = min(max(0.757198 - 0.120395*logHardness, 0.0), 1.0)
+			    
+			    lmg.uroughness_floatvalue = roughness
+			    lmg.vroughness_floatvalue = roughness
+			    lmg.uroughness_usefloattexture = lmg.vroughness_usefloattexture = False
+			    luxmat = lmg
+			    
 			
 			# Emission
 			lme = context.material.luxrender_emission
@@ -319,45 +348,47 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 					if tex_slot.use_map_normal:
 						bump_tex = (tex_slot.texture, tex_slot.normal_factor)
 			
-			if len(Kd_stack) == 1:
-				tex = Kd_stack[0][0]
-				variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
-				if variant == 'color':
-					# assign the texture directly
-					lmg.Kd_usecolortexture = True
-					lmg.Kd_colortexturename = tex.name
-					lmg.Kd_color = [i*Kd_stack[0][1] for i in lmg.Kd_color]
-					lmg.Kd_multiplycolor = True
-				else:
-					# TODO - insert mix texture
-					# check there are enough free empty texture slots !
-					pass
-			elif len(Kd_stack) > 1:
-				# TODO - set up a mix stack.
-				# check there are enough free empty texture slots !
-				pass
-			else:
-				lmg.Kd_usecolortexture = False
+			if luxrender_mat.type in ('matte', 'glossy'):
+			    if len(Kd_stack) == 1:
+				    tex = Kd_stack[0][0]
+				    variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+				    if variant == 'color':
+					    # assign the texture directly
+					    luxmat.Kd_usecolortexture = True
+					    luxmat.Kd_colortexturename = tex.name
+					    luxmat.Kd_color = [i*Kd_stack[0][1] for i in lmg.Kd_color]
+					    luxmat.Kd_multiplycolor = True
+				    else:
+					    # TODO - insert mix texture
+					    # check there are enough free empty texture slots !
+					    pass
+			    elif len(Kd_stack) > 1:
+				    # TODO - set up a mix stack.
+				    # check there are enough free empty texture slots !
+				    pass
+			    else:
+				    luxmat.Kd_usecolortexture = False
 			
-			if len(Ks_stack) == 1:
-				tex = Ks_stack[0][0]
-				variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
-				if variant == 'color':
-					# assign the texture directly
-					lmg.Ks_usecolortexture = True
-					lmg.Ks_colortexturename = tex.name
-					lmg.Ks_color = [i*Ks_stack[0][1] for i in lmg.Ks_color]
-					lmg.Ks_multiplycolor = True
-				else:
-					# TODO - insert mix texture
-					# check there are enough free empty texture slots !
-					pass
-			elif len(Ks_stack) > 1:
-				# TODO - set up a mix stack.
-				# check there are enough free empty texture slots !
-				pass
-			else:
-				lmg.Ks_usecolortexture = False
+			if luxrender_mat.type in ('glossy'):
+			    if len(Ks_stack) == 1:
+				    tex = Ks_stack[0][0]
+				    variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+				    if variant == 'color':
+					    # assign the texture directly
+					    luxmat.Ks_usecolortexture = True
+					    luxmat.Ks_colortexturename = tex.name
+					    luxmat.Ks_color = [i*Ks_stack[0][1] for i in lmg.Ks_color]
+					    luxmat.Ks_multiplycolor = True
+				    else:
+					    # TODO - insert mix texture
+					    # check there are enough free empty texture slots !
+					    pass
+			    elif len(Ks_stack) > 1:
+				    # TODO - set up a mix stack.
+				    # check there are enough free empty texture slots !
+				    pass
+			    else:
+				    luxmat.Ks_usecolortexture = False
 			
 			if bump_tex != None:
 				tex = bump_tex[0]
@@ -379,6 +410,6 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 			return {'FINISHED'}
 		except Exception as err:
 			self.report({'ERROR'}, 'Cannot convert material: %s' % err)
-			import pdb
-			pdb.set_trace()
+			#import pdb
+			#pdb.set_trace()
 			return {'CANCELLED'}
