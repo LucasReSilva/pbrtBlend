@@ -195,67 +195,67 @@ class GeometryExporter(object):
 					
 					ply_filename = bpy.path.clean_name(mesh_name) + '.ply'
 					
-					if len(mesh.uv_textures) > 0:
-						if mesh.uv_textures.active and mesh.uv_textures.active.data:
-							uv_layer = mesh.uv_textures.active.data
-					else:
-						uv_layer = None
-					
-					# Here we work out exactly which vert+normal combinations
-					# we need to export. This is done first, and the export
-					# combinations cached before writing to file because the
-					# number of verts needed needs to be written in the header
-					# and that number is not known before this is done.
-					
-					# Export data
-					co_no_cache = []
-					uv_cache = []
-					face_vert_indices = {}		# mapping of face index to list of exported vert indices for that face
-					
-					# Caches
-					vert_vno_indices = {}		# mapping of vert index to exported vert index for verts with vert normals
-					vert_use_vno = set()		# Set of vert indices that use vert normals
-					
-					vert_index = 0				# exported vert index
-					for face in ffaces_mats[i]:
-						fvi = []
-						for j, vertex in enumerate(face.vertices):
-							v = mesh.vertices[vertex]
-							
-							if face.use_smooth:
+					# skip writing the PLY file if the box is checked
+					if not self.scene.luxrender_engine.partial_ply:
+						if len(mesh.uv_textures) > 0:
+							if mesh.uv_textures.active and mesh.uv_textures.active.data:
+								uv_layer = mesh.uv_textures.active.data
+						else:
+							uv_layer = None
+						
+						# Here we work out exactly which vert+normal combinations
+						# we need to export. This is done first, and the export
+						# combinations cached before writing to file because the
+						# number of verts needed needs to be written in the header
+						# and that number is not known before this is done.
+						
+						# Export data
+						co_no_cache = []
+						uv_cache = []
+						face_vert_indices = {}		# mapping of face index to list of exported vert indices for that face
+						
+						# Caches
+						vert_vno_indices = {}		# mapping of vert index to exported vert index for verts with vert normals
+						vert_use_vno = set()		# Set of vert indices that use vert normals
+						
+						vert_index = 0				# exported vert index
+						for face in ffaces_mats[i]:
+							fvi = []
+							for j, vertex in enumerate(face.vertices):
+								v = mesh.vertices[vertex]
 								
-								if vertex not in vert_use_vno:
-									vert_use_vno.add(vertex)
+								if face.use_smooth:
 									
-									co_no_cache.append( (v.co, v.normal) )
+									if vertex not in vert_use_vno:
+										vert_use_vno.add(vertex)
+										
+										co_no_cache.append( (v.co, v.normal) )
+										if uv_layer:
+											uv_cache.append( uv_layer[face.index].uv[j] )
+										
+										vert_vno_indices[vertex] = vert_index
+										fvi.append(vert_index)
+										
+										vert_index += 1
+									else:
+										fvi.append(vert_vno_indices[vertex])
+									
+								else:
+									# All face-vert-co-no are unique, we cannot
+									# cache them
+									co_no_cache.append( (v.co, face.normal) )
 									if uv_layer:
 										uv_cache.append( uv_layer[face.index].uv[j] )
 									
-									vert_vno_indices[vertex] = vert_index
 									fvi.append(vert_index)
 									
 									vert_index += 1
-								else:
-									fvi.append(vert_vno_indices[vertex])
-								
-							else:
-								# All face-vert-co-no are unique, we cannot
-								# cache them
-								co_no_cache.append( (v.co, face.normal) )
-								if uv_layer:
-									uv_cache.append( uv_layer[face.index].uv[j] )
-								
-								fvi.append(vert_index)
-								
-								vert_index += 1
+							
+							face_vert_indices[face.index] = fvi
 						
-						face_vert_indices[face.index] = fvi
-					
-					del vert_vno_indices
-					del vert_use_vno
-					
-					skip_ply_write = self.scene.luxrender_engine.partial_ply
-					if not skip_ply_write:					
+						del vert_vno_indices
+						del vert_use_vno
+						
 						with open(ply_filename, 'wb') as ply:
 							ply.write(b'ply\n')
 							ply.write(b'format binary_little_endian 1.0\n')
@@ -300,7 +300,7 @@ class GeometryExporter(object):
 							del co_no_cache
 							del uv_cache
 							del face_vert_indices
-						
+					
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
 						'filename',
