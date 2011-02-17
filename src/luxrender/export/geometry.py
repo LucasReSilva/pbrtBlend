@@ -503,8 +503,10 @@ class GeometryExporter(object):
 			return False
 		
 		# If the mesh is only used once, instancing is a waste of memory
-		if (not self.exporting_duplis) and obj.data.users == 1:
-			return False
+		# ERROR: this can break dupli export if the dupli'd mesh is exported
+		# before the duplicator
+		#if (not self.exporting_duplis) and obj.data.users == 1:
+		#	return False
 		
 		# Only allow instancing for duplis and particles in non-hybrid mode, or
 		# for normal objects if the object has certain modifiers applied against
@@ -647,8 +649,6 @@ class GeometryExporter(object):
 		self.lux_context.attributeEnd()
 	
 	def handler_Duplis_GENERIC(self, obj, *args, **kwargs):
-		dupli_object_names = set()
-		
 		try:
 			# to fix this limitation, patch blender:
 			# - http://projects.blender.org/tracker/index.php?group_id=9&atid=498
@@ -672,7 +672,7 @@ class GeometryExporter(object):
 				self.exporting_duplis = True
 				
 				for dupli_ob in obj.dupli_list:
-					if dupli_ob.object.type not in  ['MESH', 'SURFACE', 'FONT']:
+					if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT']:
 						continue
 					
 					self.exportShapeInstances(
@@ -681,8 +681,6 @@ class GeometryExporter(object):
 						matrix=[dupli_ob.matrix,None],
 						parent=dupli_ob.object
 					)
-					
-					dupli_object_names.add( dupli_ob.object.name )
 					
 					det.exported_objects += 1
 				
@@ -698,8 +696,6 @@ class GeometryExporter(object):
 			
 		except SystemError as err:
 			LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
-		
-		return dupli_object_names
 	
 	def handler_MESH(self, obj, *args, **kwargs):
 		if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % obj)
