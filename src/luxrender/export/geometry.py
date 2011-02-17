@@ -193,7 +193,13 @@ class GeometryExporter(object):
 						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
 						continue
 					
-					ply_filename = bpy.path.clean_name(mesh_name) + '.ply'
+					# Put PLY files in frame-numbered subfolders to avoid
+					# clobbering when rendering animations
+					sc_fr = '%05d' % self.scene.frame_current
+					if not os.path.exists( os.path.join(os.getcwd(), sc_fr) ):
+						os.mkdir(sc_fr)
+					
+					ply_filename = os.path.join(sc_fr, bpy.path.clean_name(mesh_name) + '.ply')
 					
 					# skip writing the PLY file if the box is checked
 					if not (os.path.exists(ply_filename) and self.scene.luxrender_engine.partial_ply):
