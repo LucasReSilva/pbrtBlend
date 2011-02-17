@@ -632,7 +632,7 @@ class GeometryExporter(object):
 			self.have_emitting_object |= object_is_emitter
 			
 			# If the object emits, don't export instance or motioninstance, just the Shape
-			if (not self.allow_instancing(obj)) or object_is_emitter:
+			if (not self.allow_instancing(mat_object)) or object_is_emitter:
 				self.lux_context.shape(me_shape_type, me_shape_params)
 			# motionInstance for motion blur
 			elif is_object_animated:
@@ -672,6 +672,12 @@ class GeometryExporter(object):
 				self.exporting_duplis = True
 				
 				for dupli_ob in obj.dupli_list:
+					
+					det.exported_objects += 1
+					
+					if not dupli_ob.object.is_visible(self.scene) or dupli_ob.object.hide_render:
+						continue
+					
 					if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT']:
 						continue
 					
@@ -681,8 +687,6 @@ class GeometryExporter(object):
 						matrix=[dupli_ob.matrix,None],
 						parent=dupli_ob.object
 					)
-					
-					det.exported_objects += 1
 				
 				self.exporting_duplis = False
 				
