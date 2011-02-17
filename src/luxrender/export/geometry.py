@@ -656,16 +656,14 @@ class GeometryExporter(object):
 	
 	def handler_Duplis_GENERIC(self, obj, *args, **kwargs):
 		try:
-			# to fix this limitation, patch blender:
-			# - http://projects.blender.org/tracker/index.php?group_id=9&atid=498
-			# - http://www.pasteall.org/19115/c
-			if 'particle_system' in kwargs.keys():
-				prev_display_pc = kwargs['particle_system'].settings.draw_percentage
-				if prev_display_pc < 100:
-					LuxLog(
-						'WARNING: Due to a limitation in blender only %s%% of particle system "%s" will be exported. '
-						'Set the DISPLAY percentage to 100%% before exporting' % (prev_display_pc, kwargs['particle_system'].name)
-					)
+			# TODO - this workaround is still needed for file->export operator
+			#if 'particle_system' in kwargs.keys():
+			#	prev_display_pc = kwargs['particle_system'].settings.draw_percentage
+			#	if prev_display_pc < 100:
+			#		LuxLog(
+			#			'WARNING: Due to a limitation in blender only %s%% of particle system "%s" will be exported. '
+			#			'Set the DISPLAY percentage to 100%% before exporting' % (prev_display_pc, kwargs['particle_system'].name)
+			#		)
 			
 			obj.create_dupli_list(self.scene)
 			
