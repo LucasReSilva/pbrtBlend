@@ -100,7 +100,11 @@ class ExportedMaterials(object):
 		ExportedMaterials.exported_material_names = []
 		
 	@staticmethod
-	def makeNamedMaterial(name, paramset):
+	def makeNamedMaterial(lux_context, name, paramset):
+		if lux_context.API_TYPE == 'PURE':
+			lux_context.makeNamedMaterial(name, paramset)
+			return
+		
 		if name not in ExportedMaterials.exported_material_names:
 			ExportedMaterials.material_names.append(name)
 			ExportedMaterials.material_psets.append(paramset)
@@ -115,7 +119,7 @@ class ExportedMaterials(object):
 	@staticmethod
 	def export_new_named(lux_context):
 		for n, p in zip(ExportedMaterials.material_names, ExportedMaterials.material_psets):
-			if n not in ExportedMaterials.exported_material_names:
+			if lux_context.API_TYPE!='PURE' and n not in ExportedMaterials.exported_material_names:
 				ExportedMaterials.calculate_dependencies()
 				lux_context.makeNamedMaterial(n, p)
 				ExportedMaterials.exported_material_names.append(n)

@@ -221,8 +221,8 @@ class luxrender_material(declarative_property_group):
 				mat_type = self.type
 			else: # export mix for transparency
 				material_params.add_string('type', self.type)
-				ExportedMaterials.makeNamedMaterial(material.name + '_null', ParamSet().add_string('type', 'null'))
-				ExportedMaterials.makeNamedMaterial(material.name + '_base', material_params)
+				ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_null', ParamSet().add_string('type', 'null'))
+				ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_base', material_params)
 				ExportedMaterials.export_new_named(lux_context)
 				
 				# replace material params with mix
@@ -237,7 +237,7 @@ class luxrender_material(declarative_property_group):
 				
 			if mode == 'indirect':
 				material_params.add_string('type', mat_type)
-				ExportedMaterials.makeNamedMaterial(material.name, material_params)
+				ExportedMaterials.makeNamedMaterial(lux_context, material.name, material_params)
 				ExportedMaterials.export_new_named(lux_context)
 			elif mode == 'direct':
 				lux_context.material(mat_type, material_params)
