@@ -62,20 +62,22 @@ class DupliExportProgressThread(ExportProgressThread):
 	message = '...  %i%% ...'
 
 class GeometryExporter(object):
-	lux_context = None
-	scene = None
 	
-	ExportedMeshes = None
-	ExportedObjects = None
-	
-	callbacks = {}
-	valid_duplis_callbacks = []
-	valid_particles_callbacks = []
-	valid_objects_callbacks = []
-	
-	have_emitting_object = False
-	
-	exporting_duplis = False
+#	lux_context = None
+#	scene = None
+#	
+#	ExportedMeshes = None
+#	ExportedObjects = None
+#	ExportedPLYs = None
+#	
+#	callbacks = {}
+#	valid_duplis_callbacks = []
+#	valid_particles_callbacks = []
+#	valid_objects_callbacks = []
+#	
+#	have_emitting_object = False
+#	
+#	exporting_duplis = False
 	
 	def __init__(self, lux_context, scene):
 		self.lux_context = lux_context
@@ -83,6 +85,10 @@ class GeometryExporter(object):
 		
 		self.ExportedMeshes = ExportCache('ExportedMeshes')
 		self.ExportedObjects = ExportCache('ExportedObjects')
+		self.ExportedPLYs = ExportCache('ExportedPLYs')
+		
+		self.have_emitting_object = False
+		self.exporting_duplis = False
 		
 		self.callbacks = {
 			'duplis': {
@@ -199,7 +205,13 @@ class GeometryExporter(object):
 					if not os.path.exists( os.path.join(os.getcwd(), sc_fr) ):
 						os.mkdir(sc_fr)
 					
-					ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
+					ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.%04d.ply'%self.ExportedPLYs.serial(mesh_name)])
+					
+					# Ensure that all PLY files have unique names
+					while self.ExportedPLYs.have(ply_filename):
+						ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.%04d.ply'%self.ExportedPLYs.serial(mesh_name)])
+					
+					self.ExportedPLYs.add(ply_filename, None)
 					
 					# skip writing the PLY file if the box is checked
 					if not (os.path.exists(ply_filename) and self.scene.luxrender_engine.partial_ply):
@@ -307,7 +319,7 @@ class GeometryExporter(object):
 							del uv_cache
 							del face_vert_indices
 						
-						LuxLog('Binary PLY Mesh Exported: %s/%s' % (os.getcwd(),ply_filename))
+						LuxLog('Binary PLY file written: %s/%s' % (os.getcwd(),ply_filename))
 					
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
@@ -331,6 +343,8 @@ class GeometryExporter(object):
 						self.exportShapeDefinition(obj, mesh_definition)
 						self.ExportedMeshes.add(mesh_name, mesh_definition)
 					
+					#LuxLog('Binary PLY Mesh Exported: %s' % mesh_name)
+				
 				except InvalidGeometryException as err:
 					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 			
@@ -491,7 +505,7 @@ class GeometryExporter(object):
 						self.exportShapeDefinition(obj, mesh_definition)
 						self.ExportedMeshes.add(mesh_name, mesh_definition)
 					
-					LuxLog('LuxRender Mesh Exported: %s' % mesh_name)
+					#LuxLog('LuxRender Mesh Exported: %s' % mesh_name)
 					
 				except InvalidGeometryException as err:
 					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
@@ -550,6 +564,8 @@ class GeometryExporter(object):
 		
 		self.lux_context.shape(me_shape_type, me_shape_params)
 		self.lux_context.objectEnd()
+		
+		LuxLog('Mesh definition exported: %s' % me_name)
 	
 	def exportShapeInstances(self, obj, mesh_definitions, matrix=None, parent=None):
 		

@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import math
+import collections, math
 
 import bpy, mathutils
 
@@ -51,14 +51,20 @@ class ExportProgressThread(efutil.TimerThread):
 
 class ExportCache(object):
 	
-	name = 'Cache'
-	cache_keys = set()
-	cache_items = {}
+#	name = 'Cache'
+#	cache_keys = set()
+#	cache_items = {}
 	
-	def __init__(self, name):
+	def __init__(self, name='Cache'):
 		self.name = name
 		self.cache_keys = set()
 		self.cache_items = {}
+		self.serial_counter = collections.Counter()
+	
+	def serial(self, name):
+		s = self.serial_counter[name]
+		self.serial_counter[name] += 1
+		return s
 	
 	def have(self, ck):
 		return ck in self.cache_keys
