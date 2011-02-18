@@ -476,6 +476,7 @@ class luxrender_transparency(declarative_property_group):
 				alpha_amount = alpha_amount + '_alpha'
 				
 				ExportedTextures.texture(
+					lux_context,
 					alpha_amount,
 					'float',
 					'mix',
@@ -514,6 +515,7 @@ class luxrender_transparency(declarative_property_group):
 					alpha_amount = texture_name + '_alpha'
 					
 					ExportedTextures.texture(
+						lux_context,
 						alpha_amount,
 						'float',
 						'imagemap',
