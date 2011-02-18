@@ -73,6 +73,7 @@ from ..ui.textures import (
 
 # Exporter Operators need to be imported to ensure initialisation
 from .. import operators
+from ..operators import lrmdb
 
 # Add standard Blender Interface elements
 import properties_render
