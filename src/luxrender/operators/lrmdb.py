@@ -273,9 +273,14 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		else:
 			LuxLog('LRMDB ERROR: Could not find 3D view to hijack')
 			return {'CANCELLED'}
+	
+	@classmethod
+	def poll(cls, context):
+		return context.scene.render.engine == LuxRenderAddon.BL_IDNAME
 
 def lrmdb_operators(self, context):
-	row = self.layout.row(align=True)
-	row.operator("luxrender.lrmdb", text="", icon='MATERIAL_DATA')
+	if context.scene.render.engine == LuxRenderAddon.BL_IDNAME:
+		row = self.layout.row(align=True)
+		row.operator("luxrender.lrmdb", text="", icon='MATERIAL_DATA')
 #	
 bpy.types.VIEW3D_HT_header.append(lrmdb_operators)
