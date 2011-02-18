@@ -150,11 +150,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	bl_label			= 'LuxRender'
 	bl_use_preview		= True
 	
-	LuxManager			= None
-	render_update_timer	= None
-	output_dir			= './'
-	output_file			= 'default.png'
-	
 	render_lock = threading.Lock()
 	
 	def render(self, scene):
@@ -167,7 +162,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		Returns None
 		'''
 		
-		with self.render_lock:	# just render one thing at a time
+		with RENDERENGINE_luxrender.render_lock:	# just render one thing at a time
+			
+			self.LuxManager				= None
+			self.render_update_timer	= None
+			self.output_dir				= efutil.temp_directory()
+			self.output_file			= 'default.png'
+			
 			prev_dir = os.getcwd()
 			
 			if scene is None:
@@ -188,7 +189,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			os.chdir(prev_dir)
 	
 	def render_preview(self, scene):
-		self.output_dir = efutil.filesystem_path( bpy.app.tempdir )
+		self.output_dir = efutil.temp_directory()
 		
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
