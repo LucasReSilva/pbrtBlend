@@ -746,7 +746,11 @@ def iterateScene(lux_context, scene):
 					geometry_exporter.callbacks['duplis'][obj.dupli_type](obj)
 				elif OBJECT_ANALYSIS: print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
 			
-			export_original_object = True
+			# Some dupli types should hide the original
+			if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES'):
+				export_original_object = False
+			else:
+				export_original_object = True
 			
 			if number_psystems > 0:
 				export_original_object = False
