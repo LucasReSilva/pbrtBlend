@@ -186,7 +186,7 @@ class GeometryExporter(object):
 				try:
 					if i not in ffaces_mats.keys(): continue
 					
-					mesh_name = ('%s_%03d' % (obj.data.name, i)).replace(' ','_')
+					mesh_name = ('%s_m%03d' % (obj.data.name, i)).replace(' ','_')
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
 					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
