@@ -337,22 +337,24 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
 		
-		efutil.export_path = self.output_dir
-		#print('(1) export_path is %s' % efutil.export_path)
-		os.chdir(self.output_dir)
-		
 		if scene.luxrender_engine.export_type == 'INT': # and not scene.luxrender_engine.write_files:
 			write_files = scene.luxrender_engine.write_files
 			if write_files:
 				api_type = 'FILE'
 			else:
 				api_type = 'API'
+				self.output_dir = efutil.temp_directory()
+		
 		elif scene.luxrender_engine.export_type == 'LFC':
 			api_type = 'LUXFIRE_CLIENT'
 			write_files = False
 		else:
 			api_type = 'FILE'
 			write_files = True
+		
+		efutil.export_path = self.output_dir
+		#print('(1) export_path is %s' % efutil.export_path)
+		os.chdir(self.output_dir)
 		
 		# Pre-allocate the LuxManager so that we can set up the network servers before export
 		LM = LuxManager(
