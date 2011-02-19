@@ -20,6 +20,32 @@ class lrmdb_client(object):
 			
 		return lrmdb_client.server
 
+def null_callback(context):
+	pass
+
+class ClickRegion(object):
+	def __init__(self, font_id=0, x=0, y=0, z=0):
+		self.font_id = font_id
+		self.x = x
+		self.y = y
+		self.z = z
+	def hit(self, mx, my):
+		return ( my>self.y and my<(self.y+14) )
+
+class ActionText(object):
+	def __init__(self, label, region=ClickRegion(), callback=null_callback, callback_args=tuple()):
+		self.label = label
+		self.region = region
+		self.callback = callback
+		self.callback_args = callback_args
+	
+	def draw(self):
+		blf.position( self.region.font_id, self.region.x, self.region.y, self.region.z )
+		blf.draw(0, self.label )
+	
+	def execute(self, context):
+		self.callback( context, *self.callback_args )
+
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	"""Start the LuxRender Materials Database Interface"""
@@ -32,24 +58,15 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	_region_callback = None
 	_loading_msg = False
 	
-	draw_items = []
-	click_items = []
+	actions = []
 	
-	def clicked_in_region(self, event, click_region):
-		mrx = event.mouse_region_x
-		mry = event.mouse_region_y
-		cf, cx, cy, cz = click_region
-		
-		if mry>=cy and mry<=(cy+14): return True
-		
 	def modal(self, context, event):
 		context.area.tag_redraw()
 		
 		if event.type == 'LEFTMOUSE' and event.value == 'RELEASE':
-			# The user clicked on something !
-			for click_region, callback, callback_data in self.click_items:
-				if self.clicked_in_region(event, click_region):
-					callback( context, *callback_data )
+			for action in self.actions:
+				if action.region.hit(event.mouse_region_x, event.mouse_region_y):
+					action.execute(context)
 		
 		if not LUXRENDER_OT_lrmdb._active or event.type == 'ESC':
 			LUXRENDER_OT_lrmdb._active = False
@@ -69,12 +86,8 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			msg += ' Loading ...'
 		blf.draw(0, msg)
 		
-		for ps, txt in self.draw_items:
-			blf.position( *ps )
-			blf.draw(0, txt)
-	
-	def null_click(self, context):
-		pass
+		for action in self.actions:
+			action.draw()
 	
 	def select_material(self, context, mat_id):
 		#LuxLog('Chose material %s' % mat_id)
@@ -118,6 +131,7 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 							if paramsetitem['name'] in paramset_map_keys:
 								setattr(lxms, paramset_map[paramsetitem['name']], paramsetitem['value'])
 			
+			context.active_object.active_material.preview_render_type = context.active_object.active_material.preview_render_type
 			for a in context.screen.areas:
 				a.tag_redraw()
 		except KeyError as err:
@@ -140,46 +154,31 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		#LuxLog(ci)
 		
 		if len(ci) > 0:
-			self.draw_items = []
-			self.click_items = []
+			self.actions = []
 			
 			ofsy = self._ui_region.height - 30
-			mat_region = (0,75,ofsy,0)
-			self.draw_items.append(
-				(
-					mat_region,
-					'Category "%s"' % cat_name
-				)
-			)
-			self.click_items.append(
-				(
-					mat_region,
-					self.null_click,
-					tuple()
+			self.actions.append(
+				ActionText(
+					'Category "%s"' % cat_name,
+					ClickRegion(0,75,ofsy,0)
 				)
 			)
 			
-			i=0
+			i=1
 			for mat_id, mat_header in ci.items():
 				if mat_header['published'] == 1 and mat_header['type'] == 'Material':
-					i+=1
 					ofsy = self._ui_region.height - 30 - (i*30)
-					mat_region = (0,75,ofsy,0)
-					self.draw_items.append(
-						(
-							mat_region,
-							mat_header['name']
-						)
-					)
-					self.click_items.append(
-						(
-							mat_region,
+					self.actions.append(
+						ActionText(
+							mat_header['name'],
+							ClickRegion(0,85,ofsy,0),
 							self.select_material,
 							(mat_id,)
 						)
 					)
+					i+=1
 			
-			self.draw_back_link(i+1)
+			self.draw_back_link(i)
 	
 	def show_category_list(self, context):
 		
@@ -198,61 +197,41 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		
 		def display_category(ctg, i=0, j=0):
 			for cat_id, cat in ctg.items():
-				i+=1
 				ofsy = self._ui_region.height - 30 - (i*30)
-				cat_region = (0,75+j,ofsy,0)
-				self.draw_items.append(
-					(
-						cat_region,
-						cat['name'] + ' (%s)' % cat['items']
-					)
-				)
-				self.click_items.append(
-					(
-						cat_region,
+				self.actions.append(
+					ActionText(
+						cat['name'] + ' (%s)' % cat['items'],
+						ClickRegion(0,75+j,ofsy,0),
 						self.show_category_items,
 						(cat_id, cat['name'])
 					)
 				)
 				if 'subcategories' in cat.keys():
-					i = display_category(cat['subcategories'], i, j+10)
+					i = display_category(cat['subcategories'], i+1, j+10)
+				else:
+					i+=1
 			return i
 		
 		if len(ct) > 0:
-			self.draw_items = []
-			self.click_items = []
-			display_category(ct)
+			self.actions = []
+			self.actions.append(
+				ActionText(
+					'Categories',
+					ClickRegion(0,75,self._ui_region.height - 30,0)
+				)
+			)
+			display_category(ct, 1)
 	
 	def draw_back_link(self, i):
 		ofsy = self._ui_region.height - 30 - (i*30)
-		cat_region = (0,60,ofsy,0)
-		self.draw_items.append(
-			(
-				cat_region,
-				'< Back to categories'
-			)
-		)
-		self.click_items.append(
-			(
-				cat_region,
+		self.actions.append(
+			ActionText(
+				'< Back to categories',
+				ClickRegion(0,60,ofsy,0),
 				self.show_category_list,
 				tuple()
 			)
 		)
-	
-	def find_3d_view(self, context):
-		self._ui_region = context.region
-		return True
-		
-		for a in context.screen.areas:
-			if a.type == 'VIEW_3D':
-				for r in a.regions:
-					if r.type == 'WINDOW':
-						self._ui_area = a
-						print(dir(r))
-						self._ui_region = r
-						return True
-		return False
 	
 	def execute(self, context):
 		
@@ -260,19 +239,17 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			LuxLog('LRMDB ERROR: Already running!')
 			return {'CANCELLED'}
 		
-		if self.find_3d_view(context):
-			context.window_manager.modal_handler_add(self)
-			self._region_callback = self._ui_region.callback_add(self.region_callback, (context,), 'POST_PIXEL')
-			context.area.tag_redraw()
-			LUXRENDER_OT_lrmdb._active = True
-			
-			# Fire the first phase: list categories
-			self.show_category_list(context)
-			
-			return {'RUNNING_MODAL'}
-		else:
-			LuxLog('LRMDB ERROR: Could not find 3D view to hijack')
-			return {'CANCELLED'}
+		self._ui_region = context.region
+		
+		context.window_manager.modal_handler_add(self)
+		self._region_callback = self._ui_region.callback_add(self.region_callback, (context,), 'POST_PIXEL')
+		context.area.tag_redraw()
+		LUXRENDER_OT_lrmdb._active = True
+		
+		# Fire the first phase: list categories
+		self.show_category_list(context)
+		
+		return {'RUNNING_MODAL'}
 	
 	@classmethod
 	def poll(cls, context):
