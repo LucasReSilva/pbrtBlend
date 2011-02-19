@@ -48,7 +48,10 @@ class ui_luxrender_material(luxrender_material_base):
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		row = self.layout.row(align=True)
-		row.operator("luxrender.convert_material") #, text="Convert Blender material")
+		row.operator("luxrender.convert_material")
+		
+		row = self.layout.row(align=True)
+		row.operator("luxrender.copy_mat_color")
 		
 		super().draw(context)
 

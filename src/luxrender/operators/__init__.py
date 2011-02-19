@@ -254,6 +254,22 @@ menu_func = lambda self, context: self.layout.operator("export.luxrender", text=
 bpy.types.INFO_MT_file_export.append(menu_func)
 
 @LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_copy_mat_color(bpy.types.Operator):
+	bl_idname = 'luxrender.copy_mat_color'
+	bl_label = 'Copy material color to viewport'
+	
+	def execute(self, context):
+		
+		try:
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			luxrender_mat.set_master_color(blender_mat)
+			return {'FINISHED'}
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot copy settings: %s' % err)
+			return {'CANCELLED'}
+
+@LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_material(bpy.types.Operator):
 	bl_idname = 'luxrender.convert_material'
 	bl_label = 'Convert Blender material to LuxRender'
