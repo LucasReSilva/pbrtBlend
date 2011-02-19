@@ -31,12 +31,15 @@ from extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 
+class world_panel(WorldButtonsPanel, property_group_renderer):
+	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+
 @LuxRenderAddon.addon_register_class
-class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
+class world(world_panel):
 	'''
 	LuxRender World Settings
 	'''
-	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+	
 	bl_label = 'LuxRender World Settings'
 	
 	display_property_groups = [
@@ -44,11 +47,11 @@ class world(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
 	]
 
 @LuxRenderAddon.addon_register_class
-class volumes(WorldButtonsPanel, property_group_renderer, bpy.types.Panel):
+class volumes(world_panel):
 	'''
 	Interior/Exterior Volumes Settings
 	'''
-	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+	
 	bl_label = 'LuxRender Volumes'
 	
 	display_property_groups = [

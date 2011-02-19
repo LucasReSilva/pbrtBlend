@@ -27,6 +27,7 @@
 # Blender Libs
 import bpy
 from presets import AddPresetBase
+import math
 
 # LuxRender Libs
 from .. import LuxRenderAddon
@@ -34,21 +35,18 @@ from ..export.scene import SceneExporter
 
 # Per-IDPropertyGroup preset handling
 
-class LUXRENDER_MT_base(object):
+class LUXRENDER_MT_base(bpy.types.Menu):
 	preset_operator = "script.execute_preset"
 	def draw(self, context):
 		return bpy.types.Menu.draw_preset(self, context)
 
-class LUXRENDER_OT_preset_base(AddPresetBase):
-	pass
-
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base, bpy.types.Menu):
+class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base):
 	bl_label = "LuxRender Engine Presets"
 	preset_subdir = "luxrender/engine"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_engine_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
+class LUXRENDER_OT_preset_engine_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_engine_add'
 	bl_label = 'Add LuxRender Engine settings preset'
@@ -73,12 +71,12 @@ class LUXRENDER_OT_preset_engine_add(LUXRENDER_OT_preset_base, bpy.types.Operato
 		return super().execute(context)
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base, bpy.types.Menu):
+class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base):
 	bl_label = "LuxRender Networking Presets"
 	preset_subdir = "luxrender/networking"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_networking_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
+class LUXRENDER_OT_preset_networking_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_networking_add'
 	bl_label = 'Add LuxRender Networking settings preset'
@@ -93,12 +91,12 @@ class LUXRENDER_OT_preset_networking_add(LUXRENDER_OT_preset_base, bpy.types.Ope
 		return super().execute(context)
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_material(LUXRENDER_MT_base, bpy.types.Menu):
+class LUXRENDER_MT_presets_material(LUXRENDER_MT_base):
 	bl_label = "LuxRender Material Presets"
 	preset_subdir = "luxrender/material"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
+class LUXRENDER_OT_preset_material_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_material_add'
 	bl_label = 'Add LuxRender Material settings preset'
@@ -127,12 +125,12 @@ class LUXRENDER_OT_preset_material_add(LUXRENDER_OT_preset_base, bpy.types.Opera
 		return super().execute(context)
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_texture(LUXRENDER_MT_base, bpy.types.Menu):
+class LUXRENDER_MT_presets_texture(LUXRENDER_MT_base):
 	bl_label = "LuxRender Texture Presets"
 	preset_subdir = "luxrender/texture"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
+class LUXRENDER_OT_preset_texture_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_texture_add'
 	bl_label = 'Add LuxRender Texture settings preset'
@@ -169,12 +167,12 @@ class LUXRENDER_OT_preset_texture_add(LUXRENDER_OT_preset_base, bpy.types.Operat
 # Volume data handling
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_volume(LUXRENDER_MT_base, bpy.types.Menu):
+class LUXRENDER_MT_presets_volume(LUXRENDER_MT_base):
 	bl_label = "LuxRender Volume Presets"
 	preset_subdir = "luxrender/volume"
 
 @LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_volume_add(LUXRENDER_OT_preset_base, bpy.types.Operator):
+class LUXRENDER_OT_preset_volume_add(AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_volume_add'
 	bl_label = 'Add LuxRender Volume settings preset'
@@ -254,3 +252,161 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 
 menu_func = lambda self, context: self.layout.operator("export.luxrender", text="Export LuxRender Scene...")
 bpy.types.INFO_MT_file_export.append(menu_func)
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_convert_material(bpy.types.Operator):
+	bl_idname = 'luxrender.convert_material'
+	bl_label = 'Convert Blender material to LuxRender'
+	
+	def execute(self, context):
+		
+		try:
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			
+			# TODO - check values marked #ASV - Arbitrary Scale Value
+			
+			luxrender_mat.Interior_volume = ''
+			luxrender_mat.Exterior_volume = ''
+			
+			
+			if blender_mat.raytrace_mirror.use and blender_mat.raytrace_mirror.reflect_factor >= 0.9:
+				# for high mirror reflection values switch to mirror material
+				luxrender_mat.type = 'mirror'
+				lmm = luxrender_mat.luxrender_mat_mirror
+				lmm.Kr_color = [i for i in blender_mat.mirror_color]
+				luxmat = lmm
+			elif blender_mat.specular_intensity < 0.01:
+				# use matte as glossy mat with very low specular is not equal matte
+				luxrender_mat.type = 'matte'
+				lms = luxrender_mat.luxrender_mat_matte
+				lms.Kd_color = [blender_mat.diffuse_intensity*i for i in blender_mat.diffuse_color]
+				lms.sigma_floatvalue = 0.0
+				luxmat = lms
+			else:
+				luxrender_mat.type = 'glossy'
+				lmg = luxrender_mat.luxrender_mat_glossy
+				lmg.multibounce = False
+				lmg.useior = False
+				lmg.Kd_color = [blender_mat.diffuse_intensity*i for i in blender_mat.diffuse_color]
+				
+				logHardness = math.log(blender_mat.specular_hardness)
+				
+				# fit based on empirical measurements
+				# measurements based on intensity of 0.5, use linear scale for other intensities
+				specular_scale = 2.0 * max(0.0128415*logHardness**2 - 0.171266*logHardness + 0.575631, 0.0)
+				
+				lmg.Ks_color = [min(specular_scale * blender_mat.specular_intensity * i, 0.25) for i in blender_mat.specular_color]
+				
+				# fit based on empirical measurements
+				roughness = min(max(0.757198 - 0.120395*logHardness, 0.0), 1.0)
+				
+				lmg.uroughness_floatvalue = roughness
+				lmg.vroughness_floatvalue = roughness
+				lmg.uroughness_usefloattexture = lmg.vroughness_usefloattexture = False
+				luxmat = lmg
+				
+			
+			# Emission
+			lme = context.material.luxrender_emission
+			if blender_mat.emit > 0:
+				lme.use_emission = True
+				lme.L_color = [1.0, 1.0, 1.0]
+				lme.gain = blender_mat.emit
+			else:
+				lme.use_emission = False
+			
+			# Transparency
+			lmt = context.material.luxrender_transparency
+			if blender_mat.use_transparency:
+				lmt.transparent = True
+				lmt.alpha_source = 'constant'
+				lmt.alpha_value = blender_mat.alpha
+			else:
+				lmt.transparent = False
+			
+			# iterate textures and build mix stacks according to influences
+			Kd_stack = []
+			Ks_stack = []
+			bump_tex = None
+			for tex_slot in blender_mat.texture_slots:
+				if tex_slot != None:
+					tex_slot.texture.luxrender_texture.type = 'BLENDER'
+					if tex_slot.use_map_color_diffuse:
+						dcf = tex_slot.diffuse_color_factor
+						if tex_slot.use_map_diffuse:
+							dcf *= tex_slot.diffuse_factor
+						Kd_stack.append( (tex_slot.texture, dcf) )
+					if tex_slot.use_map_color_spec:
+						scf = tex_slot.specular_color_factor
+						if tex_slot.use_map_specular:
+							scf *= tex_slot.specular_factor
+						Ks_stack.append( (tex_slot.texture, scf) )
+					if tex_slot.use_map_normal:
+						bump_tex = (tex_slot.texture, tex_slot.normal_factor)
+			
+			if luxrender_mat.type in ('matte', 'glossy'):
+				if len(Kd_stack) == 1:
+					tex = Kd_stack[0][0]
+					variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+					if variant == 'color':
+						# assign the texture directly
+						luxmat.Kd_usecolortexture = True
+						luxmat.Kd_colortexturename = tex.name
+						luxmat.Kd_color = [i*Kd_stack[0][1] for i in lmg.Kd_color]
+						luxmat.Kd_multiplycolor = True
+					else:
+						# TODO - insert mix texture
+						# check there are enough free empty texture slots !
+						pass
+				elif len(Kd_stack) > 1:
+					# TODO - set up a mix stack.
+					# check there are enough free empty texture slots !
+					pass
+				else:
+					luxmat.Kd_usecolortexture = False
+			
+			if luxrender_mat.type in ('glossy'):
+				if len(Ks_stack) == 1:
+					tex = Ks_stack[0][0]
+					variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+					if variant == 'color':
+						# assign the texture directly
+						luxmat.Ks_usecolortexture = True
+						luxmat.Ks_colortexturename = tex.name
+						luxmat.Ks_color = [i*Ks_stack[0][1] for i in lmg.Ks_color]
+						luxmat.Ks_multiplycolor = True
+					else:
+						# TODO - insert mix texture
+						# check there are enough free empty texture slots !
+						pass
+				elif len(Ks_stack) > 1:
+					# TODO - set up a mix stack.
+					# check there are enough free empty texture slots !
+					pass
+				else:
+					luxmat.Ks_usecolortexture = False
+			
+			if bump_tex != None:
+				tex = bump_tex[0]
+				variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
+				if variant == 'float':
+					luxrender_mat.bumpmap_usefloattexture = True
+					luxrender_mat.bumpmap_floattexturename = tex.name
+					luxrender_mat.bumpmap_floatvalue = bump_tex[1] / 50.0 #ASV
+					luxrender_mat.bumpmap_multipyfloat = True
+				else:
+					# TODO - insert mix texture
+					# check there are enough free empty texture slots !
+					pass
+			else:
+				luxrender_mat.bumpmap_floatvalue = 0.0
+				luxrender_mat.bumpmap_usefloattexture = False
+			
+			self.report({'INFO'}, 'Converted blender material "%s"' % blender_mat.name)
+			return {'FINISHED'}
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot convert material: %s' % err)
+			#import pdb
+			#pdb.set_trace()
+			return {'CANCELLED'}

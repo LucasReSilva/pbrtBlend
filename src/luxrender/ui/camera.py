@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from properties_data_camera import CameraButtonsPanel
 
 from extensions_framework.ui import property_group_renderer
@@ -36,7 +34,7 @@ class camera_panel(CameraButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 
 @LuxRenderAddon.addon_register_class
-class camera(camera_panel, bpy.types.Panel):
+class camera(camera_panel):
 	bl_label = 'LuxRender Camera'
 	
 	display_property_groups = [
@@ -44,7 +42,7 @@ class camera(camera_panel, bpy.types.Panel):
 	]
 
 @LuxRenderAddon.addon_register_class
-class film(camera_panel, bpy.types.Panel):
+class film(camera_panel):
 	bl_label = 'LuxRender Film'
 	
 	display_property_groups = [

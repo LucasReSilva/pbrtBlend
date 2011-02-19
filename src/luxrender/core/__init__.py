@@ -73,6 +73,7 @@ from ..ui.textures import (
 
 # Exporter Operators need to be imported to ensure initialisation
 from .. import operators
+from ..operators import lrmdb
 
 # Add standard Blender Interface elements
 import properties_render
@@ -149,11 +150,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	bl_label			= 'LuxRender'
 	bl_use_preview		= True
 	
-	LuxManager			= None
-	render_update_timer	= None
-	output_dir			= './'
-	output_file			= 'default.png'
-	
 	render_lock = threading.Lock()
 	
 	def render(self, scene):
@@ -166,7 +162,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		Returns None
 		'''
 		
-		with self.render_lock:	# just render one thing at a time
+		with RENDERENGINE_luxrender.render_lock:	# just render one thing at a time
+			
+			self.LuxManager				= None
+			self.render_update_timer	= None
+			self.output_dir				= efutil.temp_directory()
+			self.output_file			= 'default.png'
+			
 			prev_dir = os.getcwd()
 			
 			if scene is None:
@@ -187,7 +189,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			os.chdir(prev_dir)
 	
 	def render_preview(self, scene):
-		self.output_dir = efutil.filesystem_path( bpy.app.tempdir )
+		self.output_dir = efutil.temp_directory()
 		
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
@@ -319,6 +321,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		preview_context.exit()
 		preview_context.wait()
+		
+		# cleanup() destroys the pylux Context
 		preview_context.cleanup()
 		
 		LM.reset()
@@ -333,22 +337,24 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
 		
-		efutil.export_path = self.output_dir
-		#print('(1) export_path is %s' % efutil.export_path)
-		os.chdir(self.output_dir)
-		
 		if scene.luxrender_engine.export_type == 'INT': # and not scene.luxrender_engine.write_files:
 			write_files = scene.luxrender_engine.write_files
 			if write_files:
 				api_type = 'FILE'
 			else:
 				api_type = 'API'
+				self.output_dir = efutil.temp_directory()
+		
 		elif scene.luxrender_engine.export_type == 'LFC':
 			api_type = 'LUXFIRE_CLIENT'
 			write_files = False
 		else:
 			api_type = 'FILE'
 			write_files = True
+		
+		efutil.export_path = self.output_dir
+		#print('(1) export_path is %s' % efutil.export_path)
+		os.chdir(self.output_dir)
 		
 		# Pre-allocate the LuxManager so that we can set up the network servers before export
 		LM = LuxManager(

@@ -31,7 +31,7 @@ from extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 
-class render_described_context(RenderButtonsPanel, property_group_renderer):
+class render_panel(RenderButtonsPanel, property_group_renderer):
 	'''
 	Base class for render engine settings panels
 	'''
@@ -39,7 +39,7 @@ class render_described_context(RenderButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 
 @LuxRenderAddon.addon_register_class
-class engine(render_described_context, bpy.types.Panel):
+class engine(render_panel):
 	'''
 	Engine settings UI Panel
 	'''
@@ -59,7 +59,7 @@ class engine(render_described_context, bpy.types.Panel):
 		super().draw(context)
 
 @LuxRenderAddon.addon_register_class
-class sampler(render_described_context, bpy.types.Panel):
+class sampler(render_panel):
 	'''
 	Sampler settings UI Panel
 	'''
@@ -71,7 +71,7 @@ class sampler(render_described_context, bpy.types.Panel):
 	]
 
 @LuxRenderAddon.addon_register_class
-class integrator(render_described_context, bpy.types.Panel):
+class integrator(render_panel):
 	'''
 	Surface Integrator settings UI Panel
 	'''
@@ -83,7 +83,7 @@ class integrator(render_described_context, bpy.types.Panel):
 	]
 
 @LuxRenderAddon.addon_register_class
-class volume(render_described_context, bpy.types.Panel):
+class volume(render_panel):
 	'''
 	Volume Integrator settings UI panel
 	'''
@@ -96,7 +96,7 @@ class volume(render_described_context, bpy.types.Panel):
 	]
 
 @LuxRenderAddon.addon_register_class
-class filter(render_described_context, bpy.types.Panel):
+class filter(render_panel):
 	'''
 	PixelFilter settings UI Panel
 	'''
@@ -109,7 +109,7 @@ class filter(render_described_context, bpy.types.Panel):
 	]
 
 @LuxRenderAddon.addon_register_class
-class accelerator(render_described_context, bpy.types.Panel):
+class accelerator(render_panel):
 	'''
 	Accelerator settings UI Panel
 	'''
@@ -122,7 +122,7 @@ class accelerator(render_described_context, bpy.types.Panel):
 	]
 
 @LuxRenderAddon.addon_register_class
-class networking(render_described_context, bpy.types.Panel):
+class networking(render_panel):
 	'''
 	Networking settings UI Panel
 	'''

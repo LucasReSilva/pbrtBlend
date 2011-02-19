@@ -24,13 +24,11 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
 
 @LuxRenderAddon.addon_register_class
-class ui_luxrender_mat_compositing(luxrender_material_base, bpy.types.Panel):
+class ui_luxrender_mat_compositing(luxrender_material_base):
 	
 	bl_label	= 'LuxRender Material Compositing'
 	

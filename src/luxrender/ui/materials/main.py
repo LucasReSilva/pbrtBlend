@@ -30,7 +30,7 @@ from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
 
 @LuxRenderAddon.addon_register_class
-class ui_luxrender_material(luxrender_material_base, bpy.types.Panel):
+class ui_luxrender_material(luxrender_material_base):
 	'''
 	Material Editor UI Panel
 	'''
@@ -47,10 +47,13 @@ class ui_luxrender_material(luxrender_material_base, bpy.types.Panel):
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMIN")
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
 		
+		row = self.layout.row(align=True)
+		row.operator("luxrender.convert_material") #, text="Convert Blender material")
+		
 		super().draw(context)
 
 @LuxRenderAddon.addon_register_class
-class ui_luxrender_material_emission(luxrender_material_base, bpy.types.Panel):
+class ui_luxrender_material_emission(luxrender_material_base):
 	'''
 	Material Emission Settings
 	'''
@@ -66,7 +69,7 @@ class ui_luxrender_material_emission(luxrender_material_base, bpy.types.Panel):
 		self.layout.prop(context.material.luxrender_emission, "use_emission", text="")
 
 @LuxRenderAddon.addon_register_class
-class ui_luxrender_material_transparency(luxrender_material_base, bpy.types.Panel):
+class ui_luxrender_material_transparency(luxrender_material_base):
 	'''
 	Material Transparency Settings
 	'''
