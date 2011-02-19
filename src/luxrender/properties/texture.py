@@ -151,35 +151,6 @@ class ColorTextureParameter(TextureParameterBase):
 		vis.update(self.get_extra_visibility())
 		return vis
 	
-	# Decide which material property sets the viewport object
-	# colour for each material type. If the property name is
-	# not set, then the color won't be changed.
-	master_color_map = {
-		'carpaint': 'Kd',
-		'glass': 'Kt',
-		'roughglass': 'Kt',
-		'glossy': 'Kd',
-		'glossy_lossy': 'Kd',
-		'matte': 'Kd',
-		'mattetranslucent': 'Kt',
-		'shinymetal': 'Ks',
-		'mirror': 'Kr',
-	}
-	
-	def set_master_colour(self, s, c):
-		'''
-		This neat little hack will set the blender material colour to the value
-		given in the material panel via the property's 'draw' lambda function.
-		'''
-		
-		return # Disabled due to forbidden RNA write in UI draw methods
-		
-		if c.type in self.master_color_map.keys() and self.attr == self.master_color_map[c.type]:
-			submat = getattr(c, 'luxrender_mat_%s'%c.type)
-			submat_col = getattr(submat, self.attr+'_color')
-			if s.material.diffuse_color != submat_col:
-				s.material.diffuse_color = submat_col
-	
 	def get_properties(self):
 		return [
 			{
@@ -221,7 +192,6 @@ class ColorTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'subtype': 'COLOR',
-				'draw': lambda s,c: self.set_master_colour(s, c),
 				'save_in_preset': True
 			},
 			{

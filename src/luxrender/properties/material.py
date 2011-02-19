@@ -189,6 +189,34 @@ class luxrender_material(declarative_property_group):
 		VolumeParameter('Interior', 'Interior') + \
 		VolumeParameter('Exterior', 'Exterior')
 	
+	# Decide which material property sets the viewport object
+	# colour for each material type. If the property name is
+	# not set, then the color won't be changed.
+	master_color_map = {
+		'carpaint': 'Kd',
+		'glass': 'Kt',
+		'roughglass': 'Kt',
+		'glossy': 'Kd',
+		'glossy_lossy': 'Kd',
+		'matte': 'Kd',
+		'mattetranslucent': 'Kt',
+		'shinymetal': 'Ks',
+		'mirror': 'Kr',
+	}
+	
+	def set_master_color(self, blender_material):
+		'''
+		This little function will set the blender material colour to the value
+		given in the material panel.
+		CAVEAT: you can only call this method in an operator context.
+		'''
+		
+		if self.type in self.master_color_map.keys():
+			submat = getattr(self, 'luxrender_mat_%s'%self.type)
+			submat_col = getattr(submat, '%s_color' % self.master_color_map[self.type])
+			if blender_material.diffuse_color != submat_col:
+				blender_material.diffuse_color = submat_col
+	
 	def export(self, lux_context, material, mode='indirect'):
 		if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
 			if self.type == 'mix':
