@@ -198,7 +198,7 @@ class SceneExporter(object):
 				self.report({'INFO'}, 'Exporting geometry')
 				if self.properties.api_type == 'FILE':
 					lux_context.set_output_file(Files.GEOM)
-					mesh_names, emitting_mats = export_geometry.iterateScene(lux_context, scene)
+				mesh_names, emitting_mats = export_geometry.iterateScene(lux_context, scene)
 			
 			if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxv):
 				if self.properties.api_type == 'FILE':
