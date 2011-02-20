@@ -105,6 +105,7 @@ class GeometryExporter(object):
 			'objects': {
 				'MESH': self.handler_MESH,
 				'SURFACE': self.handler_MESH,
+				'CURVE': self.handler_MESH,
 				'FONT': self.handler_MESH
 			}
 		}
@@ -172,7 +173,7 @@ class GeometryExporter(object):
 		
 		try:
 			mesh_definitions = []
-			mesh = obj.create_mesh(self.geometry_scene, True, 'RENDER')
+			mesh = obj.create_mesh(self.visibility_scene, True, 'RENDER')
 			if mesh is None:
 				raise UnexportableObjectException('Cannot create render/export mesh')
 			
@@ -368,7 +369,7 @@ class GeometryExporter(object):
 		
 		try:
 			mesh_definitions = []
-			mesh = obj.create_mesh(self.geometry_scene, True, 'RENDER')
+			mesh = obj.create_mesh(self.visibility_scene, True, 'RENDER')
 			if mesh is None:
 				raise UnexportableObjectException('Cannot create render/export mesh')
 			
@@ -684,7 +685,7 @@ class GeometryExporter(object):
 			#			'Set the DISPLAY percentage to 100%% before exporting' % (prev_display_pc, kwargs['particle_system'].name)
 			#		)
 			
-			obj.create_dupli_list(self.geometry_scene)
+			obj.create_dupli_list(self.visibility_scene)
 			
 			if obj.dupli_list:
 				LuxLog('Exporting Duplis...')
