@@ -30,17 +30,8 @@ from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
 
 @LuxRenderAddon.addon_register_class
-class ui_luxrender_material(luxrender_material_base):
-	'''
-	Material Editor UI Panel
-	'''
-	
-	bl_label	= 'LuxRender Materials'
-	
-	display_property_groups = [
-		( ('material',), 'luxrender_material' )
-	]
-	
+class ui_luxrender_material_utils(luxrender_material_base):
+	bl_label	= 'LuxRender Materials Utils'
 	def draw(self, context):
 		row = self.layout.row(align=True)
 		row.menu("LUXRENDER_MT_presets_material", text=bpy.types.LUXRENDER_MT_presets_material.bl_label)
@@ -51,9 +42,22 @@ class ui_luxrender_material(luxrender_material_base):
 		row.operator("luxrender.convert_material")
 		
 		row = self.layout.row(align=True)
-		row.operator("luxrender.copy_mat_color")
+		row.operator("luxrender.convert_all_materials")
 		
-		super().draw(context)
+		row = self.layout.row(align=True)
+		row.operator("luxrender.copy_mat_color")
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material(luxrender_material_base):
+	'''
+	Material Editor UI Panel
+	'''
+	
+	bl_label	= 'LuxRender Materials'
+	
+	display_property_groups = [
+		( ('material',), 'luxrender_material' )
+	]
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_emission(luxrender_material_base):
