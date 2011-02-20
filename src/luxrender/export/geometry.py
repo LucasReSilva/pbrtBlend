@@ -126,7 +126,7 @@ class GeometryExporter(object):
 		mesh_definitions = []
 		
 		export_original = True
-		ply_mesh_name = '%s_ply' % obj.data.name
+		ply_mesh_name = '%s_%s_ply' % (self.geometry_scene.name, obj.data.name)
 		if obj.luxrender_object.append_external_mesh:
 			if obj.luxrender_object.hide_proxy_mesh:
 				export_original = False
@@ -194,7 +194,7 @@ class GeometryExporter(object):
 				try:
 					if i not in ffaces_mats.keys(): continue
 					
-					mesh_name = ('%s_m%03d' % (obj.data.name, i)).replace(' ','_')
+					mesh_name = ('%s_%s_m%03d' % (self.geometry_scene.name, obj.data.name, i)).replace(' ','_')
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
 					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
@@ -390,7 +390,7 @@ class GeometryExporter(object):
 				try:
 					if i not in ffaces_mats.keys(): continue
 					
-					mesh_name = ('%s_%03d' % (obj.data.name, i)).replace(' ','_')
+					mesh_name = ('%s_%s_%03d' % (self.geometry_scene.name, obj.data.name, i)).replace(' ','_')
 					
 					# If this mesh/mat-index combo has already been processed, get it from the cache
 					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
