@@ -56,6 +56,9 @@ class ui_luxrender_lamps(lamps_panel):
 			self.layout.prop(context.lamp, "energy", text="Gain")
 			
 			super().draw(context)
+			
+			if context.lamp.type in ('AREA', 'POINT', 'SPOT'):
+				self.layout.prop(context.lamp.luxrender_lamp, "iesname", text="IES Data")
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_point(lamps_panel):

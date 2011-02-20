@@ -26,6 +26,10 @@
 #
 from math import degrees
 
+import bpy
+
+from extensions_framework import util as efutil
+
 from ..outputs import LuxManager
 from ..outputs.file_api import Files
 from ..properties import dbo
@@ -84,6 +88,14 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		.add_float('gain', light.energy) \
 		.add_float('importance', light.luxrender_lamp.importance)
 	
+	ies_data = ParamSet()
+	if light.luxrender_lamp.iesname != '':
+		if light.library is not None:
+			iespath = bpy.path.abspath(light.luxrender_lamp.iesname, light.library.filepath)
+		else:
+			iespath = light.luxrender_lamp.iesname
+		ies_data = ParamSet().add_string('iesname', efutil.path_relative_to_export(iespath))
+	
 	# Params from light sub-types
 	light_params.update( getattr(light.luxrender_lamp, 'luxrender_lamp_%s'%light.type.lower() ).get_paramset(ob) )
 	
@@ -99,6 +111,7 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		return True
 	
 	if light.type == 'SPOT':
+		light_params.update( ies_data )
 		coneangle = degrees(light.spot_size) * 0.5
 		conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
 		
@@ -116,11 +129,13 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		return True
 
 	if light.type == 'POINT':
+		light_params.update( ies_data )
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
 		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 	
 	if light.type == 'AREA':
+		light_params.update( ies_data )
 		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
 		light_params.add_float('gain', light.energy * (get_worldscale(as_scalematrix=False)**2))
 		lux_context.attributeBegin(ob.name, file=Files.MAIN)
