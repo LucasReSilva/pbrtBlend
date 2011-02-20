@@ -550,7 +550,8 @@ class GeometryExporter(object):
 		an objectBegin..objectEnd block containing the Shape definition.
 		"""
 		
-		me_name, me_mat_index, me_shape_type, me_shape_params = mesh_definition
+		me_name = mesh_definition[0]
+		me_shape_type, me_shape_params = mesh_definition[2:4]
 		
 		if len(me_shape_params) == 0: return
 		
@@ -610,8 +611,9 @@ class GeometryExporter(object):
 				self.lux_context.coordinateSystem('%s_motion_%i' % (obj.name, i))
 				self.lux_context.transformEnd()
 		
+		use_inner_scope = len(mesh_definitions) > 1
 		for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
-			self.lux_context.attributeBegin()
+			if use_inner_scope: self.lux_context.attributeBegin()
 			
 			if parent != None:
 				mat_object = parent
@@ -667,7 +669,7 @@ class GeometryExporter(object):
 			else:
 				self.lux_context.objectInstance(me_name)
 			
-			self.lux_context.attributeEnd()
+			if use_inner_scope: self.lux_context.attributeEnd()
 		
 		self.lux_context.attributeEnd()
 	
@@ -742,11 +744,16 @@ def iterateScene(lux_context, geometry_scene, visibility_scene):
 	geometry_exporter = GeometryExporter(lux_context, geometry_scene, visibility_scene)
 	
 	progress_thread = MeshExportProgressThread()
-	progress_thread.start(len(geometry_scene.objects))
+	tot_objects = len(geometry_scene.objects)
+	progress_thread.start(tot_objects)
+	
+	geometry_exporter.geometry_scene = geometry_scene
 	
 	for obj in geometry_scene.objects:
+		progress_thread.exported_objects += 1
+		
 		if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (obj, obj.type))
-			
+		
 		try:
 			# Export only objects which are enabled for render (in the outliner) and visible on a render layer
 			if not obj.is_visible(visibility_scene) or obj.hide_render:
@@ -788,8 +795,6 @@ def iterateScene(lux_context, geometry_scene, visibility_scene):
 		
 		except UnexportableObjectException as err:
 			if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
-		
-		progress_thread.exported_objects += 1
 	
 	progress_thread.stop()
 	progress_thread.join()
