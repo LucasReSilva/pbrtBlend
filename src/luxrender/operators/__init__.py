@@ -344,6 +344,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 			# iterate textures and build mix stacks according to influences
 			Kd_stack = []
 			Ks_stack = []
+			Lux_TexName =[]
 			bump_tex = None
 			for tex_slot in blender_mat.texture_slots:
 				if tex_slot != None:
@@ -352,7 +353,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 						dcf = tex_slot.diffuse_color_factor
 						if tex_slot.use_map_diffuse:
 							dcf *= tex_slot.diffuse_factor
-						Kd_stack.append( (tex_slot.texture, dcf) )
+						Kd_stack.append( (tex_slot.texture, dcf, tex_slot.color) )
 					if tex_slot.use_map_color_spec:
 						scf = tex_slot.specular_color_factor
 						if tex_slot.use_map_specular:
@@ -360,10 +361,12 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 						Ks_stack.append( (tex_slot.texture, scf) )
 					if tex_slot.use_map_normal:
 						bump_tex = (tex_slot.texture, tex_slot.normal_factor)
-			
+
 			if luxrender_mat.type in ('matte', 'glossy'):
 				if len(Kd_stack) == 1:
 					tex = Kd_stack[0][0]
+					dcf = Kd_stack[0][1]
+					color = Kd_stack[0][2]
 					variant, paramset = tex.luxrender_texture.get_paramset(context.scene, tex)
 					if variant == 'color':
 						# assign the texture directly
@@ -371,13 +374,83 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 						luxmat.Kd_colortexturename = tex.name
 						luxmat.Kd_color = [i*Kd_stack[0][1] for i in lmg.Kd_color]
 						luxmat.Kd_multiplycolor = True
-					else:
+					else:                                                
 						# TODO - insert mix texture
 						# check there are enough free empty texture slots !
+						
+						if 2*len(Kd_stack) < 18:
+							mix_tex_slot = blender_mat.texture_slots.add()
+							mix_tex_slot.use = True
+							mix_tex = mix_tex_slot.texture = bpy.data.textures.new('Lux::%s'%tex.name,'NONE')
+
+							Lux_TexName.append(mix_tex.name)
+							lux_tex = mix_tex.luxrender_texture
+
+							lux_tex.type = 'mix'
+							params = lux_tex.luxrender_tex_mix
+
+							params.variant = 'color'
+							params.amount_usefloattexture = True
+							params.amount_floattexturename = tex.name
+							params.tex1_color = blender_mat.diffuse_color
+							params.tex2_color = color
+							luxmat.Kd_usecolortexture = True
+							luxmat.Kd_colortexturename = mix_tex.name
 						pass
 				elif len(Kd_stack) > 1:
 					# TODO - set up a mix stack.
 					# check there are enough free empty texture slots !
+					if (len(Kd_stack)*3 - 1) < 18:
+						for n in range(len(Kd_stack)):
+							tex = Kd_stack[n][0]
+							dcf = Kd_stack[n][1]
+							color = Kd_stack[n][2]
+
+							#Add mix texture for blender internal textures
+							mix_tex_slot = blender_mat.texture_slots.add()
+							mix_tex_slot.use= True
+							mix_tex = mix_tex_slot.texture = bpy.data.textures.new('Lux::%s'%tex.name,'NONE')
+							Lux_TexName.append(mix_tex.name)
+							lux_tex = mix_tex.luxrender_texture
+
+							if tex.use_color_ramp:
+								#TODO: Implement band texture conversion
+								lux_tex.type = 'band'
+							else:
+								lux_tex.type = 'mix'
+								params = lux_tex.luxrender_tex_mix
+								params.variant = 'color'
+								params.amount_usefloattexture = True
+								params.amount_floattexturename = tex.name
+								params.tex1_color = blender_mat.diffuse_color
+								params.tex2_color = color
+
+							print(len(Kd_stack),n)
+							if (len(Kd_stack) > 1) and (n >= 1):
+								prev = Kd_stack[n-1][0]
+								prev_dcf = Kd_stack[n-1][1]
+								#Add mix texture to blend individual texture slots
+
+								mix_tex_slot = blender_mat.texture_slots.add()
+								mix_tex_slot.use= True
+								mix_tex = mix_tex_slot.texture = bpy.data.textures.new('Lux::Mix%d'%n,'NONE')
+								lux_tex = mix_tex.luxrender_texture
+								luxmat.Kd_use_colortexture = True
+								luxmat.Kd_colortexturename = mix_tex.name
+								lux_tex.type = 'mix'
+								params = lux_tex.luxrender_tex_mix
+
+								params.variant = 'color'
+								params.amount_float = prev_dcf/(prev_dcf + dcf)
+								params.tex1_usecolortexture = True
+								params.tex2_usecolortexture = True
+
+								params.tex1_colortexturename = Lux_TexName[n-1]
+								params.tex2_colortexturename = Lux_TexName[n]
+
+						luxmat.Kd_usecolortexture = True
+						luxmat.Kd_colortexturename = mix_tex.name					
+
 					pass
 				else:
 					luxmat.Kd_usecolortexture = False

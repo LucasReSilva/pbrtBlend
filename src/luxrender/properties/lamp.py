@@ -91,7 +91,6 @@ class luxrender_lamp(declarative_property_group):
 			'description': 'Name of group to put this light in',
 			'default': 'default'
 		},
-		
 		{
 			'type': 'float',
 			'attr': 'importance',
@@ -102,6 +101,13 @@ class luxrender_lamp(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1e3,
 			'soft_max': 1e3,
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'iesname',
+			'name': 'IES Data',
+			'description': 'Use IES data for this light\'s distribution'
 		},
 	] + \
 		LampVolumeParameter('Exterior', 'Exterior')
