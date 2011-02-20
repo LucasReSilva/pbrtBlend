@@ -185,7 +185,7 @@ def exportLight(lux_context, ob, matrix, portals = []):
 # lights(lux_context, scene)
 # MAIN export function
 #-------------------------------------------------
-def lights(lux_context, mesh_names):
+def lights(lux_context, geometry_scene, visibility_scene, mesh_names):
 	'''
 	lux_context		pylux.Context
 	Iterate over the given scene's light sources,
@@ -199,12 +199,12 @@ def lights(lux_context, mesh_names):
 	portal_shapes = []
 	
 	# First gather info about portals
-	for ob in LuxManager.CurrentScene.objects:
+	for ob in geometry_scene.objects:
 		if ob.type != 'MESH':
 			continue
 		
 		# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-		if not ob.is_visible(LuxManager.CurrentScene) or ob.hide_render:
+		if not ob.is_visible(visibility_scene) or ob.hide_render:
 			continue
 		
 		# match the mesh data name against the combined mesh-mat name exported
@@ -215,9 +215,9 @@ def lights(lux_context, mesh_names):
 					portal_shapes.append(mesh_name)
 	
 	# Then iterate for lights
-	for ob in LuxManager.CurrentScene.objects:
+	for ob in geometry_scene.objects:
 		
-		if not ob.is_visible(LuxManager.CurrentScene) or ob.hide_render:
+		if not ob.is_visible(visibility_scene) or ob.hide_render:
 			continue
 		
 		# skip dupli (child) objects when they are not lamps
@@ -228,7 +228,7 @@ def lights(lux_context, mesh_names):
 		# to support a mesh/object which got lamp as dupli object
 		if ob.is_duplicator and ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
 			# create dupli objects
-			ob.create_dupli_list(LuxManager.CurrentScene)
+			ob.create_dupli_list(geometry_scene)
 			
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
