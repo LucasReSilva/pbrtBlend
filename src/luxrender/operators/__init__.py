@@ -372,7 +372,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 						# assign the texture directly
 						luxmat.Kd_usecolortexture = True
 						luxmat.Kd_colortexturename = tex.name
-						luxmat.Kd_color = [i*Kd_stack[0][1] for i in lmg.Kd_color]
+						luxmat.Kd_color = [i*Kd_stack[0][1] for i in luxmat.Kd_color]
 						luxmat.Kd_multiplycolor = True
 					else:                                                
 						# TODO - insert mix texture
@@ -463,7 +463,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 						# assign the texture directly
 						luxmat.Ks_usecolortexture = True
 						luxmat.Ks_colortexturename = tex.name
-						luxmat.Ks_color = [i*Ks_stack[0][1] for i in lmg.Ks_color]
+						luxmat.Ks_color = [i*Ks_stack[0][1] for i in luxmat.Ks_color]
 						luxmat.Ks_multiplycolor = True
 					else:
 						# TODO - insert mix texture
