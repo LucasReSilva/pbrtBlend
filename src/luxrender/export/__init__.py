@@ -61,6 +61,9 @@ class ExportCache(object):
 		self.cache_items = {}
 		self.serial_counter = collections.Counter()
 	
+	def clear(self):
+		self.__init__(name=self.name)
+	
 	def serial(self, name):
 		s = self.serial_counter[name]
 		self.serial_counter[name] += 1

@@ -52,7 +52,7 @@ class SceneExporterProperties(object):
 
 class SceneExporter(object):
 	
-	scene = None
+	#scene = None
 	properties = SceneExporterProperties()
 	
 	def set_properties(self, properties):
@@ -181,7 +181,6 @@ class SceneExporter(object):
 				
 				lux_context.worldBegin()
 			
-			mesh_names = set()
 			lights_in_export = False
 			
 			# Find linked 'background_set' scenes
@@ -190,6 +189,8 @@ class SceneExporter(object):
 			while s.background_set != None:
 				s = s.background_set
 				geom_scenes.append(s)
+			
+			GE = export_geometry.GeometryExporter(lux_context, scene)
 			
 			# Export all data in linked 'background_set' scenes
 			for geom_scene in geom_scenes:
@@ -204,9 +205,12 @@ class SceneExporter(object):
 					self.report({'INFO'}, 'Exporting geometry')
 					if self.properties.api_type == 'FILE':
 						lux_context.set_output_file(Files.GEOM)
-					mesh_names, emitting_mats = export_geometry.iterateScene(lux_context, geom_scene, scene)
-					lights_in_export |= emitting_mats
-					
+					lights_in_export |= GE.iterateScene(geom_scene)
+			
+			# we keep a copy of the mesh_names exported for use as portalInstances when we export the lights
+			mesh_names = GE.ExportedMeshes.cache_keys.copy()
+			
+			for geom_scene in geom_scenes:
 				# Make sure lamp textures go back into main file, not geom file
 				if self.properties.api_type in ['FILE']:
 					lux_context.set_output_file(Files.MAIN)

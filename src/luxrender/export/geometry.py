@@ -79,9 +79,8 @@ class GeometryExporter(object):
 #	
 #	exporting_duplis = False
 	
-	def __init__(self, lux_context, geometry_scene, visibility_scene):
+	def __init__(self, lux_context, visibility_scene):
 		self.lux_context = lux_context
-		self.geometry_scene = geometry_scene
 		self.visibility_scene = visibility_scene
 		
 		self.ExportedMeshes = ExportCache('ExportedMeshes')
@@ -121,13 +120,15 @@ class GeometryExporter(object):
 		"""
 		
 		# Using a cache on object massively speeds up dupli instance export
-		obj_cache_key = obj
+		obj_cache_key = (self.geometry_scene, obj)
 		if self.ExportedObjects.have(obj_cache_key): return self.ExportedObjects.get(obj_cache_key)
 		
 		mesh_definitions = []
 		
 		export_original = True
-		ply_mesh_name = '%s_%s_ply' % (self.geometry_scene.name, obj.data.name)
+		# mesh data name first for portal reasons
+		# TODO: replace with proper object references
+		ply_mesh_name = '%s_%s_ply' % (obj.data.name, self.geometry_scene.name)
 		if obj.luxrender_object.append_external_mesh:
 			if obj.luxrender_object.hide_proxy_mesh:
 				export_original = False
@@ -197,7 +198,7 @@ class GeometryExporter(object):
 					if i not in material_indices: continue
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
-					mesh_cache_key = '%s-%s' % (obj.data, i)
+					mesh_cache_key = (self.geometry_scene, obj.data, i)
 					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_cache_key):
 						mesh_definitions.append( self.ExportedMeshes.get(mesh_cache_key) )
 						continue
@@ -209,13 +210,16 @@ class GeometryExporter(object):
 						os.mkdir(sc_fr)
 					
 					ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
-					mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
+					# mesh_name mush start with mesh data name for matching with portals
+					# TODO: replace with proper object references
+					mesh_name = '%s-%s_%04d_m%03d' % (obj.data.name, self.geometry_scene.name, ply_serial, i)
 					ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
 					
 					# Ensure that all PLY files have unique names
 					while self.ExportedPLYs.have(ply_filename):
 						ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
-						mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
+						# mesh_name mush start with mesh data name for matching with portals
+						mesh_name = '%s-%s_%04d_m%03d' % (obj.data.name, self.geometry_scene.name, ply_serial, i)
 						ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
 					
 					self.ExportedPLYs.add(ply_filename, None)
@@ -397,12 +401,14 @@ class GeometryExporter(object):
 					if i not in material_indices: continue
 					
 					# If this mesh/mat-index combo has already been processed, get it from the cache
-					mesh_cache_key = mesh_cache_key = '%s-%s' % (obj.data, i)
+					mesh_cache_key = (self.geometry_scene, obj.data, i)
 					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_cache_key):
 						mesh_definitions.append( self.ExportedMeshes.get(mesh_cache_key) )
 						continue
 					
-					mesh_name = '%s-%s_m%03d' % (self.geometry_scene.name, obj.data.name, i)
+					# mesh_name must start with mesh data name to match with portals
+					# TODO: replace with proper object references
+					mesh_name = '%s-%s_m%03d' % (obj.data.name, self.geometry_scene.name, i)
 					
 					if OBJECT_ANALYSIS: print(' -> NativeMesh:')
 					if OBJECT_ANALYSIS: print('  -> Material index: %d' % i)
@@ -746,67 +752,62 @@ class GeometryExporter(object):
 				self.buildMesh(obj)
 			)
 
-def iterateScene(lux_context, geometry_scene, visibility_scene):
-	
-	geometry_exporter = GeometryExporter(lux_context, geometry_scene, visibility_scene)
-	
-	progress_thread = MeshExportProgressThread()
-	tot_objects = len(geometry_scene.objects)
-	progress_thread.start(tot_objects)
-	
-	geometry_exporter.geometry_scene = geometry_scene
-	
-	for obj in geometry_scene.objects:
-		progress_thread.exported_objects += 1
+	def iterateScene(self, geometry_scene):
+		self.geometry_scene = geometry_scene
+		self.have_emitting_object = False
 		
-		if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (obj, obj.type))
+		progress_thread = MeshExportProgressThread()
+		tot_objects = len(geometry_scene.objects)
+		progress_thread.start(tot_objects)
 		
-		try:
-			# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-			if not obj.is_visible(visibility_scene) or obj.hide_render:
-				raise UnexportableObjectException(' -> not visible: %s / %s' % (obj.is_visible(visibility_scene), obj.hide_render))
+		for obj in geometry_scene.objects:
+			progress_thread.exported_objects += 1
 			
-			if obj.parent and obj.parent.is_duplicator:
-				raise UnexportableObjectException(' -> parent is duplicator')
+			if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (obj, obj.type))
 			
-			number_psystems = len(obj.particle_systems)
+			try:
+				# Export only objects which are enabled for render (in the outliner) and visible on a render layer
+				if not obj.is_visible(self.visibility_scene) or obj.hide_render:
+					raise UnexportableObjectException(' -> not visible: %s / %s' % (obj.is_visible(self.visibility_scene), obj.hide_render))
+				
+				if obj.parent and obj.parent.is_duplicator:
+					raise UnexportableObjectException(' -> parent is duplicator')
+				
+				number_psystems = len(obj.particle_systems)
+				
+				if obj.is_duplicator and number_psystems < 1:
+					if OBJECT_ANALYSIS: print(' -> is duplicator without particle systems')
+					if obj.dupli_type in self.valid_duplis_callbacks:
+						self.callbacks['duplis'][obj.dupli_type](obj)
+					elif OBJECT_ANALYSIS: print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
+				
+				# Some dupli types should hide the original
+				if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES'):
+					export_original_object = False
+				else:
+					export_original_object = True
+				
+				if number_psystems > 0:
+					export_original_object = False
+					if OBJECT_ANALYSIS: print(' -> has %i particle systems' % number_psystems)
+					for psys in obj.particle_systems:
+						export_original_object = export_original_object or psys.settings.use_render_emitter
+						if psys.settings.render_type in self.valid_particles_callbacks:
+							self.callbacks['particles'][psys.settings.render_type](obj, particle_system=psys)
+						elif OBJECT_ANALYSIS: print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
+				
+				if not export_original_object:
+					raise UnexportableObjectException('export_original_object=False')
+				
+				if not obj.type in self.valid_objects_callbacks:
+					raise UnexportableObjectException('Unsupported object type')
+				
+				self.callbacks['objects'][obj.type](obj)
 			
-			if obj.is_duplicator and number_psystems < 1:
-				if OBJECT_ANALYSIS: print(' -> is duplicator without particle systems')
-				if obj.dupli_type in geometry_exporter.valid_duplis_callbacks:
-					geometry_exporter.callbacks['duplis'][obj.dupli_type](obj)
-				elif OBJECT_ANALYSIS: print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
-			
-			# Some dupli types should hide the original
-			if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES'):
-				export_original_object = False
-			else:
-				export_original_object = True
-			
-			if number_psystems > 0:
-				export_original_object = False
-				if OBJECT_ANALYSIS: print(' -> has %i particle systems' % number_psystems)
-				for psys in obj.particle_systems:
-					export_original_object = export_original_object or psys.settings.use_render_emitter
-					if psys.settings.render_type in geometry_exporter.valid_particles_callbacks:
-						geometry_exporter.callbacks['particles'][psys.settings.render_type](obj, particle_system=psys)
-					elif OBJECT_ANALYSIS: print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
-			
-			if not export_original_object:
-				raise UnexportableObjectException('export_original_object=False')
-			
-			if not obj.type in geometry_exporter.valid_objects_callbacks:
-				raise UnexportableObjectException('Unsupported object type')
-			
-			geometry_exporter.callbacks['objects'][obj.type](obj)
+			except UnexportableObjectException as err:
+				if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
 		
-		except UnexportableObjectException as err:
-			if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
-	
-	progress_thread.stop()
-	progress_thread.join()
-	
-	# we keep a copy of the mesh_names exported for use as portalInstances when we export the lights
-	mesh_names = geometry_exporter.ExportedMeshes.cache_keys.copy()
-	
-	return mesh_names, geometry_exporter.have_emitting_object
+		progress_thread.stop()
+		progress_thread.join()
+		
+		return self.have_emitting_object
