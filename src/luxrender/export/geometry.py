@@ -704,6 +704,7 @@ class GeometryExporter(object):
 			# BUG: http://projects.blender.org/tracker/index.php?func=detail&aid=26170&group_id=9&atid=498
 			obs_d = []
 			obs_l = {}
+			obs_l_keys = set()
 			obj.create_dupli_list(self.visibility_scene)
 			if obj.dupli_list:
 				for dupli_ob in obj.dupli_list:
@@ -711,7 +712,9 @@ class GeometryExporter(object):
 				obj.free_dupli_list()
 			
 			for obj_n in obs_d:
-				obs_l[obj_n] = obj_n.layers[:]
+				if obj_n not in obs_l_keys:
+					obs_l[obj_n] = obj_n.layers[:]
+					obs_l_keys.add(obj_n)
 			
 			obj.create_dupli_list(self.visibility_scene)
 			
@@ -738,8 +741,7 @@ class GeometryExporter(object):
 					# Check for group layer visibility
 					gviz = False
 					for grp in dupli_ob.object.users_group:
-						gpvis = [a&b for a,b in zip(obs_l[dupli_ob.object], grp.layers)]
-						gviz |= True in gpvis
+						gviz |= True in [a&b for a,b in zip(obs_l[dupli_ob.object], grp.layers)]
 					if not gviz:
 						continue
 					
@@ -762,6 +764,7 @@ class GeometryExporter(object):
 			
 			del obs_d
 			del obs_l
+			del obs_l_keys
 			
 		except SystemError as err:
 			LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
