@@ -207,9 +207,6 @@ class SceneExporter(object):
 						lux_context.set_output_file(Files.GEOM)
 					lights_in_export |= GE.iterateScene(geom_scene)
 			
-			# we keep a copy of the mesh_names exported for use as portalInstances when we export the lights
-			mesh_names = GE.ExportedMeshes.cache_keys.copy()
-			
 			for geom_scene in geom_scenes:
 				# Make sure lamp textures go back into main file, not geom file
 				if self.properties.api_type in ['FILE']:
@@ -217,7 +214,7 @@ class SceneExporter(object):
 				
 				if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
 					self.report({'INFO'}, 'Exporting lights')
-					lights_in_export |= export_lights.lights(lux_context, geom_scene, scene, mesh_names)
+					lights_in_export |= export_lights.lights(lux_context, geom_scene, scene, GE.ExportedMeshes)
 			
 			if lights_in_export == False:
 				raise Exception('No lights in exported data!')
