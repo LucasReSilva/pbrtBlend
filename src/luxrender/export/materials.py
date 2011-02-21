@@ -164,11 +164,11 @@ def convert_texture(scene, texture):
 	if texture.type == 'BLEND':
 		progression_map = {
 			'LINEAR':			'lin',
-			'QUADRATIC':		'quad',
+			'QUADRATIC':			'quad',
 			'EASING':			'ease',
 			'DIAGONAL':			'diag',
-			'SPHERICAL':		'sphere',
-			'QUADRATIC_SPHERE':	'halo',
+			'SPHERICAL':			'sphere',
+			'QUADRATIC_SPHERE':		'halo',
 			'RADIAL':			'radial',
 		}
 		paramset.add_bool('flipxy', texture.use_flip_axis) \

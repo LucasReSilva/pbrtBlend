@@ -520,3 +520,4 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 			blender_mat = bpy.data.materials[self.properties.material_name]
 		
 		material_converter(self.report, context.scene, blender_mat)
+		return {'FINISHED'}
