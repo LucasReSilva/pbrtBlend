@@ -586,6 +586,9 @@ class GeometryExporter(object):
 		
 		# Don't export instances of portal meshes
 		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal: return
+		# or empty definitions
+		if len(mesh_definitions) < 1: return
+		
 		
 		self.lux_context.attributeBegin(comment=obj.name, file=Files.GEOM)
 		
@@ -697,7 +700,20 @@ class GeometryExporter(object):
 			#			'Set the DISPLAY percentage to 100%% before exporting' % (prev_display_pc, kwargs['particle_system'].name)
 			#		)
 			
-			obj.create_dupli_list(self.geometry_scene)
+			# Prepare dupli'd object group layers outside of create_dupli_list
+			# BUG: http://projects.blender.org/tracker/index.php?func=detail&aid=26170&group_id=9&atid=498
+			obs_d = []
+			obs_l = {}
+			obj.create_dupli_list(self.visibility_scene)
+			if obj.dupli_list:
+				for dupli_ob in obj.dupli_list:
+					obs_d.append( dupli_ob.object )
+				obj.free_dupli_list()
+			
+			for obj_n in obs_d:
+				obs_l[obj_n] = obj_n.layers[:]
+			
+			obj.create_dupli_list(self.visibility_scene)
 			
 			if obj.dupli_list:
 				LuxLog('Exporting Duplis...')
@@ -711,10 +727,20 @@ class GeometryExporter(object):
 					
 					det.exported_objects += 1
 					
-					if not dupli_ob.object.is_visible(self.visibility_scene) or dupli_ob.object.hide_render:
+					if	not dupli_ob.object.is_visible(self.visibility_scene) or \
+						dupli_ob.object.hide_render:
 						continue
 					
 					if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
+						continue
+					
+					# TEMP BLENDER BUG WORKAROUND
+					# Check for group layer visibility
+					gviz = False
+					for grp in dupli_ob.object.users_group:
+						gpvis = [a&b for a,b in zip(obs_l[dupli_ob.object], grp.layers)]
+						gviz |= True in gpvis
+					if not gviz:
 						continue
 					
 					self.exportShapeInstances(
@@ -734,6 +760,9 @@ class GeometryExporter(object):
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			obj.free_dupli_list()
 			
+			del obs_d
+			del obs_l
+			
 		except SystemError as err:
 			LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
 	
@@ -751,7 +780,7 @@ class GeometryExporter(object):
 				obj,
 				self.buildMesh(obj)
 			)
-
+	
 	def iterateScene(self, geometry_scene):
 		self.geometry_scene = geometry_scene
 		self.have_emitting_object = False
@@ -767,7 +796,8 @@ class GeometryExporter(object):
 			
 			try:
 				# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-				if not obj.is_visible(self.visibility_scene) or obj.hide_render:
+				
+				if	not obj.is_visible(self.visibility_scene) or obj.hide_render:
 					raise UnexportableObjectException(' -> not visible: %s / %s' % (obj.is_visible(self.visibility_scene), obj.hide_render))
 				
 				if obj.parent and obj.parent.is_duplicator:
@@ -782,7 +812,7 @@ class GeometryExporter(object):
 					elif OBJECT_ANALYSIS: print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
 				
 				# Some dupli types should hide the original
-				if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES'):
+				if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
 					export_original_object = False
 				else:
 					export_original_object = True
