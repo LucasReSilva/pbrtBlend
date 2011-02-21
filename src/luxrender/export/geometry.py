@@ -121,7 +121,8 @@ class GeometryExporter(object):
 		"""
 		
 		# Using a cache on object massively speeds up dupli instance export
-		if self.ExportedObjects.have(obj): return self.ExportedObjects.get(obj)
+		obj_cache_key = obj
+		if self.ExportedObjects.have(obj_cache_key): return self.ExportedObjects.get(obj_cache_key)
 		
 		mesh_definitions = []
 		
@@ -157,7 +158,7 @@ class GeometryExporter(object):
 			if mesh_type == 'binary_ply' or (mesh_type == 'global' and global_type == 'binary_ply'):
 				mesh_definitions.extend( self.buildBinaryPLYMesh(obj) )
 		
-		self.ExportedObjects.add(obj, mesh_definitions)
+		self.ExportedObjects.add(obj_cache_key, mesh_definitions)
 		return mesh_definitions
 	
 	@time_export
@@ -183,6 +184,7 @@ class GeometryExporter(object):
 				mi = f.material_index
 				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
 				ffaces_mats[mi].append( f )
+			material_indices = ffaces_mats.keys()
 			
 			number_of_mats = len(mesh.materials)
 			if number_of_mats > 0:
@@ -192,13 +194,12 @@ class GeometryExporter(object):
 			
 			for i in iterator_range:
 				try:
-					if i not in ffaces_mats.keys(): continue
-					
-					mesh_name = ('%s_%s_m%03d' % (self.geometry_scene.name, obj.data.name, i)).replace(' ','_')
+					if i not in material_indices: continue
 					
 					# If this mesh/mat combo has already been processed, get it from the cache
-					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
-						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
+					mesh_cache_key = '%s-%s' % (obj.data, i)
+					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_cache_key):
+						mesh_definitions.append( self.ExportedMeshes.get(mesh_cache_key) )
 						continue
 					
 					# Put PLY files in frame-numbered subfolders to avoid
@@ -207,11 +208,15 @@ class GeometryExporter(object):
 					if not os.path.exists( os.path.join(os.getcwd(), sc_fr) ):
 						os.mkdir(sc_fr)
 					
-					ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.%04d.ply'%self.ExportedPLYs.serial(mesh_name)])
+					ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
+					mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
+					ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
 					
 					# Ensure that all PLY files have unique names
 					while self.ExportedPLYs.have(ply_filename):
-						ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.%04d.ply'%self.ExportedPLYs.serial(mesh_name)])
+						ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
+						mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
+						ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
 					
 					self.ExportedPLYs.add(ply_filename, None)
 					
@@ -343,7 +348,7 @@ class GeometryExporter(object):
 					# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
 					if self.allow_instancing(obj):
 						self.exportShapeDefinition(obj, mesh_definition)
-						self.ExportedMeshes.add(mesh_name, mesh_definition)
+						self.ExportedMeshes.add(mesh_cache_key, mesh_definition)
 					
 					#LuxLog('Binary PLY Mesh Exported: %s' % mesh_name)
 				
@@ -379,6 +384,7 @@ class GeometryExporter(object):
 				mi = f.material_index
 				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
 				ffaces_mats[mi].append( f )
+			material_indices = ffaces_mats.keys()
 			
 			number_of_mats = len(mesh.materials)
 			if number_of_mats > 0:
@@ -388,19 +394,19 @@ class GeometryExporter(object):
 			
 			for i in iterator_range:
 				try:
-					if i not in ffaces_mats.keys(): continue
-					
-					mesh_name = ('%s_%s_%03d' % (self.geometry_scene.name, obj.data.name, i)).replace(' ','_')
+					if i not in material_indices: continue
 					
 					# If this mesh/mat-index combo has already been processed, get it from the cache
-					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_name):
-						mesh_definitions.append( self.ExportedMeshes.get(mesh_name) )
+					mesh_cache_key = mesh_cache_key = '%s-%s' % (obj.data, i)
+					if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_cache_key):
+						mesh_definitions.append( self.ExportedMeshes.get(mesh_cache_key) )
 						continue
+					
+					mesh_name = '%s-%s_m%03d' % (self.geometry_scene.name, obj.data.name, i)
 					
 					if OBJECT_ANALYSIS: print(' -> NativeMesh:')
 					if OBJECT_ANALYSIS: print('  -> Material index: %d' % i)
 					if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
-					
 					
 					if len(mesh.uv_textures) > 0:
 						if mesh.uv_textures.active and mesh.uv_textures.active.data:
@@ -505,7 +511,7 @@ class GeometryExporter(object):
 					# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
 					if self.allow_instancing(obj):
 						self.exportShapeDefinition(obj, mesh_definition)
-						self.ExportedMeshes.add(mesh_name, mesh_definition)
+						self.ExportedMeshes.add(mesh_cache_key, mesh_definition)
 					
 					#LuxLog('LuxRender Mesh Exported: %s' % mesh_name)
 					
@@ -702,7 +708,7 @@ class GeometryExporter(object):
 					if not dupli_ob.object.is_visible(self.visibility_scene) or dupli_ob.object.hide_render:
 						continue
 					
-					if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT']:
+					if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
 						continue
 					
 					self.exportShapeInstances(
