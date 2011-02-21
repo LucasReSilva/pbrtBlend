@@ -208,15 +208,15 @@ class GeometryExporter(object):
 					if not os.path.exists( os.path.join(os.getcwd(), sc_fr) ):
 						os.mkdir(sc_fr)
 					
-					ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
-					mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
-					ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
+					def make_plyfilename():
+						ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
+						mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
+						return mesh_name, '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
+					mesh_name, ply_filename = make_plyfilename()
 					
 					# Ensure that all PLY files have unique names
 					while self.ExportedPLYs.have(ply_filename):
-						ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
-						mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
-						ply_filename = '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
+						mesh_name, ply_filename = make_plyfilename()
 					
 					self.ExportedPLYs.add(ply_filename, None)
 					
