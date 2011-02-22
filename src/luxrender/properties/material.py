@@ -204,6 +204,12 @@ class luxrender_material(declarative_property_group):
 		'mirror': 'Kr',
 	}
 	
+	def reset(self):
+		super().reset()
+		# Also reset sub-property groups
+		for a,b,c in mat_list():
+			getattr(self, 'luxrender_mat_%s'%a).reset()
+	
 	def set_master_color(self, blender_material):
 		'''
 		This little function will set the blender material colour to the value

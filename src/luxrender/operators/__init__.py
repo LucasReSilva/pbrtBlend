@@ -632,6 +632,16 @@ def material_converter(report, scene, blender_mat):
 		return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_material_reset(bpy.types.Operator):
+	bl_idname = 'luxrender.material_reset'
+	bl_label = 'Reset material to defaults'
+	
+	def execute(self, context):
+		if context.material and hasattr(context.material, 'luxrender_material'):
+			context.material.luxrender_material.reset()
+		return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
 	bl_idname = 'luxrender.convert_all_materials'
 	bl_label = 'Convert all Blender materials'
