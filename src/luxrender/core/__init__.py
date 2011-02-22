@@ -67,7 +67,7 @@ from ..ui.materials import (
 from ..ui.textures import (
 	main, band, bilerp, blackbody, brick, cauchy, constant, checkerboard, dots,
 	equalenergy, fbm, gaussian, harlequin, imagemap, lampspectrum, luxpop,
-	marble, mix, sellmeier, scale, sopra, uv, windy, wrinkled, mapping,
+	marble, mix, multimix, sellmeier, scale, sopra, uv, windy, wrinkled, mapping,
 	tabulateddata, transform
 )
 

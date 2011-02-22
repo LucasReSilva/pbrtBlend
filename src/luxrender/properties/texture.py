@@ -521,8 +521,7 @@ class luxrender_texture(declarative_property_group):
 			'attr': 'type',
 			'name': 'LuxRender Type',
 			'type': 'enum',
-			'items': [
-				#('none', 'none', 'none'),
+			'items': (
 				('', 'Blender Textures', ''),
 				('BLENDER', 'Use Blender Texture', 'BLENDER'),
 				('', 'Lux Textures', ''),
@@ -532,10 +531,11 @@ class luxrender_texture(declarative_property_group):
 				('checkerboard', 'checkerboard', 'checkerboard'),
 				('dots', 'dots', 'dots'),
 				('fbm', 'fbm', 'fbm'),
-				('harlequin', 'harlequin', 'harlequin'),
+				#('harlequin', 'harlequin', 'harlequin'),
 				('imagemap', 'imagemap', 'imagemap'),
 				('marble', 'marble', 'marble'),
 				('mix', 'mix', 'mix'),
+				('multimix', 'multimix', 'multimix'),
 				('scale', 'scale', 'scale'),
 				('uv', 'uv', 'uv'),
 				('windy', 'windy', 'windy'),
@@ -552,7 +552,8 @@ class luxrender_texture(declarative_property_group):
 				('sellmeier', 'sellmeier', 'sellmeier'),
 				('sopra', 'sopra', 'sopra'),
 				('luxpop', 'luxpop', 'luxpop'),
-			],
+			),
+			#'use_menu': True,
 			'save_in_preset': True
 		},
 	]
@@ -1908,6 +1909,125 @@ class luxrender_tex_mix(declarative_property_group):
 			)
 		
 		return set(), mix_params
+
+def multimix_tex_controls():
+	ctls = []
+	for i in range(1,BAND_MAX_TEX+1):
+		ctls.extend([
+			[0.9,['weightfloat%d'%i,'tex%d_floatvalue'%i],'tex%d_usefloattexture'%i],
+			[0.9,'tex%d_floattexture'%i,'tex%d_multiplyfloat'%i],
+			[0.9,['weightcolor%d'%i,'tex%d_color'%i],'tex%d_usecolortexture'%i],
+			[0.9,'tex%d_colortexture'%i,'tex%d_multiplycolor'%i],
+		])
+	return ctls
+
+def multimix_visibility():
+	vis = {}
+	
+	for i in range(1, BAND_MAX_TEX+1):
+		vis.update({
+			'weightcolor%d'%i:			{ 'variant': 'color','nslots': LO({'>=':i}) },
+			'tex%d_color'%i: 			{ 'variant': 'color','nslots': LO({'>=':i}) },
+			'tex%d_usecolortexture'%i:	{ 'variant': 'color','nslots': LO({'>=':i}) },
+			'tex%d_colortexture'%i:		{ 'variant': 'color','nslots': LO({'>=':i}), 'tex%d_usecolortexture'%i: True },
+			'tex%d_multiplycolor'%i:	{ 'variant': 'color','nslots': LO({'>=':i}), 'tex%d_usecolortexture'%i: True },
+			
+			'weightfloat%d'%i:			{ 'variant': 'float','nslots': LO({'>=':i}) },
+			'tex%d_usefloattexture'%i:	{ 'variant': 'float','nslots': LO({'>=':i}) },
+			'tex%d_floatvalue'%i:		{ 'variant': 'float','nslots': LO({'>=':i}) },
+			'tex%d_floattexture'%i:		{ 'variant': 'float','nslots': LO({'>=':i}), 'tex%d_usefloattexture'%i: True },
+			'tex%d_multiplyfloat'%i:	{ 'variant': 'float','nslots': LO({'>=':i}), 'tex%d_usefloattexture'%i: True },
+		})
+	
+	return vis
+
+def multimix_tex_properties():
+	props = []
+	
+	for i in range(1, BAND_MAX_TEX+1):
+		props.extend([
+			{
+					'attr': 'weightfloat%d'%i,
+					'type': 'float',
+					'name': 'weight%d'%i,
+					'default': 0.0,
+					'precision': 3,
+					'min': 0.0,
+					'max': 1.0,
+					'save_in_preset': True
+				},
+				{
+					'attr': 'weightcolor%d'%i,
+					'type': 'float',
+					'name': 'weight%d'%i,
+					'default': 0.0,
+					'precision': 3,
+					'min': 0.0,
+					'max': 1.0,
+					'save_in_preset': True
+			}
+		])
+	
+	for prop in TC_BAND_ARRAY:
+		props.extend( prop.properties )
+	for prop in TF_BAND_ARRAY:
+		props.extend( prop.properties )
+	
+	return props
+
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_multimix(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	
+	controls = [
+		'variant',
+		'nslots',
+	] + multimix_tex_controls()
+	
+	# Visibility we do manually because of the variant switch
+	visibility = multimix_visibility()
+	
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'enum',
+			'name': 'Variant',
+			'items': [
+				('float', 'Float', 'float'),
+				('color', 'Color', 'color'),
+			],
+			'expand': True,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'nslots',
+			'type': 'int',
+			'name': 'Texture count',
+			'default': 2,
+			'min': 2,
+			'max': BAND_MAX_TEX,
+			'save_in_preset': True
+		},
+	] + multimix_tex_properties()
+	
+	def get_paramset(self, scene, texture):
+		mm_params = ParamSet()
+		
+		if LuxManager.ActiveManager is not None:
+			
+			weights = []
+			for i in range(1,self.nslots+1):
+				if self.variant == 'color':
+					weights.append( getattr(self, 'weightcolor%d'%i) )
+				else:
+					weights.append( getattr(self, 'weightfloat%d'%i) )
+				mm_params.update(
+					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
+				)
+			
+			mm_params.add_float('weights', weights)
+		
+		return set(), mm_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_sellmeier(declarative_property_group):
