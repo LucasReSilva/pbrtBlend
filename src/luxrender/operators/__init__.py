@@ -416,46 +416,12 @@ def material_converter(report, scene, blender_mat):
 							mix_params.tex2_colortexturename = color_tex.name
 							
 							for i in range(len(col_ramp)):
-								if i == 0:
-									color_params.offsetcolor1 = alpha_params.offsetfloat1 = col_ramp[i].position
-									color_params.tex1_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex1_floatvalue = col_ramp[i].color[3]
-								if i == 1:
-									color_params.offsetcolor2 = alpha_params.offsetfloat2 = col_ramp[i].position
-									color_params.tex2_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex2_floatvalue = col_ramp[i].color[3]
-								if i == 2:
-									color_params.offsetcolor3 = alpha_params.offsetfloat3 = col_ramp[i].position
-									color_params.tex3_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex3_floatvalue = col_ramp[i].color[3]
-								if i == 3:
-									color_params.offsetcolor4 = alpha_params.offsetfloat4 = col_ramp[i].position
-									color_params.tex4_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex4_floatvalue = col_ramp[i].color[3]
-								if i == 4:
-									color_params.offsetcolor5 = alpha_params.offsetfloat5 = col_ramp[i].position
-									color_params.tex5_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex5_floatvalue = col_ramp[i].color[3]
-								if i == 5:
-									color_params.offsetcolor6 = alpha_params.offsetfloat6 = col_ramp[i].position
-									color_params.tex6_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex6_floatvalue = col_ramp[i].color[3]
-								if i == 6:
-									color_params.offsetcolor7 = alpha_params.offsetfloat7 = col_ramp[i].position
-									color_params.tex7_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex7_floatvalue = col_ramp[i].color[3]
-								if i == 7:
-									color_params.offsetcolor8 = alpha_params.offsetfloat8 = col_ramp[i].position
-									color_params.tex8_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex8_floatvalue = col_ramp[i].color[3]
-								if i == 8:
-									color_params.offsetcolor9 = alpha_params.offsetfloat9 = col_ramp[i].position
-									color_params.tex9_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex9_floatvalue = col_ramp[i].color[3]
-								if i == 9:
-									color_params.offsetcolor10 = alpha_params.offsetfloat10 = col_ramp[i].position
-									color_params.tex10_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex10_floatvalue = col_ramp[i].color[3]
+								if hasattr(color_params,'offsetcolor%d'%(i+1)):
+									setattr(color_params,'offsetcolor%d'%(i+1),col_ramp[i].position)
+									setattr(alpha_params,'offsetfloat%d'%(i+1),col_ramp[i].position)
+									setattr(color_params,'tex%d_color'%(i+1),(col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2]))
+									setattr(alpha_params,'tex%d_floatvalue'%(i+1),col_ramp[i].color[3])
+
 							luxmat.Kd_usecolortexture = True
 							luxmat.Kd_colortexturename = mix_tex.name
 					pass
@@ -510,46 +476,11 @@ def material_converter(report, scene, blender_mat):
 							alpha_params.amount_floattexturename = tex.name
 							
 							for i in range(len(col_ramp)):
-								if i == 0:
-									color_params.offsetcolor1 = alpha_params.offsetfloat1 = col_ramp[i].position
-									color_params.tex1_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex1_floatvalue = col_ramp[i].color[3]
-								if i == 1:
-									color_params.offsetcolor2 = alpha_params.offsetfloat2 = col_ramp[i].position
-									color_params.tex2_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex2_floatvalue = col_ramp[i].color[3]
-								if i == 2:
-									color_params.offsetcolor3 = alpha_params.offsetfloat3 = col_ramp[i].position
-									color_params.tex3_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex3_floatvalue = col_ramp[i].color[3]
-								if i == 3:
-									color_params.offsetcolor4 = alpha_params.offsetfloat4 = col_ramp[i].position
-									color_params.tex4_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex4_floatvalue = col_ramp[i].color[3]
-								if i == 4:
-									color_params.offsetcolor5 = alpha_params.offsetfloat5 = col_ramp[i].position
-									color_params.tex5_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex5_floatvalue = col_ramp[i].color[3]
-								if i == 5:
-									color_params.offsetcolor6 = alpha_params.offsetfloat6 = col_ramp[i].position
-									color_params.tex6_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex6_floatvalue = col_ramp[i].color[3]
-								if i == 6:
-									color_params.offsetcolor7 = alpha_params.offsetfloat7 = col_ramp[i].position
-									color_params.tex7_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex7_floatvalue = col_ramp[i].color[3]
-								if i == 7:
-									color_params.offsetcolor8 = alpha_params.offsetfloat8 = col_ramp[i].position
-									color_params.tex8_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex8_floatvalue = col_ramp[i].color[3]
-								if i == 8:
-									color_params.offsetcolor9 = alpha_params.offsetfloat9 = col_ramp[i].position
-									color_params.tex9_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex9_floatvalue = col_ramp[i].color[3]
-								if i == 9:
-									color_params.offsetcolor10 = alpha_params.offsetfloat10 = col_ramp[i].position
-									color_params.tex10_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
-									alpha_params.tex10_floatvalue = col_ramp[i].color[3]
+								if hasattr(color_params,'offsetcolor%d'%(i+1)):
+									setattr(color_params,'offsetcolor%d'%(i+1),col_ramp[i].position)
+									setattr(alpha_params,'offsetfloat%d'%(i+1),col_ramp[i].position)
+									setattr(color_params,'tex%d_color'%(i+1),(col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2]))
+									setattr(alpha_params,'tex%d_floatvalue'%(i+1),col_ramp[i].color[3])
 							
 							mix_params.amount_floattexturename = alpha_tex.name
 							mix_params.amount_multiplyfloat = True
