@@ -508,12 +508,12 @@ class luxrender_texture(declarative_property_group):
 	controls = [
 		'type'
 	]
-	visibility = {
-		#'type': { 'use_lux_texture': True }
-	}
+	
+	visibility = {}
+	
 	properties = [
 		{
-			'attr': 'use_lux_texture',
+			'attr': 'auto_generated',
 			'type': 'bool',
 			'default': False,
 		},
