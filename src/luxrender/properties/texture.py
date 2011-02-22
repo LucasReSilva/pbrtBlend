@@ -30,7 +30,7 @@ import bpy
 
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
-from extensions_framework.validate import Logic_OR as O
+from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..properties.lampspectrum_data import lampspectrum_list
@@ -597,14 +597,6 @@ TF_bricktex		= FloatTextureParameter('bricktex',		'bricktex',		default=0.0, min=
 TF_mortartex	= FloatTextureParameter('mortartex',	'mortartex',	default=0.0, min=0.0, max=1.0)
 TF_tex1			= FloatTextureParameter('tex1',			'tex1',			default=1.0, min=-1e6, max=1e6)
 TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=-1e6, max=1e6)
-TF_tex3		= FloatTextureParameter('tex3',			'tex3',			default=0.0, min=-1e6, max=1e6)
-TF_tex4		= FloatTextureParameter('tex4',			'tex4',			default=0.0, min=-1e6, max=1e6)
-TF_tex5		= FloatTextureParameter('tex5',			'tex5',			default=0.0, min=-1e6, max=1e6)
-TF_tex6		= FloatTextureParameter('tex6',			'tex6',			default=0.0, min=-1e6, max=1e6)
-TF_tex7		= FloatTextureParameter('tex7',			'tex7',			default=0.0, min=-1e6, max=1e6)
-TF_tex8		= FloatTextureParameter('tex8',			'tex8',			default=0.0, min=-1e6, max=1e6)
-TF_tex9		= FloatTextureParameter('tex9',			'tex9',			default=0.0, min=-1e6, max=1e6)
-TF_tex10	= FloatTextureParameter('tex10',		'tex10',		default=0.0, min=-1e6, max=1e6)
 TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0)
 TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0)
 TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0)
@@ -615,203 +607,99 @@ TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,
 TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
 TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
-TC_tex3		= ColorTextureParameter('tex3',			'tex3',			default=(0.0,0.0,0.0))
-TC_tex4		= ColorTextureParameter('tex4',			'tex4',			default=(0.0,0.0,0.0))
-TC_tex5		= ColorTextureParameter('tex5',			'tex5',			default=(0.0,0.0,0.0))
-TC_tex6		= ColorTextureParameter('tex6',			'tex6',			default=(0.0,0.0,0.0))
-TC_tex7		= ColorTextureParameter('tex7',			'tex7',			default=(0.0,0.0,0.0))
-TC_tex8		= ColorTextureParameter('tex8',			'tex8',			default=(0.0,0.0,0.0))
-TC_tex9		= ColorTextureParameter('tex9',			'tex9',			default=(0.0,0.0,0.0))
-TC_tex10	= ColorTextureParameter('tex10',		'tex10',		default=(0.0,0.0,0.0))
+BAND_MAX_TEX = 10
+
+def band_visibility():
+	vis = {
+		'amount_floattexture':			{ 'amount_usefloattexture': True },
+		'amount_multiplyfloat':			{ 'amount_usefloattexture': True },
+	}
+	
+	for i in range(1, BAND_MAX_TEX+1):
+		vis.update({
+			'offsetcolor%d'%i:			{ 'variant': 'color','noffsets': LO({'>=':i}) },
+			'tex%d_color'%i: 			{ 'variant': 'color','noffsets': LO({'>=':i}) },
+			'tex%d_usecolortexture'%i:	{ 'variant': 'color','noffsets': LO({'>=':i}) },
+			'tex%d_colortexture'%i:		{ 'variant': 'color', 'tex%d_usecolortexture'%i: True,'noffsets': LO({'>=':i}) },
+			'tex%d_multiplycolor'%i:	{ 'variant': 'color', 'tex%d_usecolortexture'%i: True,'noffsets': LO({'>=':i}) },
+			
+			'offsetfloat%d'%i:			{ 'variant': 'float','noffsets': LO({'>=':i}) },
+			'tex%d_usefloattexture'%i:	{ 'variant': 'float','noffsets': LO({'>=':i}) },
+			'tex%d_floatvalue'%i:		{ 'variant': 'float','noffsets': LO({'>=':i}) },
+			'tex%d_floattexture'%i:		{ 'variant': 'float', 'tex%d_usefloattexture'%i: True,'noffsets': LO({'>=':i}) },
+			'tex%d_multiplyfloat'%i:	{ 'variant': 'float', 'tex%d_usefloattexture'%i: True,'noffsets': LO({'>=':i}) },
+		})
+	
+	return vis
+
+def band_tex_controls():
+	ctls = []
+	for i in range(1,BAND_MAX_TEX+1):
+		ctls.extend([
+			[0.9,['offsetfloat%d'%i,'tex%d_floatvalue'%i],'tex%d_usefloattexture'%i],
+			[0.9,'tex%d_floattexture'%i,'tex%d_multiplyfloat'%i],
+			[0.9,['offsetcolor%d'%i,'tex%d_color'%i],'tex%d_usecolortexture'%i],
+			[0.9,'tex%d_colortexture'%i,'tex%d_multiplycolor'%i],
+		])
+	return ctls
+
+TC_BAND_ARRAY = []
+TF_BAND_ARRAY = []
+for i in range(1, BAND_MAX_TEX+1):
+	TF_BAND_ARRAY.append(
+		FloatTextureParameter('tex%d'%i, 'tex%d'%i, default=0.0, min=-1e6, max=1e6)
+	)
+	TC_BAND_ARRAY.append(
+		ColorTextureParameter('tex%d'%i, 'tex%d'%i, default=(0.0,0.0,0.0))
+	)
+
+def band_tex_properties():
+	props = []
+	
+	for i in range(1, BAND_MAX_TEX+1):
+		props.extend([
+			{
+					'attr': 'offsetfloat%d'%i,
+					'type': 'float',
+					'name': 'offset%d'%i,
+					'default': 0.0,
+					'precision': 3,
+					'min': 0.0,
+					'max': 1.0,
+					'save_in_preset': True
+				},
+				{
+					'attr': 'offsetcolor%d'%i,
+					'type': 'float',
+					'name': 'offset%d'%i,
+					'default': 0.0,
+					'precision': 3,
+					'min': 0.0,
+					'max': 1.0,
+					'save_in_preset': True
+			}
+		])
+	
+	for prop in TC_BAND_ARRAY:
+		props.extend( prop.properties )
+	for prop in TF_BAND_ARRAY:
+		props.extend( prop.properties )
+	
+	return props
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_band(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	
 	controls = [
-		'variant',        	
+		'variant',
 		'noffsets',
-		[0.95, 'amount_floatvalue', 'amount_usefloattexture'],
-		[0.95, 'amount_floattexture', 'amount_multiplyfloat'],
-		[0.45,'offsetfloat1',[0.9,'tex1_floatvalue','tex1_usefloattexture']],
-		[0.95,'tex1_floattexture','tex1_multiplyfloat'],
-		[0.45,'offsetcolor1',[0.9,'tex1_color','tex1_usecolortexture']],
-		[0.95,'tex1_colortexture','tex1_multiplycolor'],
-
-		[0.45,'offsetfloat2',[0.9,'tex2_floatvalue','tex2_usefloattexture']],
-		[0.95,'tex2_floattexture','tex2_multiplyfloat'],
-		[0.45,'offsetcolor2',[0.9,'tex2_color','tex2_usecolortexture']],
-		[0.95,'tex2_colortexture','tex2_multiplycolor'],
-
-		[0.45,'offsetfloat3',[0.9,'tex3_floatvalue','tex3_usefloattexture']],
-		[0.95,'tex3_floattexture','tex3_multiplyfloat'],
-		[0.45,'offsetcolor3',[0.9,'tex3_color','tex3_usecolortexture']],
-		[0.95,'tex3_colortexture','tex3_multiplycolor'],
-
-		[0.45,'offsetfloat4',[0.9,'tex4_floatvalue','tex4_usefloattexture']],
-		[0.95,'tex4_floattexture','tex4_multiplyfloat'],
-		[0.45,'offsetcolor4',[0.9,'tex4_color','tex4_usecolortexture']],
-		[0.95,'tex4_colortexture','tex4_multiplycolor'],
-
-		[0.45,'offsetfloat5',[0.9,'tex5_floatvalue','tex5_usefloattexture']],
-		[0.95,'tex5_floattexture','tex5_multiplyfloat'],
-		[0.45,'offsetcolor5',[0.9,'tex5_color','tex5_usecolortexture']],
-		[0.95,'tex5_colortexture','tex5_multiplycolor'],
-
-		[0.45,'offsetfloat6',[0.9,'tex6_floatvalue','tex6_usefloattexture']],
-		[0.95,'tex6_floattexture','tex6_multiplyfloat'],
-		[0.45,'offsetcolor6',[0.9,'tex6_color','tex6_usecolortexture']],
-		[0.95,'tex6_colortexture','tex6_multiplycolor'],
-
-		[0.45,'offsetfloat7',[0.9,'tex7_floatvalue','tex7_usefloattexture']],
-		[0.95,'tex7_floattexture','tex7_multiplyfloat'],
-		[0.45,'offsetcolor7',[0.9,'tex7_color','tex7_usecolortexture']],
-		[0.95,'tex7_colortexture','tex7_multiplycolor'],
-
-		[0.45,'offsetfloat8',[0.9,'tex8_floatvalue','tex8_usefloattexture']],
-		[0.95,'tex8_floattexture','tex8_multiplyfloat'],
-		[0.45,'offsetcolor8',[0.9,'tex8_color','tex8_usecolortexture']],
-		[0.95,'tex8_colortexture','tex8_multiplycolor'],
-
-		[0.45,'offsetfloat9',[0.9,'tex9_floatvalue','tex9_usefloattexture']],
-		[0.95,'tex9_floattexture','tex9_multiplyfloat'],
-		[0.45,'offsetcolor9',[0.9,'tex9_color','tex9_usecolortexture']],
-		[0.95,'tex9_colortexture','tex9_multiplycolor'],
-
-		[0.45,'offsetfloat10',[0.9,'tex10_floatvalue','tex10_usefloattexture']],
-		[0.95,'tex10_floattexture','tex10_multiplyfloat'],
-		[0.45,'offsetcolor10',[0.9,'tex10_color','tex10_usecolortexture']],
-		[0.95,'tex10_colortexture','tex10_multiplycolor']
-		]
-		
-
-
+		[0.9, 'amount_floatvalue', 'amount_usefloattexture'],
+		[0.9, 'amount_floattexture', 'amount_multiplyfloat']
+	] + band_tex_controls()
+	
 	# Visibility we do manually because of the variant switch
-	visibility = {	
-		'amount_floattexture':			{ 'amount_usefloattexture': True },
-		'amount_multiplyfloat':			{ 'amount_usefloattexture': True },
-
-		'offsetcolor1':				{ 'variant': 'color' },
-		'tex1_colorlabel':			{ 'variant': 'color' },
-		'tex1_color': 				{ 'variant': 'color' },
-		'tex1_usecolortexture':			{ 'variant': 'color' },
-		'tex1_colortexture':			{ 'variant': 'color', 'tex1_usecolortexture': True },
-		'tex1_multiplycolor':			{ 'variant': 'color', 'tex1_usecolortexture': True },
-
-		'offsetfloat1':				{ 'variant': 'float' },
-		'tex1_usefloattexture':			{ 'variant': 'float' },
-		'tex1_floatvalue':			{ 'variant': 'float' },
-		'tex1_floattexture':			{ 'variant': 'float', 'tex1_usefloattexture': True },
-		'tex1_multiplyfloat':			{ 'variant': 'float', 'tex1_usefloattexture': True },
-		
-		'offsetcolor2':				{ 'variant': 'color' },
-		'tex2_color': 				{ 'variant': 'color' },
-		'tex2_usecolortexture':			{ 'variant': 'color' },
-		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
-		'tex2_multiplycolor':			{ 'variant': 'color', 'tex2_usecolortexture': True },
-		
-		'offsetfloat2':				{ 'variant': 'float' },
-		'tex2_usefloattexture':			{ 'variant': 'float'},
-		'tex2_floatvalue':			{ 'variant': 'float'},
-		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True},
-		'tex2_multiplyfloat':			{ 'variant': 'float', 'tex2_usefloattexture': True},
-		
-		'offsetcolor3':				{ 'variant': 'color','noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_color': 				{ 'variant': 'color','noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_usecolortexture':			{ 'variant': 'color','noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_colortexture':			{ 'variant': 'color', 'tex3_usecolortexture': True,'noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_multiplycolor':			{ 'variant': 'color', 'tex3_usecolortexture': True,'noffsets': O([3,4,5,6,7,8,9,10]) },
-		
-		'offsetfloat3':				{ 'variant': 'float','noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_usefloattexture':			{ 'variant': 'float','noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_floatvalue':			{ 'variant': 'float','noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_floattexture':			{ 'variant': 'float', 'tex3_usefloattexture': True,'noffsets': O([3,4,5,6,7,8,9,10]) },
-		'tex3_multiplyfloat':			{ 'variant': 'float', 'tex3_usefloattexture': True,'noffsets': O([3,4,5,6,7,8,9,10]) },
-		
-		'offsetcolor4':				{ 'variant': 'color','noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_color': 				{ 'variant': 'color','noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_usecolortexture':			{ 'variant': 'color','noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_colortexture':			{ 'variant': 'color', 'tex4_usecolortexture': True,'noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_multiplycolor':			{ 'variant': 'color', 'tex4_usecolortexture': True,'noffsets': O([4,5,6,7,8,9,10]) },
-		
-		'offsetfloat4':				{ 'variant': 'float','noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_usefloattexture':			{ 'variant': 'float','noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_floatvalue':			{ 'variant': 'float','noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_floattexture':			{ 'variant': 'float', 'tex4_usefloattexture': True,'noffsets': O([4,5,6,7,8,9,10]) },
-		'tex4_multiplyfloat':			{ 'variant': 'float', 'tex4_usefloattexture': True,'noffsets': O([4,5,6,7,8,9,10]) },
-		
-		'offsetcolor5':				{ 'variant': 'color','noffsets': O([5,6,7,8,9,10]) },
-		'tex5_color': 				{ 'variant': 'color','noffsets': O([5,6,7,8,9,10]) },
-		'tex5_usecolortexture':			{ 'variant': 'color','noffsets': O([5,6,7,8,9,10]) },
-		'tex5_colortexture':			{ 'variant': 'color', 'tex5_usecolortexture': True,'noffsets': O([5,6,7,8,9,10]) },
-		'tex5_multiplycolor':			{ 'variant': 'color', 'tex5_usecolortexture': True,'noffsets': O([5,6,7,8,9,10]) },
-		
-		'offsetfloat5':				{ 'variant': 'float','noffsets': O([5,6,7,8,9,10]) },
-		'tex5_usefloattexture':			{ 'variant': 'float','noffsets': O([5,6,7,8,9,10]) },
-		'tex5_floatvalue':			{ 'variant': 'float','noffsets': O([5,6,7,8,9,10]) },
-		'tex5_floattexture':			{ 'variant': 'float', 'tex5_usefloattexture': True,'noffsets': O([5,6,7,8,9,10]) },
-		'tex5_multiplyfloat':			{ 'variant': 'float', 'tex5_usefloattexture': True,'noffsets': O([5,6,7,8,9,10]) },
-		
-		'offsetcolor6':				{ 'variant': 'color','noffsets': O([6,7,8,9,10]) },
-		'tex6_color': 				{ 'variant': 'color','noffsets': O([6,7,8,9,10]) },
-		'tex6_usecolortexture':			{ 'variant': 'color','noffsets': O([6,7,8,9,10]) },
-		'tex6_colortexture':			{ 'variant': 'color', 'tex6_usecolortexture': True,'noffsets': O([6,7,8,9,10]) },
-		'tex6_multiplycolor':			{ 'variant': 'color', 'tex6_usecolortexture': True,'noffsets': O([6,7,8,9,10]) },
-		
-		'offsetfloat6':				{ 'variant': 'float','noffsets': O([6,7,8,9,10]) },
-		'tex6_usefloattexture':			{ 'variant': 'float','noffsets': O([6,7,8,9,10]) },
-		'tex6_floatvalue':			{ 'variant': 'float','noffsets': O([6,7,8,9,10]) },
-		'tex6_floattexture':			{ 'variant': 'float', 'tex6_usefloattexture': True,'noffsets': O([6,7,8,9,10]) },
-		'tex6_multiplyfloat':			{ 'variant': 'float', 'tex6_usefloattexture': True,'noffsets': O([6,7,8,9,10]) },
-		
-		'offsetcolor7':				{ 'variant': 'color','noffsets': O([7,8,9,10]) },
-		'tex7_color': 				{ 'variant': 'color','noffsets': O([7,8,9,10]) },
-		'tex7_usecolortexture':			{ 'variant': 'color','noffsets': O([7,8,9,10]) },
-		'tex7_colortexture':			{ 'variant': 'color', 'tex7_usecolortexture': True,'noffsets': O([7,8,9,10]) },
-		'tex7_multiplycolor':			{ 'variant': 'color', 'tex7_usecolortexture': True,'noffsets': O([7,8,9,10]) },
-		
-		'offsetfloat7':				{ 'variant': 'float','noffsets': O([7,8,9,10]) },
-		'tex7_usefloattexture':			{ 'variant': 'float','noffsets': O([7,8,9,10]) },
-		'tex7_floatvalue':			{ 'variant': 'float','noffsets': O([7,8,9,10]) },
-		'tex7_floattexture':			{ 'variant': 'float', 'tex7_usefloattexture': True,'noffsets': O([7,8,9,10]) },
-		'tex7_multiplyfloat':			{ 'variant': 'float', 'tex7_usefloattexture': True,'noffsets': O([7,8,9,10]) },
-		
-		'offsetcolor8':				{ 'variant': 'color','noffsets': O([8,9,10]) },
-		'tex8_color': 				{ 'variant': 'color','noffsets': O([8,9,10]) },
-		'tex8_usecolortexture':			{ 'variant': 'color','noffsets': O([8,9,10]) },
-		'tex8_colortexture':			{ 'variant': 'color', 'tex8_usecolortexture': True,'noffsets': O([8,9,10]) },
-		'tex8_multiplycolor':			{ 'variant': 'color', 'tex8_usecolortexture': True,'noffsets': O([8,9,10]) },
-		
-		'offsetfloat8':				{ 'variant': 'float','noffsets': O([8,9,10]) },
-		'tex8_usefloattexture':			{ 'variant': 'float','noffsets': O([8,9,10]) },
-		'tex8_floatvalue':			{ 'variant': 'float','noffsets': O([8,9,10]) },
-		'tex8_floattexture':			{ 'variant': 'float', 'tex8_usefloattexture': True,'noffsets': O([8,9,10]) },
-		'tex8_multiplyfloat':			{ 'variant': 'float', 'tex8_usefloattexture': True,'noffsets': O([8,9,10]) },
-		
-		'offsetcolor9':				{ 'variant': 'color','noffsets': O([9,10]) },
-		'tex9_color': 				{ 'variant': 'color','noffsets': O([9,10]) },
-		'tex9_usecolortexture':			{ 'variant': 'color','noffsets': O([9,10]) },
-		'tex9_colortexture':			{ 'variant': 'color', 'tex9_usecolortexture': True,'noffsets': O([9,10]) },
-		'tex9_multiplycolor':			{ 'variant': 'color', 'tex9_usecolortexture': True,'noffsets': O([9,10]) },
-		
-		'offsetfloat9':				{ 'variant': 'float','noffsets': O([9,10]) },
-		'tex9_usefloattexture':			{ 'variant': 'float','noffsets': O([9,10]) },
-		'tex9_floatvalue':			{ 'variant': 'float','noffsets': O([9,10]) },
-		'tex9_floattexture':			{ 'variant': 'float', 'tex9_usefloattexture': True,'noffsets': O([9,10]) },
-		'tex9_multiplyfloat':			{ 'variant': 'float', 'tex9_usefloattexture': True,'noffsets': O([9,10]) },
-		
-		'offsetcolor10':			{ 'variant': 'color','noffsets': O([10]) },
-		'tex10_color': 				{ 'variant': 'color','noffsets': O([10]) },
-		'tex10_usecolortexture':		{ 'variant': 'color','noffsets': O([10]) },
-		'tex10_colortexture':			{ 'variant': 'color', 'tex10_usecolortexture': True,'noffsets': O([10]) },
-		'tex10_multiplycolor':			{ 'variant': 'color', 'tex10_usecolortexture': True,'noffsets': O([10]) },
-		
-		'offsetfloat10':			{ 'variant': 'float','noffsets': O([10]) },
-		'tex10_usefloattexture':		{ 'variant': 'float','noffsets': O([10]) },
-		'tex10_floatvalue':			{ 'variant': 'float','noffsets': O([10]) },
-		'tex10_floattexture':			{ 'variant': 'float', 'tex10_usefloattexture': True,'noffsets': O([10]) },
-		'tex10_multiplyfloat':			{ 'variant': 'float', 'tex10_usefloattexture': True,'noffsets': O([10]) },
-	}
+	visibility = band_visibility()
 	
 	properties = [
 		{
@@ -831,294 +719,39 @@ class luxrender_tex_band(declarative_property_group):
 			'name': 'NOffsets',
 			'default': 2,
 			'min': 2,
-			'max': 10,
+			'max': BAND_MAX_TEX,
 			'save_in_preset': True
 		},
-		{
-			'attr': 'offsetfloat1',
-			'type': 'float',
-			'name': 'offset1',
-			'default': 0.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor1',
-			'type': 'float',
-			'name': 'offset1',
-			'default': 0.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat2',
-			'type': 'float',
-			'name': 'offset2',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor2',
-			'type': 'float',
-			'name': 'offset2',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat3',
-			'type': 'float',
-			'name': 'offset3',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor3',
-			'type': 'float',
-			'name': 'offset3',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat4',
-			'type': 'float',
-			'name': 'offset4',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor4',
-			'type': 'float',
-			'name': 'offset4',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat5',
-			'type': 'float',
-			'name': 'offset5',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor5',
-			'type': 'float',
-			'name': 'offset5',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat6',
-			'type': 'float',
-			'name': 'offset6',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor6',
-			'type': 'float',
-			'name': 'offset6',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat7',
-			'type': 'float',
-			'name': 'offset7',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor7',
-			'type': 'float',
-			'name': 'offset7',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat8',
-			'type': 'float',
-			'name': 'offset8',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor8',
-			'type': 'float',
-			'name': 'offset8',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat9',
-			'type': 'float',
-			'name': 'offset9',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor9',
-			'type': 'float',
-			'name': 'offset9',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetfloat10',
-			'type': 'float',
-			'name': 'offset10',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'offsetcolor10',
-			'type': 'float',
-			'name': 'offset10',
-			'default': 1.0,
-			'precision': 3,
-			'min': 0.0,
-			'max': 1.0,
-			'save_in_preset': True
-		},
-	] + \
-	TF_amount.properties + \
-	TF_tex1.properties + \
-	TC_tex1.properties + \
-	TF_tex2.properties + \
-	TC_tex2.properties + \
-	TF_tex3.properties + \
-	TC_tex3.properties + \
-	TF_tex4.properties + \
-	TC_tex4.properties + \
-	TF_tex5.properties + \
-	TC_tex5.properties + \
-	TF_tex6.properties + \
-	TC_tex6.properties + \
-	TF_tex7.properties + \
-	TC_tex7.properties + \
-	TF_tex8.properties + \
-	TC_tex8.properties + \
-	TF_tex9.properties + \
-	TC_tex9.properties + \
-	TF_tex10.properties + \
-	TC_tex10.properties
+	] + TF_amount.properties + \
+	band_tex_properties()
 	
 	def get_paramset(self, scene, texture):
 		band_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
+			
+			band_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'amount', 'float', self)
+			)
+			band_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
+			)
+			band_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
+			)
+			
 			offsets = []
 			for i in range(1,self.noffsets+1):
 				if self.variant == 'color':
-					if i == 1: offsets.append(self.offsetcolor1)
-					if i == 2: offsets.append(self.offsetcolor2)
-					if i == 3: offsets.append(self.offsetcolor3)
-					if i == 4: offsets.append(self.offsetcolor4)
-					if i == 5: offsets.append(self.offsetcolor5)
-					if i == 6: offsets.append(self.offsetcolor6)
-					if i == 7: offsets.append(self.offsetcolor7)
-					if i == 8: offsets.append(self.offsetcolor8)
-					if i == 9: offsets.append(self.offsetcolor9)
-					if i == 10: offsets.append(self.offsetcolor10)
+					offsets.append( getattr(self, 'offsetcolor%d'%i) )
 				else:
-					if i == 1: offsets.append(self.offsetfloat1)
-					if i == 2: offsets.append(self.offsetfloat2)
-					if i == 3: offsets.append(self.offsetfloat3)
-					if i == 4: offsets.append(self.offsetfloat4)
-					if i == 5: offsets.append(self.offsetfloat5)
-					if i == 6: offsets.append(self.offsetfloat6)
-					if i == 7: offsets.append(self.offsetfloat7)
-					if i == 8: offsets.append(self.offsetfloat8)
-					if i == 9: offsets.append(self.offsetfloat9)
-					if i == 10: offsets.append(self.offsetfloat10)
-				
-			band_params.add_float('offsets', offsets)
-			band_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'amount', 'float', self)
-			)			
-			band_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self))
-			band_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self))
-			if self.noffsets >= 3:
+					offsets.append( getattr(self, 'offsetfloat%d'%i) )
 				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex3', self.variant, self))
-			if self.noffsets >= 4:
-				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex4', self.variant, self))
-			if self.noffsets >= 5:
-				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex5', self.variant, self))
-			if self.noffsets >= 6:
-				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex6', self.variant, self))
-			if self.noffsets >= 7:
-				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex7', self.variant, self))
-			if self.noffsets >= 8:
-				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex8', self.variant, self))
-			if self.noffsets >= 9:
-				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex9', self.variant, self))
-			if self.noffsets == 10:
-				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex10', self.variant, self))
+					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
+				)
 			
+			band_params.add_float('offsets', offsets)
+		
 		return set(), band_params
 
 @LuxRenderAddon.addon_register_class
