@@ -607,6 +607,7 @@ TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,
 TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
 TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
+
 BAND_MAX_TEX = 10
 
 def band_visibility():

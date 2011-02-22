@@ -279,6 +279,8 @@ def material_converter(report, scene, blender_mat):
 		luxrender_mat.Interior_volume = ''
 		luxrender_mat.Exterior_volume = ''
 		
+		luxrender_mat.reset()
+		
 		if blender_mat.raytrace_mirror.use and blender_mat.raytrace_mirror.reflect_factor >= 0.9:
 			# for high mirror reflection values switch to mirror material
 			luxrender_mat.type = 'mirror'
@@ -389,7 +391,7 @@ def material_converter(report, scene, blender_mat):
 							lux_tex = color_tex.luxrender_texture
 							alpha_lux_tex = alpha_tex.luxrender_texture
 							
-							col_ramp = tex.color_ramp.elements                                                                
+							col_ramp = tex.color_ramp.elements
 							mix_lux_tex.type = 'mix'
 							lux_tex.type = 'band'
 							alpha_lux_tex.type = 'band'
@@ -400,18 +402,18 @@ def material_converter(report, scene, blender_mat):
 							color_params.variant = 'color'
 							color_params.noffsets = len(col_ramp)
 							color_params.amount_usefloattexture = True
-							color_params.amount_floattexturename = tex.name								
+							color_params.amount_floattexturename = tex.name
 							alpha_params.variant = 'float'
 							alpha_params.noffsets = len(col_ramp)
 							alpha_params.amount_usefloattexture = True
-							alpha_params.amount_floattexturename = tex.name								
+							alpha_params.amount_floattexturename = tex.name
 							mix_params.variant = 'color'
 							mix_params.amount_usefloattexture = True
 							mix_params.amount_floattexturename = alpha_tex.name
 							mix_params.tex1_usecolortexture = False
 							mix_params.tex1_color = blender_mat.diffuse_color
 							mix_params.tex2_usecolortexture = True
-							mix_params.tex2_colortexturename = color_tex.name                                      							
+							mix_params.tex2_colortexturename = color_tex.name
 							
 							for i in range(len(col_ramp)):
 								if i == 0:
@@ -455,7 +457,7 @@ def material_converter(report, scene, blender_mat):
 									color_params.tex10_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
 									alpha_params.tex10_floatvalue = col_ramp[i].color[3]
 							luxmat.Kd_usecolortexture = True
-							luxmat.Kd_colortexturename = mix_tex.name							
+							luxmat.Kd_colortexturename = mix_tex.name
 					pass
 			elif len(Kd_stack) > 1:
 				# TODO - set up a mix stack.
@@ -465,7 +467,7 @@ def material_converter(report, scene, blender_mat):
 						tex = Kd_stack[n][0]
 						dcf = Kd_stack[n][1]
 						color = Kd_stack[n][2]
-												
+						
 						if tex.use_color_ramp:
 							#TODO: Implement band texture conversion
 							mix_tex_slot = blender_mat.texture_slots.add()
@@ -477,36 +479,36 @@ def material_converter(report, scene, blender_mat):
 							mix_tex = mix_tex_slot.texture = bpy.data.textures.new('Lux::%s'%tex.name,'NONE')
 							color_tex = color_tex_slot.texture = bpy.data.textures.new('Lux::color:%s'%tex.name,'NONE')
 							alpha_tex = alpha_tex_slot.texture = bpy.data.textures.new('Lux::alpha:%s'%tex.name,'NONE')
-
+							
 							Lux_TexName.append(mix_tex.name)
-														
+							
 							mix_lux_tex = mix_tex.luxrender_texture
 							color_lux_tex = color_tex.luxrender_texture
 							alpha_lux_tex = alpha_tex.luxrender_texture
-
-							mix_params = mix_lux_tex.luxrender_tex_mix						
+							
+							mix_params = mix_lux_tex.luxrender_tex_mix
 							mix_params.variant = 'color'
 							mix_params.amount_floatvalue = dcf
 							mix_params.amount_usefloattexture = True
-
-							col_ramp = tex.color_ramp.elements                                                                
+							
+							col_ramp = tex.color_ramp.elements
 							mix_lux_tex.type = 'mix'
 							color_lux_tex.type = 'band'
 							alpha_lux_tex.type = 'band'
-
+							
 							color_params = color_lux_tex.luxrender_tex_band
 							alpha_params = alpha_lux_tex.luxrender_tex_band
-						
+							
 							color_params.variant = 'color'
 							color_params.noffsets = len(col_ramp)
 							color_params.amount_usefloattexture = True
-							color_params.amount_floattexturename = tex.name								
-
+							color_params.amount_floattexturename = tex.name
+							
 							alpha_params.variant = 'float'
 							alpha_params.noffsets = len(col_ramp)
 							alpha_params.amount_usefloattexture = True
-							alpha_params.amount_floattexturename = tex.name															                                             							
-
+							alpha_params.amount_floattexturename = tex.name
+							
 							for i in range(len(col_ramp)):
 								if i == 0:
 									color_params.offsetcolor1 = alpha_params.offsetfloat1 = col_ramp[i].position
@@ -546,9 +548,9 @@ def material_converter(report, scene, blender_mat):
 									alpha_params.tex9_floatvalue = col_ramp[i].color[3]
 								if i == 9:
 									color_params.offsetcolor10 = alpha_params.offsetfloat10 = col_ramp[i].position
-									color_params.tex10_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])						
+									color_params.tex10_color = (col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2])
 									alpha_params.tex10_floatvalue = col_ramp[i].color[3]
-
+							
 							mix_params.amount_floattexturename = alpha_tex.name
 							mix_params.amount_multiplyfloat = True
 							mix_params.tex2_usecolortexture = True
@@ -568,7 +570,7 @@ def material_converter(report, scene, blender_mat):
 							Lux_TexName.append(mix_tex.name)
 							mix_lux_tex = mix_tex.luxrender_texture
 							mix_lux_tex.type = 'mix'
-							mix_params = mix_lux_tex.luxrender_tex_mix						
+							mix_params = mix_lux_tex.luxrender_tex_mix
 							mix_params.variant = 'color'
 							mix_params.amount_floatvalue = dcf
 							mix_params.amount_usefloattexture = True
