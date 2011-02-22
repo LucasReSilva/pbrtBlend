@@ -28,7 +28,7 @@ from ... import LuxRenderAddon
 from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
-class ui_texture_band(luxrender_texture_base):
+class ui_texture_multimix(luxrender_texture_base):
 	bl_label = 'LuxRender Multi Mix Texture'
 	
 	LUX_COMPAT = {'multimix'}
