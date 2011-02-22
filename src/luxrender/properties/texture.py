@@ -748,11 +748,12 @@ class luxrender_tex_band(declarative_property_group):
 					offsets.append( getattr(self, 'offsetcolor%d'%i) )
 				else:
 					offsets.append( getattr(self, 'offsetfloat%d'%i) )
+			band_params.add_float('offsets', offsets)
+			
+			for i in range(1,self.noffsets+1):
 				band_params.update(
 					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
 				)
-			
-			band_params.add_float('offsets', offsets)
 		
 		return set(), band_params
 
@@ -2021,11 +2022,12 @@ class luxrender_tex_multimix(declarative_property_group):
 					weights.append( getattr(self, 'weightcolor%d'%i) )
 				else:
 					weights.append( getattr(self, 'weightfloat%d'%i) )
+			mm_params.add_float('weights', weights)
+			
+			for i in range(1,self.nslots+1):
 				mm_params.update(
 					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
 				)
-			
-			mm_params.add_float('weights', weights)
 		
 		return set(), mm_params
 
