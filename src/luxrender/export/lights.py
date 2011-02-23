@@ -65,6 +65,9 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	dbo('LIGHT', (type, params))
 	lux_context.lightGroup(group, [])
 	
+	if light.type == 'HEMI':
+		lux_context.scale(-1, 1, 1) # correct worldmap orientation
+	
 	if light.luxrender_lamp.Exterior_volume != '':
 		lux_context.exterior(light.luxrender_lamp.Exterior_volume)
 	elif LuxManager.CurrentScene.luxrender_world.default_exterior_volume != '':
