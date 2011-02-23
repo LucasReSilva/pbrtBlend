@@ -735,25 +735,21 @@ class luxrender_tex_band(declarative_property_group):
 			band_params.update(
 				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'amount', 'float', self)
 			)
-			band_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
-			)
-			band_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
-			)
 			
 			offsets = []
 			for i in range(1,self.noffsets+1):
-				if self.variant == 'color':
-					offsets.append( getattr(self, 'offsetcolor%d'%i) )
-				else:
-					offsets.append( getattr(self, 'offsetfloat%d'%i) )
-			band_params.add_float('offsets', offsets)
-			
-			for i in range(1,self.noffsets+1):
+				offsets.append(getattr(self, 'offset%s%d'%(self.variant, i)))
+				
 				band_params.update(
 					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
 				)
+			
+			# In API mode need to tell Lux how many slots explicity
+			if LuxManager.ActiveManager.lux_context.API_TYPE == 'PURE':
+				mm_params.add_integer('noffsets', self.noffsets)
+			
+			band_params.add_float('offsets', offsets)
+			
 		
 		return set(), band_params
 
@@ -2018,16 +2014,16 @@ class luxrender_tex_multimix(declarative_property_group):
 			
 			weights = []
 			for i in range(1,self.nslots+1):
-				if self.variant == 'color':
-					weights.append( getattr(self, 'weightcolor%d'%i) )
-				else:
-					weights.append( getattr(self, 'weightfloat%d'%i) )
-			mm_params.add_float('weights', weights)
-			
-			for i in range(1,self.nslots+1):
+				weights.append(getattr(self, 'weight%s%d'%(self.variant, i)))
 				mm_params.update(
 					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
 				)
+			
+			# In API mode need to tell Lux how many slots explicity
+			if LuxManager.ActiveManager.lux_context.API_TYPE == 'PURE':
+				mm_params.add_integer('nweights', self.nslots)
+			
+			mm_params.add_float('weights', weights)
 		
 		return set(), mm_params
 
