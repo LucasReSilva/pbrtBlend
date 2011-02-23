@@ -39,16 +39,16 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		row = self.layout.row(align=True)
-		row.operator("luxrender.convert_material")
+		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
 		
 		row = self.layout.row(align=True)
-		row.operator("luxrender.convert_all_materials")
+		row.operator("luxrender.convert_material", icon='MATERIAL_DATA')
 		
 		row = self.layout.row(align=True)
-		row.operator("luxrender.copy_mat_color")
+		row.operator("luxrender.copy_mat_color", icon='COLOR')
 		
 		row = self.layout.row(align=True)
-		row.operator("luxrender.material_reset")
+		row.operator("luxrender.material_reset", icon='SOLID')
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material(luxrender_material_base):
