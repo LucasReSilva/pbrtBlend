@@ -1,24 +1,9 @@
-import xmlrpc.client
-
 import bpy, blf
 
 from .. import LuxRenderAddon
 from ..outputs import LuxLog
 
-class lrmdb_client(object):
-	#static
-	server = None
-	
-	@staticmethod
-	def server_instance():
-		if lrmdb_client.server == None:
-			lrmdb_client.server = xmlrpc.client.ServerProxy(
-				"http://www.luxrender.net/lrmdb2/ixr",
-				#transport=CookieTransport,
-				#verbose=True
-			)
-			
-		return lrmdb_client.server
+from .lrmdb_lib import lrmdb_client
 
 def null_callback(context):
 	pass
