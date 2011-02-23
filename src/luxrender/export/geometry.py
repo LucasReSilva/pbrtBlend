@@ -704,10 +704,9 @@ class GeometryExporter(object):
 			
 			obj.create_dupli_list(self.visibility_scene)
 			if not obj.dupli_list:
-				LuxLog('ERROR: cannot create dupli list for object %s' % obj.name)
-				return
+				raise Exception('cannot create dupli list for object %s' % obj.name)
 			
-			# Create our own DupliOb proxy to work around incorrect layers
+			# Create our own DupliOb list to work around incorrect layers
 			# attribute when inside create_dupli_list()..free_dupli_list()
 			duplis = []
 			for dupli_ob in obj.dupli_list:
@@ -758,7 +757,7 @@ class GeometryExporter(object):
 			
 			LuxLog('... done, exported %s duplis' % det.exported_objects)
 			
-		except SystemError as err:
+		except Exception as err:
 			LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
 	
 	def handler_MESH(self, obj, *args, **kwargs):
@@ -791,8 +790,7 @@ class GeometryExporter(object):
 			
 			try:
 				# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-				
-				if	not obj.is_visible(self.visibility_scene) or obj.hide_render:
+				if not obj.is_visible(self.visibility_scene) or obj.hide_render:
 					raise UnexportableObjectException(' -> not visible: %s / %s' % (obj.is_visible(self.visibility_scene), obj.hide_render))
 				
 				if obj.parent and obj.parent.is_duplicator:
