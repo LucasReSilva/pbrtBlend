@@ -148,7 +148,7 @@ class LUXRENDER_OT_preset_texture_add(AddPresetBase, bpy.types.Operator):
 		lux_type = context.texture.luxrender_texture.type
 		sub_type = getattr(bpy.types, 'luxrender_tex_%s' % lux_type)
 		
-		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset(context.scene)
+		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset(context.scene, context.texture)
 		if '2DMAPPING' in features:
 			pv.extend([
 				'bpy.context.texture.luxrender_texture.luxrender_tex_mapping.%s'%v['attr'] for v in bpy.types.luxrender_tex_mapping.get_exportable_properties()
