@@ -800,12 +800,17 @@ class GeometryExporter(object):
 			try:
 				# Export only objects which are enabled for render (in the outliner) and visible on a render layer
 				
-				if	not obj.is_visible(self.visibility_scene) or obj.hide_render:
+				if not obj.is_visible(self.visibility_scene) or obj.hide_render:
 					raise UnexportableObjectException(' -> not visible: %s / %s' % (obj.is_visible(self.visibility_scene), obj.hide_render))
 				
 				if obj.parent and obj.parent.is_duplicator:
 					raise UnexportableObjectException(' -> parent is duplicator')
-				
+
+				for mod in obj.modifiers:
+					if mod.name == 'Smoke':
+						if mod.smoke_type == 'DOMAIN':
+							raise UnexportableObjectException(' -> Smoke domain')
+
 				number_psystems = len(obj.particle_systems)
 				
 				if obj.is_duplicator and number_psystems < 1:
@@ -835,7 +840,7 @@ class GeometryExporter(object):
 				if not obj.type in self.valid_objects_callbacks:
 					raise UnexportableObjectException('Unsupported object type')
 				
-				self.callbacks['objects'][obj.type](obj)
+				self.callbacks['objects'][obj.type](obj)			
 			
 			except UnexportableObjectException as err:
 				if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))

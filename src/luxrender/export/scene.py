@@ -35,6 +35,7 @@ from ..export 			import get_worldscale, object_anim_matrix
 from ..export			import lights		as export_lights
 from ..export			import materials	as export_materials
 from ..export			import geometry		as export_geometry
+from ..export			import volumes		as export_volumes
 from ..outputs			import LuxManager, LuxLog
 from ..outputs.file_api	import Files
 from ..outputs.pure_api	import LUXRENDER_VERSION
@@ -111,10 +112,12 @@ class SceneExporter(object):
 					LXS = True
 					LXM = True
 					LXO = True
+					LXV = True
 				else:
 					LXS = scene.luxrender_engine.write_lxs
 					LXM = scene.luxrender_engine.write_lxm
 					LXO = scene.luxrender_engine.write_lxo
+					LXV = scene.luxrender_engine.write_lxv
 				
 				if not os.access( self.properties.directory, os.W_OK):
 					raise Exception('Output path "%s" is not writable' % self.properties.directory)
@@ -124,7 +127,8 @@ class SceneExporter(object):
 						lxs_filename,
 						LXS = LXS, 
 						LXM = LXM,
-						LXO = LXO
+						LXO = LXO,
+						LXV = LXV
 					)
 				else:
 					raise Exception('Nothing to do! Select at least one of LXM/LXS/LXO')
@@ -191,6 +195,14 @@ class SceneExporter(object):
 				geom_scenes.append(s)
 			
 			GE = export_geometry.GeometryExporter(lux_context, scene)
+			if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxv):
+				if self.properties.api_type == 'FILE':
+					lux_context.set_output_file(Files.VOLM)
+				export_volumes.export_smoke(lux_context, scene)	
+			
+			# Make sure lamp textures go back into main file, not geom file
+			if self.properties.api_type in ['FILE']:
+				lux_context.set_output_file(Files.MAIN)
 			
 			# Export all data in linked 'background_set' scenes
 			for geom_scene in geom_scenes:
