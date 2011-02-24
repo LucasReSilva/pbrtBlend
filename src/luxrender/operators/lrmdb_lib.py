@@ -2,30 +2,42 @@
 Non-blender specific LRMDB interface handlers should go in here
 """
 
-import xmlrpc.client, http.client
+import xmlrpc.client, http.client, http.cookiejar, urllib.request, os
 
-class DictCookies(dict):
-	def parse_headers(self, headers):
-		# Receive incoming cookies and store key:value pairs
-		for header_name, header_value in headers:
-			if header_name == 'Set-Cookie':
-				#self._cookies.append(header_value)
-				ck_pair = header_value.split(';')[0]
-				ck_var, ck_val = ck_pair.split('=')
-				self[ck_var] = ck_val
-	def to_string(self):
-		out = []
-		for ck_pair in self.items():
-			out.append( '%s=%s' % ck_pair )
-		return ';'.join(out)
+from extensions_framework import util as efutil
+
+def make_cookie_filename():
+	fc = []
+	for p in efutil.config_paths:
+		if os.path.exists(p) and os.path.isdir(p) and os.access(p, os.W_OK):
+			fc.append( '/'.join([p, 'luxrender_lrmdb_cookies.txt']))
+	
+	if len(fc) < 1:
+		return None
+	
+	try:
+		cookie_file = fc[0]
+		if not os.path.exists(cookie_file):
+			cf = open(cookie_file, 'w')
+			cf.write("#LWP-Cookies-2.0\n\n")
+			cf.close()
+		return cookie_file
+	except:
+		print('WARNING: Cannot write cookie file; LuxRender LRMDB sessions will not be saved between Blender executions.')
+		return None
 
 class CookieTransport(xmlrpc.client.Transport):
 	# Custom user-agent string for this Transport
 	user_agent = 'LuxBlend25'
 	
 	def __init__(self, *args, **kwargs):
-		self._cookies = DictCookies()
+		self.cookiejar = http.cookiejar.LWPCookieJar(
+			make_cookie_filename()
+		)
 		super().__init__(*args, **kwargs)
+	
+	def cookie_request(self, host):
+		return urllib.request.Request('http://%s/' % host)
 	
 	# This method is almost identical to Transport.request
 	def request(self, host, handler, request_body, verbose=False):
@@ -33,16 +45,22 @@ class CookieTransport(xmlrpc.client.Transport):
 		http_conn = self.send_request(host, handler, request_body, verbose)
 		resp = http_conn.getresponse()
 		
-		headers = resp.getheaders()
+		# Extract cookies from response
+		ck_req = self.cookie_request(host)
+		self.cookiejar.extract_cookies(resp, ck_req)
 		
-		# Extract cookies
-		self._cookies.parse_headers(headers)
+		try:
+			# Save the cookies to file if we have a valid path
+			self.cookiejar.save()
+		except ValueError:
+			# nevermind, just means that cookies won't be persistent
+			pass
 		
 		if resp.status != 200:
 			raise xmlrpc.client.ProtocolError(
 				host + handler,
 				resp.status, resp.reason,
-				dict(headers)
+				dict(resp.getheaders())
 				)
 		
 		self.verbose = verbose
@@ -53,17 +71,29 @@ class CookieTransport(xmlrpc.client.Transport):
 	def send_request(self, host, handler, request_body, debug):
 		host, extra_headers, x509 = self.get_host_info(host)
 		connection = http.client.HTTPConnection(host)
+		
 		if debug:
 			connection.set_debuglevel(1)
-		headers = {}
-		if extra_headers:
-			for key, val in extra_headers:
-				headers[key] = val
-		headers["Content-Type"] = "text/xml"
-		headers["User-Agent"] = self.user_agent
 		
-		# Insert cookies
-		headers["Cookie"] = self._cookies.to_string()
+		headers = {
+			"Content-Type": "text/xml",
+			"User-Agent": self.user_agent
+		}
+		
+		if extra_headers:
+			headers.update( extra_headers )
+		
+		try:
+			# Try to load cookies from file, if possible
+			self.cookiejar.load()
+		except ValueError:
+			# nevermind, just means that cookies won't be persistent
+			pass
+		
+		# Insert cookie headers
+		ck_req = self.cookie_request(host)
+		self.cookiejar.add_cookie_header(ck_req)
+		headers.update( ck_req.header_items() )
 		
 		connection.request("POST", handler, request_body, headers)
 		return connection
