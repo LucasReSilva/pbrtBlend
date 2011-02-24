@@ -27,7 +27,7 @@
 import os, struct
 OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
-import bpy
+import bpy, mathutils
 
 from extensions_framework import util as efutil
 
@@ -99,7 +99,7 @@ class GeometryExporter(object):
 			'particles': {
 				'OBJECT': self.handler_Duplis_GENERIC,
 				'GROUP': self.handler_Duplis_GENERIC,
-				#'PATH': handler_Duplis_PATH,
+				'PATH': self.handler_Duplis_PATH,
 			},
 			'objects': {
 				'MESH': self.handler_MESH,
@@ -688,6 +688,88 @@ class GeometryExporter(object):
 			if use_inner_scope: self.lux_context.attributeEnd()
 		
 		self.lux_context.attributeEnd()
+	
+	def matrixHasNaN(self, M):
+		for row in M:
+			for i in row:
+				if str(i) == 'nan': return True
+		return False
+	
+	def handler_Duplis_PATH(self, obj, *args, **kwargs):
+		if not 'particle_system' in kwargs.keys():
+			LuxLog('ERROR: handler_Duplis_PATH called without particle_system')
+			return
+		
+		psys = kwargs['particle_system']
+		
+		# No can do, because of RNA write restriction
+		#psys_pc = psys.settings.draw_percentage
+		#psys.settings.draw_percentage = 100
+		#psys.settings.update_tag()
+		#self.visibility_scene.update()
+		
+		LuxLog('Exporting Hair system "%s"...' % psys.name)
+		
+		size = psys.settings.particle_size / 2.0 # XXX divide by 2 twice ?
+		hair_shapes = (
+			(
+				'HAIR_Junction_%s'%psys.name,
+				psys.settings.material - 1,
+				'sphere',
+				ParamSet().add_float('radius', size/2.0)
+			),
+			(
+				'HAIR_Strand_%s'%psys.name,
+				psys.settings.material - 1,
+				'cylinder',
+				ParamSet() \
+					.add_float('radius', size/2.0) \
+					.add_float('zmin', 0.0) \
+					.add_float('zmax', 1.0)
+			)
+		)
+		for sn, si, st, sp in hair_shapes:
+			self.lux_context.objectBegin(sn)
+			self.lux_context.shape(st, sp)
+			self.lux_context.objectEnd()
+		
+		det = DupliExportProgressThread()
+		det.start(len(psys.particles))
+		
+		for particle in psys.particles:
+			if not (particle.is_exist and particle.is_visible): continue
+			
+			det.exported_objects += 1
+			
+			for j in range(len(particle.hair)-1):
+				SB = mathutils.Matrix().to_3x3()
+				v1 = particle.hair[j+1].co - particle.hair[j].co
+				v2 = SB[2].cross(v1)
+				v3 = v1.cross(v2)
+				v2.normalize()
+				v3.normalize()
+				M = mathutils.Matrix( (v3,v2,v1) )
+				if self.matrixHasNaN(M):
+					M = mathutils.Matrix( (SB[0], SB[1], SB[2]) )
+				M = M.to_4x4()
+				
+				Mtrans = mathutils.Matrix.Translation(particle.hair[j].co)
+				matrix = obj.matrix_world * Mtrans * M
+				
+				self.exportShapeInstances(
+					obj,
+					hair_shapes,
+					matrix=[matrix,None]
+				)
+		
+		det.stop()
+		det.join()
+		
+		#psys.settings.draw_percentage = psys_pc
+		#psys.settings.update_tag()
+		#self.visibility_scene.update()
+		
+		LuxLog('... done, exported %s hairs' % det.exported_objects)
 	
 	def handler_Duplis_GENERIC(self, obj, *args, **kwargs):
 		try:
