@@ -704,6 +704,10 @@ class GeometryExporter(object):
 		
 		psys = kwargs['particle_system']
 		
+		if not psys.settings.type == 'HAIR':
+			LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
+			return
+		
 		# No can do, because of RNA write restriction
 		#psys_pc = psys.settings.draw_percentage
 		#psys.settings.draw_percentage = 100
@@ -744,7 +748,7 @@ class GeometryExporter(object):
 			det.exported_objects += 1
 			
 			for j in range(len(particle.hair)-1):
-				SB = mathutils.Matrix().to_3x3()
+				SB = obj.matrix_basis.copy().to_3x3()
 				v1 = particle.hair[j+1].co - particle.hair[j].co
 				v2 = SB[2].cross(v1)
 				v3 = v1.cross(v2)
