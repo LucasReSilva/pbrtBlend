@@ -35,6 +35,7 @@ class Files(object):
 	MAIN = 0
 	MATS = 1
 	GEOM = 2
+	VOLM = 3
 
 class RenderingServerInfo(object):
 	'''
@@ -87,7 +88,7 @@ class Custom_Context(object):
 		self.files[ind].write('%s%s\n' % ('\t'*tabs, st))
 		self.files[ind].flush()
 		
-	def set_filename(self, name, LXS=True, LXM=True, LXO=True):
+	def set_filename(self, name, LXS=True, LXM=True, LXO=True, LXV=True):
 		'''
 		name				string
 		
@@ -123,6 +124,13 @@ class Custom_Context(object):
 		if LXO:
 			self.files.append(open(self.file_names[Files.GEOM], 'w'))
 			self.wf(Files.GEOM, '# Geometry File')
+		else:
+			self.files.append(None)
+		
+		self.file_names.append('%s-vol.lxv' % name)
+		if LXV:
+			self.files.append(open(self.file_names[Files.VOLM], 'w'))
+			self.wf(Files.VOLM, '# Volume File')
 		else:
 			self.files.append(None)
 		
@@ -219,7 +227,7 @@ class Custom_Context(object):
 		self.wf(Files.MAIN, '\nWorldBegin')
 		if self.files[Files.MAIN] is not None:
 			# Include the other files if they exist
-			for idx in [Files.MATS, Files.GEOM]:
+			for idx in [Files.MATS, Files.GEOM, Files.VOLM]:
 				if os.path.exists(self.file_names[idx]):
 					self.wf(Files.MAIN, '\nInclude "%s"' % path_relative_to_export(self.file_names[idx]))
 	
@@ -304,6 +312,11 @@ class Custom_Context(object):
 	def exterior(self, name):
 		self._api('Exterior ', [name, []])
 	
+	def volume(self, type, params):
+		self.wf(Files.VOLM, '\nVolume "%s"' % type)
+		for p in params:
+			self.wf(Files.VOLM, p.to_string(), 1)
+
 	def texture(self, name, type, texture, params):
 		self.wf(Files.MATS, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
 		for p in params:
