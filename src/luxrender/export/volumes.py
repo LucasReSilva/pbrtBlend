@@ -92,11 +92,11 @@ class library_loader():
 					cls.lzodll = cdll.LoadLibrary(sp)
 					cls.has_lzo = True
 					break
-				except Exception as err:
-					if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
-						continue
-					else:
-						raise
+				except (Exception, OSError) as err:
+					#if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
+					continue
+					#else:
+					#	raise
 			
 			if cls.has_lzo:
 				LuxLog('Volumes: LZO Library found')
