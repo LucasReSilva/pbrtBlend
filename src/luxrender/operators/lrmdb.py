@@ -21,16 +21,15 @@ class ClickLocation(object):
 		return ( my>hy and my<(hy+14) )
 
 class ActionText(object):
-	def __init__(self, label, region, location=ClickLocation(), callback=null_callback, callback_args=tuple()):
+	def __init__(self, label, location=ClickLocation(), callback=null_callback, callback_args=tuple()):
 		self.label = label
-		self.region = region
 		self.location = location
 		self.callback = callback
 		self.callback_args = callback_args
 	
-	def draw(self):
-		x = self.location.x if self.location.x > 0 else self.region.width + self.location.x
-		y = self.location.y if self.location.y > 0 else self.region.height + self.location.y
+	def draw(self, region):
+		x = self.location.x if self.location.x > 0 else region.width + self.location.x
+		y = self.location.y if self.location.y > 0 else region.height + self.location.y
 		z = self.location.z
 		blf.position( self.location.font_id, x, y, z )
 		blf.draw(0, self.label )
@@ -46,7 +45,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	bl_label  = 'Start LRMDB'
 	
 	_active = False
-	_ui_region = None
 	_region_callback = None
 	
 	actions = []
@@ -56,13 +54,12 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		
 		if event.type == 'LEFTMOUSE' and event.value == 'RELEASE':
 			for action in self.actions:
-				if action.location.hit(self._ui_region, event.mouse_region_x, event.mouse_region_y):
+				if action.location.hit(context.region, event.mouse_region_x, event.mouse_region_y):
 					action.execute(context)
 		
 		if not LUXRENDER_OT_lrmdb._active or event.type == 'ESC':
 			LUXRENDER_OT_lrmdb._active = False
-			self._ui_region.callback_remove(self._region_callback)
-			self._ui_region = None
+			context.region.callback_remove(self._region_callback)
 			self._region_callback = None
 			
 			return {'FINISHED'}
@@ -76,7 +73,7 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		blf.draw(0, msg)
 		
 		for action in self.actions:
-			action.draw()
+			action.draw(context.region)
 	
 	def select_material(self, context, mat_id):
 		#LuxLog('Chose material %s' % mat_id)
@@ -146,7 +143,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			self.actions.append(
 				ActionText(
 					'Category "%s"' % cat_name,
-					self._ui_region,
 					ClickLocation(0,75,-30,0)
 				)
 			)
@@ -158,7 +154,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 					self.actions.append(
 						ActionText(
 							mat_header['name'],
-							self._ui_region,
 							ClickLocation(0,85,ofsy,0),
 							self.select_material,
 							(mat_id,)
@@ -187,7 +182,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 				self.actions.append(
 					ActionText(
 						cat['name'] + ' (%s)' % cat['items'],
-						self._ui_region,
 						ClickLocation(0,75+j,ofsy,0),
 						self.show_category_items,
 						(cat_id, cat['name'])
@@ -204,13 +198,12 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			self.actions.append(
 				ActionText(
 					'Categories',
-					self._ui_region,
 					ClickLocation(0,75,-30,0)
 				)
 			)
 			display_category(ct, 1)
 	
-	def begin_login(self):
+	def begin_login(self, context):
 		# invoke a menu operator to begin login process
 		pass
 	
@@ -223,14 +216,12 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			self.actions.extend([
 				ActionText(
 					'Logged In:',
-					self._ui_region,
 					ClickLocation(0,-150,-30,0),
 					null_callback,
 					tuple()
 				),
 				ActionText(
 					lrmdb_client.username,
-					self._ui_region,
 					ClickLocation(0,-150,-60,0),
 					null_callback,
 					tuple()
@@ -240,7 +231,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			self.actions.extend([
 				ActionText(
 					'Log In',
-					self._ui_region,
 					ClickLocation(0,-150,-30,0),
 					self.begin_login,
 					tuple()
@@ -252,7 +242,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		self.actions.append(
 			ActionText(
 				'< Back to categories',
-				self._ui_region,
 				ClickLocation(0,60,ofsy,0),
 				self.show_category_list,
 				tuple()
@@ -264,10 +253,8 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			LuxLog('LRMDB ERROR: Already running!')
 			return {'CANCELLED'}
 		
-		self._ui_region = context.region
-		
 		context.window_manager.modal_handler_add(self)
-		self._region_callback = self._ui_region.callback_add(self.region_callback, (context,), 'POST_PIXEL')
+		self._region_callback = context.region.callback_add(self.region_callback, (context,), 'POST_PIXEL')
 		context.area.tag_redraw()
 		LUXRENDER_OT_lrmdb._active = True
 		
