@@ -101,6 +101,8 @@ class CookieTransport(xmlrpc.client.Transport):
 class lrmdb_client(object):
 	#static
 	server = None
+	loggedin = False
+	username = ''
 	
 	@classmethod
 	def server_instance(cls):
@@ -112,3 +114,14 @@ class lrmdb_client(object):
 			)
 		
 		return cls.server
+	
+	@classmethod
+	def check_login(cls):
+		un = cls.server_instance().user.current()
+		if un:
+			cls.loggedin = True
+			cls.username = un
+		else:
+			cls.loggedin = False
+			cls.username = ''
+		return cls.loggedin
