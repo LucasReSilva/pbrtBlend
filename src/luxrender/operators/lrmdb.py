@@ -4,7 +4,6 @@ from .. import LuxRenderAddon
 from ..outputs import LuxLog
 
 from .lrmdb_lib import lrmdb_client
-from luxrender.operators.lrmdb_lib import lrmdb_client
 
 def null_callback(context):
 	pass
