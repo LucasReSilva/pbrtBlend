@@ -59,7 +59,7 @@ class library_loader():
 				'lzo.dll',
 				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzo.dll'
 			],
-			'linux': [
+			'linux2': [
 				'/usr/lib/liblzo2.so',
 				'/usr/lib/liblzo2.so.2',
 				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.so'
@@ -74,7 +74,7 @@ class library_loader():
 				'lzma.dll',
 				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzma.dll'
 			],
-			'linux': [
+			'linux2': [
 				'/usr/lib/liblzma.so',
 				'/usr/lib/liblzma.so.2',
 				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzma.so'
