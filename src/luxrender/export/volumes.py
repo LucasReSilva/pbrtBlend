@@ -114,11 +114,8 @@ class library_loader():
 					cls.lzmadll = cdll.LoadLibrary(sp)
 					cls.has_lzma = True
 					break
-				except Exception as err:
-					if err.errno == errno.EINVAL: # No 22: Invalid argument => Library not found
-						continue
-					else:
-						raise
+				except Exception:
+					continue
 			
 			if cls.has_lzma:
 				LuxLog('Volumes: LZMA Library found')
