@@ -17,7 +17,7 @@ class ClickLocation(object):
 	def hit(self, region, mx, my):
 		hx = self.x if self.x > 0 else region.width + self.x
 		hy = self.y if self.y > 0 else region.height + self.y
-		return ( my>hy and my<(hy+14) )
+		return ( my>hy and my<(hy+14) ) and ( mx>hx and mx<(hx+200))
 
 class ActionText(object):
 	def __init__(self, label, location=ClickLocation(), callback=null_callback, callback_args=tuple()):
@@ -35,6 +35,58 @@ class ActionText(object):
 	
 	def execute(self, context):
 		self.callback( context, *self.callback_args )
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_lrmdb_login(bpy.types.Operator):
+	"""Log in to the LuxRender Materials Database"""
+	
+	bl_idname = 'luxrender.lrmdb_login'
+	bl_label  = 'Log in to LRMDB'
+	
+	username = bpy.props.StringProperty(name='Username:')
+	password = bpy.props.StringProperty(name='Password:')
+	
+	def execute(self, context):
+		if self.properties.username and self.properties.password:
+			try:
+				s = lrmdb_client.server_instance()
+				li = s.user.login(self.properties.username, self.properties.password)
+				if not li:
+					lrmdb_client.loggedin = False
+					lrmdb_client.username = ''
+					self.report({'ERROR'}, 'Login failure')
+				else:
+					lrmdb_client.loggedin = True
+					lrmdb_client.username = self.properties.username
+				return {'FINISHED'}
+			except Exception as err:
+				LuxLog('LRMDB ERROR: %s' % err)
+				return {'CANCELLED'}
+		else:
+			self.report({'ERROR'}, 'Must supply both username and password')
+			return {'CANCELLED'}
+	
+	def invoke(self, context, event):
+		wm = context.window_manager
+		return wm.invoke_props_dialog(self)
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
+	"""Log out of the LuxRender Materials Database"""
+	
+	bl_idname = 'luxrender.lrmdb_logout'
+	bl_label  = 'Log out of LRMDB'
+	
+	def execute(self, context):
+		try:
+			s = lrmdb_client.server_instance()
+			li = s.user.logout()
+			if not li:
+				self.report({'ERROR'}, 'Logout failure')
+			return {'FINISHED'}
+		except Exception as err:
+			LuxLog('LRMDB ERROR: %s' % err)
+			return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_lrmdb(bpy.types.Operator):
@@ -76,6 +128,13 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	
 	def select_material(self, context, mat_id):
 		#LuxLog('Chose material %s' % mat_id)
+		
+		if not context.active_object:
+			LuxLog('WARNING: Select an object!')
+			return
+		if not context.active_object.active_material:
+			LuxLog('WARNING: Selected object does not have active material')
+			return
 		
 		try:
 			context.area.tag_redraw()
@@ -124,7 +183,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	
 	def show_category_items(self, context, cat_id, cat_name):
 		#LuxLog('Chose category %s' % cat_id)
-		
 		try:
 			context.area.tag_redraw()
 			s = lrmdb_client.server_instance()
@@ -203,8 +261,12 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			display_category(ct, 1)
 	
 	def begin_login(self, context):
-		# invoke a menu operator to begin login process
-		pass
+		bpy.ops.luxrender.lrmdb_login('INVOKE_DEFAULT')
+	
+	def end_login(self, context):
+		bpy.ops.luxrender.lrmdb_logout()
+		self.reset_actions()
+		LUXRENDER_OT_lrmdb._active = False
 	
 	def reset_actions(self):
 		self.actions = []
@@ -223,6 +285,13 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 					lrmdb_client.username,
 					ClickLocation(0,-150,-60,0),
 					null_callback,
+					tuple()
+				),
+				
+				ActionText(
+					'Log out',
+					ClickLocation(0,-150,-90,0),
+					self.end_login,
 					tuple()
 				)
 			])
