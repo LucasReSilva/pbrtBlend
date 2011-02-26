@@ -104,7 +104,7 @@ class SceneExporter(object):
 			])
 			
 			efutil.export_path = lxs_filename
-			print('(3) export_path is %s' % efutil.export_path)
+			#print('(3) export_path is %s' % efutil.export_path)
 			
 			if self.properties.api_type == 'FILE':
 				
