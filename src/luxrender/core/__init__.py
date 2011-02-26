@@ -189,7 +189,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			os.chdir(prev_dir)
 	
 	def render_preview(self, scene):
-		self.output_dir = efutil.temp_directory()
+		if sys.platform == 'darwin':
+			self.output_dir = efutil.filesystem_path( bpy.app.tempdir )
+		else:
+			self.output_dir = efutil.temp_directory()
 		
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
