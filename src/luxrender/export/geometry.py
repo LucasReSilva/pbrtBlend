@@ -205,24 +205,27 @@ class GeometryExporter(object):
 					
 					# Put PLY files in frame-numbered subfolders to avoid
 					# clobbering when rendering animations
-					sc_fr = '%05d' % self.visibility_scene.frame_current
+					sc_fr = '%s/%s/%05d' % (efutil.scene_filename(), self.geometry_scene.name, self.visibility_scene.frame_current)
 					if not os.path.exists( os.path.join(os.getcwd(), sc_fr) ):
-						os.mkdir(sc_fr)
+						os.makedirs(sc_fr)
 					
 					def make_plyfilename():
 						ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
-						mesh_name = '%s-%s_%04d_m%03d' % (self.geometry_scene.name, obj.data.name, ply_serial, i)
-						return mesh_name, '/'.join([sc_fr, bpy.path.clean_name(mesh_name) + '.ply'])
-					mesh_name, ply_filename = make_plyfilename()
+						mesh_name = '%s_%04d_m%03d' % (obj.data.name, ply_serial, i)
+						ply_filename = '%s.ply' % bpy.path.clean_name(mesh_name)
+						ply_path = '/'.join([sc_fr, ply_filename])
+						return mesh_name, ply_filename, ply_path
+					
+					mesh_name, ply_filename, ply_path = make_plyfilename()
 					
 					# Ensure that all PLY files have unique names
-					while self.ExportedPLYs.have(ply_filename):
-						mesh_name, ply_filename = make_plyfilename()
+					while self.ExportedPLYs.have(ply_path):
+						mesh_name, ply_filename, ply_path = make_plyfilename()
 					
-					self.ExportedPLYs.add(ply_filename, None)
+					self.ExportedPLYs.add(ply_path, None)
 					
 					# skip writing the PLY file if the box is checked
-					if not (os.path.exists(ply_filename) and self.visibility_scene.luxrender_engine.partial_ply):
+					if not (os.path.exists(ply_path) and self.visibility_scene.luxrender_engine.partial_ply):
 						if len(mesh.uv_textures) > 0:
 							if mesh.uv_textures.active and mesh.uv_textures.active.data:
 								uv_layer = mesh.uv_textures.active.data
@@ -282,7 +285,7 @@ class GeometryExporter(object):
 						del vert_vno_indices
 						del vert_use_vno
 						
-						with open(ply_filename, 'wb') as ply:
+						with open(ply_path, 'wb') as ply:
 							ply.write(b'ply\n')
 							ply.write(b'format binary_little_endian 1.0\n')
 							ply.write(b'comment Created by LuxBlend 2.5 exporter for LuxRender - www.luxrender.net\n')
@@ -327,12 +330,15 @@ class GeometryExporter(object):
 							del uv_cache
 							del face_vert_indices
 						
-						LuxLog('Binary PLY file written: %s/%s' % (os.getcwd(),ply_filename))
+						LuxLog('Binary PLY file written: %s/%s' % (os.getcwd(),ply_path))
 					
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
 						'filename',
-						ply_filename
+						# This really ought to be ply_filename for proper
+						# portability, but Lux doesn't adjust relative paths
+						# in files included from subdirs
+						ply_path
 					)
 					
 					# Add subdiv etc options
