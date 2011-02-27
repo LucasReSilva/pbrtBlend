@@ -32,10 +32,11 @@ from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..outputs.pure_api import LUXRENDER_VERSION
-from ..properties.material import texture_append_visibility, dict_merge
+from ..properties.material import texture_append_visibility
 from ..properties.texture import (
 	ColorTextureParameter, FloatTextureParameter, FresnelTextureParameter
 )
+from ..util import dict_merge
 
 def WorldVolumeParameter(attr, name):
 	return [
@@ -113,27 +114,6 @@ TC_absorption			= VolumeDataColorTextureParameter('absorption', 'Absorption',		d
 TC_sigma_a				= VolumeDataColorTextureParameter('sigma_a', 'Absorption',			default=(1.0,1.0,1.0))
 TC_sigma_s				= VolumeDataColorTextureParameter('sigma_s', 'Scattering',			default=(0.0,0.0,0.0))
 
-def volume_visibility():
-	v_vis = dict_merge({
-		'scattering_scale': { 'type': 'homogeneous', 'sigma_s_usecolortexture': False },
-		'g': { 'type': 'homogeneous' },
-		'depth': O([ A([{ 'type': 'clear' }, { 'absorption_usecolortexture': False }]), A([{'type': 'homogeneous' }, { 'sigma_a_usecolortexture': False }]) ])
-	},
-	TFR_IOR.visibility,
-	TC_absorption.visibility,
-	TC_sigma_a.visibility,
-	TC_sigma_s.visibility
-	)
-	
-	vis_append = { 'type': 'clear' }
-	v_vis = texture_append_visibility(v_vis, TC_absorption, vis_append)
-	
-	vis_append = { 'type': 'homogeneous' }
-	v_vis = texture_append_visibility(v_vis, TC_sigma_a, vis_append)
-	v_vis = texture_append_visibility(v_vis, TC_sigma_s, vis_append)
-	
-	return v_vis
-
 def volume_types():
 	v_types =  [
 		('clear', 'Clear', 'clear')
@@ -171,7 +151,21 @@ class luxrender_volume_data(declarative_property_group):
 		'g',
 	]
 	
-	visibility = volume_visibility()
+	visibility = dict_merge(
+		{
+			'scattering_scale': { 'type': 'homogeneous', 'sigma_s_usecolortexture': False },
+			'g': { 'type': 'homogeneous' },
+			'depth': O([ A([{ 'type': 'clear' }, { 'absorption_usecolortexture': False }]), A([{'type': 'homogeneous' }, { 'sigma_a_usecolortexture': False }]) ])
+		},
+		TFR_IOR.visibility,
+		TC_absorption.visibility,
+		TC_sigma_a.visibility,
+		TC_sigma_s.visibility
+	)
+	
+	visibility = texture_append_visibility(visibility, TC_absorption, { 'type': 'clear' })
+	visibility = texture_append_visibility(visibility, TC_sigma_a, { 'type': 'homogeneous' })
+	visibility = texture_append_visibility(visibility, TC_sigma_s, { 'type': 'homogeneous' })
 	
 	properties = [
 		{

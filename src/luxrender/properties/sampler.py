@@ -28,7 +28,6 @@ from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
-from ..properties import dbo
 from ..export import ParamSet
 
 @LuxRenderAddon.addon_register_class
@@ -225,6 +224,4 @@ class luxrender_sampler(declarative_property_group):
 			#if self.sampler in ['metropolis', 'erpt']:
 			#	params.add_integer('mutationrange', self.mutationrange)
 		
-		out = self.sampler, params
-		dbo('SAMPLER', out)
-		return out
+		return self.sampler, params

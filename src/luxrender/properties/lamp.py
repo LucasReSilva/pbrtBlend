@@ -31,9 +31,9 @@ import extensions_framework.util as efutil
 from extensions_framework.validate import Logic_Operator as LO
 
 from .. import LuxRenderAddon
-from ..properties.material import dict_merge
-from ..properties.texture import ColorTextureParameter
 from ..export import ParamSet
+from ..properties.texture import ColorTextureParameter
+from ..util import dict_merge
 
 def LampVolumeParameter(attr, name):
 	return [

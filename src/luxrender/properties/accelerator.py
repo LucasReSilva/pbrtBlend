@@ -28,7 +28,6 @@ from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
 from .. import LuxRenderAddon
-from ..properties import dbo
 from ..export import ParamSet
 
 @LuxRenderAddon.addon_register_class
@@ -209,6 +208,4 @@ class luxrender_accelerator(declarative_property_group):
 				params.add_integer('fullsweepthreshold', self.fullsweepthreshold)
 				params.add_integer('skipfactor', self.skipfactor)
 		
-		out = self.accelerator, params
-		dbo('ACCELERATOR', out)
-		return out
+		return self.accelerator, params

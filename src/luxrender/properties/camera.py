@@ -34,7 +34,6 @@ from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O
 
 from .. import LuxRenderAddon
-from ..properties import dbo
 from ..export import get_worldscale
 from ..export import ParamSet, LuxManager
 from ..outputs.pure_api import LUXRENDER_VERSION
@@ -372,9 +371,7 @@ class luxrender_camera(declarative_property_group):
 				params.add_string('endtransform', 'CameraEndTransform')
 		
 		cam_type = 'orthographic' if cam.type == 'ORTHO' else self.type
-		out = cam_type, params
-		dbo('CAMERA', out)
-		return out
+		return cam_type, params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_film(declarative_property_group):
@@ -572,8 +569,15 @@ class luxrender_film(declarative_property_group):
 		
 		return ('fleximage', params)
 
-def luxrender_colorspace_controls():
-	ctl = [
+@LuxRenderAddon.addon_register_class
+class luxrender_colorspace(declarative_property_group):
+	'''
+	Storage class for LuxRender Colour-Space settings.
+	'''
+	
+	ef_attach_to = ['luxrender_film']
+	
+	controls = [
 		'cs_label',
 		[0.1, 'preset', 'preset_name'],
 		['cs_whiteX', 'cs_whiteY'],
@@ -586,22 +590,10 @@ def luxrender_colorspace_controls():
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
-		ctl.extend([
+		controls.extend([
 			'use_crf',
 			'crf_file'
 		])
-	
-	return ctl
-
-@LuxRenderAddon.addon_register_class
-class luxrender_colorspace(declarative_property_group):
-	'''
-	Storage class for LuxRender Colour-Space settings.
-	'''
-	
-	ef_attach_to = ['luxrender_film']
-	
-	controls = luxrender_colorspace_controls()
 	
 	visibility = {
 		'preset_name':	{ 'preset': True },

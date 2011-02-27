@@ -24,18 +24,3 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
-from extensions_framework.validate import Logic_OR as O
-
-DEBUG = False
-
-if DEBUG:
-	import pprint
-def dbo(m,o):
-	'''
-	Print some debugging info to the console
-	'''
-	if DEBUG: 
-		print(m)
-		pprint.pprint(o, width=1, indent=1)

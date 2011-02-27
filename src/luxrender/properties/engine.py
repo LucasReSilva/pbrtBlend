@@ -32,7 +32,8 @@ from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..outputs.pure_api import PYLUX_AVAILABLE
 from ..outputs.pure_api import LUXRENDER_VERSION
-from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
+
+#from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
 
 def find_apis():
 	apis = [
@@ -40,13 +41,21 @@ def find_apis():
 	]
 	if PYLUX_AVAILABLE:
 		apis.append( ('INT', 'Internal', 'INT') )
-	if LUXFIRE_CLIENT_AVAILABLE:
-		apis.append( ('LFC', 'LuxFire Client', 'LFC') )
+	
+	#if LUXFIRE_CLIENT_AVAILABLE:
+	#	apis.append( ('LFC', 'LuxFire Client', 'LFC') )
 	
 	return apis
 
-def engine_controls():
-	ectl = [
+@LuxRenderAddon.addon_register_class
+class luxrender_engine(declarative_property_group):
+	'''
+	Storage class for LuxRender Engine settings.
+	'''
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
 		'export_type',
 		'binary_name',
 		'write_files',
@@ -63,21 +72,9 @@ def engine_controls():
 	
 	if LUXRENDER_VERSION >= '0.8':
 		# Insert 'renderer' before 'binary_name'
-		ectl.insert(ectl.index('binary_name'), 'renderer')
-		ectl.insert(ectl.index('binary_name'), 'opencl_platform_index')
-		ectl.append('log_verbosity')
-	
-	return ectl
-
-@LuxRenderAddon.addon_register_class
-class luxrender_engine(declarative_property_group):
-	'''
-	Storage class for LuxRender Engine settings.
-	'''
-	
-	ef_attach_to = ['Scene']
-	
-	controls = engine_controls()
+		controls.insert(controls.index('binary_name'), 'renderer')
+		controls.insert(controls.index('binary_name'), 'opencl_platform_index')
+		controls.append('log_verbosity')
 	
 	visibility = {
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },

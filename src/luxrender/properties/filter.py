@@ -27,7 +27,6 @@
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import dbo
 from ..export import ParamSet
 
 @LuxRenderAddon.addon_register_class
@@ -190,6 +189,4 @@ class luxrender_filter(declarative_property_group):
 			if self.filter == 'sinc':
 				params.add_float('tau', self.tau)
 		
-		out = self.filter, params
-		dbo('FILTER', out)
-		return out
+		return self.filter, params

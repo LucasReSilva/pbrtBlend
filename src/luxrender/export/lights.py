@@ -32,7 +32,6 @@ from extensions_framework import util as efutil
 
 from ..outputs import LuxManager
 from ..outputs.file_api import Files
-from ..properties import dbo
 from ..export import ParamSet, get_worldscale, matrix_to_list
 
 def attr_light(lux_context, light, name, group, type, params, transform=None, portals=[]):
@@ -62,7 +61,6 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	if light.type == 'SPOT' and light.luxrender_lamp.luxrender_lamp_spot.projector:
 		lux_context.rotate(180, 0,1,0)
 	
-	dbo('LIGHT', (type, params))
 	lux_context.lightGroup(group, [])
 	
 	if light.type == 'HEMI':

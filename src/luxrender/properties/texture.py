@@ -615,14 +615,42 @@ TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
 
 BAND_MAX_TEX = 32
 
-def band_visibility():
-	vis = {
+TC_BAND_ARRAY = []
+TF_BAND_ARRAY = []
+for i in range(1, BAND_MAX_TEX+1):
+	TF_BAND_ARRAY.append(
+		FloatTextureParameter('tex%d'%i, 'tex%d'%i, default=0.0, min=-1e6, max=1e6)
+	)
+	TC_BAND_ARRAY.append(
+		ColorTextureParameter('tex%d'%i, 'tex%d'%i, default=(0.0,0.0,0.0))
+	)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_band(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	
+	controls = [
+		'variant',
+		'noffsets',
+		[0.9, 'amount_floatvalue', 'amount_usefloattexture'],
+		[0.9, 'amount_floattexture', 'amount_multiplyfloat']
+	]
+	for i in range(1,BAND_MAX_TEX+1):
+		controls.extend([
+			[0.9,['offsetfloat%d'%i,'tex%d_floatvalue'%i],'tex%d_usefloattexture'%i],
+			[0.9,'tex%d_floattexture'%i,'tex%d_multiplyfloat'%i],
+			[0.9,['offsetcolor%d'%i,'tex%d_color'%i],'tex%d_usecolortexture'%i],
+			[0.9,'tex%d_colortexture'%i,'tex%d_multiplycolor'%i],
+		])
+	
+	# Visibility we do manually because of the variant switch
+	visibility = {
 		'amount_floattexture':			{ 'amount_usefloattexture': True },
 		'amount_multiplyfloat':			{ 'amount_usefloattexture': True },
 	}
 	
 	for i in range(1, BAND_MAX_TEX+1):
-		vis.update({
+		visibility.update({
 			'offsetcolor%d'%i:			{ 'variant': 'color','noffsets': LO({'>=':i}) },
 			'tex%d_color'%i: 			{ 'variant': 'color','noffsets': LO({'>=':i}) },
 			'tex%d_usecolortexture'%i:	{ 'variant': 'color','noffsets': LO({'>=':i}) },
@@ -636,34 +664,31 @@ def band_visibility():
 			'tex%d_multiplyfloat'%i:	{ 'variant': 'float', 'tex%d_usefloattexture'%i: True,'noffsets': LO({'>=':i}) },
 		})
 	
-	return vis
-
-def band_tex_controls():
-	ctls = []
-	for i in range(1,BAND_MAX_TEX+1):
-		ctls.extend([
-			[0.9,['offsetfloat%d'%i,'tex%d_floatvalue'%i],'tex%d_usefloattexture'%i],
-			[0.9,'tex%d_floattexture'%i,'tex%d_multiplyfloat'%i],
-			[0.9,['offsetcolor%d'%i,'tex%d_color'%i],'tex%d_usecolortexture'%i],
-			[0.9,'tex%d_colortexture'%i,'tex%d_multiplycolor'%i],
-		])
-	return ctls
-
-TC_BAND_ARRAY = []
-TF_BAND_ARRAY = []
-for i in range(1, BAND_MAX_TEX+1):
-	TF_BAND_ARRAY.append(
-		FloatTextureParameter('tex%d'%i, 'tex%d'%i, default=0.0, min=-1e6, max=1e6)
-	)
-	TC_BAND_ARRAY.append(
-		ColorTextureParameter('tex%d'%i, 'tex%d'%i, default=(0.0,0.0,0.0))
-	)
-
-def band_tex_properties():
-	props = []
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'enum',
+			'name': 'Variant',
+			'items': [
+				('float', 'Float', 'float'),
+				('color', 'Color', 'color'),
+			],
+			'expand': True,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'noffsets',
+			'type': 'int',
+			'name': 'NOffsets',
+			'default': 2,
+			'min': 2,
+			'max': BAND_MAX_TEX,
+			'save_in_preset': True
+		},
+	] + TF_amount.properties
 	
 	for i in range(1, BAND_MAX_TEX+1):
-		props.extend([
+		properties.extend([
 			{
 					'attr': 'offsetfloat%d'%i,
 					'type': 'float',
@@ -687,49 +712,10 @@ def band_tex_properties():
 		])
 	
 	for prop in TC_BAND_ARRAY:
-		props.extend( prop.properties )
+		properties.extend( prop.properties )
 	for prop in TF_BAND_ARRAY:
-		props.extend( prop.properties )
-	
-	return props
-
-@LuxRenderAddon.addon_register_class
-class luxrender_tex_band(declarative_property_group):
-	ef_attach_to = ['luxrender_texture']
-	
-	controls = [
-		'variant',
-		'noffsets',
-		[0.9, 'amount_floatvalue', 'amount_usefloattexture'],
-		[0.9, 'amount_floattexture', 'amount_multiplyfloat']
-	] + band_tex_controls()
-	
-	# Visibility we do manually because of the variant switch
-	visibility = band_visibility()
-	
-	properties = [
-		{
-			'attr': 'variant',
-			'type': 'enum',
-			'name': 'Variant',
-			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
-			],
-			'expand': True,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'noffsets',
-			'type': 'int',
-			'name': 'NOffsets',
-			'default': 2,
-			'min': 2,
-			'max': BAND_MAX_TEX,
-			'save_in_preset': True
-		},
-	] + TF_amount.properties + \
-	band_tex_properties()
+		properties.extend( prop.properties )
+	del i, prop
 	
 	def get_paramset(self, scene, texture):
 		band_params = ParamSet()
@@ -750,10 +736,9 @@ class luxrender_tex_band(declarative_property_group):
 			
 			# In API mode need to tell Lux how many slots explicity
 			if LuxManager.ActiveManager.lux_context.API_TYPE == 'PURE':
-				mm_params.add_integer('noffsets', self.noffsets)
+				band_params.add_integer('noffsets', self.noffsets)
 			
 			band_params.add_float('offsets', offsets)
-			
 		
 		return set(), band_params
 
@@ -1911,22 +1896,27 @@ class luxrender_tex_mix(declarative_property_group):
 		
 		return set(), mix_params
 
-def multimix_tex_controls():
-	ctls = []
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_multimix(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	
+	controls = [
+		'variant',
+		'nslots',
+	]
 	for i in range(1,BAND_MAX_TEX+1):
-		ctls.extend([
+		controls.extend([
 			[0.9,['weightfloat%d'%i,'tex%d_floatvalue'%i],'tex%d_usefloattexture'%i],
 			[0.9,'tex%d_floattexture'%i,'tex%d_multiplyfloat'%i],
 			[0.9,['weightcolor%d'%i,'tex%d_color'%i],'tex%d_usecolortexture'%i],
 			[0.9,'tex%d_colortexture'%i,'tex%d_multiplycolor'%i],
 		])
-	return ctls
-
-def multimix_visibility():
-	vis = {}
+	
+	# Visibility we do manually because of the variant switch
+	visibility = {}
 	
 	for i in range(1, BAND_MAX_TEX+1):
-		vis.update({
+		visibility.update({
 			'weightcolor%d'%i:			{ 'variant': 'color','nslots': LO({'>=':i}) },
 			'tex%d_color'%i: 			{ 'variant': 'color','nslots': LO({'>=':i}) },
 			'tex%d_usecolortexture'%i:	{ 'variant': 'color','nslots': LO({'>=':i}) },
@@ -1940,13 +1930,30 @@ def multimix_visibility():
 			'tex%d_multiplyfloat'%i:	{ 'variant': 'float','nslots': LO({'>=':i}), 'tex%d_usefloattexture'%i: True },
 		})
 	
-	return vis
-
-def multimix_tex_properties():
-	props = []
-	
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'enum',
+			'name': 'Variant',
+			'items': [
+				('float', 'Float', 'float'),
+				('color', 'Color', 'color'),
+			],
+			'expand': True,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'nslots',
+			'type': 'int',
+			'name': 'Texture count',
+			'default': 2,
+			'min': 2,
+			'max': BAND_MAX_TEX,
+			'save_in_preset': True
+		},
+	]
 	for i in range(1, BAND_MAX_TEX+1):
-		props.extend([
+		properties.extend([
 			{
 					'attr': 'weightfloat%d'%i,
 					'type': 'float',
@@ -1970,46 +1977,9 @@ def multimix_tex_properties():
 		])
 	
 	for prop in TC_BAND_ARRAY:
-		props.extend( prop.properties )
+		properties.extend( prop.properties )
 	for prop in TF_BAND_ARRAY:
-		props.extend( prop.properties )
-	
-	return props
-
-@LuxRenderAddon.addon_register_class
-class luxrender_tex_multimix(declarative_property_group):
-	ef_attach_to = ['luxrender_texture']
-	
-	controls = [
-		'variant',
-		'nslots',
-	] + multimix_tex_controls()
-	
-	# Visibility we do manually because of the variant switch
-	visibility = multimix_visibility()
-	
-	properties = [
-		{
-			'attr': 'variant',
-			'type': 'enum',
-			'name': 'Variant',
-			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
-			],
-			'expand': True,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'nslots',
-			'type': 'int',
-			'name': 'Texture count',
-			'default': 2,
-			'min': 2,
-			'max': BAND_MAX_TEX,
-			'save_in_preset': True
-		},
-	] + multimix_tex_properties()
+		properties.extend( prop.properties )
 	
 	def get_paramset(self, scene, texture):
 		mm_params = ParamSet()
@@ -2280,9 +2250,7 @@ class luxrender_tex_transform(declarative_property_group):
 class luxrender_tex_uv(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	
-	controls = [
-		# None
-	]
+	controls = []
 	
 	visibility = {} 
 	
@@ -2339,11 +2307,9 @@ class luxrender_tex_uvmask(declarative_property_group):
 class luxrender_tex_windy(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	
-	controls = [
-		# None
-	]
+	controls = []
 	
-	visibility = {} 
+	visibility = {}
 	
 	properties = [
 		{
@@ -2404,4 +2370,3 @@ class luxrender_tex_wrinkled(declarative_property_group):
 									.add_float('roughness', self.roughness)
 		
 		return {'3DMAPPING'}, wrinkled_params
-
