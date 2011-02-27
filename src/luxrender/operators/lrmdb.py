@@ -1,3 +1,29 @@
+# -*- coding: utf8 -*-
+#
+# ***** BEGIN GPL LICENSE BLOCK *****
+#
+# --------------------------------------------------------------------------
+# Blender 2.5 LuxRender Add-On
+# --------------------------------------------------------------------------
+#
+# Authors:
+# Doug Hammond
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# ***** END GPL LICENCE BLOCK *****
+#
 import bpy, blf
 
 from .. import LuxRenderAddon
@@ -145,9 +171,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			LUXRENDER_OT_lrmdb._active = False
 			return
 		
-		#import pprint
-		#pprint.pprint(md, indent=1, width=1)
-		
 		try:
 			for mat_part in md['objects']:
 				# TODO, load all parts, not just the top-most one
@@ -230,8 +253,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
 			LUXRENDER_OT_lrmdb._active = False
 			return
-		
-		#LuxLog(ct)
 		
 		def display_category(ctg, i=0, j=0):
 			for cat_id, cat in ctg.items():
