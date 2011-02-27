@@ -37,6 +37,7 @@ from ..properties.lampspectrum_data import lampspectrum_list
 from ..export import ParamSet, get_worldscale
 from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs import LuxManager
+from ..util import dict_merge
 
 #------------------------------------------------------------------------------ 
 # Texture property group construction helpers
@@ -538,6 +539,7 @@ class luxrender_texture(declarative_property_group):
 				('multimix', 'multimix', 'multimix'),
 				('scale', 'scale', 'scale'),
 				('uv', 'uv', 'uv'),
+				('uvmask', 'uvmask', 'uvmask'),
 				('windy', 'windy', 'windy'),
 				('wrinkled', 'wrinkled', 'wrinkled'),
 				('', 'Emission & Spectrum Textures', ''),
@@ -601,6 +603,8 @@ TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=-1e6, max
 TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0)
 TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0)
 TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0)
+TF_innertex		= FloatTextureParameter('innertex',		'innertex',		default=1.0, min=0.0, max=100.0)
+TF_outertex		= FloatTextureParameter('outertex',		'outertex',		default=0.0, min=0.0, max=100.0)
 
 # Color Texture Parameters
 TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'brickmodtex',	default=(1.0,1.0,1.0))
@@ -2294,6 +2298,42 @@ class luxrender_tex_uv(declarative_property_group):
 		uv_params = ParamSet()
 		
 		return {'2DMAPPING'}, uv_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_uvmask(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	
+	controls = \
+	TF_innertex.controls + \
+	TF_outertex.controls
+	
+	visibility = dict_merge(
+		TF_innertex.visibility,
+		TF_outertex.visibility,
+	)
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'float'
+		},
+	] + \
+	TF_innertex.properties + \
+	TF_outertex.properties
+	
+	def get_paramset(self, scene, texture):
+		uvmask_params = ParamSet()
+		
+		if LuxManager.ActiveManager is not None:
+			uvmask_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'innertex', self.variant, self)
+			)
+			uvmask_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'outertex', self.variant, self)
+			)
+		
+		return {'2DMAPPING'}, uvmask_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_windy(declarative_property_group):

@@ -25,8 +25,6 @@
 # ***** END GPL LICENCE BLOCK *****
 import bpy
 
-from copy import deepcopy
-
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
 
@@ -36,6 +34,7 @@ from ..export import ParamSet
 from ..export.materials import ExportedMaterials, ExportedTextures, get_texture_from_scene
 from ..outputs import LuxManager, LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
+from ..util import dict_merge
 
 def MaterialParameter(attr, name, property_group):
 	return [
@@ -121,12 +120,6 @@ TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1
 TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
 TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',	default=(0.64,0.64,0.64) )
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
-
-def dict_merge(*args):
-	vis = {}
-	for vis_dict in args:
-		vis.update(deepcopy(vis_dict))	# need a deepcopy since nested dicts return references!
-	return vis
 
 def mat_list():
 	mat_list = [

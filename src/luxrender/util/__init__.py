@@ -28,6 +28,15 @@
 Combined Base64 + zlib encoder/decoder for embedded file data
 """
 
+
+from copy import deepcopy
+
+def dict_merge(*args):
+	vis = {}
+	for vis_dict in args:
+		vis.update(deepcopy(vis_dict))	# need a deepcopy since nested dicts return references!
+	return vis
+
 import base64, io, os, time, zlib
 
 class bEncoder(object):
