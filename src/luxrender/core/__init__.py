@@ -346,7 +346,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				api_type = 'FILE'
 			else:
 				api_type = 'API'
-				self.output_dir = efutil.temp_directory()
+				if sys.platform == 'darwin':
+					self.output_dir = efutil.filesystem_path( bpy.app.tempdir )
+				else:
+					self.output_dir = efutil.temp_directory()
 		
 		elif scene.luxrender_engine.export_type == 'LFC':
 			api_type = 'LUXFIRE_CLIENT'
