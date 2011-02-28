@@ -27,7 +27,7 @@
 import os, struct
 OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
-import bpy, mathutils
+import bpy, mathutils, math
 
 from extensions_framework import util as efutil
 
@@ -699,6 +699,43 @@ class GeometryExporter(object):
 			for i in row:
 				if str(i) == 'nan': return True
 		return False
+
+	def BSpline(self, points, dimension, degree, u):
+		controlpoints = []
+		def Basispolynom(controlpoints, i, u, degree):
+			if degree == 0:
+				temp = 0
+				if (controlpoints[i] <= u) and (u < controlpoints[i+1]): temp = 1
+			else:
+				N0 = Basispolynom(controlpoints,i,u,degree-1)
+				N1 = Basispolynom(controlpoints,i+1,u,degree-1)
+				
+				if N0 == 0: 
+					sum1 = 0
+				else:
+					sum1 = (u-controlpoints[i])/(controlpoints[i+degree] - controlpoints[i])*N0
+				if N1 == 0: 
+					sum2 = 0
+				else:
+					sum2 = (controlpoints[i+1+degree]-u)/(controlpoints[i+1+degree] - controlpoints[i+1])*N1
+				
+				temp = sum1 + sum2
+			return temp
+
+		for i in range(len(points)+degree+1):
+			if i <= degree:
+				controlpoints.append(0)
+			elif i >= len(points):
+				controlpoints.append(len(points)-degree)
+			else:
+				controlpoints.append(i - degree)                                                                        
+						
+		if dimension == 2: temp = mathutils.Vector((0.0,0.0))
+		elif dimension == 3:temp = mathutils.Vector((0.0,0.0,0.0))
+
+		for i in range(len(points)):            
+			temp = temp + Basispolynom(controlpoints, i, u, degree)*points[i]
+		return temp
 	
 	def handler_Duplis_PATH(self, obj, *args, **kwargs):
 		if not 'particle_system' in kwargs.keys():
@@ -720,13 +757,15 @@ class GeometryExporter(object):
 		LuxLog('Exporting Hair system "%s"...' % psys.name)
 		
 		size = psys.settings.particle_size / 2.0 # XXX divide by 2 twice ?
-		hair_shapes = (
+		hair_Junction = (
 			(
 				'HAIR_Junction_%s'%psys.name,
 				psys.settings.material - 1,
 				'sphere',
 				ParamSet().add_float('radius', size/2.0)
 			),
+		)
+		hair_Strand = (		
 			(
 				'HAIR_Strand_%s'%psys.name,
 				psys.settings.material - 1,
@@ -735,9 +774,15 @@ class GeometryExporter(object):
 					.add_float('radius', size/2.0) \
 					.add_float('zmin', 0.0) \
 					.add_float('zmax', 1.0)
-			)
+			),
 		)
-		for sn, si, st, sp in hair_shapes:
+		
+		for sn, si, st, sp in hair_Junction:
+			self.lux_context.objectBegin(sn)
+			self.lux_context.shape(st, sp)
+			self.lux_context.objectEnd()
+
+		for sn, si, st, sp in hair_Strand:
 			self.lux_context.objectBegin(sn)
 			self.lux_context.shape(st, sp)
 			self.lux_context.objectEnd()
@@ -749,10 +794,25 @@ class GeometryExporter(object):
 			if not (particle.is_exist and particle.is_visible): continue
 			
 			det.exported_objects += 1
-			
-			for j in range(len(particle.hair)-1):
+
+			points = []			
+			for j in range(len(particle.hair)):
+				points.append(particle.hair[j].co)
+			if psys.settings.use_hair_bspline:
+				temp = []
+				degree = 2
+				dimension = 3
+				for i in range(math.trunc(math.pow(2,psys.settings.render_step))):
+					if i > 0:
+						u = i*(len(points)- degree)/math.trunc(math.pow(2,psys.settings.render_step)-1)-0.0000000000001
+					else:
+						u = i*(len(points)- degree)/math.trunc(math.pow(2,psys.settings.render_step)-1)
+					temp.append(self.BSpline(points, dimension, degree, u))
+				points = temp
+
+			for j in range(len(points)-1):
 				SB = obj.matrix_basis.copy().to_3x3()
-				v1 = particle.hair[j+1].co - particle.hair[j].co
+				v1 = points[j+1] - points[j]
 				v2 = SB[2].cross(v1)
 				v3 = v1.cross(v2)
 				v2.normalize()
@@ -762,12 +822,19 @@ class GeometryExporter(object):
 					M = mathutils.Matrix( (SB[0], SB[1], SB[2]) )
 				M = M.to_4x4()
 				
-				Mtrans = mathutils.Matrix.Translation(particle.hair[j].co)
+				Mtrans = mathutils.Matrix.Translation(points[j])
 				matrix = obj.matrix_world * Mtrans * M
+								
+				self.exportShapeInstances(
+					obj,
+					hair_Strand,
+					matrix=[matrix,None]
+				)
+				matrix = obj.matrix_world * Mtrans
 				
 				self.exportShapeInstances(
 					obj,
-					hair_shapes,
+					hair_Junction,
 					matrix=[matrix,None]
 				)
 		
