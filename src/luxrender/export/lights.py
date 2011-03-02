@@ -63,7 +63,7 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	
 	lux_context.lightGroup(group, [])
 	
-	if light.type == 'HEMI':
+	if light.type == 'HEMI' and light.luxrender_lamp.luxrender_lamp_hemi.type == 'infinite':
 		lux_context.scale(-1, 1, 1) # correct worldmap orientation
 	
 	if light.luxrender_lamp.Exterior_volume != '':
@@ -108,7 +108,12 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		return True
 	
 	if light.type == 'HEMI':
-		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		hemi_type = light.luxrender_lamp.luxrender_lamp_hemi.type
+		if hemi_type == 'distant':
+			light_params.add_point('from', (0,0,0))
+			light_params.add_point('to', (0,0,-1))
+		
+		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, hemi_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'SPOT':

@@ -117,7 +117,7 @@ class ui_luxrender_lamp_sun(lamps_panel):
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_hemi(lamps_panel):
-	bl_label = 'LuxRender Infinite Lamp'
+	bl_label = 'LuxRender Hemi Lamp'
 	
 	display_property_groups = [
 		( ('lamp','luxrender_lamp'), 'luxrender_lamp_hemi' )

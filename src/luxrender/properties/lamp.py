@@ -330,6 +330,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	
 	controls = [
+		'type',
 		[0.323, 'L_colorlabel', 'L_color'],
 		'infinite_map',
 		'mapping_type',
@@ -337,13 +338,24 @@ class luxrender_lamp_hemi(declarative_property_group):
 	]
 	
 	visibility = {
-		'mapping_type':		{ 'infinite_map': LO({'!=': ''}) },
-		'hdri_multiply':	{ 'infinite_map': LO({'!=': ''}) },
+		'infinite_map':		{ 'type': 'infinite' },
+		'mapping_type':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'hdri_multiply':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 	}
 	
 	properties = TC_L.properties + [
 		# nsamples
 		# gamma
+		{
+			'type': 'enum',
+			'attr': 'type',
+			'name': 'Type',
+			'items': [
+				('infinite', 'Infinite', 'infinite'),
+				('distant', 'Distant', 'distant'),
+			],
+			'expand': True
+		},
 		{
 			'type': 'bool',
 			'attr': 'hdri_multiply',
@@ -375,15 +387,18 @@ class luxrender_lamp_hemi(declarative_property_group):
 	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		
-		if self.infinite_map != '':
-			if lamp_object.library is not None:
-				hdri_path = bpy.path.abspath(self.infinite_map, lamp_object.library.filepath)
-			else:
-				hdri_path = self.infinite_map
-			params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
-			params.add_string('mapping', self.mapping_type)
-			
-		if self.infinite_map == '' or self.hdri_multiply:
+		if self.type == 'infinite':
+			if self.infinite_map != '':
+				if lamp_object.library is not None:
+					hdri_path = bpy.path.abspath(self.infinite_map, lamp_object.library.filepath)
+				else:
+					hdri_path = self.infinite_map
+				params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
+				params.add_string('mapping', self.mapping_type)
+				
+			if self.infinite_map == '' or self.hdri_multiply:
+				params.add_color('L', self.L_color)
+		else:
 			params.add_color('L', self.L_color)
 		
 		return params
