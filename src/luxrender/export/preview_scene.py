@@ -109,6 +109,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	else:
 		lux_context.surfaceIntegrator('bidirectional', ParamSet())
 	
+	# Volume Integrator
+	lux_context.volumeIntegrator('multi', ParamSet())
+	
 	lux_context.worldBegin()
 	
 	# Collect volumes from all scenes *sigh*
