@@ -44,7 +44,8 @@ ior_tree = [
 		("Honey, 13% water content", 12),
 		("Honey, 17% water content", 13),
 		("Honey, 21% water content", 14),
-		("Ice", 15), ("Milk", 16),
+		("Ice", 15),
+		("Milk", 16),
 		("Oil, Clove", 17),
 		("Oil, Lemon", 18),
 		("Oil, Neroli", 19),
@@ -62,8 +63,8 @@ ior_tree = [
 		("Water (100 C)", 31),
 		("Water (20 C)", 32),
 		("Whisky", 33)
-	] ),
-
+	]),
+	
 	("Gases", [
 		("Vacuum", 101),
 		("Air @ STP", 102),
@@ -72,7 +73,7 @@ ior_tree = [
 		("Carbon dioxide", 106)
 	]),
 	
-	("Transparent\x20", [
+	("Transparent", [
 		("Eye, Aqueous humor", 201),
 		("Eye, Cornea", 202),
 		("Eye, Lens", 203),
@@ -115,8 +116,8 @@ ior_tree = [
 		("Danburite", 320),
 		("Diamond", 321),
 		("Emerald", 322),
-		("Emerald Catseye",
-		323), ("Flourite", 324),
+		("Emerald Catseye", 323),
+		("Flourite", 324),
 		("Garnet, Grossular", 325),
 		("Garnet, Andradite", 326),
 		("Garnet, Demantiod", 327),
@@ -163,8 +164,8 @@ ior_tree = [
 		("Tourmaline, Red", 368),
 		("Zircon", 369),
 		("Zirconia, Cubic", 370)
-			] ),
-
+	]),
+	
 	("Other ", [
 		("Pyrex (Borosilicate glass)", 401),
 		("Ruby", 402),
@@ -193,9 +194,9 @@ ior_tree = [
 		("Gallium(III) prosphide", 425),
 		("Gallium(III) arsenide", 426),
 		("Silicon", 427)
-	] )
-	]
-	
+	])
+]
+
 ior_dict = {
 	1:1.36,
 	2:1.36,
@@ -214,7 +215,7 @@ ior_dict = {
 	15:1.309,
 	16:1.35,
 	17:1.535,
-	:1.481,
+	18:1.481,
 	19:1.482,
 	20:1.473,
 	21:1.466,
@@ -349,5 +350,58 @@ ior_dict = {
 	425:3.02,
 	426:3.5,
 	427:3.927
-	}
+}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_set_ior_preset(bpy.types.Operator):
+	bl_idname = 'luxrender.set_ior_preset'
+	bl_label = 'Apply IOR preset'
 	
+	index = bpy.props.IntProperty()
+	l_name = bpy.props.StringProperty()
+	
+	def execute(self, context):
+		# Detect either material or volume context
+		if context.material and context.material.luxrender_material:
+			lm = context.material.luxrender_material
+			for mat_type in ('glass', 'roughglass', 'glossy', 'glossy_lossy', 'glossytranslucent'):
+				if lm.type == mat_type:
+					getattr(lm, 'luxrender_mat_%s'%mat_type).index_floatvalue = ior_dict[self.properties.index]
+		elif context.scene and context.scene.luxrender_volumes:
+			vi = context.scene.luxrender_volumes.volumes_index
+			lv = context.scene.luxrender_volumes.volumes[vi]
+			lv.fresnel_fresnelvalue = ior_dict[self.properties.index]
+		return {'FINISHED'}
+
+def draw_generator(operator, m_names):
+	def draw(self, context):
+		sl = self.layout
+		for m_name, m_index in m_names:
+			op = sl.operator(operator, text=m_name)
+			op.index = m_index
+			op.l_name = m_name
+	return draw
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_MT_ior_presets(bpy.types.Menu):
+	bl_label = 'IOR presets'
+	submenus = []
+	
+	def draw(self, context):
+		sl = self.layout
+		for sm in self.submenus:
+			sl.menu(sm.bl_idname)
+	
+	for label, iors in ior_tree:
+		submenu_idname = 'LUXRENDER_MT_ior_cat%d'%len(submenus)
+		submenus.append(
+			LuxRenderAddon.addon_register_class(type(
+				submenu_idname,
+				(bpy.types.Menu,),
+				{
+					'bl_idname': submenu_idname,
+					'bl_label': label,
+					'draw': draw_generator('LUXRENDER_OT_set_ior_preset', iors)
+				}
+			))
+		)

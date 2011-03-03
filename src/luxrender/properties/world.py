@@ -139,6 +139,9 @@ class luxrender_volume_data(declarative_property_group):
 	controls = [
 		'type',
 	] + \
+	[
+		'ior_preset',
+	] + \
 	TFR_IOR.controls + \
 	TC_absorption.controls + \
 	TC_sigma_a.controls + \
@@ -168,6 +171,11 @@ class luxrender_volume_data(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TC_sigma_s, { 'type': 'homogeneous' })
 	
 	properties = [
+		{
+			'type': 'menu',
+			'attr': 'ior_preset',
+			'menu': 'LUXRENDER_MT_ior_presets',
+		},
 		{
 			'type': 'enum',
 			'attr': 'type',
