@@ -204,6 +204,13 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 	have_light = False
 	portal_shapes = []
 	
+	mesh_def_keys = {}
+	for k in mesh_definitions.cache_items.keys():
+		if not k[1] in mesh_def_keys.keys():
+			mesh_def_keys[k[1]] = []
+		mesh_def_keys[k[1]].append(k)
+	mesh_def_keys_keys = mesh_def_keys.keys()
+	
 	# First gather info about portals
 	for ob in geometry_scene.objects:
 		if ob.type != 'MESH':
@@ -213,12 +220,12 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 		if not ob.is_visible(visibility_scene) or ob.hide_render:
 			continue
 		
-		# match the mesh data name against the combined mesh-mat name exported
-		# by geometry.iterateScene
+		# match the mesh data against the keys in mesh_definitions
 		if ob.data.luxrender_mesh.portal:
-			if mesh_definitions.have(ob.data):
-				mi, mn, ms, mp = mesh_definitions.get(ob.data)
-				portal_shapes.append(mn)
+			if ob.data in mesh_def_keys_keys:
+				for mesh_def_key in mesh_def_keys[ob.data]:
+					mn, mi, ms, mp = mesh_definitions.get(mesh_def_key)
+					portal_shapes.append(mn)
 	
 	# Then iterate for lights
 	for ob in geometry_scene.objects:
