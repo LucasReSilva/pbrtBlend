@@ -285,6 +285,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		if pv_export_shape:
 			GE = GeometryExporter(lux_context, scene)
+			GE.is_preview = True
 			GE.geometry_scene = scene
 			for mesh_mat, mesh_name, mesh_type, mesh_params in GE.buildNativeMesh(obj):
 				mat.luxrender_material.export(lux_context, mat, mode='direct')
