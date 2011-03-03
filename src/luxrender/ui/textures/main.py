@@ -61,3 +61,7 @@ class ui_texture_main(luxrender_texture_base):
 		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		super().draw(context)
+		
+		cl = self.layout.column(align=True)
+		cl.label( 'Selected:')
+		cl.label( context.texture.luxrender_texture.type_label )

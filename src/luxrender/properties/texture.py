@@ -497,6 +497,104 @@ class FresnelTextureParameter(TextureParameterBase):
 #------------------------------------------------------------------------------
 # The main luxrender_texture property group
 #------------------------------------------------------------------------------ 
+
+tex_names = (
+	('Blender Textures',
+	(
+		('BLENDER', 'Use Blender Texture', 'BLENDER'),
+	)),
+	
+	('Lux Textures',
+	(
+		('band', 'Band', 'band'),
+		('bilerp', 'Bilerp', 'bilerp'),
+		('brick', 'Brick', 'brick'),
+		('checkerboard', 'Checkerboard', 'checkerboard'),
+		('dots', 'Dots', 'dots'),
+		('fbm', 'FBM', 'fbm'),
+		('harlequin', 'Harlequin', 'harlequin'),
+		('imagemap', 'Image Map', 'imagemap'),
+		('marble', 'Marble', 'marble'),
+		('mix', 'Mix', 'mix'),
+		('multimix', 'Multi mix', 'multimix'),
+		('scale', 'Scale', 'scale'),
+		('uv', 'UV', 'uv'),
+		('uvmask', 'UV mask', 'uvmask'),
+		('windy', 'Windy', 'windy'),
+		('wrinkled', 'Wrinkled', 'wrinkled'),
+	)),
+	
+	('Emission & Spectrum Textures',
+	(
+		('blackbody','Blackbody','blackbody'),
+		('equalenergy', 'Equalenergy', 'equalenergy'),
+		('lampspectrum', 'Lamp spectrum', 'lampspectrum'),
+		('gaussian', 'Gaussian', 'gaussian'),
+		('tabulateddata', 'Tabulated data', 'tabulateddata'),
+	)),
+	
+	('Fresnel Textures',
+	(
+		('constant', 'Constant', 'constant'),
+		('cauchy', 'Cauchy', 'cauchy'),
+		('sellmeier', 'Sellmeier', 'sellmeier'),
+		('sopra', 'Sopra', 'sopra'),
+		('luxpop', 'Luxpop', 'luxpop'),
+	)),
+)
+
+
+@LuxRenderAddon.addon_register_class
+class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
+	bl_idname = 'texture.set_luxrender_type'
+	bl_label = 'Set LuxRender texture type'
+	
+	tex_name = bpy.props.StringProperty()
+	tex_label = bpy.props.StringProperty()
+	
+	@classmethod
+	def poll(cls, context):
+		return	context.texture and \
+				context.texture.luxrender_texture
+	
+	def execute(self, context):
+		context.texture.luxrender_texture.type = self.properties.tex_name
+		context.texture.luxrender_texture.type_label = self.properties.tex_label
+		return {'FINISHED'}
+
+def draw_generator(operator, m_names):
+	def draw(self, context):
+		sl = self.layout
+		for m_name, m_label, m_index in m_names:
+			op = sl.operator(operator, text=m_label)
+			op.tex_name = m_name
+			op.tex_label = m_label
+	return draw
+
+@LuxRenderAddon.addon_register_class
+class TEXTURE_MT_luxrender_type(bpy.types.Menu):
+	bl_label = 'Texture Type'
+	submenus = []
+	
+	def draw(self, context):
+		sl = self.layout
+		for sm in self.submenus:
+			sl.menu(sm.bl_idname)
+	
+	for tex_cat, tex_cat_list in tex_names:
+		submenu_idname = 'TEXTURE_MT_luxrender_tex_cat%d'%len(submenus)
+		submenus.append(
+			LuxRenderAddon.addon_register_class(type(
+				submenu_idname,
+				(bpy.types.Menu,),
+				{
+					'bl_idname': submenu_idname,
+					'bl_label': tex_cat,
+					'draw': draw_generator('TEXTURE_OT_set_luxrender_type', tex_cat_list)
+				}
+			))
+		)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture(declarative_property_group):
 	'''
@@ -506,7 +604,7 @@ class luxrender_texture(declarative_property_group):
 	ef_attach_to = ['Texture']
 	
 	controls = [
-		'type'
+		'tex_type_menu',
 	]
 	
 	visibility = {}
@@ -518,43 +616,20 @@ class luxrender_texture(declarative_property_group):
 			'default': False,
 		},
 		{
+			'type': 'menu',
+			'attr': 'tex_type_menu',
+			'menu': 'TEXTURE_MT_luxrender_type'
+		},
+		{
+			'attr': 'type_label',
+			'name': 'LuxRender Type',
+			'type': 'string',
+			'save_in_preset': True
+		},
+		{
 			'attr': 'type',
 			'name': 'LuxRender Type',
-			'type': 'enum',
-			'items': (
-				('', 'Blender Textures', ''),
-				('BLENDER', 'Use Blender Texture', 'BLENDER'),
-				('', 'Lux Textures', ''),
-				('band', 'band', 'band'),
-				('bilerp', 'bilerp', 'bilerp'),
-				('brick', 'brick', 'brick'),
-				('checkerboard', 'checkerboard', 'checkerboard'),
-				('dots', 'dots', 'dots'),
-				('fbm', 'fbm', 'fbm'),
-				#('harlequin', 'harlequin', 'harlequin'),
-				('imagemap', 'imagemap', 'imagemap'),
-				('marble', 'marble', 'marble'),
-				('mix', 'mix', 'mix'),
-				('multimix', 'multimix', 'multimix'),
-				('scale', 'scale', 'scale'),
-				('uv', 'uv', 'uv'),
-				('uvmask', 'uvmask', 'uvmask'),
-				('windy', 'windy', 'windy'),
-				('wrinkled', 'wrinkled', 'wrinkled'),
-				('', 'Emission & Spectrum Textures', ''),
-				('blackbody','blackbody','blackbody'),
-				('equalenergy', 'equalenergy', 'equalenergy'),
-				('lampspectrum', 'lampspectrum', 'lampspectrum'),
-				('gaussian', 'gaussian', 'gaussian'),
-				('tabulateddata', 'tabulateddata', 'tabulateddata'),
-				('', 'Fresnel Textures', ''),
-				('constant', 'constant', 'constant'),
-				('cauchy', 'cauchy', 'cauchy'),
-				('sellmeier', 'sellmeier', 'sellmeier'),
-				('sopra', 'sopra', 'sopra'),
-				('luxpop', 'luxpop', 'luxpop'),
-			),
-			#'use_menu': True,
+			'type': 'string',
 			'save_in_preset': True
 		},
 	]
