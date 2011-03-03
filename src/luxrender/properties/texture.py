@@ -33,7 +33,6 @@ from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from .. import LuxRenderAddon
-from ..properties.lampspectrum_data import lampspectrum_list
 from ..export import ParamSet, get_worldscale
 from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs import LuxManager

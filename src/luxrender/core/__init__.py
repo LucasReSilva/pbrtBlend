@@ -49,8 +49,8 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 
 # Exporter Property Groups need to be imported to ensure initialisation
 from ..properties import (
-	accelerator, camera, engine, filter, integrator, lamp, material,
-	mesh, object as prop_object, sampler, texture, world
+	accelerator, camera, engine, filter, integrator, lamp, lampspectrum_data,
+	material, mesh, object as prop_object, sampler, texture, world
 )
 
 # Exporter Interface Panels need to be imported to ensure initialisation
@@ -66,9 +66,9 @@ from ..ui.materials import (
 
 from ..ui.textures import (
 	main, band, bilerp, blackbody, brick, cauchy, constant, checkerboard, dots,
-	equalenergy, fbm, gaussian, harlequin, imagemap, lampspectrum, luxpop,
-	marble, mix, multimix, sellmeier, scale, sopra, uv, uvmask, windy, wrinkled,
-	mapping, tabulateddata, transform
+	equalenergy, fbm, gaussian, harlequin, imagemap, lampspectrum,
+	luxpop, marble, mix, multimix, sellmeier, scale, sopra, uv, uvmask, windy,
+	wrinkled, mapping, tabulateddata, transform
 )
 
 # Exporter Operators need to be imported to ensure initialisation
