@@ -1611,7 +1611,7 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	
 	controls = [
-		'preset'
+		'lampspectrum_menu',
 	]
 	
 	visibility = {}
@@ -1623,11 +1623,22 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 			'default': 'color'
 		},
 		{
-			'type': 'enum',
+			'type': 'menu',
+			'attr': 'lampspectrum_menu',
+			'menu': 'TEXTURE_MT_lampspectrum_presets'
+		},
+		{
+			'type': 'string',
 			'attr': 'preset',
 			'name': 'Name',
-			'items': lampspectrum_list(),
-			'save_in_preset': True
+			#'items': lampspectrum_list(),
+			'save_in_preset': True,
+		},
+		{
+			'type': 'string',
+			'attr': 'label',
+			'name': 'Name',
+			'save_in_preset': True,
 		}
 	]
 	
