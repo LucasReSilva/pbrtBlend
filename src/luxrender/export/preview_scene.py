@@ -121,22 +121,16 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	# Light
 	lux_context.attributeBegin()
 	lux_context.transform([
-#		1.0, 0.0, 0.0, 0.0,
-#		0.0, 1.0, 0.0, 0.0,
-#		0.0, 0.0, 1.0, 0.0,
-#		1.0, -1.0, 4.0, 1.0
-
 		0.5996068120002747, 0.800294816493988, 2.980232594040899e-08, 0.0,
 		-0.6059534549713135, 0.45399996638298035, 0.6532259583473206, 0.0,
 		0.5227733850479126, -0.3916787803173065, 0.7571629285812378, 0.0,
 		4.076245307922363, -3.0540552139282227, 5.903861999511719, 1.0
-
 	])
 	light_bb_params = ParamSet().add_float('temperature', 6500.0)
 	lux_context.texture('pL', 'color', 'blackbody', light_bb_params)
 	light_params = ParamSet() \
 		.add_texture('L', 'pL') \
-		.add_float('gain', 1.002) \
+		.add_float('gain', 1.0) \
 		.add_float('importance', 1.0)
 	
 	if scene.luxrender_world.default_exterior_volume != '':
@@ -156,7 +150,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.attributeEnd()
 	
 	# Add a background color (light)
-	
 	if scene.luxrender_world.default_exterior_volume != '':
 		lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 	lux_context.lightSource('infinite', ParamSet().add_float('gain', 0.1).add_float('importance', 0.1))
@@ -223,7 +216,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.shape('loopsubdiv', bd_shape_params)
 	
 	if scene.luxrender_world.default_interior_volume != '':
-			lux_context.interior(scene.luxrender_world.default_interior_volume)
+		lux_context.interior(scene.luxrender_world.default_interior_volume)
 	if scene.luxrender_world.default_exterior_volume != '':
 		lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 	
@@ -291,7 +284,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))
 		lux_context.attributeEnd()
-		
 		
 	# Default 'Camera' Exterior, just before WorldEnd
 	if scene.luxrender_world.default_exterior_volume != '':
