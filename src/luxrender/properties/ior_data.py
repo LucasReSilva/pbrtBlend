@@ -362,16 +362,18 @@ class LUXRENDER_OT_set_ior_preset(bpy.types.Operator):
 	l_name = bpy.props.StringProperty()
 	
 	def execute(self, context):
-		# Detect either material or volume context
-		if context.material and context.material.luxrender_material:
+		# Detect either material or volume or texture context
+		if context.material and context.material.luxrender_material and not context.texture:
 			lm = context.material.luxrender_material
 			for mat_type in ('glass', 'roughglass', 'glossy', 'glossy_lossy', 'glossytranslucent'):
 				if lm.type == mat_type:
 					getattr(lm, 'luxrender_mat_%s'%mat_type).index_floatvalue = ior_dict[self.properties.index]
-		elif context.scene and context.scene.luxrender_volumes:
+		elif context.scene and context.scene.luxrender_volumes and not context.texture:
 			vi = context.scene.luxrender_volumes.volumes_index
 			lv = context.scene.luxrender_volumes.volumes[vi]
 			lv.fresnel_fresnelvalue = ior_dict[self.properties.index]
+		elif context.texture.luxrender_texture.luxrender_tex_cauchy:
+			context.texture.luxrender_texture.luxrender_tex_cauchy.ior = ior_dict[self.properties.index]
 		return {'FINISHED'}
 
 def draw_generator(operator, m_names):
