@@ -1149,16 +1149,23 @@ class luxrender_tex_cauchy(declarative_property_group):
 	
 	controls = [
 		'use_index',
+		'ior_preset',
 		'a', 'ior',
 		'b'
 	]
 	
 	visibility = {
 		'a':	{ 'use_index': False },
+		'ior_preset': { 'use_index': True },
 		'ior':	{ 'use_index': True },
 	}
 	
 	properties = [
+		{
+			'type': 'menu',
+			'attr': 'ior_preset',
+			'menu': 'LUXRENDER_MT_ior_presets',
+		},
 		{
 			'type': 'string',
 			'attr': 'variant',
