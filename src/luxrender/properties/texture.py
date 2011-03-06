@@ -1168,12 +1168,6 @@ class luxrender_tex_cauchy(declarative_property_group):
 		},
 		{
 			'type': 'string',
-			'attr': 'label',
-			'name': 'Name',
-			'save_in_preset': True,
-		},
-		{
-			'type': 'string',
 			'attr': 'variant',
 			'default': 'fresnel'
 		},
@@ -1227,7 +1221,6 @@ class luxrender_tex_cauchy(declarative_property_group):
 		
 		if self.use_index:
 			cp.add_float('index', self.ior)
-			return set(), ParamSet().add_string('name', self.preset)
 		else:
 			cp.add_float('cauchya', self.a)
 		

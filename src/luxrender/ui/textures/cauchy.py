@@ -37,9 +37,4 @@ class ui_texture_cauchy(luxrender_texture_base):
 		( ('texture', 'luxrender_texture'), 'luxrender_tex_cauchy' )
 	]
 
-	def draw(self, context):
-		super().draw(context)
-		cl = self.layout.column(align=True)
-		cl.label( 'Selected:')
-		cl.label( context.texture.luxrender_texture.luxrender_tex_cauchy.label )
 		
