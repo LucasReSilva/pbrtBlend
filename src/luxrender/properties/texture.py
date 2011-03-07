@@ -604,7 +604,7 @@ class luxrender_texture(declarative_property_group):
 	ef_attach_to = ['Texture']
 	
 	controls = [
-		'tex_type_menu',
+		# Preset menu is drawn manually in the ui class
 	]
 	
 	visibility = {}
@@ -615,15 +615,13 @@ class luxrender_texture(declarative_property_group):
 			'type': 'bool',
 			'default': False,
 		},
-		{
-			'type': 'menu',
-			'attr': 'tex_type_menu',
-			'menu': 'TEXTURE_MT_luxrender_type'
-		},
+		
+		# The following two items are set by the preset menu and operator.
 		{
 			'attr': 'type_label',
 			'name': 'LuxRender Type',
 			'type': 'string',
+			'default': '-- Choose type --',
 			'save_in_preset': True
 		},
 		{
