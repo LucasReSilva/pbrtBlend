@@ -37,12 +37,13 @@ class ui_material_glass(luxrender_material_sub):
 		( ('material', 'luxrender_material'), 'luxrender_mat_glass' )
 	]
 	
-	def draw(self, context):
+	def draw_ior_menu(self, context):
+		"""
+		This is a draw callback from property_group_renderer, due
+		to ef_callback item in luxrender_mat_glass.properties
+		"""
+		
 		lmg = context.material.luxrender_material.luxrender_mat_glass
-		
-		for p in lmg.controls1:
-			self.draw_column(p, self.layout, context.material.luxrender_material, context, property_group=lmg)
-		
 		menu_text = 'IOR Presets'
 		if context.material and context.material.luxrender_material:
 			fv = lmg.index_floatvalue
@@ -52,6 +53,4 @@ class ui_material_glass(luxrender_material_sub):
 		
 		cl=self.layout.column(align=True)
 		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-		
-		for p in lmg.controls2:
-			self.draw_column(p, self.layout, context.material.luxrender_material, context, property_group=lmg)
+
