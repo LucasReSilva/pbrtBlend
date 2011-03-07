@@ -893,7 +893,6 @@ class luxrender_tex_bilerp(declarative_property_group):
 			'default': 1.0,
 			'save_in_preset': True
 		},
-		
 		{
 			'attr': 'v00_c',
 			'type': 'float_vector',
@@ -1161,22 +1160,22 @@ class luxrender_tex_cauchy(declarative_property_group):
 	
 	controls = [
 		'use_index',
-		'ior_preset',
+		'draw_ior_menu',
 		'a', 'ior',
 		'b'
 	]
 	
 	visibility = {
 		'a':	{ 'use_index': False },
-		'ior_preset': { 'use_index': True },
+		'draw_ior_menu': { 'use_index': True },
 		'ior':	{ 'use_index': True },
 	}
 	
 	properties = [
 		{
-			'type': 'menu',
-			'attr': 'ior_preset',
-			'menu': 'LUXRENDER_MT_ior_presets',
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
 		},
 		{
 			'type': 'string',
@@ -1188,6 +1187,18 @@ class luxrender_tex_cauchy(declarative_property_group):
 			'attr': 'use_index',
 			'name': 'Use IOR',
 			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'ior_presetvalue',
+			'type': 'float',
+#			'default': self.default,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'ior_presetstring',
+			'type': 'string',
+			'default': '-- Choose preset --',
 			'save_in_preset': True
 		},
 		{
