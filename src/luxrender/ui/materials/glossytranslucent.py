@@ -44,7 +44,7 @@ class ui_material_glossytranslucent(luxrender_material_sub):
 		"""
 		
 		lmg = context.material.luxrender_material.luxrender_mat_glossytranslucent
-		menu_text = 'IOR Presets'
+		menu_text = '-- Choose preset --'
 		if context.material and context.material.luxrender_material:
 			fv = lmg.index_floatvalue
 			pv = lmg.index_presetvalue
