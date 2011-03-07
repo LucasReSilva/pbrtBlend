@@ -515,48 +515,47 @@ class FresnelTextureParameter(TextureParameterBase):
 tex_names = (
 	('Blender Textures',
 	(
-		('BLENDER', 'Use Blender Texture', 'BLENDER'),
+		('BLENDER', 'Use Blender Texture'),
 	)),
 	
 	('Lux Textures',
 	(
-		('band', 'Band', 'band'),
-		('bilerp', 'Bilerp', 'bilerp'),
-		('brick', 'Brick', 'brick'),
-		('checkerboard', 'Checkerboard', 'checkerboard'),
-		('dots', 'Dots', 'dots'),
-		('fbm', 'FBM', 'fbm'),
-		('harlequin', 'Harlequin', 'harlequin'),
-		('imagemap', 'Image Map', 'imagemap'),
-		('marble', 'Marble', 'marble'),
-		('mix', 'Mix', 'mix'),
-		('multimix', 'Multi mix', 'multimix'),
-		('scale', 'Scale', 'scale'),
-		('uv', 'UV', 'uv'),
-		('uvmask', 'UV mask', 'uvmask'),
-		('windy', 'Windy', 'windy'),
-		('wrinkled', 'Wrinkled', 'wrinkled'),
+		('band', 'Band'),
+		('bilerp', 'Bilerp'),
+		('brick', 'Brick'),
+		('checkerboard', 'Checkerboard'),
+		('dots', 'Dots'),
+		('fbm', 'FBM'),
+		('harlequin', 'Harlequin'),
+		('imagemap', 'Image Map'),
+		('marble', 'Marble'),
+		('mix', 'Mix'),
+		('multimix', 'Multi mix'),
+		('scale', 'Scale'),
+		('uv', 'UV'),
+		('uvmask', 'UV mask'),
+		('windy', 'Windy'),
+		('wrinkled', 'Wrinkled'),
 	)),
 	
 	('Emission & Spectrum Textures',
 	(
-		('blackbody','Blackbody','blackbody'),
-		('equalenergy', 'Equalenergy', 'equalenergy'),
-		('lampspectrum', 'Lamp spectrum', 'lampspectrum'),
-		('gaussian', 'Gaussian', 'gaussian'),
-		('tabulateddata', 'Tabulated data', 'tabulateddata'),
+		('blackbody','Blackbody'),
+		('equalenergy', 'Equalenergy'),
+		('lampspectrum', 'Lamp spectrum'),
+		('gaussian', 'Gaussian'),
+		('tabulateddata', 'Tabulated data'),
 	)),
 	
 	('Fresnel Textures',
 	(
-		('constant', 'Constant', 'constant'),
-		('cauchy', 'Cauchy', 'cauchy'),
-		('sellmeier', 'Sellmeier', 'sellmeier'),
-		('sopra', 'Sopra', 'sopra'),
-		('luxpop', 'Luxpop', 'luxpop'),
+		('constant', 'Constant'),
+		('cauchy', 'Cauchy'),
+		('sellmeier', 'Sellmeier'),
+		('sopra', 'Sopra'),
+		('luxpop', 'Luxpop'),
 	)),
 )
-
 
 @LuxRenderAddon.addon_register_class
 class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
@@ -579,7 +578,7 @@ class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
 def draw_generator(operator, m_names):
 	def draw(self, context):
 		sl = self.layout
-		for m_name, m_label, m_index in m_names:
+		for m_name, m_label in m_names:
 			op = sl.operator(operator, text=m_label)
 			op.tex_name = m_name
 			op.tex_label = m_label
@@ -635,13 +634,14 @@ class luxrender_texture(declarative_property_group):
 			'attr': 'type_label',
 			'name': 'LuxRender Type',
 			'type': 'string',
-			'default': '-- Choose type --',
+			'default': 'Use Blender Texture',
 			'save_in_preset': True
 		},
 		{
 			'attr': 'type',
 			'name': 'LuxRender Type',
 			'type': 'string',
+			'default': 'BLENDER',
 			'save_in_preset': True
 		},
 	]

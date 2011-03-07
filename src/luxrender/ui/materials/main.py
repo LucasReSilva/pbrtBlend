@@ -61,6 +61,11 @@ class ui_luxrender_material(luxrender_material_base):
 	display_property_groups = [
 		( ('material',), 'luxrender_material' )
 	]
+	
+	def draw(self, context):
+		cl = self.layout.column(align=True)
+		cl.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
+		super().draw(context)
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_emission(luxrender_material_base):
