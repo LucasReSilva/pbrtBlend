@@ -38,7 +38,7 @@ class ui_texture_lampspectrum(luxrender_texture_base):
 	]
 	
 	def draw(self, context):
-		super().draw(context)
 		cl = self.layout.column(align=True)
-		cl.label( 'Selected:')
-		cl.label( context.texture.luxrender_texture.luxrender_tex_lampspectrum.label )
+		cl.menu('TEXTURE_MT_lampspectrum_presets', text=context.texture.luxrender_texture.luxrender_tex_lampspectrum.label)
+		super().draw(context)
+

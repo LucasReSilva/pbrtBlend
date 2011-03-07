@@ -1692,7 +1692,7 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	
 	controls = [
-		'lampspectrum_menu',
+		# Preset menu is drawn manually in the ui class
 	]
 	
 	visibility = {}
@@ -1703,22 +1703,19 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 			'attr': 'variant',
 			'default': 'color'
 		},
-		{
-			'type': 'menu',
-			'attr': 'lampspectrum_menu',
-			'menu': 'TEXTURE_MT_lampspectrum_presets'
-		},
+		
+		# The following two items are set by the preset menu and operator.
 		{
 			'type': 'string',
 			'attr': 'preset',
 			'name': 'Name',
-			#'items': lampspectrum_list(),
 			'save_in_preset': True,
 		},
 		{
 			'type': 'string',
 			'attr': 'label',
 			'name': 'Name',
+			'default': '-- Choose preset --',
 			'save_in_preset': True,
 		}
 	]
