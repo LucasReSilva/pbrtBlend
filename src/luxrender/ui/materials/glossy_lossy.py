@@ -44,12 +44,11 @@ class ui_material_glossy_lossy(luxrender_material_sub):
 		"""
 		
 		lmg = context.material.luxrender_material.luxrender_mat_glossy_lossy
-		menu_text = '-- Choose preset --'
-		if context.material and context.material.luxrender_material:
-			fv = lmg.index_floatvalue
-			pv = lmg.index_presetvalue
-			if fv == pv:
-				menu_text = lmg.index_presetstring
+		
+		if lmg.index_floatvalue == lmg.index_presetvalue:
+			menu_text = lmg.index_presetstring
+		else:
+			menu_text = '-- Choose preset --'
 		
 		cl=self.layout.column(align=True)
 		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
