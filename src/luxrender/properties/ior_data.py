@@ -389,7 +389,7 @@ def draw_generator(operator, m_names):
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_MT_ior_presets(bpy.types.Menu):
-	bl_label = 'IOR Presets --'
+	bl_label = 'IOR Presets'
 	submenus = []
 	
 	def draw(self, context):
