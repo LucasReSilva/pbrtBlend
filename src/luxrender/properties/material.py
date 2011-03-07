@@ -279,7 +279,7 @@ class luxrender_material(declarative_property_group):
 	def reset(self):
 		super().reset()
 		# Also reset sub-property groups
-		for a,b,c in mat_list():
+		for a,b in mat_names:
 			getattr(self, 'luxrender_mat_%s'%a).reset()
 	
 	def set_master_color(self, blender_material):
