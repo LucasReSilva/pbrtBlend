@@ -40,7 +40,7 @@ class ui_material_glass(luxrender_material_sub):
 	def draw_ior_menu(self, context):
 		"""
 		This is a draw callback from property_group_renderer, due
-		to ef_callback item in luxrender_mat_glass.properties
+		to ef_callback item in luxrender_mat_<mat>.properties
 		"""
 		
 		lmg = context.material.luxrender_material.luxrender_mat_glass

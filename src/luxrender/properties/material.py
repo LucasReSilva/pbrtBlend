@@ -750,7 +750,7 @@ class luxrender_mat_roughglass(declarative_property_group):
 	] + \
 		TF_cauchyb.controls + \
 	[
-		'ior_preset',
+		'draw_ior_menu',
 	] + \
 		TF_index.controls + \
 		TC_Kr.controls + \
@@ -768,6 +768,11 @@ class luxrender_mat_roughglass(declarative_property_group):
 	)
 	
 	properties = [
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
+		},
 		{
 			'type': 'menu',
 			'attr': 'ior_preset',
@@ -806,7 +811,7 @@ class luxrender_mat_glossy(declarative_property_group):
 		TC_Ka.controls + \
 	[
 		'useior',
-		'ior_preset',
+		'draw_ior_menu',
 	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
@@ -816,7 +821,7 @@ class luxrender_mat_glossy(declarative_property_group):
 	
 	visibility = dict_merge(
 		{
-			'ior_preset': { 'useior': True }
+			'draw_ior_menu': { 'useior': True }
 		},
 		TF_d.visibility,
 		TF_index.visibility,
@@ -836,6 +841,11 @@ class luxrender_mat_glossy(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
 	
 	properties = [
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
+		},
 		{
 			'type': 'menu',
 			'attr': 'ior_preset',
@@ -901,7 +911,7 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TC_Ka.controls + \
 	[
 		'useior',
-		'ior_preset',
+		'draw_ior_menu',
 	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
@@ -910,7 +920,7 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	
 	visibility = dict_merge(
 		{
-			'ior_preset': { 'useior': True }
+			'draw_ior_menu': { 'useior': True }
 		},
 		TF_d.visibility,
 		TF_index.visibility,
@@ -925,6 +935,11 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
 	
 	properties = [
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
+		},
 		{
 			'type': 'menu',
 			'attr': 'ior_preset',
@@ -1049,7 +1064,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_Ka.controls + \
 	[
 		'useior',
-		'ior_preset',
+		'draw_ior_menu',
 	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
@@ -1087,7 +1102,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_backface_uroughness.visibility,
 		TF_backface_vroughness.visibility,
 		{
-			'ior_preset':			{ 'useior': True },
+			'draw_ior_menu':			{ 'useior': True },
 			'backface_multibounce':	{ 'two_sided': True },
 			'bf_useior': 			{ 'two_sided': True }
 		}
@@ -1104,6 +1119,11 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TF_backface_index,		{ 'two_sided': True, 'bf_useior': True  })
 	
 	properties = [
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
+		},
 		{
 			'type': 'menu',
 			'attr': 'ior_preset',

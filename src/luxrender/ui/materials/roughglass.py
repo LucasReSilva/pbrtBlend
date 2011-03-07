@@ -36,3 +36,20 @@ class ui_material_roughglass(luxrender_material_sub):
 	display_property_groups = [
 		( ('material', 'luxrender_material'), 'luxrender_mat_roughglass' )
 	]
+
+	def draw_ior_menu(self, context):
+		"""
+		This is a draw callback from property_group_renderer, due
+		to ef_callback item in luxrender_mat_<mat>.properties
+		"""
+		
+		lmg = context.material.luxrender_material.luxrender_mat_roughglass
+		menu_text = 'IOR Presets'
+		if context.material and context.material.luxrender_material:
+			fv = lmg.index_floatvalue
+			pv = lmg.index_presetvalue
+			if fv == pv:
+				menu_text = lmg.index_presetstring
+		
+		cl=self.layout.column(align=True)
+		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
