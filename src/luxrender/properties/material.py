@@ -773,11 +773,6 @@ class luxrender_mat_roughglass(declarative_property_group):
 			'attr': 'draw_ior_menu',
 			'method': 'draw_ior_menu',
 		},
-		{
-			'type': 'menu',
-			'attr': 'ior_preset',
-			'menu': 'LUXRENDER_MT_ior_presets',
-		},
 		
 	] + \
 		TF_cauchyb.properties + \
@@ -845,11 +840,6 @@ class luxrender_mat_glossy(declarative_property_group):
 			'type': 'ef_callback',
 			'attr': 'draw_ior_menu',
 			'method': 'draw_ior_menu',
-		},
-		{
-			'type': 'menu',
-			'attr': 'ior_preset',
-			'menu': 'LUXRENDER_MT_ior_presets',
 		},
 		{
 			'type': 'bool',
@@ -939,11 +929,6 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 			'type': 'ef_callback',
 			'attr': 'draw_ior_menu',
 			'method': 'draw_ior_menu',
-		},
-		{
-			'type': 'menu',
-			'attr': 'ior_preset',
-			'menu': 'LUXRENDER_MT_ior_presets',
 		},
 		{
 			'type': 'bool',
@@ -1123,11 +1108,6 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'type': 'ef_callback',
 			'attr': 'draw_ior_menu',
 			'method': 'draw_ior_menu',
-		},
-		{
-			'type': 'menu',
-			'attr': 'ior_preset',
-			'menu': 'LUXRENDER_MT_ior_presets',
 		},
 		{
 			'type': 'bool',
