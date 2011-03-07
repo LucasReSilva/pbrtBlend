@@ -36,3 +36,22 @@ class ui_material_glass(luxrender_material_sub):
 	display_property_groups = [
 		( ('material', 'luxrender_material'), 'luxrender_mat_glass' )
 	]
+	
+	def draw(self, context):
+		lmg = context.material.luxrender_material.luxrender_mat_glass
+		
+		for p in lmg.controls1:
+			self.draw_column(p, self.layout, context.material.luxrender_material, context, property_group=lmg)
+		
+		menu_text = 'IOR Presets'
+		if context.material and context.material.luxrender_material:
+			fv = lmg.index_floatvalue
+			pv = lmg.index_presetvalue
+			if fv == pv:
+				menu_text = lmg.index_presetstring
+		
+		cl=self.layout.column(align=True)
+		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+		
+		for p in lmg.controls2:
+			self.draw_column(p, self.layout, context.material.luxrender_material, context, property_group=lmg)

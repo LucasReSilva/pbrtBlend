@@ -649,16 +649,16 @@ class luxrender_mat_carpaint(declarative_property_group):
 class luxrender_mat_glass(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
-	controls = [
+	controls = []
+	
+	controls1 = [
 		'architectural',
 	] + \
 		TF_cauchyb.controls + \
 		TF_film.controls + \
-		TF_filmindex.controls + \
-	[
-		'ior_preset',
-	] + \
-		TF_index.controls + \
+		TF_filmindex.controls
+	
+	controls2 = TF_index.controls + \
 		TC_Kr.controls + \
 		TC_Kt.controls
 	
@@ -672,11 +672,6 @@ class luxrender_mat_glass(declarative_property_group):
 	)
 	
 	properties = [
-		{
-			'type': 'menu',
-			'attr': 'ior_preset',
-			'menu': 'LUXRENDER_MT_ior_presets',
-		},
 		{
 			'type': 'bool',
 			'attr': 'architectural',

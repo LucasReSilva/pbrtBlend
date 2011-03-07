@@ -335,6 +335,20 @@ class FloatTextureParameter(TextureParameterBase):
 				'save_in_preset': True
 			},
 			{
+				'attr': '%s_presetvalue' % self.attr,
+				'type': 'float',
+				'subtype': self.sub_type,
+				'default': self.default,
+				'save_in_preset': True
+			},
+			{
+				'attr': '%s_presetstring' % self.attr,
+				'type': 'string',
+				'default': '-- Choose preset --',
+				'save_in_preset': True
+			},
+			
+			{
 				'attr': '%s_floattexturename' % self.attr,
 				'type': 'string',
 				'name': '%s_floattexturename' % self.attr,

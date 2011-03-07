@@ -368,6 +368,8 @@ class LUXRENDER_OT_set_ior_preset(bpy.types.Operator):
 			for mat_type in ('glass', 'roughglass', 'glossy', 'glossy_lossy', 'glossytranslucent'):
 				if lm.type == mat_type:
 					getattr(lm, 'luxrender_mat_%s'%mat_type).index_floatvalue = ior_dict[self.properties.index]
+					getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetvalue = ior_dict[self.properties.index]
+					getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetstring = self.properties.l_name
 		elif context.scene and context.scene.luxrender_volumes and not context.texture:
 			vi = context.scene.luxrender_volumes.volumes_index
 			lv = context.scene.luxrender_volumes.volumes[vi]
