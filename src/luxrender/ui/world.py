@@ -58,6 +58,23 @@ class volumes(world_panel):
 		( ('scene',), 'luxrender_volumes' )
 	]
 	
+	def draw_ior_menu(self, context):
+		"""
+		This is a draw callback from property_group_renderer, due
+		to ef_callback item in luxrender_volume_data.properties
+		"""
+		
+		vi = context.scene.luxrender_volumes.volumes_index
+		lv = context.scene.luxrender_volumes.volumes[vi]
+		
+		if lv.fresnel_fresnelvalue == lv.fresnel_presetvalue:
+			menu_text = lv.fresnel_presetstring
+		else:
+			menu_text = '-- Choose preset --'
+		
+		cl=self.layout.column(align=True)
+		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+	
 	# overridden in order to draw the selected luxrender_volume_data property group
 	def draw(self, context):
 		super().draw(context)
@@ -82,7 +99,7 @@ class volumes(world_panel):
 						control,
 						self.layout,
 						current_vol,
-						context.world,	# Look in the current world object for fresnel textures
+						context,
 						property_group = current_vol
 					)
 		else:

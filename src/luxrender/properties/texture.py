@@ -476,6 +476,18 @@ class FresnelTextureParameter(TextureParameterBase):
 				'save_in_preset': True
 			},
 			{
+				'attr': '%s_presetvalue' % self.attr,
+				'type': 'float',
+				'default': self.default,
+				'save_in_preset': True
+			},
+			{
+				'attr': '%s_presetstring' % self.attr,
+				'type': 'string',
+				'default': '-- Choose preset --',
+				'save_in_preset': True
+			},
+			{
 				'attr': '%s_fresneltexturename' % self.attr,
 				'type': 'string',
 				'name': '%s_fresneltexturename' % self.attr,

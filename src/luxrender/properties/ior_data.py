@@ -374,6 +374,8 @@ class LUXRENDER_OT_set_ior_preset(bpy.types.Operator):
 			vi = context.scene.luxrender_volumes.volumes_index
 			lv = context.scene.luxrender_volumes.volumes[vi]
 			lv.fresnel_fresnelvalue = ior_dict[self.properties.index]
+			lv.fresnel_presetvalue = ior_dict[self.properties.index]
+			lv.fresnel_presetstring = self.properties.l_name
 		elif context.texture.luxrender_texture.luxrender_tex_cauchy:
 			context.texture.luxrender_texture.luxrender_tex_cauchy.ior = ior_dict[self.properties.index]
 			context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetvalue = ior_dict[self.properties.index]
