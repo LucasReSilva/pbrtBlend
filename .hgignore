@@ -1,0 +1,14 @@
+
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$
+syntax: glob
+*.pyc
+syntax: glob
+*.so
+syntax: glob
+*.pyd
+
+syntax: regexp
+^.settings
