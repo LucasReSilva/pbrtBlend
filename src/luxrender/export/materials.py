@@ -232,7 +232,7 @@ def convert_texture(scene, texture):
 			'MINKOVSKY': 'minkovsky'
 		}
 		paramset.add_string('distmetric', distancem_map[texture.distance_metric]) \
-				.add_float('minkowsky_exp', texture.minkovsky_exponent) \
+				.add_float('minkovsky_exp', texture.minkovsky_exponent) \
 				.add_float('noisesize', texture.noise_scale) \
 				.add_float('nabla', texture.nabla) \
 				.add_float('w1', texture.weight_1) \
