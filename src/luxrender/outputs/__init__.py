@@ -98,7 +98,6 @@ class LuxFilmDisplay(TimerThread):
 				
 				result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
 				
-				LuxLog('Updating RenderResult')
 				lay = result.layers[0]
 				
 				if direct_transfer:
