@@ -124,8 +124,8 @@ class luxrender_mesh(declarative_property_group):
 			'default': 2,
 			'min': 0,
 			'soft_min': 0,
-			'max': 300,
-			'soft_max': 300
+			'max': 1000,
+			'soft_max': 1000
 		},
 	] + \
 		TF_displacementmap.properties + \
