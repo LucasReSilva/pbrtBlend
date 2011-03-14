@@ -214,7 +214,7 @@ class luxrender_sampler(declarative_property_group):
 			params.add_integer('chainlength', self.chainlength)
 			params.add_string('basesampler', self.basesampler)
 		
-		if self.sampler == 'metropolis':
+		if self.sampler == 'metropolis' or (self.sampler == 'erpt' and self.basesampler == 'metropolis'):
 			params.add_float('largemutationprob', self.largemutationprob)
 			params.add_bool('usevariance', self.usevariance)
 			
