@@ -72,43 +72,46 @@ class LuxFilmDisplay(TimerThread):
 		if 'RE' in self.LocalStorage.keys():
 			p_stats = ''
 			direct_transfer = False
-			if 'lux_context' in self.LocalStorage.keys() and self.LocalStorage['lux_context'].statistics('sceneIsReady') > 0.0:
-				self.LocalStorage['lux_context'].updateFramebuffer()
-				# px = self.lux_context.framebuffer()
-				xres = int(self.LocalStorage['lux_context'].getAttribute('film', 'xResolution'))
-				yres = int(self.LocalStorage['lux_context'].getAttribute('film', 'yResolution'))
-				p_stats = ' - %s' % self.LocalStorage['lux_context'].printableStatistics(True)
-				direct_transfer = 'blenderCombinedDepthRects' in dir(self.LocalStorage['lux_context'])
-				direct_transfer &= 'integratedimaging' in self.LocalStorage.keys() and self.LocalStorage['integratedimaging']
-			elif 'resolution' in self.LocalStorage.keys():
-				xres, yres = self.LocalStorage['resolution']
-			else:
-				err_msg = 'ERROR: Cannot not load render result: resolution unknown. LuxFilmThread will terminate'
-				LuxLog(err_msg)
-				self.stop()
-				return
 			
-			if render_end:
-				LuxLog('Final render result (%ix%i%s)' % (xres,yres,p_stats))
-			else:
-				LuxLog('Updating render result (%ix%i%s)' % (xres,yres,p_stats))
+			if not bpy.app.background or render_end:
+				
+				if 'lux_context' in self.LocalStorage.keys() and self.LocalStorage['lux_context'].statistics('sceneIsReady') > 0.0:
+					self.LocalStorage['lux_context'].updateFramebuffer()
+					# px = self.lux_context.framebuffer()
+					xres = int(self.LocalStorage['lux_context'].getAttribute('film', 'xResolution'))
+					yres = int(self.LocalStorage['lux_context'].getAttribute('film', 'yResolution'))
+					p_stats = ' - %s' % self.LocalStorage['lux_context'].printableStatistics(True)
+					direct_transfer = 'blenderCombinedDepthRects' in dir(self.LocalStorage['lux_context'])
+					direct_transfer &= 'integratedimaging' in self.LocalStorage.keys() and self.LocalStorage['integratedimaging']
+				elif 'resolution' in self.LocalStorage.keys():
+					xres, yres = self.LocalStorage['resolution']
+				else:
+					err_msg = 'ERROR: Cannot not load render result: resolution unknown. LuxFilmThread will terminate'
+					LuxLog(err_msg)
+					self.stop()
+					return
 			
-			result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
-			
-			LuxLog('Updating RenderResult')
-			lay = result.layers[0]
-			
-			if direct_transfer:
-				# use the framebuffer direct from pylux using a special method
-				# for this purpose, which saves doing a lot of array processing
-				# in python
-				lay.rect, lay.passes[0].rect  = self.LocalStorage['lux_context'].blenderCombinedDepthRects()
-			elif os.path.exists(self.LocalStorage['RE'].output_file):
-				lay.load_from_file(self.LocalStorage['RE'].output_file)
-			else:
-				err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
-				LuxLog(err_msg)
-			self.LocalStorage['RE'].end_result(result)
+				if render_end:
+					LuxLog('Final render result (%ix%i%s)' % (xres,yres,p_stats))
+				else:
+					LuxLog('Updating render result (%ix%i%s)' % (xres,yres,p_stats))
+				
+				result = self.LocalStorage['RE'].begin_result(0, 0, int(xres), int(yres))
+				
+				LuxLog('Updating RenderResult')
+				lay = result.layers[0]
+				
+				if direct_transfer:
+					# use the framebuffer direct from pylux using a special method
+					# for this purpose, which saves doing a lot of array processing
+					# in python
+					lay.rect, lay.passes[0].rect  = self.LocalStorage['lux_context'].blenderCombinedDepthRects()
+				elif os.path.exists(self.LocalStorage['RE'].output_file):
+					lay.load_from_file(self.LocalStorage['RE'].output_file)
+				else:
+					err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
+					LuxLog(err_msg)
+				self.LocalStorage['RE'].end_result(result)
 		else:
 			err_msg = 'ERROR: LuxFilmThread started with insufficient parameters. LuxFilmThread will terminate'
 			LuxLog(err_msg)
