@@ -283,19 +283,19 @@ def material_converter(report, scene, blender_mat):
 		
 		if blender_mat.raytrace_mirror.use and blender_mat.raytrace_mirror.reflect_factor >= 0.9:
 			# for high mirror reflection values switch to mirror material
-			luxrender_mat.type = 'mirror'
+			luxrender_mat.set_type( 'mirror' )
 			lmm = luxrender_mat.luxrender_mat_mirror
 			lmm.Kr_color = [i for i in blender_mat.mirror_color]
 			luxmat = lmm
 		elif blender_mat.specular_intensity < 0.01:
 			# use matte as glossy mat with very low specular is not equal matte
-			luxrender_mat.type = 'matte'
+			luxrender_mat.set_type( 'matte' )
 			lms = luxrender_mat.luxrender_mat_matte
 			lms.Kd_color = [blender_mat.diffuse_intensity*i for i in blender_mat.diffuse_color]
 			lms.sigma_floatvalue = 0.0
 			luxmat = lms
 		else:
-			luxrender_mat.type = 'glossy'
+			luxrender_mat.set_type( 'glossy' )
 			lmg = luxrender_mat.luxrender_mat_glossy
 			lmg.multibounce = False
 			lmg.useior = False
@@ -359,7 +359,7 @@ def material_converter(report, scene, blender_mat):
 						bump_tex = (tex_slot.texture, tex_slot.normal_factor)
 		
 		if luxrender_mat.type in ('matte', 'glossy'):
-			print(len(Kd_stack))
+			#print(len(Kd_stack))
 			if len(Kd_stack) == 1:
 				tex = Kd_stack[0][0]
 				dcf = Kd_stack[0][1]
@@ -562,6 +562,7 @@ def material_converter(report, scene, blender_mat):
 		return {'FINISHED'}
 	except Exception as err:
 		report({'ERROR'}, 'Cannot convert material: %s' % err)
+		#print('Material conversion failed on line %d' % err.__traceback__.tb_lineno)
 		return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
