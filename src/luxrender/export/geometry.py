@@ -175,7 +175,7 @@ class GeometryExporter(object):
 		
 		try:
 			mesh_definitions = []
-			mesh = obj.create_mesh(self.geometry_scene, True, 'RENDER')
+			mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
 			if mesh is None:
 				raise UnexportableObjectException('Cannot create render/export mesh')
 			
@@ -382,7 +382,7 @@ class GeometryExporter(object):
 		
 		try:
 			mesh_definitions = []
-			mesh = obj.create_mesh(self.geometry_scene, True, 'RENDER')
+			mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
 			if mesh is None:
 				raise UnexportableObjectException('Cannot create render/export mesh')
 			
@@ -862,7 +862,7 @@ class GeometryExporter(object):
 			
 			LuxLog('Exporting Duplis...')
 			
-			obj.create_dupli_list(self.visibility_scene)
+			obj.dupli_list_create(self.visibility_scene)
 			if not obj.dupli_list:
 				raise Exception('cannot create dupli list for object %s' % obj.name)
 			
@@ -882,7 +882,7 @@ class GeometryExporter(object):
 					)
 				)
 			
-			obj.free_dupli_list()
+			obj.dupli_list_clear()
 			
 			det = DupliExportProgressThread()
 			det.start(len(duplis))
