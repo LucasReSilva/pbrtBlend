@@ -894,8 +894,8 @@ class GeometryExporter(object):
 				
 				det.exported_objects += 1
 				
-				# Check for group layer visibility
-				gviz = False
+				# Check for group layer visibility, if the object is in a group
+				gviz = len(do.users_group) == 0
 				for grp in do.users_group:
 					gviz |= True in [a&b for a,b in zip(do.layers, grp.layers)]
 				if not gviz:
