@@ -232,7 +232,7 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 		# to support a mesh/object which got lamp as dupli object
 		if ob.is_duplicator and ob.dupli_type in ('GROUP', 'VERTS', 'FACES'):
 			# create dupli objects
-			ob.create_dupli_list(geometry_scene)
+			ob.dupli_list_create(geometry_scene)
 			
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
@@ -241,7 +241,7 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
-				ob.free_dupli_list()
+				ob.dupli_list_clear()
 		else:
 			if ob.type == 'LAMP':
 				have_light |= exportLight(lux_context, ob, ob.matrix_world, portal_shapes)
