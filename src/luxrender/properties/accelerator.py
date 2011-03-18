@@ -80,7 +80,7 @@ class luxrender_accelerator(declarative_property_group):
 				#('bruteforce', 'bruteforce', 'bruteforce'),
 				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
 				#('grid', 'Grid', 'grid'),
-				('bvh', 'BVH', 'bvh'),
+				#('bvh', 'BVH', 'bvh'),
 				('qbvh', 'QBVH', 'qbvh'),
 			],
 			'save_in_preset': True
@@ -187,7 +187,7 @@ class luxrender_accelerator(declarative_property_group):
 		
 		if self.advanced:
 			if self.accelerator == 'tabreckdtree':
-				params.add_ineger('intersectcost', self.intersectcost)
+				params.add_integer('intersectcost', self.intersectcost)
 				params.add_integer('traversalcost', self.traversalcost)
 				params.add_float('emptybonus', self.emptybonus)
 				params.add_integer('maxprims', self.maxprims)
