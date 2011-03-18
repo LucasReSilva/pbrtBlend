@@ -63,8 +63,12 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	
 	lux_context.lightGroup(group, [])
 	
-	if light.type == 'HEMI' and light.luxrender_lamp.luxrender_lamp_hemi.type == 'infinite':
-		lux_context.scale(-1, 1, 1) # correct worldmap orientation
+	mirrorTransform = light.type == 'HEMI' and light.luxrender_lamp.luxrender_lamp_hemi.type == 'infinite'
+	
+	if mirrorTransform:
+		# correct worldmap orientation
+		lux_context.transformBegin(file=Files.MAIN)
+		lux_context.scale(-1, 1, 1) 
 	
 	if light.luxrender_lamp.Exterior_volume != '':
 		lux_context.exterior(light.luxrender_lamp.Exterior_volume)
@@ -72,6 +76,9 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 		lux_context.exterior(LuxManager.CurrentScene.luxrender_world.default_exterior_volume)
 	
 	lux_context.lightSource(type, params)
+
+	if mirrorTransform:
+		lux_context.transformEnd()
 	
 	for portal in portals:
 		lux_context.portalInstance(portal)
