@@ -24,14 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from properties_object import ObjectButtonsPanel
+import bl_ui
 
 from extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 
 @LuxRenderAddon.addon_register_class
-class ui_object(ObjectButtonsPanel, property_group_renderer):
+class ui_object(bl_ui.properties_object.ObjectButtonsPanel, property_group_renderer):
 	'''
 	Object settings
 	'''

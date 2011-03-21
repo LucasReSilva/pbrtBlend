@@ -24,14 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from properties_data_mesh import MeshButtonsPanel
+import bl_ui
 
 from extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 
 @LuxRenderAddon.addon_register_class
-class meshes(MeshButtonsPanel, property_group_renderer):
+class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_renderer):
 	bl_label = 'LuxRender Mesh Options'
 	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 	

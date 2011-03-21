@@ -24,13 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from properties_texture import TextureButtonsPanel
+import bl_ui
 
 from extensions_framework.ui import property_group_renderer
 
 from ... import LuxRenderAddon
 
-class luxrender_texture_base(TextureButtonsPanel, property_group_renderer):
+class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, property_group_renderer):
 	'''
 	This is the base class for all LuxRender texture sub-panels.
 	All subpanels should have their own property_groups, and define
