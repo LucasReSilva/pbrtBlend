@@ -331,9 +331,10 @@ class luxrender_lamp_hemi(declarative_property_group):
 	
 	controls = [
 		'type',
-		[0.323, 'L_colorlabel', 'L_color'],
 		'infinite_map',
 		'mapping_type',
+		'gamma',
+		[0.323, 'L_colorlabel', 'L_color'],
 		'hdri_multiply'
 	]
 	
@@ -341,6 +342,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'infinite_map':		{ 'type': 'infinite' },
 		'mapping_type':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 		'hdri_multiply':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'gamma':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 	}
 	
 	properties = TC_L.properties + [
@@ -382,6 +384,17 @@ class luxrender_lamp_hemi(declarative_property_group):
 				('vcross', 'Vert Cross', 'vcross')
 			]
 		},
+		{
+		'type': 'float',
+		'attr': 'gamma',
+		'name': 'Gamma',
+		'description': 'Light source gamma',
+		'default': 1.0,
+		'min': 0.0,
+		'soft_min': 0.0,
+		'max': 6,
+		'soft_max': 6,
+		},
 	]
 	
 	def get_paramset(self, lamp_object):
@@ -395,6 +408,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 					hdri_path = self.infinite_map
 				params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
 				params.add_string('mapping', self.mapping_type)
+				params.add_float('gamma', self.gamma)
 				
 			if self.infinite_map == '' or self.hdri_multiply:
 				params.add_color('L', self.L_color)
