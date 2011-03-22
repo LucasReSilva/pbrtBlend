@@ -175,6 +175,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		'sunsky_advanced',
 		'horizonbrightness',
 		'horizonsize',
+		'relsize',
 		'sunhalobrightness',
 		'sunhalosize',
 		'backscattering',
@@ -184,6 +185,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		'horizonbrightness':	{ 'sunsky_advanced': True },
 		'horizonsize':			{ 'sunsky_advanced': True },
 		'sunhalobrightness':	{ 'sunsky_advanced': True },
+		'relsize':				{ 'sunsky_advanced': True },
 		'sunhalosize':			{ 'sunsky_advanced': True },
 		'backscattering':		{ 'sunsky_advanced': True },
 	}
@@ -216,6 +218,16 @@ class luxrender_lamp_sun(declarative_property_group):
 			'attr': 'sunsky_advanced',
 			'name': 'Advanced',
 			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'relsize',
+			'name': 'Relative sun disk size',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 		{
 			'type': 'float',
@@ -277,6 +289,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		if self.sunsky_advanced:
 			params.add_float('horizonbrightness', self.horizonbrightness)
 			params.add_float('horizonsize', self.horizonsize)
+			params.add_float('relsize', self.relsize)
 			params.add_float('sunhalobrightness', self.sunhalobrightness)
 			params.add_float('sunhalosize', self.sunhalosize)
 			params.add_float('backscattering', self.backscattering)
@@ -347,7 +360,6 @@ class luxrender_lamp_hemi(declarative_property_group):
 	
 	properties = TC_L.properties + [
 		# nsamples
-		# gamma
 		{
 			'type': 'enum',
 			'attr': 'type',
