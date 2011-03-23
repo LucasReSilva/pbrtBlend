@@ -425,6 +425,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 		{
 			'type': 'float',
 			'attr': 'gamma',
+			'name': 'Gamma',
 			'description': 'Light source gamma',
 			'default': 1.0,
 			'min': 0.0,
