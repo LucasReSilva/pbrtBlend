@@ -171,6 +171,7 @@ class luxrender_lamp_sun(declarative_property_group):
 	
 	controls = [
 		'sunsky_type',
+		'nsamples',
 		'turbidity',
 		'sunsky_advanced',
 		'horizonbrightness',
@@ -279,12 +280,24 @@ class luxrender_lamp_sun(declarative_property_group):
 			'max': 10.0,
 			'soft_max': 10.0
 		},
+		{
+		'type': 'int',
+		'attr': 'nsamples',
+		'name': 'Shadow ray samples',
+		'description': 'The suggested number of shadow samples',
+		'default': 1 ,
+		'min': 1 ,
+		'soft_min': 1 ,
+		'max': 100,
+		'soft_max': 100,
+		},
 	]
 	
 	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		
 		params.add_float('turbidity', self.turbidity)
+		params.add_integer('nsamples', self.nsamples)
 		
 		if self.sunsky_advanced:
 			params.add_float('horizonbrightness', self.horizonbrightness)
@@ -301,6 +314,7 @@ class luxrender_lamp_area(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	
 	controls = TC_L.controls + [
+		'nsamples',
 		'power',
 		'efficacy',
 	]
@@ -308,7 +322,6 @@ class luxrender_lamp_area(declarative_property_group):
 	visibility = TC_L.visibility
 	
 	properties = TC_L.properties + [
-		# nsamples
 		{
 			'type': 'float',
 			'attr': 'power',
@@ -329,6 +342,17 @@ class luxrender_lamp_area(declarative_property_group):
 			'max': 1e6,
 			'soft_max': 1e6,
 		},
+		{
+		'type': 'int',
+		'attr': 'nsamples',
+		'name': 'Shadow ray samples',
+		'description': 'The suggested number of shadow samples',
+		'default': 1 ,
+		'min': 1 ,
+		'soft_min': 1 ,
+		'max': 100,
+		'soft_max': 100,
+		},
 	]
 	
 	def get_paramset(self, lamp_object):
@@ -336,6 +360,7 @@ class luxrender_lamp_area(declarative_property_group):
 		params.add_float('power', self.power)
 		params.add_float('efficacy', self.efficacy)
 		params.update( TC_L.get_paramset(self) )
+		params.add_integer('nsamples', self.nsamples)
 		return params
 
 @LuxRenderAddon.addon_register_class
@@ -346,6 +371,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'type',
 		'infinite_map',
 		'mapping_type',
+		'nsamples',
 		'gamma',
 		[0.323, 'L_colorlabel', 'L_color'],
 		'hdri_multiply'
@@ -355,7 +381,8 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'infinite_map':		{ 'type': 'infinite' },
 		'mapping_type':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 		'hdri_multiply':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
-		'gamma':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'gamma':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'nsamples':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 	}
 	
 	properties = TC_L.properties + [
@@ -407,6 +434,18 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'max': 6,
 		'soft_max': 6,
 		},
+		{
+		'type': 'int',
+		'attr': 'nsamples',
+		'name': 'Shadow ray samples',
+		'description': 'The suggested number of shadow samples',
+		'default': 1 ,
+		'min': 1 ,
+		'soft_min': 1 ,
+		'max': 100,
+		'soft_max': 100,
+		},
+
 	]
 	
 	def get_paramset(self, lamp_object):
@@ -421,6 +460,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 				params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
 				params.add_string('mapping', self.mapping_type)
 				params.add_float('gamma', self.gamma)
+				params.add_integer('nsamples', self.nsamples)
 				
 			if self.infinite_map == '' or self.hdri_multiply:
 				params.add_color('L', self.L_color)
