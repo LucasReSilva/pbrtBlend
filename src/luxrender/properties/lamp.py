@@ -281,15 +281,15 @@ class luxrender_lamp_sun(declarative_property_group):
 			'soft_max': 10.0
 		},
 		{
-		'type': 'int',
-		'attr': 'nsamples',
-		'name': 'Shadow ray samples',
-		'description': 'The suggested number of shadow samples',
-		'default': 1 ,
-		'min': 1 ,
-		'soft_min': 1 ,
-		'max': 100,
-		'soft_max': 100,
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
 		},
 	]
 	
@@ -343,15 +343,15 @@ class luxrender_lamp_area(declarative_property_group):
 			'soft_max': 1e6,
 		},
 		{
-		'type': 'int',
-		'attr': 'nsamples',
-		'name': 'Shadow ray samples',
-		'description': 'The suggested number of shadow samples',
-		'default': 1 ,
-		'min': 1 ,
-		'soft_min': 1 ,
-		'max': 100,
-		'soft_max': 100,
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
 		},
 	]
 	
@@ -386,7 +386,6 @@ class luxrender_lamp_hemi(declarative_property_group):
 	}
 	
 	properties = TC_L.properties + [
-		# nsamples
 		{
 			'type': 'enum',
 			'attr': 'type',
@@ -424,26 +423,25 @@ class luxrender_lamp_hemi(declarative_property_group):
 			]
 		},
 		{
-		'type': 'float',
-		'attr': 'gamma',
-		'name': 'Gamma',
-		'description': 'Light source gamma',
-		'default': 1.0,
-		'min': 0.0,
-		'soft_min': 0.0,
-		'max': 6,
-		'soft_max': 6,
+			'type': 'float',
+			'attr': 'gamma',
+			'description': 'Light source gamma',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 6,
+			'soft_max': 6,
 		},
 		{
-		'type': 'int',
-		'attr': 'nsamples',
-		'name': 'Shadow ray samples',
-		'description': 'The suggested number of shadow samples',
-		'default': 1 ,
-		'min': 1 ,
-		'soft_min': 1 ,
-		'max': 100,
-		'soft_max': 100,
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
 		},
 
 	]
