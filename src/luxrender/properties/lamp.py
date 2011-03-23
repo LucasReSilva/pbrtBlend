@@ -131,6 +131,25 @@ class luxrender_lamp_basic(declarative_property_group):
 class luxrender_lamp_point(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
 
+	controls = [
+		'flipz'
+	]
+
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'flipz',
+			'name': 'Flip Z ( IES correction )',
+			'description': 'Flip Z direction in mapping',
+			'default': True
+		},
+	]
+
+	def get_paramset(self, lamp_object):
+		params = super().get_paramset(lamp_object)
+		params.add_bool('flipz', self.flipz)
+		return params
+
 @LuxRenderAddon.addon_register_class
 class luxrender_lamp_spot(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
