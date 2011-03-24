@@ -131,11 +131,11 @@ class luxrender_lamp_basic(declarative_property_group):
 class luxrender_lamp_point(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
 
-	controls = [
+	controls = TC_L.controls [:] + [
 		'flipz'
 	]
 
-	properties = [
+	properties = properties = TC_L.properties[:] + [
 		{
 			'type': 'bool',
 			'attr': 'flipz',
