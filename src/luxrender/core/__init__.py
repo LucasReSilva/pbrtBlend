@@ -525,7 +525,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					LuxLog('LuxRender not found at path: %s' % luxrender_path)
 					return False
 				
-				cmd_args = [luxrender_path, fn]
+				cmd_args = [luxrender_path, fn.replace('//','/')]
 				
 				# set log verbosity
 				if scene.luxrender_engine.log_verbosity != 'default':
