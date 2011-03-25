@@ -130,12 +130,12 @@ class luxrender_lamp_basic(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_lamp_point(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
-
-	controls = TC_L.controls [:] + [
+	
+	controls = TC_L.controls[:] + [
 		'flipz'
 	]
-
-	properties = properties = TC_L.properties[:] + [
+	
+	properties = TC_L.properties[:] + [
 		{
 			'type': 'bool',
 			'attr': 'flipz',
@@ -332,7 +332,7 @@ class luxrender_lamp_sun(declarative_property_group):
 class luxrender_lamp_area(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	
-	controls = TC_L.controls + [
+	controls = TC_L.controls[:] + [
 		'nsamples',
 		'power',
 		'efficacy',
@@ -340,7 +340,7 @@ class luxrender_lamp_area(declarative_property_group):
 	
 	visibility = TC_L.visibility
 	
-	properties = TC_L.properties + [
+	properties = TC_L.properties[:] + [
 		{
 			'type': 'float',
 			'attr': 'power',
@@ -404,7 +404,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'nsamples':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 	}
 	
-	properties = TC_L.properties + [
+	properties = TC_L.properties[:] + [
 		{
 			'type': 'enum',
 			'attr': 'type',
