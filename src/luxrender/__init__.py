@@ -29,7 +29,7 @@ bl_info = {
 	"author": "Doug Hammond (dougal2)",
 	"version": (0, 8, 0, 'RC2'),
 	"blender": (2, 5, 6),
-	"api": 35669,
+	"api": 35764,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",

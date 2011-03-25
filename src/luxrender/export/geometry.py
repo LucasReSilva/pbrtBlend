@@ -798,8 +798,8 @@ class GeometryExporter(object):
 			det.exported_objects += 1
 
 			points = []			
-			for j in range(len(particle.hair)):
-				points.append(particle.hair[j].co)
+			for j in range(len(hair_keys)):
+				points.append(hair_keys[j].co)
 			if psys.settings.use_hair_bspline:
 				temp = []
 				degree = 2
