@@ -539,6 +539,11 @@ class luxrender_film(declarative_property_group):
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 		params.add_bool('write_resume_flm', self.write_flm)
 		
+		if self.output_alpha:
+			output_channels = 'RGBA'
+		else:
+			output_channels = 'RGB'
+		
 		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
 			# Set up params to enable z buffer and set gamma=1.0
 			# Also, this requires tonemapped EXR output
@@ -549,16 +554,11 @@ class luxrender_film(declarative_property_group):
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 			params.add_float('gamma', 1.0) # Linear workflow !
 		else:
-			# Otherwise let the user decide on tonemapped EXR
+			# Otherwise let the user decide on tonemapped EXR and other EXR settings
 			params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
+			params.add_bool('write_exr', self.write_exr)
+			if self.write_exr: params.add_string('write_exr_channels', output_channels)
 		
-		if self.output_alpha:
-			output_channels = 'RGBA'
-		else:
-			output_channels = 'RGB'
-		
-		params.add_bool('write_exr', self.write_exr)
-		if self.write_exr: params.add_string('write_exr_channels', output_channels)
 		params.add_bool('write_png', self.write_png)
 		if self.write_png: params.add_string('write_png_channels', output_channels)
 		params.add_bool('write_tga', self.write_tga)
