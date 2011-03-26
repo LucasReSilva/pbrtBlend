@@ -384,7 +384,7 @@ class luxrender_film(declarative_property_group):
 		'lbl_outputs',
 		'integratedimaging',
 		['write_png', 'write_exr','write_tga','write_flm'],
-		'output_alpha',
+		['output_alpha', 'write_exr_applyimaging'],
 		'outlierrejection_k',
 	]
 	
@@ -453,6 +453,13 @@ class luxrender_film(declarative_property_group):
 			'attr': 'output_alpha',
 			'name': 'Enable alpha channel',
 			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_exr_applyimaging',
+			'name': 'Tonemap EXR',
+			'description': 'Apply imaging pipeline to OpenEXR output. Will not affect output gamma',
+			'default': True
 		},
 		{
 			'type': 'int',
@@ -534,12 +541,16 @@ class luxrender_film(declarative_property_group):
 		
 		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
 			# Set up params to enable z buffer and set gamma=1.0
+			# Also, this requires tonemapped EXR output
 			params.add_string('write_exr_channels', 'RGBA')
 			params.add_bool('write_exr_halftype', False)
 			params.add_bool('write_exr_applyimaging', True)
 			params.add_bool('write_exr_ZBuf', True)
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 			params.add_float('gamma', 1.0) # Linear workflow !
+		else:
+			# Otherwise let the user decide on tonemapped EXR
+			params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
 		
 		if self.output_alpha:
 			output_channels = 'RGBA'
