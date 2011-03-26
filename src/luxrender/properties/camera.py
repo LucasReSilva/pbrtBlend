@@ -513,7 +513,7 @@ class luxrender_film(declarative_property_group):
 		params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
 		
 		# Camera Response Function
-		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf:
+		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf == 'file':
 			if scene.camera.library is not None:
 				local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
 			else:
@@ -525,6 +525,8 @@ class luxrender_film(declarative_property_group):
 				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath) )
 			else:
 				params.add_string('cameraresponse', local_crf_filepath)
+		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf == 'preset':
+			params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
 		
 		# Output types
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
@@ -569,6 +571,88 @@ class luxrender_film(declarative_property_group):
 		
 		return ('fleximage', params)
 
+#	Valid CRF preset names (case sensitive):
+# See lux/core/cameraresponse.cpp to keep this up to date
+
+crf_preset_names = [s.strip() for s in
+"""Advantix_100CD
+Advantix_200CD
+Advantix_400CD
+Agfachrome_ctpecisa_200CD
+Agfachrome_ctprecisa_100CD
+Agfachrome_rsx2_050CD
+Agfachrome_rsx2_100CD
+Agfachrome_rsx2_200CD
+Agfacolor_futura_100CD
+Agfacolor_futura_200CD
+Agfacolor_futura_400CD
+Agfacolor_futuraII_100CD
+Agfacolor_futuraII_200CD
+Agfacolor_futuraII_400CD
+Agfacolor_hdc_100_plusCD
+Agfacolor_hdc_200_plusCD
+Agfacolor_hdc_400_plusCD
+Agfacolor_optimaII_100CD
+Agfacolor_optimaII_200CD
+Agfacolor_ultra_050_CD
+Agfacolor_vista_100CD
+Agfacolor_vista_200CD
+Agfacolor_vista_400CD
+Agfacolor_vista_800CD
+Ektachrome_100_plusCD
+Ektachrome_100CD
+Ektachrome_320TCD
+Ektachrome_400XCD
+Ektachrome_64CD
+Ektachrome_64TCD
+Ektachrome_E100SCD
+F125CD
+F250CD
+F400CD
+FCICD
+Gold_100CD
+Gold_200CD
+Kodachrome_200CD
+Kodachrome_25CD
+Kodachrome_64CD
+Max_Zoom_800CD
+Portra_100TCD
+Portra_160NCCD
+Portra_160VCCD
+Portra_400NCCD
+Portra_400VCCD
+Portra_800CD""".splitlines()]
+
+@LuxRenderAddon.addon_register_class
+class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
+	bl_idname = 'camera.set_luxrender_crf'
+	bl_label = 'Set LuxRender Camera Response Function'
+	
+	preset_name = bpy.props.StringProperty()
+	
+	@classmethod
+	def poll(cls, context):
+		return	context.camera and \
+			context.camera.luxrender_camera.luxrender_film.luxrender_colorspace
+	
+	def execute(self, context):
+		context.camera.luxrender_camera.luxrender_film.luxrender_colorspace.crf_preset = self.properties.preset_name
+		return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class CAMERA_MT_luxrender_crf(bpy.types.Menu):
+	bl_label = 'CRF Preset'
+	
+	# Flat-list menu system
+	def draw(self, context):
+		lt = self.layout.row()
+		for i, crf_name in enumerate(sorted(crf_preset_names)):
+			# Create a new column every 20 items
+			if (i%20 == 0):
+				cl = lt.column()
+			op = cl.operator('CAMERA_OT_set_luxrender_crf', text=crf_name)
+			op.preset_name = crf_name
+
 @LuxRenderAddon.addon_register_class
 class luxrender_colorspace(declarative_property_group):
 	'''
@@ -591,24 +675,28 @@ class luxrender_colorspace(declarative_property_group):
 	
 	if LUXRENDER_VERSION >= '0.8':
 		controls.extend([
+			'crf_label',
 			'use_crf',
+			'crf_preset_menu',
 			'crf_file'
 		])
 	
 	visibility = {
-		'preset_name':	{ 'preset': True },
-		'cs_whiteX':	{ 'preset': False },
-		'cs_whiteY':	{ 'preset': False },
-		'cs_redX':		{ 'preset': False },
-		'cs_redY':		{ 'preset': False },
-		'cs_greenX':	{ 'preset': False },
-		'cs_greenY':	{ 'preset': False },
-		'cs_blueX':		{ 'preset': False },
-		'cs_blueY':		{ 'preset': False },
-		'crf_file':		{ 'use_crf': True },
+		'preset_name':		{ 'preset': True },
+		'cs_whiteX':		{ 'preset': False },
+		'cs_whiteY':		{ 'preset': False },
+		'cs_redX':			{ 'preset': False },
+		'cs_redY':			{ 'preset': False },
+		'cs_greenX':		{ 'preset': False },
+		'cs_greenY':		{ 'preset': False },
+		'cs_blueX':			{ 'preset': False },
+		'cs_blueY':			{ 'preset': False },
 		
-		'gamma_label':	{ 'preset': False },
-		'gamma':		{ 'preset': False },
+		'crf_preset_menu':	{ 'use_crf': 'preset' },
+		'crf_file':			{ 'use_crf': 'file' },
+		
+		'gamma_label':		{ 'preset': False },
+		'gamma':			{ 'preset': False },
 	}
 	
 	properties = [
@@ -714,10 +802,26 @@ class luxrender_colorspace(declarative_property_group):
 		
 		# Camera Response Functions
 		{
+			'attr': 'crf_label',
+			'type': 'text',
+			'name': 'Camera Response Function',
+		},
+		{
 			'attr': 'use_crf',
-			'type': 'bool',
+			'type': 'enum',
 			'name': 'Use Camera Response Function',
-			'default': False
+			'default': 'none',
+			'items': [
+				('none', 'None', 'Don\'t use a CRF'),
+				('file', 'File', 'Load a CRF from File'),
+				('preset', 'Preset', 'Use a built-in CRF Preset'),
+			],
+			'expand': True
+		},
+		{
+			'type': 'ef_callback',
+			'attr': 'crf_preset_menu',
+			'method': 'draw_crf_preset_menu',
 		},
 		{
 			'attr': 'crf_file',
@@ -725,6 +829,12 @@ class luxrender_colorspace(declarative_property_group):
 			'subtype': 'FILE_PATH',
 			'name': 'CRF File',
 			'default': '',
+		},
+		{
+			'attr': 'crf_preset',
+			'type': 'string',
+			'name': 'CRF Preset',
+			'default': 'CRF Preset',
 		},
 	]
 
