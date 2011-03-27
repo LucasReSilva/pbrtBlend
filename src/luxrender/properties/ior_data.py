@@ -384,9 +384,10 @@ class LUXRENDER_OT_set_ior_preset(bpy.types.Operator):
 
 def draw_generator(operator, m_names):
 	def draw(self, context):
-		sl = self.layout
-		for m_name, m_index in m_names:
-			op = sl.operator(operator, text=m_name)
+		sl = self.layout.row()
+		for i, (m_name, m_index) in enumerate(m_names):
+			if (i%20 == 0): cl=sl.column()
+			op = cl.operator(operator, text=m_name)
 			op.index = m_index
 			op.l_name = m_name
 	return draw
