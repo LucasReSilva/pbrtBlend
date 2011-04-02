@@ -130,6 +130,25 @@ class luxrender_lamp_basic(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_lamp_point(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
+	
+	controls = TC_L.controls[:] + [
+		'flipz'
+	]
+	
+	properties = TC_L.properties[:] + [
+		{
+			'type': 'bool',
+			'attr': 'flipz',
+			'name': 'Flip Z ( IES correction )',
+			'description': 'Flip Z direction in mapping',
+			'default': True
+		},
+	]
+
+	def get_paramset(self, lamp_object):
+		params = super().get_paramset(lamp_object)
+		params.add_bool('flipz', self.flipz)
+		return params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_lamp_spot(luxrender_lamp_basic):
@@ -171,10 +190,12 @@ class luxrender_lamp_sun(declarative_property_group):
 	
 	controls = [
 		'sunsky_type',
+		'nsamples',
 		'turbidity',
 		'sunsky_advanced',
 		'horizonbrightness',
 		'horizonsize',
+		'relsize',
 		'sunhalobrightness',
 		'sunhalosize',
 		'backscattering',
@@ -184,6 +205,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		'horizonbrightness':	{ 'sunsky_advanced': True },
 		'horizonsize':			{ 'sunsky_advanced': True },
 		'sunhalobrightness':	{ 'sunsky_advanced': True },
+		'relsize':				{ 'sunsky_advanced': True },
 		'sunhalosize':			{ 'sunsky_advanced': True },
 		'backscattering':		{ 'sunsky_advanced': True },
 	}
@@ -216,6 +238,16 @@ class luxrender_lamp_sun(declarative_property_group):
 			'attr': 'sunsky_advanced',
 			'name': 'Advanced',
 			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'relsize',
+			'name': 'Relative sun disk size',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0
 		},
 		{
 			'type': 'float',
@@ -267,16 +299,29 @@ class luxrender_lamp_sun(declarative_property_group):
 			'max': 10.0,
 			'soft_max': 10.0
 		},
+		{
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
+		},
 	]
 	
 	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		
 		params.add_float('turbidity', self.turbidity)
+		params.add_integer('nsamples', self.nsamples)
 		
 		if self.sunsky_advanced:
 			params.add_float('horizonbrightness', self.horizonbrightness)
 			params.add_float('horizonsize', self.horizonsize)
+			params.add_float('relsize', self.relsize)
 			params.add_float('sunhalobrightness', self.sunhalobrightness)
 			params.add_float('sunhalosize', self.sunhalosize)
 			params.add_float('backscattering', self.backscattering)
@@ -287,15 +332,15 @@ class luxrender_lamp_sun(declarative_property_group):
 class luxrender_lamp_area(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	
-	controls = TC_L.controls + [
+	controls = TC_L.controls[:] + [
+		'nsamples',
 		'power',
 		'efficacy',
 	]
 	
 	visibility = TC_L.visibility
 	
-	properties = TC_L.properties + [
-		# nsamples
+	properties = TC_L.properties[:] + [
 		{
 			'type': 'float',
 			'attr': 'power',
@@ -316,6 +361,17 @@ class luxrender_lamp_area(declarative_property_group):
 			'max': 1e6,
 			'soft_max': 1e6,
 		},
+		{
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
+		},
 	]
 	
 	def get_paramset(self, lamp_object):
@@ -323,6 +379,7 @@ class luxrender_lamp_area(declarative_property_group):
 		params.add_float('power', self.power)
 		params.add_float('efficacy', self.efficacy)
 		params.update( TC_L.get_paramset(self) )
+		params.add_integer('nsamples', self.nsamples)
 		return params
 
 @LuxRenderAddon.addon_register_class
@@ -331,9 +388,11 @@ class luxrender_lamp_hemi(declarative_property_group):
 	
 	controls = [
 		'type',
-		[0.323, 'L_colorlabel', 'L_color'],
 		'infinite_map',
 		'mapping_type',
+		'nsamples',
+		'gamma',
+		[0.323, 'L_colorlabel', 'L_color'],
 		'hdri_multiply'
 	]
 	
@@ -341,11 +400,11 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'infinite_map':		{ 'type': 'infinite' },
 		'mapping_type':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 		'hdri_multiply':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'gamma':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'nsamples':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 	}
 	
-	properties = TC_L.properties + [
-		# nsamples
-		# gamma
+	properties = TC_L.properties[:] + [
 		{
 			'type': 'enum',
 			'attr': 'type',
@@ -382,6 +441,29 @@ class luxrender_lamp_hemi(declarative_property_group):
 				('vcross', 'Vert Cross', 'vcross')
 			]
 		},
+		{
+			'type': 'float',
+			'attr': 'gamma',
+			'name': 'Gamma',
+			'description': 'Light source gamma',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 6,
+			'soft_max': 6,
+		},
+		{
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
+		},
+
 	]
 	
 	def get_paramset(self, lamp_object):
@@ -395,6 +477,8 @@ class luxrender_lamp_hemi(declarative_property_group):
 					hdri_path = self.infinite_map
 				params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
 				params.add_string('mapping', self.mapping_type)
+				params.add_float('gamma', self.gamma)
+				params.add_integer('nsamples', self.nsamples)
 				
 			if self.infinite_map == '' or self.hdri_multiply:
 				params.add_color('L', self.L_color)

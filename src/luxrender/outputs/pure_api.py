@@ -27,8 +27,8 @@
 from ..outputs import LuxLog
 
 if not 'PYLUX_AVAILABLE' in locals():
-	# If pylux is not available, revert to 0.7 feature set
-	LUXRENDER_VERSION = '0.7.1'
+	# If pylux is not available, revert to 0.8 feature set
+	LUXRENDER_VERSION = '0.8'
 	
 	try:
 		from .. import pylux

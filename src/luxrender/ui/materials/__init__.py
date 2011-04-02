@@ -24,13 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from properties_material import MaterialButtonsPanel
+import bl_ui
 
 from extensions_framework.ui import property_group_renderer
 
 from ... import LuxRenderAddon
 
-class luxrender_material_base(MaterialButtonsPanel, property_group_renderer):
+class luxrender_material_base(bl_ui.properties_material.MaterialButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
 
 class luxrender_material_sub(luxrender_material_base):

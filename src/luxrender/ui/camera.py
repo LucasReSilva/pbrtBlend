@@ -24,13 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from properties_data_camera import CameraButtonsPanel
+import bl_ui
 
 from extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 
-class camera_panel(CameraButtonsPanel, property_group_renderer):
+class camera_panel(bl_ui.properties_data_camera.CameraButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 
 @LuxRenderAddon.addon_register_class
@@ -50,3 +50,6 @@ class film(camera_panel):
 		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_colorspace' ),
 		( ('camera','luxrender_camera','luxrender_film'), 'luxrender_tonemapping' ),
 	]
+	
+	def draw_crf_preset_menu(self, context):
+		self.layout.menu('CAMERA_MT_luxrender_crf', text=context.camera.luxrender_camera.luxrender_film.luxrender_colorspace.crf_preset)

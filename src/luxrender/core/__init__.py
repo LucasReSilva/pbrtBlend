@@ -35,7 +35,7 @@ import subprocess
 import sys
 
 # Blender libs
-import bpy
+import bpy, bl_ui
 
 # Framework libs
 from extensions_framework import util as efutil
@@ -76,21 +76,15 @@ from .. import operators
 from ..operators import lrmdb
 
 # Add standard Blender Interface elements
-import properties_render
-properties_render.RENDER_PT_render.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-properties_render.RENDER_PT_output.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-del properties_render
+bl_ui.properties_render.RENDER_PT_render.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_render.RENDER_PT_output.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
-import properties_material
-properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-del properties_material
+bl_ui.properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
-import properties_data_lamp
-properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-# properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-del properties_data_lamp
+bl_ui.properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+# bl_ui.properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
 @classmethod
 def blender_texture_poll(cls, context):
@@ -104,31 +98,28 @@ def blender_texture_poll(cls, context):
 	
 	return show
 
-import properties_texture
-properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 # properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 blender_texture_ui_list = [
-	properties_texture.TEXTURE_PT_blend,
-	properties_texture.TEXTURE_PT_clouds,
-	properties_texture.TEXTURE_PT_distortednoise,
-	properties_texture.TEXTURE_PT_image,
-	properties_texture.TEXTURE_PT_magic,
-	properties_texture.TEXTURE_PT_marble,
-	properties_texture.TEXTURE_PT_musgrave,
-	#properties_texture.TEXTURE_PT_noise,
-	properties_texture.TEXTURE_PT_stucci,
-	properties_texture.TEXTURE_PT_voronoi,
-	properties_texture.TEXTURE_PT_wood,
+	bl_ui.properties_texture.TEXTURE_PT_blend,
+	bl_ui.properties_texture.TEXTURE_PT_clouds,
+	bl_ui.properties_texture.TEXTURE_PT_distortednoise,
+	bl_ui.properties_texture.TEXTURE_PT_image,
+	bl_ui.properties_texture.TEXTURE_PT_magic,
+	bl_ui.properties_texture.TEXTURE_PT_marble,
+	bl_ui.properties_texture.TEXTURE_PT_musgrave,
+	#bl_ui.properties_texture.TEXTURE_PT_noise,
+	bl_ui.properties_texture.TEXTURE_PT_stucci,
+	bl_ui.properties_texture.TEXTURE_PT_voronoi,
+	bl_ui.properties_texture.TEXTURE_PT_wood,
 ]
 for blender_texture_ui in blender_texture_ui_list:
 	blender_texture_ui.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 	blender_texture_ui.poll = blender_texture_poll
 
-del properties_texture
-
 # compatible() copied from blender repository (netrender)
 def compatible(mod):
-	mod = __import__(mod)
+	mod = getattr(bl_ui, mod)
 	for subclass in mod.__dict__.values():
 		try:
 			subclass.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
@@ -534,7 +525,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					LuxLog('LuxRender not found at path: %s' % luxrender_path)
 					return False
 				
-				cmd_args = [luxrender_path, fn]
+				cmd_args = [luxrender_path, fn.replace('//','/')]
 				
 				# set log verbosity
 				if scene.luxrender_engine.log_verbosity != 'default':

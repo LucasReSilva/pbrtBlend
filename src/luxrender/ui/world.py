@@ -24,14 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
+import bpy, bl_ui
 
-from properties_world import WorldButtonsPanel
 from extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 
-class world_panel(WorldButtonsPanel, property_group_renderer):
+class world_panel(bl_ui.properties_world.WorldButtonsPanel, property_group_renderer):
 	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
 
 @LuxRenderAddon.addon_register_class

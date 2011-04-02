@@ -24,14 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-from properties_render import RenderButtonsPanel
+import bpy, bl_ui
 
 from extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 
-class render_panel(RenderButtonsPanel, property_group_renderer):
+class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_renderer):
 	'''
 	Base class for render engine settings panels
 	'''
