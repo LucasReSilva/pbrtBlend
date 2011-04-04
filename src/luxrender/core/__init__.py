@@ -564,7 +564,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 				
-				if scene.luxrender_engine.monitor_external:
+				if not (scene.luxrender_engine.binary_name == 'luxrender' and not scene.luxrender_engine.monitor_external):
 					framebuffer_thread = LuxFilmDisplay({
 						'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
 						'RE': self,
