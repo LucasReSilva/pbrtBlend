@@ -274,7 +274,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		object_is_emitter = hasattr(mat, 'luxrender_emission') and mat.luxrender_emission.use_emission
 		if object_is_emitter:
-			lux_context.lightGroup(mat.luxrender_emission.lightgroup, [])
+			# lux_context.lightGroup(mat.luxrender_emission.lightgroup, [])
 			lux_context.areaLightSource( *mat.luxrender_emission.api_output() )
 		
 		if pv_export_shape:
