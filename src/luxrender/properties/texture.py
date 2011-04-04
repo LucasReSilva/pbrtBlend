@@ -2328,6 +2328,7 @@ class luxrender_tex_transform(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	
 	controls = [
+		'coordinates',
 		'translate',
 		'rotate',
 		'scale',
@@ -2336,6 +2337,18 @@ class luxrender_tex_transform(declarative_property_group):
 	visibility = {}
 	
 	properties = [
+		{
+			'type': 'enum',
+			'attr': 'coordinates',
+			'name': 'Coordinates',
+			'items': [
+				('global', 'Global', 'Use global 3D coordinates'),
+				('local', 'Object', 'Use object local 3D coordinates'),
+				('uv', 'UV', 'Use UV coordinates (x=u y=v z=0)'),
+			],
+			'default': 'global',
+			'save_in_preset': True
+		},
 		{
 			'type': 'float_vector',
 			'attr': 'translate',
@@ -2364,6 +2377,7 @@ class luxrender_tex_transform(declarative_property_group):
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
+		transform_params.add_string('coordinates', self.coordinates)
 		transform_params.add_vector('translate', [i*ws for i in self.translate])
 		transform_params.add_vector('rotate', self.rotate)
 		transform_params.add_vector('scale', [i*ws for i in self.scale])
