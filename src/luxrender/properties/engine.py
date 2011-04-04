@@ -65,7 +65,7 @@ class luxrender_engine(declarative_property_group):
 		
 		'mesh_type',
 		'partial_ply',
-		'render',
+		['render','monitor_external'],
 		'install_path',
 		['threads_auto', 'threads'],
 	]
@@ -86,6 +86,7 @@ class luxrender_engine(declarative_property_group):
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
 		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
+		'monitor_external':			{'export_type': 'EXT'},
 		'partial_ply':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'install_path':				{ 'render': True, 'export_type': 'EXT' },
 		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
@@ -126,6 +127,14 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
 			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+		},
+		{
+			'type': 'bool',
+			'attr': 'monitor_external',
+			'name': 'Monitor external',
+			'description': 'Monitor external GUI rendering; when selected, LuxBlend will copy the render image from the external GUI',
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',

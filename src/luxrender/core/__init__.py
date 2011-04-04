@@ -563,26 +563,28 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
-				framebuffer_thread = LuxFilmDisplay({
-					'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
-					'RE': self,
-				})
-				framebuffer_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval ) 
-				framebuffer_thread.start()
-				while luxrender_process.poll() == None and not self.test_break():
-					self.render_update_timer = threading.Timer(1, self.process_wait_timer)
-					self.render_update_timer.start()
-					if self.render_update_timer.isAlive(): self.render_update_timer.join()
 				
-				# If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
-				if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
-					# Use SIGTERM because that's the only one supported on Windows
-					luxrender_process.send_signal(subprocess.signal.SIGTERM)
-				
-				# Stop updating the render result and load the final image
-				framebuffer_thread.stop()
-				framebuffer_thread.join()
-				framebuffer_thread.kick(render_end=True)
+				if scene.luxrender_engine.monitor_external:
+					framebuffer_thread = LuxFilmDisplay({
+						'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
+						'RE': self,
+					})
+					framebuffer_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval ) 
+					framebuffer_thread.start()
+					while luxrender_process.poll() == None and not self.test_break():
+						self.render_update_timer = threading.Timer(1, self.process_wait_timer)
+						self.render_update_timer.start()
+						if self.render_update_timer.isAlive(): self.render_update_timer.join()
+					
+					# If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
+					if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
+						# Use SIGTERM because that's the only one supported on Windows
+						luxrender_process.send_signal(subprocess.signal.SIGTERM)
+					
+					# Stop updating the render result and load the final image
+					framebuffer_thread.stop()
+					framebuffer_thread.join()
+					framebuffer_thread.kick(render_end=True)
 	
 	def process_wait_timer(self):
 		# Nothing to do here
