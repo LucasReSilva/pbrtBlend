@@ -65,10 +65,10 @@ from ..ui.materials import (
 )
 
 from ..ui.textures import (
-	main, band, bilerp, blackbody, brick, cauchy, constant, checkerboard, dots,
-	equalenergy, fbm, gaussian, harlequin, imagemap, lampspectrum,
-	luxpop, marble, mix, multimix, sellmeier, scale, sopra, uv, uvmask, windy,
-	wrinkled, mapping, tabulateddata, transform
+	main, band, blender, bilerp, blackbody, brick, cauchy, constant,
+	checkerboard, dots, equalenergy, fbm, gaussian, harlequin, imagemap,
+	lampspectrum, luxpop, marble, mix, multimix, sellmeier, scale, sopra, uv,
+	uvmask, windy, wrinkled, mapping, tabulateddata, transform
 )
 
 # Exporter Operators need to be imported to ensure initialisation

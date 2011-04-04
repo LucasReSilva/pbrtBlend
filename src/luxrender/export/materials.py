@@ -157,6 +157,10 @@ def convert_texture(scene, texture):
 	# Lux only supports blender's textures in float variant
 	variant = 'float'
 	paramset = ParamSet()
+	
+	paramset.add_float('bright', texture.intensity)
+	paramset.add_float('contrast', texture.contrast)
+	
 	lux_tex_name = 'blender_%s' % texture.type.lower()
 	
 	mapping_type = '3D'
