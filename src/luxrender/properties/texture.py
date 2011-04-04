@@ -2343,7 +2343,9 @@ class luxrender_tex_transform(declarative_property_group):
 			'name': 'Coordinates',
 			'items': [
 				('global', 'Global', 'Use global 3D coordinates'),
+				('globalnormal', 'Global Normal', 'Use Global surface normals'),
 				('local', 'Object', 'Use object local 3D coordinates'),
+				('localnormal', 'Object Normal', 'Use object local surface normals'),
 				('uv', 'UV', 'Use UV coordinates (x=u y=v z=0)'),
 			],
 			'default': 'global',
