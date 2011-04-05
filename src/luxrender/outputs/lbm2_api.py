@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import json
+import collections, json
 
 #from ..outputs import LuxLog
 #from ..outputs.pure_api import LUXRENDER_VERSION
@@ -41,7 +41,6 @@ class Custom_Context(object):
 	API_TYPE = 'FILE'
 	
 	context_name = ''
-	output_file = None
 	
 	lbm2_name = ''
 	lbm2_category = -1
@@ -50,43 +49,39 @@ class Custom_Context(object):
 	
 	def __init__(self, name):
 		self.context_name = name
-		
-	def open(self, filename):
-		self.output_file = open(filename, 'w')
 	
 	def set_material_metadata(self, name, category=-1, version='0.8'):
 		self.lbm2_name = name
 		self.lbm2_category = category
 		self.lbm2_version = version
 	
-	def close(self):
-		if self.output_file != None:
-			lbm2_data = {
-				'name': self.lbm2_name,
-				'category_id': self.lbm2_category,
-				'version': self.lbm2_version,
-				'objects': self.lbm2_objects
-			}
+	def write(self, filename):
+		with open(filename, 'w') as output_file:
+			# The only reason to use OrderedDict is so that _comment
+			# appears at the top of the file
+			lbm2_data = collections.OrderedDict()
+			lbm2_data['_comment'] = 'LBM2 material data saved by LuxBlend25'
+			lbm2_data['name'] = self.lbm2_name
+			lbm2_data['category_id'] = self.lbm2_category
+			lbm2_data['version'] = self.lbm2_version
+			lbm2_data['objects'] = self.lbm2_objects
+			
 			json.dump(
 				lbm2_data,
-				self.output_file,
+				output_file,
 				indent=2
 			)
-			self.output_file.close()
-			self.output_file = None
+	
+	def upload(self):
+		pass # TODO! 
 	
 	def getRenderingServersStatus(self):
 		return []
 	
-	#def wf(self, st, tabs=0):
-	#	self.output_file.write('%s%s\n' % ('\t'*tabs, st))
-	#	self.output_file.flush()
-	
-	def _api(self, identifier, args=[], extra_tokens='', file=None):
+	def _api(self, identifier, args=[], extra_tokens=''):
 		'''
 		identifier			string
 		args				list
-		file				None or int
 		
 		Make a standard pylux.Context API call. In this case
 		the API call is translated into a minimal dict that
@@ -107,9 +102,9 @@ class Custom_Context(object):
 		
 		for p in params:
 			obj['paramset'].append({
-					'type': p.type,
-					'name': p.name,
-					'value': p.value
+				'type': p.type,
+				'name': p.name,
+				'value': p.value
 			})
 			
 		self.lbm2_objects.append(obj)
@@ -239,10 +234,10 @@ class Custom_Context(object):
 	#	self.wf('WorldEnd')
 	
 	def cleanup(self):
-		self.exit()
+		pass
 	
 	def exit(self):
-		self.close()
+		pass
 	
 	def wait(self):
 		pass

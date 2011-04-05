@@ -300,7 +300,6 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 				self.properties.directory,
 				self.properties.filename
 			)
-			material_context.open(fullpath)
 			
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
@@ -312,7 +311,8 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			
 			luxrender_mat.export(material_context, blender_mat)
 			
-			# This line is essential to close the file
+			material_context.write(fullpath)
+			
 			LM.reset()
 			LuxManager.SetActive(None)
 			

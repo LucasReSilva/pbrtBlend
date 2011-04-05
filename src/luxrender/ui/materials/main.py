@@ -33,14 +33,10 @@ from ...ui.materials import luxrender_material_base
 class ui_luxrender_material_utils(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Utils'
 	def draw(self, context):
-		#row = self.layout.row(align=True)
-		#row.menu("LUXRENDER_MT_presets_material", text=bpy.types.LUXRENDER_MT_presets_material.bl_label)
-		#row.operator("luxrender.preset_material_add", text="", icon="ZOOMIN")
-		#row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
-		
 		row = self.layout.row(align=True)
 		row.operator("luxrender.load_material", icon="DISK_DRIVE")
-		row.operator("luxrender.save_material", icon="DISK_DRIVE")
+		row.operator("luxrender.save_material", icon="DISK_DRIVE").filename =\
+			'%s.lbm2' % bpy.path.clean_name(context.material.name)
 		
 		row = self.layout.row(align=True)
 		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
