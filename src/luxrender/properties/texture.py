@@ -2828,3 +2828,241 @@ class luxrender_tex_wrinkled(declarative_property_group):
 		for psi in ps:
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
 				setattr(self, psi['name'], psi['value'])
+
+def import_paramset_to_blender_texture(texture, tex_type, ps):
+	"""
+	This function is derived from, and ought to do the exact
+	reverse of export.materials.convert_texture
+	"""
+	
+	# Some paramset item names might need to be changed to
+	# blender texture parameter names
+	def psi_translate(psi_name, xlate):
+		if psi_name in xlate.keys():
+			return xlate[psi_name]
+		else:
+			return psi_name
+	
+	# Some paramset item values might need to be remapped to
+	# blender texture parameter values
+	def psi_remap(psi_name, psi_value, xmap):
+		if psi_name in xmap.keys():
+			xm = xmap[psi_name]
+			if type(xm) == type(lambda:None):
+				return xm(psi_value)
+			elif type(xm) == dict:
+				if psi_value in xm.keys():
+					return xmap[psi_name][psi_value]
+				else:
+					return psi_value
+			else:
+				return psi_value
+		else:
+			return psi_value
+	
+	# Process the paramset items specified in accept, and run them
+	# through the translate and remap filters
+	def import_ps(accept, xl={}, xmap={}):
+		accept_keys = accept.keys()
+		for psi in ps:
+			if psi['name'] in accept_keys and psi['type'].lower() == accept[psi['name']]:
+				setattr(texture, psi_translate(psi['name'], xl), psi_remap(psi['name'],psi['value'],xmap))
+	
+	import_ps({
+		'bright': 'float',
+		'contrast': 'float'
+	},{
+		'bright': 'intensity'
+	})
+	
+	# Set the Blender texture type
+	blender_tex_type = tex_type.replace('blender_', '').upper()
+	blender_type_xlate = {
+		'DISTORTEDNOISE': 'DISTORTED_NOISE'
+	}
+	if blender_tex_type in blender_type_xlate.keys():
+		blender_tex_type = blender_type_xlate[blender_tex_type]
+	texture.type = blender_tex_type
+	
+	# Get a new reference to the texture, since changing the type
+	# needs to re-cast the blender texture as a subtype
+	tex_name = texture.name
+	texture = bpy.data.textures[tex_name]
+	
+	if texture.type == 'BLEND':
+		progression_map = {
+			'LINEAR':			'lin',
+			'QUADRATIC':		'quad',
+			'EASING':			'ease',
+			'DIAGONAL':			'diag',
+			'SPHERICAL':		'sphere',
+			'QUADRATIC_SPHERE':	'halo',
+			'RADIAL':			'radial',
+		}
+		
+		import_ps({
+			'flipxy': 'bool',
+			'type': 'string'
+		},{
+			'flipxy': 'use_flip_axis',
+			'type': 'progression'
+		},{
+			'type': {v:k for k,v in progression_map.items()}
+		})
+	
+	if texture.type == 'CLOUDS':
+		import_ps({
+			'noisetype': 'string',
+			'noisebasis': 'string',
+			'noisesize': 'float',
+			'noisedepth': 'integer'
+		},
+		{
+			'noisetype': 'noise_type',
+			'noisebasis': 'noise_basis',
+			'noisesize': 'noise_scale',
+			'noisedepth': 'noise_depth'
+		},
+		{
+			'noisetype': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+		})
+	
+	if texture.type == 'DISTORTED_NOISE':
+		import_ps({
+			'type': 'string',
+			'noisebasis': 'string',
+			'distamount': 'float',
+			'noisesize': 'float',
+			'nabla': 'float'
+		},{
+			'type': 'noise_distortion',
+			'noisebasis': 'noise_basis',
+			'distamount': 'distortion',
+			'noisesize': 'noise_scale'
+		},{
+			'type': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper()
+		})
+	
+	if texture.type == 'MAGIC':
+		import_ps({
+			'noisedepth': 'integer',
+			'turbulence': 'float'
+		},{
+			'noisedepth': 'noise_depth'
+		})
+	
+	if texture.type == 'MARBLE':
+		import_ps({
+			'type': 'string',
+			'noisetype': 'string',
+			'noisebasis': 'string',
+			'noisebasis2': 'string',
+			'noisesize': 'float',
+			'turbulence': 'float',
+			'noisedepth': 'integer'
+		},{
+			'type': 'marble_type',
+			'noisetype': 'noise_type',
+			'noisebasis': 'noise_basis',
+			'noisebasis2': 'noisebasis_2',
+			'noisedepth': 'noise_depth'
+		},{
+			'type': lambda x: x.upper(),
+			'noisetype': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+			'noisebasis2': lambda x: x.upper(),
+		})
+	
+	if texture.type == 'MUSGRAVE':
+		import_ps({
+			'type': 'string',
+			'h': 'float',
+			'lacu': 'float',
+			'noisebasis': 'string',
+			'noisesize': 'float',
+			'octs': 'float'
+		},{
+			'type': 'musgrave_type',
+			'h': 'dimension_max',
+			'lacu': 'lacunarity',
+			'noisebasis': 'noise_basis',
+			'noisesize': 'noise_scale',
+			'octs': 'octaves'
+		},{
+			'type': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+		})
+	
+	# NOISE shows no params ?
+	
+	if texture.type == 'STUCCI':
+		import_ps({
+			'type': 'string',
+			'noisetype': 'string',
+			'noisebasis': 'string',
+			'noisesize': 'float',
+			'turbulence': 'float'
+		},{
+			'type': 'stucci_type',
+			'noisetype': 'noise_type',
+			'noisebasis': 'noise_basis',
+			'noisesize': 'noise_scale'
+		},{
+			'type': lambda x: x.upper(),
+			'noisetype': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+		})
+	
+	if texture.type == 'VORONOI':
+		distancem_map = {
+			'DISTANCE': 'actual_distance',
+			'DISTANCE_SQUARED': 'distance_squared',
+			'MANHATTAN': 'manhattan',
+			'CHEBYCHEV': 'chebychev',
+			'MINKOVSKY_HALF': 'minkovsky_half',
+			'MINKOVSKY_FOUR': 'minkovsky_four',
+			'MINKOVSKY': 'minkovsky'
+		}
+		import_ps({
+			'distmetric': 'string',
+			'minkovsky_exp': 'float',
+			'noisesize': 'float',
+			'nabla': 'float',
+			'w1': 'float',
+			'w2': 'float',
+			'w3': 'float',
+			'w4': 'float',
+		},{
+			'distmetric': 'distance_metric',
+			'minkovsky_exp': 'minkovsky_exponent',
+			'noisesize': 'noise_scale',
+			'w1': 'weight_1',
+			'w2': 'weight_1',
+			'w3': 'weight_1',
+			'w4': 'weight_1',
+		},{
+			'distmetric': {v:k for k,v in distancem_map.items()}
+		})
+	
+	if texture.type == 'WOOD':
+		import_ps({
+			'noisebasis': 'string',
+			'noisebasis2': 'string',
+			'noisesize': 'float',
+			'noisetype': 'string',
+			'turbulence': 'float',
+			'type': 'string'
+		},{
+			'noisebasis': 'noise_basis',
+			'noisebasis2': 'noisebasis_2',
+			'noisesize': 'noise_scale',
+			'noisetype': 'noise_type',
+			'type': 'wood_type'
+		},{
+			'noisebasis': lambda x: x.upper(),
+			'noisebasis2': lambda x: x.upper(),
+			'noisetype': lambda x: x.upper(),
+			'type': lambda x: x.upper(),
+		})

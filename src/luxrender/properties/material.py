@@ -31,7 +31,9 @@ from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
 
 from .. import LuxRenderAddon
-from ..properties.texture import FloatTextureParameter, ColorTextureParameter
+from ..properties.texture import (
+	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture
+)
 from ..export import ParamSet
 from ..export.materials import ExportedMaterials, ExportedTextures, get_texture_from_scene
 from ..outputs import LuxManager, LuxLog
@@ -409,7 +411,8 @@ class luxrender_material(declarative_property_group):
 					subtype.load_paramset(variant, lbm2_obj['paramset'])
 				else:
 					lxt.set_type('BLENDER')
-					pass	# TODO; do the reverse of export.materials.convert_texture
+					# do the reverse of export.materials.convert_texture
+					import_paramset_to_blender_texture(blender_tex, tex_type, lbm2_obj['paramset'])
 				
 				lxt.luxrender_tex_mapping.load_paramset(lbm2_obj['paramset'])
 				lxt.luxrender_tex_transform.load_paramset(lbm2_obj['paramset'])
