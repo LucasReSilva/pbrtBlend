@@ -24,13 +24,18 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ..outputs import LuxLog
-from ..outputs.pure_api import LUXRENDER_VERSION
+import json
+
+#from ..outputs import LuxLog
+#from ..outputs.pure_api import LUXRENDER_VERSION
 
 class Custom_Context(object):
 	'''
 	Imitate the real pylux Context object so that we can
 	write materials to LBM2 files using the same API
+	
+	NOTE; not all API calls are supported by this context,
+	just enough to allow material/texture/volume export
 	'''
 	
 	API_TYPE = 'FILE'
@@ -38,28 +43,31 @@ class Custom_Context(object):
 	context_name = ''
 	output_file = None
 	
+	objects = []
+	
 	def __init__(self, name):
 		self.context_name = name
 		
 	def open(self, filename):
 		self.output_file = open(filename, 'w')
 		# self.output_file.write('# LBM2 File written by LuxBlend25\n')
-		self.output_file.write('[')
 	
 	def close(self):
 		if self.output_file != None:
-			self.output_file.write(']')
+			json.dump(
+				self.objects,
+				self.output_file,
+				indent=2
+			)
 			self.output_file.close()
+			self.output_file = None
 	
 	def getRenderingServersStatus(self):
 		return []
 	
-	def wf(self, st, tabs=0):
-		self.output_file.write('%s%s\n' % ('\t'*tabs, st))
-		self.output_file.flush()
-	
-	def set_output_file(self, file):
-		pass
+	#def wf(self, st, tabs=0):
+	#	self.output_file.write('%s%s\n' % ('\t'*tabs, st))
+	#	self.output_file.flush()
 	
 	def _api(self, identifier, args=[], extra_tokens='', file=None):
 		'''
@@ -68,184 +76,154 @@ class Custom_Context(object):
 		file				None or int
 		
 		Make a standard pylux.Context API call. In this case
-		the identifier followed by its name followed by its
-		formatted parameters are written to either the current
-		output file, or the file specified by the given index.
+		the API call is translated into a minimal dict that
+		will later be passed to json.dump
 		
 		Returns None
 		'''
 		
 		# name is a string, and params a list
 		name, params = args
-		#self.wf('\n%s "%s"' % (identifier, name))
-		#for p in params:
-		#	self.wf(p.to_string(), 1)
 		
-		self.wf('{')
-		self.wf("\t'type': '%s'," % identifier)
-		self.wf("\t'name': '%s'," % name)
-		self.wf("\t'extra_tokens': '%s'," % extra_tokens)
-		self.wf("\t'params': [")
+		obj = {
+			'type': identifier,
+			'name': name,
+			'extra_tokens': extra_tokens,
+			'params': [],
+		}
+		
 		for p in params:
-			self.wf("\t{")
-			self.wf("\t\t'type': '%s'," % p.type)
-			self.wf("\t\t'name': '%s'," % p.name)
-			self.wf("\t\t'value': %s," % p.value_to_string())
-			self.wf("\t},")
-		self.wf("\t],")
-		self.wf('},')
+			obj['params'].append({
+					'type': p.type,
+					'name': p.name,
+					'value': p.value
+			})
+			
+		self.objects.append(obj)
 	
 	# Wrapped pylux.Context API calls follow ...
 	
-	def objectBegin(self, name, file=None):
-		self._api('ObjectBegin ', [name, []], file=file)
-
-	def objectEnd(self, comment=''):
-		self._api('ObjectEnd # ', [comment, []])
+	#def objectBegin(self, name, file=None):
+	#	self._api('ObjectBegin ', [name, []], file=file)
 	
-	def objectInstance(self, name):
-		self._api('ObjectInstance ', [name, []])
+	#def objectEnd(self, comment=''):
+	#	self._api('ObjectEnd # ', [comment, []])
 	
-	def portalInstance(self, name):
-		# Backwards compatibility
-		if LUXRENDER_VERSION < '0.8':
-			LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
-			self._api('ObjectInstance ', [name, []])
-		else:
-			self._api('PortalInstance ', [name, []])
+	#def objectInstance(self, name):
+	#	self._api('ObjectInstance ', [name, []])
 	
-	def renderer(self, *args):
-		self._api('Renderer', args)
+	#def portalInstance(self, name):
+	#	# Backwards compatibility
+	#	if LUXRENDER_VERSION < '0.8':
+	#		LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
+	#		self._api('ObjectInstance ', [name, []])
+	#	else:
+	#		self._api('PortalInstance ', [name, []])
 	
-	def sampler(self, *args):
-		self._api('Sampler', args)
+	#def renderer(self, *args):
+	#	self._api('Renderer', args)
 	
-	def accelerator(self, *args):
-		self._api('Accelerator', args)
+	#def sampler(self, *args):
+	#	self._api('Sampler', args)
 	
-	def surfaceIntegrator(self, *args):
-		self._api('SurfaceIntegrator', args)
+	#def accelerator(self, *args):
+	#	self._api('Accelerator', args)
 	
-	def volumeIntegrator(self, *args):
-		self._api('VolumeIntegrator', args)
+	#def surfaceIntegrator(self, *args):
+	#	self._api('SurfaceIntegrator', args)
 	
-	def pixelFilter(self, *args):
-		self._api('PixelFilter', args)
+	#def volumeIntegrator(self, *args):
+	#	self._api('VolumeIntegrator', args)
 	
-	def lookAt(self, *args):
-		self.wf('\nLookAt %s' % ' '.join(['%f'%i for i in args]))
+	#def pixelFilter(self, *args):
+	#	self._api('PixelFilter', args)
 	
-	def coordinateSystem(self, name):
-		self._api('CoordinateSystem', [name, []])
+	#def lookAt(self, *args):
+	#	self.wf('\nLookAt %s' % ' '.join(['%f'%i for i in args]))
 	
-	def identity(self):
-		self._api('Identity #', ['', []])
+	#def coordinateSystem(self, name):
+	#	self._api('CoordinateSystem', [name, []])
 	
-	def camera(self, *args):
-		self._api('Camera', args)
+	#def identity(self):
+	#	self._api('Identity #', ['', []])
 	
-	def film(self, *args):
-		self._api('Film', args)
+	#def camera(self, *args):
+	#	self._api('Camera', args)
 	
-	def worldBegin(self, *args):
-		self.wf('\nWorldBegin')
+	#def film(self, *args):
+	#	self._api('Film', args)
 	
-	def lightGroup(self, *args):
-		self._api('LightGroup', args)
+	#def worldBegin(self, *args):
+	#	self.wf('\nWorldBegin')
 	
-	def lightSource(self, *args):
-		self._api('LightSource', args)
-
-	def areaLightSource(self, *args):
-		self._api('AreaLightSource', args)
-
-	def motionInstance(self, name, start, stop, motion_name):
-		self.wf('\nMotionInstance "%s" %f %f "%s"' % (name, start, stop, motion_name))
+	#def lightGroup(self, *args):
+	#	self._api('LightGroup', args)
+	
+	#def lightSource(self, *args):
+	#	self._api('LightSource', args)
+	
+	#def areaLightSource(self, *args):
+	#	self._api('AreaLightSource', args)
+	
+	#def motionInstance(self, name, start, stop, motion_name):
+	#	self.wf('\nMotionInstance "%s" %f %f "%s"' % (name, start, stop, motion_name))
 		
-	def attributeBegin(self, comment='', file=None):
-		'''
-		comment				string
-		file				None or int
+	#def attributeBegin(self, comment='', file=None):
+	#	self._api('AttributeBegin # ', [comment, []], file=file)
 		
-		The AttributeBegin block can be used to switch
-		the current output file, seeing as we will probably
-		be exporting LightSources to the LXS and other
-		geometry to LXO.
-		'''
-		
-		self._api('AttributeBegin # ', [comment, []], file=file)
-		
-	def attributeEnd(self):
-		self._api('AttributeEnd #', ['', []])
+	#def attributeEnd(self):
+	#	self._api('AttributeEnd #', ['', []])
 	
-	def transformBegin(self, comment='', file=None):
-		'''
-		comment				string
-		file				None or int
-		
-		See attributeBegin
-		'''
-		
-		self._api('TransformBegin # ', [comment, []], file=file)
+	#def transformBegin(self, comment='', file=None):
+	#	self._api('TransformBegin # ', [comment, []], file=file)
 	
-	def transformEnd(self):
-		self._api('TransformEnd #', ['', []])
+	#def transformEnd(self):
+	#	self._api('TransformEnd #', ['', []])
 	
-	def concatTransform(self, values):
-		self.wf('\nConcatTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
+	#def concatTransform(self, values):
+	#	self.wf('\nConcatTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
 	
-	def transform(self, values):
-		self.wf('\nTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
+	#def transform(self, values):
+	#	self.wf('\nTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
 	
-	def scale(self, x,y,z):
-		self.wf('\nScale %s' % ' '.join(['%0.15f'%i for i in [x,y,z]]))
+	#def scale(self, x,y,z):
+	#	self.wf('\nScale %s' % ' '.join(['%0.15f'%i for i in [x,y,z]]))
 	
-	def rotate(self, a,x,y,z):
-		self.wf('\nRotate %s' % ' '.join(['%0.15f'%i for i in [a,x,y,z]]))
+	#def rotate(self, a,x,y,z):
+	#	self.wf('\nRotate %s' % ' '.join(['%0.15f'%i for i in [a,x,y,z]]))
 	
-	def shape(self, *args):
-		self._api('Shape', args, file=self.current_file)
+	#def shape(self, *args):
+	#	self._api('Shape', args, file=self.current_file)
 	
-	def portalShape(self, *args):
-		self._api('PortalShape', args, file=self.current_file)
-		
-	def material(self, *args):
-		self._api('Material', args)
-		
-	def namedMaterial(self, name):
-		self._api('NamedMaterial', [name, []])
+	#def portalShape(self, *args):
+	#	self._api('PortalShape', args, file=self.current_file)
+	
+	#def material(self, *args):
+	#	self._api('Material', args)
+	
+	#def namedMaterial(self, name):
+	#	self._api('NamedMaterial', [name, []])
 	
 	def makeNamedMaterial(self, name, params):
-		#self.wf('\nMakeNamedMaterial "%s"' % name)
-		#for p in params:
-		#	self.wf(p.to_string(), 1)
 		self._api("MakeNamedMaterial", [name, params])
 	
 	def makeNamedVolume(self, name, type, params):
-		#self.wf('\nMakeNamedVolume "%s" "%s"' % (name, type))
-		#for p in params:
-		#	self.wf(p.to_string(), 1)
 		self._api("MakeNamedVolume", [name, params], extra_tokens='"%s"'%type)
 	
 	def interior(self, name):
 		self._api('Interior ', [name, []])
-		
+	
 	def exterior(self, name):
 		self._api('Exterior ', [name, []])
 	
-	def volume(self, type, params):
-		self.wf('\nVolume "%s"' % type)
-		for p in params:
-			self.wf(p.to_string(), 1)
-
+	#def volume(self, args):
+	#	self._api("Volume", *args)
+	
 	def texture(self, name, type, texture, params):
-		#self.wf('\nTexture "%s" "%s" "%s"' % (name, type, texture))
-		#for p in params:
-		#	self.wf(p.to_string(), 1)
 		self._api("Texture", [name, params], extra_tokens='"%s" "%s"' % (type,texture))
 	
-	def worldEnd(self):
-		self.wf('WorldEnd')
+	#def worldEnd(self):
+	#	self.wf('WorldEnd')
 	
 	def cleanup(self):
 		self.exit()

@@ -330,6 +330,7 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			
 			# This line is essential to close the file
 			LM.reset()
+			LuxManager.SetActive(None)
 			
 			return {'FINISHED'}
 			
