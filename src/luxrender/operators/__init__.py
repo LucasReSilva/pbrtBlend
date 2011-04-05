@@ -289,14 +289,12 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 	bl_idname = 'luxrender.save_material'
 	bl_label = 'Save material'
 	
-	filter_glob			= bpy.props.StringProperty(default='*.lxm',options={'HIDDEN'})
-	#filter_glob			= bpy.props.StringProperty(default='*.lbm2;*.lxm',options={'HIDDEN'})
+	filter_glob			= bpy.props.StringProperty(default='*.lbm2;*.lxm',options={'HIDDEN'})
 	use_filter			= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
 	filename			= bpy.props.StringProperty(name='Destination filename')
 	directory			= bpy.props.StringProperty(name='Destination directory')
 	
-	material_file_type	= bpy.props.EnumProperty(name="Exported file type", items=[('LXM','LXM','LXM')])
-	#material_file_type	= bpy.props.EnumProperty(name="Exported file type", items=[('LBM2','LBM2','LBM2'),('LXM','LXM','LXM')])
+	material_file_type	= bpy.props.EnumProperty(name="Exported file type", items=[('LBM2','LBM2','LBM2'),('LXM','LXM','LXM')])
 	
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)
@@ -320,16 +318,17 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 				self.properties.filename
 			))
 			
+			export_materials.ExportedMaterials.clear()
+			export_materials.ExportedTextures.clear()
+			
+			# Include interior/exterior for this material
 			for volume in context.scene.luxrender_volumes.volumes:
 				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
 					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
 			
-			export_materials.ExportedMaterials.clear()
-			export_materials.ExportedTextures.clear()
-			
 			luxrender_mat.export(material_context, blender_mat)
 			
-			material_context.close()
+			# This line is essential to close the file
 			LM.reset()
 			
 			return {'FINISHED'}
