@@ -172,32 +172,11 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			return
 		
 		try:
-			for mat_part in md['objects']:
-				# TODO, load all parts, not just the top-most one
-				if mat_part['type'] == 'MakeNamedMaterial' and mat_part['name'] == md['name']:
-					
-					lxm = lxms = None
-					
-					# First iterate for the material type, because
-					# we need to know which sub PropertyGroup to 
-					# set the other paramsetitems in
-					for paramsetitem in mat_part['paramset']:
-						if paramsetitem['name'] == 'type':
-							context.active_object.active_material.luxrender_material.type = paramsetitem['value']
-							lxm  = context.active_object.active_material.luxrender_material
-							lxms = getattr(context.active_object.active_material.luxrender_material, 'luxrender_mat_%s'%paramsetitem['value'])
-					
-					if lxms != None:
-						paramset_map = {
-							'Kd': 'Kd_color'
-						}
-						paramset_map_keys = paramset_map.keys()
-						for paramsetitem in mat_part['paramset']:
-							if paramsetitem['name'] in paramset_map_keys:
-								setattr(lxms, paramset_map[paramsetitem['name']], paramsetitem['value'])
-						
-						lxm.set_master_color(context.active_object.active_material)
-						context.active_object.active_material.preview_render_type = context.active_object.active_material.preview_render_type
+			context.active_object.active_material.luxrender_material.load_lbm2(
+				md,
+				context.active_object.active_material,
+				context.active_object
+			)
 			
 			for a in context.screen.areas:
 				a.tag_redraw()

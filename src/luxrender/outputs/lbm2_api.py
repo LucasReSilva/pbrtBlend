@@ -43,19 +43,32 @@ class Custom_Context(object):
 	context_name = ''
 	output_file = None
 	
-	objects = []
+	lbm2_name = ''
+	lbm2_category = -1
+	lbm2_version = '0.8'
+	lbm2_objects = []
 	
 	def __init__(self, name):
 		self.context_name = name
 		
 	def open(self, filename):
 		self.output_file = open(filename, 'w')
-		# self.output_file.write('# LBM2 File written by LuxBlend25\n')
+	
+	def set_material_metadata(self, name, category=-1, version='0.8'):
+		self.lbm2_name = name
+		self.lbm2_category = category
+		self.lbm2_version = version
 	
 	def close(self):
 		if self.output_file != None:
+			lbm2_data = {
+				'name': self.lbm2_name,
+				'category_id': self.lbm2_category,
+				'version': self.lbm2_version,
+				'objects': self.lbm2_objects
+			}
 			json.dump(
-				self.objects,
+				lbm2_data,
 				self.output_file,
 				indent=2
 			)
@@ -89,17 +102,17 @@ class Custom_Context(object):
 			'type': identifier,
 			'name': name,
 			'extra_tokens': extra_tokens,
-			'params': [],
+			'paramset': [],
 		}
 		
 		for p in params:
-			obj['params'].append({
+			obj['paramset'].append({
 					'type': p.type,
 					'name': p.name,
 					'value': p.value
 			})
 			
-		self.objects.append(obj)
+		self.lbm2_objects.append(obj)
 	
 	# Wrapped pylux.Context API calls follow ...
 	

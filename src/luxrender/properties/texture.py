@@ -136,6 +136,17 @@ class TextureParameterBase(object):
 
 class ColorTextureParameter(TextureParameterBase):
 	
+	def load_paramset(self, property_group, ps):
+		for psi in ps:
+			if psi['name'] == self.attr:
+				setattr( property_group, '%s_multiplycolor' % self.attr, False )
+				if psi['type'].lower() =='texture':
+					setattr( property_group, '%s_usecolortexture' % self.attr, True )
+					setattr( property_group, '%s_colortexture' % self.attr, psi['value'] )
+				else:
+					setattr( property_group, '%s_usecolortexture' % self.attr, False )
+					setattr( property_group, '%s_color' % self.attr, psi['value'] )
+	
 	def get_controls(self):
 		return [
 			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
@@ -265,6 +276,17 @@ class FloatTextureParameter(TextureParameterBase):
 		self.controls = self.get_controls()
 		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
+	
+	def load_paramset(self, property_group, ps):
+		for psi in ps:
+			if psi['name'] == self.attr:
+				setattr( property_group, '%s_multiplyfloat' % self.attr, False )
+				if psi['type'].lower() =='texture':
+					setattr( property_group, '%s_usefloattexture' % self.attr, True )
+					setattr( property_group, '%s_floattexture' % self.attr, psi['value'] )
+				else:
+					setattr( property_group, '%s_usefloattexture' % self.attr, False )
+					setattr( property_group, '%s_floatvalue' % self.attr, psi['value'] )
 	
 	def get_controls(self):
 		if self.texture_only:

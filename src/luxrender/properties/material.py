@@ -277,11 +277,15 @@ class luxrender_material(declarative_property_group):
 		'mirror': 'Kr',
 	}
 	
-	def reset(self):
+	def reset(self, prnt=None):
 		super().reset()
 		# Also reset sub-property groups
 		for a,b in mat_names.items():
 			getattr(self, 'luxrender_mat_%s'%a).reset()
+		
+		if prnt:
+			prnt.luxrender_emission.reset()
+			prnt.luxrender_transparency.reset()
 	
 	def set_master_color(self, blender_material):
 		'''
@@ -350,6 +354,50 @@ class luxrender_material(declarative_property_group):
 				lux_context.material(mat_type, material_params)
 		
 		return material.luxrender_emission.use_emission
+	
+	def load_lbm2(self, lbm2, blender_mat, blender_obj):
+		'''
+		Load LBM2 data into this material, either from LRMDB or from file
+		'''
+		
+		# Remove all materials assigned to blender_obj
+		while len(blender_obj.material_slots) > 0:
+			bpy.ops.object.material_slot_remove()
+		
+		# Change the name of this material to the target material in the lbm2 data
+		blender_mat.name = lbm2['name']
+		
+		material_index=0
+		for mat_part in lbm2['objects']:
+			# Add back all the materials
+			if mat_part['type'] == 'MakeNamedMaterial':
+				if mat_part['name'] not in bpy.data.materials:
+					bpy.data.materials.new(name=mat_part['name'])
+				
+				bpy.ops.object.material_slot_add()
+				blender_obj.material_slots[material_index].material = bpy.data.materials[mat_part['name']]
+				
+				# Update an existing material with data from lbm2
+				lxm = bpy.data.materials[mat_part['name']].luxrender_material
+				# reset this material
+				lxm.reset(prnt=bpy.data.materials[mat_part['name']])
+				
+				subtype = None
+				
+				# First iterate for the material type, because
+				# we need to know which sub PropertyGroup to 
+				# set the other paramsetitems in
+				for paramsetitem in mat_part['paramset']:
+					if paramsetitem['name'] == 'type':
+						lxm.set_type( paramsetitem['value'] )
+						subtype = getattr(lxm, 'luxrender_mat_%s'%paramsetitem['value'])
+				
+				subtype.load_paramset(mat_part['paramset'])
+				
+				material_index+=1
+		
+		self.set_master_color(blender_mat)
+		blender_mat.preview_render_type = blender_mat.preview_render_type
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_compositing(declarative_property_group):
@@ -448,6 +496,12 @@ class luxrender_mat_compositing(declarative_property_group):
 				compo_params.add_float('compo_override_alpha_value', self.override_alpha_value)
 		
 		return compo_params
+	
+	def load_paramset(self, ps):
+		for psi in ps:
+			for prop in self.properties:
+				if prop['type'] == psi['type'] and prop['attr'] == psi['name']:
+					setattr(self, psi['name'], psi['value'])
 
 class TransparencyFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
@@ -717,6 +771,28 @@ class luxrender_mat_carpaint(declarative_property_group):
 			carpaint_params.add_string('name', self.name)
 		
 		return carpaint_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'name': 'string'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TF_d.load_paramset(self, ps)
+		TC_Ka.load_paramset(self, ps)
+		TC_Kd.load_paramset(self, ps)
+		TC_Ks1.load_paramset(self, ps)
+		TC_Ks2.load_paramset(self, ps)
+		TC_Ks3.load_paramset(self, ps)
+		TF_M1.load_paramset(self, ps)
+		TF_M2.load_paramset(self, ps)
+		TF_M3.load_paramset(self, ps)
+		TF_R1.load_paramset(self, ps)
+		TF_R2.load_paramset(self, ps)
+		TF_R3.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glass(declarative_property_group):
@@ -778,6 +854,22 @@ class luxrender_mat_glass(declarative_property_group):
 		glass_params.update( TC_Kt.get_paramset(self) )
 		
 		return glass_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'architectural': 'bool',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TF_cauchyb.load_paramset(self, ps)
+		TF_film.load_paramset(self, ps)
+		TF_filmindex.load_paramset(self, ps)
+		TF_index.load_paramset(self, ps)
+		TC_Kr.load_paramset(self, ps)
+		TC_Kt.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glass2(declarative_property_group):
@@ -814,6 +906,16 @@ class luxrender_mat_glass2(declarative_property_group):
 		glass2_params.add_bool('dispersion', self.dispersion)
 		
 		return glass2_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'architectural': 'bool',
+			'dispersion': 'bool',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_roughglass(declarative_property_group):
@@ -866,6 +968,21 @@ class luxrender_mat_roughglass(declarative_property_group):
 		roughglass_params.update( TF_vroughness.get_paramset(self) )
 		
 		return roughglass_params
+	
+	def load_paramset(self, ps):
+		#psi_accept = {
+		#}
+		#psi_accept_keys = psi_accept.keys()
+		#for psi in ps:
+		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+		#		setattr(self, psi['name'], psi['value'])
+		
+		TF_cauchyb.load_paramset(self, ps)
+		TF_index.load_paramset(self, ps)
+		TC_Kr.load_paramset(self, ps)
+		TC_Kt.load_paramset(self, ps)
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glossy(declarative_property_group):
@@ -962,6 +1079,24 @@ class luxrender_mat_glossy(declarative_property_group):
 		glossy_params.update( TF_vroughness.get_paramset(self) )
 		
 		return glossy_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'multibounce': 'bool'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TF_d.load_paramset(self, ps)
+		TF_index.load_paramset(self, ps)
+		TC_Ka.load_paramset(self, ps)
+		TC_Kd.load_paramset(self, ps)
+		TC_Ks.load_paramset(self, ps)
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
+		TF_alpha.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glossy_lossy(declarative_property_group):
@@ -1040,7 +1175,23 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		glossy_lossy_params.update( TF_vroughness.get_paramset(self) )
 		
 		return glossy_lossy_params
-
+	
+	def load_paramset(self, ps):
+		#psi_accept = {
+		#}
+		#psi_accept_keys = psi_accept.keys()
+		#for psi in ps:
+		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+		#		setattr(self, psi['name'], psi['value'])
+		
+		TC_Kd.load_paramset(self, ps)
+		TF_d.load_paramset(self, ps)
+		TC_Ka.load_paramset(self, ps)
+		TF_index.load_paramset(self, ps)
+		TC_Ks.load_paramset(self, ps)
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
+	
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_matte(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
@@ -1067,6 +1218,10 @@ class luxrender_mat_matte(declarative_property_group):
 		matte_params.update( TF_sigma.get_paramset(self) )
 		
 		return matte_params
+	
+	def load_paramset(self, ps):
+		TC_Kd.load_paramset(self, ps)
+		TF_sigma.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_mattetranslucent(declarative_property_group):
@@ -1108,6 +1263,19 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 		mattetranslucent_params.update( TF_sigma.get_paramset(self) )
 		
 		return mattetranslucent_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'energyconserving': 'bool'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TC_Kr.load_paramset(self, ps)
+		TC_Kt.load_paramset(self, ps)
+		TF_sigma.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glossytranslucent(declarative_property_group):
@@ -1279,6 +1447,32 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			glossytranslucent_params.update( TF_backface_vroughness.get_paramset(self) )
 		
 		return glossytranslucent_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'multibounce': 'bool',
+			'backface_multibounce': 'bool',
+			'onesided': 'bool'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TC_Kt.load_paramset(self, ps)
+		TC_Kd.load_paramset(self, ps)
+		TF_d.load_paramset(self, ps)
+		TC_Ka.load_paramset(self, ps)
+		TF_index.load_paramset(self, ps)
+		TC_Ks.load_paramset(self, ps)
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
+		TF_backface_d.load_paramset(self, ps)
+		TC_backface_Ka.load_paramset(self, ps)
+		TF_backface_index.load_paramset(self, ps)
+		TC_backface_Ks.load_paramset(self, ps)
+		TF_backface_uroughness.load_paramset(self, ps)
+		TF_backface_vroughness.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_metal(declarative_property_group):
@@ -1340,6 +1534,19 @@ class luxrender_mat_metal(declarative_property_group):
 			metal_params.add_string('name', self.name)
 		
 		return metal_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'name': 'string',
+			'filename': 'string'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_scatter(declarative_property_group):
@@ -1367,6 +1574,17 @@ class luxrender_mat_scatter(declarative_property_group):
 		scatter_params.update( TF_g.get_paramset(self) )
 		
 		return scatter_params
+	
+	def load_paramset(self, ps):
+		#psi_accept = {
+		#}
+		#psi_accept_keys = psi_accept.keys()
+		#for psi in ps:
+		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+		#		setattr(self, psi['name'], psi['value'])
+		
+		TC_Kd.load_paramset(self, ps)
+		TF_g.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_shinymetal(declarative_property_group):
@@ -1410,6 +1628,21 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		shinymetal_params.update( TF_vroughness.get_paramset(self) )
 		
 		return shinymetal_params
+	
+	def load_paramset(self, ps):
+		#psi_accept = {
+		#}
+		#psi_accept_keys = psi_accept.keys()
+		#for psi in ps:
+		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+		#		setattr(self, psi['name'], psi['value'])
+		
+		TF_film.load_paramset(self, ps)
+		TF_filmindex.load_paramset(self, ps)
+		TC_Kr.load_paramset(self, ps)
+		TC_Ks.load_paramset(self, ps)
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_mirror(declarative_property_group):
@@ -1441,6 +1674,18 @@ class luxrender_mat_mirror(declarative_property_group):
 		mirror_params.update( TC_Kr.get_paramset(self) )
 		
 		return mirror_params
+	
+	def load_paramset(self, ps):
+		#psi_accept = {
+		#}
+		#psi_accept_keys = psi_accept.keys()
+		#for psi in ps:
+		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+		#		setattr(self, psi['name'], psi['value'])
+		
+		TF_film.load_paramset(self, ps)
+		TF_filmindex.load_paramset(self, ps)
+		TC_Kr.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_mix(declarative_property_group):
@@ -1468,6 +1713,18 @@ class luxrender_mat_mix(declarative_property_group):
 		mix_params.update( TF_amount.get_paramset(self) )
 		
 		return mix_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'namedmaterial1': 'string',
+			'namedmaterial2': 'string'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, '%s_material'%psi['name'], psi['value'])
+		
+		TF_amount.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_null(declarative_property_group):
@@ -1479,6 +1736,9 @@ class luxrender_mat_null(declarative_property_group):
 	
 	def get_paramset(self, material):
 		return ParamSet()
+	
+	def load_paramset(self, ps):
+		pass
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_velvet(declarative_property_group):
@@ -1562,6 +1822,20 @@ class luxrender_mat_velvet(declarative_property_group):
 			velvet_params.add_float('p3', self.p3)
 		
 		return velvet_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'thickness': 'float',
+			'p1': 'float',
+			'p2': 'float',
+			'p3': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TC_Kd.load_paramset(self, ps)
 
 class EmissionColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):

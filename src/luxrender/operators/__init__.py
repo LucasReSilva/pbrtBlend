@@ -26,7 +26,7 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import math, os
+import json, math, os
 
 # LuxRender Libs
 from .. import LuxRenderAddon
@@ -261,6 +261,7 @@ bpy.types.INFO_MT_file_export.append(menu_func)
 class LUXRENDER_OT_load_material(bpy.types.Operator):
 	bl_idname = 'luxrender.load_material'
 	bl_label = 'Load material'
+	bl_description = 'Load material from LBM2 file'
 	
 	filter_glob	= bpy.props.StringProperty(default='*.lbm2',options={'HIDDEN'})
 	use_filter	= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
@@ -272,22 +273,33 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
-		try:
+		#try:
 			if self.properties.filename == '' or self.properties.directory == '':
 				raise Exception('No filename or directory given.')
 			
 			blender_mat = context.material
 			luxrender_mat = context.material.luxrender_material
 			
+			fullpath = os.path.join(
+				self.properties.directory,
+				self.properties.filename
+			)
+			with open(fullpath, 'r') as lbm2_file:
+				lbm2_data = json.load(lbm2_file)
 			
-		except Exception as err:
-			self.report({'ERROR'}, 'Cannot load: %s' % err)
-			return {'CANCELLED'}
+			luxrender_mat.load_lbm2(lbm2_data, blender_mat, context.object)
+			
+			return {'FINISHED'}
+		
+		#except Exception as err:
+		#	self.report({'ERROR'}, 'Cannot load: %s' % err)
+		#	return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_save_material(bpy.types.Operator):
 	bl_idname = 'luxrender.save_material'
 	bl_label = 'Save material'
+	bl_description = 'Save material as LXM or LBM2 file'
 	
 	filter_glob			= bpy.props.StringProperty(default='*.lbm2;*.lxm',options={'HIDDEN'})
 	use_filter			= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
@@ -313,10 +325,16 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			LM.SetCurrentScene(context.scene)
 			
 			material_context = LM.lux_context
-			material_context.open(os.path.join(
+			
+			material_context.set_material_metadata(
+				blender_mat.name, version='0.8'
+			)
+			
+			fullpath = os.path.join(
 				self.properties.directory,
 				self.properties.filename
-			))
+			)
+			material_context.open(fullpath)
 			
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
@@ -363,7 +381,7 @@ def material_converter(report, scene, blender_mat):
 		luxrender_mat.Interior_volume = ''
 		luxrender_mat.Exterior_volume = ''
 		
-		luxrender_mat.reset()
+		luxrender_mat.reset(prnt=blender_mat)
 		
 		if blender_mat.raytrace_mirror.use and blender_mat.raytrace_mirror.reflect_factor >= 0.9:
 			# for high mirror reflection values switch to mirror material
@@ -656,7 +674,7 @@ class LUXRENDER_OT_material_reset(bpy.types.Operator):
 	
 	def execute(self, context):
 		if context.material and hasattr(context.material, 'luxrender_material'):
-			context.material.luxrender_material.reset()
+			context.material.luxrender_material.reset(prnt=context.material)
 		return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class
