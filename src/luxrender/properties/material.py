@@ -392,7 +392,8 @@ class luxrender_material(declarative_property_group):
 						lxm.set_type( paramsetitem['value'] )
 						subtype = getattr(lxm, 'luxrender_mat_%s'%paramsetitem['value'])
 				
-				subtype.load_paramset(mat_part['paramset'])
+				if subtype != None:
+					subtype.load_paramset(mat_part['paramset'])
 				
 				material_index+=1
 		
