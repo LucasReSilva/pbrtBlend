@@ -40,15 +40,12 @@ class Custom_Context(object):
 	
 	API_TYPE = 'FILE'
 	
-	context_name = ''
-	
-	lbm2_name = ''
-	lbm2_category = -1
-	lbm2_version = '0.8'
-	lbm2_objects = []
-	
 	def __init__(self, name):
 		self.context_name = name
+		self.lbm2_name = ''
+		self.lbm2_category = -1
+		self.lbm2_version = '0.8'
+		self.lbm2_objects = []
 	
 	def set_material_metadata(self, name, category=-1, version='0.8'):
 		self.lbm2_name = name
