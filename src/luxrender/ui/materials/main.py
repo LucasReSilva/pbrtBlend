@@ -39,6 +39,10 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		row = self.layout.row(align=True)
+		#row.operator("luxrender.load_material", icon="DISK_DRIVE")
+		row.operator("luxrender.save_material", icon="DISK_DRIVE")
+		
+		row = self.layout.row(align=True)
 		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
 		
 		row = self.layout.row(align=True)

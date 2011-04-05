@@ -26,12 +26,14 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import math
+import math, os
 
 # LuxRender Libs
 from .. import LuxRenderAddon
-from ..outputs import LuxLog
+from ..outputs import LuxLog, LuxManager
 from ..export.scene import SceneExporter
+from ..export import materials as export_materials
+from ..outputs.lbm2_api import Custom_Context
 
 # Per-IDPropertyGroup preset handling
 
@@ -225,6 +227,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	bl_idname = 'export.luxrender'
 	bl_label = 'Export LuxRender Scene (.lxs)'
 	
+	filter_glob		= bpy.props.StringProperty(default='*.lxs',options={'HIDDEN'})
+	use_filter		= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
 	filename		= bpy.props.StringProperty(name='LXS filename')
 	directory		= bpy.props.StringProperty(name='LXS directory')
 	
@@ -252,6 +256,87 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 
 menu_func = lambda self, context: self.layout.operator("export.luxrender", text="Export LuxRender Scene...")
 bpy.types.INFO_MT_file_export.append(menu_func)
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_load_material(bpy.types.Operator):
+	bl_idname = 'luxrender.load_material'
+	bl_label = 'Load material'
+	
+	filter_glob	= bpy.props.StringProperty(default='*.lbm2',options={'HIDDEN'})
+	use_filter	= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
+	filename	= bpy.props.StringProperty(name='Destination filename')
+	directory	= bpy.props.StringProperty(name='Destination directory')
+	
+	def invoke(self, context, event):
+		context.window_manager.fileselect_add(self)
+		return {'RUNNING_MODAL'}
+	
+	def execute(self, context):
+		try:
+			if self.properties.filename == '' or self.properties.directory == '':
+				raise Exception('No filename or directory given.')
+			
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			
+			
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot load: %s' % err)
+			return {'CANCELLED'}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_save_material(bpy.types.Operator):
+	bl_idname = 'luxrender.save_material'
+	bl_label = 'Save material'
+	
+	filter_glob			= bpy.props.StringProperty(default='*.lxm',options={'HIDDEN'})
+	#filter_glob			= bpy.props.StringProperty(default='*.lbm2;*.lxm',options={'HIDDEN'})
+	use_filter			= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
+	filename			= bpy.props.StringProperty(name='Destination filename')
+	directory			= bpy.props.StringProperty(name='Destination directory')
+	
+	material_file_type	= bpy.props.EnumProperty(name="Exported file type", items=[('LXM','LXM','LXM')])
+	#material_file_type	= bpy.props.EnumProperty(name="Exported file type", items=[('LBM2','LBM2','LBM2'),('LXM','LXM','LXM')])
+	
+	def invoke(self, context, event):
+		context.window_manager.fileselect_add(self)
+		return {'RUNNING_MODAL'}
+	
+	def execute(self, context):
+		#try:
+			if self.properties.filename == '' or self.properties.directory == '':
+				raise Exception('No filename or directory given.')
+			
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			
+			LM = LuxManager("material_save", self.properties.material_file_type)
+			LuxManager.SetActive(LM)
+			LM.SetCurrentScene(context.scene)
+			
+			material_context = LM.lux_context
+			material_context.open(os.path.join(
+				self.properties.directory,
+				self.properties.filename
+			))
+			
+			for volume in context.scene.luxrender_volumes.volumes:
+				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
+					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
+			
+			export_materials.ExportedMaterials.clear()
+			export_materials.ExportedTextures.clear()
+			
+			luxrender_mat.export(material_context, blender_mat)
+			
+			material_context.close()
+			LM.reset()
+			
+			return {'FINISHED'}
+			
+		#except Exception as err:
+		#	self.report({'ERROR'}, 'Cannot save: %s' % err)
+		#	return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_copy_mat_color(bpy.types.Operator):

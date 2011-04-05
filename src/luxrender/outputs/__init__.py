@@ -43,6 +43,10 @@ def LuxLog(*args, popup=False):
 # CHOOSE API TYPE
 # Write conventional lx* files and use pylux to manage lux process or external process
 from ..outputs import file_api
+# Write material definitions to LBM2 format
+from ..outputs import lbm2_api
+# Write material definitions to LXM format
+from ..outputs import lxm_api
 # Access lux via a remote LuxFire slave
 from ..outputs import luxfire_client
 # Access lux only through pylux bindings
@@ -174,6 +178,10 @@ class LuxManager(object):
 			Context = luxfire_client.Client_Locator
 		elif api_type == 'API':
 			Context = pure_api.Custom_Context
+		elif api_type == 'LBM2':
+			Context = lbm2_api.Custom_Context
+		elif api_type == 'LXM':
+			Context = lxm_api.Custom_Context
 		else:
 			raise Exception('Unknown exporter API type "%s"' % api_type)
 		
