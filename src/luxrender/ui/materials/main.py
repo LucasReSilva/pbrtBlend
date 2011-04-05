@@ -63,8 +63,9 @@ class ui_luxrender_material(luxrender_material_base):
 	]
 	
 	def draw(self, context):
-		cl = self.layout.column(align=True)
-		cl.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
+		row = self.layout.row(align=True)
+		row.label("Material type")
+		row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
 		super().draw(context)
 
 @LuxRenderAddon.addon_register_class

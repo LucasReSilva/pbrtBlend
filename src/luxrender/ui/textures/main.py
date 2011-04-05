@@ -60,6 +60,7 @@ class ui_texture_main(luxrender_texture_base):
 		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMIN")
 		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMOUT").remove_active = True
 		
-		cl = self.layout.column(align=True)
-		cl.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
+		row = self.layout.row(align=True)
+		row.label("LuxRender type")
+		row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
 		super().draw(context)
