@@ -23,6 +23,8 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 # ***** END GPL LICENCE BLOCK *****
+import re
+
 import bpy
 
 from extensions_framework import declarative_property_group
@@ -358,42 +360,85 @@ class luxrender_material(declarative_property_group):
 	def load_lbm2(self, lbm2, blender_mat, blender_obj):
 		'''
 		Load LBM2 data into this material, either from LRMDB or from file
+		(Includes setting up textures and volumes!)
+		
+		NOTE: this function may well overwrite material settings if the
+		imported data contains objects of the same name as exists in the
+		scene already.
+		It will also clear and reset all material and texture slots.
 		'''
 		
 		# Remove all materials assigned to blender_obj
 		while len(blender_obj.material_slots) > 0:
 			bpy.ops.object.material_slot_remove()
 		
+		for tsi in range(18):
+			blender_mat.texture_slots.clear(tsi)
+		
 		# Change the name of this material to the target material in the lbm2 data
 		blender_mat.name = lbm2['name']
 		
 		material_index=0
-		for mat_part in lbm2['objects']:
+		for lbm2_obj in lbm2['objects']:
+			# Add back all the textures
+			if lbm2_obj['type'] == 'Texture':
+				
+				# parse variant and type first
+				vt_matches = re.match('"(.*)" "(.*)"', lbm2_obj['extra_tokens'])
+				if vt_matches.lastindex != 2:
+					continue	# not a valid texture!
+				
+				variant, tex_type = vt_matches.groups()
+				
+				tex_slot = blender_mat.texture_slots.add()
+				if lbm2_obj['name'] not in bpy.data.textures:
+					bpy.data.textures.new(name=lbm2_obj['name'],type='NONE')
+				
+				blender_tex = bpy.data.textures[lbm2_obj['name']]
+				tex_slot.texture = blender_tex
+				
+				lxt = bpy.data.textures[lbm2_obj['name']].luxrender_texture
+				
+				# Restore default texture settings
+				lxt.reset()
+				
+				# TODO: error checking for correct type
+				if not tex_type.startswith('blender_'):
+					lxt.set_type(tex_type)
+					subtype = getattr(lxt, 'luxrender_tex_%s'%tex_type)
+					subtype.load_paramset(variant, lbm2_obj['paramset'])
+				else:
+					lxt.set_type('BLENDER')
+					pass	# TODO; do the reverse of export.materials.convert_texture
+				
+				lxt.luxrender_tex_mapping.load_paramset(lbm2_obj['paramset'])
+				lxt.luxrender_tex_transform.load_paramset(lbm2_obj['paramset'])
+			
 			# Add back all the materials
-			if mat_part['type'] == 'MakeNamedMaterial':
-				if mat_part['name'] not in bpy.data.materials:
-					bpy.data.materials.new(name=mat_part['name'])
+			if lbm2_obj['type'] == 'MakeNamedMaterial':
+				if lbm2_obj['name'] not in bpy.data.materials:
+					bpy.data.materials.new(name=lbm2_obj['name'])
 				
 				bpy.ops.object.material_slot_add()
-				blender_obj.material_slots[material_index].material = bpy.data.materials[mat_part['name']]
+				blender_obj.material_slots[material_index].material = bpy.data.materials[lbm2_obj['name']]
 				
 				# Update an existing material with data from lbm2
-				lxm = bpy.data.materials[mat_part['name']].luxrender_material
+				lxm = bpy.data.materials[lbm2_obj['name']].luxrender_material
 				# reset this material
-				lxm.reset(prnt=bpy.data.materials[mat_part['name']])
+				lxm.reset(prnt=bpy.data.materials[lbm2_obj['name']])
 				
 				subtype = None
 				
 				# First iterate for the material type, because
 				# we need to know which sub PropertyGroup to 
 				# set the other paramsetitems in
-				for paramsetitem in mat_part['paramset']:
+				for paramsetitem in lbm2_obj['paramset']:
 					if paramsetitem['name'] == 'type':
 						lxm.set_type( paramsetitem['value'] )
 						subtype = getattr(lxm, 'luxrender_mat_%s'%paramsetitem['value'])
 				
 				if subtype != None:
-					subtype.load_paramset(mat_part['paramset'])
+					subtype.load_paramset(lbm2_obj['paramset'])
 				
 				material_index+=1
 		
