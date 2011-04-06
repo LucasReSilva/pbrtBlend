@@ -513,9 +513,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				if os.path.isdir(luxrender_path) and os.path.exists(luxrender_path):
 					config_updates['install_path'] = luxrender_path
 				
-				if sys.platform == 'darwin' and scene.luxrender_engine.binary_name == 'luxrender':
+				if sys.platform == 'darwin':
 					# Get binary from OSX package
-					luxrender_path += 'luxrender.app/Contents/MacOS/luxrender'
+					luxrender_path += 'Luxrender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name
 				elif sys.platform == 'win32':
 					luxrender_path += '%s.exe' % scene.luxrender_engine.binary_name
 				else:
