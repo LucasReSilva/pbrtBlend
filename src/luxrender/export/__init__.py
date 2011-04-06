@@ -140,7 +140,10 @@ class ParamSetItem(list):
 		if self.type == "integer":
 			return fs_num % ('integer', self.name, '%i' % self.value)
 		if self.type == "string":
-			return fs_str % ('string', self.name, self.value.replace('\\', '\\\\'))
+			if type(self.value) is list:
+				return fs_num % ('string', self.name, '\n'.join(['"%s"'%v for v in self.value]))
+			else:
+				return fs_str % ('string', self.name, self.value.replace('\\', '\\\\'))
 		if self.type == "vector":
 			lst = self.list_wrap(self.value, self.WRAP_WIDTH, 'f')
 			return fs_num % ('vector', self.name, lst)
@@ -196,7 +199,10 @@ class ParamSet(list):
 		return self
 	
 	def add_string(self, name, value):
-		self.add('string', name, str(value))
+		if type(value) is list:
+			self.add('string', name, [str(v) for v in value])
+		else:
+			self.add('string', name, str(value))
 		return self
 	
 	def add_vector(self, name, value):

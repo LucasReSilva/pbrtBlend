@@ -1889,7 +1889,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 		if scene.luxrender_engine.embed_filedata:
 			from ..util import bencode_file2string
 			params.add_string('filename', os.path.basename(fn))
-			params.add_string('filename_data', bencode_file2string(fn) )
+			params.add_string('filename_data', bencode_file2string(fn).splitlines() )
 		else:
 			params.add_string('filename', efutil.path_relative_to_export(fn) )
 		
