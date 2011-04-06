@@ -27,7 +27,8 @@
 import bpy, blf
 
 from .. import LuxRenderAddon
-from ..outputs import LuxLog
+from ..outputs import LuxLog, LuxManager
+from ..export import materials as export_materials
 
 from .lrmdb_lib import lrmdb_client
 
@@ -109,6 +110,7 @@ class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
 			li = s.user.logout()
 			if not li:
 				self.report({'ERROR'}, 'Logout failure')
+			lrmdb_client.reset()
 			return {'FINISHED'}
 		except Exception as err:
 			LuxLog('LRMDB ERROR: %s' % err)
@@ -334,6 +336,52 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context):
 		return context.scene.render.engine == LuxRenderAddon.BL_IDNAME
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_upload_material(bpy.types.Operator):
+	bl_idname = 'luxrender.lrmdb_upload'
+	bl_label = 'Upload material to LRMDB'
+	
+	def execute(self, context):
+		try:
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			
+			LM = LuxManager("material_save", 'LBM2')
+			LuxManager.SetActive(LM)
+			LM.SetCurrentScene(context.scene)
+			
+			material_context = LM.lux_context
+			
+			material_context.set_material_metadata(
+				blender_mat.name, version='0.8'
+			)
+			
+			export_materials.ExportedMaterials.clear()
+			export_materials.ExportedTextures.clear()
+			
+			# Include interior/exterior for this material
+			for volume in context.scene.luxrender_volumes.volumes:
+				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
+					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
+			
+			luxrender_mat.export(material_context, blender_mat)
+			
+			result = material_context.upload(lrmdb_client)
+			if result:
+				self.report({'INFO'},'Upload successful!')
+			else:
+				self.report({'WARNING'},'Upload failed!')
+			
+			LM.reset()
+			LuxManager.SetActive(None)
+			
+			return {'FINISHED'}
+			
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot save: %s' % err)
+			return {'CANCELLED'}
+
 
 def lrmdb_operators(self, context):
 	if context.scene.render.engine == LuxRenderAddon.BL_IDNAME:

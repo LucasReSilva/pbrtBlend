@@ -28,6 +28,7 @@ import bpy
 
 from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
+from ...operators.lrmdb_lib import lrmdb_client
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
@@ -37,6 +38,10 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		row.operator("luxrender.load_material", icon="DISK_DRIVE")
 		row.operator("luxrender.save_material", icon="DISK_DRIVE").filename =\
 			'%s.lbm2' % bpy.path.clean_name(context.material.name)
+		
+		if lrmdb_client.loggedin:
+			row = self.layout.row(align=True)
+			row.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
 		
 		row = self.layout.row(align=True)
 		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')

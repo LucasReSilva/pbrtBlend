@@ -33,7 +33,6 @@ from .. import LuxRenderAddon
 from ..outputs import LuxLog, LuxManager
 from ..export.scene import SceneExporter
 from ..export import materials as export_materials
-from ..outputs.lbm2_api import Custom_Context
 
 # Per-IDPropertyGroup preset handling
 

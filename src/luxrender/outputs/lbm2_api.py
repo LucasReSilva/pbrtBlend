@@ -52,25 +52,36 @@ class Custom_Context(object):
 		self.lbm2_category = category
 		self.lbm2_version = version
 	
+	def _get_lbm2(self, add_comment=False):
+		# The only reason to use OrderedDict is so that _comment
+		# appears at the top of the file
+		
+		lbm2_data = collections.OrderedDict()
+		if add_comment: lbm2_data['_comment'] = 'LBM2 material data saved by LuxBlend25'
+		lbm2_data['name'] = self.lbm2_name
+		lbm2_data['category_id'] = self.lbm2_category
+		lbm2_data['version'] = self.lbm2_version
+		lbm2_data['objects'] = self.lbm2_objects
+		return lbm2_data
+	
 	def write(self, filename):
 		with open(filename, 'w') as output_file:
-			# The only reason to use OrderedDict is so that _comment
-			# appears at the top of the file
-			lbm2_data = collections.OrderedDict()
-			lbm2_data['_comment'] = 'LBM2 material data saved by LuxBlend25'
-			lbm2_data['name'] = self.lbm2_name
-			lbm2_data['category_id'] = self.lbm2_category
-			lbm2_data['version'] = self.lbm2_version
-			lbm2_data['objects'] = self.lbm2_objects
 			
 			json.dump(
-				lbm2_data,
+				self._get_lbm2(add_comment=True),
 				output_file,
 				indent=2
 			)
 	
-	def upload(self):
-		pass # TODO! 
+	def upload(self, lrmdb_client):
+		if lrmdb_client.loggedin:
+			s = lrmdb_client.server_instance()
+			upload = s.material.submit(dict(self._get_lbm2()))
+			if type(upload) is str:
+				raise Exception(upload)
+			return upload
+		else:
+			raise Exception("Not logged in!")
 	
 	def getRenderingServersStatus(self):
 		return []
