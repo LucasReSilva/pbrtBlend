@@ -238,7 +238,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
-		#try:
+		try:
 			if self.properties.filename == '' or self.properties.directory == '':
 				raise Exception('No filename or directory given.')
 			
@@ -256,9 +256,9 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 			
 			return {'FINISHED'}
 		
-		#except Exception as err:
-		#	self.report({'ERROR'}, 'Cannot load: %s' % err)
-		#	return {'CANCELLED'}
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot load: %s' % err)
+			return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_save_material(bpy.types.Operator):
@@ -278,7 +278,7 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
-		#try:
+		try:
 			if self.properties.filename == '' or self.properties.directory == '':
 				raise Exception('No filename or directory given.')
 			
@@ -317,9 +317,9 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			
 			return {'FINISHED'}
 			
-		#except Exception as err:
-		#	self.report({'ERROR'}, 'Cannot save: %s' % err)
-		#	return {'CANCELLED'}
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot save: %s' % err)
+			return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_copy_mat_color(bpy.types.Operator):
