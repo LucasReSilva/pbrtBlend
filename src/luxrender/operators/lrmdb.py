@@ -360,6 +360,9 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
 			
+			# This causes lb25 to embed all external data ...
+			context.scene.luxrender_engine.is_saving_lbm2 = True
+			
 			# Include interior/exterior for this material
 			for volume in context.scene.luxrender_volumes.volumes:
 				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
@@ -372,6 +375,9 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 				self.report({'INFO'},'Upload successful!')
 			else:
 				self.report({'WARNING'},'Upload failed!')
+			
+			# .. and must be reset!
+			context.scene.luxrender_engine.is_saving_lbm2 = False
 			
 			LM.reset()
 			LuxManager.SetActive(None)

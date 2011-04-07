@@ -26,9 +26,6 @@
 #
 import collections, json
 
-#from ..outputs import LuxLog
-#from ..outputs.pure_api import LUXRENDER_VERSION
-
 class Custom_Context(object):
 	'''
 	Imitate the real pylux Context object so that we can

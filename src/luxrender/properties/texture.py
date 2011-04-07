@@ -36,7 +36,7 @@ from .. import LuxRenderAddon
 from ..export import ParamSet, get_worldscale
 from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs import LuxManager
-from ..util import dict_merge
+from ..util import dict_merge, bdecode_string2file
 
 #------------------------------------------------------------------------------ 
 # Texture property group construction helpers
@@ -1922,6 +1922,15 @@ class luxrender_tex_imagemap(declarative_property_group):
 		for psi in ps:
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
 				setattr(self, psi['name'], psi['value'])
+		
+		# Use a 2nd loop to ensure that self.filename has been set
+		for psi in ps:
+			# embedded data decode
+			if  psi['name'] == 'filename_data':
+				filename_data = '\n'.join(psi['value'])
+				self.filename = '//%s' % self.filename
+				fn = efutil.filesystem_path(self.filename)
+				bdecode_string2file(filename_data, fn)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_lampspectrum(declarative_property_group):

@@ -238,6 +238,13 @@ class luxrender_engine(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'bool',
+			'attr': 'is_saving_lbm2',
+			'name': '<for internal use>',
+			'default': False,
+			'save_in_preset': False
+		},
+		{
 			'type': 'enum',
 			'attr': 'mesh_type',
 			'name': 'Default mesh format',
@@ -273,7 +280,9 @@ class luxrender_engine(declarative_property_group):
 	]
 	
 	def allow_file_embed(self):
-		return self.embed_filedata and (self.export_type == 'EXT' or (self.export_type == 'INT' and self.write_files == True))
+		saving_files = (self.export_type == 'EXT' or (self.export_type == 'INT' and self.write_files == True))
+		
+		return self.is_saving_lbm2 or (saving_files and self.embed_filedata)
 	
 	def api_output(self):
 		renderer_params = ParamSet()

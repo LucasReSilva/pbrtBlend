@@ -113,6 +113,13 @@ class bDecoder(object):
 				self._Decode(fSrc, fDes)
 				return fDes.getvalue()
 	
+	def Decode_String2File(self, in_string, fDes_name):
+		fSrc = io.BytesIO()
+		fSrc.write(in_string.encode())
+		with open(fDes_name, 'wb') as fDes:
+			fSrc.name = fDes.name
+			self._Decode(fSrc, fDes)
+	
 	def _Decode(self, fSrc, fDes):
 		"""
 		Assumes that fSrc and fDes are already-opened file-like objects
@@ -160,3 +167,6 @@ def bdecode_file2file(in_filename, out_filename):
 def bdecode_file2string(in_filename):
 	be = bDecoder()
 	return be.Decode_File2String(in_filename)
+def bdecode_string2file(in_string, out_filename):
+	be = bDecoder()
+	be.Decode_String2File(in_string, out_filename)
