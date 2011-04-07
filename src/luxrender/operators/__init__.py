@@ -252,7 +252,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 			with open(fullpath, 'r') as lbm2_file:
 				lbm2_data = json.load(lbm2_file)
 			
-			luxrender_mat.load_lbm2(lbm2_data, blender_mat, context.object)
+			luxrender_mat.load_lbm2(context, lbm2_data, blender_mat, context.object)
 			
 			return {'FINISHED'}
 		

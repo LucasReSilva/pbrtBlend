@@ -26,6 +26,8 @@
 #
 import math
 
+import bpy
+
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
@@ -265,6 +267,26 @@ class luxrender_volume_data(declarative_property_group):
 			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
 		
 		return self.type, vp
+	
+	def load_paramset(self, world, ps):
+		psi_accept = {
+			'type': 'string',
+			'g': 'color'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+			
+			if psi['type'].lower() == 'texture':
+				# assign the referenced texture to the world
+				tex_slot = world.texture_slots.add()
+				tex_slot.texture = bpy.data.textures[psi['value']]
+		
+		TFR_IOR.load_paramset(self, ps)
+		TC_absorption.load_paramset(self, ps)
+		TC_sigma_a.load_paramset(self, ps)
+		TC_sigma_s.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volumes(declarative_property_group):

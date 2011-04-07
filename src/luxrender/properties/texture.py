@@ -435,6 +435,18 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
 	
+	
+	def load_paramset(self, property_group, ps):
+		for psi in ps:
+			if psi['name'] == self.attr:
+				setattr( property_group, '%s_multiplyfloat' % self.attr, False )
+				if psi['type'].lower() =='texture':
+					setattr( property_group, '%s_usefresneltexture' % self.attr, True )
+					setattr( property_group, '%s_fresneltexturename' % self.attr, psi['value'] )
+				else:
+					setattr( property_group, '%s_usefresneltexture' % self.attr, False )
+					setattr( property_group, '%s_fresnelvalue' % self.attr, psi['value'] )
+	
 	def get_controls(self):
 		if self.texture_only:
 			return [

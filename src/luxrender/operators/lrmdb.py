@@ -175,6 +175,7 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		
 		try:
 			context.active_object.active_material.luxrender_material.load_lbm2(
+				context,
 				md,
 				context.active_object.active_material,
 				context.active_object

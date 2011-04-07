@@ -284,7 +284,7 @@ class luxrender_material(declarative_property_group):
 	def reset(self, prnt=None):
 		super().reset()
 		# Also reset sub-property groups
-		for a,b in mat_names.items():
+		for a in mat_names.keys():
 			getattr(self, 'luxrender_mat_%s'%a).reset()
 		
 		if prnt:
@@ -321,7 +321,7 @@ class luxrender_material(declarative_property_group):
 			# find alpha texture if material should be transparent
 			if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
 				alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
-
+			
 			# Bump mapping
 			if self.type not in ['mix', 'null']:
 				material_params.update( TF_bumpmap.get_paramset(self) )
@@ -359,7 +359,7 @@ class luxrender_material(declarative_property_group):
 		
 		return material.luxrender_emission.use_emission
 	
-	def load_lbm2(self, lbm2, blender_mat, blender_obj):
+	def load_lbm2(self, context, lbm2, blender_mat, blender_obj):
 		'''
 		Load LBM2 data into this material, either from LRMDB or from file
 		(Includes setting up textures and volumes!)
@@ -381,6 +381,7 @@ class luxrender_material(declarative_property_group):
 		blender_mat.name = lbm2['name']
 		
 		material_index=0
+		
 		for lbm2_obj in lbm2['objects']:
 			# Add back all the textures
 			if lbm2_obj['type'] == 'Texture':
@@ -444,6 +445,30 @@ class luxrender_material(declarative_property_group):
 					subtype.load_paramset(lbm2_obj['paramset'])
 				
 				material_index+=1
+		
+		
+		for lbm2_obj in lbm2['objects']:
+			# Load volume data in a separate loop to ensure
+			# that any textures used have already been created
+			if lbm2_obj['type'] == 'MakeNamedVolume':
+				# parse volume type first
+				vt_matches = re.match('"(.*)"', lbm2_obj['extra_tokens'])
+				if vt_matches.lastindex != 1:
+					continue	# not a valid volume!
+				
+				scene_vols = context.scene.luxrender_volumes.volumes
+				try:
+					# Use existing vol if present
+					volm = scene_vols[lbm2_obj['name']]
+				except KeyError:
+					# else make a new one
+					scene_vols.add()
+					volm = scene_vols[len(scene_vols)-1]
+					volm.name = lbm2_obj['name']
+				
+				volm.reset()
+				# load paramset will also assign any textures used to the world
+				volm.load_paramset(context.scene.world, lbm2_obj['paramset'])
 		
 		self.set_master_color(blender_mat)
 		blender_mat.preview_render_type = blender_mat.preview_render_type
