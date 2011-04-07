@@ -1886,7 +1886,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		params = ParamSet()
 		fn = self.get_filename(texture)
-		if scene.luxrender_engine.embed_filedata:
+		if scene.luxrender_engine.allow_file_embed():
 			from ..util import bencode_file2string
 			params.add_string('filename', os.path.basename(fn))
 			params.add_string('filename_data', bencode_file2string(fn).splitlines() )

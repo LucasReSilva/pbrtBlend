@@ -526,7 +526,7 @@ class luxrender_film(declarative_property_group):
 			else:
 				local_crf_filepath = self.luxrender_colorspace.crf_file
 			local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
-			if scene.luxrender_engine.embed_filedata:
+			if scene.luxrender_engine.allow_file_embed():
 				from ..util import bencode_file2string
 				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
 				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath).splitlines() )

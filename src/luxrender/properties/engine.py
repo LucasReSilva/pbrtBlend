@@ -60,8 +60,7 @@ class luxrender_engine(declarative_property_group):
 		'binary_name',
 		'write_files',
 		['write_lxs', 'write_lxm', 'write_lxo', 'write_lxv'],
-		
-		# 'embed_filedata', # Disabled pending acceptance into LuxRender core
+		'embed_filedata',
 		
 		'mesh_type',
 		'partial_ply',
@@ -84,6 +83,7 @@ class luxrender_engine(declarative_property_group):
 		'write_lxm':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'write_lxo':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
 		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
@@ -271,6 +271,9 @@ class luxrender_engine(declarative_property_group):
 			'save_in_preset': True
 		},
 	]
+	
+	def allow_file_embed(self):
+		return self.embed_filedata and (self.export_type == 'EXT' or (self.export_type == 'INT' and self.write_files == True))
 	
 	def api_output(self):
 		renderer_params = ParamSet()
