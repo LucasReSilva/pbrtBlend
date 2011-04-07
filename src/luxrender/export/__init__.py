@@ -116,15 +116,7 @@ class ParamSetItem(list):
 			elif type == 'i':
 				str = ' '.join(['%i'%i for i in lst])
 		return str
-	
-	def value_to_string(self):
-		if self.type in ["string", "texture"]:
-			return "'%s'" % self.value
-		if self.type == "bool":
-			return "true" if self.value else "false"
-		
-		return self.value
-	
+
 	def to_string(self):
 		fs_num = '"%s %s" [%s]'
 		fs_str = '"%s %s" ["%s"]'
