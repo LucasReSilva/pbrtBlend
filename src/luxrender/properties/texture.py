@@ -73,7 +73,7 @@ class TextureParameterBase(object):
 		self.properties = self.get_properties()
 	
 	def texture_collection_finder(self):
-		return lambda s,c: s.object.material_slots[s.object.active_material_index].material
+		return lambda superctx,ctx: superctx.object.material_slots[superctx.object.active_material_index].material
 	
 	def texture_slot_set_attr(self):
 		def set_attr(s,c):

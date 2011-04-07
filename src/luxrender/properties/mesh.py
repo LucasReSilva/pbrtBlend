@@ -34,6 +34,16 @@ from ..properties.texture import FloatTextureParameter
 from ..util import dict_merge
 
 class MeshFloatTextureParameter(FloatTextureParameter):
+	def texture_collection_finder(self):
+		def _tcf_wrap(superctx,ctx):
+			
+			if superctx.object and len(superctx.object.material_slots)>0 and superctx.object.material_slots[superctx.object.active_material_index].material:
+				return superctx.object.material_slots[superctx.object.active_material_index].material
+			else:
+				return superctx.scene.world
+		
+		return _tcf_wrap
+	
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other FloatTextureParameters
 		return lambda s,c: c.luxrender_mesh
