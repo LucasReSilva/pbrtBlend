@@ -239,8 +239,7 @@ class GeometryExporter(object):
 						# and that number is not known before this is done.
 						
 						# Export data
-						co_no_cache = []
-						uv_cache = []
+						co_no_uv_cache = []
 						face_vert_indices = {}		# mapping of face index to list of exported vert indices for that face
 						
 						# Caches
@@ -258,9 +257,10 @@ class GeometryExporter(object):
 									if vertex not in vert_use_vno:
 										vert_use_vno.add(vertex)
 										
-										co_no_cache.append( (v.co, v.normal) )
 										if uv_layer:
-											uv_cache.append( uv_layer[face.index].uv[j] )
+											co_no_uv_cache.append( (v.co, v.normal, uv_layer[face.index].uv[j]) )
+										else:
+											co_no_uv_cache.append( (v.co, v.normal) )
 										
 										vert_vno_indices[vertex] = vert_index
 										fvi.append(vert_index)
@@ -272,9 +272,10 @@ class GeometryExporter(object):
 								else:
 									# All face-vert-co-no are unique, we cannot
 									# cache them
-									co_no_cache.append( (v.co, face.normal) )
 									if uv_layer:
-										uv_cache.append( uv_layer[face.index].uv[j] )
+										co_no_uv_cache.append( (v.co, face.normal, uv_layer[face.index].uv[j]) )
+									else:
+										co_no_uv_cache.append( (v.co, face.normal) )
 									
 									fvi.append(vert_index)
 									
@@ -311,12 +312,12 @@ class GeometryExporter(object):
 							
 							# dump cached co/no/uv
 							if uv_layer:
-								for j, (co,no) in enumerate(co_no_cache):
+								for co,no,uv in co_no_uv_cache:
 									ply.write( struct.pack('<3f', *co) )
 									ply.write( struct.pack('<3f', *no) )
-									ply.write( struct.pack('<2f', *uv_cache[j] ) )
+									ply.write( struct.pack('<2f', *uv) )
 							else:
-								for co,no in co_no_cache:
+								for co,no in co_no_uv_cache:
 									ply.write( struct.pack('<3f', *co) )
 									ply.write( struct.pack('<3f', *no) )
 							
@@ -326,8 +327,7 @@ class GeometryExporter(object):
 								ply.write( struct.pack('<B', lfvi) )
 								ply.write( struct.pack('<%dI'%lfvi, *face_vert_indices[face.index]) )
 							
-							del co_no_cache
-							del uv_cache
+							del co_no_uv_cache
 							del face_vert_indices
 						
 						LuxLog('Binary PLY file written: %s/%s' % (os.getcwd(),ply_path))
