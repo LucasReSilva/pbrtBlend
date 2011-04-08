@@ -2987,7 +2987,7 @@ def import_paramset_to_blender_texture(texture, tex_type, ps):
 			'type': 'marble_type',
 			'noisetype': 'noise_type',
 			'noisebasis': 'noise_basis',
-			'noisebasis2': 'noisebasis_2',
+			'noisebasis2': 'noise_basis_2',
 			'noisedepth': 'noise_depth'
 		},{
 			'type': lambda x: x.upper(),
@@ -3077,7 +3077,7 @@ def import_paramset_to_blender_texture(texture, tex_type, ps):
 			'type': 'string'
 		},{
 			'noisebasis': 'noise_basis',
-			'noisebasis2': 'noisebasis_2',
+			'noisebasis2': 'noise_basis_2',
 			'noisesize': 'noise_scale',
 			'noisetype': 'noise_type',
 			'type': 'wood_type'

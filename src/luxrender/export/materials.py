@@ -201,7 +201,7 @@ def convert_texture(scene, texture):
 		paramset.add_string('type', texture.marble_type.lower() ) \
 				.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
-				.add_string('noisebasis2', texture.noisebasis_2.lower() ) \
+				.add_string('noisebasis2', texture.noise_basis_2.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
 				.add_float('turbulence', texture.turbulence) \
 				.add_integer('noisedepth', texture.noise_depth)# \
@@ -246,7 +246,7 @@ def convert_texture(scene, texture):
 	
 	if texture.type == 'WOOD':
 		paramset.add_string('noisebasis', texture.noise_basis.lower() ) \
-				.add_string('noisebasis2', texture.noisebasis_2.lower() ) \
+				.add_string('noisebasis2', texture.noise_basis_2.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
 				.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_float('turbulence', texture.turbulence) \
