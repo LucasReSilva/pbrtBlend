@@ -467,6 +467,8 @@ class luxrender_material(declarative_property_group):
 					volm.name = lbm2_obj['name']
 				
 				volm.reset()
+				
+				volm.type = vt_matches.groups()[0]
 				# load paramset will also assign any textures used to the world
 				volm.load_paramset(context.scene.world, lbm2_obj['paramset'])
 		

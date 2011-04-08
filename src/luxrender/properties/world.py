@@ -250,7 +250,7 @@ class luxrender_volume_data(declarative_property_group):
 		
 		def absorption_at_depth_scaled(i):
 			# This is copied from the old LuxBlend, I don't pretend to understand it, DH
-			depthed = (-math.log(max([(float(i)),1e-30]))/(self.depth*self.absorption_scale)) * ((float(i))==1.0 and -1 or 1)
+			depthed = ( -math.log(  float(i)  )  /  (self.depth*self.absorption_scale) ) * ((float(i))==1.0 and -1 or 1)
 			#print('abs xform: %f -> %f' % (i,depthed))
 			return depthed
 		
@@ -270,7 +270,6 @@ class luxrender_volume_data(declarative_property_group):
 	
 	def load_paramset(self, world, ps):
 		psi_accept = {
-			'type': 'string',
 			'g': 'color'
 		}
 		psi_accept_keys = psi_accept.keys()
@@ -287,6 +286,65 @@ class luxrender_volume_data(declarative_property_group):
 		TC_absorption.load_paramset(self, ps)
 		TC_sigma_a.load_paramset(self, ps)
 		TC_sigma_s.load_paramset(self, ps)
+		
+		
+		# reverse the scattering scale factor
+		def sct_col_in_range(val):
+			return val>=0.01 and val<=0.99
+		def find_scale(Sr,Sg,Sb):
+			scale_val = 100000.0
+			# simultaneously scale all abs values to a sensible range
+			while not (sct_col_in_range(Sr*scale_val) and sct_col_in_range(Sg*scale_val) and sct_col_in_range(Sb*scale_val)):
+				scale_val /= 10
+				# bail out at minimum scale if we can't find a perfect solution
+				if scale_val < 1e-6: break
+			return scale_val
+		
+		# get the raw value from the paramset, value assigned via TC_sigma_s.load_paramset
+		# will already have been clamped to (0,1)
+		sct_col = [0.0, 0.0, 0.0]
+		for psi in ps:
+			if psi['type'] == 'color' and psi['name'] == 'sigma_s':
+				sct_col = psi['value']
+		scl_val = find_scale(*sct_col)
+		self.scattering_scale = 1/scl_val
+		self.sigma_s_color = [c*scl_val for c in sct_col]
+		
+		# reverse the absorption_at_depth process
+		def rev_aad_in_range(val):
+			abs = math.e**-val
+			return abs>=0.01 and abs<=0.99
+		
+		def find_depth(Ar,Ag,Ab):
+			depth_val = 100000.0
+			# simultaneously scale all abs values to a sensible range
+			while not (rev_aad_in_range(Ar*depth_val) and rev_aad_in_range(Ag*depth_val) and rev_aad_in_range(Ab*depth_val)):
+				depth_val /= 10
+				# bail out at minimum depth if we can't find a perfect solution
+				if depth_val < 1e-6: break
+			return depth_val
+		
+		if self.type == 'clear':
+			abs_col = [1.0, 1.0, 1.0]
+			# get the raw value from the paramset, value assigned via TC_absorption.load_paramset
+			# will already have been clamped to (0,1)
+			for psi in ps:
+				if psi['type'] == 'color' and psi['name'] == 'absorption':
+					abs_col = psi['value']
+			self.depth = find_depth(*abs_col)
+			
+			self.absorption_color = [math.e**-(c*self.depth) for c in abs_col]
+			
+		if self.type == 'homogeneous':
+			abs_col = [1.0, 1.0, 1.0]
+			# get the raw value from the paramset, value assigned via TC_sigma_a.load_paramset
+			# will already have been clamped to (0,1)
+			for psi in ps:
+				if psi['type'] == 'color' and psi['name'] == 'sigma_a':
+					abs_col = psi['value']
+			self.depth = find_depth(*abs_col)
+			
+			self.sigma_a_color = [math.e**-(c*self.depth) for c in abs_col]
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volumes(declarative_property_group):
