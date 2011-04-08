@@ -252,30 +252,29 @@ class GeometryExporter(object):
 							for j, vertex in enumerate(face.vertices):
 								v = mesh.vertices[vertex]
 								
+								if uv_layer:
+									vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
+								else:
+									vert_data = (v.co[:], v.normal[:])
+								
 								if face.use_smooth:
 									
-									if vertex not in vert_use_vno:
-										vert_use_vno.add(vertex)
+									if vert_data not in vert_use_vno:
+										vert_use_vno.add( vert_data )
 										
-										if uv_layer:
-											co_no_uv_cache.append( (v.co, v.normal, uv_layer[face.index].uv[j]) )
-										else:
-											co_no_uv_cache.append( (v.co, v.normal) )
+										co_no_uv_cache.append( vert_data )
 										
-										vert_vno_indices[vertex] = vert_index
+										vert_vno_indices[vert_data] = vert_index
 										fvi.append(vert_index)
 										
 										vert_index += 1
 									else:
-										fvi.append(vert_vno_indices[vertex])
+										fvi.append(vert_vno_indices[vert_data])
 									
 								else:
 									# All face-vert-co-no are unique, we cannot
 									# cache them
-									if uv_layer:
-										co_no_uv_cache.append( (v.co, face.normal, uv_layer[face.index].uv[j]) )
-									else:
-										co_no_uv_cache.append( (v.co, face.normal) )
+									co_no_uv_cache.append( vert_data )
 									
 									fvi.append(vert_index)
 									
@@ -441,30 +440,33 @@ class GeometryExporter(object):
 						for j, vertex in enumerate(face.vertices):
 							v = mesh.vertices[vertex]
 							
+							if uv_layer:
+								vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:] )
+							else:
+								vert_data = (v.co[:], v.normal[:], tuple() )
+							
 							if face.use_smooth:
 								
-								if vertex not in vert_use_vno:
-									vert_use_vno.add(vertex)
+								if vert_data not in vert_use_vno:
+									vert_use_vno.add(vert_data)
 									
-									points.extend(v.co)
-									normals.extend(v.normal)
-									if uv_layer:
-										uvs.extend( uv_layer[face.index].uv[j] )
+									points.extend( vert_data[0] )
+									normals.extend( vert_data[1] )
+									uvs.extend( vert_data[2] )
 									
-									vert_vno_indices[vertex] = vert_index
+									vert_vno_indices[vert_data] = vert_index
 									fvi.append(vert_index)
 									
 									vert_index += 1
 								else:
-									fvi.append(vert_vno_indices[vertex])
+									fvi.append(vert_vno_indices[vert_data])
 								
 							else:
 								# all face-vert-co-no are unique, we cannot
 								# cache them
-								points.extend(v.co)
-								normals.extend(face.normal)
-								if uv_layer:
-									uvs.extend( uv_layer[face.index].uv[j] )
+								points.extend( vert_data[0] )
+								normals.extend( vert_data[1] )
+								uvs.extend( vert_data[2] )
 								
 								fvi.append(vert_index)
 								
