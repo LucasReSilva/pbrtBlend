@@ -291,10 +291,6 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			
 			material_context = LM.lux_context
 			
-			material_context.set_material_metadata(
-				blender_mat.name, version='0.8'
-			)
-			
 			fullpath = os.path.join(
 				self.properties.directory,
 				self.properties.filename
@@ -312,6 +308,12 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
 			
 			luxrender_mat.export(material_context, blender_mat)
+			
+			material_context.set_material_name(blender_mat.name)
+			material_context.update_material_metadata(
+				interior=luxrender_mat.Interior_volume,
+				exterior=luxrender_mat.Exterior_volume
+			)
 			
 			material_context.write(fullpath)
 			

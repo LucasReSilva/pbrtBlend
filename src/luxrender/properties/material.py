@@ -431,6 +431,9 @@ class luxrender_material(declarative_property_group):
 				# reset this material
 				lxm.reset(prnt=bpy.data.materials[lbm2_obj['name']])
 				
+				# Set up bump map
+				TF_bumpmap.load_paramset(lxm, lbm2_obj['paramset'])
+				
 				subtype = None
 				
 				# First iterate for the material type, because
@@ -471,6 +474,13 @@ class luxrender_material(declarative_property_group):
 				volm.type = vt_matches.groups()[0]
 				# load paramset will also assign any textures used to the world
 				volm.load_paramset(context.scene.world, lbm2_obj['paramset'])
+		
+		# restore interior/exterior from metadata, if present
+		if 'metadata' in lbm2.keys():
+			if 'interior' in lbm2['metadata'].keys():
+				self.Interior_volume = lbm2['metadata']['interior']
+			if 'exterior' in lbm2['metadata'].keys():
+				self.Exterior_volume = lbm2['metadata']['exterior']
 		
 		self.set_master_color(blender_mat)
 		blender_mat.preview_render_type = blender_mat.preview_render_type

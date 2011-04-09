@@ -355,9 +355,7 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 			
 			material_context = LM.lux_context
 			
-			material_context.set_material_metadata(
-				blender_mat.name, version='0.8'
-			)
+			
 			
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
@@ -371,6 +369,12 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
 			
 			luxrender_mat.export(material_context, blender_mat)
+			
+			material_context.set_material_name(blender_mat.name)
+			material_context.update_material_metadata(
+				interior=luxrender_mat.Interior_volume,
+				exterior=luxrender_mat.Exterior_volume
+			)
 			
 			result = material_context.upload(lrmdb_client)
 			if result:

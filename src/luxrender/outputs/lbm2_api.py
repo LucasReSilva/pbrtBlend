@@ -26,6 +26,8 @@
 #
 import collections, json
 
+from .pure_api import LUXRENDER_VERSION
+
 class Custom_Context(object):
 	'''
 	Imitate the real pylux Context object so that we can
@@ -37,35 +39,41 @@ class Custom_Context(object):
 	
 	API_TYPE = 'FILE'
 	
+	_default_data = {
+		'name': '',
+		'category_id': -1,
+		'version': LUXRENDER_VERSION,
+		'objects': [],
+		'metadata': {}
+	}
+	
 	def __init__(self, name):
 		self.context_name = name
-		self.lbm2_name = ''
-		self.lbm2_category = -1
-		self.lbm2_version = '0.8'
+		self.lbm2_data = Custom_Context._default_data
 		self.lbm2_objects = []
+		self.lbm2_metadata = {}
 	
-	def set_material_metadata(self, name, category=-1, version='0.8'):
-		self.lbm2_name = name
-		self.lbm2_category = category
-		self.lbm2_version = version
+	def set_material_name(self, name):
+		self.lbm2_data['name'] = name
+	
+	def update_material_metadata(self, **kwargs):
+		self.lbm2_data['metadata'].update( kwargs )
 	
 	def _get_lbm2(self, add_comment=False):
-		# The only reason to use OrderedDict is so that _comment
-		# appears at the top of the file
-		
-		lbm2_data = collections.OrderedDict()
-		if add_comment: lbm2_data['_comment'] = 'LBM2 material data saved by LuxBlend25'
-		lbm2_data['name'] = self.lbm2_name
-		lbm2_data['category_id'] = self.lbm2_category
-		lbm2_data['version'] = self.lbm2_version
+		lbm2_data = self.lbm2_data
 		lbm2_data['objects'] = self.lbm2_objects
 		return lbm2_data
 	
 	def write(self, filename):
 		with open(filename, 'w') as output_file:
+			# The only reason to use OrderedDict is so that _comment
+			# appears at the top of the file
+			lbm2_data = collections.OrderedDict()
+			lbm2_data['_comment'] = 'LBM2 material data saved by LuxBlend25'
+			lbm2_data.update( self._get_lbm2() )
 			
 			json.dump(
-				self._get_lbm2(add_comment=True),
+				lbm2_data,
 				output_file,
 				indent=2
 			)
@@ -73,7 +81,7 @@ class Custom_Context(object):
 	def upload(self, lrmdb_client):
 		if lrmdb_client.loggedin:
 			s = lrmdb_client.server_instance()
-			upload = s.material.submit(dict(self._get_lbm2()))
+			upload = s.material.submit( self._get_lbm2() )
 			if type(upload) is str:
 				raise Exception(upload)
 			return upload
