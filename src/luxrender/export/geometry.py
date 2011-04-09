@@ -252,12 +252,12 @@ class GeometryExporter(object):
 							for j, vertex in enumerate(face.vertices):
 								v = mesh.vertices[vertex]
 								
-								if uv_layer:
-									vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
-								else:
-									vert_data = (v.co[:], v.normal[:])
-								
 								if face.use_smooth:
+									
+									if uv_layer:
+										vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
+									else:
+										vert_data = (v.co[:], v.normal[:])
 									
 									if vert_data not in vert_use_vno:
 										vert_use_vno.add( vert_data )
@@ -272,6 +272,12 @@ class GeometryExporter(object):
 										fvi.append(vert_vno_indices[vert_data])
 									
 								else:
+									
+									if uv_layer:
+										vert_data = (v.co[:], face.normal[:], uv_layer[face.index].uv[j][:])
+									else:
+										vert_data = (v.co[:], face.normal[:])
+									
 									# All face-vert-co-no are unique, we cannot
 									# cache them
 									co_no_uv_cache.append( vert_data )
@@ -440,12 +446,12 @@ class GeometryExporter(object):
 						for j, vertex in enumerate(face.vertices):
 							v = mesh.vertices[vertex]
 							
-							if uv_layer:
-								vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:] )
-							else:
-								vert_data = (v.co[:], v.normal[:], tuple() )
-							
 							if face.use_smooth:
+								
+								if uv_layer:
+									vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:] )
+								else:
+									vert_data = (v.co[:], v.normal[:], tuple() )
 								
 								if vert_data not in vert_use_vno:
 									vert_use_vno.add(vert_data)
@@ -464,9 +470,9 @@ class GeometryExporter(object):
 							else:
 								# all face-vert-co-no are unique, we cannot
 								# cache them
-								points.extend( vert_data[0] )
-								normals.extend( vert_data[1] )
-								uvs.extend( vert_data[2] )
+								points.extend( v.co[:] )
+								normals.extend( face.normal[:] )
+								if uv_layer: uvs.extend( uv_layer[face.index].uv[j][:] )
 								
 								fvi.append(vert_index)
 								

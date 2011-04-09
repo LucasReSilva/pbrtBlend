@@ -255,7 +255,6 @@ class luxrender_volume_data(declarative_property_group):
 			#print('abs xform: %f -> %f' % (i,depthed))
 			return depthed
 		
-		
 		if self.type == 'clear':
 			vp.update( TFR_IOR.get_paramset(self) )
 			vp.update( TC_absorption.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
@@ -289,7 +288,6 @@ class luxrender_volume_data(declarative_property_group):
 					ExportedTextures.export_new(lux_context)
 					# overwrite the absorption tex name with the scaled tex
 					vp.add_texture('absorption', texture_name)
-			
 		
 		if self.type == 'homogeneous':
 			def scattering_scale(i):
