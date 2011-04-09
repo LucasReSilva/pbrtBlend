@@ -439,7 +439,7 @@ class FresnelTextureParameter(TextureParameterBase):
 	def load_paramset(self, property_group, ps):
 		for psi in ps:
 			if psi['name'] == self.attr:
-				setattr( property_group, '%s_multiplyfloat' % self.attr, False )
+				setattr( property_group, '%s_multiplyfresnel' % self.attr, False )
 				if psi['type'].lower() =='texture':
 					setattr( property_group, '%s_usefresneltexture' % self.attr, True )
 					setattr( property_group, '%s_fresneltexturename' % self.attr, psi['value'] )
@@ -455,7 +455,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		else:
 			return [
 				[0.9, '%s_fresnelvalue' % self.attr, '%s_usefresneltexture' % self.attr],
-				'%s_fresneltexture' % self.attr,
+				[0.9, '%s_fresneltexture' % self.attr,'%s_multiplyfresnel' % self.attr],
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
@@ -475,9 +475,12 @@ class FresnelTextureParameter(TextureParameterBase):
 				'default': self.get_real_param_name()
 			},
 			{
-				'attr': '%s_multiplyfloat' % self.attr,
+				'attr': '%s_multiplyfresnel' % self.attr,
+				'name': 'M',
+				'description': 'Multiply fresnel texture by fresnel value',
 				'type': 'bool',
 				'default': self.multiply_float,
+				'toggle': True,
 				'save_in_preset': True
 			},
 			{
@@ -758,6 +761,10 @@ TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,
 TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
 TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
+
+# Fresnel Texture Parameters
+TFR_tex1		= FresnelTextureParameter('tex1',		'tex1',			default=1.0, min=-1e6, max=1e6)
+TFR_tex2		= FresnelTextureParameter('tex2',		'tex2',			default=0.0, min=-1e6, max=1e6)
 
 BAND_MAX_TEX = 32
 
@@ -2495,33 +2502,45 @@ class luxrender_tex_scale(declarative_property_group):
 		
 	] + \
 	TF_tex1.controls + \
+	TFR_tex1.controls + \
 	TC_tex1.controls + \
 	TF_tex2.controls + \
+	TFR_tex2.controls + \
 	TC_tex2.controls
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
-		'tex1_colorlabel':				{ 'variant': 'color' },
-		'tex1_color': 					{ 'variant': 'color' },
-		'tex1_usecolortexture':			{ 'variant': 'color' },
-		'tex1_colortexture':			{ 'variant': 'color', 'tex1_usecolortexture': True },
-		'tex1_multiplycolor':			{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_colorlabel':			{ 'variant': 'color' },
+		'tex1_color': 				{ 'variant': 'color' },
+		'tex1_usecolortexture':		{ 'variant': 'color' },
+		'tex1_colortexture':		{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_multiplycolor':		{ 'variant': 'color', 'tex1_usecolortexture': True },
 		
-		'tex1_usefloattexture':			{ 'variant': 'float' },
-		'tex1_floatvalue':				{ 'variant': 'float' },
-		'tex1_floattexture':			{ 'variant': 'float', 'tex1_usefloattexture': True },
-		'tex1_multiplyfloat':			{ 'variant': 'float', 'tex1_usefloattexture': True },
+		'tex1_usefloattexture':		{ 'variant': 'float' },
+		'tex1_floatvalue':			{ 'variant': 'float' },
+		'tex1_floattexture':		{ 'variant': 'float', 'tex1_usefloattexture': True },
+		'tex1_multiplyfloat':		{ 'variant': 'float', 'tex1_usefloattexture': True },
 		
-		'tex2_colorlabel':				{ 'variant': 'color' },
-		'tex2_color': 					{ 'variant': 'color' },
-		'tex2_usecolortexture':			{ 'variant': 'color' },
-		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
-		'tex2_multiplycolor':			{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex1_usefresneltexture':	{ 'variant': 'fresnel' },
+		'tex1_fresnelvalue':		{ 'variant': 'fresnel' },
+		'tex1_fresneltexture':		{ 'variant': 'fresnel', 'tex1_usefresneltexture': True },
+		'tex1_multiplyfresnel':		{ 'variant': 'fresnel', 'tex1_usefresneltexture': True },
 		
-		'tex2_usefloattexture':			{ 'variant': 'float' },
-		'tex2_floatvalue':				{ 'variant': 'float' },
-		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
-		'tex2_multiplyfloat':			{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_colorlabel':			{ 'variant': 'color' },
+		'tex2_color': 				{ 'variant': 'color' },
+		'tex2_usecolortexture':		{ 'variant': 'color' },
+		'tex2_colortexture':		{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex2_multiplycolor':		{ 'variant': 'color', 'tex2_usecolortexture': True },
+		
+		'tex2_usefloattexture':		{ 'variant': 'float' },
+		'tex2_floatvalue':			{ 'variant': 'float' },
+		'tex2_floattexture':		{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_multiplyfloat':		{ 'variant': 'float', 'tex2_usefloattexture': True },
+		
+		'tex2_usefresneltexture':	{ 'variant': 'fresnel' },
+		'tex2_fresnelvalue':		{ 'variant': 'fresnel' },
+		'tex2_fresneltexture':		{ 'variant': 'fresnel', 'tex2_usefresneltexture': True },
+		'tex2_multiplyfresnel':		{ 'variant': 'fresnel', 'tex2_usefresneltexture': True },
 	}
 	
 	properties = [
@@ -2532,14 +2551,17 @@ class luxrender_tex_scale(declarative_property_group):
 			'items': [
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
+				('fresnel', 'Fresnel', 'fresnel'),
 			],
 			'expand': True,
 			'save_in_preset': True
 		},
 	] + \
 	TF_tex1.properties + \
+	TFR_tex1.properties + \
 	TC_tex1.properties + \
 	TF_tex2.properties + \
+	TFR_tex2.properties + \
 	TC_tex2.properties
 	
 	def get_paramset(self, scene, texture):

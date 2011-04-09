@@ -361,6 +361,19 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 						)
 						texture_name += '_scaled_%i' % sv
 					
+					if hasattr(property_group, '%s_multiplyfresnel' % lux_prop_name) and getattr(property_group, '%s_multiplyfresnel' % lux_prop_name):
+						sv = ExportedTextures.next_scale_value()
+						ExportedTextures.texture(
+							lux_context,
+							'%s_scaled_%i' % (texture_name, sv),
+							variant,
+							'scale',
+							ParamSet() \
+								.add_float('tex1', float(getattr(property_group, '%s_fresnelvalue' % lux_prop_name))) \
+								.add_texture('tex2', texture_name)
+						)
+						texture_name += '_scaled_%i' % sv
+					
 					if hasattr(property_group, '%s_multiplycolor' % lux_prop_name) and getattr(property_group, '%s_multiplycolor' % lux_prop_name):
 						sv = ExportedTextures.next_scale_value()
 						ExportedTextures.texture(
