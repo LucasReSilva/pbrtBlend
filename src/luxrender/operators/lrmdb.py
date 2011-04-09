@@ -238,19 +238,20 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		
 		def display_category(ctg, i=0, j=0):
 			for cat_id, cat in ctg.items():
-				ofsy =  -30 - (i*30)
-				self.actions.append(
-					ActionText(
-						cat['name'] + ' (%s)' % cat['items'],
-						ClickLocation(0,75+j,ofsy,0),
-						self.show_category_items,
-						(cat_id, cat['name'])
+				if cat['name'] != 'incoming':
+					ofsy =  -30 - (i*30)
+					self.actions.append(
+						ActionText(
+							cat['name'] + ' (%s)' % cat['items'],
+							ClickLocation(0,75+j,ofsy,0),
+							self.show_category_items,
+							(cat_id, cat['name'])
+						)
 					)
-				)
-				if 'subcategories' in cat.keys():
-					i = display_category(cat['subcategories'], i+1, j+10)
-				else:
-					i+=1
+					if 'subcategories' in cat.keys():
+						i = display_category(cat['subcategories'], i+1, j+10)
+					else:
+						i+=1
 			return i
 		
 		if len(ct) > 0:
