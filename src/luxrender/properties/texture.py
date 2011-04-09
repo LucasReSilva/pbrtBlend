@@ -73,7 +73,14 @@ class TextureParameterBase(object):
 		self.properties = self.get_properties()
 	
 	def texture_collection_finder(self):
-		return lambda superctx,ctx: superctx.object.material_slots[superctx.object.active_material_index].material
+		def _tcf_wrap(superctx,ctx):
+			
+			if superctx.object and len(superctx.object.material_slots)>0 and superctx.object.material_slots[superctx.object.active_material_index].material:
+				return superctx.object.material_slots[superctx.object.active_material_index].material
+			else:
+				return superctx.scene.world
+		
+		return _tcf_wrap
 	
 	def texture_slot_set_attr(self):
 		def set_attr(s,c):
@@ -463,6 +470,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		if not self.texture_only:
 			vis = {
 				'%s_fresneltexture' % self.attr: { '%s_usefresneltexture' % self.attr: True },
+				'%s_multiplyfresnel' % self.attr: { '%s_usefresneltexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -2551,7 +2559,7 @@ class luxrender_tex_scale(declarative_property_group):
 			'items': [
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
-				('fresnel', 'Fresnel', 'fresnel'),
+				# ('fresnel', 'Fresnel', 'fresnel'),
 			],
 			'expand': True,
 			'save_in_preset': True
