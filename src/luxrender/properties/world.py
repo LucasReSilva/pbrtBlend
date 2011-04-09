@@ -33,6 +33,7 @@ from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
+from ..export.materials import ExportedTextures
 from ..outputs.pure_api import LUXRENDER_VERSION
 from ..properties.material import texture_append_visibility
 from ..properties.texture import (
@@ -254,9 +255,41 @@ class luxrender_volume_data(declarative_property_group):
 			#print('abs xform: %f -> %f' % (i,depthed))
 			return depthed
 		
+		
 		if self.type == 'clear':
 			vp.update( TFR_IOR.get_paramset(self) )
 			vp.update( TC_absorption.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
+			
+			if self.absorption_usecolortexture and self.absorption_scale!=1.0:
+				
+				tex_found = False
+				for psi in vp:
+					if psi.type == 'texture' and psi.name == 'absorption':
+						tex_found = True
+						absorption_tex = psi.value
+				
+				if tex_found:
+					sv = ExportedTextures.next_scale_value()
+					texture_name = 'absorption_scaled_%i' % sv
+					ExportedTextures.texture(
+						lux_context,
+						texture_name,
+						'color',
+						'scale',
+						ParamSet() \
+						.add_color(
+							'tex1',
+							[self.absorption_scale]*3
+						) \
+						.add_texture(
+							'tex2',
+							absorption_tex
+						)
+					)
+					ExportedTextures.export_new(lux_context)
+					# overwrite the absorption tex name with the scaled tex
+					vp.add_texture('absorption', texture_name)
+			
 		
 		if self.type == 'homogeneous':
 			def scattering_scale(i):
@@ -265,6 +298,36 @@ class luxrender_volume_data(declarative_property_group):
 			vp.add_color('g', self.g)
 			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
 			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
+			
+			if self.absorption_usecolortexture and self.absorption_scale!=1.0:
+				
+				tex_found = False
+				for psi in vp:
+					if psi.type == 'texture' and psi.name == 'sigma_a':
+						tex_found = True
+						sigma_a_tex = psi.value
+				
+				if tex_found:
+					sv = ExportedTextures.next_scale_value()
+					texture_name = 'sigma_a_scaled_%i' % sv
+					ExportedTextures.texture(
+						lux_context,
+						texture_name,
+						'color',
+						'scale',
+						ParamSet() \
+						.add_color(
+							'tex1',
+							[self.absorption_scale]*3
+						) \
+						.add_texture(
+							'tex2',
+							sigma_a_tex
+						)
+					)
+					ExportedTextures.export_new(lux_context)
+					# overwrite the sigma_a tex name with the scaled tex
+					vp.add_texture('sigma_a', texture_name)
 		
 		return self.type, vp
 	
