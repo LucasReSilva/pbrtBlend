@@ -906,15 +906,20 @@ class luxrender_tex_band(declarative_property_group):
 	def load_paramset(self, variant, ps):
 		self.variant = variant if variant in ['float', 'color'] else 'float'
 		
-		psi_accept = {
-			'noffsets': 'integer'
-		}
-		psi_accept_keys = psi_accept.keys()
+		offsets = []
 		for psi in ps:
-			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-				setattr(self, psi['name'], psi['value'])
+			if psi['name'] == 'offsets' and psi['type'] == 'float':
+				offsets = psi['value']
+				self.noffsets = len(psi['value'])
 		
-		# TODO; figure out dynamic loading
+		if self.variant == 'float':
+			for i in range(self.noffsets):
+				TF_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'offsetfloat%d'%i, offsets[i])
+		if self.variant == 'color':
+			for i in range(self.noffsets):
+				TC_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'offsetcolor%d'%i, offsets[i])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_bilerp(declarative_property_group):
@@ -2414,7 +2419,20 @@ class luxrender_tex_multimix(declarative_property_group):
 	def load_paramset(self, variant, ps):
 		self.variant = variant if variant in ['float', 'color'] else 'float'
 		
-		# TODO
+		weights = []
+		for psi in ps:
+			if psi['name'] == 'weights' and psi['type'] == 'float':
+				weights = psi['value']
+				self.nslots = len(psi['value'])
+		
+		if self.variant == 'float':
+			for i in range(self.nslots):
+				TF_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'weightfloat%d'%i, weights[i])
+		if self.variant == 'color':
+			for i in range(self.nslots):
+				TC_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'weightcolor%d'%i, weights[i])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_sellmeier(declarative_property_group):
