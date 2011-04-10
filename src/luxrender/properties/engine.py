@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
@@ -34,6 +36,14 @@ from ..outputs.pure_api import PYLUX_AVAILABLE
 from ..outputs.pure_api import LUXRENDER_VERSION
 
 #from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
+
+def find_luxrender_path():
+	return os.getenv(
+		# Use the env var path, if set ...
+		'LUXRENDER_ROOT',
+		# .. or load the last path from CFG file
+		efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+	)
 
 def find_apis():
 	apis = [
@@ -187,7 +197,7 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'install_path',
 			'name': 'Path to LuxRender Installation',
 			'description': 'Path to LuxRender',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+			'default': find_luxrender_path()
 		},
 		{
 			'type': 'bool',
