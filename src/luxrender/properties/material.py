@@ -311,9 +311,17 @@ class luxrender_material(declarative_property_group):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
 				if self.type == 'mix':
 					# First export the other mix mats
-					m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material]
+					m1_name = self.luxrender_mat_mix.namedmaterial1_material
+					if m1_name == '':
+						raise Exception('Unassigned mix material slot 1 on material %s' % material.name)
+					m1 = bpy.data.materials[m1_name]
 					m1.luxrender_material.export(lux_context, m1, 'indirect')
-					m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material]
+					
+					m2_name = self.luxrender_mat_mix.namedmaterial2_material
+					if m2_name == '':
+						raise Exception('Unassigned mix material slot 2 on material %s' % material.name)
+					
+					m2 = bpy.data.materials[m2_name]
 					m2.luxrender_material.export(lux_context, m2, 'indirect')
 				
 				material_params = ParamSet()
