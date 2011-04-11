@@ -752,16 +752,16 @@ class luxrender_texture(declarative_property_group):
 #------------------------------------------------------------------------------ 
 
 # Float Texture Parameters
-TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'brickmodtex',	default=0.0, min=0.0, max=1.0)
-TF_bricktex		= FloatTextureParameter('bricktex',		'bricktex',		default=0.0, min=0.0, max=1.0)
-TF_mortartex	= FloatTextureParameter('mortartex',	'mortartex',	default=0.0, min=0.0, max=1.0)
-TF_tex1			= FloatTextureParameter('tex1',			'tex1',			default=1.0, min=-1e6, max=1e6)
-TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=-1e6, max=1e6)
-TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0)
-TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0)
-TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0)
-TF_innertex		= FloatTextureParameter('innertex',		'innertex',		default=1.0, min=0.0, max=100.0)
-TF_outertex		= FloatTextureParameter('outertex',		'outertex',		default=0.0, min=0.0, max=100.0)
+TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'brickmodtex',	default=0.0, min=0.0, max=1.0, precision=6)
+TF_bricktex		= FloatTextureParameter('bricktex',		'bricktex',		default=0.0, min=0.0, max=1.0, precision=6)
+TF_mortartex	= FloatTextureParameter('mortartex',	'mortartex',	default=0.0, min=0.0, max=1.0, precision=6)
+TF_tex1			= FloatTextureParameter('tex1',			'tex1',			default=1.0, min=-1e6, max=1e6, precision=6)
+TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=-1e6, max=1e6, precision=6)
+TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0, precision=6)
+TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0, precision=6)
+TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0, precision=6)
+TF_innertex		= FloatTextureParameter('innertex',		'innertex',		default=1.0, min=0.0, max=100.0, precision=6)
+TF_outertex		= FloatTextureParameter('outertex',		'outertex',		default=0.0, min=0.0, max=100.0, precision=6)
 
 # Color Texture Parameters
 TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'brickmodtex',	default=(1.0,1.0,1.0))
@@ -1192,6 +1192,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'type': 'float',
 			'name': 'Bevel',
 			'default': 0.0,
+			'precision': 6,
 			'save_in_preset': True
 		},
 		{
@@ -1203,6 +1204,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': -10.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 6,
 			'save_in_preset': True
 		},
 		{
@@ -1214,6 +1216,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'precision': 6,
 			'save_in_preset': True
 		},
 		{
@@ -1225,6 +1228,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 3,
 			'save_in_preset': True
 		},
 		{
@@ -1236,6 +1240,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 3,
 			'save_in_preset': True
 		},
 		{
@@ -1247,6 +1252,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 3,
 			'save_in_preset': True
 		},
 	] + \
