@@ -259,7 +259,7 @@ class luxrender_camera(declarative_property_group):
 		up = matrix[1]
 		return pos[:3] + target[:3] + up[:3]
 	
-	def screenwindow(self, xr, yr, cam):
+	def screenwindow(self, xr, yr, scene, cam):
 		'''
 		xr			float
 		yr			float
@@ -295,7 +295,19 @@ class luxrender_camera(declarative_property_group):
 				((2*shiftY)-1) * scale,
 				((2*shiftY)+1) * scale
 				]
-				
+		
+		if scene.render.use_border:
+			(x1,x2,y1,y2) = [
+				scene.render.border_min_x, scene.render.border_max_x,
+				scene.render.border_min_y, scene.render.border_max_y
+			]
+			sw = [
+				sw[0]*(1-x1)+sw[1]*x1,
+				sw[0]*(1-x2)+sw[1]*x2,
+				sw[2]*(1-y1)+sw[3]*y1,
+				sw[2]*(1-y2)+sw[3]*y2
+			]
+		
 		return sw
 	
 	def exposure_time(self):
@@ -324,14 +336,14 @@ class luxrender_camera(declarative_property_group):
 		'''
 		
 		cam = scene.camera.data
-		xr, yr = self.luxrender_film.resolution()
+		xr, yr = self.luxrender_film.resolution(scene)
 		
 		params = ParamSet()
 		
 		if cam.type == 'PERSP' and self.type == 'perspective':
 			params.add_float('fov', math.degrees(scene.camera.data.angle))
 		
-		params.add_float('screenwindow', self.screenwindow(xr, yr, cam))
+		params.add_float('screenwindow', self.screenwindow(xr, yr, scene, cam))
 		params.add_bool('autofocus', False)
 		
 		fps = scene.render.fps
@@ -472,7 +484,7 @@ class luxrender_film(declarative_property_group):
 		},
 	]
 	
-	def resolution(self):
+	def resolution(self, scene):
 		'''
 		Calculate the output render resolution
 		
@@ -482,6 +494,9 @@ class luxrender_film(declarative_property_group):
 		
 		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
 		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
+		
+		xr = round(xr)
+		yr = round(yr)
 		
 		return xr, yr
 	
@@ -499,13 +514,20 @@ class luxrender_film(declarative_property_group):
 		'''
 		scene = LuxManager.CurrentScene
 		
-		xr, yr = self.resolution()
+		xr, yr = self.resolution(scene)
 		
 		params = ParamSet()
 		
 		# Set resolution
-		params.add_integer('xresolution', int(xr))
-		params.add_integer('yresolution', int(yr))
+		params.add_integer('xresolution', xr)
+		params.add_integer('yresolution', yr)
+		
+		if scene.render.use_border:
+			cropwindow = [
+				scene.render.border_min_x, scene.render.border_max_x,
+				scene.render.border_min_y, scene.render.border_max_y
+			]
+			params.add_float('cropwindow', cropwindow)
 		
 		# ColourSpace
 		if self.luxrender_colorspace.preset:

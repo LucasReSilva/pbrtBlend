@@ -257,8 +257,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			export_materials.ExportedTextures.clear()
 			
 			from ..export import preview_scene
-			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution()
-			xres, yres = int(xres), int(yres)
+			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 			
 			# Don't render the tiny images
 			if xres <= 96:
@@ -566,7 +565,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				
 				if not (scene.luxrender_engine.binary_name == 'luxrender' and not scene.luxrender_engine.monitor_external):
 					framebuffer_thread = LuxFilmDisplay({
-						'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
+						'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(scene),
 						'RE': self,
 					})
 					framebuffer_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval ) 

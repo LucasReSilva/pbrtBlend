@@ -41,11 +41,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.camera('perspective', camera_params)
 	
 	# Film
-	xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution()
+	xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 	
 	film_params = ParamSet() \
-		.add_integer('xresolution', int(xr)) \
-		.add_integer('yresolution', int(yr)) \
+		.add_integer('xresolution', xr) \
+		.add_integer('yresolution', yr) \
 		.add_string('filename', 'luxblend25-preview') \
 		.add_bool('write_exr_ZBuf', True) \
 		.add_bool('write_exr_applyimaging', True) \
