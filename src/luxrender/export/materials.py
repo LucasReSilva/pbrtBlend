@@ -33,6 +33,22 @@ from extensions_framework import util as efutil
 from ..export import ParamSet
 from ..outputs import LuxLog, LuxManager
 
+class TextureCounter(object):
+	stack = []
+	@classmethod
+	def reset(cls):
+		cls.stack = []
+	def __init__(self, name):
+		self.ident = name
+	def __enter__(self):
+		if self.ident in TextureCounter.stack:
+			raise Exception("Recursion in texture assignment: %s" % ' -> '.join(TextureCounter.stack))
+		TextureCounter.stack.append(self.ident)
+		#print('TCS: '+ ' -> '.join(TextureCounter.stack))
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		TextureCounter.stack.pop()
+		#print('TCS: '+ ' -> '.join(TextureCounter.stack))
+
 # TODO: convert this into ExportCache instance
 class ExportedTextures(object):
 	# static class variables
@@ -45,8 +61,9 @@ class ExportedTextures(object):
 	
 	@staticmethod
 	def clear():
+		TextureCounter.reset()
 		ExportedTextures.texture_names = []
-		ExportedTextures.texture_types = [] 
+		ExportedTextures.texture_types = []
 		ExportedTextures.texture_texts = []
 		ExportedTextures.texture_psets = []
 		ExportedTextures.exported_texture_names = []
@@ -68,11 +85,7 @@ class ExportedTextures(object):
 			ExportedTextures.texture_types.append(type)
 			ExportedTextures.texture_texts.append(texture)
 			ExportedTextures.texture_psets.append(params)
-	
-	@staticmethod
-	def calculate_dependencies():
-		pass
-	
+
 	@staticmethod
 	def export_new(lux_context):
 		for n, ty, tx, p in zip(
@@ -82,9 +95,24 @@ class ExportedTextures(object):
 				ExportedTextures.texture_psets
 			):
 			if lux_context.API_TYPE!='PURE' and n not in ExportedTextures.exported_texture_names:
-				ExportedTextures.calculate_dependencies()
 				lux_context.texture(n, ty, tx, p)
 				ExportedTextures.exported_texture_names.append(n)
+
+class MaterialCounter(object):
+	stack = []
+	@classmethod
+	def reset(cls):
+		cls.stack = []
+	def __init__(self, name):
+		self.ident = name
+	def __enter__(self):
+		if self.ident in MaterialCounter.stack:
+			raise Exception("Recursion in material assignment: %s" % ' -> '.join(MaterialCounter.stack))
+		MaterialCounter.stack.append(self.ident)
+		#print('MCS: '+ ' -> '.join(MaterialCounter.stack))
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		MaterialCounter.stack.pop()
+		#print('MCS: '+ ' -> '.join(MaterialCounter.stack))
 
 # TODO: convert this into ExportCache instance
 class ExportedMaterials(object):
@@ -95,6 +123,7 @@ class ExportedMaterials(object):
 	
 	@staticmethod
 	def clear():
+		MaterialCounter.reset()
 		ExportedMaterials.material_names = []
 		ExportedMaterials.material_psets = []
 		ExportedMaterials.exported_material_names = []
@@ -108,19 +137,11 @@ class ExportedMaterials(object):
 		if name not in ExportedMaterials.exported_material_names:
 			ExportedMaterials.material_names.append(name)
 			ExportedMaterials.material_psets.append(paramset)
-		
-	@staticmethod
-	def calculate_dependencies():
-		'''
-		TODO: detect and cure cyclic-deps 
-		'''
-		pass
 	
 	@staticmethod
 	def export_new_named(lux_context):
 		for n, p in zip(ExportedMaterials.material_names, ExportedMaterials.material_psets):
 			if lux_context.API_TYPE!='PURE' and n not in ExportedMaterials.exported_material_names:
-				ExportedMaterials.calculate_dependencies()
 				lux_context.makeNamedMaterial(n, p)
 				ExportedMaterials.exported_material_names.append(n)
 
@@ -308,6 +329,8 @@ def get_texture_from_scene(scene, tex_name):
 	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
 	return False
 
+
+
 def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, value_transform_function=None):
 	'''
 	lux_context				pylux.Context - like object
@@ -331,72 +354,74 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 		if getattr(property_group, '%s_use%stexture' % (lux_prop_name, variant)):
 			texture_name = getattr(property_group, '%s_%stexturename' % (lux_prop_name, variant))
 			if texture_name != '':
-				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
-				
-				if texture != False:
-					if texture.luxrender_texture.type != 'BLENDER':
-						tex_luxrender_texture = texture.luxrender_texture
-						lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
-						if lux_tex_variant == variant:
-							ExportedTextures.texture(lux_context, texture_name, variant, tex_luxrender_texture.type, paramset)
+				with TextureCounter(texture_name):
+					
+					texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+					
+					if texture != False:
+						if texture.luxrender_texture.type != 'BLENDER':
+							tex_luxrender_texture = texture.luxrender_texture
+							lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
+							if lux_tex_variant == variant:
+								ExportedTextures.texture(lux_context, texture_name, variant, tex_luxrender_texture.type, paramset)
+							else:
+								LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 						else:
-							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
-					else:
-						lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture)
-						if lux_tex_variant == variant:
-							ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
-						else:
-							LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
-					
-					if hasattr(property_group, '%s_multiplyfloat' % lux_prop_name) and getattr(property_group, '%s_multiplyfloat' % lux_prop_name):
-						sv = ExportedTextures.next_scale_value()
-						ExportedTextures.texture(
-							lux_context,
-							'%s_scaled_%i' % (texture_name, sv),
-							variant,
-							'scale',
-							ParamSet() \
-								.add_float('tex1', float(getattr(property_group, '%s_floatvalue' % lux_prop_name))) \
-								.add_texture('tex2', texture_name)
+							lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture)
+							if lux_tex_variant == variant:
+								ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
+							else:
+								LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
+						
+						if hasattr(property_group, '%s_multiplyfloat' % lux_prop_name) and getattr(property_group, '%s_multiplyfloat' % lux_prop_name):
+							sv = ExportedTextures.next_scale_value()
+							ExportedTextures.texture(
+								lux_context,
+								'%s_scaled_%i' % (texture_name, sv),
+								variant,
+								'scale',
+								ParamSet() \
+									.add_float('tex1', float(getattr(property_group, '%s_floatvalue' % lux_prop_name))) \
+									.add_texture('tex2', texture_name)
+							)
+							texture_name += '_scaled_%i' % sv
+						
+						if hasattr(property_group, '%s_multiplyfresnel' % lux_prop_name) and getattr(property_group, '%s_multiplyfresnel' % lux_prop_name):
+							sv = ExportedTextures.next_scale_value()
+							ExportedTextures.texture(
+								lux_context,
+								'%s_scaled_%i' % (texture_name, sv),
+								variant,
+								'scale',
+								ParamSet() \
+									.add_float('tex1', float(getattr(property_group, '%s_fresnelvalue' % lux_prop_name))) \
+									.add_texture('tex2', texture_name)
+							)
+							texture_name += '_scaled_%i' % sv
+						
+						if hasattr(property_group, '%s_multiplycolor' % lux_prop_name) and getattr(property_group, '%s_multiplycolor' % lux_prop_name):
+							sv = ExportedTextures.next_scale_value()
+							ExportedTextures.texture(
+								lux_context,
+								'%s_scaled_%i' % (texture_name, sv),
+								variant,
+								'scale',
+								ParamSet() \
+									.add_color(
+										'tex1',
+										[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
+									) \
+									.add_texture('tex2', texture_name)
+							)
+							texture_name += '_scaled_%i' % sv
+						
+						ExportedTextures.export_new(lux_context)
+						
+						params.add_texture(
+							export_param_name,
+							texture_name
 						)
-						texture_name += '_scaled_%i' % sv
-					
-					if hasattr(property_group, '%s_multiplyfresnel' % lux_prop_name) and getattr(property_group, '%s_multiplyfresnel' % lux_prop_name):
-						sv = ExportedTextures.next_scale_value()
-						ExportedTextures.texture(
-							lux_context,
-							'%s_scaled_%i' % (texture_name, sv),
-							variant,
-							'scale',
-							ParamSet() \
-								.add_float('tex1', float(getattr(property_group, '%s_fresnelvalue' % lux_prop_name))) \
-								.add_texture('tex2', texture_name)
-						)
-						texture_name += '_scaled_%i' % sv
-					
-					if hasattr(property_group, '%s_multiplycolor' % lux_prop_name) and getattr(property_group, '%s_multiplycolor' % lux_prop_name):
-						sv = ExportedTextures.next_scale_value()
-						ExportedTextures.texture(
-							lux_context,
-							'%s_scaled_%i' % (texture_name, sv),
-							variant,
-							'scale',
-							ParamSet() \
-								.add_color(
-									'tex1',
-									[float(value_transform_function(i)) for i in getattr(property_group, '%s_color' % lux_prop_name)]
-								) \
-								.add_texture('tex2', texture_name)
-						)
-						texture_name += '_scaled_%i' % sv
-					
-					ExportedTextures.export_new(lux_context)
-					
-					params.add_texture(
-						export_param_name,
-						texture_name
-					)
-					
+						
 			elif export_param_name not in ['bumpmap', 'displacementmap']:
 				LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, export_param_name))
 		else:

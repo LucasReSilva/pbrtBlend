@@ -35,7 +35,9 @@ from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture
 )
 from ..export import ParamSet
-from ..export.materials import ExportedMaterials, ExportedTextures, get_texture_from_scene
+from ..export.materials import (
+	MaterialCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
+)
 from ..outputs import LuxManager, LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
 from ..util import dict_merge
@@ -305,58 +307,59 @@ class luxrender_material(declarative_property_group):
 				blender_material.diffuse_color = submat_col
 	
 	def export(self, lux_context, material, mode='indirect'):
-		if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
-			if self.type == 'mix':
-				# First export the other mix mats
-				m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material]
-				m1.luxrender_material.export(lux_context, m1, 'indirect')
-				m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material]
-				m2.luxrender_material.export(lux_context, m2, 'indirect')
-			
-			material_params = ParamSet()
-			
-			sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
-			
-			alpha_type = None
-			# find alpha texture if material should be transparent
-			if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
-				alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
-			
-			# Bump mapping
-			if self.type not in ['mix', 'null']:
-				material_params.update( TF_bumpmap.get_paramset(self) )
-			
-			material_params.update( sub_type.get_paramset(material) )
-			
-			# DistributedPath compositing
-			if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-				material_params.update( self.luxrender_mat_compositing.get_paramset() )
-			
-			if alpha_type == None:
-				mat_type = self.type
-			else: # export mix for transparency
-				material_params.add_string('type', self.type)
-				ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_null', ParamSet().add_string('type', 'null'))
-				ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_base', material_params)
-				ExportedMaterials.export_new_named(lux_context)
+		with MaterialCounter(material.name):
+			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
+				if self.type == 'mix':
+					# First export the other mix mats
+					m1 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial1_material]
+					m1.luxrender_material.export(lux_context, m1, 'indirect')
+					m2 = bpy.data.materials[self.luxrender_mat_mix.namedmaterial2_material]
+					m2.luxrender_material.export(lux_context, m2, 'indirect')
 				
-				# replace material params with mix
-				mat_type = 'mix'
-				material_params = ParamSet() \
-					.add_string('namedmaterial1', material.name + '_null') \
-					.add_string('namedmaterial2', material.name + '_base')
-				if alpha_type == 'float':
-					material_params.add_float('amount', alpha_amount)
-				else:
-					material_params.add_texture('amount', alpha_amount)
+				material_params = ParamSet()
 				
-			if mode == 'indirect':
-				material_params.add_string('type', mat_type)
-				ExportedMaterials.makeNamedMaterial(lux_context, material.name, material_params)
-				ExportedMaterials.export_new_named(lux_context)
-			elif mode == 'direct':
-				lux_context.material(mat_type, material_params)
-		
+				sub_type = getattr(self, 'luxrender_mat_%s'%self.type)
+				
+				alpha_type = None
+				# find alpha texture if material should be transparent
+				if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
+					alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
+				
+				# Bump mapping
+				if self.type not in ['mix', 'null']:
+					material_params.update( TF_bumpmap.get_paramset(self) )
+				
+				material_params.update( sub_type.get_paramset(material) )
+				
+				# DistributedPath compositing
+				if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+					material_params.update( self.luxrender_mat_compositing.get_paramset() )
+				
+				if alpha_type == None:
+					mat_type = self.type
+				else: # export mix for transparency
+					material_params.add_string('type', self.type)
+					ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_null', ParamSet().add_string('type', 'null'))
+					ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_base', material_params)
+					ExportedMaterials.export_new_named(lux_context)
+					
+					# replace material params with mix
+					mat_type = 'mix'
+					material_params = ParamSet() \
+						.add_string('namedmaterial1', material.name + '_null') \
+						.add_string('namedmaterial2', material.name + '_base')
+					if alpha_type == 'float':
+						material_params.add_float('amount', alpha_amount)
+					else:
+						material_params.add_texture('amount', alpha_amount)
+					
+				if mode == 'indirect':
+					material_params.add_string('type', mat_type)
+					ExportedMaterials.makeNamedMaterial(lux_context, material.name, material_params)
+					ExportedMaterials.export_new_named(lux_context)
+				elif mode == 'direct':
+					lux_context.material(mat_type, material_params)
+			
 		return material.luxrender_emission.use_emission
 	
 	def load_lbm2(self, context, lbm2, blender_mat, blender_obj):
