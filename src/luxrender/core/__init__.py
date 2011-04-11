@@ -400,10 +400,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	def render_start(self, scene):
 		self.LuxManager = LuxManager.ActiveManager
 		
-		# TODO: this will be removed when direct framebuffer
-		# access is implemented in Blender
+		# Remove previous rendering, to prevent loading old data
+		# if the update timer fires before the image is written
 		if os.path.exists(self.output_file):
-			# reset output image file and
 			os.remove(self.output_file)
 		
 		internal	= (scene.luxrender_engine.export_type in ['INT', 'LFC'])
@@ -487,7 +486,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					try:
 						thread_count = multiprocessing.cpu_count()
 					except:
-						# TODO: when might this fail?
 						thread_count = 1
 				else:
 					thread_count = scene.luxrender_engine.threads

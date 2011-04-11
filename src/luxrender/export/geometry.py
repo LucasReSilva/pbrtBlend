@@ -127,7 +127,6 @@ class GeometryExporter(object):
 		
 		export_original = True
 		# mesh data name first for portal reasons
-		# TODO: replace with proper object references
 		ply_mesh_name = '%s_%s_ply' % (obj.data.name, self.geometry_scene.name)
 		if obj.luxrender_object.append_external_mesh:
 			if obj.luxrender_object.hide_proxy_mesh:
@@ -416,7 +415,6 @@ class GeometryExporter(object):
 						continue
 					
 					# mesh_name must start with mesh data name to match with portals
-					# TODO: replace with proper object references
 					mesh_name = '%s-%s_m%03d' % (obj.data.name, self.geometry_scene.name, i)
 					
 					if OBJECT_ANALYSIS: print(' -> NativeMesh:')

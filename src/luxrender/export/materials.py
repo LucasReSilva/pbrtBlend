@@ -49,7 +49,6 @@ class TextureCounter(object):
 		TextureCounter.stack.pop()
 		#print('TCS: '+ ' -> '.join(TextureCounter.stack))
 
-# TODO: convert this into ExportCache instance
 class ExportedTextures(object):
 	# static class variables
 	texture_names = []	# Name
@@ -114,7 +113,6 @@ class MaterialCounter(object):
 		MaterialCounter.stack.pop()
 		#print('MCS: '+ ' -> '.join(MaterialCounter.stack))
 
-# TODO: convert this into ExportCache instance
 class ExportedMaterials(object):
 	# Static class variables
 	material_names = []

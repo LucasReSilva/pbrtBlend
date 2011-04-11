@@ -82,8 +82,6 @@ def VolumeParameter(attr, name):
 		},
 	]
 
-# TODO: add override props to *TextureParameter instead of using these sub-types
-
 class SubGroupFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other FloatTextureParameters
@@ -416,8 +414,7 @@ class luxrender_material(declarative_property_group):
 				# Restore default texture settings
 				lxt.reset()
 				
-				# TODO: error checking for correct type
-				if not tex_type.startswith('blender_'):
+				if (not tex_type.startswith('blender_')) and hasattr(lxt, 'luxrender_tex_%s'%tex_type):
 					lxt.set_type(tex_type)
 					subtype = getattr(lxt, 'luxrender_tex_%s'%tex_type)
 					subtype.load_paramset(variant, lbm2_obj['paramset'])
