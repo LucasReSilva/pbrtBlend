@@ -397,6 +397,7 @@ class luxrender_film(declarative_property_group):
 		'integratedimaging',
 		['write_png', 'write_exr','write_tga','write_flm'],
 		['output_alpha', 'write_exr_applyimaging'],
+		'ldr_clamp_method',
 		'outlierrejection_k',
 	]
 	
@@ -481,6 +482,18 @@ class luxrender_film(declarative_property_group):
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
+		},
+		{
+			'type': 'enum',
+			'attr': 'ldr_clamp_method',
+			'name': 'LDR Clamp method',
+			'description': 'Method used to clamp bright areas into LDR range',
+			'items': [
+				('lum', 'Luminosity', 'Preserve luminosity'),
+				('hue', 'Hue', 'Preserve hue'),
+				('cut', 'Cut', 'Clip values')
+			],
+			'default': 'lum'
 		},
 	]
 	
@@ -585,6 +598,8 @@ class luxrender_film(declarative_property_group):
 		if self.write_png: params.add_string('write_png_channels', output_channels)
 		params.add_bool('write_tga', self.write_tga)
 		if self.write_tga: params.add_string('write_tga_channels', output_channels)
+		
+		params.add_string('ldr_clamp_method', self.ldr_clamp_method)
 		
 		params.add_integer('displayinterval', self.displayinterval)
 		params.add_integer('writeinterval', self.writeinterval)
