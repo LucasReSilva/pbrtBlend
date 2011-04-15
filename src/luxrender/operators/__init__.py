@@ -26,12 +26,13 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import math
+import json, math, os
 
 # LuxRender Libs
 from .. import LuxRenderAddon
-from ..outputs import LuxLog
+from ..outputs import LuxLog, LuxManager
 from ..export.scene import SceneExporter
+from ..export import materials as export_materials
 
 # Per-IDPropertyGroup preset handling
 
@@ -88,40 +89,6 @@ class LUXRENDER_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy
 		self.preset_values = [
 			'bpy.context.scene.luxrender_networking.%s'%v['attr'] for v in bpy.types.luxrender_networking.get_exportable_properties()
 		]
-		return super().execute(context)
-
-@LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_material(LUXRENDER_MT_base):
-	bl_label = "LuxRender Material Presets"
-	preset_subdir = "luxrender/material"
-
-@LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_material_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
-	'''Save the current settings as a preset'''
-	bl_idname = 'luxrender.preset_material_add'
-	bl_label = 'Add LuxRender Material settings preset'
-	preset_menu = 'LUXRENDER_MT_presets_material'
-	preset_values = []
-	preset_subdir = 'luxrender/material'
-	
-	def execute(self, context):
-		pv = [
-			'bpy.context.material.luxrender_material.%s'%v['attr'] for v in bpy.types.luxrender_material.get_exportable_properties()
-		] + [
-			'bpy.context.material.luxrender_emission.%s'%v['attr'] for v in bpy.types.luxrender_emission.get_exportable_properties()
-		] + [
-			'bpy.context.material.luxrender_transparency.%s'%v['attr'] for v in bpy.types.luxrender_transparency.get_exportable_properties()
-		]
-		
-		# store only the sub-properties of the selected lux material type
-		lux_type = context.material.luxrender_material.type
-		sub_type = getattr(bpy.types, 'luxrender_mat_%s' % lux_type)
-		
-		pv.extend([
-			'bpy.context.material.luxrender_material.luxrender_mat_%s.%s'%(lux_type, v['attr']) for v in sub_type.get_exportable_properties()
-		])
-		
-		self.preset_values = pv
 		return super().execute(context)
 
 @LuxRenderAddon.addon_register_class
@@ -225,6 +192,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 	bl_idname = 'export.luxrender'
 	bl_label = 'Export LuxRender Scene (.lxs)'
 	
+	filter_glob		= bpy.props.StringProperty(default='*.lxs',options={'HIDDEN'})
+	use_filter		= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
 	filename		= bpy.props.StringProperty(name='LXS filename')
 	directory		= bpy.props.StringProperty(name='LXS directory')
 	
@@ -254,6 +223,113 @@ menu_func = lambda self, context: self.layout.operator("export.luxrender", text=
 bpy.types.INFO_MT_file_export.append(menu_func)
 
 @LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_load_material(bpy.types.Operator):
+	bl_idname = 'luxrender.load_material'
+	bl_label = 'Load material'
+	bl_description = 'Load material from LBM2 file'
+	
+	filter_glob	= bpy.props.StringProperty(default='*.lbm2',options={'HIDDEN'})
+	use_filter	= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
+	filename	= bpy.props.StringProperty(name='Destination filename')
+	directory	= bpy.props.StringProperty(name='Destination directory')
+	
+	def invoke(self, context, event):
+		context.window_manager.fileselect_add(self)
+		return {'RUNNING_MODAL'}
+	
+	def execute(self, context):
+		#try:
+			if self.properties.filename == '' or self.properties.directory == '':
+				raise Exception('No filename or directory given.')
+			
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			
+			fullpath = os.path.join(
+				self.properties.directory,
+				self.properties.filename
+			)
+			with open(fullpath, 'r') as lbm2_file:
+				lbm2_data = json.load(lbm2_file)
+			
+			luxrender_mat.load_lbm2(context, lbm2_data, blender_mat, context.object)
+			
+			return {'FINISHED'}
+		
+		#except Exception as err:
+		#	self.report({'ERROR'}, 'Cannot load: %s' % err)
+		#	return {'CANCELLED'}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_save_material(bpy.types.Operator):
+	bl_idname = 'luxrender.save_material'
+	bl_label = 'Save material'
+	bl_description = 'Save material as LXM or LBM2 file'
+	
+	filter_glob			= bpy.props.StringProperty(default='*.lbm2;*.lxm',options={'HIDDEN'})
+	use_filter			= bpy.props.BoolProperty(default=True,options={'HIDDEN'})
+	filename			= bpy.props.StringProperty(name='Destination filename')
+	directory			= bpy.props.StringProperty(name='Destination directory')
+	
+	material_file_type	= bpy.props.EnumProperty(name="Exported file type", items=[('LBM2','LBM2','LBM2'),('LXM','LXM','LXM')])
+	
+	def invoke(self, context, event):
+		context.window_manager.fileselect_add(self)
+		return {'RUNNING_MODAL'}
+	
+	def execute(self, context):
+		try:
+			if self.properties.filename == '' or self.properties.directory == '':
+				raise Exception('No filename or directory given.')
+			
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			
+			LM = LuxManager("material_save", self.properties.material_file_type)
+			LuxManager.SetActive(LM)
+			LM.SetCurrentScene(context.scene)
+			
+			material_context = LM.lux_context
+			
+			fullpath = os.path.join(
+				self.properties.directory,
+				self.properties.filename
+			)
+			
+			export_materials.ExportedMaterials.clear()
+			export_materials.ExportedTextures.clear()
+			
+			# This causes lb25 to embed all external data ...
+			context.scene.luxrender_engine.is_saving_lbm2 = True
+			
+			# Include interior/exterior for this material
+			for volume in context.scene.luxrender_volumes.volumes:
+				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
+					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
+			
+			luxrender_mat.export(material_context, blender_mat)
+			
+			material_context.set_material_name(blender_mat.name)
+			material_context.update_material_metadata(
+				interior=luxrender_mat.Interior_volume,
+				exterior=luxrender_mat.Exterior_volume
+			)
+			
+			material_context.write(fullpath)
+			
+			# .. and must be reset!
+			context.scene.luxrender_engine.is_saving_lbm2 = False
+			
+			LM.reset()
+			LuxManager.SetActive(None)
+			
+			return {'FINISHED'}
+			
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot save: %s' % err)
+			return {'CANCELLED'}
+
+@LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_copy_mat_color(bpy.types.Operator):
 	bl_idname = 'luxrender.copy_mat_color'
 	bl_label = 'Copy material color to viewport'
@@ -278,7 +354,7 @@ def material_converter(report, scene, blender_mat):
 		luxrender_mat.Interior_volume = ''
 		luxrender_mat.Exterior_volume = ''
 		
-		luxrender_mat.reset()
+		luxrender_mat.reset(prnt=blender_mat)
 		
 		if blender_mat.raytrace_mirror.use and blender_mat.raytrace_mirror.reflect_factor >= 0.9:
 			# for high mirror reflection values switch to mirror material
@@ -571,7 +647,7 @@ class LUXRENDER_OT_material_reset(bpy.types.Operator):
 	
 	def execute(self, context):
 		if context.material and hasattr(context.material, 'luxrender_material'):
-			context.material.luxrender_material.reset()
+			context.material.luxrender_material.reset(prnt=context.material)
 		return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class

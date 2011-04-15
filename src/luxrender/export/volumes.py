@@ -427,9 +427,11 @@ def export_smoke(lux_context, scene):
 									if param[0] == 'color sigma_s': sigma_s = param[1]
 									if param[0] == 'color g': g = param[1][0]
 
-					x = max = int(domain.dimensions[0])
-					y = int(domain.dimensions[1])
-					z = int(domain.dimensions[2])
+
+					#round float value before conversion due to float to int conversion errors
+					x = max = int(round(domain.dimensions[0],0))
+					y = int(round(domain.dimensions[1],0))
+					z = int(round(domain.dimensions[2],0))
 
 					if y > max: max = y
 					if z > max: max = z

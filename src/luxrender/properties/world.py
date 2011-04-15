@@ -26,11 +26,14 @@
 #
 import math
 
+import bpy
+
 from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
+from ..export.materials import ExportedTextures
 from ..outputs.pure_api import LUXRENDER_VERSION
 from ..properties.material import texture_append_visibility
 from ..properties.texture import (
@@ -255,6 +258,36 @@ class luxrender_volume_data(declarative_property_group):
 		if self.type == 'clear':
 			vp.update( TFR_IOR.get_paramset(self) )
 			vp.update( TC_absorption.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
+			
+			if self.absorption_usecolortexture and self.absorption_scale!=1.0:
+				
+				tex_found = False
+				for psi in vp:
+					if psi.type == 'texture' and psi.name == 'absorption':
+						tex_found = True
+						absorption_tex = psi.value
+				
+				if tex_found:
+					sv = ExportedTextures.next_scale_value()
+					texture_name = 'absorption_scaled_%i' % sv
+					ExportedTextures.texture(
+						lux_context,
+						texture_name,
+						'color',
+						'scale',
+						ParamSet() \
+						.add_color(
+							'tex1',
+							[self.absorption_scale]*3
+						) \
+						.add_texture(
+							'tex2',
+							absorption_tex
+						)
+					)
+					ExportedTextures.export_new(lux_context)
+					# overwrite the absorption tex name with the scaled tex
+					vp.add_texture('absorption', texture_name)
 		
 		if self.type == 'homogeneous':
 			def scattering_scale(i):
@@ -263,8 +296,116 @@ class luxrender_volume_data(declarative_property_group):
 			vp.add_color('g', self.g)
 			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
 			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
+			
+			if self.absorption_usecolortexture and self.absorption_scale!=1.0:
+				
+				tex_found = False
+				for psi in vp:
+					if psi.type == 'texture' and psi.name == 'sigma_a':
+						tex_found = True
+						sigma_a_tex = psi.value
+				
+				if tex_found:
+					sv = ExportedTextures.next_scale_value()
+					texture_name = 'sigma_a_scaled_%i' % sv
+					ExportedTextures.texture(
+						lux_context,
+						texture_name,
+						'color',
+						'scale',
+						ParamSet() \
+						.add_color(
+							'tex1',
+							[self.absorption_scale]*3
+						) \
+						.add_texture(
+							'tex2',
+							sigma_a_tex
+						)
+					)
+					ExportedTextures.export_new(lux_context)
+					# overwrite the sigma_a tex name with the scaled tex
+					vp.add_texture('sigma_a', texture_name)
 		
 		return self.type, vp
+	
+	def load_paramset(self, world, ps):
+		psi_accept = {
+			'g': 'color'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+			
+			if psi['type'].lower() == 'texture':
+				# assign the referenced texture to the world
+				tex_slot = world.texture_slots.add()
+				tex_slot.texture = bpy.data.textures[psi['value']]
+		
+		TFR_IOR.load_paramset(self, ps)
+		TC_absorption.load_paramset(self, ps)
+		TC_sigma_a.load_paramset(self, ps)
+		TC_sigma_s.load_paramset(self, ps)
+		
+		
+		# reverse the scattering scale factor
+		def sct_col_in_range(val):
+			return val>=0.01 and val<=0.99
+		def find_scale(Sr,Sg,Sb):
+			scale_val = 100000.0
+			# simultaneously scale all abs values to a sensible range
+			while not (sct_col_in_range(Sr*scale_val) and sct_col_in_range(Sg*scale_val) and sct_col_in_range(Sb*scale_val)):
+				scale_val /= 10
+				# bail out at minimum scale if we can't find a perfect solution
+				if scale_val < 1e-6: break
+			return scale_val
+		
+		# get the raw value from the paramset, value assigned via TC_sigma_s.load_paramset
+		# will already have been clamped to (0,1)
+		sct_col = [0.0, 0.0, 0.0]
+		for psi in ps:
+			if psi['type'] == 'color' and psi['name'] == 'sigma_s':
+				sct_col = psi['value']
+		scl_val = find_scale(*sct_col)
+		self.scattering_scale = 1/scl_val
+		self.sigma_s_color = [c*scl_val for c in sct_col]
+		
+		# reverse the absorption_at_depth process
+		def rev_aad_in_range(val):
+			abs = math.e**-val
+			return abs>=0.01 and abs<=0.99
+		
+		def find_depth(Ar,Ag,Ab):
+			depth_val = 100000.0
+			# simultaneously scale all abs values to a sensible range
+			while not (rev_aad_in_range(Ar*depth_val) and rev_aad_in_range(Ag*depth_val) and rev_aad_in_range(Ab*depth_val)):
+				depth_val /= 10
+				# bail out at minimum depth if we can't find a perfect solution
+				if depth_val < 1e-6: break
+			return depth_val
+		
+		if self.type == 'clear':
+			abs_col = [1.0, 1.0, 1.0]
+			# get the raw value from the paramset, value assigned via TC_absorption.load_paramset
+			# will already have been clamped to (0,1)
+			for psi in ps:
+				if psi['type'] == 'color' and psi['name'] == 'absorption':
+					abs_col = psi['value']
+			self.depth = find_depth(*abs_col)
+			
+			self.absorption_color = [math.e**-(c*self.depth) for c in abs_col]
+			
+		if self.type == 'homogeneous':
+			abs_col = [1.0, 1.0, 1.0]
+			# get the raw value from the paramset, value assigned via TC_sigma_a.load_paramset
+			# will already have been clamped to (0,1)
+			for psi in ps:
+				if psi['type'] == 'color' and psi['name'] == 'sigma_a':
+					abs_col = psi['value']
+			self.depth = find_depth(*abs_col)
+			
+			self.sigma_a_color = [math.e**-(c*self.depth) for c in abs_col]
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volumes(declarative_property_group):

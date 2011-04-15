@@ -65,10 +65,10 @@ from ..ui.materials import (
 )
 
 from ..ui.textures import (
-	main, band, bilerp, blackbody, brick, cauchy, constant, checkerboard, dots,
-	equalenergy, fbm, gaussian, harlequin, imagemap, lampspectrum,
-	luxpop, marble, mix, multimix, sellmeier, scale, sopra, uv, uvmask, windy,
-	wrinkled, mapping, tabulateddata, transform
+	main, band, blender, bilerp, blackbody, brick, cauchy, constant,
+	checkerboard, dots, equalenergy, fbm, gaussian, harlequin, imagemap,
+	lampspectrum, luxpop, marble, mix, multimix, sellmeier, scale, sopra, uv,
+	uvmask, windy, wrinkled, mapping, tabulateddata, transform
 )
 
 # Exporter Operators need to be imported to ensure initialisation
@@ -257,8 +257,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			export_materials.ExportedTextures.clear()
 			
 			from ..export import preview_scene
-			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution()
-			xres, yres = int(xres), int(yres)
+			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 			
 			# Don't render the tiny images
 			if xres <= 96:
@@ -401,10 +400,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	def render_start(self, scene):
 		self.LuxManager = LuxManager.ActiveManager
 		
-		# TODO: this will be removed when direct framebuffer
-		# access is implemented in Blender
+		# Remove previous rendering, to prevent loading old data
+		# if the update timer fires before the image is written
 		if os.path.exists(self.output_file):
-			# reset output image file and
 			os.remove(self.output_file)
 		
 		internal	= (scene.luxrender_engine.export_type in ['INT', 'LFC'])
@@ -488,7 +486,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					try:
 						thread_count = multiprocessing.cpu_count()
 					except:
-						# TODO: when might this fail?
 						thread_count = 1
 				else:
 					thread_count = scene.luxrender_engine.threads
@@ -513,9 +510,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				if os.path.isdir(luxrender_path) and os.path.exists(luxrender_path):
 					config_updates['install_path'] = luxrender_path
 				
-				if sys.platform == 'darwin' and scene.luxrender_engine.binary_name == 'luxrender':
+				if sys.platform == 'darwin':
 					# Get binary from OSX package
-					luxrender_path += 'luxrender.app/Contents/MacOS/luxrender'
+					luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name
 				elif sys.platform == 'win32':
 					luxrender_path += '%s.exe' % scene.luxrender_engine.binary_name
 				else:
@@ -563,26 +560,28 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)
 				luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
-				framebuffer_thread = LuxFilmDisplay({
-					'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(),
-					'RE': self,
-				})
-				framebuffer_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval ) 
-				framebuffer_thread.start()
-				while luxrender_process.poll() == None and not self.test_break():
-					self.render_update_timer = threading.Timer(1, self.process_wait_timer)
-					self.render_update_timer.start()
-					if self.render_update_timer.isAlive(): self.render_update_timer.join()
 				
-				# If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
-				if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
-					# Use SIGTERM because that's the only one supported on Windows
-					luxrender_process.send_signal(subprocess.signal.SIGTERM)
-				
-				# Stop updating the render result and load the final image
-				framebuffer_thread.stop()
-				framebuffer_thread.join()
-				framebuffer_thread.kick(render_end=True)
+				if not (scene.luxrender_engine.binary_name == 'luxrender' and not scene.luxrender_engine.monitor_external):
+					framebuffer_thread = LuxFilmDisplay({
+						'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(scene),
+						'RE': self,
+					})
+					framebuffer_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval ) 
+					framebuffer_thread.start()
+					while luxrender_process.poll() == None and not self.test_break():
+						self.render_update_timer = threading.Timer(1, self.process_wait_timer)
+						self.render_update_timer.start()
+						if self.render_update_timer.isAlive(): self.render_update_timer.join()
+					
+					# If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
+					if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
+						# Use SIGTERM because that's the only one supported on Windows
+						luxrender_process.send_signal(subprocess.signal.SIGTERM)
+					
+					# Stop updating the render result and load the final image
+					framebuffer_thread.stop()
+					framebuffer_thread.join()
+					framebuffer_thread.kick(render_end=True)
 	
 	def process_wait_timer(self):
 		# Nothing to do here

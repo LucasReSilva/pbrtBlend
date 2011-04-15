@@ -127,7 +127,6 @@ class GeometryExporter(object):
 		
 		export_original = True
 		# mesh data name first for portal reasons
-		# TODO: replace with proper object references
 		ply_mesh_name = '%s_%s_ply' % (obj.data.name, self.geometry_scene.name)
 		if obj.luxrender_object.append_external_mesh:
 			if obj.luxrender_object.hide_proxy_mesh:
@@ -239,8 +238,7 @@ class GeometryExporter(object):
 						# and that number is not known before this is done.
 						
 						# Export data
-						co_no_cache = []
-						uv_cache = []
+						co_no_uv_cache = []
 						face_vert_indices = {}		# mapping of face index to list of exported vert indices for that face
 						
 						# Caches
@@ -255,26 +253,33 @@ class GeometryExporter(object):
 								
 								if face.use_smooth:
 									
-									if vertex not in vert_use_vno:
-										vert_use_vno.add(vertex)
+									if uv_layer:
+										vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
+									else:
+										vert_data = (v.co[:], v.normal[:])
+									
+									if vert_data not in vert_use_vno:
+										vert_use_vno.add( vert_data )
 										
-										co_no_cache.append( (v.co, v.normal) )
-										if uv_layer:
-											uv_cache.append( uv_layer[face.index].uv[j] )
+										co_no_uv_cache.append( vert_data )
 										
-										vert_vno_indices[vertex] = vert_index
+										vert_vno_indices[vert_data] = vert_index
 										fvi.append(vert_index)
 										
 										vert_index += 1
 									else:
-										fvi.append(vert_vno_indices[vertex])
+										fvi.append(vert_vno_indices[vert_data])
 									
 								else:
+									
+									if uv_layer:
+										vert_data = (v.co[:], face.normal[:], uv_layer[face.index].uv[j][:])
+									else:
+										vert_data = (v.co[:], face.normal[:])
+									
 									# All face-vert-co-no are unique, we cannot
 									# cache them
-									co_no_cache.append( (v.co, face.normal) )
-									if uv_layer:
-										uv_cache.append( uv_layer[face.index].uv[j] )
+									co_no_uv_cache.append( vert_data )
 									
 									fvi.append(vert_index)
 									
@@ -311,12 +316,12 @@ class GeometryExporter(object):
 							
 							# dump cached co/no/uv
 							if uv_layer:
-								for j, (co,no) in enumerate(co_no_cache):
+								for co,no,uv in co_no_uv_cache:
 									ply.write( struct.pack('<3f', *co) )
 									ply.write( struct.pack('<3f', *no) )
-									ply.write( struct.pack('<2f', *uv_cache[j] ) )
+									ply.write( struct.pack('<2f', *uv) )
 							else:
-								for co,no in co_no_cache:
+								for co,no in co_no_uv_cache:
 									ply.write( struct.pack('<3f', *co) )
 									ply.write( struct.pack('<3f', *no) )
 							
@@ -326,8 +331,7 @@ class GeometryExporter(object):
 								ply.write( struct.pack('<B', lfvi) )
 								ply.write( struct.pack('<%dI'%lfvi, *face_vert_indices[face.index]) )
 							
-							del co_no_cache
-							del uv_cache
+							del co_no_uv_cache
 							del face_vert_indices
 						
 						LuxLog('Binary PLY file written: %s/%s' % (os.getcwd(),ply_path))
@@ -411,7 +415,6 @@ class GeometryExporter(object):
 						continue
 					
 					# mesh_name must start with mesh data name to match with portals
-					# TODO: replace with proper object references
 					mesh_name = '%s-%s_m%03d' % (obj.data.name, self.geometry_scene.name, i)
 					
 					if OBJECT_ANALYSIS: print(' -> NativeMesh:')
@@ -443,28 +446,31 @@ class GeometryExporter(object):
 							
 							if face.use_smooth:
 								
-								if vertex not in vert_use_vno:
-									vert_use_vno.add(vertex)
+								if uv_layer:
+									vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:] )
+								else:
+									vert_data = (v.co[:], v.normal[:], tuple() )
+								
+								if vert_data not in vert_use_vno:
+									vert_use_vno.add(vert_data)
 									
-									points.extend(v.co)
-									normals.extend(v.normal)
-									if uv_layer:
-										uvs.extend( uv_layer[face.index].uv[j] )
+									points.extend( vert_data[0] )
+									normals.extend( vert_data[1] )
+									uvs.extend( vert_data[2] )
 									
-									vert_vno_indices[vertex] = vert_index
+									vert_vno_indices[vert_data] = vert_index
 									fvi.append(vert_index)
 									
 									vert_index += 1
 								else:
-									fvi.append(vert_vno_indices[vertex])
+									fvi.append(vert_vno_indices[vert_data])
 								
 							else:
 								# all face-vert-co-no are unique, we cannot
 								# cache them
-								points.extend(v.co)
-								normals.extend(face.normal)
-								if uv_layer:
-									uvs.extend( uv_layer[face.index].uv[j] )
+								points.extend( v.co[:] )
+								normals.extend( face.normal[:] )
+								if uv_layer: uvs.extend( uv_layer[face.index].uv[j][:] )
 								
 								fvi.append(vert_index)
 								
@@ -661,7 +667,8 @@ class GeometryExporter(object):
 					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='direct')
 				
 				if object_is_emitter:
-					self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+					if not self.visibility_scene.luxrender_engine.ignore_lightgroups:
+						self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
 					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output() )
 				
 				int_v, ext_v = get_material_volume_defs(ob_mat)

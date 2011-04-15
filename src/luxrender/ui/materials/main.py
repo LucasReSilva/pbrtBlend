@@ -28,15 +28,20 @@ import bpy
 
 from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
+from ...operators.lrmdb_lib import lrmdb_client
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Utils'
 	def draw(self, context):
 		row = self.layout.row(align=True)
-		row.menu("LUXRENDER_MT_presets_material", text=bpy.types.LUXRENDER_MT_presets_material.bl_label)
-		row.operator("luxrender.preset_material_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_material_add", text="", icon="ZOOMOUT").remove_active = True
+		row.operator("luxrender.load_material", icon="DISK_DRIVE")
+		row.operator("luxrender.save_material", icon="DISK_DRIVE").filename =\
+			'%s.lbm2' % bpy.path.clean_name(context.material.name)
+		
+		if lrmdb_client.loggedin:
+			row = self.layout.row(align=True)
+			row.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
 		
 		row = self.layout.row(align=True)
 		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
@@ -63,8 +68,9 @@ class ui_luxrender_material(luxrender_material_base):
 	]
 	
 	def draw(self, context):
-		cl = self.layout.column(align=True)
-		cl.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
+		row = self.layout.row(align=True)
+		row.label("Material type")
+		row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
 		super().draw(context)
 
 @LuxRenderAddon.addon_register_class

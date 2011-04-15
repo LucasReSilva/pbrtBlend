@@ -131,6 +131,12 @@ class lrmdb_client(object):
 	username = ''
 	
 	@classmethod
+	def reset(cls):
+		cls.server = None
+		cls.loggedin = False
+		cls.username = ''
+	
+	@classmethod
 	def server_instance(cls):
 		if cls.server == None:
 			cls.server = xmlrpc.client.ServerProxy(

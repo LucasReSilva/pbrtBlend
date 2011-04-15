@@ -36,7 +36,7 @@ from .. import LuxRenderAddon
 from ..export import ParamSet, get_worldscale
 from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs import LuxManager
-from ..util import dict_merge
+from ..util import dict_merge, bdecode_string2file
 
 #------------------------------------------------------------------------------ 
 # Texture property group construction helpers
@@ -73,7 +73,14 @@ class TextureParameterBase(object):
 		self.properties = self.get_properties()
 	
 	def texture_collection_finder(self):
-		return lambda s,c: s.object.material_slots[s.object.active_material_index].material
+		def _tcf_wrap(superctx,ctx):
+			
+			if superctx.object and len(superctx.object.material_slots)>0 and superctx.object.material_slots[superctx.object.active_material_index].material:
+				return superctx.object.material_slots[superctx.object.active_material_index].material
+			else:
+				return superctx.scene.world
+		
+		return _tcf_wrap
 	
 	def texture_slot_set_attr(self):
 		def set_attr(s,c):
@@ -135,6 +142,17 @@ class TextureParameterBase(object):
 			return self.attr
 
 class ColorTextureParameter(TextureParameterBase):
+	
+	def load_paramset(self, property_group, ps):
+		for psi in ps:
+			if psi['name'] == self.attr:
+				setattr( property_group, '%s_multiplycolor' % self.attr, False )
+				if psi['type'].lower() =='texture':
+					setattr( property_group, '%s_usecolortexture' % self.attr, True )
+					setattr( property_group, '%s_colortexturename' % self.attr, psi['value'] )
+				else:
+					setattr( property_group, '%s_usecolortexture' % self.attr, False )
+					setattr( property_group, '%s_color' % self.attr, psi['value'] )
 	
 	def get_controls(self):
 		return [
@@ -265,6 +283,17 @@ class FloatTextureParameter(TextureParameterBase):
 		self.controls = self.get_controls()
 		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
+	
+	def load_paramset(self, property_group, ps):
+		for psi in ps:
+			if psi['name'] == self.attr:
+				setattr( property_group, '%s_multiplyfloat' % self.attr, False )
+				if psi['type'].lower() =='texture':
+					setattr( property_group, '%s_usefloattexture' % self.attr, True )
+					setattr( property_group, '%s_floattexturename' % self.attr, psi['value'] )
+				else:
+					setattr( property_group, '%s_usefloattexture' % self.attr, False )
+					setattr( property_group, '%s_floatvalue' % self.attr, psi['value'] )
 	
 	def get_controls(self):
 		if self.texture_only:
@@ -413,6 +442,18 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
 	
+	
+	def load_paramset(self, property_group, ps):
+		for psi in ps:
+			if psi['name'] == self.attr:
+				setattr( property_group, '%s_multiplyfresnel' % self.attr, False )
+				if psi['type'].lower() =='texture':
+					setattr( property_group, '%s_usefresneltexture' % self.attr, True )
+					setattr( property_group, '%s_fresneltexturename' % self.attr, psi['value'] )
+				else:
+					setattr( property_group, '%s_usefresneltexture' % self.attr, False )
+					setattr( property_group, '%s_fresnelvalue' % self.attr, psi['value'] )
+	
 	def get_controls(self):
 		if self.texture_only:
 			return [
@@ -421,7 +462,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		else:
 			return [
 				[0.9, '%s_fresnelvalue' % self.attr, '%s_usefresneltexture' % self.attr],
-				'%s_fresneltexture' % self.attr,
+				[0.9, '%s_fresneltexture' % self.attr,'%s_multiplyfresnel' % self.attr],
 			] + self.get_extra_controls()
 	
 	def get_visibility(self):
@@ -429,6 +470,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		if not self.texture_only:
 			vis = {
 				'%s_fresneltexture' % self.attr: { '%s_usefresneltexture' % self.attr: True },
+				'%s_multiplyfresnel' % self.attr: { '%s_usefresneltexture' % self.attr: True },
 			}
 		vis.update(self.get_extra_visibility())
 		return vis
@@ -441,9 +483,12 @@ class FresnelTextureParameter(TextureParameterBase):
 				'default': self.get_real_param_name()
 			},
 			{
-				'attr': '%s_multiplyfloat' % self.attr,
+				'attr': '%s_multiplyfresnel' % self.attr,
+				'name': 'M',
+				'description': 'Multiply fresnel texture by fresnel value',
 				'type': 'bool',
 				'default': self.multiply_float,
+				'toggle': True,
 				'save_in_preset': True
 			},
 			{
@@ -658,6 +703,20 @@ class luxrender_texture(declarative_property_group):
 		},
 	]
 	
+	def set_type(self, tex_type):
+		self.type = tex_type
+		for cat, texs in tex_names:
+			for a,b in texs:
+				if tex_type == a:
+					self.type_label = b
+	
+	def reset(self, prnt=None):
+		super().reset()
+		# Also reset sub-property groups
+		for cat, texs in tex_names:
+			for a,b in texs:
+				if a != 'BLENDER': getattr(self, 'luxrender_tex_%s'%a).reset()
+	
 	def get_paramset(self, scene, texture):
 		'''
 		Discover the type of this LuxRender texture, and return its
@@ -693,16 +752,16 @@ class luxrender_texture(declarative_property_group):
 #------------------------------------------------------------------------------ 
 
 # Float Texture Parameters
-TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'brickmodtex',	default=0.0, min=0.0, max=1.0)
-TF_bricktex		= FloatTextureParameter('bricktex',		'bricktex',		default=0.0, min=0.0, max=1.0)
-TF_mortartex	= FloatTextureParameter('mortartex',	'mortartex',	default=0.0, min=0.0, max=1.0)
-TF_tex1			= FloatTextureParameter('tex1',			'tex1',			default=1.0, min=-1e6, max=1e6)
-TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=-1e6, max=1e6)
-TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0)
-TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0)
-TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0)
-TF_innertex		= FloatTextureParameter('innertex',		'innertex',		default=1.0, min=0.0, max=100.0)
-TF_outertex		= FloatTextureParameter('outertex',		'outertex',		default=0.0, min=0.0, max=100.0)
+TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'brickmodtex',	default=0.0, min=0.0, max=1.0, precision=6)
+TF_bricktex		= FloatTextureParameter('bricktex',		'bricktex',		default=0.0, min=0.0, max=1.0, precision=6)
+TF_mortartex	= FloatTextureParameter('mortartex',	'mortartex',	default=0.0, min=0.0, max=1.0, precision=6)
+TF_tex1			= FloatTextureParameter('tex1',			'tex1',			default=1.0, min=-1e6, max=1e6, precision=6)
+TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=-1e6, max=1e6, precision=6)
+TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0, precision=6)
+TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0, precision=6)
+TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0, precision=6)
+TF_innertex		= FloatTextureParameter('innertex',		'innertex',		default=1.0, min=0.0, max=100.0, precision=6)
+TF_outertex		= FloatTextureParameter('outertex',		'outertex',		default=0.0, min=0.0, max=100.0, precision=6)
 
 # Color Texture Parameters
 TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'brickmodtex',	default=(1.0,1.0,1.0))
@@ -710,6 +769,10 @@ TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,
 TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
 TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
+
+# Fresnel Texture Parameters
+TFR_tex1		= FresnelTextureParameter('tex1',		'tex1',			default=1.0, min=-1e6, max=1e6)
+TFR_tex2		= FresnelTextureParameter('tex2',		'tex2',			default=0.0, min=-1e6, max=1e6)
 
 BAND_MAX_TEX = 32
 
@@ -839,6 +902,24 @@ class luxrender_tex_band(declarative_property_group):
 			band_params.add_float('offsets', offsets)
 		
 		return set(), band_params
+	
+	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color'] else 'float'
+		
+		offsets = []
+		for psi in ps:
+			if psi['name'] == 'offsets' and psi['type'] == 'float':
+				offsets = psi['value']
+				self.noffsets = len(psi['value'])
+		
+		if self.variant == 'float':
+			for i in range(self.noffsets):
+				TF_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'offsetfloat%d'%i, offsets[i])
+		if self.variant == 'color':
+			for i in range(self.noffsets):
+				TC_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'offsetcolor%d'%i, offsets[i])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_bilerp(declarative_property_group):
@@ -962,6 +1043,29 @@ class luxrender_tex_bilerp(declarative_property_group):
 				.add_color('v11', self.v11_c)
 				
 		return {'2DMAPPING'}, params
+	
+	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color'] else 'float'
+		
+		psi_accept = {
+			'noffsets': 'integer'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		
+		psi_accept = {
+			'v00': variant,
+			'v01': variant,
+			'v10': variant,
+			'v11': variant,
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, '%s_%s'%(psi['name'], variant[0]), psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_blackbody(declarative_property_group):
@@ -990,6 +1094,16 @@ class luxrender_tex_blackbody(declarative_property_group):
 	
 	def get_paramset(self, scene, texture):
 		return set(), ParamSet().add_float('temperature', self.temperature)
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'temperature': 'float'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_brick(declarative_property_group):
@@ -1078,6 +1192,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'type': 'float',
 			'name': 'Bevel',
 			'default': 0.0,
+			'precision': 6,
 			'save_in_preset': True
 		},
 		{
@@ -1089,6 +1204,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': -10.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 6,
 			'save_in_preset': True
 		},
 		{
@@ -1100,6 +1216,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'precision': 6,
 			'save_in_preset': True
 		},
 		{
@@ -1111,6 +1228,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 3,
 			'save_in_preset': True
 		},
 		{
@@ -1122,6 +1240,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 3,
 			'save_in_preset': True
 		},
 		{
@@ -1133,6 +1252,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 10.0,
 			'soft_max': 10.0,
+			'precision': 3,
 			'save_in_preset': True
 		},
 	] + \
@@ -1165,6 +1285,30 @@ class luxrender_tex_brick(declarative_property_group):
 			)
 		
 		return {'3DMAPPING'}, brick_params
+	
+	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color'] else 'float'
+		
+		psi_accept = {
+			'brickbevel': 'float',
+			'brickbond': 'string', 
+			'brickdepth': 'float',
+			'brickheight': 'float',
+			'brickwidth': 'float',
+			'brickrun': 'float',
+			'mortarsize': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TF_brickmodtex.load_paramset(self, ps)
+		TC_brickmodtex.load_paramset(self, ps)
+		TF_bricktex.load_paramset(self, ps)
+		TC_bricktex.load_paramset(self, ps)
+		TF_mortartex.load_paramset(self, ps)
+		TC_mortartex.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_cauchy(declarative_property_group):
@@ -1260,6 +1404,17 @@ class luxrender_tex_cauchy(declarative_property_group):
 			cp.add_float('cauchya', self.a)
 		
 		return set(), cp
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'index': 'float',
+			'cauchya': 'float', 
+			'cauchyb': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_checkerboard(declarative_property_group):
@@ -1332,6 +1487,19 @@ class luxrender_tex_checkerboard(declarative_property_group):
 			features = {'3DMAPPING'}
 		
 		return features, checkerboard_params
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'aamode': 'string',
+			'dimension': 'integer',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TF_tex1.load_paramset(self, ps)
+		TF_tex2.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_constant(declarative_property_group):
@@ -1368,6 +1536,15 @@ class luxrender_tex_constant(declarative_property_group):
 		constant_params.add_float('value', self.value)
 		
 		return set(), constant_params
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'value': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_dots(declarative_property_group):
@@ -1413,6 +1590,17 @@ class luxrender_tex_dots(declarative_property_group):
 			)
 		
 		return {'2DMAPPING'}, dots_params
+	
+	def load_paramset(self, variant, ps):
+		#psi_accept = {
+		#}
+		#psi_accept_keys = psi_accept.keys()
+		#for psi in ps:
+		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+		#		setattr(self, psi['name'], psi['value'])
+		
+		TF_inside.load_paramset(self, ps)
+		TF_outside.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_equalenergy(declarative_property_group):
@@ -1445,6 +1633,15 @@ class luxrender_tex_equalenergy(declarative_property_group):
 	
 	def get_paramset(self, scene, texture):
 		return set(), ParamSet().add_float('energy', self.energy)
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'energy': 'float'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_fbm(declarative_property_group):
@@ -1492,6 +1689,16 @@ class luxrender_tex_fbm(declarative_property_group):
 							   .add_float('roughness', self.roughness)
 		
 		return {'3DMAPPING'}, fbm_params
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'octaves': 'integer',
+			'roughness': 'float'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_gaussian(declarative_property_group):
@@ -1550,6 +1757,17 @@ class luxrender_tex_gaussian(declarative_property_group):
 		return set(), ParamSet().add_float('energy', self.energy) \
 								.add_float('wavelength', self.wavelength) \
 								.add_float('width', self.width)
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'energy': 'float',
+			'wavelength': 'float',
+			'width': 'float'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_harlequin(declarative_property_group):
@@ -1573,6 +1791,9 @@ class luxrender_tex_harlequin(declarative_property_group):
 		harlequin_params = ParamSet()
 		
 		return set(), harlequin_params
+	
+	def load_paramset(self, ps):
+		pass
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_imagemap(declarative_property_group):
@@ -1703,10 +1924,10 @@ class luxrender_tex_imagemap(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		params = ParamSet()
 		fn = self.get_filename(texture)
-		if scene.luxrender_engine.embed_filedata:
+		if scene.luxrender_engine.allow_file_embed():
 			from ..util import bencode_file2string
 			params.add_string('filename', os.path.basename(fn))
-			params.add_string('filename_data', bencode_file2string(fn) )
+			params.add_string('filename_data', bencode_file2string(fn).splitlines() )
 		else:
 			params.add_string('filename', efutil.path_relative_to_export(fn) )
 		
@@ -1721,6 +1942,33 @@ class luxrender_tex_imagemap(declarative_property_group):
 			params.add_string('channel', self.channel)
 		
 		return {'2DMAPPING'}, params
+	
+	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color'] else 'float'
+		
+		psi_accept = {
+			'filename': 'string',
+			'discardmipmaps': 'integer',
+			'filtertype': 'string',
+			'gain': 'float',
+			'gamma': 'float',
+			'maxanisotropy': 'float',
+			'wrap': 'string',
+			'channel': 'string',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		# Use a 2nd loop to ensure that self.filename has been set
+		for psi in ps:
+			# embedded data decode
+			if  psi['name'] == 'filename_data':
+				filename_data = '\n'.join(psi['value'])
+				self.filename = '//%s' % self.filename
+				fn = efutil.filesystem_path(self.filename)
+				bdecode_string2file(filename_data, fn)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_lampspectrum(declarative_property_group):
@@ -1757,6 +2005,15 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 	
 	def get_paramset(self, scene, texture):
 		return set(), ParamSet().add_string('name', self.preset)
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'name': 'string',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, 'preset', psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_mapping(declarative_property_group):
@@ -1871,6 +2128,21 @@ class luxrender_tex_mapping(declarative_property_group):
 			mapping_params.add_float('vdelta', self.vdelta)
 		
 		return mapping_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'mapping': 'string',
+			'udelta': 'float',
+			'vdelta': 'float',
+			'uscale': 'float',
+			'vscale': 'float',
+			'v1': 'vector',
+			'v2': 'vector',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'] if psi['name'] != 'mapping' else 'type', psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_marble(declarative_property_group):
@@ -1942,6 +2214,18 @@ class luxrender_tex_marble(declarative_property_group):
 										.add_float('roughness', self.roughness) \
 										.add_float('scale', self.scale) \
 										.add_float('variation', self.variation)
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'octaves': 'integer',
+			'roughness': 'float',
+			'scale': 'float',
+			'variation': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_mix(declarative_property_group):
@@ -2019,6 +2303,19 @@ class luxrender_tex_mix(declarative_property_group):
 			)
 		
 		return set(), mix_params
+	
+	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color'] else 'float'
+		
+		TF_amount.load_paramset(self, ps)
+		
+		if variant == 'float':
+			TF_tex1.load_paramset(self, ps)
+			TF_tex2.load_paramset(self, ps)
+			
+		if  variant == 'color':
+			TC_tex1.load_paramset(self, ps)
+			TC_tex2.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_multimix(declarative_property_group):
@@ -2124,6 +2421,24 @@ class luxrender_tex_multimix(declarative_property_group):
 			mm_params.add_float('weights', weights)
 		
 		return set(), mm_params
+	
+	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color'] else 'float'
+		
+		weights = []
+		for psi in ps:
+			if psi['name'] == 'weights' and psi['type'] == 'float':
+				weights = psi['value']
+				self.nslots = len(psi['value'])
+		
+		if self.variant == 'float':
+			for i in range(self.nslots):
+				TF_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'weightfloat%d'%i, weights[i])
+		if self.variant == 'color':
+			for i in range(self.nslots):
+				TC_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'weightcolor%d'%i, weights[i])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_sellmeier(declarative_property_group):
@@ -2198,6 +2513,17 @@ class luxrender_tex_sellmeier(declarative_property_group):
 				.add_float('C', tuple(self.c))
 		
 		return set(), sp
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'A': 'float',
+			'B': 'float',
+			'C': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'].lower(), psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_scale(declarative_property_group):
@@ -2208,33 +2534,45 @@ class luxrender_tex_scale(declarative_property_group):
 		
 	] + \
 	TF_tex1.controls + \
+	TFR_tex1.controls + \
 	TC_tex1.controls + \
 	TF_tex2.controls + \
+	TFR_tex2.controls + \
 	TC_tex2.controls
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
-		'tex1_colorlabel':				{ 'variant': 'color' },
-		'tex1_color': 					{ 'variant': 'color' },
-		'tex1_usecolortexture':			{ 'variant': 'color' },
-		'tex1_colortexture':			{ 'variant': 'color', 'tex1_usecolortexture': True },
-		'tex1_multiplycolor':			{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_colorlabel':			{ 'variant': 'color' },
+		'tex1_color': 				{ 'variant': 'color' },
+		'tex1_usecolortexture':		{ 'variant': 'color' },
+		'tex1_colortexture':		{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_multiplycolor':		{ 'variant': 'color', 'tex1_usecolortexture': True },
 		
-		'tex1_usefloattexture':			{ 'variant': 'float' },
-		'tex1_floatvalue':				{ 'variant': 'float' },
-		'tex1_floattexture':			{ 'variant': 'float', 'tex1_usefloattexture': True },
-		'tex1_multiplyfloat':			{ 'variant': 'float', 'tex1_usefloattexture': True },
+		'tex1_usefloattexture':		{ 'variant': 'float' },
+		'tex1_floatvalue':			{ 'variant': 'float' },
+		'tex1_floattexture':		{ 'variant': 'float', 'tex1_usefloattexture': True },
+		'tex1_multiplyfloat':		{ 'variant': 'float', 'tex1_usefloattexture': True },
 		
-		'tex2_colorlabel':				{ 'variant': 'color' },
-		'tex2_color': 					{ 'variant': 'color' },
-		'tex2_usecolortexture':			{ 'variant': 'color' },
-		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
-		'tex2_multiplycolor':			{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex1_usefresneltexture':	{ 'variant': 'fresnel' },
+		'tex1_fresnelvalue':		{ 'variant': 'fresnel' },
+		'tex1_fresneltexture':		{ 'variant': 'fresnel', 'tex1_usefresneltexture': True },
+		'tex1_multiplyfresnel':		{ 'variant': 'fresnel', 'tex1_usefresneltexture': True },
 		
-		'tex2_usefloattexture':			{ 'variant': 'float' },
-		'tex2_floatvalue':				{ 'variant': 'float' },
-		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
-		'tex2_multiplyfloat':			{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_colorlabel':			{ 'variant': 'color' },
+		'tex2_color': 				{ 'variant': 'color' },
+		'tex2_usecolortexture':		{ 'variant': 'color' },
+		'tex2_colortexture':		{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex2_multiplycolor':		{ 'variant': 'color', 'tex2_usecolortexture': True },
+		
+		'tex2_usefloattexture':		{ 'variant': 'float' },
+		'tex2_floatvalue':			{ 'variant': 'float' },
+		'tex2_floattexture':		{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_multiplyfloat':		{ 'variant': 'float', 'tex2_usefloattexture': True },
+		
+		'tex2_usefresneltexture':	{ 'variant': 'fresnel' },
+		'tex2_fresnelvalue':		{ 'variant': 'fresnel' },
+		'tex2_fresneltexture':		{ 'variant': 'fresnel', 'tex2_usefresneltexture': True },
+		'tex2_multiplyfresnel':		{ 'variant': 'fresnel', 'tex2_usefresneltexture': True },
 	}
 	
 	properties = [
@@ -2245,14 +2583,17 @@ class luxrender_tex_scale(declarative_property_group):
 			'items': [
 				('float', 'Float', 'float'),
 				('color', 'Color', 'color'),
+				# ('fresnel', 'Fresnel', 'fresnel'),
 			],
 			'expand': True,
 			'save_in_preset': True
 		},
 	] + \
 	TF_tex1.properties + \
+	TFR_tex1.properties + \
 	TC_tex1.properties + \
 	TF_tex2.properties + \
+	TFR_tex2.properties + \
 	TC_tex2.properties
 	
 	def get_paramset(self, scene, texture):
@@ -2267,6 +2608,17 @@ class luxrender_tex_scale(declarative_property_group):
 			)
 		
 		return set(), scale_params
+	
+	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color'] else 'float'
+		
+		if self.variant == 'float':
+			TF_tex1.load_paramset(self, ps)
+			TF_tex2.load_paramset(self, ps)
+		
+		if self.variant == 'color':
+			TC_tex1.load_paramset(self, ps)
+			TC_tex2.load_paramset(self, ps)
 
 class tabulatedbase(declarative_property_group):
 	controls = [
@@ -2280,6 +2632,15 @@ class tabulatedbase(declarative_property_group):
 			fn = self.filename
 		td = ParamSet().add_string('filename', efutil.path_relative_to_export(fn) )
 		return set(), td
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'filename': 'string',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'].lower(), psi['value'])
 
 class tabulatedcolor(tabulatedbase):
 	properties = [
@@ -2328,6 +2689,7 @@ class luxrender_tex_transform(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	
 	controls = [
+		'coordinates',
 		'translate',
 		'rotate',
 		'scale',
@@ -2336,6 +2698,20 @@ class luxrender_tex_transform(declarative_property_group):
 	visibility = {}
 	
 	properties = [
+		{
+			'type': 'enum',
+			'attr': 'coordinates',
+			'name': 'Coordinates',
+			'items': [
+				('global', 'Global', 'Use global 3D coordinates'),
+				('globalnormal', 'Global Normal', 'Use Global surface normals'),
+				('local', 'Object', 'Use object local 3D coordinates'),
+				('localnormal', 'Object Normal', 'Use object local surface normals'),
+				('uv', 'UV', 'Use UV coordinates (x=u y=v z=0)'),
+			],
+			'default': 'global',
+			'save_in_preset': True
+		},
 		{
 			'type': 'float_vector',
 			'attr': 'translate',
@@ -2364,11 +2740,24 @@ class luxrender_tex_transform(declarative_property_group):
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
+		transform_params.add_string('coordinates', self.coordinates)
 		transform_params.add_vector('translate', [i*ws for i in self.translate])
 		transform_params.add_vector('rotate', self.rotate)
 		transform_params.add_vector('scale', [i*ws for i in self.scale])
 		
 		return transform_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'coordinates': 'string',
+			'translate': 'vector',
+			'rotate': 'vector',
+			'scale': 'vector',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_uv(declarative_property_group):
@@ -2390,6 +2779,9 @@ class luxrender_tex_uv(declarative_property_group):
 		uv_params = ParamSet()
 		
 		return {'2DMAPPING'}, uv_params
+	
+	def load_paramset(self, variant, ps):
+		pass
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_uvmask(declarative_property_group):
@@ -2426,6 +2818,10 @@ class luxrender_tex_uvmask(declarative_property_group):
 			)
 		
 		return {'2DMAPPING'}, uvmask_params
+	
+	def load_paramset(self, variant, ps):
+		TF_innertex.load_paramset(self, ps)
+		TF_outertex.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_windy(declarative_property_group):
@@ -2447,6 +2843,9 @@ class luxrender_tex_windy(declarative_property_group):
 		windy_params = ParamSet()
 		
 		return {'3DMAPPING'}, windy_params
+	
+	def load_paramset(self, variant, ps):
+		pass
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_wrinkled(declarative_property_group):
@@ -2494,3 +2893,251 @@ class luxrender_tex_wrinkled(declarative_property_group):
 									.add_float('roughness', self.roughness)
 		
 		return {'3DMAPPING'}, wrinkled_params
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'octaves': 'integer',
+			'roughness': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+
+def import_paramset_to_blender_texture(texture, tex_type, ps):
+	"""
+	This function is derived from, and ought to do the exact
+	reverse of export.materials.convert_texture
+	"""
+	
+	# Some paramset item names might need to be changed to
+	# blender texture parameter names
+	def psi_translate(psi_name, xlate):
+		if psi_name in xlate.keys():
+			return xlate[psi_name]
+		else:
+			return psi_name
+	
+	# Some paramset item values might need to be remapped to
+	# blender texture parameter values
+	def psi_remap(psi_name, psi_value, xmap):
+		if psi_name in xmap.keys():
+			xm = xmap[psi_name]
+			if type(xm) == type(lambda:None):
+				return xm(psi_value)
+			elif type(xm) == dict:
+				if psi_value in xm.keys():
+					return xmap[psi_name][psi_value]
+				else:
+					return psi_value
+			else:
+				return psi_value
+		else:
+			return psi_value
+	
+	# Process the paramset items specified in accept, and run them
+	# through the translate and remap filters
+	def import_ps(accept, xl={}, xmap={}):
+		accept_keys = accept.keys()
+		for psi in ps:
+			if psi['name'] in accept_keys and psi['type'].lower() == accept[psi['name']]:
+				setattr(texture, psi_translate(psi['name'], xl), psi_remap(psi['name'],psi['value'],xmap))
+	
+	import_ps({
+		'bright': 'float',
+		'contrast': 'float'
+	},{
+		'bright': 'intensity'
+	})
+	
+	# Set the Blender texture type
+	blender_tex_type = tex_type.replace('blender_', '').upper()
+	blender_type_xlate = {
+		'DISTORTEDNOISE': 'DISTORTED_NOISE'
+	}
+	if blender_tex_type in blender_type_xlate.keys():
+		blender_tex_type = blender_type_xlate[blender_tex_type]
+	texture.type = blender_tex_type
+	
+	# Get a new reference to the texture, since changing the type
+	# needs to re-cast the blender texture as a subtype
+	tex_name = texture.name
+	texture = bpy.data.textures[tex_name]
+	
+	if texture.type == 'BLEND':
+		progression_map = {
+			'LINEAR':			'lin',
+			'QUADRATIC':		'quad',
+			'EASING':			'ease',
+			'DIAGONAL':			'diag',
+			'SPHERICAL':		'sphere',
+			'QUADRATIC_SPHERE':	'halo',
+			'RADIAL':			'radial',
+		}
+		
+		import_ps({
+			'flipxy': 'bool',
+			'type': 'string'
+		},{
+			'flipxy': 'use_flip_axis',
+			'type': 'progression'
+		},{
+			'type': {v:k for k,v in progression_map.items()}
+		})
+	
+	if texture.type == 'CLOUDS':
+		import_ps({
+			'noisetype': 'string',
+			'noisebasis': 'string',
+			'noisesize': 'float',
+			'noisedepth': 'integer'
+		},
+		{
+			'noisetype': 'noise_type',
+			'noisebasis': 'noise_basis',
+			'noisesize': 'noise_scale',
+			'noisedepth': 'noise_depth'
+		},
+		{
+			'noisetype': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+		})
+	
+	if texture.type == 'DISTORTED_NOISE':
+		import_ps({
+			'type': 'string',
+			'noisebasis': 'string',
+			'distamount': 'float',
+			'noisesize': 'float',
+			'nabla': 'float'
+		},{
+			'type': 'noise_distortion',
+			'noisebasis': 'noise_basis',
+			'distamount': 'distortion',
+			'noisesize': 'noise_scale'
+		},{
+			'type': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper()
+		})
+	
+	if texture.type == 'MAGIC':
+		import_ps({
+			'noisedepth': 'integer',
+			'turbulence': 'float'
+		},{
+			'noisedepth': 'noise_depth'
+		})
+	
+	if texture.type == 'MARBLE':
+		import_ps({
+			'type': 'string',
+			'noisetype': 'string',
+			'noisebasis': 'string',
+			'noisebasis2': 'string',
+			'noisesize': 'float',
+			'turbulence': 'float',
+			'noisedepth': 'integer'
+		},{
+			'type': 'marble_type',
+			'noisetype': 'noise_type',
+			'noisebasis': 'noise_basis',
+			'noisebasis2': 'noise_basis_2',
+			'noisedepth': 'noise_depth'
+		},{
+			'type': lambda x: x.upper(),
+			'noisetype': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+			'noisebasis2': lambda x: x.upper(),
+		})
+	
+	if texture.type == 'MUSGRAVE':
+		import_ps({
+			'type': 'string',
+			'h': 'float',
+			'lacu': 'float',
+			'noisebasis': 'string',
+			'noisesize': 'float',
+			'octs': 'float'
+		},{
+			'type': 'musgrave_type',
+			'h': 'dimension_max',
+			'lacu': 'lacunarity',
+			'noisebasis': 'noise_basis',
+			'noisesize': 'noise_scale',
+			'octs': 'octaves'
+		},{
+			'type': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+		})
+	
+	# NOISE shows no params ?
+	
+	if texture.type == 'STUCCI':
+		import_ps({
+			'type': 'string',
+			'noisetype': 'string',
+			'noisebasis': 'string',
+			'noisesize': 'float',
+			'turbulence': 'float'
+		},{
+			'type': 'stucci_type',
+			'noisetype': 'noise_type',
+			'noisebasis': 'noise_basis',
+			'noisesize': 'noise_scale'
+		},{
+			'type': lambda x: x.upper(),
+			'noisetype': lambda x: x.upper(),
+			'noisebasis': lambda x: x.upper(),
+		})
+	
+	if texture.type == 'VORONOI':
+		distancem_map = {
+			'DISTANCE': 'actual_distance',
+			'DISTANCE_SQUARED': 'distance_squared',
+			'MANHATTAN': 'manhattan',
+			'CHEBYCHEV': 'chebychev',
+			'MINKOVSKY_HALF': 'minkovsky_half',
+			'MINKOVSKY_FOUR': 'minkovsky_four',
+			'MINKOVSKY': 'minkovsky'
+		}
+		import_ps({
+			'distmetric': 'string',
+			'minkovsky_exp': 'float',
+			'noisesize': 'float',
+			'nabla': 'float',
+			'w1': 'float',
+			'w2': 'float',
+			'w3': 'float',
+			'w4': 'float',
+		},{
+			'distmetric': 'distance_metric',
+			'minkovsky_exp': 'minkovsky_exponent',
+			'noisesize': 'noise_scale',
+			'w1': 'weight_1',
+			'w2': 'weight_1',
+			'w3': 'weight_1',
+			'w4': 'weight_1',
+		},{
+			'distmetric': {v:k for k,v in distancem_map.items()}
+		})
+	
+	if texture.type == 'WOOD':
+		import_ps({
+			'noisebasis': 'string',
+			'noisebasis2': 'string',
+			'noisesize': 'float',
+			'noisetype': 'string',
+			'turbulence': 'float',
+			'type': 'string'
+		},{
+			'noisebasis': 'noise_basis',
+			'noisebasis2': 'noise_basis_2',
+			'noisesize': 'noise_scale',
+			'noisetype': 'noise_type',
+			'type': 'wood_type'
+		},{
+			'noisebasis': lambda x: x.upper(),
+			'noisebasis2': lambda x: x.upper(),
+			'noisetype': lambda x: x.upper(),
+			'type': lambda x: x.upper(),
+		})

@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+import os
+
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
@@ -34,6 +36,14 @@ from ..outputs.pure_api import PYLUX_AVAILABLE
 from ..outputs.pure_api import LUXRENDER_VERSION
 
 #from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
+
+def find_luxrender_path():
+	return os.getenv(
+		# Use the env var path, if set ...
+		'LUXRENDER_ROOT',
+		# .. or load the last path from CFG file
+		efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+	)
 
 def find_apis():
 	apis = [
@@ -60,14 +70,14 @@ class luxrender_engine(declarative_property_group):
 		'binary_name',
 		'write_files',
 		['write_lxs', 'write_lxm', 'write_lxo', 'write_lxv'],
-		
-		# 'embed_filedata', # Disabled pending acceptance into LuxRender core
+		'embed_filedata',
 		
 		'mesh_type',
 		'partial_ply',
-		'render',
+		['render','monitor_external'],
 		'install_path',
 		['threads_auto', 'threads'],
+		'ignore_lightgroups',
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
@@ -83,9 +93,11 @@ class luxrender_engine(declarative_property_group):
 		'write_lxm':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'write_lxo':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
 		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
+		'monitor_external':			{'export_type': 'EXT', 'binary_name': 'luxrender'},
 		'partial_ply':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'install_path':				{ 'render': True, 'export_type': 'EXT' },
 		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
@@ -126,6 +138,14 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
 			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+		},
+		{
+			'type': 'bool',
+			'attr': 'monitor_external',
+			'name': 'Monitor external',
+			'description': 'Monitor external GUI rendering; when selected, LuxBlend will copy the render image from the external GUI',
+			'default': True,
+			'save_in_preset': True
 		},
 		{
 			'type': 'bool',
@@ -178,7 +198,7 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'install_path',
 			'name': 'Path to LuxRender Installation',
 			'description': 'Path to LuxRender',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+			'default': find_luxrender_path()
 		},
 		{
 			'type': 'bool',
@@ -229,6 +249,13 @@ class luxrender_engine(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'bool',
+			'attr': 'is_saving_lbm2',
+			'name': '<for internal use>',
+			'default': False,
+			'save_in_preset': False
+		},
+		{
 			'type': 'enum',
 			'attr': 'mesh_type',
 			'name': 'Default mesh format',
@@ -252,8 +279,21 @@ class luxrender_engine(declarative_property_group):
 				('very-quiet', 'Very quiet', 'very-quiet'),
 			],
 			'save_in_preset': True
-		}
+		},
+		{
+			'type': 'bool',
+			'attr': 'ignore_lightgroups',
+			'name': 'Ignore LightGroups',
+			'description': 'Enable this for final renders, or to decrease RAM usage.',
+			'default': False,
+			'save_in_preset': True
+		},
 	]
+	
+	def allow_file_embed(self):
+		saving_files = (self.export_type == 'EXT' or (self.export_type == 'INT' and self.write_files == True))
+		
+		return self.is_saving_lbm2 or (saving_files and self.embed_filedata)
 	
 	def api_output(self):
 		renderer_params = ParamSet()

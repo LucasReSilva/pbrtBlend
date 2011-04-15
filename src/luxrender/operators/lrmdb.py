@@ -27,7 +27,8 @@
 import bpy, blf
 
 from .. import LuxRenderAddon
-from ..outputs import LuxLog
+from ..outputs import LuxLog, LuxManager
+from ..export import materials as export_materials
 
 from .lrmdb_lib import lrmdb_client
 
@@ -109,6 +110,7 @@ class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
 			li = s.user.logout()
 			if not li:
 				self.report({'ERROR'}, 'Logout failure')
+			lrmdb_client.reset()
 			return {'FINISHED'}
 		except Exception as err:
 			LuxLog('LRMDB ERROR: %s' % err)
@@ -172,32 +174,12 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			return
 		
 		try:
-			for mat_part in md['objects']:
-				# TODO, load all parts, not just the top-most one
-				if mat_part['type'] == 'MakeNamedMaterial' and mat_part['name'] == md['name']:
-					
-					lxm = lxms = None
-					
-					# First iterate for the material type, because
-					# we need to know which sub PropertyGroup to 
-					# set the other paramsetitems in
-					for paramsetitem in mat_part['paramset']:
-						if paramsetitem['name'] == 'type':
-							context.active_object.active_material.luxrender_material.type = paramsetitem['value']
-							lxm  = context.active_object.active_material.luxrender_material
-							lxms = getattr(context.active_object.active_material.luxrender_material, 'luxrender_mat_%s'%paramsetitem['value'])
-					
-					if lxms != None:
-						paramset_map = {
-							'Kd': 'Kd_color'
-						}
-						paramset_map_keys = paramset_map.keys()
-						for paramsetitem in mat_part['paramset']:
-							if paramsetitem['name'] in paramset_map_keys:
-								setattr(lxms, paramset_map[paramsetitem['name']], paramsetitem['value'])
-						
-						lxm.set_master_color(context.active_object.active_material)
-						context.active_object.active_material.preview_render_type = context.active_object.active_material.preview_render_type
+			context.active_object.active_material.luxrender_material.load_lbm2(
+				context,
+				md,
+				context.active_object.active_material,
+				context.active_object
+			)
 			
 			for a in context.screen.areas:
 				a.tag_redraw()
@@ -256,19 +238,20 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		
 		def display_category(ctg, i=0, j=0):
 			for cat_id, cat in ctg.items():
-				ofsy =  -30 - (i*30)
-				self.actions.append(
-					ActionText(
-						cat['name'] + ' (%s)' % cat['items'],
-						ClickLocation(0,75+j,ofsy,0),
-						self.show_category_items,
-						(cat_id, cat['name'])
+				if cat['name'] != 'incoming':
+					ofsy =  -30 - (i*30)
+					self.actions.append(
+						ActionText(
+							cat['name'] + ' (%s)' % cat['items'],
+							ClickLocation(0,75+j,ofsy,0),
+							self.show_category_items,
+							(cat_id, cat['name'])
+						)
 					)
-				)
-				if 'subcategories' in cat.keys():
-					i = display_category(cat['subcategories'], i+1, j+10)
-				else:
-					i+=1
+					if 'subcategories' in cat.keys():
+						i = display_category(cat['subcategories'], i+1, j+10)
+					else:
+						i+=1
 			return i
 		
 		if len(ct) > 0:
@@ -355,6 +338,62 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context):
 		return context.scene.render.engine == LuxRenderAddon.BL_IDNAME
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_upload_material(bpy.types.Operator):
+	bl_idname = 'luxrender.lrmdb_upload'
+	bl_label = 'Upload material to LRMDB'
+	
+	def execute(self, context):
+		try:
+			blender_mat = context.material
+			luxrender_mat = context.material.luxrender_material
+			
+			LM = LuxManager("material_save", 'LBM2')
+			LuxManager.SetActive(LM)
+			LM.SetCurrentScene(context.scene)
+			
+			material_context = LM.lux_context
+			
+			
+			
+			export_materials.ExportedMaterials.clear()
+			export_materials.ExportedTextures.clear()
+			
+			# This causes lb25 to embed all external data ...
+			context.scene.luxrender_engine.is_saving_lbm2 = True
+			
+			# Include interior/exterior for this material
+			for volume in context.scene.luxrender_volumes.volumes:
+				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
+					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
+			
+			luxrender_mat.export(material_context, blender_mat)
+			
+			material_context.set_material_name(blender_mat.name)
+			material_context.update_material_metadata(
+				interior=luxrender_mat.Interior_volume,
+				exterior=luxrender_mat.Exterior_volume
+			)
+			
+			result = material_context.upload(lrmdb_client)
+			if result:
+				self.report({'INFO'},'Upload successful!')
+			else:
+				self.report({'WARNING'},'Upload failed!')
+			
+			# .. and must be reset!
+			context.scene.luxrender_engine.is_saving_lbm2 = False
+			
+			LM.reset()
+			LuxManager.SetActive(None)
+			
+			return {'FINISHED'}
+			
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot save: %s' % err)
+			return {'CANCELLED'}
+
 
 def lrmdb_operators(self, context):
 	if context.scene.render.engine == LuxRenderAddon.BL_IDNAME:

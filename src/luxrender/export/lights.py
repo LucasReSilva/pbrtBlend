@@ -88,8 +88,13 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	else:
 		lux_context.attributeEnd()
 
-def exportLight(lux_context, ob, matrix, portals = []):
+def exportLight(scene, lux_context, ob, matrix, portals = []):
 	light = ob.data
+	
+	if scene.luxrender_engine.ignore_lightgroups:
+		light_group = 'default'
+	else:
+		light_group = light.luxrender_lamp.lightgroup
 		
 	# Params common to all light types
 	light_params = ParamSet() \
@@ -111,7 +116,7 @@ def exportLight(lux_context, ob, matrix, portals = []):
 	if light.type == 'SUN':
 		invmatrix = matrix.inverted()
 		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type != 'sky': light_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
-		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
+		attr_light(lux_context, light, ob.name, light_group, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
 		return True
 	
 	if light.type == 'HEMI':
@@ -120,7 +125,7 @@ def exportLight(lux_context, ob, matrix, portals = []):
 			light_params.add_point('from', (0,0,0))
 			light_params.add_point('to', (0,0,-1))
 		
-		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, hemi_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		attr_light(lux_context, light, ob.name, light_group, hemi_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'SPOT':
@@ -138,13 +143,13 @@ def exportLight(lux_context, ob, matrix, portals = []):
 			light_params.add_float('coneangle', coneangle)
 			light_params.add_float('conedeltaangle', conedeltaangle)
 		
-		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light_group, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 
 	if light.type == 'POINT':
 		light_params.update( ies_data )
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(lux_context, light, ob.name, light.luxrender_lamp.lightgroup, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
 		return True
 	
 	if light.type == 'AREA':
@@ -153,12 +158,12 @@ def exportLight(lux_context, ob, matrix, portals = []):
 		light_params.add_float('gain', light.energy * (get_worldscale(as_scalematrix=False)**2))
 		lux_context.attributeBegin(ob.name, file=Files.MAIN)
 		lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
-		lux_context.lightGroup(light.luxrender_lamp.lightgroup, [])
+		lux_context.lightGroup(light_group, [])
 		
 		if light.luxrender_lamp.Exterior_volume != '':
 			lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-		elif LuxManager.CurrentScene.luxrender_world.default_exterior_volume != '':
-			lux_context.exterior(LuxManager.CurrentScene.luxrender_world.default_exterior_volume)
+		elif scene.luxrender_world.default_exterior_volume != '':
+			lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 		
 		lux_context.areaLightSource('area', light_params)
 		
@@ -244,14 +249,14 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 			for dupli_ob in ob.dupli_list:
 				if dupli_ob.object.type != 'LAMP':
 					continue
-				have_light |= exportLight(lux_context, dupli_ob.object, dupli_ob.matrix, portal_shapes)
+				have_light |= exportLight(visibility_scene, lux_context, dupli_ob.object, dupli_ob.matrix, portal_shapes)
 			
 			# free object dupli list again. Warning: all dupli objects are INVALID now!
 			if ob.dupli_list: 
 				ob.dupli_list_clear()
 		else:
 			if ob.type == 'LAMP':
-				have_light |= exportLight(lux_context, ob, ob.matrix_world, portal_shapes)
+				have_light |= exportLight(visibility_scene, lux_context, ob, ob.matrix_world, portal_shapes)
 	
 	return have_light
 

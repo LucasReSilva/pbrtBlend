@@ -41,11 +41,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.camera('perspective', camera_params)
 	
 	# Film
-	xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution()
+	xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 	
 	film_params = ParamSet() \
-		.add_integer('xresolution', int(xr)) \
-		.add_integer('yresolution', int(yr)) \
+		.add_integer('xresolution', xr) \
+		.add_integer('yresolution', yr) \
 		.add_string('filename', 'luxblend25-preview') \
 		.add_bool('write_exr_ZBuf', True) \
 		.add_bool('write_exr_applyimaging', True) \
@@ -274,7 +274,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		
 		object_is_emitter = hasattr(mat, 'luxrender_emission') and mat.luxrender_emission.use_emission
 		if object_is_emitter:
-			lux_context.lightGroup(mat.luxrender_emission.lightgroup, [])
+			# lux_context.lightGroup(mat.luxrender_emission.lightgroup, [])
 			lux_context.areaLightSource( *mat.luxrender_emission.api_output() )
 		
 		if pv_export_shape:
