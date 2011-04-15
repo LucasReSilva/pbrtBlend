@@ -531,16 +531,25 @@ class luxrender_film(declarative_property_group):
 		
 		params = ParamSet()
 		
-		# Set resolution
-		params.add_integer('xresolution', xr)
-		params.add_integer('yresolution', yr)
-		
 		if scene.render.use_border:
-			cropwindow = [
+			(x1,x2,y1,y2) = [
 				scene.render.border_min_x, scene.render.border_max_x,
 				scene.render.border_min_y, scene.render.border_max_y
-			]
-			params.add_float('cropwindow', cropwindow)
+			]			
+			# Set resolution
+			params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
+			params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+		else:
+			# Set resolution
+			params.add_integer('xresolution', xr)
+			params.add_integer('yresolution', yr)
+		
+#		if scene.render.use_border:
+#			cropwindow = [
+#				scene.render.border_min_x, scene.render.border_max_x,
+#				scene.render.border_min_y, scene.render.border_max_y
+#			]
+#			params.add_float('cropwindow', cropwindow)
 		
 		# ColourSpace
 		if self.luxrender_colorspace.preset:
