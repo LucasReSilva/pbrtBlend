@@ -32,7 +32,7 @@ from extensions_framework import util as efutil
 
 from .. import LuxRenderAddon
 from ..properties.texture import (
-	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture
+	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture, shorten_name
 )
 from ..export import ParamSet
 from ..export.materials import (
@@ -387,7 +387,7 @@ class luxrender_material(declarative_property_group):
 			blender_mat.texture_slots.clear(tsi)
 		
 		# Change the name of this material to the target material in the lbm2 data
-		blender_mat.name = lbm2['name']
+		blender_mat.name = shorten_name(lbm2['name'])
 		
 		material_index=0
 		
@@ -404,12 +404,12 @@ class luxrender_material(declarative_property_group):
 				
 				tex_slot = blender_mat.texture_slots.add()
 				if lbm2_obj['name'] not in bpy.data.textures:
-					bpy.data.textures.new(name=lbm2_obj['name'],type='NONE')
+					bpy.data.textures.new(name=shorten_name(lbm2_obj['name']),type='NONE')
 				
-				blender_tex = bpy.data.textures[lbm2_obj['name']]
+				blender_tex = bpy.data.textures[shorten_name(lbm2_obj['name'])]
 				tex_slot.texture = blender_tex
 				
-				lxt = bpy.data.textures[lbm2_obj['name']].luxrender_texture
+				lxt = bpy.data.textures[shorten_name(lbm2_obj['name'])].luxrender_texture
 				
 				# Restore default texture settings
 				lxt.reset()
@@ -429,15 +429,15 @@ class luxrender_material(declarative_property_group):
 			# Add back all the materials
 			if lbm2_obj['type'] == 'MakeNamedMaterial':
 				if lbm2_obj['name'] not in bpy.data.materials:
-					bpy.data.materials.new(name=lbm2_obj['name'])
+					bpy.data.materials.new(name=shorten_name(lbm2_obj['name']))
 				
 				bpy.ops.object.material_slot_add()
-				blender_obj.material_slots[material_index].material = bpy.data.materials[lbm2_obj['name']]
+				blender_obj.material_slots[material_index].material = bpy.data.materials[shorten_name(lbm2_obj['name'])]
 				
 				# Update an existing material with data from lbm2
-				lxm = bpy.data.materials[lbm2_obj['name']].luxrender_material
+				lxm = bpy.data.materials[shorten_name(lbm2_obj['name'])].luxrender_material
 				# reset this material
-				lxm.reset(prnt=bpy.data.materials[lbm2_obj['name']])
+				lxm.reset(prnt=bpy.data.materials[shorten_name(lbm2_obj['name'])])
 				
 				# Set up bump map
 				TF_bumpmap.load_paramset(lxm, lbm2_obj['paramset'])
@@ -1816,7 +1816,7 @@ class luxrender_mat_mix(declarative_property_group):
 		psi_accept_keys = psi_accept.keys()
 		for psi in ps:
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-				setattr(self, '%s_material'%psi['name'], psi['value'])
+				setattr(self, '%s_material'%psi['name'], shorten_name(psi['value']))
 		
 		TF_amount.load_paramset(self, ps)
 

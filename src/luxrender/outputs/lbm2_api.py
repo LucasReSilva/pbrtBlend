@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import collections, json
+import collections, json, sys
 
 from .pure_api import LUXRENDER_VERSION
 
@@ -52,6 +52,7 @@ class Custom_Context(object):
 		self.lbm2_data = Custom_Context._default_data
 		self.lbm2_objects = []
 		self.lbm2_metadata = {}
+		self._size = 0
 	
 	def set_material_name(self, name):
 		self.lbm2_data['name'] = name
@@ -62,6 +63,8 @@ class Custom_Context(object):
 	def _get_lbm2(self, add_comment=False):
 		lbm2_data = self.lbm2_data
 		lbm2_data['objects'] = self.lbm2_objects
+		print('LBM2 DATA SIZE %s' % self._size)
+		lbm2_data['metadata']['estimated_size'] = self._size
 		return lbm2_data
 	
 	def write(self, filename):
@@ -77,6 +80,7 @@ class Custom_Context(object):
 				output_file,
 				indent=2
 			)
+			print('LBM2 data %s takes %s bytes storage' % (self.context_name, output_file.tell()))
 	
 	def upload(self, lrmdb_client):
 		if lrmdb_client.loggedin:
@@ -119,7 +123,10 @@ class Custom_Context(object):
 				'name': p.name,
 				'value': p.value
 			})
-			
+			# Size really is just an estimate, and is most accurate for large
+			# amounts of data
+			self._size += round(p.getSize()*1.24) + 40
+		
 		self.lbm2_objects.append(obj)
 	
 	# Wrapped pylux.Context API calls follow ...
@@ -188,10 +195,10 @@ class Custom_Context(object):
 	
 	#def motionInstance(self, name, start, stop, motion_name):
 	#	self.wf('\nMotionInstance "%s" %f %f "%s"' % (name, start, stop, motion_name))
-		
+	
 	#def attributeBegin(self, comment='', file=None):
 	#	self._api('AttributeBegin # ', [comment, []], file=file)
-		
+	
 	#def attributeEnd(self):
 	#	self._api('AttributeEnd #', ['', []])
 	

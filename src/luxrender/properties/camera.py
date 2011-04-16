@@ -580,7 +580,8 @@ class luxrender_film(declarative_property_group):
 			if scene.luxrender_engine.allow_file_embed():
 				from ..util import bencode_file2string
 				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
-				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath).splitlines() )
+				encoded_data = bencode_file2string(local_crf_filepath)
+				params.add_string('cameraresponse_data', encoded_data.splitlines() )
 			else:
 				params.add_string('cameraresponse', local_crf_filepath)
 		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf == 'preset':

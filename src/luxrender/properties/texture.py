@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import os
+import hashlib, os
 
 import bpy
 
@@ -41,6 +41,9 @@ from ..util import dict_merge, bdecode_string2file
 #------------------------------------------------------------------------------ 
 # Texture property group construction helpers
 #------------------------------------------------------------------------------ 
+
+def shorten_name(n):
+	return hashlib.md5(n.encode()).hexdigest()[:21] if len(n) > 21 else n
 
 class TextureParameterBase(object):
 	real_attr			= None
@@ -149,7 +152,7 @@ class ColorTextureParameter(TextureParameterBase):
 				setattr( property_group, '%s_multiplycolor' % self.attr, False )
 				if psi['type'].lower() =='texture':
 					setattr( property_group, '%s_usecolortexture' % self.attr, True )
-					setattr( property_group, '%s_colortexturename' % self.attr, psi['value'] )
+					setattr( property_group, '%s_colortexturename' % self.attr, shorten_name(psi['value']) )
 				else:
 					setattr( property_group, '%s_usecolortexture' % self.attr, False )
 					setattr( property_group, '%s_color' % self.attr, psi['value'] )
@@ -290,7 +293,7 @@ class FloatTextureParameter(TextureParameterBase):
 				setattr( property_group, '%s_multiplyfloat' % self.attr, False )
 				if psi['type'].lower() =='texture':
 					setattr( property_group, '%s_usefloattexture' % self.attr, True )
-					setattr( property_group, '%s_floattexturename' % self.attr, psi['value'] )
+					setattr( property_group, '%s_floattexturename' % self.attr, shorten_name(psi['value']) )
 				else:
 					setattr( property_group, '%s_usefloattexture' % self.attr, False )
 					setattr( property_group, '%s_floatvalue' % self.attr, psi['value'] )
@@ -449,7 +452,7 @@ class FresnelTextureParameter(TextureParameterBase):
 				setattr( property_group, '%s_multiplyfresnel' % self.attr, False )
 				if psi['type'].lower() =='texture':
 					setattr( property_group, '%s_usefresneltexture' % self.attr, True )
-					setattr( property_group, '%s_fresneltexturename' % self.attr, psi['value'] )
+					setattr( property_group, '%s_fresneltexturename' % self.attr, shorten_name(psi['value']) )
 				else:
 					setattr( property_group, '%s_usefresneltexture' % self.attr, False )
 					setattr( property_group, '%s_fresnelvalue' % self.attr, psi['value'] )
@@ -1919,7 +1922,6 @@ class luxrender_tex_imagemap(declarative_property_group):
 		else:
 			fn = self.filename
 		return efutil.filesystem_path(fn)
-
 	
 	def get_paramset(self, scene, texture):
 		params = ParamSet()
@@ -1927,7 +1929,8 @@ class luxrender_tex_imagemap(declarative_property_group):
 		if scene.luxrender_engine.allow_file_embed():
 			from ..util import bencode_file2string
 			params.add_string('filename', os.path.basename(fn))
-			params.add_string('filename_data', bencode_file2string(fn).splitlines() )
+			encoded_data = bencode_file2string(fn)
+			params.add_string('filename_data', encoded_data.splitlines() )
 		else:
 			params.add_string('filename', efutil.path_relative_to_export(fn) )
 		

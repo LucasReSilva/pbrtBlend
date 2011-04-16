@@ -296,8 +296,6 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 			
 			material_context = LM.lux_context
 			
-			
-			
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
 			

@@ -97,6 +97,31 @@ class ParamSetItem(list):
 		self.append(self.type_name)
 		self.append(self.value)
 	
+	def getSize(self, vl=None):
+		sz = 0
+		
+		if vl==None:
+			vl=self.value
+			sz+=len(self.name)+len(self.type)
+		
+		if type(vl) in (list,tuple):
+			s=0
+			for v in vl:
+				s += self.getSize(vl=v)
+			sz += s
+		
+		if type(vl) is str:
+			sz += len(vl)
+		if type(vl) is float:
+			sz += 14
+		if type(vl) is int:
+			if vl==0:
+				sz+=1
+			else:
+				sz += math.floor( math.log10(abs(vl)) ) + 1
+		
+		return sz
+	
 	def list_wrap(self, lst, cnt, type='f'):
 		fcnt = float(cnt)
 		flen = float(len(lst))
