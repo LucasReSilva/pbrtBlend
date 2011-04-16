@@ -396,6 +396,7 @@ class luxrender_film(declarative_property_group):
 		'lbl_outputs',
 		'integratedimaging',
 		['write_png', 'write_exr','write_tga','write_flm'],
+		'restart_flm',
 		['output_alpha', 'write_exr_applyimaging'],
 		'ldr_clamp_method',
 		'outlierrejection_k',
@@ -459,6 +460,12 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_flm',
 			'name': 'FLM',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'restart_flm',
+			'name': 'Restart FLM file',
 			'default': False
 		},
 		{
@@ -582,6 +589,7 @@ class luxrender_film(declarative_property_group):
 		# Output types
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 		params.add_bool('write_resume_flm', self.write_flm)
+		params.add_bool('restart_resume_flm', self.restart_flm)
 		
 		if self.output_alpha:
 			output_channels = 'RGBA'
