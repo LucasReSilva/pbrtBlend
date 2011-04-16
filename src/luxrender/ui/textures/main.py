@@ -56,11 +56,6 @@ class ui_texture_main(luxrender_texture_base):
 	
 	def draw(self, context):
 		row = self.layout.row(align=True)
-		row.menu("LUXRENDER_MT_presets_texture", text=bpy.types.LUXRENDER_MT_presets_texture.bl_label)
-		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMOUT").remove_active = True
-		
-		row = self.layout.row(align=True)
 		row.label("LuxRender type")
 		row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
 		super().draw(context)

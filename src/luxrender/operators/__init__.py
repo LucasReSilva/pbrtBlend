@@ -91,46 +91,6 @@ class LUXRENDER_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy
 		]
 		return super().execute(context)
 
-@LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_texture(LUXRENDER_MT_base):
-	bl_label = "LuxRender Texture Presets"
-	preset_subdir = "luxrender/texture"
-
-@LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_texture_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
-	'''Save the current settings as a preset'''
-	bl_idname = 'luxrender.preset_texture_add'
-	bl_label = 'Add LuxRender Texture settings preset'
-	preset_menu = 'LUXRENDER_MT_presets_texture'
-	preset_values = []
-	preset_subdir = 'luxrender/texture'
-	
-	def execute(self, context):
-		pv = [
-			'bpy.context.texture.luxrender_texture.%s'%v['attr'] for v in bpy.types.luxrender_texture.get_exportable_properties()
-		]
-		
-		# store only the sub-properties of the selected lux texture type
-		lux_type = context.texture.luxrender_texture.type
-		sub_type = getattr(bpy.types, 'luxrender_tex_%s' % lux_type)
-		
-		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset(context.scene, context.texture)
-		if '2DMAPPING' in features:
-			pv.extend([
-				'bpy.context.texture.luxrender_texture.luxrender_tex_mapping.%s'%v['attr'] for v in bpy.types.luxrender_tex_mapping.get_exportable_properties()
-			])
-		if '3DMAPPING' in features:
-			pv.extend([
-				'bpy.context.texture.luxrender_texture.luxrender_tex_transform.%s'%v['attr'] for v in bpy.types.luxrender_tex_transform.get_exportable_properties()
-			])
-		
-		pv.extend([
-			'bpy.context.texture.luxrender_texture.luxrender_tex_%s.%s'%(lux_type, v['attr']) for v in sub_type.get_exportable_properties()
-		])
-		
-		self.preset_values = pv
-		return super().execute(context)
-
 # Volume data handling
 
 @LuxRenderAddon.addon_register_class
