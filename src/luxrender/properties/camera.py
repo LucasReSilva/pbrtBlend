@@ -146,7 +146,6 @@ class luxrender_camera(declarative_property_group):
 			'max': 6400.0,
 			'soft_max': 6400.0
 		},
-		
 		{
 			'type': 'enum',
 			'attr': 'exposure_mode',
@@ -158,7 +157,6 @@ class luxrender_camera(declarative_property_group):
 			],
 			'default': 'normalised'
 		},
-		
 		{
 			'type': 'float',
 			'attr': 'exposure_start',
@@ -207,8 +205,6 @@ class luxrender_camera(declarative_property_group):
 			'max': 360.0,
 			'soft_max': 360.0
 		},
-		
-		
 		{
 			'type': 'bool',
 			'attr': 'usemblur',
@@ -374,11 +370,11 @@ class luxrender_camera(declarative_property_group):
 		if self.use_clipping:
 			params.add_float('hither', ws*cam.clip_start)
 			params.add_float('yon', ws*cam.clip_end)
-
+		
 		if self.usemblur:
 			# update the camera settings with motion blur settings
 			params.add_string('shutterdistribution', self.shutterdistribution)
-
+		
 			if self.cammblur and is_cam_animated:
 				params.add_string('endtransform', 'CameraEndTransform')
 		
@@ -395,14 +391,18 @@ class luxrender_film(declarative_property_group):
 		'displayinterval',
 		'lbl_outputs',
 		'integratedimaging',
-		['write_png', 'write_exr','write_tga','write_flm'],
-		'restart_flm',
-		['output_alpha', 'write_exr_applyimaging'],
+		['write_png', 'write_tga'],
+		['write_exr', 'write_exr_applyimaging'],
+		['write_flm', 'restart_flm'],
+		'output_alpha',
 		'ldr_clamp_method',
 		'outlierrejection_k',
 	]
 	
-	visibility = {}
+	visibility = {
+		'restart_flm': { 'write_flm': True },
+		'write_exr_applyimaging': { 'write_exr': True },
+	}
 	
 	properties = [
 		
@@ -459,13 +459,13 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'write_flm',
-			'name': 'FLM',
+			'name': 'Write FLM',
 			'default': False
 		},
 		{
 			'type': 'bool',
 			'attr': 'restart_flm',
-			'name': 'Restart FLM file',
+			'name': 'Restart FLM',
 			'default': False
 		},
 		{
