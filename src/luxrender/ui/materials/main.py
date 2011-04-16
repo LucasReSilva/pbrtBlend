@@ -29,6 +29,22 @@ import bpy
 from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
 from ...operators.lrmdb_lib import lrmdb_client
+from ...operators.lrmdb import LUXRENDER_OT_lrmdb
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_db(luxrender_material_base):
+	bl_label	= 'LuxRender Materials Database'
+	def draw(self, context):
+		if not LUXRENDER_OT_lrmdb._active:
+			self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
+		else:
+			self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
+			
+			for action in LUXRENDER_OT_lrmdb.actions:
+				if action.callback == None:
+					self.layout.label(text=action.label)
+				else:
+					self.layout.operator('luxrender.lrmdb', text=action.label).invoke_action_id = action.aid
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
@@ -39,9 +55,9 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		row.operator("luxrender.save_material", icon="DISK_DRIVE").filename =\
 			'%s.lbm2' % bpy.path.clean_name(context.material.name)
 		
-		if lrmdb_client.loggedin:
-			row = self.layout.row(align=True)
-			row.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
+		#if lrmdb_client.loggedin:
+		#	row = self.layout.row(align=True)
+		#	row.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
 		
 		row = self.layout.row(align=True)
 		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')

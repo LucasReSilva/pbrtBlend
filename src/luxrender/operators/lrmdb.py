@@ -32,33 +32,18 @@ from ..export import materials as export_materials
 
 from .lrmdb_lib import lrmdb_client
 
-def null_callback(context):
-	pass
-
-class ClickLocation(object):
-	def __init__(self, font_id=0, x=0, y=0, z=0):
-		self.font_id = font_id
-		self.x = x
-		self.y = y
-		self.z = z
-	def hit(self, region, mx, my):
-		hx = self.x if self.x > 0 else region.width + self.x
-		hy = self.y if self.y > 0 else region.height + self.y
-		return ( my>hy and my<(hy+14) ) and ( mx>hx and mx<(hx+200))
-
-class ActionText(object):
-	def __init__(self, label, location=ClickLocation(), callback=null_callback, callback_args=tuple()):
+class LrmdbActionButton(object):
+	action_counter = 0
+	@staticmethod
+	def action_id():
+		LrmdbActionButton.action_counter += 1
+		return LrmdbActionButton.action_counter
+	
+	def __init__(self, label, callback=None, callback_args=tuple()):
+		self.aid = LrmdbActionButton.action_id()
 		self.label = label
-		self.location = location
 		self.callback = callback
 		self.callback_args = callback_args
-	
-	def draw(self, region):
-		x = self.location.x if self.location.x > 0 else region.width + self.location.x
-		y = self.location.y if self.location.y > 0 else region.height + self.location.y
-		z = self.location.z
-		blf.position( self.location.font_id, x, y, z )
-		blf.draw(0, self.label )
 	
 	def execute(self, context):
 		self.callback( context, *self.callback_args )
@@ -124,35 +109,33 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	bl_label  = 'Start LRMDB'
 	
 	_active = False
-	_region_callback = None
 	
 	actions = []
 	
-	def modal(self, context, event):
-		context.area.tag_redraw()
-		
-		if event.type == 'LEFTMOUSE' and event.value == 'RELEASE':
-			for action in self.actions:
-				if action.location.hit(context.region, event.mouse_region_x, event.mouse_region_y):
+	invoke_action_id = bpy.props.IntProperty(default=0)
+	
+	def execute(self, context):
+		try:
+			aid = self.properties.invoke_action_id
+			
+			if aid == -1:
+				# Activate panel
+				LUXRENDER_OT_lrmdb._active = True
+				self.show_category_list(context)
+			if aid == -2:
+				# Deactivate panel
+				LUXRENDER_OT_lrmdb._active = False
+			
+			# Otherwise look for action id in current list
+			for action in LUXRENDER_OT_lrmdb.actions:
+				if action.aid == aid:
 					action.execute(context)
-		
-		if not LUXRENDER_OT_lrmdb._active or event.type == 'ESC':
-			LUXRENDER_OT_lrmdb._active = False
-			context.region.callback_remove(self._region_callback)
-			self._region_callback = None
 			
 			return {'FINISHED'}
-		
-		return {'PASS_THROUGH'}
-	
-	def region_callback(self, context):
-		blf.position(0, 75, 30, 0)
-		blf.size(0, 14, 72)
-		msg = 'LRMDB Material Chooser (ESC to close)'
-		blf.draw(0, msg)
-		
-		for action in self.actions:
-			action.draw(context.region)
+		except Exception as err:
+			self.report({'ERROR'}, '%s' % err)
+			LuxLog('LRMDB ERROR: %s' % err)
+			return {'CANCELLED'}
 	
 	def select_material(self, context, mat_id):
 		#LuxLog('Chose material %s' % mat_id)
@@ -202,28 +185,23 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		if len(ci) > 0:
 			self.reset_actions()
 			
-			self.actions.append(
-				ActionText(
-					'Category "%s"' % cat_name,
-					ClickLocation(0,75,-30,0)
+			LUXRENDER_OT_lrmdb.actions.append(
+				LrmdbActionButton(
+					'Category "%s"' % cat_name
 				)
 			)
 			
-			i=1
 			for mat_id, mat_header in ci.items():
 				if mat_header['published'] == 1 and mat_header['type'] == 'Material':
-					ofsy =  -30 - (i*30)
-					self.actions.append(
-						ActionText(
+					LUXRENDER_OT_lrmdb.actions.append(
+						LrmdbActionButton(
 							mat_header['name'],
-							ClickLocation(0,85,ofsy,0),
 							self.select_material,
 							(mat_id,)
 						)
 					)
-					i+=1
 			
-			self.draw_back_link(i)
+			self.draw_back_link()
 	
 	def show_category_list(self, context):
 		try:
@@ -236,33 +214,28 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			LUXRENDER_OT_lrmdb._active = False
 			return
 		
-		def display_category(ctg, i=0, j=0):
+		def display_category(ctg):
 			for cat_id, cat in ctg.items():
 				if cat['name'] != 'incoming':
-					ofsy =  -30 - (i*30)
-					self.actions.append(
-						ActionText(
-							cat['name'] + ' (%s)' % cat['items'],
-							ClickLocation(0,75+j,ofsy,0),
-							self.show_category_items,
-							(cat_id, cat['name'])
+					if cat['items'] > 0:
+						LUXRENDER_OT_lrmdb.actions.append(
+							LrmdbActionButton(
+								cat['name'] + ' (%s)' % cat['items'],
+								self.show_category_items,
+								(cat_id, cat['name'])
+							)
 						)
-					)
 					if 'subcategories' in cat.keys():
-						i = display_category(cat['subcategories'], i+1, j+10)
-					else:
-						i+=1
-			return i
+						display_category(cat['subcategories'])
 		
 		if len(ct) > 0:
 			self.reset_actions()
-			self.actions.append(
-				ActionText(
+			LUXRENDER_OT_lrmdb.actions.append(
+				LrmdbActionButton(
 					'Categories',
-					ClickLocation(0,75,-30,0)
 				)
 			)
-			display_category(ct, 1)
+			display_category(ct)
 	
 	def begin_login(self, context):
 		bpy.ops.luxrender.lrmdb_login('INVOKE_DEFAULT')
@@ -273,67 +246,35 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 		LUXRENDER_OT_lrmdb._active = False
 	
 	def reset_actions(self):
-		self.actions = []
+		LUXRENDER_OT_lrmdb.actions = []
 		self.draw_loggedin()
 	
 	def draw_loggedin(self):
 		if lrmdb_client.loggedin:
-			self.actions.extend([
-				ActionText(
-					'Logged In:',
-					ClickLocation(0,-150,-30,0),
-					null_callback,
-					tuple()
+			LUXRENDER_OT_lrmdb.actions.extend([
+				LrmdbActionButton(
+					'Logged In as: %s' % lrmdb_client.username,
 				),
-				ActionText(
-					lrmdb_client.username,
-					ClickLocation(0,-150,-60,0),
-					null_callback,
-					tuple()
-				),
-				
-				ActionText(
+				LrmdbActionButton(
 					'Log out',
-					ClickLocation(0,-150,-90,0),
-					self.end_login,
-					tuple()
+					self.end_login
 				)
 			])
 		else:
-			self.actions.extend([
-				ActionText(
+			LUXRENDER_OT_lrmdb.actions.extend([
+				LrmdbActionButton(
 					'Log In',
-					ClickLocation(0,-150,-30,0),
-					self.begin_login,
-					tuple()
+					self.begin_login
 				),
 			])
 	
-	def draw_back_link(self, i):
-		ofsy = -30 - (i*30)
-		self.actions.append(
-			ActionText(
+	def draw_back_link(self):
+		LUXRENDER_OT_lrmdb.actions.append(
+			LrmdbActionButton(
 				'< Back to categories',
-				ClickLocation(0,60,ofsy,0),
-				self.show_category_list,
-				tuple()
+				self.show_category_list
 			)
 		)
-	
-	def execute(self, context):
-		if LUXRENDER_OT_lrmdb._active:
-			LuxLog('LRMDB ERROR: Already running!')
-			return {'CANCELLED'}
-		
-		context.window_manager.modal_handler_add(self)
-		self._region_callback = context.region.callback_add(self.region_callback, (context,), 'POST_PIXEL')
-		context.area.tag_redraw()
-		LUXRENDER_OT_lrmdb._active = True
-		
-		# Fire the first phase: list categories
-		self.show_category_list(context)
-		
-		return {'RUNNING_MODAL'}
 	
 	@classmethod
 	def poll(cls, context):
@@ -393,11 +334,3 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 		except Exception as err:
 			self.report({'ERROR'}, 'Cannot save: %s' % err)
 			return {'CANCELLED'}
-
-
-def lrmdb_operators(self, context):
-	if context.scene.render.engine == LuxRenderAddon.BL_IDNAME:
-		row = self.layout.row(align=True)
-		row.operator("luxrender.lrmdb", text="LuxRender Materials", icon='MATERIAL_DATA')
-#	
-bpy.types.VIEW3D_HT_header.append(lrmdb_operators)
