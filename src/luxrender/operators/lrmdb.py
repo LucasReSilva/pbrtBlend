@@ -193,9 +193,12 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			
 			for mat_id, mat_header in ci.items():
 				if mat_header['published'] == 1 and mat_header['type'] == 'Material':
+					mn = mat_header['name']
+					es = mat_header['estimated_size']
+					dmn = ('%s %s' % (mn, es)) if es!='' else mn
 					LUXRENDER_OT_lrmdb.actions.append(
 						LrmdbActionButton(
-							mat_header['name'],
+							dmn,
 							self.select_material,
 							(mat_id,)
 						)

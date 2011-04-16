@@ -63,7 +63,6 @@ class Custom_Context(object):
 	def _get_lbm2(self, add_comment=False):
 		lbm2_data = self.lbm2_data
 		lbm2_data['objects'] = self.lbm2_objects
-		print('LBM2 DATA SIZE %s' % self._size)
 		lbm2_data['metadata']['estimated_size'] = self._size
 		return lbm2_data
 	
@@ -80,7 +79,6 @@ class Custom_Context(object):
 				output_file,
 				indent=2
 			)
-			print('LBM2 data %s takes %s bytes storage' % (self.context_name, output_file.tell()))
 	
 	def upload(self, lrmdb_client):
 		if lrmdb_client.loggedin:
