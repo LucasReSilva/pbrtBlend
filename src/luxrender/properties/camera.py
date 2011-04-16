@@ -396,6 +396,7 @@ class luxrender_film(declarative_property_group):
 		'lbl_outputs',
 		'integratedimaging',
 		['write_png', 'write_exr','write_tga','write_flm'],
+		'restart_flm',
 		['output_alpha', 'write_exr_applyimaging'],
 		'ldr_clamp_method',
 		'outlierrejection_k',
@@ -459,6 +460,12 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_flm',
 			'name': 'FLM',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'restart_flm',
+			'name': 'Restart FLM file',
 			'default': False
 		},
 		{
@@ -531,16 +538,25 @@ class luxrender_film(declarative_property_group):
 		
 		params = ParamSet()
 		
-		# Set resolution
-		params.add_integer('xresolution', xr)
-		params.add_integer('yresolution', yr)
-		
 		if scene.render.use_border:
-			cropwindow = [
+			(x1,x2,y1,y2) = [
 				scene.render.border_min_x, scene.render.border_max_x,
 				scene.render.border_min_y, scene.render.border_max_y
-			]
-			params.add_float('cropwindow', cropwindow)
+			]			
+			# Set resolution
+			params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
+			params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+		else:
+			# Set resolution
+			params.add_integer('xresolution', xr)
+			params.add_integer('yresolution', yr)
+		
+#		if scene.render.use_border:
+#			cropwindow = [
+#				scene.render.border_min_x, scene.render.border_max_x,
+#				scene.render.border_min_y, scene.render.border_max_y
+#			]
+#			params.add_float('cropwindow', cropwindow)
 		
 		# ColourSpace
 		if self.luxrender_colorspace.preset:
@@ -573,6 +589,7 @@ class luxrender_film(declarative_property_group):
 		# Output types
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 		params.add_bool('write_resume_flm', self.write_flm)
+		params.add_bool('restart_resume_flm', self.restart_flm)
 		
 		if self.output_alpha:
 			output_channels = 'RGBA'
