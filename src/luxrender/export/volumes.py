@@ -53,31 +53,33 @@ class library_loader():
 		'lzo': {
 			'darwin': [
 				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ),
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.dylib'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzo2.dylib'
 			],
 			'win32': [
 				'lzo.dll',
-				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzo.dll'
+				bpy.utils.user_resource('SCRIPTS','addons/luxrender/lzo.dll'),
+				bpy.app.binary_path[:-11] + '2.57/scripts/addons/luxrender/lzo.dll'
 			],
 			'linux2': [
 				'/usr/lib/liblzo2.so',
 				'/usr/lib/liblzo2.so.2',
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.so'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzo2.so'
 			],
 		},
 		'lzma': {
 			'darwin': [
 				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'),
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzmadec.dylib'
 			],
 			'win32': [
 				'lzma.dll',
-				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzma.dll'
+				bpy.utils.user_resource('SCRIPTS','addons/luxrender/lzma.dll'),
+				bpy.app.binary_path[:-11] + '2.57/scripts/addons/luxrender/lzma.dll'
 			],
 			'linux2': [
 				'/usr/lib/liblzma.so',
 				'/usr/lib/liblzma.so.2',
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzma.so'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzma.so'
 			]
 		}
 	}
