@@ -40,6 +40,9 @@ class ui_luxrender_material_db(luxrender_material_base):
 		else:
 			self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
 			
+			if lrmdb_client.loggedin:
+				self.layout.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
+			
 			for action in LUXRENDER_OT_lrmdb.actions:
 				if action.callback == None:
 					self.layout.label(text=action.label)
@@ -54,10 +57,6 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		row.operator("luxrender.load_material", icon="DISK_DRIVE")
 		row.operator("luxrender.save_material", icon="DISK_DRIVE").filename =\
 			'%s.lbm2' % bpy.path.clean_name(context.material.name)
-		
-		#if lrmdb_client.loggedin:
-		#	row = self.layout.row(align=True)
-		#	row.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
 		
 		row = self.layout.row(align=True)
 		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
