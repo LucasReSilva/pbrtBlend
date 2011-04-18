@@ -147,13 +147,12 @@ class lrmdb_client(object):
 		
 		return cls.server
 	
-	@classmethod
-	def check_login(cls):
-		un = cls.server_instance().user.current()
+	def check_login(self):
+		un = self.server_instance().user.current()
 		if un:
-			cls.loggedin = True
-			cls.username = un
+			self.loggedin = True
+			self.username = un
 		else:
-			cls.loggedin = False
-			cls.username = ''
-		return cls.loggedin
+			self.loggedin = False
+			self.username = ''
+		return self.loggedin

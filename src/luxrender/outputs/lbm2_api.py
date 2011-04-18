@@ -80,9 +80,9 @@ class Custom_Context(object):
 				indent=2
 			)
 	
-	def upload(self, lrmdb_client):
-		if lrmdb_client.loggedin:
-			s = lrmdb_client.server_instance()
+	def upload(self, lrmdb_state):
+		if lrmdb_state.loggedin:
+			s = lrmdb_state.server_instance()
 			upload = s.material.submit( self._get_lbm2() )
 			if type(upload) is str:
 				raise Exception(upload)

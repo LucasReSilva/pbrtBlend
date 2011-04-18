@@ -28,22 +28,18 @@ import bpy
 
 from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
-from ...operators.lrmdb_lib import lrmdb_client
-from ...operators.lrmdb import LUXRENDER_OT_lrmdb
+from ...operators.lrmdb import lrmdb_state
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_db(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Database'
 	def draw(self, context):
-		if not LUXRENDER_OT_lrmdb._active:
+		if not lrmdb_state._active:
 			self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
 		else:
 			self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
 			
-			if lrmdb_client.loggedin:
-				self.layout.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
-			
-			for action in LUXRENDER_OT_lrmdb.actions:
+			for action in lrmdb_state.actions:
 				if action.callback == None:
 					self.layout.label(text=action.label)
 				else:

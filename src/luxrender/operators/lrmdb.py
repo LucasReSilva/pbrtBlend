@@ -24,13 +24,165 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy, blf
+import bpy
 
 from .. import LuxRenderAddon
 from ..outputs import LuxLog, LuxManager
 from ..export import materials as export_materials
 
 from .lrmdb_lib import lrmdb_client
+
+class _lrmdb_state(lrmdb_client):
+	
+	def __init__(self):
+		self._active = False
+		self.actions = []
+	
+	def reset_actions(self):
+		self.actions = []
+		
+		if self.loggedin:
+			self.actions.extend([
+				LrmdbActionButton(
+					'Logged In as: %s' % self.username,
+				),
+				LrmdbActionButton(
+					'Upload current material',
+					self.upload
+				),
+				LrmdbActionButton(
+					'Log out',
+					self.end_login
+				)
+			])
+		else:
+			self.actions.extend([
+				LrmdbActionButton(
+					'Log In',
+					self.begin_login
+				),
+			])
+	
+	def upload(self, context):
+		bpy.ops.luxrender.lrmdb_upload()
+	
+	def select_material(self, context, mat_id):
+		#LuxLog('Chose material %s' % mat_id)
+		
+		if not context.active_object:
+			LuxLog('WARNING: Select an object!')
+			return
+		if not context.active_object.active_material:
+			LuxLog('WARNING: Selected object does not have active material')
+			return
+		
+		try:
+			context.area.tag_redraw()
+			s = self.server_instance()
+			md = s.material.get.data(mat_id)
+		except Exception as err:
+			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
+			self._active = False
+			return
+		
+		try:
+			context.active_object.active_material.luxrender_material.load_lbm2(
+				context,
+				md,
+				context.active_object.active_material,
+				context.active_object
+			)
+			
+			for a in context.screen.areas:
+				a.tag_redraw()
+		except KeyError as err:
+			LuxLog('LRMDB ERROR: Bad material data')
+	
+	def show_category_items(self, context, cat_id, cat_name):
+		#LuxLog('Chose category %s' % cat_id)
+		try:
+			context.area.tag_redraw()
+			s = self.server_instance()
+			ci = s.category.item(cat_id)
+		except Exception as err:
+			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
+			self._active = False
+			return
+		
+		#LuxLog(ci)
+		
+		if len(ci) > 0:
+			self.reset_actions()
+			
+			self.actions.append(
+				LrmdbActionButton(
+					'Category "%s"' % cat_name
+				)
+			)
+			
+			for mat_id, mat_header in ci.items():
+				if mat_header['published'] == 1 and mat_header['type'] == 'Material':
+					mn = mat_header['name']
+					es = mat_header['estimated_size']
+					dmn = ('%s %s' % (mn, es)) if es!='' else mn
+					self.actions.append(
+						LrmdbActionButton(
+							dmn,
+							self.select_material,
+							(mat_id,)
+						)
+					)
+			
+			self.actions.append(
+				LrmdbActionButton(
+					'< Back to categories',
+					self.show_category_list
+				)
+			)
+	
+	def show_category_list(self, context):
+		try:
+			context.area.tag_redraw()
+			s = self.server_instance()
+			ct = s.category.tree()
+			self.check_login()
+		except Exception as err:
+			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
+			self._active = False
+			return
+		
+		def display_category(ctg):
+			for cat_id, cat in ctg.items():
+				if cat['name'] != 'incoming':
+					if cat['items'] > 0:
+						self.actions.append(
+							LrmdbActionButton(
+								cat['name'] + ' (%s)' % cat['items'],
+								self.show_category_items,
+								(cat_id, cat['name'])
+							)
+						)
+					if 'subcategories' in cat.keys():
+						display_category(cat['subcategories'])
+		
+		if len(ct) > 0:
+			self.reset_actions()
+			self.actions.append(
+				LrmdbActionButton(
+					'Categories',
+				)
+			)
+			display_category(ct)
+	
+	def begin_login(self, context):
+		bpy.ops.luxrender.lrmdb_login('INVOKE_DEFAULT')
+	
+	def end_login(self, context):
+		bpy.ops.luxrender.lrmdb_logout()
+		self.reset_actions()
+		self._active = False
+
+lrmdb_state = _lrmdb_state()
 
 class LrmdbActionButton(object):
 	action_counter = 0
@@ -61,15 +213,16 @@ class LUXRENDER_OT_lrmdb_login(bpy.types.Operator):
 	def execute(self, context):
 		if self.properties.username and self.properties.password:
 			try:
-				s = lrmdb_client.server_instance()
+				s = lrmdb_state.server_instance()
 				li = s.user.login(self.properties.username, self.properties.password)
 				if not li:
-					lrmdb_client.loggedin = False
-					lrmdb_client.username = ''
+					lrmdb_state.loggedin = False
+					lrmdb_state.username = ''
 					self.report({'ERROR'}, 'Login failure')
 				else:
-					lrmdb_client.loggedin = True
-					lrmdb_client.username = self.properties.username
+					lrmdb_state.loggedin = True
+					lrmdb_state.username = self.properties.username
+					lrmdb_state.show_category_list(context)
 				return {'FINISHED'}
 			except Exception as err:
 				LuxLog('LRMDB ERROR: %s' % err)
@@ -91,11 +244,11 @@ class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
 	
 	def execute(self, context):
 		try:
-			s = lrmdb_client.server_instance()
+			s = lrmdb_state.server_instance()
 			li = s.user.logout()
 			if not li:
 				self.report({'ERROR'}, 'Logout failure')
-			lrmdb_client.reset()
+			lrmdb_state.reset()
 			return {'FINISHED'}
 		except Exception as err:
 			LuxLog('LRMDB ERROR: %s' % err)
@@ -108,10 +261,6 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	bl_idname = 'luxrender.lrmdb'
 	bl_label  = 'Start LRMDB'
 	
-	_active = False
-	
-	actions = []
-	
 	invoke_action_id = bpy.props.IntProperty(default=0)
 	
 	def execute(self, context):
@@ -120,164 +269,23 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 			
 			if aid == -1:
 				# Activate panel
-				LUXRENDER_OT_lrmdb._active = True
-				self.show_category_list(context)
+				lrmdb_state._active = True
+				lrmdb_state.show_category_list(context)
 			if aid == -2:
 				# Deactivate panel
-				LUXRENDER_OT_lrmdb._active = False
+				lrmdb_state._active = False
 			
 			# Otherwise look for action id in current list
-			for action in LUXRENDER_OT_lrmdb.actions:
+			for action in lrmdb_state.actions:
 				if action.aid == aid:
 					action.execute(context)
 			
 			return {'FINISHED'}
+		
 		except Exception as err:
 			self.report({'ERROR'}, '%s' % err)
 			LuxLog('LRMDB ERROR: %s' % err)
 			return {'CANCELLED'}
-	
-	def select_material(self, context, mat_id):
-		#LuxLog('Chose material %s' % mat_id)
-		
-		if not context.active_object:
-			LuxLog('WARNING: Select an object!')
-			return
-		if not context.active_object.active_material:
-			LuxLog('WARNING: Selected object does not have active material')
-			return
-		
-		try:
-			context.area.tag_redraw()
-			s = lrmdb_client.server_instance()
-			md = s.material.get.data(mat_id)
-		except Exception as err:
-			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
-			LUXRENDER_OT_lrmdb._active = False
-			return
-		
-		try:
-			context.active_object.active_material.luxrender_material.load_lbm2(
-				context,
-				md,
-				context.active_object.active_material,
-				context.active_object
-			)
-			
-			for a in context.screen.areas:
-				a.tag_redraw()
-		except KeyError as err:
-			LuxLog('LRMDB ERROR: Bad material data')
-	
-	def show_category_items(self, context, cat_id, cat_name):
-		#LuxLog('Chose category %s' % cat_id)
-		try:
-			context.area.tag_redraw()
-			s = lrmdb_client.server_instance()
-			ci = s.category.item(cat_id)
-		except Exception as err:
-			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
-			LUXRENDER_OT_lrmdb._active = False
-			return
-		
-		#LuxLog(ci)
-		
-		if len(ci) > 0:
-			self.reset_actions()
-			
-			LUXRENDER_OT_lrmdb.actions.append(
-				LrmdbActionButton(
-					'Category "%s"' % cat_name
-				)
-			)
-			
-			for mat_id, mat_header in ci.items():
-				if mat_header['published'] == 1 and mat_header['type'] == 'Material':
-					mn = mat_header['name']
-					es = mat_header['estimated_size']
-					dmn = ('%s %s' % (mn, es)) if es!='' else mn
-					LUXRENDER_OT_lrmdb.actions.append(
-						LrmdbActionButton(
-							dmn,
-							self.select_material,
-							(mat_id,)
-						)
-					)
-			
-			self.draw_back_link()
-	
-	def show_category_list(self, context):
-		try:
-			context.area.tag_redraw()
-			s = lrmdb_client.server_instance()
-			ct = s.category.tree()
-			lrmdb_client.check_login()
-		except Exception as err:
-			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
-			LUXRENDER_OT_lrmdb._active = False
-			return
-		
-		def display_category(ctg):
-			for cat_id, cat in ctg.items():
-				if cat['name'] != 'incoming':
-					if cat['items'] > 0:
-						LUXRENDER_OT_lrmdb.actions.append(
-							LrmdbActionButton(
-								cat['name'] + ' (%s)' % cat['items'],
-								self.show_category_items,
-								(cat_id, cat['name'])
-							)
-						)
-					if 'subcategories' in cat.keys():
-						display_category(cat['subcategories'])
-		
-		if len(ct) > 0:
-			self.reset_actions()
-			LUXRENDER_OT_lrmdb.actions.append(
-				LrmdbActionButton(
-					'Categories',
-				)
-			)
-			display_category(ct)
-	
-	def begin_login(self, context):
-		bpy.ops.luxrender.lrmdb_login('INVOKE_DEFAULT')
-	
-	def end_login(self, context):
-		bpy.ops.luxrender.lrmdb_logout()
-		self.reset_actions()
-		LUXRENDER_OT_lrmdb._active = False
-	
-	def reset_actions(self):
-		LUXRENDER_OT_lrmdb.actions = []
-		self.draw_loggedin()
-	
-	def draw_loggedin(self):
-		if lrmdb_client.loggedin:
-			LUXRENDER_OT_lrmdb.actions.extend([
-				LrmdbActionButton(
-					'Logged In as: %s' % lrmdb_client.username,
-				),
-				LrmdbActionButton(
-					'Log out',
-					self.end_login
-				)
-			])
-		else:
-			LUXRENDER_OT_lrmdb.actions.extend([
-				LrmdbActionButton(
-					'Log In',
-					self.begin_login
-				),
-			])
-	
-	def draw_back_link(self):
-		LUXRENDER_OT_lrmdb.actions.append(
-			LrmdbActionButton(
-				'< Back to categories',
-				self.show_category_list
-			)
-		)
 	
 	@classmethod
 	def poll(cls, context):
@@ -318,7 +326,7 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 				exterior=luxrender_mat.Exterior_volume
 			)
 			
-			result = material_context.upload(lrmdb_client)
+			result = material_context.upload(lrmdb_state)
 			if result:
 				self.report({'INFO'},'Upload successful!')
 			else:
