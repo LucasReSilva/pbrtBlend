@@ -87,6 +87,8 @@ class GeometryExporter(object):
 		self.ExportedObjects = ExportCache('ExportedObjects')
 		self.ExportedPLYs = ExportCache('ExportedPLYs')
 		
+		self.objects_used_as_duplis = set()
+		
 		self.have_emitting_object = False
 		self.exporting_duplis = False
 		
@@ -552,8 +554,8 @@ class GeometryExporter(object):
 		# If the mesh is only used once, instancing is a waste of memory
 		# ERROR: this can break dupli export if the dupli'd mesh is exported
 		# before the duplicator
-		#if (not self.exporting_duplis) and obj.data.users == 1:
-		#	return False
+		if (not ((obj.parent and obj.parent.is_duplicator) or obj in self.objects_used_as_duplis)) and obj.data.users == 1:
+			return False
 		
 		# Only allow instancing for duplis and particles in non-hybrid mode, or
 		# for normal objects if the object has certain modifiers applied against
@@ -882,6 +884,7 @@ class GeometryExporter(object):
 				if not dupli_ob.object.is_visible(self.visibility_scene) or dupli_ob.object.hide_render:
 					continue
 				
+				self.objects_used_as_duplis.add(dupli_ob.object)
 				duplis.append(
 					(
 						dupli_ob.object,
@@ -950,6 +953,8 @@ class GeometryExporter(object):
 		tot_objects = len(geometry_scene.objects)
 		progress_thread.start(tot_objects)
 		
+		export_originals = {}
+		
 		for obj in geometry_scene.objects:
 			progress_thread.exported_objects += 1
 			
@@ -962,12 +967,12 @@ class GeometryExporter(object):
 				
 				if obj.parent and obj.parent.is_duplicator:
 					raise UnexportableObjectException(' -> parent is duplicator')
-
+				
 				for mod in obj.modifiers:
 					if mod.name == 'Smoke':
 						if mod.smoke_type == 'DOMAIN':
 							raise UnexportableObjectException(' -> Smoke domain')
-
+				
 				number_psystems = len(obj.particle_systems)
 				
 				if obj.is_duplicator and number_psystems < 1:
@@ -978,20 +983,29 @@ class GeometryExporter(object):
 				
 				# Some dupli types should hide the original
 				if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
-					export_original_object = False
+					export_originals[obj] = False
 				else:
-					export_original_object = True
+					export_originals[obj] = True
 				
 				if number_psystems > 0:
-					export_original_object = False
+					export_originals[obj] = False
 					if OBJECT_ANALYSIS: print(' -> has %i particle systems' % number_psystems)
 					for psys in obj.particle_systems:
-						export_original_object = export_original_object or psys.settings.use_render_emitter
+						export_originals[obj] = export_originals[obj] or psys.settings.use_render_emitter
 						if psys.settings.render_type in self.valid_particles_callbacks:
 							self.callbacks['particles'][psys.settings.render_type](obj, particle_system=psys)
 						elif OBJECT_ANALYSIS: print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
+			
+			except UnexportableObjectException as err:
+				if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
+		
+		export_originals_keys = export_originals.keys()
+		
+		for obj in geometry_scene.objects:
+			try:
+				if obj not in export_originals_keys: continue
 				
-				if not export_original_object:
+				if not export_originals[obj]:
 					raise UnexportableObjectException('export_original_object=False')
 				
 				if not obj.type in self.valid_objects_callbacks:
@@ -1004,5 +1018,7 @@ class GeometryExporter(object):
 		
 		progress_thread.stop()
 		progress_thread.join()
+		
+		self.objects_used_as_duplis.clear()
 		
 		return self.have_emitting_object
