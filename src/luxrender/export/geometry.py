@@ -671,7 +671,7 @@ class GeometryExporter(object):
 				if object_is_emitter:
 					if not self.visibility_scene.luxrender_engine.ignore_lightgroups:
 						self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
-					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output() )
+					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
 				
 				int_v, ext_v = get_material_volume_defs(ob_mat)
 				if int_v != '':

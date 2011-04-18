@@ -1948,7 +1948,7 @@ class luxrender_emission(declarative_property_group):
 	
 	controls = [
 		#'use_emission', # drawn in header
-		'lightgroup',
+		'lightgroup', 'iesname'
 	] + \
 	TC_L.controls + \
 	[
@@ -1958,14 +1958,15 @@ class luxrender_emission(declarative_property_group):
 	]
 	
 	visibility = {
-		'lightgroup': 			{ 'use_emission': True },
-		'L_colorlabel': 		{ 'use_emission': True },
-		'L_color': 				{ 'use_emission': True },
+		'lightgroup':			{ 'use_emission': True },
+		'iesname':				{ 'use_emission': True },
+		'L_colorlabel':			{ 'use_emission': True },
+		'L_color':				{ 'use_emission': True },
 		'L_usecolortexture':	{ 'use_emission': True },
 		'L_colortexture':		{ 'use_emission': True, 'L_usecolortexture': True },
 		'L_multiplycolor':		{ 'use_emission': True, 'L_usecolortexture': True },
-		'gain': 				{ 'use_emission': True },
-		'power': 				{ 'use_emission': True },
+		'gain':					{ 'use_emission': True },
+		'power':				{ 'use_emission': True },
 		'efficacy': 			{ 'use_emission': True },
 	}
 	
@@ -1983,6 +1984,13 @@ class luxrender_emission(declarative_property_group):
 			'name': 'Light Group',
 			'default': 'default',
 			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'iesname',
+			'name': 'IES Data',
+			'description': 'Use IES data for this light\'s distribution'
 		},
 		{
 			'type': 'float',
@@ -2021,10 +2029,16 @@ class luxrender_emission(declarative_property_group):
 	] + \
 	TC_L.properties
 	
-	def api_output(self):
+	def api_output(self, obj):
 		arealightsource_params = ParamSet() \
 				.add_float('gain', self.gain) \
 				.add_float('power', self.power) \
 				.add_float('efficacy', self.efficacy)
 		arealightsource_params.update( TC_L.get_paramset(self) )
+		if self.iesname != '':
+			if obj.library is not None:
+				iespath = bpy.path.abspath(self.iesname, obj.library.filepath)
+			else:
+				iespath = self.iesname
+			arealightsource_params.add_string('iesname', efutil.path_relative_to_export(iespath))
 		return 'area', arealightsource_params
