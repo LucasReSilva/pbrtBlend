@@ -44,6 +44,9 @@ class bEncoder(object):
 	Encode binary files to text using base64(zlib.compress(file))
 	"""
 	
+	def __init__(self):
+		self.last_encode_size = 0
+	
 	def Encode_File2File(self, fSrc_name, fDes_name):
 		with open(fSrc_name, 'rb') as fSrc:
 			with open(fDes_name, 'w') as fDes:
@@ -84,14 +87,14 @@ class bEncoder(object):
 			).decode()
 		)
 		
-		outlen = fDes.tell()
+		self.last_encode_size = fDes.tell()
 		elapsed = time.time() - start_time
 		print('bEncode %s : %d bytes -> %d bytes -> %d bytes: %0.2f%% : %0.2f sec : %0.2f kb/sec' % (
 			input_filename, 
 			filelen,
 			len(deflated),
-			outlen,
-			100*outlen/filelen,
+			self.last_encode_size,
+			100*self.last_encode_size/filelen,
 			elapsed,
 			filelen / elapsed / 1024)
 		)
@@ -160,6 +163,11 @@ def bencode_file2file(in_filename, out_filename):
 def bencode_file2string(in_filename):
 	be = bEncoder()
 	return be.Encode_File2String(in_filename)
+def bencode_file2string_with_size(in_filename):
+	be = bEncoder()
+	en = be.Encode_File2String(in_filename)
+	sz = be.last_encode_size
+	return en, sz
 
 def bdecode_file2file(in_filename, out_filename):
 	be = bDecoder()

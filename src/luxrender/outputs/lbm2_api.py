@@ -24,9 +24,9 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import collections, json, sys
+import collections, json
 
-from .pure_api import LUXRENDER_VERSION
+from ..__init__ import LuxRenderAddon
 
 class Custom_Context(object):
 	'''
@@ -42,7 +42,7 @@ class Custom_Context(object):
 	_default_data = {
 		'name': '',
 		'category_id': -1,
-		'version': LUXRENDER_VERSION,
+		'version': LuxRenderAddon.BL_VERSION,
 		'objects': [],
 		'metadata': {}
 	}
@@ -52,7 +52,7 @@ class Custom_Context(object):
 		self.lbm2_data = Custom_Context._default_data
 		self.lbm2_objects = []
 		self.lbm2_metadata = {}
-		self._size = 0
+		self._size = 244	# Rough overhead for object definition
 	
 	def set_material_name(self, name):
 		self.lbm2_data['name'] = name
@@ -63,7 +63,9 @@ class Custom_Context(object):
 	def _get_lbm2(self, add_comment=False):
 		lbm2_data = self.lbm2_data
 		lbm2_data['objects'] = self.lbm2_objects
-		lbm2_data['metadata']['estimated_size'] = self._size
+		# 1.22 mostly corrects for other data not yet accounted for ;)
+		#print('lbm2 estimated_size %s' % self._size*1.22)
+		lbm2_data['metadata']['estimated_size'] = round(self._size * 1.22)
 		return lbm2_data
 	
 	def write(self, filename):
@@ -115,15 +117,16 @@ class Custom_Context(object):
 			'paramset': [],
 		}
 		
+		# Size really is just an estimate, and is most accurate for large
+		# amounts of data
+		self._size += 120				# Rough overhead per object entry
+		self._size += params.getSize()	# + the estimated size of encoded data
 		for p in params:
 			obj['paramset'].append({
 				'type': p.type,
 				'name': p.name,
 				'value': p.value
 			})
-			# Size really is just an estimate, and is most accurate for large
-			# amounts of data
-			self._size += round(p.getSize()*1.24) + 40
 		
 		self.lbm2_objects.append(obj)
 	

@@ -102,13 +102,11 @@ class ParamSetItem(list):
 		
 		if vl==None:
 			vl=self.value
-			sz+=len(self.name)+len(self.type)
+			sz+=100	# Rough overhead for encoded paramset item
 		
 		if type(vl) in (list,tuple):
-			s=0
 			for v in vl:
-				s += self.getSize(vl=v)
-			sz += s
+				sz += self.getSize(vl=v)
 		
 		if type(vl) is str:
 			sz += len(vl)
@@ -184,7 +182,22 @@ class ParamSetItem(list):
 
 class ParamSet(list):
 	
-	names = []
+	def __init__(self):
+		self.names = []
+		self.item_sizes = {}
+	
+	def increase_size(self, param_name, sz):
+		self.item_sizes[param_name] = sz
+	
+	def getSize(self):
+		sz = 0
+		item_sizes_keys = self.item_sizes.keys()
+		for p in self:
+			if p.name in item_sizes_keys:
+				sz += self.item_sizes[p.name]
+			else:
+				sz += p.getSize()
+		return sz
 	
 	def update(self, other):
 		for p in other:

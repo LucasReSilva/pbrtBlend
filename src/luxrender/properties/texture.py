@@ -1927,9 +1927,10 @@ class luxrender_tex_imagemap(declarative_property_group):
 		params = ParamSet()
 		fn = self.get_filename(texture)
 		if scene.luxrender_engine.allow_file_embed():
-			from ..util import bencode_file2string
+			from ..util import bencode_file2string_with_size
 			params.add_string('filename', os.path.basename(fn))
-			encoded_data = bencode_file2string(fn)
+			encoded_data, encoded_size = bencode_file2string_with_size(fn)
+			params.increase_size('filename_data', encoded_size)
 			params.add_string('filename_data', encoded_data.splitlines() )
 		else:
 			params.add_string('filename', efutil.path_relative_to_export(fn) )
