@@ -26,7 +26,7 @@
 #
 import collections, json
 
-from ..__init__ import LuxRenderAddon
+from .. import LuxRenderAddon
 
 class Custom_Context(object):
 	'''
