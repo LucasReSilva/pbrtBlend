@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import hashlib, os
+import hashlib
 
 import bpy
 

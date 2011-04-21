@@ -26,8 +26,8 @@
 #
 # System Libs
 from __future__ import division
-from ctypes import cdll, c_uint, c_float, cast, POINTER, byref, sizeof, c_long
-import errno, os, struct, sys
+from ctypes import cdll, c_uint, c_float, cast, POINTER, byref, sizeof
+import os, struct, sys
 
 # Blender Libs
 import bpy
@@ -211,7 +211,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 				if (data_type == 3) or (data_type == 4):
 					cell_count = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 					#print("Cell count: {0:1d}".format(cell_count))
-					usr_data_type = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+					struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 					
 					# Shadow values
 					compressed = struct.unpack("1B", cachefile.read(1))[0]
@@ -368,7 +368,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 							p_dens = cast(uncomp_stream, POINTER(c_float))
 							
 							#call lzo decompressor
-							lReturn = lzodll.lzo1x_decompress(stream,stream_size,p_dens,byref(outlen), None)
+							lzodll.lzo1x_decompress(stream,stream_size,p_dens,byref(outlen), None)
 							
 							for i in range(cell_count):
 								density.append(p_dens[i])
@@ -385,7 +385,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 							outlen = c_uint(cell_count*SZ_FLOAT)
 							
 							#call lzma decompressor
-							lReturn = lzmadll.LzmaUncompress(p_dens, byref(outlen), stream, byref(c_uint(stream_size)), props, props_size)
+							lzmadll.LzmaUncompress(p_dens, byref(outlen), stream, byref(c_uint(stream_size)), props, props_size)
 							
 							for i in range(cell_count):
 								density.append(p_dens[i])

@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ... import LuxRenderAddon
 from ...ui.textures import luxrender_texture_base
 

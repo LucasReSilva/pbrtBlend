@@ -399,7 +399,7 @@ def material_converter(report, scene, blender_mat):
 				tex = Kd_stack[0][0]
 				dcf = Kd_stack[0][1]
 				color = Kd_stack[0][2]
-				variant, paramset = tex.luxrender_texture.get_paramset(scene, tex)
+				variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
 				if variant == 'color':
 					# assign the texture directly
 					luxmat.Kd_usecolortexture = True
@@ -559,7 +559,7 @@ def material_converter(report, scene, blender_mat):
 		if luxrender_mat.type in ('glossy'):
 			if len(Ks_stack) == 1:
 				tex = Ks_stack[0][0]
-				variant, paramset = tex.luxrender_texture.get_paramset(scene, tex)
+				variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
 				if variant == 'color':
 					# assign the texture directly
 					luxmat.Ks_usecolortexture = True
@@ -579,7 +579,7 @@ def material_converter(report, scene, blender_mat):
 		
 		if bump_tex != None:
 			tex = bump_tex[0]
-			variant, paramset = tex.luxrender_texture.get_paramset(scene, tex)
+			variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
 			if variant == 'float':
 				luxrender_mat.bumpmap_usefloattexture = True
 				luxrender_mat.bumpmap_floattexturename = tex.name

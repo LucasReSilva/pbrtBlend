@@ -215,13 +215,13 @@ class GeometryExporter(object):
 						mesh_name = '%s_%04d_m%03d' % (obj.data.name, ply_serial, i)
 						ply_filename = '%s.ply' % bpy.path.clean_name(mesh_name)
 						ply_path = '/'.join([sc_fr, ply_filename])
-						return mesh_name, ply_filename, ply_path
+						return mesh_name, ply_path
 					
-					mesh_name, ply_filename, ply_path = make_plyfilename()
+					mesh_name, ply_path = make_plyfilename()
 					
 					# Ensure that all PLY files have unique names
 					while self.ExportedPLYs.have(ply_path):
-						mesh_name, ply_filename, ply_path = make_plyfilename()
+						mesh_name, ply_path = make_plyfilename()
 					
 					self.ExportedPLYs.add(ply_path, None)
 					

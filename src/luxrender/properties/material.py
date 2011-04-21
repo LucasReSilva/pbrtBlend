@@ -39,7 +39,6 @@ from ..export.materials import (
 	MaterialCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
-from ..outputs.pure_api import LUXRENDER_VERSION
 from ..util import dict_merge
 
 def MaterialParameter(attr, name, property_group):
