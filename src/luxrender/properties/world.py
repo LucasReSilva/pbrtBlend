@@ -428,9 +428,7 @@ class luxrender_volumes(declarative_property_group):
 			'ptype': luxrender_volume_data,
 			'name': 'volumes',
 			'attr': 'volumes',
-			'items': [
-				
-			]
+			'items': []
 		},
 		{
 			'type': 'int',
@@ -457,6 +455,84 @@ class luxrender_volumes(declarative_property_group):
 			'type': 'operator',
 			'attr': 'op_vol_rem',
 			'operator': 'luxrender.volume_remove',
+			'text': 'Remove',
+			'icon': 'ZOOMOUT',
+		},
+	]
+
+@LuxRenderAddon.addon_register_class
+class luxrender_lightgroup_data(declarative_property_group):
+	'''
+	Storage class for LuxRender light groups. The
+	luxrender_lightgroups object will store 1 or more of
+	these in its CollectionProperty 'lightgroups'.
+	'''
+	
+	ef_attach_to = []	# not attached
+	
+	controls = [
+		'gain'
+	]
+	properties = [
+		{
+			'type': 'float',
+			'attr': 'gain',
+			'name': 'Gain',
+			'description': 'Overall gain for this light group',
+			'min': 0.0,
+			'soft_min': 0.0,
+			'default': 1.0
+		}
+	]
+
+@LuxRenderAddon.addon_register_class
+class luxrender_lightgroups(declarative_property_group):
+	'''
+	Storage class for LuxRender Light Groups.
+	'''
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
+		'lightgroups_select',
+		['op_lg_add', 'op_lg_rem']
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'type': 'collection',
+			'ptype': luxrender_lightgroup_data,
+			'name': 'lightgroups',
+			'attr': 'lightgroups',
+			'items': []
+		},
+		{
+			'type': 'int',
+			'name': 'lightgroups_index',
+			'attr': 'lightgroups_index',
+		},
+		{
+			'type': 'template_list',
+			'name': 'lightgroups_select',
+			'attr': 'lightgroups_select',
+			'trg': lambda sc,c: c.luxrender_lightgroups,
+			'trg_attr': 'lightgroups_index',
+			'src': lambda sc,c: c.luxrender_lightgroups,
+			'src_attr': 'lightgroups',
+		},
+		{
+			'type': 'operator',
+			'attr': 'op_lg_add',
+			'operator': 'luxrender.lightgroup_add',
+			'text': 'Add',
+			'icon': 'ZOOMIN',
+		},
+		{
+			'type': 'operator',
+			'attr': 'op_lg_rem',
+			'operator': 'luxrender.lightgroup_remove',
 			'text': 'Remove',
 			'icon': 'ZOOMOUT',
 		},

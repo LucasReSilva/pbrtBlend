@@ -1929,6 +1929,26 @@ class luxrender_mat_velvet(declarative_property_group):
 		
 		TC_Kd.load_paramset(self, ps)
 
+def EmissionLightGroupParameter():
+	return [
+		{
+			'attr': 'lightgroup',
+			'type': 'string',
+			'name': 'lightgroup',
+			'description': 'lightgroup; leave blank to use default',
+			'save_in_preset': True
+		},
+		{
+			'type': 'prop_search',
+			'attr': 'lightgroup_chooser',
+			'src': lambda s,c: s.scene.luxrender_lightgroups,
+			'src_attr': 'lightgroups',
+			'trg': lambda s,c: c.luxrender_emission,
+			'trg_attr': 'lightgroup',
+			'name': 'Light Group'
+		},
+	]
+
 class EmissionColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other ColorTextureParameters
@@ -1946,7 +1966,8 @@ class luxrender_emission(declarative_property_group):
 	
 	controls = [
 		#'use_emission', # drawn in header
-		'lightgroup', 'iesname'
+		'lightgroup_chooser',
+		'iesname'
 	] + \
 	TC_L.controls + \
 	[
@@ -1956,7 +1977,7 @@ class luxrender_emission(declarative_property_group):
 	]
 	
 	visibility = {
-		'lightgroup':			{ 'use_emission': True },
+		'lightgroup_chooser':	{ 'use_emission': True },
 		'iesname':				{ 'use_emission': True },
 		'L_colorlabel':			{ 'use_emission': True },
 		'L_color':				{ 'use_emission': True },
@@ -2025,11 +2046,16 @@ class luxrender_emission(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-	TC_L.properties
+	TC_L.properties + \
+	EmissionLightGroupParameter()
 	
 	def api_output(self, obj):
+		lg_gain = 1.0
+		if self.lightgroup in LuxManager.CurrentScene.luxrender_lightgroups.lightgroups:
+			lg_gain = LuxManager.CurrentScene.luxrender_lightgroups.lightgroups[self.lightgroup].gain
+		
 		arealightsource_params = ParamSet() \
-				.add_float('gain', self.gain) \
+				.add_float('gain', self.gain*lg_gain) \
 				.add_float('power', self.power) \
 				.add_float('efficacy', self.efficacy)
 		arealightsource_params.update( TC_L.get_paramset(self) )

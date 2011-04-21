@@ -55,6 +55,26 @@ def LampVolumeParameter(attr, name):
 		},
 	]
 
+def LampLightGroupParameter():
+	return [
+		{
+			'attr': 'lightgroup',
+			'type': 'string',
+			'name': 'lightgroup',
+			'description': 'lightgroup; leave blank to use default',
+			'save_in_preset': True
+		},
+		{
+			'type': 'prop_search',
+			'attr': 'lightgroup_chooser',
+			'src': lambda s,c: s.scene.luxrender_lightgroups,
+			'src_attr': 'lightgroups',
+			'trg': lambda s,c: c.luxrender_lamp,
+			'trg_attr': 'lightgroup',
+			'name': 'Light Group'
+		},
+	]
+
 class LampColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):
 		return lambda s,c: getattr(c, 'luxrender_lamp_%s'%s.lamp.type.lower())
@@ -80,17 +100,19 @@ class luxrender_lamp(declarative_property_group):
 	ef_attach_to = ['Lamp']
 	
 	controls = [
-		'importance', 'lightgroup', 'Exterior'
+		'importance',
+		'lightgroup_chooser',
+		'Exterior'
 	]
 	
 	properties = [
-		{
-			'type': 'string',
-			'attr': 'lightgroup',
-			'name': 'Light Group',
-			'description': 'Name of group to put this light in',
-			'default': 'default'
-		},
+#		{
+#			'type': 'string',
+#			'attr': 'lightgroup',
+#			'name': 'Light Group',
+#			'description': 'Name of group to put this light in',
+#			'default': 'default'
+#		},
 		{
 			'type': 'float',
 			'attr': 'importance',
@@ -110,7 +132,8 @@ class luxrender_lamp(declarative_property_group):
 			'description': 'Use IES data for this light\'s distribution'
 		},
 	] + \
-		LampVolumeParameter('Exterior', 'Exterior')
+		LampVolumeParameter('Exterior', 'Exterior') + \
+		LampLightGroupParameter()
 	
 	def get_paramset(self):
 		params = ParamSet()

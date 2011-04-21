@@ -95,10 +95,14 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		light_group = 'default'
 	else:
 		light_group = light.luxrender_lamp.lightgroup
-		
+	
+	lg_gain = 1.0
+	if light_group in scene.luxrender_lightgroups.lightgroups:
+		lg_gain = scene.luxrender_lightgroups.lightgroups[light_group].gain
+	
 	# Params common to all light types
 	light_params = ParamSet() \
-		.add_float('gain', light.energy) \
+		.add_float('gain', light.energy*lg_gain) \
 		.add_float('importance', light.luxrender_lamp.importance)
 	
 	ies_data = ParamSet()

@@ -103,3 +103,41 @@ class volumes(world_panel):
 					)
 		else:
 			self.layout.label('No active World available!')
+
+@LuxRenderAddon.addon_register_class
+class lightgroups(world_panel):
+	'''
+	Light Groups Settings
+	'''
+	
+	bl_label = 'LuxRender Light Groups'
+	
+	display_property_groups = [
+		( ('scene',), 'luxrender_lightgroups' )
+	]
+	
+	# overridden in order to draw the selected luxrender_lightgroup_data property group
+	def draw(self, context):
+		super().draw(context)
+		
+		if context.world:
+			
+			if len(context.scene.luxrender_lightgroups.lightgroups) > 0:
+				current_lg_ind = context.scene.luxrender_lightgroups.lightgroups_index
+				current_lg = context.scene.luxrender_lightgroups.lightgroups[current_lg_ind]
+				# 'name' is not a member of current_lp.properties,
+				# so we draw it explicitly
+				self.layout.prop(
+					current_lg, 'name'
+				)
+				# Here we draw the currently selected luxrender_volumes_data property group
+				for control in current_lg.controls:
+					self.draw_column(
+						control,
+						self.layout,
+						current_lg,
+						context,
+						property_group = current_lg
+					)
+		else:
+			self.layout.label('No active World available!')

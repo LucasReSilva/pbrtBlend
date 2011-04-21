@@ -145,6 +145,35 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 		w.volumes_index = len(w.volumes)-1
 		return {'FINISHED'}
 
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_lightgroup_add(bpy.types.Operator):
+	'''Add a new light group definition to the scene'''
+	
+	bl_idname = "luxrender.lightgroup_add"
+	bl_label = "Add LuxRender Light Group"
+	
+	new_lightgroup_name = bpy.props.StringProperty(default='New Light Group')
+	
+	def invoke(self, context, event):
+		lg = context.scene.luxrender_lightgroups.lightgroups
+		lg.add()
+		new_lg = lg[len(lg)-1]
+		new_lg.name = self.properties.new_lightgroup_name
+		return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
+	'''Remove the selected lightgroup definition'''
+	
+	bl_idname = "luxrender.lightgroup_remove"
+	bl_label = "Remove LuxRender Light Group"
+	
+	def invoke(self, context, event):
+		w = context.scene.luxrender_lightgroups
+		w.lightgroups.remove( w.lightgroups_index )
+		w.lightgroups_index = len(w.lightgroups)-1
+		return {'FINISHED'}
+
 # Export process
 
 @LuxRenderAddon.addon_register_class
