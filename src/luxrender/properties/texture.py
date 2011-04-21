@@ -33,7 +33,7 @@ from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from .. import LuxRenderAddon
-from ..export import ParamSet, get_worldscale
+from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs import LuxManager
 from ..util import dict_merge, bdecode_string2file
@@ -1916,24 +1916,12 @@ class luxrender_tex_imagemap(declarative_property_group):
 		},
 	]
 	
-	def get_filename(self, texture):
-		if texture.library is not None:
-			fn = bpy.path.abspath(self.filename, texture.library.filepath)
-		else:
-			fn = self.filename
-		return efutil.filesystem_path(fn)
-	
 	def get_paramset(self, scene, texture):
 		params = ParamSet()
-		fn = self.get_filename(texture)
-		if scene.luxrender_engine.allow_file_embed():
-			from ..util import bencode_file2string_with_size
-			params.add_string('filename', os.path.basename(fn))
-			encoded_data, encoded_size = bencode_file2string_with_size(fn)
-			params.increase_size('filename_data', encoded_size)
-			params.add_string('filename_data', encoded_data.splitlines() )
-		else:
-			params.add_string('filename', efutil.path_relative_to_export(fn) )
+		
+		# This function resolves relative paths (even in linked library blends)
+		# and optionally encodes/embeds the data if the setting is enabled
+		process_filepath_data(scene, texture, self.filename, params, 'filename')
 		
 		params.add_integer('discardmipmaps', self.discardmipmaps) \
 			  .add_string('filtertype', self.filtertype) \
@@ -2630,11 +2618,12 @@ class tabulatedbase(declarative_property_group):
 	]
 	
 	def get_paramset(self, scene, texture):
-		if texture.library is not None:
-			fn = bpy.path.abspath(self.filename, texture.library.filepath)
-		else:
-			fn = self.filename
-		td = ParamSet().add_string('filename', efutil.path_relative_to_export(fn) )
+		td = ParamSet()
+		
+		# This function resolves relative paths (even in linked library blends)
+		# and optionally encodes/embeds the data if the setting is enabled
+		process_filepath_data(scene, texture, self.filename, td, 'filename')
+		
 		return set(), td
 	
 	def load_paramset(self, variant, ps):

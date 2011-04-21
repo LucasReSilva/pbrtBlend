@@ -24,13 +24,14 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import collections, math
+import collections, math, os
 
 import bpy, mathutils
 
 from extensions_framework import util as efutil
 
 from ..outputs import LuxManager, LuxLog
+from ..util import bencode_file2string_with_size
 
 class ExportProgressThread(efutil.TimerThread):
 	message = '%i%%'
@@ -326,3 +327,17 @@ def matrix_to_list(matrix, apply_worldscale=False):
 			matrix[3][0], matrix[3][1], matrix[3][2], matrix[3][3] ]
 	
 	return [float(i) for i in l]
+
+def process_filepath_data(scene, obj, file_path, paramset, parameter_name):
+	file_basename		= os.path.basename(file_path)
+	library_filepath	= obj.library.filepath if obj.library else ''
+	file_library_path	= efutil.filesystem_path(bpy.path.abspath(file_path, library_filepath))
+	file_relative		= efutil.path_relative_to_export(file_library_path) if obj.library else efutil.path_relative_to_export(file_path)
+	
+	if scene.luxrender_engine.allow_file_embed():
+		paramset.add_string(parameter_name, file_basename)
+		encoded_data, encoded_size = bencode_file2string_with_size(file_relative)
+		paramset.increase_size('%s_data' % parameter_name, encoded_size)
+		paramset.add_string('%s_data' % parameter_name, encoded_data.splitlines() )
+	else:
+		paramset.add_string(parameter_name, file_relative)

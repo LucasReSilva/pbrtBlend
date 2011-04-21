@@ -34,7 +34,7 @@ from .. import LuxRenderAddon
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture, shorten_name
 )
-from ..export import ParamSet
+from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
 	MaterialCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
 )
@@ -1619,11 +1619,10 @@ class luxrender_mat_metal(declarative_property_group):
 		metal_params.update( TF_vroughness.get_paramset(self) )
 		
 		if self.name == 'nk':	# use an NK data file
-			if material.library is not None:
-				nk_path = bpy.path.abspath(self.filename, material.library.filepath)
-			else:
-				nk_path = self.filename
-			metal_params.add_string('filename', efutil.path_relative_to_export(nk_path) )
+			
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(LuxManager.CurrentScene, material, self.filename, metal_params, 'filename')
 		else:					# use a preset name
 			metal_params.add_string('name', self.name)
 		
@@ -2036,9 +2035,8 @@ class luxrender_emission(declarative_property_group):
 				.add_float('efficacy', self.efficacy)
 		arealightsource_params.update( TC_L.get_paramset(self) )
 		if self.iesname != '':
-			if obj.library is not None:
-				iespath = bpy.path.abspath(self.iesname, obj.library.filepath)
-			else:
-				iespath = self.iesname
-			arealightsource_params.add_string('iesname', efutil.path_relative_to_export(iespath))
+			
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(LuxManager.CurrentScene, obj, self.iesname, arealightsource_params, 'iesname')
 		return 'area', arealightsource_params
