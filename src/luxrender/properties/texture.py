@@ -155,7 +155,11 @@ class ColorTextureParameter(TextureParameterBase):
 					setattr( property_group, '%s_colortexturename' % self.attr, shorten_name(psi['value']) )
 				else:
 					setattr( property_group, '%s_usecolortexture' % self.attr, False )
-					setattr( property_group, '%s_color' % self.attr, psi['value'] )
+					try:
+						setattr( property_group, '%s_color' % self.attr, psi['value'] )
+					except:
+						import pdb
+						pdb.set_trace()
 	
 	def get_controls(self):
 		return [
@@ -1306,12 +1310,14 @@ class luxrender_tex_brick(declarative_property_group):
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
 				setattr(self, psi['name'], psi['value'])
 		
-		TF_brickmodtex.load_paramset(self, ps)
-		TC_brickmodtex.load_paramset(self, ps)
-		TF_bricktex.load_paramset(self, ps)
-		TC_bricktex.load_paramset(self, ps)
-		TF_mortartex.load_paramset(self, ps)
-		TC_mortartex.load_paramset(self, ps)
+		if self.variant == 'float':
+			TF_brickmodtex.load_paramset(self, ps)
+			TF_bricktex.load_paramset(self, ps)
+			TF_mortartex.load_paramset(self, ps)
+		else:
+			TC_brickmodtex.load_paramset(self, ps)
+			TC_bricktex.load_paramset(self, ps)
+			TC_mortartex.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_cauchy(declarative_property_group):
