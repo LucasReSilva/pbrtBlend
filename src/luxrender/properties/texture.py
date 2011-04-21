@@ -2055,6 +2055,7 @@ class luxrender_tex_mapping(declarative_property_group):
 			'soft_min': -100.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'precision': 5,
 			'save_in_preset': True
 		},
 		{
@@ -2066,6 +2067,7 @@ class luxrender_tex_mapping(declarative_property_group):
 			'soft_min': -100.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'precision': 5,
 			'save_in_preset': True
 		},
 		{
@@ -2077,6 +2079,7 @@ class luxrender_tex_mapping(declarative_property_group):
 			'soft_min': -100.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'precision': 5,
 			'save_in_preset': True
 		},
 		{
@@ -2088,6 +2091,7 @@ class luxrender_tex_mapping(declarative_property_group):
 			'soft_min': -100.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'precision': 5,
 			'save_in_preset': True
 		},
 		{
@@ -2095,6 +2099,7 @@ class luxrender_tex_mapping(declarative_property_group):
 			'type': 'float_vector',
 			'name': 'V1',
 			'default': (1.0, 0.0, 0.0),
+			'precision': 5,
 			'save_in_preset': True
 		},
 		{
@@ -2102,6 +2107,7 @@ class luxrender_tex_mapping(declarative_property_group):
 			'type': 'float_vector',
 			'name': 'V2',
 			'default': (0.0, 1.0, 0.0),
+			'precision': 5,
 			'save_in_preset': True
 		},
 	]
@@ -2716,6 +2722,7 @@ class luxrender_tex_transform(declarative_property_group):
 			'attr': 'translate',
 			'name': 'Translate',
 			'default': (0.0, 0.0, 0.0),
+			'precision': 5,
 			'save_in_preset': True
 		},
 		{
@@ -2723,6 +2730,7 @@ class luxrender_tex_transform(declarative_property_group):
 			'attr': 'rotate',
 			'name': 'Rotate',
 			'default': (0.0, 0.0, 0.0),
+			'precision': 5,
 			'save_in_preset': True
 		},
 		{
@@ -2730,6 +2738,7 @@ class luxrender_tex_transform(declarative_property_group):
 			'attr': 'scale',
 			'name': 'Scale',
 			'default': (1.0, 1.0, 1.0),
+			'precision': 5,
 			'save_in_preset': True
 		},
 	]
