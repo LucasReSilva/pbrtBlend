@@ -91,14 +91,13 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 def exportLight(scene, lux_context, ob, matrix, portals = []):
 	light = ob.data
 	
-	if scene.luxrender_engine.ignore_lightgroups or light.luxrender_lamp.lightgroup == "" :
-		light_group = 'default'
-	else:
-		light_group = light.luxrender_lamp.lightgroup
-	
 	lg_gain = 1.0
+	light_group = light.luxrender_lamp.lightgroup
 	if light_group in scene.luxrender_lightgroups.lightgroups:
 		lg_gain = scene.luxrender_lightgroups.lightgroups[light_group].gain
+	
+	if scene.luxrender_engine.ignore_lightgroups or light.luxrender_lamp.lightgroup == "" :
+		light_group = 'default'
 	
 	# Params common to all light types
 	light_params = ParamSet() \
