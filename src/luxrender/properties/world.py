@@ -494,8 +494,9 @@ class luxrender_lightgroups(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'lightgroups_select',
-		['op_lg_add', 'op_lg_rem']
+		#'lightgroups_select',
+		'op_lg_add',
+		#'op_lg_rem'
 	]
 	
 	visibility = {}
@@ -513,15 +514,15 @@ class luxrender_lightgroups(declarative_property_group):
 			'name': 'lightgroups_index',
 			'attr': 'lightgroups_index',
 		},
-		{
-			'type': 'template_list',
-			'name': 'lightgroups_select',
-			'attr': 'lightgroups_select',
-			'trg': lambda sc,c: c.luxrender_lightgroups,
-			'trg_attr': 'lightgroups_index',
-			'src': lambda sc,c: c.luxrender_lightgroups,
-			'src_attr': 'lightgroups',
-		},
+#		{
+#			'type': 'template_list',
+#			'name': 'lightgroups_select',
+#			'attr': 'lightgroups_select',
+#			'trg': lambda sc,c: c.luxrender_lightgroups,
+#			'trg_attr': 'lightgroups_index',
+#			'src': lambda sc,c: c.luxrender_lightgroups,
+#			'src_attr': 'lightgroups',
+#		},
 		{
 			'type': 'operator',
 			'attr': 'op_lg_add',
@@ -529,11 +530,11 @@ class luxrender_lightgroups(declarative_property_group):
 			'text': 'Add',
 			'icon': 'ZOOMIN',
 		},
-		{
-			'type': 'operator',
-			'attr': 'op_lg_rem',
-			'operator': 'luxrender.lightgroup_remove',
-			'text': 'Remove',
-			'icon': 'ZOOMOUT',
-		},
+#		{
+#			'type': 'operator',
+#			'attr': 'op_lg_rem',
+#			'operator': 'luxrender.lightgroup_remove',
+#			'text': 'Remove',
+#			'icon': 'ZOOMOUT',
+#		},
 	]

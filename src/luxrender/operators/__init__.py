@@ -168,9 +168,14 @@ class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
 	bl_idname = "luxrender.lightgroup_remove"
 	bl_label = "Remove LuxRender Light Group"
 	
+	lg_index = bpy.props.IntProperty(default=-1)
+	
 	def invoke(self, context, event):
 		w = context.scene.luxrender_lightgroups
-		w.lightgroups.remove( w.lightgroups_index )
+		if self.properties.lg_index == -1:
+			w.lightgroups.remove( w.lightgroups_index )
+		else:
+			w.lightgroups.remove( self.properties.lg_index )
 		w.lightgroups_index = len(w.lightgroups)-1
 		return {'FINISHED'}
 
