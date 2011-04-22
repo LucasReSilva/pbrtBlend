@@ -159,7 +159,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 	if light.type == 'AREA':
 		light_params.update( ies_data )
 		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
-		light_params.add_float('gain', light.energy * (get_worldscale(as_scalematrix=False)**2))
+		light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False)**2))
 		lux_context.attributeBegin(ob.name, file=Files.MAIN)
 		lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
 		lux_context.lightGroup(light_group, [])
