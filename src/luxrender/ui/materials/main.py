@@ -33,6 +33,8 @@ from ...operators.lrmdb import lrmdb_state
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_db(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Database'
+	bl_options = 'DEFAULT_CLOSED'
+	
 	def draw(self, context):
 		if not lrmdb_state._active:
 			self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
@@ -48,6 +50,8 @@ class ui_luxrender_material_db(luxrender_material_base):
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Utils'
+	bl_options = 'DEFAULT_CLOSED'
+	
 	def draw(self, context):
 		row = self.layout.row(align=True)
 		row.operator("luxrender.load_material", icon="DISK_DRIVE")
@@ -113,9 +117,6 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 		( ('material',), 'luxrender_transparency' )
 	]
 	
-	# only textures with Kd (or similar) for now
-	#LUX_COMPAT = {'carpaint', 'glass', 'glossy', 'glossy_lossy', 'mattetranslucent', 'glossytranslucent', 'scatter', 'matte', 'mirror', 'velvet'}
-	
 	def draw_header(self, context):
 		self.layout.prop(context.material.luxrender_transparency, "transparent", text="")
 	
@@ -123,5 +124,4 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 	def poll(cls, context):
 		if not hasattr(context.material, 'luxrender_transparency'):
 			return False
-		#return super().poll(context) and context.material.luxrender_material.type in cls.LUX_COMPAT
 		return super().poll(context) and context.material.luxrender_material.type != 'null'

@@ -48,13 +48,13 @@ class luxrender_filter(declarative_property_group):
 	]
 	
 	visibility = {
-		'xwidth':				{ 'advanced': True },
-		'ywidth':				{ 'advanced': True },
-		'alpha':				{ 'advanced': True, 'filter': 'gaussian' },
-		'b':					{ 'advanced': True, 'filter': 'mitchell' },
-		'c':					{ 'advanced': True, 'filter': 'mitchell' },
-		'supersample':			{ 'advanced': True, 'filter': 'mitchell' },
-		'tau':					{ 'advanced': True, 'filter': 'sinc' },
+		'xwidth':		{ 'advanced': True },
+		'ywidth':		{ 'advanced': True },
+		'alpha':		{ 'advanced': True, 'filter': 'gaussian' },
+		'b':			{ 'advanced': True, 'filter': 'mitchell' },
+		'c':			{ 'advanced': True, 'filter': 'mitchell' },
+		'supersample':	{ 'advanced': True, 'filter': 'mitchell' },
+		'tau':			{ 'advanced': True, 'filter': 'sinc' },
 	}
 	
 	properties = [

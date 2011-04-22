@@ -203,10 +203,6 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 
 	return False
 
-#-------------------------------------------------
-# lights(lux_context, scene)
-# MAIN export function
-#-------------------------------------------------
 def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 	'''
 	lux_context		pylux.Context
@@ -218,7 +214,6 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 	'''
 	
 	have_light = False
-	
 	
 	# First gather info about portals
 	portal_shapes = []

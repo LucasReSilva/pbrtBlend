@@ -232,7 +232,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
-		#try:
+		try:
 			if self.properties.filename == '' or self.properties.directory == '':
 				raise Exception('No filename or directory given.')
 			
@@ -250,9 +250,9 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 			
 			return {'FINISHED'}
 		
-		#except Exception as err:
-		#	self.report({'ERROR'}, 'Cannot load: %s' % err)
-		#	return {'CANCELLED'}
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot load: %s' % err)
+			return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_save_material(bpy.types.Operator):
@@ -490,7 +490,7 @@ def material_converter(report, scene, blender_mat):
 									setattr(alpha_params,'offsetfloat%d'%(i+1),col_ramp[i].position)
 									setattr(color_params,'tex%d_color'%(i+1),(col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2]))
 									setattr(alpha_params,'tex%d_floatvalue'%(i+1),col_ramp[i].color[3])
-
+							
 							luxmat.Kd_usecolortexture = True
 							luxmat.Kd_colortexturename = mix_tex.name
 					pass

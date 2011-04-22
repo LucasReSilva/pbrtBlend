@@ -50,7 +50,6 @@ class ui_texture_main(luxrender_texture_base):
 		return	tex and \
 				(context.scene.render.engine in cls.COMPAT_ENGINES) \
 				and context.texture.luxrender_texture.type is not 'BLENDER'
-				#(tex.type != 'NONE' or tex.use_nodes) and \
 	
 	def draw(self, context):
 		row = self.layout.row(align=True)

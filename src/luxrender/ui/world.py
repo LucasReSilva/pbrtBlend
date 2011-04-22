@@ -137,23 +137,6 @@ class lightgroups(world_panel):
 						property_group = lg
 					)
 				row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index=lg_index
-			
-#			if len(context.scene.luxrender_lightgroups.lightgroups) > 0:
-#				current_lg_ind = context.scene.luxrender_lightgroups.lightgroups_index
-#				current_lg = context.scene.luxrender_lightgroups.lightgroups[current_lg_ind]
-#				# 'name' is not a member of current_lp.properties,
-#				# so we draw it explicitly
-#				self.layout.prop(
-#					current_lg, 'name'
-#				)
-#				# Here we draw the currently selected luxrender_volumes_data property group
-#				for control in current_lg.controls:
-#					self.draw_column(
-#						control,
-#						self.layout,
-#						current_lg,
-#						context,
-#						property_group = current_lg
-#					)
+		
 		else:
 			self.layout.label('No active World available!')

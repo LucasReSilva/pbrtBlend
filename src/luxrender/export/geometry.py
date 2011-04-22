@@ -63,22 +63,6 @@ class DupliExportProgressThread(ExportProgressThread):
 
 class GeometryExporter(object):
 	
-#	lux_context = None
-#	scene = None
-#	
-#	ExportedMeshes = None
-#	ExportedObjects = None
-#	ExportedPLYs = None
-#	
-#	callbacks = {}
-#	valid_duplis_callbacks = []
-#	valid_particles_callbacks = []
-#	valid_objects_callbacks = []
-#	
-#	have_emitting_object = False
-#	
-#	exporting_duplis = False
-	
 	def __init__(self, lux_context, visibility_scene):
 		self.lux_context = lux_context
 		self.visibility_scene = visibility_scene
@@ -341,9 +325,6 @@ class GeometryExporter(object):
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
 						'filename',
-						# This really ought to be ply_filename for proper
-						# portability, but Lux doesn't adjust relative paths
-						# in files included from subdirs
 						ply_path
 					)
 					
@@ -362,8 +343,6 @@ class GeometryExporter(object):
 					if self.allow_instancing(obj):
 						self.exportShapeDefinition(obj, mesh_definition)
 						self.ExportedMeshes.add(mesh_cache_key, mesh_definition)
-					
-					#LuxLog('Binary PLY Mesh Exported: %s' % mesh_name)
 				
 				except InvalidGeometryException as err:
 					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
@@ -488,10 +467,6 @@ class GeometryExporter(object):
 					del vert_vno_indices
 					del vert_use_vno
 					
-					#print(' %s num points: %i' % (obj.name, len(points)))
-					#print(' %s num normals: %i' % (obj.name, len(normals)))
-					#print(' %s num idxs: %i' % (obj.name, len(indices)))
-					
 					# build shape ParamSet
 					shape_params = ParamSet()
 					
@@ -500,20 +475,12 @@ class GeometryExporter(object):
 						shape_params.add_integer('ntris', ntris)
 						shape_params.add_integer('nvertices', vert_index)
 					
-					#print('-> Add indices to paramset')
 					shape_params.add_integer('triindices', face_vert_indices)
-					#print('-> Add verts to paramset')
 					shape_params.add_point('P', points)
-					#print('-> Add normals to paramset')
 					shape_params.add_normal('N', normals)
 					
 					if uv_layer:
-						#print(' %s num uvs: %i' % (obj.name, len(uvs)))
-						#print('-> Add UVs to paramset')
 						shape_params.add_float('uv', uvs)
-					
-					#print(' %s ntris: %i' % (obj.name, ntris))
-					#print(' %s nvertices: %i' % (obj.name, nvertices))
 					
 					# Add other properties from LuxRender Mesh panel
 					shape_params.update( obj.data.luxrender_mesh.get_paramset() )
@@ -530,9 +497,7 @@ class GeometryExporter(object):
 					if self.allow_instancing(obj):
 						self.exportShapeDefinition(obj, mesh_definition)
 						self.ExportedMeshes.add(mesh_cache_key, mesh_definition)
-					
-					#LuxLog('LuxRender Mesh Exported: %s' % mesh_name)
-					
+				
 				except InvalidGeometryException as err:
 					LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 			
@@ -552,8 +517,7 @@ class GeometryExporter(object):
 			return False
 		
 		# If the mesh is only used once, instancing is a waste of memory
-		# ERROR: this can break dupli export if the dupli'd mesh is exported
-		# before the duplicator
+		# However, duplis don't increase the users count, so we cout those separately
 		if (not ((obj.parent and obj.parent.is_duplicator) or obj in self.objects_used_as_duplis)) and obj.data.users == 1:
 			return False
 		
@@ -561,13 +525,10 @@ class GeometryExporter(object):
 		# for normal objects if the object has certain modifiers applied against
 		# the same shared base mesh.
 		if hasattr(obj, 'modifiers') and len(obj.modifiers) > 0 and obj.data.users > 1:
-			#if OBJECT_ANALYSIS: print(' -> Instancing check on %s' % obj)
 			instance = False
 			for mod in obj.modifiers:
-				#if OBJECT_ANALYSIS: print(' -> MODIFIER %s' % mod.type)
 				# Allow non-deforming modifiers
 				instance |= mod.type in ('COLLISION','PARTICLE_INSTANCE','PARTICLE_SYSTEM','SMOKE')
-			#if OBJECT_ANALYSIS: print(' -> INSTANCING == %s'%instance)
 			return instance
 		else:
 			return not self.is_preview
@@ -603,7 +564,6 @@ class GeometryExporter(object):
 		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal: return
 		# or empty definitions
 		if len(mesh_definitions) < 1: return
-		
 		
 		self.lux_context.attributeBegin(comment=obj.name, file=Files.GEOM)
 		
@@ -759,12 +719,6 @@ class GeometryExporter(object):
 			LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
 			return
 		
-		# No can do, because of RNA write restriction
-		#psys_pc = psys.settings.draw_percentage
-		#psys.settings.draw_percentage = 100
-		#psys.settings.update_tag()
-		#self.visibility_scene.update()
-		
 		LuxLog('Exporting Hair system "%s"...' % psys.name)
 		
 		size = psys.settings.particle_size / 2.0 # XXX divide by 2 twice ?
@@ -852,23 +806,10 @@ class GeometryExporter(object):
 		det.stop()
 		det.join()
 		
-		#psys.settings.draw_percentage = psys_pc
-		#psys.settings.update_tag()
-		#self.visibility_scene.update()
-		
 		LuxLog('... done, exported %s hairs' % det.exported_objects)
 	
 	def handler_Duplis_GENERIC(self, obj, *args, **kwargs):
 		try:
-			# TODO - this workaround is still needed for file->export operator
-			#if 'particle_system' in kwargs.keys():
-			#	prev_display_pc = kwargs['particle_system'].settings.draw_percentage
-			#	if prev_display_pc < 100:
-			#		LuxLog(
-			#			'WARNING: Due to a limitation in blender only %s%% of particle system "%s" will be exported. '
-			#			'Set the DISPLAY percentage to 100%% before exporting' % (prev_display_pc, kwargs['particle_system'].name)
-			#		)
-			
 			LuxLog('Exporting Duplis...')
 			
 			obj.dupli_list_create(self.visibility_scene)

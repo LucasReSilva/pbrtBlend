@@ -24,16 +24,3 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-#
-#from ... import LuxRenderAddon
-#from ...ui.materials import luxrender_material_sub
-
-#@LuxRenderAddon.addon_register_class
-#class ui_material_null(luxrender_material_sub):
-#	bl_label = 'LuxRender Null Material'
-#	
-#	LUX_COMPAT = {'null'}
-#	
-#	display_property_groups = [
-#		( ('material', 'luxrender_material'), 'luxrender_mat_null' )
-#	]

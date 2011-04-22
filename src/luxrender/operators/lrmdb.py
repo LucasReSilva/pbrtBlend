@@ -67,8 +67,6 @@ class _lrmdb_state(lrmdb_client):
 		bpy.ops.luxrender.lrmdb_upload()
 	
 	def select_material(self, context, mat_id):
-		#LuxLog('Chose material %s' % mat_id)
-		
 		if not context.active_object:
 			LuxLog('WARNING: Select an object!')
 			return
@@ -99,7 +97,6 @@ class _lrmdb_state(lrmdb_client):
 			LuxLog('LRMDB ERROR: Bad material data')
 	
 	def show_category_items(self, context, cat_id, cat_name):
-		#LuxLog('Chose category %s' % cat_id)
 		try:
 			context.area.tag_redraw()
 			s = self.server_instance()
@@ -108,8 +105,6 @@ class _lrmdb_state(lrmdb_client):
 			LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
 			self._active = False
 			return
-		
-		#LuxLog(ci)
 		
 		if len(ci) > 0:
 			self.reset_actions()

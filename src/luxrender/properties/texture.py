@@ -163,7 +163,6 @@ class ColorTextureParameter(TextureParameterBase):
 	
 	def get_controls(self):
 		return [
-			#[ 0.8, [0.425,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
 			[ 0.9, [0.375,'%s_colorlabel' % self.attr, '%s_color' % self.attr], '%s_usecolortexture' % self.attr ],
 			[ 0.9, '%s_colortexture' % self.attr, '%s_multiplycolor' % self.attr ],
 		] + self.get_extra_controls()
@@ -209,7 +208,7 @@ class ColorTextureParameter(TextureParameterBase):
 			{
 				'type': 'float_vector',
 				'attr': '%s_color' % self.attr,
-				'name': '', #self.name,
+				'name': '',
 				'description': self.name,
 				'default': self.default,
 				'min': self.min,
@@ -367,7 +366,6 @@ class FloatTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'precision': self.precision,
-				#'slider': True,
 				'save_in_preset': True
 			},
 			{
@@ -449,7 +447,6 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.visibility = self.get_visibility()
 		self.properties = self.get_properties()
 	
-	
 	def load_paramset(self, property_group, ps):
 		for psi in ps:
 			if psi['name'] == self.attr:
@@ -524,7 +521,6 @@ class FresnelTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'precision': self.precision,
-				#'slider': True,
 				'save_in_preset': True
 			},
 			{
@@ -740,12 +736,10 @@ class luxrender_texture(declarative_property_group):
 			features, params = lux_texture.get_paramset(scene, texture)
 			
 			# 2D Mapping options
-			#if self.type in {'bilerp', 'checkerboard', 'dots', 'imagemap', 'uv', 'uvmask'}:
 			if '2DMAPPING' in features:
 				params.update( self.luxrender_tex_mapping.get_paramset(scene) )
 				
 			# 3D Mapping options
-			#if self.type in {'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'}:
 			if '3DMAPPING' in features:
 				params.update( self.luxrender_tex_transform.get_paramset(scene) )
 				
@@ -942,15 +936,15 @@ class luxrender_tex_bilerp(declarative_property_group):
 	]
 	
 	visibility = {
-		'v00_f':			{ 'variant': 'float' },
-		'v01_f':			{ 'variant': 'float' },
-		'v10_f':			{ 'variant': 'float' },
-		'v11_f':			{ 'variant': 'float' },
+		'v00_f': { 'variant': 'float' },
+		'v01_f': { 'variant': 'float' },
+		'v10_f': { 'variant': 'float' },
+		'v11_f': { 'variant': 'float' },
 		
-		'v00_c':			{ 'variant': 'color' },
-		'v01_c':			{ 'variant': 'color' },
-		'v10_c':			{ 'variant': 'color' },
-		'v11_c':			{ 'variant': 'color' },
+		'v00_c': { 'variant': 'color' },
+		'v01_c': { 'variant': 'color' },
+		'v10_c': { 'variant': 'color' },
+		'v11_c': { 'variant': 'color' },
 	}
 	
 	properties = [
@@ -1110,7 +1104,6 @@ class luxrender_tex_blackbody(declarative_property_group):
 		for psi in ps:
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
 				setattr(self, psi['name'], psi['value'])
-		
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_brick(declarative_property_group):
@@ -1133,38 +1126,38 @@ class luxrender_tex_brick(declarative_property_group):
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
-		'brickmodtex_colorlabel':			{ 'variant': 'color' },
-		'brickmodtex_color': 				{ 'variant': 'color' },
-		'brickmodtex_usecolortexture':		{ 'variant': 'color' },
-		'brickmodtex_colortexture':			{ 'variant': 'color', 'brickmodtex_usecolortexture': True },
-		'brickmodtex_multiplycolor':		{ 'variant': 'color', 'brickmodtex_usecolortexture': True },
+		'brickmodtex_colorlabel':		{ 'variant': 'color' },
+		'brickmodtex_color': 			{ 'variant': 'color' },
+		'brickmodtex_usecolortexture':	{ 'variant': 'color' },
+		'brickmodtex_colortexture':		{ 'variant': 'color', 'brickmodtex_usecolortexture': True },
+		'brickmodtex_multiplycolor':	{ 'variant': 'color', 'brickmodtex_usecolortexture': True },
 		
-		'brickmodtex_usefloattexture':		{ 'variant': 'float' },
-		'brickmodtex_floatvalue':			{ 'variant': 'float' },
-		'brickmodtex_floattexture':			{ 'variant': 'float', 'brickmodtex_usefloattexture': True },
-		'brickmodtex_multiplyfloat':		{ 'variant': 'float', 'brickmodtex_usefloattexture': True },
+		'brickmodtex_usefloattexture':	{ 'variant': 'float' },
+		'brickmodtex_floatvalue':		{ 'variant': 'float' },
+		'brickmodtex_floattexture':		{ 'variant': 'float', 'brickmodtex_usefloattexture': True },
+		'brickmodtex_multiplyfloat':	{ 'variant': 'float', 'brickmodtex_usefloattexture': True },
 		
-		'bricktex_colorlabel':				{ 'variant': 'color' },
-		'bricktex_color': 					{ 'variant': 'color' },
-		'bricktex_usecolortexture':			{ 'variant': 'color' },
-		'bricktex_colortexture':			{ 'variant': 'color', 'bricktex_usecolortexture': True },
-		'bricktex_multiplycolor':			{ 'variant': 'color', 'bricktex_usecolortexture': True },
+		'bricktex_colorlabel':			{ 'variant': 'color' },
+		'bricktex_color': 				{ 'variant': 'color' },
+		'bricktex_usecolortexture':		{ 'variant': 'color' },
+		'bricktex_colortexture':		{ 'variant': 'color', 'bricktex_usecolortexture': True },
+		'bricktex_multiplycolor':		{ 'variant': 'color', 'bricktex_usecolortexture': True },
 		
-		'bricktex_usefloattexture':			{ 'variant': 'float' },
-		'bricktex_floatvalue':				{ 'variant': 'float' },
-		'bricktex_floattexture':			{ 'variant': 'float', 'bricktex_usefloattexture': True },
-		'bricktex_multiplyfloat':			{ 'variant': 'float', 'bricktex_usefloattexture': True },
+		'bricktex_usefloattexture':		{ 'variant': 'float' },
+		'bricktex_floatvalue':			{ 'variant': 'float' },
+		'bricktex_floattexture':		{ 'variant': 'float', 'bricktex_usefloattexture': True },
+		'bricktex_multiplyfloat':		{ 'variant': 'float', 'bricktex_usefloattexture': True },
 		
-		'mortartex_colorlabel':				{ 'variant': 'color' },
-		'mortartex_color': 					{ 'variant': 'color' },
-		'mortartex_usecolortexture':		{ 'variant': 'color' },
-		'mortartex_colortexture':			{ 'variant': 'color', 'mortartex_usecolortexture': True },
-		'mortartex_multiplycolor':			{ 'variant': 'color', 'mortartex_usecolortexture': True },
+		'mortartex_colorlabel':			{ 'variant': 'color' },
+		'mortartex_color': 				{ 'variant': 'color' },
+		'mortartex_usecolortexture':	{ 'variant': 'color' },
+		'mortartex_colortexture':		{ 'variant': 'color', 'mortartex_usecolortexture': True },
+		'mortartex_multiplycolor':		{ 'variant': 'color', 'mortartex_usecolortexture': True },
 		
-		'mortartex_usefloattexture':		{ 'variant': 'float' },
-		'mortartex_floatvalue':				{ 'variant': 'float' },
-		'mortartex_floattexture':			{ 'variant': 'float', 'mortartex_usefloattexture': True },
-		'mortartex_multiplyfloat':			{ 'variant': 'float', 'mortartex_usefloattexture': True },
+		'mortartex_usefloattexture':	{ 'variant': 'float' },
+		'mortartex_floatvalue':			{ 'variant': 'float' },
+		'mortartex_floattexture':		{ 'variant': 'float', 'mortartex_usefloattexture': True },
+		'mortartex_multiplyfloat':		{ 'variant': 'float', 'mortartex_usefloattexture': True },
 	}
 	
 	properties = [
@@ -1331,9 +1324,9 @@ class luxrender_tex_cauchy(declarative_property_group):
 	]
 	
 	visibility = {
-		'a':	{ 'use_index': False },
+		'a': { 'use_index': False },
 		'draw_ior_menu': { 'use_index': True },
-		'ior':	{ 'use_index': True },
+		'ior': { 'use_index': True },
 	}
 	
 	properties = [
@@ -1357,7 +1350,6 @@ class luxrender_tex_cauchy(declarative_property_group):
 		{
 			'attr': 'ior_presetvalue',
 			'type': 'float',
-#			'default': self.default,
 			'save_in_preset': True
 		},
 		{
@@ -1566,15 +1558,15 @@ class luxrender_tex_dots(declarative_property_group):
 	TF_outside.controls
 	
 	visibility = {
-		'inside_usefloattexture':		{ 'variant': 'float' },
-		'inside_floatvalue':			{ 'variant': 'float' },
-		'inside_floattexture':			{ 'variant': 'float', 'inside_usefloattexture': True },
-		'inside_multiplyfloat':			{ 'variant': 'float', 'inside_usefloattexture': True },
+		'inside_usefloattexture':	{ 'variant': 'float' },
+		'inside_floatvalue':		{ 'variant': 'float' },
+		'inside_floattexture':		{ 'variant': 'float', 'inside_usefloattexture': True },
+		'inside_multiplyfloat':		{ 'variant': 'float', 'inside_usefloattexture': True },
 		
-		'outside_usefloattexture':		{ 'variant': 'float' },
-		'outside_floatvalue':			{ 'variant': 'float' },
-		'outside_floattexture':			{ 'variant': 'float', 'outside_usefloattexture': True },
-		'outside_multiplyfloat':		{ 'variant': 'float', 'outside_usefloattexture': True },
+		'outside_usefloattexture':	{ 'variant': 'float' },
+		'outside_floatvalue':		{ 'variant': 'float' },
+		'outside_floattexture':		{ 'variant': 'float', 'outside_usefloattexture': True },
+		'outside_multiplyfloat':	{ 'variant': 'float', 'outside_usefloattexture': True },
 	} 
 	
 	properties = [
@@ -1601,13 +1593,6 @@ class luxrender_tex_dots(declarative_property_group):
 		return {'2DMAPPING'}, dots_params
 	
 	def load_paramset(self, variant, ps):
-		#psi_accept = {
-		#}
-		#psi_accept_keys = psi_accept.keys()
-		#for psi in ps:
-		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-		#		setattr(self, psi['name'], psi['value'])
-		
 		TF_inside.load_paramset(self, ps)
 		TF_outside.load_paramset(self, ps)
 
@@ -1821,7 +1806,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 	]
 	
 	visibility = {
-		'channel':	{ 'variant': 'float' },
+		'channel': { 'variant': 'float' },
 	}
 	
 	properties = [
@@ -2025,12 +2010,12 @@ class luxrender_tex_mapping(declarative_property_group):
 	]
 	
 	visibility = {
-		'v1':				{ 'type': 'planar' },
-		'v2':				{ 'type': 'planar' },
-		'uscale':			{ 'type': O(['uv', 'spherical', 'cylindrical']) },
-		'vscale':			{ 'type': O(['uv', 'spherical']) },
+		'v1':		{ 'type': 'planar' },
+		'v2':		{ 'type': 'planar' },
+		'uscale':	{ 'type': O(['uv', 'spherical', 'cylindrical']) },
+		'vscale':	{ 'type': O(['uv', 'spherical']) },
 		# 'udelta': # always visible
-		'vdelta':			{ 'type': O(['uv', 'spherical', 'planar']) },
+		'vdelta':	{ 'type': O(['uv', 'spherical', 'planar']) },
 	}
 	
 	properties = [
@@ -2247,30 +2232,30 @@ class luxrender_tex_mix(declarative_property_group):
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
-		'amount_floattexture':			{ 'amount_usefloattexture': True },
-		'amount_multiplyfloat':			{ 'amount_usefloattexture': True },
+		'amount_floattexture':	{ 'amount_usefloattexture': True },
+		'amount_multiplyfloat':	{ 'amount_usefloattexture': True },
 		
-		'tex1_colorlabel':				{ 'variant': 'color' },
-		'tex1_color': 					{ 'variant': 'color' },
-		'tex1_usecolortexture':			{ 'variant': 'color' },
-		'tex1_colortexture':			{ 'variant': 'color', 'tex1_usecolortexture': True },
-		'tex1_multiplycolor':			{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_colorlabel':		{ 'variant': 'color' },
+		'tex1_color': 			{ 'variant': 'color' },
+		'tex1_usecolortexture':	{ 'variant': 'color' },
+		'tex1_colortexture':	{ 'variant': 'color', 'tex1_usecolortexture': True },
+		'tex1_multiplycolor':	{ 'variant': 'color', 'tex1_usecolortexture': True },
 		
-		'tex1_usefloattexture':			{ 'variant': 'float' },
-		'tex1_floatvalue':				{ 'variant': 'float' },
-		'tex1_floattexture':			{ 'variant': 'float', 'tex1_usefloattexture': True },
-		'tex1_multiplyfloat':			{ 'variant': 'float', 'tex1_usefloattexture': True },
+		'tex1_usefloattexture':	{ 'variant': 'float' },
+		'tex1_floatvalue':		{ 'variant': 'float' },
+		'tex1_floattexture':	{ 'variant': 'float', 'tex1_usefloattexture': True },
+		'tex1_multiplyfloat':	{ 'variant': 'float', 'tex1_usefloattexture': True },
 		
-		'tex2_colorlabel':				{ 'variant': 'color' },
-		'tex2_color': 					{ 'variant': 'color' },
-		'tex2_usecolortexture':			{ 'variant': 'color' },
-		'tex2_colortexture':			{ 'variant': 'color', 'tex2_usecolortexture': True },
-		'tex2_multiplycolor':			{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex2_colorlabel':		{ 'variant': 'color' },
+		'tex2_color': 			{ 'variant': 'color' },
+		'tex2_usecolortexture':	{ 'variant': 'color' },
+		'tex2_colortexture':	{ 'variant': 'color', 'tex2_usecolortexture': True },
+		'tex2_multiplycolor':	{ 'variant': 'color', 'tex2_usecolortexture': True },
 		
-		'tex2_usefloattexture':			{ 'variant': 'float' },
-		'tex2_floatvalue':				{ 'variant': 'float' },
-		'tex2_floattexture':			{ 'variant': 'float', 'tex2_usefloattexture': True },
-		'tex2_multiplyfloat':			{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_usefloattexture':	{ 'variant': 'float' },
+		'tex2_floatvalue':		{ 'variant': 'float' },
+		'tex2_floattexture':	{ 'variant': 'float', 'tex2_usefloattexture': True },
+		'tex2_multiplyfloat':	{ 'variant': 'float', 'tex2_usefloattexture': True },
 	}
 	
 	properties = [
@@ -2773,7 +2758,7 @@ class luxrender_tex_uv(declarative_property_group):
 	
 	controls = []
 	
-	visibility = {} 
+	visibility = {}
 	
 	properties = [
 		{
@@ -2864,7 +2849,7 @@ class luxrender_tex_wrinkled(declarative_property_group):
 		'roughness',
 	]
 	
-	visibility = {} 
+	visibility = {}
 	
 	properties = [
 		{

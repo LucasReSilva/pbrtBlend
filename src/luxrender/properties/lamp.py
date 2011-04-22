@@ -106,13 +106,6 @@ class luxrender_lamp(declarative_property_group):
 	]
 	
 	properties = [
-#		{
-#			'type': 'string',
-#			'attr': 'lightgroup',
-#			'name': 'Light Group',
-#			'description': 'Name of group to put this light in',
-#			'default': 'default'
-#		},
 		{
 			'type': 'float',
 			'attr': 'importance',
@@ -255,7 +248,6 @@ class luxrender_lamp_sun(declarative_property_group):
 				('sky', 'Sky Only', 'sky'),
 			]
 		},
-		
 		{
 			'type': 'bool',
 			'attr': 'sunsky_advanced',
@@ -423,8 +415,8 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'infinite_map':		{ 'type': 'infinite' },
 		'mapping_type':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 		'hdri_multiply':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
-		'gamma':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
-		'nsamples':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'gamma':			{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'nsamples':			{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
 	}
 	
 	properties = TC_L.properties[:] + [
@@ -486,7 +478,6 @@ class luxrender_lamp_hemi(declarative_property_group):
 			'max': 100,
 			'soft_max': 100,
 		},
-
 	]
 	
 	def get_paramset(self, lamp_object):

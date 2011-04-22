@@ -94,7 +94,6 @@ class ui_luxrender_lamp_spot(lamps_panel):
 				projector = context.lamp.luxrender_lamp.luxrender_lamp_spot.projector
 				
 				if wide_ui and not projector:
-					#col = split.column()
 					col = self.layout.row()
 				else:
 					col = self.layout.column()
@@ -147,7 +146,6 @@ class ui_luxrender_lamp_area(lamps_panel):
 			if context.lamp.type == 'AREA':
 				
 				if wide_ui:
-					#col = split.column()
 					col = self.layout.row()
 				else:
 					col = self.layout.column()

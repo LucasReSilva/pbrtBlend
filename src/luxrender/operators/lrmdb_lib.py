@@ -141,8 +141,7 @@ class lrmdb_client(object):
 		if cls.server == None:
 			cls.server = xmlrpc.client.ServerProxy(
 				"http://www.luxrender.net/lrmdb2/ixr",
-				transport=CookieTransport(),
-				#verbose=True
+				transport=CookieTransport()
 			)
 		
 		return cls.server

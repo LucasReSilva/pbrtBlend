@@ -144,7 +144,6 @@ class bDecoder(object):
 				)
 			)
 		)
-		#fDes.write( decomp_obj.flush() )
 		
 		outlen = fDes.tell()
 		elapsed = time.time() - start_time

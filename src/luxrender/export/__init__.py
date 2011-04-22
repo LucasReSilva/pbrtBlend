@@ -51,11 +51,6 @@ class ExportProgressThread(efutil.TimerThread):
 			LuxLog(self.message % pc)
 
 class ExportCache(object):
-	
-#	name = 'Cache'
-#	cache_keys = set()
-#	cache_items = {}
-	
 	def __init__(self, name='Cache'):
 		self.name = name
 		self.cache_keys = set()
@@ -81,14 +76,9 @@ class ExportCache(object):
 		if self.have(ck):
 			return self.cache_items[ck]
 		else:
-			raise InvalidGeometryException('Item %s not found in %s!' % (ck, self.name))
+			raise Exception('Item %s not found in %s!' % (ck, self.name))
 
 class ParamSetItem(list):
-	
-	type		= None
-	type_name	= None
-	name		= None
-	value		= None
 	
 	WRAP_WIDTH	= 100
 	

@@ -132,107 +132,6 @@ class Custom_Context(object):
 	
 	# Wrapped pylux.Context API calls follow ...
 	
-	#def objectBegin(self, name, file=None):
-	#	self._api('ObjectBegin ', [name, []], file=file)
-	
-	#def objectEnd(self, comment=''):
-	#	self._api('ObjectEnd # ', [comment, []])
-	
-	#def objectInstance(self, name):
-	#	self._api('ObjectInstance ', [name, []])
-	
-	#def portalInstance(self, name):
-	#	# Backwards compatibility
-	#	if LUXRENDER_VERSION < '0.8':
-	#		LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
-	#		self._api('ObjectInstance ', [name, []])
-	#	else:
-	#		self._api('PortalInstance ', [name, []])
-	
-	#def renderer(self, *args):
-	#	self._api('Renderer', args)
-	
-	#def sampler(self, *args):
-	#	self._api('Sampler', args)
-	
-	#def accelerator(self, *args):
-	#	self._api('Accelerator', args)
-	
-	#def surfaceIntegrator(self, *args):
-	#	self._api('SurfaceIntegrator', args)
-	
-	#def volumeIntegrator(self, *args):
-	#	self._api('VolumeIntegrator', args)
-	
-	#def pixelFilter(self, *args):
-	#	self._api('PixelFilter', args)
-	
-	#def lookAt(self, *args):
-	#	self.wf('\nLookAt %s' % ' '.join(['%f'%i for i in args]))
-	
-	#def coordinateSystem(self, name):
-	#	self._api('CoordinateSystem', [name, []])
-	
-	#def identity(self):
-	#	self._api('Identity #', ['', []])
-	
-	#def camera(self, *args):
-	#	self._api('Camera', args)
-	
-	#def film(self, *args):
-	#	self._api('Film', args)
-	
-	#def worldBegin(self, *args):
-	#	self.wf('\nWorldBegin')
-	
-	#def lightGroup(self, *args):
-	#	self._api('LightGroup', args)
-	
-	#def lightSource(self, *args):
-	#	self._api('LightSource', args)
-	
-	#def areaLightSource(self, *args):
-	#	self._api('AreaLightSource', args)
-	
-	#def motionInstance(self, name, start, stop, motion_name):
-	#	self.wf('\nMotionInstance "%s" %f %f "%s"' % (name, start, stop, motion_name))
-	
-	#def attributeBegin(self, comment='', file=None):
-	#	self._api('AttributeBegin # ', [comment, []], file=file)
-	
-	#def attributeEnd(self):
-	#	self._api('AttributeEnd #', ['', []])
-	
-	#def transformBegin(self, comment='', file=None):
-	#	self._api('TransformBegin # ', [comment, []], file=file)
-	
-	#def transformEnd(self):
-	#	self._api('TransformEnd #', ['', []])
-	
-	#def concatTransform(self, values):
-	#	self.wf('\nConcatTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
-	
-	#def transform(self, values):
-	#	self.wf('\nTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
-	
-	#def scale(self, x,y,z):
-	#	self.wf('\nScale %s' % ' '.join(['%0.15f'%i for i in [x,y,z]]))
-	
-	#def rotate(self, a,x,y,z):
-	#	self.wf('\nRotate %s' % ' '.join(['%0.15f'%i for i in [a,x,y,z]]))
-	
-	#def shape(self, *args):
-	#	self._api('Shape', args, file=self.current_file)
-	
-	#def portalShape(self, *args):
-	#	self._api('PortalShape', args, file=self.current_file)
-	
-	#def material(self, *args):
-	#	self._api('Material', args)
-	
-	#def namedMaterial(self, name):
-	#	self._api('NamedMaterial', [name, []])
-	
 	def makeNamedMaterial(self, name, params):
 		self._api("MakeNamedMaterial", [name, params])
 	
@@ -245,14 +144,8 @@ class Custom_Context(object):
 	def exterior(self, name):
 		self._api('Exterior ', [name, []])
 	
-	#def volume(self, args):
-	#	self._api("Volume", *args)
-	
 	def texture(self, name, type, texture, params):
 		self._api("Texture", [name, params], extra_tokens='"%s" "%s"' % (type,texture))
-	
-	#def worldEnd(self):
-	#	self.wf('WorldEnd')
 	
 	def cleanup(self):
 		pass

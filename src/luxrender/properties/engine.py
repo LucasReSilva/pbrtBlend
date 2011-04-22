@@ -35,8 +35,6 @@ from ..export import ParamSet
 from ..outputs.pure_api import PYLUX_AVAILABLE
 from ..outputs.pure_api import LUXRENDER_VERSION
 
-#from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
-
 def find_luxrender_path():
 	return os.getenv(
 		# Use the env var path, if set ...
@@ -51,9 +49,6 @@ def find_apis():
 	]
 	if PYLUX_AVAILABLE:
 		apis.append( ('INT', 'Internal', 'INT') )
-	
-	#if LUXFIRE_CLIENT_AVAILABLE:
-	#	apis.append( ('LFC', 'LuxFire Client', 'LFC') )
 	
 	return apis
 
@@ -308,7 +303,6 @@ class luxrender_networking(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		# 'use_network_servers', # drawn in panel header
 		'servers',
 		'serverinterval'
 	]
@@ -319,7 +313,7 @@ class luxrender_networking(declarative_property_group):
 	}
 	
 	properties = [
-		{
+		{	# drawn in panel header
 			'type': 'bool',
 			'attr': 'use_network_servers',
 			'name': 'Use Networking',

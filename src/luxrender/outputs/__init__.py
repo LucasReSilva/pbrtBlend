@@ -47,8 +47,6 @@ from ..outputs import file_api
 from ..outputs import lbm2_api
 # Write material definitions to LXM format
 from ..outputs import lxm_api
-# Access lux via a remote LuxFire slave
-from ..outputs import luxfire_client
 # Access lux only through pylux bindings
 from ..outputs import pure_api
 
@@ -97,7 +95,7 @@ class LuxFilmDisplay(TimerThread):
 					LuxLog(err_msg)
 					self.stop()
 					return
-			
+				
 				if render_end:
 					LuxLog('Final render result (%ix%i%s)' % (xres,yres,p_stats))
 				else:
@@ -183,8 +181,6 @@ class LuxManager(object):
 		
 		if api_type == 'FILE':
 			Context = file_api.Custom_Context
-		elif api_type == 'LUXFIRE_CLIENT':
-			Context = luxfire_client.Client_Locator
 		elif api_type == 'API':
 			Context = pure_api.Custom_Context
 		elif api_type == 'LBM2':
@@ -198,7 +194,7 @@ class LuxManager(object):
 		self.lux_context = Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
 		
 		self.reset()
-
+	
 	def start(self):
 		'''
 		Start the pylux.Context object rendering. This is achieved

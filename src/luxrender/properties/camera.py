@@ -542,7 +542,7 @@ class luxrender_film(declarative_property_group):
 			(x1,x2,y1,y2) = [
 				scene.render.border_min_x, scene.render.border_max_x,
 				scene.render.border_min_y, scene.render.border_max_y
-			]			
+			]
 			# Set resolution
 			params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
 			params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
@@ -637,7 +637,7 @@ class luxrender_film(declarative_property_group):
 		
 		return ('fleximage', params)
 
-#	Valid CRF preset names (case sensitive):
+# Valid CRF preset names (case sensitive):
 # See lux/core/cameraresponse.cpp to keep this up to date
 
 crf_preset_names = [s.strip() for s in
@@ -820,7 +820,6 @@ class luxrender_colorspace(declarative_property_group):
 			'precision': 6,
 			'default': 0.329411
 		},
-		
 		{
 			'attr': 'cs_redX',
 			'type': 'float',
@@ -835,7 +834,6 @@ class luxrender_colorspace(declarative_property_group):
 			'precision': 6,
 			'default': 0.34
 		},
-		
 		{
 			'attr': 'cs_greenX',
 			'type': 'float',
@@ -850,7 +848,6 @@ class luxrender_colorspace(declarative_property_group):
 			'precision': 6,
 			'default': 0.595
 		},
-		
 		{
 			'attr': 'cs_blueX',
 			'type': 'float',
@@ -986,23 +983,6 @@ class colorspace_presets(object):
 		cs_blueX	= 0.1666
 		cs_blueY	= 0.0089
 
-def get_tonemaps():
-	
-	items =  [
-		('reinhard', 'Reinhard', 'reinhard'),
-		('linear', 'Linear (manual)', 'linear'),
-		# put autolinear in this space for supported versions
-		('contrast', 'Contrast', 'contrast'),
-		('maxwhite', 'Maxwhite', 'maxwhite')
-	]
-	
-	if LUXRENDER_VERSION >= '0.8':
-		items.insert(2,
-			('autolinear', 'Linear (auto-exposure)', 'autolinear')
-		)
-	
-	return items
-
 @LuxRenderAddon.addon_register_class
 class luxrender_tonemapping(declarative_property_group):
 	'''
@@ -1047,7 +1027,13 @@ class luxrender_tonemapping(declarative_property_group):
 			'name': 'Tonemapper',
 			'description': 'Choose tonemapping type',
 			'default': 'reinhard',
-			'items': get_tonemaps(),
+			'items': [
+				('reinhard', 'Reinhard', 'reinhard'),
+				('linear', 'Linear (manual)', 'linear'),
+				('autolinear', 'Linear (auto-exposure)', 'autolinear'),
+				('contrast', 'Contrast', 'contrast'),
+				('maxwhite', 'Maxwhite', 'maxwhite')
+			]
 		},
 		
 		# Reinhard
