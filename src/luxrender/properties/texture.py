@@ -578,7 +578,7 @@ tex_names = (
 		('BLENDER', 'Use Blender Texture'),
 	)),
 	
-	('Lux Textures',
+	('LuxRender Textures',
 	(
 		('band', 'Band'),
 		('bilerp', 'Bilerp'),
