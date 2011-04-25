@@ -67,8 +67,8 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		row = self.layout.row(align=True)
 		row.operator("luxrender.copy_mat_color", icon='COLOR')
 		
-		row = self.layout.row(align=True)
-		row.operator("luxrender.material_reset", icon='SOLID')
+		#row = self.layout.row(align=True)
+		#row.operator("luxrender.material_reset", icon='SOLID')
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material(luxrender_material_base):
