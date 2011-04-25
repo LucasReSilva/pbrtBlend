@@ -94,7 +94,7 @@ class luxrender_engine(declarative_property_group):
 		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
 		'monitor_external':			{'export_type': 'EXT', 'binary_name': 'luxrender', 'render': True },
 		'partial_ply':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'install_path':				{ 'render': True, 'export_type': 'EXT' },
+		'install_path':				{ 'export_type': 'EXT' },
 		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':					A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
 	}
