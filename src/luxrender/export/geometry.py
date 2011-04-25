@@ -125,7 +125,7 @@ class GeometryExporter(object):
 				ply_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
 				ply_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
 				
-				mesh_definition = (ply_mesh_name, obj.active_material, 'plymesh', ply_params)
+				mesh_definition = (ply_mesh_name, obj.active_material.name, 'plymesh', ply_params)
 				mesh_definitions.append( mesh_definition )
 				
 				# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
