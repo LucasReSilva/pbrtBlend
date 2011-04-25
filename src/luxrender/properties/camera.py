@@ -67,9 +67,11 @@ class luxrender_camera(declarative_property_group):
 	ef_attach_to = ['Camera']
 	
 	controls = [
+		# type is drawn in the UI class manually, and only for perspective camera type
+		#'type',
+		
 		'Exterior',
 		['autofocus', 'use_dof', 'use_clipping'],
-		'type',
 		'fstop',
 		'sensitivity',
 		'exposure_mode',
