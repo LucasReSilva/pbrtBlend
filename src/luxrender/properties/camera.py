@@ -446,7 +446,7 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'displayinterval',
-			'name': 'GUI refresh interval',
+			'name': 'Refresh interval',
 			'description': 'Period for updating rendering on screen (seconds)',
 			'default': 10,
 			'min': 2,
