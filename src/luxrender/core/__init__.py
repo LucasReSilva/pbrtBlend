@@ -456,12 +456,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				
 				self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.camera.data.luxrender_camera.luxrender_film.integratedimaging
 				
-				if scene.camera.data.luxrender_camera.luxrender_film.integratedimaging:
-					# Use the GUI update interval
-					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.displayinterval )
-				else:
-					# Update the image from disk only as often as it is written
-					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval )
+				# Update the image from disk only as often as it is written
+				self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.internal_updateinterval )
 				
 				# Start the stats and framebuffer threads and add additional threads to Lux renderer
 				self.LuxManager.start_worker_threads(self)

@@ -389,14 +389,20 @@ class luxrender_film(declarative_property_group):
 	ef_attach_to = ['luxrender_camera']
 	
 	controls = [
+		'lbl_internal',
+		'internal_updateinterval',
+		
+		'lbl_external',
 		'writeinterval',
 		'displayinterval',
+		
 		'lbl_outputs',
 		'integratedimaging',
 		['write_png', 'write_tga'],
 		['write_exr', 'write_exr_applyimaging'],
-		['write_flm', 'restart_flm'],
 		'output_alpha',
+		['write_flm', 'restart_flm'],
+		
 		'ldr_clamp_method',
 		'outlierrejection_k',
 	]
@@ -407,13 +413,32 @@ class luxrender_film(declarative_property_group):
 	}
 	
 	properties = [
-		
+		{
+			'type': 'text',
+			'attr': 'lbl_internal',
+			'name': 'Internal rendering'
+		},
+		{
+			'type': 'int',
+			'attr': 'internal_updateinterval',
+			'name': 'Update interval',
+			'description': 'Period for updating render image (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text',
+			'attr': 'lbl_external',
+			'name': 'External rendering'
+		},
 		{
 			'type': 'int',
 			'attr': 'writeinterval',
 			'name': 'Save interval',
 			'description': 'Period for writing images to disk (seconds)',
-			'default': 10,
+			'default': 180,
 			'min': 2,
 			'soft_min': 2,
 			'save_in_preset': True
@@ -621,8 +646,11 @@ class luxrender_film(declarative_property_group):
 		
 		params.add_string('ldr_clamp_method', self.ldr_clamp_method)
 		
-		params.add_integer('displayinterval', self.displayinterval)
-		params.add_integer('writeinterval', self.writeinterval)
+		if scene.luxrender_engine.export_type == 'EXT':
+			params.add_integer('displayinterval', self.displayinterval)
+			params.add_integer('writeinterval', self.writeinterval)
+		else:
+			params.add_integer('writeinterval', self.internal_updateinterval)
 		
 		# Halt conditions
 		if scene.luxrender_sampler.haltspp > 0:
