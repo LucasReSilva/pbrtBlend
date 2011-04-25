@@ -96,7 +96,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 	if light_group in scene.luxrender_lightgroups.lightgroups:
 		lg_gain = scene.luxrender_lightgroups.lightgroups[light_group].gain
 	
-	if scene.luxrender_engine.ignore_lightgroups or light.luxrender_lamp.lightgroup == "" :
+	if scene.luxrender_lightgroups.ignore or light.luxrender_lamp.lightgroup == "" :
 		light_group = 'default'
 	
 	# Params common to all light types

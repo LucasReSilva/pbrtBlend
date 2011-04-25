@@ -493,7 +493,8 @@ class luxrender_lightgroups(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'op_lg_add'
+		'op_lg_add',
+		'ignore',
 	]
 	
 	visibility = {}
@@ -517,5 +518,13 @@ class luxrender_lightgroups(declarative_property_group):
 			'operator': 'luxrender.lightgroup_add',
 			'text': 'Add',
 			'icon': 'ZOOMIN',
+		},
+		{
+			'type': 'bool',
+			'attr': 'ignore',
+			'name': 'Merge LightGroups',
+			'description': 'Enable this for final renders, or to decrease RAM usage.',
+			'default': False,
+			'save_in_preset': True
 		},
 	]

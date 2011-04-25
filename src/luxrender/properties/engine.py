@@ -64,15 +64,14 @@ class luxrender_engine(declarative_property_group):
 		'export_type',
 		'binary_name',
 		'write_files',
+		'install_path',
 		['write_lxs', 'write_lxm', 'write_lxo', 'write_lxv'],
 		'embed_filedata',
 		
 		'mesh_type',
 		'partial_ply',
 		['render','monitor_external'],
-		'install_path',
 		['threads_auto', 'threads'],
-		'ignore_lightgroups',
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
@@ -273,15 +272,7 @@ class luxrender_engine(declarative_property_group):
 				('very-quiet', 'Very quiet', 'very-quiet'),
 			],
 			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'ignore_lightgroups',
-			'name': 'Ignore LightGroups',
-			'description': 'Enable this for final renders, or to decrease RAM usage.',
-			'default': False,
-			'save_in_preset': True
-		},
+		}
 	]
 	
 	def allow_file_embed(self):
