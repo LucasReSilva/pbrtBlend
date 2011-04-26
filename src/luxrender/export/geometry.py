@@ -719,6 +719,9 @@ class GeometryExporter(object):
 			LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
 			return
 		
+		# This should force the strand/junction objects to be instanced
+		self.objects_used_as_duplis.add(obj)
+		
 		LuxLog('Exporting Hair system "%s"...' % psys.name)
 		
 		size = psys.settings.particle_size / 2.0 # XXX divide by 2 twice ?
@@ -730,7 +733,7 @@ class GeometryExporter(object):
 				ParamSet().add_float('radius', size/2.0)
 			),
 		)
-		hair_Strand = (		
+		hair_Strand = (
 			(
 				'HAIR_Strand_%s'%psys.name,
 				psys.settings.material - 1,
@@ -789,7 +792,7 @@ class GeometryExporter(object):
 				
 				Mtrans = mathutils.Matrix.Translation(points[j])
 				matrix = obj.matrix_world * Mtrans * M
-								
+				
 				self.exportShapeInstances(
 					obj,
 					hair_Strand,
