@@ -218,6 +218,10 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 	portal_shapes = []
 	mesh_def_keys = {}
 	for k in mesh_definitions.cache_items.keys():
+		# PLY proxies add string keys into mesh_definitions,
+		# and the external meshes are never portals, so skip them
+		if type(k) is str: continue
+		
 		if not k[1] in mesh_def_keys.keys():
 			mesh_def_keys[k[1]] = []
 		mesh_def_keys[k[1]].append(k)

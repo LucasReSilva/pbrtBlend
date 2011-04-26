@@ -247,4 +247,5 @@ class SceneExporter(object):
 		
 		except Exception as err:
 			self.report({'ERROR'}, 'Export aborted: %s' % err)
+			# raise err
 			return {'CANCELLED'}
