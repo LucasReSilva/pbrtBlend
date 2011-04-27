@@ -93,6 +93,11 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 	
 	lg_gain = 1.0
 	light_group = light.luxrender_lamp.lightgroup
+	
+	# If this lamp's light group is disabled, skip it
+	if not scene.luxrender_lightgroups.is_enabled(light_group):
+		return False
+	
 	if light_group in scene.luxrender_lightgroups.lightgroups:
 		lg_gain = scene.luxrender_lightgroups.lightgroups[light_group].gain
 	

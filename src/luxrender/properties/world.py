@@ -470,9 +470,17 @@ class luxrender_lightgroup_data(declarative_property_group):
 	ef_attach_to = []	# not attached
 	
 	controls = [
+		# enabled is drawn manually in the UI class
 		'gain'
 	]
 	properties = [
+		{
+			'type': 'bool',
+			'attr': 'enabled',
+			'name': 'Enabled',
+			'description': 'Enable this light group',
+			'default': True
+		},
 		{
 			'type': 'float',
 			'attr': 'gain',
@@ -524,7 +532,11 @@ class luxrender_lightgroups(declarative_property_group):
 			'attr': 'ignore',
 			'name': 'Merge LightGroups',
 			'description': 'Enable this for final renders, or to decrease RAM usage.',
-			'default': False,
-			'save_in_preset': True
+			'default': False
 		},
 	]
+	
+	def is_enabled(self, name):
+		if name != '' and name in self.lightgroups:
+			return self.lightgroups[name].enabled
+		return True

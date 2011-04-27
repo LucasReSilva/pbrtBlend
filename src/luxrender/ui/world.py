@@ -116,22 +116,24 @@ class lightgroups(world_panel):
 		( ('scene',), 'luxrender_lightgroups' )
 	]
 	
-	# overridden in order to draw the selected luxrender_lightgroup_data property group
+	# overridden in order to draw a 'non-standard' panel
 	def draw(self, context):
 		super().draw(context)
 		
 		if context.world:
 			
-			
 			for lg_index in range(len(context.scene.luxrender_lightgroups.lightgroups)):
 				lg = context.scene.luxrender_lightgroups.lightgroups[lg_index]
 				row = self.layout.row()
-				row.prop(lg, 'name', text="")
+				row.prop(lg, 'enabled', text="")
+				subrow=row.row()
+				subrow.enabled = lg.enabled
+				subrow.prop(lg, 'name', text="")
 				# Here we draw the currently selected luxrender_volumes_data property group
 				for control in lg.controls:
 					self.draw_column(
 						control,
-						row.column(),
+						subrow.column(),
 						lg,
 						context,
 						property_group = lg

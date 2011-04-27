@@ -629,9 +629,13 @@ class GeometryExporter(object):
 					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='direct')
 				
 				if object_is_emitter:
-					if not self.visibility_scene.luxrender_lightgroups.ignore:
-						self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
-					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
+					# Only add the AreaLightSource if this object's emission lightgroup is enabled
+					if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
+						if not self.visibility_scene.luxrender_lightgroups.ignore:
+							self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+						self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
+					else:
+						object_is_emitter = False
 				
 				int_v, ext_v = get_material_volume_defs(ob_mat)
 				if int_v != '':
