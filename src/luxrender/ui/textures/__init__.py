@@ -52,6 +52,7 @@ class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, prope
 		'''
 		
 		tex = context.texture
+		if not tex: return False
 		
 		if context.texture.luxrender_texture.type == 'BLENDER':
 			return tex and \
