@@ -43,6 +43,7 @@ class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, prope
 	#bl_options		= {'HIDE_HEADER'}
 	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
 	LUX_COMPAT		= set()
+	BL_COMPAT		= set()
 	
 	@classmethod
 	def poll(cls, context):
@@ -52,8 +53,10 @@ class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, prope
 		
 		tex = context.texture
 		
-		if hasattr(cls, 'BL_COMPAT'):
-			return tex and context.texture.type in cls.BL_COMPAT
+		if context.texture.luxrender_texture.type == 'BLENDER':
+			return tex and \
+					(context.scene.render.engine in cls.COMPAT_ENGINES) and \
+					context.texture.type in cls.BL_COMPAT
 		else:
 			return tex and \
 					(context.scene.render.engine in cls.COMPAT_ENGINES) and \
