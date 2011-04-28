@@ -46,8 +46,8 @@ class luxrender_object(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'append_external_mesh',
-			'name': 'External PLY Mesh',
-			'description': 'Use this object to place an external PLY mesh file in the scene',
+			'name': 'External PLY or STL Mesh',
+			'description': 'Use this object to place an external PLY or STL mesh file in the scene',
 			'default': False
 		},
 		{
@@ -69,6 +69,6 @@ class luxrender_object(declarative_property_group):
 			'subtype': 'FILE_PATH',
 			'attr': 'external_mesh',
 			'name': 'Mesh file',
-			'description': 'External PLY mesh file to place in scene',
+			'description': 'External PLY or STL mesh file to place in scene',
 		}
 	]

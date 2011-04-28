@@ -113,25 +113,25 @@ class GeometryExporter(object):
 		
 		export_original = True
 		# mesh data name first for portal reasons
-		ply_mesh_name = '%s_%s_ply' % (obj.data.name, self.geometry_scene.name)
+		ext_mesh_name = '%s_%s_ext' % (obj.data.name, self.geometry_scene.name)
 		if obj.luxrender_object.append_external_mesh:
 			if obj.luxrender_object.hide_proxy_mesh:
 				export_original = False
 			
-			if self.allow_instancing(obj) and self.ExportedMeshes.have(ply_mesh_name):
-				mesh_definitions.append( self.ExportedMeshes.get(ply_mesh_name) )
+			if self.allow_instancing(obj) and self.ExportedMeshes.have(ext_mesh_name):
+				mesh_definitions.append( self.ExportedMeshes.get(ext_mesh_name) )
 			else:
 				ply_params = ParamSet()
 				ply_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
 				ply_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
 				
-				mesh_definition = (ply_mesh_name, obj.active_material.name, 'plymesh', ply_params)
+				mesh_definition = (ext_mesh_name, obj.active_material.name, obj.luxrender_object.external_mesh[-3:] + 'mesh', ply_params)
 				mesh_definitions.append( mesh_definition )
 				
 				# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
 				if self.allow_instancing(obj):
 					self.exportShapeDefinition(obj, mesh_definition)
-					self.ExportedMeshes.add(ply_mesh_name, mesh_definition)
+					self.ExportedMeshes.add(ext_mesh_name, mesh_definition)
 		
 		if export_original:
 			# Choose the mesh export type, if set, or use the default
