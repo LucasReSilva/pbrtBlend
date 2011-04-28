@@ -165,7 +165,7 @@ def get_instance_materials(ob):
 def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
-def convert_texture(scene, texture):
+def convert_texture(scene, texture, variant_hint=None):
 	# Lux only supports blender's textures in float variant (except for image)
 	variant = 'float'
 	paramset = ParamSet()
@@ -277,7 +277,10 @@ def convert_texture(scene, texture):
 			tex_image = efutil.path_relative_to_export(f_path)
 		
 		lux_tex_name = 'imagemap'
-		variant = 'color'
+		if variant_hint:
+			variant = variant_hint
+		else:
+			variant = 'color'
 		paramset.add_string('filename', tex_image)
 		paramset.add_float('gamma', 2.2)
 		mapping_type = '2D'
@@ -350,7 +353,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 							else:
 								LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 						else:
-							lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture)
+							lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint=variant)
 							if lux_tex_variant == variant:
 								ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 							else:
