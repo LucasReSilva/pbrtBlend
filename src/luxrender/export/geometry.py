@@ -917,7 +917,6 @@ class GeometryExporter(object):
 			
 			try:
 				# Export only objects which are enabled for render (in the outliner) and visible on a render layer
-				#if not obj.is_visible(self.visibility_scene) or obj.hide_render:
 				if not self.is_visible(obj):
 					raise UnexportableObjectException(' -> not visible')
 				
