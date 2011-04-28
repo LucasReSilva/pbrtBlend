@@ -51,7 +51,11 @@ class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, prope
 		'''
 		
 		tex = context.texture
-		return	tex and \
-				(context.scene.render.engine in cls.COMPAT_ENGINES) and \
-				context.texture.luxrender_texture.type in cls.LUX_COMPAT
+		
+		if hasattr(cls, 'BL_COMPAT'):
+			return tex and context.texture.type in cls.BL_COMPAT
+		else:
+			return tex and \
+					(context.scene.render.engine in cls.COMPAT_ENGINES) and \
+					context.texture.luxrender_texture.type in cls.LUX_COMPAT
 
