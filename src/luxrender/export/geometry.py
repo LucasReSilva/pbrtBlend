@@ -121,11 +121,11 @@ class GeometryExporter(object):
 			if self.allow_instancing(obj) and self.ExportedMeshes.have(ext_mesh_name):
 				mesh_definitions.append( self.ExportedMeshes.get(ext_mesh_name) )
 			else:
-				ply_params = ParamSet()
-				ply_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
-				ply_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
+				ext_params = ParamSet()
+				ext_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
+				ext_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
 				
-				mesh_definition = (ext_mesh_name, obj.active_material.name, obj.luxrender_object.external_mesh[-3:] + 'mesh', ply_params)
+				mesh_definition = (ext_mesh_name, obj.active_material.name, obj.luxrender_object.external_mesh[-3:] + 'mesh', ext_params)
 				mesh_definitions.append( mesh_definition )
 				
 				# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
