@@ -832,8 +832,8 @@ class luxrender_tex_band(declarative_property_group):
 			'type': 'enum',
 			'name': 'Variant',
 			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -953,8 +953,8 @@ class luxrender_tex_bilerp(declarative_property_group):
 			'type': 'enum',
 			'name': 'Variant',
 			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -1166,8 +1166,8 @@ class luxrender_tex_brick(declarative_property_group):
 			'type': 'enum',
 			'name': 'Variant',
 			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -1815,8 +1815,8 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'type': 'enum',
 			'name': 'Variant',
 			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -2264,8 +2264,8 @@ class luxrender_tex_mix(declarative_property_group):
 			'type': 'enum',
 			'name': 'Variant',
 			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -2346,8 +2346,8 @@ class luxrender_tex_multimix(declarative_property_group):
 			'type': 'enum',
 			'name': 'Variant',
 			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -2570,8 +2570,8 @@ class luxrender_tex_scale(declarative_property_group):
 			'type': 'enum',
 			'name': 'Variant',
 			'items': [
-				('float', 'Float', 'float'),
-				('color', 'Color', 'color'),
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
 				# ('fresnel', 'Fresnel', 'fresnel'),
 			],
 			'expand': True,
