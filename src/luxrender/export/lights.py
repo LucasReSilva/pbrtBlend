@@ -151,13 +151,13 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			light_params.add_float('coneangle', coneangle)
 			light_params.add_float('conedeltaangle', conedeltaangle)
 		
-		attr_light(lux_context, light, ob.name, light_group, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light_group, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 
 	if light.type == 'POINT':
 		light_params.update( ies_data )
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'AREA':

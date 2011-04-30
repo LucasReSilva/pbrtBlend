@@ -516,6 +516,10 @@ class GeometryExporter(object):
 		if self.visibility_scene.luxrender_engine.renderer == 'hybrid':
 			return False
 		
+		# Portals are always instances
+		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
+			return True
+		
 		# If the mesh is only used once, instancing is a waste of memory
 		# However, duplis don't increase the users count, so we cout those separately
 		if (not ((obj.parent and obj.parent.is_duplicator) or obj in self.objects_used_as_duplis)) and obj.data.users == 1:

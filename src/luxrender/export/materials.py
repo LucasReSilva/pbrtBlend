@@ -356,7 +356,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 							lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint=variant)
 							if texture.type == 'IMAGE':
 								texture_name = texture_name + "_" + lux_tex_variant
-
+							
 							if lux_tex_variant == variant:
 								ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 							else:
