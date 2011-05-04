@@ -70,6 +70,7 @@ class GeometryExporter(object):
 		self.ExportedMeshes = ExportCache('ExportedMeshes')
 		self.ExportedObjects = ExportCache('ExportedObjects')
 		self.ExportedPLYs = ExportCache('ExportedPLYs')
+		self.AnimationDataCache = ExportCache('AnimationData')
 		
 		self.objects_used_as_duplis = set()
 		
@@ -520,6 +521,10 @@ class GeometryExporter(object):
 		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
 			return True
 		
+		# If the object is animated, for motion blur we need instances
+		if self.is_object_animated(obj)[0]:
+			return True
+		
 		# If the mesh is only used once, instancing is a waste of memory
 		# However, duplis don't increase the users count, so we cout those separately
 		if (not ((obj.parent and obj.parent.is_duplicator) or obj in self.objects_used_as_duplis)) and obj.data.users == 1:
@@ -562,6 +567,36 @@ class GeometryExporter(object):
 		
 		LuxLog('Mesh definition exported: %s' % me_name)
 	
+	def is_object_animated(self, obj, matrix=None):
+		
+		if self.AnimationDataCache.have(obj):
+			return self.AnimationDataCache.get(obj)
+		
+		next_matrices = []
+		
+		# object motion blur
+		is_object_animated = False
+		if self.visibility_scene.camera.data.luxrender_camera.usemblur and self.visibility_scene.camera.data.luxrender_camera.objectmblur:
+			if matrix is not None and matrix[1] is not None:
+				next_matrices = [matrix[1]]
+				is_object_animated = True
+			else:
+				# grab a bunch of fractional-frame fcurve_matrices and export
+				# several motionInstances for non-linear motion blur
+				STEPS = 1
+				for i in range(STEPS,0,-1):
+					fcurve_matrix = object_anim_matrix(self.geometry_scene, obj, frame_offset=i/float(STEPS))
+					if fcurve_matrix == False:
+						break
+					
+					next_matrices.append(fcurve_matrix)
+				
+				is_object_animated = len(next_matrices) > 0
+		
+		self.AnimationDataCache.add(obj, (is_object_animated, next_matrices))
+		
+		return is_object_animated, next_matrices
+	
 	def exportShapeInstances(self, obj, mesh_definitions, matrix=None, parent=None):
 		
 		# Don't export instances of portal meshes
@@ -577,26 +612,7 @@ class GeometryExporter(object):
 		else:
 			self.lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
 		
-		# object motion blur
-		is_object_animated = False
-		if self.visibility_scene.camera.data.luxrender_camera.usemblur and self.visibility_scene.camera.data.luxrender_camera.objectmblur:
-			if matrix is not None and matrix[1] is not None:
-				next_matrices = [matrix[1]]
-				is_object_animated = True
-			
-			else:
-				next_matrices = []
-				# grab a bunch of fractional-frame fcurve_matrices and export
-				# several motionInstances for non-linear motion blur
-				STEPS = 1
-				for i in range(STEPS,0,-1):
-					fcurve_matrix = object_anim_matrix(self.geometry_scene, obj, frame_offset=i/float(STEPS))
-					if fcurve_matrix == False:
-						break
-					
-					next_matrices.append(fcurve_matrix)
-				
-				is_object_animated = len(next_matrices) > 0
+		is_object_animated, next_matrices = self.is_object_animated(obj, matrix)
 		
 		if is_object_animated:
 			for i, next_matrix in enumerate(next_matrices):
