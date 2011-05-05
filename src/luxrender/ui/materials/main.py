@@ -28,20 +28,35 @@ import bpy
 
 from ... import LuxRenderAddon
 from ...ui.materials import luxrender_material_base
-from ...operators.lrmdb_lib import lrmdb_client
+from ...operators.lrmdb import lrmdb_state
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_db(luxrender_material_base):
+	bl_label	= 'LuxRender Materials Database'
+	bl_options = 'DEFAULT_CLOSED'
+	
+	def draw(self, context):
+		if not lrmdb_state._active:
+			self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
+		else:
+			self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
+			
+			for action in lrmdb_state.actions:
+				if action.callback == None:
+					self.layout.label(text=action.label)
+				else:
+					self.layout.operator('luxrender.lrmdb', text=action.label).invoke_action_id = action.aid
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Utils'
+	bl_options = 'DEFAULT_CLOSED'
+	
 	def draw(self, context):
 		row = self.layout.row(align=True)
 		row.operator("luxrender.load_material", icon="DISK_DRIVE")
 		row.operator("luxrender.save_material", icon="DISK_DRIVE").filename =\
 			'%s.lbm2' % bpy.path.clean_name(context.material.name)
-		
-		if lrmdb_client.loggedin:
-			row = self.layout.row(align=True)
-			row.operator("luxrender.lrmdb_upload", icon="FILE_PARENT")
 		
 		row = self.layout.row(align=True)
 		row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
@@ -52,8 +67,8 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		row = self.layout.row(align=True)
 		row.operator("luxrender.copy_mat_color", icon='COLOR')
 		
-		row = self.layout.row(align=True)
-		row.operator("luxrender.material_reset", icon='SOLID')
+		#row = self.layout.row(align=True)
+		#row.operator("luxrender.material_reset", icon='SOLID')
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material(luxrender_material_base):
@@ -102,9 +117,6 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 		( ('material',), 'luxrender_transparency' )
 	]
 	
-	# only textures with Kd (or similar) for now
-	#LUX_COMPAT = {'carpaint', 'glass', 'glossy', 'glossy_lossy', 'mattetranslucent', 'glossytranslucent', 'scatter', 'matte', 'mirror', 'velvet'}
-	
 	def draw_header(self, context):
 		self.layout.prop(context.material.luxrender_transparency, "transparent", text="")
 	
@@ -112,5 +124,4 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 	def poll(cls, context):
 		if not hasattr(context.material, 'luxrender_transparency'):
 			return False
-		#return super().poll(context) and context.material.luxrender_material.type in cls.LUX_COMPAT
 		return super().poll(context) and context.material.luxrender_material.type != 'null'

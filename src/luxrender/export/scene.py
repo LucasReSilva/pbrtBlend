@@ -42,7 +42,7 @@ from ..outputs.pure_api	import LUXRENDER_VERSION
 
 class SceneExporterProperties(object):
 	"""
-	Mimics the properties member conatined within EXPORT_OT_LuxRender operator
+	Mimics the properties member contained within EXPORT_OT_LuxRender operator
 	"""
 	
 	filename		= ''
@@ -53,7 +53,6 @@ class SceneExporterProperties(object):
 
 class SceneExporter(object):
 	
-	#scene = None
 	properties = SceneExporterProperties()
 	
 	def set_properties(self, properties):
@@ -104,7 +103,6 @@ class SceneExporter(object):
 			])
 			
 			efutil.export_path = lxs_filename
-			#print('(3) export_path is %s' % efutil.export_path)
 			
 			if self.properties.api_type == 'FILE':
 				
@@ -249,4 +247,5 @@ class SceneExporter(object):
 		
 		except Exception as err:
 			self.report({'ERROR'}, 'Export aborted: %s' % err)
+			# raise err
 			return {'CANCELLED'}

@@ -26,8 +26,8 @@
 #
 # System Libs
 from __future__ import division
-from ctypes import cdll, c_uint, c_float, cast, POINTER, byref, sizeof, c_long
-import errno, os, struct, sys
+from ctypes import cdll, c_uint, c_float, cast, POINTER, byref, sizeof
+import os, struct, sys
 
 # Blender Libs
 import bpy
@@ -53,31 +53,33 @@ class library_loader():
 		'lzo': {
 			'darwin': [
 				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ),
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.dylib'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzo2.dylib'
 			],
 			'win32': [
 				'lzo.dll',
-				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzo.dll'
+				bpy.utils.user_resource('SCRIPTS','addons/luxrender/lzo.dll'),
+				bpy.app.binary_path[:-11] + '2.57/scripts/addons/luxrender/lzo.dll'
 			],
 			'linux2': [
 				'/usr/lib/liblzo2.so',
 				'/usr/lib/liblzo2.so.2',
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzo2.so'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzo2.so'
 			],
 		},
 		'lzma': {
 			'darwin': [
 				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzmadec.dylib'),
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzmadec.dylib'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzmadec.dylib'
 			],
 			'win32': [
 				'lzma.dll',
-				bpy.app.binary_path[:-11] + '2.56/scripts/addons/luxrender/lzma.dll'
+				bpy.utils.user_resource('SCRIPTS','addons/luxrender/lzma.dll'),
+				bpy.app.binary_path[:-11] + '2.57/scripts/addons/luxrender/lzma.dll'
 			],
 			'linux2': [
 				'/usr/lib/liblzma.so',
 				'/usr/lib/liblzma.so.2',
-				bpy.app.binary_path[:-7] + '2.56/scripts/addons/luxrender/liblzma.so'
+				bpy.app.binary_path[:-7] + '2.57/scripts/addons/luxrender/liblzma.so'
 			]
 		}
 	}
@@ -209,7 +211,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 				if (data_type == 3) or (data_type == 4):
 					cell_count = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 					#print("Cell count: {0:1d}".format(cell_count))
-					usr_data_type = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+					struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 					
 					# Shadow values
 					compressed = struct.unpack("1B", cachefile.read(1))[0]
@@ -366,7 +368,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 							p_dens = cast(uncomp_stream, POINTER(c_float))
 							
 							#call lzo decompressor
-							lReturn = lzodll.lzo1x_decompress(stream,stream_size,p_dens,byref(outlen), None)
+							lzodll.lzo1x_decompress(stream,stream_size,p_dens,byref(outlen), None)
 							
 							for i in range(cell_count):
 								density.append(p_dens[i])
@@ -383,7 +385,7 @@ def read_cache(smokecache, is_high_res, amplifier):
 							outlen = c_uint(cell_count*SZ_FLOAT)
 							
 							#call lzma decompressor
-							lReturn = lzmadll.LzmaUncompress(p_dens, byref(outlen), stream, byref(c_uint(stream_size)), props, props_size)
+							lzmadll.LzmaUncompress(p_dens, byref(outlen), stream, byref(c_uint(stream_size)), props, props_size)
 							
 							for i in range(cell_count):
 								density.append(p_dens[i])

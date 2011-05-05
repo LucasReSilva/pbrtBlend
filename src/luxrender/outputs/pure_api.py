@@ -83,9 +83,6 @@ if not 'PYLUX_AVAILABLE' in locals():
 					pass
 				except AttributeError:
 					pass
-				
-			
-			# no further action required
 		
 		# Backwards-compatibility Context method substitution
 		if LUXRENDER_VERSION < '0.8':

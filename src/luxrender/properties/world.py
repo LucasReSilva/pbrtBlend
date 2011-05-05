@@ -348,7 +348,6 @@ class luxrender_volume_data(declarative_property_group):
 		TC_sigma_a.load_paramset(self, ps)
 		TC_sigma_s.load_paramset(self, ps)
 		
-		
 		# reverse the scattering scale factor
 		def sct_col_in_range(val):
 			return val>=0.01 and val<=0.99
@@ -428,9 +427,7 @@ class luxrender_volumes(declarative_property_group):
 			'ptype': luxrender_volume_data,
 			'name': 'volumes',
 			'attr': 'volumes',
-			'items': [
-				
-			]
+			'items': []
 		},
 		{
 			'type': 'int',
@@ -461,3 +458,85 @@ class luxrender_volumes(declarative_property_group):
 			'icon': 'ZOOMOUT',
 		},
 	]
+
+@LuxRenderAddon.addon_register_class
+class luxrender_lightgroup_data(declarative_property_group):
+	'''
+	Storage class for LuxRender light groups. The
+	luxrender_lightgroups object will store 1 or more of
+	these in its CollectionProperty 'lightgroups'.
+	'''
+	
+	ef_attach_to = []	# not attached
+	
+	controls = [
+		# enabled is drawn manually in the UI class
+		'gain'
+	]
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'enabled',
+			'name': 'Enabled',
+			'description': 'Enable this light group',
+			'default': True
+		},
+		{
+			'type': 'float',
+			'attr': 'gain',
+			'name': 'Gain',
+			'description': 'Overall gain for this light group',
+			'min': 0.0,
+			'soft_min': 0.0,
+			'default': 1.0
+		}
+	]
+
+@LuxRenderAddon.addon_register_class
+class luxrender_lightgroups(declarative_property_group):
+	'''
+	Storage class for LuxRender Light Groups.
+	'''
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
+		'op_lg_add',
+		'ignore',
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'type': 'collection',
+			'ptype': luxrender_lightgroup_data,
+			'name': 'lightgroups',
+			'attr': 'lightgroups',
+			'items': []
+		},
+		{
+			'type': 'int',
+			'name': 'lightgroups_index',
+			'attr': 'lightgroups_index',
+		},
+		{
+			'type': 'operator',
+			'attr': 'op_lg_add',
+			'operator': 'luxrender.lightgroup_add',
+			'text': 'Add',
+			'icon': 'ZOOMIN',
+		},
+		{
+			'type': 'bool',
+			'attr': 'ignore',
+			'name': 'Merge LightGroups',
+			'description': 'Enable this for final renders, or to decrease RAM usage.',
+			'default': False
+		},
+	]
+	
+	def is_enabled(self, name):
+		if name != '' and name in self.lightgroups:
+			return self.lightgroups[name].enabled
+		return True

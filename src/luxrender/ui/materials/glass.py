@@ -52,4 +52,3 @@ class ui_material_glass(luxrender_material_sub):
 		
 		cl=self.layout.column(align=True)
 		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-

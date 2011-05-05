@@ -26,7 +26,7 @@
 #
 import collections, json
 
-from .pure_api import LUXRENDER_VERSION
+from .. import LuxRenderAddon
 
 class Custom_Context(object):
 	'''
@@ -42,7 +42,7 @@ class Custom_Context(object):
 	_default_data = {
 		'name': '',
 		'category_id': -1,
-		'version': LUXRENDER_VERSION,
+		'version': LuxRenderAddon.BL_VERSION,
 		'objects': [],
 		'metadata': {}
 	}
@@ -52,6 +52,7 @@ class Custom_Context(object):
 		self.lbm2_data = Custom_Context._default_data
 		self.lbm2_objects = []
 		self.lbm2_metadata = {}
+		self._size = 244	# Rough overhead for object definition
 	
 	def set_material_name(self, name):
 		self.lbm2_data['name'] = name
@@ -62,6 +63,9 @@ class Custom_Context(object):
 	def _get_lbm2(self, add_comment=False):
 		lbm2_data = self.lbm2_data
 		lbm2_data['objects'] = self.lbm2_objects
+		# 1.22 mostly corrects for other data not yet accounted for ;)
+		#print('lbm2 estimated_size %s' % self._size*1.22)
+		lbm2_data['metadata']['estimated_size'] = round(self._size * 1.22)
 		return lbm2_data
 	
 	def write(self, filename):
@@ -78,9 +82,9 @@ class Custom_Context(object):
 				indent=2
 			)
 	
-	def upload(self, lrmdb_client):
-		if lrmdb_client.loggedin:
-			s = lrmdb_client.server_instance()
+	def upload(self, lrmdb_state):
+		if lrmdb_state.loggedin:
+			s = lrmdb_state.server_instance()
 			upload = s.material.submit( self._get_lbm2() )
 			if type(upload) is str:
 				raise Exception(upload)
@@ -113,117 +117,20 @@ class Custom_Context(object):
 			'paramset': [],
 		}
 		
+		# Size really is just an estimate, and is most accurate for large
+		# amounts of data
+		self._size += 120				# Rough overhead per object entry
+		self._size += params.getSize()	# + the estimated size of encoded data
 		for p in params:
 			obj['paramset'].append({
 				'type': p.type,
 				'name': p.name,
 				'value': p.value
 			})
-			
+		
 		self.lbm2_objects.append(obj)
 	
 	# Wrapped pylux.Context API calls follow ...
-	
-	#def objectBegin(self, name, file=None):
-	#	self._api('ObjectBegin ', [name, []], file=file)
-	
-	#def objectEnd(self, comment=''):
-	#	self._api('ObjectEnd # ', [comment, []])
-	
-	#def objectInstance(self, name):
-	#	self._api('ObjectInstance ', [name, []])
-	
-	#def portalInstance(self, name):
-	#	# Backwards compatibility
-	#	if LUXRENDER_VERSION < '0.8':
-	#		LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
-	#		self._api('ObjectInstance ', [name, []])
-	#	else:
-	#		self._api('PortalInstance ', [name, []])
-	
-	#def renderer(self, *args):
-	#	self._api('Renderer', args)
-	
-	#def sampler(self, *args):
-	#	self._api('Sampler', args)
-	
-	#def accelerator(self, *args):
-	#	self._api('Accelerator', args)
-	
-	#def surfaceIntegrator(self, *args):
-	#	self._api('SurfaceIntegrator', args)
-	
-	#def volumeIntegrator(self, *args):
-	#	self._api('VolumeIntegrator', args)
-	
-	#def pixelFilter(self, *args):
-	#	self._api('PixelFilter', args)
-	
-	#def lookAt(self, *args):
-	#	self.wf('\nLookAt %s' % ' '.join(['%f'%i for i in args]))
-	
-	#def coordinateSystem(self, name):
-	#	self._api('CoordinateSystem', [name, []])
-	
-	#def identity(self):
-	#	self._api('Identity #', ['', []])
-	
-	#def camera(self, *args):
-	#	self._api('Camera', args)
-	
-	#def film(self, *args):
-	#	self._api('Film', args)
-	
-	#def worldBegin(self, *args):
-	#	self.wf('\nWorldBegin')
-	
-	#def lightGroup(self, *args):
-	#	self._api('LightGroup', args)
-	
-	#def lightSource(self, *args):
-	#	self._api('LightSource', args)
-	
-	#def areaLightSource(self, *args):
-	#	self._api('AreaLightSource', args)
-	
-	#def motionInstance(self, name, start, stop, motion_name):
-	#	self.wf('\nMotionInstance "%s" %f %f "%s"' % (name, start, stop, motion_name))
-		
-	#def attributeBegin(self, comment='', file=None):
-	#	self._api('AttributeBegin # ', [comment, []], file=file)
-		
-	#def attributeEnd(self):
-	#	self._api('AttributeEnd #', ['', []])
-	
-	#def transformBegin(self, comment='', file=None):
-	#	self._api('TransformBegin # ', [comment, []], file=file)
-	
-	#def transformEnd(self):
-	#	self._api('TransformEnd #', ['', []])
-	
-	#def concatTransform(self, values):
-	#	self.wf('\nConcatTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
-	
-	#def transform(self, values):
-	#	self.wf('\nTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
-	
-	#def scale(self, x,y,z):
-	#	self.wf('\nScale %s' % ' '.join(['%0.15f'%i for i in [x,y,z]]))
-	
-	#def rotate(self, a,x,y,z):
-	#	self.wf('\nRotate %s' % ' '.join(['%0.15f'%i for i in [a,x,y,z]]))
-	
-	#def shape(self, *args):
-	#	self._api('Shape', args, file=self.current_file)
-	
-	#def portalShape(self, *args):
-	#	self._api('PortalShape', args, file=self.current_file)
-	
-	#def material(self, *args):
-	#	self._api('Material', args)
-	
-	#def namedMaterial(self, name):
-	#	self._api('NamedMaterial', [name, []])
 	
 	def makeNamedMaterial(self, name, params):
 		self._api("MakeNamedMaterial", [name, params])
@@ -237,14 +144,8 @@ class Custom_Context(object):
 	def exterior(self, name):
 		self._api('Exterior ', [name, []])
 	
-	#def volume(self, args):
-	#	self._api("Volume", *args)
-	
 	def texture(self, name, type, texture, params):
 		self._api("Texture", [name, params], extra_tokens='"%s" "%s"' % (type,texture))
-	
-	#def worldEnd(self):
-	#	self.wf('WorldEnd')
 	
 	def cleanup(self):
 		pass

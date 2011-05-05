@@ -34,8 +34,6 @@ class luxrender_material_base(bl_ui.properties_material.MaterialButtonsPanel, pr
 	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
 
 class luxrender_material_sub(luxrender_material_base):
-	#bl_options		= {'HIDE_HEADER'}
-	
 	LUX_COMPAT		= set()
 	
 	@classmethod

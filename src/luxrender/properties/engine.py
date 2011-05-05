@@ -35,8 +35,6 @@ from ..export import ParamSet
 from ..outputs.pure_api import PYLUX_AVAILABLE
 from ..outputs.pure_api import LUXRENDER_VERSION
 
-#from ..outputs.luxfire_client import LUXFIRE_CLIENT_AVAILABLE
-
 def find_luxrender_path():
 	return os.getenv(
 		# Use the env var path, if set ...
@@ -52,9 +50,6 @@ def find_apis():
 	if PYLUX_AVAILABLE:
 		apis.append( ('INT', 'Internal', 'INT') )
 	
-	#if LUXFIRE_CLIENT_AVAILABLE:
-	#	apis.append( ('LFC', 'LuxFire Client', 'LFC') )
-	
 	return apis
 
 @LuxRenderAddon.addon_register_class
@@ -69,15 +64,14 @@ class luxrender_engine(declarative_property_group):
 		'export_type',
 		'binary_name',
 		'write_files',
+		'install_path',
 		['write_lxs', 'write_lxm', 'write_lxo', 'write_lxv'],
 		'embed_filedata',
 		
 		'mesh_type',
 		'partial_ply',
 		['render','monitor_external'],
-		'install_path',
 		['threads_auto', 'threads'],
-		'ignore_lightgroups',
 	]
 	
 	if LUXRENDER_VERSION >= '0.8':
@@ -97,9 +91,9 @@ class luxrender_engine(declarative_property_group):
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
 		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
-		'monitor_external':			{'export_type': 'EXT', 'binary_name': 'luxrender'},
+		'monitor_external':			{'export_type': 'EXT', 'binary_name': 'luxrender', 'render': True },
 		'partial_ply':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'install_path':				{ 'render': True, 'export_type': 'EXT' },
+		'install_path':				{ 'export_type': 'EXT' },
 		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
 		'threads':					A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
 	}
@@ -279,15 +273,7 @@ class luxrender_engine(declarative_property_group):
 				('very-quiet', 'Very quiet', 'very-quiet'),
 			],
 			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'ignore_lightgroups',
-			'name': 'Ignore LightGroups',
-			'description': 'Enable this for final renders, or to decrease RAM usage.',
-			'default': False,
-			'save_in_preset': True
-		},
+		}
 	]
 	
 	def allow_file_embed(self):
@@ -309,7 +295,6 @@ class luxrender_networking(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		# 'use_network_servers', # drawn in panel header
 		'servers',
 		'serverinterval'
 	]
@@ -320,7 +305,7 @@ class luxrender_networking(declarative_property_group):
 	}
 	
 	properties = [
-		{
+		{	# drawn in panel header
 			'type': 'bool',
 			'attr': 'use_network_servers',
 			'name': 'Use Networking',

@@ -67,9 +67,11 @@ class luxrender_camera(declarative_property_group):
 	ef_attach_to = ['Camera']
 	
 	controls = [
+		# type is drawn in the UI class manually, and only for perspective camera type
+		#'type',
+		
 		'Exterior',
 		['autofocus', 'use_dof', 'use_clipping'],
-		'type',
 		'fstop',
 		'sensitivity',
 		'exposure_mode',
@@ -146,7 +148,6 @@ class luxrender_camera(declarative_property_group):
 			'max': 6400.0,
 			'soft_max': 6400.0
 		},
-		
 		{
 			'type': 'enum',
 			'attr': 'exposure_mode',
@@ -158,7 +159,6 @@ class luxrender_camera(declarative_property_group):
 			],
 			'default': 'normalised'
 		},
-		
 		{
 			'type': 'float',
 			'attr': 'exposure_start',
@@ -207,8 +207,6 @@ class luxrender_camera(declarative_property_group):
 			'max': 360.0,
 			'soft_max': 360.0
 		},
-		
-		
 		{
 			'type': 'bool',
 			'attr': 'usemblur',
@@ -374,11 +372,11 @@ class luxrender_camera(declarative_property_group):
 		if self.use_clipping:
 			params.add_float('hither', ws*cam.clip_start)
 			params.add_float('yon', ws*cam.clip_end)
-
+		
 		if self.usemblur:
 			# update the camera settings with motion blur settings
 			params.add_string('shutterdistribution', self.shutterdistribution)
-
+		
 			if self.cammblur and is_cam_animated:
 				params.add_string('endtransform', 'CameraEndTransform')
 		
@@ -391,26 +389,56 @@ class luxrender_film(declarative_property_group):
 	ef_attach_to = ['luxrender_camera']
 	
 	controls = [
+		'lbl_internal',
+		'internal_updateinterval',
+		
+		'lbl_external',
 		'writeinterval',
 		'displayinterval',
+		
 		'lbl_outputs',
 		'integratedimaging',
-		['write_png', 'write_exr','write_tga','write_flm'],
-		['output_alpha', 'write_exr_applyimaging'],
+		['write_png', 'write_tga'],
+		['write_exr', 'write_exr_applyimaging'],
+		'output_alpha',
+		['write_flm', 'restart_flm'],
+		
 		'ldr_clamp_method',
 		'outlierrejection_k',
 	]
 	
-	visibility = {}
+	visibility = {
+		'restart_flm': { 'write_flm': True },
+		'write_exr_applyimaging': { 'write_exr': True },
+	}
 	
 	properties = [
-		
+		{
+			'type': 'text',
+			'attr': 'lbl_internal',
+			'name': 'Internal rendering'
+		},
+		{
+			'type': 'int',
+			'attr': 'internal_updateinterval',
+			'name': 'Update interval',
+			'description': 'Period for updating render image (seconds)',
+			'default': 10,
+			'min': 2,
+			'soft_min': 2,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text',
+			'attr': 'lbl_external',
+			'name': 'External rendering'
+		},
 		{
 			'type': 'int',
 			'attr': 'writeinterval',
 			'name': 'Save interval',
 			'description': 'Period for writing images to disk (seconds)',
-			'default': 10,
+			'default': 180,
 			'min': 2,
 			'soft_min': 2,
 			'save_in_preset': True
@@ -418,7 +446,7 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'displayinterval',
-			'name': 'GUI refresh interval',
+			'name': 'Refresh interval',
 			'description': 'Period for updating rendering on screen (seconds)',
 			'default': 10,
 			'min': 2,
@@ -458,7 +486,13 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'write_flm',
-			'name': 'FLM',
+			'name': 'Write FLM',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'restart_flm',
+			'name': 'Restart FLM',
 			'default': False
 		},
 		{
@@ -531,16 +565,25 @@ class luxrender_film(declarative_property_group):
 		
 		params = ParamSet()
 		
-		# Set resolution
-		params.add_integer('xresolution', xr)
-		params.add_integer('yresolution', yr)
-		
 		if scene.render.use_border:
-			cropwindow = [
+			(x1,x2,y1,y2) = [
 				scene.render.border_min_x, scene.render.border_max_x,
 				scene.render.border_min_y, scene.render.border_max_y
 			]
-			params.add_float('cropwindow', cropwindow)
+			# Set resolution
+			params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
+			params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+		else:
+			# Set resolution
+			params.add_integer('xresolution', xr)
+			params.add_integer('yresolution', yr)
+		
+#		if scene.render.use_border:
+#			cropwindow = [
+#				scene.render.border_min_x, scene.render.border_max_x,
+#				scene.render.border_min_y, scene.render.border_max_y
+#			]
+#			params.add_float('cropwindow', cropwindow)
 		
 		# ColourSpace
 		if self.luxrender_colorspace.preset:
@@ -564,7 +607,8 @@ class luxrender_film(declarative_property_group):
 			if scene.luxrender_engine.allow_file_embed():
 				from ..util import bencode_file2string
 				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
-				params.add_string('cameraresponse_data', bencode_file2string(local_crf_filepath).splitlines() )
+				encoded_data = bencode_file2string(local_crf_filepath)
+				params.add_string('cameraresponse_data', encoded_data.splitlines() )
 			else:
 				params.add_string('cameraresponse', local_crf_filepath)
 		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf == 'preset':
@@ -573,6 +617,7 @@ class luxrender_film(declarative_property_group):
 		# Output types
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 		params.add_bool('write_resume_flm', self.write_flm)
+		params.add_bool('restart_resume_flm', self.restart_flm)
 		
 		if self.output_alpha:
 			output_channels = 'RGBA'
@@ -601,8 +646,11 @@ class luxrender_film(declarative_property_group):
 		
 		params.add_string('ldr_clamp_method', self.ldr_clamp_method)
 		
-		params.add_integer('displayinterval', self.displayinterval)
-		params.add_integer('writeinterval', self.writeinterval)
+		if scene.luxrender_engine.export_type == 'EXT':
+			params.add_integer('displayinterval', self.displayinterval)
+			params.add_integer('writeinterval', self.writeinterval)
+		else:
+			params.add_integer('writeinterval', self.internal_updateinterval)
 		
 		# Halt conditions
 		if scene.luxrender_sampler.haltspp > 0:
@@ -619,7 +667,7 @@ class luxrender_film(declarative_property_group):
 		
 		return ('fleximage', params)
 
-#	Valid CRF preset names (case sensitive):
+# Valid CRF preset names (case sensitive):
 # See lux/core/cameraresponse.cpp to keep this up to date
 
 crf_preset_names = [s.strip() for s in
@@ -802,7 +850,6 @@ class luxrender_colorspace(declarative_property_group):
 			'precision': 6,
 			'default': 0.329411
 		},
-		
 		{
 			'attr': 'cs_redX',
 			'type': 'float',
@@ -817,7 +864,6 @@ class luxrender_colorspace(declarative_property_group):
 			'precision': 6,
 			'default': 0.34
 		},
-		
 		{
 			'attr': 'cs_greenX',
 			'type': 'float',
@@ -832,7 +878,6 @@ class luxrender_colorspace(declarative_property_group):
 			'precision': 6,
 			'default': 0.595
 		},
-		
 		{
 			'attr': 'cs_blueX',
 			'type': 'float',
@@ -968,23 +1013,6 @@ class colorspace_presets(object):
 		cs_blueX	= 0.1666
 		cs_blueY	= 0.0089
 
-def get_tonemaps():
-	
-	items =  [
-		('reinhard', 'Reinhard', 'reinhard'),
-		('linear', 'Linear (manual)', 'linear'),
-		# put autolinear in this space for supported versions
-		('contrast', 'Contrast', 'contrast'),
-		('maxwhite', 'Maxwhite', 'maxwhite')
-	]
-	
-	if LUXRENDER_VERSION >= '0.8':
-		items.insert(2,
-			('autolinear', 'Linear (auto-exposure)', 'autolinear')
-		)
-	
-	return items
-
 @LuxRenderAddon.addon_register_class
 class luxrender_tonemapping(declarative_property_group):
 	'''
@@ -1029,7 +1057,13 @@ class luxrender_tonemapping(declarative_property_group):
 			'name': 'Tonemapper',
 			'description': 'Choose tonemapping type',
 			'default': 'reinhard',
-			'items': get_tonemaps(),
+			'items': [
+				('reinhard', 'Reinhard', 'reinhard'),
+				('linear', 'Linear (manual)', 'linear'),
+				('autolinear', 'Linear (auto-exposure)', 'autolinear'),
+				('contrast', 'Contrast', 'contrast'),
+				('maxwhite', 'Maxwhite', 'maxwhite')
+			]
 		},
 		
 		# Reinhard

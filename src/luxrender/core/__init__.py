@@ -59,15 +59,15 @@ from ..ui import (
 )
 
 from ..ui.materials import (
-	main, compositing, carpaint, glass, glass2, roughglass, glossytranslucent,
-	glossy_lossy, glossy, matte, mattetranslucent, metal, mirror, mix, null,
+	main as mat_main, compositing, carpaint, glass, glass2, roughglass, glossytranslucent,
+	glossy_lossy, glossy, matte, mattetranslucent, metal, mirror, mix as mat_mix, null,
 	scatter, shinymetal, velvet
 )
 
 from ..ui.textures import (
-	main, band, blender, bilerp, blackbody, brick, cauchy, constant,
+	main as tex_main, band, blender, bilerp, blackbody, brick, cauchy, constant,
 	checkerboard, dots, equalenergy, fbm, gaussian, harlequin, imagemap,
-	lampspectrum, luxpop, marble, mix, multimix, sellmeier, scale, sopra, uv,
+	lampspectrum, luxpop, marble, mix as tex_mix, multimix, sellmeier, scale, sopra, uv,
 	uvmask, windy, wrinkled, mapping, tabulateddata, transform
 )
 
@@ -84,7 +84,6 @@ bl_ui.properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRen
 bl_ui.properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
 bl_ui.properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-# bl_ui.properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
 @classmethod
 def blender_texture_poll(cls, context):
@@ -99,7 +98,6 @@ def blender_texture_poll(cls, context):
 	return show
 
 bl_ui.properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-# properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 blender_texture_ui_list = [
 	bl_ui.properties_texture.TEXTURE_PT_blend,
 	bl_ui.properties_texture.TEXTURE_PT_clouds,
@@ -108,7 +106,6 @@ blender_texture_ui_list = [
 	bl_ui.properties_texture.TEXTURE_PT_magic,
 	bl_ui.properties_texture.TEXTURE_PT_marble,
 	bl_ui.properties_texture.TEXTURE_PT_musgrave,
-	#bl_ui.properties_texture.TEXTURE_PT_noise,
 	bl_ui.properties_texture.TEXTURE_PT_stucci,
 	bl_ui.properties_texture.TEXTURE_PT_voronoi,
 	bl_ui.properties_texture.TEXTURE_PT_wood,
@@ -276,8 +273,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				time.sleep(0.05)
 			
 			def is_finished(ctx):
-				#future
-				#return ctx.getAttribute('renderer', 'state') == ctx.PYLUX.Renderer.State.TERMINATE
 				return ctx.statistics('enoughSamples') == 1.0
 			
 			def interruptible_sleep(sec, increment=0.05):
@@ -306,7 +301,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				result = self.begin_result(0, 0, xres, yres)
 				lay = result.layers[0]
 				
-				lay.rect, no_z_buffer  = preview_context.blenderCombinedDepthRects()
+				lay.rect  = preview_context.blenderCombinedDepthRects()[0]
 				
 				self.end_result(result)
 		except Exception as exc:
@@ -330,7 +325,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		if self.output_dir[-1] != '/':
 			self.output_dir += '/'
 		
-		if scene.luxrender_engine.export_type == 'INT': # and not scene.luxrender_engine.write_files:
+		if scene.luxrender_engine.export_type == 'INT':
 			write_files = scene.luxrender_engine.write_files
 			if write_files:
 				api_type = 'FILE'
@@ -349,7 +344,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			write_files = True
 		
 		efutil.export_path = self.output_dir
-		#print('(1) export_path is %s' % efutil.export_path)
 		os.chdir(self.output_dir)
 		
 		# Pre-allocate the LuxManager so that we can set up the network servers before export
@@ -436,17 +430,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				parse = False
 				worldEnd = False
 		
-		#print('internal %s' % internal)
-		#print('write_files %s' % write_files)
-		#print('render %s' % render)
-		#print('start_rendering %s' % start_rendering)
-		#print('parse %s' % parse)
-		#print('worldEnd %s' % worldEnd)
-		
 		if self.LuxManager.lux_context.API_TYPE == 'FILE':
 			fn = self.LuxManager.lux_context.file_names[0]
-			
-			#print('calling pylux.context.worldEnd() (1)')
 			self.LuxManager.lux_context.worldEnd()
 			if parse:
 				# file_api.parse() creates a real pylux context. we must replace
@@ -457,7 +442,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				self.LuxManager.stats_thread.LocalStorage['lux_context'] = ctx
 				self.LuxManager.fb_thread.LocalStorage['lux_context'] = ctx
 		elif worldEnd:
-			#print('calling pylux.context.worldEnd() (2)')
 			self.LuxManager.lux_context.worldEnd()
 		
 		# Begin rendering
@@ -472,12 +456,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				
 				self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.camera.data.luxrender_camera.luxrender_film.integratedimaging
 				
-				if scene.camera.data.luxrender_camera.luxrender_film.integratedimaging:
-					# Use the GUI update interval
-					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.displayinterval )
-				else:
-					# Update the image from disk only as often as it is written
-					self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.writeinterval )
+				# Update the image from disk only as often as it is written
+				self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.internal_updateinterval )
 				
 				# Start the stats and framebuffer threads and add additional threads to Lux renderer
 				self.LuxManager.start_worker_threads(self)

@@ -91,46 +91,6 @@ class LUXRENDER_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy
 		]
 		return super().execute(context)
 
-@LuxRenderAddon.addon_register_class
-class LUXRENDER_MT_presets_texture(LUXRENDER_MT_base):
-	bl_label = "LuxRender Texture Presets"
-	preset_subdir = "luxrender/texture"
-
-@LuxRenderAddon.addon_register_class
-class LUXRENDER_OT_preset_texture_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
-	'''Save the current settings as a preset'''
-	bl_idname = 'luxrender.preset_texture_add'
-	bl_label = 'Add LuxRender Texture settings preset'
-	preset_menu = 'LUXRENDER_MT_presets_texture'
-	preset_values = []
-	preset_subdir = 'luxrender/texture'
-	
-	def execute(self, context):
-		pv = [
-			'bpy.context.texture.luxrender_texture.%s'%v['attr'] for v in bpy.types.luxrender_texture.get_exportable_properties()
-		]
-		
-		# store only the sub-properties of the selected lux texture type
-		lux_type = context.texture.luxrender_texture.type
-		sub_type = getattr(bpy.types, 'luxrender_tex_%s' % lux_type)
-		
-		features, junk = getattr(context.texture.luxrender_texture, 'luxrender_tex_%s' % lux_type).get_paramset(context.scene, context.texture)
-		if '2DMAPPING' in features:
-			pv.extend([
-				'bpy.context.texture.luxrender_texture.luxrender_tex_mapping.%s'%v['attr'] for v in bpy.types.luxrender_tex_mapping.get_exportable_properties()
-			])
-		if '3DMAPPING' in features:
-			pv.extend([
-				'bpy.context.texture.luxrender_texture.luxrender_tex_transform.%s'%v['attr'] for v in bpy.types.luxrender_tex_transform.get_exportable_properties()
-			])
-		
-		pv.extend([
-			'bpy.context.texture.luxrender_texture.luxrender_tex_%s.%s'%(lux_type, v['attr']) for v in sub_type.get_exportable_properties()
-		])
-		
-		self.preset_values = pv
-		return super().execute(context)
-
 # Volume data handling
 
 @LuxRenderAddon.addon_register_class
@@ -183,6 +143,40 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 		w = context.scene.luxrender_volumes
 		w.volumes.remove( w.volumes_index )
 		w.volumes_index = len(w.volumes)-1
+		return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_lightgroup_add(bpy.types.Operator):
+	'''Add a new light group definition to the scene'''
+	
+	bl_idname = "luxrender.lightgroup_add"
+	bl_label = "Add LuxRender Light Group"
+	
+	new_lightgroup_name = bpy.props.StringProperty(default='New Light Group')
+	
+	def invoke(self, context, event):
+		lg = context.scene.luxrender_lightgroups.lightgroups
+		lg.add()
+		new_lg = lg[len(lg)-1]
+		new_lg.name = self.properties.new_lightgroup_name
+		return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
+	'''Remove the selected lightgroup definition'''
+	
+	bl_idname = "luxrender.lightgroup_remove"
+	bl_label = "Remove LuxRender Light Group"
+	
+	lg_index = bpy.props.IntProperty(default=-1)
+	
+	def invoke(self, context, event):
+		w = context.scene.luxrender_lightgroups
+		if self.properties.lg_index == -1:
+			w.lightgroups.remove( w.lightgroups_index )
+		else:
+			w.lightgroups.remove( self.properties.lg_index )
+		w.lightgroups_index = len(w.lightgroups)-1
 		return {'FINISHED'}
 
 # Export process
@@ -238,7 +232,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 		return {'RUNNING_MODAL'}
 	
 	def execute(self, context):
-		#try:
+		try:
 			if self.properties.filename == '' or self.properties.directory == '':
 				raise Exception('No filename or directory given.')
 			
@@ -256,9 +250,9 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 			
 			return {'FINISHED'}
 		
-		#except Exception as err:
-		#	self.report({'ERROR'}, 'Cannot load: %s' % err)
-		#	return {'CANCELLED'}
+		except Exception as err:
+			self.report({'ERROR'}, 'Cannot load: %s' % err)
+			return {'CANCELLED'}
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_save_material(bpy.types.Operator):
@@ -439,7 +433,7 @@ def material_converter(report, scene, blender_mat):
 				tex = Kd_stack[0][0]
 				dcf = Kd_stack[0][1]
 				color = Kd_stack[0][2]
-				variant, paramset = tex.luxrender_texture.get_paramset(scene, tex)
+				variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
 				if variant == 'color':
 					# assign the texture directly
 					luxmat.Kd_usecolortexture = True
@@ -496,7 +490,7 @@ def material_converter(report, scene, blender_mat):
 									setattr(alpha_params,'offsetfloat%d'%(i+1),col_ramp[i].position)
 									setattr(color_params,'tex%d_color'%(i+1),(col_ramp[i].color[0], col_ramp[i].color[1], col_ramp[i].color[2]))
 									setattr(alpha_params,'tex%d_floatvalue'%(i+1),col_ramp[i].color[3])
-
+							
 							luxmat.Kd_usecolortexture = True
 							luxmat.Kd_colortexturename = mix_tex.name
 					pass
@@ -599,7 +593,7 @@ def material_converter(report, scene, blender_mat):
 		if luxrender_mat.type in ('glossy'):
 			if len(Ks_stack) == 1:
 				tex = Ks_stack[0][0]
-				variant, paramset = tex.luxrender_texture.get_paramset(scene, tex)
+				variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
 				if variant == 'color':
 					# assign the texture directly
 					luxmat.Ks_usecolortexture = True
@@ -619,7 +613,7 @@ def material_converter(report, scene, blender_mat):
 		
 		if bump_tex != None:
 			tex = bump_tex[0]
-			variant, paramset = tex.luxrender_texture.get_paramset(scene, tex)
+			variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
 			if variant == 'float':
 				luxrender_mat.bumpmap_usefloattexture = True
 				luxrender_mat.bumpmap_floattexturename = tex.name

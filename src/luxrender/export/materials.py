@@ -44,10 +44,8 @@ class TextureCounter(object):
 		if self.ident in TextureCounter.stack:
 			raise Exception("Recursion in texture assignment: %s" % ' -> '.join(TextureCounter.stack))
 		TextureCounter.stack.append(self.ident)
-		#print('TCS: '+ ' -> '.join(TextureCounter.stack))
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		TextureCounter.stack.pop()
-		#print('TCS: '+ ' -> '.join(TextureCounter.stack))
 
 class ExportedTextures(object):
 	# static class variables
@@ -84,7 +82,7 @@ class ExportedTextures(object):
 			ExportedTextures.texture_types.append(type)
 			ExportedTextures.texture_texts.append(texture)
 			ExportedTextures.texture_psets.append(params)
-
+	
 	@staticmethod
 	def export_new(lux_context):
 		for n, ty, tx, p in zip(
@@ -108,10 +106,8 @@ class MaterialCounter(object):
 		if self.ident in MaterialCounter.stack:
 			raise Exception("Recursion in material assignment: %s" % ' -> '.join(MaterialCounter.stack))
 		MaterialCounter.stack.append(self.ident)
-		#print('MCS: '+ ' -> '.join(MaterialCounter.stack))
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		MaterialCounter.stack.pop()
-		#print('MCS: '+ ' -> '.join(MaterialCounter.stack))
 
 class ExportedMaterials(object):
 	# Static class variables
@@ -150,8 +146,6 @@ def export_object_material(lux_context, ob):
 		elif lux_context.API_TYPE == 'PURE':
 			mat = ob.active_material
 			mat.luxrender_material.export(lux_context, mat, mode='direct')
-	#else:
-	#	LuxLog('WARNING: Object "%s" has no material assigned' % ob.name)
 
 def get_instance_materials(ob):
 	obmats = []
@@ -171,9 +165,8 @@ def get_instance_materials(ob):
 def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
-def convert_texture(scene, texture):
-	
-	# Lux only supports blender's textures in float variant
+def convert_texture(scene, texture, variant_hint=None):
+	# Lux only supports blender's textures in float variant (except for image)
 	variant = 'float'
 	paramset = ParamSet()
 	
@@ -187,11 +180,11 @@ def convert_texture(scene, texture):
 	if texture.type == 'BLEND':
 		progression_map = {
 			'LINEAR':			'lin',
-			'QUADRATIC':			'quad',
+			'QUADRATIC':		'quad',
 			'EASING':			'ease',
 			'DIAGONAL':			'diag',
-			'SPHERICAL':			'sphere',
-			'QUADRATIC_SPHERE':		'halo',
+			'SPHERICAL':		'sphere',
+			'QUADRATIC_SPHERE':	'halo',
 			'RADIAL':			'radial',
 		}
 		paramset.add_bool('flipxy', texture.use_flip_axis) \
@@ -201,8 +194,7 @@ def convert_texture(scene, texture):
 		paramset.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
-				.add_integer('noisedepth', texture.noise_depth)# \
-				#.add_float('nabla', texture.nabla)
+				.add_integer('noisedepth', texture.noise_depth)
 	
 	if texture.type == 'DISTORTED_NOISE':
 		lux_tex_name = 'blender_distortednoise'
@@ -223,8 +215,7 @@ def convert_texture(scene, texture):
 				.add_string('noisebasis2', texture.noise_basis_2.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
 				.add_float('turbulence', texture.turbulence) \
-				.add_integer('noisedepth', texture.noise_depth)# \
-				#.add_float('nabla', texture.nabla)
+				.add_integer('noisedepth', texture.noise_depth)
 	
 	if texture.type == 'MUSGRAVE':
 		paramset.add_string('type', texture.musgrave_type.lower() ) \
@@ -232,8 +223,7 @@ def convert_texture(scene, texture):
 				.add_float('lacu', texture.lacunarity) \
 				.add_string('noisebasis', texture.noise_basis.lower() ) \
 				.add_float('noisesize', texture.noise_scale) \
-				.add_float('octs', texture.octaves)# \
-				#.add_float('nabla', texture.nabla)
+				.add_float('octs', texture.octaves)
 	
 	# NOISE shows no params ?
 	
@@ -269,8 +259,7 @@ def convert_texture(scene, texture):
 				.add_float('noisesize', texture.noise_scale) \
 				.add_string('noisetype', texture.noise_type.lower() ) \
 				.add_float('turbulence', texture.turbulence) \
-				.add_string('type', texture.wood_type.lower() )# \
-				#.add_float('nabla', texture.nabla)
+				.add_string('type', texture.wood_type.lower() )
 	
 	# Translate Blender Image/movie into lux tex
 	if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE']:
@@ -288,11 +277,13 @@ def convert_texture(scene, texture):
 			tex_image = efutil.path_relative_to_export(f_path)
 		
 		lux_tex_name = 'imagemap'
-		variant = 'color'
+		if variant_hint:
+			variant = variant_hint
+		else:
+			variant = 'color'
 		paramset.add_string('filename', tex_image)
 		paramset.add_float('gamma', 2.2)
 		mapping_type = '2D'
-	
 	
 	if mapping_type == '3D':
 		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset(scene) )
@@ -305,7 +296,6 @@ def value_transform_passthrough(val):
 	return val
 
 def get_texture_from_scene(scene, tex_name):
-	
 	for tex_slot in scene.world.texture_slots:
 		if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
 			return tex_slot.texture
@@ -326,8 +316,6 @@ def get_texture_from_scene(scene, tex_name):
 	
 	LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
 	return False
-
-
 
 def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, value_transform_function=None):
 	'''
@@ -365,7 +353,10 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 							else:
 								LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 						else:
-							lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture)
+							lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint=variant)
+							if texture.type == 'IMAGE':
+								texture_name = texture_name + "_" + lux_tex_variant
+							
 							if lux_tex_variant == variant:
 								ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 							else:

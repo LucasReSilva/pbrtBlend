@@ -91,14 +91,22 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 def exportLight(scene, lux_context, ob, matrix, portals = []):
 	light = ob.data
 	
-	if scene.luxrender_engine.ignore_lightgroups:
+	lg_gain = 1.0
+	light_group = light.luxrender_lamp.lightgroup
+	
+	# If this lamp's light group is disabled, skip it
+	if not scene.luxrender_lightgroups.is_enabled(light_group):
+		return False
+	
+	if light_group in scene.luxrender_lightgroups.lightgroups:
+		lg_gain = scene.luxrender_lightgroups.lightgroups[light_group].gain
+	
+	if scene.luxrender_lightgroups.ignore or light.luxrender_lamp.lightgroup == "" :
 		light_group = 'default'
-	else:
-		light_group = light.luxrender_lamp.lightgroup
-		
+	
 	# Params common to all light types
 	light_params = ParamSet() \
-		.add_float('gain', light.energy) \
+		.add_float('gain', light.energy*lg_gain) \
 		.add_float('importance', light.luxrender_lamp.importance)
 	
 	ies_data = ParamSet()
@@ -143,19 +151,19 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			light_params.add_float('coneangle', coneangle)
 			light_params.add_float('conedeltaangle', conedeltaangle)
 		
-		attr_light(lux_context, light, ob.name, light_group, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light_group, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 
 	if light.type == 'POINT':
 		light_params.update( ies_data )
 		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True))
+		attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'AREA':
 		light_params.update( ies_data )
 		# overwrite gain with a gain scaled by ws^2 to account for change in lamp area
-		light_params.add_float('gain', light.energy * (get_worldscale(as_scalematrix=False)**2))
+		light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False)**2))
 		lux_context.attributeBegin(ob.name, file=Files.MAIN)
 		lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
 		lux_context.lightGroup(light_group, [])
@@ -199,10 +207,6 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 
 	return False
 
-#-------------------------------------------------
-# lights(lux_context, scene)
-# MAIN export function
-#-------------------------------------------------
 def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 	'''
 	lux_context		pylux.Context
@@ -215,11 +219,14 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 	
 	have_light = False
 	
-	
 	# First gather info about portals
 	portal_shapes = []
 	mesh_def_keys = {}
 	for k in mesh_definitions.cache_items.keys():
+		# PLY proxies add string keys into mesh_definitions,
+		# and the external meshes are never portals, so skip them
+		if type(k) is str: continue
+		
 		if not k[1] in mesh_def_keys.keys():
 			mesh_def_keys[k[1]] = []
 		mesh_def_keys[k[1]].append(k)

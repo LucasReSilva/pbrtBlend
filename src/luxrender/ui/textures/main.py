@@ -24,8 +24,6 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
-
 from ... import LuxRenderAddon
 from ...ui.textures import luxrender_texture_base
 
@@ -52,14 +50,8 @@ class ui_texture_main(luxrender_texture_base):
 		return	tex and \
 				(context.scene.render.engine in cls.COMPAT_ENGINES) \
 				and context.texture.luxrender_texture.type is not 'BLENDER'
-				#(tex.type != 'NONE' or tex.use_nodes) and \
 	
 	def draw(self, context):
-		row = self.layout.row(align=True)
-		row.menu("LUXRENDER_MT_presets_texture", text=bpy.types.LUXRENDER_MT_presets_texture.bl_label)
-		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_texture_add", text="", icon="ZOOMOUT").remove_active = True
-		
 		row = self.layout.row(align=True)
 		row.label("LuxRender type")
 		row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)

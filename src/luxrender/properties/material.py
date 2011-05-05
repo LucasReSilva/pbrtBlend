@@ -32,14 +32,13 @@ from extensions_framework import util as efutil
 
 from .. import LuxRenderAddon
 from ..properties.texture import (
-	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture
+	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture, shorten_name
 )
-from ..export import ParamSet
+from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
 	MaterialCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
-from ..outputs.pure_api import LUXRENDER_VERSION
 from ..util import dict_merge
 
 def MaterialParameter(attr, name, property_group):
@@ -133,39 +132,22 @@ TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color'
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
 
 mat_names = {
-	
-	# Categories are disabled for now, doesn't seem worth it
-	# and there's no agreeable correct way to do it
-	#('Matte', (
-		'matte': 'Matte',
-		'mattetranslucent': 'Matte Translucent',
-	#)),
-	
-	#('Glossy', (
-		'glossy': 'Glossy',
-		'glossy_lossy': 'Glossy (Lossy)',
-		'glossytranslucent': 'Glossy Translucent',
-	#)),
-	
-	#('Glass', (
-		'glass': 'Glass',
-		'glass2': 'Glass2',
-		'roughglass': 'Rough Glass',
-		'mirror': 'Mirror',
-	#)),
-	
-	#('Metal', (
-		'carpaint': 'Car Paint',
-		'metal': 'Metal',
-		'shinymetal': 'Shiny Metal',
-	#)),
-	
-	#('Other', (
-		'velvet': 'Velvet',
-		'scatter': 'Scatter',
-		'mix': 'Mix',
-		'null': 'Null',
-	#))
+	'matte': 'Matte',
+	'mattetranslucent': 'Matte Translucent',
+	'glossy': 'Glossy',
+	'glossy_lossy': 'Glossy (Lossy)',
+	'glossytranslucent': 'Glossy Translucent',
+	'glass': 'Glass',
+	'glass2': 'Glass2',
+	'roughglass': 'Rough Glass',
+	'mirror': 'Mirror',
+	'carpaint': 'Car Paint',
+	'metal': 'Metal',
+	'shinymetal': 'Shiny Metal',
+	'velvet': 'Velvet',
+	'scatter': 'Scatter',
+	'mix': 'Mix',
+	'null': 'Null',
 }
 
 @LuxRenderAddon.addon_register_class
@@ -184,40 +166,10 @@ class MATERIAL_OT_set_luxrender_type(bpy.types.Operator):
 		context.material.luxrender_material.set_type( self.properties.mat_name )
 		return {'FINISHED'}
 
-#def draw_generator(operator, m_names):
-#	def draw(self, context):
-#		sl = self.layout
-#		for m_name, m_label in sorted(m_names):
-#			op = sl.operator(operator, text=m_label)
-#			op.mat_name = m_name
-#			op.mat_label = m_label
-#	return draw
-
 @LuxRenderAddon.addon_register_class
 class MATERIAL_MT_luxrender_type(bpy.types.Menu):
 	bl_label = 'Material Type'
 	
-#	NESTED MENU SYSTEM, perhaps for future use
-#	submenus = []
-#	for mat_cat, mat_cat_list in sorted(mat_names):
-#		submenu_idname = 'MATERIAL_MT_luxrender_mat_cat%d'%len(submenus)
-#		submenus.append(
-#			LuxRenderAddon.addon_register_class(type(
-#				submenu_idname,
-#				(bpy.types.Menu,),
-#				{
-#					'bl_idname': submenu_idname,
-#					'bl_label': mat_cat,
-#					'draw': draw_generator('MATERIAL_OT_set_luxrender_type', mat_cat_list)
-#				}
-#			))
-#		)
-#	def draw(self, context):
-#		sl = self.layout
-#		for sm in self.submenus:
-#			sl.menu(sm.bl_idname)
-	
-	# Flat-list menu system
 	def draw(self, context):
 		sl = self.layout
 		for m_name in sorted(mat_names.keys()):
@@ -387,7 +339,7 @@ class luxrender_material(declarative_property_group):
 			blender_mat.texture_slots.clear(tsi)
 		
 		# Change the name of this material to the target material in the lbm2 data
-		blender_mat.name = lbm2['name']
+		blender_mat.name = shorten_name(lbm2['name'])
 		
 		material_index=0
 		
@@ -404,12 +356,12 @@ class luxrender_material(declarative_property_group):
 				
 				tex_slot = blender_mat.texture_slots.add()
 				if lbm2_obj['name'] not in bpy.data.textures:
-					bpy.data.textures.new(name=lbm2_obj['name'],type='NONE')
+					bpy.data.textures.new(name=shorten_name(lbm2_obj['name']),type='NONE')
 				
-				blender_tex = bpy.data.textures[lbm2_obj['name']]
+				blender_tex = bpy.data.textures[shorten_name(lbm2_obj['name'])]
 				tex_slot.texture = blender_tex
 				
-				lxt = bpy.data.textures[lbm2_obj['name']].luxrender_texture
+				lxt = bpy.data.textures[shorten_name(lbm2_obj['name'])].luxrender_texture
 				
 				# Restore default texture settings
 				lxt.reset()
@@ -429,15 +381,15 @@ class luxrender_material(declarative_property_group):
 			# Add back all the materials
 			if lbm2_obj['type'] == 'MakeNamedMaterial':
 				if lbm2_obj['name'] not in bpy.data.materials:
-					bpy.data.materials.new(name=lbm2_obj['name'])
+					bpy.data.materials.new(name=shorten_name(lbm2_obj['name']))
 				
 				bpy.ops.object.material_slot_add()
-				blender_obj.material_slots[material_index].material = bpy.data.materials[lbm2_obj['name']]
+				blender_obj.material_slots[material_index].material = bpy.data.materials[shorten_name(lbm2_obj['name'])]
 				
 				# Update an existing material with data from lbm2
-				lxm = bpy.data.materials[lbm2_obj['name']].luxrender_material
+				lxm = bpy.data.materials[shorten_name(lbm2_obj['name'])].luxrender_material
 				# reset this material
-				lxm.reset(prnt=bpy.data.materials[lbm2_obj['name']])
+				lxm.reset(prnt=bpy.data.materials[shorten_name(lbm2_obj['name'])])
 				
 				# Set up bump map
 				TF_bumpmap.load_paramset(lxm, lbm2_obj['paramset'])
@@ -456,7 +408,6 @@ class luxrender_material(declarative_property_group):
 					subtype.load_paramset(lbm2_obj['paramset'])
 				
 				material_index+=1
-		
 		
 		for lbm2_obj in lbm2['objects']:
 			# Load volume data in a separate loop to ensure
@@ -513,12 +464,12 @@ class luxrender_mat_compositing(declarative_property_group):
 	]
 	
 	visibility = {
-		'visible_material':					{ 'enabled': True },
-		'visible_emission':					{ 'enabled': True },
-		'visible_indirect_material':		{ 'enabled': True },
-		'visible_indirect_emission':		{ 'enabled': True },
-		'override_alpha':					{ 'enabled': True },
-		'override_alpha_value':				{ 'enabled': True, 'override_alpha': True },
+		'visible_material':				{ 'enabled': True },
+		'visible_emission':				{ 'enabled': True },
+		'visible_indirect_material':	{ 'enabled': True },
+		'visible_indirect_emission':	{ 'enabled': True },
+		'override_alpha':				{ 'enabled': True },
+		'override_alpha_value':			{ 'enabled': True, 'override_alpha': True },
 	}
 	
 	properties = [
@@ -613,7 +564,6 @@ class luxrender_transparency(declarative_property_group):
 	ef_attach_to = ['Material']
 	
 	controls = [
-		# 'transparent', # drawn in header 
 		'alpha_source',
 		'alpha_value',
 	] + \
@@ -633,7 +583,7 @@ class luxrender_transparency(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'texture' })
 	
 	properties = [
-		{
+		{	# Drawn in the panel header
 			'type': 'bool',
 			'attr': 'transparent',
 			'name': 'Transparent',
@@ -1064,13 +1014,6 @@ class luxrender_mat_roughglass(declarative_property_group):
 		return roughglass_params
 	
 	def load_paramset(self, ps):
-		#psi_accept = {
-		#}
-		#psi_accept_keys = psi_accept.keys()
-		#for psi in ps:
-		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-		#		setattr(self, psi['name'], psi['value'])
-		
 		TF_cauchyb.load_paramset(self, ps)
 		TF_index.load_paramset(self, ps)
 		TC_Kr.load_paramset(self, ps)
@@ -1271,13 +1214,6 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		return glossy_lossy_params
 	
 	def load_paramset(self, ps):
-		#psi_accept = {
-		#}
-		#psi_accept_keys = psi_accept.keys()
-		#for psi in ps:
-		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-		#		setattr(self, psi['name'], psi['value'])
-		
 		TC_Kd.load_paramset(self, ps)
 		TF_d.load_paramset(self, ps)
 		TC_Ka.load_paramset(self, ps)
@@ -1351,7 +1287,6 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 		mattetranslucent_params = ParamSet()
 		
 		mattetranslucent_params.add_bool('energyconserving', self.energyconserving)
-		
 		mattetranslucent_params.update( TC_Kr.get_paramset(self) )
 		mattetranslucent_params.update( TC_Kt.get_paramset(self) )
 		mattetranslucent_params.update( TF_sigma.get_paramset(self) )
@@ -1580,7 +1515,7 @@ class luxrender_mat_metal(declarative_property_group):
 		TF_vroughness.controls
 	
 	visibility = dict_merge({
-			'filename':	{ 'name': 'nk' }
+			'filename': { 'name': 'nk' }
 		},
 		TF_uroughness.visibility,
 		TF_vroughness.visibility
@@ -1619,11 +1554,10 @@ class luxrender_mat_metal(declarative_property_group):
 		metal_params.update( TF_vroughness.get_paramset(self) )
 		
 		if self.name == 'nk':	# use an NK data file
-			if material.library is not None:
-				nk_path = bpy.path.abspath(self.filename, material.library.filepath)
-			else:
-				nk_path = self.filename
-			metal_params.add_string('filename', efutil.path_relative_to_export(nk_path) )
+			
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(LuxManager.CurrentScene, material, self.filename, metal_params, 'filename')
 		else:					# use a preset name
 			metal_params.add_string('name', self.name)
 		
@@ -1670,13 +1604,6 @@ class luxrender_mat_scatter(declarative_property_group):
 		return scatter_params
 	
 	def load_paramset(self, ps):
-		#psi_accept = {
-		#}
-		#psi_accept_keys = psi_accept.keys()
-		#for psi in ps:
-		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-		#		setattr(self, psi['name'], psi['value'])
-		
 		TC_Kd.load_paramset(self, ps)
 		TF_g.load_paramset(self, ps)
 
@@ -1724,13 +1651,6 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		return shinymetal_params
 	
 	def load_paramset(self, ps):
-		#psi_accept = {
-		#}
-		#psi_accept_keys = psi_accept.keys()
-		#for psi in ps:
-		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-		#		setattr(self, psi['name'], psi['value'])
-		
 		TF_film.load_paramset(self, ps)
 		TF_filmindex.load_paramset(self, ps)
 		TC_Kr.load_paramset(self, ps)
@@ -1770,13 +1690,6 @@ class luxrender_mat_mirror(declarative_property_group):
 		return mirror_params
 	
 	def load_paramset(self, ps):
-		#psi_accept = {
-		#}
-		#psi_accept_keys = psi_accept.keys()
-		#for psi in ps:
-		#	if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-		#		setattr(self, psi['name'], psi['value'])
-		
 		TF_film.load_paramset(self, ps)
 		TF_filmindex.load_paramset(self, ps)
 		TC_Kr.load_paramset(self, ps)
@@ -1816,7 +1729,7 @@ class luxrender_mat_mix(declarative_property_group):
 		psi_accept_keys = psi_accept.keys()
 		for psi in ps:
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
-				setattr(self, '%s_material'%psi['name'], psi['value'])
+				setattr(self, '%s_material'%psi['name'], shorten_name(psi['value']))
 		
 		TF_amount.load_paramset(self, ps)
 
@@ -1931,6 +1844,26 @@ class luxrender_mat_velvet(declarative_property_group):
 		
 		TC_Kd.load_paramset(self, ps)
 
+def EmissionLightGroupParameter():
+	return [
+		{
+			'attr': 'lightgroup',
+			'type': 'string',
+			'name': 'lightgroup',
+			'description': 'lightgroup; leave blank to use default',
+			'save_in_preset': True
+		},
+		{
+			'type': 'prop_search',
+			'attr': 'lightgroup_chooser',
+			'src': lambda s,c: s.scene.luxrender_lightgroups,
+			'src_attr': 'lightgroups',
+			'trg': lambda s,c: c.luxrender_emission,
+			'trg_attr': 'lightgroup',
+			'name': 'Light Group'
+		},
+	]
+
 class EmissionColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other ColorTextureParameters
@@ -1947,8 +1880,8 @@ class luxrender_emission(declarative_property_group):
 	ef_attach_to = ['Material']
 	
 	controls = [
-		#'use_emission', # drawn in header
-		'lightgroup',
+		'lightgroup_chooser',
+		'iesname'
 	] + \
 	TC_L.controls + \
 	[
@@ -1958,19 +1891,20 @@ class luxrender_emission(declarative_property_group):
 	]
 	
 	visibility = {
-		'lightgroup': 			{ 'use_emission': True },
-		'L_colorlabel': 		{ 'use_emission': True },
-		'L_color': 				{ 'use_emission': True },
+		'lightgroup_chooser':	{ 'use_emission': True },
+		'iesname':				{ 'use_emission': True },
+		'L_colorlabel':			{ 'use_emission': True },
+		'L_color':				{ 'use_emission': True },
 		'L_usecolortexture':	{ 'use_emission': True },
 		'L_colortexture':		{ 'use_emission': True, 'L_usecolortexture': True },
 		'L_multiplycolor':		{ 'use_emission': True, 'L_usecolortexture': True },
-		'gain': 				{ 'use_emission': True },
-		'power': 				{ 'use_emission': True },
+		'gain':					{ 'use_emission': True },
+		'power':				{ 'use_emission': True },
 		'efficacy': 			{ 'use_emission': True },
 	}
 	
 	properties = [
-		{
+		{	# drawn in header
 			'type': 'bool',
 			'attr': 'use_emission',
 			'name': 'Use Emission',
@@ -1983,6 +1917,13 @@ class luxrender_emission(declarative_property_group):
 			'name': 'Light Group',
 			'default': 'default',
 			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'iesname',
+			'name': 'IES Data',
+			'description': 'Use IES data for this light\'s distribution'
 		},
 		{
 			'type': 'float',
@@ -2019,12 +1960,22 @@ class luxrender_emission(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-	TC_L.properties
+	TC_L.properties + \
+	EmissionLightGroupParameter()
 	
-	def api_output(self):
+	def api_output(self, obj):
+		lg_gain = 1.0
+		if self.lightgroup in LuxManager.CurrentScene.luxrender_lightgroups.lightgroups:
+			lg_gain = LuxManager.CurrentScene.luxrender_lightgroups.lightgroups[self.lightgroup].gain
+		
 		arealightsource_params = ParamSet() \
-				.add_float('gain', self.gain) \
+				.add_float('gain', self.gain*lg_gain) \
 				.add_float('power', self.power) \
 				.add_float('efficacy', self.efficacy)
 		arealightsource_params.update( TC_L.get_paramset(self) )
+		if self.iesname != '':
+			
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(LuxManager.CurrentScene, obj, self.iesname, arealightsource_params, 'iesname')
 		return 'area', arealightsource_params

@@ -95,7 +95,7 @@ class CookieTransport(xmlrpc.client.Transport):
 	
 	# This method is identical to Transport.send_request
 	def send_request(self, host, handler, request_body, debug):
-		host, extra_headers, x509 = self.get_host_info(host)
+		host, extra_headers = self.get_host_info(host)[0:2]
 		connection = http.client.HTTPConnection(host)
 		
 		if debug:
@@ -141,19 +141,17 @@ class lrmdb_client(object):
 		if cls.server == None:
 			cls.server = xmlrpc.client.ServerProxy(
 				"http://www.luxrender.net/lrmdb2/ixr",
-				transport=CookieTransport(),
-				#verbose=True
+				transport=CookieTransport()
 			)
 		
 		return cls.server
 	
-	@classmethod
-	def check_login(cls):
-		un = cls.server_instance().user.current()
+	def check_login(self):
+		un = self.server_instance().user.current()
 		if un:
-			cls.loggedin = True
-			cls.username = un
+			self.loggedin = True
+			self.username = un
 		else:
-			cls.loggedin = False
-			cls.username = ''
-		return cls.loggedin
+			self.loggedin = False
+			self.username = ''
+		return self.loggedin
