@@ -266,8 +266,9 @@ class luxrender_integrator(declarative_property_group):
 		# sppm
 		'maxeyedepth':						{ 'surfaceintegrator': 'sppm' },
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
+		'startradius':						{ 'surfaceintegrator': 'sppm' },
+
 		# sppm advanced
-		'startradius':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 	}
@@ -831,12 +832,12 @@ class luxrender_integrator(declarative_property_group):
 		if self.surfaceintegrator == 'sppm':
 			params.add_integer('maxeyedepth', self.maxeyedepth) \
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
-				  .add_integer('photonperpass', self.photonperpass)
+				  .add_integer('photonperpass', self.photonperpass) \
+				  .add_float('startradius', self.startradius) \
+				  .add_bool('includeenvironment', self.includeenvironment)
 			if self.advanced:
-				params.add_float('startradius', self.startradius) \
-				  .add_float('alpha', self.alpha) \
+				params.add_float('alpha', self.alpha) \
 				  .add_string('lookupaccel', self.lookupaccel) \
-  				  .add_bool('includeenvironment', self.includeenvironment)
 		
 		if self.surfaceintegrator == 'distributedpath':
 			params.add_bool('directsampleall', self.directsampleall) \
