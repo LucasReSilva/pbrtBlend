@@ -182,6 +182,7 @@ class luxrender_integrator(declarative_property_group):
 		'startradius',
 		'alpha',
 		'lookupaccel',
+		'pixelsampler',
 				
 		# path
 		'includeenvironment',
@@ -271,6 +272,7 @@ class luxrender_integrator(declarative_property_group):
 		# sppm advanced
 		'alpha':							{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 	}
 	
 	properties = [
@@ -800,6 +802,20 @@ class luxrender_integrator(declarative_property_group):
 			],
 			'save_in_preset': True
 		},
+		{
+			'type': 'enum',
+			'attr': 'pixelsampler',
+			'name': 'Pixel sampler',
+			'default': 'vegas',
+			'description': 'Sampling pattern used during the eye pass',
+			'items': [
+				('vegas', 'Vegas', 'vegas'),
+				('linear', 'Linear', 'linear'),
+				('tile', 'Tile', 'tile'),
+				('hilbert', 'Hilbert', 'hilbert'),
+			],
+			'save_in_preset': True
+		},
 	]
 	
 	def api_output(self, engine_properties):
@@ -849,6 +865,7 @@ class luxrender_integrator(declarative_property_group):
 			if self.advanced:
 				params.add_float('alpha', self.alpha) \
 				  .add_string('lookupaccel', self.lookupaccel) \
+				  .add_string('pixelsampler', self.pixelsampler)
 		
 		if self.surfaceintegrator == 'distributedpath':
 			params.add_bool('directsampleall', self.directsampleall) \
