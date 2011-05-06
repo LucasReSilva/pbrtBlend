@@ -818,6 +818,17 @@ class luxrender_integrator(declarative_property_group):
 			if self.lightstrategy != 'one':
 				LuxLog('Incompatible lightstrategy for Hybrid renderer (use "one").')
 				raise Exception('Incompatible render settings')
+				
+		#SPPM requires that renderer and engine both = sppm, neither option works without the other. Here we ensure that the user set both.
+		if engine_properties.renderer == 'sppm':
+			if self.surfaceintegrator != 'sppm':
+				LuxLog('SPPM Renderer requires SPPM surface integrator.')
+				raise Exception('Incompatible render settings')
+				
+		if self.surfaceintegrator == 'sppm':
+			if engine_properties.renderer != 'sppm':
+				LuxLog('SPPM surface integrator only works with SPPM renderer, select it under "Renderer" in LuxRender Engine Configuration.')
+				raise Exception('Incompatible render settings')
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \
