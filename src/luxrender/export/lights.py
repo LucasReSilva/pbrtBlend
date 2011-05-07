@@ -88,14 +88,22 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	else:
 		lux_context.attributeEnd()
 
+def checkLightEnabled(scene, lamp):
+	# This is a separate function because it's used in the export pre-process phase
+	
+	# If this lamp's light group is disabled, skip it
+	if not scene.luxrender_lightgroups.is_enabled(lamp.luxrender_lamp.lightgroup):
+		return False
+	else:
+		return True
+
 def exportLight(scene, lux_context, ob, matrix, portals = []):
 	light = ob.data
 	
 	lg_gain = 1.0
 	light_group = light.luxrender_lamp.lightgroup
 	
-	# If this lamp's light group is disabled, skip it
-	if not scene.luxrender_lightgroups.is_enabled(light_group):
+	if not checkLightEnabled(scene, light):
 		return False
 	
 	if light_group in scene.luxrender_lightgroups.lightgroups:
