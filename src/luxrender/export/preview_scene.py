@@ -282,7 +282,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			GE.is_preview = True
 			GE.geometry_scene = scene
 			for mesh_mat, mesh_name, mesh_type, mesh_params in GE.buildNativeMesh(obj):
-				mat.luxrender_material.export(lux_context, mat, mode='direct')
+				mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
 				lux_context.shape(mesh_type, mesh_params)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))

@@ -53,6 +53,38 @@ def find_apis():
 	return apis
 
 @LuxRenderAddon.addon_register_class
+class luxrender_testing(declarative_property_group):
+	"""
+	Properties related to exporter and scene testing
+	"""
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
+		'clay_render',
+		'object_analysis'
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'clay_render',
+			'name': 'Clay render',
+			'description': 'Export all materials as default "clay"',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'object_analysis',
+			'name': 'Debug: print object analysis',
+			'description': 'Show extra output as objects are processed',
+			'default': False
+		},
+	]
+
+@LuxRenderAddon.addon_register_class
 class luxrender_engine(declarative_property_group):
 	'''
 	Storage class for LuxRender Engine settings.

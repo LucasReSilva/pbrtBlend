@@ -121,6 +121,15 @@ class accelerator(render_panel):
 	]
 
 @LuxRenderAddon.addon_register_class
+class testing(render_panel):
+	bl_label = 'Test/Debugging Options'
+	bl_options = 'DEFAULT_CLOSED'
+	
+	display_property_groups = [
+		( ('scene',), 'luxrender_testing' )
+	]
+
+@LuxRenderAddon.addon_register_class
 class networking(render_panel):
 	'''
 	Networking settings UI Panel

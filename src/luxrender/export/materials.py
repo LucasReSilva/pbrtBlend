@@ -139,14 +139,6 @@ class ExportedMaterials(object):
 				lux_context.makeNamedMaterial(n, p)
 				ExportedMaterials.exported_material_names.append(n)
 
-def export_object_material(lux_context, ob):
-	if ob.active_material is not None:
-		if lux_context.API_TYPE == 'FILE':
-			lux_context.namedMaterial(ob.active_material.name)
-		elif lux_context.API_TYPE == 'PURE':
-			mat = ob.active_material
-			mat.luxrender_material.export(lux_context, mat, mode='direct')
-
 def get_instance_materials(ob):
 	obmats = []
 	# Grab materials attached to object instances ...

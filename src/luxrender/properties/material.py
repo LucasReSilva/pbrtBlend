@@ -256,7 +256,11 @@ class luxrender_material(declarative_property_group):
 			if blender_material.diffuse_color != submat_col:
 				blender_material.diffuse_color = submat_col
 	
-	def export(self, lux_context, material, mode='indirect'):
+	def export(self, scene, lux_context, material, mode='indirect'):
+		
+		if scene.luxrender_testing.clay_render and self.type not in ['glass', 'glass2']:
+			return {'CLAY'}
+		
 		with MaterialCounter(material.name):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
 				if self.type == 'mix':
@@ -265,14 +269,14 @@ class luxrender_material(declarative_property_group):
 					if m1_name == '':
 						raise Exception('Unassigned mix material slot 1 on material %s' % material.name)
 					m1 = bpy.data.materials[m1_name]
-					m1.luxrender_material.export(lux_context, m1, 'indirect')
+					m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
 					
 					m2_name = self.luxrender_mat_mix.namedmaterial2_material
 					if m2_name == '':
 						raise Exception('Unassigned mix material slot 2 on material %s' % material.name)
 					
 					m2 = bpy.data.materials[m2_name]
-					m2.luxrender_material.export(lux_context, m2, 'indirect')
+					m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
 				
 				material_params = ParamSet()
 				
@@ -290,7 +294,7 @@ class luxrender_material(declarative_property_group):
 				material_params.update( sub_type.get_paramset(material) )
 				
 				# DistributedPath compositing
-				if LuxManager.CurrentScene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+				if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
 					material_params.update( self.luxrender_mat_compositing.get_paramset() )
 				
 				if alpha_type == None:
@@ -318,7 +322,10 @@ class luxrender_material(declarative_property_group):
 				elif mode == 'direct':
 					lux_context.material(mat_type, material_params)
 			
-		return material.luxrender_emission.use_emission
+		if material.luxrender_emission.use_emission:
+			return {'EMITTER'}
+		else:
+			return set()
 	
 	def load_lbm2(self, context, lbm2, blender_mat, blender_obj):
 		'''

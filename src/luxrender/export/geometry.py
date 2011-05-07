@@ -25,7 +25,6 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import os, struct
-OBJECT_ANALYSIS = os.getenv('LB25_OBJECT_ANALYSIS', False)
 
 import bpy, mathutils, math
 
@@ -36,18 +35,6 @@ from ..outputs.file_api import Files
 from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix
 from ..export import matrix_to_list
 from ..export.materials import get_material_volume_defs
-
-def time_export(func):
-	if not OBJECT_ANALYSIS: return func
-	
-	import time
-	def _wrap(*args, **kwargs):
-		start = time.time()
-		result = func(*args, **kwargs)
-		end = time.time()
-		print('Calling %s took %0.4f seconds' % (func, (end-start)))
-		return result
-	return _wrap
 
 class InvalidGeometryException(Exception):
 	pass
@@ -148,7 +135,6 @@ class GeometryExporter(object):
 		self.ExportedObjects.add(obj_cache_key, mesh_definitions)
 		return mesh_definitions
 	
-	@time_export
 	def buildBinaryPLYMesh(self, obj):
 		"""
 		Convert supported blender objects into a MESH, and then split into parts
@@ -356,7 +342,6 @@ class GeometryExporter(object):
 		
 		return mesh_definitions
 	
-	@time_export
 	def buildNativeMesh(self, obj):
 		"""
 		Convert supported blender objects into a MESH, and then split into parts
@@ -399,9 +384,9 @@ class GeometryExporter(object):
 					# mesh_name must start with mesh data name to match with portals
 					mesh_name = '%s-%s_m%03d' % (obj.data.name, self.geometry_scene.name, i)
 					
-					if OBJECT_ANALYSIS: print(' -> NativeMesh:')
-					if OBJECT_ANALYSIS: print('  -> Material index: %d' % i)
-					if OBJECT_ANALYSIS: print('  -> derived mesh name: %s' % mesh_name)
+					if self.visibility_scene.luxrender_testing.object_analysis: print(' -> NativeMesh:')
+					if self.visibility_scene.luxrender_testing.object_analysis: print('  -> Material index: %d' % i)
+					if self.visibility_scene.luxrender_testing.object_analysis: print('  -> derived mesh name: %s' % mesh_name)
 					
 					if len(mesh.uv_textures) > 0:
 						if mesh.uv_textures.active and mesh.uv_textures.active.data:
@@ -642,11 +627,14 @@ class GeometryExporter(object):
 				# Export material definition && check for emission
 				if self.lux_context.API_TYPE == 'FILE':
 					self.lux_context.set_output_file(Files.MATS)
-					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='indirect')
+					mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context, ob_mat, mode='indirect')
 					self.lux_context.set_output_file(Files.GEOM)
-					self.lux_context.namedMaterial(ob_mat.name)
+					if not 'CLAY' in mat_export_result:
+						self.lux_context.namedMaterial(ob_mat.name)
 				elif self.lux_context.API_TYPE == 'PURE':
-					object_is_emitter = ob_mat.luxrender_material.export(self.lux_context, ob_mat, mode='direct')
+					mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context, ob_mat, mode='direct')
+				
+				object_is_emitter = 'EMITTER' in mat_export_result
 				
 				if object_is_emitter:
 					# Only add the AreaLightSource if this object's emission lightgroup is enabled
@@ -900,7 +888,7 @@ class GeometryExporter(object):
 			LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
 	
 	def handler_MESH(self, obj, *args, **kwargs):
-		if OBJECT_ANALYSIS: print(' -> handler_MESH: %s' % obj)
+		if self.visibility_scene.luxrender_testing.object_analysis: print(' -> handler_MESH: %s' % obj)
 		
 		if 'matrix' in kwargs.keys():
 			self.exportShapeInstances(
@@ -933,7 +921,7 @@ class GeometryExporter(object):
 		for obj in geometry_scene.objects:
 			progress_thread.exported_objects += 1
 			
-			if OBJECT_ANALYSIS: print('Analysing object %s : %s' % (obj, obj.type))
+			if self.visibility_scene.luxrender_testing.object_analysis: print('Analysing object %s : %s' % (obj, obj.type))
 			
 			try:
 				# Export only objects which are enabled for render (in the outliner) and visible on a render layer
@@ -951,10 +939,10 @@ class GeometryExporter(object):
 				number_psystems = len(obj.particle_systems)
 				
 				if obj.is_duplicator and number_psystems < 1:
-					if OBJECT_ANALYSIS: print(' -> is duplicator without particle systems')
+					if self.visibility_scene.luxrender_testing.object_analysis: print(' -> is duplicator without particle systems')
 					if obj.dupli_type in self.valid_duplis_callbacks:
 						self.callbacks['duplis'][obj.dupli_type](obj)
-					elif OBJECT_ANALYSIS: print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
+					elif self.visibility_scene.luxrender_testing.object_analysis: print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
 				
 				# Some dupli types should hide the original
 				if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
@@ -964,15 +952,15 @@ class GeometryExporter(object):
 				
 				if number_psystems > 0:
 					export_originals[obj] = False
-					if OBJECT_ANALYSIS: print(' -> has %i particle systems' % number_psystems)
+					if self.visibility_scene.luxrender_testing.object_analysis: print(' -> has %i particle systems' % number_psystems)
 					for psys in obj.particle_systems:
 						export_originals[obj] = export_originals[obj] or psys.settings.use_render_emitter
 						if psys.settings.render_type in self.valid_particles_callbacks:
 							self.callbacks['particles'][psys.settings.render_type](obj, particle_system=psys)
-						elif OBJECT_ANALYSIS: print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
+						elif self.visibility_scene.luxrender_testing.object_analysis: print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
 			
 			except UnexportableObjectException as err:
-				if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
+				if self.visibility_scene.luxrender_testing.object_analysis: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
 		
 		export_originals_keys = export_originals.keys()
 		
@@ -989,7 +977,7 @@ class GeometryExporter(object):
 				self.callbacks['objects'][obj.type](obj)
 			
 			except UnexportableObjectException as err:
-				if OBJECT_ANALYSIS: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
+				if self.visibility_scene.luxrender_testing.object_analysis: print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
 		
 		progress_thread.stop()
 		progress_thread.join()
