@@ -634,7 +634,7 @@ class GeometryExporter(object):
 				elif self.lux_context.API_TYPE == 'PURE':
 					mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context, ob_mat, mode='direct')
 				
-				object_is_emitter = 'EMITTER' in mat_export_result
+				object_is_emitter = ob_mat.luxrender_emission.use_emission
 				
 				if object_is_emitter:
 					# Only add the AreaLightSource if this object's emission lightgroup is enabled
