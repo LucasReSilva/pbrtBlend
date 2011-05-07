@@ -656,9 +656,14 @@ class luxrender_transparency(declarative_property_group):
 		
 		if self.alpha_source == 'texture':
 			alpha_type = 'texture'
-			alpha_amount = self.alpha_floattexturename
+			# alpha_amount = self.alpha_floattexturename
+			
 			# export texture
 			TF_alpha.get_paramset(self)
+			
+			# We take the name of the last texture exported, since
+			# the texture export code may have re-written the name
+			alpha_amount = ExportedTextures.exported_texture_names[-1]
 			
 			if self.inverse:
 				params = ParamSet() \
