@@ -218,12 +218,12 @@ class luxrender_lamp_sun(declarative_property_group):
 	]
 	
 	visibility = {
-		'horizonbrightness':	{ 'sunsky_advanced': True },
-		'horizonsize':			{ 'sunsky_advanced': True },
-		'sunhalobrightness':	{ 'sunsky_advanced': True },
-		'relsize':				{ 'sunsky_advanced': True },
-		'sunhalosize':			{ 'sunsky_advanced': True },
-		'backscattering':		{ 'sunsky_advanced': True },
+		'relsize':				{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sky'}) },
+		'horizonbrightness':	{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'horizonsize':			{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'sunhalobrightness':	{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'sunhalosize':			{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'backscattering':		{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
 	}
 	
 	properties = [
