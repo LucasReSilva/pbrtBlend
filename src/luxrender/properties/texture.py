@@ -253,21 +253,21 @@ class ColorTextureParameter(TextureParameterBase):
 		return TC_params
 
 class FloatTextureParameter(TextureParameterBase):
-	default			= 0.0
-	min				= 0.0
-	max				= 1.0
-	precision		= 6
-	texture_only	= False
-	multiply_float	= False
-	ignore_zero		= False
-	sub_type		= 'NONE'
-	unit			= 'NONE'
+	default				= 0.0
+	min					= 0.0
+	max					= 1.0
+	precision			= 6
+	texture_only		= False
+	multiply_float		= False
+	ignore_unassigned	= False
+	sub_type			= 'NONE'
+	unit				= 'NONE'
 	
 	def __init__(self,
 			attr, name,
 			add_float_value = True,		# True: Show float value input, and [T] button; False: Just show texture slot
 			multiply_float = False,		# Specify that when texture is in use, it should be scaled by the float value
-			ignore_zero = False,		# Don't export this parameter if the float value == 0.0
+			ignore_unassigned = False,	# Don't export this parameter if the texture slot is unassigned
 			real_attr = None,			# translate self.attr into something else at export time (overcome 31 char RNA limit)
 			sub_type = 'NONE',
 			unit = 'NONE',
@@ -277,7 +277,7 @@ class FloatTextureParameter(TextureParameterBase):
 		self.name = name
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
-		self.ignore_zero = ignore_zero
+		self.ignore_unassigned = ignore_unassigned
 		self.sub_type = sub_type
 		self.unit = unit
 		self.real_attr = real_attr
@@ -339,9 +339,9 @@ class FloatTextureParameter(TextureParameterBase):
 				'save_in_preset': True
 			},
 			{
-				'attr': '%s_ignorezero' % self.attr,
+				'attr': '%s_ignore_unassigned' % self.attr,
 				'type': 'bool',
-				'default': self.ignore_zero,
+				'default': self.ignore_unassigned,
 				'save_in_preset': True
 			},
 			{
@@ -416,19 +416,19 @@ class FloatTextureParameter(TextureParameterBase):
 		return TC_params
 
 class FresnelTextureParameter(TextureParameterBase):
-	default			= 0.0
-	min				= 0.0
-	max				= 1.0
-	precision		= 6
-	texture_only	= False
-	multiply_float	= False
-	ignore_zero		= False
+	default				= 0.0
+	min					= 0.0
+	max					= 1.0
+	precision			= 6
+	texture_only		= False
+	multiply_float		= False
+	ignore_unassigned	= False
 	
 	def __init__(self,
 			attr, name,
 			add_float_value = True,		# True: Show float value input, and [T] button; False: Just show texture slot
 			multiply_float = False,		# Specify that when texture is in use, it should be scaled by the float value
-			ignore_zero = False,		# Don't export this parameter if the float value == 0.0
+			ignore_unassigned = False,	# Don't export this parameter if the texture slot is unassigned
 			real_attr = None,			# translate self.attr into something else at export time (overcome 31 char RNA limit)
 			default = 0.0, min = 0.0, max = 1.0, precision=6
 		):
@@ -436,7 +436,7 @@ class FresnelTextureParameter(TextureParameterBase):
 		self.name = name
 		self.texture_only = (not add_float_value)
 		self.multiply_float = multiply_float
-		self.ignore_zero = ignore_zero
+		self.ignore_unassigned = ignore_unassigned
 		self.real_attr = real_attr
 		self.default = default
 		self.min = min
@@ -496,9 +496,9 @@ class FresnelTextureParameter(TextureParameterBase):
 				'save_in_preset': True
 			},
 			{
-				'attr': '%s_ignorezero' % self.attr,
+				'attr': '%s_ignore_unassigned' % self.attr,
 				'type': 'bool',
-				'default': self.ignore_zero,
+				'default': self.ignore_unassigned,
 				'save_in_preset': True
 			},
 			{

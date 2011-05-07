@@ -423,7 +423,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 		else:
 			if variant == 'float':
 				fval = float(getattr(property_group, '%s_floatvalue' % lux_prop_name))
-				if not (getattr(property_group, '%s_ignorezero' % lux_prop_name) and fval==0.0):
+				if not getattr(property_group, '%s_ignore_unassigned' % lux_prop_name):
 					params.add_float(
 						export_param_name,
 						fval
