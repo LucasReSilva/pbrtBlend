@@ -139,14 +139,6 @@ class ExportedMaterials(object):
 				lux_context.makeNamedMaterial(n, p)
 				ExportedMaterials.exported_material_names.append(n)
 
-def export_object_material(lux_context, ob):
-	if ob.active_material is not None:
-		if lux_context.API_TYPE == 'FILE':
-			lux_context.namedMaterial(ob.active_material.name)
-		elif lux_context.API_TYPE == 'PURE':
-			mat = ob.active_material
-			mat.luxrender_material.export(lux_context, mat, mode='direct')
-
 def get_instance_materials(ob):
 	obmats = []
 	# Grab materials attached to object instances ...
@@ -170,12 +162,13 @@ def convert_texture(scene, texture, variant_hint=None):
 	variant = 'float'
 	paramset = ParamSet()
 	
-	paramset.add_float('bright', texture.intensity)
-	paramset.add_float('contrast', texture.contrast)
-	
 	lux_tex_name = 'blender_%s' % texture.type.lower()
 	
 	mapping_type = '3D'
+	
+	if texture.type != 'IMAGE':
+		paramset.add_float('bright', texture.intensity)
+		paramset.add_float('contrast', texture.contrast)
 	
 	if texture.type == 'BLEND':
 		progression_map = {

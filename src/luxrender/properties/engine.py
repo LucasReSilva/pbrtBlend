@@ -53,6 +53,38 @@ def find_apis():
 	return apis
 
 @LuxRenderAddon.addon_register_class
+class luxrender_testing(declarative_property_group):
+	"""
+	Properties related to exporter and scene testing
+	"""
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
+		'clay_render',
+		'object_analysis'
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'clay_render',
+			'name': 'Clay render',
+			'description': 'Export all materials as default "clay"',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'object_analysis',
+			'name': 'Debug: print object analysis',
+			'description': 'Show extra output as objects are processed',
+			'default': False
+		},
+	]
+
+@LuxRenderAddon.addon_register_class
 class luxrender_engine(declarative_property_group):
 	'''
 	Storage class for LuxRender Engine settings.
@@ -65,8 +97,8 @@ class luxrender_engine(declarative_property_group):
 		'binary_name',
 		'write_files',
 		'install_path',
-		['write_lxs', 'write_lxm', 'write_lxo', 'write_lxv'],
-		'embed_filedata',
+		['write_lxv',
+		'embed_filedata'],
 		
 		'mesh_type',
 		'partial_ply',
@@ -83,10 +115,7 @@ class luxrender_engine(declarative_property_group):
 	visibility = {
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'write_files':				{ 'export_type': 'INT' },
-		'write_lxs':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'write_lxm':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'write_lxo':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
-		'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
+		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
@@ -204,33 +233,9 @@ class luxrender_engine(declarative_property_group):
 		},
 		{
 			'type': 'bool',
-			'attr': 'write_lxs',
-			'name': 'LXS',
-			'description': 'Write master scene file',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_lxm',
-			'name': 'LXM',
-			'description': 'Write materials file',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_lxo',
-			'name': 'LXO',
-			'description': 'Write objects file',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
 			'attr': 'write_lxv',
-			'name': 'LXV',
-			'description': 'Write volumes file',
+			'name': 'Export smoke',
+			'description': 'Process and export smoke simulations',
 			'default': True,
 			'save_in_preset': True
 		},

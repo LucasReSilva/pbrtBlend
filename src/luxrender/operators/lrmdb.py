@@ -313,7 +313,10 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
 					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
 			
-			luxrender_mat.export(material_context, blender_mat)
+			cr = context.scene.luxrender_testing.clay_render
+			context.scene.luxrender_testing.clay_render = False
+			luxrender_mat.export(context.scene, material_context, blender_mat)
+			context.scene.luxrender_testing.clay_render = cr
 			
 			material_context.set_material_name(blender_mat.name)
 			material_context.update_material_metadata(

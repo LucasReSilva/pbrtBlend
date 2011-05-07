@@ -91,7 +91,7 @@ class Custom_Context(object):
 		self.files[ind].write('%s%s\n' % ('\t'*tabs, st))
 		self.files[ind].flush()
 		
-	def set_filename(self, scene, name, LXS=True, LXM=True, LXO=True, LXV=True):
+	def set_filename(self, scene, name, LXV=True):
 		'''
 		name				string
 		
@@ -110,31 +110,21 @@ class Custom_Context(object):
 		self.file_names = []
 		
 		self.file_names.append('%s.lxs' % name)
-		if LXS:
-			self.files.append(open(self.file_names[Files.MAIN], 'w'))
-			self.wf(Files.MAIN, '# Main Scene File')
-		else:
-			self.files.append(None)
+		self.files.append(open(self.file_names[Files.MAIN], 'w'))
+		self.wf(Files.MAIN, '# Main Scene File')
 		
 		subdir = '%s/%s/%05d' % (scene_filename(), scene.name, scene.frame_current)
 		
-		if LXM or LXO or LXV:
-			if not os.path.exists(subdir):
-				os.makedirs(subdir)
+		if not os.path.exists(subdir):
+			os.makedirs(subdir)
 		
 		self.file_names.append('%s/LuxRender-Materials.lxm' % subdir)
-		if LXM:
-			self.files.append(open(self.file_names[Files.MATS], 'w'))
-			self.wf(Files.MATS, '# Materials File')
-		else:
-			self.files.append(None)
+		self.files.append(open(self.file_names[Files.MATS], 'w'))
+		self.wf(Files.MATS, '# Materials File')
 		
 		self.file_names.append('%s/LuxRender-Geometry.lxo' % subdir)
-		if LXO:
-			self.files.append(open(self.file_names[Files.GEOM], 'w'))
-			self.wf(Files.GEOM, '# Geometry File')
-		else:
-			self.files.append(None)
+		self.files.append(open(self.file_names[Files.GEOM], 'w'))
+		self.wf(Files.GEOM, '# Geometry File')
 		
 		self.file_names.append('%s/LuxRender-Volumes.lxv' % subdir)
 		if LXV:

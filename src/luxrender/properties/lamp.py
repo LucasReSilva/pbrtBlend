@@ -209,21 +209,21 @@ class luxrender_lamp_sun(declarative_property_group):
 		'nsamples',
 		'turbidity',
 		'sunsky_advanced',
+		'relsize',
 		'horizonbrightness',
 		'horizonsize',
-		'relsize',
 		'sunhalobrightness',
 		'sunhalosize',
 		'backscattering',
 	]
 	
 	visibility = {
-		'horizonbrightness':	{ 'sunsky_advanced': True },
-		'horizonsize':			{ 'sunsky_advanced': True },
-		'sunhalobrightness':	{ 'sunsky_advanced': True },
-		'relsize':				{ 'sunsky_advanced': True },
-		'sunhalosize':			{ 'sunsky_advanced': True },
-		'backscattering':		{ 'sunsky_advanced': True },
+		'relsize':				{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sky'}) },
+		'horizonbrightness':	{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'horizonsize':			{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'sunhalobrightness':	{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'sunhalosize':			{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'backscattering':		{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
 	}
 	
 	properties = [
@@ -333,10 +333,12 @@ class luxrender_lamp_sun(declarative_property_group):
 		params.add_float('turbidity', self.turbidity)
 		params.add_integer('nsamples', self.nsamples)
 		
-		if self.sunsky_advanced:
+		if self.sunsky_advanced and self.sunsky_type != 'sky':
+			params.add_float('relsize', self.relsize)
+		
+		if self.sunsky_advanced and self.sunsky_type != 'sun':
 			params.add_float('horizonbrightness', self.horizonbrightness)
 			params.add_float('horizonsize', self.horizonsize)
-			params.add_float('relsize', self.relsize)
 			params.add_float('sunhalobrightness', self.sunhalobrightness)
 			params.add_float('sunhalosize', self.sunhalosize)
 			params.add_float('backscattering', self.backscattering)

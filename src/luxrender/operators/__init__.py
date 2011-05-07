@@ -290,6 +290,10 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 				self.properties.filename
 			)
 			
+			# Make sure the filename has the correct extension
+			if not fullpath.lower().endswith( '.%s' % self.properties.material_file_type.lower() ):
+				fullpath += '.%s' % self.properties.material_file_type.lower()
+			
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
 			
@@ -301,7 +305,10 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
 					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
 			
-			luxrender_mat.export(material_context, blender_mat)
+			cr = context.scene.luxrender_testing.clay_render
+			context.scene.luxrender_testing.clay_render = False
+			luxrender_mat.export(context.scene, material_context, blender_mat)
+			context.scene.luxrender_testing.clay_render = cr
 			
 			material_context.set_material_name(blender_mat.name)
 			material_context.update_material_metadata(
@@ -317,6 +324,7 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			LM.reset()
 			LuxManager.SetActive(None)
 			
+			self.report({'INFO'}, 'Material "%s" saved to %s' % (blender_mat.name, fullpath))
 			return {'FINISHED'}
 			
 		except Exception as err:

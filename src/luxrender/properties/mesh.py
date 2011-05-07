@@ -59,7 +59,7 @@ class luxrender_mesh(declarative_property_group):
 		'portal',
 		'subdiv',
 		'sublevels',
-		['nsmooth', 'sharpbound'],
+		['nsmooth', 'sharpbound', 'splitnormal'],
 	] + \
 		TF_displacementmap.controls + \
 	[
@@ -69,6 +69,7 @@ class luxrender_mesh(declarative_property_group):
 	visibility = dict_merge({
 		'nsmooth':		{ 'subdiv': LO({'!=': 'None'}) },
 		'sharpbound':	{ 'subdiv': LO({'!=': 'None'}) },
+		'splitnormal':	{ 'subdiv': LO({'!=': 'None'}) },
 		'sublevels':	{ 'subdiv': LO({'!=': 'None'}) },
 		'dmscale':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
 		'dmoffset':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
@@ -118,6 +119,12 @@ class luxrender_mesh(declarative_property_group):
 			'default': False,
 		},
 		{
+			'type': 'bool',
+			'attr': 'splitnormal',
+			'name': 'Keep Split Edges',
+			'default': False,
+			'description': 'Preserves edge-split modifier with set-smooth meshes. WARNING: This will cause set-solid meshes to rip open!'},
+		{
 			'type': 'int',
 			'attr': 'sublevels',
 			'name': 'Subdivision Levels',
@@ -157,6 +164,7 @@ class luxrender_mesh(declarative_property_group):
 			params.add_integer('nsubdivlevels',self.sublevels)
 			params.add_bool('dmnormalsmooth', self.nsmooth)
 			params.add_bool('dmsharpboundary', self.sharpbound)
+			params.add_bool('dmnormalsplit', self.splitnormal)
 			
 		
 		export_dm = TF_displacementmap.get_paramset(self)
