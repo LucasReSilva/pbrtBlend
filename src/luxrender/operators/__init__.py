@@ -290,6 +290,10 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 				self.properties.filename
 			)
 			
+			# Make sure the filename has the correct extension
+			if not fullpath.lower().endswith( '.%s' % self.properties.material_file_type.lower() ):
+				fullpath += '.%s' % self.properties.material_file_type.lower()
+			
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
 			
@@ -317,6 +321,7 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			LM.reset()
 			LuxManager.SetActive(None)
 			
+			self.report({'INFO'}, 'Material "%s" saved to %s' % (blender_mat.name, fullpath))
 			return {'FINISHED'}
 			
 		except Exception as err:
