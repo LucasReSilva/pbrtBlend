@@ -170,12 +170,13 @@ def convert_texture(scene, texture, variant_hint=None):
 	variant = 'float'
 	paramset = ParamSet()
 	
-	paramset.add_float('bright', texture.intensity)
-	paramset.add_float('contrast', texture.contrast)
-	
 	lux_tex_name = 'blender_%s' % texture.type.lower()
 	
 	mapping_type = '3D'
+	
+	if texture.type != 'IMAGE':
+		paramset.add_float('bright', texture.intensity)
+		paramset.add_float('contrast', texture.contrast)
 	
 	if texture.type == 'BLEND':
 		progression_map = {
