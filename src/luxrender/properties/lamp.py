@@ -333,10 +333,10 @@ class luxrender_lamp_sun(declarative_property_group):
 		params.add_float('turbidity', self.turbidity)
 		params.add_integer('nsamples', self.nsamples)
 		
-		if self.sunsky_advanced and self.type != 'sky':
+		if self.sunsky_advanced and self.sunsky_type != 'sky':
 			params.add_float('relsize', self.relsize)
 		
-		if self.sunsky_advanced and self.type != 'sun':
+		if self.sunsky_advanced and self.sunsky_type != 'sun':
 			params.add_float('horizonbrightness', self.horizonbrightness)
 			params.add_float('horizonsize', self.horizonsize)
 			params.add_float('sunhalobrightness', self.sunhalobrightness)
