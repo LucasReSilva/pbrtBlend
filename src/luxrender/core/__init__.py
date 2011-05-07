@@ -243,7 +243,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			# Dump to file in temp dir for debugging
 			from ..outputs.file_api import Custom_Context as lxs_writer
 			preview_context = lxs_writer(scene.name)
-			preview_context.set_filename(scene, 'luxblend25-preview', LXS=True, LXM=False, LXO=False, LXV=False)
+			preview_context.set_filename(scene, 'luxblend25-preview', LXV=False)
 			LM.lux_context = preview_context
 		else:
 			preview_context = LM.lux_context

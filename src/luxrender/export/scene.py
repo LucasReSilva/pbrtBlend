@@ -107,30 +107,18 @@ class SceneExporter(object):
 			if self.properties.api_type == 'FILE':
 				
 				if self.properties.write_all_files:
-					LXS = True
-					LXM = True
-					LXO = True
 					LXV = True
 				else:
-					LXS = scene.luxrender_engine.write_lxs
-					LXM = scene.luxrender_engine.write_lxm
-					LXO = scene.luxrender_engine.write_lxo
 					LXV = scene.luxrender_engine.write_lxv
 				
 				if not os.access( self.properties.directory, os.W_OK):
 					raise Exception('Output path "%s" is not writable' % self.properties.directory)
 				
-				if LXS or LXM or LXO:
-					lux_context.set_filename(
-						scene,
-						lxs_filename,
-						LXS = LXS, 
-						LXM = LXM,
-						LXO = LXO,
-						LXV = LXV
-					)
-				else:
-					raise Exception('Nothing to do! Select at least one of LXM/LXS/LXO')
+				lux_context.set_filename(
+					scene,
+					lxs_filename,
+					LXV = LXV
+				)
 			
 			if lux_context == False:
 				raise Exception('Lux context is not valid for export to %s'%self.properties.filename)
@@ -138,51 +126,52 @@ class SceneExporter(object):
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
 			
-			if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
-				self.report({'INFO'}, 'Exporting render settings')
+			# Pretty sure this conditional is useless
+			#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
+			self.report({'INFO'}, 'Exporting render settings')
+			
+			if self.properties.api_type == 'FILE':
+				lux_context.set_output_file(Files.MAIN)
+			
+			# Set up render engine parameters
+			if LUXRENDER_VERSION >= '0.8':
+				lux_context.renderer(		*scene.luxrender_engine.api_output()							)
+			lux_context.sampler(			*scene.luxrender_sampler.api_output()							)
+			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()						)
+			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output(scene.luxrender_engine)	)
+			lux_context.volumeIntegrator(	*scene.luxrender_volumeintegrator.api_output()					)
+			lux_context.pixelFilter(		*scene.luxrender_filter.api_output()							)
+			
+			# Set up camera, view and film
+			is_cam_animated = False
+			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 				
-				if self.properties.api_type == 'FILE':
-					lux_context.set_output_file(Files.MAIN)
+				next_matrix = object_anim_matrix(scene, scene.camera, ignore_scale=True)
 				
-				# Set up render engine parameters
-				if LUXRENDER_VERSION >= '0.8':
-					lux_context.renderer(		*scene.luxrender_engine.api_output()							)
-				lux_context.sampler(			*scene.luxrender_sampler.api_output()							)
-				lux_context.accelerator(		*scene.luxrender_accelerator.api_output()						)
-				lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output(scene.luxrender_engine)	)
-				lux_context.volumeIntegrator(	*scene.luxrender_volumeintegrator.api_output()					)
-				lux_context.pixelFilter(		*scene.luxrender_filter.api_output()							)
-				
-				# Set up camera, view and film
-				is_cam_animated = False
-				if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
+				if next_matrix != False:
+					lux_context.transformBegin(file=Files.MAIN)
 					
-					next_matrix = object_anim_matrix(scene, scene.camera, ignore_scale=True)
+					ws = get_worldscale()
+					next_matrix *= ws
+					ws = get_worldscale(as_scalematrix=False)
+					next_matrix[3][0] *= ws
+					next_matrix[3][1] *= ws
+					next_matrix[3][2] *= ws
 					
-					if next_matrix != False:
-						lux_context.transformBegin(file=Files.MAIN)
-						
-						ws = get_worldscale()
-						next_matrix *= ws
-						ws = get_worldscale(as_scalematrix=False)
-						next_matrix[3][0] *= ws
-						next_matrix[3][1] *= ws
-						next_matrix[3][2] *= ws
-						
-						pos = next_matrix[3]
-						forwards = -next_matrix[2]
-						target = (pos + forwards)
-						up = next_matrix[1]
-						lux_context.lookAt( * pos[:3] + target[:3] + up[:3] )
-						lux_context.coordinateSystem('CameraEndTransform')
-						lux_context.transformEnd()
-						is_cam_animated = True
-						
-				lux_context.lookAt(	*scene.camera.data.luxrender_camera.lookAt(scene.camera) )
-				lux_context.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
-				lux_context.film(	*scene.camera.data.luxrender_camera.luxrender_film.api_output()	)
-				
-				lux_context.worldBegin()
+					pos = next_matrix[3]
+					forwards = -next_matrix[2]
+					target = (pos + forwards)
+					up = next_matrix[1]
+					lux_context.lookAt( * pos[:3] + target[:3] + up[:3] )
+					lux_context.coordinateSystem('CameraEndTransform')
+					lux_context.transformEnd()
+					is_cam_animated = True
+					
+			lux_context.lookAt(	*scene.camera.data.luxrender_camera.lookAt(scene.camera) )
+			lux_context.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
+			lux_context.film(	*scene.camera.data.luxrender_camera.luxrender_film.api_output()	)
+			
+			lux_context.worldBegin()
 			
 			lights_in_export = False
 			
@@ -194,10 +183,12 @@ class SceneExporter(object):
 				geom_scenes.append(s)
 			
 			GE = export_geometry.GeometryExporter(lux_context, scene)
-			if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxv):
+			# Pretty sure this conditional is useless
+			#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
+			if scene.luxrender_engine.write_lxv:
 				if self.properties.api_type == 'FILE':
 					lux_context.set_output_file(Files.VOLM)
-				export_volumes.export_smoke(lux_context, scene)	
+				export_volumes.export_smoke(lux_context, scene)
 			
 			# Make sure lamp textures go back into main file, not geom file
 			if self.properties.api_type in ['FILE']:
@@ -212,20 +203,22 @@ class SceneExporter(object):
 					for volume in geom_scene.luxrender_volumes.volumes:
 						lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 				
-				if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxo):
-					self.report({'INFO'}, 'Exporting geometry')
-					if self.properties.api_type == 'FILE':
-						lux_context.set_output_file(Files.GEOM)
-					lights_in_export |= GE.iterateScene(geom_scene)
+				# Pretty sure this conditional is useless
+				#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
+				self.report({'INFO'}, 'Exporting geometry')
+				if self.properties.api_type == 'FILE':
+					lux_context.set_output_file(Files.GEOM)
+				lights_in_export |= GE.iterateScene(geom_scene)
 			
 			for geom_scene in geom_scenes:
 				# Make sure lamp textures go back into main file, not geom file
 				if self.properties.api_type in ['FILE']:
 					lux_context.set_output_file(Files.MAIN)
 				
-				if (self.properties.api_type in ['API', 'LUXFIRE_CLIENT'] and not self.properties.write_files) or (self.properties.write_files and scene.luxrender_engine.write_lxs):
-					self.report({'INFO'}, 'Exporting lights')
-					lights_in_export |= export_lights.lights(lux_context, geom_scene, scene, GE.ExportedMeshes)
+				# Pretty sure this conditional is useless
+				#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
+				self.report({'INFO'}, 'Exporting lights')
+				lights_in_export |= export_lights.lights(lux_context, geom_scene, scene, GE.ExportedMeshes)
 			
 			if lights_in_export == False:
 				raise Exception('No lights in exported data!')
