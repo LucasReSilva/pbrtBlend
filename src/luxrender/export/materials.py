@@ -257,18 +257,31 @@ def convert_texture(scene, texture, variant_hint=None):
 	
 	# Translate Blender Image/movie into lux tex
 	if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE']:
+		
+		extract_path = os.path.join(
+			efutil.scene_filename(),
+			bpy.path.clean_name(scene.name),
+			'%05d' % scene.frame_current
+		)
+		
 		if texture.image.source == 'GENERATED':
-			tex_image = 'luxblend_baked_image_%s.png' % bpy.path.clean_name(texture.name)
+			tex_image = 'luxblend_baked_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.file_format)
+			tex_image = os.path.join(extract_path, tex_image)
 			texture.image.save_render(tex_image, scene)
 		
 		if texture.image.source == 'FILE':
-			if texture.library is not None:
-				f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
+			if texture.image.packed_file:
+				tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.file_format)
+				tex_image = os.path.join(extract_path, tex_image)
+				texture.image.save_render(tex_image, scene)
 			else:
-				f_path = efutil.filesystem_path(texture.image.filepath)
-			if not os.path.exists(f_path):
-				raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
-			tex_image = efutil.path_relative_to_export(f_path)
+				if texture.library is not None:
+					f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
+				else:
+					f_path = efutil.filesystem_path(texture.image.filepath)
+				if not os.path.exists(f_path):
+					raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+				tex_image = efutil.path_relative_to_export(f_path)
 		
 		lux_tex_name = 'imagemap'
 		if variant_hint:
