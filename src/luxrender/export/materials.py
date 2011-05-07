@@ -75,6 +75,7 @@ class ExportedTextures(object):
 	def texture(lux_context, name, type, texture, params):
 		if lux_context.API_TYPE == 'PURE':
 			lux_context.texture(name, type, texture, params)
+			ExportedTextures.exported_texture_names.append(name)
 			return
 		
 		if name not in ExportedTextures.exported_texture_names:
