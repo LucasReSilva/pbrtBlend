@@ -70,6 +70,41 @@ class SceneExporter(object):
 	def report(self, type, message):
 		LuxLog('%s: %s' % ('|'.join([('%s'%i).upper() for i in type]), message))
 	
+	def scene_is_lit(self, GE):
+		have_lamp = False
+		have_emitter = False
+		
+		for obj in self.scene.objects:
+			if obj.type == 'LAMP' and GE.is_visible(obj):
+				lamp_enabled = export_lights.checkLightEnabled(self.scene, obj.data)
+				lamp_enabled &= obj.data.energy > 0.0
+				if obj.data.type == 'POINT':
+					lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_point.L_color.v > 0.0
+				if obj.data.type == 'SPOT':
+					lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_spot.L_color.v > 0.0
+				if obj.data.type == 'HEMI':
+					lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_hemi.L_color.v > 0.0
+				if obj.data.type == 'AREA':
+					lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.L_color.v > 0.0
+					lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.power > 0.0
+					lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.efficacy > 0.0
+				have_lamp |= lamp_enabled
+			
+			if obj.type in ['MESH', 'SURFACE', 'CURVE', 'FONT'] and GE.is_visible(obj):
+				for ms in obj.material_slots:
+					mat = ms.material
+					if mat and mat.luxrender_emission.use_emission:
+						emit_enabled = self.scene.luxrender_lightgroups.is_enabled(mat.luxrender_emission.lightgroup)
+						emit_enabled &= (mat.luxrender_emission.L_color.v*mat.luxrender_emission.gain*mat.luxrender_emission.power*mat.luxrender_emission.efficacy) > 0.0
+						have_emitter |= emit_enabled
+						if have_emitter:
+							break
+			
+			if have_lamp or have_emitter:
+				return True
+		
+		return False
+	
 	def export(self):
 		scene = self.scene
 		
@@ -93,6 +128,11 @@ class SceneExporter(object):
 			
 			LuxManager.ActiveManager.SetCurrentScene(scene)
 			lux_context = LuxManager.ActiveManager.lux_context
+			
+			GE = export_geometry.GeometryExporter(lux_context, scene)
+			
+			if not self.scene_is_lit(GE):
+				raise Exception('Scene is not lit!')
 			
 			if self.properties.filename.endswith('.lxs'):
 				self.properties.filename = self.properties.filename[:-4]
@@ -126,8 +166,6 @@ class SceneExporter(object):
 			export_materials.ExportedMaterials.clear()
 			export_materials.ExportedTextures.clear()
 			
-			# Pretty sure this conditional is useless
-			#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
 			self.report({'INFO'}, 'Exporting render settings')
 			
 			if self.properties.api_type == 'FILE':
@@ -182,9 +220,6 @@ class SceneExporter(object):
 				s = s.background_set
 				geom_scenes.append(s)
 			
-			GE = export_geometry.GeometryExporter(lux_context, scene)
-			# Pretty sure this conditional is useless
-			#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
 			if scene.luxrender_engine.write_lxv:
 				if self.properties.api_type == 'FILE':
 					lux_context.set_output_file(Files.VOLM)
@@ -203,8 +238,6 @@ class SceneExporter(object):
 					for volume in geom_scene.luxrender_volumes.volumes:
 						lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 				
-				# Pretty sure this conditional is useless
-				#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
 				self.report({'INFO'}, 'Exporting geometry')
 				if self.properties.api_type == 'FILE':
 					lux_context.set_output_file(Files.GEOM)
@@ -215,8 +248,6 @@ class SceneExporter(object):
 				if self.properties.api_type in ['FILE']:
 					lux_context.set_output_file(Files.MAIN)
 				
-				# Pretty sure this conditional is useless
-				#if (self.properties.api_type in ['API'] and not self.properties.write_files) or (self.properties.write_files):
 				self.report({'INFO'}, 'Exporting lights')
 				lights_in_export |= export_lights.lights(lux_context, geom_scene, scene, GE.ExportedMeshes)
 			
