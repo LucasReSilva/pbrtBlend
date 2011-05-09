@@ -338,6 +338,8 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'maxdepth',
 			'name': 'Max. depth',
 			'default': 48,
+			'min': 8,
+			'max': 2048,
 			'save_in_preset': True
 		},
 		
