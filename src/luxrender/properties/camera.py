@@ -723,7 +723,7 @@ Portra_800CD""".splitlines()]
 @LuxRenderAddon.addon_register_class
 class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
 	bl_idname = 'camera.set_luxrender_crf'
-	bl_label = 'Set LuxRender Camera Response Function'
+	bl_label = 'Set LuxRender Film Response Function'
 	
 	preset_name = bpy.props.StringProperty()
 	
@@ -898,17 +898,17 @@ class luxrender_colorspace(declarative_property_group):
 		{
 			'attr': 'crf_label',
 			'type': 'text',
-			'name': 'Camera Response Function',
+			'name': 'Film Response Function',
 		},
 		{
 			'attr': 'use_crf',
 			'type': 'enum',
-			'name': 'Use Camera Response Function',
+			'name': 'Use Film Response',
 			'default': 'none',
 			'items': [
-				('none', 'None', 'Don\'t use a CRF'),
-				('file', 'File', 'Load a CRF from File'),
-				('preset', 'Preset', 'Use a built-in CRF Preset'),
+				('none', 'None', 'Don\'t use a Film Response'),
+				('file', 'File', 'Load a Film Response from file'),
+				('preset', 'Preset', 'Use a built-in Film Response Preset'),
 			],
 			'expand': True
 		},
@@ -921,14 +921,14 @@ class luxrender_colorspace(declarative_property_group):
 			'attr': 'crf_file',
 			'type': 'string',
 			'subtype': 'FILE_PATH',
-			'name': 'CRF File',
+			'name': 'Film Reponse File',
 			'default': '',
 		},
 		{
 			'attr': 'crf_preset',
 			'type': 'string',
-			'name': 'CRF Preset',
-			'default': 'CRF Preset',
+			'name': 'Film Reponse Preset',
+			'default': 'Film Response Preset',
 		},
 	]
 
