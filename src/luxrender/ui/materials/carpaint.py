@@ -29,7 +29,7 @@ from ...ui.materials import luxrender_material_sub
 
 @LuxRenderAddon.addon_register_class
 class ui_material_carpaint(luxrender_material_sub):
-	bl_label = 'LuxRender Carpaint Material'
+	bl_label = 'LuxRender Car Paint Material'
 	
 	LUX_COMPAT = {'carpaint'}
 	
