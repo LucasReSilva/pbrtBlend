@@ -700,13 +700,13 @@ class luxrender_transparency(declarative_property_group):
 						'diffuseintensity': 'colored_mean',
 					}
 					
-					params = ParamSet() \
-						.add_string('filename', efutil.path_relative_to_export(src_texture.get_filename(texture))) \
-						.add_string('channel', channelMap[self.alpha_source]) \
-						.add_integer('discardmipmaps', src_texture.discardmipmaps) \
-						.add_string('filtertype', src_texture.filtertype) \
-						.add_float('maxanisotropy', src_texture.maxanisotropy) \
-						.add_string('wrap', src_texture.wrap)
+					params = ParamSet()
+					process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
+					params.add_string('channel', channelMap[self.alpha_source])
+					params.add_integer('discardmipmaps', src_texture.discardmipmaps)
+					params.add_string('filtertype', src_texture.filtertype)
+					params.add_float('maxanisotropy', src_texture.maxanisotropy)
+					params.add_string('wrap', src_texture.wrap)
 					params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 					
 					alpha_type = 'texture'
