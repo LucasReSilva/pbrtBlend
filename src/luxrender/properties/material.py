@@ -663,6 +663,10 @@ class luxrender_transparency(declarative_property_group):
 			
 			# We take the name of the last texture exported, since
 			# the texture export code may have re-written the name
+			
+			if len(ExportedTextures.exported_texture_names) < 1:
+				raise Exception("Cannot get alpha texture for material %s" % material.name)
+			
 			alpha_amount = ExportedTextures.exported_texture_names[-1]
 			
 			if self.inverse:
