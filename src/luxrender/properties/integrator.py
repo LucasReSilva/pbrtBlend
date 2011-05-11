@@ -113,6 +113,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		# dl +
 		'maxdepth',
+		'shadowraycount',
 		
 		# dp
 		['lbl_direct',
@@ -190,6 +191,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		# dl +
 		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path']) },
+		'shadowraycount':					{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'path']) },
 		
 		# dp
 		'lbl_direct':						{ 'surfaceintegrator': 'distributedpath' },
@@ -342,7 +344,13 @@ class luxrender_integrator(declarative_property_group):
 			'max': 2048,
 			'save_in_preset': True
 		},
-		
+		{
+			'type': 'int',
+			'attr': 'shadowraycount',
+			'name': 'Shadow Ray Count',
+			'default': 1,
+			'save_in_preset': True
+		},
 		{
 			'type': 'text',
 			'attr': 'lbl_direct',
@@ -766,7 +774,8 @@ class luxrender_integrator(declarative_property_group):
 				params.add_float('lightrrthreshold', self.lightrrthreshold)
 		
 		if self.surfaceintegrator == 'directlighting':
-			params.add_integer('maxdepth', self.maxdepth)
+			params.add_integer('maxdepth', self.maxdepth) \
+				.add_integer('shadowraycount', self.shadowraycount)
 		
 		if self.surfaceintegrator == 'distributedpath':
 			params.add_bool('directsampleall', self.directsampleall) \
@@ -798,6 +807,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		if self.surfaceintegrator == 'exphotonmap':
 			params.add_integer('maxdepth', self.maxdepth) \
+				  .add_integer('shadowraycount', self.shadowraycount) \
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
 				  .add_integer('directphotons', self.directphotons) \
 				  .add_integer('causticphotons', self.causticphotons) \
@@ -828,6 +838,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		if self.surfaceintegrator == 'path':
 			params.add_integer('maxdepth', self.maxdepth) \
+				  .add_integer('shadowraycount', self.shadowraycount) \
 				  .add_float('rrcontinueprob', self.rrcontinueprob) \
 				  .add_string('rrstrategy', self.rrstrategy) \
 				  .add_bool('includeenvironment', self.includeenvironment)
