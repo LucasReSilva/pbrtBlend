@@ -391,13 +391,13 @@ class luxrender_film(declarative_property_group):
 	controls = [
 		'lbl_internal',
 		'internal_updateinterval',
+		'integratedimaging',
 		
 		'lbl_external',
 		'writeinterval',
 		'displayinterval',
 		
 		'lbl_outputs',
-		'integratedimaging',
 		['write_png', 'write_tga'],
 		['write_exr', 'write_exr_applyimaging'],
 		'output_alpha',
@@ -461,7 +461,7 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'integratedimaging',
-			'name': 'Integrated Imaging workflow',
+			'name': 'Integrated imaging workflow',
 			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
 			'default': False
 		},
@@ -493,6 +493,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'restart_flm',
 			'name': 'Restart FLM',
+			'description': 'Restart render from the beginning even if an FLM is available',
 			'default': False
 		},
 		{
@@ -512,7 +513,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'int',
 			'attr': 'outlierrejection_k',
 			'name': 'Firefly rejection',
-			'description': 'Firefly (outlier) rejection k parameter',
+			'description': 'Firefly (outlier) rejection k parameter. 0=disabled',
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
