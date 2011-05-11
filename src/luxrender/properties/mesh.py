@@ -102,8 +102,8 @@ class luxrender_mesh(declarative_property_group):
 			'default': 'None',
 			'items': [
 				('None', 'None', 'None'),
-				('loop', 'loop', 'loop'),
-				('microdisplacement', 'microdisplacement', 'microdisplacement')
+				('loop', 'Loop', 'loop'),
+				('microdisplacement', 'Microdisplacement', 'microdisplacement')
 			]
 		},
 		{
