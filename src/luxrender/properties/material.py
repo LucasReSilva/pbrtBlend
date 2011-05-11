@@ -122,8 +122,8 @@ TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value
 TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
 TC_Kd					= ColorTextureParameter('Kd', 'Diffuse color',						default=(0.64,0.64,0.64) )
 TC_Kr					= ColorTextureParameter('Kr', 'Reflection color',					default=(0.7,0.7,0.7) ) # 1.0 reflection color is not sane for mirror or shinymetal, 0.7 does not signifcantly affect glass or roughglass
-TC_Ks					= ColorTextureParameter('Ks', 'Specular color',						default=(0.25,0.25,0.25) )
-TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(0.25,0.25,0.25) )
+TC_Ks					= ColorTextureParameter('Ks', 'Specular color',						default=(0.04,0.04,0.04) )
+TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(0.15,0.15,0.15) )
 TC_Ks2					= ColorTextureParameter('Ks2', 'Specular color 2',					default=(0.07,0.07,0.07) )
 TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(0.04,0.04,0.04) )
 TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
