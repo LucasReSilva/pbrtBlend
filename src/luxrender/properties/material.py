@@ -1288,7 +1288,7 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 			'attr': 'energyconserving',
 			'name': 'Energy conserving',
 			'description': 'Force energy conservation with regards to reflection and transmission',
-			'default': False
+			'default': True
 		},
 	] + \
 		TC_Kr.properties + \
