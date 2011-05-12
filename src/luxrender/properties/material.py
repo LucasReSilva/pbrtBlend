@@ -695,7 +695,7 @@ class luxrender_transparency(declarative_property_group):
 			if texture_name != '':
 				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 				lux_texture = texture.luxrender_texture
-				if lux_texture.type == 'imagemap':
+				if lux_texture.type == 'imagemap' or (texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE'):
 					src_texture = lux_texture.luxrender_tex_imagemap
 					
 					channelMap = {
