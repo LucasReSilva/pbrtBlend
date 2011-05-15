@@ -506,8 +506,8 @@ class GeometryExporter(object):
 		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
 			return True
 		
-		if obj.type == 'MESH' and obj.data.luxrender_mesh.instancing != 'auto':
-			return obj.data.luxrender_mesh.instancing == 'always'
+		if obj.type == 'MESH' and obj.data.luxrender_mesh.instancing_mode != 'auto':
+			return obj.data.luxrender_mesh.instancing_mode == 'always'
 		
 		# If the object is animated, for motion blur we need instances
 		if self.is_object_animated(obj)[0]:
