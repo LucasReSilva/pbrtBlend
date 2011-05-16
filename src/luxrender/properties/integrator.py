@@ -782,6 +782,8 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'alpha',
 			'name': 'Alpha',
 			'default': 0.7,
+			'min': 0.01,
+			'max': 0.99,
 			'save_in_preset': True
 		},
 		{
