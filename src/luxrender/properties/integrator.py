@@ -770,7 +770,9 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'maxeyedepth',
 			'name': 'Max. eye depth',
-			'default': 16,
+			'default': 48,
+			'min': 8,
+			'max': 2048,
 			'save_in_preset': True
 		},
 		{
