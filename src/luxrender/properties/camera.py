@@ -391,13 +391,13 @@ class luxrender_film(declarative_property_group):
 	controls = [
 		'lbl_internal',
 		'internal_updateinterval',
+		'integratedimaging',
 		
 		'lbl_external',
 		'writeinterval',
 		'displayinterval',
 		
 		'lbl_outputs',
-		'integratedimaging',
 		['write_png', 'write_tga'],
 		['write_exr', 'write_exr_applyimaging'],
 		'output_alpha',
@@ -461,7 +461,7 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'integratedimaging',
-			'name': 'Integrated Imaging workflow',
+			'name': 'Integrated imaging workflow',
 			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
 			'default': False
 		},
@@ -493,6 +493,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'restart_flm',
 			'name': 'Restart FLM',
+			'description': 'Restart render from the beginning even if an FLM is available',
 			'default': False
 		},
 		{
@@ -512,7 +513,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'int',
 			'attr': 'outlierrejection_k',
 			'name': 'Firefly rejection',
-			'description': 'Firefly (outlier) rejection k parameter',
+			'description': 'Firefly (outlier) rejection k parameter. 0=disabled',
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
@@ -722,7 +723,7 @@ Portra_800CD""".splitlines()]
 @LuxRenderAddon.addon_register_class
 class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
 	bl_idname = 'camera.set_luxrender_crf'
-	bl_label = 'Set LuxRender Camera Response Function'
+	bl_label = 'Set LuxRender Film Response Function'
 	
 	preset_name = bpy.props.StringProperty()
 	
@@ -897,17 +898,17 @@ class luxrender_colorspace(declarative_property_group):
 		{
 			'attr': 'crf_label',
 			'type': 'text',
-			'name': 'Camera Response Function',
+			'name': 'Film Response Function',
 		},
 		{
 			'attr': 'use_crf',
 			'type': 'enum',
-			'name': 'Use Camera Response Function',
+			'name': 'Use Film Response',
 			'default': 'none',
 			'items': [
-				('none', 'None', 'Don\'t use a CRF'),
-				('file', 'File', 'Load a CRF from File'),
-				('preset', 'Preset', 'Use a built-in CRF Preset'),
+				('none', 'None', 'Don\'t use a Film Response'),
+				('file', 'File', 'Load a Film Response from file'),
+				('preset', 'Preset', 'Use a built-in Film Response Preset'),
 			],
 			'expand': True
 		},
@@ -920,14 +921,14 @@ class luxrender_colorspace(declarative_property_group):
 			'attr': 'crf_file',
 			'type': 'string',
 			'subtype': 'FILE_PATH',
-			'name': 'CRF File',
+			'name': 'Film Reponse File',
 			'default': '',
 		},
 		{
 			'attr': 'crf_preset',
 			'type': 'string',
-			'name': 'CRF Preset',
-			'default': 'CRF Preset',
+			'name': 'Film Reponse Preset',
+			'default': 'Film Response Preset',
 		},
 	]
 

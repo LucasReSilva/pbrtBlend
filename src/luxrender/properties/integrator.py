@@ -113,6 +113,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		# dl +
 		'maxdepth',
+		'shadowraycount',
 		
 		# dp
 		['lbl_direct',
@@ -198,6 +199,7 @@ class luxrender_integrator(declarative_property_group):
 		# dl +
 		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath'])},
 		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path']) },
+		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'path']) },
 		
 		# dp
 		'lbl_direct':						{ 'surfaceintegrator': 'distributedpath' },
@@ -357,9 +359,17 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'maxdepth',
 			'name': 'Max. depth',
 			'default': 48,
+			'min': 8,
+			'max': 2048,
 			'save_in_preset': True
 		},
-		
+		{
+			'type': 'int',
+			'attr': 'shadowraycount',
+			'name': 'Shadow Ray Count',
+			'default': 1,
+			'save_in_preset': True
+		},
 		{
 			'type': 'text',
 			'attr': 'lbl_direct',
@@ -856,7 +866,7 @@ class luxrender_integrator(declarative_property_group):
 				params.add_float('lightrrthreshold', self.lightrrthreshold)
 		
 		if self.surfaceintegrator == 'directlighting':
-			params.add_integer('maxdepth', self.maxdepth)
+			params.add_integer('maxdepth', self.maxdepth) \
 			
 		if self.surfaceintegrator == 'sppm':
 			params.add_integer('maxeyedepth', self.maxeyedepth) \
@@ -934,6 +944,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_bool('includeenvironment', self.includeenvironment)
 		
 		if self.advanced and self.surfaceintegrator not in ('bidirectional', 'sppm'):
-			params.add_string('lightstrategy', self.lightstrategy)
+			params.add_string('lightstrategy', self.lightstrategy) \
+				.add_integer('shadowraycount', self.shadowraycount)
 		
 		return self.surfaceintegrator, params

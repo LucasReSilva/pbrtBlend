@@ -29,7 +29,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_wrinkled(luxrender_texture_base):
-	bl_label = 'LuxRender wrinkled Texture'
+	bl_label = 'LuxRender Wrinkled Texture'
 	
 	LUX_COMPAT = {'wrinkled'}
 	

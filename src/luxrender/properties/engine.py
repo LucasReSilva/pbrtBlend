@@ -62,7 +62,8 @@ class luxrender_testing(declarative_property_group):
 	
 	controls = [
 		'clay_render',
-		'object_analysis'
+		'object_analysis',
+		're_raise'
 	]
 	
 	visibility = {}
@@ -80,6 +81,13 @@ class luxrender_testing(declarative_property_group):
 			'attr': 'object_analysis',
 			'name': 'Debug: print object analysis',
 			'description': 'Show extra output as objects are processed',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 're_raise',
+			'name': 'Debug: show full trace on export error',
+			'description': '',
 			'default': False
 		},
 	]

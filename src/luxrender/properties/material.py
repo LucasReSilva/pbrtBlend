@@ -102,7 +102,7 @@ TF_cauchyb				= FloatTextureParameter('cauchyb', 'Cauchy B',						add_float_valu
 TF_d					= FloatTextureParameter('d', 'Absorption Depth',					add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
 TF_film					= FloatTextureParameter('film', 'Thin Film Thickness (nm)',			add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
 TF_filmindex			= FloatTextureParameter('filmindex', 'Film IOR',					add_float_value=True, default=1.3333, min=1.0, max=6.0 ) # default 1.3333 for a coating of a water-based solution
-TF_index				= FloatTextureParameter('index', 'IOR',								add_float_value=True, min=0.0, max=25.0, default=1.519) #default of something other than 1.0 so glass and roughglass render propery with defaults
+TF_index				= FloatTextureParameter('index', 'IOR',								add_float_value=True, min=0.0, max=25.0, default=1.520) #default of something other than 1.0 so glass and roughglass render propery with defaults
 TF_M1					= FloatTextureParameter('M1', 'M1',									add_float_value=True, default=0.300, min=0.0001, max=1.0 ) #carpaint defaults set for a basic gray clearcoat paint job, as a "setting suggestion"
 TF_M2					= FloatTextureParameter('M2', 'M2',									add_float_value=True, default=0.200, min=0.0001, max=1.0 ) #set m1-3 min to .0001, carpaint will take 0.0 as being max (1.0)
 TF_M3					= FloatTextureParameter('M3', 'M3',									add_float_value=True, default=0.025, min=0.0001, max=1.0 )
@@ -122,8 +122,8 @@ TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value
 TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
 TC_Kd					= ColorTextureParameter('Kd', 'Diffuse color',						default=(0.64,0.64,0.64) )
 TC_Kr					= ColorTextureParameter('Kr', 'Reflection color',					default=(0.7,0.7,0.7) ) # 1.0 reflection color is not sane for mirror or shinymetal, 0.7 does not signifcantly affect glass or roughglass
-TC_Ks					= ColorTextureParameter('Ks', 'Specular color',						default=(0.25,0.25,0.25) )
-TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(0.25,0.25,0.25) )
+TC_Ks					= ColorTextureParameter('Ks', 'Specular color',						default=(0.04,0.04,0.04) )
+TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(0.15,0.15,0.15) )
 TC_Ks2					= ColorTextureParameter('Ks2', 'Specular color 2',					default=(0.07,0.07,0.07) )
 TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(0.04,0.04,0.04) )
 TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
@@ -663,6 +663,10 @@ class luxrender_transparency(declarative_property_group):
 			
 			# We take the name of the last texture exported, since
 			# the texture export code may have re-written the name
+			
+			if len(ExportedTextures.exported_texture_names) < 1:
+				raise Exception("Cannot get alpha texture for material %s" % material.name)
+			
 			alpha_amount = ExportedTextures.exported_texture_names[-1]
 			
 			if self.inverse:
@@ -691,7 +695,7 @@ class luxrender_transparency(declarative_property_group):
 			if texture_name != '':
 				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 				lux_texture = texture.luxrender_texture
-				if lux_texture.type == 'imagemap':
+				if lux_texture.type == 'imagemap' or (texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE'):
 					src_texture = lux_texture.luxrender_tex_imagemap
 					
 					channelMap = {
@@ -700,13 +704,13 @@ class luxrender_transparency(declarative_property_group):
 						'diffuseintensity': 'colored_mean',
 					}
 					
-					params = ParamSet() \
-						.add_string('filename', efutil.path_relative_to_export(src_texture.get_filename(texture))) \
-						.add_string('channel', channelMap[self.alpha_source]) \
-						.add_integer('discardmipmaps', src_texture.discardmipmaps) \
-						.add_string('filtertype', src_texture.filtertype) \
-						.add_float('maxanisotropy', src_texture.maxanisotropy) \
-						.add_string('wrap', src_texture.wrap)
+					params = ParamSet()
+					process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
+					params.add_string('channel', channelMap[self.alpha_source])
+					params.add_integer('discardmipmaps', src_texture.discardmipmaps)
+					params.add_string('filtertype', src_texture.filtertype)
+					params.add_float('maxanisotropy', src_texture.maxanisotropy)
+					params.add_string('wrap', src_texture.wrap)
 					params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 					
 					alpha_type = 'texture'
@@ -1288,7 +1292,7 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 			'attr': 'energyconserving',
 			'name': 'Energy conserving',
 			'description': 'Force energy conservation with regards to reflection and transmission',
-			'default': False
+			'default': True
 		},
 	] + \
 		TC_Kr.properties + \

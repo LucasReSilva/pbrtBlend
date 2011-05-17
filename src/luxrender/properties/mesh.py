@@ -55,7 +55,7 @@ class luxrender_mesh(declarative_property_group):
 	
 	controls = [
 		'mesh_type',
-		
+		'instancing_mode',
 		'portal',
 		'subdiv',
 		'sublevels',
@@ -90,6 +90,17 @@ class luxrender_mesh(declarative_property_group):
 			'default': 'global'
 		},
 		{
+			'type': 'enum',
+			'attr': 'instancing_mode',
+			'name': 'Instancing',
+			'items': [
+				('auto', 'Automatic', 'Let the exporter code decide'),
+				('always', 'Always', 'Always export this mesh as instances'),
+				('never', 'Never', 'Never export this mesh as instances')
+			],
+			'default': 'auto'
+		},
+		{
 			'type': 'bool',
 			'attr': 'portal',
 			'name': 'Exit Portal',
@@ -102,8 +113,8 @@ class luxrender_mesh(declarative_property_group):
 			'default': 'None',
 			'items': [
 				('None', 'None', 'None'),
-				('loop', 'loop', 'loop'),
-				('microdisplacement', 'microdisplacement', 'microdisplacement')
+				('loop', 'Loop', 'loop'),
+				('microdisplacement', 'Microdisplacement', 'microdisplacement')
 			]
 		},
 		{

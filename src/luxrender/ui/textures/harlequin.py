@@ -29,7 +29,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_harlequin(luxrender_texture_base):
-	bl_label = 'LuxRender harlequin Texture'
+	bl_label = 'LuxRender Harlequin Texture'
 	
 	LUX_COMPAT = {'harlequin'}
 	
