@@ -58,6 +58,7 @@ class GeometryExporter(object):
 		self.ExportedObjects = ExportCache('ExportedObjects')
 		self.ExportedPLYs = ExportCache('ExportedPLYs')
 		self.AnimationDataCache = ExportCache('AnimationData')
+		self.ExportedObjectsDuplis = ExportCache('ExportedObjectsDuplis')
 		
 		self.objects_used_as_duplis = set()
 		
@@ -829,6 +830,12 @@ class GeometryExporter(object):
 	def handler_Duplis_GENERIC(self, obj, *args, **kwargs):
 		try:
 			LuxLog('Exporting Duplis...')
+			
+			if self.ExportedObjectsDuplis.have(obj):
+				LuxLog('... duplis already exported for object %s' % obj)
+				return
+			
+			self.ExportedObjectsDuplis.add(obj, True)
 			
 			obj.dupli_list_create(self.visibility_scene)
 			if not obj.dupli_list:
