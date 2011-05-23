@@ -184,6 +184,7 @@ class luxrender_integrator(declarative_property_group):
 		'alpha',
 		'lookupaccel',
 		'pixelsampler',
+		'photonsampler',
 				
 		# path
 		'includeenvironment',
@@ -275,6 +276,7 @@ class luxrender_integrator(declarative_property_group):
 		'alpha':							{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'photonsampler':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 	}
 	
 	properties = [
@@ -824,6 +826,19 @@ class luxrender_integrator(declarative_property_group):
 			],
 			'save_in_preset': True
 		},
+		{
+			'type': 'enum',
+			'attr': 'photonsampler',
+			'name': 'Photon sampler',
+			'default': 'halton',
+			'description': 'Sampling method for photons',
+			'items': [
+				('amc', 'Adaptive Markov Chain', 'amc'),
+				('halton', 'Halton', 'halton'),
+			],
+			'save_in_preset': True
+		},
+			
 	]
 	
 	def api_output(self, engine_properties):
@@ -873,7 +888,8 @@ class luxrender_integrator(declarative_property_group):
 			if self.advanced:
 				params.add_float('alpha', self.alpha) \
 				  .add_string('lookupaccel', self.lookupaccel) \
-				  .add_string('pixelsampler', self.pixelsampler)
+				  .add_string('pixelsampler', self.pixelsampler) \
+				  .add_string('photonsampler', self.photonsampler)
 		
 		if self.surfaceintegrator == 'distributedpath':
 			params.add_bool('directsampleall', self.directsampleall) \
