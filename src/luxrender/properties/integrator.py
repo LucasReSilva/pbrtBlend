@@ -807,12 +807,6 @@ class luxrender_integrator(declarative_property_group):
 				('hashgrid', 'Hash Grid', 'hashgrid'),
 				('kdtree', 'KD Tree', 'kdtree'),
 				('hybridhashgrid', 'Hybrid Hash Grid', 'hybridhashgrid'),
-	#			('stochastichashgrid', 'Stochastic Hash Grid', 'stochastichashgrid'),
-				('grid', 'Grid', 'grid'),
-	#			('cuckoohashgrid', 'Cuckoo Hash Grid', 'cuckoohashgrid'),
-				('hybridmultihashgrid', 'Hybrid Multihash Grid', 'hybridmultihashgrid'),
-	#			('stochasticmultihashgrid', 'Stochastic Multihash Grid', 'stochasticmultihashgrid'),
-	# Some of these are works-in-progress in the core, so are commented out for now.
 			],
 			'save_in_preset': True
 		},
