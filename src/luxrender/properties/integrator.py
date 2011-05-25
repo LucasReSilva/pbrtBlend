@@ -594,7 +594,9 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'maxphotondepth',
 			'name': 'Max. photon depth',
-			'default': 16,
+			'default': 48,
+			'min': 8,
+			'max': 2048,
 			'save_in_preset': True
 		},
 		{

@@ -1896,6 +1896,7 @@ class luxrender_emission(declarative_property_group):
 	ef_attach_to = ['Material']
 	
 	controls = [
+		'importance',
 		'lightgroup_chooser',
 		'iesname'
 	] + \
@@ -1907,6 +1908,7 @@ class luxrender_emission(declarative_property_group):
 	]
 	
 	visibility = {
+		'importance':			{ 'use_emission': True },
 		'lightgroup_chooser':	{ 'use_emission': True },
 		'iesname':				{ 'use_emission': True },
 		'L_colorlabel':			{ 'use_emission': True },
@@ -1926,6 +1928,17 @@ class luxrender_emission(declarative_property_group):
 			'name': 'Use Emission',
 			'default': False,
 			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'importance',
+			'name': 'Importance',
+			'description': 'Light source importance',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e3,
+			'soft_max': 1e3,
 		},
 		{
 			'type': 'string',
@@ -1985,6 +1998,7 @@ class luxrender_emission(declarative_property_group):
 			lg_gain = LuxManager.CurrentScene.luxrender_lightgroups.lightgroups[self.lightgroup].gain
 		
 		arealightsource_params = ParamSet() \
+				.add_float('importance', self.importance) \
 				.add_float('gain', self.gain*lg_gain) \
 				.add_float('power', self.power) \
 				.add_float('efficacy', self.efficacy)
