@@ -485,7 +485,7 @@ class luxrender_lightgroup_data(declarative_property_group):
 			'type': 'float',
 			'attr': 'gain',
 			'name': 'Gain',
-			'description': 'Overall gain for this gight group',
+			'description': 'Overall gain for this light group',
 			'min': 0.0,
 			'soft_min': 0.0,
 			'default': 1.0
