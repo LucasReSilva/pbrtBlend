@@ -173,7 +173,7 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'monitor_external',
-			'name': 'Monitor external',
+			'name': 'Monitor External',
 			'description': 'Monitor external GUI rendering; when selected, LuxBlend will copy the render image from the external GUI',
 			'default': True,
 			'save_in_preset': True
@@ -233,7 +233,7 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'write_files',
-			'name': 'Write to disk',
+			'name': 'Write to Disk',
 			'description': 'Write scene files to disk',
 			'default': True,
 			'save_in_preset': True
@@ -241,7 +241,7 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'write_lxv',
-			'name': 'Export smoke',
+			'name': 'Export Smoke',
 			'description': 'Process and export smoke simulations',
 			'default': True,
 			'save_in_preset': True
@@ -249,7 +249,7 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'embed_filedata',
-			'name': 'Embed File data',
+			'name': 'Embed File Data',
 			'description': 'Embed all external files (images etc) inline into the exporter output',
 			'default': False,
 			'save_in_preset': True
