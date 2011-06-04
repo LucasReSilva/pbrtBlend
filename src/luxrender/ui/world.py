@@ -125,9 +125,9 @@ class lightgroups(world_panel):
 			for lg_index in range(len(context.scene.luxrender_lightgroups.lightgroups)):
 				lg = context.scene.luxrender_lightgroups.lightgroups[lg_index]
 				row = self.layout.row()
-				row.prop(lg, 'enabled', text="")
+				row.prop(lg, 'lg_enabled', text="")
 				subrow=row.row()
-				subrow.enabled = lg.enabled
+				subrow.enabled = lg.lg_enabled
 				subrow.prop(lg, 'name', text="")
 				# Here we draw the currently selected luxrender_volumes_data property group
 				for control in lg.controls:

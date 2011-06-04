@@ -470,13 +470,13 @@ class luxrender_lightgroup_data(declarative_property_group):
 	ef_attach_to = []	# not attached
 	
 	controls = [
-		# enabled is drawn manually in the UI class
+		# lg_enabled is drawn manually in the UI class
 		'gain'
 	]
 	properties = [
 		{
 			'type': 'bool',
-			'attr': 'enabled',
+			'attr': 'lg_enabled',
 			'name': 'Enabled',
 			'description': 'Enable this light group',
 			'default': True
@@ -538,5 +538,5 @@ class luxrender_lightgroups(declarative_property_group):
 	
 	def is_enabled(self, name):
 		if name != '' and name in self.lightgroups:
-			return self.lightgroups[name].enabled
+			return self.lightgroups[name].lg_enabled
 		return True

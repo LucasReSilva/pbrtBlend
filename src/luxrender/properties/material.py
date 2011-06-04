@@ -461,7 +461,7 @@ class luxrender_mat_compositing(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
 	
 	controls = [
-		'enabled',
+		'use_compositing',
 		['visible_material',
 		'visible_emission'],
 		['visible_indirect_material',
@@ -471,18 +471,18 @@ class luxrender_mat_compositing(declarative_property_group):
 	]
 	
 	visibility = {
-		'visible_material':				{ 'enabled': True },
-		'visible_emission':				{ 'enabled': True },
-		'visible_indirect_material':	{ 'enabled': True },
-		'visible_indirect_emission':	{ 'enabled': True },
-		'override_alpha':				{ 'enabled': True },
-		'override_alpha_value':			{ 'enabled': True, 'override_alpha': True },
+		'visible_material':				{ 'use_compositing': True },
+		'visible_emission':				{ 'use_compositing': True },
+		'visible_indirect_material':	{ 'use_compositing': True },
+		'visible_indirect_emission':	{ 'use_compositing': True },
+		'override_alpha':				{ 'use_compositing': True },
+		'override_alpha_value':			{ 'use_compositing': True, 'override_alpha': True },
 	}
 	
 	properties = [
 		{
 			'type': 'bool',
-			'attr': 'enabled',
+			'attr': 'use_compositing',
 			'name': 'Use compositing settings',
 			'default': False,
 			'save_in_preset': True
@@ -538,7 +538,7 @@ class luxrender_mat_compositing(declarative_property_group):
 	def get_paramset(self):
 		compo_params = ParamSet()
 		
-		if self.enabled:
+		if self.use_compositing:
 			compo_params.add_bool('compo_visible_material', self.visible_material)
 			compo_params.add_bool('compo_visible_emission', self.visible_emission)
 			compo_params.add_bool('compo_visible_indirect_material', self.visible_indirect_material)
