@@ -195,6 +195,7 @@ class luxrender_engine(declarative_property_group):
 			'items': [
 				('sampler', 'Sampler (traditional CPU)', 'sampler'),
 				('hybrid', 'Hybrid (CPU + GPU)', 'hybrid'),
+				('sppm', 'SPPM (CPU)', 'sppm'),
 			],
 			'save_in_preset': True
 		},

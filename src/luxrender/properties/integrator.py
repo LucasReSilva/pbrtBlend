@@ -177,19 +177,28 @@ class luxrender_integrator(declarative_property_group):
 		'nlights',
 		'mindist',
 		
+		#sppm
+		'maxeyedepth',
+		'photonperpass',
+		'startradius',
+		'alpha',
+		'lookupaccel',
+		'pixelsampler',
+		'photonsampler',
+				
 		# path
 		'includeenvironment',
 	]
 	
 	visibility = {
 		# bidir +
-		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': LO({'!=': 'bidirectional'}) },
 		'eyedepth':							{ 'surfaceintegrator': 'bidirectional' },
 		'lightdepth':						{ 'surfaceintegrator': 'bidirectional' },
 		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		'lightrrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		
 		# dl +
+		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath'])},
 		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path']) },
 		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'path']) },
 		
@@ -228,7 +237,7 @@ class luxrender_integrator(declarative_property_group):
 		'glossyrefractreject_threshold':	{ 'glossyrefractreject': True, 'surfaceintegrator': 'distributedpath' },
 		
 		# epm
-		'maxphotondepth':					{ 'surfaceintegrator': 'exphotonmap' },
+		'maxphotondepth':					{ 'surfaceintegrator': O(['exphotonmap', 'sppm']) },
 		'directphotons':					{ 'surfaceintegrator': 'exphotonmap' },
 		'causticphotons':					{ 'surfaceintegrator': 'exphotonmap' },
 		'indirectphotons':					{ 'surfaceintegrator': 'exphotonmap' },
@@ -256,7 +265,18 @@ class luxrender_integrator(declarative_property_group):
 		'mindist':							{ 'surfaceintegrator': 'igi' },
 		
 		# path
-		'includeenvironment':				{ 'surfaceintegrator': 'path' },
+		'includeenvironment':				{ 'surfaceintegrator': O(['sppm', 'path']) },
+		
+		# sppm
+		'maxeyedepth':						{ 'surfaceintegrator': 'sppm' },
+		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
+		'startradius':						{ 'surfaceintegrator': 'sppm' },
+
+		# sppm advanced
+		'alpha':							{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'photonsampler':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 	}
 	
 	properties = [
@@ -273,6 +293,7 @@ class luxrender_integrator(declarative_property_group):
 				('distributedpath', 'Distributed Path', 'distributedpath'),
 				('igi', 'Instant Global Illumination', 'igi',),
 				('exphotonmap', 'Ex-Photon Map', 'exphotonmap'),
+				('sppm', 'SPPM', 'sppm'),
 			],
 			'save_in_preset': True
 		},
@@ -647,8 +668,8 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Rendering mode',
 			'default': 'directlighting',
 			'items': [
-				('directlighting', 'directlighting', 'directlighting'),
-				('path', 'path', 'path'),
+				('directlighting', 'Direct Lighting', 'directlighting'),
+				('path', 'Path', 'path'),
 			],
 			'save_in_preset': True
 		},
@@ -749,6 +770,77 @@ class luxrender_integrator(declarative_property_group):
 			'default': True,
 			'save_in_preset': True
 		},
+		{
+			'type': 'int',
+			'attr': 'maxeyedepth',
+			'name': 'Max. eye depth',
+			'default': 48,
+			'min': 8,
+			'max': 2048,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'photonperpass',
+			'name': 'Photons per pass',
+			'default': 1000000,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'startradius',
+			'name': 'Starting radius',
+			'default': 2.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'alpha',
+			'name': 'Alpha',
+			'default': 0.7,
+			'min': 0.01,
+			'max': 0.99,
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'lookupaccel',
+			'name': 'Lookup accelerator',
+			'default': 'hybridhashgrid',
+			'items': [
+				('hashgrid', 'Hash Grid', 'hashgrid'),
+				('kdtree', 'KD Tree', 'kdtree'),
+				('hybridhashgrid', 'Hybrid Hash Grid', 'hybridhashgrid'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'pixelsampler',
+			'name': 'Pixel sampler',
+			'default': 'vegas',
+			'description': 'Sampling pattern used during the eye pass',
+			'items': [
+				('vegas', 'Vegas', 'vegas'),
+				('linear', 'Linear', 'linear'),
+				('tile', 'Tile', 'tile'),
+				('hilbert', 'Hilbert', 'hilbert'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'photonsampler',
+			'name': 'Photon sampler',
+			'default': 'halton',
+			'description': 'Sampling method for photons',
+			'items': [
+				('amc', 'Adaptive Markov Chain', 'amc'),
+				('halton', 'Halton', 'halton'),
+			],
+			'save_in_preset': True
+		},
+			
 	]
 	
 	def api_output(self, engine_properties):
@@ -767,6 +859,17 @@ class luxrender_integrator(declarative_property_group):
 			if self.lightstrategy != 'one':
 				LuxLog('Incompatible lightstrategy for Hybrid renderer (use "one").')
 				raise Exception('Incompatible render settings')
+				
+		#SPPM requires that renderer and engine both = sppm, neither option works without the other. Here we ensure that the user set both.
+		if engine_properties.renderer == 'sppm':
+			if self.surfaceintegrator != 'sppm':
+				LuxLog('SPPM Renderer requires SPPM surface integrator.')
+				raise Exception('Incompatible render settings')
+				
+		if self.surfaceintegrator == 'sppm':
+			if engine_properties.renderer != 'sppm':
+				LuxLog('SPPM surface integrator only works with SPPM renderer, select it under "Renderer" in LuxRender Engine Configuration.')
+				raise Exception('Incompatible render settings')
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \
@@ -777,6 +880,18 @@ class luxrender_integrator(declarative_property_group):
 		
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth) \
+			
+		if self.surfaceintegrator == 'sppm':
+			params.add_integer('maxeyedepth', self.maxeyedepth) \
+				  .add_integer('maxphotondepth', self.maxphotondepth) \
+				  .add_integer('photonperpass', self.photonperpass) \
+				  .add_float('startradius', self.startradius) \
+				  .add_bool('includeenvironment', self.includeenvironment)
+			if self.advanced:
+				params.add_float('alpha', self.alpha) \
+				  .add_string('lookupaccel', self.lookupaccel) \
+				  .add_string('pixelsampler', self.pixelsampler) \
+				  .add_string('photonsampler', self.photonsampler)
 		
 		if self.surfaceintegrator == 'distributedpath':
 			params.add_bool('directsampleall', self.directsampleall) \
@@ -842,7 +957,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_string('rrstrategy', self.rrstrategy) \
 				  .add_bool('includeenvironment', self.includeenvironment)
 		
-		if self.advanced and self.surfaceintegrator != 'bidirectional':
+		if self.advanced and self.surfaceintegrator not in ('bidirectional', 'sppm'):
 			params.add_string('lightstrategy', self.lightstrategy) \
 				.add_integer('shadowraycount', self.shadowraycount)
 		
