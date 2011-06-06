@@ -148,7 +148,9 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
 	
 	controls = TC_L.controls[:] + [
-		'flipz'
+		'flipz',
+		'power',
+		'efficacy'
 	]
 	
 	properties = TC_L.properties[:] + [
@@ -159,11 +161,33 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'description': 'Flip Z direction in mapping',
 			'default': True
 		},
+				{
+			'type': 'float',
+			'attr': 'power',
+			'name': 'Power',
+			'default': 0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e6,
+			'soft_max': 1e6,
+		},
+		{
+			'type': 'float',
+			'attr': 'efficacy',
+			'name': 'Efficacy',
+			'default': 0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e6,
+			'soft_max': 1e6,
+		}
 	]
 
 	def get_paramset(self, lamp_object):
 		params = super().get_paramset(lamp_object)
 		params.add_bool('flipz', self.flipz)
+		params.add_float('power', self.power)
+		params.add_float('efficacy', self.efficacy)
 		return params
 
 @LuxRenderAddon.addon_register_class
@@ -172,7 +196,9 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
 	
 	controls = luxrender_lamp_basic.controls[:] + [
 		'projector',
-		'mapname'
+		'mapname',
+		'power',
+		'efficacy'
 	]
 	visibility = dict_merge(
 		luxrender_lamp_basic.visibility,
@@ -193,9 +219,31 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
 			'description': 'Image to project from this lamp',
 			'default': ''
 		},
+		{
+			'type': 'float',
+			'attr': 'power',
+			'name': 'Power',
+			'default': 0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e6,
+			'soft_max': 1e6,
+		},
+		{
+			'type': 'float',
+			'attr': 'efficacy',
+			'name': 'Efficacy',
+			'default': 0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1e6,
+			'soft_max': 1e6,
+		}
 	]
 	def get_paramset(self, lamp_object):
 		params = super().get_paramset(lamp_object)
+		params.add_float('power', self.power)
+		params.add_float('efficacy', self.efficacy)
 		if self.projector:
 			params.add_string('mapname', self.mapname)
 		return params
