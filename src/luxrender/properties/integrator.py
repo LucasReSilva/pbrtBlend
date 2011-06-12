@@ -856,8 +856,8 @@ class luxrender_integrator(declarative_property_group):
 			if self.surfaceintegrator != 'path':
 				LuxLog('Incompatible surface integrator for Hybrid renderer (use "path").')
 				raise Exception('Incompatible render settings')
-			if self.lightstrategy != 'one':
-				LuxLog('Incompatible lightstrategy for Hybrid renderer (use "one").')
+			if self.lightstrategy not in ('one', 'all', 'auto'):
+				LuxLog('Incompatible lightstrategy for Hybrid renderer (use "auto", "all", or "one").')
 				raise Exception('Incompatible render settings')
 				
 		#SPPM requires that renderer and engine both = sppm, neither option works without the other. Here we ensure that the user set both.
