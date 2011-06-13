@@ -101,9 +101,16 @@ class luxrender_engine(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'advanced'
+		[ 0.7, 'renderer', 'advanced'],
+		
+		'opencl_platform_index',
+		'raybuffersize',
+		'workgroupsize',
+		'deviceselection',
+		'usegpus',
 		'export_type',
 		'binary_name',
+		'log_verbosity'
 		'write_files',
 		'install_path',
 		['write_lxv',
@@ -113,25 +120,14 @@ class luxrender_engine(declarative_property_group):
 		'partial_ply',
 		['render','monitor_external'],
 		['threads_auto', 'threads'],
-	]
-	
-	if LUXRENDER_VERSION >= '0.8':
-		# Insert 'renderer' before 'binary_name'
-		controls.insert(controls.index('binary_name'), 'renderer')
-		# Also insert renderer specific controls
-		controls.insert(controls.index('binary_name'), 'opencl_platform_index',)
-		controls.insert(controls.index('binary_name'), 'raybuffersize',)
-		controls.insert(controls.index('binary_name'), 'workgroupsize',)
-		controls.insert(controls.index('binary_name'), 'deviceselection',)
-		controls.insert(controls.index('binary_name'), 'usegpus',)
-		controls.append('log_verbosity')
+		]
 	
 	visibility = {
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
-		'raybuffersize':			{ 'renderer': 'hybrid' },
-		'workgroupsize':			{ 'renderer': 'hybrid' },
+		'raybuffersize':			{ 'advanced': True, 'renderer': 'hybrid' },
+		'workgroupsize':			{ 'advanced': True, 'renderer': 'hybrid' },
+		'deviceselection':			{ 'advanced': True, 'renderer': 'hybrid' },
 		'usegpus':					{ 'renderer': 'hybrid' },
-		'deviceselection':			{ 'renderer': 'hybrid' },
 		'write_files':				{ 'export_type': 'INT' },
 		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
@@ -152,6 +148,14 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Auto Threads',
 			'description': 'Let LuxRender decide how many threads to use',
 			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'advanced',
+			'name': 'Advanced',
+			'description': 'Configure advanced renderer settings',
+			'default': False,
+			'save_in_preset': True
 		},
 		{
 			'type': 'int',
@@ -204,7 +208,7 @@ class luxrender_engine(declarative_property_group):
 			'default': 'sampler',
 			'items': [
 				('sampler', 'Sampler (traditional CPU)', 'sampler'),
-				('hybrid', 'Hybrid (CPU + GPU)', 'hybrid'),
+				('hybrid', 'Hybrid (CPU+GPU)', 'hybrid'),
 				('sppm', 'SPPM (CPU)', 'sppm'),
 			],
 			'save_in_preset': True
@@ -349,10 +353,11 @@ class luxrender_engine(declarative_property_group):
 		
 		if self.renderer == 'hybrid':
 			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
-			renderer_params.add_integer('raybuffersize', self.raybuffersize)
-			renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
-			renderer_params.add_string('opencl.devices.select', self.deviceselection)
 			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
+			if self.advanced:
+				renderer_params.add_integer('raybuffersize', self.raybuffersize)
+				renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
+				renderer_params.add_string('opencl.devices.select', self.deviceselection)
 		
 		return self.renderer, renderer_params
 
