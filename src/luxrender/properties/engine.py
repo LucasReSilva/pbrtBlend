@@ -131,7 +131,7 @@ class luxrender_engine(declarative_property_group):
 		'raybuffersize':			{ 'renderer': 'hybrid' },
 		'workgroupsize':			{ 'renderer': 'hybrid' },
 		'usegpus':					{ 'renderer': 'hybrid' },
-		'deviceselectionion':			{ 'renderer': 'hybrid' },
+		'deviceselection':			{ 'renderer': 'hybrid' },
 		'write_files':				{ 'export_type': 'INT' },
 		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
