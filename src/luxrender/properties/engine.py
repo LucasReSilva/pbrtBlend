@@ -117,11 +117,14 @@ class luxrender_engine(declarative_property_group):
 	if LUXRENDER_VERSION >= '0.8':
 		# Insert 'renderer' before 'binary_name'
 		controls.insert(controls.index('binary_name'), 'renderer')
-		controls.insert(controls.index('binary_name'), 'opencl_platform_index')
+		controls.insert(controls.index('binary_name'), 'opencl_platform_index',)
+		controls.insert(controls.index('binary_name'), 'raybuffersize',)
+		controls.insert(controls.index('binary_name'), 'workgroupsize',)
 		controls.append('log_verbosity')
 	
 	visibility = {
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
+		'raybuffersize':			{ 'renderer': 'hybrid' },
 		'write_files':				{ 'export_type': 'INT' },
 		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
@@ -202,13 +205,37 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'opencl_platform_index',
-			'name': 'OpenCL Platform Index',
+			'name': 'OpenCL platform index',
 			'description': 'Try increasing this value 1 at a time if LuxRender fails to use your GPU',
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
 			'max': 16,
 			'soft_max': 16,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'raybuffersize',
+			'name': 'Ray buffer size',
+			'description': 'Size of ray "bundles" fed to OpenCL device',
+			'default': 8192,
+			'min': 2,
+			'soft_min': 2,
+			'max': 16384,
+			'soft_max': 16384,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'workgroupsize',
+			'name': 'OpenCL work group size',
+			'description': 'Size of OpenCL work group. Use 0 for auto',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+			'max': 1024,
+			'soft_max': 1024,
 			'save_in_preset': True
 		},
 		{
@@ -299,6 +326,8 @@ class luxrender_engine(declarative_property_group):
 		
 		if self.renderer == 'hybrid':
 			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
+			renderer_params.add_integer('raybuffersize', self.raybuffersize)
+			renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
 		
 		return self.renderer, renderer_params
 
