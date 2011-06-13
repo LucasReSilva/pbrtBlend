@@ -101,6 +101,7 @@ class luxrender_engine(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'advanced'
 		'export_type',
 		'binary_name',
 		'write_files',
@@ -117,15 +118,20 @@ class luxrender_engine(declarative_property_group):
 	if LUXRENDER_VERSION >= '0.8':
 		# Insert 'renderer' before 'binary_name'
 		controls.insert(controls.index('binary_name'), 'renderer')
+		# Also insert renderer specific controls
 		controls.insert(controls.index('binary_name'), 'opencl_platform_index',)
 		controls.insert(controls.index('binary_name'), 'raybuffersize',)
 		controls.insert(controls.index('binary_name'), 'workgroupsize',)
+		controls.insert(controls.index('binary_name'), 'deviceselection',)
+		controls.insert(controls.index('binary_name'), 'usegpus',)
 		controls.append('log_verbosity')
 	
 	visibility = {
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'renderer': 'hybrid' },
 		'workgroupsize':			{ 'renderer': 'hybrid' },
+		'usegpus':					{ 'renderer': 'hybrid' },
+		'deviceselectionion':			{ 'renderer': 'hybrid' },
 		'write_files':				{ 'export_type': 'INT' },
 		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
@@ -240,6 +246,22 @@ class luxrender_engine(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'string',
+			'attr': 'deviceselection',
+			'name': 'OpenCL devices',
+			'description': 'Enter target OpenCL devices here. Leave blank to use all available.',
+			'default': '',
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'usegpus',
+			'name': 'Use GPUs',
+			'description': 'Target GPU devices instead of using native threads.',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
 			'type': 'enum',
 			'attr': 'binary_name',
 			'name': 'External type',
@@ -329,6 +351,8 @@ class luxrender_engine(declarative_property_group):
 			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
 			renderer_params.add_integer('raybuffersize', self.raybuffersize)
 			renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
+			renderer_params.add_string('opencl.devices.select', self.deviceselection)
+			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
 		
 		return self.renderer, renderer_params
 
