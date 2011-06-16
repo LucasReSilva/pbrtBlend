@@ -401,7 +401,7 @@ class luxrender_film(declarative_property_group):
 		['write_png', 'write_tga'],
 		['write_exr', 'write_exr_applyimaging'],
 		'output_alpha',
-		['write_flm', 'restart_flm'],
+		['write_flm', 'restart_flm', 'write_flm_direct'],
 		
 		'ldr_clamp_method',
 		'outlierrejection_k',
@@ -409,6 +409,7 @@ class luxrender_film(declarative_property_group):
 	
 	visibility = {
 		'restart_flm': { 'write_flm': True },
+		'write_flm_direct': { 'write_flm': True },
 		'write_exr_applyimaging': { 'write_exr': True },
 	}
 	
@@ -494,6 +495,13 @@ class luxrender_film(declarative_property_group):
 			'attr': 'restart_flm',
 			'name': 'Restart FLM',
 			'description': 'Restart render from the beginning even if an FLM is available',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_flm_direct',
+			'name': 'Write FLM Directly',
+			'description': 'Write FLM directly to disk instead of trying to build it in RAM first. Slower, but uses less memory.',
 			'default': False
 		},
 		{
@@ -619,6 +627,7 @@ class luxrender_film(declarative_property_group):
 		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
 		params.add_bool('write_resume_flm', self.write_flm)
 		params.add_bool('restart_resume_flm', self.restart_flm)
+		params.add_bool('write_flm_direct', self.write_flm_direct)
 		
 		if self.output_alpha:
 			output_channels = 'RGBA'
