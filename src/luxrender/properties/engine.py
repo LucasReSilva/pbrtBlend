@@ -105,6 +105,7 @@ class luxrender_engine(declarative_property_group):
 		
 		'opencl_platform_index',
 		'raybuffersize',
+		'statebuffercount',
 		'workgroupsize',
 		'deviceselection',
 		'usegpus',
@@ -125,6 +126,7 @@ class luxrender_engine(declarative_property_group):
 	visibility = {
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'advanced': True, 'renderer': 'hybrid' },
+		'statebuffercount':			{ 'advanced': True, 'renderer': 'hybrid' },
 		'workgroupsize':			{ 'advanced': True, 'renderer': 'hybrid' },
 		'deviceselection':			{ 'advanced': True, 'renderer': 'hybrid' },
 		'usegpus':					{ 'renderer': 'hybrid' },
@@ -235,6 +237,16 @@ class luxrender_engine(declarative_property_group):
 			'soft_min': 2,
 			'max': 16384,
 			'soft_max': 16384,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'statebuffercount',
+			'name': 'State buffer count',
+			'description': 'Numbers of buffers used for surface integrator states',
+			'default': 1,
+			'min': 1,
+			'soft_min': 1,
 			'save_in_preset': True
 		},
 		{
@@ -356,6 +368,7 @@ class luxrender_engine(declarative_property_group):
 			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
 			if self.advanced:
 				renderer_params.add_integer('raybuffersize', self.raybuffersize)
+				renderer_params.add_integer('statebuffercount', self.statebuffercount)
 				renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
 				renderer_params.add_string('opencl.devices.select', self.deviceselection)
 		
