@@ -403,6 +403,7 @@ def export_smoke(lux_context, scene):
 		for mod in object.modifiers:
 			if mod.name == 'Smoke':
 				if mod.smoke_type == 'DOMAIN':
+					eps = 0.000001
 					domain = object
 					p = []
 					# gather smoke domain settings
@@ -430,15 +431,11 @@ def export_smoke(lux_context, scene):
 									if param[0] == 'color g': g = param[1][0]
 
 
-					#round float value before conversion due to float to int conversion errors
-					x = max = int(round(domain.dimensions[0],0))
-					y = int(round(domain.dimensions[1],0))
-					z = int(round(domain.dimensions[2],0))
-
-					if y > max: max = y
-					if z > max: max = z
-
-					big_res = [int(resolution/max*x),int(resolution/max*y),int(resolution/max*z)]
+					max = domain.dimensions[0]
+					if (max - domain.dimensions[1]) < -eps: max = domain.dimensions[1]
+					if (max - domain.dimensions[2]) < -eps: max = domain.dimensions[2]
+					
+					big_res = [int(round(resolution*domain.dimensions[0]/max,0)),int(round(resolution*domain.dimensions[1]/max,0)),int(round(resolution*domain.dimensions[2]/max,0))]
 					if set.use_high_resolution: big_res = [big_res[0]*(set.amplify+1), big_res[1]*(set.amplify+1), big_res[2]*(set.amplify+1)]
 
 					if len(density) == big_res[0]*big_res[1]*big_res[2]:
