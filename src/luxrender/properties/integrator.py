@@ -800,7 +800,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'startk',
-			'name': 'Start K',
+			'name': 'Starting K',
 			'description': 'Adjust starting photon radius to get this many photons. Higher values are faster but less accurate. 0=use initial radius.',
 			'default': 15,
 			'min': 0,
@@ -901,10 +901,11 @@ class luxrender_integrator(declarative_property_group):
 			params.add_integer('maxeyedepth', self.maxeyedepth) \
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
 				  .add_integer('photonperpass', self.photonperpass) \
-				  .add_float('startradius', self.startradius) \
+				  .add_integer('startk', self.startk) \
 				  .add_bool('includeenvironment', self.includeenvironment)
 			if self.advanced:
-				params.add_float('alpha', self.alpha) \
+			params.add_float('startradius', self.startradius) \
+				  .add_float('alpha', self.alpha) \
 				  .add_string('lookupaccel', self.lookupaccel) \
 				  .add_string('pixelsampler', self.pixelsampler) \
 				  .add_string('photonsampler', self.photonsampler)
