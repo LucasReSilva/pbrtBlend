@@ -180,6 +180,8 @@ class luxrender_integrator(declarative_property_group):
 		#sppm
 		'maxeyedepth',
 		'photonperpass',
+		'startk',
+		#sppm advanced
 		'startradius',
 		'alpha',
 		'lookupaccel',
@@ -270,9 +272,10 @@ class luxrender_integrator(declarative_property_group):
 		# sppm
 		'maxeyedepth':						{ 'surfaceintegrator': 'sppm' },
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
-		'startradius':						{ 'surfaceintegrator': 'sppm' },
+		'startk':							{ 'surfaceintegrator': 'sppm' },
 
 		# sppm advanced
+		'startradius':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
@@ -790,13 +793,24 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'float',
 			'attr': 'startradius',
 			'name': 'Starting radius',
+			'description': 'Photon radius used for initial pass',
 			'default': 2.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'startk',
+			'name': 'Start K',
+			'description': 'Adjust starting photon radius to get this many photons. Higher values are faster but less accurate. 0=use initial radius.',
+			'default': 15,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'alpha',
 			'name': 'Alpha',
+			'description': 'Tighten photon search radius by this factor on subsequent passes',
 			'default': 0.7,
 			'min': 0.01,
 			'max': 0.99,
@@ -851,6 +865,8 @@ class luxrender_integrator(declarative_property_group):
 		'''
 		
 		params = ParamSet()
+		
+		#Check to make sure all settings are correct when hybrid is selected. Keep this up to date as hybrid gets new options in 0.9
 		
 		if engine_properties.renderer == 'hybrid':
 			if self.surfaceintegrator != 'path':
