@@ -123,6 +123,16 @@ class luxrender_engine(declarative_property_group):
 		['threads_auto', 'threads'],
 		]
 	
+	# Insert 'renderer' before 'binary_name'
+	controls.insert(controls.index('binary_name'), 'renderer')
+	# Also insert renderer specific controls
+	controls.insert(controls.index('binary_name'), 'opencl_platform_index',)
+	controls.insert(controls.index('binary_name'), 'raybuffersize',)
+	controls.insert(controls.index('binary_name'), 'workgroupsize',)
+	controls.insert(controls.index('binary_name'), 'deviceselection',)
+	controls.insert(controls.index('binary_name'), 'usegpus',)
+	controls.append('log_verbosity')
+	
 	visibility = {
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'advanced': True, 'renderer': 'hybrid' },
