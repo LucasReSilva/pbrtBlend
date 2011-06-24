@@ -73,6 +73,7 @@ class luxrender_camera(declarative_property_group):
 		'Exterior',
 		['autofocus', 'use_dof', 'use_clipping'],
 		'fstop',
+		'blades',
 		'sensitivity',
 		'exposure_mode',
 		['exposure_start', 'exposure_end'],
@@ -83,6 +84,7 @@ class luxrender_camera(declarative_property_group):
 	]
 	
 	visibility = {
+		'blades':					{ 'use_dof': True },
 		'exposure_start':			{ 'exposure_mode': O(['normalised','absolute']) },
 		'exposure_end':				{ 'exposure_mode': O(['normalised','absolute']) },
 		'exposure_degrees_start':	{ 'exposure_mode': 'degrees' },
@@ -113,6 +115,14 @@ class luxrender_camera(declarative_property_group):
 			'name': 'Auto focus',
 			'description': 'Use auto focus',
 			'default': True,
+		},
+		{
+			'type': 'int',
+			'attr': 'blades',
+			'name': 'Blades',
+			'description': 'Number of aperture blades. Use 2 or lower for circular aperture.',
+			'min': 0,
+			'default': 0,
 		},
 		{
 			'type': 'enum',
@@ -153,9 +163,9 @@ class luxrender_camera(declarative_property_group):
 			'attr': 'exposure_mode',
 			'name': 'Exposure timing',
 			'items': [
-				('normalised', 'normalised', 'normalised'),
-				('absolute', 'absolute', 'absolute'),
-				('degrees', 'degrees', 'degrees'),
+				('normalised', 'Normalised', 'normalised'),
+				('absolute', 'Absolute', 'absolute'),
+				('degrees', 'Degrees', 'degrees'),
 			],
 			'default': 'normalised'
 		},
@@ -358,6 +368,9 @@ class luxrender_camera(declarative_property_group):
 		if self.use_dof:
 			# Do not world-scale this, it is already in meters !
 			params.add_float('lensradius', (cam.lens / 1000.0) / ( 2.0 * self.fstop ))
+		
+			#Write number of blades to use
+			params.add_integer('blades', self.blades)
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
