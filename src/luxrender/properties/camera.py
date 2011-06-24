@@ -415,6 +415,8 @@ class luxrender_film(declarative_property_group):
 		['write_png', 'write_png_16bit'],
 		'write_tga',
 		['write_exr', 'write_exr_applyimaging'],
+		'write_exr_halftype',
+		'write_exr_compressiontype',
 		['write_exr_ZBuf', 'write_exr_zbuf_normalizationtype'],
 		'output_alpha',
 		['write_flm', 'restart_flm', 'write_flm_direct'],
@@ -428,6 +430,8 @@ class luxrender_film(declarative_property_group):
 		'write_flm_direct': { 'write_flm': True },
 		'write_png_16bit': { 'write_png': True },
 		'write_exr_applyimaging': { 'write_exr': True },
+		'write_exr_halftype': { 'write_exr': True },
+		'write_exr_compressiontype': { 'write_exr': True },
 		'write_exr_ZBuf': { 'write_exr': True },
 		#This doesn't work. Keep this param invisible until I can find out how to make only appear when EXR w/Z-buffer is enabled
 #		'write_exr_zbuf_normalizationtype': { A(['write_exr', 'write_exr_ZBuf']): True },
@@ -517,6 +521,27 @@ class luxrender_film(declarative_property_group):
 			'name': 'EXR',
 			'description': 'Enable OpenEXR ouput',
 			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_exr_halftype',
+			'name': 'Use 16bit EXR',
+			'description': 'Use "half" (16bit float) OpenEXR format instead of 32bit float.',
+			'default': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'write_exr_compressiontype',
+			'name': 'EXR Compression',
+			'description': 'Compression format for OpenEXR output',
+			'items': [
+				('RLE (lossless)', 'RLE (lossless)', 'RLE (lossless)'),
+				('PIZ (lossless)', 'PIZ (lossless)', 'PIZ (lossless)'),
+				('ZIP (lossless)', 'ZIP (lossless)', 'ZIP (lossless)'),
+				('Pxr24 (lossy)', 'Pxr24 (lossy)', 'Pxr24 (lossy)'),
+				('None', 'None', 'None'),
+			],
+			'default': 'PIZ (lossless)'
 		},
 		{
 			'type': 'bool',
@@ -707,14 +732,16 @@ class luxrender_film(declarative_property_group):
 			params.add_float('gamma', 1.0) # Linear workflow !
 		else:
 			# Otherwise let the user decide on tonemapped EXR and other EXR settings
+			params.add_bool('write_exr_halftype', self.write_exr_halftype)
 			params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
 			params.add_bool('write_exr_ZBuf', self.write_exr_ZBuf)
+			params.add_string('write_exr_compressiontype', self.write_exr_compressiontype)
 #			params.add_string('write_exr_zbuf_normalizationtype', self.write_exr_zbuf_normalizationtype)
 			params.add_bool('write_exr', self.write_exr)
 			if self.write_exr: params.add_string('write_exr_channels', output_channels)
 		
 		params.add_bool('write_png', self.write_png)
-		params.add_bool('write_png_16bit', self.write_exr_ZBuf)
+		params.add_bool('write_png_16bit', self.write_png_16bit)
 		if self.write_png: params.add_string('write_png_channels', output_channels)
 		params.add_bool('write_tga', self.write_tga)
 		if self.write_tga: params.add_string('write_tga_channels', output_channels)
