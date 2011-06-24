@@ -914,7 +914,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_integer('photonperpass', self.photonperpass) \
 				  .add_integer('startk', self.startk) \
 				  .add_bool('includeenvironment', self.includeenvironment)
-		if self.advanced:
+		if self.advanced and self.surfaceintegrator == 'sppm':
 			params.add_float('startradius', self.startradius) \
 				  .add_float('alpha', self.alpha) \
   				  .add_float('glossythreshold', self.glossythreshold) \
