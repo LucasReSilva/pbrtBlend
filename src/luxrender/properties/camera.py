@@ -31,7 +31,7 @@ import bpy
 
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import get_worldscale
@@ -412,8 +412,10 @@ class luxrender_film(declarative_property_group):
 		'displayinterval',
 		
 		'lbl_outputs',
-		['write_png', 'write_tga'],
+		['write_png', 'write_png_16bit'],
+		'write_tga',
 		['write_exr', 'write_exr_applyimaging'],
+		['write_exr_ZBuf', 'write_exr_zbuf_normalizationtype'],
 		'output_alpha',
 		['write_flm', 'restart_flm', 'write_flm_direct'],
 		
@@ -424,7 +426,12 @@ class luxrender_film(declarative_property_group):
 	visibility = {
 		'restart_flm': { 'write_flm': True },
 		'write_flm_direct': { 'write_flm': True },
+		'write_png_16bit': { 'write_png': True },
 		'write_exr_applyimaging': { 'write_exr': True },
+		'write_exr_ZBuf': { 'write_exr': True },
+		#This doesn't work. Keep this param invisible until I can find out how to make only appear when EXR w/Z-buffer is enabled
+#		'write_exr_zbuf_normalizationtype': { A(['write_exr', 'write_exr_ZBuf']): True },
+
 	}
 	
 	properties = [
@@ -494,18 +501,28 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_png',
 			'name': 'PNG',
+			'description': 'Enable PNG output',
 			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'write_png_16bit',
+			'name': 'Use 16bit PNG',
+			'description': 'Use 16bit per channel PNG instead of 8bit',
+			'default': False
 		},
 		{
 			'type': 'bool',
 			'attr': 'write_exr',
 			'name': 'EXR',
+			'description': 'Enable OpenEXR ouput',
 			'default': False
 		},
 		{
 			'type': 'bool',
 			'attr': 'write_tga',
 			'name': 'TGA',
+			'description': 'Enable TARGA ouput',
 			'default': False
 		},
 		{
@@ -532,15 +549,36 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'output_alpha',
 			'name': 'Enable alpha channel',
+			'description': 'Enable alpha channel. This applies to all image formats.',
 			'default': False
 		},
 		{
 			'type': 'bool',
 			'attr': 'write_exr_applyimaging',
 			'name': 'Tonemap EXR',
-			'description': 'Apply imaging pipeline to OpenEXR output. Will not affect output gamma',
+			'description': 'Apply imaging pipeline to OpenEXR output. Gamma correction will be skipped regardless.',
 			'default': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'write_exr_ZBuf',
+			'name': 'Enable EXR Z-Buffer',
+			'description': 'Include Z-buffer in OpenEXR output',
+			'default': False
+		},
+#Visibility for this param does not work atm. It will neither appear in the UI nor be exported.
+#		{
+#			'type': 'enum',
+#			'attr': 'write_exr_zbuf_normalization',
+#			'name': 'Normalization type for Z-buffer',
+#			'description': 'Include Z-buffer in OpenEXR output',
+#			'items': [
+#				('Camera Start/End clip', 'Camera start/end clip', 'Use Camera clipping range'),
+#				('Min/Max', 'Min/max', 'Min/max'),
+#				('None', 'None', 'None'),
+#			],
+#			'default': 'None'
+#		},
 		{
 			'type': 'int',
 			'attr': 'outlierrejection_k',
@@ -558,7 +596,7 @@ class luxrender_film(declarative_property_group):
 			'items': [
 				('lum', 'Luminosity', 'Preserve luminosity'),
 				('hue', 'Hue', 'Preserve hue'),
-				('cut', 'Cut', 'Clip values')
+				('cut', 'Cut', 'Clip channels individually')
 			],
 			'default': 'lum'
 		},
@@ -670,10 +708,13 @@ class luxrender_film(declarative_property_group):
 		else:
 			# Otherwise let the user decide on tonemapped EXR and other EXR settings
 			params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
+			params.add_bool('write_exr_ZBuf', self.write_exr_ZBuf)
+#			params.add_string('write_exr_zbuf_normalizationtype', self.write_exr_zbuf_normalizationtype)
 			params.add_bool('write_exr', self.write_exr)
 			if self.write_exr: params.add_string('write_exr_channels', output_channels)
 		
 		params.add_bool('write_png', self.write_png)
+		params.add_bool('write_png_16bit', self.write_exr_ZBuf)
 		if self.write_png: params.add_string('write_png_channels', output_channels)
 		params.add_bool('write_tga', self.write_tga)
 		if self.write_tga: params.add_string('write_tga_channels', output_channels)
