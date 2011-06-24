@@ -781,6 +781,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'bool',
 			'attr': 'directlightsampling',
 			'name': 'Direct Light Sampling',
+			'description': 'Turn this off to use brute force path tracing (faster with only "infinite" light (HDRI))',
 			'default': True,
 			'save_in_preset': True
 		},
