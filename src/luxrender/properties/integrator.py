@@ -191,6 +191,7 @@ class luxrender_integrator(declarative_property_group):
 				
 		# path
 		'includeenvironment',
+		'directlightsampling',
 	]
 	
 	visibility = {
@@ -269,6 +270,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		# path
 		'includeenvironment':				{ 'surfaceintegrator': O(['sppm', 'path']) },
+		'directlightsampling':				{ 'surfaceintegrator': 'path' },
 		
 		# sppm
 		'maxeyedepth':						{ 'surfaceintegrator': 'sppm' },
@@ -776,6 +778,13 @@ class luxrender_integrator(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'bool',
+			'attr': 'directlightsampling',
+			'name': 'Direct Light Sampling',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
 			'type': 'int',
 			'attr': 'maxeyedepth',
 			'name': 'Max. eye depth',
@@ -984,7 +993,8 @@ class luxrender_integrator(declarative_property_group):
 			params.add_integer('maxdepth', self.maxdepth) \
 				  .add_float('rrcontinueprob', self.rrcontinueprob) \
 				  .add_string('rrstrategy', self.rrstrategy) \
-				  .add_bool('includeenvironment', self.includeenvironment)
+				  .add_bool('includeenvironment', self.includeenvironment) \
+				  .add_bool('directlightsampling', self.directlightsampling)
 		
 		if self.advanced and self.surfaceintegrator not in ('bidirectional', 'sppm'):
 			params.add_string('lightstrategy', self.lightstrategy) \
