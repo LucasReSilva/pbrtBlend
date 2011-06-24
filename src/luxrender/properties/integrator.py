@@ -184,6 +184,7 @@ class luxrender_integrator(declarative_property_group):
 		#sppm advanced
 		'startradius',
 		'alpha',
+		'glossythreshold',
 		'lookupaccel',
 		'pixelsampler',
 		'photonsampler',
@@ -277,6 +278,7 @@ class luxrender_integrator(declarative_property_group):
 		# sppm advanced
 		'startradius':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'photonsampler':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
@@ -801,7 +803,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'startk',
 			'name': 'Starting K',
-			'description': 'Adjust starting photon radius to get this many photons. Higher values are faster but less accurate. 0=use initial radius.',
+			'description': 'Adjust starting photon radius to get this many photons. Higher values clear faster but are less accurate. 0=use initial radius.',
 			'default': 15,
 			'min': 0,
 			'save_in_preset': True
@@ -814,6 +816,15 @@ class luxrender_integrator(declarative_property_group):
 			'default': 0.7,
 			'min': 0.01,
 			'max': 0.99,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'glossythreshold',
+			'name': 'Glossy Threshold',
+			'description': 'Maximum specularity that will store photons. 0=only matte materials store photons.',
+			'min': 0,
+			'default': 100,
 			'save_in_preset': True
 		},
 		{
@@ -906,6 +917,7 @@ class luxrender_integrator(declarative_property_group):
 		if self.advanced:
 			params.add_float('startradius', self.startradius) \
 				  .add_float('alpha', self.alpha) \
+  				  .add_float('glossythreshold', self.glossythreshold) \
 				  .add_string('lookupaccel', self.lookupaccel) \
 				  .add_string('pixelsampler', self.pixelsampler) \
 				  .add_string('photonsampler', self.photonsampler)
