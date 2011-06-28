@@ -28,12 +28,33 @@ import os
 
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..outputs.pure_api import PYLUX_AVAILABLE
-from ..outputs.pure_api import LUXRENDER_VERSION
+
+renderer_alert_states = set()
+
+def check_renderer_settings(context):
+	lre = context.scene.luxrender_engine
+	lri = context.scene.luxrender_integrator
+	
+	# Check hybrid renderer and surfaceintegrator compatibility
+	hybrid_valid = lri.surfaceintegrator == 'path' and lri.advanced and lri.lightstrategy in ['one', 'all', 'auto']
+	if ((lre.renderer == 'hybrid' and hybrid_valid) or lre.renderer!='hybrid') and 'renderer' in renderer_alert_states:
+		del lre.alert['renderer']
+		del lri.alert['surfaceintegrator']
+		del lri.alert['advanced']
+		del lri.alert['lightstrategy']
+		renderer_alert_states.remove('renderer')
+	elif (lre.renderer == 'hybrid' and not hybrid_valid):
+		# These logical tests should evaluate to True if the setting is incompatible
+		lre.alert['renderer'] = { 'renderer': LO({'!=':'hybrid'}) }
+		lri.alert['surfaceintegrator'] = { 'surfaceintegrator': LO({'!=':'path'}) }
+		lri.alert['advanced'] = { 'advanced': LO({'!=':True}) }
+		lri.alert['lightstrategy'] = { 'lightstrategy': LO({'!=':['one', 'all', 'auto']}) }
+		renderer_alert_states.add('renderer')
 
 def find_luxrender_path():
 	return os.getenv(
@@ -146,6 +167,8 @@ class luxrender_engine(declarative_property_group):
 		'threads':					A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
 	}
 	
+	alert = {}
+	
 	properties = [
 		{
 			'type': 'bool',
@@ -216,6 +239,7 @@ class luxrender_engine(declarative_property_group):
 				('hybrid', 'Hybrid (CPU+GPU)', 'hybrid'),
 				('sppm', 'SPPM (CPU)', 'sppm'),
 			],
+			'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
 		},
 		{
