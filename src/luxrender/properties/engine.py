@@ -41,18 +41,16 @@ def check_renderer_settings(context):
 	lri = context.scene.luxrender_integrator
 	
 	# Check hybrid renderer and surfaceintegrator compatibility
-	hybrid_valid = lri.surfaceintegrator == 'path' and lri.advanced and lri.lightstrategy in ['one', 'all', 'auto']
+	hybrid_valid = lri.surfaceintegrator == 'path' and lri.lightstrategy in ['one', 'all', 'auto']
 	if ((lre.renderer == 'hybrid' and hybrid_valid) or lre.renderer!='hybrid') and 'renderer' in renderer_alert_states:
 		del lre.alert['renderer']
 		del lri.alert['surfaceintegrator']
-		del lri.alert['advanced']
 		del lri.alert['lightstrategy']
 		renderer_alert_states.remove('renderer')
 	elif (lre.renderer == 'hybrid' and not hybrid_valid):
 		# These logical tests should evaluate to True if the setting is incompatible
 		lre.alert['renderer'] = { 'renderer': LO({'!=':'hybrid'}) }
 		lri.alert['surfaceintegrator'] = { 'surfaceintegrator': LO({'!=':'path'}) }
-		lri.alert['advanced'] = { 'advanced': LO({'!=':True}) }
 		lri.alert['lightstrategy'] = { 'lightstrategy': LO({'!=':['one', 'all', 'auto']}) }
 		renderer_alert_states.add('renderer')
 
