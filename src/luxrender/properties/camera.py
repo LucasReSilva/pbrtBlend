@@ -31,7 +31,7 @@ import bpy
 
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A
+from extensions_framework.validate import Logic_OR as O
 
 from .. import LuxRenderAddon
 from ..export import get_worldscale
@@ -414,10 +414,10 @@ class luxrender_film(declarative_property_group):
 		'lbl_outputs',
 		['write_png', 'write_png_16bit'],
 		'write_tga',
-		['write_exr', 'write_exr_applyimaging'],
-		'write_exr_halftype',
+		['write_exr', 'write_exr_applyimaging', 'write_exr_halftype'],
 		'write_exr_compressiontype',
-		['write_exr_ZBuf', 'write_exr_zbuf_normalizationtype'],
+		'write_exr_ZBuf',
+		'exr_zbuf_normalization',
 		'output_alpha',
 		['write_flm', 'restart_flm', 'write_flm_direct'],
 		
@@ -433,9 +433,7 @@ class luxrender_film(declarative_property_group):
 		'write_exr_halftype': { 'write_exr': True },
 		'write_exr_compressiontype': { 'write_exr': True },
 		'write_exr_ZBuf': { 'write_exr': True },
-		#This doesn't work. Keep this param invisible until I can find out how to make only appear when EXR w/Z-buffer is enabled
-#		'write_exr_zbuf_normalizationtype': { A(['write_exr', 'write_exr_ZBuf']): True },
-
+		'exr_zbuf_normalization': { 'write_exr': True, 'write_exr_ZBuf': True },
 	}
 	
 	properties = [
@@ -518,7 +516,7 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'write_exr',
-			'name': 'EXR',
+			'name': 'OpenEXR',
 			'description': 'Enable OpenEXR ouput',
 			'default': False
 		},
@@ -546,7 +544,7 @@ class luxrender_film(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'write_tga',
-			'name': 'TGA',
+			'name': 'TARGA',
 			'description': 'Enable TARGA ouput',
 			'default': False
 		},
@@ -591,19 +589,18 @@ class luxrender_film(declarative_property_group):
 			'description': 'Include Z-buffer in OpenEXR output',
 			'default': False
 		},
-#Visibility for this param does not work atm. It will neither appear in the UI nor be exported.
-#		{
-#			'type': 'enum',
-#			'attr': 'write_exr_zbuf_normalization',
-#			'name': 'Normalization type for Z-buffer',
-#			'description': 'Include Z-buffer in OpenEXR output',
-#			'items': [
-#				('Camera Start/End clip', 'Camera start/end clip', 'Use Camera clipping range'),
-#				('Min/Max', 'Min/max', 'Min/max'),
-#				('None', 'None', 'None'),
-#			],
-#			'default': 'None'
-#		},
+		{
+			'type': 'enum',
+			'attr': 'exr_zbuf_normalization',
+			'name': 'Z-Buffer Normalization',
+			'description': 'Where to get normalization info for Z-buffer.',
+			'items': [
+				('Camera Start/End clip', 'Camera start/end clip', 'Use Camera clipping range'),
+				('Min/Max', 'Min/max', 'Min/max'),
+				('None', 'None', 'None'),
+			],
+			'default': 'None'
+		},
 		{
 			'type': 'int',
 			'attr': 'outlierrejection_k',
@@ -736,7 +733,7 @@ class luxrender_film(declarative_property_group):
 			params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
 			params.add_bool('write_exr_ZBuf', self.write_exr_ZBuf)
 			params.add_string('write_exr_compressiontype', self.write_exr_compressiontype)
-#			params.add_string('write_exr_zbuf_normalizationtype', self.write_exr_zbuf_normalizationtype)
+			params.add_string('write_exr_zbuf_normalizationtype', self.exr_zbuf_normalization)
 			params.add_bool('write_exr', self.write_exr)
 			if self.write_exr: params.add_string('write_exr_channels', output_channels)
 		
