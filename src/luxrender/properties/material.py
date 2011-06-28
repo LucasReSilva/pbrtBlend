@@ -174,7 +174,7 @@ class MATERIAL_MT_luxrender_type(bpy.types.Menu):
 		for m_name in sorted(mat_names.keys()):
 			op = sl.operator('MATERIAL_OT_set_luxrender_type', text=mat_names[m_name])
 			op.mat_name = m_name
-	
+
 @LuxRenderAddon.addon_register_class
 class luxrender_material(declarative_property_group):
 	'''

@@ -143,6 +143,12 @@ class TextureParameterBase(object):
 			return self.real_attr
 		else:
 			return self.attr
+	
+def refresh_preview(self, context):
+	if context.material != None:
+		context.material.preview_render_type = context.material.preview_render_type
+	if context.texture != None:
+		context.texture.intensity = context.texture.intensity
 
 class ColorTextureParameter(TextureParameterBase):
 	
@@ -189,6 +195,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'description': 'Multiply texture by color',
 				'default': False,
 				'toggle': True,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
@@ -198,6 +205,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'description': 'Textured %s' % self.name,
 				'default': False,
 				'toggle': True,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
@@ -224,6 +232,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'type': 'string',
 				'name': '%s_colortexturename' % self.attr,
 				'description': '%s Texture' % self.name,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
@@ -337,6 +346,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'description': 'Multiply texture by value',
 				'default': self.multiply_float,
 				'toggle': True,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
@@ -352,6 +362,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'description': 'Textured %s' % self.name,
 				'default': False if not self.texture_only else True,
 				'toggle': True,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
@@ -367,6 +378,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'precision': self.precision,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
@@ -374,6 +386,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'type': 'float',
 				'subtype': self.sub_type,
 				'default': self.default,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
@@ -388,6 +401,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'type': 'string',
 				'name': '%s_floattexturename' % self.attr,
 				'description': '%s Texture' % self.name,
+				'update': refresh_preview,
 				'save_in_preset': True
 			},
 			{
