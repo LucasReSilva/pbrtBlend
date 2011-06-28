@@ -34,25 +34,31 @@ from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..outputs.pure_api import PYLUX_AVAILABLE
 
-renderer_alert_states = set()
-
 def check_renderer_settings(context):
 	lre = context.scene.luxrender_engine
 	lri = context.scene.luxrender_integrator
 	
+	def clear_renderer_alert():
+		if 'surfaceintegrator' in lri.alert.keys(): del lri.alert['surfaceintegrator']
+		if 'lightstrategy' in lri.alert.keys(): del lri.alert['lightstrategy']
+	
 	# Check hybrid renderer and surfaceintegrator compatibility
 	hybrid_valid = lri.surfaceintegrator == 'path' and lri.lightstrategy in ['one', 'all', 'auto']
-	if ((lre.renderer == 'hybrid' and hybrid_valid) or lre.renderer!='hybrid') and 'renderer' in renderer_alert_states:
-		del lre.alert['renderer']
-		del lri.alert['surfaceintegrator']
-		del lri.alert['lightstrategy']
-		renderer_alert_states.remove('renderer')
-	elif (lre.renderer == 'hybrid' and not hybrid_valid):
+	if ((lre.renderer == 'hybrid' and hybrid_valid) or lre.renderer!='hybrid'):
+		clear_renderer_alert()
+	elif lre.renderer == 'hybrid' and not hybrid_valid:
 		# These logical tests should evaluate to True if the setting is incompatible
-		lre.alert['renderer'] = { 'renderer': LO({'!=':'hybrid'}) }
 		lri.alert['surfaceintegrator'] = { 'surfaceintegrator': LO({'!=':'path'}) }
 		lri.alert['lightstrategy'] = { 'lightstrategy': LO({'!=':['one', 'all', 'auto']}) }
-		renderer_alert_states.add('renderer')
+		return
+	
+	# check compatible SSPM mode
+	sppm_valid = lri.surfaceintegrator == 'sppm'
+	if ((lre.renderer == 'sppm' and sppm_valid) or lre.renderer!='sppm'):
+		clear_renderer_alert()
+	elif lre.renderer == 'sppm' and not sppm_valid:
+		lri.alert['surfaceintegrator'] = { 'surfaceintegrator': LO({'!=':'sppm'}) }
+		return
 
 def find_luxrender_path():
 	return os.getenv(
