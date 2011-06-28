@@ -31,7 +31,7 @@ import bpy
 
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O
+from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..export import get_worldscale
@@ -910,7 +910,11 @@ class luxrender_colorspace(declarative_property_group):
 			'attr': 'gamma',
 			'type': 'float',
 			'name': 'Gamma',
-			'default': 2.2
+			'default': 2.2,
+			'min': 0.1,
+			'soft_min': 0.1,
+			'max': 20.0,
+			'soft_max': 20.0
 		},
 		{
 			'attr': 'preset',
