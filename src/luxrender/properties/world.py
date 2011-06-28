@@ -138,6 +138,7 @@ class luxrender_volume_data(declarative_property_group):
 	'''
 	
 	ef_attach_to = []	# not attached
+	alert = {}
 	
 	controls = [
 		'type',
@@ -468,6 +469,7 @@ class luxrender_lightgroup_data(declarative_property_group):
 	'''
 	
 	ef_attach_to = []	# not attached
+	alert = {}
 	
 	controls = [
 		# lg_enabled is drawn manually in the UI class

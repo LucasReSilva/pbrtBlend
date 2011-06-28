@@ -143,7 +143,45 @@ class TextureParameterBase(object):
 			return self.real_attr
 		else:
 			return self.attr
+
+def check_texture_variant(self, context, attr, expected_variant):
+	#print('CHECK TEXTURE: self        %s' % self)
+	#print('CHECK TEXTURE: context     %s' % context)
+	#print('CHECK TEXTURE: attr        %s' % attr)
+	#print('CHECK TEXTURE: expected    %s' % expected_variant)
 	
+	attr_name  = '%s_%stexturename' % (attr, expected_variant)
+	attr_alert = '%s_use%stexture' % (attr, expected_variant)
+	
+	def clear_alert():
+		if attr_alert in self.alert.keys(): del self.alert[attr_alert]
+	
+	tn = getattr(self,attr_name)
+	if tn == '':
+		# empty assignment
+		clear_alert()
+		return
+	
+	valid = False
+	
+	if tn in bpy.data.textures:
+		lt = bpy.data.textures[tn].luxrender_texture
+		#print('CHECK TEXTURE: lt          %s' % lt)
+		
+		lst = getattr(lt, 'luxrender_tex_%s'%lt.type)
+		#print('CHECK TEXTURE: lst         %s' % lst)
+		#print('CHECK TEXTURE: lst.variant %s' % lst.variant)
+		
+		valid = lst.variant == expected_variant
+	#else:
+	#	print('CHECK TEXTURE: Not a valid texture')
+	
+	if not valid:
+		self.alert[attr_alert] = { attr_alert: LO({'!=':None}) }
+		#print('CHECK TEXTURE: Not a valid variant assigned')
+	else:
+		clear_alert()
+
 def refresh_preview(self, context):
 	if context.material != None:
 		context.material.preview_render_type = context.material.preview_render_type
@@ -232,7 +270,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'type': 'string',
 				'name': '%s_colortexturename' % self.attr,
 				'description': '%s Texture' % self.name,
-				'update': refresh_preview,
+				'update': lambda s,c: refresh_preview(s,c) or check_texture_variant(s,c, self.attr,'color'),
 				'save_in_preset': True
 			},
 			{
@@ -401,7 +439,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'type': 'string',
 				'name': '%s_floattexturename' % self.attr,
 				'description': '%s Texture' % self.name,
-				'update': refresh_preview,
+				'update': lambda s,c: refresh_preview(s,c) or check_texture_variant(s,c, self.attr,'float'),
 				'save_in_preset': True
 			},
 			{
@@ -690,6 +728,7 @@ class luxrender_texture(declarative_property_group):
 	'''
 	
 	ef_attach_to = ['Texture']
+	alert = {}
 	
 	controls = [
 		# Preset menu is drawn manually in the ui class
@@ -805,6 +844,7 @@ for i in range(1, BAND_MAX_TEX+1):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_band(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'variant',
@@ -940,6 +980,7 @@ class luxrender_tex_band(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_bilerp(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'variant',
@@ -1086,6 +1127,7 @@ class luxrender_tex_bilerp(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_blackbody(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'temperature'
@@ -1123,6 +1165,7 @@ class luxrender_tex_blackbody(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_brick(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'variant',
@@ -1330,6 +1373,7 @@ class luxrender_tex_brick(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_cauchy(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'use_index',
@@ -1435,6 +1479,7 @@ class luxrender_tex_cauchy(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_checkerboard(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'aamode',
@@ -1520,6 +1565,7 @@ class luxrender_tex_checkerboard(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_constant(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'value'
@@ -1565,6 +1611,7 @@ class luxrender_tex_constant(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_dots(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		# None
@@ -1614,6 +1661,7 @@ class luxrender_tex_dots(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_equalenergy(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'energy'
@@ -1655,6 +1703,7 @@ class luxrender_tex_equalenergy(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_fbm(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'octaves',
@@ -1712,6 +1761,7 @@ class luxrender_tex_fbm(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_gaussian(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'energy',
@@ -1781,6 +1831,7 @@ class luxrender_tex_gaussian(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_harlequin(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		# None
@@ -1807,6 +1858,7 @@ class luxrender_tex_harlequin(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_imagemap(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'variant',
@@ -1971,6 +2023,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_lampspectrum(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		# Preset menu is drawn manually in the ui class
@@ -2016,6 +2069,7 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_mapping(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'type',
@@ -2151,6 +2205,7 @@ class luxrender_tex_mapping(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_marble(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'octaves',
@@ -2234,6 +2289,7 @@ class luxrender_tex_marble(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_mix(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'variant',
@@ -2324,6 +2380,7 @@ class luxrender_tex_mix(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_multimix(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'variant',
@@ -2447,6 +2504,7 @@ class luxrender_tex_multimix(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_sellmeier(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'advanced',
@@ -2532,6 +2590,7 @@ class luxrender_tex_sellmeier(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_scale(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'variant',
@@ -2682,16 +2741,20 @@ class tabulatedfresnel(tabulatedbase):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_tabulateddata(tabulatedcolor):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_luxpop(tabulatedfresnel):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_sopra(tabulatedfresnel):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_transform(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'coordinates',
@@ -2770,6 +2833,7 @@ class luxrender_tex_transform(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_uv(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = []
 	
@@ -2794,6 +2858,7 @@ class luxrender_tex_uv(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_uvmask(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = \
 	TF_innertex.controls + \
@@ -2834,6 +2899,7 @@ class luxrender_tex_uvmask(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_windy(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = []
 	
@@ -2858,6 +2924,7 @@ class luxrender_tex_windy(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_wrinkled(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
+	alert = {}
 	
 	controls = [
 		'octaves',

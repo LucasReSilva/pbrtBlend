@@ -182,6 +182,7 @@ class luxrender_material(declarative_property_group):
 	'''
 	
 	ef_attach_to = ['Material']
+	alert = {}
 	
 	controls = [
 		# Type select Menu is drawn manually
@@ -458,6 +459,7 @@ class luxrender_mat_compositing(declarative_property_group):
 	'''
 	
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'use_compositing',
@@ -568,6 +570,7 @@ class luxrender_transparency(declarative_property_group):
 	'''
 	
 	ef_attach_to = ['Material']
+	alert = {}
 	
 	controls = [
 		'alpha_source',
@@ -733,6 +736,7 @@ class luxrender_transparency(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'name'
@@ -856,6 +860,7 @@ class luxrender_mat_carpaint(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glass(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'architectural',
@@ -933,6 +938,7 @@ class luxrender_mat_glass(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glass2(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'architectural',
@@ -979,6 +985,7 @@ class luxrender_mat_glass2(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_roughglass(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 	] + \
@@ -1039,6 +1046,7 @@ class luxrender_mat_roughglass(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glossy(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'multibounce'
@@ -1153,6 +1161,7 @@ class luxrender_mat_glossy(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glossy_lossy(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 	] + \
@@ -1240,6 +1249,7 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_matte(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 	] + \
@@ -1271,6 +1281,7 @@ class luxrender_mat_matte(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_mattetranslucent(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'energyconserving'
@@ -1324,6 +1335,7 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glossytranslucent(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'multibounce',
@@ -1521,6 +1533,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_metal(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'name',
@@ -1594,6 +1607,7 @@ class luxrender_mat_metal(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_scatter(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 	] + \
@@ -1625,6 +1639,7 @@ class luxrender_mat_scatter(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_shinymetal(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 	] + \
@@ -1676,6 +1691,7 @@ class luxrender_mat_shinymetal(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_mirror(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 	] + \
@@ -1712,6 +1728,7 @@ class luxrender_mat_mirror(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_mix(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = [
 		'namedmaterial1',
@@ -1751,6 +1768,7 @@ class luxrender_mat_mix(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_null(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = []
 	visibility = {}
@@ -1765,6 +1783,7 @@ class luxrender_mat_null(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_velvet(declarative_property_group):
 	ef_attach_to = ['luxrender_material']
+	alert = {}
 	
 	controls = TC_Kd.controls + [
 		'thickness',
@@ -1893,6 +1912,7 @@ class luxrender_emission(declarative_property_group):
 	'''
 	
 	ef_attach_to = ['Material']
+	alert = {}
 	
 	controls = [
 		'importance',
