@@ -28,7 +28,6 @@ import re
 import bpy
 
 from extensions_framework import declarative_property_group
-from extensions_framework import util as efutil
 
 from .. import LuxRenderAddon
 from ..properties.texture import (
