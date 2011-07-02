@@ -48,7 +48,7 @@ def check_renderer_settings(context):
 		clear_renderer_alert()
 	elif lre.renderer == 'hybrid' and not hybrid_valid:
 		# These logical tests should evaluate to True if the setting is incompatible
-		lri.alert['surfaceintegrator'] = { 'surfaceintegrator': LO({'!=':'path'}) }
+		lri.alert['surfaceintegrator'] = { 'surfaceintegrator': LO({'!=':['path', 'bidirectional']}) }
 		lri.alert['lightstrategy'] = { 'lightstrategy': LO({'!=':['one', 'all', 'auto']}) }
 		return
 	

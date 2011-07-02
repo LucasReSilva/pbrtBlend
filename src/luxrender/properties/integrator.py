@@ -111,6 +111,7 @@ class luxrender_integrator(declarative_property_group):
 		# bidir +
 		['eyedepth', 'lightdepth'],
 		['eyerrthreshold', 'lightrrthreshold'],
+		'bidirstrategy',
 		
 		# dl +
 		'maxdepth',
@@ -201,6 +202,7 @@ class luxrender_integrator(declarative_property_group):
 		'lightdepth':						{ 'surfaceintegrator': 'bidirectional' },
 		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		'lightrrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
+		'bidirstrategy':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		
 		# dl +
 		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath'])},
@@ -331,6 +333,20 @@ class luxrender_integrator(declarative_property_group):
 				('powerimp', 'Power', 'powerimp'),
 				('allpowerimp', 'All Power', 'allpowerimp'),
 				('logpowerimp', 'Log Power', 'logpowerimp')
+			],
+			'update': lambda s,c: check_renderer_settings(c),
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'bidirstrategy',
+			'name': 'Light Strategy',
+			'description': 'Light Sampling Strategy',
+			'default': 'auto',
+			'items': [
+				('auto', 'Auto', 'auto'),
+				('one', 'One', 'one'),
+				('all', 'All', 'all')
 			],
 			'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
@@ -896,12 +912,17 @@ class luxrender_integrator(declarative_property_group):
 		#Check to make sure all settings are correct when hybrid is selected. Keep this up to date as hybrid gets new options in 0.9
 		
 		if engine_properties.renderer == 'hybrid':
-			if self.surfaceintegrator != 'path':
-				LuxLog('Incompatible surface integrator for Hybrid renderer (use "path").')
+			if self.surfaceintegrator not in ('path', 'bidirectional'):
+				LuxLog('Incompatible surface integrator for Hybrid renderer (use "path" or "bidirectional").')
 				raise Exception('Incompatible render settings')
 			if self.lightstrategy not in ('one', 'all', 'auto'):
-				LuxLog('Incompatible lightstrategy for Hybrid renderer (use "auto", "all", or "one").')
+				LuxLog('Incompatible lightstrategy for Hybrid Path (use "auto", "all", or "one").')
 				raise Exception('Incompatible render settings')
+			if self.bidirstrategy != ('one'):
+				LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
+				raise Exception('Incompatible render settings')
+			if self.surfaceintegrator == 'bidirectional':
+				LuxLog('WARNING: Hybrid bidir is only partially functional! Exporting anyway...')
 				
 		#SPPM requires that renderer and engine both = sppm, neither option works without the other. Here we ensure that the user set both.
 		if engine_properties.renderer == 'sppm':
@@ -920,6 +941,7 @@ class luxrender_integrator(declarative_property_group):
 			if self.advanced:
 				params.add_float('eyerrthreshold', self.eyerrthreshold)
 				params.add_float('lightrrthreshold', self.lightrrthreshold)
+				params.add_string('strategy', self.bidirstrategy)
 		
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth) \
