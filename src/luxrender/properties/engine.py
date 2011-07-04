@@ -42,6 +42,7 @@ def check_renderer_settings(context):
 		if 'surfaceintegrator' in lri.alert.keys(): del lri.alert['surfaceintegrator']
 		if 'lightstrategy' in lri.alert.keys(): del lri.alert['lightstrategy']
 		if 'bidirstrategy' in lri.alert.keys(): del lri.alert['bidirstrategy']
+		if 'advanced' in lri.alert.keys(): del lri.alert['advanced']
 	
 	# Check hybrid renderer and surfaceintegrator compatibility
 	hybrid_valid = (lri.surfaceintegrator == 'path' and lri.lightstrategy in ['one', 'all', 'auto']) or (lri.surfaceintegrator == 'bidirectional' and lri.bidirstrategy in ['one'])
@@ -52,6 +53,7 @@ def check_renderer_settings(context):
 		lri.alert['surfaceintegrator'] = { 'surfaceintegrator': LO({'!=':['path', 'bidirectional']}) }
 		lri.alert['lightstrategy'] = { 'lightstrategy': LO({'!=':['one', 'all', 'auto']}) }
 		lri.alert['bidirstrategy'] = { 'bidirstrategy': LO({'!=':['one']}) }
+		lri.alert['advanced'] = { 'bidirstrategy': LO({'!=':['one']}) }
 		return
 	
 	# check compatible SSPM mode
