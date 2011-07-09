@@ -232,7 +232,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'bool',
 			'attr': 'partial_ply',
 			'name': 'Partial PLY Export',
-			'description': 'Skip PLY file write',
+			'description': 'Skip exporting PLY files that already exist. Try disabling this if you have geometry issues',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -254,7 +254,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'int',
 			'attr': 'opencl_platform_index',
 			'name': 'OpenCL platform index',
-			'description': 'Try increasing this value 1 at a time if LuxRender fails to use your GPU',
+			'description': 'OpenCL Platform to target. Try increasing this value 1 at a time if LuxRender fails to use your GPU',
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
@@ -300,7 +300,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'string',
 			'attr': 'deviceselection',
 			'name': 'OpenCL devices',
-			'description': 'Enter target OpenCL devices here. Leave blank to use all available.',
+			'description': 'Enter target OpenCL devices here. Leave blank to use all available',
 			'default': '',
 			'save_in_preset': True
 		},
@@ -308,7 +308,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'bool',
 			'attr': 'usegpus',
 			'name': 'Use GPUs',
-			'description': 'Target GPU devices instead of using native threads.',
+			'description': 'Target GPU devices instead of using native threads',
 			'default': True,
 			'save_in_preset': True
 		},
@@ -329,7 +329,7 @@ class luxrender_engine(declarative_property_group):
 			'subtype': 'DIR_PATH',
 			'attr': 'install_path',
 			'name': 'Path to LuxRender Installation',
-			'description': 'Path to LuxRender',
+			'description': 'Path to LuxRender install directory',
 			'default': find_luxrender_path()
 		},
 		{
@@ -367,6 +367,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'enum',
 			'attr': 'mesh_type',
 			'name': 'Default mesh format',
+			'description': 'Sets whether to export scene geometry as PLY files or directly in the LXO file. PLY is faster and recommended',
 			'items': [
 				('native', 'LuxRender mesh', 'native'),
 				('binary_ply', 'Binary PLY', 'binary_ply')
