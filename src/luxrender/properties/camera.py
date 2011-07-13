@@ -418,7 +418,7 @@ class luxrender_film(declarative_property_group):
 		'write_exr_compressiontype',
 		'write_exr_ZBuf',
 		'exr_zbuf_normalization',
-		'output_alpha',
+		['output_alpha', 'premultiply_alpha'],
 		['write_flm', 'restart_flm', 'write_flm_direct'],
 		
 		'ldr_clamp_method',
@@ -427,6 +427,7 @@ class luxrender_film(declarative_property_group):
 	
 	visibility = {
 		'restart_flm': { 'write_flm': True },
+		'premultiply_alpha': { 'output_alpha': True },
 		'write_flm_direct': { 'write_flm': True },
 		'write_png_16bit': { 'write_png': True },
 		'write_exr_applyimaging': { 'write_exr': True },
@@ -577,6 +578,13 @@ class luxrender_film(declarative_property_group):
 		},
 		{
 			'type': 'bool',
+			'attr': 'premultiply_alpha',
+			'name': 'Premultiply Alpha',
+			'description': 'Premultiply alpha channel (happens during film stage, not image output)',
+			'default': True
+		},
+		{
+			'type': 'bool',
 			'attr': 'write_exr_applyimaging',
 			'name': 'Tonemap EXR',
 			'description': 'Apply imaging pipeline to OpenEXR output. Gamma correction will be skipped regardless.',
@@ -715,15 +723,17 @@ class luxrender_film(declarative_property_group):
 		
 		if self.output_alpha:
 			output_channels = 'RGBA'
+			params.add_bool('premultiplyalpha', self.premultiply_alpha)
 		else:
 			output_channels = 'RGB'
-		
+								
 		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
 			# Set up params to enable z buffer and set gamma=1.0
 			# Also, this requires tonemapped EXR output
 			params.add_string('write_exr_channels', 'RGBA')
 			params.add_bool('write_exr_halftype', False)
 			params.add_bool('write_exr_applyimaging', True)
+			params.add_bool('premultiplyalpha', True) #Apparently, this should always be true with EXR
 			params.add_bool('write_exr_ZBuf', True)
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 			params.add_float('gamma', 1.0) # Linear workflow !
