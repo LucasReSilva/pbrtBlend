@@ -256,7 +256,7 @@ class luxrender_integrator(declarative_property_group):
 		'gatherangle':						{ 'finalgather': True, 'surfaceintegrator': 'exphotonmap' },
 		'renderingmode':					{ 'surfaceintegrator': 'exphotonmap' },
 		'rrstrategy':						{ 'surfaceintegrator': O(['exphotonmap', 'path']) },
-		'rrcontinueprob':					{ 'surfaceintegrator': O(['exphotonmap', 'path']) },
+		'rrcontinueprob':					{ 'rrstrategy': 'probability', 'surfaceintegrator': O(['exphotonmap', 'path']) },
 		# epm advanced
 		'distancethreshold':				{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
 		'photonmapsfile':					{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
