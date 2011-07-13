@@ -140,7 +140,6 @@ class luxrender_engine(declarative_property_group):
 		'usegpus',
 		'export_type',
 		'binary_name',
-		'log_verbosity'
 		'write_files',
 		'install_path',
 		['write_lxv',
