@@ -79,8 +79,7 @@ from ..operators import lrmdb
 bl_ui.properties_render.RENDER_PT_render.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_render.RENDER_PT_output.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-#Post-pro panel doesn't do anything atm, not sure why. Keeping it hidden.
-#bl_ui.properties_render.RENDER_PT_post_processing.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_render.RENDER_PT_post_processing.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_render.RENDER_PT_stamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
 bl_ui.properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
