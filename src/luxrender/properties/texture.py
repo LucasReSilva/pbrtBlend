@@ -641,6 +641,7 @@ tex_names = (
 		('fbm', 'FBM'),
 		('harlequin', 'Harlequin'),
 		('imagemap', 'Image Map'),
+		('normalmap', 'Normal Map'),
 		('marble', 'Marble'),
 		('mix', 'Mix'),
 		('multimix', 'Multi Mix'),
@@ -1888,7 +1889,6 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'expand': True,
 			'save_in_preset': True
 		},
-		
 		{
 			'type': 'string',
 			'subtype': 'FILE_PATH',
@@ -2020,6 +2020,111 @@ class luxrender_tex_imagemap(declarative_property_group):
 				fn = efutil.filesystem_path(self.filename)
 				bdecode_string2file(filename_data, fn)
 
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_normalmap(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = [
+		'varient'
+		'filename',
+		'discardmipmaps',
+		'filtertype',
+		'maxanisotropy',
+		'wrap',
+	]
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'float'
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'filename',
+			'name': 'File Name',
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'discardmipmaps',
+			'name': 'Discard MipMaps below',
+			'description': 'Set to 0 to disable',
+			'default': 0,
+			'min': 0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'filtertype',
+			'name': 'Filter type',
+			'items': [
+				('bilinear', 'bilinear', 'bilinear'),
+				('mipmap_trilinear', 'MipMap Trilinear', 'mipmap_trilinear'),
+				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
+				('nearest', 'nearest', 'nearest'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'maxanisotropy',
+			'name': 'Max. Anisotropy',
+			'default': 8.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'wrap',
+			'name': 'Wrapping',
+			'items': [
+				('repeat', 'repeat', 'repeat'),
+				('black', 'black', 'black'),
+				('white', 'white', 'white'),
+				('clamp', 'clamp', 'clamp')
+			],
+			'save_in_preset': True
+		},
+	]
+
+	def get_paramset(self, scene, texture):
+		params = ParamSet()
+		
+		# This function resolves relative paths (even in linked library blends)
+		# and optionally encodes/embeds the data if the setting is enabled
+		process_filepath_data(scene, texture, self.filename, params, 'filename')
+		
+		params.add_integer('discardmipmaps', self.discardmipmaps) \
+			  .add_string('filtertype', self.filtertype) \
+			  .add_float('maxanisotropy', self.maxanisotropy) \
+			  .add_float('gamma', 1.0) \
+			  .add_string('wrap', self.wrap)
+			  #Don't gamma correct normal maps^
+		
+		return {'2DMAPPING'}, params
+		
+		psi_accept = {
+			'filename': 'string',
+			'discardmipmaps': 'integer',
+			'filtertype': 'string',
+			'maxanisotropy': 'float',
+			'wrap': 'string',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		# Use a 2nd loop to ensure that self.filename has been set
+		for psi in ps:
+			# embedded data decode
+			if  psi['name'] == 'filename_data':
+				filename_data = '\n'.join(psi['value'])
+				self.filename = '//%s' % self.filename
+				fn = efutil.filesystem_path(self.filename)
+				
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_lampspectrum(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']

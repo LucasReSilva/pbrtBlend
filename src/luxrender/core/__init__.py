@@ -66,7 +66,7 @@ from ..ui.materials import (
 
 from ..ui.textures import (
 	main as tex_main, band, blender, bilerp, blackbody, brick, cauchy, constant,
-	checkerboard, dots, equalenergy, fbm, gaussian, harlequin, imagemap,
+	checkerboard, dots, equalenergy, fbm, gaussian, harlequin, imagemap, normalmap,
 	lampspectrum, luxpop, marble, mix as tex_mix, multimix, sellmeier, scale, sopra, uv,
 	uvmask, windy, wrinkled, mapping, tabulateddata, transform
 )
