@@ -1865,16 +1865,18 @@ class luxrender_tex_imagemap(declarative_property_group):
 		'variant',
 		'filename',
 		'channel',
-		'discardmipmaps',
-		'filtertype',
 		'gain',
 		'gamma',
+		'filtertype',
+		'discardmipmaps',
 		'maxanisotropy',
 		'wrap',
 	]
 	
 	visibility = {
 		'channel': { 'variant': 'float' },
+		'discardmipmaps': { 'filtertype': O(['mipmap_trilinear', 'mipmap_ewa']) },
+		'maxanisotropy': { 'filtertype': O(['mipmap_trilinear', 'mipmap_ewa']) },
 	}
 	
 	properties = [
@@ -1901,12 +1903,12 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'attr': 'channel',
 			'name': 'Channel',
 			'items': [
-				('mean', 'mean', 'mean'),
-				('red', 'red', 'red'),
-				('green', 'green', 'green'),
-				('blue', 'blue', 'blue'),
-				('alpha', 'alpha', 'alpha'),
-				('colored_mean', 'colored_mean', 'colored_mean')
+				('mean', 'Mean', 'mean'),
+				('red', 'Red', 'red'),
+				('green', 'Green', 'green'),
+				('blue', 'Blue', 'blue'),
+				('alpha', 'Alpha', 'alpha'),
+				('colored_mean', 'Colored mean', 'colored_mean')
 			],
 			'save_in_preset': True
 		},
@@ -1924,10 +1926,10 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'attr': 'filtertype',
 			'name': 'Filter type',
 			'items': [
-				('bilinear', 'bilinear', 'bilinear'),
-				('mipmap_trilinear', 'MipMap Trilinear', 'mipmap_trilinear'),
+				('bilinear', 'Bilinear', 'bilinear'),
+				('mipmap_trilinear', 'MipMap trilinear', 'mipmap_trilinear'),
 				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
-				('nearest', 'nearest', 'nearest'),
+				('nearest', 'Nearest neighbor', 'nearest'),
 			],
 			'save_in_preset': True
 		},
@@ -1936,6 +1938,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'attr': 'gain',
 			'name': 'Gain',
 			'default': 1.0,
+			'description': 'Scale texture value by this amount',
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 10.0,
@@ -1946,6 +1949,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'type': 'float',
 			'attr': 'gamma',
 			'name': 'Gamma',
+			'description': 'Gamma correction setting. Use 1 to get the actual values in the texture, otherwise use your screen gamma',
 			'default': 2.2,
 			'min': 0.0,
 			'soft_min': 0.0,
@@ -1965,10 +1969,10 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'attr': 'wrap',
 			'name': 'Wrapping',
 			'items': [
-				('repeat', 'repeat', 'repeat'),
-				('black', 'black', 'black'),
-				('white', 'white', 'white'),
-				('clamp', 'clamp', 'clamp')
+				('repeat', 'Repeat', 'repeat'),
+				('black', 'Black', 'black'),
+				('white', 'White', 'white'),
+				('clamp', 'Clamp', 'clamp')
 			],
 			'save_in_preset': True
 		},
@@ -2028,11 +2032,16 @@ class luxrender_tex_normalmap(declarative_property_group):
 	controls = [
 		'varient',
 		'filename',
-		'discardmipmaps',
 		'filtertype',
+		'discardmipmaps',
 		'maxanisotropy',
 		'wrap',
 	]
+	
+	visibility = {
+		'discardmipmaps': { 'filtertype': O(['mipmap_trilinear', 'mipmap_ewa']) },
+		'maxanisotropy': { 'filtertype': O(['mipmap_trilinear', 'mipmap_ewa']) },
+	}
 	
 	properties = [
 		{
@@ -2061,10 +2070,10 @@ class luxrender_tex_normalmap(declarative_property_group):
 			'attr': 'filtertype',
 			'name': 'Filter type',
 			'items': [
-				('bilinear', 'bilinear', 'bilinear'),
-				('mipmap_trilinear', 'MipMap Trilinear', 'mipmap_trilinear'),
+				('bilinear', 'Bilinear', 'bilinear'),
+				('mipmap_trilinear', 'MipMap trilinear', 'mipmap_trilinear'),
 				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
-				('nearest', 'nearest', 'nearest'),
+				('nearest', 'Nearest neighbor', 'nearest'),
 			],
 			'save_in_preset': True
 		},
@@ -2080,10 +2089,10 @@ class luxrender_tex_normalmap(declarative_property_group):
 			'attr': 'wrap',
 			'name': 'Wrapping',
 			'items': [
-				('repeat', 'repeat', 'repeat'),
-				('black', 'black', 'black'),
-				('white', 'white', 'white'),
-				('clamp', 'clamp', 'clamp')
+				('repeat', 'Repeat', 'repeat'),
+				('black', 'Black', 'black'),
+				('white', 'White', 'white'),
+				('clamp', 'Clamp', 'clamp')
 			],
 			'save_in_preset': True
 		},
