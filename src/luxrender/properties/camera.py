@@ -31,7 +31,7 @@ import bpy
 
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
+from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import get_worldscale
@@ -416,8 +416,8 @@ class luxrender_film(declarative_property_group):
 		'write_tga',
 		['write_exr', 'write_exr_applyimaging', 'write_exr_halftype'],
 		'write_exr_compressiontype',
-		'write_exr_ZBuf',
-		'exr_zbuf_normalization',
+		'write_zbuf',
+		'zbuf_normalization',
 		['output_alpha', 'premultiply_alpha'],
 		['write_flm', 'restart_flm', 'write_flm_direct'],
 		
@@ -433,8 +433,8 @@ class luxrender_film(declarative_property_group):
 		'write_exr_applyimaging': { 'write_exr': True },
 		'write_exr_halftype': { 'write_exr': True },
 		'write_exr_compressiontype': { 'write_exr': True },
-		'write_exr_ZBuf': { 'write_exr': True },
-		'exr_zbuf_normalization': { 'write_exr': True, 'write_exr_ZBuf': True },
+		'write_zbuf': O([{'write_exr': True }, { 'write_tga': True }]),
+		'zbuf_normalization': A([{'write_zbuf': True}, O([{'write_exr': True }, { 'write_tga': True }])]),
 	}
 	
 	properties = [
@@ -592,14 +592,14 @@ class luxrender_film(declarative_property_group):
 		},
 		{
 			'type': 'bool',
-			'attr': 'write_exr_ZBuf',
-			'name': 'Enable EXR Z-Buffer',
-			'description': 'Include Z-buffer in OpenEXR output',
+			'attr': 'write_zbuf',
+			'name': 'Enable Z-Buffer',
+			'description': 'Include Z-buffer in OpenEXR and TARGA output',
 			'default': False
 		},
 		{
 			'type': 'enum',
-			'attr': 'exr_zbuf_normalization',
+			'attr': 'zbuf_normalization',
 			'name': 'Z-Buffer Normalization',
 			'description': 'Where to get normalization info for Z-buffer.',
 			'items': [
@@ -741,17 +741,21 @@ class luxrender_film(declarative_property_group):
 			# Otherwise let the user decide on tonemapped EXR and other EXR settings
 			params.add_bool('write_exr_halftype', self.write_exr_halftype)
 			params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
-			params.add_bool('write_exr_ZBuf', self.write_exr_ZBuf)
+			params.add_bool('write_exr_ZBuf', self.write_zbuf)
 			params.add_string('write_exr_compressiontype', self.write_exr_compressiontype)
-			params.add_string('write_exr_zbuf_normalizationtype', self.exr_zbuf_normalization)
+			params.add_string('write_exr_zbuf_normalizationtype', self.zbuf_normalization)
 			params.add_bool('write_exr', self.write_exr)
 			if self.write_exr: params.add_string('write_exr_channels', output_channels)
 		
 		params.add_bool('write_png', self.write_png)
-		params.add_bool('write_png_16bit', self.write_png_16bit)
-		if self.write_png: params.add_string('write_png_channels', output_channels)
+		if self.write_png:
+			params.add_string('write_png_channels', output_channels)
+			params.add_bool('write_png_16bit', self.write_png_16bit)
 		params.add_bool('write_tga', self.write_tga)
-		if self.write_tga: params.add_string('write_tga_channels', output_channels)
+		if self.write_tga:
+			params.add_string('write_tga_channels', output_channels)
+			params.add_string('write_tga_Zbuf', self.write_zbuf)
+			params.add_string('write_tga_zbuf_normalizationtype', self.zbuf_normalization)
 		
 		params.add_string('ldr_clamp_method', self.ldr_clamp_method)
 		
