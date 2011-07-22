@@ -2030,7 +2030,6 @@ class luxrender_tex_normalmap(declarative_property_group):
 	alert = {}
 	
 	controls = [
-		'varient',
 		'filename',
 		'filtertype',
 		'discardmipmaps',
