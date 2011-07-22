@@ -235,10 +235,13 @@ class luxrender_material(declarative_property_group):
 		'roughglass': 'Kt',
 		'glossy': 'Kd',
 		'glossy_lossy': 'Kd',
+		'glossytranslucent': 'Kd',
 		'matte': 'Kd',
-		'mattetranslucent': 'Kt',
-		'shinymetal': 'Ks',
+		'mattetranslucent': 'Kr',
+		'shinymetal': 'Kr',
 		'mirror': 'Kr',
+		'scatter': 'Kd',
+		'velvet': 'Kd',
 	}
 	
 	def reset(self, prnt=None):
