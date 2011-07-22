@@ -2030,7 +2030,6 @@ class luxrender_tex_normalmap(declarative_property_group):
 	alert = {}
 	
 	controls = [
-		'varient',
 		'filename',
 		'filtertype',
 		'discardmipmaps',
@@ -2113,7 +2112,8 @@ class luxrender_tex_normalmap(declarative_property_group):
 			  #Don't gamma correct normal maps^
 		
 		return {'2DMAPPING'}, params
-		
+	
+	def load_paramset(self, variant, ps):
 		psi_accept = {
 			'filename': 'string',
 			'discardmipmaps': 'integer',
@@ -2133,7 +2133,8 @@ class luxrender_tex_normalmap(declarative_property_group):
 				filename_data = '\n'.join(psi['value'])
 				self.filename = '//%s' % self.filename
 				fn = efutil.filesystem_path(self.filename)
-				
+				bdecode_string2file(filename_data, fn)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_lampspectrum(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
