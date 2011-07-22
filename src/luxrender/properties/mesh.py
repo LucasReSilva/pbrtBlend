@@ -111,7 +111,7 @@ class luxrender_mesh(declarative_property_group):
 			'type': 'bool',
 			'attr': 'generatetangents',
 			'name': 'Generate Tangents',
-			'description': 'Generate tanget space for meshes with this material. Enable when using a bake-generated normal map',
+			'description': 'Generate tanget space for this mesh. Enable when using a bake-generated normal map',
 			'default': False,
 		},
 		{
@@ -181,7 +181,7 @@ class luxrender_mesh(declarative_property_group):
 	def get_paramset(self):
 		params = ParamSet()
 		
-		#Export generatetangent
+		#Export generatetangents
 		params.add_bool('generatetangents', self.generatetangents)
 		
 		# check if subdivision is used
