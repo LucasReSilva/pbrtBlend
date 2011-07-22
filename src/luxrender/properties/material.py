@@ -275,6 +275,15 @@ class luxrender_material(declarative_property_group):
 		if self.type not in ('matte', 'mattetranslucent', 'scatter'):
 			if blender_material.specular_intensity != 0.5:
 				blender_material.specular_intensity = 0.5
+				
+		#Make perfectly specular mats shiny
+		if self.type in ('glass', 'glass2', 'mirror'):
+			if blender_material.specular_hardness != 500:
+				blender_material.specular_hardness = 500
+		#Reset spec intensity if the mat type becomes something else
+		if self.type not in ('glass', 'glass2', 'mirror'):
+			if blender_material.specular_hardness != 50:
+				blender_material.specular_hardness = 50
 	
 	def export(self, scene, lux_context, material, mode='indirect'):
 		
