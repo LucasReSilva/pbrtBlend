@@ -188,7 +188,7 @@ class luxrender_material(declarative_property_group):
 		# Type select Menu is drawn manually
 		'Interior',
 		'Exterior',
-		'generatetangents'
+#		'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
 	] + \
 	TF_bumpmap.controls
 	
@@ -210,13 +210,13 @@ class luxrender_material(declarative_property_group):
 			'default': 'matte',
 			'save_in_preset': True
 		},
-		{
-			'type': 'bool',
-			'attr': 'generatetangents',
-			'name': 'Generate Tangents',
-			'description': 'Generate tanget space for meshes with this material. Enable when using a bake-generated normal map',
-			'default': False,
-		},
+#		{
+#			'type': 'bool',
+#			'attr': 'generatetangents',
+#			'name': 'Generate Tangents',
+#			'description': 'Generate tanget space for meshes with this material. Enable when using a bake-generated normal map',
+#			'default': False,
+#		},
 	] + \
 		TF_bumpmap.properties + \
 		VolumeParameter('Interior', 'Interior') + \
