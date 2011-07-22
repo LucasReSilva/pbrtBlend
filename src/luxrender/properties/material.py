@@ -266,6 +266,15 @@ class luxrender_material(declarative_property_group):
 			submat_col = getattr(submat, '%s_color' % self.master_color_map[self.type])
 			if blender_material.diffuse_color != submat_col:
 				blender_material.diffuse_color = submat_col
+		
+		#Kill spec intensity for matte materials
+		if self.type in ('matte', 'mattetranslucent', 'scatter'):
+			if blender_material.specular_intensity != 0:
+				blender_material.specular_intensity = 0
+		#Reset spec intensity if the mat type becomes something else
+		if self.type not in ('matte', 'mattetranslucent', 'scatter'):
+			if blender_material.specular_intensity != 0.5:
+				blender_material.specular_intensity = 0.5
 	
 	def export(self, scene, lux_context, material, mode='indirect'):
 		
