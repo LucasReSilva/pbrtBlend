@@ -915,14 +915,15 @@ class luxrender_integrator(declarative_property_group):
 			if self.surfaceintegrator not in ('path', 'bidirectional'):
 				LuxLog('Incompatible surface integrator for Hybrid renderer (use "path" or "bidirectional").')
 				raise Exception('Incompatible render settings')
-			if self.lightstrategy not in ('one', 'all', 'auto'):
-				LuxLog('Incompatible lightstrategy for Hybrid Path (use "auto", "all", or "one").')
-				raise Exception('Incompatible render settings')
-			if self.bidirstrategy != ('one'):
-				LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
-				raise Exception('Incompatible render settings')
+			#Check each integrator seperately so they don't mess with each other!
+			if self.surfaceintegrator == 'path':
+				if self.lightstrategy not in ('one', 'all', 'auto'):
+					LuxLog('Incompatible lightstrategy for Hybrid Path (use "auto", "all", or "one").')
+					raise Exception('Incompatible render settings')
 			if self.surfaceintegrator == 'bidirectional':
-				LuxLog('WARNING: Hybrid bidir is only partially functional! Exporting anyway...')
+				if self.bidirstrategy != ('one'):
+					LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
+					raise Exception('Incompatible render settings')
 				
 		#SPPM requires that renderer and engine both = sppm, neither option works without the other. Here we ensure that the user set both.
 		if engine_properties.renderer == 'sppm':
