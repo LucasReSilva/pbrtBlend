@@ -254,7 +254,7 @@ class luxrender_volume_data(declarative_property_group):
 		
 		def absorption_at_depth_scaled(i):
 			# This is copied from the old LuxBlend, I don't pretend to understand it, DH
-			depthed = (-math.log(max([(float(i)),1e-30]))/(self.depth*self.absorption_scale)) * ((float(i))==1.0 and -1 or 1)
+			depthed = (-math.log(max([(float(i)),1e-30]))/(self.depth)) * self.absorption_scale * ((float(i))==1.0 and -1 or 1)
 			#print('abs xform: %f -> %f' % (i,depthed))
 			return depthed
 		
