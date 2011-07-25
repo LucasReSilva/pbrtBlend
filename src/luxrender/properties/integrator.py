@@ -152,7 +152,10 @@ class luxrender_integrator(declarative_property_group):
 		'glossyrefractreject_threshold'],
 		
 		# epm
-		'maxphotondepth',
+		['maxeyedepth', 'maxphotondepth'],
+		#Exphotonmap uses maxdepth, not maxeyedepth. However, it uses maxeyedepth in the GUI to allow a double-box for both itself and SPPM
+		#This is because maxdepth cannot be used in a double box, since path, igi, and direct use maxdepth by itself.
+		#The value of maxeyedepth is exported for the "maxdepth" entry in the lxs when using exphotonmap, see export section
 		'directphotons',
 		'causticphotons',
 		'indirectphotons',
@@ -180,7 +183,6 @@ class luxrender_integrator(declarative_property_group):
 		'mindist',
 		
 		#sppm
-		'maxeyedepth',
 		'photonperpass',
 		'startk',
 		#sppm advanced
@@ -206,7 +208,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		# dl +
 		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath'])},
-		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path']) },
+		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'igi', 'path']) },
 		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'path']) },
 		
 		# dp
@@ -244,6 +246,7 @@ class luxrender_integrator(declarative_property_group):
 		'glossyrefractreject_threshold':	{ 'glossyrefractreject': True, 'surfaceintegrator': 'distributedpath' },
 		
 		# epm
+		'maxeyedepth':						{ 'surfaceintegrator': O(['exphotonmap', 'sppm']) },
 		'maxphotondepth':					{ 'surfaceintegrator': O(['exphotonmap', 'sppm']) },
 		'directphotons':					{ 'surfaceintegrator': 'exphotonmap' },
 		'causticphotons':					{ 'surfaceintegrator': 'exphotonmap' },
@@ -276,7 +279,6 @@ class luxrender_integrator(declarative_property_group):
 		'directlightsampling':				{ 'surfaceintegrator': 'path' },
 		
 		# sppm
-		'maxeyedepth':						{ 'surfaceintegrator': 'sppm' },
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
 		'startk':							{ 'surfaceintegrator': 'sppm' },
 
@@ -786,9 +788,9 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'RR strategy',
 			'default': 'efficiency',
 			'items': [
-				('efficiency', 'efficiency', 'efficiency'),
-				('probability', 'probability', 'probability'),
-				('none', 'none', 'none'),
+				('efficiency', 'Efficiency', 'efficiency'),
+				('probability', 'Probability', 'probability'),
+				('none', 'None', 'none'),
 			],
 			'save_in_preset': True
 		},
@@ -990,7 +992,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_float('glossyrefractreject_threshold', self.glossyrefractreject_threshold)
 		
 		if self.surfaceintegrator == 'exphotonmap':
-			params.add_integer('maxdepth', self.maxdepth) \
+			params.add_integer('maxdepth', self.maxeyedepth) \
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
 				  .add_integer('directphotons', self.directphotons) \
 				  .add_integer('causticphotons', self.causticphotons) \
@@ -1004,6 +1006,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_float('gatherangle', self.gatherangle) \
 				  .add_string('rrstrategy', self.rrstrategy) \
 				  .add_float('rrcontinueprob', self.rrcontinueprob)
+				  #Export maxeyedepth as maxdepth, since that is actually the switch the scene file accepts
 			if self.advanced:
 				params.add_float('distancethreshold', self.distancethreshold) \
 					  .add_string('photonmapsfile', self.photonmapsfile) \
