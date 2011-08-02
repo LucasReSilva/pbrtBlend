@@ -1186,7 +1186,10 @@ class luxrender_mat_glossy(declarative_property_group):
 			glossy_params.update( TF_uroughness.get_paramset(self) )
 			glossy_params.update( TF_vroughness.get_paramset(self) )
 		else:
-			#roughness isn't a real parameter, so we make it into a matching pair of u and v roughness settings
+			# export the roughness param twice, under different aliased names
+			self.roughness = 'uroughness'
+			glossy_params.update( TF_roughness.get_paramset(self) )
+			self.roughness = 'vroughness'
 			glossy_params.update( TF_roughness.get_paramset(self) )
 			
 		return glossy_params
