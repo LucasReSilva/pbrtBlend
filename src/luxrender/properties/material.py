@@ -1025,6 +1025,9 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TF_index.controls + \
 		TC_Kr.controls + \
 		TC_Kt.controls + \
+	[
+			'anisotropic',
+	] + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
@@ -1037,12 +1040,23 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TF_vroughness.visibility
 	)
 	
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	
 	properties = [
 		{
 			'type': 'ef_callback',
 			'attr': 'draw_ior_menu',
 			'method': 'draw_ior_menu',
 		},
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': False,
+			'save_in_preset': True
+		}
 		
 	] + \
 		TF_cauchyb.properties + \
@@ -1051,6 +1065,18 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TC_Kt.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+		
+	def link_iso_roughness(self, context):
+		if not self.anisotropic:
+			self.vroughness_floatvalue = self.uroughness_floatvalue
+			self.vroughness_usefloattexture = self.uroughness_usefloattexture
+			self.vroughness_floattexturename = self.uroughness_floattexturename
+			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+	
+	# 'patch' the uroughness parameter with an update callback
+	for prop in properties:
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = link_iso_roughness
 	
 	def get_paramset(self, material):
 		roughglass_params = ParamSet()
@@ -1139,7 +1165,7 @@ class luxrender_mat_glossy(declarative_property_group):
 			'attr': 'anisotropic',
 			'name': 'Anisotropic roughness',
 			'description': 'Enable anisotropic roughness',
-			'default': True,
+			'default': False,
 			'save_in_preset': True
 		},
 		{
@@ -1229,6 +1255,9 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
+	[
+			'anisotropic',
+	] + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
@@ -1244,6 +1273,9 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TF_uroughness.visibility,
 		TF_vroughness.visibility
 	)
+	
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
 	
 	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
@@ -1261,7 +1293,15 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 			'description': 'Use IOR/Reflective index input',
 			'default': False,
 			'save_in_preset': True
-		}
+		},
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': False,
+			'save_in_preset': True
+		},
 	] + \
 		TC_Kd.properties + \
 		TF_d.properties + \
@@ -1270,6 +1310,18 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+		
+	def link_iso_roughness(self, context):
+		if not self.anisotropic:
+			self.vroughness_floatvalue = self.uroughness_floatvalue
+			self.vroughness_usefloattexture = self.uroughness_usefloattexture
+			self.vroughness_floattexturename = self.uroughness_floattexturename
+			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+	
+	# 'patch' the uroughness parameter with an update callback
+	for prop in properties:
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = link_iso_roughness
 	
 	def get_paramset(self, material):
 		glossy_lossy_params = ParamSet()
@@ -1405,6 +1457,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
+	[
+			'anisotropic',
+	] + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls + \
 	[
@@ -1418,6 +1473,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 	] + \
 		TF_backface_index.controls + \
 		TC_backface_Ks.controls + \
+	[
+		'bf_anisotropic'
+	] + \
 		TF_backface_uroughness.controls + \
 		TF_backface_vroughness.controls
 	
@@ -1441,9 +1499,14 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		{
 			'draw_ior_menu':			{ 'useior': True },
 			'backface_multibounce':	{ 'two_sided': True },
-			'bf_useior': 			{ 'two_sided': True }
+			'bf_useior': 			{ 'two_sided': True },
+			'bf_anisotropic': 		{ 'two_sided': True }
 		}
 	)
+	
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_backface_vroughness, { 'bf_anisotropic': True })
 	
 	visibility = texture_append_visibility(visibility, TC_Ks,					{ 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index,				{ 'useior': True  })
@@ -1466,6 +1529,14 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'attr': 'multibounce',
 			'name': 'Multibounce',
 			'description': 'Enable surface layer multi-bounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -1497,7 +1568,15 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'type': 'bool',
 			'attr': 'bf_useior',
 			'name': 'Backface use IOR',
-			'description': 'Use IOR/Reflective index input',
+			'description': 'Use IOR/Reflective index input for backface',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'bf_anisotropic',
+			'name': 'Backface anisotropic roughness',
+			'description': 'Enable anisotropic roughness for backface',
 			'default': False,
 			'save_in_preset': True
 		}
@@ -1516,6 +1595,32 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_backface_Ks.properties + \
 		TF_backface_uroughness.properties + \
 		TF_backface_vroughness.properties
+		
+	def link_iso_roughness(self, context):
+		if not self.anisotropic:
+			self.vroughness_floatvalue = self.uroughness_floatvalue
+			self.vroughness_usefloattexture = self.uroughness_usefloattexture
+			self.vroughness_floattexturename = self.uroughness_floattexturename
+			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+	
+	# 'patch' the uroughness parameter with an update callback
+	for prop in properties:
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = link_iso_roughness
+
+	#FIX ME!	
+	#Do it all again for the backface:
+	def link_iso_bf_roughness(self, context):
+		if not self.bf_anisotropic:
+			self.bf_vroughness_floatvalue = self.bf_uroughness_floatvalue
+			self.bf_vroughness_usefloattexture = self.bf_uroughness_usefloattexture
+			self.bf_vroughness_floattexturename = self.bf_uroughness_floattexturename
+			self.bf_vroughness_multiplyfloat = self.bf_uroughness_multiplyfloat
+	
+	# 'patch' the backface uroughness parameter with an update callback
+	for prop in properties:
+		if prop['attr'].startswith('bf_uroughness'):
+			prop['update'] = link_iso_bf_roughness
 		
 	def get_paramset(self, material):
 		glossytranslucent_params = ParamSet()
@@ -1593,6 +1698,7 @@ class luxrender_mat_metal(declarative_property_group):
 	controls = [
 		'name',
 		'filename',
+		'anisotropic',
 	] + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
@@ -1603,6 +1709,9 @@ class luxrender_mat_metal(declarative_property_group):
 		TF_uroughness.visibility,
 		TF_vroughness.visibility
 	)
+	
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
 	
 	properties = [
 		{
@@ -1626,9 +1735,29 @@ class luxrender_mat_metal(declarative_property_group):
 			'name': 'NK file',
 			'save_in_preset': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': False,
+			'save_in_preset': True
+		}
 	] + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+		
+	def link_iso_roughness(self, context):
+		if not self.anisotropic:
+			self.vroughness_floatvalue = self.uroughness_floatvalue
+			self.vroughness_usefloattexture = self.uroughness_usefloattexture
+			self.vroughness_floattexturename = self.uroughness_floattexturename
+			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+	
+	# 'patch' the uroughness parameter with an update callback
+	for prop in properties:
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = link_iso_roughness
 	
 	def get_paramset(self, material):
 		metal_params = ParamSet()
@@ -1702,6 +1831,9 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TF_filmindex.controls + \
 		TC_Kr.controls + \
 		TC_Ks.controls + \
+	[
+			'anisotropic',
+	] + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
@@ -1714,7 +1846,18 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TF_vroughness.visibility
 	)
 	
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	
 	properties = [
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': False,
+			'save_in_preset': True
+		}
 	] + \
 		TF_film.properties + \
 		TF_filmindex.properties + \
@@ -1722,6 +1865,18 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TC_Ks.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties
+		
+	def link_iso_roughness(self, context):
+		if not self.anisotropic:
+			self.vroughness_floatvalue = self.uroughness_floatvalue
+			self.vroughness_usefloattexture = self.uroughness_usefloattexture
+			self.vroughness_floattexturename = self.uroughness_floattexturename
+			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+	
+	# 'patch' the uroughness parameter with an update callback
+	for prop in properties:
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = link_iso_roughness
 	
 	def get_paramset(self, material):
 		shinymetal_params = ParamSet()
