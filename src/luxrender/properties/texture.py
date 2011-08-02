@@ -168,11 +168,14 @@ def check_texture_variant(self, context, attr, expected_variant):
 		lt = bpy.data.textures[tn].luxrender_texture
 		#print('CHECK TEXTURE: lt          %s' % lt)
 		
-		lst = getattr(lt, 'luxrender_tex_%s'%lt.type)
-		#print('CHECK TEXTURE: lst         %s' % lst)
-		#print('CHECK TEXTURE: lst.variant %s' % lst.variant)
-		
-		valid = lst.variant == expected_variant
+		if lt.type == 'BLENDER':
+			valid = 'float' == expected_variant
+		else:
+			lst = getattr(lt, 'luxrender_tex_%s'%lt.type)
+			#print('CHECK TEXTURE: lst         %s' % lst)
+			#print('CHECK TEXTURE: lst.variant %s' % lst.variant)
+			
+			valid = lst.variant == expected_variant
 	#else:
 	#	print('CHECK TEXTURE: Not a valid texture')
 	
