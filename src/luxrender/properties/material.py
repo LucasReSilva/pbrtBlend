@@ -109,7 +109,6 @@ TF_R1					= FloatTextureParameter('R1', 'R1',									add_float_value=True, min=
 TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.250 )
 TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.005 )
 TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
-TF_roughness			= FloatTextureParameter('roughness', 'Roughness',					add_float_value=True, min=0.00001, max=0.8, default=0.075 )
 TF_uroughness			= FloatTextureParameter('uroughness', ' U-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
 TF_vroughness			= FloatTextureParameter('vroughness', 'V-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
 TF_backface_d			= FloatTextureParameter('bf_d', 'Backface absorption depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
@@ -1093,7 +1092,6 @@ class luxrender_mat_glossy(declarative_property_group):
 	[
 			'anisotropic',
 	] + \
-		TF_roughness.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
@@ -1107,7 +1105,6 @@ class luxrender_mat_glossy(declarative_property_group):
 		TC_Ka.visibility,
 		TC_Kd.visibility,
 		TC_Ks.visibility,
-		TF_roughness.visibility,
 		TF_uroughness.visibility,
 		TF_vroughness.visibility,
 		{
@@ -1116,10 +1113,10 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_alpha.visibility
 	)
 	
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	
 	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
-	visibility = texture_append_visibility(visibility, TF_roughness, { 'anisotropic': False })
-	visibility = texture_append_visibility(visibility, TF_uroughness, { 'anisotropic': True })
-	visibility = texture_append_visibility(visibility, TF_vroughness, { 'anisotropic': True })
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
 	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
 	
@@ -1159,10 +1156,21 @@ class luxrender_mat_glossy(declarative_property_group):
 		TC_Ka.properties + \
 		TC_Kd.properties + \
 		TC_Ks.properties + \
-		TF_roughness.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties + \
 		TF_alpha.properties
+	
+	def link_iso_roughness(self, context):
+		if not self.anisotropic:
+			self.vroughness_floatvalue = self.uroughness_floatvalue
+			self.vroughness_usefloattexture = self.uroughness_usefloattexture
+			self.vroughness_floattexturename = self.uroughness_floattexturename
+			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+	
+	# 'patch' the uroughness parameter with an update callback
+	for prop in properties:
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = link_iso_roughness
 	
 	def get_paramset(self, material):
 		glossy_params = ParamSet()
@@ -1182,16 +1190,9 @@ class luxrender_mat_glossy(declarative_property_group):
 			glossy_params.update( TC_Ks.get_paramset(self) )
 			glossy_params.add_float('index', 0.0)
 		
-		if self.anisotropic:
-			glossy_params.update( TF_uroughness.get_paramset(self) )
-			glossy_params.update( TF_vroughness.get_paramset(self) )
-		else:
-			# export the roughness param twice, under different aliased names
-			self.roughness = 'uroughness'
-			glossy_params.update( TF_roughness.get_paramset(self) )
-			self.roughness = 'vroughness'
-			glossy_params.update( TF_roughness.get_paramset(self) )
-			
+		glossy_params.update( TF_uroughness.get_paramset(self) )
+		glossy_params.update( TF_vroughness.get_paramset(self) )
+		
 		return glossy_params
 	
 	def load_paramset(self, ps):
