@@ -96,10 +96,10 @@ def texture_append_visibility(vis_main, textureparam_object, vis_append):
 
 # Float Textures
 TF_bumpmap				= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, min=-1.0, max=1.0, default=0.0, precision=6, multiply_float=True, ignore_unassigned=True, sub_type='DISTANCE', unit='LENGTH' )
-TF_amount				= FloatTextureParameter('amount', 'Mix Amount',						add_float_value=True, min=0.0, default=0.5, max=1.0 )
+TF_amount				= FloatTextureParameter('amount', 'Mix amount',						add_float_value=True, min=0.0, default=0.5, max=1.0 )
 TF_cauchyb				= FloatTextureParameter('cauchyb', 'Cauchy B',						add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
-TF_d					= FloatTextureParameter('d', 'Absorption Depth',					add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
-TF_film					= FloatTextureParameter('film', 'Thin Film Thickness (nm)',			add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
+TF_d					= FloatTextureParameter('d', 'Absorption depth',					add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
+TF_film					= FloatTextureParameter('film', 'Thin film thickness (nm)',			add_float_value=True, min=0.0, default=0.0, max=1500.0 ) # default 0.0 for OFF
 TF_filmindex			= FloatTextureParameter('filmindex', 'Film IOR',					add_float_value=True, default=1.3333, min=1.0, max=6.0 ) # default 1.3333 for a coating of a water-based solution
 TF_index				= FloatTextureParameter('index', 'IOR',								add_float_value=True, min=0.0, max=25.0, default=1.520) #default of something other than 1.0 so glass and roughglass render propery with defaults
 TF_M1					= FloatTextureParameter('M1', 'M1',									add_float_value=True, default=0.300, min=0.0001, max=1.0 ) #carpaint defaults set for a basic gray clearcoat paint job, as a "setting suggestion"
@@ -109,12 +109,13 @@ TF_R1					= FloatTextureParameter('R1', 'R1',									add_float_value=True, min=
 TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.250 )
 TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.005 )
 TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
-TF_uroughness			= FloatTextureParameter('uroughness', 'uroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.075 )
-TF_vroughness			= FloatTextureParameter('vroughness', 'vroughness',					add_float_value=True, min=0.00001, max=1.0, default=0.075 )
-TF_backface_d			= FloatTextureParameter('bf_d', 'Backface Absorption Depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
+TF_roughness			= FloatTextureParameter('roughness', 'Roughness',					add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+TF_uroughness			= FloatTextureParameter('uroughness', ' U-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+TF_vroughness			= FloatTextureParameter('vroughness', 'V-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+TF_backface_d			= FloatTextureParameter('bf_d', 'Backface absorption depth',		real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=15.0 ) # default 0.0 for OFF
 TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
-TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface uroughness',		real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 ) #backface roughness is high than front by default, will usually be for backs of leaves or cloth
-TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface vroughness',		real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 )
+TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface U-Roughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 ) #backface roughness is high than front by default, will usually be for backs of leaves or cloth
+TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface V-Roughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 )
 TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 
 # Color Textures
@@ -1089,6 +1090,10 @@ class luxrender_mat_glossy(declarative_property_group):
 	] + \
 		TF_index.controls + \
 		TC_Ks.controls + \
+	[
+			'anisotropic',
+	] + \
+		TF_roughness.controls + \
 		TF_uroughness.controls + \
 		TF_vroughness.controls
 	
@@ -1102,6 +1107,7 @@ class luxrender_mat_glossy(declarative_property_group):
 		TC_Ka.visibility,
 		TC_Kd.visibility,
 		TC_Ks.visibility,
+		TF_roughness.visibility,
 		TF_uroughness.visibility,
 		TF_vroughness.visibility,
 		{
@@ -1111,6 +1117,9 @@ class luxrender_mat_glossy(declarative_property_group):
 	)
 	
 	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
+	visibility = texture_append_visibility(visibility, TF_roughness, { 'anisotropic': False })
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'anisotropic': True })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'anisotropic': True })
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
 	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
 	
@@ -1130,6 +1139,14 @@ class luxrender_mat_glossy(declarative_property_group):
 		},
 		{
 			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
 			'attr': 'useior',
 			'name': 'Use IOR',
 			'description': 'Use IOR/Reflective index input',
@@ -1142,6 +1159,7 @@ class luxrender_mat_glossy(declarative_property_group):
 		TC_Ka.properties + \
 		TC_Kd.properties + \
 		TC_Ks.properties + \
+		TF_roughness.properties + \
 		TF_uroughness.properties + \
 		TF_vroughness.properties + \
 		TF_alpha.properties
@@ -1163,10 +1181,14 @@ class luxrender_mat_glossy(declarative_property_group):
 		else:
 			glossy_params.update( TC_Ks.get_paramset(self) )
 			glossy_params.add_float('index', 0.0)
-			
-		glossy_params.update( TF_uroughness.get_paramset(self) )
-		glossy_params.update( TF_vroughness.get_paramset(self) )
 		
+		if self.anisotropic:
+			glossy_params.update( TF_uroughness.get_paramset(self) )
+			glossy_params.update( TF_vroughness.get_paramset(self) )
+		else:
+			#roughness isn't a real parameter, so we make it into a matching pair of u and v roughness settings
+			glossy_params.update( TF_roughness.get_paramset(self) )
+			
 		return glossy_params
 	
 	def load_paramset(self, ps):
