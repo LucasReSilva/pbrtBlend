@@ -229,8 +229,8 @@ class luxrender_volume_data(declarative_property_group):
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
-			'max': 10000.0,
-			'soft_max': 10000.0,
+			'max': 100000.0,
+			'soft_max': 100000.0,
 			'precision': 6,
 			'save_in_preset': True
 		},
