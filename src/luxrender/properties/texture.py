@@ -170,6 +170,8 @@ def check_texture_variant(self, context, attr, expected_variant):
 		
 		if lt.type == 'BLENDER':
 			valid = 'float' == expected_variant
+			if bpy.data.textures[tn].type == 'IMAGE':
+				valid = True
 		else:
 			lst = getattr(lt, 'luxrender_tex_%s'%lt.type)
 			#print('CHECK TEXTURE: lst         %s' % lst)
