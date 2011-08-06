@@ -185,9 +185,9 @@ class luxrender_integrator(declarative_property_group):
 		#sppm
 		'photonperpass',
 		'startk',
+		'alpha',
 		#sppm advanced
 		'startradius',
-		'alpha',
 		'glossythreshold',
 		'lookupaccel',
 		'pixelsampler',
@@ -281,10 +281,10 @@ class luxrender_integrator(declarative_property_group):
 		# sppm
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
 		'startk':							{ 'surfaceintegrator': 'sppm' },
+		'alpha':							{ 'surfaceintegrator': 'sppm' },
 
 		# sppm advanced
 		'startradius':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
-		'alpha':							{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
@@ -301,7 +301,7 @@ class luxrender_integrator(declarative_property_group):
 			'description': 'Surface Integrator',
 			'default': 'bidirectional',
 			'items': [
-				('bidirectional', 'Bi-Directional', 'bidirectional'),
+				('bidirectional', 'Bidirectional', 'bidirectional'),
 				('path', 'Path', 'path'),
 				('directlighting', 'Direct Lighting', 'directlighting'),
 				('distributedpath', 'Distributed Path', 'distributedpath'),
@@ -838,7 +838,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'startk',
 			'name': 'Starting K',
 			'description': 'Adjust starting photon radius to get this many photons. Higher values clear faster but are less accurate. 0=use initial radius.',
-			'default': 15,
+			'default': 30,
 			'min': 0,
 			'save_in_preset': True
 		},
@@ -937,6 +937,8 @@ class luxrender_integrator(declarative_property_group):
 			if engine_properties.renderer != 'sppm':
 				LuxLog('SPPM surface integrator only works with SPPM renderer, select it under "Renderer" in LuxRender Engine Configuration.')
 				raise Exception('Incompatible render settings')
+				
+		#Safety checks for settings end here
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \
@@ -954,10 +956,10 @@ class luxrender_integrator(declarative_property_group):
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
 				  .add_integer('photonperpass', self.photonperpass) \
 				  .add_integer('startk', self.startk) \
+				  .add_float('alpha', self.alpha) \
 				  .add_bool('includeenvironment', self.includeenvironment)
 			if self.advanced:
 				params.add_float('startradius', self.startradius) \
-					  .add_float('alpha', self.alpha) \
   					  .add_float('glossythreshold', self.glossythreshold) \
 					  .add_string('lookupaccel', self.lookupaccel) \
 					  .add_string('pixelsampler', self.pixelsampler) \
