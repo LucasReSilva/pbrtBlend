@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
@@ -162,14 +162,14 @@ class luxrender_integrator(declarative_property_group):
 		'radiancephotons',
 		'nphotonsused',
 		'maxphotondist',
+		'renderingmode',
 		'finalgather',
 		'finalgathersamples',
 		'gatherangle',
-		'renderingmode',
+		'distancethreshold',
 		'rrstrategy',
 		'rrcontinueprob',
 		# epm advanced
-		'distancethreshold',
 		'photonmapsfile',
 		'dbg_enabledirect',
 		'dbg_enableradiancemap',
@@ -245,7 +245,7 @@ class luxrender_integrator(declarative_property_group):
 		'glossyrefractreject':				{ 'surfaceintegrator': 'distributedpath' },
 		'glossyrefractreject_threshold':	{ 'glossyrefractreject': True, 'surfaceintegrator': 'distributedpath' },
 		
-		# epm
+		# expm
 		'maxeyedepth':						{ 'surfaceintegrator': O(['exphotonmap', 'sppm']) },
 		'maxphotondepth':					{ 'surfaceintegrator': O(['exphotonmap', 'sppm']) },
 		'directphotons':					{ 'surfaceintegrator': 'exphotonmap' },
@@ -254,14 +254,14 @@ class luxrender_integrator(declarative_property_group):
 		'radiancephotons':					{ 'surfaceintegrator': 'exphotonmap' },
 		'nphotonsused':						{ 'surfaceintegrator': 'exphotonmap' },
 		'maxphotondist':					{ 'surfaceintegrator': 'exphotonmap' },
-		'finalgather':						{ 'surfaceintegrator': 'exphotonmap' },
-		'finalgathersamples':				{ 'finalgather': True, 'surfaceintegrator': 'exphotonmap' },
-		'gatherangle':						{ 'finalgather': True, 'surfaceintegrator': 'exphotonmap' },
 		'renderingmode':					{ 'surfaceintegrator': 'exphotonmap' },
+		'finalgather':						{ 'renderingmode': 'directlighting', 'surfaceintegrator': 'exphotonmap' },
+		'finalgathersamples':				{ 'finalgather': True, 'renderingmode': 'directlighting', 'surfaceintegrator': 'exphotonmap' },
+		'gatherangle':						{ 'finalgather': True, 'renderingmode': 'directlighting', 'surfaceintegrator': 'exphotonmap' },
 		'rrstrategy':						{ 'surfaceintegrator': O(['exphotonmap', 'path']) },
 		'rrcontinueprob':					{ 'rrstrategy': 'probability', 'surfaceintegrator': O(['exphotonmap', 'path']) },
-		# epm advanced
-		'distancethreshold':				{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		'distancethreshold':				{ 'renderingmode': 'path', 'surfaceintegrator': 'exphotonmap' },
+		# expm advanced
 		'photonmapsfile':					{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
 		'dbg_enabledirect':					{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
 		'dbg_enableradiancemap':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
@@ -282,7 +282,6 @@ class luxrender_integrator(declarative_property_group):
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
 		'startk':							{ 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'surfaceintegrator': 'sppm' },
-
 		# sppm advanced
 		'startradius':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
@@ -634,6 +633,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'directphotons',
 			'name': 'Direct photons',
+			'description': 'Target number of direct light photons',
 			'default': 1000000,
 			'save_in_preset': True
 		},
@@ -641,6 +641,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'causticphotons',
 			'name': 'Caustic photons',
+			'description': 'Target number of caustic photons',
 			'default': 20000,
 			'save_in_preset': True
 		},
@@ -648,6 +649,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'indirectphotons',
 			'name': 'Indirect photons',
+			'description': 'Target number of soft-indirect photons',
 			'default': 200000,
 			'save_in_preset': True
 		},
@@ -655,6 +657,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'radiancephotons',
 			'name': 'Radiance photons',
+			'description': 'Target number of final gather photons',
 			'default': 200000,
 			'save_in_preset': True
 		},
@@ -683,6 +686,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'finalgathersamples',
 			'name': 'Final gather samples',
+			'description': 'Number of final gather samples to shoot (per ray, not per pixel)',
 			'default': 32,
 			'save_in_preset': True
 		},
@@ -690,6 +694,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'float',
 			'attr': 'gatherangle',
 			'name': 'Gather angle',
+			'description': 'Reject final gather rays beyond this angle. Adjusts final gather accuracy',
 			'default': 10.0,
 			'save_in_preset': True
 		},
@@ -708,7 +713,8 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'float',
 			'attr': 'distancethreshold',
 			'name': 'Distance threshold',
-			'default': 0.75,
+			'description': 'Fallbacks to path tracing when rendering corners in order to avoid photon leaks', #<--- that's what the wiki says it does.
+			'default': 0.5, #same as maxphotondist, this is how core defaults according to wiki
 			'save_in_preset': True
 		},
 		{
