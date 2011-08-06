@@ -149,6 +149,7 @@ class luxrender_engine(declarative_property_group):
 		'partial_ply',
 		['render','monitor_external'],
 		['threads_auto', 'threads'],
+		'fixed_seed',
 		]
 	
 	#Append log verbosity, for some reason it only works when set like this.
@@ -387,7 +388,15 @@ class luxrender_engine(declarative_property_group):
 				('very-quiet', 'Very quiet', 'very-quiet'),
 			],
 			'save_in_preset': True
-		}
+		},
+		{
+			'type': 'bool',
+			'attr': 'fixed_seed',
+			'name': 'Use fixed seeds',
+			'description': 'Use fixed seeds for threads. Helps with keeping noise even for animations.',
+			'default': False,
+			'save_in_preset': True
+		},
 	]
 	
 	def allow_file_embed(self):
