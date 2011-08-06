@@ -24,6 +24,7 @@
 
 import bpy
 bpy.context.scene.luxrender_engine.renderer = 'sppm'
+bpy.context.scene.luxrender_engine.fixed_seed = False
 bpy.context.scene.luxrender_engine.mesh_type = 'binary_ply'
 bpy.context.scene.luxrender_engine.log_verbosity = 'default'
 bpy.context.scene.luxrender_sampler.sampler = 'lowdiscrepancy'

@@ -1,6 +1,6 @@
 import bpy
 bpy.context.scene.luxrender_engine.advanced = False
-bpy.context.scene.luxrender_engine.export_type = 'INT'
+bpy.context.scene.luxrender_engine.export_type = 'EXT'
 bpy.context.scene.luxrender_engine.monitor_external = True
 bpy.context.scene.luxrender_engine.partial_ply = False
 bpy.context.scene.luxrender_engine.renderer = 'sppm'
@@ -10,7 +10,7 @@ bpy.context.scene.luxrender_engine.statebuffercount = 1
 bpy.context.scene.luxrender_engine.workgroupsize = 0
 bpy.context.scene.luxrender_engine.deviceselection = ''
 bpy.context.scene.luxrender_engine.usegpus = True
-bpy.context.scene.luxrender_engine.binary_name = 'luxrender'
+bpy.context.scene.luxrender_engine.binary_name = 'luxconsole'
 bpy.context.scene.luxrender_engine.write_files = False
 bpy.context.scene.luxrender_engine.write_lxv = True
 bpy.context.scene.luxrender_engine.embed_filedata = False
@@ -19,7 +19,7 @@ bpy.context.scene.luxrender_engine.log_verbosity = 'default'
 bpy.context.scene.luxrender_engine.fixed_seed = True
 bpy.context.scene.luxrender_sampler.sampler = 'metropolis'
 bpy.context.scene.luxrender_sampler.advanced = False
-bpy.context.scene.luxrender_sampler.haltspp = 150
+bpy.context.scene.luxrender_sampler.haltspp = 200
 bpy.context.scene.luxrender_sampler.halttime = 0
 bpy.context.scene.luxrender_sampler.largemutationprob = 0.4000000059604645
 bpy.context.scene.luxrender_sampler.maxconsecrejects = 512

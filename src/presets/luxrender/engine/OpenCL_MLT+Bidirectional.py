@@ -23,6 +23,7 @@
 #
 import bpy
 bpy.context.scene.luxrender_engine.renderer = 'hybrid'
+bpy.context.scene.luxrender_engine.fixed_seed = False
 bpy.context.scene.luxrender_engine.opencl_platform_index = 0
 bpy.context.scene.luxrender_engine.raybuffersize = 8192
 bpy.context.scene.luxrender_engine.statebuffercount = 1
