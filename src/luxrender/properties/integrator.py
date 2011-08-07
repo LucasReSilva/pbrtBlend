@@ -883,7 +883,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'enum',
 			'attr': 'pixelsampler',
 			'name': 'Pixel sampler',
-			'default': 'vegas',
+			'default': 'hilbert',
 			'description': 'Sampling pattern used during the eye pass',
 			'items': [
 				('vegas', 'Vegas', 'vegas'),
