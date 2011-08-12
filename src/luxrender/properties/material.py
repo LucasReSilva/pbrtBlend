@@ -763,6 +763,26 @@ class luxrender_transparency(declarative_property_group):
 			return None, None
 		
 		return alpha_type, alpha_amount
+		
+def update_roughness(self, context):
+	self.uroughness_floatvalue = (2.0/(self.uexponent_floatvalue+2.0))**0.5
+	self.uroughness_usefloattexture = self.uexponent_usefloattexture
+	self.uroughness_floattexturename = self.uexponent_floattexturename
+	self.uroughness_multiplyfloat = self.uexponent_multiplyfloat
+		
+	self.link_iso_roughness(context)
+	
+def link_iso_roughness(self, context):
+	if not self.anisotropic:
+		self.vroughness_floatvalue = self.uroughness_floatvalue
+		self.vroughness_usefloattexture = self.uroughness_usefloattexture
+		self.vroughness_floattexturename = self.uroughness_floattexturename
+		self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+		
+		self.vexponent_floatvalue = self.uexponent_floatvalue
+		self.vexponent_usefloattexture = self.uexponent_usefloattexture
+		self.vexponent_floattexturename = self.uexponent_floattexturename
+		self.vexponent_multiplyfloat = self.uexponent_multiplyfloat
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
@@ -1206,30 +1226,12 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_vroughness.get_properties() + \
 		TF_vexponent.get_properties() + \
 		TF_alpha.get_properties()
-	
-	def update_roughness(self, context):
-		self.uroughness_floatvalue = (2.0/(self.uexponent_floatvalue+2.0))**0.5
-		self.uroughness_usefloattexture = self.uexponent_usefloattexture
-		self.uroughness_floattexturename = self.uexponent_floattexturename
-		self.uroughness_multiplyfloat = self.uexponent_multiplyfloat
-		
-		self.link_iso_roughness(context)
-	
-	def link_iso_roughness(self, context):
-		if not self.anisotropic:
-			self.vroughness_floatvalue = self.uroughness_floatvalue
-			self.vroughness_usefloattexture = self.uroughness_usefloattexture
-			self.vroughness_floattexturename = self.uroughness_floattexturename
-			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
-			
-			self.vexponent_floatvalue = self.uexponent_floatvalue
-			self.vexponent_usefloattexture = self.uexponent_usefloattexture
-			self.vexponent_floattexturename = self.uexponent_floattexturename
-			self.vexponent_multiplyfloat = self.uexponent_multiplyfloat
 			
 	for prop in properties:
 		if prop['attr'].startswith('uexponent'):
 			prop['update'] = update_roughness
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = link_iso_roughness
 	
 	def get_paramset(self, material):
 		glossy_params = ParamSet()
