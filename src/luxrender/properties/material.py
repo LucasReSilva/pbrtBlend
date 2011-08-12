@@ -763,26 +763,67 @@ class luxrender_transparency(declarative_property_group):
 			return None, None
 		
 		return alpha_type, alpha_amount
-		
-def update_roughness(self, context):
-	self.uroughness_floatvalue = (2.0/(self.uexponent_floatvalue+2.0))**0.5
-	self.uroughness_usefloattexture = self.uexponent_usefloattexture
-	self.uroughness_floattexturename = self.uexponent_floattexturename
-	self.uroughness_multiplyfloat = self.uexponent_multiplyfloat
-		
-	self.link_iso_roughness(context)
-	
-def link_iso_roughness(self, context):
-	if not self.anisotropic:
+
+def link_anisotropy(self, context, chan='u'):
+	if not self.anisotropic and not self.use_exponent:
+		if chan=='v': return
 		self.vroughness_floatvalue = self.uroughness_floatvalue
 		self.vroughness_usefloattexture = self.uroughness_usefloattexture
 		self.vroughness_floattexturename = self.uroughness_floattexturename
 		self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
-		
+	
+	if not self.anisotropic and self.use_exponent:
+		if chan=='v': return
 		self.vexponent_floatvalue = self.uexponent_floatvalue
 		self.vexponent_usefloattexture = self.uexponent_usefloattexture
 		self.vexponent_floattexturename = self.uexponent_floattexturename
 		self.vexponent_multiplyfloat = self.uexponent_multiplyfloat
+
+def gen_CB_update_exponent(chan='u'):
+	def update_exponent(self, context):
+		if not self.use_exponent:
+			setattr(self,
+				'%sexponent_floatvalue'%chan,
+				(2.0/(getattr(self, '%sroughness_floatvalue'%chan)** 2)-2.0)
+			)
+			setattr(self,
+				'%sexponent_usefloattexture'%chan,
+				getattr(self, '%sroughness_usefloattexture'%chan)
+			)
+			setattr(self,
+				'%sexponent_floattexturename'%chan,
+				getattr(self, '%sroughness_floattexturename'%chan)
+			)
+			setattr(self,
+				'%sexponent_multiplyfloat'%chan,
+				getattr(self, '%sroughness_multiplyfloat'%chan)
+			)
+		
+			link_anisotropy(self, context, chan)
+	return update_exponent
+
+def gen_CB_update_roughness(chan='u'):
+	def update_roughness(self, context):
+		if self.use_exponent:
+			setattr(self,
+				'%sroughness_floatvalue'%chan,
+				(2.0/(getattr(self, '%sexponent_floatvalue'%chan)+2.0))**0.5
+			)
+			setattr(self,
+				'%sroughness_usefloattexture'%chan,
+				getattr(self, '%sexponent_usefloattexture'%chan)
+			)
+			setattr(self,
+				'%sroughness_floattexturename'%chan,
+				getattr(self, '%sexponent_floattexturename'%chan)
+			)
+			setattr(self,
+				'%sroughness_multiplyfloat'%chan,
+				getattr(self, '%sexponent_multiplyfloat'%chan)
+			)
+		
+			link_anisotropy(self, context, chan)
+	return update_roughness
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
@@ -1087,18 +1128,11 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TC_Kt.get_properties() + \
 		TF_uroughness.get_properties() + \
 		TF_vroughness.get_properties()
-		
-	def link_iso_roughness(self, context):
-		if not self.anisotropic:
-			self.vroughness_floatvalue = self.uroughness_floatvalue
-			self.vroughness_usefloattexture = self.uroughness_usefloattexture
-			self.vroughness_floattexturename = self.uroughness_floattexturename
-			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
 	
 	# 'patch' the uroughness parameter with an update callback
-	for prop in properties:
-		if prop['attr'].startswith('uroughness'):
-			prop['update'] = link_iso_roughness
+	#for prop in properties:
+	#	if prop['attr'].startswith('uroughness'):
+	#		prop['update'] = link_anisotropy
 	
 	def get_paramset(self, material):
 		roughglass_params = ParamSet()
@@ -1138,7 +1172,7 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_index.controls + \
 		TC_Ks.controls + \
 	[
-			['anisotropic', 'exponent'],
+			['anisotropic', 'use_exponent'],
 	] + \
 		TF_uroughness.controls + \
 		TF_uexponent.controls + \
@@ -1167,12 +1201,13 @@ class luxrender_mat_glossy(declarative_property_group):
 	
 	enabled = {}
 	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
-	enabled = texture_append_visibility(enabled, TF_vexponent, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
 	
-#	visibility = texture_append_visibility(visibility, TF_uroughness, { 'exponent': False })
-#	visibility = texture_append_visibility(visibility, TF_vroughness, { 'exponent': False })	
-#	visibility = texture_append_visibility(visibility, TF_uexponent, { 'exponent': True })
-#	visibility = texture_append_visibility(visibility, TF_vexponent, { 'exponent': True })
+	enabled = texture_append_visibility(enabled, TF_uroughness, { 'use_exponent': False })
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'use_exponent': False })
+	enabled = texture_append_visibility(enabled, TF_uexponent,  { 'use_exponent': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'use_exponent': True })
+
 	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
 	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
@@ -1201,7 +1236,7 @@ class luxrender_mat_glossy(declarative_property_group):
 		},
 		{
 			'type': 'bool',
-			'attr': 'exponent',
+			'attr': 'use_exponent',
 			'name': 'Use exponent',
 			'description': 'Display roughness as a specular exponent',
 			'default': False,
@@ -1229,9 +1264,14 @@ class luxrender_mat_glossy(declarative_property_group):
 			
 	for prop in properties:
 		if prop['attr'].startswith('uexponent'):
-			prop['update'] = update_roughness
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
 		if prop['attr'].startswith('uroughness'):
-			prop['update'] = link_iso_roughness
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
 	
 	def get_paramset(self, material):
 		glossy_params = ParamSet()
@@ -1345,18 +1385,11 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TC_Ks.get_properties() + \
 		TF_uroughness.get_properties() + \
 		TF_vroughness.get_properties()
-		
-	def link_iso_roughness(self, context):
-		if not self.anisotropic:
-			self.vroughness_floatvalue = self.uroughness_floatvalue
-			self.vroughness_usefloattexture = self.uroughness_usefloattexture
-			self.vroughness_floattexturename = self.uroughness_floattexturename
-			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
 	
 	# 'patch' the uroughness parameter with an update callback
-	for prop in properties:
-		if prop['attr'].startswith('uroughness'):
-			prop['update'] = link_iso_roughness
+	#for prop in properties:
+	#	if prop['attr'].startswith('uroughness'):
+	#		prop['update'] = link_anisotropy
 	
 	def get_paramset(self, material):
 		glossy_lossy_params = ParamSet()
@@ -1631,18 +1664,11 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_backface_Ks.get_properties() + \
 		TF_backface_uroughness.get_properties() + \
 		TF_backface_vroughness.get_properties()
-		
-	def link_iso_roughness(self, context):
-		if not self.anisotropic:
-			self.vroughness_floatvalue = self.uroughness_floatvalue
-			self.vroughness_usefloattexture = self.uroughness_usefloattexture
-			self.vroughness_floattexturename = self.uroughness_floattexturename
-			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
 	
 	# 'patch' the uroughness parameter with an update callback
-	for prop in properties:
-		if prop['attr'].startswith('uroughness'):
-			prop['update'] = link_iso_roughness
+	#for prop in properties:
+	#	if prop['attr'].startswith('uroughness'):
+	#		prop['update'] = link_anisotropy
 
 	#FIX ME!	
 	#Do it all again for the backface:
@@ -1654,9 +1680,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			self.bf_vroughness_multiplyfloat = self.bf_uroughness_multiplyfloat
 	
 	# 'patch' the backface uroughness parameter with an update callback
-	for prop in properties:
-		if prop['attr'].startswith('bf_uroughness'):
-			prop['update'] = link_iso_bf_roughness
+	#for prop in properties:
+	#	if prop['attr'].startswith('bf_uroughness'):
+	#		prop['update'] = link_iso_bf_roughness
 		
 	def get_paramset(self, material):
 		glossytranslucent_params = ParamSet()
@@ -1782,18 +1808,11 @@ class luxrender_mat_metal(declarative_property_group):
 	] + \
 		TF_uroughness.get_properties() + \
 		TF_vroughness.get_properties()
-		
-	def link_iso_roughness(self, context):
-		if not self.anisotropic:
-			self.vroughness_floatvalue = self.uroughness_floatvalue
-			self.vroughness_usefloattexture = self.uroughness_usefloattexture
-			self.vroughness_floattexturename = self.uroughness_floattexturename
-			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
 	
 	# 'patch' the uroughness parameter with an update callback
-	for prop in properties:
-		if prop['attr'].startswith('uroughness'):
-			prop['update'] = link_iso_roughness
+	#for prop in properties:
+	#	if prop['attr'].startswith('uroughness'):
+	#		prop['update'] = link_anisotropy
 	
 	def get_paramset(self, material):
 		metal_params = ParamSet()
@@ -1901,18 +1920,11 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TC_Ks.get_properties() + \
 		TF_uroughness.get_properties() + \
 		TF_vroughness.get_properties()
-		
-	def link_iso_roughness(self, context):
-		if not self.anisotropic:
-			self.vroughness_floatvalue = self.uroughness_floatvalue
-			self.vroughness_usefloattexture = self.uroughness_usefloattexture
-			self.vroughness_floattexturename = self.uroughness_floattexturename
-			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
 	
 	# 'patch' the uroughness parameter with an update callback
-	for prop in properties:
-		if prop['attr'].startswith('uroughness'):
-			prop['update'] = link_iso_roughness
+	#for prop in properties:
+	#	if prop['attr'].startswith('uroughness'):
+	#		prop['update'] = link_anisotropy
 	
 	def get_paramset(self, material):
 		shinymetal_params = ParamSet()
