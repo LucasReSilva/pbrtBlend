@@ -31,7 +31,8 @@ from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
 from ..properties.texture import (
-	FloatTextureParameter, ColorTextureParameter, import_paramset_to_blender_texture, shorten_name
+	FloatTextureParameter, ColorTextureParameter,
+	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
 from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
@@ -800,6 +801,7 @@ def gen_CB_update_exponent(chan='u'):
 			)
 		
 			link_anisotropy(self, context, chan)
+			refresh_preview(self, context)
 	return update_exponent
 
 def gen_CB_update_roughness(chan='u'):
@@ -823,6 +825,7 @@ def gen_CB_update_roughness(chan='u'):
 			)
 		
 			link_anisotropy(self, context, chan)
+			refresh_preview(self, context)
 	return update_roughness
 
 @LuxRenderAddon.addon_register_class
