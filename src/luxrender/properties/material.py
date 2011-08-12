@@ -220,7 +220,7 @@ class luxrender_material(declarative_property_group):
 #			'default': False,
 #		},
 	] + \
-		TF_bumpmap.properties + \
+		TF_bumpmap.get_properties() + \
 		VolumeParameter('Interior', 'Interior') + \
 		VolumeParameter('Exterior', 'Exterior')
 	
@@ -665,7 +665,7 @@ class luxrender_transparency(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-		TF_alpha.properties
+		TF_alpha.get_properties()
 	
 	sourceMap = {
 		'carpaint': 'Kd',
@@ -830,18 +830,18 @@ class luxrender_mat_carpaint(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-		TF_d.properties + \
-		TC_Ka.properties + \
-		TC_Kd.properties + \
-		TC_Ks1.properties + \
-		TC_Ks2.properties + \
-		TC_Ks3.properties + \
-		TF_M1.properties + \
-		TF_M2.properties + \
-		TF_M3.properties + \
-		TF_R1.properties + \
-		TF_R2.properties + \
-		TF_R3.properties
+		TF_d.get_properties() + \
+		TC_Ka.get_properties() + \
+		TC_Kd.get_properties() + \
+		TC_Ks1.get_properties() + \
+		TC_Ks2.get_properties() + \
+		TC_Ks3.get_properties() + \
+		TF_M1.get_properties() + \
+		TF_M2.get_properties() + \
+		TF_M3.get_properties() + \
+		TF_R1.get_properties() + \
+		TF_R2.get_properties() + \
+		TF_R3.get_properties()
 	
 	def get_paramset(self, material):
 		carpaint_params = ParamSet()
@@ -929,12 +929,12 @@ class luxrender_mat_glass(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-		TF_cauchyb.properties + \
-		TF_film.properties + \
-		TF_filmindex.properties + \
-		TF_index.properties + \
-		TC_Kr.properties + \
-		TC_Kt.properties
+		TF_cauchyb.get_properties() + \
+		TF_film.get_properties() + \
+		TF_filmindex.get_properties() + \
+		TF_index.get_properties() + \
+		TC_Kr.get_properties() + \
+		TC_Kt.get_properties()
 	
 	def get_paramset(self, material):
 		glass_params = ParamSet()
@@ -1061,12 +1061,12 @@ class luxrender_mat_roughglass(declarative_property_group):
 		}
 		
 	] + \
-		TF_cauchyb.properties + \
-		TF_index.properties + \
-		TC_Kr.properties + \
-		TC_Kt.properties + \
-		TF_uroughness.properties + \
-		TF_vroughness.properties
+		TF_cauchyb.get_properties() + \
+		TF_index.get_properties() + \
+		TC_Kr.get_properties() + \
+		TC_Kt.get_properties() + \
+		TF_uroughness.get_properties() + \
+		TF_vroughness.get_properties()
 		
 	def link_iso_roughness(self, context):
 		if not self.anisotropic:
@@ -1192,24 +1192,26 @@ class luxrender_mat_glossy(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-		TF_d.properties + \
-		TF_index.properties + \
-		TC_Ka.properties + \
-		TC_Kd.properties + \
-		TC_Ks.properties + \
-		TF_uroughness.properties + \
-		TF_uexponent.properties + \
-		TF_vroughness.properties + \
-		TF_vexponent.properties + \
-		TF_alpha.properties
+		TF_d.get_properties() + \
+		TF_index.get_properties() + \
+		TC_Ka.get_properties() + \
+		TC_Kd.get_properties() + \
+		TC_Ks.get_properties() + \
+		TF_uroughness.get_properties() + \
+		TF_uexponent.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties() + \
+		TF_alpha.get_properties()
 	
 	#When roughness mode is selected, use this to update exponent in case user switches modes.
 	def update_u_exponent(self, context):
 		#if not self.exponent: #We're in roughness mode
-			self.uexponent_floatvalue = self.uroughness_floatvalue
-			self.uexponent_usefloattexture = self.uroughness_usefloattexture
-			self.uexponent_floattexturename = self.uroughness_floattexturename
-			self.uexponent_multiplyfloat = self.roughness_multiplyfloat
+		self.uexponent_floatvalue = self.uroughness_floatvalue
+		self.uexponent_usefloattexture = self.uroughness_usefloattexture
+		self.uexponent_floattexturename = self.uroughness_floattexturename
+		self.uexponent_multiplyfloat = self.uroughness_multiplyfloat
+		
+		self.link_iso_roughness(context)
 	
 	def link_iso_roughness(self, context):
 		if not self.anisotropic:
@@ -1218,11 +1220,6 @@ class luxrender_mat_glossy(declarative_property_group):
 			self.vroughness_floattexturename = self.uroughness_floattexturename
 			self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
 	
-	# 'patch' the uroughness parameter with an update callback
-	for prop in properties:
-		if prop['attr'].startswith('uroughness'):
-			prop['update'] = link_iso_roughness
-			
 	for prop in properties:
 		if prop['attr'].startswith('uroughness'):
 			prop['update'] = update_u_exponent
@@ -1332,13 +1329,13 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-		TC_Kd.properties + \
-		TF_d.properties + \
-		TC_Ka.properties + \
-		TF_index.properties + \
-		TC_Ks.properties + \
-		TF_uroughness.properties + \
-		TF_vroughness.properties
+		TC_Kd.get_properties() + \
+		TF_d.get_properties() + \
+		TC_Ka.get_properties() + \
+		TF_index.get_properties() + \
+		TC_Ks.get_properties() + \
+		TF_uroughness.get_properties() + \
+		TF_vroughness.get_properties()
 		
 	def link_iso_roughness(self, context):
 		if not self.anisotropic:
@@ -1399,8 +1396,8 @@ class luxrender_mat_matte(declarative_property_group):
 	
 	properties = [
 	] + \
-		TC_Kd.properties + \
-		TF_sigma.properties
+		TC_Kd.get_properties() + \
+		TF_sigma.get_properties()
 	
 	def get_paramset(self, material):
 		matte_params = ParamSet()
@@ -1441,9 +1438,9 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 			'default': True
 		},
 	] + \
-		TC_Kr.properties + \
-		TC_Kt.properties + \
-		TF_sigma.properties
+		TC_Kr.get_properties() + \
+		TC_Kt.get_properties() + \
+		TF_sigma.get_properties()
 	
 	def get_paramset(self, material):
 		mattetranslucent_params = ParamSet()
@@ -1611,20 +1608,20 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'save_in_preset': True
 		}
 	] + \
-		TC_Kt.properties + \
-		TC_Kd.properties + \
-		TF_d.properties + \
-		TC_Ka.properties + \
-		TF_index.properties + \
-		TC_Ks.properties + \
-		TF_uroughness.properties + \
-		TF_vroughness.properties + \
-		TF_backface_d.properties + \
-		TC_backface_Ka.properties + \
-		TF_backface_index.properties + \
-		TC_backface_Ks.properties + \
-		TF_backface_uroughness.properties + \
-		TF_backface_vroughness.properties
+		TC_Kt.get_properties() + \
+		TC_Kd.get_properties() + \
+		TF_d.get_properties() + \
+		TC_Ka.get_properties() + \
+		TF_index.get_properties() + \
+		TC_Ks.get_properties() + \
+		TF_uroughness.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_backface_d.get_properties() + \
+		TC_backface_Ka.get_properties() + \
+		TF_backface_index.get_properties() + \
+		TC_backface_Ks.get_properties() + \
+		TF_backface_uroughness.get_properties() + \
+		TF_backface_vroughness.get_properties()
 		
 	def link_iso_roughness(self, context):
 		if not self.anisotropic:
@@ -1774,8 +1771,8 @@ class luxrender_mat_metal(declarative_property_group):
 			'save_in_preset': True
 		}
 	] + \
-		TF_uroughness.properties + \
-		TF_vroughness.properties
+		TF_uroughness.get_properties() + \
+		TF_vroughness.get_properties()
 		
 	def link_iso_roughness(self, context):
 		if not self.anisotropic:
@@ -1835,8 +1832,8 @@ class luxrender_mat_scatter(declarative_property_group):
 	
 	properties = [
 	] + \
-		TC_Kd.properties + \
-		TF_g.properties
+		TC_Kd.get_properties() + \
+		TF_g.get_properties()
 	
 	def get_paramset(self, material):
 		scatter_params = ParamSet()
@@ -1889,12 +1886,12 @@ class luxrender_mat_shinymetal(declarative_property_group):
 			'save_in_preset': True
 		}
 	] + \
-		TF_film.properties + \
-		TF_filmindex.properties + \
-		TC_Kr.properties + \
-		TC_Ks.properties + \
-		TF_uroughness.properties + \
-		TF_vroughness.properties
+		TF_film.get_properties() + \
+		TF_filmindex.get_properties() + \
+		TC_Kr.get_properties() + \
+		TC_Ks.get_properties() + \
+		TF_uroughness.get_properties() + \
+		TF_vroughness.get_properties()
 		
 	def link_iso_roughness(self, context):
 		if not self.anisotropic:
@@ -1947,9 +1944,9 @@ class luxrender_mat_mirror(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_film.properties + \
-		TF_filmindex.properties + \
-		TC_Kr.properties
+		TF_film.get_properties() + \
+		TF_filmindex.get_properties() + \
+		TC_Kr.get_properties()
 	
 	def get_paramset(self, material):
 		mirror_params = ParamSet()
@@ -1980,7 +1977,7 @@ class luxrender_mat_mix(declarative_property_group):
 	
 	properties = [
 	] + \
-		TF_amount.properties + \
+		TF_amount.get_properties() + \
 		MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_mat_mix') + \
 		MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_mat_mix')
 	
@@ -2037,7 +2034,7 @@ class luxrender_mat_velvet(declarative_property_group):
 		'p3':	{ 'advanced': True },
 	}, TC_Kd.visibility)
 	
-	properties = TC_Kd.properties + [
+	properties = TC_Kd.get_properties() + [
 		{
 			'type': 'bool',
 			'attr': 'advanced',
@@ -2248,7 +2245,7 @@ class luxrender_emission(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
-	TC_L.properties + \
+	TC_L.get_properties() + \
 	EmissionLightGroupParameter()
 	
 	def api_output(self, obj):
