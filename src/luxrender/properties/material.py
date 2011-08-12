@@ -1151,6 +1151,10 @@ class luxrender_mat_glossy(declarative_property_group):
 	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
 	enabled = texture_append_visibility(enabled, TF_vexponent, { 'anisotropic': True })
 	
+#	visibility = texture_append_visibility(visibility, TF_uroughness, { 'exponent': False })
+#	visibility = texture_append_visibility(visibility, TF_vroughness, { 'exponent': False })	
+#	visibility = texture_append_visibility(visibility, TF_uexponent, { 'exponent': True })
+#	visibility = texture_append_visibility(visibility, TF_vexponent, { 'exponent': True })
 	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
 	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
