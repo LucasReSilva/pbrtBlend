@@ -27,8 +27,6 @@ import re
 
 import bpy
 
-import math
-
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
