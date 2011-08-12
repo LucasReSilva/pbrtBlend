@@ -111,9 +111,9 @@ TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=
 TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.005 )
 TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
 TF_uroughness			= FloatTextureParameter('uroughness', ' U-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
-TF_uexponent			= FloatTextureParameter('uexponent', ' U-Exponent',					add_float_value=True, min=0.0, max=1000000, default=353.556 )
+TF_uexponent			= FloatTextureParameter('uexponent', ' U-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
 TF_vroughness			= FloatTextureParameter('vroughness', 'V-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
-TF_vexponent			= FloatTextureParameter('vexponent', 'V-Exponent',					add_float_value=True, min=0.0, max=1000000, default=353.556 )
+TF_vexponent			= FloatTextureParameter('vexponent', 'V-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
 TF_backface_d			= FloatTextureParameter('bf_d', 'Backface absorption depth (nm)',	real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=1500.0 ) # default 0.0 for OFF
 TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface U-Roughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 ) #backface roughness is high than front by default, will usually be for backs of leaves or cloth
