@@ -1092,22 +1092,32 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TC_Kr.controls + \
 		TC_Kt.controls + \
 	[
-			'anisotropic',
+			['anisotropic', 'use_exponent'],
 	] + \
 		TF_uroughness.controls + \
-		TF_vroughness.controls
+		TF_uexponent.controls + \
+		TF_vroughness.controls + \
+		TF_vexponent.controls
 	
 	visibility = dict_merge(
 		TF_cauchyb.visibility,
 		TF_index.visibility,
 		TC_Kr.visibility,
-		TC_Kt.visibility,
+		TC_Kt.visibility,		
 		TF_uroughness.visibility,
-		TF_vroughness.visibility
+		TF_uexponent.visibility,
+		TF_vroughness.visibility,
+		TF_vexponent.visibility,
 	)
 	
 	enabled = {}
 	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
+	
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
 	
 	properties = [
 		{
@@ -1122,7 +1132,15 @@ class luxrender_mat_roughglass(declarative_property_group):
 			'description': 'Enable anisotropic roughness',
 			'default': False,
 			'save_in_preset': True
-		}
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
+		},
 		
 	] + \
 		TF_cauchyb.get_properties() + \
@@ -1130,12 +1148,21 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TC_Kr.get_properties() + \
 		TC_Kt.get_properties() + \
 		TF_uroughness.get_properties() + \
-		TF_vroughness.get_properties()
+		TF_uexponent.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties()
+
 	
-	# 'patch' the uroughness parameter with an update callback
-	#for prop in properties:
-	#	if prop['attr'].startswith('uroughness'):
-	#		prop['update'] = link_anisotropy
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
 	
 	def get_paramset(self, material):
 		roughglass_params = ParamSet()
@@ -1225,7 +1252,7 @@ class luxrender_mat_glossy(declarative_property_group):
 			'type': 'bool',
 			'attr': 'multibounce',
 			'name': 'Multibounce',
-			'description': 'Enable surface layer multi-bounce',
+			'description': 'Enable surface layer multibounce',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -1334,10 +1361,12 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TF_index.controls + \
 		TC_Ks.controls + \
 	[
-			'anisotropic',
+			['anisotropic', 'use_exponent'],
 	] + \
 		TF_uroughness.controls + \
-		TF_vroughness.controls
+		TF_uexponent.controls + \
+		TF_vroughness.controls + \
+		TF_vexponent.controls
 	
 	visibility = dict_merge(
 		{
@@ -1349,12 +1378,20 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TC_Kd.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
-		TF_vroughness.visibility
+		TF_uexponent.visibility,
+		TF_vroughness.visibility,
+		TF_vexponent.visibility,
 	)
 	
 	enabled = {}
 	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
 	
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
+
 	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
 	
@@ -1380,6 +1417,14 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 			'default': False,
 			'save_in_preset': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
+		},
 	] + \
 		TC_Kd.get_properties() + \
 		TF_d.get_properties() + \
@@ -1387,12 +1432,20 @@ class luxrender_mat_glossy_lossy(declarative_property_group):
 		TF_index.get_properties() + \
 		TC_Ks.get_properties() + \
 		TF_uroughness.get_properties() + \
-		TF_vroughness.get_properties()
+		TF_uexponent.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties()
 	
-	# 'patch' the uroughness parameter with an update callback
-	#for prop in properties:
-	#	if prop['attr'].startswith('uroughness'):
-	#		prop['update'] = link_anisotropy
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
 	
 	def get_paramset(self, material):
 		glossy_lossy_params = ParamSet()
@@ -1529,10 +1582,12 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_index.controls + \
 		TC_Ks.controls + \
 	[
-			'anisotropic',
+			['anisotropic', 'use_exponent'],
 	] + \
 		TF_uroughness.controls + \
+		TF_uexponent.controls + \
 		TF_vroughness.controls + \
+		TF_vexponent.controls
 	[
 		'two_sided',
 		'backface_multibounce',
@@ -1558,7 +1613,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_index.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
+		TF_uexponent.visibility,
 		TF_vroughness.visibility,
+		TF_vexponent.visibility,
 		
 		TF_backface_d.visibility,
 		TC_backface_Ka.visibility,
@@ -1575,9 +1632,15 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		}
 	)
 	
-	#enabled = {}
-	#enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
 	#enabled = texture_append_visibility(enabled, TF_backface_vroughness, { 'bf_anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
+	
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
 	
 	visibility = texture_append_visibility(visibility, TC_Ks,					{ 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index,				{ 'useior': True  })
@@ -1600,7 +1663,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'type': 'bool',
 			'attr': 'multibounce',
 			'name': 'Multibounce',
-			'description': 'Enable surface layer multi-bounce',
+			'description': 'Enable surface layer multibounce',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -1614,9 +1677,17 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		},
 		{
 			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
 			'attr': 'two_sided',
 			'name': 'Two sided',
-			'description': 'Different surface properties for back-face and front-face',
+			'description': 'Use different specular properties for back-face and front-face',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -1624,7 +1695,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'type': 'bool',
 			'attr': 'backface_multibounce',
 			'name': 'Backface Multibounce',
-			'description': 'Enable back-surface layer multi-bounce',
+			'description': 'Enable back-surface layer multibounce',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -1660,32 +1731,28 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_index.get_properties() + \
 		TC_Ks.get_properties() + \
 		TF_uroughness.get_properties() + \
+		TF_uexponent.get_properties() + \
 		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties() + \
 		TF_backface_d.get_properties() + \
 		TC_backface_Ka.get_properties() + \
 		TF_backface_index.get_properties() + \
 		TC_backface_Ks.get_properties() + \
 		TF_backface_uroughness.get_properties() + \
 		TF_backface_vroughness.get_properties()
-	
-	# 'patch' the uroughness parameter with an update callback
-	#for prop in properties:
-	#	if prop['attr'].startswith('uroughness'):
-	#		prop['update'] = link_anisotropy
+		
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
 
-	#FIX ME!	
-	#Do it all again for the backface:
-	def link_iso_bf_roughness(self, context):
-		if not self.bf_anisotropic:
-			self.bf_vroughness_floatvalue = self.bf_uroughness_floatvalue
-			self.bf_vroughness_usefloattexture = self.bf_uroughness_usefloattexture
-			self.bf_vroughness_floattexturename = self.bf_uroughness_floattexturename
-			self.bf_vroughness_multiplyfloat = self.bf_uroughness_multiplyfloat
-	
-	# 'patch' the backface uroughness parameter with an update callback
-	#for prop in properties:
-	#	if prop['attr'].startswith('bf_uroughness'):
-	#		prop['update'] = link_iso_bf_roughness
+	#FIX ME! There should be code to make anisotropic and exponent work for backface here
 		
 	def get_paramset(self, material):
 		glossytranslucent_params = ParamSet()
@@ -1763,34 +1830,46 @@ class luxrender_mat_metal(declarative_property_group):
 	controls = [
 		'name',
 		'filename',
-		'anisotropic',
+		['anisotropic', 'use_exponent'],
 	] + \
 		TF_uroughness.controls + \
-		TF_vroughness.controls
+		TF_uexponent.controls + \
+		TF_vroughness.controls + \
+		TF_vexponent.controls
 	
 	visibility = dict_merge({
 			'filename': { 'name': 'nk' }
 		},
 		TF_uroughness.visibility,
-		TF_vroughness.visibility
+		TF_uexponent.visibility,
+		TF_vroughness.visibility,
+		TF_vexponent.visibility,
 	)
 	
 	enabled = {}
 	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
+	
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
 	
 	properties = [
 		{
 			'type': 'enum',
 			'attr': 'name',
 			'name': 'Preset',
+			'description': 'Metal type to use, select "Use NK file" to input external metal data',
 			'items': [
-				('nk', 'Use nk File', 'nk'),
+				('nk', 'Use NK file', 'nk'),
 				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
 				('copper', 'copper', 'copper'),
 				('gold', 'gold', 'gold'),
 				('silver', 'silver', 'silver'),
 				('aluminium', 'aluminium', 'aluminium')
 			],
+			'default': 'aluminium',
 			'save_in_preset': True
 		},
 		{
@@ -1807,15 +1886,31 @@ class luxrender_mat_metal(declarative_property_group):
 			'description': 'Enable anisotropic roughness',
 			'default': False,
 			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
 		}
 	] + \
 		TF_uroughness.get_properties() + \
-		TF_vroughness.get_properties()
+		TF_uexponent.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties()
 	
-	# 'patch' the uroughness parameter with an update callback
-	#for prop in properties:
-	#	if prop['attr'].startswith('uroughness'):
-	#		prop['update'] = link_anisotropy
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
 	
 	def get_paramset(self, material):
 		metal_params = ParamSet()
@@ -1890,10 +1985,12 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TC_Kr.controls + \
 		TC_Ks.controls + \
 	[
-			'anisotropic',
+			['anisotropic', 'use_exponent'],
 	] + \
 		TF_uroughness.controls + \
-		TF_vroughness.controls
+		TF_uexponent.controls + \
+		TF_vroughness.controls + \
+		TF_vexponent.controls
 	
 	visibility = dict_merge(
 		TF_film.visibility,
@@ -1901,11 +1998,19 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TC_Kr.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
-		TF_vroughness.visibility
+		TF_uexponent.visibility,
+		TF_vroughness.visibility,
+		TF_vexponent.visibility
 	)
 	
 	enabled = {}
 	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
+
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
 	
 	properties = [
 		{
@@ -1915,6 +2020,14 @@ class luxrender_mat_shinymetal(declarative_property_group):
 			'description': 'Enable anisotropic roughness',
 			'default': False,
 			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
 		}
 	] + \
 		TF_film.get_properties() + \
@@ -1922,12 +2035,20 @@ class luxrender_mat_shinymetal(declarative_property_group):
 		TC_Kr.get_properties() + \
 		TC_Ks.get_properties() + \
 		TF_uroughness.get_properties() + \
-		TF_vroughness.get_properties()
+		TF_uexponent.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties()
 	
-	# 'patch' the uroughness parameter with an update callback
-	#for prop in properties:
-	#	if prop['attr'].startswith('uroughness'):
-	#		prop['update'] = link_anisotropy
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
 	
 	def get_paramset(self, material):
 		shinymetal_params = ParamSet()
