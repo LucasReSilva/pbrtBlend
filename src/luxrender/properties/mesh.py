@@ -60,7 +60,8 @@ class luxrender_mesh(declarative_property_group):
 		'generatetangents',
 		'subdiv',
 		'sublevels',
-		['nsmooth', 'sharpbound', 'splitnormal'],
+		'nsmooth',
+		['sharpbound', 'splitnormal'],
 	] + \
 		TF_displacementmap.controls + \
 	[
@@ -136,13 +137,13 @@ class luxrender_mesh(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'sharpbound',
-			'name': 'Sharpen Bounds',
+			'name': 'Sharpen bounds',
 			'default': False,
 		},
 		{
 			'type': 'bool',
 			'attr': 'splitnormal',
-			'name': 'Keep Split Edges',
+			'name': 'Keep split edges',
 			'default': False,
 			'description': 'Preserves edge-split modifier with set-smooth meshes. WARNING: This will cause set-solid meshes to rip open!'},
 		{

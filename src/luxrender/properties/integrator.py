@@ -831,6 +831,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'photonperpass',
 			'name': 'Photons per pass',
+			'description': 'Number of photons to gather before going on to next pass',
 			'default': 1000000,
 			'save_in_preset': True
 		},
@@ -865,7 +866,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'float',
 			'attr': 'glossythreshold',
 			'name': 'Glossy Threshold',
-			'description': 'Maximum specularity that will store photons. 0=only matte materials store photons.',
+			'description': 'Maximum specularity (PDF) that will store photons. 0=only matte materials store photons',
 			'min': 0,
 			'default': 100,
 			'save_in_preset': True
@@ -874,6 +875,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'enum',
 			'attr': 'lookupaccel',
 			'name': 'Lookup accelerator',
+			'description': 'Acceleration structure for hitpoints (not scene geometry)',
 			'default': 'hybridhashgrid',
 			'items': [
 				('hashgrid', 'Hash Grid', 'hashgrid'),
