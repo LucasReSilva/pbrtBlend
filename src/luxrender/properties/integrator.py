@@ -925,7 +925,7 @@ class luxrender_integrator(declarative_property_group):
 		},
 	]
 	
-	def api_output(self, engine_properties):
+	def api_output(self, scene=None):
 		'''
 		Format this class's members into a LuxRender ParamSet
 		
@@ -936,16 +936,16 @@ class luxrender_integrator(declarative_property_group):
 		
 		#Check to make sure all settings are correct when hybrid is selected. Keep this up to date as hybrid gets new options in 0.9
 		
-#		if engine_properties.renderer == 'hybrid':
-#			#Check each integrator seperately so they don't mess with each other!
-#			if self.surfaceintegrator == 'path':
-#				if self.lightstrategy not in ('one', 'all', 'auto'):
-#					LuxLog('Incompatible lightstrategy for Hybrid Path (use "auto", "all", or "one").')
-#					raise Exception('Incompatible render settings')
-#			if self.surfaceintegrator == 'bidirectional':
-#				if self.bidirstrategy != ('one'):
-#					LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
-#					raise Exception('Incompatible render settings')
+		if scene.luxrender_rendermode.renderer == 'hybrid':
+			#Check each integrator seperately so they don't mess with each other!
+			if self.surfaceintegrator == 'path':
+				if self.lightstrategy not in ('one', 'all', 'auto'):
+					LuxLog('Incompatible lightstrategy for Hybrid Path (use "auto", "all", or "one").')
+					raise Exception('Incompatible render settings')
+			if self.surfaceintegrator == 'bidirectional':
+				if self.bidirstrategy != ('one'):
+					LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
+					raise Exception('Incompatible render settings')
 				
 		#Safety checks for settings end here
 		

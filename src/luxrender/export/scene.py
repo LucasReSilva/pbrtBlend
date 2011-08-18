@@ -175,7 +175,7 @@ class SceneExporter(object):
 			lux_context.renderer(			*scene.luxrender_rendermode.api_output()						)
 			lux_context.sampler(			*scene.luxrender_sampler.api_output()							)
 			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()						)
-			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output(scene.luxrender_engine)	)
+			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output(scene)					)
 			lux_context.volumeIntegrator(	*scene.luxrender_volumeintegrator.api_output()					)
 			lux_context.pixelFilter(		*scene.luxrender_filter.api_output()							)
 			
