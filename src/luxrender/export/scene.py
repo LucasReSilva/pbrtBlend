@@ -172,8 +172,7 @@ class SceneExporter(object):
 				lux_context.set_output_file(Files.MAIN)
 			
 			# Set up render engine parameters
-			if LUXRENDER_VERSION >= '0.8':
-				lux_context.renderer(		*scene.luxrender_engine.api_output()							)
+			lux_context.renderer(			*scene.luxrender_rendermode.api_output()						)
 			lux_context.sampler(			*scene.luxrender_sampler.api_output()							)
 			lux_context.accelerator(		*scene.luxrender_accelerator.api_output()						)
 			lux_context.surfaceIntegrator(	*scene.luxrender_integrator.api_output(scene.luxrender_engine)	)

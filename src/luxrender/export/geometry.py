@@ -500,7 +500,7 @@ class GeometryExporter(object):
 	
 	def allow_instancing(self, obj):
 		# Some situations require full geometry export
-		if self.visibility_scene.luxrender_engine.renderer == 'hybrid':
+		if self.visibility_scene.luxrender_rendermode.renderer == 'hybrid':
 			return False
 		
 		# Portals are always instances

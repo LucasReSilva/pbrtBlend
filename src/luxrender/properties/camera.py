@@ -767,11 +767,11 @@ class luxrender_film(declarative_property_group):
 			params.add_integer('writeinterval', self.internal_updateinterval)
 		
 		# Halt conditions
-		if scene.luxrender_sampler.haltspp > 0:
-			params.add_integer('haltspp', scene.luxrender_sampler.haltspp)
+		if scene.luxrender_halt.haltspp > 0:
+			params.add_integer('haltspp', scene.luxrender_halt.haltspp)
 		
-		if scene.luxrender_sampler.halttime > 0:
-			params.add_integer('halttime', scene.luxrender_sampler.halttime)
+		if scene.luxrender_halt.halttime > 0:
+			params.add_integer('halttime', scene.luxrender_halt.halttime)
 		
 		if self.outlierrejection_k > 0:
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)

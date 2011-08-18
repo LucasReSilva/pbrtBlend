@@ -31,7 +31,7 @@ from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
-from .engine import check_renderer_settings
+#from .engine import check_renderer_settings
 
 def volumeintegrator_types():
 	items = [
@@ -55,8 +55,13 @@ class luxrender_volumeintegrator(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'volumeintegrator', 'stepsize'
+		[0.7, 'volumeintegrator', 'advanced'],
+		'stepsize',
 	]
+	
+	visibility = {
+		'stepsize':							{ 'advanced': True },
+	}
 	
 	properties = [
 		{
@@ -79,7 +84,15 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'max': 100.0,
 			'soft_max': 100.0,
 			'save_in_preset': True
-		}
+		},
+		{
+			'type': 'bool',
+			'attr': 'advanced',
+			'name': 'Advanced',
+			'description': 'Configure advanced volume integrator settings',
+			'default': False,
+			'save_in_preset': True
+		},
 	]
 	
 	def api_output(self):
@@ -104,8 +117,7 @@ class luxrender_integrator(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		[ 0.7, 'surfaceintegrator', 'advanced'],
-		
+		'advanced',
 		'lightstrategy',
 		
 		# bidir +
@@ -293,6 +305,7 @@ class luxrender_integrator(declarative_property_group):
 	alert = {}
 	
 	properties = [
+		#This parameter is fed to the "integrator' context, and holds the actual surface integrator setting. The user does not interact with it directly, and it does not appear in the panels
 		{
 			'type': 'enum', 
 			'attr': 'surfaceintegrator',
@@ -910,7 +923,6 @@ class luxrender_integrator(declarative_property_group):
 			],
 			'save_in_preset': True
 		},
-			
 	]
 	
 	def api_output(self, engine_properties):
@@ -925,9 +937,6 @@ class luxrender_integrator(declarative_property_group):
 		#Check to make sure all settings are correct when hybrid is selected. Keep this up to date as hybrid gets new options in 0.9
 		
 		if engine_properties.renderer == 'hybrid':
-			if self.surfaceintegrator not in ('path', 'bidirectional'):
-				LuxLog('Incompatible surface integrator for Hybrid renderer (use "path" or "bidirectional").')
-				raise Exception('Incompatible render settings')
 			#Check each integrator seperately so they don't mess with each other!
 			if self.surfaceintegrator == 'path':
 				if self.lightstrategy not in ('one', 'all', 'auto'):
@@ -937,17 +946,6 @@ class luxrender_integrator(declarative_property_group):
 				if self.bidirstrategy != ('one'):
 					LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
 					raise Exception('Incompatible render settings')
-				
-		#SPPM requires that renderer and engine both = sppm, neither option works without the other. Here we ensure that the user set both.
-		if engine_properties.renderer == 'sppm':
-			if self.surfaceintegrator != 'sppm':
-				LuxLog('SPPM Renderer requires SPPM surface integrator.')
-				raise Exception('Incompatible render settings')
-				
-		if self.surfaceintegrator == 'sppm':
-			if engine_properties.renderer != 'sppm':
-				LuxLog('SPPM surface integrator only works with SPPM renderer, select it under "Renderer" in LuxRender Engine Configuration.')
-				raise Exception('Incompatible render settings')
 				
 		#Safety checks for settings end here
 		

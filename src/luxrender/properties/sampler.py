@@ -40,7 +40,6 @@ class luxrender_sampler(declarative_property_group):
 	
 	controls = [
 		[ 0.7, 'sampler', 'advanced'],
-		['haltspp','halttime'],
 		
 		'chainlength',
 		
@@ -69,8 +68,8 @@ class luxrender_sampler(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'sampler',
-			'name': 'Sampler Type',
-			'description': 'Sampler Type',
+			'name': 'Sampler',
+			'description': 'Pixel sampling algorithm to use',
 			'default': 'metropolis',
 			'items': [
 				('metropolis', 'Metropolis', 'metropolis'),
@@ -86,30 +85,6 @@ class luxrender_sampler(declarative_property_group):
 			'name': 'Advanced',
 			'description': 'Configure advanced sampler settings',
 			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'haltspp',
-			'name': 'Halt SPP',
-			'description': 'Halt the rendering at this number of samples/px (0=disabled)',
-			'default': 0,
-			'min': 0,
-			'soft_min': 0,
-			'max': 65535,
-			'soft_max': 65535,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'halttime',
-			'name': 'Halt time',
-			'description': 'Halt the rendering at this number seconds (0=disabled)',
-			'default': 0,
-			'min': 0,
-			'soft_min': 0,
-			'max': 65535,
-			'soft_max': 65535,
 			'save_in_preset': True
 		},
 		{

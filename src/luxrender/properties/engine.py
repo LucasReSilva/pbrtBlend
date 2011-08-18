@@ -35,7 +35,7 @@ from ..export import ParamSet
 from ..outputs.pure_api import PYLUX_AVAILABLE
 
 def check_renderer_settings(context):
-	lre = context.scene.luxrender_engine
+	lre = context.scene.luxrender_rendermode
 	lri = context.scene.luxrender_integrator
 	
 	def clear_renderer_alert():
@@ -56,7 +56,7 @@ def check_renderer_settings(context):
 		lri.alert['advanced'] = { 'bidirstrategy': LO({'!=':['one']}) }
 		return
 	
-	# check compatible SSPM mode
+	# check compatible SPPM mode
 	sppm_valid = lri.surfaceintegrator == 'sppm'
 	if ((lre.renderer == 'sppm' and sppm_valid) or lre.renderer!='sppm'):
 		clear_renderer_alert()
@@ -129,15 +129,7 @@ class luxrender_engine(declarative_property_group):
 	
 	ef_attach_to = ['Scene']
 	
-	controls = [
-		[ 0.7, 'renderer', 'advanced'],
-		
-		'opencl_platform_index',
-		'raybuffersize',
-		'statebuffercount',
-		'workgroupsize',
-		'deviceselection',
-		'usegpus',
+	controls = [		
 		'export_type',
 		'binary_name',
 		'write_files',
@@ -156,12 +148,6 @@ class luxrender_engine(declarative_property_group):
 	controls.append('log_verbosity')
 	
 	visibility = {
-		'opencl_platform_index':	{ 'renderer': 'hybrid' },
-		'raybuffersize':			{ 'advanced': True, 'renderer': 'hybrid' },
-		'statebuffercount':			{ 'advanced': True, 'renderer': 'hybrid' },
-		'workgroupsize':			{ 'advanced': True, 'renderer': 'hybrid' },
-		'deviceselection':			{ 'advanced': True, 'renderer': 'hybrid' },
-		'usegpus':					{ 'renderer': 'hybrid' },
 		'write_files':				{ 'export_type': 'INT' },
 		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
@@ -186,14 +172,6 @@ class luxrender_engine(declarative_property_group):
 			'default': True
 		},
 		{
-			'type': 'bool',
-			'attr': 'advanced',
-			'name': 'Advanced',
-			'description': 'Configure advanced renderer settings',
-			'default': False,
-			'save_in_preset': True
-		},
-		{
 			'type': 'int',
 			'attr': 'threads',
 			'name': 'Render Threads',
@@ -207,7 +185,7 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'export_type',
-			'name': 'Rendering Mode',
+			'name': 'Export Type',
 			'description': 'Run LuxRender inside or outside of Blender',
 			'default': 'EXT', # if not PYLUX_AVAILABLE else 'INT',
 			'items': find_apis(),
@@ -238,84 +216,8 @@ class luxrender_engine(declarative_property_group):
 		},
 		{
 			'type': 'enum',
-			'attr': 'renderer',
-			'name': 'Renderer',
-			'description': 'Renderer type',
-			'default': 'sampler',
-			'items': [
-				('sampler', 'Sampler (traditional CPU)', 'sampler'),
-				('hybrid', 'Hybrid (CPU+GPU)', 'hybrid'),
-				('sppm', 'SPPM (CPU)', 'sppm'),
-			],
-			'update': lambda s,c: check_renderer_settings(c),
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'opencl_platform_index',
-			'name': 'OpenCL platform index',
-			'description': 'OpenCL Platform to target. Try increasing this value 1 at a time if LuxRender fails to use your GPU',
-			'default': 0,
-			'min': 0,
-			'soft_min': 0,
-			'max': 16,
-			'soft_max': 16,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'raybuffersize',
-			'name': 'Ray buffer size',
-			'description': 'Size of ray "bundles" fed to OpenCL device',
-			'default': 8192,
-			'min': 2,
-			'soft_min': 2,
-			'max': 16384,
-			'soft_max': 16384,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'statebuffercount',
-			'name': 'State buffer count',
-			'description': 'Numbers of buffers used for surface integrator states',
-			'default': 1,
-			'min': 1,
-			'soft_min': 1,
-			'save_in_preset': True
-		},
-		{
-			'type': 'int',
-			'attr': 'workgroupsize',
-			'name': 'OpenCL work group size',
-			'description': 'Size of OpenCL work group. Use 0 for auto',
-			'default': 0,
-			'min': 0,
-			'soft_min': 0,
-			'max': 1024,
-			'soft_max': 1024,
-			'save_in_preset': True
-		},
-		{
-			'type': 'string',
-			'attr': 'deviceselection',
-			'name': 'OpenCL devices',
-			'description': 'Enter target OpenCL devices here. Leave blank to use all available',
-			'default': '',
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'usegpus',
-			'name': 'Use GPUs',
-			'description': 'Target GPU devices instead of using native threads',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'enum',
 			'attr': 'binary_name',
-			'name': 'External type',
+			'name': 'External Type',
 			'description': 'Choose full GUI or console renderer',
 			'default': 'luxrender',
 			'items': [
@@ -403,20 +305,6 @@ class luxrender_engine(declarative_property_group):
 		saving_files = (self.export_type == 'EXT' or (self.export_type == 'INT' and self.write_files == True))
 		
 		return self.is_saving_lbm2 or (saving_files and self.embed_filedata)
-	
-	def api_output(self):
-		renderer_params = ParamSet()
-		
-		if self.renderer == 'hybrid':
-			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
-			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
-			if self.advanced:
-				renderer_params.add_integer('raybuffersize', self.raybuffersize)
-				renderer_params.add_integer('statebuffercount', self.statebuffercount)
-				renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
-				renderer_params.add_string('opencl.devices.select', self.deviceselection)
-		
-		return self.renderer, renderer_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_networking(declarative_property_group):
