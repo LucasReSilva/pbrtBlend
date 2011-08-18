@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond
+# Doug Hammond, Jason Clarke
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -57,7 +57,23 @@ class luxrender_rendermode(declarative_property_group):
 		'deviceselection':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'usegpus':					{ 'renderer': 'hybrid' },
 		}
+	
+	#This function sets renderer and surface integrator according to rendermode setting
+	def update_rendering_mode(self, context):
+		if self.rendermode == 'hybridpath':
+			context.scene.luxrender_integrator.surfaceintegrator = 'path'
+		elif self.rendermode == 'hybridbidir':
+			context.scene.luxrender_integrator.surfaceintegrator = 'bidirectional'
+		else:
+			context.scene.luxrender_integrator.surfaceintegrator = self.rendermode
 		
+		if self.rendermode in ('hybridpath', 'hybridbidir'):
+			self.renderer = 'hybrid'
+		elif self.rendermode == 'sppm':
+			self.renderer = 'sppm'
+		else:
+			self.renderer = 'sampler'
+	
 	properties = [
 		{
 			'type': 'enum', 
@@ -76,6 +92,7 @@ class luxrender_rendermode(declarative_property_group):
 				('hybridpath', 'Hybrid Path', 'hybridpath'),
 				('sppm', 'SPPM', 'sppm'),
 			],
+			'update': update_rendering_mode,
 			'save_in_preset': True
 		},
 		#This parameter is fed to the "renderer' context, and holds the actual renderer setting. The user does not interact with it directly, and it does not appear in the panels
@@ -90,7 +107,7 @@ class luxrender_rendermode(declarative_property_group):
 				('hybrid', 'Hybrid (CPU+GPU)', 'hybrid'),
 				('sppm', 'SPPM (CPU)', 'sppm'),
 			],
-			'update': lambda s,c: check_renderer_settings(c),
+			# 'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
 		},
 		{
@@ -165,26 +182,6 @@ class luxrender_rendermode(declarative_property_group):
 		},
 		]
 	
-	#This function sets renderer and surface integrator according to rendermode setting
-	def update_rendering_mode(self, context):
-		if self.rendermode == 'hybridpath':
-			context.scene.luxrender_integrator.surfaceintegrator = 'path'
-		elif self.rendermode == 'hybridbidir':
-			context.scene.luxrender_integrator.surfaceintegrator = 'bidirectional'
-		else:
-			context.scene.luxrender_integrator.surfaceintegrator = self.rendermode
-	
-		if self.rendermode in ('hybridpath', 'hybridbidir'):
-			self.renderer = 'hybrid'
-		elif self.rendermode == 'sppm':
-			self.renderer = 'sppm'
-		else:
-			self.renderer = 'sampler'
-			
-	for prop in properties:		
-		if prop['attr'].startswith('rendermode'):
-			prop['update'] = update_rendering_mode
-	
 	def api_output(self):
 		renderer_params = ParamSet()
 		
@@ -197,7 +194,7 @@ class luxrender_rendermode(declarative_property_group):
 			renderer_params.add_string('opencl.devices.select', self.deviceselection)
 		
 		return self.renderer, renderer_params
-		
+
 @LuxRenderAddon.addon_register_class
 class luxrender_halt(declarative_property_group):
 	'''
@@ -235,4 +232,4 @@ class luxrender_halt(declarative_property_group):
 			'soft_max': 65535,
 			'save_in_preset': True
 		},
-		]
+	]

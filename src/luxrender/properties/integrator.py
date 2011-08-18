@@ -321,7 +321,7 @@ class luxrender_integrator(declarative_property_group):
 				('exphotonmap', 'Ex-Photon Map', 'exphotonmap'),
 				('sppm', 'SPPM', 'sppm'),
 			],
-			'update': lambda s,c: check_renderer_settings(c),
+			#'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
 		},
 		{
@@ -330,7 +330,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Advanced',
 			'description': 'Configure advanced integrator settings',
 			'default': False,
-			'update': lambda s,c: check_renderer_settings(c),
+			#'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
 		},
 		{
@@ -348,7 +348,7 @@ class luxrender_integrator(declarative_property_group):
 				('allpowerimp', 'All Power', 'allpowerimp'),
 				('logpowerimp', 'Log Power', 'logpowerimp')
 			],
-			'update': lambda s,c: check_renderer_settings(c),
+			#'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
 		},
 		{
@@ -362,7 +362,7 @@ class luxrender_integrator(declarative_property_group):
 				('one', 'One', 'one'),
 				('all', 'All', 'all')
 			],
-			'update': lambda s,c: check_renderer_settings(c),
+			#'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
 		},
 		{
