@@ -23,8 +23,8 @@
 #
 
 import bpy
-bpy.context.scene.luxrender_engine.renderer = 'sampler'
-bpy.context.scene.luxrender_engine.fixed_seed = False
+bpy.context.scene.luxrender_rendermode.rendermode = 'directlighting'
+bpy.context.scene.luxrender_rendermode.renderer = 'sampler'
 bpy.context.scene.luxrender_sampler.sampler = 'lowdiscrepancy'
 bpy.context.scene.luxrender_sampler.advanced = False
 bpy.context.scene.luxrender_sampler.largemutationprob = 0.4000000059604645

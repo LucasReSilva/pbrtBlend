@@ -23,7 +23,7 @@
 #
 
 import bpy
-bpy.context.scene.luxrender_engine.renderer = 'sampler'
+bpy.context.scene.luxrender_rendermode.rendermode = 'bidirectional'
 bpy.context.scene.luxrender_engine.fixed_seed = False
 bpy.context.scene.luxrender_sampler.sampler = 'metropolis'
 bpy.context.scene.luxrender_sampler.advanced = False
@@ -35,7 +35,6 @@ bpy.context.scene.luxrender_sampler.chainlength = 512
 bpy.context.scene.luxrender_sampler.mutationrange = 256
 bpy.context.scene.luxrender_sampler.pixelsampler = 'vegas'
 bpy.context.scene.luxrender_sampler.pixelsamples = 2
-bpy.context.scene.luxrender_integrator.surfaceintegrator = 'bidirectional'
 bpy.context.scene.luxrender_integrator.advanced = False
 bpy.context.scene.luxrender_integrator.lightstrategy = 'auto'
 bpy.context.scene.luxrender_integrator.eyedepth = 48

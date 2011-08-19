@@ -23,7 +23,8 @@
 #
 
 import bpy
-bpy.context.scene.luxrender_engine.renderer = 'sampler'
+bpy.context.scene.luxrender_rendermode.rendermode = 'exphotonmap'
+bpy.context.scene.luxrender_rendermode.renderer = 'sampler'
 bpy.context.scene.luxrender_engine.fixed_seed = False
 bpy.context.scene.luxrender_sampler.sampler = 'metropolis'
 bpy.context.scene.luxrender_sampler.advanced = False

@@ -23,7 +23,8 @@
 #
 
 import bpy
-bpy.context.scene.luxrender_engine.renderer = 'hybrid'
+bpy.context.scene.luxrender_rendermode.rendermode = 'hybridpath'
+bpy.context.scene.luxrender_rendermode.renderer = 'hybrid'
 bpy.context.scene.luxrender_engine.fixed_seed = False
 bpy.context.scene.luxrender_sampler.sampler = 'metropolis'
 bpy.context.scene.luxrender_sampler.advanced = False

@@ -22,7 +22,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
-bpy.context.scene.luxrender_engine.renderer = 'hybrid'
+bpy.context.scene.luxrender_rendermode.rendermode = 'hybridbidir'
 bpy.context.scene.luxrender_engine.fixed_seed = False
 bpy.context.scene.luxrender_engine.opencl_platform_index = 0
 bpy.context.scene.luxrender_engine.raybuffersize = 8192

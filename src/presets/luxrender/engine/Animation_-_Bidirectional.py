@@ -26,7 +26,8 @@ import bpy
 bpy.context.scene.luxrender_engine.export_type = 'EXT'
 bpy.context.scene.luxrender_engine.monitor_external = True
 bpy.context.scene.luxrender_engine.partial_ply = False
-bpy.context.scene.luxrender_engine.renderer = 'sampler'
+bpy.context.scene.luxrender_rendermode.rendermode = 'bidirectional'
+bpy.context.scene.luxrender_rendermode.renderer = 'sampler'
 bpy.context.scene.luxrender_engine.opencl_platform_index = 0
 bpy.context.scene.luxrender_engine.binary_name = 'luxconsole'
 bpy.context.scene.luxrender_engine.write_files = False
