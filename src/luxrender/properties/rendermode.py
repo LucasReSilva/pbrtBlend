@@ -50,7 +50,7 @@ class luxrender_rendermode(declarative_property_group):
 	
 	visibility = {
 		'opencl_prefs':				{ 'renderer': 'hybrid' },
-		'opencl_platform_index':	{ 'opencl_prefs': True, 'renderer': 'hybrid' },
+		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
