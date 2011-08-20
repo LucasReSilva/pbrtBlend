@@ -76,7 +76,7 @@ class luxrender_accelerator(declarative_property_group):
 			'description': 'Scene accelerator type',
 			'default': 'qbvh',
 			'items': [
-				# Other accelerator types are omitted deliberately, as broken or not useful
+				# Other accelerator types are omitted deliberately, as broken or not useful.
 				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
 				('qbvh', 'QBVH', 'qbvh'),
 			],
@@ -86,6 +86,7 @@ class luxrender_accelerator(declarative_property_group):
 			'attr': 'advanced',
 			'type': 'bool',
 			'name': 'Advanced',
+			'description': 'Configure advanced accelerator options',
 			'default': False,
 			'save_in_preset': True
 		},

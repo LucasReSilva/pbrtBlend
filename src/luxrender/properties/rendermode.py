@@ -88,7 +88,7 @@ class luxrender_rendermode(declarative_property_group):
 				('distributedpath', 'Distributed Path', 'distributedpath'),
 				('igi', 'Instant Global Illumination', 'igi',),
 				('exphotonmap', 'Ex-Photon Map', 'exphotonmap'),
-				('hybridbidir', 'Hybrid Bidir', 'hybridbidir'),
+				('hybridbidir', 'Hybrid Bidirectional', 'hybridbidir'),
 				('hybridpath', 'Hybrid Path', 'hybridpath'),
 				('sppm', 'SPPM', 'sppm'),
 			],

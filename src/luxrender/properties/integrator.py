@@ -33,19 +33,6 @@ from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
 #from .engine import check_renderer_settings
 
-def volumeintegrator_types():
-	items = [
-		('emission', 'Emission', 'emission'),
-		('single', 'Single', 'single'),
-	]
-	
-	if LUXRENDER_VERSION >= '0.8':
-		items.append(
-			('multi', 'Multi', 'multi'),
-		)
-		
-	return items
-
 @LuxRenderAddon.addon_register_class
 class luxrender_volumeintegrator(declarative_property_group):
 	'''
@@ -69,20 +56,26 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'attr': 'volumeintegrator',
 			'name': 'Volume Integrator',
 			'description': 'Volume Integrator',
-			'default': 'single' if LUXRENDER_VERSION < '0.8' else 'multi',
-			'items': volumeintegrator_types(),
+			'default': 'multi',
+			'items': [
+				('emission', 'Emission', 'emission'),
+				('single', 'Single', 'single'),
+				('multi', 'Multi', 'multi'),
+			],
 			'save_in_preset': True
 		},
 		{
 			'type': 'float',
 			'attr': 'stepsize',
 			'name': 'Step Size',
-			'description': 'Volume Integrator Step Size',
+			'description': 'Ray-marching step size. Only used for smoke simulations',
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 100.0,
 			'soft_max': 100.0,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH',
 			'save_in_preset': True
 		},
 		{
