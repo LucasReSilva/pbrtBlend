@@ -473,7 +473,7 @@ class luxrender_film(declarative_property_group):
 			'attr': 'flmwriteinterval',
 			'name': 'Flm write interval',
 			'description': 'Period for writing flm files to disk (seconds)',
-			'default': 180,
+			'default': 900,
 			'min': 2,
 			'soft_min': 2,
 			'save_in_preset': True
