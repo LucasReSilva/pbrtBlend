@@ -773,7 +773,7 @@ class luxrender_film(declarative_property_group):
 		if scene.luxrender_halt.halttime > 0:
 			params.add_integer('halttime', scene.luxrender_halt.halttime)
 		
-		if self.outlierrejection_k > 0:
+		if self.outlierrejection_k > 0 and scene.luxrender_rendermode.renderer != 'sppm':
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)
 		
 		# update the film settings with tonemapper settings
