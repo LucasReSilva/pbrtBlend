@@ -189,10 +189,9 @@ class luxrender_integrator(declarative_property_group):
 		
 		#sppm
 		'photonperpass',
-		'startk',
+		['startradius', 'startk'],
 		'alpha',
 		#sppm advanced
-		'startradius',
 		'glossythreshold',
 		'lookupaccel',
 		'pixelsampler',
@@ -287,8 +286,8 @@ class luxrender_integrator(declarative_property_group):
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
 		'startk':							{ 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'surfaceintegrator': 'sppm' },
+		'startradius':						{ 'surfaceintegrator': 'sppm' },
 		# sppm advanced
-		'startradius':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
@@ -845,8 +844,9 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'float',
 			'attr': 'startradius',
 			'name': 'Starting radius',
-			'description': 'Photon radius used for initial pass',
+			'description': 'Photon radius used for initial pass. Try lowering this if the first pass renders very slowly',
 			'default': 2.0,
+			'min': 0.0001,
 			'save_in_preset': True
 		},
 		{
@@ -865,7 +865,7 @@ class luxrender_integrator(declarative_property_group):
 			'description': 'Tighten photon search radius by this factor on subsequent passes',
 			'default': 0.7,
 			'min': 0.01,
-			'max': 0.99,
+			'max': 1.0,
 			'save_in_preset': True
 		},
 		{
@@ -957,12 +957,12 @@ class luxrender_integrator(declarative_property_group):
 			params.add_integer('maxeyedepth', self.maxeyedepth) \
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
 				  .add_integer('photonperpass', self.photonperpass) \
+ 				  .add_float('startradius', self.startradius) \
 				  .add_integer('startk', self.startk) \
 				  .add_float('alpha', self.alpha) \
 				  .add_bool('includeenvironment', self.includeenvironment)
 			if self.advanced:
-				params.add_float('startradius', self.startradius) \
-  					  .add_float('glossythreshold', self.glossythreshold) \
+				params.add_float('glossythreshold', self.glossythreshold) \
 					  .add_string('lookupaccel', self.lookupaccel) \
 					  .add_string('pixelsampler', self.pixelsampler) \
 					  .add_string('photonsampler', self.photonsampler)
