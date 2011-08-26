@@ -42,6 +42,7 @@ class luxrender_rendermode(declarative_property_group):
 		'rendermode',
 		['opencl_prefs', 'usegpus'],
 		'opencl_platform_index',
+		'configfile',
 		'raybuffersize',
 		'statebuffercount',
 		'workgroupsize',
@@ -51,6 +52,7 @@ class luxrender_rendermode(declarative_property_group):
 	visibility = {
 		'opencl_prefs':				{ 'renderer': 'hybrid' },
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
+		'configfile':				{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
@@ -131,6 +133,15 @@ class luxrender_rendermode(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'configfile',
+			'name': 'OpenCL config file',
+			'description': 'Path to a machine-specific OpenCL configuration file. The settings from the lxs (set below) are used if this is not specified or found',
+			'default': '',
+			'save_in_preset': True
+		},
+		{
 			'type': 'int',
 			'attr': 'raybuffersize',
 			'name': 'Ray buffer size',
@@ -188,6 +199,7 @@ class luxrender_rendermode(declarative_property_group):
 		if self.renderer == 'hybrid' and self.opencl_prefs == True:
 			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
 			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
+			renderer_params.add_string('configfile', self.configfile)
 			renderer_params.add_integer('raybuffersize', self.raybuffersize)
 			renderer_params.add_integer('statebuffercount', self.statebuffercount)
 			renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
