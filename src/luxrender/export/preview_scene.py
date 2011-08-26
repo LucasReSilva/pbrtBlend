@@ -158,72 +158,73 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	lux_context.lightSource('infinite', ParamSet().add_float('gain', 0.1).add_float('importance', 0.1))
 	
 	# back drop
-	lux_context.attributeBegin()
-	lux_context.transform([
-		5.0, 0.0, 0.0, 0.0,
-		0.0, 5.0, 0.0, 0.0,
-		0.0, 0.0, 5.0, 0.0,
-		0.0, 0.0, 0.0, 1.0
-	])
-	lux_context.scale(4,1,1)
-	checks_pattern_params = ParamSet() \
-		.add_integer('dimension', 2) \
-		.add_string('mapping', 'uv') \
-		.add_float('uscale', 36.8) \
-		.add_float('vscale', 36.0*4) #.add_string('aamode', 'supersample') \
-	lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
-	checks_params = ParamSet() \
-		.add_texture('amount', 'checks::pattern') \
-		.add_color('tex1', [0.9, 0.9, 0.9]) \
-		.add_color('tex2', [0.0, 0.0, 0.0])
-	lux_context.texture('checks', 'color', 'mix', checks_params)
-	mat_params = ParamSet().add_texture('Kd', 'checks')
-	lux_context.material('matte', mat_params)
-	bd_shape_params = ParamSet() \
-		.add_integer('nlevels', 3) \
-		.add_bool('dmnormalsmooth', True) \
-		.add_bool('dmsharpboundary', False) \
-		.add_integer('ntris', 18) \
-		.add_integer('nvertices', 8) \
-		.add_integer('indices', [0,1,2,0,2,3,1,0,4,1,4,5,5,4,6,5,6,7]) \
-		.add_point('P', [
-			 1.0,  1.0, 0.0,
-			-1.0,  1.0, 0.0,
-			-1.0, -1.0, 0.0,
-			 1.0, -1.0, 0.0,
-			 1.0,  3.0, 0.0,
-			-1.0,  3.0, 0.0,
-			 1.0,  3.0, 2.0,
-			-1.0,  3.0, 2.0,
-		]) \
-		.add_normal('N', [
-			0.0,  0.000000, 1.000000,
-			0.0,  0.000000, 1.000000,
-			0.0,  0.000000, 1.000000,
-			0.0,  0.000000, 1.000000,
-			0.0, -0.707083, 0.707083,
-			0.0, -0.707083, 0.707083,
-			0.0, -1.000000, 0.000000,
-			0.0, -1.000000, 0.000000,
-		]) \
-		.add_float('uv', [
-			0.333334, 0.000000,
-			0.333334, 0.333334,
-			0.000000, 0.333334,
-			0.000000, 0.000000,
-			0.666667, 0.000000,
-			0.666667, 0.333333,
-			1.000000, 0.000000,
-			1.000000, 0.333333,
+	if mat.preview_render_type != 'FLAT':
+		lux_context.attributeBegin()
+		lux_context.transform([
+			5.0, 0.0, 0.0, 0.0,
+			0.0, 5.0, 0.0, 0.0,
+			0.0, 0.0, 5.0, 0.0,
+			0.0, 0.0, 0.0, 1.0
 		])
-	lux_context.shape('loopsubdiv', bd_shape_params)
+		lux_context.scale(4,1,1)
+		checks_pattern_params = ParamSet() \
+			.add_integer('dimension', 2) \
+			.add_string('mapping', 'uv') \
+			.add_float('uscale', 36.8) \
+			.add_float('vscale', 36.0*4) #.add_string('aamode', 'supersample') \
+		lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
+		checks_params = ParamSet() \
+			.add_texture('amount', 'checks::pattern') \
+			.add_color('tex1', [0.9, 0.9, 0.9]) \
+			.add_color('tex2', [0.0, 0.0, 0.0])
+		lux_context.texture('checks', 'color', 'mix', checks_params)
+		mat_params = ParamSet().add_texture('Kd', 'checks')
+		lux_context.material('matte', mat_params)
+		bd_shape_params = ParamSet() \
+			.add_integer('nlevels', 3) \
+			.add_bool('dmnormalsmooth', True) \
+			.add_bool('dmsharpboundary', False) \
+			.add_integer('ntris', 18) \
+			.add_integer('nvertices', 8) \
+			.add_integer('indices', [0,1,2,0,2,3,1,0,4,1,4,5,5,4,6,5,6,7]) \
+			.add_point('P', [
+				 1.0,  1.0, 0.0,
+				-1.0,  1.0, 0.0,
+				-1.0, -1.0, 0.0,
+				 1.0, -1.0, 0.0,
+				 1.0,  3.0, 0.0,
+				-1.0,  3.0, 0.0,
+				 1.0,  3.0, 2.0,
+				-1.0,  3.0, 2.0,
+			]) \
+			.add_normal('N', [
+				0.0,  0.000000, 1.000000,
+				0.0,  0.000000, 1.000000,
+				0.0,  0.000000, 1.000000,
+				0.0,  0.000000, 1.000000,
+				0.0, -0.707083, 0.707083,
+				0.0, -0.707083, 0.707083,
+				0.0, -1.000000, 0.000000,
+				0.0, -1.000000, 0.000000,
+			]) \
+			.add_float('uv', [
+				0.333334, 0.000000,
+				0.333334, 0.333334,
+				0.000000, 0.333334,
+				0.000000, 0.000000,
+				0.666667, 0.000000,
+				0.666667, 0.333333,
+				1.000000, 0.000000,
+				1.000000, 0.333333,
+			])
+		lux_context.shape('loopsubdiv', bd_shape_params)
 	
-	if scene.luxrender_world.default_interior_volume != '':
-		lux_context.interior(scene.luxrender_world.default_interior_volume)
-	if scene.luxrender_world.default_exterior_volume != '':
-		lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+		if scene.luxrender_world.default_interior_volume != '':
+			lux_context.interior(scene.luxrender_world.default_interior_volume)
+		if scene.luxrender_world.default_exterior_volume != '':
+			lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 	
-	lux_context.attributeEnd()
+		lux_context.attributeEnd()
 	
 	if obj is not None and mat is not None:
 		# preview object
@@ -237,7 +238,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		pv_export_shape = True
 		
 		if mat.preview_render_type == 'FLAT':
-			pv_export_shape = False
+			lux_context.scale(1, 1, 2)
+			lux_context.rotate(90, 90,0,0)
 		if mat.preview_render_type == 'SPHERE':
 			pv_transform = [
 				0.1, 0.0, 0.0, 0.0,
