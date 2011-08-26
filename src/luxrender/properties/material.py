@@ -1587,7 +1587,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_uroughness.controls + \
 		TF_uexponent.controls + \
 		TF_vroughness.controls + \
-		TF_vexponent.controls
+		TF_vexponent.controls + \
 	[
 		'two_sided',
 		'backface_multibounce',
