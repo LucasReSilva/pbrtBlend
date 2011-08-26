@@ -944,11 +944,12 @@ class luxrender_integrator(declarative_property_group):
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \
-				  .add_integer('lightdepth', self.lightdepth)
+				  .add_integer('lightdepth', self.lightdepth) \
+				  .add_string('strategy', self.bidirstrategy)
+			#Always export bidir strategy to make working with hybrid bidir easier (the rendermode menu sets the strat to one automatically)
 			if self.advanced:
 				params.add_float('eyerrthreshold', self.eyerrthreshold)
 				params.add_float('lightrrthreshold', self.lightrrthreshold)
-				params.add_string('strategy', self.bidirstrategy)
 		
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth) \
