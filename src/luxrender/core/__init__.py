@@ -240,7 +240,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		LuxManager.SetCurrentScene(scene)
 		LuxManager.SetActive(LM)
 		
-		file_based_preview = True
+		file_based_preview = False
 		
 		if file_based_preview:
 			# Dump to file in temp dir for debugging
