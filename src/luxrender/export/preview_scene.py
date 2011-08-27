@@ -190,38 +190,26 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		mat_params = ParamSet().add_texture('Kd', 'checks')
 		lux_context.material('matte', mat_params)
 		bd_shape_params = ParamSet() \
-			.add_integer('ntris', 18) \
-			.add_integer('nvertices', 8) \
-			.add_integer('indices', [0,1,2,0,2,3,1,0,4,1,4,5,5,4,6,5,6,7]) \
+			.add_integer('ntris', 6) \
+			.add_integer('nvertices', 4) \
+			.add_integer('indices', [0,1,2,0,2,3]) \
 			.add_point('P', [
 				 1.0,  1.0, 0.0,
 				-1.0,  1.0, 0.0,
 				-1.0, -1.0, 0.0,
 				 1.0, -1.0, 0.0,
-				 1.0,  3.0, 0.0,
-				-1.0,  3.0, 0.0,
-				 1.0,  4.0, 0.0,
-				-1.0,  4.0, 0.0,
 			]) \
 			.add_normal('N', [
-				0.0,  0.000000, 1.000000,
-				0.0,  0.000000, 1.000000,
-				0.0,  0.000000, 1.000000,
-				0.0,  0.000000, 1.000000,
-				0.0, -0.707083, 0.707083,
-				0.0, -0.707083, 0.707083,
-				0.0, -1.000000, 0.000000,
-				0.0, -1.000000, 0.000000,
+				0.0,  0.0, 1.0,
+				0.0,  0.0, 1.0,
+				0.0,  0.0, 1.0,
+				0.0,  0.0, 1.0,
 			]) \
 			.add_float('uv', [
 				0.333334, 0.000000,
 				0.333334, 0.333334,
 				0.000000, 0.333334,
 				0.000000, 0.000000,
-				0.666667, 0.000000,
-				0.666667, 0.333333,
-				1.000000, 0.000000,
-				1.000000, 0.333333,
 			])
 		lux_context.shape('loopsubdiv', bd_shape_params)
 	else:
