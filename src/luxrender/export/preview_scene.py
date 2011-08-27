@@ -190,9 +190,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		mat_params = ParamSet().add_texture('Kd', 'checks')
 		lux_context.material('matte', mat_params)
 		bd_shape_params = ParamSet() \
-			.add_integer('nlevels', 3) \
-			.add_bool('dmnormalsmooth', True) \
-			.add_bool('dmsharpboundary', False) \
 			.add_integer('ntris', 18) \
 			.add_integer('nvertices', 8) \
 			.add_integer('indices', [0,1,2,0,2,3,1,0,4,1,4,5,5,4,6,5,6,7]) \
