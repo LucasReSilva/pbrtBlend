@@ -3237,7 +3237,7 @@ def import_paramset_to_blender_texture(texture, tex_type, ps):
 			'noisetype': 'noise_type',
 			'noisebasis': 'noise_basis',
 			'noisebasis2': 'noise_basis_2',
-			'noisesize': 'noise_size',
+			'noisesize': 'noise_scale',
 			'noisedepth': 'noise_depth'
 		},{
 			'type': lambda x: x.upper(),
