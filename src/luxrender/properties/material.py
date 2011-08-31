@@ -103,12 +103,12 @@ TF_d					= FloatTextureParameter('d', 'Absorption depth (nm)',				add_float_valu
 TF_film					= FloatTextureParameter('film', 'Thin film thickness (nm)',			add_float_value=True, min=0.0, default=0.0, max=2500.0 ) # default 0.0 for OFF
 TF_filmindex			= FloatTextureParameter('filmindex', 'Film IOR',					add_float_value=True, default=1.3333, min=1.0, max=6.0 ) # default 1.3333 for a coating of a water-based solution
 TF_index				= FloatTextureParameter('index', 'IOR',								add_float_value=True, min=0.0, max=25.0, default=1.520) #default of something other than 1.0 so glass and roughglass render propery with defaults
-TF_M1					= FloatTextureParameter('M1', 'M1',									add_float_value=True, default=0.300, min=0.0001, max=1.0 ) #carpaint defaults set for a basic gray clearcoat paint job, as a "setting suggestion"
-TF_M2					= FloatTextureParameter('M2', 'M2',									add_float_value=True, default=0.200, min=0.0001, max=1.0 ) #set m1-3 min to .0001, carpaint will take 0.0 as being max (1.0)
-TF_M3					= FloatTextureParameter('M3', 'M3',									add_float_value=True, default=0.025, min=0.0001, max=1.0 )
+TF_M1					= FloatTextureParameter('M1', 'M1',									add_float_value=True, default=0.350, min=0.0001, max=1.0 ) #carpaint defaults set for a basic gray clearcoat paint job, as a "setting suggestion"
+TF_M2					= FloatTextureParameter('M2', 'M2',									add_float_value=True, default=0.150, min=0.0001, max=1.0 ) #set m1-3 min to .0001, carpaint will take 0.0 as being max (1.0)
+TF_M3					= FloatTextureParameter('M3', 'M3',									add_float_value=True, default=0.015, min=0.0001, max=1.0 )
 TF_R1					= FloatTextureParameter('R1', 'R1',									add_float_value=True, min=0.00001, max=1.0, default=0.950 )
-TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.250 )
-TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.005 )
+TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.90 )
+TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.7 )
 TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
 TF_uroughness			= FloatTextureParameter('uroughness', ' U-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
 TF_uexponent			= FloatTextureParameter('uexponent', ' U-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
@@ -125,9 +125,9 @@ TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0
 TC_Kd					= ColorTextureParameter('Kd', 'Diffuse color',						default=(0.64,0.64,0.64) )
 TC_Kr					= ColorTextureParameter('Kr', 'Reflection color',					default=(0.7,0.7,0.7) ) # 1.0 reflection color is not sane for mirror or shinymetal, 0.7 does not signifcantly affect glass or roughglass
 TC_Ks					= ColorTextureParameter('Ks', 'Specular color',						default=(0.04,0.04,0.04) )
-TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(0.10,0.10,0.10) )
-TC_Ks2					= ColorTextureParameter('Ks2', 'Specular color 2',					default=(0.06,0.06,0.06) )
-TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(0.04,0.04,0.04) )
+TC_Ks1					= ColorTextureParameter('Ks1', 'Specular color 1',					default=(0.06,0.06,0.06) )
+TC_Ks2					= ColorTextureParameter('Ks2', 'Specular color 2',					default=(0.08,0.08,0.08) )
+TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(0.012,0.012,0.012) )
 TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
 TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
 TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',	default=(0.64,0.64,0.64) )
