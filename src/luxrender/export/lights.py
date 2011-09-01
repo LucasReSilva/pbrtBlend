@@ -164,8 +164,34 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 
 	if light.type == 'POINT':
 		light_params.update( ies_data )
-		light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-		attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		#Here the point size option kicks in. If it is non-zero, we export a spherical area light. If it is 0, we export a point.
+		if light.luxrender_lamp.luxrender_lamp_point.pointsize !=0 and scene.luxrender_rendermode.renderer != 'hybrid': #no sphere primitives with hybrid!
+			light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False)**2))
+			lux_context.attributeBegin(ob.name, file=Files.MAIN)
+			lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
+			lux_context.lightGroup(light_group, [])
+			
+			if light.luxrender_lamp.Exterior_volume != '':
+				lux_context.exterior(light.luxrender_lamp.Exterior_volume)
+			elif scene.luxrender_world.default_exterior_volume != '':
+				lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+		
+			lux_context.areaLightSource('area', light_params)
+			
+			shape_params = ParamSet()
+		
+			shape_params.add_float('radius', [light.luxrender_lamp.luxrender_lamp_point.pointsize])
+		
+			lux_context.shape('sphere', shape_params)
+		
+			for portal in portals:
+				lux_context.portalInstance(portal)
+		
+			lux_context.attributeEnd()
+		
+		else: #export an actual point light
+			light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
+			attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'AREA':

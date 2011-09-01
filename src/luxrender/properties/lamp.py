@@ -150,7 +150,8 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 	controls = TC_L.controls[:] + [
 		'flipz',
 		'power',
-		'efficacy'
+		'efficacy',
+		'pointsize'
 	]
 	
 	properties = TC_L.properties[:] + [
@@ -180,7 +181,18 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'soft_min': 0.0,
 			'max': 1e6,
 			'soft_max': 1e6,
-		}
+		},		
+		{
+			'type': 'float',
+			'attr': 'pointsize',
+			'name': 'Radius',
+			'default': 0.0,
+			'description': 'Lamp radius. 0 gives a true point, but is not recommended unless using an IES profile',
+			'min': 0.0,
+			'soft_min': 0.0,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH'
+		},
 	]
 
 	def get_paramset(self, lamp_object):
