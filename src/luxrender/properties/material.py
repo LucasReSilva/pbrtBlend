@@ -31,7 +31,7 @@ from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
 from ..properties.texture import (
-	FloatTextureParameter, ColorTextureParameter,
+	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
 from ..export import ParamSet, process_filepath_data
@@ -133,6 +133,9 @@ TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption col
 TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',	default=(0.64,0.64,0.64) )
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
 
+# Fresnel Textures
+TFR_fresnel				= FresnelTextureParameter('fresnel', 'Frensel',						add_float_value=True, default=5.0, min=0.0, max=20.0)
+
 mat_names = {
 	'matte': 'Matte',
 	'mattetranslucent': 'Matte Translucent',
@@ -145,6 +148,7 @@ mat_names = {
 	'mirror': 'Mirror',
 	'carpaint': 'Car Paint',
 	'metal': 'Metal',
+	'metal2': 'Metal2',
 	'shinymetal': 'Shiny Metal',
 	'velvet': 'Velvet',
 	'scatter': 'Scatter',
@@ -1938,6 +1942,87 @@ class luxrender_mat_metal(declarative_property_group):
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
 				setattr(self, psi['name'], psi['value'])
 		
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_mat_metal2(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
+	alert = {}
+	
+	controls = [
+	] + \
+		TFR_fresnel.controls + \
+	[
+		['anisotropic', 'use_exponent'],
+	] + \
+		TF_uroughness.controls + \
+		TF_uexponent.controls + \
+		TF_vroughness.controls + \
+		TF_vexponent.controls
+	
+	visibility = dict_merge(
+		TFR_fresnel.visibility,
+		TF_uroughness.visibility,
+		TF_uexponent.visibility,
+		TF_vroughness.visibility,
+		TF_vexponent.visibility,
+	)
+	
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
+	
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
+		}
+	] + \
+		TFR_fresnel.get_properties() + \
+		TF_uroughness.get_properties() + \
+		TF_uexponent.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties()
+	
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
+	
+	def get_paramset(self, material):
+		metal2_params = ParamSet()
+		
+		metal2_params.update( TFR_fresnel.get_paramset(self) )
+		metal2_params.update( TF_uroughness.get_paramset(self) )
+		metal2_params.update( TF_vroughness.get_paramset(self) )
+		
+		return metal2_params
+		
+		TFR_fresnel.load_paramset(self, ps)
 		TF_uroughness.load_paramset(self, ps)
 		TF_vroughness.load_paramset(self, ps)
 

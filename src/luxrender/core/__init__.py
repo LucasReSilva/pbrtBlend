@@ -60,7 +60,7 @@ from ..ui import (
 
 from ..ui.materials import (
 	main as mat_main, compositing, carpaint, glass, glass2, roughglass, glossytranslucent,
-	glossy_lossy, glossy, matte, mattetranslucent, metal, mirror, mix as mat_mix, null,
+	glossy_lossy, glossy, matte, mattetranslucent, metal, metal2, mirror, mix as mat_mix, null,
 	scatter, shinymetal, velvet
 )
 
