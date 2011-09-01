@@ -177,7 +177,11 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 				lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 		
 			lux_context.areaLightSource('area', light_params)
-			
+
+			# always remove blender object_scale to avoid corona-effect
+			x,y,z = bpy.data.objects[light.name].scale.copy() # get scale from blender
+			lux_context.scale( 1/x, 1/y, 1/z)
+		
 			shape_params = ParamSet()
 		
 			shape_params.add_float('radius', [light.luxrender_lamp.luxrender_lamp_point.pointsize])
