@@ -134,7 +134,7 @@ TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color'
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
 
 # Fresnel Textures
-TFR_fresnel				= FresnelTextureParameter('fresnel', 'Frensel',						add_float_value=True, default=5.0, min=0.0, max=20.0)
+TFR_fresnel				= FresnelTextureParameter('fresnel', 'Frensel', 					add_float_value = False)
 
 mat_names = {
 	'matte': 'Matte',
