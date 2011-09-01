@@ -671,6 +671,7 @@ tex_names = (
 		('constant', 'Constant'),
 		('cauchy', 'Cauchy'),
 		('sellmeier', 'Sellmeier'),
+		('fresnelcolor', 'Fresnel Color'),
 		('sopra', 'Sopra'),
 		('luxpop', 'Luxpop'),
 	)),
@@ -830,6 +831,7 @@ TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,
 TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
 TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
+TC_color		= ColorTextureParameter('color',		'color',		default=(0.5,0.5,0.5)) #This parameter is used by the fresnelcolor texture
 
 # Fresnel Texture Parameters
 TFR_tex1		= FresnelTextureParameter('tex1',		'tex1',			default=1.0, min=-1e6, max=1e6)
@@ -1763,7 +1765,43 @@ class luxrender_tex_fbm(declarative_property_group):
 		for psi in ps:
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
 				setattr(self, psi['name'], psi['value'])
-
+				
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_fresnelcolor(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = [
+	] + \
+	TC_color.controls
+	
+	visibility = {
+		'color_colortexture': 	{ 'color_usecolortexture': True },
+		'color_multiplycolor':	{ 'color_usecolortexture': True },
+	}
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'fresnel'
+		},
+	] + \
+	TC_color.properties
+	
+	def get_paramset(self, scene, texture):
+		fresnelcolor_params = ParamSet()
+		
+		if LuxManager.ActiveManager is not None:
+			fresnelcolor_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'color', 'color', self)
+			)
+		
+		return set(), fresnelcolor_params
+	
+	def load_paramset(self, variant, ps):
+		TC_color.load_paramset(self, ps)
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_gaussian(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
