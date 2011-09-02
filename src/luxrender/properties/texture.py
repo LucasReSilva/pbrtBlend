@@ -670,8 +670,8 @@ tex_names = (
 	(
 		('constant', 'Constant'),
 		('cauchy', 'Cauchy'),
-		('sellmeier', 'Sellmeier'),
 		('fresnelcolor', 'Fresnel Color'),
+		('sellmeier', 'Sellmeier'),
 		('sopra', 'Sopra'),
 		('luxpop', 'Luxpop'),
 	)),
