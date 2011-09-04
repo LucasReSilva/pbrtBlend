@@ -831,7 +831,7 @@ TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,
 TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
 TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
-TC_color		= ColorTextureParameter('color',		'color',		default=(0.5,0.5,0.5)) #This parameter is used by the fresnelcolor texture
+TC_Kr			= ColorTextureParameter('Kr',			'reflection color',		default=(0.7,0.7,0.7)) #This parameter is used by the fresnelcolor texture
 
 # Fresnel Texture Parameters
 TFR_tex1		= FresnelTextureParameter('tex1',		'tex1',			default=1.0, min=-1e6, max=1e6)
@@ -1773,11 +1773,11 @@ class luxrender_tex_fresnelcolor(declarative_property_group):
 	
 	controls = [
 	] + \
-	TC_color.controls
+	TC_Kr.controls
 	
 	visibility = {
-		'color_colortexture': 	{ 'color_usecolortexture': True },
-		'color_multiplycolor':	{ 'color_usecolortexture': True },
+		'Kr_colortexture': 	{ 'Kr_usecolortexture': True },
+		'Kr_multiplycolor':	{ 'Kr_usecolortexture': True },
 	}
 	
 	properties = [
@@ -1787,14 +1787,14 @@ class luxrender_tex_fresnelcolor(declarative_property_group):
 			'default': 'fresnel'
 		},
 	] + \
-	TC_color.properties
+	TC_Kr.properties
 	
 	def get_paramset(self, scene, texture):
 		fresnelcolor_params = ParamSet()
 		
 		if LuxManager.ActiveManager is not None:
 			fresnelcolor_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'color', 'color', self)
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'Kr', 'color', self)
 			)
 		
 		return set(), fresnelcolor_params
