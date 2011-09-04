@@ -153,12 +153,14 @@ class luxrender_engine(declarative_property_group):
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
-		'render':					O([{'write_files': True}, {'export_type': 'EXT'}]),
+		'render':					O([{'write_files': True}, { 'export_type': 'EXT' }]), #We need run renderer unless we are set for internal-pipe mode, which is the only time both of these are false
 		'monitor_external':			{'export_type': 'EXT', 'binary_name': 'luxrender', 'render': True },
 		'partial_ply':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'install_path':				{ 'export_type': 'EXT' },
-		'threads_auto':				A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }]),
-		'threads':					A([O([{'write_files': True}, {'export_type': 'EXT'}]), { 'render': True }, { 'threads_auto': False }]),
+		'threads_auto':				O([A([{'write_files': False}, { 'export_type': 'INT' }]), A([O([{'write_files': True}, { 'export_type': 'EXT' }]), { 'render': True }])]), #The flag options must be present for any condition where run renderer is present and checked, as well as internal-pipe mode
+		'threads':					O([A([{'write_files': False}, { 'export_type': 'INT' }, {'threads_auto': False}]), A([O([{'write_files': True}, { 'export_type': 'EXT' }]), { 'render': True }, {'threads_auto': False}])]), #Longest logic test in the whole plugin! threads-auto is in both sides, since we must check that it is false for either internal-pipe mode, or when using run-renderer.
+		'fixed_seed':				O([A([{'write_files': False}, { 'export_type': 'INT' }]), A([O([{'write_files': True}, { 'export_type': 'EXT' }]), { 'render': True }])]),
+		'log_verbosity':			O([A([{'write_files': False}, { 'export_type': 'INT' }]), A([O([{'write_files': True}, { 'export_type': 'EXT' }]), { 'render': True }])]),
 	}
 	
 	alert = {}
