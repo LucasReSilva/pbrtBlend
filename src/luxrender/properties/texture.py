@@ -1265,7 +1265,7 @@ class luxrender_tex_brick(declarative_property_group):
 			'attr': 'brickrun',
 			'type': 'float',
 			'name': 'brickrun',
-			'default': 0.5,
+			'default': 0.75,
 			'min': -10.0,
 			'soft_min': -10.0,
 			'max': 10.0,
