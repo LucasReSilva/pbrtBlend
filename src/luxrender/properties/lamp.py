@@ -151,8 +151,16 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 		'flipz',
 		'power',
 		'efficacy',
-		'pointsize'
+		'usesphere',
+		'pointsize',
+		'nsamples',
 	]
+	
+	visibility = dict_merge(
+		luxrender_lamp_basic.visibility,
+		{ 'pointsize':				{ 'usesphere': True} },
+		{ 'nsamples':				{ 'usesphere': True} },
+		)
 	
 	properties = TC_L.properties[:] + [
 		{
@@ -181,17 +189,35 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'soft_min': 0.0,
 			'max': 1e6,
 			'soft_max': 1e6,
-		},		
+		},
+		{
+			'type': 'bool',
+			'attr': 'usesphere',
+			'name': 'Use Sphere',
+			'default': False,
+			'description': 'Use a spherical area light instead of a true point light. This is more realistic, but can deform IES profiles',
+		},	
 		{
 			'type': 'float',
 			'attr': 'pointsize',
 			'name': 'Radius',
-			'default': 0.0,
-			'description': 'Lamp radius. 0 gives a true point, but is not recommended unless using an IES profile',
-			'min': 0.0,
-			'soft_min': 0.0,
+			'default': 0.025, #2.5cm default, this is roughly the radius of a common light bulb.
+			'description': 'Radius of the lamp sphere',
+			'min': 0.000001, #1-micron minimum radius. This needs to be non-zero.
+			'soft_min': 0.0000001,
 			'sub_type': 'DISTANCE',
 			'unit': 'LENGTH'
+		},
+		{
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
 		},
 	]
 

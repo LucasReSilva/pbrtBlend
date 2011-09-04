@@ -164,9 +164,10 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 
 	if light.type == 'POINT':
 		light_params.update( ies_data )
-		#Here the point size option kicks in. If it is non-zero, we export a spherical area light. If it is 0, we export a point.
-		if light.luxrender_lamp.luxrender_lamp_point.pointsize !=0 and scene.luxrender_rendermode.renderer != 'hybrid': #no sphere primitives with hybrid!
+		#Here the use sphere option kicks in. If true, export an spherical area light (using Lux's geometric sphere primitive) rather than a true point light
+		if light.luxrender_lamp.luxrender_lamp_point.usesphere == True and scene.luxrender_rendermode.renderer != 'hybrid': #no sphere primitives with hybrid!
 			light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False)**2))
+			light_params.add_integer('nsamples', [light.luxrender_lamp.luxrender_lamp_point.nsamples]) #Add this in manually, it is not used for the true point and thus is not in the normal parameter set
 			lux_context.attributeBegin(ob.name, file=Files.MAIN)
 			lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
 			lux_context.lightGroup(light_group, [])
@@ -184,7 +185,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		
 			shape_params = ParamSet()
 		
-			shape_params.add_float('radius', [light.luxrender_lamp.luxrender_lamp_point.pointsize])
+			shape_params.add_float('radius', [light.luxrender_lamp.luxrender_lamp_point.pointsize]) #Fetch point light size and use it for the sphere primitive's radius param
 		
 			lux_context.shape('sphere', shape_params)
 		
