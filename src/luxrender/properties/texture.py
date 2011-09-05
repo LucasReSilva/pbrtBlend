@@ -274,7 +274,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'attr': '%s_colortexturename' % self.attr,
 				'type': 'string',
 				'name': '%s_colortexturename' % self.attr,
-				'description': '%s Texture' % self.name,
+				'description': '%s texture' % self.name,
 				'update': lambda s,c: refresh_preview(s,c) or check_texture_variant(s,c, self.attr,'color'),
 				'save_in_preset': True
 			},
@@ -414,7 +414,7 @@ class FloatTextureParameter(TextureParameterBase):
 				'subtype': self.sub_type,
 				'unit': self.unit,
 				'name': self.name,
-				'description': '%s Value' % self.name,
+				'description': '%s value' % self.name,
 				'default': self.default,
 				'min': self.min,
 				'soft_min': self.min,
@@ -572,7 +572,7 @@ class FresnelTextureParameter(TextureParameterBase):
 				'attr': '%s_fresnelvalue' % self.attr,
 				'type': 'float',
 				'name': self.name,
-				'description': '%s Value' % self.name,
+				'description': '%s value' % self.name,
 				'default': self.default,
 				'min': self.min,
 				'soft_min': self.min,
@@ -597,7 +597,7 @@ class FresnelTextureParameter(TextureParameterBase):
 				'attr': '%s_fresneltexturename' % self.attr,
 				'type': 'string',
 				'name': '%s_fresneltexturename' % self.attr,
-				'description': '%s Texture' % self.name,
+				'description': '%s texture' % self.name,
 				'save_in_preset': True
 			},
 			{
@@ -814,28 +814,28 @@ class luxrender_texture(declarative_property_group):
 #------------------------------------------------------------------------------ 
 
 # Float Texture Parameters
-TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'brickmodtex',	default=0.0, min=0.0, max=1.0, precision=6)
-TF_bricktex		= FloatTextureParameter('bricktex',		'bricktex',		default=0.0, min=0.0, max=1.0, precision=6)
-TF_mortartex	= FloatTextureParameter('mortartex',	'mortartex',	default=0.0, min=0.0, max=1.0, precision=6)
-TF_tex1			= FloatTextureParameter('tex1',			'tex1',			default=1.0, min=-1e6, max=1e6, precision=6)
-TF_tex2			= FloatTextureParameter('tex2',			'tex2',			default=0.0, min=-1e6, max=1e6, precision=6)
-TF_amount		= FloatTextureParameter('amount',		'amount',		default=0.5, min=0.0, max=1.0, precision=6)
-TF_inside		= FloatTextureParameter('inside',		'inside',		default=1.0, min=0.0, max=100.0, precision=6)
-TF_outside		= FloatTextureParameter('outside',		'outside',		default=0.0, min=0.0, max=100.0, precision=6)
-TF_innertex		= FloatTextureParameter('innertex',		'innertex',		default=1.0, min=0.0, max=100.0, precision=6)
-TF_outertex		= FloatTextureParameter('outertex',		'outertex',		default=0.0, min=0.0, max=100.0, precision=6)
+TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'Brick modulation texture',	default=0.0, min=0.0, max=1.0, precision=6)
+TF_bricktex		= FloatTextureParameter('bricktex',		'Brick texture',			default=0.0, min=0.0, max=1.0, precision=6)
+TF_mortartex	= FloatTextureParameter('mortartex',	'Mortar texture',			default=0.0, min=0.0, max=1.0, precision=6)
+TF_tex1			= FloatTextureParameter('tex1',			'Texture 1',				default=1.0, min=-1e6, max=1e6, precision=6)
+TF_tex2			= FloatTextureParameter('tex2',			'Texture 2',				default=0.0, min=-1e6, max=1e6, precision=6)
+TF_amount		= FloatTextureParameter('amount',		'Amount',					default=0.5, min=0.0, max=1.0, precision=6)
+TF_inside		= FloatTextureParameter('inside',		'Inside',					default=1.0, min=0.0, max=100.0, precision=6)
+TF_outside		= FloatTextureParameter('outside',		'Outside',					default=0.0, min=0.0, max=100.0, precision=6)
+TF_innertex		= FloatTextureParameter('innertex',		'Inner texture',			default=1.0, min=0.0, max=100.0, precision=6)
+TF_outertex		= FloatTextureParameter('outertex',		'Outer texture',			default=0.0, min=0.0, max=100.0, precision=6)
 
 # Color Texture Parameters
-TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'brickmodtex',	default=(1.0,1.0,1.0))
-TC_bricktex		= ColorTextureParameter('bricktex',		'bricktex',		default=(1.0,1.0,1.0))
-TC_mortartex	= ColorTextureParameter('mortartex',	'mortartex',	default=(1.0,1.0,1.0))
-TC_tex1			= ColorTextureParameter('tex1',			'tex1',			default=(1.0,1.0,1.0))
-TC_tex2			= ColorTextureParameter('tex2',			'tex2',			default=(0.0,0.0,0.0))
-TC_Kr			= ColorTextureParameter('Kr',			'reflection color',		default=(0.7,0.7,0.7)) #This parameter is used by the fresnelcolor texture
+TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'Brick modulation texture',	default=(1.0,1.0,1.0))
+TC_bricktex		= ColorTextureParameter('bricktex',		'Brick texture',			default=(1.0,1.0,1.0))
+TC_mortartex	= ColorTextureParameter('mortartex',	'Mortar texture',			default=(1.0,1.0,1.0))
+TC_tex1			= ColorTextureParameter('tex1',			'Texture 1',				default=(1.0,1.0,1.0))
+TC_tex2			= ColorTextureParameter('tex2',			'Texture 2',				default=(0.0,0.0,0.0))
+TC_Kr			= ColorTextureParameter('Kr',			'Reflection color',			default=(0.7,0.7,0.7)) #This parameter is used by the fresnelcolor texture
 
 # Fresnel Texture Parameters
-TFR_tex1		= FresnelTextureParameter('tex1',		'tex1',			default=1.0, min=-1e6, max=1e6)
-TFR_tex2		= FresnelTextureParameter('tex2',		'tex2',			default=0.0, min=-1e6, max=1e6)
+TFR_tex1		= FresnelTextureParameter('tex1',		'Texture 1',				default=1.0, min=-1e6, max=1e6)
+TFR_tex2		= FresnelTextureParameter('tex2',		'Texture 2',				default=0.0, min=-1e6, max=1e6)
 
 BAND_MAX_TEX = 32
 
@@ -904,7 +904,7 @@ class luxrender_tex_band(declarative_property_group):
 		{
 			'attr': 'noffsets',
 			'type': 'int',
-			'name': 'NOffsets',
+			'name': 'Number of Offsets',
 			'default': 2,
 			'min': 2,
 			'max': BAND_MAX_TEX,
@@ -1241,15 +1241,15 @@ class luxrender_tex_brick(declarative_property_group):
 		{
 			'attr': 'brickbond',
 			'type': 'enum',
-			'name': 'Bond Type',
+			'name': 'Bond type',
 			'items': [
-				('running', 'running', 'running'),
-				('stacked', 'stacked', 'stacked'),
-				('flemish', 'flemish', 'flemish'),
-				('english', 'english', 'english'),
-				('herringbone', 'herringbone', 'herringbone'),
-				('basket', 'basket', 'basket'),
-				('chain link', 'chain link', 'chain link')
+				('running', 'Running', 'running'),
+				('stacked', 'Stacked', 'stacked'),
+				('flemish', 'Flemish', 'flemish'),
+				('english', 'English', 'english'),
+				('herringbone', 'Herringbone', 'herringbone'),
+				('basket', 'Basket', 'basket'),
+				('chain link', 'Chain link', 'chain link')
 			],
 			'save_in_preset': True
 		},
@@ -1264,7 +1264,7 @@ class luxrender_tex_brick(declarative_property_group):
 		{
 			'attr': 'brickrun',
 			'type': 'float',
-			'name': 'brickrun',
+			'name': 'Brick run',
 			'default': 0.75,
 			'min': -10.0,
 			'soft_min': -10.0,
@@ -1276,7 +1276,7 @@ class luxrender_tex_brick(declarative_property_group):
 		{
 			'attr': 'mortarsize',
 			'type': 'float',
-			'name': 'Mortar Size',
+			'name': 'Mortar size',
 			'default': 0.01,
 			'min': 0.0,
 			'soft_min': 0.0,
@@ -1515,9 +1515,9 @@ class luxrender_tex_checkerboard(declarative_property_group):
 			'name': 'Anti-Alias Mode',
 			'default': 'closedform',
 			'items': [
-				('closedform', 'closedform', 'closedform'),
-				('supersample', 'supersample', 'supersample'),
-				('none', 'none', 'none')
+				('closedform', 'Closed-form', 'closedform'),
+				('supersample', 'Supersample', 'supersample'),
+				('none', 'None', 'none')
 			],
 			'save_in_preset': True
 		},
@@ -2251,10 +2251,10 @@ class luxrender_tex_mapping(declarative_property_group):
 			'type': 'enum',
 			'name': 'Mapping Type',
 			'items': [
-				('uv','uv','uv'),
-				('planar','planar','planar'),
-				('spherical','spherical','spherical'),
-				('cylindrical','cylindrical','cylindrical'),
+				('uv','UV','uv'),
+				('planar','Planar','planar'),
+				('spherical','Spherical','spherical'),
+				('cylindrical','Cylindrical','cylindrical'),
 			],
 			'save_in_preset': True
 		},
