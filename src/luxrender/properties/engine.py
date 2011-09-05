@@ -140,13 +140,11 @@ class luxrender_engine(declarative_property_group):
 		'mesh_type',
 		'partial_ply',
 		['render','monitor_external'],
-		['threads_auto', 'threads'],
-		'fixed_seed',
+		['threads_auto', 'fixed_seed'],
+		'threads',
+		'log_verbosity',
 		]
-	
-	#Append log verbosity, for some reason it only works when set like this.
-	controls.append('log_verbosity')
-	
+		
 	visibility = {
 		'write_files':				{ 'export_type': 'INT' },
 		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
