@@ -120,9 +120,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		for volume in scn.luxrender_volumes.volumes:
 			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 
-#	LuxManager.SetCurrentScene(scene) # here we get wrong scene ( previev instead of active scene )
-	scene = bpy.data.scenes[bpy.context.scene.name]  # intermediate fix but looses context sometimes
-#	print("--------->", scene)
+	scene = LuxManager.CurrentScene
 
 	# Light
 	lux_context.attributeBegin()
