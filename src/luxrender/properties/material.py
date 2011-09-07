@@ -215,6 +215,7 @@ class luxrender_material(declarative_property_group):
 			'attr': 'type',
 			'name': 'Type',
 			'default': 'matte',
+			'update': refresh_preview,
 			'save_in_preset': True
 		},
 #		{
