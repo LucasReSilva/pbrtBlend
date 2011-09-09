@@ -834,19 +834,23 @@ TC_tex2			= ColorTextureParameter('tex2',			'Texture 2',				default=(0.0,0.0,0.0
 TC_Kr			= ColorTextureParameter('Kr',			'Reflection color',			default=(0.7,0.7,0.7)) #This parameter is used by the fresnelcolor texture
 
 # Fresnel Texture Parameters
-TFR_tex1		= FresnelTextureParameter('tex1',		'Texture 1',				default=1.0, min=-1e6, max=1e6)
-TFR_tex2		= FresnelTextureParameter('tex2',		'Texture 2',				default=0.0, min=-1e6, max=1e6)
+TFR_tex1		= FresnelTextureParameter('tex1',		'Texture 1',				default=1.0, min=-40.0, max=40.0)
+TFR_tex2		= FresnelTextureParameter('tex2',		'Texture 2',				default=1.0, min=-40.0, max=40.0)
 
 BAND_MAX_TEX = 32
 
 TC_BAND_ARRAY = []
 TF_BAND_ARRAY = []
+TFR_BAND_ARRAY = []
 for i in range(1, BAND_MAX_TEX+1):
 	TF_BAND_ARRAY.append(
 		FloatTextureParameter('tex%d'%i, 'tex%d'%i, default=0.0, min=-1e6, max=1e6)
 	)
 	TC_BAND_ARRAY.append(
 		ColorTextureParameter('tex%d'%i, 'tex%d'%i, default=(0.0,0.0,0.0))
+	)
+	TFR_BAND_ARRAY.append(
+		FresnelTextureParameter('tex%d'%i, 'tex%d'%i, default=1.0, min=-40.0, max=40.0)
 	)
 
 @LuxRenderAddon.addon_register_class
@@ -866,6 +870,8 @@ class luxrender_tex_band(declarative_property_group):
 			[0.9,'tex%d_floattexture'%i,'tex%d_multiplyfloat'%i],
 			[0.9,['offsetcolor%d'%i,'tex%d_color'%i],'tex%d_usecolortexture'%i],
 			[0.9,'tex%d_colortexture'%i,'tex%d_multiplycolor'%i],
+			[0.9,['offsetfresnel%d'%i,'tex%d_fresnelvalue'%i],'tex%d_usefresneltexture'%i],
+			[0.9,'tex%d_fresneltexture'%i,'tex%d_multiplyfresnel'%i],
 		])
 	
 	# Visibility we do manually because of the variant switch
@@ -887,6 +893,12 @@ class luxrender_tex_band(declarative_property_group):
 			'tex%d_floatvalue'%i:		{ 'variant': 'float','noffsets': LO({'>=':i}) },
 			'tex%d_floattexture'%i:		{ 'variant': 'float', 'tex%d_usefloattexture'%i: True,'noffsets': LO({'>=':i}) },
 			'tex%d_multiplyfloat'%i:	{ 'variant': 'float', 'tex%d_usefloattexture'%i: True,'noffsets': LO({'>=':i}) },
+			
+			'offsetfresnel%d'%i:			{ 'variant': 'fresnel','noffsets': LO({'>=':i}) },
+			'tex%d_usefresneltexture'%i:	{ 'variant': 'fresnel','noffsets': LO({'>=':i}) },
+			'tex%d_fresnelvalue'%i:			{ 'variant': 'fresnel','noffsets': LO({'>=':i}) },
+			'tex%d_fresneltexture'%i:		{ 'variant': 'fresnel', 'tex%d_usefresneltexture'%i: True,'noffsets': LO({'>=':i}) },
+			'tex%d_multiplyfresnel'%i:		{ 'variant': 'fresnel', 'tex%d_usefresneltexture'%i: True,'noffsets': LO({'>=':i}) }
 		})
 	
 	properties = [
@@ -897,6 +909,7 @@ class luxrender_tex_band(declarative_property_group):
 			'items': [
 				('float', 'Greyscale', 'Output a floating point number'),
 				('color', 'Color', 'Output a color value'),
+				('fresnel', 'Fresnel', 'Output optical data'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -933,6 +946,16 @@ class luxrender_tex_band(declarative_property_group):
 					'min': 0.0,
 					'max': 1.0,
 					'save_in_preset': True
+			},
+			{
+					'attr': 'offsetfresnel%d'%i,
+					'type': 'float',
+					'name': 'offset%d'%i,
+					'default': 0.0,
+					'precision': 3,
+					'min': 0.0,
+					'max': 1.0,
+					'save_in_preset': True
 			}
 		])
 	
@@ -940,6 +963,9 @@ class luxrender_tex_band(declarative_property_group):
 		properties.extend( prop.properties )
 	for prop in TF_BAND_ARRAY:
 		properties.extend( prop.properties )
+	for prop in TFR_BAND_ARRAY:
+		properties.extend( prop.properties )
+
 	del i, prop
 	
 	def get_paramset(self, scene, texture):
@@ -968,7 +994,7 @@ class luxrender_tex_band(declarative_property_group):
 		return set(), band_params
 	
 	def load_paramset(self, variant, ps):
-		self.variant = variant if variant in ['float', 'color'] else 'float'
+		self.variant = variant if variant in ['float', 'color', 'fresnel',] else 'float'
 		
 		offsets = []
 		for psi in ps:
@@ -984,6 +1010,10 @@ class luxrender_tex_band(declarative_property_group):
 			for i in range(self.noffsets):
 				TC_BAND_ARRAY[i].load_paramset(self, ps)
 				setattr(self, 'offsetcolor%d'%i, offsets[i])
+		if self.variant == 'fresnel':
+			for i in range(self.noffsets):
+				TFR_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'offsetfresnel%d'%i, offsets[i])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_bilerp(declarative_property_group):
@@ -997,6 +1027,9 @@ class luxrender_tex_bilerp(declarative_property_group):
 		
 		['v00_c', 'v10_c'],
 		['v01_c', 'v11_c'],
+		
+		['v00_fr', 'v10_fr'],
+		['v01_fr', 'v11_fr'],
 	]
 	
 	visibility = {
@@ -1009,6 +1042,11 @@ class luxrender_tex_bilerp(declarative_property_group):
 		'v01_c': { 'variant': 'color' },
 		'v10_c': { 'variant': 'color' },
 		'v11_c': { 'variant': 'color' },
+		
+		'v00_fr': { 'variant': 'fresnel' },
+		'v01_fr': { 'variant': 'fresnel' },
+		'v10_fr': { 'variant': 'fresnel' },
+		'v11_fr': { 'variant': 'fresnel' },
 	}
 	
 	properties = [
@@ -1019,6 +1057,7 @@ class luxrender_tex_bilerp(declarative_property_group):
 			'items': [
 				('float', 'Greyscale', 'Output a floating point number'),
 				('color', 'Color', 'Output a color value'),
+				('fresnel', 'Fresnel', 'Output optical data'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -1091,6 +1130,34 @@ class luxrender_tex_bilerp(declarative_property_group):
 			'max': 1.0,
 			'save_in_preset': True
 		},
+		{
+			'attr': 'v00_fr',
+			'type': 'float',
+			'name': '(0,0)',
+			'default': 1.0,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'v01_fr',
+			'type': 'float',
+			'name': '(0,1)',
+			'default': 2.0,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'v10_fr',
+			'type': 'float',
+			'name': '(1,0)',
+			'default': 1.0,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'v11_fr',
+			'type': 'float',
+			'name': '(1,1)',
+			'default': 2.0,
+			'save_in_preset': True
+		},
 	]
 	
 	def get_paramset(self, scene, texture):
@@ -1100,6 +1167,13 @@ class luxrender_tex_bilerp(declarative_property_group):
 				.add_float('v10', self.v10_f) \
 				.add_float('v01', self.v01_f) \
 				.add_float('v11', self.v11_f)
+				
+		elif self.variant == 'fresnel':
+			params = ParamSet() \
+				.add_float('v00', self.v00_fr) \
+				.add_float('v10', self.v10_fr) \
+				.add_float('v01', self.v01_fr) \
+				.add_float('v11', self.v11_fr)
 		else:
 			params = ParamSet() \
 				.add_color('v00', self.v00_c) \
@@ -2456,8 +2530,10 @@ class luxrender_tex_mix(declarative_property_group):
 	TF_amount.controls + \
 	TF_tex1.controls + \
 	TC_tex1.controls + \
+	TFR_tex1.controls + \
 	TF_tex2.controls + \
-	TC_tex2.controls
+	TC_tex2.controls + \
+	TFR_tex2.controls
 	
 	# Visibility we do manually because of the variant switch
 	visibility = {
@@ -2475,6 +2551,11 @@ class luxrender_tex_mix(declarative_property_group):
 		'tex1_floattexture':	{ 'variant': 'float', 'tex1_usefloattexture': True },
 		'tex1_multiplyfloat':	{ 'variant': 'float', 'tex1_usefloattexture': True },
 		
+		'tex1_usefresneltexture':	{ 'variant': 'fresnel' },
+		'tex1_fresnelvalue':		{ 'variant': 'fresnel' },
+		'tex1_fresneltexture':		{ 'variant': 'fresnel', 'tex1_usefresneltexture': True },
+		'tex1_multiplyfresnel':		{ 'variant': 'fresnel', 'tex1_usefresneltexture': True },
+		
 		'tex2_colorlabel':		{ 'variant': 'color' },
 		'tex2_color': 			{ 'variant': 'color' },
 		'tex2_usecolortexture':	{ 'variant': 'color' },
@@ -2485,6 +2566,11 @@ class luxrender_tex_mix(declarative_property_group):
 		'tex2_floatvalue':		{ 'variant': 'float' },
 		'tex2_floattexture':	{ 'variant': 'float', 'tex2_usefloattexture': True },
 		'tex2_multiplyfloat':	{ 'variant': 'float', 'tex2_usefloattexture': True },
+		
+		'tex2_usefresneltexture':	{ 'variant': 'fresnel' },
+		'tex2_fresnelvalue':		{ 'variant': 'fresnel' },
+		'tex2_fresneltexture':	{ 'variant': 'fresnel', 'tex2_usefresneltexture': True },
+		'tex2_multiplyfresnel':	{ 'variant': 'fresnel', 'tex2_usefresneltexture': True },
 	}
 	
 	properties = [
@@ -2495,6 +2581,7 @@ class luxrender_tex_mix(declarative_property_group):
 			'items': [
 				('float', 'Greyscale', 'Output a floating point number'),
 				('color', 'Color', 'Output a color value'),
+				('fresnel', 'Fresnel', 'Output optical data'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -2503,8 +2590,10 @@ class luxrender_tex_mix(declarative_property_group):
 	TF_amount.properties + \
 	TF_tex1.properties + \
 	TC_tex1.properties + \
+	TFR_tex1.properties + \
 	TF_tex2.properties + \
-	TC_tex2.properties
+	TC_tex2.properties + \
+	TFR_tex2.properties
 	
 	def get_paramset(self, scene, texture):
 		mix_params = ParamSet()
@@ -2523,7 +2612,7 @@ class luxrender_tex_mix(declarative_property_group):
 		return set(), mix_params
 	
 	def load_paramset(self, variant, ps):
-		self.variant = variant if variant in ['float', 'color'] else 'float'
+		self.variant = variant if variant in ['float', 'color', 'fresnel',] else 'float'
 		
 		TF_amount.load_paramset(self, ps)
 		
@@ -2534,6 +2623,10 @@ class luxrender_tex_mix(declarative_property_group):
 		if  variant == 'color':
 			TC_tex1.load_paramset(self, ps)
 			TC_tex2.load_paramset(self, ps)
+		
+		if  variant == 'fresnel':
+			TFR_tex1.load_paramset(self, ps)
+			TFR_tex2.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_multimix(declarative_property_group):
@@ -2550,6 +2643,8 @@ class luxrender_tex_multimix(declarative_property_group):
 			[0.9,'tex%d_floattexture'%i,'tex%d_multiplyfloat'%i],
 			[0.9,['weightcolor%d'%i,'tex%d_color'%i],'tex%d_usecolortexture'%i],
 			[0.9,'tex%d_colortexture'%i,'tex%d_multiplycolor'%i],
+			[0.9,['weightfresnel%d'%i,'tex%d_fresnelvalue'%i],'tex%d_usefresneltexture'%i],
+			[0.9,'tex%d_fresneltexture'%i,'tex%d_multiplyfresnel'%i],
 		])
 	
 	# Visibility we do manually because of the variant switch
@@ -2557,17 +2652,23 @@ class luxrender_tex_multimix(declarative_property_group):
 	
 	for i in range(1, BAND_MAX_TEX+1):
 		visibility.update({
-			'weightcolor%d'%i:			{ 'variant': 'color','nslots': LO({'>=':i}) },
-			'tex%d_color'%i: 			{ 'variant': 'color','nslots': LO({'>=':i}) },
-			'tex%d_usecolortexture'%i:	{ 'variant': 'color','nslots': LO({'>=':i}) },
-			'tex%d_colortexture'%i:		{ 'variant': 'color','nslots': LO({'>=':i}), 'tex%d_usecolortexture'%i: True },
-			'tex%d_multiplycolor'%i:	{ 'variant': 'color','nslots': LO({'>=':i}), 'tex%d_usecolortexture'%i: True },
+			'weightcolor%d'%i:				{ 'variant': 'color','nslots': LO({'>=':i}) },
+			'tex%d_color'%i: 				{ 'variant': 'color','nslots': LO({'>=':i}) },
+			'tex%d_usecolortexture'%i:		{ 'variant': 'color','nslots': LO({'>=':i}) },
+			'tex%d_colortexture'%i:			{ 'variant': 'color','nslots': LO({'>=':i}), 'tex%d_usecolortexture'%i: True },
+			'tex%d_multiplycolor'%i:		{ 'variant': 'color','nslots': LO({'>=':i}), 'tex%d_usecolortexture'%i: True },
 			
-			'weightfloat%d'%i:			{ 'variant': 'float','nslots': LO({'>=':i}) },
-			'tex%d_usefloattexture'%i:	{ 'variant': 'float','nslots': LO({'>=':i}) },
-			'tex%d_floatvalue'%i:		{ 'variant': 'float','nslots': LO({'>=':i}) },
-			'tex%d_floattexture'%i:		{ 'variant': 'float','nslots': LO({'>=':i}), 'tex%d_usefloattexture'%i: True },
-			'tex%d_multiplyfloat'%i:	{ 'variant': 'float','nslots': LO({'>=':i}), 'tex%d_usefloattexture'%i: True },
+			'weightfloat%d'%i:				{ 'variant': 'float','nslots': LO({'>=':i}) },
+			'tex%d_usefloattexture'%i:		{ 'variant': 'float','nslots': LO({'>=':i}) },
+			'tex%d_floatvalue'%i:			{ 'variant': 'float','nslots': LO({'>=':i}) },
+			'tex%d_floattexture'%i:			{ 'variant': 'float','nslots': LO({'>=':i}), 'tex%d_usefloattexture'%i: True },
+			'tex%d_multiplyfloat'%i:		{ 'variant': 'float','nslots': LO({'>=':i}), 'tex%d_usefloattexture'%i: True },
+			
+			'weightfresnel%d'%i:			{ 'variant': 'fresnel','nslots': LO({'>=':i}) },
+			'tex%d_usefresneltexture'%i:	{ 'variant': 'fresnel','nslots': LO({'>=':i}) },
+			'tex%d_fresnelvalue'%i:			{ 'variant': 'fresnel','nslots': LO({'>=':i}) },
+			'tex%d_fresneltexture'%i:		{ 'variant': 'fresnel','nslots': LO({'>=':i}), 'tex%d_usefresneltexture'%i: True },
+			'tex%d_multiplyfresnel'%i:		{ 'variant': 'fresnel','nslots': LO({'>=':i}), 'tex%d_usefresneltexture'%i: True },
 		})
 	
 	properties = [
@@ -2578,6 +2679,7 @@ class luxrender_tex_multimix(declarative_property_group):
 			'items': [
 				('float', 'Greyscale', 'Output a floating point number'),
 				('color', 'Color', 'Output a color value'),
+				('fresnel', 'Fresnel', 'Output optical data'),
 			],
 			'expand': True,
 			'save_in_preset': True
@@ -2613,12 +2715,24 @@ class luxrender_tex_multimix(declarative_property_group):
 					'min': 0.0,
 					'max': 1.0,
 					'save_in_preset': True
+				},
+				{
+					'attr': 'weightfresnel%d'%i,
+					'type': 'float',
+					'name': 'weight%d'%i,
+					'default': 0.0,
+					'precision': 3,
+					'min': 0.0,
+					'max': 1.0,
+					'save_in_preset': True
 			}
 		])
 	
 	for prop in TC_BAND_ARRAY:
 		properties.extend( prop.properties )
 	for prop in TF_BAND_ARRAY:
+		properties.extend( prop.properties )
+	for prop in TFR_BAND_ARRAY:
 		properties.extend( prop.properties )
 	
 	def get_paramset(self, scene, texture):
@@ -2642,7 +2756,7 @@ class luxrender_tex_multimix(declarative_property_group):
 		return set(), mm_params
 	
 	def load_paramset(self, variant, ps):
-		self.variant = variant if variant in ['float', 'color'] else 'float'
+		self.variant = variant if variant in ['float', 'color', 'fresnel',] else 'float'
 		
 		weights = []
 		for psi in ps:
@@ -2658,6 +2772,10 @@ class luxrender_tex_multimix(declarative_property_group):
 			for i in range(self.nslots):
 				TC_BAND_ARRAY[i].load_paramset(self, ps)
 				setattr(self, 'weightcolor%d'%i, weights[i])
+		if self.variant == 'fresnel':
+			for i in range(self.nslots):
+				TF_BAND_ARRAY[i].load_paramset(self, ps)
+				setattr(self, 'weightfresnel%d'%i, weights[i])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_sellmeier(declarative_property_group):
