@@ -660,6 +660,7 @@ tex_names = (
 	('Emission & Spectrum Textures',
 	(
 		('blackbody','Blackbody'),
+		('colordepth', 'Color at Depth'),
 		('equalenergy', 'Equalenergy'),
 		('lampspectrum', 'Lamp Spectrum'),
 		('gaussian', 'Gaussian'),
@@ -832,6 +833,7 @@ TC_mortartex	= ColorTextureParameter('mortartex',	'Mortar texture',			default=(1
 TC_tex1			= ColorTextureParameter('tex1',			'Texture 1',				default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'Texture 2',				default=(0.0,0.0,0.0))
 TC_Kr			= ColorTextureParameter('Kr',			'Reflection color',			default=(0.7,0.7,0.7)) #This parameter is used by the fresnelcolor texture
+TC_Kt			= ColorTextureParameter('Kt',			'Transmission color',		default=(1.0,1.0, 1.0)) #This parameter is used by the color at depth texture
 
 # Fresnel Texture Parameters
 TFR_tex1		= FresnelTextureParameter('tex1',		'Texture 1',				default=1.0, min=-40.0, max=40.0)
@@ -1689,6 +1691,67 @@ class luxrender_tex_constant(declarative_property_group):
 		for psi in ps:
 			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
 				setattr(self, psi['name'], psi['value'])
+				
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_colordepth(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = [
+		'depth',
+	] + \
+	TC_Kt.controls
+
+	
+	visibility = {
+		'Kt_colortexture': 	{ 'Kt_usecolortexture': True },
+		'Kt_multiplycolor':	{ 'Kt_usecolortexture': True },
+	}
+	
+	properties = [
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'color'
+		},
+		{
+			'type': 'float',
+			'attr': 'depth',
+			'name': 'Depth',
+			'description': 'Transmission depth at which absorption results in the given color',
+			'default': 1.0,
+			'min': 0.00001,
+			'soft_min': 0.00001,
+			'max': 1000.0,
+			'soft_max': 1000.0,
+			'precision': 6,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH',
+			'save_in_preset': True
+		}
+	] + \
+	TC_Kt.properties
+	
+	def get_paramset(self, scene, texture):
+		colordepth_params = ParamSet().add_float('depth', self.depth)
+		
+		if LuxManager.ActiveManager is not None:
+			colordepth_params.update(
+				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'Kt', 'color', self)
+			)
+		
+		return set(), colordepth_params
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'depth': 'float',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		TC_Kt.load_paramset(self, ps)
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_dots(declarative_property_group):
@@ -1874,7 +1937,7 @@ class luxrender_tex_fresnelcolor(declarative_property_group):
 		return set(), fresnelcolor_params
 	
 	def load_paramset(self, variant, ps):
-		TC_color.load_paramset(self, ps)
+		TC_Kr.load_paramset(self, ps)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_gaussian(declarative_property_group):
