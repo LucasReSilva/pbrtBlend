@@ -121,7 +121,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 
 	scene = LuxManager.CurrentScene
-	LuxManager.SetCurrentScene(scene)
 
 	# Light
 	lux_context.attributeBegin()
