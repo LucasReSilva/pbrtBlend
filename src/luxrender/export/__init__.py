@@ -262,31 +262,35 @@ def get_worldscale(as_scalematrix=True):
 		return ws
 
 def object_anim_matrix(scene, obj, frame_offset=1, ignore_scale=False):
-	
-	if not obj.users_scene:
-		return False
-	
-	# save current object matrix
-	matrix_orginal = obj.matrix_world.copy()
-	
-	# save current scene frame
-	current_frame = scene.frame_current
-	next_frame = current_frame+frame_offset
-	
-	# move forward with frame_offset
-	scene.frame_set(next_frame)
-	
-	# get new matrix of object
-	matrix_new = obj.matrix_world.copy()
-	
-	# move frame backward
-	scene.frame_set(current_frame)
-	
-	# compare the matrices if equal, then return false
-	if matrix_compare(matrix_orginal, matrix_new) == True:	
-		return False
+	if obj.animation_data != None and obj.animation_data.action != None and len(obj.animation_data.action.fcurves)>0:
+		next_frame = scene.frame_current + frame_offset
+		
+		anim_location = obj.location.copy()
+		anim_rotation = obj.rotation_euler.copy()
+		anim_scale    = obj.scale.copy()
+		
+		for fc in obj.animation_data.action.fcurves:
+			if fc.data_path == 'location':
+				anim_location[fc.array_index] = fc.evaluate(next_frame)
+			if fc.data_path == 'rotation_euler':
+				anim_rotation[fc.array_index] = fc.evaluate(next_frame)
+			if fc.data_path == 'scale':
+				anim_scale[fc.array_index] = fc.evaluate(next_frame)
+		
+		next_matrix  = mathutils.Matrix.Translation( mathutils.Vector(anim_location) )
+		anim_rotn_e = mathutils.Euler(anim_rotation)
+		anim_rotn_e.make_compatible(obj.rotation_euler)
+		anim_rotn_e = anim_rotn_e.to_matrix().to_4x4()
+		next_matrix *= anim_rotn_e
+		
+		if not ignore_scale:
+			next_matrix *= mathutils.Matrix.Scale(anim_scale[0], 4, mathutils.Vector([1,0,0]))
+			next_matrix *= mathutils.Matrix.Scale(anim_scale[1], 4, mathutils.Vector([0,1,0]))
+			next_matrix *= mathutils.Matrix.Scale(anim_scale[2], 4, mathutils.Vector([0,0,1]))
+		
+		return next_matrix
 	else:
-		return matrix_new
+		return False
 
 def matrix_to_list(matrix, apply_worldscale=False):
 	'''
@@ -327,31 +331,3 @@ def process_filepath_data(scene, obj, file_path, paramset, parameter_name):
 		paramset.add_string('%s_data' % parameter_name, encoded_data.splitlines() )
 	else:
 		paramset.add_string(parameter_name, file_relative)
-		
-def compare_floats(f1, f2):
-	'''
-		compare two floats 
-	'''
-	epsilon = 1e-6
-	if(math.fabs(f1 - f2) > epsilon):
-		return False
-	else:
-		return True
-
-def matrix_compare(matrixA, matrixB):
-	''' 
-		compare two matrices and returns True or False
-	'''
-	
-	if (matrixA.col_size != matrixB.col_size) or (matrixA.row_size != matrixB.row_size):
-		return False
-	
-	rows = matrixA.row_size
-	cols = matrixA.col_size
-	# iterate over the matrix
-	for row in range(rows):
-		for col in range(cols):
-			if compare_floats(matrixA[row][col], matrixB[row][col]) == False:
-				return False
-	
-	return True
