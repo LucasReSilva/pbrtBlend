@@ -672,6 +672,7 @@ tex_names = (
 		('constant', 'Constant'),
 		('cauchy', 'Cauchy'),
 		('fresnelcolor', 'Fresnel Color'),
+		('fresnelname', 'Fresnel Name (preset/nk data)'),
 		('sellmeier', 'Sellmeier'),
 		('sopra', 'Sopra'),
 		('luxpop', 'Luxpop'),
@@ -1938,6 +1939,73 @@ class luxrender_tex_fresnelcolor(declarative_property_group):
 	
 	def load_paramset(self, variant, ps):
 		TC_Kr.load_paramset(self, ps)
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_fresnelname(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = [
+		'name',
+		'filename',
+	]
+	
+	visibility = {
+			'filename': { 'name': 'nk' },
+		}
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'name',
+			'name': 'Preset',
+			'description': 'Metal type to use, select "Use NK file" to input external metal data',
+			'items': [
+				('nk', 'Use NK file', 'nk'),
+				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
+				('copper', 'copper', 'copper'),
+				('gold', 'gold', 'gold'),
+				('silver', 'silver', 'silver'),
+				('aluminium', 'aluminium', 'aluminium')
+			],
+			'default': 'aluminium',
+			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'filename',
+			'name': 'NK file',
+			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'fresnel'
+		},
+	]
+	
+	def get_paramset(self, scene, texture):
+		fresnelname_params = ParamSet()
+		if self.name == 'nk':	# use an NK data file
+			
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(scene, texture, self.filename, fresnelname_params, 'filename')
+		else:					# use a preset name
+			fresnelname_params.add_string('name', self.name)
+		
+		return set(), fresnelname_params
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'name': 'string',
+			'filename': 'string'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_gaussian(declarative_property_group):

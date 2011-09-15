@@ -66,7 +66,7 @@ from ..ui.materials import (
 
 from ..ui.textures import (
 	main as tex_main, band, blender, bilerp, blackbody, brick, cauchy, constant, colordepth,
-	checkerboard, dots, equalenergy, fbm, fresnelcolor, gaussian, harlequin, imagemap, normalmap,
+	checkerboard, dots, equalenergy, fbm, fresnelcolor, fresnelname, gaussian, harlequin, imagemap, normalmap,
 	lampspectrum, luxpop, marble, mix as tex_mix, multimix, sellmeier, scale, sopra, uv,
 	uvmask, windy, wrinkled, mapping, tabulateddata, transform
 )
@@ -87,6 +87,8 @@ bl_ui.properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.
 bl_ui.properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
 bl_ui.properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_data_lamp.DATA_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+
 
 @classmethod
 def blender_texture_poll(cls, context):
