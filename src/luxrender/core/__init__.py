@@ -87,8 +87,6 @@ bl_ui.properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.
 bl_ui.properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
 bl_ui.properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_data_lamp.DATA_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-
 
 @classmethod
 def blender_texture_poll(cls, context):
