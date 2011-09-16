@@ -80,8 +80,12 @@ class TextureParameterBase(object):
 			
 			if superctx.object and len(superctx.object.material_slots)>0 and superctx.object.material_slots[superctx.object.active_material_index].material:
 				return superctx.object.material_slots[superctx.object.active_material_index].material
+			elif superctx.lamp: #If this is a lamp, we need to get any textures attatched to the same lamp
+				return superctx.lamp
 			else:
 				return superctx.scene.world
+				
+			#It doesn't cost us any functionality atm, but the above function will almost certainly miss particle textures. -JtheNinja
 		
 		return _tcf_wrap
 	
