@@ -78,6 +78,7 @@ class luxrender_camera(declarative_property_group):
 		'exposure_mode',
 		['exposure_start', 'exposure_end'],
 		['exposure_degrees_start', 'exposure_degrees_end'],
+		'motion_blur_samples',
 		'usemblur',
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
@@ -90,6 +91,7 @@ class luxrender_camera(declarative_property_group):
 		'exposure_degrees_start':	{ 'exposure_mode': 'degrees' },
 		'exposure_degrees_end':		{ 'exposure_mode': 'degrees' },
 		'shutterdistribution':		{ 'usemblur': True },
+		'motion_blur_samples':		{ 'usemblur': True },
 		'cammblur':					{ 'usemblur': True },
 		'objectmblur':				{ 'usemblur': True },
 	}
@@ -168,6 +170,17 @@ class luxrender_camera(declarative_property_group):
 				('degrees', 'Degrees', 'degrees'),
 			],
 			'default': 'normalised'
+		},
+		{
+			'type': 'int',
+			'attr': 'motion_blur_samples',
+			'name': 'Shutter',
+			'description': 'Shutter Steps',
+			'default': 1,
+			'min': 1,
+			'soft_min': 1,
+			'max': 100,
+			'soft_max': 100
 		},
 		{
 			'type': 'float',

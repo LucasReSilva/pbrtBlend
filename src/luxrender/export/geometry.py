@@ -35,6 +35,7 @@ from ..outputs.file_api import Files
 from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix
 from ..export import matrix_to_list
 from ..export.materials import get_material_volume_defs
+from ..export import LuxManager
 
 class InvalidGeometryException(Exception):
 	pass
@@ -572,7 +573,8 @@ class GeometryExporter(object):
 			else:
 				# grab a bunch of fractional-frame fcurve_matrices and export
 				# several motionInstances for non-linear motion blur
-				STEPS = 1
+				STEPS = LuxManager.CurrentScene.camera.data.luxrender_camera.motion_blur_samples
+	
 				for i in range(STEPS,0,-1):
 					fcurve_matrix = object_anim_matrix(self.geometry_scene, obj, frame_offset=i/float(STEPS))
 					if fcurve_matrix == False:
