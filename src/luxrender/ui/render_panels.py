@@ -88,7 +88,7 @@ class volume(render_panel):
 	'''
 	
 	bl_label = 'Volume Integrator'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_volumeintegrator' )
@@ -101,7 +101,7 @@ class filter(render_panel):
 	'''
 	
 	bl_label = 'Filter'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_filter' )
@@ -114,7 +114,7 @@ class accelerator(render_panel):
 	'''
 	
 	bl_label = 'Accelerator'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_accelerator' )
@@ -123,7 +123,7 @@ class accelerator(render_panel):
 @LuxRenderAddon.addon_register_class
 class testing(render_panel):
 	bl_label = 'Test/Debugging Options'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_testing' )
@@ -136,7 +136,7 @@ class networking(render_panel):
 	'''
 	
 	bl_label = 'LuxRender Networking'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_networking' )

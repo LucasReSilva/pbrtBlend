@@ -33,7 +33,7 @@ from ...operators.lrmdb import lrmdb_state
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_db(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Database'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	def draw(self, context):
 		if not lrmdb_state._active:
@@ -50,7 +50,7 @@ class ui_luxrender_material_db(luxrender_material_base):
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Utils'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	def draw(self, context):
 		row = self.layout.row(align=True)
@@ -95,7 +95,7 @@ class ui_luxrender_material_emission(luxrender_material_base):
 	'''
 	
 	bl_label = 'LuxRender Emission'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('material',), 'luxrender_emission' )
@@ -111,7 +111,7 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 	'''
 	
 	bl_label = 'LuxRender Alpha Transparency'
-	bl_options = 'DEFAULT_CLOSED'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('material',), 'luxrender_transparency' )
