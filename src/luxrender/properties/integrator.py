@@ -939,6 +939,10 @@ class luxrender_integrator(declarative_property_group):
 				if self.bidirstrategy != ('one'):
 					LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
 					raise Exception('Incompatible render settings')
+		
+		#Exphotonmap is not compatible with light groups, warn here instead of light export code so this warning only shows once instead of per lamp
+		if scene.luxrender_lightgroups.ignore == False and self.surfaceintegrator == 'exphotonmap':
+			LuxLog('WARNING: Ex-Photon Map does not support light groups, exporting all lights in default group.')
 				
 		#Safety checks for settings end here
 		
