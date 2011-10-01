@@ -110,14 +110,16 @@ TF_R1					= FloatTextureParameter('R1', 'R1',									add_float_value=True, min=
 TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.90 )
 TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.7 )
 TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=100.0 )
-TF_uroughness			= FloatTextureParameter('uroughness', ' U-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
-TF_uexponent			= FloatTextureParameter('uexponent', ' U-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
+TF_uroughness			= FloatTextureParameter('uroughness', 'U-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+TF_uexponent			= FloatTextureParameter('uexponent', 'U-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
 TF_vroughness			= FloatTextureParameter('vroughness', 'V-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
 TF_vexponent			= FloatTextureParameter('vexponent', 'V-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
 TF_backface_d			= FloatTextureParameter('bf_d', 'Backface absorption depth (nm)',	real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=1500.0 ) # default 0.0 for OFF
-TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.0)
+TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.333333)
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface U-Roughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 ) #backface roughness is high than front by default, will usually be for backs of leaves or cloth
+TF_backface_uexponent	= FloatTextureParameter('bf_uexponent', 'Backface U-Exponent',		real_attr='backface_uexponent', add_float_value=True, min=1.0, max=1000000, default=30 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface V-Roughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 )
+TF_backface_vexponent	= FloatTextureParameter('bf_vexponent', 'Backface V-Exponent',		real_attr='backface_vexponent',	add_float_value=True, min=1.0, max=1000000, default=30 )
 TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 
 # Color Textures
@@ -130,8 +132,7 @@ TC_Ks2					= ColorTextureParameter('Ks2', 'Specular color 2',					default=(0.08,
 TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(0.012,0.012,0.012) )
 TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
 TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
-TC_backface_Kd			= ColorTextureParameter('backface_Kd', 'Backface Diffuse color',	default=(0.64,0.64,0.64) )
-TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.25,0.25,0.25) )
+TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.02,0.02,0.02) ) #.02 = 1.333, the IOR of water
 
 # Fresnel Textures
 TFR_fresnel				= FresnelTextureParameter('fresnel', 'Frensel', 					add_float_value = False)
@@ -784,6 +785,21 @@ def link_anisotropy(self, context, chan='u'):
 		self.vexponent_usefloattexture = self.uexponent_usefloattexture
 		self.vexponent_floattexturename = self.uexponent_floattexturename
 		self.vexponent_multiplyfloat = self.uexponent_multiplyfloat
+		
+def link_backface_anisotropy(self, context, chan='u'):
+	if not self.bf_anisotropic and not self.bf_exponent:
+		if chan=='v': return
+		self.bf_vroughness_floatvalue = self.bf_uroughness_floatvalue
+		self.bf_vroughness_usefloattexture = self.bf_uroughness_usefloattexture
+		self.bf_vroughness_floattexturename = self.bf_uroughness_floattexturename
+		self.bf_vroughness_multiplyfloat = self.bf_uroughness_multiplyfloat
+	
+	if not self.bf_anisotropic and self.bf_exponent:
+		if chan=='v': return
+		self.bf_vexponent_floatvalue = self.bf_uexponent_floatvalue
+		self.bf_vexponent_usefloattexture = self.bf_uexponent_usefloattexture
+		self.bf_vexponent_floattexturename = self.bf_uexponent_floattexturename
+		self.bf_vexponent_multiplyfloat = self.bf_uexponent_multiplyfloat
 
 def gen_CB_update_exponent(chan='u'):
 	def update_exponent(self, context):
@@ -832,6 +848,54 @@ def gen_CB_update_roughness(chan='u'):
 			link_anisotropy(self, context, chan)
 			refresh_preview(self, context)
 	return update_roughness
+	
+def gen_CB_update_backface_exponent(chan='u'):
+	def update_backface_exponent(self, context):
+		if not self.bf_exponent:
+			setattr(self,
+				'bf_%sexponent_floatvalue'%chan,
+				(2.0/(getattr(self, 'bf_%sroughness_floatvalue'%chan)** 2)-2.0)
+			)
+			setattr(self,
+				'bf_%sexponent_usefloattexture'%chan,
+				getattr(self, 'bf_%sroughness_usefloattexture'%chan)
+			)
+			setattr(self,
+				'bf_%sexponent_floattexturename'%chan,
+				getattr(self, 'bf_%sroughness_floattexturename'%chan)
+			)
+			setattr(self,
+				'bf_%sexponent_multiplyfloat'%chan,
+				getattr(self, 'bf_%sroughness_multiplyfloat'%chan)
+			)
+		
+			link_backface_anisotropy(self, context, chan)
+			refresh_preview(self, context)
+	return update_backface_exponent
+
+def gen_CB_update_backface_roughness(chan='u'):
+	def update_backface_roughness(self, context):
+		if self.bf_exponent:
+			setattr(self,
+				'bf_%sroughness_floatvalue'%chan,
+				(2.0/(getattr(self, 'bf_%sexponent_floatvalue'%chan)+2.0))**0.5
+			)
+			setattr(self,
+				'bf_%sroughness_usefloattexture'%chan,
+				getattr(self, 'bf_%sexponent_usefloattexture'%chan)
+			)
+			setattr(self,
+				'bf_%sroughness_floattexturename'%chan,
+				getattr(self, 'bf_%sexponent_floattexturename'%chan)
+			)
+			setattr(self,
+				'bf_%sroughness_multiplyfloat'%chan,
+				getattr(self, 'bf_%sexponent_multiplyfloat'%chan)
+			)
+		
+			link_backface_anisotropy(self, context, chan)
+			refresh_preview(self, context)
+	return update_backface_roughness
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
@@ -1605,10 +1669,12 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_backface_index.controls + \
 		TC_backface_Ks.controls + \
 	[
-		'bf_anisotropic'
+		['bf_anisotropic', 'bf_exponent'],
 	] + \
 		TF_backface_uroughness.controls + \
-		TF_backface_vroughness.controls
+		TF_backface_vroughness.controls + \
+		TF_backface_uexponent.controls + \
+		TF_backface_vexponent.controls
 	
 	visibility = dict_merge(
 		TC_Kt.visibility,
@@ -1624,34 +1690,41 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		
 		TF_backface_d.visibility,
 		TC_backface_Ka.visibility,
-		TC_backface_Kd.visibility,
 		TF_backface_index.visibility,
 		TC_backface_Ks.visibility,
 		TF_backface_uroughness.visibility,
 		TF_backface_vroughness.visibility,
+		TF_backface_uexponent.visibility,
+		TF_backface_vexponent.visibility,
 		{
-			'draw_ior_menu':			{ 'useior': True },
+			'draw_ior_menu':		{ 'useior': True },
 			'backface_multibounce':	{ 'two_sided': True },
 			'bf_useior': 			{ 'two_sided': True },
-			'bf_anisotropic': 		{ 'two_sided': True }
+			'bf_anisotropic': 		{ 'two_sided': True },
+			'bf_exponent':	 		{ 'two_sided': True },			
 		}
 	)
 	
 	enabled = {}
-	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
-	#enabled = texture_append_visibility(enabled, TF_backface_vroughness, { 'bf_anisotropic': True })
-	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vroughness, 			{ 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_backface_vroughness, 	{ 'bf_anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  			{ 'bf_anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_backface_vexponent, 	{ 'bf_anisotropic': True })
+
 	
 	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
 	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
 	
+	visibility = texture_append_visibility(visibility, TF_backface_uroughness, { 'two_sided': True, 'bf_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_backface_vroughness, { 'two_sided': True, 'bf_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_backface_uexponent,  { 'two_sided': True, 'bf_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_backface_vexponent,  { 'two_sided': True, 'bf_exponent': True })
+	
 	visibility = texture_append_visibility(visibility, TC_Ks,					{ 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index,				{ 'useior': True  })
-	visibility = texture_append_visibility(visibility, TF_vroughness,			{ 'anisotropic': True  })
 	visibility = texture_append_visibility(visibility, TC_backface_Ka,			{ 'two_sided': True })
-	visibility = texture_append_visibility(visibility, TC_backface_Kd,			{ 'two_sided': True })
 	visibility = texture_append_visibility(visibility, TF_backface_d,			{ 'two_sided': True })
 	visibility = texture_append_visibility(visibility, TF_backface_uroughness,	{ 'two_sided': True })
 	visibility = texture_append_visibility(visibility, TF_backface_vroughness,	{ 'two_sided': True })
@@ -1727,6 +1800,14 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			'description': 'Enable anisotropic roughness for backface',
 			'default': False,
 			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'bf_exponent',
+			'name': 'Backface exponent',
+			'description': 'Display backface roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
 		}
 	] + \
 		TC_Kt.get_properties() + \
@@ -1744,7 +1825,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TF_backface_index.get_properties() + \
 		TC_backface_Ks.get_properties() + \
 		TF_backface_uroughness.get_properties() + \
-		TF_backface_vroughness.get_properties()
+		TF_backface_vroughness.get_properties() + \
+		TF_backface_uexponent.get_properties() + \
+		TF_backface_vexponent.get_properties()
 		
 	for prop in properties:
 		if prop['attr'].startswith('uexponent'):
@@ -1756,8 +1839,16 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 			prop['update'] = gen_CB_update_exponent('u')
 		if prop['attr'].startswith('vroughness'):
 			prop['update'] = gen_CB_update_exponent('v')
-
-	#FIX ME! There should be code to make anisotropic and exponent work for backface here
+			
+		if prop['attr'].startswith('bf_uexponent'):
+			prop['update'] = gen_CB_update_backface_roughness('u')
+		if prop['attr'].startswith('bf_vexponent'):
+			prop['update'] = gen_CB_update_backface_roughness('v')
+		
+		if prop['attr'].startswith('bf_uroughness'):
+			prop['update'] = gen_CB_update_backface_exponent('u')
+		if prop['attr'].startswith('bf_vroughness'):
+			prop['update'] = gen_CB_update_backface_exponent('v')
 		
 	def get_paramset(self, material):
 		glossytranslucent_params = ParamSet()
