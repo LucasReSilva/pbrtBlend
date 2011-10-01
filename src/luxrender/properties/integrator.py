@@ -363,7 +363,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Eye Depth',
 			'description': 'Max recursion depth for ray casting from eye',
 			'default': 48,
-			'min': 0,
+			'min': 8,
 			'max': 2048,
 			'save_in_preset': True
 		},
@@ -373,7 +373,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Light Depth',
 			'description': 'Max recursion depth for ray casting from light',
 			'default': 48,
-			'min': 0,
+			'min': 8,
 			'max': 2048,
 			'save_in_preset': True
 		},
@@ -693,7 +693,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'finalgathersamples',
 			'name': 'Final gather samples',
-			'description': 'Number of final gather samples to shoot (per ray, not per pixel)',
+			'description': 'Number of final gather samples to shoot for each ray',
 			'default': 32,
 			'save_in_preset': True
 		},
@@ -942,7 +942,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		#Exphotonmap is not compatible with light groups, warn here instead of light export code so this warning only shows once instead of per lamp
 		if scene.luxrender_lightgroups.ignore == False and self.surfaceintegrator == 'exphotonmap':
-			LuxLog('WARNING: Ex-Photon Map does not support light groups, exporting all lights in default group.')
+			LuxLog('WARNING: Ex-Photon Map does not support light groups, exporting all lights in the default group.')
 				
 		#Safety checks for settings end here
 		
