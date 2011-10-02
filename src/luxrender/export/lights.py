@@ -176,7 +176,16 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 				lux_context.exterior(light.luxrender_lamp.Exterior_volume)
 			elif scene.luxrender_world.default_exterior_volume != '':
 				lux_context.exterior(scene.luxrender_world.default_exterior_volume)
-		
+				
+			if light.luxrender_lamp.luxrender_lamp_point.null_lamp:		
+				mat_params = ParamSet()
+	
+				mat_params.add_string('type', 'null')
+					
+				lux_context.makeNamedMaterial(ob.name, mat_params)
+				
+				lux_context.namedMaterial(ob.name)
+			
 			lux_context.areaLightSource('area', light_params)
 
 			# always remove blender object_scale to avoid corona-effect
@@ -188,7 +197,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			shape_params.add_float('radius', [light.luxrender_lamp.luxrender_lamp_point.pointsize]) #Fetch point light size and use it for the sphere primitive's radius param
 		
 			lux_context.shape('sphere', shape_params)
-		
+					
 			for portal in portals:
 				lux_context.portalInstance(portal)
 		
@@ -211,7 +220,16 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			lux_context.exterior(light.luxrender_lamp.Exterior_volume)
 		elif scene.luxrender_world.default_exterior_volume != '':
 			lux_context.exterior(scene.luxrender_world.default_exterior_volume)
-		
+					
+		if light.luxrender_lamp.luxrender_lamp_area.null_lamp:		
+			mat_params = ParamSet()
+
+			mat_params.add_string('type', 'null')
+				
+			lux_context.makeNamedMaterial(ob.name, mat_params)
+			
+			lux_context.namedMaterial(ob.name)
+			
 		lux_context.areaLightSource('area', light_params)
 		
 		areax = light.size

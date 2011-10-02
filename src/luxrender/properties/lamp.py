@@ -154,12 +154,14 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 		'usesphere',
 		'pointsize',
 		'nsamples',
+		'null_lamp',
 	]
 	
 	visibility = dict_merge(
 		luxrender_lamp_basic.visibility,
 		{ 'pointsize':				{ 'usesphere': True} },
 		{ 'nsamples':				{ 'usesphere': True} },
+		{ 'null_lamp':				{ 'usesphere': True} },
 		)
 	
 	properties = TC_L.properties[:] + [
@@ -194,8 +196,9 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'type': 'bool',
 			'attr': 'usesphere',
 			'name': 'Use Sphere',
-			'default': False,
 			'description': 'Use a spherical area light instead of a true point light. This is more realistic, but can deform IES profiles',
+			'default': False,
+
 		},	
 		{
 			'type': 'float',
@@ -219,6 +222,13 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'max': 100,
 			'soft_max': 100,
 		},
+		{
+			'type': 'bool',
+			'attr': 'null_lamp',
+			'name': 'Hide geometry',
+			'description': 'Use a null material for lamp geometry (lamp will still be visisble when viewed directly, as it emits its own light',
+			'default': True,
+		},	
 	]
 
 	def get_paramset(self, lamp_object):
@@ -439,6 +449,7 @@ class luxrender_lamp_area(declarative_property_group):
 		'nsamples',
 		'power',
 		'efficacy',
+		'null_lamp',
 	]
 	
 	visibility = TC_L.visibility
@@ -474,6 +485,13 @@ class luxrender_lamp_area(declarative_property_group):
 			'soft_min': 1 ,
 			'max': 100,
 			'soft_max': 100,
+		},
+		{
+			'type': 'bool',
+			'attr': 'null_lamp',
+			'name': 'Hide geometry',
+			'description': 'Use a null material for lamp geometry (lamp will still be visisble when viewed on emitting side, as it emits its own light',
+			'default': True,
 		},
 	]
 	
