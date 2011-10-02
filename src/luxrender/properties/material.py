@@ -192,6 +192,31 @@ class luxrender_material(declarative_property_group):
 	ef_attach_to = ['Material']
 	alert = {}
 	
+	def set_viewport_properties(self, context):
+		#This function is exectued when changing the material type
+		#it will update several properties of the blender material so the viewport better matches the Lux material
+		
+		#Kill spec intensity for matte materials
+		if self.type in ('matte', 'mattetranslucent', 'scatter'):
+			if context.material.specular_intensity != 0:
+				context.material.specular_intensity = 0
+		#Reset spec intensity if the mat type becomes something else
+		if self.type not in ('matte', 'mattetranslucent', 'scatter'):
+			if context.material.specular_intensity != 0.5:
+				context.material.specular_intensity = 0.5
+				
+		#Make perfectly specular mats shiny
+		if self.type in ('glass', 'glass2', 'mirror'):
+			if context.material.specular_hardness != 500:
+				context.material.specular_hardness = 500
+		#Reset spec hardness if the mat type becomes something else
+		if self.type not in ('glass', 'glass2', 'mirror'):
+			if context.material.specular_hardness != 50:
+				context.material.specular_hardness = 50
+	
+		#Also refresh the preview when changing mat type
+		#refresh_preview(self, context)
+	
 	controls = [
 		# Type select Menu is drawn manually
 		'Interior',
@@ -216,7 +241,7 @@ class luxrender_material(declarative_property_group):
 			'attr': 'type',
 			'name': 'Type',
 			'default': 'matte',
-			'update': refresh_preview,
+			'update': set_viewport_properties,
 			'save_in_preset': True
 		},
 #		{
@@ -275,24 +300,6 @@ class luxrender_material(declarative_property_group):
 			submat_col = getattr(submat, '%s_color' % self.master_color_map[self.type])
 			if blender_material.diffuse_color != submat_col:
 				blender_material.diffuse_color = submat_col
-		
-		#Kill spec intensity for matte materials
-		if self.type in ('matte', 'mattetranslucent', 'scatter'):
-			if blender_material.specular_intensity != 0:
-				blender_material.specular_intensity = 0
-		#Reset spec intensity if the mat type becomes something else
-		if self.type not in ('matte', 'mattetranslucent', 'scatter'):
-			if blender_material.specular_intensity != 0.5:
-				blender_material.specular_intensity = 0.5
-				
-		#Make perfectly specular mats shiny
-		if self.type in ('glass', 'glass2', 'mirror'):
-			if blender_material.specular_hardness != 500:
-				blender_material.specular_hardness = 500
-		#Reset spec hardness if the mat type becomes something else
-		if self.type not in ('glass', 'glass2', 'mirror'):
-			if blender_material.specular_hardness != 50:
-				blender_material.specular_hardness = 50
 	
 	def export(self, scene, lux_context, material, mode='indirect'):
 		
