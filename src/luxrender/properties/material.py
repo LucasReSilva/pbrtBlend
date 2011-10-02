@@ -198,24 +198,29 @@ class luxrender_material(declarative_property_group):
 		
 		#Kill spec intensity for matte materials
 		if self.type in ('matte', 'mattetranslucent', 'scatter'):
-			if context.material.specular_intensity != 0:
-				context.material.specular_intensity = 0
-		#Reset spec intensity if the mat type becomes something else
-		if self.type not in ('matte', 'mattetranslucent', 'scatter'):
-			if context.material.specular_intensity != 0.5:
-				context.material.specular_intensity = 0.5
-				
+			context.material.specular_intensity = 0
 		#Make perfectly specular mats shiny
-		if self.type in ('glass', 'glass2', 'mirror'):
-			if context.material.specular_hardness != 500:
-				context.material.specular_hardness = 500
-		#Reset spec hardness if the mat type becomes something else
-		if self.type not in ('glass', 'glass2', 'mirror'):
-			if context.material.specular_hardness != 50:
-				context.material.specular_hardness = 50
+		elif self.type in ('glass', 'glass2', 'mirror'):
+			context.material.specular_intensity = 0.7
+			context.material.specular_hardness = 511
+		#Reset spec intensity if the mat type becomes some other mat
+		else:
+			context.material.specular_intensity = 0.5
+			context.material.specular_hardness = 50
+		
+		#Make glass and null mats transparent
+		if self.type in ('glass', 'glass2', 'roughglass'):
+			context.material.use_transparency = True
+			context.material.alpha = 0.8
+		elif self.type == 'null':
+			context.material.use_transparency = True
+			context.material.alpha = 0.1
+		else:
+			context.material.use_transparency = False
+			context.material.alpha = 1.0
 	
 		#Also refresh the preview when changing mat type
-		#refresh_preview(self, context)
+		refresh_preview(self, context)
 	
 	controls = [
 		# Type select Menu is drawn manually
