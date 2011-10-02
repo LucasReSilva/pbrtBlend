@@ -2485,6 +2485,11 @@ class luxrender_emission(declarative_property_group):
 	ef_attach_to = ['Material']
 	alert = {}
 	
+	def set_viewport_emission(self, context):
+		#This litte function monkeys with the blender mat's emit value to sort-of show the meshlight in the viewport
+		if self.use_emission:
+			context.material.emit = self.gain
+	
 	controls = [
 		'importance',
 		'lightgroup_chooser',
@@ -2517,6 +2522,7 @@ class luxrender_emission(declarative_property_group):
 			'attr': 'use_emission',
 			'name': 'Use Emission',
 			'default': False,
+			'update': set_viewport_emission,
 			'save_in_preset': True
 		},
 		{
@@ -2549,6 +2555,7 @@ class luxrender_emission(declarative_property_group):
 			'attr': 'gain',
 			'name': 'Gain',
 			'default': 1.0,
+			'update': set_viewport_emission,
 			'min': 0.0,
 			'soft_min': 0.0,
 			'max': 1e8,
@@ -2577,7 +2584,8 @@ class luxrender_emission(declarative_property_group):
 			'max': 1e4,
 			'soft_max': 1e4,
 			'save_in_preset': True
-		},
+		}
+	
 	] + \
 	TC_L.get_properties() + \
 	EmissionLightGroupParameter()
