@@ -2489,6 +2489,8 @@ class luxrender_emission(declarative_property_group):
 		#This litte function monkeys with the blender mat's emit value to sort-of show the meshlight in the viewport
 		if self.use_emission:
 			context.material.emit = self.gain
+		else:
+			context.material.emit = 0
 	
 	controls = [
 		'importance',
