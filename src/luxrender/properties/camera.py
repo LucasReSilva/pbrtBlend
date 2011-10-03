@@ -641,7 +641,7 @@ class luxrender_film(declarative_property_group):
 				('hue', 'Hue', 'Preserve hue'),
 				('cut', 'Cut', 'Clip channels individually')
 			],
-			'default': 'lum'
+			'default': 'cut'
 		},
 	]
 	
@@ -1187,7 +1187,7 @@ class luxrender_tonemapping(declarative_property_group):
 			'attr': 'type',
 			'name': 'Tonemapper',
 			'description': 'Choose tonemapping type',
-			'default': 'reinhard',
+			'default': 'autolinear',
 			'items': [
 				('reinhard', 'Reinhard', 'reinhard'),
 				('linear', 'Linear (manual)', 'linear'),
