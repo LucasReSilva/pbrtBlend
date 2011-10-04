@@ -74,6 +74,7 @@ class luxrender_camera(declarative_property_group):
 		['autofocus', 'use_dof', 'use_clipping'],
 		'fstop',
 		'blades',
+		['distribution', 'power'],
 		'sensitivity',
 		'exposure_mode',
 		['exposure_start', 'exposure_end'],
@@ -86,6 +87,8 @@ class luxrender_camera(declarative_property_group):
 	
 	visibility = {
 		'blades':					{ 'use_dof': True },
+		'distribution':				{ 'use_dof': True },
+		'power':					{ 'use_dof': True },
 		'exposure_start':			{ 'exposure_mode': O(['normalised','absolute']) },
 		'exposure_end':				{ 'exposure_mode': O(['normalised','absolute']) },
 		'exposure_degrees_start':	{ 'exposure_mode': 'degrees' },
@@ -123,6 +126,28 @@ class luxrender_camera(declarative_property_group):
 			'attr': 'blades',
 			'name': 'Blades',
 			'description': 'Number of aperture blades. Use 2 or lower for circular aperture.',
+			'min': 0,
+			'default': 0,
+		},
+		{
+			'type': 'enum',
+			'attr': 'distribution',
+			'name': 'Distribution',
+			'description': 'This value controls the lens sampling distribution. Non-uniform distributions allow for ring effects',
+			'default': 'uniform',
+			'items': [
+				('uniform', 'Uniform', 'Uniform'),
+				('exponential', 'Exponential', 'Exponential'),
+				('inverse exponential', 'Inverse Exponential', 'Inverse Exponential'),
+				('gaussian', 'Gaussian', 'Gaussian'),
+				('inverse gaussian', 'Inverse Gaussian', 'Inverse Gaussian'),
+				]
+		},
+		{
+			'type': 'int',
+			'attr': 'power',
+			'name': 'Power',
+			'description': 'Exponent for lens samping distribution. Higher values give more pronounced ring-effects',
 			'min': 0,
 			'default': 0,
 		},
@@ -174,7 +199,7 @@ class luxrender_camera(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'motion_blur_samples',
-			'name': 'Shutter',
+			'name': 'Shutter Steps',
 			'description': 'Shutter Steps',
 			'default': 1,
 			'min': 1,
@@ -382,8 +407,10 @@ class luxrender_camera(declarative_property_group):
 			# Do not world-scale this, it is already in meters !
 			params.add_float('lensradius', (cam.lens / 1000.0) / ( 2.0 * self.fstop ))
 		
-			#Write number of blades to use
+			#Write apperture params
 			params.add_integer('blades', self.blades)
+			params.add_integer('power', self.power)
+			params.add_string('distribution', self.distribution)
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
