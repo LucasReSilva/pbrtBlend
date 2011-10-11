@@ -189,8 +189,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		#sppm
 		'photonperpass',
-		['startradius', 'startk'],
-		'alpha',
+		['startradius', 'alpha'],
 		#sppm advanced
 		'glossythreshold',
 		'lookupaccel',
