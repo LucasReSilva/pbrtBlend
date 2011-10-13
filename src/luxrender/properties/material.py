@@ -300,6 +300,9 @@ class luxrender_material(declarative_property_group):
 		CAVEAT: you can only call this method in an operator context.
 		'''
 		
+		if blender_material == None:
+			return
+		
 		if self.type in self.master_color_map.keys():
 			submat = getattr(self, 'luxrender_mat_%s'%self.type)
 			submat_col = getattr(submat, '%s_color' % self.master_color_map[self.type])

@@ -271,7 +271,7 @@ class ColorTextureParameter(TextureParameterBase):
 				'max': self.max,
 				'soft_max': self.max,
 				'subtype': 'COLOR',
-				'update': lambda s, c: c.material.luxrender_material.set_master_color(c.material),
+				'update': lambda s, c: c.material.luxrender_material.set_master_color(c.material) if hasattr(c.material, 'luxrender_material') else None,
 				'save_in_preset': True
 			},
 			{
