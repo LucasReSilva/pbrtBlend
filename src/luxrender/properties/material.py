@@ -143,6 +143,7 @@ mat_names = {
 	'glossy': 'Glossy',
 	'glossy_lossy': 'Glossy (Lossy)',
 	'glossytranslucent': 'Glossy Translucent',
+	'glossycoating': 'Glossy Coating',
 	'glass': 'Glass',
 	'glass2': 'Glass2',
 	'roughglass': 'Rough Glass',
@@ -330,6 +331,13 @@ class luxrender_material(declarative_property_group):
 					
 					m2 = bpy.data.materials[m2_name]
 					m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
+
+				if self.type == 'glossycoating':
+					bm_name = self.luxrender_mat_glossycoating.basematerial_material
+					if bm_name == '':
+						raise Exception('No base material assigned!')
+					bm = bpy.data.materials[bm_name]
+					bm.luxrender_material.export(scene, lux_context, bm, 'indirect')
 				
 				material_params = ParamSet()
 				
@@ -1932,6 +1940,165 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 		TC_backface_Ks.load_paramset(self, ps)
 		TF_backface_uroughness.load_paramset(self, ps)
 		TF_backface_vroughness.load_paramset(self, ps)
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_mat_glossycoating(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
+	alert = {}
+	
+	controls = [
+		'basematerial',
+	] + \
+		TF_d.controls + \
+		TC_Ka.controls + \
+	[
+		'useior',
+		'draw_ior_menu',
+	] + \
+		TF_index.controls + \
+		TC_Ks.controls + \
+	[
+			['anisotropic', 'use_exponent'],
+	] + \
+		TF_uroughness.controls + \
+		TF_uexponent.controls + \
+		TF_vroughness.controls + \
+		TF_vexponent.controls
+		
+		
+	visibility = dict_merge(
+		{
+			'draw_ior_menu': { 'useior': True }
+		},
+		TF_d.visibility,
+		TF_index.visibility,
+		TC_Ka.visibility,
+		TC_Kd.visibility,
+		TC_Ks.visibility,
+		TF_uroughness.visibility,
+		TF_uexponent.visibility,
+		TF_vroughness.visibility,
+		TF_vexponent.visibility	
+	)
+
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_vroughness, { 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_vexponent,  { 'anisotropic': True })
+	
+	visibility = texture_append_visibility(visibility, TF_uroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
+
+	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
+	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
+	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
+	
+	properties = [
+	] + \
+		MaterialParameter('basematerial', 'Base Material', 'luxrender_mat_glossycoating') + \
+	[
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
+		},
+		{
+			'type': 'bool',
+			'attr': 'multibounce',
+			'name': 'Multibounce',
+			'description': 'Enable surface layer multibounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
+			'default': False,
+			'save_in_preset': True
+		},
+	] + \
+		TF_d.get_properties() + \
+		TF_index.get_properties() + \
+		TC_Ka.get_properties() + \
+		TC_Kd.get_properties() + \
+		TC_Ks.get_properties() + \
+		TF_uroughness.get_properties() + \
+		TF_uexponent.get_properties() + \
+		TF_vroughness.get_properties() + \
+		TF_vexponent.get_properties()
+			
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
+		
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
+	
+	def get_paramset(self, material):
+		glossycoating_params = ParamSet()
+		
+		glossycoating_params.add_bool('multibounce', self.multibounce)
+		
+		if self.d_floatvalue > 0:
+			glossycoating_params.update( TF_d.get_paramset(self) )
+			glossycoating_params.update( TC_Ka.get_paramset(self) )
+		
+		glossycoating_params.update( TC_Kd.get_paramset(self) )
+		
+		if self.useior:
+			glossycoating_params.update( TF_index.get_paramset(self) )
+			glossycoating_params.add_color('Ks', (1.0, 1.0, 1.0))
+		else:
+			glossycoating_params.update( TC_Ks.get_paramset(self) )
+			glossycoating_params.add_float('index', 0.0)
+		
+		glossycoating_params.update( TF_uroughness.get_paramset(self) )
+		glossycoating_params.update( TF_vroughness.get_paramset(self) )
+		
+		glossycoating_params.add_string('basematerial', self.basematerial_material)
+		
+		return glossycoating_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'multibounce': 'bool',
+			'basematerial': 'string'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TF_d.load_paramset(self, ps)
+		TF_index.load_paramset(self, ps)
+		TC_Ka.load_paramset(self, ps)
+		TC_Kd.load_paramset(self, ps)
+		TC_Ks.load_paramset(self, ps)
+		TF_uroughness.load_paramset(self, ps)
+		TF_vroughness.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_metal(declarative_property_group):
