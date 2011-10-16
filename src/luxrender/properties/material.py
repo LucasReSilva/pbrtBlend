@@ -1948,6 +1948,7 @@ class luxrender_mat_glossycoating(declarative_property_group):
 	
 	controls = [
 		'basematerial',
+		'multibounce',
 	] + \
 		TF_d.controls + \
 		TC_Ka.controls + \
