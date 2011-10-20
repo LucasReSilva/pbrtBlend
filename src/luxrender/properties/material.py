@@ -140,7 +140,7 @@ TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption col
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.02,0.02,0.02) ) #.02 = 1.333, the IOR of water
 
 # Fresnel Textures
-TFR_fresnel				= FresnelTextureParameter('fresnel', 'Frensel', 					add_float_value = False)
+TFR_fresnel				= FresnelTextureParameter('fresnel', 'Fresnel', 					add_float_value = False)
 
 mat_names = {
 	'matte': 'Matte',
