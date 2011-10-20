@@ -121,6 +121,11 @@ TF_backface_uexponent	= FloatTextureParameter('bf_uexponent', 'Backface U-Expone
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface V-Roughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 )
 TF_backface_vexponent	= FloatTextureParameter('bf_vexponent', 'Backface V-Exponent',		real_attr='backface_vexponent',	add_float_value=True, min=1.0, max=1000000, default=30 )
 TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
+#These are for the layered mat:
+TF_OP1					= FloatTextureParameter('opacity1', 'Opacity 1',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_OP2					= FloatTextureParameter('opacity2', 'Opacity 2',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_OP3					= FloatTextureParameter('opacity3', 'Opacity 3',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
+TF_OP4					= FloatTextureParameter('opacity4', 'Opacity 4',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
 
 # Color Textures
 TC_Ka					= ColorTextureParameter('Ka', 'Absorption color',					default=(0.0,0.0,0.0) )
@@ -155,6 +160,7 @@ mat_names = {
 	'velvet': 'Velvet',
 	'scatter': 'Scatter',
 	'mix': 'Mix',
+	'layered': 'Layered',
 	'null': 'Null',
 }
 
@@ -338,6 +344,33 @@ class luxrender_material(declarative_property_group):
 						raise Exception('No base material assigned!')
 					bm = bpy.data.materials[bm_name]
 					bm.luxrender_material.export(scene, lux_context, bm, 'indirect')
+					
+				if self.type == 'layered':
+					m1_name = self.luxrender_mat_layered.namedmaterial1_material
+					if m1_name == '':
+						raise Exception('Unassigned layered material slot 1 on material %s' % material.name)
+					m1 = bpy.data.materials[m1_name]
+					m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
+					
+					m2_name = self.luxrender_mat_layered.namedmaterial2_material
+					if m2_name == '':
+						raise Exception('Unassigned layered material slot 2 on material %s' % material.name)
+					
+					m2 = bpy.data.materials[m2_name]
+					m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
+					
+					m3_name = self.luxrender_mat_layered.namedmaterial3_material
+					if m3_name == '':
+						raise Exception('Unassigned layered material slot 3 on material %s' % material.name)
+					m3 = bpy.data.materials[m3_name]
+					m3.luxrender_material.export(scene, lux_context, m3, 'indirect')
+					
+					m4_name = self.luxrender_mat_layered.namedmaterial4_material
+					if m4_name == '':
+						raise Exception('Unassigned layered material slot 4 on material %s' % material.name)
+					
+					m4 = bpy.data.materials[m4_name]
+					m4.luxrender_material.export(scene, lux_context, m4, 'indirect')
 				
 				material_params = ParamSet()
 				
@@ -349,7 +382,7 @@ class luxrender_material(declarative_property_group):
 					alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
 				
 				# Bump mapping
-				if self.type not in ['mix', 'null']:
+				if self.type not in ['mix', 'null', 'layered']:
 					material_params.update( TF_bumpmap.get_paramset(self) )
 				
 				material_params.update( sub_type.get_paramset(material) )
@@ -2506,6 +2539,72 @@ class luxrender_mat_mix(declarative_property_group):
 				setattr(self, '%s_material'%psi['name'], shorten_name(psi['value']))
 		
 		TF_amount.load_paramset(self, ps)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_mat_layered(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
+	alert = {}
+
+	controls = [
+		'namedmaterial1',
+		'namedmaterial2',
+		'namedmaterial3',
+		'namedmaterial4',
+	] + \
+		TF_OP1.controls + \
+		TF_OP2.controls + \
+		TF_OP3.controls + \
+		TF_OP4.controls
+	
+	visibility =dict_merge(
+		TF_OP1.visibility,
+		TF_OP2.visibility,
+		TF_OP3.visibility,
+		TF_OP4.visibility
+	)
+		
+	
+	properties = [
+	] + \
+		MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_mat_layered') + \
+		MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_mat_layered') + \
+		MaterialParameter('namedmaterial3', 'Material 3', 'luxrender_mat_layered') + \
+		MaterialParameter('namedmaterial4', 'Material 4', 'luxrender_mat_layered') + \
+		TF_OP1.properties + \
+		TF_OP2.properties + \
+		TF_OP3.properties + \
+		TF_OP4.properties
+		
+	def get_paramset(self, material):
+		layered_params = ParamSet()
+		
+		layered_params.add_string('namedmaterial1', self.namedmaterial1_material)	
+		layered_params.add_string('namedmaterial2', self.namedmaterial2_material)
+		layered_params.add_string('namedmaterial3', self.namedmaterial3_material)
+		layered_params.add_string('namedmaterial4', self.namedmaterial4_material)
+		layered_params.update( TF_OP1.get_paramset(self) )
+		layered_params.update( TF_OP2.get_paramset(self) )
+		layered_params.update( TF_OP3.get_paramset(self) )
+		layered_params.update( TF_OP4.get_paramset(self) )
+		
+		return layered_params
+		
+	def load_paramset(self, ps):
+		psi_accept = {
+			'namedmaterial1': 'string',
+			'namedmaterial2': 'string',
+			'namedmaterial3': 'string',
+			'namedmaterial4': 'string'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, '%s_material'%psi['name'], shorten_name(psi['value']))
+		
+		TF_OP1.load_paramset(self, ps)
+		TF_OP2.load_paramset(self, ps)
+		TF_OP3.load_paramset(self, ps)
+		TF_OP4.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_null(declarative_property_group):
