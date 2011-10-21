@@ -51,7 +51,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_bool('write_exr_applyimaging', True) \
 		.add_string('write_exr_channels', 'RGBA') \
 		.add_bool('write_exr_halftype', False) \
-		.add_float('gamma', 2.2) \
 		.add_bool('write_png', False) \
 		.add_bool('write_tga', False) \
 		.add_bool('write_resume_flm', False) \
@@ -60,6 +59,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_string('tonemapkernel', 'linear') \
 		.add_integer('reject_warmup', 64) \
 		.add_string('ldr_clamp_method', 'hue')
+	
+	if scene.render.use_color_management:
+		film_params.add_float('gamma', 1.0)
+	else:
+		film_params.add_float('gamma', 2.2)
 	
 	if LUXRENDER_VERSION >= '0.8':
 		film_params \
