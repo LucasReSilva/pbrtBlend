@@ -51,7 +51,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 		.add_bool('write_exr_applyimaging', True) \
 		.add_string('write_exr_channels', 'RGBA') \
 		.add_bool('write_exr_halftype', False) \
-		.add_float('gamma', 1.0) \
+		.add_float('gamma', 2.2) \
 		.add_bool('write_png', False) \
 		.add_bool('write_tga', False) \
 		.add_bool('write_resume_flm', False) \
