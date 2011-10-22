@@ -353,24 +353,19 @@ class luxrender_material(declarative_property_group):
 					m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
 					
 					m2_name = self.luxrender_mat_layered.namedmaterial2_material
-					if m2_name == '':
-						raise Exception('Unassigned layered material slot 2 on material %s' % material.name)
-					
-					m2 = bpy.data.materials[m2_name]
-					m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
+					if m2_name != '':						# core layered mat simply stops when finding empty slot
+						m2 = bpy.data.materials[m2_name]
+						m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
 					
 					m3_name = self.luxrender_mat_layered.namedmaterial3_material
-					if m3_name == '':
-						raise Exception('Unassigned layered material slot 3 on material %s' % material.name)
-					m3 = bpy.data.materials[m3_name]
-					m3.luxrender_material.export(scene, lux_context, m3, 'indirect')
+					if m3_name != '':
+						m3 = bpy.data.materials[m3_name]
+						m3.luxrender_material.export(scene, lux_context, m3, 'indirect')
 					
 					m4_name = self.luxrender_mat_layered.namedmaterial4_material
-					if m4_name == '':
-						raise Exception('Unassigned layered material slot 4 on material %s' % material.name)
-					
-					m4 = bpy.data.materials[m4_name]
-					m4.luxrender_material.export(scene, lux_context, m4, 'indirect')
+					if m4_name != '':					
+						m4 = bpy.data.materials[m4_name]
+						m4.luxrender_material.export(scene, lux_context, m4, 'indirect')
 				
 				material_params = ParamSet()
 				
