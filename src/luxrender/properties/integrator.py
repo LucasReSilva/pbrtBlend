@@ -852,7 +852,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'startk',
 			'name': 'Starting K',
-			'description': 'Adjust starting photon radius to get this many photons. Higher values clear faster but are less accurate. 0=use initial radius.',
+			'description': 'Adjust starting photon radius to get this many photons. Higher values clear faster but are less accurate. 0=use initial radius',
 			'default': 30,
 			'min': 0,
 			'save_in_preset': True

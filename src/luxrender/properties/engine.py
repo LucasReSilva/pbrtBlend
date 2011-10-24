@@ -295,7 +295,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'bool',
 			'attr': 'fixed_seed',
 			'name': 'Use fixed seeds',
-			'description': 'Use fixed seeds for threads. Helps with keeping noise even for animations.',
+			'description': 'Use fixed seeds for threads. Helps with keeping noise even for animations',
 			'default': False,
 			'save_in_preset': True
 		},

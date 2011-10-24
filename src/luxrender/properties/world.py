@@ -238,7 +238,7 @@ class luxrender_volume_data(declarative_property_group):
 			'type': 'float_vector',
 			'attr': 'g',
 			'name': 'Asymmetry',
-			'description': 'Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering.',
+			'description': 'Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering',
 			'default': (0.0, 0.0, 0.0),
 			'min': -1.0,
 			'soft_min': -1.0,
@@ -535,7 +535,7 @@ class luxrender_lightgroups(declarative_property_group):
 			'type': 'bool',
 			'attr': 'ignore',
 			'name': 'Merge light groups',
-			'description': 'Combine all light groups into one. Enable this for final renders, or to decrease RAM usage.',
+			'description': 'Combine all light groups into one. Enable this for final renders, or to decrease RAM usage',
 			'default': False
 		},
 	]

@@ -125,7 +125,7 @@ class luxrender_camera(declarative_property_group):
 			'type': 'int',
 			'attr': 'blades',
 			'name': 'Blades',
-			'description': 'Number of aperture blades. Use 2 or lower for circular aperture.',
+			'description': 'Number of aperture blades. Use 2 or lower for circular aperture',
 			'min': 0,
 			'default': 0,
 		},
@@ -565,7 +565,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_exr_halftype',
 			'name': 'Use 16bit EXR',
-			'description': 'Use "half" (16bit float) OpenEXR format instead of 32bit float.',
+			'description': 'Use "half" (16bit float) OpenEXR format instead of 32bit float',
 			'default': True
 		},
 		{
@@ -606,14 +606,14 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_flm_direct',
 			'name': 'Write FLM Directly',
-			'description': 'Write FLM directly to disk instead of trying to build it in RAM first. Slower, but uses less memory.',
+			'description': 'Write FLM directly to disk instead of trying to build it in RAM first. Slower, but uses less memory',
 			'default': False
 		},
 		{
 			'type': 'bool',
 			'attr': 'output_alpha',
 			'name': 'Enable alpha channel',
-			'description': 'Enable alpha channel. This applies to all image formats.',
+			'description': 'Enable alpha channel. This applies to all image formats',
 			'default': False
 		},
 		{
@@ -627,7 +627,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_exr_applyimaging',
 			'name': 'Tonemap EXR',
-			'description': 'Apply imaging pipeline to OpenEXR output. Gamma correction will be skipped regardless.',
+			'description': 'Apply imaging pipeline to OpenEXR output. Gamma correction will be skipped regardless',
 			'default': True
 		},
 		{
@@ -641,7 +641,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'enum',
 			'attr': 'zbuf_normalization',
 			'name': 'Z-Buffer Normalization',
-			'description': 'Where to get normalization info for Z-buffer.',
+			'description': 'Where to get normalization info for Z-buffer',
 			'items': [
 				('Camera Start/End clip', 'Camera start/end clip', 'Use Camera clipping range'),
 				('Min/Max', 'Min/max', 'Min/max'),
