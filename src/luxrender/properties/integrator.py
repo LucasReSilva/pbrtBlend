@@ -362,7 +362,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Eye Depth',
 			'description': 'Max recursion depth for ray casting from eye',
 			'default': 48,
-			'min': 8,
+			'min': 1,
 			'max': 2048,
 			'save_in_preset': True
 		},
@@ -372,7 +372,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Light Depth',
 			'description': 'Max recursion depth for ray casting from light',
 			'default': 48,
-			'min': 8,
+			'min': 1,
 			'max': 2048,
 			'save_in_preset': True
 		},
@@ -396,7 +396,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Max. depth',
 			'description': 'Max recursion depth for ray casting from eye',
 			'default': 48,
-			'min': 8,
+			'min': 1,
 			'max': 2048,
 			'save_in_preset': True
 		},
@@ -631,7 +631,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Max. photon depth',
 			'description': 'Max recursion depth for photon tracing',
 			'default': 48,
-			'min': 8,
+			'min': 1,
 			'max': 2048,
 			'save_in_preset': True
 		},
@@ -827,7 +827,7 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Max. eye depth',
 			'default': 48,
 			'description': 'Max recursion depth for ray casting from eye',
-			'min': 8,
+			'min': 1,
 			'max': 2048,
 			'save_in_preset': True
 		},
