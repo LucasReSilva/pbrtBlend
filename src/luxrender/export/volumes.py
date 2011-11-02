@@ -33,9 +33,9 @@ import os, struct, sys
 import bpy
 
 # LuxRender libs
-from luxrender.export import ParamSet, matrix_to_list, LuxManager
-from luxrender.outputs import LuxLog
-from luxrender.outputs.file_api import Files
+from . import ParamSet, matrix_to_list, LuxManager
+from ..outputs import LuxLog
+from ..outputs.file_api import Files
 
 class library_loader():
 	
@@ -50,7 +50,7 @@ class library_loader():
 	lzmadll = None
 	
 	ver_str = '%d.%d' % bpy.app.version[0:2]
-    
+	
 	platform_search = {
 		'lzo': {
 			'darwin': [
