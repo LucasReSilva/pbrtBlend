@@ -31,7 +31,6 @@ from extensions_framework import util as efutil
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
 from .. import LuxRenderAddon
-from ..export import ParamSet
 from ..outputs.pure_api import PYLUX_AVAILABLE
 
 def check_renderer_settings(context):
@@ -139,7 +138,7 @@ class luxrender_engine(declarative_property_group):
 		
 		'mesh_type',
 		'partial_ply',
-		['render','monitor_external'],
+		['render', 'monitor_external'],
 		['threads_auto', 'fixed_seed'],
 		'threads',
 		'log_verbosity',
@@ -196,7 +195,7 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'render',
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',
-			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', False),
+			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', True),
 		},
 		{
 			'type': 'bool',
