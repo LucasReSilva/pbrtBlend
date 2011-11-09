@@ -962,7 +962,6 @@ class luxrender_integrator(declarative_property_group):
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
 				  .add_integer('photonperpass', self.photonperpass) \
  				  .add_float('startradius', self.startradius) \
-				  .add_integer('startk', self.startk) \
 				  .add_float('alpha', self.alpha) \
 				  .add_bool('includeenvironment', self.includeenvironment)
 			if self.advanced:
