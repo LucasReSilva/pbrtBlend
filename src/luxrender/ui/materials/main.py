@@ -122,3 +122,40 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 		if not hasattr(context.material, 'luxrender_transparency'):
 			return False
 		return super().poll(context) and context.material.luxrender_material.type != 'null'
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_coating(luxrender_material_base):
+	'''
+	Material Glossy Coating Settings
+	'''
+	
+	bl_label = 'LuxRender Glossy Coating'
+	bl_options = {'DEFAULT_CLOSED'}
+	
+	display_property_groups = [
+		( ('material',), 'luxrender_coating' )
+	]
+		
+	def draw_header(self, context):
+		self.layout.prop(context.material.luxrender_coating, "use_coating", text="")
+	
+	def draw_coating_ior_menu(self, context):
+		"""
+		This is a draw callback from property_group_renderer, due
+		to ef_callback item in luxrender_coating.properties
+		"""
+		lmc = context.material.luxrender_coating
+		
+		if lmc.index_floatvalue == lmc.index_presetvalue:
+			menu_text = lmc.index_presetstring
+		else:
+			menu_text = '-- Choose preset --'
+		
+		cl=self.layout.column(align=True)
+		cl.menu('LUXRENDER_MT_coating_ior_presets', text=menu_text)
+	
+	@classmethod
+	def poll(cls, context):
+		if not hasattr(context.material, 'luxrender_coating'):
+			return False
+		return super().poll(context) and context.material.luxrender_material.type != 'null'

@@ -299,6 +299,7 @@ class luxrender_material(declarative_property_group):
 		if prnt:
 			prnt.luxrender_emission.reset()
 			prnt.luxrender_transparency.reset()
+			prnt.luxrender_coating.reset()
 	
 	def set_master_color(self, blender_material):
 		'''
@@ -375,6 +376,11 @@ class luxrender_material(declarative_property_group):
 				# find alpha texture if material should be transparent
 				if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
 					alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
+
+				coating_params = None
+				# find coating if material should be coated
+				if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
+					coating_params = material.luxrender_coating.export(lux_context, material)
 				
 				# Bump mapping
 				if self.type not in ['mix', 'null', 'layered']:
@@ -386,24 +392,37 @@ class luxrender_material(declarative_property_group):
 				if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
 					material_params.update( self.luxrender_mat_compositing.get_paramset() )
 				
-				if alpha_type == None:
-					mat_type = self.type
-				else: # export mix for transparency
-					material_params.add_string('type', self.type)
-					ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_null', ParamSet().add_string('type', 'null'))
+				mat_type = self.type
+				
+				print(coating_params)
+				if coating_params != None:
+					# export coating
+					material_params.add_string('type', mat_type)					
 					ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_base', material_params)
+					ExportedMaterials.export_new_named(lux_context)
+
+					# replace material params with glossycoating
+					mat_type = 'glossycoating'
+					material_params = coating_params \
+						.add_string('basematerial', material.name + '_base')
+				
+				if alpha_type != None:
+					# export mix for transparency
+					material_params.add_string('type', mat_type)
+					ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_null', ParamSet().add_string('type', 'null'))
+					ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_mat', material_params)
 					ExportedMaterials.export_new_named(lux_context)
 					
 					# replace material params with mix
 					mat_type = 'mix'
 					material_params = ParamSet() \
 						.add_string('namedmaterial1', material.name + '_null') \
-						.add_string('namedmaterial2', material.name + '_base')
+						.add_string('namedmaterial2', material.name + '_mat')
 					if alpha_type == 'float':
 						material_params.add_float('amount', alpha_amount)
 					else:
 						material_params.add_texture('amount', alpha_amount)
-					
+				
 				if mode == 'indirect':
 					material_params.add_string('type', mat_type)
 					ExportedMaterials.makeNamedMaterial(lux_context, material.name, material_params)
@@ -645,6 +664,132 @@ class luxrender_mat_compositing(declarative_property_group):
 				if prop['type'] == psi['type'] and prop['attr'] == psi['name']:
 					setattr(self, psi['name'], psi['value'])
 
+def link_anisotropy(self, context, chan='u'):
+	if not self.anisotropic and not self.use_exponent:
+		if chan=='v': return
+		self.vroughness_floatvalue = self.uroughness_floatvalue
+		self.vroughness_usefloattexture = self.uroughness_usefloattexture
+		self.vroughness_floattexturename = self.uroughness_floattexturename
+		self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
+	
+	if not self.anisotropic and self.use_exponent:
+		if chan=='v': return
+		self.vexponent_floatvalue = self.uexponent_floatvalue
+		self.vexponent_usefloattexture = self.uexponent_usefloattexture
+		self.vexponent_floattexturename = self.uexponent_floattexturename
+		self.vexponent_multiplyfloat = self.uexponent_multiplyfloat
+		
+def link_backface_anisotropy(self, context, chan='u'):
+	if not self.bf_anisotropic and not self.bf_exponent:
+		if chan=='v': return
+		self.bf_vroughness_floatvalue = self.bf_uroughness_floatvalue
+		self.bf_vroughness_usefloattexture = self.bf_uroughness_usefloattexture
+		self.bf_vroughness_floattexturename = self.bf_uroughness_floattexturename
+		self.bf_vroughness_multiplyfloat = self.bf_uroughness_multiplyfloat
+	
+	if not self.bf_anisotropic and self.bf_exponent:
+		if chan=='v': return
+		self.bf_vexponent_floatvalue = self.bf_uexponent_floatvalue
+		self.bf_vexponent_usefloattexture = self.bf_uexponent_usefloattexture
+		self.bf_vexponent_floattexturename = self.bf_uexponent_floattexturename
+		self.bf_vexponent_multiplyfloat = self.bf_uexponent_multiplyfloat
+
+def gen_CB_update_exponent(chan='u'):
+	def update_exponent(self, context):
+		if not self.use_exponent:
+			setattr(self,
+				'%sexponent_floatvalue'%chan,
+				(2.0/(getattr(self, '%sroughness_floatvalue'%chan)** 2)-2.0)
+			)
+			setattr(self,
+				'%sexponent_usefloattexture'%chan,
+				getattr(self, '%sroughness_usefloattexture'%chan)
+			)
+			setattr(self,
+				'%sexponent_floattexturename'%chan,
+				getattr(self, '%sroughness_floattexturename'%chan)
+			)
+			setattr(self,
+				'%sexponent_multiplyfloat'%chan,
+				getattr(self, '%sroughness_multiplyfloat'%chan)
+			)
+		
+			link_anisotropy(self, context, chan)
+			refresh_preview(self, context)
+	return update_exponent
+
+def gen_CB_update_roughness(chan='u'):
+	def update_roughness(self, context):
+		if self.use_exponent:
+			setattr(self,
+				'%sroughness_floatvalue'%chan,
+				(2.0/(getattr(self, '%sexponent_floatvalue'%chan)+2.0))**0.5
+			)
+			setattr(self,
+				'%sroughness_usefloattexture'%chan,
+				getattr(self, '%sexponent_usefloattexture'%chan)
+			)
+			setattr(self,
+				'%sroughness_floattexturename'%chan,
+				getattr(self, '%sexponent_floattexturename'%chan)
+			)
+			setattr(self,
+				'%sroughness_multiplyfloat'%chan,
+				getattr(self, '%sexponent_multiplyfloat'%chan)
+			)
+		
+			link_anisotropy(self, context, chan)
+			refresh_preview(self, context)
+	return update_roughness
+	
+def gen_CB_update_backface_exponent(chan='u'):
+	def update_backface_exponent(self, context):
+		if not self.bf_exponent:
+			setattr(self,
+				'bf_%sexponent_floatvalue'%chan,
+				(2.0/(getattr(self, 'bf_%sroughness_floatvalue'%chan)** 2)-2.0)
+			)
+			setattr(self,
+				'bf_%sexponent_usefloattexture'%chan,
+				getattr(self, 'bf_%sroughness_usefloattexture'%chan)
+			)
+			setattr(self,
+				'bf_%sexponent_floattexturename'%chan,
+				getattr(self, 'bf_%sroughness_floattexturename'%chan)
+			)
+			setattr(self,
+				'bf_%sexponent_multiplyfloat'%chan,
+				getattr(self, 'bf_%sroughness_multiplyfloat'%chan)
+			)
+		
+			link_backface_anisotropy(self, context, chan)
+			refresh_preview(self, context)
+	return update_backface_exponent
+
+def gen_CB_update_backface_roughness(chan='u'):
+	def update_backface_roughness(self, context):
+		if self.bf_exponent:
+			setattr(self,
+				'bf_%sroughness_floatvalue'%chan,
+				(2.0/(getattr(self, 'bf_%sexponent_floatvalue'%chan)+2.0))**0.5
+			)
+			setattr(self,
+				'bf_%sroughness_usefloattexture'%chan,
+				getattr(self, 'bf_%sexponent_usefloattexture'%chan)
+			)
+			setattr(self,
+				'bf_%sroughness_floattexturename'%chan,
+				getattr(self, 'bf_%sexponent_floattexturename'%chan)
+			)
+			setattr(self,
+				'bf_%sroughness_multiplyfloat'%chan,
+				getattr(self, 'bf_%sexponent_multiplyfloat'%chan)
+			)
+		
+			link_backface_anisotropy(self, context, chan)
+			refresh_preview(self, context)
+	return update_backface_roughness
+
 class TransparencyFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other ColorTextureParameters
@@ -822,131 +967,176 @@ class luxrender_transparency(declarative_property_group):
 		
 		return alpha_type, alpha_amount
 
-def link_anisotropy(self, context, chan='u'):
-	if not self.anisotropic and not self.use_exponent:
-		if chan=='v': return
-		self.vroughness_floatvalue = self.uroughness_floatvalue
-		self.vroughness_usefloattexture = self.uroughness_usefloattexture
-		self.vroughness_floattexturename = self.uroughness_floattexturename
-		self.vroughness_multiplyfloat = self.uroughness_multiplyfloat
-	
-	if not self.anisotropic and self.use_exponent:
-		if chan=='v': return
-		self.vexponent_floatvalue = self.uexponent_floatvalue
-		self.vexponent_usefloattexture = self.uexponent_usefloattexture
-		self.vexponent_floattexturename = self.uexponent_floattexturename
-		self.vexponent_multiplyfloat = self.uexponent_multiplyfloat
-		
-def link_backface_anisotropy(self, context, chan='u'):
-	if not self.bf_anisotropic and not self.bf_exponent:
-		if chan=='v': return
-		self.bf_vroughness_floatvalue = self.bf_uroughness_floatvalue
-		self.bf_vroughness_usefloattexture = self.bf_uroughness_usefloattexture
-		self.bf_vroughness_floattexturename = self.bf_uroughness_floattexturename
-		self.bf_vroughness_multiplyfloat = self.bf_uroughness_multiplyfloat
-	
-	if not self.bf_anisotropic and self.bf_exponent:
-		if chan=='v': return
-		self.bf_vexponent_floatvalue = self.bf_uexponent_floatvalue
-		self.bf_vexponent_usefloattexture = self.bf_uexponent_usefloattexture
-		self.bf_vexponent_floattexturename = self.bf_uexponent_floattexturename
-		self.bf_vexponent_multiplyfloat = self.bf_uexponent_multiplyfloat
+class CoatingColorTextureParameter(ColorTextureParameter):
+	def texture_slot_set_attr(self):
+		# Looks in a different location than other ColorTextureParameters
+		return lambda s,c: c.luxrender_coating
 
-def gen_CB_update_exponent(chan='u'):
-	def update_exponent(self, context):
-		if not self.use_exponent:
-			setattr(self,
-				'%sexponent_floatvalue'%chan,
-				(2.0/(getattr(self, '%sroughness_floatvalue'%chan)** 2)-2.0)
-			)
-			setattr(self,
-				'%sexponent_usefloattexture'%chan,
-				getattr(self, '%sroughness_usefloattexture'%chan)
-			)
-			setattr(self,
-				'%sexponent_floattexturename'%chan,
-				getattr(self, '%sroughness_floattexturename'%chan)
-			)
-			setattr(self,
-				'%sexponent_multiplyfloat'%chan,
-				getattr(self, '%sroughness_multiplyfloat'%chan)
-			)
-		
-			link_anisotropy(self, context, chan)
-			refresh_preview(self, context)
-	return update_exponent
+class CoatingFloatTextureParameter(FloatTextureParameter):
+	def texture_slot_set_attr(self):
+		# Looks in a different location than other ColorTextureParameters
+		return lambda s,c: c.luxrender_coating
 
-def gen_CB_update_roughness(chan='u'):
-	def update_roughness(self, context):
-		if self.use_exponent:
-			setattr(self,
-				'%sroughness_floatvalue'%chan,
-				(2.0/(getattr(self, '%sexponent_floatvalue'%chan)+2.0))**0.5
-			)
-			setattr(self,
-				'%sroughness_usefloattexture'%chan,
-				getattr(self, '%sexponent_usefloattexture'%chan)
-			)
-			setattr(self,
-				'%sroughness_floattexturename'%chan,
-				getattr(self, '%sexponent_floattexturename'%chan)
-			)
-			setattr(self,
-				'%sroughness_multiplyfloat'%chan,
-				getattr(self, '%sexponent_multiplyfloat'%chan)
-			)
-		
-			link_anisotropy(self, context, chan)
-			refresh_preview(self, context)
-	return update_roughness
+# Float Textures
+TF_c_d					= CoatingFloatTextureParameter('d', 'Absorption depth (nm)',		add_float_value=True, default=0.0, min=0.0, max=2500.0 ) # default 0.0 for OFF
+TF_c_index				= CoatingFloatTextureParameter('index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.520) #default of something other than 1.0 so glass and roughglass render propery with defaults
+TF_c_uroughness			= CoatingFloatTextureParameter('uroughness', 'U-Roughness',			add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+TF_c_uexponent			= CoatingFloatTextureParameter('uexponent', 'U-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
+TF_c_vroughness			= CoatingFloatTextureParameter('vroughness', 'V-Roughness',			add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+TF_c_vexponent			= CoatingFloatTextureParameter('vexponent', 'V-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
+
+# Color Textures
+TC_c_Ka					= CoatingColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
+TC_c_Ks					= CoatingColorTextureParameter('Ks', 'Specular color',				default=(0.04,0.04,0.04) )
+
+@LuxRenderAddon.addon_register_class
+class luxrender_coating(declarative_property_group):
+	'''
+	Storage class for LuxRender Material glossy coating settings.
+	'''
 	
-def gen_CB_update_backface_exponent(chan='u'):
-	def update_backface_exponent(self, context):
-		if not self.bf_exponent:
-			setattr(self,
-				'bf_%sexponent_floatvalue'%chan,
-				(2.0/(getattr(self, 'bf_%sroughness_floatvalue'%chan)** 2)-2.0)
-			)
-			setattr(self,
-				'bf_%sexponent_usefloattexture'%chan,
-				getattr(self, 'bf_%sroughness_usefloattexture'%chan)
-			)
-			setattr(self,
-				'bf_%sexponent_floattexturename'%chan,
-				getattr(self, 'bf_%sroughness_floattexturename'%chan)
-			)
-			setattr(self,
-				'bf_%sexponent_multiplyfloat'%chan,
-				getattr(self, 'bf_%sroughness_multiplyfloat'%chan)
-			)
+	ef_attach_to = ['Material']
+	alert = {}
+	
+	controls = [
+		'multibounce',
+	] + \
+		TF_c_d.controls + \
+		TC_c_Ka.controls + \
+	[
+		'useior',
+		'draw_ior_menu',
+	] + \
+		TF_c_index.controls + \
+		TC_c_Ks.controls + \
+	[
+			['anisotropic', 'use_exponent'],
+	] + \
+		TF_c_uroughness.controls + \
+		TF_c_uexponent.controls + \
+		TF_c_vroughness.controls + \
+		TF_c_vexponent.controls
 		
-			link_backface_anisotropy(self, context, chan)
-			refresh_preview(self, context)
-	return update_backface_exponent
+		
+	visibility = dict_merge(
+		{
+			'multibounce':      { 'use_coating': True },
+			'useior':           { 'use_coating': True },
+			'draw_ior_menu':    { 'use_coating': True, 'useior': True },
+			'anisotropic':      { 'use_coating': True },
+			'use_exponent':     { 'use_coating': True }
+		},
+		TF_c_d.visibility,
+		TF_c_index.visibility,
+		TC_c_Ka.visibility,
+		TC_c_Ks.visibility,
+		TF_c_uroughness.visibility,
+		TF_c_uexponent.visibility,
+		TF_c_vroughness.visibility,
+		TF_c_vexponent.visibility	
+	)
 
-def gen_CB_update_backface_roughness(chan='u'):
-	def update_backface_roughness(self, context):
-		if self.bf_exponent:
-			setattr(self,
-				'bf_%sroughness_floatvalue'%chan,
-				(2.0/(getattr(self, 'bf_%sexponent_floatvalue'%chan)+2.0))**0.5
-			)
-			setattr(self,
-				'bf_%sroughness_usefloattexture'%chan,
-				getattr(self, 'bf_%sexponent_usefloattexture'%chan)
-			)
-			setattr(self,
-				'bf_%sroughness_floattexturename'%chan,
-				getattr(self, 'bf_%sexponent_floattexturename'%chan)
-			)
-			setattr(self,
-				'bf_%sroughness_multiplyfloat'%chan,
-				getattr(self, 'bf_%sexponent_multiplyfloat'%chan)
-			)
+	enabled = {}
+	enabled = texture_append_visibility(enabled, TF_c_vroughness, { 'use_coating': True, 'anisotropic': True })
+	enabled = texture_append_visibility(enabled, TF_c_vexponent,  { 'use_coating': True, 'anisotropic': True })
+	
+	visibility = texture_append_visibility(visibility, TF_c_uroughness, { 'use_coating': True, 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_c_vroughness, { 'use_coating': True, 'use_exponent': False })
+	visibility = texture_append_visibility(visibility, TF_c_uexponent,  { 'use_coating': True, 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TF_c_vexponent,  { 'use_coating': True, 'use_exponent': True })
+
+	visibility = texture_append_visibility(visibility, TC_c_Ks,    { 'use_coating': True, 'useior': False })
+	visibility = texture_append_visibility(visibility, TF_c_index, { 'use_coating': True, 'useior': True })
+	visibility = texture_append_visibility(visibility, TC_c_Ka,    { 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TF_c_d,     { 'use_coating': True })
+	
+	properties = [
+		{	# Drawn in the panel header
+			'type': 'bool',
+			'attr': 'use_coating',
+			'name': 'Use Coating',
+			'description': 'Enable glossy coating layer',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_coating_ior_menu',
+		},
+		{
+			'type': 'bool',
+			'attr': 'multibounce',
+			'name': 'Multibounce',
+			'description': 'Enable surface layer multibounce',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'anisotropic',
+			'name': 'Anisotropic roughness',
+			'description': 'Enable anisotropic roughness',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'use_exponent',
+			'name': 'Use exponent',
+			'description': 'Display roughness as a specular exponent',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'useior',
+			'name': 'Use IOR',
+			'description': 'Use IOR/Reflective index input',
+			'default': False,
+			'save_in_preset': True
+		},
+	] + \
+		TF_c_d.get_properties() + \
+		TF_c_index.get_properties() + \
+		TC_c_Ka.get_properties() + \
+		TC_c_Ks.get_properties() + \
+		TF_c_uroughness.get_properties() + \
+		TF_c_uexponent.get_properties() + \
+		TF_c_vroughness.get_properties() + \
+		TF_c_vexponent.get_properties()
+			
+	for prop in properties:
+		if prop['attr'].startswith('uexponent'):
+			prop['update'] = gen_CB_update_roughness('u')
+		if prop['attr'].startswith('vexponent'):
+			prop['update'] = gen_CB_update_roughness('v')
 		
-			link_backface_anisotropy(self, context, chan)
-			refresh_preview(self, context)
-	return update_backface_roughness
+		if prop['attr'].startswith('uroughness'):
+			prop['update'] = gen_CB_update_exponent('u')
+		if prop['attr'].startswith('vroughness'):
+			prop['update'] = gen_CB_update_exponent('v')
+	
+	def export(self, lux_context, material):
+		glossycoating_params = ParamSet()
+		
+		glossycoating_params.add_bool('multibounce', self.multibounce)
+		
+		if self.d_floatvalue > 0:
+			glossycoating_params.update( TF_c_d.get_paramset(self) )
+			glossycoating_params.update( TC_c_Ka.get_paramset(self) )
+		
+		if self.useior:
+			glossycoating_params.update( TF_c_index.get_paramset(self) )
+			glossycoating_params.add_color('Ks', (1.0, 1.0, 1.0))
+		else:
+			glossycoating_params.update( TC_c_Ks.get_paramset(self) )
+			glossycoating_params.add_float('index', 0.0)
+		
+		glossycoating_params.update( TF_c_uroughness.get_paramset(self) )
+		glossycoating_params.update( TF_c_vroughness.get_paramset(self) )
+				
+		return glossycoating_params	
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
@@ -2002,7 +2192,6 @@ class luxrender_mat_glossycoating(declarative_property_group):
 		TF_d.visibility,
 		TF_index.visibility,
 		TC_Ka.visibility,
-		TC_Kd.visibility,
 		TC_Ks.visibility,
 		TF_uroughness.visibility,
 		TF_uexponent.visibility,
@@ -2068,7 +2257,6 @@ class luxrender_mat_glossycoating(declarative_property_group):
 		TF_d.get_properties() + \
 		TF_index.get_properties() + \
 		TC_Ka.get_properties() + \
-		TC_Kd.get_properties() + \
 		TC_Ks.get_properties() + \
 		TF_uroughness.get_properties() + \
 		TF_uexponent.get_properties() + \
@@ -2094,8 +2282,6 @@ class luxrender_mat_glossycoating(declarative_property_group):
 		if self.d_floatvalue > 0:
 			glossycoating_params.update( TF_d.get_paramset(self) )
 			glossycoating_params.update( TC_Ka.get_paramset(self) )
-		
-		glossycoating_params.update( TC_Kd.get_paramset(self) )
 		
 		if self.useior:
 			glossycoating_params.update( TF_index.get_paramset(self) )
@@ -2124,7 +2310,6 @@ class luxrender_mat_glossycoating(declarative_property_group):
 		TF_d.load_paramset(self, ps)
 		TF_index.load_paramset(self, ps)
 		TC_Ka.load_paramset(self, ps)
-		TC_Kd.load_paramset(self, ps)
 		TC_Ks.load_paramset(self, ps)
 		TF_uroughness.load_paramset(self, ps)
 		TF_vroughness.load_paramset(self, ps)
