@@ -394,7 +394,6 @@ class luxrender_material(declarative_property_group):
 				
 				mat_type = self.type
 				
-				print(coating_params)
 				if coating_params != None:
 					# export coating
 					material_params.add_string('type', mat_type)					

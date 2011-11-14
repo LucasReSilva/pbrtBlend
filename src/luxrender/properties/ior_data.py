@@ -362,7 +362,6 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 	l_name = bpy.props.StringProperty()
 	
 	def execute(self, context):
-		print(self.bl_idname)
 		ior = ior_dict[self.properties.index]
 		name = self.properties.l_name
 		# Detect either material or volume or texture context
@@ -394,7 +393,6 @@ class LUXRENDER_OT_set_coating_ior_preset(bpy.types.Operator):
 	l_name = bpy.props.StringProperty()
 	
 	def execute(self, context):
-		print(self.bl_idname)
 		ior = ior_dict[self.properties.index]
 		name = self.properties.l_name
 		if context.material and context.material.luxrender_coating:
