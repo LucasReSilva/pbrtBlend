@@ -173,10 +173,38 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			if scene.render.use_color_management == False:
 				LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
 			
-			if self.render_scene(scene) == False:
-				return
+			api_type, write_files = self.set_export_path(scene)
+			is_animation = hasattr(self, 'is_animation') and self.is_animation
+			make_queue = scene.luxrender_engine.export_type == 'EXT' and write_files
 			
-			self.render_start(scene)
+			if is_animation and make_queue:
+				queue_file = efutil.export_path + '%s.%s.lxq' % (efutil.scene_filename(), scene.name)
+				
+				# Open/reset a queue file
+				if scene.frame_current == scene.frame_start:
+					open(queue_file, 'w').close()
+				
+				if hasattr(self, 'update_progress'):
+					fr = scene.frame_end - scene.frame_start
+					fo = scene.frame_current - scene.frame_start
+					self.update_progress(fo/fr)
+			
+			exported_file = self.export_scene(scene)
+			if exported_file == False:
+				return	# Export frame failed, abort rendering
+			
+			if is_animation and make_queue:
+				self.LuxManager = LuxManager.ActiveManager
+				self.LuxManager.lux_context.worldEnd()
+				with open(queue_file, 'a') as qf:
+					qf.write("%s\n" % exported_file)
+				
+				if scene.frame_current == scene.frame_end:
+					# run the queue
+					self.render_queue(scene, queue_file)
+			else:
+				self.render_start(scene)
+			
 			os.chdir(prev_dir)
 	
 	def render_preview(self, scene):
@@ -319,7 +347,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		LM.reset()
 	
-	def render_scene(self, scene):
+	def set_export_path(self, scene):
 		scene_path = efutil.filesystem_path(scene.render.filepath)
 		if os.path.isdir(scene_path):
 			self.output_dir = scene_path
@@ -349,6 +377,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		efutil.export_path = self.output_dir
 		os.chdir(self.output_dir)
+		
+		return api_type, write_files
+	
+	def export_scene(self, scene):
+		api_type, write_files = self.set_export_path(scene)
 		
 		# Pre-allocate the LuxManager so that we can set up the network servers before export
 		LM = LuxManager(
@@ -393,16 +426,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				'%s/%s.exr' % (self.output_dir, output_filename)
 			)
 		
-		return True
+		return "%s.lxs" % output_filename
 	
-	def render_start(self, scene):
-		self.LuxManager = LuxManager.ActiveManager
-		
-		# Remove previous rendering, to prevent loading old data
-		# if the update timer fires before the image is written
-		if os.path.exists(self.output_file):
-			os.remove(self.output_file)
-		
+	def rendering_behaviour(self, scene):
 		internal	= (scene.luxrender_engine.export_type in ['INT', 'LFC'])
 		write_files	= scene.luxrender_engine.write_files and (scene.luxrender_engine.export_type in ['INT', 'EXT'])
 		render		= scene.luxrender_engine.render or (scene.luxrender_engine.export_type in ['LFC'])
@@ -433,6 +459,95 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				start_rendering = False
 				parse = False
 				worldEnd = False
+		
+		return internal, start_rendering, parse, worldEnd
+	
+	def render_queue(self, scene, queue_file):
+		internal, start_rendering, parse, worldEnd = self.rendering_behaviour(scene)
+		
+		if start_rendering:
+			cmd_args = self.get_process_args(scene, start_rendering)
+			
+			cmd_args.extend(['-L', queue_file])
+			
+			LuxLog('Launching Queue: %s' % cmd_args)
+			# LuxLog(' in %s' % self.outout_dir)
+			luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
+	
+	def get_process_args(self, scene, start_rendering):
+		config_updates = {
+			'auto_start': start_rendering
+		}
+		
+		luxrender_path = efutil.filesystem_path( scene.luxrender_engine.install_path )
+		if luxrender_path[-1] != '/':
+			luxrender_path += '/'
+		
+		if os.path.isdir(luxrender_path) and os.path.exists(luxrender_path):
+			config_updates['install_path'] = luxrender_path
+		
+		if sys.platform == 'darwin':
+			# Get binary from OSX package
+			luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name
+		elif sys.platform == 'win32':
+			luxrender_path += '%s.exe' % scene.luxrender_engine.binary_name
+		else:
+			luxrender_path += scene.luxrender_engine.binary_name
+		
+		if not os.path.exists(luxrender_path):
+			LuxLog('LuxRender not found at path: %s' % luxrender_path)
+			return False
+		
+		cmd_args = [luxrender_path]
+		
+		# set log verbosity
+		if scene.luxrender_engine.log_verbosity != 'default':
+			cmd_args.append('--' + scene.luxrender_engine.log_verbosity)
+		
+		if scene.luxrender_engine.binary_name == 'luxrender':
+			# Copy the GUI log to the console
+			cmd_args.append('--logconsole')
+		
+		# Set number of threads for external processes
+		if not scene.luxrender_engine.threads_auto:
+			cmd_args.append('--threads=%i' % scene.luxrender_engine.threads)
+			
+		#Set fixed seeds, if enabled
+		if scene.luxrender_engine.fixed_seed:
+			cmd_args.append('--fixedseed')
+		
+		if scene.luxrender_networking.use_network_servers:
+			for server in scene.luxrender_networking.servers.split(','):
+				cmd_args.append('--useserver')
+				cmd_args.append(server.strip())
+			
+			cmd_args.append('--serverinterval')
+			cmd_args.append('%i' % scene.luxrender_networking.serverinterval)
+			
+			config_updates['servers'] = scene.luxrender_networking.servers
+			config_updates['serverinterval'] = '%i' % scene.luxrender_networking.serverinterval
+		
+		config_updates['use_network_servers'] = scene.luxrender_networking.use_network_servers
+		
+		# Save changed config items and then launch Lux
+		
+		try:
+			for k, v in config_updates.items():
+				efutil.write_config_value('luxrender', 'defaults', k, v)
+		except Exception as err:
+			LuxLog('WARNING: Saving LuxRender config failed, please set your user scripts dir: %s' % err)
+		
+		return cmd_args
+	
+	def render_start(self, scene):
+		self.LuxManager = LuxManager.ActiveManager
+		
+		# Remove previous rendering, to prevent loading old data
+		# if the update timer fires before the image is written
+		if os.path.exists(self.output_file):
+			os.remove(self.output_file)
+		
+		internal, start_rendering, parse, worldEnd = self.rendering_behaviour(scene)
 		
 		if self.LuxManager.lux_context.API_TYPE == 'FILE':
 			fn = self.LuxManager.lux_context.file_names[0]
@@ -483,67 +598,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					self.render_update_timer.start()
 					if self.render_update_timer.isAlive(): self.render_update_timer.join()
 			else:
-				config_updates = {
-					'auto_start': render
-				}
+				cmd_args = self.get_process_args(scene, start_rendering)
 				
-				luxrender_path = efutil.filesystem_path( scene.luxrender_engine.install_path )
-				if luxrender_path[-1] != '/':
-					luxrender_path += '/'
-				
-				if os.path.isdir(luxrender_path) and os.path.exists(luxrender_path):
-					config_updates['install_path'] = luxrender_path
-				
-				if sys.platform == 'darwin':
-					# Get binary from OSX package
-					luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name
-				elif sys.platform == 'win32':
-					luxrender_path += '%s.exe' % scene.luxrender_engine.binary_name
-				else:
-					luxrender_path += scene.luxrender_engine.binary_name
-				
-				if not os.path.exists(luxrender_path):
-					LuxLog('LuxRender not found at path: %s' % luxrender_path)
-					return False
-				
-				cmd_args = [luxrender_path, fn.replace('//','/')]
-				
-				# set log verbosity
-				if scene.luxrender_engine.log_verbosity != 'default':
-					cmd_args.append('--' + scene.luxrender_engine.log_verbosity)
-				
-				if scene.luxrender_engine.binary_name == 'luxrender':
-					# Copy the GUI log to the console
-					cmd_args.append('--logconsole')
-				
-				# Set number of threads for external processes
-				if not scene.luxrender_engine.threads_auto:
-					cmd_args.append('--threads=%i' % scene.luxrender_engine.threads)
-					
-				#Set fixed seeds, if enabled
-				if scene.luxrender_engine.fixed_seed:
-					cmd_args.append('--fixedseed')
-				
-				if scene.luxrender_networking.use_network_servers:
-					for server in scene.luxrender_networking.servers.split(','):
-						cmd_args.append('--useserver')
-						cmd_args.append(server.strip())
-					
-					cmd_args.append('--serverinterval')
-					cmd_args.append('%i' % scene.luxrender_networking.serverinterval)
-					
-					config_updates['servers'] = scene.luxrender_networking.servers
-					config_updates['serverinterval'] = '%i' % scene.luxrender_networking.serverinterval
-				
-				config_updates['use_network_servers'] = scene.luxrender_networking.use_network_servers
-				
-				# Save changed config items and then launch Lux
-				
-				try:
-					for k, v in config_updates.items():
-						efutil.write_config_value('luxrender', 'defaults', k, v)
-				except Exception as err:
-					LuxLog('WARNING: Saving LuxRender config failed, please set your user scripts dir: %s' % err)
+				cmd_args.append(fn.replace('//','/'))
 				
 				LuxLog('Launching: %s' % cmd_args)
 				# LuxLog(' in %s' % self.outout_dir)
