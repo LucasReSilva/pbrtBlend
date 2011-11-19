@@ -820,8 +820,8 @@ class luxrender_texture(declarative_property_group):
 #------------------------------------------------------------------------------ 
 
 # Float Texture Parameters
-TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'Brick modulation texture',	default=0.0, min=0.0, max=1.0, precision=6)
-TF_bricktex		= FloatTextureParameter('bricktex',		'Brick texture',			default=0.0, min=0.0, max=1.0, precision=6)
+TF_brickmodtex	= FloatTextureParameter('brickmodtex',	'Brick modulation texture',	default=0.9, min=0.0, max=1.0, precision=6)
+TF_bricktex		= FloatTextureParameter('bricktex',		'Brick texture',			default=1.0, min=0.0, max=1.0, precision=6)
 TF_mortartex	= FloatTextureParameter('mortartex',	'Mortar texture',			default=0.0, min=0.0, max=1.0, precision=6)
 TF_tex1			= FloatTextureParameter('tex1',			'Texture 1',				default=1.0, min=-1e6, max=1e6, precision=6)
 TF_tex2			= FloatTextureParameter('tex2',			'Texture 2',				default=0.0, min=-1e6, max=1e6, precision=6)
@@ -832,9 +832,9 @@ TF_innertex		= FloatTextureParameter('innertex',		'Inner texture',			default=1.0
 TF_outertex		= FloatTextureParameter('outertex',		'Outer texture',			default=0.0, min=0.0, max=100.0, precision=6)
 
 # Color Texture Parameters
-TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'Brick modulation texture',	default=(1.0,1.0,1.0))
-TC_bricktex		= ColorTextureParameter('bricktex',		'Brick texture',			default=(1.0,1.0,1.0))
-TC_mortartex	= ColorTextureParameter('mortartex',	'Mortar texture',			default=(1.0,1.0,1.0))
+TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'Brick modulation texture',	default=(0.9,0.9,0.9))
+TC_bricktex		= ColorTextureParameter('bricktex',		'Brick texture',			default=(0.64,0.64,0.64))
+TC_mortartex	= ColorTextureParameter('mortartex',	'Mortar texture',			default=(0.1,0.1,0.1))
 TC_tex1			= ColorTextureParameter('tex1',			'Texture 1',				default=(1.0,1.0,1.0))
 TC_tex2			= ColorTextureParameter('tex2',			'Texture 2',				default=(0.0,0.0,0.0))
 TC_Kr			= ColorTextureParameter('Kr',			'Reflection color',			default=(0.7,0.7,0.7)) #This parameter is used by the fresnelcolor texture
@@ -1352,6 +1352,8 @@ class luxrender_tex_brick(declarative_property_group):
 			'max': 10.0,
 			'soft_max': 10.0,
 			'precision': 6,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH',
 			'save_in_preset': True
 		},
 		{
@@ -1364,6 +1366,8 @@ class luxrender_tex_brick(declarative_property_group):
 			'max': 1.0,
 			'soft_max': 1.0,
 			'precision': 6,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH',
 			'save_in_preset': True
 		},
 		{
@@ -1376,6 +1380,8 @@ class luxrender_tex_brick(declarative_property_group):
 			'max': 10.0,
 			'soft_max': 10.0,
 			'precision': 3,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH',
 			'save_in_preset': True
 		},
 		{
@@ -1388,6 +1394,8 @@ class luxrender_tex_brick(declarative_property_group):
 			'max': 10.0,
 			'soft_max': 10.0,
 			'precision': 3,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH',
 			'save_in_preset': True
 		},
 		{
@@ -1400,6 +1408,8 @@ class luxrender_tex_brick(declarative_property_group):
 			'max': 10.0,
 			'soft_max': 10.0,
 			'precision': 3,
+			'sub_type': 'DISTANCE',
+			'unit': 'LENGTH',
 			'save_in_preset': True
 		},
 	] + \

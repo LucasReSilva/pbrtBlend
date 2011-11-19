@@ -36,7 +36,7 @@ from ..properties.texture import (
 )
 from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
-	MaterialCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
+	MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
@@ -284,6 +284,7 @@ class luxrender_material(declarative_property_group):
 		'glossytranslucent': 'Kd',
 		'matte': 'Kd',
 		'mattetranslucent': 'Kr',
+		'metal2': 'Kr',
 		'shinymetal': 'Kr',
 		'mirror': 'Kr',
 		'scatter': 'Kd',
@@ -377,6 +378,7 @@ class luxrender_material(declarative_property_group):
 				if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
 					alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
 
+
 				coating_params = None
 				# find coating if material should be coated
 				if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
@@ -386,24 +388,34 @@ class luxrender_material(declarative_property_group):
 				if self.type not in ['mix', 'null', 'layered']:
 					material_params.update( TF_bumpmap.get_paramset(self) )
 				
+				if hasattr(sub_type, 'export'):
+				   sub_type.export(lux_context, material)
+				   
 				material_params.update( sub_type.get_paramset(material) )
 				
 				# DistributedPath compositing
 				if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
 					material_params.update( self.luxrender_mat_compositing.get_paramset() )
 				
+
 				mat_type = self.type
+
 				
+
 				if coating_params != None:
 					# export coating
+
 					material_params.add_string('type', mat_type)					
+
 					ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_base', material_params)
 					ExportedMaterials.export_new_named(lux_context)
+
 
 					# replace material params with glossycoating
 					mat_type = 'glossycoating'
 					material_params = coating_params \
 						.add_string('basematerial', material.name + '_base')
+
 				
 				if alpha_type != None:
 					# export mix for transparency
@@ -663,6 +675,7 @@ class luxrender_mat_compositing(declarative_property_group):
 				if prop['type'] == psi['type'] and prop['attr'] == psi['name']:
 					setattr(self, psi['name'], psi['value'])
 
+
 def link_anisotropy(self, context, chan='u'):
 	if not self.anisotropic and not self.use_exponent:
 		if chan=='v': return
@@ -789,6 +802,7 @@ def gen_CB_update_backface_roughness(chan='u'):
 			refresh_preview(self, context)
 	return update_backface_roughness
 
+
 class TransparencyFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other ColorTextureParameters
@@ -881,7 +895,8 @@ class luxrender_transparency(declarative_property_group):
 		'roughglass': 'Kr',
 		'scatter': 'Kd',
 		'shinymetal': 'Kr',
-		'velvet': 'Kd'
+		'velvet': 'Kd',
+		'metal2': 'Kr',
 	}
 	
 	def export(self, lux_context, material):
@@ -966,27 +981,42 @@ class luxrender_transparency(declarative_property_group):
 		
 		return alpha_type, alpha_amount
 
+
 class CoatingColorTextureParameter(ColorTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other ColorTextureParameters
 		return lambda s,c: c.luxrender_coating
+
 
 class CoatingFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
 		# Looks in a different location than other ColorTextureParameters
 		return lambda s,c: c.luxrender_coating
 
+
 # Float Textures
+
 TF_c_d					= CoatingFloatTextureParameter('d', 'Absorption depth (nm)',		add_float_value=True, default=0.0, min=0.0, max=2500.0 ) # default 0.0 for OFF
+
 TF_c_index				= CoatingFloatTextureParameter('index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.520) #default of something other than 1.0 so glass and roughglass render propery with defaults
+
 TF_c_uroughness			= CoatingFloatTextureParameter('uroughness', 'U-Roughness',			add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+
 TF_c_uexponent			= CoatingFloatTextureParameter('uexponent', 'U-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
+
 TF_c_vroughness			= CoatingFloatTextureParameter('vroughness', 'V-Roughness',			add_float_value=True, min=0.00001, max=0.8, default=0.075 )
+
 TF_c_vexponent			= CoatingFloatTextureParameter('vexponent', 'V-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
 
+
+
 # Color Textures
+
 TC_c_Ka					= CoatingColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
+
 TC_c_Ks					= CoatingColorTextureParameter('Ks', 'Specular color',				default=(0.04,0.04,0.04) )
+
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_coating(declarative_property_group):
@@ -1019,7 +1049,9 @@ class luxrender_coating(declarative_property_group):
 		
 	visibility = dict_merge(
 		{
+
 			'multibounce':      { 'use_coating': True },
+
 			'useior':           { 'use_coating': True },
 			'draw_ior_menu':    { 'use_coating': True, 'useior': True },
 			'anisotropic':      { 'use_coating': True },
@@ -2438,8 +2470,12 @@ class luxrender_mat_metal2(declarative_property_group):
 	alert = {}
 	
 	controls = [
+		'metaltype',
+		'filename',
+		'preset',
 	] + \
 		TFR_fresnel.controls + \
+		TC_Kr.controls + \
 	[
 		['anisotropic', 'use_exponent'],
 	] + \
@@ -2450,10 +2486,15 @@ class luxrender_mat_metal2(declarative_property_group):
 	
 	visibility = dict_merge(
 		TFR_fresnel.visibility,
+		TC_Kr.visibility,
 		TF_uroughness.visibility,
 		TF_uexponent.visibility,
 		TF_vroughness.visibility,
 		TF_vexponent.visibility,
+		{
+			'filename': { 'metaltype': 'nk' },
+			'preset': 	{ 'metaltype': 'preset' },
+		}
 	)
 	
 	enabled = {}
@@ -2464,8 +2505,48 @@ class luxrender_mat_metal2(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TF_vroughness, { 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_uexponent,  { 'use_exponent': True })
 	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
+	visibility = texture_append_visibility(visibility, TC_Kr,  		  { 'metaltype': 'fresnelcolor' })
+	visibility = texture_append_visibility(visibility, TFR_fresnel,   { 'metaltype': 'fresneltex' })
+	
+	
 	
 	properties = [
+		{
+			'type': 'enum',
+			'attr': 'metaltype',
+			'name': 'Metal type',
+			'description': 'Metal type to use',
+			'items': [
+				('fresnelcolor', 'Custom color', 'Use a custom reflection color'),
+				('preset', 'Preset', 'Use preset metal'),
+				('nk', 'External nk file', 'Use external nk file'),
+				('fresneltex', 'Fresnel texture', 'Use generic fresnel input'),
+			],
+			'default': 'preset',
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'preset',
+			'name': 'Preset',
+			'description': 'Metal type to use',
+			'items': [
+				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
+				('copper', 'copper', 'copper'),
+				('gold', 'gold', 'gold'),
+				('silver', 'silver', 'silver'),
+				('aluminium', 'aluminium', 'aluminium')
+			],
+			'default': 'aluminium',
+			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'subtype': 'FILE_PATH',
+			'attr': 'filename',
+			'name': 'NK file',
+			'save_in_preset': True
+		},
 		{
 			'type': 'bool',
 			'attr': 'anisotropic',
@@ -2484,6 +2565,7 @@ class luxrender_mat_metal2(declarative_property_group):
 		}
 	] + \
 		TFR_fresnel.get_properties() + \
+		TC_Kr.get_properties() + \
 		TF_uroughness.get_properties() + \
 		TF_uexponent.get_properties() + \
 		TF_vroughness.get_properties() + \
@@ -2499,14 +2581,65 @@ class luxrender_mat_metal2(declarative_property_group):
 			prop['update'] = gen_CB_update_exponent('u')
 		if prop['attr'].startswith('vroughness'):
 			prop['update'] = gen_CB_update_exponent('v')
-	
+			
+	def export(self, lux_context, material):
+		if self.metaltype == 'fresnelcolor':
+			fresnelcolor_params = ParamSet()
+			
+			if LuxManager.ActiveManager is not None:
+				fresnelcolor_params.update(
+					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'Kr', 'color', self)
+				)
+				
+			ExportedTextures.texture(
+				lux_context,
+				'%s_nk' % material.name,
+				'fresnel',
+				'fresnelcolor',
+				fresnelcolor_params
+			)
+			ExportedTextures.export_new(lux_context)
+				
+		if self.metaltype == 'preset':
+			fresnelname_params = ParamSet()
+			
+			fresnelname_params.add_string('name', self.preset)
+				
+			ExportedTextures.texture(
+				lux_context,
+				'%s_nk' % material.name,
+				'fresnel',
+				'fresnelname',
+				fresnelname_params
+			)
+			ExportedTextures.export_new(lux_context)
+			
+		if self.metaltype == 'nk':
+			fresnelname_params = ParamSet()			
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(LuxManager.CurrentScene, material, self.filename, fresnelname_params, 'filename')
+				
+			ExportedTextures.texture(
+				lux_context,
+				'%s_nk' % material.name,
+				'fresnel',
+				'fresnelname',
+				fresnelname_params
+			)
+			ExportedTextures.export_new(lux_context)
+			
 	def get_paramset(self, material):
 		metal2_params = ParamSet()
 		
-		metal2_params.update( TFR_fresnel.get_paramset(self) )
 		metal2_params.update( TF_uroughness.get_paramset(self) )
 		metal2_params.update( TF_vroughness.get_paramset(self) )
 		
+		if self.metaltype == 'fresneltex':
+ 			metal2_params.update( TFR_fresnel.get_paramset(self) )
+		else:
+			metal2_params.add_texture('fresnel', '%s_nk' % material.name)
+					
 		return metal2_params
 		
 		TFR_fresnel.load_paramset(self, ps)
