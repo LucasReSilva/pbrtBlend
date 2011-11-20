@@ -672,6 +672,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'nphotonsused',
 			'name': 'Number of photons used',
 			'default': 50,
+			'min': 1,
 			'save_in_preset': True
 		},
 		{
@@ -679,6 +680,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'maxphotondist',
 			'name': 'Max. photon distance',
 			'default': 0.1,
+			'min', 0.01,
 			'save_in_preset': True
 		},
 		{
