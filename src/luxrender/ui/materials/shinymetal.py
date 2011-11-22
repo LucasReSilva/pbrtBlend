@@ -36,3 +36,19 @@ class ui_material_shinymetal(luxrender_material_sub):
 	display_property_groups = [
 		( ('material', 'luxrender_material'), 'luxrender_mat_shinymetal' )
 	]
+
+	def draw_ior_menu(self, context):
+		"""
+		This is a draw callback from property_group_renderer, due
+		to ef_callback item in luxrender_mat_<mat>.properties
+		"""
+		
+		lmg = context.material.luxrender_material.luxrender_mat_mirror
+		
+		if lmg.filmindex_floatvalue == lmg.filmindex_presetvalue:
+			menu_text = lmg.filmindex_presetstring
+		else:
+			menu_text = '-- Choose preset --'
+		
+		cl=self.layout.column(align=True)
+		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)

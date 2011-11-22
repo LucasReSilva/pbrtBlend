@@ -353,6 +353,7 @@ ior_dict = {
 	427:3.927
 }
 
+
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 	bl_idname = 'luxrender.set_old_ior_preset'
@@ -362,8 +363,11 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 	l_name = bpy.props.StringProperty()
 	
 	def execute(self, context):
+
 		ior = ior_dict[self.properties.index]
+
 		name = self.properties.l_name
+
 		# Detect either material or volume or texture context
 		if context.material and context.material.luxrender_material and not context.texture:
 			lm = context.material.luxrender_material
@@ -372,6 +376,11 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 					getattr(lm, 'luxrender_mat_%s'%mat_type).index_floatvalue = ior
 					getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetvalue = ior
 					getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetstring = name
+			for mat_type in ('mirror', 'shinymetal'):
+				if lm.type == mat_type:
+					getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_floatvalue = ior
+					getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_presetvalue = ior
+					getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_presetstring = name
 		elif context.scene and context.scene.luxrender_volumes and not context.texture:
 			vi = context.scene.luxrender_volumes.volumes_index
 			lv = context.scene.luxrender_volumes.volumes[vi]
@@ -384,6 +393,7 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 			context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetstring = name		
 		return {'FINISHED'}
 
+
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_set_coating_ior_preset(bpy.types.Operator):
 	bl_idname = 'luxrender.set_coating_ior_preset'
@@ -393,14 +403,18 @@ class LUXRENDER_OT_set_coating_ior_preset(bpy.types.Operator):
 	l_name = bpy.props.StringProperty()
 	
 	def execute(self, context):
+
 		ior = ior_dict[self.properties.index]
+
 		name = self.properties.l_name
+
 		if context.material and context.material.luxrender_coating:
 			lc = context.material.luxrender_coating
 			lc.index_floatvalue = ior
 			lc.index_presetvalue = ior
 			lc.index_presetstring = name
 		return {'FINISHED'}
+
 
 def draw_generator(operator, m_names):
 	def draw(self, context):
@@ -412,11 +426,15 @@ def draw_generator(operator, m_names):
 			op.l_name = m_name
 	return draw
 
+
 def create_ior_menu(name, opname):
+
 	submenus = []
 	for label, iors in ior_tree:
 		submenu_idname = 'LUXRENDER_MT_ior_%s_cat%d' % (name, len(submenus))
+
 		
+
 		submenus.append(
 			LuxRenderAddon.addon_register_class(type(
 				submenu_idname,
@@ -428,6 +446,7 @@ def create_ior_menu(name, opname):
 				}
 			))
 		)
+
 	return submenus
 
 class LUXRENDER_MT_ior_presets_base(bpy.types.Menu):
@@ -436,12 +455,15 @@ class LUXRENDER_MT_ior_presets_base(bpy.types.Menu):
 		for sm in self.submenus:
 			sl.menu(sm.bl_idname)
 	
+
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_MT_ior_presets(LUXRENDER_MT_ior_presets_base):
 	bl_label = 'IOR Presets'
+
 	submenus = create_ior_menu('old', 'LUXRENDER_OT_set_old_ior_preset')
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_MT_coating_ior_presets(LUXRENDER_MT_ior_presets_base):
 	bl_label = 'IOR Presets'
+
 	submenus = create_ior_menu('coating', 'LUXRENDER_OT_set_coating_ior_preset')

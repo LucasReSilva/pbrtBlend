@@ -2686,6 +2686,9 @@ class luxrender_mat_shinymetal(declarative_property_group):
 	controls = [
 	] + \
 		TF_film.controls + \
+	[
+		'draw_ior_menu'
+	] + \
 		TF_filmindex.controls + \
 		TC_Kr.controls + \
 		TC_Ks.controls + \
@@ -2718,6 +2721,11 @@ class luxrender_mat_shinymetal(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
 	
 	properties = [
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
+		},
 		{
 			'type': 'bool',
 			'attr': 'anisotropic',
@@ -2783,6 +2791,9 @@ class luxrender_mat_mirror(declarative_property_group):
 	controls = [
 	] + \
 		TF_film.controls + \
+	[
+		'draw_ior_menu'
+	] + \
 		TF_filmindex.controls + \
 		TC_Kr.controls
 	
@@ -2793,6 +2804,11 @@ class luxrender_mat_mirror(declarative_property_group):
 	)
 	
 	properties = [
+		{
+			'type': 'ef_callback',
+			'attr': 'draw_ior_menu',
+			'method': 'draw_ior_menu',
+		},
 	] + \
 		TF_film.get_properties() + \
 		TF_filmindex.get_properties() + \
