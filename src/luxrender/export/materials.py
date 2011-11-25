@@ -303,9 +303,10 @@ def value_transform_passthrough(val):
 	return val
 
 def get_texture_from_scene(scene, tex_name):
-	for tex_slot in scene.world.texture_slots:
-		if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
-			return tex_slot.texture
+	if scene.world != None:	
+		for tex_slot in scene.world.texture_slots:
+			if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
+				return tex_slot.texture
 	for obj in scene.objects:
 		for mat_slot in obj.material_slots:
 			if mat_slot != None and mat_slot.material != None:
