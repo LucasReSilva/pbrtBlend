@@ -932,7 +932,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		if scene.luxrender_rendermode.renderer == 'hybrid':
 			#Check each integrator seperately so they don't mess with each other!
-			if self.surfaceintegrator == 'path':
+			if self.surfaceintegrator == 'path' and self.advanced == True:
 				if self.lightstrategy not in ('one', 'all', 'auto'):
 					LuxLog('Incompatible lightstrategy for Hybrid Path (use "auto", "all", or "one").')
 					raise Exception('Incompatible render settings')
