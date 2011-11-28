@@ -128,7 +128,7 @@ class luxrender_engine(declarative_property_group):
 	
 	ef_attach_to = ['Scene']
 	
-	controls = [		
+	controls = [
 		'export_type',
 		'binary_name',
 		'write_files',
