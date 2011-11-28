@@ -154,56 +154,60 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		'''
 		
 		with RENDERENGINE_luxrender.render_lock:	# just render one thing at a time
-			
-			self.LuxManager				= None
-			self.render_update_timer	= None
-			self.output_dir				= efutil.temp_directory()
-			self.output_file			= 'default.png'
-			
 			prev_dir = os.getcwd()
 			
-			if scene is None:
-				LuxLog('ERROR: Scene to render is not valid')
-				return
-			
-			if scene.name == 'preview':
-				self.render_preview(scene)
-				return
-			
-			if scene.render.use_color_management == False:
-				LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
-			
-			api_type, write_files = self.set_export_path(scene)
-			is_animation = hasattr(self, 'is_animation') and self.is_animation
-			make_queue = scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and write_files
-			
-			if is_animation and make_queue:
-				queue_file = efutil.export_path + '%s.%s.lxq' % (efutil.scene_filename(), scene.name)
+			try:
+				self.LuxManager				= None
+				self.render_update_timer	= None
+				self.output_dir				= efutil.temp_directory()
+				self.output_file			= 'default.png'
 				
-				# Open/reset a queue file
-				if scene.frame_current == scene.frame_start:
-					open(queue_file, 'w').close()
+				if scene is None:
+					LuxLog('ERROR: Scene to render is not valid')
+					return
 				
-				if hasattr(self, 'update_progress'):
-					fr = scene.frame_end - scene.frame_start
-					fo = scene.frame_current - scene.frame_start
-					self.update_progress(fo/fr)
-			
-			exported_file = self.export_scene(scene)
-			if exported_file == False:
-				return	# Export frame failed, abort rendering
-			
-			if is_animation and make_queue:
-				self.LuxManager = LuxManager.ActiveManager
-				self.LuxManager.lux_context.worldEnd()
-				with open(queue_file, 'a') as qf:
-					qf.write("%s\n" % exported_file)
+				if scene.name == 'preview':
+					self.render_preview(scene)
+					return
 				
-				if scene.frame_current == scene.frame_end:
-					# run the queue
-					self.render_queue(scene, queue_file)
-			else:
-				self.render_start(scene)
+				if scene.render.use_color_management == False:
+					LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
+				
+				api_type, write_files = self.set_export_path(scene)
+				is_animation = hasattr(self, 'is_animation') and self.is_animation
+				make_queue = scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and write_files
+				
+				if is_animation and make_queue:
+					queue_file = efutil.export_path + '%s.%s.lxq' % (efutil.scene_filename(), scene.name)
+					
+					# Open/reset a queue file
+					if scene.frame_current == scene.frame_start:
+						open(queue_file, 'w').close()
+					
+					if hasattr(self, 'update_progress'):
+						fr = scene.frame_end - scene.frame_start
+						fo = scene.frame_current - scene.frame_start
+						self.update_progress(fo/fr)
+				
+				exported_file = self.export_scene(scene)
+				if exported_file == False:
+					return	# Export frame failed, abort rendering
+				
+				if is_animation and make_queue:
+					self.LuxManager = LuxManager.ActiveManager
+					self.LuxManager.lux_context.worldEnd()
+					with open(queue_file, 'a') as qf:
+						qf.write("%s\n" % exported_file)
+					
+					if scene.frame_current == scene.frame_end:
+						# run the queue
+						self.render_queue(scene, queue_file)
+				else:
+					self.render_start(scene)
+			
+			except Exception as err:
+				LuxLog('%s'%err)
+				self.report({'ERROR'}, '%s'%err)
 			
 			os.chdir(prev_dir)
 	
@@ -495,8 +499,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			luxrender_path += scene.luxrender_engine.binary_name
 		
 		if not os.path.exists(luxrender_path):
-			LuxLog('LuxRender not found at path: %s' % luxrender_path)
-			return False
+			raise Exception('LuxRender not found at path: %s' % luxrender_path)
 		
 		cmd_args = [luxrender_path]
 		
