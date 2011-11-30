@@ -142,7 +142,10 @@ class SceneExporter(object):
 				self.properties.filename
 			])
 			
-			efutil.export_path = lxs_filename
+			if self.properties.directory[-1] not in ('/', '\\'):
+				self.properties.directory += '/'
+			
+			efutil.export_path = self.properties.directory
 			
 			if self.properties.api_type == 'FILE':
 				

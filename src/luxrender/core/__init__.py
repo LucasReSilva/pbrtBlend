@@ -42,6 +42,7 @@ from extensions_framework import util as efutil
 
 # Exporter libs
 from .. import LuxRenderAddon
+from ..export import get_output_filename
 from ..export.scene import SceneExporter
 from ..outputs import LuxManager, LuxFilmDisplay
 from ..outputs import LuxLog
@@ -154,8 +155,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		'''
 		
 		with RENDERENGINE_luxrender.render_lock:	# just render one thing at a time
-			prev_dir = os.getcwd()
-			
+			prev_cwd = os.getcwd()
 			try:
 				self.LuxManager				= None
 				self.render_update_timer	= None
@@ -174,6 +174,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
 				
 				api_type, write_files = self.set_export_path(scene)
+				
+				os.chdir(efutil.export_path)
+				
 				is_animation = hasattr(self, 'is_animation') and self.is_animation
 				make_queue = scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and write_files
 				
@@ -209,7 +212,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				LuxLog('%s'%err)
 				self.report({'ERROR'}, '%s'%err)
 			
-			os.chdir(prev_dir)
+			os.chdir(prev_cwd)
 	
 	def render_preview(self, scene):
 		if sys.platform == 'darwin':
@@ -221,8 +224,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			self.output_dir += '/'
 		
 		efutil.export_path = self.output_dir
-		#print('(2) export_path is %s' % efutil.export_path)
-		os.chdir( self.output_dir )
 		
 		from ..outputs.pure_api import PYLUX_AVAILABLE
 		if not PYLUX_AVAILABLE:
@@ -358,7 +359,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		else:
 			self.output_dir = os.path.dirname( scene_path )
 		
-		if self.output_dir[-1] != '/':
+		if self.output_dir[-1] not in ('/', '\\'):
 			self.output_dir += '/'
 		
 		if scene.luxrender_engine.export_type == 'INT':
@@ -372,15 +373,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				else:
 					self.output_dir = efutil.temp_directory()
 		
-		elif scene.luxrender_engine.export_type == 'LFC':
-			api_type = 'LUXFIRE_CLIENT'
-			write_files = False
 		else:
 			api_type = 'FILE'
 			write_files = True
 		
 		efutil.export_path = self.output_dir
-		os.chdir(self.output_dir)
 		
 		return api_type, write_files
 	
@@ -401,7 +398,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				for server in scene.luxrender_networking.servers.split(','):
 					LM.lux_context.addServer(server.strip())
 		
-		output_filename = '%s.%s.%05i' % (efutil.scene_filename(), scene.name, scene.frame_current)
+		output_filename = get_output_filename(scene)
 		
 		scene_exporter = SceneExporter()
 		scene_exporter.properties.directory = self.output_dir
@@ -433,9 +430,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		return "%s.lxs" % output_filename
 	
 	def rendering_behaviour(self, scene):
-		internal	= (scene.luxrender_engine.export_type in ['INT', 'LFC'])
+		internal	= (scene.luxrender_engine.export_type in ['INT'])
 		write_files	= scene.luxrender_engine.write_files and (scene.luxrender_engine.export_type in ['INT', 'EXT'])
-		render		= scene.luxrender_engine.render or (scene.luxrender_engine.export_type in ['LFC'])
+		render		= scene.luxrender_engine.render
 		
 		# Handle various option combinations using simplified variable names !
 		if internal:

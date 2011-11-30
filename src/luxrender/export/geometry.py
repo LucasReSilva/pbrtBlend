@@ -179,8 +179,8 @@ class GeometryExporter(object):
 					
 					# Put PLY files in frame-numbered subfolders to avoid
 					# clobbering when rendering animations
-					sc_fr = '%s/%s/%05d' % (efutil.scene_filename(), self.geometry_scene.name, self.visibility_scene.frame_current)
-					if not os.path.exists( os.path.join(os.getcwd(), sc_fr) ):
+					sc_fr = '%s/%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), self.geometry_scene.name, self.visibility_scene.frame_current)
+					if not os.path.exists( sc_fr ):
 						os.makedirs(sc_fr)
 					
 					def make_plyfilename():
@@ -309,12 +309,12 @@ class GeometryExporter(object):
 							del co_no_uv_cache
 							del face_vert_indices
 						
-						LuxLog('Binary PLY file written: %s/%s' % (os.getcwd(),ply_path))
+						LuxLog('Binary PLY file written: %s' % (ply_path))
 					
 					# Export the shape definition to LXO
 					shape_params = ParamSet().add_string(
 						'filename',
-						ply_path
+						efutil.path_relative_to_export(ply_path)
 					)
 					
 					# Add subdiv etc options

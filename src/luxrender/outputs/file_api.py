@@ -26,7 +26,7 @@
 #
 import os
 
-from extensions_framework.util import path_relative_to_export, scene_filename
+import extensions_framework.util as efutil
 
 from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION 
@@ -113,7 +113,7 @@ class Custom_Context(object):
 		self.files.append(open(self.file_names[Files.MAIN], 'w'))
 		self.wf(Files.MAIN, '# Main Scene File')
 		
-		subdir = '%s/%s/%05d' % (scene_filename(), scene.name, scene.frame_current)
+		subdir = '%s%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), scene.name, scene.frame_current)
 		
 		if not os.path.exists(subdir):
 			os.makedirs(subdir)
@@ -227,7 +227,7 @@ class Custom_Context(object):
 			# Include the other files if they exist
 			for idx in [Files.MATS, Files.GEOM, Files.VOLM]:
 				if os.path.exists(self.file_names[idx]):
-					self.wf(Files.MAIN, '\nInclude "%s"' % path_relative_to_export(self.file_names[idx]))
+					self.wf(Files.MAIN, '\nInclude "%s"' % efutil.path_relative_to_export(self.file_names[idx]))
 	
 	def lightGroup(self, *args):
 		self._api('LightGroup', args)

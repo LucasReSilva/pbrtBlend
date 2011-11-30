@@ -34,7 +34,7 @@ from extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO, Logic_AND as A
 
 from .. import LuxRenderAddon
-from ..export import get_worldscale
+from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
 from ..outputs.pure_api import LUXRENDER_VERSION
 
@@ -756,7 +756,7 @@ class luxrender_film(declarative_property_group):
 			params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
 		
 		# Output types
-		params.add_string('filename', efutil.path_relative_to_export(efutil.export_path))
+		params.add_string('filename', get_output_filename(scene))
 		params.add_bool('write_resume_flm', self.write_flm)
 		params.add_bool('restart_resume_flm', self.restart_flm)
 		params.add_bool('write_flm_direct', self.write_flm_direct)
