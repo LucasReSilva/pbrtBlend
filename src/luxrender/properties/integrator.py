@@ -190,6 +190,7 @@ class luxrender_integrator(declarative_property_group):
 		#sppm
 		'photonperpass',
 		['startradius', 'alpha'],
+		'sppmdirectlight',
 		#sppm advanced
 		'glossythreshold',
 		'lookupaccel',
@@ -197,8 +198,8 @@ class luxrender_integrator(declarative_property_group):
 		'photonsampler',
 				
 		# path
-		'includeenvironment',
 		'directlightsampling',
+		'includeenvironment',
 	]
 	
 	visibility = {
@@ -286,6 +287,8 @@ class luxrender_integrator(declarative_property_group):
 		'startk':							{ 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'surfaceintegrator': 'sppm' },
 		'startradius':						{ 'surfaceintegrator': 'sppm' },
+		'sppmdirectlight':					{ 'surfaceintegrator': 'sppm' },
+
 		# sppm advanced
 		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
@@ -917,6 +920,15 @@ class luxrender_integrator(declarative_property_group):
 			],
 			'save_in_preset': True
 		},
+		#SPPM direct light sampling is a seperate parameter from Path's, due to the need for a different default and tooltip
+		{
+			'type': 'bool',
+			'attr': 'sppmdirectlight',
+			'name': 'Direct Light Sampling',
+			'description': 'Use direct light sampling during the eye pass. Can improve efficiency with simple lighting',
+			'default': False,
+			'save_in_preset': True
+		},
 	]
 	
 	def api_output(self, scene=None):
@@ -965,7 +977,8 @@ class luxrender_integrator(declarative_property_group):
 				  .add_integer('photonperpass', self.photonperpass) \
  				  .add_float('startradius', self.startradius) \
 				  .add_float('alpha', self.alpha) \
-				  .add_bool('includeenvironment', self.includeenvironment)
+				  .add_bool('includeenvironment', self.includeenvironment) \
+				  .add_bool('directlightsampling', self.sppmdirectlight)
 			if self.advanced:
 				params.add_float('glossythreshold', self.glossythreshold) \
 					  .add_string('lookupaccel', self.lookupaccel) \
