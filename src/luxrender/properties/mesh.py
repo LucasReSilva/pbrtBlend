@@ -60,6 +60,7 @@ class luxrender_mesh(declarative_property_group):
 		'generatetangents',
 		'subdiv',
 		'sublevels',
+		'mdsublevels',
 		'nsmooth',
 		['sharpbound', 'splitnormal'],
 	] + \
@@ -69,10 +70,11 @@ class luxrender_mesh(declarative_property_group):
 	]
 	
 	visibility = dict_merge({
-		'nsmooth':		{ 'subdiv': LO({'!=': 'None'}) },
-		'sharpbound':	{ 'subdiv': LO({'!=': 'None'}) },
-		'splitnormal':	{ 'subdiv': LO({'!=': 'None'}) },
-		'sublevels':	{ 'subdiv': LO({'!=': 'None'}) },
+		'nsmooth':		{ 'subdiv': 'loop' },
+		'sharpbound':	{ 'subdiv': 'loop' },
+		'splitnormal':	{ 'subdiv': 'loop' },
+		'sublevels':	{ 'subdiv': 'loop' },
+		'mdsublevels':  { 'subdiv': 'microdisplacement' },
 		'dmscale':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
 		'dmoffset':		{ 'subdiv': LO({'!=': 'None'}), 'dm_floattexturename': LO({'!=': ''}) },
 	}, TF_displacementmap.visibility )
@@ -145,12 +147,22 @@ class luxrender_mesh(declarative_property_group):
 			'attr': 'splitnormal',
 			'name': 'Keep split edges',
 			'default': False,
-			'description': 'Preserves edge-split modifier with set-smooth meshes. WARNING: This will cause set-solid meshes to rip open!'},
+			'description': 'Preserves effects of edge-split modifier with smooth-shaded meshes. WARNING: This will cause solid-shaded meshes to rip open!'},
 		{
 			'type': 'int',
 			'attr': 'sublevels',
 			'name': 'Subdivision Levels',
 			'default': 2,
+			'min': 0,
+			'soft_min': 0,
+			'max': 6,
+			'soft_max': 6
+		},
+		{
+			'type': 'int',
+			'attr': 'mdsublevels',
+			'name': 'Microsubdivision Levels',
+			'default': 50,
 			'min': 0,
 			'soft_min': 0,
 			'max': 1000,
@@ -190,7 +202,10 @@ class luxrender_mesh(declarative_property_group):
 		# check if subdivision is used
 		if self.subdiv != 'None':
 			params.add_string('subdivscheme', self.subdiv)
-			params.add_integer('nsubdivlevels',self.sublevels)
+			if self.subdiv == 'loop':
+				params.add_integer('nsubdivlevels', self.sublevels)
+			elif self.subdiv == 'microdisplacement':
+				params.add_integer('nsubdivlevels', self.mdsublevels)
 			params.add_bool('dmnormalsmooth', self.nsmooth)
 			params.add_bool('dmsharpboundary', self.sharpbound)
 			params.add_bool('dmnormalsplit', self.splitnormal)
