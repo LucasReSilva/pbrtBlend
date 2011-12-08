@@ -488,6 +488,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'diffusereflectdepth',
 			'name': 'Reflection depth',
 			'default': 3,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
@@ -495,6 +496,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'diffusereflectsamples',
 			'name': 'Reflection samples',
 			'default': 1,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
@@ -502,6 +504,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'diffuserefractdepth',
 			'name': 'Refraction depth',
 			'default': 5,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
@@ -509,6 +512,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'diffuserefractsamples',
 			'name': 'Refraction samples',
 			'default': 1,
+			'min': 0,
 			'save_in_preset': True
 		},
 		
@@ -522,6 +526,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'glossyreflectdepth',
 			'name': 'Reflection depth',
 			'default': 2,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
@@ -529,6 +534,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'glossyreflectsamples',
 			'name': 'Reflection samples',
 			'default': 1,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
@@ -536,6 +542,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'glossyrefractdepth',
 			'name': 'Refraction depth',
 			'default': 5,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
@@ -543,6 +550,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'glossyrefractsamples',
 			'name': 'Refraction samples',
 			'default': 1,
+			'min': 0,
 			'save_in_preset': True
 		},
 		
@@ -556,6 +564,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'specularreflectdepth',
 			'name': 'Reflection depth',
 			'default': 3,
+			'min': 0,
 			'save_in_preset': True
 		},
 		{
@@ -563,6 +572,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'specularrefractdepth',
 			'name': 'Refraction depth',
 			'default': 5,
+			'min': 0,
 			'save_in_preset': True
 		},
 		
