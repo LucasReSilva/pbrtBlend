@@ -743,6 +743,10 @@ class luxrender_texture(declarative_property_group):
 	ef_attach_to = ['Texture']
 	alert = {}
 	
+	def update_type(self, context):
+		# refresh the preview when changing tex type
+		refresh_preview(self, context)
+	
 	controls = [
 		# Preset menu is drawn manually in the ui class
 	]
@@ -769,6 +773,7 @@ class luxrender_texture(declarative_property_group):
 			'name': 'LuxRender Type',
 			'type': 'string',
 			'default': 'BLENDER',
+			'update': update_type,
 			'save_in_preset': True
 		},
 	]

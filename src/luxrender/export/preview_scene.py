@@ -34,7 +34,6 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 
 def export_preview_texture(lux_context, texture):
 	texture_name = texture.name
-	print(texture.luxrender_texture.type)
 	if texture.luxrender_texture.type != 'BLENDER':
 		tex_luxrender_texture = texture.luxrender_texture
 		lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
