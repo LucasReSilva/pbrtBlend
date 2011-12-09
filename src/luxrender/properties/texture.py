@@ -196,7 +196,7 @@ def refresh_preview(self, context):
 	if context.material != None:
 		context.material.preview_render_type = context.material.preview_render_type
 	if context.texture != None:
-		context.texture.intensity = context.texture.intensity
+		context.texture.type = context.texture.type
 
 class ColorTextureParameter(TextureParameterBase):
 	
@@ -743,14 +743,7 @@ class luxrender_texture(declarative_property_group):
 	
 	ef_attach_to = ['Texture']
 	alert = {}
-	
-
-	def update_type(self, context):
-
-		# refresh the preview when changing tex type
-		refresh_preview(self, context)
-
-	
+		
 	controls = [
 		# Preset menu is drawn manually in the ui class
 	]
@@ -777,8 +770,7 @@ class luxrender_texture(declarative_property_group):
 			'name': 'LuxRender Type',
 			'type': 'string',
 			'default': 'BLENDER',
-
-			'update': update_type,
+			'update': refresh_preview,
 			'save_in_preset': True
 		},
 	]
