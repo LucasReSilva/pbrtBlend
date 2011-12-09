@@ -281,7 +281,7 @@ def convert_texture(scene, texture, variant_hint=None):
 					f_path = efutil.filesystem_path(texture.image.filepath)
 				if not os.path.exists(f_path):
 					raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
-				tex_image = efutil.path_relative_to_export(f_path)
+				tex_image = efutil.filesystem_path(f_path)
 		
 		lux_tex_name = 'imagemap'
 		if variant_hint:
