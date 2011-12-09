@@ -34,6 +34,7 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 
 def export_preview_texture(lux_context, texture):
 	texture_name = texture.name
+	print(texture.luxrender_texture.type)
 	if texture.luxrender_texture.type != 'BLENDER':
 		tex_luxrender_texture = texture.luxrender_texture
 		lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
@@ -61,11 +62,8 @@ def export_preview_texture(lux_context, texture):
 	return texture_name
 
 def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
-	if mat.preview_render_type == 'FLAT':
-		HALTSPP = 32
-	else:
-		HALTSPP = 256
-		
+	HALTSPP = 256
+
 	# Camera
 	lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
 	camera_params = ParamSet().add_float('fov', 22.5)
@@ -184,8 +182,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	
 	if bl_scene.luxrender_world.default_exterior_volume != '':
 		lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
-	if tex == None:
-		lux_context.areaLightSource('area', light_params)
+	lux_context.areaLightSource('area', light_params)
 
 	areax = 1
 	areay = 1
@@ -196,20 +193,18 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	shape_params.add_integer('nvertices', 4)
 	shape_params.add_integer('indices', [0, 1, 2, 0, 2, 3])
 	shape_params.add_point('P', points)
-	lux_context.shape('trianglemesh', shape_params)
+
+	if tex == None:
+		lux_context.shape('trianglemesh', shape_params)
 	lux_context.attributeEnd()
 	
 	# Add a background color (light)
 	if bl_scene.luxrender_world.default_exterior_volume != '':
 		lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
-
 	if tex == None:
-
 		inf_gain = 0.1
-
 	else:
-
-		inf_gain = 1.0
+		inf_gain = 1.2
 	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', inf_gain))
 	
 	# back drop
@@ -330,6 +325,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	if obj is not None and mat is not None:
 		# preview object
 		lux_context.attributeBegin()
+		lux_context.identity()
 		pv_transform = [
 			0.5, 0.0, 0.0, 0.0,
 			0.0, 0.5, 0.0, 0.0,
@@ -339,14 +335,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		pv_export_shape = True
 		
 		if mat.preview_render_type == 'FLAT':
-			lux_context.scale(1, 1, 8)
+			lux_context.translate(0, -1, 0.5)
 			lux_context.rotate(90, 1,0,0)
-			pv_transform = [
-				0.5, 0.0, 0.0, 0.0,
-				0.0, 0.1, 0.0, 0.0,
-				0.0, 0.0, 0.2, 0.0,
-				0.0, 0.0625, -1, 1.0
-			]
+			lux_context.rotate(90, 0,0,1)
+			lux_context.scale(2.0/3.0, 2.0/3.0, 2.0/3.0)
 		if mat.preview_render_type == 'SPHERE':
 			pv_transform = [
 				0.1, 0.0, 0.0, 0.0,
@@ -396,7 +388,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 					lux_context.identity()
 					texture_name = export_preview_texture(lux_context, tex)
 					lux_context.transformEnd()
-													
+					
 					lux_context.material('matte', ParamSet().add_texture('Kd', texture_name))
 				else:
 					mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
