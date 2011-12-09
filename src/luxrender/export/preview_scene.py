@@ -28,11 +28,40 @@ import bpy
 
 from ..export import ParamSet
 from ..export.geometry import GeometryExporter
-from ..export.materials import get_material_volume_defs
-from ..outputs import LuxManager
+from ..export.materials import ExportedTextures, convert_texture, get_material_volume_defs
+from ..outputs import LuxLog, LuxManager
 from ..outputs.pure_api import LUXRENDER_VERSION
 
-def preview_scene(scene, lux_context, obj=None, mat=None):
+def export_preview_texture(lux_context, texture):
+	texture_name = texture.name
+	print(texture.luxrender_texture.type)
+	if texture.luxrender_texture.type != 'BLENDER':
+		tex_luxrender_texture = texture.luxrender_texture
+		lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
+		lux_tex_name = tex_luxrender_texture.type
+	else:
+		lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint='color')
+		if texture.type == 'IMAGE':
+			texture_name = texture_name + "_" + lux_tex_variant
+							
+	#if lux_tex_variant == 'color':
+	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
+	if lux_tex_variant == 'float':
+		
+		mix_params = ParamSet() \
+					 .add_texture('amount', texture_name) \
+					 .add_color('tex1', [0, 0, 0]) \
+					 .add_color('tex2', [0.9, 0.9, 0.9])
+		
+		texture_name = texture_name + "_color"
+		ExportedTextures.texture(lux_context, texture_name, 'color', 'mix', mix_params)
+		
+	elif lux_tex_variant != 'color':
+		LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (texture_name, 'color', lux_tex_variant))
+		
+	return texture_name
+
+def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	HALTSPP = 256
 
 	# Camera
@@ -153,7 +182,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	
 	if bl_scene.luxrender_world.default_exterior_volume != '':
 		lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
-	lux_context.areaLightSource('area', light_params)
+	if tex == None:
+		lux_context.areaLightSource('area', light_params)
 
 	areax = 1
 	areay = 1
@@ -170,7 +200,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 	# Add a background color (light)
 	if bl_scene.luxrender_world.default_exterior_volume != '':
 		lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
-	lux_context.lightSource('infinite', ParamSet().add_float('gain', 0.1).add_float('importance', 0.1))
+	if tex == None:
+		inf_gain = 0.1
+	else:
+		inf_gain = 1.0
+	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', inf_gain))
 	
 	# back drop
 	if mat.preview_render_type == 'FLAT':
@@ -302,10 +336,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			lux_context.scale(1, 1, 8)
 			lux_context.rotate(90, 1,0,0)
 			pv_transform = [
-				0.1, 0.0, 0.0, 0.0,
+				0.5, 0.0, 0.0, 0.0,
 				0.0, 0.1, 0.0, 0.0,
 				0.0, 0.0, 0.2, 0.0,
-				0.0, 0.06, -1, 1.0
+				0.0, 0.0625, -1, 1.0
 			]
 		if mat.preview_render_type == 'SPHERE':
 			pv_transform = [
@@ -351,7 +385,16 @@ def preview_scene(scene, lux_context, obj=None, mat=None):
 			GE.is_preview = True
 			GE.geometry_scene = scene
 			for mesh_mat, mesh_name, mesh_type, mesh_params in GE.buildNativeMesh(obj):
-				mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
+				if tex != None:
+					lux_context.transformBegin()
+					lux_context.identity()
+					texture_name = export_preview_texture(lux_context, tex)
+					lux_context.transformEnd()
+													
+					lux_context.material('matte', ParamSet().add_texture('Kd', texture_name))
+				else:
+					mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
+					
 				lux_context.shape(mesh_type, mesh_params)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))

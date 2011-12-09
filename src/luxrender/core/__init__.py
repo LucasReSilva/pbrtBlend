@@ -264,7 +264,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			return
 		
 		pm = likely_materials[0]
+		pt = None
 		LuxLog('Rendering material preview: %s' % pm.name)
+
+		if PREVIEW_TYPE == 'TEXTURE':
+			pt = pm.active_texture		
 		
 		LM = LuxManager(
 			scene.name,
@@ -296,7 +300,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			if xres <= 96:
 				raise Exception('Preview image too small (%ix%i)' % (xres,yres))
 			
-			preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm)
+			preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm, tex=pt)
 			
 			# render !
 			preview_context.worldEnd()
