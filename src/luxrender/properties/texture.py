@@ -192,6 +192,7 @@ def check_texture_variant(self, context, attr, expected_variant):
 		clear_alert()
 
 def refresh_preview(self, context):
+
 	if context.material != None:
 		context.material.preview_render_type = context.material.preview_render_type
 	if context.texture != None:
@@ -743,9 +744,12 @@ class luxrender_texture(declarative_property_group):
 	ef_attach_to = ['Texture']
 	alert = {}
 	
+
 	def update_type(self, context):
+
 		# refresh the preview when changing tex type
 		refresh_preview(self, context)
+
 	
 	controls = [
 		# Preset menu is drawn manually in the ui class
@@ -773,6 +777,7 @@ class luxrender_texture(declarative_property_group):
 			'name': 'LuxRender Type',
 			'type': 'string',
 			'default': 'BLENDER',
+
 			'update': update_type,
 			'save_in_preset': True
 		},
@@ -2432,6 +2437,7 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 			'attr': 'label',
 			'name': 'Name',
 			'default': '-- Choose preset --',
+			'update': refresh_preview,
 			'save_in_preset': True,
 		}
 	]

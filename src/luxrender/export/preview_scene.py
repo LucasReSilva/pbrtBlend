@@ -61,8 +61,11 @@ def export_preview_texture(lux_context, texture):
 	return texture_name
 
 def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
-	HALTSPP = 256
-
+	if mat.preview_render_type == 'FLAT':
+		HALTSPP = 32
+	else:
+		HALTSPP = 256
+		
 	# Camera
 	lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
 	camera_params = ParamSet().add_float('fov', 22.5)
@@ -199,9 +202,13 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	# Add a background color (light)
 	if bl_scene.luxrender_world.default_exterior_volume != '':
 		lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
+
 	if tex == None:
+
 		inf_gain = 0.1
+
 	else:
+
 		inf_gain = 1.0
 	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', inf_gain))
 	
