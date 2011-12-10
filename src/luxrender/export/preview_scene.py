@@ -34,7 +34,6 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 
 def export_preview_texture(lux_context, texture):
 	texture_name = texture.name
-	print(texture.luxrender_texture.type)
 	if texture.luxrender_texture.type != 'BLENDER':
 		tex_luxrender_texture = texture.luxrender_texture
 		lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
@@ -62,7 +61,10 @@ def export_preview_texture(lux_context, texture):
 	return texture_name
 
 def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
-	HALTSPP = 256
+	if mat.preview_render_type == 'FLAT':
+		HALTSPP = 32
+	else:
+		HALTSPP = 256
 
 	# Camera
 	lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
