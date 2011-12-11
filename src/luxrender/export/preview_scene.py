@@ -337,10 +337,21 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		pv_export_shape = True
 		
 		if mat.preview_render_type == 'FLAT':
-			lux_context.translate(0, -1, 0.5)
-			lux_context.rotate(90, 1,0,0)
-			lux_context.rotate(90, 0,0,1)
-			lux_context.scale(2.0/3.0, 2.0/3.0, 2.0/3.0)
+			if tex == None:
+				lux_context.scale(1, 1, 8)
+				lux_context.rotate(90, 1,0,0)
+				pv_transform = [
+					0.1, 0.0, 0.0, 0.0,
+					0.0, 0.1, 0.0, 0.0,
+					0.0, 0.0, 0.2, 0.0,
+					0.0, 0.06, -1, 1.0
+				]
+			else:
+				lux_context.translate(0, -1, 0.5)
+				lux_context.rotate(90, 1,0,0)
+				lux_context.rotate(90, 0,0,1)
+				lux_context.scale(2.0/3.0, 2.0/3.0, 2.0/3.0)
+
 		if mat.preview_render_type == 'SPHERE':
 			pv_transform = [
 				0.1, 0.0, 0.0, 0.0,
