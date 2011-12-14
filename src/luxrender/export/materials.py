@@ -265,13 +265,13 @@ def convert_texture(scene, texture, variant_hint=None):
 		)
 		
 		if texture.image.source == 'GENERATED':
-			tex_image = 'luxblend_baked_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.file_format)
+			tex_image = 'luxblend_baked_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.image_settings.file_format)
 			tex_image = os.path.join(extract_path, tex_image)
 			texture.image.save_render(tex_image, scene)
 		
 		if texture.image.source == 'FILE':
 			if texture.image.packed_file:
-				tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.file_format)
+				tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.image_settings.file_format)
 				tex_image = os.path.join(extract_path, tex_image)
 				texture.image.save_render(tex_image, scene)
 			else:
