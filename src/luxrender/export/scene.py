@@ -26,6 +26,7 @@
 #
 # System Libs
 import os
+import tempfile
 
 # Extensions_Framework Libs
 from extensions_framework import util as efutil
@@ -137,6 +138,19 @@ class SceneExporter(object):
 			if self.properties.filename.endswith('.lxs'):
 				self.properties.filename = self.properties.filename[:-4]
 			
+			if self.properties.api_type == 'FILE':
+				try:
+					# unfortunately os.access() isn't reliable
+					# only way to test if dir is writable is to actually create 
+					# a file in the directory
+					tempfile.TemporaryFile(dir = self.properties.directory).close()
+				except EnvironmentError as e:
+					if e.errno == os.errno.EACCES:
+						self.report({'WARNING'}, 'Output path "%s" is not writable, using temp directory' % os.path.normpath(self.properties.directory))
+						self.properties.directory = tempfile.gettempdir()
+					else:
+						raise
+			
 			lxs_filename = '/'.join([
 				self.properties.directory,
 				self.properties.filename
@@ -153,9 +167,6 @@ class SceneExporter(object):
 					LXV = True
 				else:
 					LXV = scene.luxrender_engine.write_lxv
-				
-				if not os.access( self.properties.directory, os.W_OK):
-					raise Exception('Output path "%s" is not writable' % self.properties.directory)
 				
 				lux_context.set_filename(
 					scene,

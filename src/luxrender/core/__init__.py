@@ -357,7 +357,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		LM.reset()
 	
 	def set_export_path(self, scene):
-		scene_path = efutil.filesystem_path(scene.render.filepath)
+		# replace /tmp/ with the real %temp% folder on Windows
+		fp = scene.render.filepath
+		output_path_split = list(os.path.split(fp))
+		if sys.platform == 'win32' and output_path_split[0] == '/tmp':
+			output_path_split[0] = efutil.temp_directory()
+			fp = '/'.join(output_path_split)
+		
+		scene_path = efutil.filesystem_path( fp )
+		
 		if os.path.isdir(scene_path):
 			self.output_dir = scene_path
 		else:
