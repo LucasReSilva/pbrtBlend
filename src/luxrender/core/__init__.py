@@ -113,6 +113,7 @@ blender_texture_ui_list = [
 	bl_ui.properties_texture.TEXTURE_PT_stucci,
 	bl_ui.properties_texture.TEXTURE_PT_voronoi,
 	bl_ui.properties_texture.TEXTURE_PT_wood,
+	bl_ui.properties_texture.TEXTURE_PT_ocean,
 ]
 for blender_texture_ui in blender_texture_ui_list:
 	blender_texture_ui.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)

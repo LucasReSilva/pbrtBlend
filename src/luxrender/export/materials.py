@@ -159,7 +159,7 @@ def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
 def convert_texture(scene, texture, variant_hint=None):
-	# Lux only supports blender's textures in float variant (except for image)
+	# Lux only supports blender's textures in float variant (except for image/ocean (both of these are exported imagemap)
 	variant = 'float'
 	paramset = ParamSet()
 	
@@ -167,7 +167,7 @@ def convert_texture(scene, texture, variant_hint=None):
 	
 	mapping_type = '3D'
 	
-	if texture.type != 'IMAGE':
+	if texture.type not in ('IMAGE', 'OCEAN'):
 		paramset.add_float('bright', texture.intensity)
 		paramset.add_float('contrast', texture.contrast)
 	
@@ -292,6 +292,34 @@ def convert_texture(scene, texture, variant_hint=None):
 		paramset.add_float('gamma', 2.2)
 		mapping_type = '2D'
 	
+	# Similar to image handler, but for Ocean tex
+	if texture.type == 'OCEAN':
+		if texture.ocean.output == 'FOAM':
+
+			ocean_mods = [m for m in texture.ocean.ocean_object.modifiers if m.type == 'OCEAN']
+			if len(ocean_mods) == 0:
+				print ('No ocean modifiers!')
+			else:
+				ocean_mod = ocean_mods[0]
+			
+			if texture.ocean.output == 'FOAM':
+				tex_image = os.path.join(ocean_mod.filepath, 'foam_%04d.exr' % scene.frame_current) 
+			#SOON! (until 3D disp support...)
+			#elif texture.ocean.output == 'DISPLACEMENT':
+				#tex_image = os.path.join(ocean_mod.filepath, 'disp_%04d.exr' % scene.frame_current) 
+			
+			lux_tex_name = 'imagemap'
+			if variant_hint:
+				variant = variant_hint
+			else:
+				variant = 'color'
+			paramset.add_string('filename', tex_image)
+			paramset.add_float('gamma', 1.0)
+			mapping_type = '2D'
+			
+		else:
+			lux_tex_name = 'constant'
+		
 	if mapping_type == '3D':
 		paramset.update( texture.luxrender_texture.luxrender_tex_transform.get_paramset(scene) )
 	else:
@@ -362,7 +390,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
 								LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (lux_prop_name, variant, lux_tex_variant))
 						else:
 							lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint=variant)
-							if texture.type == 'IMAGE':
+							if texture.type in ('OCEAN', 'IMAGE'):
 								texture_name = texture_name + "_" + lux_tex_variant
 							
 							if lux_tex_variant == variant:

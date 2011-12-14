@@ -40,7 +40,7 @@ def export_preview_texture(lux_context, texture):
 		lux_tex_name = tex_luxrender_texture.type
 	else:
 		lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint='color')
-		if texture.type == 'IMAGE':
+		if texture.type in ('OCEAN', 'IMAGE'):
 			texture_name = texture_name + "_" + lux_tex_variant
 							
 	#if lux_tex_variant == 'color':
