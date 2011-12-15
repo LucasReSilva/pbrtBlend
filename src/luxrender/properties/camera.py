@@ -678,7 +678,6 @@ class luxrender_film(declarative_property_group):
 		
 		Returns		tuple(2) (floats)
 		'''
-		scene = LuxManager.CurrentScene
 		
 		xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
 		yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0

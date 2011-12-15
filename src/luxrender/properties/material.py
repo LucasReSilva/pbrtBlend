@@ -2586,9 +2586,9 @@ class luxrender_mat_metal2(declarative_property_group):
 		if self.metaltype == 'fresnelcolor':
 			fresnelcolor_params = ParamSet()
 			
-			if LuxManager.ActiveManager is not None:
+			if LuxManager.GetActive() is not None:
 				fresnelcolor_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'Kr', 'color', self)
+					add_texture_parameter(LuxManager.GetActive().lux_context, 'Kr', 'color', self)
 				)
 				
 			ExportedTextures.texture(

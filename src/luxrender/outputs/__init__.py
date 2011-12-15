@@ -145,6 +145,9 @@ class LuxManager(object):
 	def SetActive(LM):
 		LuxManager.ActiveManager = LM
 	@staticmethod
+	def GetActive():
+		return LuxManager.ActiveManager
+	@staticmethod
 	def ClearActive():
 		LuxManager.ActiveManager = None
 	

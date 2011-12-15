@@ -297,10 +297,10 @@ class ColorTextureParameter(TextureParameterBase):
 	def get_paramset(self, property_group, value_transform_function = None):
 		TC_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			TC_params.update(
 				add_texture_parameter(
-					LuxManager.ActiveManager.lux_context,
+					LuxManager.GetActive().lux_context,
 					self.attr,
 					'color',
 					property_group,
@@ -466,10 +466,10 @@ class FloatTextureParameter(TextureParameterBase):
 	def get_paramset(self, property_group):
 		TC_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			TC_params.update(
 				add_texture_parameter(
-					LuxManager.ActiveManager.lux_context,
+					LuxManager.GetActive().lux_context,
 					self.attr,
 					'float',
 					property_group
@@ -619,10 +619,10 @@ class FresnelTextureParameter(TextureParameterBase):
 	def get_paramset(self, property_group):
 		TC_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			TC_params.update(
 				add_texture_parameter(
-					LuxManager.ActiveManager.lux_context,
+					LuxManager.GetActive().lux_context,
 					self.attr,
 					'fresnel',
 					property_group
@@ -980,10 +980,10 @@ class luxrender_tex_band(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		band_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			
 			band_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'amount', 'float', self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'amount', 'float', self)
 			)
 			
 			offsets = []
@@ -991,11 +991,11 @@ class luxrender_tex_band(declarative_property_group):
 				offsets.append(getattr(self, 'offset%s%d'%(self.variant, i)))
 				
 				band_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
+					add_texture_parameter(LuxManager.GetActive().lux_context, 'tex%d'%i, self.variant, self)
 				)
 			
 			# In API mode need to tell Lux how many slots explicity
-			if LuxManager.ActiveManager.lux_context.API_TYPE == 'PURE':
+			if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
 				band_params.add_integer('noffsets', self.noffsets)
 			
 			band_params.add_float('offsets', offsets)
@@ -1432,15 +1432,15 @@ class luxrender_tex_brick(declarative_property_group):
 			.add_float('brickrun', self.brickrun) \
 			.add_float('mortarsize', self.mortarsize)
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			brick_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'brickmodtex', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'brickmodtex', self.variant, self)
 			)
 			brick_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'bricktex', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'bricktex', self.variant, self)
 			)
 			brick_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'mortartex', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'mortartex', self.variant, self)
 			)
 		
 		return {'3DMAPPING'}, brick_params
@@ -1635,12 +1635,12 @@ class luxrender_tex_checkerboard(declarative_property_group):
 			.add_string('aamode', self.aamode) \
 			.add_integer('dimension', self.dimension)
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			checkerboard_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
 			)
 			checkerboard_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
 			)
 		
 		if self.dimension == 2:
@@ -1752,9 +1752,9 @@ class luxrender_tex_colordepth(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		colordepth_params = ParamSet().add_float('depth', self.depth)
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			colordepth_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'Kt', 'color', self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'Kt', 'color', self)
 			)
 		
 		return set(), colordepth_params
@@ -1806,12 +1806,12 @@ class luxrender_tex_dots(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		dots_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			dots_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'inside', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'inside', self.variant, self)
 			)
 			dots_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'outside', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'outside', self.variant, self)
 			)
 		
 		return {'2DMAPPING'}, dots_params
@@ -1946,9 +1946,9 @@ class luxrender_tex_fresnelcolor(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		fresnelcolor_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			fresnelcolor_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'Kr', 'color', self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'Kr', 'color', self)
 			)
 		
 		return set(), fresnelcolor_params
@@ -2746,15 +2746,15 @@ class luxrender_tex_mix(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		mix_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			mix_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'amount', 'float', self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'amount', 'float', self)
 			)
 			mix_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
 			)
 			mix_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
 			)
 		
 		return set(), mix_params
@@ -2886,17 +2886,17 @@ class luxrender_tex_multimix(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		mm_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			
 			weights = []
 			for i in range(1,self.nslots+1):
 				weights.append(getattr(self, 'weight%s%d'%(self.variant, i)))
 				mm_params.update(
-					add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex%d'%i, self.variant, self)
+					add_texture_parameter(LuxManager.GetActive().lux_context, 'tex%d'%i, self.variant, self)
 				)
 			
 			# In API mode need to tell Lux how many slots explicity
-			if LuxManager.ActiveManager.lux_context.API_TYPE == 'PURE':
+			if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
 				mm_params.add_integer('nweights', self.nslots)
 			
 			mm_params.add_float('weights', weights)
@@ -3086,12 +3086,12 @@ class luxrender_tex_scale(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		scale_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			scale_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex1', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
 			)
 			scale_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'tex2', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
 			)
 		
 		return set(), scale_params
@@ -3306,12 +3306,12 @@ class luxrender_tex_uvmask(declarative_property_group):
 	def get_paramset(self, scene, texture):
 		uvmask_params = ParamSet()
 		
-		if LuxManager.ActiveManager is not None:
+		if LuxManager.GetActive() is not None:
 			uvmask_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'innertex', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'innertex', self.variant, self)
 			)
 			uvmask_params.update(
-				add_texture_parameter(LuxManager.ActiveManager.lux_context, 'outertex', self.variant, self)
+				add_texture_parameter(LuxManager.GetActive().lux_context, 'outertex', self.variant, self)
 			)
 		
 		return {'2DMAPPING'}, uvmask_params

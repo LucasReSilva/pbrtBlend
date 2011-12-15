@@ -198,7 +198,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					return	# Export frame failed, abort rendering
 				
 				if is_animation and make_queue:
-					self.LuxManager = LuxManager.ActiveManager
+					self.LuxManager = LuxManager.GetActive()
 					self.LuxManager.lux_context.worldEnd()
 					with open(queue_file, 'a') as qf:
 						qf.write("%s\n" % exported_file)
@@ -553,7 +553,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		return cmd_args
 	
 	def render_start(self, scene):
-		self.LuxManager = LuxManager.ActiveManager
+		self.LuxManager = LuxManager.GetActive()
 		
 		# Remove previous rendering, to prevent loading old data
 		# if the update timer fires before the image is written

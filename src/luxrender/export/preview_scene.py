@@ -150,15 +150,16 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	
 	lux_context.worldBegin()
 	
+	bl_scene = LuxManager.CurrentScene # actual blender scene keeping default volumes
+	
 	# Collect volumes from all scenes *sigh*
 	for scn in bpy.data.scenes:
 		LuxManager.SetCurrentScene(scn)
 		for volume in scn.luxrender_volumes.volumes:
 			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
-
-	bl_scene = LuxManager.CurrentScene # actual blender scene keeping default volumes
+	
 	LuxManager.SetCurrentScene(scene) # for preview context
-
+	
 	# Light
 	lux_context.attributeBegin()
 	if mat.preview_render_type == 'FLAT':

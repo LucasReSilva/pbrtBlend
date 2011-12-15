@@ -119,7 +119,7 @@ class SceneExporter(object):
 			# Set up the rendering context
 			self.report({'INFO'}, 'Creating LuxRender context')
 			created_lux_manager = False
-			if LuxManager.ActiveManager is None:
+			if LuxManager.GetActive() is None:
 				LM = LuxManager(
 					scene.name,
 					api_type = self.properties.api_type,
@@ -127,8 +127,8 @@ class SceneExporter(object):
 				LuxManager.SetActive(LM)
 				created_lux_manager = True
 			
-			LuxManager.ActiveManager.SetCurrentScene(scene)
-			lux_context = LuxManager.ActiveManager.lux_context
+			LuxManager.SetCurrentScene(scene)
+			lux_context = LuxManager.GetActive().lux_context
 			
 			GE = export_geometry.GeometryExporter(lux_context, scene)
 			

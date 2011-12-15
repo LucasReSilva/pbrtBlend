@@ -573,7 +573,7 @@ class GeometryExporter(object):
 			else:
 				# grab a bunch of fractional-frame fcurve_matrices and export
 				# several motionInstances for non-linear motion blur
-				STEPS = LuxManager.CurrentScene.camera.data.luxrender_camera.motion_blur_samples
+				STEPS = self.geometry_scene.camera.data.luxrender_camera.motion_blur_samples
 	
 				for i in range(STEPS,0,-1):
 					fcurve_matrix = object_anim_matrix(self.geometry_scene, obj, frame_offset=i/float(STEPS))

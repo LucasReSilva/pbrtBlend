@@ -34,17 +34,17 @@ from ..outputs import LuxManager
 from ..outputs.file_api import Files
 from ..export import ParamSet, get_worldscale, matrix_to_list
 
-def attr_light(lux_context, light, name, group, type, params, transform=None, portals=[]):
+def attr_light(scene, lux_context, light, name, group, light_type, params, transform=None, portals=[]):
 	'''
 	lux_context		pylux.Context
 	name			string
 	group			string LightGroup name
-	type			string
+	light_type		string
 	params			dict
 	transform		None or list
 	
 	This method outputs a lightSource of the given name and
-	type to context lux_context. The lightSource will be
+	light_type to context lux_context. The lightSource will be
 	wrapped in a transformBegin...transformEnd block if
 	a transform is given, otherwise it will appear in an
 	attributeBegin...attributeEnd block.
@@ -72,10 +72,10 @@ def attr_light(lux_context, light, name, group, type, params, transform=None, po
 	
 	if light.luxrender_lamp.Exterior_volume != '':
 		lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-	elif LuxManager.CurrentScene.luxrender_world.default_exterior_volume != '':
-		lux_context.exterior(LuxManager.CurrentScene.luxrender_world.default_exterior_volume)
+	elif scene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 	
-	lux_context.lightSource(type, params)
+	lux_context.lightSource(light_type, params)
 
 	if mirrorTransform:
 		lux_context.transformEnd()
@@ -132,7 +132,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 	if light.type == 'SUN':
 		invmatrix = matrix.inverted()
 		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type != 'sky': light_params.add_vector('sundir', (invmatrix[0][2], invmatrix[1][2], invmatrix[2][2]))
-		attr_light(lux_context, light, ob.name, light_group, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
+		attr_light(scene, lux_context, light, ob.name, light_group, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
 		return True
 	
 	if light.type == 'HEMI':
@@ -141,7 +141,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			light_params.add_point('from', (0,0,0))
 			light_params.add_point('to', (0,0,-1))
 		
-		attr_light(lux_context, light, ob.name, light_group, hemi_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		attr_light(scene, lux_context, light, ob.name, light_group, hemi_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'SPOT':
@@ -159,7 +159,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			light_params.add_float('coneangle', coneangle)
 			light_params.add_float('conedeltaangle', conedeltaangle)
 		
-		attr_light(lux_context, light, ob.name, light_group, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		attr_light(scene, lux_context, light, ob.name, light_group, light_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 
 	if light.type == 'POINT':
@@ -205,7 +205,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		
 		else: #export an actual point light
 			light_params.add_point('from', (0,0,0)) # (0,0,0) is correct since there is an active Transform
-			attr_light(lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+			attr_light(scene, lux_context, light, ob.name, light_group, 'point', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'AREA':

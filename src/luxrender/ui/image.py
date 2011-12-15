@@ -43,9 +43,9 @@ class luxrender_ui_rendering_controls(property_group_renderer):
 	def poll(cls, context):
 		eng = context.scene.render.engine in cls.COMPAT_ENGINES
 		if eng:
-			lma = LM.ActiveManager != None and LM.ActiveManager.started
+			lma = LM.GetActive() != None and LM.GetActive().started
 			if lma:
-				cls.ctx = LM.ActiveManager.lux_context
+				cls.ctx = LM.GetActive().lux_context
 				ctxc = cls.ctx != None and cls.ctx.API_TYPE == 'PURE'
 				csd = context.space_data
 				return PYLUX_AVAILABLE and ctxc and csd
