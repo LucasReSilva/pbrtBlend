@@ -182,7 +182,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				make_queue = scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and write_files
 				
 				if is_animation and make_queue:
-					queue_file = efutil.export_path + '%s.%s.lxq' % (efutil.scene_filename(), scene.name)
+					queue_file = efutil.export_path + '%s.%s.lxq' % (efutil.scene_filename(), bpy.path.clean_name(scene.name))
 					
 					# Open/reset a queue file
 					if scene.frame_current == scene.frame_start:

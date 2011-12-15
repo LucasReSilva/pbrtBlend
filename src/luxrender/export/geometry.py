@@ -179,7 +179,7 @@ class GeometryExporter(object):
 					
 					# Put PLY files in frame-numbered subfolders to avoid
 					# clobbering when rendering animations
-					sc_fr = '%s/%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), self.geometry_scene.name, self.visibility_scene.frame_current)
+					sc_fr = '%s/%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), bpy.path.clean_name(self.geometry_scene.name), self.visibility_scene.frame_current)
 					if not os.path.exists( sc_fr ):
 						os.makedirs(sc_fr)
 					

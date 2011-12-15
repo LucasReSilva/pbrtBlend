@@ -333,4 +333,4 @@ def process_filepath_data(scene, obj, file_path, paramset, parameter_name):
 		paramset.add_string(parameter_name, file_relative)
 
 def get_output_filename(scene):
-	return '%s.%s.%05i' % (efutil.scene_filename(), bpy.path.clean_name(scene.name), scene.frame_current)
+	return '%s.%s.%05d' % (efutil.scene_filename(), bpy.path.clean_name(scene.name), scene.frame_current)

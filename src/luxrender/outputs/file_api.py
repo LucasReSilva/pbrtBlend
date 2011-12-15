@@ -26,6 +26,8 @@
 #
 import os
 
+import bpy
+
 import extensions_framework.util as efutil
 
 from ..outputs import LuxLog
@@ -113,7 +115,7 @@ class Custom_Context(object):
 		self.files.append(open(self.file_names[Files.MAIN], 'w'))
 		self.wf(Files.MAIN, '# Main Scene File')
 		
-		subdir = '%s%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), scene.name, scene.frame_current)
+		subdir = '%s%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), bpy.path.clean_name(scene.name), scene.frame_current)
 		
 		if not os.path.exists(subdir):
 			os.makedirs(subdir)
