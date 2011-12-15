@@ -77,7 +77,7 @@ class luxrender_camera(declarative_property_group):
 		['distribution', 'power'],
 		'sensitivity',
 		'exposure_mode',
-		['exposure_start', 'exposure_end'],
+		'exposure_start', 'exposure_end_norm', 'exposure_end_abs',
 		['exposure_degrees_start', 'exposure_degrees_end'],
 		'usemblur',
 		'motion_blur_samples',
@@ -90,7 +90,8 @@ class luxrender_camera(declarative_property_group):
 		'distribution':				{ 'use_dof': True },
 		'power':					{ 'use_dof': True },
 		'exposure_start':			{ 'exposure_mode': O(['normalised','absolute']) },
-		'exposure_end':				{ 'exposure_mode': O(['normalised','absolute']) },
+		'exposure_end_norm':		{ 'exposure_mode': 'normalised' },
+		'exposure_end_abs':			{ 'exposure_mode': 'absolute' },
 		'exposure_degrees_start':	{ 'exposure_mode': 'degrees' },
 		'exposure_degrees_end':		{ 'exposure_mode': 'degrees' },
 		'shutterdistribution':		{ 'usemblur': True },
@@ -221,7 +222,7 @@ class luxrender_camera(declarative_property_group):
 		},
 		{
 			'type': 'float',
-			'attr': 'exposure_end',
+			'attr': 'exposure_end_norm',
 			'name': 'Close',
 			'description': 'Shutter close time',
 			'precision': 6,
@@ -230,6 +231,18 @@ class luxrender_camera(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0
+		},
+		{
+			'type': 'float',
+			'attr': 'exposure_end_abs',
+			'name': 'Close',
+			'description': 'Shutter close time',
+			'precision': 6,
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 120.0,
+			'soft_max': 120.0
 		},
 		{
 			'type': 'float',
@@ -364,9 +377,9 @@ class luxrender_camera(declarative_property_group):
 		
 		time = 1.0
 		if self.exposure_mode == 'normalised':
-			time = (self.exposure_end - self.exposure_start) / fps
+			time = (self.exposure_end_norm - self.exposure_start) / fps
 		if self.exposure_mode == 'absolute':
-			time = (self.exposure_end - self.exposure_start)
+			time = (self.exposure_end_abs - self.exposure_start)
 		if self.exposure_mode == 'degrees':
 			time = (self.exposure_degrees_end - self.exposure_degrees_start) / (fps * 360.0)
 		
@@ -395,10 +408,10 @@ class luxrender_camera(declarative_property_group):
 		fps = scene.render.fps
 		if self.exposure_mode == 'normalised':
 			params.add_float('shutteropen', self.exposure_start / fps)
-			params.add_float('shutterclose', self.exposure_end / fps)
+			params.add_float('shutterclose', self.exposure_end_norm / fps)
 		if self.exposure_mode == 'absolute':
 			params.add_float('shutteropen', self.exposure_start)
-			params.add_float('shutterclose', self.exposure_end)
+			params.add_float('shutterclose', self.exposure_end_abs)
 		if self.exposure_mode == 'degrees':
 			params.add_float('shutteropen', self.exposure_degrees_start / (fps*360.0))
 			params.add_float('shutterclose', self.exposure_degrees_end / (fps*360.0))
