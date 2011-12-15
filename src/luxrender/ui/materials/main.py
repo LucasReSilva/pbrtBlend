@@ -158,4 +158,4 @@ class ui_luxrender_material_coating(luxrender_material_base):
 	def poll(cls, context):
 		if not hasattr(context.material, 'luxrender_coating'):
 			return False
-		return super().poll(context) and context.material.luxrender_material.type != 'null'
+		return super().poll(context)
