@@ -31,7 +31,7 @@ import bpy
 
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO, Logic_AND as A
+from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import get_worldscale, get_output_filename
@@ -79,8 +79,8 @@ class luxrender_camera(declarative_property_group):
 		'exposure_mode',
 		['exposure_start', 'exposure_end'],
 		['exposure_degrees_start', 'exposure_degrees_end'],
-		'motion_blur_samples',
 		'usemblur',
+		'motion_blur_samples',
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
 	]
