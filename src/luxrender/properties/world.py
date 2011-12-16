@@ -78,7 +78,7 @@ class VolumeDataColorTextureParameter(ColorTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s.world	# Look in the current world object for fresnel textures
+			return s.world if s.world else s.material # Look in the current world object for fresnel textures
 		return func
 	
 	def texture_slot_set_attr(self):
@@ -90,7 +90,7 @@ class VolumeDataFloatTextureParameter(FloatTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s.world	# Look in the current world object for fresnel textures
+			return s.world if s.world else s.material # Look in the current world object for fresnel textures
 		return func
 	
 	def texture_slot_set_attr(self):
@@ -102,7 +102,7 @@ class VolumeDataFresnelTextureParameter(FresnelTextureParameter):
 	#texture_collection = 'textures'
 	def texture_collection_finder(self):
 		def func(s,c):
-			return s.world	# Look in the current world object for fresnel textures
+			return s.world if s.world else s.material # Look in the current world object for fresnel textures
 		return func
 	
 	def texture_slot_set_attr(self):
