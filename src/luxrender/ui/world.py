@@ -73,16 +73,16 @@ class volumes_base(object):
 			menu_text = '-- Choose preset --'
 		
 		cl=self.layout.column(align=True)
-		cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+		cl.menu('LUXRENDER_MT_ior_presets_volumes', text=menu_text)
 	
 	# overridden in order to draw the selected luxrender_volume_data property group
 	def draw(self, context):
 		super().draw(context)
 		
-		row = self.layout.row(align=True)
-		row.menu("LUXRENDER_MT_presets_volume", text=bpy.types.LUXRENDER_MT_presets_volume.bl_label)
-		row.operator("luxrender.preset_volume_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_volume_add", text="", icon="ZOOMOUT").remove_active = True
+		#row = self.layout.row(align=True)
+		#row.menu("LUXRENDER_MT_presets_volume", text=bpy.types.LUXRENDER_MT_presets_volume.bl_label)
+		#row.operator("luxrender.preset_volume_add", text="", icon="ZOOMIN")
+		#row.operator("luxrender.preset_volume_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		if len(context.scene.luxrender_volumes.volumes) > 0:
 			current_vol_ind = context.scene.luxrender_volumes.volumes_index
