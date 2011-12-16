@@ -303,7 +303,7 @@ def convert_texture(scene, texture, variant_hint=None):
 				ocean_mod = ocean_mods[0]
 			
 			if texture.ocean.output == 'FOAM':
-				tex_image = os.path.join(ocean_mod.filepath, 'foam_%04d.exr' % scene.frame_current) 
+				tex_image = efutil.filesystem_path(os.path.join(ocean_mod.filepath, 'foam_%04d.exr' % scene.frame_current)) 
 			#SOON! (until 3D disp support...)
 			#elif texture.ocean.output == 'DISPLACEMENT':
 				#tex_image = os.path.join(ocean_mod.filepath, 'disp_%04d.exr' % scene.frame_current) 
