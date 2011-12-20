@@ -97,6 +97,7 @@ def texture_append_visibility(vis_main, textureparam_object, vis_append):
 
 # Float Textures
 TF_bumpmap				= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, min=-1.0, max=1.0, default=0.0, precision=6, multiply_float=True, ignore_unassigned=True, sub_type='DISTANCE', unit='LENGTH' )
+TF_normalmap			= SubGroupFloatTextureParameter('normalmap', 'Normal Map',			add_float_value=False)
 TF_amount				= FloatTextureParameter('amount', 'Mix amount',						add_float_value=True, min=0.0, default=0.5, max=1.0 )
 TF_cauchyb				= FloatTextureParameter('cauchyb', 'Cauchy B',						add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
 TF_d					= FloatTextureParameter('d', 'Absorption depth (nm)',				add_float_value=True, default=0.0, min=0.0, max=2500.0 ) # default 0.0 for OFF
@@ -235,9 +236,10 @@ class luxrender_material(declarative_property_group):
 		'Exterior',
 #		'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
 	] + \
-	TF_bumpmap.controls
+	TF_bumpmap.controls + \
+	TF_normalmap.controls
 	
-	visibility = dict_merge({}, TF_bumpmap.visibility)
+	visibility = dict_merge({}, TF_bumpmap.visibility, TF_normalmap.visibility)
 	
 	properties = [
 		# The following two items are set by the preset menu and operator.
@@ -265,6 +267,7 @@ class luxrender_material(declarative_property_group):
 #		},
 	] + \
 		TF_bumpmap.get_properties() + \
+		TF_normalmap.get_properties() + \
 		VolumeParameter('Interior', 'Interior') + \
 		VolumeParameter('Exterior', 'Exterior')
 	
@@ -384,9 +387,64 @@ class luxrender_material(declarative_property_group):
 				if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
 					coating_params = material.luxrender_coating.export(lux_context, material)
 				
-				# Bump mapping
-				if self.type not in ['mix', 'null', 'layered']:
+				# Bump and normal mapping mapping
+				if self.type not in ['mix', 'null', 'layered']:			
+					
 					material_params.update( TF_bumpmap.get_paramset(self) )
+
+					#Get the normal map
+					texture_name = getattr(material.luxrender_material, 'normalmap_floattexturename')
+					if texture_name != '':
+						texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+						lux_texture = texture.luxrender_texture
+						if lux_texture.type in ('normalmap', 'imagemap') or (texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE'):
+							if lux_texture.type == 'normalmap':
+								src_texture = lux_texture.luxrender_tex_normalmap
+							else:
+								src_texture = lux_texture.luxrender_tex_imagemap
+									
+							params = ParamSet()
+							process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
+							params.add_integer('discardmipmaps', src_texture.discardmipmaps)
+							params.add_string('filtertype', src_texture.filtertype)
+							params.add_float('maxanisotropy', src_texture.maxanisotropy)
+							params.add_float('gamma', 1) #Don't gamma correct normal maps
+							params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
+							
+							ExportedTextures.texture(
+								lux_context,
+								self.normalmap_floattexturename,
+								'float',
+								'normalmap',
+								params
+							)
+							ExportedTextures.export_new(lux_context)
+							
+					#Build the multi-mix tex of the summed bump and normal maps					
+					mm_params = ParamSet() \
+						.add_texture('tex1', self.bumpmap_floattexturename) \
+						.add_texture('tex2', self.normalmap_floattexturename)
+					
+					
+					weights = [self.bumpmap_floatvalue, 1]
+	
+					# In API mode need to tell Lux how many slots explicity
+					if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
+						mm_params.add_integer('nweights', 2)
+					#Now add the actual weights
+					mm_params.add_float('weights', weights)
+					
+					ExportedTextures.texture(
+						lux_context,
+						'%s_bump+normal_generated' % material.name,
+						'float',
+						'multimix',
+						mm_params
+					)
+					ExportedTextures.export_new(lux_context)
+					
+					#Overwrite the old maps with the combined map
+					material_params.add_texture('bumpmap', '%s_bump+normal_generated' % material.name)
 				
 				if hasattr(sub_type, 'export'):
 				   sub_type.export(lux_context, material)

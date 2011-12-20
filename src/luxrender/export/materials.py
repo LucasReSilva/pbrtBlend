@@ -159,7 +159,7 @@ def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
 def convert_texture(scene, texture, variant_hint=None):
-	# Lux only supports blender's textures in float variant (except for image/ocean (both of these are exported imagemap)
+	# Lux only supports blender's textures in float variant (except for image/ocean (both of these are exported as imagemap)
 	variant = 'float'
 	paramset = ParamSet()
 	
