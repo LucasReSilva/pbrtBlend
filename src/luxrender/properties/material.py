@@ -397,7 +397,7 @@ class luxrender_material(declarative_property_group):
 					if texture_name != '':
 						texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 						lux_texture = texture.luxrender_texture
-						if lux_texture.type in ('normalmap', 'imagemap') or (texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE'):
+						if lux_texture.type in ('normalmap', 'imagemap'):
 							if lux_texture.type == 'normalmap':
 								src_texture = lux_texture.luxrender_tex_normalmap
 							else:
@@ -408,7 +408,7 @@ class luxrender_material(declarative_property_group):
 							params.add_integer('discardmipmaps', src_texture.discardmipmaps)
 							params.add_string('filtertype', src_texture.filtertype)
 							params.add_float('maxanisotropy', src_texture.maxanisotropy)
-							params.add_float('gamma', 1) #Don't gamma correct normal maps
+							params.add_float('gamma', 1.0) #Don't gamma correct normal maps
 							params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 							
 							ExportedTextures.texture(
@@ -419,7 +419,25 @@ class luxrender_material(declarative_property_group):
 								params
 							)
 							ExportedTextures.export_new(lux_context)
+						elif lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
+							src_texture = texture.image
+									
+							params = ParamSet()
+							process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filepath, params, 'filename')
+							params.add_string('filtertype', 'bilinear')
+							params.add_float('gamma', 1.0) #Don't gamma correct normal maps
+							params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 							
+							ExportedTextures.texture(
+								lux_context,
+								self.normalmap_floattexturename,
+								'float',
+								'normalmap',
+								params
+							)
+							ExportedTextures.export_new(lux_context)
+						else:
+							LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to the bump channel.' % texture_name)
 					#Build the multi-mix tex of the summed bump and normal maps					
 					mm_params = ParamSet() \
 						.add_texture('tex1', self.bumpmap_floattexturename) \
@@ -1003,7 +1021,7 @@ class luxrender_transparency(declarative_property_group):
 			if texture_name != '':
 				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 				lux_texture = texture.luxrender_texture
-				if lux_texture.type == 'imagemap' or (texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE'):
+				if lux_texture.type == 'imagemap':
 					src_texture = lux_texture.luxrender_tex_imagemap
 					
 					channelMap = {
@@ -1018,6 +1036,7 @@ class luxrender_transparency(declarative_property_group):
 					params.add_integer('discardmipmaps', src_texture.discardmipmaps)
 					params.add_string('filtertype', src_texture.filtertype)
 					params.add_float('maxanisotropy', src_texture.maxanisotropy)
+					params.add_float('gamma', 1.0) #Don't gamma correct alpha maps
 					params.add_string('wrap', src_texture.wrap)
 					params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 					
@@ -1032,7 +1051,36 @@ class luxrender_transparency(declarative_property_group):
 						params
 					)
 					ExportedTextures.export_new(lux_context)
-		
+				elif texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE':
+					src_texture = texture.image
+					
+					channelMap = {
+						'diffusealpha': 'alpha', 
+						'diffusemean': 'mean',
+						'diffuseintensity': 'colored_mean',
+					}
+					
+					params = ParamSet()
+					process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filepath, params, 'filename')
+					params.add_string('channel', channelMap[self.alpha_source])
+					params.add_string('filtertype', 'bilinear')
+					params.add_float('gamma', 1.0) #Don't gamma correct alpha maps
+					params.add_string('wrap', 'repeat')
+					params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
+					
+					alpha_type = 'texture'
+					alpha_amount = texture_name + '_alpha'
+					
+					ExportedTextures.texture(
+						lux_context,
+						alpha_amount,
+						'float',
+						'imagemap',
+						params
+					)
+					ExportedTextures.export_new(lux_context)
+				else:
+					LuxLog('Texture %s is not an alpha map!' % texture_name)
 		if alpha_type == None:
 			LuxLog('WARNING: Invalid alpha texture for material ''%s'', disabling transparency' % material.name)
 			return None, None
