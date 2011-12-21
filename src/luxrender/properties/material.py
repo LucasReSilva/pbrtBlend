@@ -387,11 +387,11 @@ class luxrender_material(declarative_property_group):
 				if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
 					coating_params = material.luxrender_coating.export(lux_context, material)
 				
-				# Bump and normal mapping mapping
+				# Bump and normal mapping
 				if self.type not in ['mix', 'null', 'layered']:			
 					
 					material_params.update( TF_bumpmap.get_paramset(self) )
-
+					
 					#Get the normal map
 					texture_name = getattr(material.luxrender_material, 'normalmap_floattexturename')
 					if texture_name != '':
@@ -438,11 +438,21 @@ class luxrender_material(declarative_property_group):
 							ExportedTextures.export_new(lux_context)
 						else:
 							LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to the bump channel.' % texture_name)
-					#Build the multi-mix tex of the summed bump and normal maps					
-					mm_params = ParamSet() \
-						.add_texture('tex1', self.bumpmap_floattexturename) \
-						.add_texture('tex2', self.normalmap_floattexturename)
+						
+					bumpmap_texturename = self.bumpmap_floattexturename
 					
+					#Get the bump map
+					texture_name = getattr(material.luxrender_material, 'bumpmap_floattexturename')
+					if texture_name != '':
+						texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+						lux_texture = texture.luxrender_texture
+						if lux_texture.type == 'BLENDER':
+							bumpmap_texturename = '%s_float' % bumpmap_texturename
+							
+					#Build the multi-mix tex of the summed bump and normal maps
+					mm_params = ParamSet() \
+						.add_texture('tex1', bumpmap_texturename) \
+						.add_texture('tex2', self.normalmap_floattexturename)
 					
 					weights = [self.bumpmap_floatvalue, 1]
 	
