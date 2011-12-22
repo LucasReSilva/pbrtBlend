@@ -683,12 +683,6 @@ class GeometryExporter(object):
 		
 		self.lux_context.attributeEnd()
 	
-	def matrixHasNaN(self, M):
-		for row in M:
-			for i in row:
-				if str(i) == 'nan': return True
-		return False
-	
 	def BSpline(self, points, dimension, degree, u):
 		controlpoints = []
 		def Basispolynom(controlpoints, i, u, degree):
@@ -805,11 +799,12 @@ class GeometryExporter(object):
 				v3 = v1.cross(v2)
 				v2.normalize()
 				v3.normalize()
-				# v1, v2, v3 are the new columns
-				# set as rows, transpose later
-				M = mathutils.Matrix( (v3,v2,v1) )
-				if self.matrixHasNaN(M):
+				if any(v.length_squared == 0 for v in (v1, v2, v3)):
 					M = SB
+				else:
+					# v1, v2, v3 are the new columns
+					# set as rows, transpose later
+					M = mathutils.Matrix( (v3,v2,v1) )
 				M = M.transposed().to_4x4()
 				
 				Mtrans = mathutils.Matrix.Translation(points[j])
