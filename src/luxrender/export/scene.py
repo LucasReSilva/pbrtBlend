@@ -205,10 +205,12 @@ class SceneExporter(object):
 					ws = get_worldscale()
 					next_matrix *= ws
 					ws = get_worldscale(as_scalematrix=False)
-					next_matrix[3][0] *= ws
-					next_matrix[3][1] *= ws
-					next_matrix[3][2] *= ws
-					
+					next_matrix[0][3] *= ws
+					next_matrix[1][3] *= ws
+					next_matrix[2][3] *= ws
+					# transpose to extract columns
+					# TODO - update to matrix.col when available
+					next_matrix = next_matrix.transposed()
 					pos = next_matrix[3]
 					forwards = -next_matrix[2]
 					target = (pos + forwards)

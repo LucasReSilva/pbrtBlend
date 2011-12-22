@@ -803,9 +803,10 @@ class GeometryExporter(object):
 				v3 = v1.cross(v2)
 				v2.normalize()
 				v3.normalize()
-				M = mathutils.Matrix( (v3,v2,v1) )
+				# v1, v2, v3 are the new columns, so set as rows and transpose
+				M = mathutils.Matrix( (v3,v2,v1) ).transposed()
 				if self.matrixHasNaN(M):
-					M = mathutils.Matrix( (SB[0], SB[1], SB[2]) )
+					M = SB.copy()
 				M = M.to_4x4()
 				
 				Mtrans = mathutils.Matrix.Translation(points[j])

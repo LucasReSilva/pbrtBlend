@@ -309,9 +309,12 @@ class luxrender_camera(declarative_property_group):
 		ws = get_worldscale()
 		matrix *= ws
 		ws = get_worldscale(as_scalematrix=False)
-		matrix[3][0] *= ws
-		matrix[3][1] *= ws
-		matrix[3][2] *= ws
+		matrix[0][3] *= ws
+		matrix[1][3] *= ws
+		matrix[2][3] *= ws
+		# transpose to extract columns
+		# TODO - update to matrix.col when available
+		matrix = matrix.transposed() 
 		pos = matrix[3]
 		forwards = -matrix[2]
 		target = (pos + forwards)
