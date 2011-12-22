@@ -797,17 +797,20 @@ class GeometryExporter(object):
 				points = temp
 			
 			for j in range(len(points)-1):
-				SB = obj.matrix_basis.copy().to_3x3()
+				# transpose SB so we can extract columns
+				# TODO - change when matrix.col is available
+				SB = obj.matrix_basis.transposed().to_3x3()
 				v1 = points[j+1] - points[j]
 				v2 = SB[2].cross(v1)
 				v3 = v1.cross(v2)
 				v2.normalize()
 				v3.normalize()
-				# v1, v2, v3 are the new columns, so set as rows and transpose
-				M = mathutils.Matrix( (v3,v2,v1) ).transposed()
+				# v1, v2, v3 are the new columns
+				# set as rows, transpose later
+				M = mathutils.Matrix( (v3,v2,v1) )
 				if self.matrixHasNaN(M):
-					M = SB.copy()
-				M = M.to_4x4()
+					M = SB
+				M = M.transposed().to_4x4()
 				
 				Mtrans = mathutils.Matrix.Translation(points[j])
 				matrix = obj.matrix_world * Mtrans * M
