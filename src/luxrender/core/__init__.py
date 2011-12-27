@@ -91,6 +91,8 @@ bl_ui.properties_scene.SCENE_PT_keying_set_paths.COMPAT_ENGINES.add(LuxRenderAdd
 bl_ui.properties_scene.SCENE_PT_unit.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_scene.SCENE_PT_custom_props.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
+bl_ui.properties_world.WORLD_PT_context_world.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+
 bl_ui.properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
