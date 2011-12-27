@@ -83,6 +83,14 @@ bl_ui.properties_render.RENDER_PT_output.COMPAT_ENGINES.add(LuxRenderAddon.BL_ID
 bl_ui.properties_render.RENDER_PT_post_processing.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_render.RENDER_PT_stamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 
+bl_ui.properties_scene.SCENE_PT_scene.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_scene.SCENE_PT_audio.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_scene.SCENE_PT_physics.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME) #This is the gravity panel
+bl_ui.properties_scene.SCENE_PT_keying_sets.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_scene.SCENE_PT_keying_set_paths.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_scene.SCENE_PT_unit.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+bl_ui.properties_scene.SCENE_PT_custom_props.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+
 bl_ui.properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
 bl_ui.properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
