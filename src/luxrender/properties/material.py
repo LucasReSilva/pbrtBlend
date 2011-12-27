@@ -446,7 +446,7 @@ class luxrender_material(declarative_property_group):
 					if texture_name != '':
 						texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 						lux_texture = texture.luxrender_texture
-						if lux_texture.type == 'BLENDER':
+						if lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
 							bumpmap_texturename = '%s_float' % bumpmap_texturename
 							
 					#Build the multi-mix tex of the summed bump and normal maps
