@@ -194,7 +194,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			shape_params = ParamSet()
 		
 			shape_params.add_float('radius', [light.luxrender_lamp.luxrender_lamp_point.pointsize]) #Fetch point light size and use it for the sphere primitive's radius param
-		
+			shape_params.add_string('name', light.name)
 			lux_context.shape('sphere', shape_params)
 					
 			for portal in portals:
@@ -251,6 +251,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		
 		shape_params.add_integer('indices', [0, 1, 2, 0, 2, 3])
 		shape_params.add_point('P', points)
+		shape_params.add_string('name', light.name)
 		
 		lux_context.shape('trianglemesh', shape_params)
 		

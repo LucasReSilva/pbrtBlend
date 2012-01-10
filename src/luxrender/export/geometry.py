@@ -551,7 +551,7 @@ class GeometryExporter(object):
 		# an objectInstance won't be exported for it.
 		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
 			self.lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
-		
+		me_shape_params.add_string('name', obj.name)
 		self.lux_context.shape(me_shape_type, me_shape_params)
 		self.lux_context.objectEnd()
 		
@@ -615,6 +615,7 @@ class GeometryExporter(object):
 		
 		use_inner_scope = len(mesh_definitions) > 1
 		for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
+			me_shape_params.add_string('name', obj.name)
 			if use_inner_scope: self.lux_context.attributeBegin()
 			
 			if parent != None:
