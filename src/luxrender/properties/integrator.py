@@ -947,6 +947,8 @@ class luxrender_integrator(declarative_property_group):
 			'name': 'Wavelength Stratification Passes',
 			'description': 'Use non-random wavelengths for this many passes. Can help with wierd initial coloration due to unsampled wavelengths',
 			'default': 8,
+			'min': 0,
+			'max': 64,
 			'save_in_preset': True
 		},
 	]
