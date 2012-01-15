@@ -88,7 +88,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_integer('displayinterval', 3) \
 		.add_integer('haltspp', HALTSPP) \
 		.add_string('tonemapkernel', 'linear') \
-		.add_integer('reject_warmup', 64) \
 		.add_string('ldr_clamp_method', 'hue')
 	
 	if scene.render.use_color_management:

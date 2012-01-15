@@ -164,7 +164,7 @@ class luxrender_rendermode(declarative_property_group):
 			'type': 'int',
 			'attr': 'statebuffercount',
 			'name': 'State buffer count',
-			'description': 'Numbers of buffers used for surface integrator states',
+			'description': 'Numbers of ray buffers to maintain simultaneously',
 			'default': 1,
 			'min': 1,
 			'soft_min': 1,
