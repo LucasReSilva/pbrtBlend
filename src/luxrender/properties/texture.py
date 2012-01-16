@@ -666,7 +666,7 @@ tex_names = (
 	(
 		('blackbody','Blackbody'),
 		('colordepth', 'Color at Depth'),
-		('equalenergy', 'Equalenergy'),
+		('equalenergy', 'Equal Energy'),
 		('lampspectrum', 'Lamp Spectrum'),
 		('gaussian', 'Gaussian'),
 		('tabulateddata', 'Tabulated Data'),
@@ -1846,6 +1846,7 @@ class luxrender_tex_equalenergy(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		}
 	]
@@ -1900,6 +1901,7 @@ class luxrender_tex_fbm(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 	]
@@ -2051,6 +2053,7 @@ class luxrender_tex_gaussian(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{
@@ -3383,6 +3386,7 @@ class luxrender_tex_wrinkled(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 	]

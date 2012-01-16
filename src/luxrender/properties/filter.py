@@ -127,6 +127,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{
@@ -139,6 +140,7 @@ class luxrender_filter(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 1.0,
 			'soft_max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{

@@ -386,6 +386,9 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'eyerrthreshold',
 			'name': 'Eye RR Threshold',
 			'default': 0.0,
+			'min': 0.0,
+			'max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{
@@ -393,6 +396,9 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'lightrrthreshold',
 			'name': 'Light RR Threshold',
 			'default': 0.0,
+			'min': 0.0,
+			'max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{
@@ -724,7 +730,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'renderingmode',
-			'name': 'Rendering mode',
+			'name': 'Eye-pass mode',
 			'default': 'directlighting',
 			'items': [
 				('directlighting', 'Direct Lighting', 'directlighting'),
@@ -809,6 +815,9 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'rrcontinueprob',
 			'name': 'RR continue probability',
 			'default': 0.65,
+			'min': 0.0,
+			'max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{

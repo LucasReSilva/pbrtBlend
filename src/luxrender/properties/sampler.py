@@ -61,7 +61,7 @@ class luxrender_sampler(declarative_property_group):
 		'pixelsamples':			O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
 		'maxconsecrejects':		A([{ 'advanced': True }, O([{ 'sampler': 'metropolis' },	{'sampler':'erpt', 'basesampler': 'metropolis' } ]) ]),
 		'largemutationprob':	O([{ 'sampler': 'metropolis' },								{'sampler':'erpt', 'basesampler': 'metropolis' } ]),
-		'usevariance':			O([{ 'sampler': 'metropolis' },								{'sampler':'erpt', 'basesampler': 'metropolis' } ]),
+		'usevariance':			A([{ 'advanced': True }, O([{ 'sampler': 'metropolis' },	{'sampler':'erpt', 'basesampler': 'metropolis' } ]) ]),
 	}
 	
 	properties = [
@@ -95,6 +95,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 0.4,
 			'min': 0,
 			'max': 1,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{
@@ -120,9 +121,9 @@ class luxrender_sampler(declarative_property_group):
 			'attr': 'basesampler',
 			'name': 'Base Sampler',
 			'items': [
-				('random','random', 'random'),
-				('lowdiscrepancy', 'lowdiscrepancy', 'lowdiscrepancy'),
-				('metropolis', 'metropolis', 'metropolis')
+				('random','Random', 'random'),
+				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
+				('metropolis', 'Metropolis', 'metropolis')
 			],
 			'save_in_preset': True
 		},
