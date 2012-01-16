@@ -72,10 +72,10 @@ class luxrender_sampler(declarative_property_group):
 			'description': 'Pixel sampling algorithm to use',
 			'default': 'metropolis',
 			'items': [
-				('metropolis', 'Metropolis', 'metropolis'),
-				('erpt', 'ERPT', 'erpt'),
-				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
-				('random', 'Random', 'random')
+				('metropolis', 'Metropolis', 'Keleman-style metropolis light transport'),
+				('erpt', 'ERPT', 'Energy redistribution path tracing sampler'),
+				('lowdiscrepancy', 'Low Discrepancy', 'Use a low discrepancy sequence'),
+				('random', 'Random', 'Completely random sampler')
 			],
 			'save_in_preset': True
 		},
@@ -121,9 +121,9 @@ class luxrender_sampler(declarative_property_group):
 			'attr': 'basesampler',
 			'name': 'Base Sampler',
 			'items': [
-				('random','Random', 'random'),
-				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
-				('metropolis', 'Metropolis', 'metropolis')
+				('random','Random', 'Use a random base sampler'),
+				('lowdiscrepancy', 'Low Discrepancy', 'Use a low discrepancy sequence for the base sampler'),
+				('metropolis', 'Metropolis', 'Use MLT for the base sampler')
 			],
 			'save_in_preset': True
 		},
@@ -153,11 +153,11 @@ class luxrender_sampler(declarative_property_group):
 			'description': 'Pixel sampling strategy',
 			'default': 'lowdiscrepancy',
 			'items': [
-				('linear', 'Linear', 'linear'),
-				('tile', 'Tile', 'tile'),
-				('vegas', 'Vegas', 'vegas'),
-				('lowdiscrepancy', 'Low Discrepancy', 'lowdiscrepancy'),
-				('hilbert', 'Hilbert', 'hilbert'),
+				('linear', 'Linear', 'Scan top-to-bottom, one pixel line at a time'),
+				('tile', 'Tile', 'Scan in 32x32 blocks'),
+				('vegas', 'Vegas', 'Random sample distribution'),
+				('lowdiscrepancy', 'Low Discrepancy', 'Distribute samples in a standard low discrepancy pattern'),
+				('hilbert', 'Hilbert', 'Scan in a hilbert curve'),
 			],
 			'save_in_preset': True
 		},

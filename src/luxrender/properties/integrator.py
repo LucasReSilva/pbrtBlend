@@ -58,9 +58,9 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'description': 'Volume Integrator',
 			'default': 'multi',
 			'items': [
-				('emission', 'Emission', 'emission'),
-				('single', 'Single', 'single'),
-				('multi', 'Multi', 'multi'),
+				('emission', 'Emission', 'Calculate absorption and light-emission only'),
+				('single', 'Single', 'Calculate single scattering as well as absorption and light-emission'),
+				('multi', 'Multi', 'Calculate all volumetric effects, including multiple scattering, absorption, and light-emission'),
 			],
 			'save_in_preset': True
 		},
@@ -922,10 +922,10 @@ class luxrender_integrator(declarative_property_group):
 			'default': 'hilbert',
 			'description': 'Sampling pattern used during the eye pass',
 			'items': [
-				('vegas', 'Vegas', 'vegas'),
-				('linear', 'Linear', 'linear'),
-				('tile', 'Tile', 'tile'),
-				('hilbert', 'Hilbert', 'hilbert'),
+				('linear', 'Linear', 'Scan top-to-bottom, one pixel line at a time'),
+				('tile', 'Tile', 'Scan in 32x32 blocks'),
+				('vegas', 'Vegas', 'Random sample distribution'),
+				('hilbert', 'Hilbert', 'Scan in a hilbert curve'),
 			],
 			'save_in_preset': True
 		},
@@ -936,8 +936,8 @@ class luxrender_integrator(declarative_property_group):
 			'default': 'halton',
 			'description': 'Sampling method for photons',
 			'items': [
-				('amc', 'Adaptive Markov Chain', 'amc'),
-				('halton', 'Halton', 'halton'),
+				('amc', 'Adaptive Markov Chain', 'Use adapative markov chain monte carlo sampling'),
+				('halton', 'Halton', 'Use a permuted halton sequence'),
 			],
 			'save_in_preset': True
 		},
