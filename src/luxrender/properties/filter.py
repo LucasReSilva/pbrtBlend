@@ -40,6 +40,8 @@ class luxrender_filter(declarative_property_group):
 	controls = [
 		[ 0.7, 'filter', 'advanced'],
 		
+		'sharpness',
+		
 		['xwidth', 'ywidth'],
 		'alpha',
 		['b', 'c'],
@@ -48,6 +50,7 @@ class luxrender_filter(declarative_property_group):
 	]
 	
 	visibility = {
+		'sharpness':	{ 'advanced': False },
 		'xwidth':		{ 'advanced': True },
 		'ywidth':		{ 'advanced': True },
 		'alpha':		{ 'advanced': True, 'filter': 'gaussian' },
@@ -79,6 +82,20 @@ class luxrender_filter(declarative_property_group):
 			'name': 'Advanced',
 			'description': 'Configure advanced filter settings',
 			'default': False,
+			'save_in_preset': True
+		},
+		#The values for sharpness are not actually tied to the values of B/C, they are completely independent controls!
+		{
+			'type': 'float',
+			'attr': 'sharpness',
+			'name': 'Sharpness',
+			'description': 'Sets the sharpness of the the Mitchell filter B/C coefficients. Increased sharpness may increase ringing/edge artifacts',
+			'default': 1/3,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'slider': True,
 			'save_in_preset': True
 		},
 		{
@@ -176,7 +193,10 @@ class luxrender_filter(declarative_property_group):
 		
 		if self.filter == 'mitchell':
 			params.add_bool('supersample', self.supersample)
-		
+			if not self.advanced:
+				params.add_float('B', self.sharpness)
+				params.add_float('C', self.sharpness)
+				
 		if self.advanced:
 			params.add_float('xwidth', self.xwidth)
 			params.add_float('ywidth', self.ywidth)
