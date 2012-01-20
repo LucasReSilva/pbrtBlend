@@ -50,7 +50,7 @@ class luxrender_filter(declarative_property_group):
 	]
 	
 	visibility = {
-		'sharpness':	{ 'advanced': False },
+		'sharpness':	{ 'advanced': False, 'filter': 'mitchell' },
 		'xwidth':		{ 'advanced': True },
 		'ywidth':		{ 'advanced': True },
 		'alpha':		{ 'advanced': True, 'filter': 'gaussian' },
