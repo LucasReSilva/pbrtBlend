@@ -176,6 +176,8 @@ class luxrender_integrator(declarative_property_group):
 		'rrcontinueprob',
 		# epm advanced
 		'photonmapsfile',
+		# epm debug
+		'debugmode',
 		'dbg_enabledirect',
 		'dbg_enableradiancemap',
 		'dbg_enableindircaustic',
@@ -268,11 +270,14 @@ class luxrender_integrator(declarative_property_group):
 		'distancethreshold':				{ 'renderingmode': 'path', 'surfaceintegrator': 'exphotonmap' },
 		# expm advanced
 		'photonmapsfile':					{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
-		'dbg_enabledirect':					{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
-		'dbg_enableradiancemap':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
-		'dbg_enableindircaustic':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
-		'dbg_enableindirdiffuse':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
-		'dbg_enableindirspecular':			{ 'advanced': True, 'surfaceintegrator': 'exphotonmap' },
+		
+		# expm debug
+		'debugmode':						{ 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enabledirect':					{ 'debugmode': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableradiancemap':			{ 'debugmode': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableindircaustic':			{ 'debugmode': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableindirdiffuse':			{ 'debugmode': True, 'surfaceintegrator': 'exphotonmap' },
+		'dbg_enableindirspecular':			{ 'debugmode': True, 'surfaceintegrator': 'exphotonmap' },
 		
 		# igi
 		'nsets':							{ 'surfaceintegrator': 'igi' },
@@ -730,7 +735,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'renderingmode',
-			'name': 'Eye-pass mode',
+			'name': 'Eye-Pass Mode',
 			'default': 'directlighting',
 			'items': [
 				('directlighting', 'Direct Lighting', 'directlighting'),
@@ -752,6 +757,13 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'photonmapsfile',
 			'name': 'Photonmaps file',
 			'default': '',
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'debugmode',
+			'name': 'Enable Debug Mode',
+			'default': False,
 			'save_in_preset': True
 		},
 		{
@@ -1063,8 +1075,9 @@ class luxrender_integrator(declarative_property_group):
 				  #Export maxeyedepth as maxdepth, since that is actually the switch the scene file accepts
 			if self.advanced:
 				params.add_float('distancethreshold', self.distancethreshold) \
-					  .add_string('photonmapsfile', self.photonmapsfile) \
-					  .add_bool('dbg_enabledirect', self.dbg_enabledirect) \
+					  .add_string('photonmapsfile', self.photonmapsfile) 
+			if self.debugmode:
+				params.add_bool('dbg_enabledirect', self.dbg_enabledirect) \
 					  .add_bool('dbg_enableradiancemap', self.dbg_enableradiancemap) \
 					  .add_bool('dbg_enableindircaustic', self.dbg_enableindircaustic) \
 					  .add_bool('dbg_enableindirdiffuse', self.dbg_enableindirdiffuse) \
