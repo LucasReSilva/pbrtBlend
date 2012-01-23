@@ -197,6 +197,7 @@ class luxrender_integrator(declarative_property_group):
 		'glossythreshold',
 		'wavelengthstratificationpasses',
 		'lookupaccel',
+		'parallelhashgridspare',
 		'pixelsampler',
 		'photonsampler',
 				
@@ -299,6 +300,7 @@ class luxrender_integrator(declarative_property_group):
 		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'wavelengthstratificationpasses': 	{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'parallelhashgridspare':			{ 'advanced': True, 'lookupaccel': 'parallelhashgrid', 'surfaceintegrator': 'sppm' },
 		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'photonsampler':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 	}
@@ -923,8 +925,17 @@ class luxrender_integrator(declarative_property_group):
 			'items': [
 				('hashgrid', 'Hash Grid', 'hashgrid'),
 				('kdtree', 'KD Tree', 'kdtree'),
+				('parallelhashgrid', 'Parallel Hash Grid', 'parallelhashgrid'),
 				('hybridhashgrid', 'Hybrid Hash Grid', 'hybridhashgrid'),
 			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'parallelhashgridspare',
+			'name': 'Parallel Hash Grid Spare',
+			'description': 'Higher values are faster but can use more memory',
+			'default': 1.0,
 			'save_in_preset': True
 		},
 		{
@@ -1026,6 +1037,7 @@ class luxrender_integrator(declarative_property_group):
 				params.add_float('glossythreshold', self.glossythreshold) \
 					  .add_integer('wavelengthstratificationpasses', self.wavelengthstratificationpasses) \
 					  .add_string('lookupaccel', self.lookupaccel) \
+					  .add_float('parallelhashgridspare', self.parallelhashgridspare) \
 					  .add_string('pixelsampler', self.pixelsampler) \
 					  .add_string('photonsampler', self.photonsampler)
 		
