@@ -142,6 +142,8 @@ def compatible(mod):
 compatible("properties_data_mesh")
 compatible("properties_data_camera")
 compatible("properties_particle")
+compatible("properties_data_speaker")
+
 
 @LuxRenderAddon.addon_register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):
