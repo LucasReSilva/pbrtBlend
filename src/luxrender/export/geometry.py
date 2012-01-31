@@ -737,7 +737,7 @@ class GeometryExporter(object):
 		
 		LuxLog('Exporting Hair system "%s"...' % psys.name)
 		
-		size = psys.settings.particle_size / 2.0 # XXX divide by 2 twice ?
+		size = psys.settings.particle_size / 2.0 / 1000.0 # XXX divide by 2 twice ? Also throw in /1000.0 to scale down to millimeters
 		hair_Junction = (
 			(
 				'HAIR_Junction_%s'%psys.name,
