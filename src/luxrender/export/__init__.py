@@ -294,7 +294,7 @@ def object_anim_matrix(scene, obj, frame_offset=1, ignore_scale=False):
 
 # hack for the matrix order api change in r42816
 # TODO remove this when obsolete
-def fix_matrix_order(matrix):
+def fix_matrix_order_old(matrix):
 	return matrix.transposed()
 def fix_matrix_order_new(matrix):
 	return matrix
