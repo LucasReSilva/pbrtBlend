@@ -292,6 +292,18 @@ def object_anim_matrix(scene, obj, frame_offset=1, ignore_scale=False):
 	else:
 		return False
 
+# hack for the matrix order api change in r42816
+# TODO remove this when obsolete
+def fix_matrix_order(matrix):
+	return matrix.transposed()
+def fix_matrix_order_new(matrix):
+	return matrix
+
+if bpy.app.build_revision >= '42816':
+	fix_matrix_order = fix_matrix_order_new
+else:
+	fix_matrix_order = fix_matrix_order_old
+
 def matrix_to_list(matrix, apply_worldscale=False):
 	'''
 	matrix		  Matrix
@@ -306,10 +318,13 @@ def matrix_to_list(matrix, apply_worldscale=False):
 		sm = get_worldscale()
 		matrix *= sm
 		sm = get_worldscale(as_scalematrix = False)
+		matrix = fix_matrix_order(matrix) # matrix indexing hack
 		matrix[0][3] *= sm
 		matrix[1][3] *= sm
 		matrix[2][3] *= sm
-		
+	else:
+		matrix = fix_matrix_order(matrix) # matrix indexing hack
+
 	
 	l = [	matrix[0][0], matrix[1][0], matrix[2][0], matrix[3][0],\
 		matrix[0][1], matrix[1][1], matrix[2][1], matrix[3][1],\

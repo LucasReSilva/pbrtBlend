@@ -130,6 +130,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 	# Other lamp params from lamp object
 	if light.type == 'SUN':
 		invmatrix = matrix.inverted()
+		invmatrix = fix_matrix_order(invmatrix) # matrix indexing hack
 		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type != 'sky': light_params.add_vector('sundir', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
 		attr_light(scene, lux_context, light, ob.name, light_group, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
 		return True

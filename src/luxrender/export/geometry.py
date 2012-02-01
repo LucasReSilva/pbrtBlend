@@ -795,6 +795,7 @@ class GeometryExporter(object):
 				# transpose SB so we can extract columns
 				# TODO - change when matrix.col is available
 				SB = obj.matrix_basis.transposed().to_3x3()
+				SB = fix_matrix_order(SB) # matrix indexing hack
 				v1 = points[j+1] - points[j]
 				v2 = SB[2].cross(v1)
 				v3 = v1.cross(v2)
@@ -806,6 +807,7 @@ class GeometryExporter(object):
 					# v1, v2, v3 are the new columns
 					# set as rows, transpose later
 					M = mathutils.Matrix( (v3,v2,v1) )
+					M = fix_matrix_order(M) # matrix indexing hack
 				M = M.transposed().to_4x4()
 				
 				Mtrans = mathutils.Matrix.Translation(points[j])

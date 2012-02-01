@@ -36,6 +36,7 @@ from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 from .. import LuxRenderAddon
 from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
+from ..export import fix_matrix_order
 from ..outputs.pure_api import LUXRENDER_VERSION
 
 def CameraVolumeParameter(attr, name):
@@ -309,6 +310,7 @@ class luxrender_camera(declarative_property_group):
 		ws = get_worldscale()
 		matrix *= ws
 		ws = get_worldscale(as_scalematrix=False)
+		matrix = fix_matrix_order(matrix) # matrix indexing hack
 		matrix[0][3] *= ws
 		matrix[1][3] *= ws
 		matrix[2][3] *= ws

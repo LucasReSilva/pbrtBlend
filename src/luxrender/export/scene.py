@@ -205,6 +205,7 @@ class SceneExporter(object):
 					ws = get_worldscale()
 					next_matrix *= ws
 					ws = get_worldscale(as_scalematrix=False)
+					next_matrix = fix_matrix_order(next_matrix) # matrix indexing hack
 					next_matrix[0][3] *= ws
 					next_matrix[1][3] *= ws
 					next_matrix[2][3] *= ws
