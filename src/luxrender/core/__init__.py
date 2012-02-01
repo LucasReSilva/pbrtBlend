@@ -76,28 +76,35 @@ from ..ui.textures import (
 from .. import operators
 from ..operators import lrmdb
 
+def _register_elm(elm, required=False):
+	try:
+		elm.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+	except:
+		if required:
+			LuxLog('Failed to add LuxRender to ' + elm.__name__)
+
 # Add standard Blender Interface elements
-bl_ui.properties_render.RENDER_PT_render.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_render.RENDER_PT_output.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_render.RENDER_PT_post_processing.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_render.RENDER_PT_stamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+_register_elm(bl_ui.properties_render.RENDER_PT_render, required=True)
+_register_elm(bl_ui.properties_render.RENDER_PT_dimensions, required=True)
+_register_elm(bl_ui.properties_render.RENDER_PT_output, required=True)
+_register_elm(bl_ui.properties_render.RENDER_PT_post_processing)
+_register_elm(bl_ui.properties_render.RENDER_PT_stamp)
 
-bl_ui.properties_scene.SCENE_PT_scene.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_scene.SCENE_PT_audio.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_scene.SCENE_PT_physics.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME) #This is the gravity panel
-bl_ui.properties_scene.SCENE_PT_keying_sets.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_scene.SCENE_PT_keying_set_paths.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_scene.SCENE_PT_unit.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_scene.SCENE_PT_custom_props.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+_register_elm(bl_ui.properties_scene.SCENE_PT_scene, required=True)
+_register_elm(bl_ui.properties_scene.SCENE_PT_audio)
+_register_elm(bl_ui.properties_scene.SCENE_PT_physics) #This is the gravity panel
+_register_elm(bl_ui.properties_scene.SCENE_PT_keying_sets)
+_register_elm(bl_ui.properties_scene.SCENE_PT_keying_set_paths)
+_register_elm(bl_ui.properties_scene.SCENE_PT_unit)
+_register_elm(bl_ui.properties_scene.SCENE_PT_custom_props)
 
-bl_ui.properties_world.WORLD_PT_context_world.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+_register_elm(bl_ui.properties_world.WORLD_PT_context_world, required=True)
 
-bl_ui.properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-bl_ui.properties_texture.TEXTURE_PT_preview.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+_register_elm(bl_ui.properties_material.MATERIAL_PT_context_material, required=True)
+_register_elm(bl_ui.properties_material.MATERIAL_PT_preview)
+_register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 
-bl_ui.properties_data_lamp.DATA_PT_context_lamp.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+_register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
 @classmethod
 def blender_texture_poll(cls, context):
@@ -111,7 +118,7 @@ def blender_texture_poll(cls, context):
 	
 	return show
 
-bl_ui.properties_texture.TEXTURE_PT_context_texture.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+_register_elm(bl_ui.properties_texture.TEXTURE_PT_context_texture)
 blender_texture_ui_list = [
 	bl_ui.properties_texture.TEXTURE_PT_blend,
 	bl_ui.properties_texture.TEXTURE_PT_clouds,
@@ -126,17 +133,14 @@ blender_texture_ui_list = [
 	bl_ui.properties_texture.TEXTURE_PT_ocean,
 ]
 for blender_texture_ui in blender_texture_ui_list:
-	blender_texture_ui.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+	_register_elm(blender_texture_ui)
 	blender_texture_ui.poll = blender_texture_poll
 
 # compatible() copied from blender repository (netrender)
 def compatible(mod):
 	mod = getattr(bl_ui, mod)
 	for subclass in mod.__dict__.values():
-		try:
-			subclass.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
-		except:
-			pass
+		_register_elm(subclass)
 	del mod
 
 compatible("properties_data_mesh")
