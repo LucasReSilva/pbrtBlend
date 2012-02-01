@@ -32,6 +32,7 @@ from extensions_framework import util as efutil
 
 from ..outputs.file_api import Files
 from ..export import ParamSet, get_worldscale, matrix_to_list
+from ..export import fix_matrix_order
 
 def attr_light(scene, lux_context, light, name, group, light_type, params, transform=None, portals=[]):
 	'''
