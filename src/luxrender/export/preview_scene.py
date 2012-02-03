@@ -88,7 +88,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_integer('displayinterval', 3) \
 		.add_integer('haltspp', HALTSPP) \
 		.add_string('tonemapkernel', 'linear') \
-		.add_string('ldr_clamp_method', 'hue')
+		.add_string('ldr_clamp_method', 'hue') \
+		.add_integer('tilecount', 1)
 	
 	if scene.render.use_color_management:
 		film_params.add_float('gamma', 1.0)

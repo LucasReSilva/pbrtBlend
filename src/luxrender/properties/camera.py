@@ -481,6 +481,7 @@ class luxrender_film(declarative_property_group):
 		
 		'ldr_clamp_method',
 		'outlierrejection_k',
+		'tilecount'
 	]
 	
 	visibility = {
@@ -672,6 +673,15 @@ class luxrender_film(declarative_property_group):
 			'attr': 'outlierrejection_k',
 			'name': 'Firefly rejection',
 			'description': 'Firefly (outlier) rejection k parameter. 0=disabled',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+		},
+		{
+			'type': 'int',
+			'attr': 'tilecount',
+			'name': 'Tiles',
+			'description': 'Number of film buffer tiles to use. 0=auto-detect',
 			'default': 0,
 			'min': 0,
 			'soft_min': 0,
