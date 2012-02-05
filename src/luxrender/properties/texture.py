@@ -837,8 +837,8 @@ TF_outertex		= FloatTextureParameter('outertex',		'Outer texture',			default=0.0
 TC_brickmodtex	= ColorTextureParameter('brickmodtex',	'Brick modulation texture',	default=(0.9,0.9,0.9))
 TC_bricktex		= ColorTextureParameter('bricktex',		'Brick texture',			default=(0.64,0.64,0.64))
 TC_mortartex	= ColorTextureParameter('mortartex',	'Mortar texture',			default=(0.1,0.1,0.1))
-TC_tex1			= ColorTextureParameter('tex1',			'Texture 1',				default=(1.0,1.0,1.0))
-TC_tex2			= ColorTextureParameter('tex2',			'Texture 2',				default=(0.0,0.0,0.0))
+TC_tex1			= ColorTextureParameter('tex1',			'Texture 1',				default=(0.8,0.8,0.8))
+TC_tex2			= ColorTextureParameter('tex2',			'Texture 2',				default=(0.1,0.1,0.1))
 TC_Kr			= ColorTextureParameter('Kr',			'Reflection color',			default=(0.7,0.7,0.7)) #This parameter is used by the fresnelcolor texture
 TC_Kt			= ColorTextureParameter('Kt',			'Transmission color',		default=(1.0,1.0, 1.0)) #This parameter is used by the color at depth texture
 
@@ -856,7 +856,7 @@ for i in range(1, BAND_MAX_TEX+1):
 		FloatTextureParameter('tex%d'%i, 'tex%d'%i, default=0.0, min=-1e6, max=1e6)
 	)
 	TC_BAND_ARRAY.append(
-		ColorTextureParameter('tex%d'%i, 'tex%d'%i, default=(0.0,0.0,0.0))
+		ColorTextureParameter('tex%d'%i, 'tex%d'%i, default=(0.1,0.1,0.1))
 	)
 	TFR_BAND_ARRAY.append(
 		FresnelTextureParameter('tex%d'%i, 'tex%d'%i, default=1.0, min=-40.0, max=40.0)
