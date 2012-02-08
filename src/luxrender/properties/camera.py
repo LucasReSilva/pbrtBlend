@@ -844,6 +844,8 @@ class luxrender_film(declarative_property_group):
 		
 		if self.outlierrejection_k > 0 and scene.luxrender_rendermode.renderer != 'sppm':
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)
+			
+		params.add_integer('tilecount', self.tilecount)
 		
 		# update the film settings with tonemapper settings
 		params.update( self.luxrender_tonemapping.get_paramset() )
