@@ -200,6 +200,7 @@ class luxrender_integrator(declarative_property_group):
 		'parallelhashgridspare',
 		'pixelsampler',
 		'photonsampler',
+		'useproba',
 				
 		# path
 		'directlightsampling',
@@ -303,6 +304,7 @@ class luxrender_integrator(declarative_property_group):
 		'parallelhashgridspare':			{ 'advanced': True, 'lookupaccel': 'parallelhashgrid', 'surfaceintegrator': 'sppm' },
 		'pixelsampler':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'photonsampler':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'useproba':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 	}
 	
 	alert = {}
@@ -983,6 +985,14 @@ class luxrender_integrator(declarative_property_group):
 			'max': 64,
 			'save_in_preset': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'useproba',
+			'name': 'Use PPM Probability',
+			'description': 'Use PPM probability for search radius reduction.',
+			'default': False,
+			'save_in_preset': True
+		},
 	]
 	
 	def api_output(self, scene=None):
@@ -1035,6 +1045,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_bool('directlightsampling', self.sppmdirectlight)
 			if self.advanced:
 				params.add_float('glossythreshold', self.glossythreshold) \
+					  .add_bool('useproba', self.useproba)\
 					  .add_integer('wavelengthstratificationpasses', self.wavelengthstratificationpasses) \
 					  .add_string('lookupaccel', self.lookupaccel) \
 					  .add_float('parallelhashgridspare', self.parallelhashgridspare) \
