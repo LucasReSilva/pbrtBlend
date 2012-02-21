@@ -50,6 +50,18 @@ class MeshExportProgressThread(ExportProgressThread):
 class DupliExportProgressThread(ExportProgressThread):
 	message = '...  %i%% ...'
 
+# hack for bmesh
+# TODO remove this when obsolete
+def get_uv_textures_old(mesh):
+	return mesh.uv_textures
+def get_uv_textures_new(mesh):
+	return mesh.tessface_uv_textures
+
+if bpy.app.build_revision >= '44254':
+	get_uv_textures = get_uv_textures_new
+else:
+	get_uv_textures = get_uv_textures_old
+
 class GeometryExporter(object):
 	
 	def __init__(self, lux_context, visibility_scene):
@@ -201,9 +213,10 @@ class GeometryExporter(object):
 					
 					# skip writing the PLY file if the box is checked
 					if not (os.path.exists(ply_path) and self.visibility_scene.luxrender_engine.partial_ply):
-						if len(mesh.uv_textures) > 0:
-							if mesh.uv_textures.active and mesh.uv_textures.active.data:
-								uv_layer = mesh.uv_textures.active.data
+						uv_textures = get_uv_textures(mesh)
+						if len(uv_textures) > 0:
+							if mesh.uv_textures.active and uv_textures.active.data:
+								uv_layer = uv_textures.active.data
 						else:
 							uv_layer = None
 						
@@ -391,9 +404,10 @@ class GeometryExporter(object):
 					if self.visibility_scene.luxrender_testing.object_analysis: print('  -> Material index: %d' % i)
 					if self.visibility_scene.luxrender_testing.object_analysis: print('  -> derived mesh name: %s' % mesh_name)
 					
-					if len(mesh.uv_textures) > 0:
-						if mesh.uv_textures.active and mesh.uv_textures.active.data:
-							uv_layer = mesh.uv_textures.active.data
+					uv_textures = get_uv_textures(mesh)
+					if len(uv_textures) > 0:
+						if uv_textures.active and uv_textures.active.data:
+							uv_layer = uv_textures.active.data
 					else:
 						uv_layer = None
 					
