@@ -79,6 +79,7 @@ class luxrender_accelerator(declarative_property_group):
 				# Other accelerator types are omitted deliberately, as broken or not useful.
 				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
 				('qbvh', 'QBVH', 'SSE-accelerated quad bounding volume hierarchy'),
+				('sqbvh', 'SQBVH', 'SSE quad bounding volume hierarchy with spatial split support'),
 			],
 			'save_in_preset': True
 		},
