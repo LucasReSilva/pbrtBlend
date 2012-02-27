@@ -223,7 +223,7 @@ class GeometryExporter(object):
 					skip_exporting = obj in self.KnownExportedObjects and not obj in self.KnownModifiedObjects
 					if not os.path.exists(ply_path) or not (self.visibility_scene.luxrender_engine.partial_ply and skip_exporting):
 						
-						self.NewExportedObjects.add(obj)
+						GeometryExporter.NewExportedObjects.add(obj)
 						
 						uv_textures = get_uv_textures(mesh)
 						if len(uv_textures) > 0:
