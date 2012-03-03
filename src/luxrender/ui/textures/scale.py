@@ -31,7 +31,7 @@ from ...ui.textures import luxrender_texture_base
 class ui_texture_scale(luxrender_texture_base):
 	bl_label = 'LuxRender scale Texture'
 	
-	LUX_COMPAT = {'scale'}
+	LUX_COMPAT = {'Scale'}
 	
 	display_property_groups = [
 		( ('texture', 'luxrender_texture'), 'luxrender_tex_scale' )
