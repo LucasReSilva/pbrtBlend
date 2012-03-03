@@ -29,9 +29,9 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_scale(luxrender_texture_base):
-	bl_label = 'LuxRender scale Texture'
+	bl_label = 'LuxRender Scale Texture'
 	
-	LUX_COMPAT = {'Scale'}
+	LUX_COMPAT = {'scale'}
 	
 	display_property_groups = [
 		( ('texture', 'luxrender_texture'), 'luxrender_tex_scale' )
