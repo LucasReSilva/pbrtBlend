@@ -299,7 +299,8 @@ def fix_matrix_order_old(matrix):
 def fix_matrix_order_new(matrix):
 	return matrix
 
-if bpy.app.build_revision >= '42816':
+revstring = '{}' .format(bpy.app.build_revision)
+if revstring >= '42816':
 	fix_matrix_order = fix_matrix_order_new
 else:
 	fix_matrix_order = fix_matrix_order_old

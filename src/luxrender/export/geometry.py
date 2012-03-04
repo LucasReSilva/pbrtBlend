@@ -58,7 +58,8 @@ def get_uv_textures_old(mesh):
 def get_uv_textures_new(mesh):
 	return mesh.tessface_uv_textures
 
-if bpy.app.build_revision >= '44254':
+revstring = '{}' .format(bpy.app.build_revision)
+if revstring >= '44254':
 	get_uv_textures = get_uv_textures_new
 else:
 	get_uv_textures = get_uv_textures_old
