@@ -75,13 +75,6 @@ class luxrender_rendermode(declarative_property_group):
 			self.renderer = 'sppm'
 		else:
 			self.renderer = 'sampler'
-
-		#Also set light strategy for hybrid bidir, so the user doesn't need to
-		if self.rendermode == 'hybridbidir':
-			context.scene.luxrender_integrator.bidirstrategy = 'one'
-		#And set if back if they choose regular bidir
-		if self.rendermode == 'bidirectional':
-			context.scene.luxrender_integrator.bidirstrategy = 'auto'
 	
 	properties = [
 		{

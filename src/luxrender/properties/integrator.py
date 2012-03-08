@@ -116,11 +116,9 @@ class luxrender_integrator(declarative_property_group):
 		# bidir +
 		['eyedepth', 'lightdepth'],
 		['eyerrthreshold', 'lightrrthreshold'],
-		'bidirstrategy',
 		
 		# dl +
 		'maxdepth',
-		'shadowraycount',
 		
 		# dp
 		['lbl_direct',
@@ -203,6 +201,7 @@ class luxrender_integrator(declarative_property_group):
 		'useproba',
 				
 		# path
+		'shadowraycount',
 		'directlightsampling',
 		'includeenvironment',
 	]
@@ -213,12 +212,10 @@ class luxrender_integrator(declarative_property_group):
 		'lightdepth':						{ 'surfaceintegrator': 'bidirectional' },
 		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		'lightrrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
-		'bidirstrategy':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
+		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath', 'bidirectional'])},
 		
 		# dl +
-		'lightstrategy':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath'])},
 		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'igi', 'path']) },
-		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'path']) },
 		
 		# dp
 		'lbl_direct':						{ 'surfaceintegrator': 'distributedpath' },
@@ -289,6 +286,7 @@ class luxrender_integrator(declarative_property_group):
 		# path
 		'includeenvironment':				{ 'surfaceintegrator': O(['sppm', 'path']) },
 		'directlightsampling':				{ 'surfaceintegrator': 'path' },
+		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': 'path' },
 		
 		# sppm
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
@@ -352,20 +350,6 @@ class luxrender_integrator(declarative_property_group):
 				('powerimp', 'Power', 'powerimp'),
 				('allpowerimp', 'All Power', 'allpowerimp'),
 				('logpowerimp', 'Log Power', 'logpowerimp')
-			],
-			#'update': lambda s,c: check_renderer_settings(c),
-			'save_in_preset': True
-		},
-		{
-			'type': 'enum',
-			'attr': 'bidirstrategy',
-			'name': 'Light Strategy',
-			'description': 'Light Sampling Strategy',
-			'default': 'auto',
-			'items': [
-				('auto', 'Auto', 'auto'),
-				('one', 'One', 'one'),
-				('all', 'All', 'all')
 			],
 			#'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
@@ -1013,7 +997,7 @@ class luxrender_integrator(declarative_property_group):
 					LuxLog('Incompatible lightstrategy for Hybrid Path (use "auto", "all", or "one").')
 					raise Exception('Incompatible render settings')
 			if self.surfaceintegrator == 'bidirectional':
-				if self.bidirstrategy != ('one'):
+				if self.lightstrategy != ('one'):
 					LuxLog('Incompatible lightstrategy for Hybrid Bidir (use "one").')
 					raise Exception('Incompatible render settings')
 		
@@ -1025,12 +1009,10 @@ class luxrender_integrator(declarative_property_group):
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \
-				  .add_integer('lightdepth', self.lightdepth) \
-				  .add_string('strategy', self.bidirstrategy)
-			#Always export bidir strategy to make working with hybrid bidir easier (the rendermode menu sets the strat to one automatically)
+				  .add_integer('lightdepth', self.lightdepth)
 			if self.advanced:
-				params.add_float('eyerrthreshold', self.eyerrthreshold)
-				params.add_float('lightrrthreshold', self.lightrrthreshold)
+				params.add_float('eyerrthreshold', self.eyerrthreshold) \
+					  .add_float('lightrrthreshold', self.lightrrthreshold)
 		
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth) \
@@ -1117,10 +1099,10 @@ class luxrender_integrator(declarative_property_group):
 				  .add_float('rrcontinueprob', self.rrcontinueprob) \
 				  .add_string('rrstrategy', self.rrstrategy) \
 				  .add_bool('includeenvironment', self.includeenvironment) \
-				  .add_bool('directlightsampling', self.directlightsampling)
+				  .add_bool('directlightsampling', self.directlightsampling) \
+				  .add_integer('shadowraycount', self.shadowraycount)
 		
-		if self.advanced and self.surfaceintegrator not in ('bidirectional', 'sppm'):
+		if self.advanced and self.surfaceintegrator != 'sppm':
 			params.add_string('lightstrategy', self.lightstrategy) \
-				.add_integer('shadowraycount', self.shadowraycount)
 		
 		return self.surfaceintegrator, params
