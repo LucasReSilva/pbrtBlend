@@ -1042,6 +1042,8 @@ class GeometryExporter(object):
 def lux_scene_update(context):
 	if bpy.data.objects.is_updated:
 		for ob in bpy.data.objects:
+			if ob == None:
+				continue
 			#if ob.is_updated_data:
 			#	print('updated_data', ob.name)
 			#if ob.data.is_updated:
