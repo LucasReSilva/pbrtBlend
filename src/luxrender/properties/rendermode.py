@@ -46,6 +46,7 @@ class luxrender_rendermode(declarative_property_group):
 		'raybuffersize',
 		'statebuffercount',
 		'workgroupsize',
+		'qbvhstacksize',
 		'deviceselection',
 		]
 	
@@ -56,6 +57,7 @@ class luxrender_rendermode(declarative_property_group):
 		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
+		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'deviceselection':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'usegpus':					{ 'renderer': 'hybrid' },
 		}
@@ -176,6 +178,16 @@ class luxrender_rendermode(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'int',
+			'attr': 'qbvhstacksize',
+			'name': 'QBVH Stack Size',
+			'description': 'Max depth of GPU QBVH stack. Lower this if you get an out-of-resources error',
+			'default': 32,
+			'min': 16,
+			'max': 64,
+			'save_in_preset': True
+		},
+		{
 			'type': 'string',
 			'attr': 'deviceselection',
 			'name': 'OpenCL devices',
@@ -203,6 +215,7 @@ class luxrender_rendermode(declarative_property_group):
 			renderer_params.add_integer('raybuffersize', self.raybuffersize)
 			renderer_params.add_integer('statebuffercount', self.statebuffercount)
 			renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
+			renderer_params.add_integer('accelerator.qbvh.stacksize.max', self.qbvhstacksize)
 			renderer_params.add_string('opencl.devices.select', self.deviceselection)
 		
 		return self.renderer, renderer_params
