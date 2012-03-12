@@ -219,15 +219,15 @@ class luxrender_integrator(declarative_property_group):
 		
 		# dp
 		'lbl_direct':						{ 'surfaceintegrator': 'distributedpath' },
-		'directsampleall':					{ 'surfaceintegrator': 'distributedpath' },
+		'directsampleall':					{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
 		'directsamples':					{ 'surfaceintegrator': 'distributedpath' },
-		'directdiffuse':					{ 'surfaceintegrator': 'distributedpath' },
-		'directglossy':						{ 'surfaceintegrator': 'distributedpath' },
+		'directdiffuse':					{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
+		'directglossy':						{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
 		'lbl_indirect':						{ 'surfaceintegrator': 'distributedpath' },
-		'indirectsampleall':				{ 'surfaceintegrator': 'distributedpath' },
+		'indirectsampleall':				{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
 		'indirectsamples':					{ 'surfaceintegrator': 'distributedpath' },
-		'indirectdiffuse':					{ 'surfaceintegrator': 'distributedpath' },
-		'indirectglossy':					{ 'surfaceintegrator': 'distributedpath' },
+		'indirectdiffuse':					{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
+		'indirectglossy':					{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
 		'lbl_diffuse':						{ 'surfaceintegrator': 'distributedpath' },
 		'diffusereflectdepth':				{ 'surfaceintegrator': 'distributedpath' },
 		'diffusereflectsamples':			{ 'surfaceintegrator': 'distributedpath' },
@@ -241,15 +241,15 @@ class luxrender_integrator(declarative_property_group):
 		'lbl_specular':						{ 'surfaceintegrator': 'distributedpath' },
 		'specularreflectdepth':				{ 'surfaceintegrator': 'distributedpath' },
 		'specularrefractdepth':				{ 'surfaceintegrator': 'distributedpath' },
-		'lbl_rejection':					{ 'surfaceintegrator': 'distributedpath' },
-		'diffusereflectreject':				{ 'surfaceintegrator': 'distributedpath' },
-		'diffusereflectreject_threshold':	{ 'diffusereflectreject': True, 'surfaceintegrator': 'distributedpath' },
-		'diffuserefractreject':				{ 'surfaceintegrator': 'distributedpath' },
-		'diffuserefractreject_threshold':	{ 'diffuserefractreject': True, 'surfaceintegrator': 'distributedpath' },
-		'glossyreflectreject':				{ 'surfaceintegrator': 'distributedpath' },
-		'glossyreflectreject_threshold':	{ 'glossyreflectreject': True, 'surfaceintegrator': 'distributedpath' },
-		'glossyrefractreject':				{ 'surfaceintegrator': 'distributedpath' },
-		'glossyrefractreject_threshold':	{ 'glossyrefractreject': True, 'surfaceintegrator': 'distributedpath' },
+		'lbl_rejection':					{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
+		'diffusereflectreject':				{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
+		'diffusereflectreject_threshold':	{ 'advanced': True, 'diffusereflectreject': True, 'surfaceintegrator': 'distributedpath' },
+		'diffuserefractreject':				{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
+		'diffuserefractreject_threshold':	{ 'advanced': True, 'diffuserefractreject': True, 'surfaceintegrator': 'distributedpath' },
+		'glossyreflectreject':				{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
+		'glossyreflectreject_threshold':	{ 'advanced': True, 'glossyreflectreject': True, 'surfaceintegrator': 'distributedpath' },
+		'glossyrefractreject':				{ 'advanced': True, 'surfaceintegrator': 'distributedpath' },
+		'glossyrefractreject_threshold':	{ 'advanced': True, 'glossyrefractreject': True, 'surfaceintegrator': 'distributedpath' },
 		
 		# expm
 		'maxeyedepth':						{ 'surfaceintegrator': O(['exphotonmap', 'sppm']) },
@@ -428,6 +428,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'directsamples',
 			'name': 'Samples',
 			'default': 1,
+			'description': 'Number of shadow rays to start from first path vertex',
 			'save_in_preset': True
 		},
 		{
@@ -462,6 +463,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'indirectsamples',
 			'name': 'Samples',
 			'default': 1,
+			'description': 'Number of shadows rays to start from subsequent path vertices',
 			'save_in_preset': True
 		},
 		{
@@ -488,6 +490,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'diffusereflectdepth',
 			'name': 'Reflection depth',
+			'description': 'Max recursion depth after bouncing from a diffuse surface',
 			'default': 3,
 			'min': 0,
 			'save_in_preset': True
@@ -496,6 +499,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'diffusereflectsamples',
 			'name': 'Reflection samples',
+			'description': 'Number of paths to start from a diffuse-reflection vertex',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -504,6 +508,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'diffuserefractdepth',
 			'name': 'Refraction depth',
+			'description': 'Max recursion depth after bouncing through a diffuse-refraction (translucent) surface',
 			'default': 5,
 			'min': 0,
 			'save_in_preset': True
@@ -512,6 +517,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'diffuserefractsamples',
 			'name': 'Refraction samples',
+			'description': 'Number of paths to start from a diffuse-refraction (translucent) vertex',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -526,6 +532,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'glossyreflectdepth',
 			'name': 'Reflection depth',
+			'description': 'Max recursion depth after bouncing from a glossy surface',
 			'default': 2,
 			'min': 0,
 			'save_in_preset': True
@@ -534,6 +541,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'glossyreflectsamples',
 			'name': 'Reflection samples',
+			'description': 'Number of paths to start from a glossy-reflection vertex',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -542,6 +550,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'glossyrefractdepth',
 			'name': 'Refraction depth',
+			'description': 'Max recursion depth after bouncing through a glossy-refraction surface, such as rough glass',
 			'default': 5,
 			'min': 0,
 			'save_in_preset': True
@@ -550,6 +559,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'glossyrefractsamples',
 			'name': 'Refraction samples',
+			'description': 'Number of paths to start from a glossy-refraction vertex, such as rough glass',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -564,6 +574,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'specularreflectdepth',
 			'name': 'Reflection depth',
+			'description': 'Max recursion depth after a specular reflection',
 			'default': 3,
 			'min': 0,
 			'save_in_preset': True
@@ -572,6 +583,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'specularrefractdepth',
 			'name': 'Refraction depth',
+			'description': 'Max recursion depth after a specular transmission, such as glass or null',
 			'default': 5,
 			'min': 0,
 			'save_in_preset': True
@@ -1035,14 +1047,8 @@ class luxrender_integrator(declarative_property_group):
 					  .add_string('photonsampler', self.photonsampler)
 		
 		if self.surfaceintegrator == 'distributedpath':
-			params.add_bool('directsampleall', self.directsampleall) \
-				  .add_integer('directsamples', self.directsamples) \
-				  .add_bool('directdiffuse', self.directdiffuse) \
-				  .add_bool('directglossy', self.directglossy) \
-				  .add_bool('indirectsampleall', self.indirectsampleall) \
+			params.add_integer('directsamples', self.directsamples) \
 				  .add_integer('indirectsamples', self.indirectsamples) \
-				  .add_bool('indirectdiffuse', self.indirectdiffuse) \
-				  .add_bool('indirectglossy', self.indirectglossy) \
 				  .add_integer('diffusereflectdepth', self.diffusereflectdepth) \
 				  .add_integer('diffusereflectsamples', self.diffusereflectsamples) \
 				  .add_integer('diffuserefractdepth', self.diffuserefractdepth) \
@@ -1052,15 +1058,22 @@ class luxrender_integrator(declarative_property_group):
 				  .add_integer('glossyrefractdepth', self.glossyrefractdepth) \
 				  .add_integer('glossyrefractsamples', self.glossyrefractsamples) \
 				  .add_integer('specularreflectdepth', self.specularreflectdepth) \
-				  .add_integer('specularrefractdepth', self.specularrefractdepth) \
-				  .add_bool('diffusereflectreject', self.diffusereflectreject) \
-				  .add_float('diffusereflectreject_threshold', self.diffusereflectreject_threshold) \
-				  .add_bool('diffuserefractreject', self.diffuserefractreject) \
-				  .add_float('diffuserefractreject_threshold', self.diffuserefractreject_threshold) \
-				  .add_bool('glossyreflectreject', self.glossyreflectreject) \
-				  .add_float('glossyreflectreject_threshold', self.glossyreflectreject_threshold) \
-				  .add_bool('glossyrefractreject', self.glossyrefractreject) \
-				  .add_float('glossyrefractreject_threshold', self.glossyrefractreject_threshold)
+				  .add_integer('specularrefractdepth', self.specularrefractdepth)
+			if self.advanced:
+				params.add_bool('directsampleall', self.directsampleall) \
+					  .add_bool('directdiffuse', self.directdiffuse) \
+					  .add_bool('directglossy', self.directglossy) \
+					  .add_bool('indirectsampleall', self.indirectsampleall) \
+				  	  .add_bool('indirectdiffuse', self.indirectdiffuse) \
+				  	  .add_bool('indirectglossy', self.indirectglossy) \
+					  .add_bool('diffusereflectreject', self.diffusereflectreject) \
+					  .add_float('diffusereflectreject_threshold', self.diffusereflectreject_threshold) \
+				  	  .add_bool('diffuserefractreject', self.diffuserefractreject) \
+				  	  .add_float('diffuserefractreject_threshold', self.diffuserefractreject_threshold) \
+				  	  .add_bool('glossyreflectreject', self.glossyreflectreject) \
+				  	  .add_float('glossyreflectreject_threshold', self.glossyreflectreject_threshold) \
+				  	  .add_bool('glossyrefractreject', self.glossyrefractreject) \
+				  	  .add_float('glossyrefractreject_threshold', self.glossyrefractreject_threshold)
 		
 		if self.surfaceintegrator == 'exphotonmap':
 			params.add_integer('maxdepth', self.maxeyedepth) \
