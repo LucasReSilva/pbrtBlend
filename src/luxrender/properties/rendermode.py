@@ -170,7 +170,7 @@ class luxrender_rendermode(declarative_property_group):
 			'attr': 'workgroupsize',
 			'name': 'OpenCL work group size',
 			'description': 'Size of OpenCL work group. Use 0 for auto',
-			'default': 0,
+			'default': 64,
 			'min': 0,
 			'soft_min': 0,
 			'max': 1024,
