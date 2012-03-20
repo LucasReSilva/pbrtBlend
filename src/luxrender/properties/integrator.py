@@ -55,7 +55,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'type': 'enum',
 			'attr': 'volumeintegrator',
 			'name': 'Volume Integrator',
-			'description': 'Volume Integrator',
+			'description': 'Integrator used to calculate volumetric effects',
 			'default': 'multi',
 			'items': [
 				('emission', 'Emission', 'Calculate absorption and light-emission only'),
