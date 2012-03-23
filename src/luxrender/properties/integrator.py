@@ -111,7 +111,6 @@ class luxrender_integrator(declarative_property_group):
 	
 	controls = [
 		'advanced',
-		'lightstrategy',
 		
 		# bidir +
 		['eyedepth', 'lightdepth'],
@@ -190,7 +189,7 @@ class luxrender_integrator(declarative_property_group):
 		#sppm
 		'photonperpass',
 		['startradius', 'alpha'],
-		'sppmdirectlight',
+		['directlightsampling', 'includeenvironment'],
 		#sppm advanced
 		'glossythreshold',
 		'wavelengthstratificationpasses',
@@ -199,11 +198,13 @@ class luxrender_integrator(declarative_property_group):
 		'pixelsampler',
 		'photonsampler',
 		'useproba',
+
 				
 		# path
 		'shadowraycount',
-		'directlightsampling',
-		'includeenvironment',
+		
+		'lightstrategy', #Appended light strategy at the end, so non-advanced options don't shift down when light strat menu appears (when advanced is checked)
+
 	]
 	
 	visibility = {
@@ -284,8 +285,6 @@ class luxrender_integrator(declarative_property_group):
 		'mindist':							{ 'surfaceintegrator': 'igi' },
 		
 		# path
-		'includeenvironment':				{ 'surfaceintegrator': O(['sppm', 'path']) },
-		'directlightsampling':				{ 'surfaceintegrator': 'path' },
 		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': 'path' },
 		
 		# sppm
@@ -293,8 +292,9 @@ class luxrender_integrator(declarative_property_group):
 		'startk':							{ 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'surfaceintegrator': 'sppm' },
 		'startradius':						{ 'surfaceintegrator': 'sppm' },
-		'sppmdirectlight':					{ 'surfaceintegrator': 'sppm' },
-
+		'includeenvironment':				{ 'surfaceintegrator': O(['sppm', 'path']) },
+		'directlightsampling':				{ 'surfaceintegrator': O(['sppm', 'path']) },
+		
 		# sppm advanced
 		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'wavelengthstratificationpasses': 	{ 'advanced': True, 'surfaceintegrator': 'sppm' },
@@ -962,15 +962,6 @@ class luxrender_integrator(declarative_property_group):
 			],
 			'save_in_preset': True
 		},
-		#SPPM direct light sampling is a seperate parameter from Path's, due to the need for a different default and tooltip
-		{
-			'type': 'bool',
-			'attr': 'sppmdirectlight',
-			'name': 'Direct Light Sampling',
-			'description': 'Use direct light sampling during the eye pass. Can improve efficiency with simple lighting',
-			'default': False,
-			'save_in_preset': True
-		},
 		{
 			'type': 'int',
 			'attr': 'wavelengthstratificationpasses',
@@ -1036,7 +1027,7 @@ class luxrender_integrator(declarative_property_group):
  				  .add_float('startradius', self.startradius) \
 				  .add_float('alpha', self.alpha) \
 				  .add_bool('includeenvironment', self.includeenvironment) \
-				  .add_bool('directlightsampling', self.sppmdirectlight)
+				  .add_bool('directlightsampling', self.directlightsampling)
 			if self.advanced:
 				params.add_float('glossythreshold', self.glossythreshold) \
 					  .add_bool('useproba', self.useproba)\
