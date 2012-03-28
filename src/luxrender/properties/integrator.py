@@ -1028,7 +1028,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_bool('includeenvironment', self.includeenvironment) \
 				  .add_bool('directlightsampling', self.directlightsampling)
 			if self.advanced:
-				params.add_float('storeglossy', self.storeglossy) \
+				params.add_bool('storeglossy', self.storeglossy) \
 					  .add_bool('useproba', self.useproba)\
 					  .add_integer('wavelengthstratificationpasses', self.wavelengthstratificationpasses) \
 					  .add_string('lookupaccel', self.lookupaccel) \
