@@ -191,7 +191,7 @@ class luxrender_integrator(declarative_property_group):
 		['startradius', 'alpha'],
 		['directlightsampling', 'includeenvironment'],
 		#sppm advanced
-		'glossythreshold',
+		'storeglossy',
 		'wavelengthstratificationpasses',
 		'lookupaccel',
 		'parallelhashgridspare',
@@ -203,7 +203,7 @@ class luxrender_integrator(declarative_property_group):
 		# path
 		'shadowraycount',
 		
-		'lightstrategy', #Appended light strategy at the end, so non-advanced options don't shift down when light strat menu appears (when advanced is checked)
+		'lightstrategy', #Append light strategy at the end, so non-advanced options don't shift down when light strat menu appears (when advanced is checked)
 
 	]
 	
@@ -296,7 +296,7 @@ class luxrender_integrator(declarative_property_group):
 		'directlightsampling':				{ 'surfaceintegrator': O(['sppm', 'path']) },
 		
 		# sppm advanced
-		'glossythreshold':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
+		'storeglossy':					{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'wavelengthstratificationpasses': 	{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'lookupaccel':						{ 'advanced': True, 'surfaceintegrator': 'sppm' },
 		'parallelhashgridspare':			{ 'advanced': True, 'lookupaccel': 'parallelhashgrid', 'surfaceintegrator': 'sppm' },
@@ -906,12 +906,11 @@ class luxrender_integrator(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
-			'type': 'float',
-			'attr': 'glossythreshold',
-			'name': 'Glossy Threshold',
-			'description': 'Maximum specularity (PDF) that will store photons. 0=only matte materials store photons',
-			'min': 0,
-			'default': 100,
+			'type': 'bool',
+			'attr': 'storeglossy',
+			'name': 'Store on glossy',
+			'description': 'Use the photon pass to render glossy and metal surfaces. Can introduce noise, but is needed for some corner cases',
+			'default': False,
 			'save_in_preset': True
 		},
 		{
@@ -977,7 +976,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'useproba',
 			'name': 'Use PPM Probability',
 			'description': 'Use PPM probability for search radius reduction.',
-			'default': False,
+			'default': True,
 			'save_in_preset': True
 		},
 	]
@@ -1029,7 +1028,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_bool('includeenvironment', self.includeenvironment) \
 				  .add_bool('directlightsampling', self.directlightsampling)
 			if self.advanced:
-				params.add_float('glossythreshold', self.glossythreshold) \
+				params.add_float('storeglossy', self.storeglossy) \
 					  .add_bool('useproba', self.useproba)\
 					  .add_integer('wavelengthstratificationpasses', self.wavelengthstratificationpasses) \
 					  .add_string('lookupaccel', self.lookupaccel) \
