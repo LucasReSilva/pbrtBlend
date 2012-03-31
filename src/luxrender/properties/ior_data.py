@@ -368,7 +368,7 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 		# Detect either material or volume or texture context
 		if context.material and context.material.luxrender_material and not context.texture:
 			lm = context.material.luxrender_material
-			for mat_type in ('glass', 'roughglass', 'glossy', 'glossy_lossy', 'glossytranslucent'):
+			for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent'):
 				if lm.type == mat_type:
 					getattr(lm, 'luxrender_mat_%s'%mat_type).index_floatvalue = ior
 					getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetvalue = ior
