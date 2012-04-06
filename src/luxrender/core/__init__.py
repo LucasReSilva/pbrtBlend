@@ -354,6 +354,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				if LUXRENDER_VERSION < '0.8' or preview_context.getAttribute('renderer_statistics', 'samplesPerPixel') > 24:
 					interruptible_sleep(1.8) # up to HALTSPP every 2 seconds in sum
 					
+				preview_context.updateStatisticsWindow()
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.getAttribute('renderer_statistics_formatted_short', '_recommended_string')))
 				
 				result = self.begin_result(0, 0, xres, yres)
