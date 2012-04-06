@@ -63,6 +63,16 @@ if bpy.app.version[1] >= 62 and bpy.app.version[2] > 0: # bmesh adaption
 else:
 	get_uv_textures = get_uv_textures_old
 
+def get_mesh_faces_old(mesh):
+	return mesh.faces
+def get_mesh_faces_new(mesh):
+	return mesh.tessfaces
+
+if bpy.app.version[1] >= 62 and bpy.app.version[2] > 1: # bmesh adaption
+	get_mesh_faces = get_mesh_faces_new
+else:
+	get_mesh_faces = get_mesh_faces_old
+
 class GeometryExporter(object):
 	
 	# for partial mesh export
@@ -176,7 +186,8 @@ class GeometryExporter(object):
 			
 			# collate faces by mat index
 			ffaces_mats = {}
-			for f in mesh.faces:
+			mesh_faces = get_mesh_faces(mesh)
+			for f in mesh_faces:
 				mi = f.material_index
 				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
 				ffaces_mats[mi].append( f )
@@ -389,7 +400,8 @@ class GeometryExporter(object):
 			
 			# collate faces by mat index
 			ffaces_mats = {}
-			for f in mesh.faces:
+			mesh_faces = get_mesh_faces(mesh)
+			for f in mesh_faces:
 				mi = f.material_index
 				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
 				ffaces_mats[mi].append( f )

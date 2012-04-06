@@ -44,28 +44,22 @@ class luxrender_accelerator(declarative_property_group):
 		'intersectcost',
 		'traversalcost',
 		'emptybonus'
-		'treetype',
-		'costsample',
 		'maxprims',
 		'maxdepth',
-		'refineimmediately',
 		'maxprimsperleaf',
 		'fullsweepthreshold',
 		'skipfactor',
 	]
 	
 	visibility = {
-		'intersectcost':		{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
-		'traversalcost':		{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
-		'emptybonus':			{ 'advanced': True, 'accelerator': O(['bvh', 'tabreckdtree']) },
-		'treetype':				{ 'advanced': True, 'accelerator': 'bvh' },
-		'costsample':			{ 'advanced': True, 'accelerator': 'bvh' },
+		'intersectcost':		{ 'advanced': True, 'accelerator': 'tabreckdtree' },
+		'traversalcost':		{ 'advanced': True, 'accelerator': 'tabreckdtree' },
+		'emptybonus':			{ 'advanced': True, 'accelerator': 'tabreckdtree' },
 		'maxprims':				{ 'advanced': True, 'accelerator': 'tabreckdtree' },
 		'maxdepth':				{ 'advanced': True, 'accelerator': 'tabreckdtree' },
-		'refineimmediately':	{ 'advanced': True, 'accelerator': 'grid' },
-		'maxprimsperleaf':		{ 'advanced': True, 'accelerator': 'qbvh' },
-		'fullsweepthreshold':	{ 'advanced': True, 'accelerator': 'qbvh' },
-		'skipfactor':			{ 'advanced': True, 'accelerator': 'qbvh' },
+		'maxprimsperleaf':		{ 'advanced': True, 'accelerator': O(['qbvh', 'sqbvh']) },
+		'fullsweepthreshold':	{ 'advanced': True, 'accelerator': O(['qbvh', 'sqbvh']) },
+		'skipfactor':			{ 'advanced': True, 'accelerator': O(['qbvh', 'sqbvh']) },
 	}
 	
 	properties = [
@@ -76,10 +70,10 @@ class luxrender_accelerator(declarative_property_group):
 			'description': 'Scene accelerator type',
 			'default': 'qbvh',
 			'items': [
-				# Other accelerator types are omitted deliberately, as broken or not useful.
-				('tabreckdtree', 'KD Tree', 'tabreckdtree'),
-				('qbvh', 'QBVH', 'SSE-accelerated quad bounding volume hierarchy'),
-				('sqbvh', 'SQBVH', 'SSE quad bounding volume hierarchy with spatial split support'),
+				# As of 0.9, other accelerator types have been removed from the core entirely
+				('tabreckdtree', 'KD Tree', 'A traditional KD Tree'),
+				('qbvh', 'QBVH', 'Quad bounding volume hierarchy'),
+				('sqbvh', 'SQBVH', 'Spatial quad bounding volume hierarchy. Should be faster than normal QBVH, but may use more memory'),
 			],
 			'save_in_preset': True
 		},
@@ -113,25 +107,6 @@ class luxrender_accelerator(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
-			'attr': 'treetype',
-			'type': 'enum',
-			'name': 'Tree Type',
-			'default': '2',
-			'items': [
-				('2', 'Binary', '2'),
-				('4', 'Quad', '4'),
-				('8', 'Oct', '8'),
-			],
-			'save_in_preset': True
-		},
-		{
-			'attr': 'costsample',
-			'type': 'int',
-			'name': 'Costsample',
-			'default': 0,
-			'save_in_preset': True
-		},
-		{
 			'attr': 'maxprims',
 			'type': 'int',
 			'name': 'Max. Prims',
@@ -143,13 +118,6 @@ class luxrender_accelerator(declarative_property_group):
 			'type': 'int',
 			'name': 'Max. depth',
 			'default': -1,
-			'save_in_preset': True
-		},
-		{
-			'attr': 'refineimmediately',
-			'type': 'bool',
-			'name': 'Refine Immediately',
-			'default': False,
 			'save_in_preset': True
 		},
 		{
@@ -192,17 +160,7 @@ class luxrender_accelerator(declarative_property_group):
 				params.add_integer('maxprims', self.maxprims)
 				params.add_integer('maxdepth', self.maxdepth)
 			
-			if self.accelerator == 'grid':
-				params.add_bool('refineimmediately', self.refineimmediately)
-			
-			if self.accelerator == 'bvh':
-				params.add_integer('treetype', self.treetype)
-				params.add_integer('costsamples', self.costsamples)
-				params.add_integer('intersectcost', self.intersectcost)
-				params.add_integer('traversalcost', self.traversalcost)
-				params.add_float('emptybonus', self.emptybonus)
-			
-			if self.accelerator == 'qbvh':
+			if self.accelerator in ('qbvh', 'sqbvh'):
 				params.add_integer('maxprimsperleaf', self.maxprimsperleaf)
 				params.add_integer('fullsweepthreshold', self.fullsweepthreshold)
 				params.add_integer('skipfactor', self.skipfactor)

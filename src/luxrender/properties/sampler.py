@@ -91,7 +91,7 @@ class luxrender_sampler(declarative_property_group):
 			'type': 'float',
 			'attr': 'largemutationprob',
 			'name': 'Large Mutation Probability',
-			'description': 'Large Mutation Probability',
+			'description': 'Probability of a completely random mutation rather than a guided one. Lower values increase sampler strength',
 			'default': 0.4,
 			'min': 0,
 			'max': 1,
@@ -102,7 +102,7 @@ class luxrender_sampler(declarative_property_group):
 			'type': 'int', 
 			'attr': 'maxconsecrejects',
 			'name': 'Max. Consecutive Rejections',
-			'description': 'Maximum number of consecutive rejections',
+			'description': 'Maximum amount of samples in a particular area before moving on. Setting this too low may mute lamps and caustics',
 			'default': 512,
 			'min': 0,
 			'max': 32768,
@@ -123,8 +123,7 @@ class luxrender_sampler(declarative_property_group):
 			'items': [
 				('random','Random', 'Use a random base sampler'),
 				('lowdiscrepancy', 'Low Discrepancy', 'Use a low discrepancy sequence for the base sampler'),
-				('metropolis', 'Metropolis', 'Use MLT for the base sampler')
-			],
+			], #this parameter will technically accept any valid sampler. It is MEANT to only be used with random and LD, calling itself or metroplois doesn't make any sense
 			'save_in_preset': True
 		},
 		{
