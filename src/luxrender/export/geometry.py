@@ -58,7 +58,7 @@ def get_uv_textures_old(mesh):
 def get_uv_textures_new(mesh):
 	return mesh.tessface_uv_textures
 
-if bpy.app.version[1] >= 62 and bpy.app.version[2] > 0: # bmesh adaption
+if bpy.app.version > (2, 62, 0 ): # bmesh adaption
 	get_uv_textures = get_uv_textures_new
 else:
 	get_uv_textures = get_uv_textures_old
@@ -68,7 +68,7 @@ def get_mesh_faces_old(mesh):
 def get_mesh_faces_new(mesh):
 	return mesh.tessfaces
 
-if bpy.app.version[1] >= 62 and bpy.app.version[2] > 1: # bmesh adaption
+if bpy.app.version > (2, 62, 1 ): # bmesh adaption
 	get_mesh_faces = get_mesh_faces_new
 else:
 	get_mesh_faces = get_mesh_faces_old
