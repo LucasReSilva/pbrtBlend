@@ -61,6 +61,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 				('emission', 'Emission', 'Calculate absorption and light-emission only'),
 				('single', 'Single', 'Calculate single scattering as well as absorption and light-emission'),
 				('multi', 'Multi', 'Calculate all volumetric effects, including multiple scattering, absorption, and light-emission'),
+                ('none', 'None', 'Experimental, NoneScattering volumetric effects'),
 			],
 			'save_in_preset': True
 		},
