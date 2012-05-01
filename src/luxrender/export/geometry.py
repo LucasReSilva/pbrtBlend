@@ -1051,7 +1051,7 @@ def lux_scene_update(context):
 			
 			# only flag as updated if either modifiers or 
 			# mesh data is updated
-			if ob.is_updated_data or ob.data.is_updated:
+			if ob.is_updated_data or (ob.data != None and ob.data.is_updated):
 				GeometryExporter.KnownModifiedObjects.add(ob)
 
 @persistent
