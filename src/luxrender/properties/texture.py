@@ -2356,8 +2356,8 @@ class luxrender_tex_normalmap(declarative_property_group):
 			'name': 'Wrapping',
 			'items': [
 				('repeat', 'Repeat', 'repeat'),
-				('black', 'Black', 'black'),
-				('white', 'White', 'white'),
+#				('black', 'Black', 'black'),
+#				('white', 'White', 'white'),
 				('clamp', 'Clamp', 'clamp')
 			],
 			'save_in_preset': True
