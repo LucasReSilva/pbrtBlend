@@ -2301,7 +2301,7 @@ class luxrender_tex_normalmap(declarative_property_group):
 		'filtertype',
 		'discardmipmaps',
 		'maxanisotropy',
-#		'wrap',
+		'wrap',
 	]
 	
 	visibility = {
@@ -2350,18 +2350,18 @@ class luxrender_tex_normalmap(declarative_property_group):
 			'default': 8.0,
 			'save_in_preset': True
 		},
-#		{
-#			'type': 'enum',
-#			'attr': 'wrap',
-#			'name': 'Wrapping',
-#			'items': [
-#				('repeat', 'Repeat', 'repeat'),
-#				('black', 'Black', 'black'),
-#				('white', 'White', 'white'),
-#				('clamp', 'Clamp', 'clamp')
-#			],
-#			'save_in_preset': True
-#		},
+		{
+			'type': 'enum',
+			'attr': 'wrap',
+			'name': 'Wrapping',
+			'items': [
+				('repeat', 'Repeat', 'repeat'),
+				('black', 'Black', 'black'),
+				('white', 'White', 'white'),
+				('clamp', 'Clamp', 'clamp')
+			],
+			'save_in_preset': True
+		},
 	]
 
 	def get_paramset(self, scene, texture):
@@ -2374,8 +2374,8 @@ class luxrender_tex_normalmap(declarative_property_group):
 		params.add_integer('discardmipmaps', self.discardmipmaps) \
 			  .add_string('filtertype', self.filtertype) \
 			  .add_float('maxanisotropy', self.maxanisotropy) \
-			  .add_float('gamma', 1.0)
-#			  .add_string('wrap', self.wrap)
+			  .add_float('gamma', 1.0) \
+			  .add_string('wrap', self.wrap)
 			  #Don't gamma correct normal maps^
 		
 		return {'2DMAPPING'}, params
@@ -2386,7 +2386,7 @@ class luxrender_tex_normalmap(declarative_property_group):
 			'discardmipmaps': 'integer',
 			'filtertype': 'string',
 			'maxanisotropy': 'float',
-#			'wrap': 'string',
+			'wrap': 'string',
 		}
 		psi_accept_keys = psi_accept.keys()
 		for psi in ps:
