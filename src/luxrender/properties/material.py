@@ -409,6 +409,7 @@ class luxrender_material(declarative_property_group):
 							params.add_string('filtertype', src_texture.filtertype)
 							params.add_float('maxanisotropy', src_texture.maxanisotropy)
 							params.add_float('gamma', 1.0) #Don't gamma correct normal maps
+							params.add_string('wrap', src_texture.wrap)
 							params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
 							
 							ExportedTextures.texture(
