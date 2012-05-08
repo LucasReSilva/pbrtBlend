@@ -2715,7 +2715,7 @@ class luxrender_mat_metal2(declarative_property_group):
 				lux_context,
 				'%s_nk' % material.name,
 				'fresnel',
-				'fresnelname',
+				'preset',
 				fresnelname_params
 			)
 			ExportedTextures.export_new(lux_context)
