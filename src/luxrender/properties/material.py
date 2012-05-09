@@ -455,8 +455,8 @@ class luxrender_material(declarative_property_group):
 						.add_texture('tex1', bumpmap_texturename) \
 						.add_texture('tex2', self.normalmap_floattexturename)
 					
-					weights = [self.bumpmap_floatvalue, 1]
-	
+					weights = [self.bumpmap_floatvalue, 1.0] if self.bumpmap_multiplyfloat else [1.0, 1.0]
+#					print("---------->", weights)
 					# In API mode need to tell Lux how many slots explicity
 					if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
 						mm_params.add_integer('nweights', 2)
