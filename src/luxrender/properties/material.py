@@ -236,7 +236,8 @@ class luxrender_material(declarative_property_group):
 		'Exterior',
 #		'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
 	] + \
-	TF_bumpmap.controls + \
+	TF_normalmap.controls + \
+	TF_bumpmap.controls
 	TF_normalmap.controls
 	
 	visibility = dict_merge({}, TF_bumpmap.visibility, TF_normalmap.visibility)
