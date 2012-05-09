@@ -519,8 +519,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			config_updates['install_path'] = luxrender_path
 		
 		if sys.platform == 'darwin':
-			# Get binary from OSX package
-			luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name
+			luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name # Get binary from OSX bundle
+			if not os.path.exists(luxrender_path):
+				LuxLog('LuxRender not found at path: %s' % luxrender_path, ', trying default LuxRender location')
+				luxrender_path = '/Applications/LuxRender/LuxRender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name # try fallback to default installation path
+
 		elif sys.platform == 'win32':
 			luxrender_path += '%s.exe' % scene.luxrender_engine.binary_name
 		else:
