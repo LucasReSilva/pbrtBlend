@@ -394,6 +394,7 @@ class luxrender_material(declarative_property_group):
 					
 					#Get the normal map
 					texture_name = getattr(material.luxrender_material, 'normalmap_floattexturename')
+
 					if texture_name != '' and self.normalmap_usefloattexture:
 						texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 						lux_texture = texture.luxrender_texture
@@ -441,6 +442,7 @@ class luxrender_material(declarative_property_group):
 							LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to the bump channel.' % texture_name)
 						
 					bumpmap_texturename = self.bumpmap_floattexturename if self.bumpmap_usefloattexture else ''
+					normalmap_floattexturename = self.normalmap_floattexturename if self.normalmap_usefloattexture else ''
 					
 					#Get the bump map
 					texture_name = getattr(material.luxrender_material, 'bumpmap_floattexturename')
@@ -453,7 +455,7 @@ class luxrender_material(declarative_property_group):
 					#Build the multi-mix tex of the summed bump and normal maps
 					mm_params = ParamSet() \
 						.add_texture('tex1', bumpmap_texturename) \
-						.add_texture('tex2', self.normalmap_floattexturename)
+						.add_texture('tex2', normalmap_floattexturename)
 					
 					if self.bumpmap_multiplyfloat:
 						weights = [self.bumpmap_floatvalue, 1.0]
