@@ -174,7 +174,8 @@ class luxrender_camera(declarative_property_group):
 			'min': 0.4,
 			'soft_min': 0.4,
 			'max': 128.0,
-			'soft_max': 128.0
+			'soft_max': 128.0,
+			'step': 100
 		},
 		{
 			'type': 'float',
@@ -185,7 +186,8 @@ class luxrender_camera(declarative_property_group):
 			'min': 10.0,
 			'soft_min': 10.0,
 			'max': 6400.0,
-			'soft_max': 6400.0
+			'soft_max': 6400.0,
+			'step': 1000
 		},
 		{
 			'type': 'enum',
