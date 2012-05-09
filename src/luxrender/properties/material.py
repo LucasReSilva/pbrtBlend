@@ -440,7 +440,7 @@ class luxrender_material(declarative_property_group):
 						else:
 							LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to the bump channel.' % texture_name)
 						
-					bumpmap_texturename = self.bumpmap_floattexturename
+					bumpmap_texturename = self.bumpmap_floattexturename if self.bumpmap_usefloattexture else ''
 					
 					#Get the bump map
 					texture_name = getattr(material.luxrender_material, 'bumpmap_floattexturename')
