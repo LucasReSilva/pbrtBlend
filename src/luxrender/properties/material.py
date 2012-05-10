@@ -96,8 +96,8 @@ def texture_append_visibility(vis_main, textureparam_object, vis_append):
 	return vis_main
 
 # Float Textures
-TF_bumpmap			= SubGroupFloatTextureParameter('bumpmap', 'Bump Map Scale',			add_float_value=True, min=-1.0, max=1.0, default=0.0, precision=6, multiply_float=True, ignore_unassigned=True, sub_type='DISTANCE', unit='LENGTH' )
-TF_normalmap			= SubGroupFloatTextureParameter('normalmap', 'Normal Map Scale',		add_float_value=True, min=-5.0, max=5.0, default=1.0, precision=6, multiply_float=False, ignore_unassigned=True)
+TF_bumpmap			= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',			add_float_value=True, min=-5.0, max=5.0, default=1.0, precision=6, multiply_float=True, ignore_unassigned=True, sub_type='DISTANCE', unit='LENGTH' )
+TF_normalmap			= SubGroupFloatTextureParameter('normalmap', 'Normal Map',		add_float_value=True, min=-5.0, max=5.0, default=1.0, precision=6, multiply_float=False, ignore_unassigned=True)
 TF_amount				= FloatTextureParameter('amount', 'Mix amount',						add_float_value=True, min=0.0, default=0.5, max=1.0)
 TF_cauchyb				= FloatTextureParameter('cauchyb', 'Cauchy B',						add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
 TF_d					= FloatTextureParameter('d', 'Absorption depth (nm)',				add_float_value=True, default=0.0, min=0.0, max=2500.0 ) # default 0.0 for OFF
