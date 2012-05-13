@@ -27,7 +27,6 @@
 # System Libs
 import os
 import tempfile
-import bpy
 
 # Extensions_Framework Libs
 from extensions_framework import util as efutil
@@ -149,7 +148,7 @@ class SceneExporter(object):
 				except EnvironmentError as e:
 					if e.errno == os.errno.EACCES:
 						self.report({'WARNING'}, 'Output path "%s" is not writable, using temp directory' % os.path.normpath(self.properties.directory))
-						self.properties.directory = efutil.filesystem_path( bpy.app.tempdir ) # instead of tempfile.gettempdir() use blender tempdir to prevent luxcrashes
+						self.properties.directory = tempfile.gettempdir()
 					else:
 						raise
 			
