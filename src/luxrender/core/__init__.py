@@ -78,7 +78,7 @@ from ..operators import lrmdb
 
 def _register_elm(elm, required=False):
 	try:
-		elm.COMPAT_ENGINES.add(LuxRenderAddon.BL_IDNAME)
+		elm.COMPAT_ENGINES.add('LUXRENDER_RENDER')
 	except:
 		if required:
 			LuxLog('Failed to add LuxRender to ' + elm.__name__)
@@ -113,7 +113,7 @@ def blender_texture_poll(cls, context):
 		   ((tex.type == cls.tex_type and not tex.use_nodes) and \
 		   (context.scene.render.engine in cls.COMPAT_ENGINES))
 	
-	if context.scene.render.engine == LuxRenderAddon.BL_IDNAME:
+	if context.scene.render.engine == 'LUXRENDER_RENDER':
 		show = show and tex.luxrender_texture.type == 'BLENDER'
 	
 	return show
@@ -155,7 +155,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	LuxRender Engine Exporter/Integration class
 	'''
 	
-	bl_idname			= LuxRenderAddon.BL_IDNAME
+	bl_idname			= 'LUXRENDER_RENDER'
 	bl_label			= 'LuxRender'
 	bl_use_preview		= True
 	

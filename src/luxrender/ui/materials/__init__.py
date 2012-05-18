@@ -31,7 +31,7 @@ from extensions_framework.ui import property_group_renderer
 from ... import LuxRenderAddon
 
 class luxrender_material_base(bl_ui.properties_material.MaterialButtonsPanel, property_group_renderer):
-	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
+	COMPAT_ENGINES	= 'LUXRENDER_RENDER'
 
 class luxrender_material_sub(luxrender_material_base):
 	LUX_COMPAT		= set()

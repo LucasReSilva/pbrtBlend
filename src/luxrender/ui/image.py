@@ -35,7 +35,7 @@ class luxrender_ui_rendering_controls(property_group_renderer):
 	bl_space_type = 'IMAGE_EDITOR'
 	bl_region_type = 'UI'
 	bl_label = "LuxRender Rendering Controls"
-	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+	COMPAT_ENGINES = 'LUXRENDER_RENDER'
 	
 	ctx = None
 	

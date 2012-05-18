@@ -33,7 +33,7 @@ from .lamps import lamps_panel
 from .materials import luxrender_material_base
 
 class world_panel(bl_ui.properties_world.WorldButtonsPanel, property_group_renderer):
-	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+	COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 @LuxRenderAddon.addon_register_class
 class world(world_panel):

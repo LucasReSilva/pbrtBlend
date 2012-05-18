@@ -37,7 +37,7 @@ class ui_object(bl_ui.properties_object.ObjectButtonsPanel, property_group_rende
 	'''
 	
 	bl_label = 'LuxRender Object Settings'
-	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+	COMPAT_ENGINES = 'LUXRENDER_RENDER'
 	
 	@classmethod
 	def poll(cls, context):
