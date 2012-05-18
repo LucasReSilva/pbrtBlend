@@ -72,7 +72,7 @@ class luxrender_camera(declarative_property_group):
 		#'type',
 		
 		'Exterior',
-		['autofocus', 'use_dof', 'use_clipping'],
+		[0.3, 'use_dof','autofocus',  'use_clipping'],
 		'fstop',
 		'blades',
 		['distribution', 'power'],
@@ -87,6 +87,7 @@ class luxrender_camera(declarative_property_group):
 	]
 	
 	visibility = {
+		'autofocus':					{ 'use_dof': True },
 		'blades':					{ 'use_dof': True },
 		'distribution':				{ 'use_dof': True },
 		'power':					{ 'use_dof': True },
