@@ -31,7 +31,7 @@ from extensions_framework.ui import property_group_renderer
 from .. import LuxRenderAddon
 
 class camera_panel(bl_ui.properties_data_camera.CameraButtonsPanel, property_group_renderer):
-	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+	COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 @LuxRenderAddon.addon_register_class
 class camera(camera_panel):

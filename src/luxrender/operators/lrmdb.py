@@ -284,7 +284,7 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 	
 	@classmethod
 	def poll(cls, context):
-		return context.scene.render.engine == LuxRenderAddon.BL_IDNAME
+		return context.scene.render.engine == 'LUXRENDER_RENDER'
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_upload_material(bpy.types.Operator):

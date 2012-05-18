@@ -41,7 +41,7 @@ class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, prope
 	'''
 	
 	#bl_options		= {'HIDE_HEADER'}
-	COMPAT_ENGINES	= {LuxRenderAddon.BL_IDNAME}
+	COMPAT_ENGINES	= 'LUXRENDER_RENDER'
 	LUX_COMPAT		= set()
 	BL_COMPAT		= set()
 	

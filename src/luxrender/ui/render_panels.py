@@ -35,7 +35,7 @@ class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_re
 	Base class for render engine settings panels
 	'''
 	
-	COMPAT_ENGINES = {LuxRenderAddon.BL_IDNAME}
+	COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 @LuxRenderAddon.addon_register_class
 class engine(render_panel):
