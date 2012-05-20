@@ -432,7 +432,7 @@ class luxrender_camera(declarative_property_group):
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
-		if self.autofocus:
+		if self.autofocus and self.use_dof:
 			params.add_bool('autofocus', True)
 		else:
 			if cam.dof_object is not None:
