@@ -25,13 +25,58 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ..outputs import LuxLog
+import shutil
+import tempfile
+import os
+import platform
 
 if not 'PYLUX_AVAILABLE' in locals():
 	# If pylux is not available, revert to 0.8 feature set
 	LUXRENDER_VERSION = '0.8'
 	
 	try:
-		from .. import pylux
+		if platform.system() == 'Windows':
+			# On Windows, shared libraries cannot be overwritten
+			# while loaded.
+			# In order to facilitate in-place updates on Windows, 
+			# copy pylux to temp directory and load from there
+			import sys
+			orig_sys_path = sys.path
+			try:
+				sdir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+				sname = os.path.join(sdir, 'pylux.pyd')
+				
+				tdir = os.path.abspath(os.path.join(os.path.realpath(tempfile.gettempdir()), 'luxblend25'))
+				tname = os.path.join(tdir, 'pylux.pyd')
+				
+				if not os.path.isdir(tdir):
+					os.mkdir(tdir)
+				
+				import filecmp
+				# Check if temp module is up to date, in case multiple copies of Blender
+				# is launched. May still fail if launched in too quick succession but better
+				# than nothing. Also avoids redundant copy.
+				if not (os.path.isfile(tname) and filecmp.cmp(sname, tname, shallow=False)):
+					LuxLog('Updating dynamic pylux module')
+					# files are not equal, if copy fails then fall back
+					shutil.copyfile(sname, tname)
+				
+				# override sys.path for module loading
+				sys.path.insert(0, tdir)
+				
+				import pylux
+				LuxLog('Using dynamic pylux module')
+				
+			except Exception as e:
+				LuxLog('Error loading dynamic pylux module: %s' % str(e))
+				LuxLog('Falling back to regular pylux module')
+				sys.path = orig_sys_path
+				from .. import pylux
+				
+			# reset sys.path (safer here than in try block)
+			sys.path = orig_sys_path
+		else:
+			from .. import pylux
 		
 		LUXRENDER_VERSION = pylux.version()
 		
