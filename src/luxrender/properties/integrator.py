@@ -1106,7 +1106,7 @@ class luxrender_integrator(declarative_property_group):
 				  .add_bool('directlightsampling', self.directlightsampling) \
 				  .add_integer('shadowraycount', self.shadowraycount)
 		
-		if self.advanced and self.surfaceintegrator != 'sppm':
+		if self.surfaceintegrator != 'sppm':
 			params.add_string('lightstrategy', self.lightstrategy) \
 		
 		return self.surfaceintegrator, params
