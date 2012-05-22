@@ -204,7 +204,7 @@ class luxrender_integrator(declarative_property_group):
 		# path
 		'shadowraycount',
 		
-		'lightstrategy', #Append light strategy at the end, so non-advanced options don't shift down when light strat menu appears (when advanced is checked)
+		'lightstrategy'
 
 	]
 	
@@ -344,13 +344,13 @@ class luxrender_integrator(declarative_property_group):
 			'description': 'Light Sampling Strategy',
 			'default': 'auto',
 			'items': [
-				('auto', 'Auto', 'auto'),
-				('one', 'One', 'one'),
-				('all', 'All', 'all'),
-				('importance', 'Importance', 'importance'),
-				('powerimp', 'Power', 'powerimp'),
-				('allpowerimp', 'All Power', 'allpowerimp'),
-				('logpowerimp', 'Log Power', 'logpowerimp')
+				('auto', 'Auto', 'Automatically choose between one or all depending on number of lights'),
+				('one', 'One', 'Each ray samples a single lamp, chosen at random'),
+				('all', 'All', 'Each ray samples all lamps'),
+				('importance', 'Importance', 'Each ray samples a single lamp chosen by importance value'),
+				('powerimp', 'Power', 'Each ray samples a single lamp, chosen by importance value and output power'),
+				('allpowerimp', 'All Power', 'Each ray samples all lamps at least once, extra samples are given to lamps with higher importance and output power'),
+				('logpowerimp', 'Log Power', 'Each ray samples a single lamp, chosen by importance value and logarithmic output power')
 			],
 			#'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True

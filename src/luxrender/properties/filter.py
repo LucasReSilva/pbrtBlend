@@ -56,7 +56,7 @@ class luxrender_filter(declarative_property_group):
 		'alpha':		{ 'advanced': True, 'filter': 'gaussian' },
 		'b':			{ 'advanced': True, 'filter': 'mitchell' },
 		'c':			{ 'advanced': True, 'filter': 'mitchell' },
-		'supersample':	{ 'filter': 'mitchell' },
+		'supersample':	{ 'advanced': True, 'filter': 'mitchell' },
 		'tau':			{ 'advanced': True, 'filter': 'sinc' },
 	}
 	
@@ -192,19 +192,17 @@ class luxrender_filter(declarative_property_group):
 		params = ParamSet()
 		
 		if self.filter == 'mitchell':
-			params.add_bool('supersample', self.supersample)
 			
 			# See LuxBlend_01.py lines ~3895
+			#Always use supersample if advanced filter options are hidden
 			if not self.advanced:
-				if not self.supersample:
-					B = 1.0 - self.sharpness
-					C = self.sharpness * 0.5
-				else:
-					B = C = self.sharpness
-					
+				B = C = self.sharpness
+
+				params.add_bool('supersample', True)
 				params.add_float('B', B)
 				params.add_float('C', C)
 			else:
+				params.add_bool('supersample', self.supersample)
 				params.add_float('B', self.b)
 				params.add_float('C', self.c)
 		
