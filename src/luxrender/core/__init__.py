@@ -106,6 +106,16 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 
 _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
+### Some additions to Blender panels for better allocation in context
+### use this example for such overrides
+
+# Add use_clipping button to lens panel
+def lux_use_clipping(self, context):
+    if context.scene.render.engine == 'LUXRENDER_RENDER':
+        self.layout.split().column().prop(context.camera.luxrender_camera, "use_clipping", text="Export Clipping")
+
+_register_elm(bl_ui.properties_data_camera.DATA_PT_lens.append(lux_use_clipping))
+
 @classmethod
 def blender_texture_poll(cls, context):
 	tex = context.texture

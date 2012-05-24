@@ -78,7 +78,7 @@ class luxrender_camera(declarative_property_group):
 		'motion_blur_samples',
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
-		[0.3, 'use_dof','autofocus',  'use_clipping'],
+		[0.3, 'use_dof','autofocus'], # use_clipping moved to blender lens panel
 		'blades',
 		['distribution', 'power'],
 	]
