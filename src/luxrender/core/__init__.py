@@ -116,6 +116,23 @@ def lux_use_clipping(self, context):
 
 _register_elm(bl_ui.properties_data_camera.DATA_PT_lens.append(lux_use_clipping))
 
+# Add lux dof elements to blender dof panel
+def lux_use_dof(self, context):
+    if context.scene.render.engine == 'LUXRENDER_RENDER':
+        row = self.layout.row()
+        row.prop(context.camera.luxrender_camera, "use_dof", text="DOF")
+        if context.camera.luxrender_camera.use_dof == True:
+            row.prop(context.camera.luxrender_camera, "autofocus", text="Auto Focus")
+
+            row = self.layout.row()
+            row.prop(context.camera.luxrender_camera, "blades", text="Blades")
+
+            row = self.layout.row(align=True)
+            row.prop(context.camera.luxrender_camera, "distribution", text="Distribution")
+            row.prop(context.camera.luxrender_camera, "power", text="Power")
+
+_register_elm(bl_ui.properties_data_camera.DATA_PT_camera_dof.append(lux_use_dof))
+
 @classmethod
 def blender_texture_poll(cls, context):
 	tex = context.texture

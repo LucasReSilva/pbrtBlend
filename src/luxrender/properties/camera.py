@@ -78,16 +78,16 @@ class luxrender_camera(declarative_property_group):
 		'motion_blur_samples',
 		'shutterdistribution', 
 		['cammblur', 'objectmblur'],
-		[0.3, 'use_dof','autofocus'], # use_clipping moved to blender lens panel
-		'blades',
-		['distribution', 'power'],
+#		[0.3, 'use_dof','autofocus', 'use_clipping'], # moved to blender panels visually
+#		'blades',
+#		['distribution', 'power'],
 	]
 	
 	visibility = {
-		'autofocus':				{ 'use_dof': True },
-		'blades':					{ 'use_dof': True },
-		'distribution':				{ 'use_dof': True },
-		'power':					{ 'use_dof': True },
+#		'autofocus':				{ 'use_dof': True },
+#		'blades':					{ 'use_dof': True },
+#		'distribution':				{ 'use_dof': True },
+#		'power':					{ 'use_dof': True },
 		'exposure_start':			{ 'exposure_mode': O(['normalised','absolute']) },
 		'exposure_end_norm':		{ 'exposure_mode': 'normalised' },
 		'exposure_end_abs':			{ 'exposure_mode': 'absolute' },
