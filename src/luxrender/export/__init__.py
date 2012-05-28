@@ -299,7 +299,7 @@ def fix_matrix_order_old(matrix):
 def fix_matrix_order_new(matrix):
 	return matrix
 
-if bpy.app.version[1] >= 62:
+if bpy.app.version >= (2, 62, 0 ):
 	fix_matrix_order = fix_matrix_order_new
 else:
 	fix_matrix_order = fix_matrix_order_old

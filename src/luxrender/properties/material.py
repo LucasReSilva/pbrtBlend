@@ -1539,6 +1539,7 @@ class luxrender_mat_roughglass(declarative_property_group):
 	alert = {}
 	
 	controls = [
+		'dispersion',
 	] + \
 		TF_cauchyb.controls + \
 	[
@@ -1576,6 +1577,13 @@ class luxrender_mat_roughglass(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TF_vexponent,  { 'use_exponent': True })
 	
 	properties = [
+		{
+			'type': 'bool',
+			'attr': 'dispersion',
+			'name': 'Dispersion',
+			'default': False,
+			'save_in_preset': True
+		},
 		{
 			'type': 'ef_callback',
 			'attr': 'draw_ior_menu',
@@ -1623,6 +1631,7 @@ class luxrender_mat_roughglass(declarative_property_group):
 	def get_paramset(self, material):
 		roughglass_params = ParamSet()
 		
+		roughglass_params.add_bool('dispersion', self.dispersion)		
 		roughglass_params.update( TF_cauchyb.get_paramset(self) )
 		roughglass_params.update( TF_index.get_paramset(self) )
 		roughglass_params.update( TC_Kr.get_paramset(self) )
@@ -1639,6 +1648,14 @@ class luxrender_mat_roughglass(declarative_property_group):
 		TC_Kt.load_paramset(self, ps)
 		TF_uroughness.load_paramset(self, ps)
 		TF_vroughness.load_paramset(self, ps)
+			
+		psi_accept = {
+			'dispersion': 'bool',
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_glossy(declarative_property_group):
