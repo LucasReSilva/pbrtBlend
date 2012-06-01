@@ -175,6 +175,12 @@ class Custom_Context(object):
 	def transformEnd(self):
 		self._api('TransformEnd #', ['', []])
 	
+	def motionBegin(self, time_values):
+		self.wf('\nMotionBegin [%s]' % ' '.join(['%0.15f' % i for i in time_values]))
+	
+	def motionEnd(self):
+		self.wf('\nMotionEnd')
+		
 	def concatTransform(self, values):
 		self.wf('\nConcatTransform [%s]' % ' '.join(['%0.15f'%i for i in values]))
 	

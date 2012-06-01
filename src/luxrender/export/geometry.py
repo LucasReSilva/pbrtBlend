@@ -594,7 +594,7 @@ class GeometryExporter(object):
 				# several motionInstances for non-linear motion blur
 				STEPS = self.geometry_scene.camera.data.luxrender_camera.motion_blur_samples
 	
-				for i in range(STEPS,0,-1):
+				for i in range(1, STEPS+1):
 					fcurve_matrix = object_anim_matrix(self.geometry_scene, obj, frame_offset=i/float(STEPS))
 					if fcurve_matrix == False:
 						break
@@ -616,21 +616,33 @@ class GeometryExporter(object):
 		
 		self.lux_context.attributeBegin(comment=obj.name, file=Files.GEOM)
 		
+		is_object_animated, next_matrices = self.is_object_animated(obj, matrix)
+		
 		# object translation/rotation/scale
+		if is_object_animated:
+			num_steps = len(next_matrices)
+			fsps = float(num_steps) * self.visibility_scene.render.fps
+			step_times = [(i) / fsps for i in range(0, num_steps+1)]
+			self.lux_context.motionBegin(step_times)
+			# then export first matrix as normal
+		
 		if matrix is not None:
 			self.lux_context.transform( matrix_to_list(matrix[0], apply_worldscale=True) )
 		else:
 			self.lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
 		
-		is_object_animated, next_matrices = self.is_object_animated(obj, matrix)
-		
+		# export rest of the frames matrices
 		if is_object_animated:
-			for i, next_matrix in enumerate(next_matrices):
-				self.lux_context.transformBegin(comment=obj.name)
-				self.lux_context.identity()
+			for next_matrix in next_matrices:
+				#fni = float(num_instances) * self.visibility_scene.render.fps
+				#self.lux_context.motionInstance(me_name, i/fni, (i+1)/fni, '%s_motion_%i' % (obj.name, i))
+				#self.lux_context.transformBegin(comment=obj.name)
+				#self.lux_context.identity()
+				#self.lux_context.transform(matrix_to_list(next_matrix, apply_worldscale=True))
+				#self.lux_context.coordinateSystem('%s_motion_%i' % (obj.name, i))
+				#self.lux_context.transformEnd()
 				self.lux_context.transform(matrix_to_list(next_matrix, apply_worldscale=True))
-				self.lux_context.coordinateSystem('%s_motion_%i' % (obj.name, i))
-				self.lux_context.transformEnd()
+			self.lux_context.motionEnd()
 		
 		use_inner_scope = len(mesh_definitions) > 1
 		for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
@@ -690,11 +702,8 @@ class GeometryExporter(object):
 			if (not self.allow_instancing(mat_object)) or object_is_emitter:
 				self.lux_context.shape(me_shape_type, me_shape_params)
 			# motionInstance for motion blur
-			elif is_object_animated:
-				num_instances = len(next_matrices)
-				for i in range(num_instances):
-					fni = float(num_instances) * self.visibility_scene.render.fps
-					self.lux_context.motionInstance(me_name, i/fni, (i+1)/fni, '%s_motion_%i' % (obj.name, i))
+			#elif is_object_animated:
+			# handled by ordinary object instance
 			# ordinary mesh instance
 			else:
 				self.lux_context.objectInstance(me_name)
