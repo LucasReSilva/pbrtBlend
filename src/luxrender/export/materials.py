@@ -290,7 +290,8 @@ def convert_texture(scene, texture, variant_hint=None):
 		else:
 			variant = 'color'
 		paramset.add_string('filename', tex_image)
-		paramset.add_string('channel', sampling.channel)
+		if variant_hint == float:
+			paramset.add_string('channel', sampling.channel)
 		paramset.add_integer('discardmipmaps', sampling.discardmipmaps)
 		paramset.add_float('gain', sampling.gain)
 		paramset.add_float('gamma', sampling.gamma)
