@@ -2291,6 +2291,126 @@ class luxrender_tex_imagemap(declarative_property_group):
 				fn = efutil.filesystem_path(self.filename)
 				bdecode_string2file(filename_data, fn)
 
+#This class holds the parameters for the image sampling panel which exposes Lux params when blender's image texture is selected
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_imagesampling(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = [
+		'channel',
+		'gain',
+		'gamma',
+		'filtertype',
+		'discardmipmaps',
+		'maxanisotropy',
+		'wrap',
+	]
+	
+	#varient is auto-detected for blender image, and file path is supplied from blender tex
+	
+	visibility = {
+		'discardmipmaps': { 'filtertype': O(['mipmap_trilinear', 'mipmap_ewa']) },
+		'maxanisotropy': { 'filtertype': O(['mipmap_trilinear', 'mipmap_ewa']) },
+	}
+	
+	properties = [
+			{
+			'attr': 'variant',
+			'type': 'enum',
+			'name': 'Variant',
+			'items': [
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
+			],
+			'expand': True,
+			'save_in_preset': True
+		},
+		#all textures need to have a varient defined, no exceptions!
+		{
+			'type': 'enum',
+			'attr': 'channel',
+			'name': 'Channel',
+			'description': 'Channel to sample for grayscale textures',
+			'items': [
+				('mean', 'Mean', 'mean'),
+				('red', 'Red', 'red'),
+				('green', 'Green', 'green'),
+				('blue', 'Blue', 'blue'),
+				('alpha', 'Alpha', 'alpha'),
+				('colored_mean', 'Colored mean', 'colored_mean')
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'discardmipmaps',
+			'name': 'Discard MipMaps below',
+			'description': 'Set to 0 to disable',
+			'default': 0,
+			'min': 0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'filtertype',
+			'name': 'Filter type',
+			'items': [
+				('bilinear', 'Bilinear', 'bilinear'),
+				('mipmap_trilinear', 'MipMap trilinear', 'mipmap_trilinear'),
+				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
+				('nearest', 'Nearest neighbor', 'nearest'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'gain',
+			'name': 'Gain',
+			'default': 1.0,
+			'description': 'Scale texture value by this amount',
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 10.0,
+			'soft_max': 10.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'gamma',
+			'name': 'Gamma',
+			'description': 'Gamma correction setting. Use 1 to get the actual values in the texture, otherwise use your screen gamma',
+			'default': 2.2,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 6.0,
+			'soft_max': 6.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'maxanisotropy',
+			'name': 'Max. Anisotropy',
+			'default': 8.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'wrap',
+			'name': 'Wrapping',
+			'items': [
+				('repeat', 'Repeat', 'repeat'),
+				('black', 'Black', 'black'),
+				('white', 'White', 'white'),
+				('clamp', 'Clamp', 'clamp')
+			],
+			'save_in_preset': True
+		},
+	]
+
+	#We do not build a paramset for imagesampling, that is handled by convert_texture in export/materials.py
+
+
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_normalmap(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
