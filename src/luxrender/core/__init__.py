@@ -67,7 +67,7 @@ from ..ui.materials import (
 
 from ..ui.textures import (
 	main as tex_main, band, blender, bilerp, blackbody, brick, cauchy, constant, colordepth,
-	checkerboard, dots, equalenergy, fbm, fresnelcolor, fresnelname, gaussian, harlequin, imagemap, normalmap,
+	checkerboard, dots, equalenergy, fbm, fresnelcolor, fresnelname, gaussian, harlequin, imagemap, imagesampling, normalmap,
 	lampspectrum, luxpop, marble, mix as tex_mix, multimix, sellmeier, scale, sopra, uv,
 	uvmask, windy, wrinkled, mapping, tabulateddata, transform
 )
@@ -111,15 +111,19 @@ _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
 # Add use_clipping button to lens panel
 def lux_use_clipping(self, context):
+
     if context.scene.render.engine == 'LUXRENDER_RENDER':
+
         self.layout.split().column().prop(context.camera.luxrender_camera, "use_clipping", text="Export Clipping")
 
 _register_elm(bl_ui.properties_data_camera.DATA_PT_lens.append(lux_use_clipping))
 
 # Add lux dof elements to blender dof panel
 def lux_use_dof(self, context):
+
     if context.scene.render.engine == 'LUXRENDER_RENDER':
         row = self.layout.row()
+
         row.prop(context.camera.luxrender_camera, "use_dof", text="DOF")
         if context.camera.luxrender_camera.use_dof == True:
             row.prop(context.camera.luxrender_camera, "autofocus", text="Auto Focus")

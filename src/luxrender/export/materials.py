@@ -159,7 +159,7 @@ def get_material_volume_defs(m):
 	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
 def convert_texture(scene, texture, variant_hint=None):
-	# Lux only supports blender's textures in float variant (except for image/ocean (both of these are exported as imagemap)
+	# Lux only supports blender's textures in float variant (except for image/ocean, but both of these are exported as imagemap)
 	variant = 'float'
 	paramset = ParamSet()
 	
@@ -284,12 +284,18 @@ def convert_texture(scene, texture, variant_hint=None):
 				tex_image = efutil.filesystem_path(f_path)
 		
 		lux_tex_name = 'imagemap'
+		sampling = texture.luxrender_texture.luxrender_tex_imagesampling
 		if variant_hint:
 			variant = variant_hint
 		else:
 			variant = 'color'
 		paramset.add_string('filename', tex_image)
-		paramset.add_float('gamma', 2.2)
+		paramset.add_string('channel', sampling.channel)
+		paramset.add_integer('discardmipmaps', sampling.discardmipmaps)
+		paramset.add_float('gain', sampling.gain)
+		paramset.add_float('gamma', sampling.gamma)
+		paramset.add_float('maxanisotropy', sampling.maxanisotropy)
+		paramset.add_string('wrap', sampling.wrap)
 		mapping_type = '2D'
 	
 	# Similar to image handler, but for Ocean tex
