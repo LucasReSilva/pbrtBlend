@@ -87,7 +87,6 @@ def _register_elm(elm, required=False):
 _register_elm(bl_ui.properties_render.RENDER_PT_render, required=True)
 _register_elm(bl_ui.properties_render.RENDER_PT_dimensions, required=True)
 _register_elm(bl_ui.properties_render.RENDER_PT_output, required=True)
-_register_elm(bl_ui.properties_render.RENDER_PT_post_processing)
 _register_elm(bl_ui.properties_render.RENDER_PT_stamp)
 
 _register_elm(bl_ui.properties_scene.SCENE_PT_scene, required=True)

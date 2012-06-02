@@ -38,6 +38,96 @@ class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_re
 	COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 @LuxRenderAddon.addon_register_class
+class layers(render_panel):
+	'''
+	Render Layers UI panel
+	'''
+	
+	bl_label = 'Layers'
+	
+	display_property_groups = [
+		( ('scene',), 'luxrender_lightgroups' )
+	]
+	
+	def draw(self, context): 
+		#Add in Blender's layer stuff, this taken from Blender's startup/properties_render.py
+		layout = self.layout
+
+		scene = context.scene
+		rd = scene.render
+
+		row = layout.row()
+		row.template_list(rd, "layers", rd.layers, "active_index", rows=2)
+
+		col = row.column(align=True)
+		col.operator("scene.render_layer_add", icon='ZOOMIN', text="")
+		col.operator("scene.render_layer_remove", icon='ZOOMOUT', text="")
+
+		row = layout.row()
+		rl = rd.layers.active
+		if rl:
+			row.prop(rl, "name")
+
+		row.prop(rd, "use_single_layer", text="", icon_only=True)
+		
+		split = layout.split()
+
+		col = split.column()
+		col.prop(scene, "layers", text="Scene")
+		col.label(text="")
+		col = split.column()
+		        
+		col.label(text="Passes:")
+		col.prop(rl, "use_pass_combined")
+		col.prop(rl, "use_pass_z")
+		
+		super().draw(context)
+		
+		#Light groups, this is a "special" panel section
+		for lg_index in range(len(context.scene.luxrender_lightgroups.lightgroups)):
+			lg = context.scene.luxrender_lightgroups.lightgroups[lg_index]
+			row = self.layout.row()
+			row.prop(lg, 'lg_enabled', text="")
+			subrow=row.row()
+			subrow.enabled = lg.lg_enabled
+			subrow.prop(lg, 'name', text="")
+			# Here we draw the currently selected luxrender_volumes_data property group
+			for control in lg.controls:
+				self.draw_column(
+					control,
+					subrow.column(),
+					lg,
+					context,
+					property_group = lg
+				)
+			row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index=lg_index
+			
+@LuxRenderAddon.addon_register_class
+class layers(render_panel):
+	'''
+	Post Pro UI panel
+	'''
+	
+	bl_label = 'Post Processing'
+	bl_options = {'DEFAULT_CLOSED'}
+
+	
+	#We make our own post-pro panel so we can have one without BI's option here. Theoretically, if Lux gains the ability to do lens effects through the command line/API, we could add that here
+	
+	def draw(self, context):
+		layout = self.layout
+
+		rd = context.scene.render
+
+		split = layout.split()
+
+		col = split.column()
+		col.prop(rd, "use_compositing")
+		col.prop(rd, "use_sequencer")
+
+		split.prop(rd, "dither_intensity", text="Dither", slider=True)
+	
+@LuxRenderAddon.addon_register_class
 class engine(render_panel):
 	'''
 	Engine settings UI Panel

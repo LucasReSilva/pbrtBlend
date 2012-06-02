@@ -505,13 +505,18 @@ class luxrender_lightgroups(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'op_lg_add',
+		['lightgroups_label', 'op_lg_add'],
 		'ignore',
 	]
 	
 	visibility = {}
 	
 	properties = [
+		{	
+			'type': 'text',
+			'name': 'Light groups',
+			'attr': 'lightgroups_label',
+		},		
 		{
 			'type': 'collection',
 			'ptype': luxrender_lightgroup_data,
