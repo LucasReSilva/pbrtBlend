@@ -147,6 +147,10 @@ class luxrender_lamp_basic(declarative_property_group):
 class luxrender_lamp_point(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
 	
+	def sphere_lamp_prop(self, context):
+		context.lamp.use_sphere = self.usesphere
+		context.lamp.distance = self.pointsize
+	
 	controls = TC_L.controls[:] + [
 		'flipz',
 		'power',
@@ -196,6 +200,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'type': 'bool',
 			'attr': 'usesphere',
 			'name': 'Use Sphere',
+			'update': sphere_lamp_prop,
 			'description': 'Use a spherical area light instead of a true point light. This is more realistic, but can deform IES profiles',
 			'default': False,
 
@@ -206,6 +211,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'name': 'Radius',
 			'default': 0.025, #2.5cm default, this is roughly the radius of a common light bulb.
 			'description': 'Radius of the lamp sphere',
+			'update': sphere_lamp_prop,
 			'min': 0.000001, #1-micron minimum radius. This needs to be non-zero.
 			'soft_min': 0.0000001,
 			'sub_type': 'DISTANCE',
@@ -237,7 +243,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 		params.add_float('power', self.power)
 		params.add_float('efficacy', self.efficacy)
 		return params
-
+	
 @LuxRenderAddon.addon_register_class
 class luxrender_lamp_spot(luxrender_lamp_basic):
 	ef_attach_to = ['luxrender_lamp']
