@@ -103,7 +103,7 @@ class layers(render_panel):
 			row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index=lg_index
 			
 @LuxRenderAddon.addon_register_class
-class layers(render_panel):
+class postprocessing(render_panel):
 	'''
 	Post Pro UI panel
 	'''
