@@ -339,7 +339,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'bool',
 			'attr': 'advanced',
 			'name': 'Advanced',
-			'description': 'Configure advanced integrator settings',
+			'description': 'Configure advanced render settings',
 			'update': advanced_switch,
 			'default': False,
 			#'update': lambda s,c: check_renderer_settings(c),

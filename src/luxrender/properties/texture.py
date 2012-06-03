@@ -1261,7 +1261,7 @@ class luxrender_tex_brick(declarative_property_group):
 	controls = [
 		'variant',
 		'brickbond',
-		'brickbevel',
+		#'brickbevel',
 		'brickrun',
 		'mortarsize',
 		['brickwidth', 'brickdepth', 'brickheight'],
