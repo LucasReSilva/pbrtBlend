@@ -155,7 +155,7 @@ class LUXRENDER_OT_lightgroup_add(bpy.types.Operator):
 	bl_label = "Add LuxRender Light Group"
 	
 	lg_count = 0
-	new_lightgroup_name = bpy.props.StringProperty(default='New Light Group_')
+	new_lightgroup_name = bpy.props.StringProperty(default='New Light Group ')
 	
 	def invoke(self, context, event):
 		lg = context.scene.luxrender_lightgroups.lightgroups
