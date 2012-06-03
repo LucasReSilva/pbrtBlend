@@ -39,7 +39,7 @@ class luxrender_accelerator(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		[0.7, 'accelerator', 'advanced'],
+		'accelerator',
 		
 		'intersectcost',
 		'traversalcost',

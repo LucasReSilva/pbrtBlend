@@ -39,7 +39,7 @@ class luxrender_sampler(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		[ 0.7, 'sampler', 'advanced'],
+		'sampler',
 		
 		'chainlength',
 		

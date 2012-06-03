@@ -42,7 +42,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		[0.7, 'volumeintegrator', 'advanced'],
+		'volumeintegrator',
 		'stepsize',
 	]
 	
@@ -110,6 +110,12 @@ class luxrender_integrator(declarative_property_group):
 	'''
 	
 	ef_attach_to = ['Scene']
+	
+	def advanced_switch(self, context):
+		context.scene.luxrender_sampler.advanced = self.advanced
+		context.scene.luxrender_volumeintegrator.advanced = self.advanced
+		context.scene.luxrender_filter.advanced = self.advanced
+		context.scene.luxrender_accelerator.advanced = self.advanced
 	
 	controls = [
 		'advanced',
@@ -334,6 +340,7 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced integrator settings',
+			'update': advanced_switch,
 			'default': False,
 			#'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True

@@ -38,7 +38,7 @@ class luxrender_filter(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		[ 0.7, 'filter', 'advanced'],
+		'filter',
 		
 		'sharpness',
 		
