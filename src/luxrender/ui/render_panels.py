@@ -44,6 +44,7 @@ class layers(render_panel):
 	'''
 	
 	bl_label = 'Layers'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_lightgroups' )
