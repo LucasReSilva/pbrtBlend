@@ -2696,8 +2696,13 @@ class luxrender_tex_mapping(declarative_property_group):
 		if self.type in {'uv'}:
 			mapping_params.add_float('uscale', self.uscale)
 			mapping_params.add_float('vscale', self.vscale * -1) # flip to match blender
-			mapping_params.add_float('udelta', self.udelta)
-			mapping_params.add_float('vdelta', self.vdelta + 1) # initial correction for correct export with clamp
+
+			if luxrender_tex_imagesampling.wrap ==  'repeat':
+				mapping_params.add_float('vdelta', self.vdelta)
+				mapping_params.add_float('udelta', self.udelta)
+			else:
+				mapping_params.add_float('vdelta', self.vdelta * -1 + 1-(0.5*(1.0-self.vscale))) # auto-center the texture
+				mapping_params.add_float('udelta', self.udelta +0.5*(1.0-self.uscale)) # auto-center the texture
 		
 		return mapping_params
 	
