@@ -2619,7 +2619,7 @@ class luxrender_tex_mapping(declarative_property_group):
 			'attr': 'vscale',
 			'type': 'float',
 			'name': 'V Scale',
-			'default': -1.0,
+			'default': 1.0, # gets corrected in export
 			'min': -100.0,
 			'soft_min': -100.0,
 			'max': 100.0,
@@ -2673,20 +2673,31 @@ class luxrender_tex_mapping(declarative_property_group):
 		mapping_params = ParamSet()
 		
 		mapping_params.add_string('mapping', self.type)
-		mapping_params.add_float('udelta', self.udelta)
-		
+
+################# start rework this part to match blender mappings and wrappings ##################
+###### i made for now seperate params for each, to be able to add individual math if needed #######
+
 		if self.type == 'planar':
 			mapping_params.add_vector('v1', self.v1)
 			mapping_params.add_vector('v2', self.v2)
-			
-		if self.type in {'uv', 'spherical', 'cylindrical'}:
-			mapping_params.add_float('uscale', self.uscale)
-			
-		if self.type in {'uv', 'spherical'}:
-			mapping_params.add_float('vscale', self.vscale)
-			
-		if self.type in {'uv', 'spherical', 'planar'}:
+			mapping_params.add_float('udelta', self.udelta)
 			mapping_params.add_float('vdelta', self.vdelta)
+
+		if self.type in {'cylindrical'}:
+			mapping_params.add_float('uscale', self.uscale)
+			mapping_params.add_float('udelta', self.udelta)
+
+		if self.type in {'spherical'}:
+			mapping_params.add_float('uscale', self.uscale)
+			mapping_params.add_float('vscale', self.vscale)
+			mapping_params.add_float('udelta', self.udelta)
+			mapping_params.add_float('vdelta', self.vdelta)
+			
+		if self.type in {'uv'}:
+			mapping_params.add_float('uscale', self.uscale)
+			mapping_params.add_float('vscale', self.vscale * -1) # flip to match blender
+			mapping_params.add_float('udelta', self.udelta)
+			mapping_params.add_float('vdelta', self.vdelta + 1) # initial correction for correct export with clamp
 		
 		return mapping_params
 	
