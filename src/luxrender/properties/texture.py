@@ -2579,6 +2579,7 @@ class luxrender_tex_mapping(declarative_property_group):
 		['uscale', 'vscale'],
 		['udelta', 'vdelta'],
 		'v1', 'v2',
+		'center_image',
 	]
 	
 	visibility = {
@@ -2588,6 +2589,7 @@ class luxrender_tex_mapping(declarative_property_group):
 		'vscale':	{ 'type': O(['uv', 'spherical']) },
 		# 'udelta': # always visible
 		'vdelta':	{ 'type': O(['uv', 'spherical', 'planar']) },
+		'center_image': { 'type': O(['uv']) },
 	}
 	
 	properties = [
@@ -2667,6 +2669,13 @@ class luxrender_tex_mapping(declarative_property_group):
 			'precision': 5,
 			'save_in_preset': True
 		},
+		{
+			'attr': 'center_image',
+			'type': 'bool',
+			'name': 'Center Image',
+			'default': False,
+			'save_in_preset': True
+		},
 	]
 	
 	def get_paramset(self, scene):
@@ -2674,35 +2683,32 @@ class luxrender_tex_mapping(declarative_property_group):
 		
 		mapping_params.add_string('mapping', self.type)
 
-################# start rework this part to match blender mappings and wrappings ##################
-###### i made for now seperate params for each, to be able to add individual math if needed #######
-
 		if self.type == 'planar':
 			mapping_params.add_vector('v1', self.v1)
 			mapping_params.add_vector('v2', self.v2)
 			mapping_params.add_float('udelta', self.udelta)
 			mapping_params.add_float('vdelta', self.vdelta)
 
-		if self.type in {'cylindrical'}:
+		if self.type =='cylindrical':
 			mapping_params.add_float('uscale', self.uscale)
 			mapping_params.add_float('udelta', self.udelta)
 
-		if self.type in {'spherical'}:
+		if self.type == 'spherical':
 			mapping_params.add_float('uscale', self.uscale)
 			mapping_params.add_float('vscale', self.vscale)
 			mapping_params.add_float('udelta', self.udelta)
 			mapping_params.add_float('vdelta', self.vdelta)
 			
-		if self.type in {'uv'}:
+		if self.type == 'uv':
 			mapping_params.add_float('uscale', self.uscale)
 			mapping_params.add_float('vscale', self.vscale * -1) # flip to match blender
 
-			if luxrender_tex_imagesampling.wrap ==  'repeat':
-				mapping_params.add_float('vdelta', self.vdelta)
+			if self.center_image ==  False:
 				mapping_params.add_float('udelta', self.udelta)
+				mapping_params.add_float('vdelta', self.vdelta + 1) # correction for clamped types, does not harm repeat type
 			else:
-				mapping_params.add_float('vdelta', self.vdelta * -1 + 1-(0.5*(1.0-self.vscale))) # auto-center the texture
 				mapping_params.add_float('udelta', self.udelta +0.5*(1.0-self.uscale)) # auto-center the texture
+				mapping_params.add_float('vdelta', self.vdelta * -1 + 1-(0.5*(1.0-self.vscale))) # auto-center the texture
 		
 		return mapping_params
 	
