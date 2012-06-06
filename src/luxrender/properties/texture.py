@@ -2579,7 +2579,7 @@ class luxrender_tex_mapping(declarative_property_group):
 		['uscale', 'vscale'],
 		['udelta', 'vdelta'],
 		'v1', 'v2',
-		'center_image',
+		'center_map',
 	]
 	
 	visibility = {
@@ -2589,7 +2589,7 @@ class luxrender_tex_mapping(declarative_property_group):
 		'vscale':	{ 'type': O(['uv', 'spherical']) },
 		# 'udelta': # always visible
 		'vdelta':	{ 'type': O(['uv', 'spherical', 'planar']) },
-		'center_image': { 'type': O(['uv']) },
+		'center_map': { 'type': O(['uv']) },
 	}
 	
 	properties = [
@@ -2670,9 +2670,9 @@ class luxrender_tex_mapping(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
-			'attr': 'center_image',
+			'attr': 'center_map',
 			'type': 'bool',
-			'name': 'Center Image',
+			'name': 'Center Map',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -2703,12 +2703,12 @@ class luxrender_tex_mapping(declarative_property_group):
 			mapping_params.add_float('uscale', self.uscale)
 			mapping_params.add_float('vscale', self.vscale * -1) # flip to match blender
 
-			if self.center_image ==  False:
+			if self.center_map ==  False:
 				mapping_params.add_float('udelta', self.udelta)
 				mapping_params.add_float('vdelta', self.vdelta + 1) # correction for clamped types, does not harm repeat type
 			else:
-				mapping_params.add_float('udelta', self.udelta +0.5*(1.0-self.uscale)) # auto-center the texture
-				mapping_params.add_float('vdelta', self.vdelta * -1 + 1-(0.5*(1.0-self.vscale))) # auto-center the texture
+				mapping_params.add_float('udelta', self.udelta +0.5*(1.0-self.uscale)) # auto-center the mapping
+				mapping_params.add_float('vdelta', self.vdelta * -1 + 1-(0.5*(1.0-self.vscale))) # auto-center the mapping
 		
 		return mapping_params
 	
