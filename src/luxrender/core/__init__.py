@@ -61,7 +61,7 @@ from ..ui import (
 
 from ..ui.materials import (
 	main as mat_main, compositing, carpaint, glass, glass2, roughglass, glossytranslucent,
-	glossy_lossy, glossycoating, glossy, layered, matte, mattetranslucent, metal, metal2, mirror, mix as mat_mix, null,
+	glossycoating, glossy, layered, matte, mattetranslucent, metal, metal2, mirror, mix as mat_mix, null,
 	scatter, shinymetal, velvet
 )
 
