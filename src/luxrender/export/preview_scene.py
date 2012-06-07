@@ -355,14 +355,15 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 
 		if mat.preview_render_type == 'SPHERE':
 			pv_transform = [
-				0.1, 0.0, 0.0, 0.0,
-				0.0, 0.1, 0.0, 0.0,
-				0.0, 0.0, 0.1, 0.0,
+				0.09, 0.0, 0.0, 0.0,
+				0.0, 0.09, 0.0, 0.0,
+				0.0, 0.0, 0.09, 0.0,
 				0.0, 0.0, 0.5, 1.0
 			]
 		if mat.preview_render_type == 'CUBE':
-			lux_context.scale(0.8, 0.8, 0.8)
-			lux_context.rotate(-35, 0,0,1)
+			lux_context.scale(0.75, 0.75, 0.75)
+			lux_context.rotate(-45, -0.5, -0.2, 1)
+			lux_context.translate(0 , 0, 0.3)
 		if mat.preview_render_type == 'MONKEY':
 			pv_transform = [
 				1.0573405027389526, 0.6340668201446533, 0.0, 0.0,
