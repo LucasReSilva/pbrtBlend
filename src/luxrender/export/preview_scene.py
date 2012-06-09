@@ -50,14 +50,10 @@ def export_preview_texture(lux_context, texture):
 		paramset.add_float('vscale', -1.0)
 		paramset.add_bool('wrap', 'repeat')
 		paramset.add_bool('center_map', False)
-# fix blender types to have a usable texture preview
-	print("------------->", texture.luxrender_texture.type)
-	print("------------->", texture.type)
-	print("------------->", paramset)
-	if texture.luxrender_texture.type == ('BLENDER'):
+	# fix blender types to have a usable texture preview
+	if texture.type == ('BLEND'):
 		paramset.add_string('coordinates', 'local')
-		
-	
+			
 	#if lux_tex_variant == 'color':
 	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 	if lux_tex_variant == 'float':
