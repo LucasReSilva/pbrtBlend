@@ -51,9 +51,10 @@ def export_preview_texture(lux_context, texture):
 		paramset.add_bool('wrap', 'repeat')
 		paramset.add_bool('center_map', False)
 # fix blender types to have a usable texture preview
+	print("------------->", texture.luxrender_texture.type)
 	print("------------->", texture.type)
 	print("------------->", paramset)
-	if texture.type in ('BLEND'):
+	if texture.luxrender_texture.type == ('BLENDER'):
 		paramset.add_string('coordinates', 'local')
 		
 	
