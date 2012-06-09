@@ -42,7 +42,15 @@ def export_preview_texture(lux_context, texture):
 		lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint='color')
 		if texture.type in ('OCEAN', 'IMAGE'):
 			texture_name = texture_name + "_" + lux_tex_variant
-							
+
+	# image texture preview should always only a constant image preview, we overide other mappings here
+	if texture.luxrender_texture.type in ('imagemap', 'normalmap') or texture.type in ('OCEAN', 'IMAGE'):
+		paramset.add_string('mapping', 'uv')
+		paramset.add_float('uscale', 1.0)
+		paramset.add_float('vscale', -1.0)
+		paramset.add_bool('wrap', 'repeat')
+		paramset.add_bool('center_map', False) 
+	
 	#if lux_tex_variant == 'color':
 	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 	if lux_tex_variant == 'float':
