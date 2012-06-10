@@ -67,13 +67,13 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		HALTSPP = 256
 
 	# Camera
-	if mat.preview_render_type == 'FLAT': # and tex != None: # texture preview is always flat othografic topview
+	if mat.preview_render_type == 'FLAT': # texture preview is topview
 		lux_context.lookAt(0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
 		camera_params = ParamSet().add_float('fov', 22.5)
 		lux_context.camera('perspective', camera_params)
 			
 	else:
-		lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
+		lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0) # all other previews are sideviews
 		camera_params = ParamSet().add_float('fov', 22.5)
 		lux_context.camera('perspective', camera_params)
 
