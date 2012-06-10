@@ -42,18 +42,7 @@ def export_preview_texture(lux_context, texture):
 		lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint='color')
 		if texture.type in ('OCEAN', 'IMAGE'):
 			texture_name = texture_name + "_" + lux_tex_variant
-
-	# image texture preview should always only a constant image preview, we overide other mappings here
-	if texture.luxrender_texture.type in ('imagemap', 'normalmap') or texture.type in ('OCEAN', 'IMAGE'):
-		paramset.add_string('mapping', 'uv')
-		paramset.add_float('uscale', 1.0)
-		paramset.add_float('vscale', -1.0)
-		paramset.add_bool('wrap', 'repeat')
-		paramset.add_bool('center_map', False)
-	# fix blender types to have a usable texture preview
-	if texture.type == ('BLEND'):
-		paramset.add_string('coordinates', 'local')
-			
+							
 	#if lux_tex_variant == 'color':
 	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 	if lux_tex_variant == 'float':
@@ -72,16 +61,22 @@ def export_preview_texture(lux_context, texture):
 	return texture_name
 
 def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
-	if mat.preview_render_type == 'FLAT':
+	if mat.preview_render_type == 'FLAT'and tex != None:
 		HALTSPP = 32
 	else:
 		HALTSPP = 256
 
 	# Camera
-	lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
-	camera_params = ParamSet().add_float('fov', 22.5)
-	lux_context.camera('perspective', camera_params)
-	
+	if mat.preview_render_type == 'FLAT': # and tex != None: # texture preview is always flat othografic topview
+		lux_context.lookAt(0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
+		camera_params = ParamSet().add_float('fov', 22.5)
+		lux_context.camera('perspective', camera_params)
+			
+	else:
+		lux_context.lookAt(0.0,-3.0,0.5, 0.0,-2.0,0.5, 0.0,0.0,1.0)
+		camera_params = ParamSet().add_float('fov', 22.5)
+		lux_context.camera('perspective', camera_params)
+
 	# Film
 	xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 	
@@ -178,8 +173,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 			0.5, 0.0, 0.0, 0.0,
 			0.0, 0.5, 0.0, 0.0,
 			0.0, 0.0, 0.5, 0.0,
-			2.5, -2.5, 2.5, 1.0
+			2.5, -2.5, 4.5, 1.0
 		])
+		lux_context.translate(-2, 1, 5)
 	else:
 		lux_context.transform([
 			0.5996068120002747, 0.800294816493988, 2.980232594040899e-08, 0.0,
@@ -222,112 +218,69 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', inf_gain))
 	
 	# back drop
+
+	lux_context.attributeBegin()
+	lux_context.transform([
+		5.0, 0.0, 0.0, 0.0,
+		0.0, 5.0, 0.0, 0.0,
+		0.0, 0.0, 5.0, 0.0,
+		0.0, 0.0, 0.0, 1.0
+	])
 	if mat.preview_render_type == 'FLAT':
-		lux_context.attributeBegin()
-		lux_context.transform([
-			5.0, 0.0, 0.0, 0.0,
-			0.0, 5.0, 0.0, 0.0,
-			0.0, 0.0, 5.0, 0.0,
-			0.0, 10.0, 0.0, 1.0
+		lux_context.translate(-0.31, -0.22, -1.2)
+
+	lux_context.scale(4,1,1)
+	checks_pattern_params = ParamSet() \
+		.add_integer('dimension', 2) \
+		.add_string('mapping', 'uv') \
+		.add_float('uscale', 36.8) \
+		.add_float('vscale', 36.0*4) #.add_string('aamode', 'supersample') \
+	lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
+	checks_params = ParamSet() \
+		.add_texture('amount', 'checks::pattern') \
+		.add_color('tex1', [0.9, 0.9, 0.9]) \
+		.add_color('tex2', [0.0, 0.0, 0.0])
+	lux_context.texture('checks', 'color', 'mix', checks_params)
+	mat_params = ParamSet().add_texture('Kd', 'checks')
+	lux_context.material('matte', mat_params)
+	bd_shape_params = ParamSet() \
+		.add_integer('nlevels', 3) \
+		.add_bool('dmnormalsmooth', True) \
+		.add_bool('dmsharpboundary', False) \
+		.add_integer('ntris', 18) \
+		.add_integer('nvertices', 8) \
+		.add_integer('indices', [0,1,2,0,2,3,1,0,4,1,4,5,5,4,6,5,6,7]) \
+		.add_point('P', [
+			 1.0,  1.0, 0.0,
+			-1.0,  1.0, 0.0,
+			-1.0, -1.0, 0.0,
+			 1.0, -1.0, 0.0,
+			 1.0,  3.0, 0.0,
+			-1.0,  3.0, 0.0,
+			 1.0,  3.0, 2.0,
+			-1.0,  3.0, 2.0,
+		]) \
+		.add_normal('N', [
+			0.0,  0.000000, 1.000000,
+			0.0,  0.000000, 1.000000,
+			0.0,  0.000000, 1.000000,
+			0.0,  0.000000, 1.000000,
+			0.0, -0.707083, 0.707083,
+			0.0, -0.707083, 0.707083,
+			0.0, -1.000000, 0.000000,
+			0.0, -1.000000, 0.000000,
+		]) \
+		.add_float('uv', [
+			0.333334, 0.000000,
+			0.333334, 0.333334,
+			0.000000, 0.333334,
+			0.000000, 0.000000,
+			0.666667, 0.000000,
+			0.666667, 0.333333,
+			1.000000, 0.000000,
+			1.000000, 0.333333,
 		])
-		lux_context.scale(4,1,1)
-		lux_context.rotate(90, 1,0,0)
-		checks_pattern_params = ParamSet() \
-			.add_integer('dimension', 2) \
-			.add_string('mapping', 'uv') \
-			.add_float('uscale', 36.8) \
-			.add_float('vscale', 36.0*4)
-		lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
-		checks_params = ParamSet() \
-			.add_texture('amount', 'checks::pattern') \
-			.add_color('tex1', [0.9, 0.9, 0.9]) \
-			.add_color('tex2', [0.0, 0.0, 0.0])
-		lux_context.texture('checks', 'color', 'mix', checks_params)
-		mat_params = ParamSet().add_texture('Kd', 'checks')
-		lux_context.material('matte', mat_params)
-		bd_shape_params = ParamSet() \
-			.add_integer('ntris', 6) \
-			.add_integer('nvertices', 4) \
-			.add_integer('indices', [0,1,2,0,2,3]) \
-			.add_point('P', [
-				 1.0,  1.0, 0.0,
-				-1.0,  1.0, 0.0,
-				-1.0, -1.0, 0.0,
-				 1.0, -1.0, 0.0,
-			]) \
-			.add_normal('N', [
-				0.0,  0.0, 1.0,
-				0.0,  0.0, 1.0,
-				0.0,  0.0, 1.0,
-				0.0,  0.0, 1.0,
-			]) \
-			.add_float('uv', [
-				0.333334, 0.000000,
-				0.333334, 0.333334,
-				0.000000, 0.333334,
-				0.000000, 0.000000,
-			])
-		lux_context.shape('loopsubdiv', bd_shape_params)
-	else:
-		lux_context.attributeBegin()
-		lux_context.transform([
-			5.0, 0.0, 0.0, 0.0,
-			0.0, 5.0, 0.0, 0.0,
-			0.0, 0.0, 5.0, 0.0,
-			0.0, 0.0, 0.0, 1.0
-		])
-		lux_context.scale(4,1,1)
-		checks_pattern_params = ParamSet() \
-			.add_integer('dimension', 2) \
-			.add_string('mapping', 'uv') \
-			.add_float('uscale', 36.8) \
-			.add_float('vscale', 36.0*4) #.add_string('aamode', 'supersample') \
-		lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
-		checks_params = ParamSet() \
-			.add_texture('amount', 'checks::pattern') \
-			.add_color('tex1', [0.9, 0.9, 0.9]) \
-			.add_color('tex2', [0.0, 0.0, 0.0])
-		lux_context.texture('checks', 'color', 'mix', checks_params)
-		mat_params = ParamSet().add_texture('Kd', 'checks')
-		lux_context.material('matte', mat_params)
-		bd_shape_params = ParamSet() \
-			.add_integer('nlevels', 3) \
-			.add_bool('dmnormalsmooth', True) \
-			.add_bool('dmsharpboundary', False) \
-			.add_integer('ntris', 18) \
-			.add_integer('nvertices', 8) \
-			.add_integer('indices', [0,1,2,0,2,3,1,0,4,1,4,5,5,4,6,5,6,7]) \
-			.add_point('P', [
-				 1.0,  1.0, 0.0,
-				-1.0,  1.0, 0.0,
-				-1.0, -1.0, 0.0,
-				 1.0, -1.0, 0.0,
-				 1.0,  3.0, 0.0,
-				-1.0,  3.0, 0.0,
-				 1.0,  3.0, 2.0,
-				-1.0,  3.0, 2.0,
-			]) \
-			.add_normal('N', [
-				0.0,  0.000000, 1.000000,
-				0.0,  0.000000, 1.000000,
-				0.0,  0.000000, 1.000000,
-				0.0,  0.000000, 1.000000,
-				0.0, -0.707083, 0.707083,
-				0.0, -0.707083, 0.707083,
-				0.0, -1.000000, 0.000000,
-				0.0, -1.000000, 0.000000,
-			]) \
-			.add_float('uv', [
-				0.333334, 0.000000,
-				0.333334, 0.333334,
-				0.000000, 0.333334,
-				0.000000, 0.000000,
-				0.666667, 0.000000,
-				0.666667, 0.333333,
-				1.000000, 0.000000,
-				1.000000, 0.333333,
-			])
-		lux_context.shape('loopsubdiv', bd_shape_params)
+	lux_context.shape('loopsubdiv', bd_shape_params)
 	
 	if bl_scene.luxrender_world.default_interior_volume != '':
 		lux_context.interior(bl_scene.luxrender_world.default_interior_volume)
@@ -350,19 +303,14 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		
 		if mat.preview_render_type == 'FLAT':
 			if tex == None:
-				lux_context.scale(1, 1, 8)
-				lux_context.rotate(90, 1,0,0)
-				pv_transform = [
-					0.1, 0.0, 0.0, 0.0,
-					0.0, 0.1, 0.0, 0.0,
-					0.0, 0.0, 0.2, 0.0,
-					0.0, 0.06, -1, 1.0
-				]
+				lux_context.scale(0.25, 2.0, 2.0)
+				lux_context.translate(0, 0, -0.99)
+
 			else:
-				lux_context.translate(0, -1, 0.5)
-				lux_context.rotate(90, 1,0,0)
+
 				lux_context.rotate(90, 0,0,1)
-				lux_context.scale(2.0/3.0, 2.0/3.0, 2.0/3.0)
+				lux_context.scale(2.0, 2.0, 2.0)
+				lux_context.translate(0, 0, -1)
 
 		if mat.preview_render_type == 'SPHERE':
 			pv_transform = [
@@ -372,9 +320,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 				0.0, 0.0, 0.5, 1.0
 			]
 		if mat.preview_render_type == 'CUBE':
-			lux_context.scale(0.75, 0.75, 0.75)
-			lux_context.rotate(-45, -0.5, -0.2, 1)
-			lux_context.translate(0 , 0, 0.3)
+			lux_context.scale(0.8, 0.8, 0.8)
+			lux_context.rotate(-35, 0,0,1)
+
 		if mat.preview_render_type == 'MONKEY':
 			pv_transform = [
 				1.0573405027389526, 0.6340668201446533, 0.0, 0.0,
