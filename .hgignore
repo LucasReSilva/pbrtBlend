@@ -5,16 +5,14 @@ syntax: regexp
 ^\.pydevproject$
 syntax: glob
 *.pyc
-syntax: glob
 *.so
-syntax: glob
 *.pyd
-syntax: glob
 *.DS_Store
-syntax: glob
 liblzo2*
-syntax: glob
 liblzmadec*
+liblux*
+*.dll
+*.dylib
 
 syntax: regexp
 ^.settings
