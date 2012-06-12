@@ -35,9 +35,14 @@ class ui_luxrender_material_header(luxrender_material_base):
 	'''
 	Material Editor UI Panel
 	'''
-	
-	bl_label	= ''
+	bl_label = ''
 	bl_options = {'HIDE_HEADER'}
+	
+	@classmethod
+	def poll(cls, context):
+		# An exception, dont call the parent poll func because this manages materials for all engine types
+		engine = context.scene.render.engine
+		return (context.material or context.object) and (engine in cls.COMPAT_ENGINES)
 	
 	display_property_groups = [
 		( ('material',), 'luxrender_material' )
@@ -83,8 +88,9 @@ class ui_luxrender_material_header(luxrender_material_base):
 			split.separator()
 
 		row = self.layout.row(align=True)
-		row.label("Material type")
-		row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
+		if slot:
+			row.label("Material type")
+			row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
 		super().draw(context)
 
 @LuxRenderAddon.addon_register_class

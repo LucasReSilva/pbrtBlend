@@ -3089,10 +3089,11 @@ class luxrender_emission(declarative_property_group):
 	controls = [
 		'importance',
 		'lightgroup_chooser',
-		'iesname'
+		'iesname',
 	] + \
 	TC_L.controls + \
 	[
+		'nsamples',
 		'gain',
 		'power',
 		'efficacy',
@@ -3102,6 +3103,7 @@ class luxrender_emission(declarative_property_group):
 		'importance':			{ 'use_emission': True },
 		'lightgroup_chooser':	{ 'use_emission': True },
 		'iesname':				{ 'use_emission': True },
+		'nsamples':				{ 'use_emission': True },
 		'L_colorlabel':			{ 'use_emission': True },
 		'L_color':				{ 'use_emission': True },
 		'L_usecolortexture':	{ 'use_emission': True },
@@ -3145,6 +3147,17 @@ class luxrender_emission(declarative_property_group):
 			'attr': 'iesname',
 			'name': 'IES Data',
 			'description': 'Use IES data for this light\'s distribution'
+		},
+		{
+			'type': 'int',
+			'attr': 'nsamples',
+			'name': 'Shadow ray samples',
+			'description': 'The suggested number of shadow samples',
+			'default': 1 ,
+			'min': 1 ,
+			'soft_min': 1 ,
+			'max': 100,
+			'soft_max': 100,
 		},
 		{
 			'type': 'float',
@@ -3195,7 +3208,8 @@ class luxrender_emission(declarative_property_group):
 				.add_float('importance', self.importance) \
 				.add_float('gain', self.gain*lg_gain) \
 				.add_float('power', self.power) \
-				.add_float('efficacy', self.efficacy)
+				.add_float('efficacy', self.efficacy) \
+				.add_integer('nsamples', self.nsamples)
 		arealightsource_params.update( TC_L.get_paramset(self) )
 		if self.iesname != '':
 			
