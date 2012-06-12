@@ -31,6 +31,63 @@ from ...ui.materials import luxrender_material_base
 from ...operators.lrmdb import lrmdb_state
 
 @LuxRenderAddon.addon_register_class
+class ui_luxrender_material_header(luxrender_material_base):
+	'''
+	Material Editor UI Panel
+	'''
+	
+	bl_label	= ''
+	bl_options = {'HIDE_HEADER'}
+	
+	display_property_groups = [
+		( ('material',), 'luxrender_material' )
+	]
+	
+	def draw(self, context):
+		layout = self.layout
+		
+		mat = context.material
+		ob = context.object
+		slot = context.material_slot
+		space = context.space_data
+
+		if ob:
+			row = layout.row()
+
+			row.template_list(ob, "material_slots", ob, "active_material_index", rows=2)
+
+			col = row.column(align=True)
+			col.operator("object.material_slot_add", icon='ZOOMIN', text="")
+			col.operator("object.material_slot_remove", icon='ZOOMOUT', text="")
+
+			col.menu("MATERIAL_MT_specials", icon='DOWNARROW_HLT', text="")
+
+			if ob.mode == 'EDIT':
+				row = layout.row(align=True)
+				row.operator("object.material_slot_assign", text="Assign")
+				row.operator("object.material_slot_select", text="Select")
+				row.operator("object.material_slot_deselect", text="Deselect")
+
+		split = layout.split(percentage=0.65)
+
+		if ob:
+			split.template_ID(ob, "active_material", new="material.new")
+			row = split.row()
+
+			if slot:
+				row.prop(slot, "link", text="")
+			else:
+				row.label()
+		elif mat:
+			split.template_ID(space, "pin_id")
+			split.separator()
+
+		row = self.layout.row(align=True)
+		row.label("Material type")
+		row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
+		super().draw(context)
+
+@LuxRenderAddon.addon_register_class
 class ui_luxrender_material_db(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Database'
 	bl_options = {'DEFAULT_CLOSED'}
@@ -68,30 +125,12 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		#row.operator("luxrender.material_reset", icon='SOLID')
 
 @LuxRenderAddon.addon_register_class
-class ui_luxrender_material(luxrender_material_base):
-	'''
-	Material Editor UI Panel
-	'''
-	
-	bl_label	= 'LuxRender Materials'
-	
-	display_property_groups = [
-		( ('material',), 'luxrender_material' )
-	]
-	
-	def draw(self, context):
-		row = self.layout.row(align=True)
-		row.label("Material type")
-		row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
-		super().draw(context)
-
-@LuxRenderAddon.addon_register_class
 class ui_luxrender_material_emission(luxrender_material_base):
 	'''
 	Material Emission Settings
 	'''
 	
-	bl_label = 'LuxRender Emission'
+	bl_label = 'LuxRender Light Emission'
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
@@ -123,6 +162,7 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 			return False
 		return super().poll(context) and context.material.luxrender_material.type != 'null'
 
+
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_coating(luxrender_material_base):
 	'''
@@ -139,6 +179,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
 	def draw_header(self, context):
 		self.layout.prop(context.material.luxrender_coating, "use_coating", text="")
 	
+
 	def draw_coating_ior_menu(self, context):
 		"""
 		This is a draw callback from property_group_renderer, due
@@ -152,6 +193,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
 			menu_text = '-- Choose preset --'
 		
 		cl=self.layout.column(align=True)
+
 		cl.menu('LUXRENDER_MT_coating_ior_presets', text=menu_text)
 	
 	@classmethod

@@ -99,7 +99,6 @@ _register_elm(bl_ui.properties_scene.SCENE_PT_custom_props)
 
 _register_elm(bl_ui.properties_world.WORLD_PT_context_world, required=True)
 
-_register_elm(bl_ui.properties_material.MATERIAL_PT_context_material, required=True)
 _register_elm(bl_ui.properties_material.MATERIAL_PT_preview)
 _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 
