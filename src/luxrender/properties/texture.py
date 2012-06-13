@@ -1348,14 +1348,14 @@ class luxrender_tex_brick(declarative_property_group):
 			'attr': 'brickrun',
 			'type': 'float',
 			'name': 'Brick run',
-			'default': 0.75,
-			'min': -10.0,
-			'soft_min': -10.0,
-			'max': 10.0,
-			'soft_max': 10.0,
-			'precision': 6,
-			'subtype': 'DISTANCE',
-			'unit': 'LENGTH',
+			'default': 50.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+			'precision': 2,
+			'subtype': 'PERCENTAGE',
+			'unit': 'NONE',
 			'save_in_preset': True
 		},
 		{
@@ -1429,7 +1429,7 @@ class luxrender_tex_brick(declarative_property_group):
 			.add_float('brickdepth', self.brickdepth) \
 			.add_float('brickheight', self.brickheight) \
 			.add_float('brickwidth', self.brickwidth) \
-			.add_float('brickrun', self.brickrun) \
+			.add_float('brickrun', self.brickrun / 100) \
 			.add_float('mortarsize', self.mortarsize)
 		
 		if LuxManager.GetActive() is not None:
