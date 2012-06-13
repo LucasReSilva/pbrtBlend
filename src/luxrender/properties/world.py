@@ -204,7 +204,7 @@ class luxrender_volume_data(declarative_property_group):
 			'max': 1000.0,
 			'soft_max': 1000.0,
 			'precision': 6,
-			'sub_type': 'DISTANCE',
+			'subtype': 'DISTANCE',
 			'unit': 'LENGTH',
 			'save_in_preset': True
 		},

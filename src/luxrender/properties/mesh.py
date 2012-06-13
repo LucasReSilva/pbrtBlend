@@ -178,7 +178,7 @@ class luxrender_mesh(declarative_property_group):
 			'description': 'Displacement Map Scale',
 			'default': 1.0,
 			'precision': 6,
-			'sub_type': 'DISTANCE',
+			'subtype': 'DISTANCE',
 			'unit': 'LENGTH'
 		},
 		{
@@ -188,7 +188,7 @@ class luxrender_mesh(declarative_property_group):
 			'description': 'Displacement Map Offset',
 			'default': 0.0,
 			'precision': 6,
-			'sub_type': 'DISTANCE',
+			'subtype': 'DISTANCE',
 			'unit': 'LENGTH'
 		},
 	]

@@ -214,7 +214,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 			'update': sphere_lamp_prop,
 			'min': 0.000001, #1-micron minimum radius. This needs to be non-zero.
 			'soft_min': 0.0000001,
-			'sub_type': 'DISTANCE',
+			'subtype': 'DISTANCE',
 			'unit': 'LENGTH'
 		},
 		{

@@ -75,7 +75,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 100.0,
 			'soft_max': 100.0,
-			'sub_type': 'DISTANCE',
+			'subtype': 'DISTANCE',
 			'unit': 'LENGTH',
 			'save_in_preset': True
 		},
