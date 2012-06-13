@@ -257,6 +257,24 @@ class luxrender_material(declarative_property_group):
 			'update': set_viewport_properties,
 			'save_in_preset': True
 		},
+		{
+		'type': 'bool',
+		'attr': 'mat_preview_flip_xz',
+		'description': 'Flip flat preview xz orientation',
+		'name': 'Flip XZ',
+		'default': False
+		},
+		{
+		'attr': 'preview_zoom',
+		'type': 'float',
+		'name': 'Zoom Factor', # gets corrected in export
+		'min': 1.0,
+		'soft_min': 0.5,
+		'max': 2.0,
+		'soft_max': 2.0,
+		'step': 50,
+		'default': 1.0
+		},
 #		{
 #			'type': 'bool',
 #			'attr': 'generatetangents',

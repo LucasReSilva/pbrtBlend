@@ -297,7 +297,6 @@ class luxrender_camera(declarative_property_group):
 			'name': 'Object Motion Blur',
 			'default': True
 		},
-		
 	]
 	
 	def lookAt(self, camera):
