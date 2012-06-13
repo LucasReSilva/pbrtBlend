@@ -32,9 +32,6 @@ from ..export.materials import ExportedTextures, convert_texture, get_material_v
 from ..outputs import LuxLog, LuxManager
 from ..outputs.pure_api import LUXRENDER_VERSION
 
-#mat_preview_xz = False # global preview setting
-#preview_zoom = 1 # global preview setting
-
 def export_preview_texture(lux_context, texture):
 	texture_name = texture.name
 	if texture.luxrender_texture.type != 'BLENDER':
@@ -60,11 +57,6 @@ def export_preview_texture(lux_context, texture):
 		
 	elif lux_tex_variant != 'color':
 		LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (texture_name, 'color', lux_tex_variant))
-
-#	global mat_preview_xz
-#	mat_preview_xz = texture.luxrender_texture.luxrender_tex_mapping.mat_preview_flip_xz
-#	global preview_zoom
-#	preview_zoom = texture.luxrender_texture.luxrender_tex_mapping.preview_zoom
 
 	return texture_name
 
@@ -399,12 +391,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 					lux_context.scale(0.25, 2.0, 2.0)
 					lux_context.translate(0, 0, -0.99)
 			else:
-#				if mat_preview_xz == False:
-#					lux_context.translate(0, -1, 0.5)
-#					lux_context.rotate(90, 1,0,0)
-#					lux_context.rotate(90, 0,0,1)
-#					lux_context.scale(2.0/3.0, 2.0/3.0, 2.0/3.0)
-#				else:
 				lux_context.rotate(90, 0,0,1) # keep tex pre always same 
 				lux_context.scale(2.0, 2.0, 2.0)
 				lux_context.translate(0, 0, -1)

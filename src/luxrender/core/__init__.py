@@ -118,16 +118,15 @@ def lux_use_alternate_matview(self, context):
 
 _register_elm(bl_ui.properties_material.MATERIAL_PT_preview.append(lux_use_alternate_matview))
 
-#def lux_use_alternate_texview(self, context):
-#
-#	if context.scene.render.engine == 'LUXRENDER_RENDER':
-#		row = self.layout.row()
-#		row.prop(context.texture.luxrender_texture.luxrender_tex_mapping, "preview_zoom", text="Zoom Factor")
-#		if context.material.preview_render_type == 'FLAT':
-#			row.prop(context.texture.luxrender_texture.luxrender_tex_mapping, "mat_preview_flip_xz", text="Flip Flat Preview XZ")
-#
-#
-#_register_elm(bl_ui.properties_texture.TEXTURE_PT_preview.append(lux_use_alternate_texview))
+def lux_use_alternate_texview(self, context):
+
+	if context.scene.render.engine == 'LUXRENDER_RENDER':
+		row = self.layout.row()
+		row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom Factor")
+		if context.material.preview_render_type == 'FLAT':
+			row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip Preview XZ")
+
+_register_elm(bl_ui.properties_texture.TEXTURE_PT_preview.append(lux_use_alternate_texview))
 
 # Add use_clipping button to lens panel
 def lux_use_clipping(self, context):
