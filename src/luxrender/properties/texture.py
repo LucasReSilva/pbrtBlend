@@ -1307,6 +1307,7 @@ class luxrender_tex_brick(declarative_property_group):
 		'mortartex_floatvalue':			{ 'variant': 'float' },
 		'mortartex_floattexture':		{ 'variant': 'float', 'mortartex_usefloattexture': True },
 		'mortartex_multiplyfloat':		{ 'variant': 'float', 'mortartex_usefloattexture': True },
+		'brickrun':						O([{ 'brickbond': 'running' }, { 'brickbond': 'flemish' }]),
 	}
 	
 	properties = [
