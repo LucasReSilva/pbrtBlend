@@ -110,7 +110,7 @@ class LUXRENDER_OT_preset_volume_add(bl_operators.presets.AddPresetBase, bpy.typ
 	preset_subdir = 'luxrender/volume'
 	
 	def execute(self, context):
-		ks = 'bpy.context.scene.luxrender_volumes.volumes[bpy.context.scene.luxrender_volumes.volumes_index].%s'
+		ks = 'bpy.context.scene.world.luxrender_volumes.volumes[bpy.context.scene.world.luxrender_volumes.volumes_index].%s'
 		pv = [
 			ks%v['attr'] for v in bpy.types.luxrender_volume_data.get_exportable_properties()
 		]
@@ -128,7 +128,7 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
 	new_volume_name = bpy.props.StringProperty(default='New Volume')
 	
 	def invoke(self, context, event):
-		v = context.scene.luxrender_volumes.volumes
+		v = context.scene.world.luxrender_volumes.volumes
 		v.add()
 		new_vol = v[len(v)-1]
 		new_vol.name = self.properties.new_volume_name
@@ -142,7 +142,7 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 	bl_label = "Remove LuxRender Volume"
 	
 	def invoke(self, context, event):
-		w = context.scene.luxrender_volumes
+		w = context.scene.world.luxrender_volumes
 		w.volumes.remove( w.volumes_index )
 		w.volumes_index = len(w.volumes)-1
 		return {'FINISHED'}
@@ -305,7 +305,7 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 			context.scene.luxrender_engine.is_saving_lbm2 = True
 			
 			# Include interior/exterior for this material
-			for volume in context.scene.luxrender_volumes.volumes:
+			for volume in context.scene.world.luxrender_volumes.volumes:
 				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
 					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
 			

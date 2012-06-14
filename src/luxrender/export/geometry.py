@@ -686,12 +686,12 @@ class GeometryExporter(object):
 				int_v, ext_v = get_material_volume_defs(ob_mat)
 				if int_v != '':
 					self.lux_context.interior(int_v)
-				elif self.geometry_scene.luxrender_world.default_interior_volume != '':
-					self.lux_context.interior(self.geometry_scene.luxrender_world.default_interior_volume)
+				elif self.geometry_scene.world.luxrender_world.default_interior_volume != '':
+					self.lux_context.interior(self.geometry_scene.world.luxrender_world.default_interior_volume)
 				if ext_v != '':
 					self.lux_context.exterior(ext_v)
-				elif self.geometry_scene.luxrender_world.default_exterior_volume != '':
-					self.lux_context.exterior(self.geometry_scene.luxrender_world.default_exterior_volume)
+				elif self.geometry_scene.world.luxrender_world.default_exterior_volume != '':
+					self.lux_context.exterior(self.geometry_scene.world.luxrender_world.default_exterior_volume)
 				
 			else:
 				object_is_emitter = False

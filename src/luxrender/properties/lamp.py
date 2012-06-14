@@ -47,7 +47,7 @@ def LampVolumeParameter(attr, name):
 		{
 			'type': 'prop_search',
 			'attr': attr,
-			'src': lambda s,c: s.scene.luxrender_volumes,
+			'src': lambda s,c: s.scene.world.luxrender_volumes,
 			'src_attr': 'volumes',
 			'trg': lambda s,c: c.luxrender_lamp,
 			'trg_attr': '%s_volume' % attr,
