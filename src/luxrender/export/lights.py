@@ -72,8 +72,8 @@ def attr_light(scene, lux_context, light, name, group, light_type, params, trans
 	
 	if light.luxrender_lamp.Exterior_volume != '':
 		lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-	elif scene.world.luxrender_world.default_exterior_volume != '':
-		lux_context.exterior(scene.world.luxrender_world.default_exterior_volume)
+	elif scene.luxrender_world.default_exterior_volume != '':
+		lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 	
 	lux_context.lightSource(light_type, params)
 
@@ -175,8 +175,8 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 			
 			if light.luxrender_lamp.Exterior_volume != '':
 				lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-			elif scene.world.luxrender_world.default_exterior_volume != '':
-				lux_context.exterior(scene.world.luxrender_world.default_exterior_volume)
+			elif scene.luxrender_world.default_exterior_volume != '':
+				lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 				
 			if light.luxrender_lamp.luxrender_lamp_point.null_lamp:		
 				mat_params = ParamSet()
@@ -219,8 +219,8 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		
 		if light.luxrender_lamp.Exterior_volume != '':
 			lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-		elif scene.world.luxrender_world.default_exterior_volume != '':
-			lux_context.exterior(scene.world.luxrender_world.default_exterior_volume)
+		elif scene.luxrender_world.default_exterior_volume != '':
+			lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 					
 		if light.luxrender_lamp.luxrender_lamp_area.null_lamp:		
 			mat_params = ParamSet()

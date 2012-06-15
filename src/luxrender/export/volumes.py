@@ -424,7 +424,7 @@ def export_smoke(lux_context, scene):
 
 					if hasattr(domain.active_material,'luxrender_material'):
 						int_v = object.active_material.luxrender_material.Interior_volume
-						for volume in scene.world.luxrender_volumes.volumes:
+						for volume in scene.luxrender_volumes.volumes:
 							if volume.name == int_v and volume.type == 'homogeneous':
 								data = volume.api_output(lux_context)[1]
 								for param in data:

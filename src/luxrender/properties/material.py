@@ -73,7 +73,7 @@ def VolumeParameter(attr, name):
 		{
 			'type': 'prop_search',
 			'attr': attr,
-			'src': lambda s,c: s.scene.world.luxrender_volumes,
+			'src': lambda s,c: s.scene.luxrender_volumes,
 			'src_attr': 'volumes',
 			'trg': lambda s,c: c.luxrender_material,
 			'trg_attr': '%s_volume' % attr,
@@ -656,14 +656,14 @@ class luxrender_material(declarative_property_group):
 				if vt_matches.lastindex != 1:
 					continue	# not a valid volume!
 				
-				world_vols = context.scene.world.luxrender_volumes.volumes
+				scene_vols = context.scene.luxrender_volumes.volumes
 				try:
 					# Use existing vol if present
-					volm = world_vols[lbm2_obj['name']]
+					volm = scene_vols[lbm2_obj['name']]
 				except KeyError:
 					# else make a new one
-					world_vols.add()
-					volm = world_vols[len(world_vols)-1]
+					scene_vols.add()
+					volm = scene_vols[len(scene_vols)-1]
 					volm.name = lbm2_obj['name']
 				
 				volm.reset()

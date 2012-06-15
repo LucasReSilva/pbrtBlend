@@ -53,7 +53,7 @@ def WorldVolumeParameter(attr, name):
 		{
 			'type': 'prop_search',
 			'attr': attr,
-			'src': lambda s,c: s.scene.world.luxrender_volumes,
+			'src': lambda s,c: s.scene.luxrender_volumes,
 			'src_attr': 'volumes',
 			'trg': lambda s,c: c.luxrender_world,
 			'trg_attr': '%s_volume' % attr,
@@ -63,7 +63,7 @@ def WorldVolumeParameter(attr, name):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_world(declarative_property_group):
-	ef_attach_to = ['World']
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		'default_interior',
@@ -415,7 +415,7 @@ class luxrender_volumes(declarative_property_group):
 	Storage class for LuxRender Material volumes.
 	'''
 	
-	ef_attach_to = ['World']
+	ef_attach_to = ['Scene']
 	
 	controls = [
 		'volumes_select',

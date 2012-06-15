@@ -396,9 +396,9 @@ class LUXRENDER_OT_set_volume_ior_preset(bpy.types.Operator):
 		ior = ior_dict[self.properties.index]
 		name = self.properties.l_name
 		
-		if context.scene and context.scene.world.luxrender_volumes and not context.texture:
-			vi = context.scene.world.luxrender_volumes.volumes_index
-			lv = context.scene.world.luxrender_volumes.volumes[vi]
+		if context.scene and context.scene.luxrender_volumes and not context.texture:
+			vi = context.scene.luxrender_volumes.volumes_index
+			lv = context.scene.luxrender_volumes.volumes[vi]
 			lv.fresnel_fresnelvalue = ior
 			lv.fresnel_presetvalue = ior
 			lv.fresnel_presetstring = name

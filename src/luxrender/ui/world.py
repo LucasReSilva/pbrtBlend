@@ -44,7 +44,7 @@ class world(world_panel):
 	bl_label = 'LuxRender World Settings'
 	
 	display_property_groups = [
-		( ('world',), 'luxrender_world' )
+		( ('scene',), 'luxrender_world' )
 	]
 
 class volumes_base(object):
@@ -55,7 +55,7 @@ class volumes_base(object):
 	bl_label = 'LuxRender Volumes'
 	
 	display_property_groups = [
-		( ('world',), 'luxrender_volumes' )
+		( ('scene',), 'luxrender_volumes' )
 	]
 	
 	def draw_ior_menu(self, context):
@@ -64,8 +64,8 @@ class volumes_base(object):
 		to ef_callback item in luxrender_volume_data.properties
 		"""
 		
-		vi = context.scene.world.luxrender_volumes.volumes_index
-		lv = context.scene.world.luxrender_volumes.volumes[vi]
+		vi = context.scene.luxrender_volumes.volumes_index
+		lv = context.scene.luxrender_volumes.volumes[vi]
 		
 		if lv.fresnel_fresnelvalue == lv.fresnel_presetvalue:
 			menu_text = lv.fresnel_presetstring
@@ -77,15 +77,16 @@ class volumes_base(object):
 	
 	# overridden in order to draw the selected luxrender_volume_data property group
 	def draw(self, context):
-			
+		super().draw(context)
+		
 		#row = self.layout.row(align=True)
 		#row.menu("LUXRENDER_MT_presets_volume", text=bpy.types.LUXRENDER_MT_presets_volume.bl_label)
 		#row.operator("luxrender.preset_volume_add", text="", icon="ZOOMIN")
 		#row.operator("luxrender.preset_volume_add", text="", icon="ZOOMOUT").remove_active = True
 		
-		if len(context.scene.world.luxrender_volumes.volumes) > 0:
-			current_vol_ind = context.scene.world.luxrender_volumes.volumes_index
-			current_vol = context.scene.world.luxrender_volumes.volumes[current_vol_ind]
+		if len(context.scene.luxrender_volumes.volumes) > 0:
+			current_vol_ind = context.scene.luxrender_volumes.volumes_index
+			current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
 			# 'name' is not a member of current_vol.properties,
 			# so we draw it explicitly
 			self.layout.prop(
@@ -100,7 +101,6 @@ class volumes_base(object):
 					context,
 					property_group = current_vol
 				)
-		super().draw(context)
 
 @LuxRenderAddon.addon_register_class
 class volumes_world(volumes_base, world_panel):

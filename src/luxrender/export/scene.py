@@ -248,11 +248,11 @@ class SceneExporter(object):
 			
 			# Export all data in linked 'background_set' scenes
 			for geom_scene in geom_scenes:
-				if len(geom_scene.world.luxrender_volumes.volumes) > 0:
+				if len(geom_scene.luxrender_volumes.volumes) > 0:
 					self.report({'INFO'}, 'Exporting volume data')
 					if self.properties.api_type == 'FILE':
 						lux_context.set_output_file(Files.MATS)
-					for volume in geom_scene.world.luxrender_volumes.volumes:
+					for volume in geom_scene.luxrender_volumes.volumes:
 						lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 				
 				self.report({'INFO'}, 'Exporting geometry')
@@ -274,8 +274,8 @@ class SceneExporter(object):
 			# Default 'Camera' Exterior
 			if scene.camera.data.luxrender_camera.Exterior_volume != '':
 				lux_context.exterior(scene.camera.data.luxrender_camera.Exterior_volume)
-			elif scene.world.luxrender_world.default_exterior_volume != '':
-				lux_context.exterior(scene.world.luxrender_world.default_exterior_volume)
+			elif scene.luxrender_world.default_exterior_volume != '':
+				lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 			
 			if self.properties.write_all_files:
 				lux_context.worldEnd()

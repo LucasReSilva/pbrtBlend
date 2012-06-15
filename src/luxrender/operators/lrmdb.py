@@ -309,7 +309,7 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
 			context.scene.luxrender_engine.is_saving_lbm2 = True
 			
 			# Include interior/exterior for this material
-			for volume in context.world.luxrender_volumes.volumes:
+			for volume in context.scene.luxrender_volumes.volumes:
 				if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
 					material_context.makeNamedVolume( volume.name, *volume.api_output(material_context) )
 			
