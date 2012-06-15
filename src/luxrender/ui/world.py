@@ -138,7 +138,7 @@ class lightgroups_base(object):
 			subrow=row.row()
 			subrow.enabled = lg.lg_enabled
 			subrow.prop(lg, 'name', text="")
-			# Here we draw the currently selected luxrender_volumes_data property group
+			# Here we draw the currently selected luxrender_lightgroups_data property group
 			for control in lg.controls:
 				self.draw_column(
 					control,

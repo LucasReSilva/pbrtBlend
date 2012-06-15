@@ -272,7 +272,7 @@ class luxrender_material(declarative_property_group):
 		'soft_min': 0.5,
 		'max': 2.0,
 		'soft_max': 2.0,
-		'step': 50,
+		'step': 25,
 		'default': 1.0
 		},
 #		{
