@@ -26,16 +26,16 @@
 #
 bl_info = {
 	"name": "LuxRender",
-	"author": "Doug Hammond (dougal2)",
+	"author": "LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), Jens Verwiebe, Jason Clarke (JtheNinja), neo2068",
 	"version": (1, 0, 0, 'RC2'),
 	"blender": (2, 6, 3),
 	"api": 44256,
 	"category": "Render",
 	"location": "Render > Engine > LuxRender",
 	"warning": "",
-	"wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/LuxBlend",
-	"tracker_url": "http://projects.blender.org/tracker/index.php?func=detail&aid=23361&group_id=153&atid=514",
-	"description": "This Addon will allow you to render your scenes with the LuxRender engine."
+	"wiki_url": "http://www.luxrender.net/wiki/LuxBlend25_Manual",
+	"tracker_url": "http://www.luxrender.net/mantis",
+	"description": "LuxRender integration for Blender"
 }
 
 if 'core' in locals():
