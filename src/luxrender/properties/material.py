@@ -267,12 +267,24 @@ class luxrender_material(declarative_property_group):
 		{
 		'attr': 'preview_zoom',
 		'type': 'float',
-		'name': 'Zoom Factor', # gets corrected in export
+		'name': 'Zoom Factor',
 		'min': 1.0,
 		'soft_min': 0.5,
 		'max': 2.0,
 		'soft_max': 2.0,
 		'step': 25,
+		'default': 1.0
+		},
+		{
+		'attr': 'preview_scale',
+		'type': 'float',
+		'name': 'Preview Scale Preview',
+		'description': 'Scale Preview',
+		'min': 0.1,
+		'soft_min': 0.1,
+		'max': 10.0,
+		'soft_max': 10.0,
+		'step': 100,
 		'default': 1.0
 		},
 #		{

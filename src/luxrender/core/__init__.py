@@ -76,6 +76,8 @@ from ..ui.textures import (
 from .. import operators
 from ..operators import lrmdb
 
+previewscale = 1
+
 def _register_elm(elm, required=False):
 	try:
 		elm.COMPAT_ENGINES.add('LUXRENDER_RENDER')
@@ -109,12 +111,14 @@ _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
 # Add view buttons for viewcontrol to preview panels
 def lux_use_alternate_matview(self, context):
-
+	global previewscale
+	previewscale = context.material.luxrender_material.preview_scale
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 		row = self.layout.row()
 		row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom Factor")
+		row.prop(context.material.luxrender_material, "preview_scale", text="Scale Preview")
 		if context.material.preview_render_type == 'FLAT':
-			row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip Flat Preview XZ")
+			row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip Preview XZ")
 
 _register_elm(bl_ui.properties_material.MATERIAL_PT_preview.append(lux_use_alternate_matview))
 
@@ -123,6 +127,7 @@ def lux_use_alternate_texview(self, context):
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 		row = self.layout.row()
 		row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom Factor")
+		row.prop(context.material.luxrender_material, "preview_scale", text="Scale Preview")
 		if context.material.preview_render_type == 'FLAT':
 			row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip Preview XZ")
 
