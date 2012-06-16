@@ -31,7 +31,7 @@ bl_info = {
 	"blender": (2, 6, 3),
 	"api": 44256,
 	"category": "Render",
-	"location": "Render > Engine > LuxRender",
+	"location": "Info Header > Engine dropdown menu",
 	"warning": "",
 	"wiki_url": "http://www.luxrender.net/wiki/LuxBlend25_Manual",
 	"tracker_url": "http://www.luxrender.net/mantis",
