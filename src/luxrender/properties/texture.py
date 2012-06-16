@@ -643,23 +643,14 @@ tex_names = (
 	
 	('LuxRender Textures',
 	(
-		('add', 'Add'),
-		('band', 'Band'),
 		('bilerp', 'Bilerp'),
 		('brick', 'Brick'),
 		('checkerboard', 'Checkerboard'),
 		('dots', 'Dots'),
 		('fbm', 'FBM'),
-		('harlequin', 'Harlequin'),
 		('imagemap', 'Image Map'),
 		('normalmap', 'Normal Map'),
 		('marble', 'Marble'),
-		('mix', 'Mix'),
-		('multimix', 'Multi Mix'),
-		('scale', 'Scale'),
-		('subtract', 'Subtract'),
-		('uv', 'UV'),
-		('uvmask', 'UV Mask'),
 		('windy', 'Windy'),
 		('wrinkled', 'Wrinkled'),
 	)),
@@ -684,6 +675,20 @@ tex_names = (
 		('sopra', 'Sopra'),
 		('luxpop', 'Luxpop'),
 	)),
+	
+	('Utility Textures',
+	(
+		('add', 'Add'),
+		('band', 'Band'),
+		('harlequin', 'Harlequin'),
+		('mix', 'Mix'),
+		('multimix', 'Multi Mix'),
+		('scale', 'Scale'),
+		('subtract', 'Subtract'),
+		('uv', 'UV'),
+		('uvmask', 'UV Mask'),
+	)),
+
 )
 
 @LuxRenderAddon.addon_register_class
