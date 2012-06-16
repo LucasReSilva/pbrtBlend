@@ -643,7 +643,6 @@ tex_names = (
 	
 	('LuxRender Textures',
 	(
-		('bilerp', 'Bilerp'),
 		('brick', 'Brick'),
 		('checkerboard', 'Checkerboard'),
 		('dots', 'Dots'),
@@ -667,7 +666,6 @@ tex_names = (
 	
 	('Fresnel Textures',
 	(
-		('constant', 'Constant'),
 		('cauchy', 'Cauchy'),
 		('fresnelcolor', 'Fresnel Color'),
 		('fresnelname', 'Fresnel Name (preset/nk data)'),
@@ -680,6 +678,8 @@ tex_names = (
 	(
 		('add', 'Add'),
 		('band', 'Band'),
+		('bilerp', 'Bilerp'),
+		('constant', 'Constant'),
 		('harlequin', 'Harlequin'),
 		('mix', 'Mix'),
 		('multimix', 'Multi Mix'),
@@ -1773,26 +1773,59 @@ class luxrender_tex_constant(declarative_property_group):
 	alert = {}
 	
 	controls = [
-		'value'
+		'variant',
+		'floatvalue',
+		'colorvalue',
+		'value' #Just use "value" for fresnel value to avoid breaking .blend files made from when this tex only had a fresnel mode
 	]
 	
-	visibility = {}
+	visibility = {
+		'floatvalue': { 'variant': 'float' },
+		'colorvalue': { 'variant': 'color' },
+		'value': 	  { 'variant': 'fresnel' },
+	}
 	
 	properties = [
 		{
-			'type': 'string',
 			'attr': 'variant',
-			'default': 'fresnel'
+			'type': 'enum',
+			'name': 'Variant',
+			'items': [
+				('float', 'Greyscale', 'Output a floating point number'),
+				('color', 'Color', 'Output a color value'),
+				('fresnel', 'Fresnel', 'Output optical data'),
+			],
+			'expand': True,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'floatvalue',
+			'type': 'float',
+			'name': 'Value',
+			'default': 1.00,
+			'precision': 4,
+			'save_in_preset': True
+		},
+		{
+			'attr': 'colorvalue',
+			'type': 'float_vector',
+			'name': 'Value',
+			'default': (0.64, 0.64, 0.64),
+			'max': 10.0, #Blender's color picker does not behave will with unbounded colors
+			'soft_max': 10.0,
+			'min': -10.0,
+			'soft_min': -10.0,
+			'precision': 4,
+			'subtype': 'COLOR',
+			'save_in_preset': True
 		},
 		{
 			'attr': 'value',
 			'type': 'float',
 			'name': 'Value',
-			'default': 1.51,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 10.0,
-			'soft_max': 10.0,
+			'default': 1.52,
+			'min': 1.0, #Lux core does not properly handle lower fresnel values
+			'soft_min': 1.0,
 			'precision': 4,
 			'save_in_preset': True
 		},
@@ -1800,11 +1833,17 @@ class luxrender_tex_constant(declarative_property_group):
 	
 	def get_paramset(self, scene, texture):
 		constant_params = ParamSet()
-		constant_params.add_float('value', self.value)
+		if self.variant == 'float':
+			constant_params.add_float('value', self.floatvalue)
+		if self.variant == 'color':
+			constant_params.add_color('value', self.colorvalue)
+		if self.variant == 'fresnel':
+			constant_params.add_float('value', self.value)
 		
 		return set(), constant_params
 	
 	def load_paramset(self, variant, ps):
+		self.variant = variant if variant in ['float', 'color', 'fresnel',] else 'float'
 		psi_accept = {
 			'value': 'float',
 		}
@@ -3017,11 +3056,11 @@ class luxrender_tex_mix(declarative_property_group):
 			TF_tex1.load_paramset(self, ps)
 			TF_tex2.load_paramset(self, ps)
 			
-		if  variant == 'color':
+		if variant == 'color':
 			TC_tex1.load_paramset(self, ps)
 			TC_tex2.load_paramset(self, ps)
 		
-		if  variant == 'fresnel':
+		if variant == 'fresnel':
 			TFR_tex1.load_paramset(self, ps)
 			TFR_tex2.load_paramset(self, ps)
 
