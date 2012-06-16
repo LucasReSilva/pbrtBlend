@@ -1722,7 +1722,7 @@ class luxrender_tex_checkerboard(declarative_property_group):
 			'attr': 'dimension',
 			'type': 'int',
 			'name': 'Dimensions',
-			'default': 2,
+			'default': 3,
 			'min': 2,
 			'soft_min': 2,
 			'max': 3,
