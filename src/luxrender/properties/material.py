@@ -275,18 +275,6 @@ class luxrender_material(declarative_property_group):
 		'step': 25,
 		'default': 1.0
 		},
-		{
-		'attr': 'preview_scale',
-		'type': 'float',
-		'name': 'Preview Scale Preview',
-		'description': 'Scale Preview',
-		'min': 0.1,
-		'soft_min': 0.1,
-		'max': 10.0,
-		'soft_max': 10.0,
-		'step': 100,
-		'default': 1.0
-		},
 #		{
 #			'type': 'bool',
 #			'attr': 'generatetangents',

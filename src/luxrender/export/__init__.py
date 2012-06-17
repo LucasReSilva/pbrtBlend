@@ -247,7 +247,7 @@ class ParamSet(list):
 		return self
 
 def get_worldscale(as_scalematrix=True):
-	ws = 1.0
+	ws = bpy.context.scene.luxrender_world.preview_scale
 	
 	scn_us = LuxManager.CurrentScene.unit_settings
 	

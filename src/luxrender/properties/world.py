@@ -70,7 +70,20 @@ class luxrender_world(declarative_property_group):
 		'default_exterior'
 	]
 	
-	properties = [] + \
+	properties = [
+				  {
+				  'attr': 'preview_scale',
+				  'type': 'float',
+				  'name': 'Preview Scale Preview',
+				  'description': 'Scale Preview',
+				  'min': 0.1,
+				  'soft_min': 0.1,
+				  'max': 10.0,
+				  'soft_max': 10.0,
+				  'step': 100,
+				  'default': 1.0
+				  }
+				  ] + \
 		WorldVolumeParameter('default_interior', 'Default Interior') + \
 		WorldVolumeParameter('default_exterior', 'Default Exterior')
 

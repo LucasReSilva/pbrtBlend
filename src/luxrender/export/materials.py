@@ -164,9 +164,6 @@ def get_preview_flip(m):
 def get_preview_zoom(m):
 	return m.luxrender_material.preview_zoom
 
-def get_preview_scale(m):
-	return m.luxrender_material.preview_scale
-
 def convert_texture(scene, texture, variant_hint=None):
 	# Lux only supports blender's textures in float variant (except for image/ocean, but both of these are exported as imagemap)
 	variant = 'float'
