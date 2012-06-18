@@ -74,7 +74,7 @@ class luxrender_world(declarative_property_group):
 				  {
 				  'attr': 'preview_scale',
 				  'type': 'float',
-				  'name': 'Preview Scale Preview',
+				  'name': 'Preview Scale Preview Object',
 				  'description': 'Scale Preview',
 				  'min': 0.1,
 				  'soft_min': 0.1,

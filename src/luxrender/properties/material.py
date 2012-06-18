@@ -267,6 +267,7 @@ class luxrender_material(declarative_property_group):
 		{
 		'attr': 'preview_zoom',
 		'type': 'float',
+		'description': 'Zoom preview camera',
 		'name': 'Zoom Factor',
 		'min': 1.0,
 		'soft_min': 0.5,
