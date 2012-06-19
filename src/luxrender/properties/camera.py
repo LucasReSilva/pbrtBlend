@@ -802,9 +802,7 @@ class luxrender_film(declarative_property_group):
 			params.add_bool('premultiplyalpha', True) #Apparently, this should always be true with EXR
 			params.add_bool('write_exr_ZBuf', True)
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
-			if scene.render.use_color_management:
-				params.add_float('gamma', 1.0) # Linear workflow !
-			# else leave as pre-corrected gamma
+			params.add_float('gamma', 1.0) #Blender is always expecting a gamma 1.0 image
 		else:
 			# Otherwise let the user decide on tonemapped EXR and other EXR settings
 			params.add_bool('write_exr_halftype', self.write_exr_halftype)

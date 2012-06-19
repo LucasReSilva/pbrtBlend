@@ -77,7 +77,7 @@ class layers(render_panel):
 		col.prop(scene, "layers", text="Scene")
 		col.label(text="")
 		col = split.column()
-		        
+				
 		col.label(text="Passes:")
 		col.prop(rl, "use_pass_combined")
 		col.prop(rl, "use_pass_z")
@@ -142,11 +142,18 @@ class engine(render_panel):
 	
 	def draw(self, context):
 		row = self.layout.row(align=True)
+		rd = context.scene.render
+		split = self.layout.split()
 		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
 		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
 		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		super().draw(context)
+		
+		row = self.layout.row(align=True)
+		row.prop(rd, "use_color_management")
+		if rd.use_color_management == True:
+			row.prop(rd, "use_color_unpremultiply")
 		
 @LuxRenderAddon.addon_register_class
 class render_settings(render_panel):
