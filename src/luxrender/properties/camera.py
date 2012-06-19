@@ -1278,8 +1278,8 @@ class luxrender_tonemapping(declarative_property_group):
 		{
 			'type': 'float',
 			'attr': 'reinhard_burn',
-			'name': 'Burn',
-			'description': 'Reinhard Burn factor',
+			'name': 'Dodge and Burn',
+			'description': 'Reinhard Dodge and Burn factor',
 			'default': 6.0,
 			'min': 0.01,
 			'soft_min': 0.01,
