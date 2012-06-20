@@ -673,7 +673,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				
 				self.LuxManager.lux_context.logVerbosity(scene.luxrender_engine.log_verbosity)
 				
-				self.update_stats('', 'LuxRender: Rendering warmup')
+				self.update_stats('', 'LuxRender: Building %s' % scene.luxrender_accelerator.accelerator)
 				self.LuxManager.start()
 				
 				self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.luxrender_engine.integratedimaging
