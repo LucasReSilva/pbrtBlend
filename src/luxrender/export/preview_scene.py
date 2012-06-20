@@ -46,11 +46,11 @@ def export_preview_texture(lux_context, texture):
 			texture_name = texture_name + "_" + lux_tex_variant
 	
 	global preview_correct
-	if texture.luxrender_texture.luxrender_tex_transform.coordinates == 'global':
+	if texture.luxrender_texture.luxrender_tex_transform.coordinates == 'global' and texture.luxrender_texture.type in ('BLENDER', 'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled'):
 		preview_correct = True
 	else:
 		preview_correct = False	
-	
+
 	#if lux_tex_variant == 'color':
 	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 	if lux_tex_variant == 'float':
