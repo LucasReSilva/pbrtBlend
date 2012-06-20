@@ -32,8 +32,6 @@ from ..export.materials import ExportedTextures, convert_texture, get_material_v
 from ..outputs import LuxLog, LuxManager
 from ..outputs.pure_api import LUXRENDER_VERSION
 
-preview_correct = False # hack to compensate blender preview plane dimensions
-
 def export_preview_texture(lux_context, texture):
 	texture_name = texture.name
 	if texture.luxrender_texture.type != 'BLENDER':
@@ -44,13 +42,7 @@ def export_preview_texture(lux_context, texture):
 		lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint='color')
 		if texture.type in ('OCEAN', 'IMAGE'):
 			texture_name = texture_name + "_" + lux_tex_variant
-	
-	global preview_correct
-	if texture.luxrender_texture.luxrender_tex_transform.coordinates == 'global' and texture.luxrender_texture.type in ('BLENDER', 'brick', 'checkerboard', 'fbm', 'marble', 'windy', 'wrinkled') and texture.type not in ('OCEAN', 'IMAGE'):
-		preview_correct = True
-	else:
-		preview_correct = False	
-
+							
 	#if lux_tex_variant == 'color':
 	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 	if lux_tex_variant == 'float':
@@ -387,27 +379,16 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		if mat.preview_render_type == 'FLAT':
 			if tex == None :
 				if mat_preview_xz == True:
-					if preview_correct == True:
-						pv_transform = [
-							1.25, 0.0, 0.0, 0.0,
-							0.0, 1.25, 0.0, 0.0,
-							0.0, 0.0, 1.25, 0.0,
-							0.0, 0.06, -1, 1.0
-							]
-					else:
-						pv_transform = [
-							0.1, 0.0, 0.0, 0.0,
-							0.0, 0.1, 0.0, 0.0,
-							0.0, 0.0, 0.2, 0.0,
-							0.0, 0.06, -1, 1.0
-						]
 					lux_context.scale(1, 1, 8)
 					lux_context.rotate(90, 1,0,0)
+					pv_transform = [
+						0.1, 0.0, 0.0, 0.0,
+						0.0, 0.1, 0.0, 0.0,
+						0.0, 0.0, 0.2, 0.0,
+						0.0, 0.06, -1, 1.0
+					]
 				else:
-					if preview_correct == True:
-						lux_context.scale(2.0, 2.0, 2.0)
-					else:
-						lux_context.scale(0.25, 2.0, 2.0)
+					lux_context.scale(0.25, 2.0, 2.0)
 					lux_context.translate(0, 0, -0.99)
 			else:
 				lux_context.rotate(90, 0,0,1) # keep tex pre always same 
