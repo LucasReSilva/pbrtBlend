@@ -461,7 +461,6 @@ class luxrender_film(declarative_property_group):
 	controls = [
 		'lbl_internal',
 		'internal_updateinterval',
-		'integratedimaging',
 		
 		'lbl_external',
 		'writeinterval',
@@ -550,13 +549,6 @@ class luxrender_film(declarative_property_group):
 			'type': 'text',
 			'attr': 'lbl_outputs',
 			'name': 'Output formats'
-		},
-		{
-			'type': 'bool',
-			'attr': 'integratedimaging',
-			'name': 'Integrated imaging workflow',
-			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
-			'default': False
 		},
 		{
 			'type': 'bool',
@@ -793,7 +785,7 @@ class luxrender_film(declarative_property_group):
 		else:
 			output_channels = 'RGB'
 								
-		if scene.luxrender_engine.export_type == 'INT' and self.integratedimaging:
+		if scene.luxrender_engine.export_type == 'INT' and scene.luxrender_engine.integratedimaging:
 			# Set up params to enable z buffer and set gamma=1.0
 			# Also, this requires tonemapped EXR output
 			params.add_string('write_exr_channels', 'RGBA')
@@ -1278,8 +1270,8 @@ class luxrender_tonemapping(declarative_property_group):
 		{
 			'type': 'float',
 			'attr': 'reinhard_burn',
-			'name': 'Dodge/Burn',
-			'description': 'Reinhard Dodge and Burn factor',
+			'name': 'Burn',
+			'description': 'Reinhard Burn factor',
 			'default': 6.0,
 			'min': 0.01,
 			'soft_min': 0.01,

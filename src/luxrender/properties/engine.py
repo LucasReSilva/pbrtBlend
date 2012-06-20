@@ -189,6 +189,13 @@ class luxrender_engine(declarative_property_group):
 		},
 		{
 			'type': 'bool',
+			'attr': 'integratedimaging',
+			'name': 'Integrated imaging workflow',
+			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
+			'default': False
+		},
+		{
+			'type': 'bool',
 			'attr': 'render',
 			'name': 'Run Renderer',
 			'description': 'Run Renderer after export',

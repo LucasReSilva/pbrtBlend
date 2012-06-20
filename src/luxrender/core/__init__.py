@@ -158,17 +158,20 @@ def lux_use_dof(self, context):
 
 _register_elm(bl_ui.properties_data_camera.DATA_PT_camera_dof.append(lux_use_dof))
 
+#Add options by render image/anim buttons
 def render_start_options(self, context):
 
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 		col = self.layout.column()
+		row = self.layout.row()
 		
 		col.prop(context.scene.luxrender_engine, "export_type", text="Export type")
 		if context.scene.luxrender_engine.export_type == 'EXT':
 			col.prop(context.scene.luxrender_engine, "binary_name", text="Render using")
 			col.prop(context.scene.luxrender_engine, "install_path", text="Path to LuxRender Installation")
 		if context.scene.luxrender_engine.export_type == 'INT':
-			col.prop(context.scene.luxrender_engine, "write_files", text="Write to Disk")
+			row.prop(context.scene.luxrender_engine, "write_files", text="Write to Disk")
+			row.prop(context.scene.luxrender_engine, "integratedimaging", text="Integrated Imaging")
 
 _register_elm(bl_ui.properties_render.RENDER_PT_render.append(render_start_options))
 
@@ -673,7 +676,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				self.update_stats('', 'LuxRender: Rendering warmup')
 				self.LuxManager.start()
 				
-				self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.camera.data.luxrender_camera.luxrender_film.integratedimaging
+				self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.luxrender_engine.integratedimaging
 				
 				# Update the image from disk only as often as it is written
 				self.LuxManager.fb_thread.set_kick_period( scene.camera.data.luxrender_camera.luxrender_film.internal_updateinterval )
