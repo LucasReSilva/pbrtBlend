@@ -50,7 +50,7 @@ def export_preview_texture(lux_context, texture):
 		preview_correct = True
 	else:
 		preview_correct = False	
-	print("----------------->", texture.type)
+
 	#if lux_tex_variant == 'color':
 	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 	if lux_tex_variant == 'float':
