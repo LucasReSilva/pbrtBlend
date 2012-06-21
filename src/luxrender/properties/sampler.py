@@ -50,7 +50,7 @@ class luxrender_sampler(declarative_property_group):
 		'largemutationprob',
 		#'mutationrange',
 		'maxconsecrejects',
-		'usevariance',
+		['usevariance', 'usecooldown'],
 	]
 	
 	visibility = {
@@ -59,9 +59,10 @@ class luxrender_sampler(declarative_property_group):
 		'basesampler':			{ 'sampler': 'erpt' },
 		'pixelsampler':			O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
 		'pixelsamples':			O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
-		'maxconsecrejects':		A([{ 'advanced': True }, O([{ 'sampler': 'metropolis' },	{'sampler':'erpt', 'basesampler': 'metropolis' } ]) ]),
-		'largemutationprob':	O([{ 'sampler': 'metropolis' },								{'sampler':'erpt', 'basesampler': 'metropolis' } ]),
-		'usevariance':			A([{ 'advanced': True }, O([{ 'sampler': 'metropolis' },	{'sampler':'erpt', 'basesampler': 'metropolis' } ]) ]),
+		'largemutationprob':	{ 'sampler': 'metropolis' },					
+		'maxconsecrejects':		A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+		'usevariance':			A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+		'usecooldown':			A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 	}
 	
 	properties = [
@@ -73,7 +74,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 'metropolis',
 			'items': [
 				('metropolis', 'Metropolis', 'Keleman-style metropolis light transport'),
-				('erpt', 'ERPT', 'Energy redistribution path tracing sampler'),
+				('erpt', 'ERPT', 'Experimental energy redistribution path tracing sampler'),
 				('lowdiscrepancy', 'Low Discrepancy', 'Use a low discrepancy sequence'),
 				('random', 'Random', 'Completely random sampler')
 			],
@@ -113,6 +114,14 @@ class luxrender_sampler(declarative_property_group):
 			'attr': 'usevariance',
 			'name': 'Use Variance',
 			'description': 'Use Variance',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'usecooldown',
+			'name': 'Use Cooldown',
+			'description': 'Use fixed large mutation probability at the beginning of the render, to avoid convergence errors with extreme settings',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -189,12 +198,13 @@ class luxrender_sampler(declarative_property_group):
 			params.add_integer('chainlength', self.chainlength)
 			params.add_string('basesampler', self.basesampler)
 		
-		if self.sampler == 'metropolis' or (self.sampler == 'erpt' and self.basesampler == 'metropolis'):
+		if self.sampler == 'metropolis':
 			params.add_float('largemutationprob', self.largemutationprob)
-			params.add_bool('usevariance', self.usevariance)
 			
 		if self.advanced:
-			if self.sampler == 'metropolis' or (self.sampler == 'erpt' and self.basesampler == 'metropolis'):
+			if self.sampler == 'metropolis':
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
+				params.add_bool('usevariance', self.usevariance)
+				params.add_bool('usecooldown', self.usecooldown)
 		
 		return self.sampler, params
