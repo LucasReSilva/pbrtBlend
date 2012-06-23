@@ -42,7 +42,12 @@ def export_preview_texture(lux_context, texture):
 		lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture, variant_hint='color')
 		if texture.type in ('OCEAN', 'IMAGE'):
 			texture_name = texture_name + "_" + lux_tex_variant
-							
+
+	#running bonds shown from the side in tex-preview	
+	if texture.luxrender_texture.type == ('brick') and texture.luxrender_texture.luxrender_tex_brick.brickbond in ('running', 'flemish'):
+		brick_rot = texture.luxrender_texture.luxrender_tex_transform.rotate[:]
+		paramset.add_vector('rotate', [brick_rot[0]+90, brick_rot[1], brick_rot[2]])		
+
 	#if lux_tex_variant == 'color':
 	ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
 	if lux_tex_variant == 'float':
