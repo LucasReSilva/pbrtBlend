@@ -74,14 +74,16 @@ class luxrender_world(declarative_property_group):
 				  {
 				  'attr': 'preview_scale',
 				  'type': 'float',
-				  'name': 'Preview Scale Preview',
+				  'name': 'Scale Preview',
 				  'description': 'Scale Preview Object',
 				  'min': 0.1,
 				  'soft_min': 0.1,
 				  'max': 10.0,
 				  'soft_max': 10.0,
 				  'step': 100,
-				  'default': 1.0
+				  'default': 2.0,
+				  'subtype': 'DISTANCE',
+				  'unit': 'LENGTH',
 				  }
 				  ] + \
 		WorldVolumeParameter('default_interior', 'Default Interior') + \
