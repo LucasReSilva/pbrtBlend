@@ -1030,6 +1030,13 @@ class luxrender_integrator(declarative_property_group):
 		#Exphotonmap is not compatible with light groups, warn here instead of light export code so this warning only shows once instead of per lamp
 		if scene.luxrender_lightgroups.ignore == False and self.surfaceintegrator == 'exphotonmap':
 			LuxLog('WARNING: Ex-Photon Map does not support light groups, exporting all lights in the default group.')
+			
+		#Warn about multi volume integrator and homogeneous exterior
+		if scene.luxrender_world.default_exterior_volume != '':
+			ext_v = scene.luxrender_world.default_exterior_volume
+			for volume in scene.luxrender_volumes.volumes:
+				if volume.name == ext_v and volume.type == 'homogeneous' and scene.luxrender_volumeintegrator.volumeintegrator == 'multi':
+					LuxLog('Warning: Default exterior volume is homogeneous, and the "multi" volume integrator is selected! Performance may be poor, consider using the "single" volume integrator instead')
 				
 		#Safety checks for settings end here
 		
