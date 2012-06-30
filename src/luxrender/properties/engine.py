@@ -138,6 +138,7 @@ class luxrender_engine(declarative_property_group):
 		['render', 'monitor_external'],
 		['threads_auto', 'fixed_seed'],
 		'threads',
+		['use_prio', 'prio'],
 		'log_verbosity',
 		]
 		
@@ -155,6 +156,8 @@ class luxrender_engine(declarative_property_group):
 		'threads':					O([A([{'write_files': False}, { 'export_type': 'INT' }, {'threads_auto': False}]), A([O([{'write_files': True}, { 'export_type': 'EXT' }]), { 'render': True }, {'threads_auto': False}])]), #Longest logic test in the whole plugin! threads-auto is in both sides, since we must check that it is false for either internal-pipe mode, or when using run-renderer.
 		'fixed_seed':				O([A([{'write_files': False}, { 'export_type': 'INT' }]), A([O([{'write_files': True}, { 'export_type': 'EXT' }]), { 'render': True }])]),
 		'log_verbosity':			O([A([{'write_files': False}, { 'export_type': 'INT' }]), A([O([{'write_files': True}, { 'export_type': 'EXT' }]), { 'render': True }])]),
+		'prio':						{ 'export_type': 'EXT', 'use_prio': True },
+		'use_prio':					{ 'export_type': 'EXT'},
 	}
 	
 	alert = {}
@@ -177,6 +180,25 @@ class luxrender_engine(declarative_property_group):
 			'soft_min': 1,
 			'max': 64,
 			'soft_max': 64
+		},
+		{
+		'type': 'bool',
+		'attr': 'use_prio',
+		'name': 'Set Process Priority',
+		'description': 'Set the priority of lux app on launch',
+		'default': False
+		},
+		{
+		'type': 'enum',
+		'attr': 'prio',
+		'name': 'Priority',
+		'description': 'Set the process priority of lux app',
+		'default': 'normal',
+		'items': [
+				('high', 'High', 'high'),
+				('normal', 'Normal', 'normal'),
+				('low', 'Low', 'low'),
+				],
 		},
 		{
 			'type': 'enum',
