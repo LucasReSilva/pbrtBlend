@@ -203,21 +203,7 @@ class SceneExporter(object):
 				if next_matrix != False:
 					lux_context.transformBegin(file=Files.MAIN)
 					
-					ws = get_worldscale()
-					next_matrix *= ws
-					ws = get_worldscale(as_scalematrix=False)
-					next_matrix = fix_matrix_order(next_matrix) # matrix indexing hack
-					next_matrix[0][3] *= ws
-					next_matrix[1][3] *= ws
-					next_matrix[2][3] *= ws
-					# transpose to extract columns
-					# TODO - update to matrix.col when available
-					next_matrix = next_matrix.transposed()
-					pos = next_matrix[3]
-					forwards = -next_matrix[2]
-					target = (pos + forwards)
-					up = next_matrix[1]
-					lux_context.lookAt( * pos[:3] + target[:3] + up[:3] )
+					lux_context.lookAt( *scene.camera.data.luxrender_camera.lookAt(scene.camera, next_matrix) )
 					lux_context.coordinateSystem('CameraEndTransform')
 					lux_context.transformEnd()
 					is_cam_animated = True

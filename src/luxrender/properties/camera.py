@@ -299,13 +299,14 @@ class luxrender_camera(declarative_property_group):
 		},
 	]
 	
-	def lookAt(self, camera):
+	def lookAt(self, camera, matrix = None):
 		'''
 		Derive a list describing 3 points for a LuxRender LookAt statement
 		
 		Returns		tuple(9) (floats)
 		'''
-		matrix = camera.matrix_world.copy()
+		if matrix is None:
+			matrix = camera.matrix_world.copy()
 		ws = get_worldscale()
 		matrix *= ws
 		ws = get_worldscale(as_scalematrix=False)
