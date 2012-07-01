@@ -305,7 +305,7 @@ class luxrender_camera(declarative_property_group):
 		
 		Returns		tuple(9) (floats)
 		'''
-		if matrix == None:
+		if matrix is None:
 			matrix = camera.matrix_world.copy()
 		ws = get_worldscale()
 		matrix *= ws
