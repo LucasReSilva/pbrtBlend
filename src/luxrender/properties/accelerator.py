@@ -52,6 +52,7 @@ class luxrender_accelerator(declarative_property_group):
 	]
 	
 	visibility = {
+		'accelerator':			{ 'advanced': True },
 		'intersectcost':		{ 'advanced': True, 'accelerator': 'tabreckdtree' },
 		'traversalcost':		{ 'advanced': True, 'accelerator': 'tabreckdtree' },
 		'emptybonus':			{ 'advanced': True, 'accelerator': 'tabreckdtree' },
