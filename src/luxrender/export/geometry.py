@@ -33,7 +33,7 @@ from extensions_framework import util as efutil
 
 from ..outputs import LuxLog
 from ..outputs.file_api import Files
-from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix
+from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix, object_anim_matrices
 from ..export import matrix_to_list
 from ..export import fix_matrix_order
 from ..export.materials import get_material_volume_defs
@@ -593,13 +593,10 @@ class GeometryExporter(object):
 				# grab a bunch of fractional-frame fcurve_matrices and export
 				# several motionInstances for non-linear motion blur
 				STEPS = self.geometry_scene.camera.data.luxrender_camera.motion_blur_samples
-	
-				for i in range(1, STEPS+1):
-					fcurve_matrix = object_anim_matrix(self.geometry_scene, obj, frame_offset=i/float(STEPS))
-					if fcurve_matrix == False:
-						break
-					
-					next_matrices.append(fcurve_matrix)
+				
+				# object_anim_matrices returns steps+1 matrices, ie start and end of frame
+				# we don't want the start matrix
+				next_matrices = object_anim_matrices(self.geometry_scene, obj, STEPS)[1:]
 				
 				is_object_animated = len(next_matrices) > 0
 		
@@ -621,7 +618,7 @@ class GeometryExporter(object):
 		# object translation/rotation/scale
 		if is_object_animated:
 			num_steps = len(next_matrices)
-			fsps = float(num_steps) * self.visibility_scene.render.fps
+			fsps = float(num_steps) * self.visibility_scene.render.fps / self.visibility_scene.render.fps_base
 			step_times = [(i) / fsps for i in range(0, num_steps+1)]
 			self.lux_context.motionBegin(step_times)
 			# then export first matrix as normal

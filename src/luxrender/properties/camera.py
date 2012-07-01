@@ -392,7 +392,7 @@ class luxrender_camera(declarative_property_group):
 		"""
 		Calculate the camera exposure time in seconds
 		"""
-		fps = LuxManager.CurrentScene.render.fps
+		fps = LuxManager.CurrentScene.render.fps / LuxManager.CurrentScene.render.fps_base
 		
 		time = 1.0
 		if self.exposure_mode == 'normalised':
@@ -424,7 +424,7 @@ class luxrender_camera(declarative_property_group):
 		params.add_float('screenwindow', self.screenwindow(xr, yr, scene, cam))
 		params.add_bool('autofocus', False)
 		
-		fps = scene.render.fps
+		fps = scene.render.fps / scene.render.fps_base
 		if self.exposure_mode == 'normalised':
 			params.add_float('shutteropen', self.exposure_start_norm / fps)
 			params.add_float('shutterclose', self.exposure_end_norm / fps)

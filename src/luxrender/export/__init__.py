@@ -293,6 +293,24 @@ def object_anim_matrix(scene, obj, frame_offset=1, ignore_scale=False):
 	else:
 		return False
 
+def object_anim_matrices(scene, obj, steps=1, ignore_scale=False):
+	'''
+	steps		Number of interpolation steps per frame
+	
+	Returns a list of animated matrices for the object, with the given number of 
+	per-frame interpolation steps. 
+	The number of matrices returned is at most steps+1.
+	'''
+	next_matrices = []
+	for i in range(0, steps+1):
+		fcurve_matrix = object_anim_matrix(scene, obj, frame_offset=i/float(steps))
+		if fcurve_matrix == False:
+			break
+			
+		next_matrices.append(fcurve_matrix)
+		
+	return next_matrices
+
 # hack for the matrix order api change in r42816
 # TODO remove this when obsolete
 def fix_matrix_order_old(matrix):
