@@ -621,7 +621,8 @@ class GeometryExporter(object):
 		# object translation/rotation/scale
 		if is_object_animated:
 			num_steps = len(next_matrices)
-			step_times = [self.visibility_scene.camera.data.luxrender_camera.intraframe_time(i / float(num_steps)) for i in range(0, num_steps+1)]
+			fsps = float(num_steps) * self.visibility_scene.render.fps
+			step_times = [(i) / fsps for i in range(0, num_steps+1)]
 			self.lux_context.motionBegin(step_times)
 			# then export first matrix as normal
 		
