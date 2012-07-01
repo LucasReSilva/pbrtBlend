@@ -72,7 +72,8 @@ class luxrender_camera(declarative_property_group):
 		'fstop',
 		'sensitivity',
 		'exposure_mode',
-		'exposure_start', 'exposure_end_norm', 'exposure_end_abs',
+		['exposure_start_norm', 'exposure_end_norm'], 
+		'exposure_start_abs', 'exposure_end_abs',
 		['exposure_degrees_start', 'exposure_degrees_end'],
 		'usemblur',
 		'motion_blur_samples',
@@ -88,8 +89,9 @@ class luxrender_camera(declarative_property_group):
 #		'blades':					{ 'use_dof': True },
 #		'distribution':				{ 'use_dof': True },
 #		'power':					{ 'use_dof': True },
-		'exposure_start':			{ 'exposure_mode': O(['normalised','absolute']) },
+		'exposure_start_norm':		{ 'exposure_mode': 'normalised' },
 		'exposure_end_norm':		{ 'exposure_mode': 'normalised' },
+		'exposure_start_abs':		{ 'exposure_mode': 'absolute' },
 		'exposure_end_abs':			{ 'exposure_mode': 'absolute' },
 		'exposure_degrees_start':	{ 'exposure_mode': 'degrees' },
 		'exposure_degrees_end':		{ 'exposure_mode': 'degrees' },
@@ -211,10 +213,10 @@ class luxrender_camera(declarative_property_group):
 		},
 		{
 			'type': 'float',
-			'attr': 'exposure_start',
+			'attr': 'exposure_start_norm',
 			'name': 'Open',
-			'description': 'Shutter open time',
-			'precision': 6,
+			'description': 'Normalised shutter open time',
+			'precision': 3,
 			'default': 0.0,
 			'min': 0.0,
 			'soft_min': 0.0,
@@ -225,8 +227,8 @@ class luxrender_camera(declarative_property_group):
 			'type': 'float',
 			'attr': 'exposure_end_norm',
 			'name': 'Close',
-			'description': 'Shutter close time',
-			'precision': 6,
+			'description': 'Normalised shutter close time',
+			'precision': 3,
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
@@ -235,15 +237,23 @@ class luxrender_camera(declarative_property_group):
 		},
 		{
 			'type': 'float',
+			'attr': 'exposure_start_abs',
+			'name': 'Open',
+			'description': 'Absolute shutter open time (seconds)',
+			'precision': 6,
+			'default': 0.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+		},
+		{
+			'type': 'float',
 			'attr': 'exposure_end_abs',
 			'name': 'Close',
-			'description': 'Shutter close time',
+			'description': 'Absolute shutter close time (seconds)',
 			'precision': 6,
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
-			'max': 120.0,
-			'soft_max': 120.0
 		},
 		{
 			'type': 'float',
@@ -254,8 +264,10 @@ class luxrender_camera(declarative_property_group):
 			'default': 0.0,
 			'min': 0.0,
 			'soft_min': 0.0,
-			'max': 360.0,
-			'soft_max': 360.0
+			'max': 2*math.pi,
+			'soft_max': 2*math.pi,
+			'subtype': 'ANGLE',
+			'unit': 'ROTATION'
 		},
 		{
 			'type': 'float',
@@ -263,11 +275,13 @@ class luxrender_camera(declarative_property_group):
 			'name': 'Close angle',
 			'description': 'Shutter close angle',
 			'precision': 1,
-			'default': 360.0,
+			'default': 2*math.pi,
 			'min': 0.0,
 			'soft_min': 0.0,
-			'max': 360.0,
-			'soft_max': 360.0
+			'max': 2*math.pi,
+			'soft_max': 2*math.pi,
+			'subtype': 'ANGLE',
+			'unit': 'ROTATION'
 		},
 		{
 			'type': 'bool',
@@ -382,11 +396,11 @@ class luxrender_camera(declarative_property_group):
 		
 		time = 1.0
 		if self.exposure_mode == 'normalised':
-			time = (self.exposure_end_norm - self.exposure_start) / fps
+			time = (self.exposure_end_norm - self.exposure_start_norm) / fps
 		if self.exposure_mode == 'absolute':
-			time = (self.exposure_end_abs - self.exposure_start)
+			time = (self.exposure_end_abs - self.exposure_start_abs)
 		if self.exposure_mode == 'degrees':
-			time = (self.exposure_degrees_end - self.exposure_degrees_start) / (fps * 360.0)
+			time = (self.exposure_degrees_end - self.exposure_degrees_start) / (fps * 2 * math.pi)
 		
 		return time
 	
@@ -412,14 +426,14 @@ class luxrender_camera(declarative_property_group):
 		
 		fps = scene.render.fps
 		if self.exposure_mode == 'normalised':
-			params.add_float('shutteropen', self.exposure_start / fps)
+			params.add_float('shutteropen', self.exposure_start_norm / fps)
 			params.add_float('shutterclose', self.exposure_end_norm / fps)
 		if self.exposure_mode == 'absolute':
-			params.add_float('shutteropen', self.exposure_start)
+			params.add_float('shutteropen', self.exposure_start_abs)
 			params.add_float('shutterclose', self.exposure_end_abs)
 		if self.exposure_mode == 'degrees':
-			params.add_float('shutteropen', self.exposure_degrees_start / (fps*360.0))
-			params.add_float('shutterclose', self.exposure_degrees_end / (fps*360.0))
+			params.add_float('shutteropen', self.exposure_degrees_start / (fps * 2 * math.pi))
+			params.add_float('shutterclose', self.exposure_degrees_end / (fps * 2 * math.pi))
 		
 		if self.use_dof:
 			# Do not world-scale this, it is already in meters !
