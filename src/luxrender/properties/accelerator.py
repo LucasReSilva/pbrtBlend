@@ -39,6 +39,7 @@ class luxrender_accelerator(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'spacer',
 		'accelerator',
 		
 		'intersectcost',
@@ -49,9 +50,11 @@ class luxrender_accelerator(declarative_property_group):
 		'maxprimsperleaf',
 		'fullsweepthreshold',
 		'skipfactor',
+		'spacer', #add an extra one for halt settings, which does not have its own advanced option
 	]
 	
 	visibility = {
+		'spacer':				{ 'advanced': True },
 		'accelerator':			{ 'advanced': True },
 		'intersectcost':		{ 'advanced': True, 'accelerator': 'tabreckdtree' },
 		'traversalcost':		{ 'advanced': True, 'accelerator': 'tabreckdtree' },
@@ -64,6 +67,11 @@ class luxrender_accelerator(declarative_property_group):
 	}
 	
 	properties = [
+		{
+			'type': 'text',
+			'attr': 'spacer',
+			'name': '', #This param just draws some blank space in the panel
+		},
 		{
 			'type': 'enum',
 			'attr': 'accelerator',

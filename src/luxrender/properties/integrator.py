@@ -42,15 +42,22 @@ class luxrender_volumeintegrator(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'spacer',
 		'volumeintegrator',
 		'stepsize',
 	]
 	
 	visibility = {
-		'stepsize':							{ 'advanced': True },
+		'spacer':	{ 'advanced': True },
+		'stepsize':	{ 'advanced': True },
 	}
 	
 	properties = [
+		{
+			'type': 'text',
+			'attr': 'spacer',
+			'name': '', #This param just draws some blank space in the panel
+		},
 		{
 			'type': 'enum',
 			'attr': 'volumeintegrator',

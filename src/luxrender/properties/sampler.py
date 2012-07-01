@@ -39,6 +39,7 @@ class luxrender_sampler(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'spacer',
 		'sampler',
 		
 		'chainlength',
@@ -54,6 +55,7 @@ class luxrender_sampler(declarative_property_group):
 	]
 	
 	visibility = {
+		'spacer':				{ 'advanced': True },
 		'chainlength':			{ 'sampler': 'erpt' },
 		'mutationrange':		{ 'advanced': True, 'sampler': O(['erpt', 'metropolis']) },
 		'basesampler':			{ 'sampler': 'erpt' },
@@ -66,6 +68,11 @@ class luxrender_sampler(declarative_property_group):
 	}
 	
 	properties = [
+		{
+			'type': 'text',
+			'attr': 'spacer',
+			'name': '', #This param just draws some blank space in the panel
+		},
 		{
 			'type': 'enum',
 			'attr': 'sampler',
