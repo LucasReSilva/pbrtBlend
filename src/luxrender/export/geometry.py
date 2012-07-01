@@ -583,6 +583,10 @@ class GeometryExporter(object):
 		
 		next_matrices = []
 		
+		geom_scene = self.visibility_scene
+		if hasattr(self, 'geometry_scene') and self.geometry_scene:
+			geom_scene = self.geometry_scene
+		
 		# object motion blur
 		is_object_animated = False
 		if self.visibility_scene.camera.data.luxrender_camera.usemblur and self.visibility_scene.camera.data.luxrender_camera.objectmblur:
@@ -592,10 +596,10 @@ class GeometryExporter(object):
 			else:
 				# grab a bunch of fractional-frame fcurve_matrices and export
 				# several motionInstances for non-linear motion blur
-				STEPS = self.geometry_scene.camera.data.luxrender_camera.motion_blur_samples
+				STEPS = geom_scene.camera.data.luxrender_camera.motion_blur_samples
 	
 				for i in range(1, STEPS+1):
-					fcurve_matrix = object_anim_matrix(self.geometry_scene, obj, frame_offset=i/float(STEPS))
+					fcurve_matrix = object_anim_matrix(geom_scene, obj, frame_offset=i/float(STEPS))
 					if fcurve_matrix == False:
 						break
 					
@@ -621,8 +625,7 @@ class GeometryExporter(object):
 		# object translation/rotation/scale
 		if is_object_animated:
 			num_steps = len(next_matrices)
-			fsps = float(num_steps) * self.visibility_scene.render.fps
-			step_times = [(i) / fsps for i in range(0, num_steps+1)]
+			step_times = [self.visibility_scene.camera.data.luxrender_camera.intraframe_time(i / float(num_steps)) for i in range(0, num_steps+1)]
 			self.lux_context.motionBegin(step_times)
 			# then export first matrix as normal
 		

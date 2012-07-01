@@ -299,13 +299,14 @@ class luxrender_camera(declarative_property_group):
 		},
 	]
 	
-	def lookAt(self, camera):
+	def lookAt(self, camera, matrix = None):
 		'''
 		Derive a list describing 3 points for a LuxRender LookAt statement
 		
 		Returns		tuple(9) (floats)
 		'''
-		matrix = camera.matrix_world.copy()
+		if matrix == None:
+			matrix = camera.matrix_world.copy()
 		ws = get_worldscale()
 		matrix *= ws
 		ws = get_worldscale(as_scalematrix=False)
@@ -386,6 +387,28 @@ class luxrender_camera(declarative_property_group):
 			time = (self.exposure_end_abs - self.exposure_start)
 		if self.exposure_mode == 'degrees':
 			time = (self.exposure_degrees_end - self.exposure_degrees_start) / (fps * 360.0)
+		
+		return time
+		
+	def intraframe_time(self, t):
+		'''
+		t		float
+		
+		Given t in [0, 1], calculates the intra-frame time based on exposure mode
+		
+		Returns adjusted intra-frame time
+		'''
+		fps = LuxManager.CurrentScene.render.fps
+		
+		time = t
+		if self.exposure_mode == 'normalised':
+			time = (self.exposure_start + t * (self.exposure_end_norm - self.exposure_start)) / fps
+		if self.exposure_mode == 'absolute':
+			time = self.exposure_start + t * (self.exposure_end_abs - self.exposure_start)
+		if self.exposure_mode == 'degrees':
+			# degrees is special, the time of the frame spans 360 degrees, but shutter is open just part of that time
+			#time = (t * 360.0) / (fps * 360.0)
+			time = t / fps
 		
 		return time
 	
