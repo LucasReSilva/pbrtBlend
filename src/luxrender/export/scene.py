@@ -32,7 +32,7 @@ import tempfile
 from extensions_framework import util as efutil
 
 # LuxRender libs
-from ..export 			import get_worldscale, object_anim_matrix
+from ..export 			import get_worldscale, object_anim_matrix, object_anim_matrices
 from ..export			import lights		as export_lights
 from ..export			import materials	as export_materials
 from ..export			import geometry		as export_geometry
@@ -198,17 +198,23 @@ class SceneExporter(object):
 			is_cam_animated = False
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 				
-				next_matrix = object_anim_matrix(scene, scene.camera, ignore_scale=True)
+				STEPS = scene.camera.data.luxrender_camera.motion_blur_samples
+				anim_matrices = object_anim_matrices(scene, scene.camera, steps=STEPS, ignore_scale=True)
 				
-				if next_matrix != False:
-					lux_context.transformBegin(file=Files.MAIN)
-					
-					lux_context.lookAt( *scene.camera.data.luxrender_camera.lookAt(scene.camera, next_matrix) )
-					lux_context.coordinateSystem('CameraEndTransform')
-					lux_context.transformEnd()
+				if anim_matrices:
+					num_steps = len(anim_matrices)-1
+					fsps = float(num_steps) * scene.render.fps / scene.render.fps_base
+					step_times = [(i) / fsps for i in range(0, num_steps+1)]
+					lux_context.motionBegin(step_times)
+
+					for m in anim_matrices:
+						lux_context.lookAt( *scene.camera.data.luxrender_camera.lookAt(scene.camera, m) )
+					lux_context.motionEnd()
 					is_cam_animated = True
 					
-			lux_context.lookAt(	*scene.camera.data.luxrender_camera.lookAt(scene.camera) )
+			if not is_cam_animated:
+				lux_context.lookAt(	*scene.camera.data.luxrender_camera.lookAt(scene.camera) )
+				
 			lux_context.camera(	*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated)	)
 			lux_context.film(	*scene.camera.data.luxrender_camera.luxrender_film.api_output()	)
 			

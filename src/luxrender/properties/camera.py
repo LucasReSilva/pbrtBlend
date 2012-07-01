@@ -462,9 +462,6 @@ class luxrender_camera(declarative_property_group):
 			# update the camera settings with motion blur settings
 			params.add_string('shutterdistribution', self.shutterdistribution)
 		
-			if self.cammblur and is_cam_animated:
-				params.add_string('endtransform', 'CameraEndTransform')
-		
 		cam_type = 'orthographic' if cam.type == 'ORTHO' else self.type if bpy.app.version < (2, 63, 5 ) else 'environment' if cam.type == 'PANO' else 'perspective'
 		return cam_type, params
 
