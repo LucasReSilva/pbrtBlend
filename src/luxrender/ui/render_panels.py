@@ -135,22 +135,17 @@ class engine(render_panel):
 	'''
 	
 	bl_label = 'LuxRender Engine Configuration'
+	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_engine' )
 	]
 	
 	def draw(self, context):
-		row = self.layout.row(align=True)
-		rd = context.scene.render
-		split = self.layout.split()
-		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
-		
 		super().draw(context)
 		
 		row = self.layout.row(align=True)
+		rd = context.scene.render
 		row.prop(rd, "use_color_management")
 		if rd.use_color_management == True:
 			row.prop(rd, "use_color_unpremultiply")
@@ -172,6 +167,17 @@ class render_settings(render_panel):
 		( ('scene',), 'luxrender_accelerator' ),
 		( ('scene',), 'luxrender_halt' ),
 	]
+	
+	def draw(self, context):
+		row = self.layout.row(align=True)
+		rd = context.scene.render
+		split = self.layout.split()
+		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
+		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
+		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
+		
+		super().draw(context)
+	
 	
 @LuxRenderAddon.addon_register_class
 class testing(render_panel):
