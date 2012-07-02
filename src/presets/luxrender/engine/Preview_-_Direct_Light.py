@@ -23,18 +23,18 @@
 #
 
 import bpy
-bpy.context.scene.luxrender_engine.export_type = 'INT'
-bpy.context.scene.luxrender_rendermode.rendermode = 'sppm'
-bpy.context.scene.luxrender_rendermode.renderer = 'sppm'
-bpy.context.scene.luxrender_engine.write_files = True
-bpy.context.scene.luxrender_engine.fixed_seed = True
-bpy.context.scene.luxrender_halt.haltspp = 150
-bpy.context.scene.luxrender_integrator.surfaceintegrator = 'sppm'
-bpy.context.scene.luxrender_integrator.maxphotondepth = 24
-bpy.context.scene.luxrender_integrator.maxeyedepth = 8
-bpy.context.scene.luxrender_integrator.startradius = 3.0
-bpy.context.scene.luxrender_integrator.alpha = 1.0
-bpy.context.scene.luxrender_integrator.photonperpass = 2000000
+bpy.context.scene.luxrender_rendermode.rendermode = 'directlighting'
+bpy.context.scene.luxrender_rendermode.renderer = 'sampler'
+bpy.context.scene.luxrender_sampler.sampler = 'random'
+bpy.context.scene.luxrender_sampler.pixelsampler = 'vegas'
+bpy.context.scene.luxrender_sampler.pixelsamples = 1
+bpy.context.scene.luxrender_integrator.surfaceintegrator = 'directlighting'
+bpy.context.scene.luxrender_integrator.lightstrategy = 'auto'
+bpy.context.scene.luxrender_integrator.maxdepth = 16
+bpy.context.scene.luxrender_integrator.rrstrategy = 'efficiency'
+bpy.context.scene.luxrender_integrator.includeenvironment = True
+bpy.context.scene.luxrender_volumeintegrator.volumeintegrator = 'single'
+bpy.context.scene.luxrender_volumeintegrator.stepsize = 1.0
 bpy.context.scene.luxrender_accelerator.accelerator = 'qbvh'
 bpy.context.scene.luxrender_accelerator.advanced = False
 bpy.context.scene.luxrender_accelerator.intersectcost = 80
