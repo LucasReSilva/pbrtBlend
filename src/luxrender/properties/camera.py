@@ -203,8 +203,8 @@ class luxrender_camera(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'motion_blur_samples',
-			'name': 'Shutter Steps',
-			'description': 'Shutter Steps',
+			'name': 'Motion Subdivision',
+			'description': 'Number of motion steps per frame. Increase for non-linear motion blur or high velocity rotations',
 			'default': 1,
 			'min': 1,
 			'soft_min': 1,
