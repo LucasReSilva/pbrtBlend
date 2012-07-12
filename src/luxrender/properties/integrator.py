@@ -218,7 +218,6 @@ class luxrender_integrator(declarative_property_group):
 				
 		# path
 		'shadowraycount',
-		
 		'lightstrategy'
 
 	]
@@ -234,7 +233,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		# dl +
 		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'igi', 'path']) },
-		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': O(['exphotonmap', 'direct', 'path']) },
+		'shadowraycount':					{ 'advanced': True, 'surfaceintegrator': O(['exphotonmap', 'directlighting', 'path']) },
 		
 		# dp
 		'lbl_direct':						{ 'surfaceintegrator': 'distributedpath' },
