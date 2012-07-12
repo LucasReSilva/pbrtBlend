@@ -65,10 +65,10 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'description': 'Integrator used to calculate volumetric effects',
 			'default': 'multi',
 			'items': [
-				('emission', 'Emission', 'Calculate absorption and light-emission only'),
-				('single', 'Single', 'Calculate single scattering as well as absorption and light-emission'),
-				('multi', 'Multi', 'Calculate all volumetric effects, including multiple scattering, absorption, and light-emission'),
-				('none', 'None', 'Experimental, NoneScattering volumetric effects'),
+				('emission', 'Emission', 'Calculate volumetric absorption'),
+				('single', 'Single', 'Calculate single scattering and absorption'),
+				('multi', 'Multi', 'Calculate all volumetric effects, including multiple scattering and absorption'),
+				('none', 'None', 'Experimental/Debugging integrator, does not calculate any scattering effects'),
 			],
 			'save_in_preset': True
 		},
