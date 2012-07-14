@@ -747,7 +747,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
 		
 		if hasattr(self, 'update_progress') and LC.getAttribute('renderer_statistics', 'percentComplete') > 0:
-			prg = LC.statistics('percentComplete') / 100.0
+			prg = LC.getAttribute('renderer_statistics', 'percentComplete') / 100.0
 			self.update_progress(prg)
 		
 		if self.test_break() or \
