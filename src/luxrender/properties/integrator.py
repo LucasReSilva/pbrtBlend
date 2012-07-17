@@ -203,7 +203,7 @@ class luxrender_integrator(declarative_property_group):
 		'mindist',
 		
 		#sppm
-		'photonperpass',
+		['hitpointperpass', 'photonperpass'],
 		['startradius', 'alpha'],
 		['directlightsampling', 'includeenvironment'],
 		#sppm advanced
@@ -307,6 +307,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		# sppm
 		'photonperpass':					{ 'surfaceintegrator': 'sppm' },
+		'hitpointperpass':					{ 'surfaceintegrator': 'sppm' },
 		'startk':							{ 'surfaceintegrator': 'sppm' },
 		'alpha':							{ 'surfaceintegrator': 'sppm' },
 		'startradius':						{ 'surfaceintegrator': 'sppm' },
@@ -907,8 +908,16 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'photonperpass',
 			'name': 'Photons per pass',
-			'description': 'Number of photons to gather before going on to next pass',
+			'description': 'Number of photons to gather before going on to the next pass',
 			'default': 1000000,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'hitpointperpass',
+			'name': 'Hit points per pass',
+			'description': 'Number of hit points to store per eye-pass before moving on. Lower values can decrease memory useage at the cost of some performance. 0=one hitpoint per pixel.',
+			'default': 0,
 			'save_in_preset': True
 		},
 		{
@@ -920,15 +929,15 @@ class luxrender_integrator(declarative_property_group):
 			'min': 0.0001,
 			'save_in_preset': True
 		},
-		{
-			'type': 'int',
-			'attr': 'startk',
-			'name': 'Starting K',
-			'description': 'Adjust starting photon radius to get this many photons. Higher values clear faster but are less accurate. 0=use initial radius',
-			'default': 30,
-			'min': 0,
-			'save_in_preset': True
-		},
+# 		{
+# 			'type': 'int',
+# 			'attr': 'startk',
+# 			'name': 'Starting K',
+# 			'description': 'Adjust starting photon radius to get this many photons. Higher values clear faster but are less accurate. 0=use initial radius',
+# 			'default': 30,
+# 			'min': 0,
+# 			'save_in_preset': True
+# 		},
 		{
 			'type': 'float',
 			'attr': 'alpha',
@@ -1065,6 +1074,7 @@ class luxrender_integrator(declarative_property_group):
 			params.add_integer('maxeyedepth', self.maxeyedepth) \
 				  .add_integer('maxphotondepth', self.maxphotondepth) \
 				  .add_integer('photonperpass', self.photonperpass) \
+				  .add_integer('hitpointperpass', self.hitpointperpass) \
  				  .add_float('startradius', self.startradius) \
 				  .add_float('alpha', self.alpha) \
 				  .add_bool('includeenvironment', self.includeenvironment) \
