@@ -29,9 +29,11 @@ from extensions_framework.validate import Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
+from ..export.materials import get_texture_from_scene
 from ..properties.material import texture_append_visibility
 from ..properties.texture import FloatTextureParameter
 from ..util import dict_merge
+from ..outputs import LuxManager
 
 class MeshFloatTextureParameter(FloatTextureParameter):
 	def texture_slot_set_attr(self):
@@ -214,7 +216,12 @@ class luxrender_mesh(declarative_property_group):
 		export_dm = TF_displacementmap.get_paramset(self)
 		
 		if self.dm_floattexturename != '' and len(export_dm) > 0:
-			params.add_string('displacementmap', self.dm_floattexturename)
+			texture_name = getattr(self, 'dm_floattexturename')
+			texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+			if texture.type in ('IMAGE', 'OCEAN') and texture.luxrender_texture.type == 'BLENDER':
+				params.add_string('displacementmap', '%s_float' % self.dm_floattexturename)
+			else:	
+				params.add_string('displacementmap', self.dm_floattexturename)
 			params.add_float('dmscale', self.dmscale)
 			params.add_float('dmoffset', self.dmoffset)
 		
