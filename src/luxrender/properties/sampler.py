@@ -62,7 +62,7 @@ class luxrender_sampler(declarative_property_group):
 		'basesampler':					{ 'sampler': 'erpt' },
 		'pixelsampler':					O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
 		'pixelsamples':					O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
-		'adaptive_largemutationprob':	{ 'sampler': 'metropolis' },					
+		'adaptive_largemutationprob':	A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),					
 		'largemutationprob':			A([{ 'sampler': 'metropolis' }, { 'adaptive_largemutationprob': False }, ]),
 		'usecooldown':					A([{ 'sampler': 'metropolis' }, { 'adaptive_largemutationprob': False }, ]),
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
@@ -101,8 +101,8 @@ class luxrender_sampler(declarative_property_group):
 			'type': 'bool',
 			'attr': 'adaptive_largemutationprob',
 			'name': 'Adaptive Large Mutation Probability',
-			'description': 'Automatically determine the probability of compeltely random mutations vs guided ones',
-			'default': False,
+			'description': 'Automatically determine the probability of completely random mutations vs guided ones',
+			'default': True,
 			'save_in_preset': True
 		},
 		{
