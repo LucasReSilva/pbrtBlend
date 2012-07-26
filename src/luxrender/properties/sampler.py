@@ -48,8 +48,8 @@ class luxrender_sampler(declarative_property_group):
 		'pixelsampler',
 		'pixelsamples',
 		
-		'usecooldown',
 		'adaptive_largemutationprob',
+		'usecooldown',
 		'largemutationprob',
 		#'mutationrange',
 		'maxconsecrejects',
@@ -65,7 +65,7 @@ class luxrender_sampler(declarative_property_group):
 		'pixelsamples':					O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
 		'adaptive_largemutationprob':	{ 'sampler': 'metropolis' },					
 		'largemutationprob':			A([{ 'sampler': 'metropolis' }, { 'adaptive_largemutationprob': False }, ]),
-		'usecooldown':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+		'usecooldown':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, { 'adaptive_largemutationprob': False }, ]),
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 	}
