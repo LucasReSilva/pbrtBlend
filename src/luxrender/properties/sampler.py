@@ -48,23 +48,25 @@ class luxrender_sampler(declarative_property_group):
 		'pixelsampler',
 		'pixelsamples',
 		
-		'largemutationprob',
+		'adaptive_largemutationprob',
+		['largemutationprob', 'usecooldown'],
 		#'mutationrange',
 		'maxconsecrejects',
-		['usevariance', 'usecooldown'],
+		'usevariance',
 	]
 	
 	visibility = {
-		'spacer':				{ 'advanced': True },
-		'chainlength':			{ 'sampler': 'erpt' },
-		'mutationrange':		{ 'advanced': True, 'sampler': O(['erpt', 'metropolis']) },
-		'basesampler':			{ 'sampler': 'erpt' },
-		'pixelsampler':			O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
-		'pixelsamples':			O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
-		'largemutationprob':	{ 'sampler': 'metropolis' },					
-		'maxconsecrejects':		A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
-		'usevariance':			A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
-		'usecooldown':			A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+		'spacer':						{ 'advanced': True },
+		'chainlength':					{ 'sampler': 'erpt' },
+		'mutationrange':				{ 'advanced': True, 'sampler': O(['erpt', 'metropolis']) },
+		'basesampler':					{ 'sampler': 'erpt' },
+		'pixelsampler':					O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
+		'pixelsamples':					O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
+		'adaptive_largemutationprob':	{ 'sampler': 'metropolis' },					
+		'largemutationprob':			A([{ 'sampler': 'metropolis' }, { 'adaptive_largemutationprob': False }, ]),
+		'usecooldown':					A([{ 'sampler': 'metropolis' }, { 'adaptive_largemutationprob': False }, ]),
+		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 	}
 	
 	properties = [
@@ -92,6 +94,14 @@ class luxrender_sampler(declarative_property_group):
 			'attr': 'advanced',
 			'name': 'Advanced',
 			'description': 'Configure advanced sampler settings',
+			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'adaptive_largemutationprob',
+			'name': 'Adaptive Large Mutation Probability',
+			'description': 'Automatically determine the probability of compeltely random mutations vs guided ones',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -129,7 +139,7 @@ class luxrender_sampler(declarative_property_group):
 			'attr': 'usecooldown',
 			'name': 'Use Cooldown',
 			'description': 'Use fixed large mutation probability at the beginning of the render, to avoid convergence errors with extreme settings',
-			'default': False,
+			'default': True,
 			'save_in_preset': True
 		},
 		{
@@ -206,12 +216,14 @@ class luxrender_sampler(declarative_property_group):
 			params.add_string('basesampler', self.basesampler)
 		
 		if self.sampler == 'metropolis':
-			params.add_float('largemutationprob', self.largemutationprob)
+			params.add_bool('adaptive_largemutationprob', self.adaptive_largemutationprob)
+			if not self.adaptive_largemutationprob:
+				params.add_float('largemutationprob', self.largemutationprob)
+				params.add_bool('usecooldown', self.usecooldown)
 			
 		if self.advanced:
 			if self.sampler == 'metropolis':
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 				params.add_bool('usevariance', self.usevariance)
-				params.add_bool('usecooldown', self.usecooldown)
-		
+						
 		return self.sampler, params
