@@ -141,7 +141,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 			.add_integer('pixelsamples', 2)
 		lux_context.sampler('lowdiscrepancy', sampler_params)
 	else:
-		lux_context.sampler('metropolis', ParamSet())
+		sampler_params = ParamSet() \
+			.add_bool('usecooldown', False)
+		lux_context.sampler('metropolis', sampler_params)
 	
 	# Surface Integrator
 	if False:
