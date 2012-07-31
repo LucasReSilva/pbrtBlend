@@ -563,9 +563,9 @@ class luxrender_lamp_hemi(declarative_property_group):
 			'name': 'Map Type',
 			'default': 'latlong',
 			'items': [
-				('latlong', 'Lat Long', 'latlong'),
-				('angular', 'Angular', 'angular'),
-				('vcross', 'Vert Cross', 'vcross')
+				('latlong', 'Equirectangular (lat long)', 'latlong'),
+				('angular', 'Angular (mirror ball)', 'angular'),
+				('vcross', 'Vertical Cross (skybox)', 'vcross')
 			]
 		},
 		{
