@@ -216,15 +216,19 @@ class luxrender_sampler(declarative_property_group):
 			params.add_integer('chainlength', self.chainlength)
 			params.add_string('basesampler', self.basesampler)
 		
+# 		if self.sampler == 'metropolis':
+# 			params.add_bool('adaptive_largemutationprob', self.adaptive_largemutationprob)
+# 			if not self.adaptive_largemutationprob:
+# 				params.add_float('largemutationprob', self.largemutationprob)
+# 				params.add_bool('usecooldown', self.usecooldown)
+		
 		if self.sampler == 'metropolis':
-			params.add_bool('adaptive_largemutationprob', self.adaptive_largemutationprob)
-			if not self.adaptive_largemutationprob:
-				params.add_float('largemutationprob', self.largemutationprob)
-				params.add_bool('usecooldown', self.usecooldown)
+			params.add_float('largemutationprob', self.largemutationprob)
 			
 		if self.advanced:
 			if self.sampler == 'metropolis':
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 				params.add_bool('usevariance', self.usevariance)
+				params.add_bool('usecooldown', self.usecooldown)
 						
 		return self.sampler, params
