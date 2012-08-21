@@ -1679,9 +1679,10 @@ class luxrender_mat_glossy(declarative_property_group):
 	alert = {}
 	
 	controls = [
-		'multibounce'
+		['multibounce', 'separable']
 	] + \
 		TC_Kd.controls + \
+		TF_sigma.controls + \
 		TF_d.controls + \
 		TC_Ka.controls + \
 	[
@@ -1715,7 +1716,8 @@ class luxrender_mat_glossy(declarative_property_group):
 		{
 			'alpha_source': { 'transparent': True }
 		},
-		TF_alpha.visibility
+		TF_alpha.visibility,
+		TF_sigma.visibility
 	)
 	
 	enabled = {}
@@ -1730,6 +1732,7 @@ class luxrender_mat_glossy(declarative_property_group):
 	visibility = texture_append_visibility(visibility, TC_Ks, { 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_index, { 'useior': True })
 	visibility = texture_append_visibility(visibility, TF_alpha, { 'transparent': True, 'alpha_source': 'separate' })
+	visibility = texture_append_visibility(visibility, TF_sigma, { 'separable': True })
 	
 	properties = [
 		{
@@ -1743,6 +1746,14 @@ class luxrender_mat_glossy(declarative_property_group):
 			'name': 'Multibounce',
 			'description': 'Enable surface layer multibounce',
 			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'separable',
+			'name': 'Separable',
+			'description': 'Use separable coating/base model',
+			'default': True,
 			'save_in_preset': True
 		},
 		{
@@ -1779,7 +1790,8 @@ class luxrender_mat_glossy(declarative_property_group):
 		TF_uexponent.get_properties() + \
 		TF_vroughness.get_properties() + \
 		TF_vexponent.get_properties() + \
-		TF_alpha.get_properties()
+		TF_alpha.get_properties() + \
+		TF_sigma.get_properties()
 			
 	for prop in properties:
 		if prop['attr'].startswith('uexponent'):
@@ -1812,6 +1824,9 @@ class luxrender_mat_glossy(declarative_property_group):
 		
 		glossy_params.update( TF_uroughness.get_paramset(self) )
 		glossy_params.update( TF_vroughness.get_paramset(self) )
+		
+		if self.separable:
+			glossy_params.update( TF_sigma.get_paramset(self) )
 		
 		return glossy_params
 	
