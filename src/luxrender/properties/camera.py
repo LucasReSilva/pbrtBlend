@@ -374,7 +374,7 @@ class luxrender_camera(declarative_property_group):
 				((2*shiftY)+1) * scale
 				]
 		
-		if scene.render.use_border:
+		if scene.render.use_border and scene.render.use_crop_to_border:
 			(x1,x2,y1,y2) = [
 				scene.render.border_min_x, scene.render.border_max_x,
 				scene.render.border_min_y, scene.render.border_max_y
@@ -736,7 +736,7 @@ class luxrender_film(declarative_property_group):
 		
 		params = ParamSet()
 		
-		if scene.render.use_border:
+		if scene.render.use_border and scene.render.use_crop_to_border:
 			(x1,x2,y1,y2) = [
 				scene.render.border_min_x, scene.render.border_max_x,
 				scene.render.border_min_y, scene.render.border_max_y
@@ -749,12 +749,12 @@ class luxrender_film(declarative_property_group):
 			params.add_integer('xresolution', xr)
 			params.add_integer('yresolution', yr)
 		
-#		if scene.render.use_border:
-#			cropwindow = [
-#				scene.render.border_min_x, scene.render.border_max_x,
-#				scene.render.border_min_y, scene.render.border_max_y
-#			]
-#			params.add_float('cropwindow', cropwindow)
+		if scene.render.use_border and not scene.render.use_crop_to_border:
+			cropwindow = [
+				scene.render.border_min_x, scene.render.border_max_x,
+				scene.render.border_min_y, scene.render.border_max_y
+			]
+			params.add_float('cropwindow', cropwindow)
 		
 		# ColourSpace
 		if self.luxrender_colorspace.preset:
