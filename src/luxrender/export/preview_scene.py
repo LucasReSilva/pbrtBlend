@@ -182,6 +182,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	LuxManager.SetCurrentScene(scene) # for preview context
 	
 	# Light
+	preview_scale = bl_scene.luxrender_world.preview_object_size / 2
 	lux_context.attributeBegin()
 	if mat.preview_render_type == 'FLAT' and mat_preview_xz == True:
 		lux_context.transform([
@@ -194,7 +195,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		lux_context.texture('pL', 'color', 'blackbody', light_bb_params)
 		light_params = ParamSet() \
 			.add_texture('L', 'pL') \
-			.add_float('gain', 1.5 / (bl_scene.luxrender_world.preview_object_size / 2 )) \
+			.add_float('gain', 1.5 / preview_scale ) \
 			.add_float('importance', 1.0)
 
 	elif mat.preview_render_type == 'FLAT' and mat_preview_xz == False:
@@ -209,7 +210,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		lux_context.texture('pL', 'color', 'blackbody', light_bb_params)
 		light_params = ParamSet() \
 			.add_texture('L', 'pL') \
-			.add_float('gain', 7.0 / (bl_scene.luxrender_world.preview_object_size / 2 )) \
+			.add_float('gain', 7.0 / preview_scale ) \
 			.add_float('importance', 1.0)
 
 	else:
@@ -223,7 +224,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		lux_context.texture('pL', 'color', 'blackbody', light_bb_params)
 		light_params = ParamSet() \
 			.add_texture('L', 'pL') \
-			.add_float('gain', 1.0 / (bl_scene.luxrender_world.preview_object_size / 2 )) \
+			.add_float('gain', 1.0 / preview_scale ) \
 			.add_float('importance', 1.0)
 	
 	if bl_scene.luxrender_world.default_exterior_volume != '':
