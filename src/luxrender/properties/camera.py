@@ -374,7 +374,7 @@ class luxrender_camera(declarative_property_group):
 				((2*shiftY)+1) * scale
 				]
 		
-		if scene.render.use_border and scene.render.use_crop_to_border:
+		if scene.render.use_border and not (scene.render.use_crop_to_border == False and (scene.luxrender_engine.render == False or (scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and scene.luxrender_engine.monitor_external == False))): #If we are using cropwindow, we want the full-frame screenwindow. See border render handling code elsewhere in this file (do a search for "border")
 			(x1,x2,y1,y2) = [
 				scene.render.border_min_x, scene.render.border_max_x,
 				scene.render.border_min_y, scene.render.border_max_y
@@ -736,25 +736,41 @@ class luxrender_film(declarative_property_group):
 		
 		params = ParamSet()
 		
-		if scene.render.use_border and scene.render.use_crop_to_border:
-			(x1,x2,y1,y2) = [
-				scene.render.border_min_x, scene.render.border_max_x,
-				scene.render.border_min_y, scene.render.border_max_y
-			]
-			# Set resolution
-			params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
-			params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+		if scene.render.use_border: #Border rendering handler, this gets a bit tricky. Blender ALWAYS expects to get back a cropped image, it will handle the padding itself if the user asked for it.
+			if scene.render.use_crop_to_border: #user asked to crop, so always crop
+				(x1,x2,y1,y2) = [
+					scene.render.border_min_x, scene.render.border_max_x,
+					scene.render.border_min_y, scene.render.border_max_y
+				]
+				# Set resolution
+				params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
+				params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+			
+			if not scene.render.use_crop_to_border: #user asked for padded-to-full-frame output, there are a few cases where Lux needs to do this itself since the rendered image will not be returned to Blender
+				if scene.luxrender_engine.render == False or (scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and scene.luxrender_engine.monitor_external == False): #If run-renderer (scene.luxrender_engine.render) is disabled or we are in un-monitored external mode, we do not return the image to Blender and Lux must pad the image itself
+					cropwindow = [
+						scene.render.border_min_x, scene.render.border_max_x,
+						1-scene.render.border_min_y, 1-scene.render.border_max_y
+					] #Subtract scene.render.border Y values from 1 to translate between Blender and Lux conventions
+					params.add_float('cropwindow', cropwindow)
+					params.add_integer('xresolution', xr) #Don't forget to set full frame resolution
+					params.add_integer('yresolution', yr)
+
+					
+				else: #we are returning the image to blender which will pad for us, so have LuxRender send back a cropped frame anyway
+					(x1,x2,y1,y2) = [
+						scene.render.border_min_x, scene.render.border_max_x,
+						scene.render.border_min_y, scene.render.border_max_y
+					]
+					# Set resolution
+					params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
+					params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+
 		else:
 			# Set resolution
 			params.add_integer('xresolution', xr)
 			params.add_integer('yresolution', yr)
 		
-		if scene.render.use_border and not scene.render.use_crop_to_border:
-			cropwindow = [
-				scene.render.border_min_x, scene.render.border_max_x,
-				scene.render.border_min_y, scene.render.border_max_y
-			]
-			params.add_float('cropwindow', cropwindow)
 		
 		# ColourSpace
 		if self.luxrender_colorspace.preset:
