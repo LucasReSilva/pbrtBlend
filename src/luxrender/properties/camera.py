@@ -743,8 +743,12 @@ class luxrender_film(declarative_property_group):
 					scene.render.border_min_y, scene.render.border_max_y
 				]
 				# Set resolution
-				params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
-				params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+#				params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
+#				params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
+				# This is a new method of "rounding" the cropped image to match blenders expected rectangle_size
+				# I tested this with several cases which failed with the above rounding, pls check - Jens
+				params.add_integer('xresolution', int((xr*x2)-(xr*x1)+1))
+				params.add_integer('yresolution', int((yr*y2)-(yr*y1)+1))
 			
 			if not scene.render.use_crop_to_border: #user asked for padded-to-full-frame output, there are a few cases where Lux needs to do this itself since the rendered image will not be returned to Blender
 				if scene.luxrender_engine.render == False or (scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and scene.luxrender_engine.monitor_external == False): #If run-renderer (scene.luxrender_engine.render) is disabled or we are in un-monitored external mode, we do not return the image to Blender and Lux must pad the image itself
