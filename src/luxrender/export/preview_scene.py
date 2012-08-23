@@ -182,6 +182,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	LuxManager.SetCurrentScene(scene) # for preview context
 	
 	# Light
+	# for usability previev_scale is not an own property but calculated from the object dimensions
+	# thus a user can directly judge mappings on a given object size
 	preview_scale = bl_scene.luxrender_world.preview_object_size / 2
 	lux_context.attributeBegin()
 	if mat.preview_render_type == 'FLAT' and mat_preview_xz == True:

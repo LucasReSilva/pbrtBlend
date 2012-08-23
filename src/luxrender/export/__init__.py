@@ -247,7 +247,8 @@ class ParamSet(list):
 		return self
 
 def get_worldscale(as_scalematrix=True):
-	
+	# for usability previev_scale is not an own property but calculated from the object dimensions
+	# thus a user can directly judge mappings on a given object size
 	preview_scale = bpy.context.scene.luxrender_world.preview_object_size / 2
 	ws = 1 / preview_scale
 	
