@@ -72,10 +72,10 @@ class luxrender_world(declarative_property_group):
 	
 	properties = [
 				  {
-				  'attr': 'preview_scale',
+				  'attr': 'preview_object_size',
 				  'type': 'float',
-				  'name': 'Scale Preview',
-				  'description': 'Size of the Preview Objects Edges or Sphere-Diameter',
+				  'name': 'Preview Object Size',
+				  'description': 'Real Size of the Preview Objects Edges or Sphere-Diameter',
 				  'min': 0.01,
 				  'soft_min': 0.01,
 				  'max': 100.0,

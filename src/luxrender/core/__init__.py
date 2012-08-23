@@ -112,7 +112,7 @@ def lux_use_alternate_matview(self, context):
 
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 		row = self.layout.row()
-		row.prop(context.scene.luxrender_world, "preview_scale", text="Size")
+		row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
 		row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
 		if context.material.preview_render_type == 'FLAT':
 			row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
@@ -123,7 +123,7 @@ def lux_use_alternate_texview(self, context):
 
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 		row = self.layout.row()
-		row.prop(context.scene.luxrender_world, "preview_scale", text="Size")
+		row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
 		row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
 		if context.material.preview_render_type == 'FLAT':
 			row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")

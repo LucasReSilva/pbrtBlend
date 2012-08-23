@@ -248,7 +248,7 @@ class ParamSet(list):
 
 def get_worldscale(as_scalematrix=True):
 	
-	ws = 2 / bpy.context.scene.luxrender_world.preview_scale
+	ws = 2 / bpy.context.scene.luxrender_world.preview_object_size # this is orig. size and matches scale == 1
 	
 	scn_us = LuxManager.CurrentScene.unit_settings
 	
