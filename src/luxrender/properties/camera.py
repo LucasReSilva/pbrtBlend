@@ -743,10 +743,8 @@ class luxrender_film(declarative_property_group):
 					scene.render.border_min_y, scene.render.border_max_y
 				]
 				# Set resolution
-#				params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
-#				params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
 				# This is a new method of "rounding" the cropped image to match blenders expected rectangle_size
-				# I tested this with several cases which failed with the above rounding, pls check - Jens
+				# I tested this with several cases which failed with the former rounding, pls check - Jens
 				params.add_integer('xresolution', int((xr*x2)-(xr*x1)+1))
 				params.add_integer('yresolution', int((yr*y2)-(yr*y1)+1))
 			
@@ -767,10 +765,8 @@ class luxrender_film(declarative_property_group):
 						scene.render.border_min_y, scene.render.border_max_y
 					]
 					# Set resolution
-#					params.add_integer('xresolution', round(xr*x2, 0)-round(xr*x1, 0))
-#					params.add_integer('yresolution', round(yr*y2, 0)-round(yr*y1, 0))
 					# This is a new method of "rounding" the cropped image to match blenders expected rectangle_size
-					# I tested this with several cases which failed with the above rounding, pls check - Jens
+					# I tested this with several cases which failed with the former rounding, pls check - Jens
 					params.add_integer('xresolution', int((xr*x2)-(xr*x1)+1))
 					params.add_integer('yresolution', int((yr*y2)-(yr*y1)+1))
 
