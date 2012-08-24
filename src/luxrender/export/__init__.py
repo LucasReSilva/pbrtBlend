@@ -250,8 +250,8 @@ def get_worldscale(as_scalematrix=True):
 	# For usability, previev_scale is not an own property but calculated from the object dimensions
 	# A user can directly judge mappings on an adjustable object_size, we simply scale the whole preview
 	preview_scale = bpy.context.scene.luxrender_world.preview_object_size / 2
-	ws = 1 / preview_scale
-	
+	ws = 1 / preview_scale if LuxManager.CurrentScene.name == "preview" else 1 # this is a safety net to prevent previewscale affecting render
+
 	scn_us = LuxManager.CurrentScene.unit_settings
 	
 	if scn_us.system in ['METRIC', 'IMPERIAL']:
