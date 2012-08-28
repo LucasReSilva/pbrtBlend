@@ -258,11 +258,16 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
 		luxrender_lamp_basic.visibility,
 		{ 'mapname': { 'projector': True } },
 	)
+	
+	def square_projector(self, context):
+		context.lamp.use_square = self.projector #Toggle the "square" option to give something of a preview for projector
+
 	properties = luxrender_lamp_basic.properties[:] + [
 		{
 			'type': 'bool',
 			'attr': 'projector',
 			'name': 'Projector',
+			'update': square_projector,
 			'default': False
 		},
 		{

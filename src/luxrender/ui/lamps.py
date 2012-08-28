@@ -102,6 +102,9 @@ class ui_luxrender_lamp_spot(lamps_panel):
 				if not projector:
 					col.prop(context.lamp, "spot_blend", text="Blend", slider=True)
 
+				row = self.layout.row()
+				row.prop(context.lamp, "show_cone", text="Show Cone")
+
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_sun(lamps_panel):
 	bl_label = 'LuxRender Sun + Sky'
