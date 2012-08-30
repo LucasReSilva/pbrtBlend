@@ -107,6 +107,16 @@ _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 ### Some additions to Blender panels for better allocation in context
 ### use this example for such overrides
 
+# Add a hint to differentiate blender output and lux output
+def lux_output_hints(self, context):
+	if context.scene.render.engine == 'LUXRENDER_RENDER':
+		row = self.layout.row()
+		col = self.layout.column()
+		row.label("NOTE: This panel only controls Blender image output")
+		col.label("Setup LuxRender output in the Camera -> LuxRenderFilm")
+
+_register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))
+
 # Add view buttons for viewcontrol to preview panels
 def lux_use_alternate_matview(self, context):
 
