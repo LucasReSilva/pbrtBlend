@@ -844,7 +844,7 @@ class luxrender_film(declarative_property_group):
 		params.add_bool('write_tga', self.write_tga)
 		if self.write_tga:
 			params.add_string('write_tga_channels', output_channels)
-			params.add_string('write_tga_Zbuf', self.write_zbuf)
+			params.add_bool('write_tga_ZBuf', self.write_zbuf)
 			params.add_string('write_tga_zbuf_normalizationtype', self.zbuf_normalization)
 		
 		params.add_string('ldr_clamp_method', self.ldr_clamp_method)
