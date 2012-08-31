@@ -569,7 +569,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 			'default': 'latlong',
 			'items': [
 				('latlong', 'Equirectangular (lat long)', 'latlong'),
-				('angular', 'Angular (mirror ball)', 'angular'),
+				('angular', 'Angular (light probe)', 'angular'),
 				('vcross', 'Vertical Cross (skybox)', 'vcross')
 			]
 		},
