@@ -110,10 +110,16 @@ _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 # Add a hint to differentiate blender output and lux output
 def lux_output_hints(self, context):
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
-		row = self.layout.row()
+
 		col = self.layout.column()
-		row.label("NOTE: This panel only controls Blender image output")
-		col.label("Setup LuxRender output in the Camera -> LuxRenderFilm")
+		col.label("LuxOutput  (adv. settings -> Camera -> LuxRenderFilm)")
+		# these controls are redundant and in sync with camera panel settings
+		# meant for easy acces and better overview
+		row = self.layout.row()
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png", text="PNG")
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TGA")
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr", text="EXR")
+		
 
 _register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))
 
