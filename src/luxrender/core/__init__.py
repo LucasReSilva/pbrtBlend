@@ -112,13 +112,35 @@ def lux_output_hints(self, context):
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 
 		col = self.layout.column()
-		col.label("LuxOutput  (adv. settings -> Camera -> LuxRenderFilm)")
-		# these controls are redundant and in sync with camera panel settings
-		# meant for easy acces and better overview
+		col.label("Lux Output formats")
 		row = self.layout.row()
 		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png", text="PNG")
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TGA")
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr", text="EXR")
+		if context.scene.camera.data.luxrender_camera.luxrender_film.write_png:
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png_16bit", text="use 16bit PNG")
+		row = self.layout.row()
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TARGA")
+		row = self.layout.row()
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr", text="OpenEXR")
+		if context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_applyimaging", text="Tonemap EXR")
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_halftype", text="Use 16bit EXR")
+			row = self.layout.row()
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_compressiontype", text="EXR Compression")
+		if context.scene.camera.data.luxrender_camera.luxrender_film.write_tga or context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+			row = self.layout.row()
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_zbuf", text="Enable Z-Buffer")
+			if context.scene.camera.data.luxrender_camera.luxrender_film.write_zbuf:
+				row = self.layout.row()
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "zbuf_normalization", text="Z-Buffer Normalization")
+		row = self.layout.row()
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Enable alpha channel")
+		if context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha:
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
+		row = self.layout.row()
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm", text="Write FLM")
+		if context.scene.camera.data.luxrender_camera.luxrender_film.write_flm:
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct", text="Write FLM Directly")
 		
 
 _register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))

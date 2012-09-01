@@ -479,32 +479,32 @@ class luxrender_film(declarative_property_group):
 		'flmwriteinterval',
 		'displayinterval',
 		
-		'lbl_outputs',
-		['write_png', 'write_png_16bit'],
-		'write_tga',
-		['write_exr', 'write_exr_applyimaging', 'write_exr_halftype'],
-		'write_exr_compressiontype',
-		'write_zbuf',
-		'zbuf_normalization',
-		['output_alpha', 'premultiply_alpha'],
-		['write_flm', 'restart_flm', 'write_flm_direct'],
+#		'lbl_outputs',
+#		['write_png', 'write_png_16bit'],
+#		'write_tga',
+#		['write_exr', 'write_exr_applyimaging', 'write_exr_halftype'],
+#		'write_exr_compressiontype',
+#		'write_zbuf',
+#		'zbuf_normalization',
+#		['output_alpha', 'premultiply_alpha'],
+#		['write_flm', 'restart_flm', 'write_flm_direct'],
 		
 		'ldr_clamp_method',
 		'outlierrejection_k',
 		'tilecount'
 	]
 	
-	visibility = {
-		'restart_flm': { 'write_flm': True },
-		'premultiply_alpha': { 'output_alpha': True },
-		'write_flm_direct': { 'write_flm': True },
-		'write_png_16bit': { 'write_png': True },
-		'write_exr_applyimaging': { 'write_exr': True },
-		'write_exr_halftype': { 'write_exr': True },
-		'write_exr_compressiontype': { 'write_exr': True },
-		'write_zbuf': O([{'write_exr': True }, { 'write_tga': True }]),
-		'zbuf_normalization': A([{'write_zbuf': True}, O([{'write_exr': True }, { 'write_tga': True }])]),
-	}
+#	visibility = {
+#		'restart_flm': { 'write_flm': True },
+#		'premultiply_alpha': { 'output_alpha': True },
+#		'write_flm_direct': { 'write_flm': True },
+#		'write_png_16bit': { 'write_png': True },
+#		'write_exr_applyimaging': { 'write_exr': True },
+#		'write_exr_halftype': { 'write_exr': True },
+#		'write_exr_compressiontype': { 'write_exr': True },
+#		'write_zbuf': O([{'write_exr': True }, { 'write_tga': True }]),
+#		'zbuf_normalization': A([{'write_zbuf': True}, O([{'write_exr': True }, { 'write_tga': True }])]),
+#	}
 	
 	properties = [
 		{
