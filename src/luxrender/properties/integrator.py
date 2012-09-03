@@ -916,7 +916,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'hitpointperpass',
 			'name': 'Hit points per pass',
-			'description': 'Number of hit points to store per eye-pass before moving on. Lower values can decrease memory useage at the cost of some performance. 0=one hitpoint per pixel.',
+			'description': 'Number of hit points to store per eye-pass before moving on. Lower values can decrease memory useage at the cost of some performance. 0=one hitpoint per pixel',
 			'default': 0,
 			'save_in_preset': True
 		},
@@ -1018,7 +1018,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'bool',
 			'attr': 'useproba',
 			'name': 'Use PPM Probability',
-			'description': 'Use PPM probability for search radius reduction.',
+			'description': 'Use PPM probability for search radius reduction',
 			'default': True,
 			'save_in_preset': True
 		},
