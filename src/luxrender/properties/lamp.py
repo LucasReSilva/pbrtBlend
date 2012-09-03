@@ -25,6 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
+import math
 
 from extensions_framework import declarative_property_group
 import extensions_framework.util as efutil
@@ -322,9 +323,19 @@ class luxrender_lamp_sun(declarative_property_group):
 		'sunhalobrightness',
 		'sunhalosize',
 		'backscattering',
-	]
+		'theta'
+	] + TC_L.controls[:] #Pin this at the end so the sun type menu isn't jumping around when you select the distant lamp
 	
-	visibility = {
+	visibility = { #Do L visibility manually because we only need it for distant
+		'L_colorlabel':			{ 'sunsky_type': 'distant'},
+		'L_color': 				{ 'sunsky_type': 'distant'},
+		'L_usecolortexture':	{ 'sunsky_type': 'distant'},
+		'L_colortexture':		{ 'sunsky_type': 'distant', 'L_usecolortexture': True },
+		'L_multiplycolor':		{ 'sunsky_type': 'distant', 'L_usecolortexture': True },
+		'sunsky_advanced':		{ 'sunsky_type': LO({'!=':'distant'})},
+		'turbidity':			{ 'sunsky_type': LO({'!=':'distant'})},
+		'nsamples':				{ 'sunsky_type': LO({'!=':'distant'})},
+		'theta':				{ 'sunsky_type': 'distant'},
 		'relsize':				{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sky'}) },
 		'horizonbrightness':	{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
 		'horizonsize':			{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
@@ -333,7 +344,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		'backscattering':		{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
 	}
 	
-	properties = [
+	properties = TC_L.properties[:] + [
 		{
 			'type': 'float',
 			'attr': 'turbidity',
@@ -350,9 +361,10 @@ class luxrender_lamp_sun(declarative_property_group):
 			'name': 'Sky Type',
 			'default': 'sunsky',
 			'items': [
-				('sunsky', 'Sun & Sky', 'sunsky'),
-				('sun', 'Sun Only', 'sun'),
-				('sky', 'Sky Only', 'sky'),
+				('sunsky', 'Sun & Sky', 'Physical sun with sky'),
+				('sun', 'Sun Only', 'Physical sun without sky'),
+				('sky', 'Sky Only', 'Physical sky without sun'),
+				('distant', 'Distant', 'Generic directional light'),
 			]
 		},
 		{
@@ -432,18 +444,36 @@ class luxrender_lamp_sun(declarative_property_group):
 			'max': 100,
 			'soft_max': 100,
 		},
+		{
+			'type': 'float',
+			'attr': 'theta',
+			'name': 'Theta',
+			'description': 'Size of the lamp, set as the half-angle of the light source',
+			'default': 0.0 ,
+			'min': 0.0 ,
+			'soft_min': 0.0 ,
+			'max': math.pi,
+			'soft_max': math.pi,
+			'subtype': 'ANGLE', #Angle params are already in radians, which is what theta is, so no conversion is necessary
+			'unit': 'ROTATION'
+		},
 	]
 	
 	def get_paramset(self, lamp_object):
 		params = ParamSet()
+		#params = super().get_paramset(lamp_object)
+		if self.sunsky_type == 'distant':			
+			params.add_float('theta', self.theta),
+			params.update( TC_L.get_paramset(self) )
 		
-		params.add_float('turbidity', self.turbidity)
-		params.add_integer('nsamples', self.nsamples)
+		if self.sunsky_type != 'distant':
+			params.add_float('turbidity', self.turbidity)
+			params.add_integer('nsamples', self.nsamples)
 		
-		if self.sunsky_advanced and self.sunsky_type != 'sky':
+		if self.sunsky_advanced and self.sunsky_type in ['sun', 'sunsky']:
 			params.add_float('relsize', self.relsize)
 		
-		if self.sunsky_advanced and self.sunsky_type != 'sun':
+		if self.sunsky_advanced and self.sunsky_type in ['sky', 'sunsky']:
 			params.add_float('horizonbrightness', self.horizonbrightness)
 			params.add_float('horizonsize', self.horizonsize)
 			params.add_float('sunhalobrightness', self.sunhalobrightness)
@@ -519,7 +549,6 @@ class luxrender_lamp_hemi(declarative_property_group):
 	ef_attach_to = ['luxrender_lamp']
 	
 	controls = [
-		'type',
 		'infinite_map',
 		'mapping_type',
 		'nsamples',
@@ -529,24 +558,13 @@ class luxrender_lamp_hemi(declarative_property_group):
 	]
 	
 	visibility = {
-		'infinite_map':		{ 'type': 'infinite' },
-		'mapping_type':		{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
-		'hdri_multiply':	{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
-		'gamma':			{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
-		'nsamples':			{ 'type': 'infinite', 'infinite_map': LO({'!=': ''}) },
+		'mapping_type':		{ 'infinite_map': LO({'!=': ''}) },
+		'hdri_multiply':	{ 'infinite_map': LO({'!=': ''}) },
+		'gamma':			{ 'infinite_map': LO({'!=': ''}) },
+		'nsamples':			{ 'infinite_map': LO({'!=': ''}) },
 	}
 	
 	properties = TC_L.properties[:] + [
-		{
-			'type': 'enum',
-			'attr': 'type',
-			'name': 'Type',
-			'items': [
-				('infinite', 'Infinite', 'infinite'),
-				('distant', 'Distant', 'distant'),
-			],
-			'expand': True
-		},
 		{
 			'type': 'bool',
 			'attr': 'hdri_multiply',
@@ -577,7 +595,7 @@ class luxrender_lamp_hemi(declarative_property_group):
 			'type': 'float',
 			'attr': 'gamma',
 			'name': 'Gamma',
-			'description': 'Light source gamma',
+			'description': 'Reverse gamma correction value for HDRI map',
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
@@ -600,20 +618,17 @@ class luxrender_lamp_hemi(declarative_property_group):
 	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		
-		if self.type == 'infinite':
-			if self.infinite_map != '':
-				if lamp_object.library is not None:
-					hdri_path = bpy.path.abspath(self.infinite_map, lamp_object.library.filepath)
-				else:
-					hdri_path = self.infinite_map
-				params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
-				params.add_string('mapping', self.mapping_type)
-				params.add_float('gamma', self.gamma)
-				params.add_integer('nsamples', self.nsamples)
-				
-			if self.infinite_map == '' or self.hdri_multiply:
-				params.add_color('L', self.L_color)
-		else:
+		if self.infinite_map != '':
+			if lamp_object.library is not None:
+				hdri_path = bpy.path.abspath(self.infinite_map, lamp_object.library.filepath)
+			else:
+				hdri_path = self.infinite_map
+			params.add_string('mapname', efutil.path_relative_to_export(hdri_path) )
+			params.add_string('mapping', self.mapping_type)
+			params.add_float('gamma', self.gamma)
+			params.add_integer('nsamples', self.nsamples)
+			
+		if self.infinite_map == '' or self.hdri_multiply:
 			params.add_color('L', self.L_color)
 		
 		return params

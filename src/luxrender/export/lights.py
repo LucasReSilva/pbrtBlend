@@ -63,7 +63,7 @@ def attr_light(scene, lux_context, light, name, group, light_type, params, trans
 	
 	lux_context.lightGroup(group, [])
 	
-	mirrorTransform = light.type == 'HEMI' and light.luxrender_lamp.luxrender_lamp_hemi.type == 'infinite'
+	mirrorTransform = light.type == 'HEMI'
 	
 	if mirrorTransform:
 		# correct worldmap orientation
@@ -132,17 +132,16 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 	if light.type == 'SUN':
 		invmatrix = matrix.inverted()
 		invmatrix = fix_matrix_order(invmatrix) # matrix indexing hack
-		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type != 'sky': light_params.add_vector('sundir', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
+		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type in ['sun', 'sunsky']:
+			light_params.add_vector('sundir', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
+		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type == 'distant':
+			light_params.add_point('from', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
+			light_params.add_point('to', (0,0,0)) #This combo will produce the same result as sundir
 		attr_light(scene, lux_context, light, ob.name, light_group, light.luxrender_lamp.luxrender_lamp_sun.sunsky_type, light_params, portals=portals)
 		return True
 	
 	if light.type == 'HEMI':
-		hemi_type = light.luxrender_lamp.luxrender_lamp_hemi.type
-		if hemi_type == 'distant':
-			light_params.add_point('from', (0,0,0))
-			light_params.add_point('to', (0,0,-1))
-		
-		attr_light(scene, lux_context, light, ob.name, light_group, hemi_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		attr_light(scene, lux_context, light, ob.name, light_group, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'SPOT':

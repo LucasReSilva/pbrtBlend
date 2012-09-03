@@ -107,7 +107,7 @@ class ui_luxrender_lamp_spot(lamps_panel):
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_sun(lamps_panel):
-	bl_label = 'LuxRender Sun + Sky'
+	bl_label = 'LuxRender Sun Lamp'
 	
 	display_property_groups = [
 		( ('lamp','luxrender_lamp'), 'luxrender_lamp_sun' )
