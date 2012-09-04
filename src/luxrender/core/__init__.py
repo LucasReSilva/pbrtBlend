@@ -112,11 +112,11 @@ def lux_output_hints(self, context):
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 
 		col = self.layout.column()
-		col.label("Lux Output formats")
+		col.label("LuxRender Output Formats")
 		row = self.layout.row()
 		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png", text="PNG")
 		if context.scene.camera.data.luxrender_camera.luxrender_film.write_png:
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png_16bit", text="use 16bit PNG")
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png_16bit", text="Use 16bit PNG")
 		row = self.layout.row()
 		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TARGA")
 		row = self.layout.row()
@@ -133,7 +133,7 @@ def lux_output_hints(self, context):
 				row = self.layout.row()
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "zbuf_normalization", text="Z-Buffer Normalization")
 		row = self.layout.row()
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Enable alpha channel")
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
 		if context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha:
 			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
 		row = self.layout.row()
