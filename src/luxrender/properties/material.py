@@ -457,9 +457,25 @@ class luxrender_material(declarative_property_group):
 								ExportedTextures.export_new(lux_context)
 							else:
 								LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to the bump channel.' % texture_name)
+								
+							if self.normalmap_multiplyfloat:
+								ExportedTextures.texture(
+								lux_context,
+								'%s_scaled' % self.normalmap_floattexturename,
+								'float',
+								'scale',
+								ParamSet() \
+									.add_float('tex1', self.normalmap_floatvalue) \
+									.add_texture('tex2', self.normalmap_floattexturename)
+								)
+								ExportedTextures.export_new(lux_context)
+								
+								#Attach it to the bump map slot:
+								material_params.add_texture('bumpmap', '%s_scaled' % self.normalmap_floattexturename)
 							
-							#Attach the normal map to the bump slot
-							material_params.add_texture('bumpmap', self.normalmap_floattexturename)
+							else:
+								#Attach the normal map directly to the bump slot
+								material_params.add_texture('bumpmap', self.normalmap_floattexturename)
 
 					if not self.normalmap_usefloattexture and self.bumpmap_usefloattexture: #we have only the bump map, so simply export it directly
 					
