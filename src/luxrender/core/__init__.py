@@ -469,7 +469,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				
 				lay.rect  = preview_context.blenderCombinedDepthRects()[0]
 				
-				self.end_result(result)
+				self.end_result(result, 0) if bpy.app.version > (2, 63, 17 ) else self.end_result(result) # cycles tiles adaption
 		except Exception as exc:
 			LuxLog('Preview aborted: %s' % exc)
 		
