@@ -867,8 +867,7 @@ class luxrender_film(declarative_property_group):
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)
 			
 		params.add_integer('tilecount', self.tilecount)
-		params.add_float('haltthreshold', 10)
-				
+		
 		# update the film settings with tonemapper settings
 		params.update( self.luxrender_tonemapping.get_paramset() )
 		
