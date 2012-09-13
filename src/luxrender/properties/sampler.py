@@ -55,6 +55,7 @@ class luxrender_sampler(declarative_property_group):
 		'maxconsecrejects',
 		'usevariance',
 		'noiseaware',
+		'haltthreshold',
 	]
 	
 	visibility = {
@@ -70,6 +71,7 @@ class luxrender_sampler(declarative_property_group):
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'noiseaware':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+		'haltthreshold':				A([{ 'advanced': True }, { 'noiseaware': True }, { 'sampler': 'metropolis' }, ]),
 	}
 	
 	properties = [
@@ -143,6 +145,22 @@ class luxrender_sampler(declarative_property_group):
 			'name': 'Use NoiseAware',
 			'description': 'Use NoiseAware',
 			'default': False,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'haltthreshold',
+			'name': 'HaltThreshhold',
+			'description': 'Percentage of Noise where the render should be stopped',
+			'default': 10.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+			'precision': 5,
+			'subtype': 'PERCENTAGE',
+			'unit': 'NONE',
+			'slider': True,
 			'save_in_preset': True
 		},
 		{
@@ -234,6 +252,7 @@ class luxrender_sampler(declarative_property_group):
 		
 		if self.sampler == 'metropolis':
 			params.add_float('largemutationprob', self.largemutationprob)
+
 			
 		if self.advanced:
 			if self.sampler == 'metropolis':
@@ -243,3 +262,7 @@ class luxrender_sampler(declarative_property_group):
 				params.add_bool('usecooldown', self.usecooldown)
 						
 		return self.sampler, params
+			
+		params.add_float('haltthreshold', self.haltthreshold)
+			
+		return ('fleximage', params)
