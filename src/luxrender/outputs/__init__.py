@@ -124,7 +124,7 @@ class LuxFilmDisplay(TimerThread):
 				else:
 					err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
 					LuxLog(err_msg)
-				self.LocalStorage['RE'].end_result(result)
+				self.LocalStorage['RE'].end_result(result, 0) if bpy.app.version > (2, 63, 17 ) else self.LocalStorage['RE'].end_result(result) # cycles tiles adaption
 		else:
 			err_msg = 'ERROR: LuxFilmThread started with insufficient parameters. LuxFilmThread will terminate'
 			LuxLog(err_msg)
