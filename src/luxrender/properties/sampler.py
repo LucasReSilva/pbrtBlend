@@ -260,9 +260,7 @@ class luxrender_sampler(declarative_property_group):
 				params.add_bool('usevariance', self.usevariance)
 				params.add_bool('noiseaware', self.noiseaware)
 				params.add_bool('usecooldown', self.usecooldown)
-						
+		
 		return self.sampler, params
-			
-		params.add_float('haltthreshold', self.haltthreshold)
-			
-		return ('fleximage', params)
+
+
