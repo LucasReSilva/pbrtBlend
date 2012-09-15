@@ -151,7 +151,7 @@ class luxrender_sampler(declarative_property_group):
 			'type': 'float',
 			'attr': 'haltthreshold',
 			'name': 'HaltThreshhold',
-			'description': 'Halt the rendering at this percent of noise eliminated (0=disabled )',
+			'description': 'Halt the rendering at this percent of noise eliminated (100=disabled )',
 			'default': 10.0,
 			'min': 0.0,
 			'soft_min': 0.0,
