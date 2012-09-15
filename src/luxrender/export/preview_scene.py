@@ -116,7 +116,12 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		else:
 			film_params.add_float('gamma', 2.2)
 	else:
-		film_params.add_float('gamma', 1.0) # new default sRBG with OpenColorIO
+		if scene.display_settings.display_device == "sRGB":
+			film_params.add_float('gamma', 1.0) # new default sRBG with OpenColorIO
+		elif scene.display_settings.display_device == "Rec709":
+			film_params.add_float('gamma', 1.1)
+		else:
+			film_params.add_float('gamma', 2.2)
 	
 	if LUXRENDER_VERSION >= '0.8':
 		film_params \
