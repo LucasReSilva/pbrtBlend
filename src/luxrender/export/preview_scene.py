@@ -110,10 +110,13 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_string('ldr_clamp_method', 'hue') \
 		.add_integer('tilecount', 1)
 	
-	if scene.render.use_color_management:
-		film_params.add_float('gamma', 1.0)
+	if bpy.app.version < (2, 63, 19 ):
+		if scene.render.use_color_management:
+			film_params.add_float('gamma', 1.0)
+		else:
+			film_params.add_float('gamma', 2.2)
 	else:
-		film_params.add_float('gamma', 2.2)
+		film_params.add_float('gamma', 1.0) # new default sRBG with OpenColorIO
 	
 	if LUXRENDER_VERSION >= '0.8':
 		film_params \

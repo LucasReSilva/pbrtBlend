@@ -294,8 +294,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					self.render_preview(scene)
 					return
 				
-				if scene.render.use_color_management == False:
-					LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
+				if bpy.app.version < (2, 63, 19 ):
+					if scene.render.use_color_management == False:
+						LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
 				
 				api_type, write_files = self.set_export_path(scene)
 				

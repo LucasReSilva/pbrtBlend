@@ -146,8 +146,11 @@ class engine(render_panel):
 		
 		row = self.layout.row(align=True)
 		rd = context.scene.render
-		row.prop(rd, "use_color_management")
-		if rd.use_color_management == True:
+		if bpy.app.version < (2, 63, 19 ):
+			row.prop(rd, "use_color_management")
+			if rd.use_color_management == True:
+				row.prop(rd, "use_color_unpremultiply")
+		else:
 			row.prop(rd, "use_color_unpremultiply")
 		
 @LuxRenderAddon.addon_register_class
