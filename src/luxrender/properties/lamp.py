@@ -29,7 +29,7 @@ import math
 
 from extensions_framework import declarative_property_group
 import extensions_framework.util as efutil
-from extensions_framework.validate import Logic_Operator as LO
+from extensions_framework.validate import Logic_Operator as LO, Logic_OR as O
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
@@ -316,6 +316,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		'sunsky_type',
 		'nsamples',
 		'turbidity',
+		'legacy_sky',
 		'sunsky_advanced',
 		'relsize',
 		'horizonbrightness',
@@ -332,16 +333,17 @@ class luxrender_lamp_sun(declarative_property_group):
 		'L_usecolortexture':	{ 'sunsky_type': 'distant'},
 		'L_colortexture':		{ 'sunsky_type': 'distant', 'L_usecolortexture': True },
 		'L_multiplycolor':		{ 'sunsky_type': 'distant', 'L_usecolortexture': True },
-		'sunsky_advanced':		{ 'sunsky_type': LO({'!=':'distant'})},
+		'sunsky_advanced':		{ 'sunsky_type': O(['sun', 'sky', 'sunsky']) },
+		'legacy_sky':			{ 'sunsky_type': O(['sunsky', 'sky']) },
 		'turbidity':			{ 'sunsky_type': LO({'!=':'distant'})},
 		'nsamples':				{ 'sunsky_type': LO({'!=':'distant'})},
 		'theta':				{ 'sunsky_type': 'distant'},
-		'relsize':				{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sky'}) },
-		'horizonbrightness':	{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
-		'horizonsize':			{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
-		'sunhalobrightness':	{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
-		'sunhalosize':			{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
-		'backscattering':		{ 'sunsky_advanced': True, 'sunsky_type': LO({'!=':'sun'}) },
+		'relsize':				{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sun']) },
+		'horizonbrightness':	{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'horizonsize':			{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'sunhalobrightness':	{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'sunhalosize':			{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'backscattering':		{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
 	}
 	
 	properties = TC_L.properties[:] + [
@@ -371,6 +373,14 @@ class luxrender_lamp_sun(declarative_property_group):
 			'type': 'bool',
 			'attr': 'sunsky_advanced',
 			'name': 'Advanced',
+			'description': 'Configure advanced sun and sky parameters',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'legacy_sky',
+			'name': 'Use Legacy Sky Spectrum',
+			'description': 'Use legacy Preetham sky model instead of Hosek and Wilkie model',
 			'default': False
 		},
 		{
