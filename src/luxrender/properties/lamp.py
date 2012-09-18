@@ -339,11 +339,11 @@ class luxrender_lamp_sun(declarative_property_group):
 		'nsamples':				{ 'sunsky_type': LO({'!=':'distant'})},
 		'theta':				{ 'sunsky_type': 'distant'},
 		'relsize':				{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sun']) },
-		'horizonbrightness':	{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
-		'horizonsize':			{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
-		'sunhalobrightness':	{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
-		'sunhalosize':			{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
-		'backscattering':		{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'horizonbrightness':	{ 'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'horizonsize':			{ 'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'sunhalobrightness':	{ 'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'sunhalosize':			{ 'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky']) },
+		'backscattering':		{ 'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky']) },
 	}
 	
 	properties = TC_L.properties[:] + [
@@ -483,7 +483,7 @@ class luxrender_lamp_sun(declarative_property_group):
 		if self.sunsky_advanced and self.sunsky_type in ['sun', 'sunsky']:
 			params.add_float('relsize', self.relsize)
 		
-		if self.sunsky_advanced and self.sunsky_type in ['sky', 'sunsky']:
+		if self.sunsky_advanced and self.sunsky_type in ['sky', 'sunsky'] and self.legacy_sky:
 			params.add_float('horizonbrightness', self.horizonbrightness)
 			params.add_float('horizonsize', self.horizonsize)
 			params.add_float('sunhalobrightness', self.sunhalobrightness)
