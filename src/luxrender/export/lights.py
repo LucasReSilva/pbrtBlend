@@ -139,12 +139,12 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type == 'distant':
 			light_params.add_point('from', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
 			light_params.add_point('to', (0,0,0)) #This combo will produce the same result as sundir
-		if not legacy_sky and not sunsky_type == 'sun': # new skymodel
+		if not legacy_sky and sunsky_type not in ['sun', 'distant']: # new skymodel
 			if sunsky_type == 'sky':
 				attr_light(scene, lux_context, light, ob.name, light_group, 'sky2', light_params, portals=portals)
 			elif sunsky_type == 'sunsky':
 				attr_light(scene, lux_context, light, ob.name, light_group, 'sunsky2', light_params, portals=portals)
-		else: # old skymodel and sun_only
+		else: # Use light definition itself, old sky model, sun only, or distant, as needed.
 			attr_light(scene, lux_context, light, ob.name, light_group, sunsky_type, light_params, portals=portals)
 		return True
 	

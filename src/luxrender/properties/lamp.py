@@ -336,7 +336,6 @@ class luxrender_lamp_sun(declarative_property_group):
 		'sunsky_advanced':		{ 'sunsky_type': O(['sun', 'sky', 'sunsky']) },
 		'legacy_sky':			{ 'sunsky_type': O(['sunsky', 'sky']) },
 		'turbidity':			{ 'sunsky_type': LO({'!=':'distant'})},
-		'nsamples':				{ 'sunsky_type': LO({'!=':'distant'})},
 		'theta':				{ 'sunsky_type': 'distant'},
 		'relsize':				{ 'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sun']) },
 		'horizonbrightness':	{ 'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky']) },
@@ -472,13 +471,14 @@ class luxrender_lamp_sun(declarative_property_group):
 	def get_paramset(self, lamp_object):
 		params = ParamSet()
 		#params = super().get_paramset(lamp_object)
+		params.add_integer('nsamples', self.nsamples)
+
 		if self.sunsky_type == 'distant':			
 			params.add_float('theta', self.theta),
 			params.update( TC_L.get_paramset(self) )
 		
 		if self.sunsky_type != 'distant':
 			params.add_float('turbidity', self.turbidity)
-			params.add_integer('nsamples', self.nsamples)
 		
 		if self.sunsky_advanced and self.sunsky_type in ['sun', 'sunsky']:
 			params.add_float('relsize', self.relsize)
