@@ -535,7 +535,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		if scene.luxrender_engine.export_type == 'INT':
 			# Set up networking before export so that we get better server usage
-			if scene.luxrender_networking.use_network_servers:
+			if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers != '':
 				LM.lux_context.setNetworkServerUpdateInterval( scene.luxrender_networking.serverinterval )
 				for server in scene.luxrender_networking.servers.split(','):
 					LM.lux_context.addServer(server.strip())
@@ -661,7 +661,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		if scene.luxrender_engine.fixed_seed:
 			cmd_args.append('--fixedseed')
 		
-		if scene.luxrender_networking.use_network_servers:
+		if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers != '':
 			for server in scene.luxrender_networking.servers.split(','):
 				cmd_args.append('--useserver')
 				cmd_args.append(server.strip())
