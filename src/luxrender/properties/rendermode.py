@@ -268,7 +268,7 @@ class luxrender_halt(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 100.0,
 			'soft_max': 100.0,
-			'precision': 5,
+			'precision': 3,
 			'subtype': 'PERCENTAGE',
 			'unit': 'NONE',
 			'slider': True,
