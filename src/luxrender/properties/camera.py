@@ -863,7 +863,7 @@ class luxrender_film(declarative_property_group):
 		if scene.luxrender_halt.halttime > 0:
 			params.add_integer('halttime', scene.luxrender_halt.halttime)
 
-		if scene.luxrender_halt.haltthreshold < 100.0:
+		if scene.luxrender_halt.haltthreshold > 0:
 			params.add_float('haltthreshold', 1 - ( scene.luxrender_halt.haltthreshold / 100.00 ))
 		
 		if self.outlierrejection_k > 0 and scene.luxrender_rendermode.renderer != 'sppm':
