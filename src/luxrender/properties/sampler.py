@@ -55,7 +55,6 @@ class luxrender_sampler(declarative_property_group):
 		'maxconsecrejects',
 		'usevariance',
 		'noiseaware',
-		'haltthreshold',
 	]
 	
 	visibility = {
@@ -71,7 +70,6 @@ class luxrender_sampler(declarative_property_group):
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'noiseaware':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
-		'haltthreshold':				A([{ 'advanced': True }, { 'noiseaware': True }, { 'sampler': 'metropolis' }, ]),
 	}
 	
 	properties = [
@@ -145,22 +143,6 @@ class luxrender_sampler(declarative_property_group):
 			'name': 'Use NoiseAware',
 			'description': 'Use NoiseAware',
 			'default': False,
-			'save_in_preset': True
-		},
-		{
-			'type': 'float',
-			'attr': 'haltthreshold',
-			'name': 'HaltThreshhold',
-			'description': 'Halt the rendering at this percent of noise eliminated (100=disabled )',
-			'default': 10.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 100.0,
-			'soft_max': 100.0,
-			'precision': 5,
-			'subtype': 'PERCENTAGE',
-			'unit': 'NONE',
-			'slider': True,
 			'save_in_preset': True
 		},
 		{

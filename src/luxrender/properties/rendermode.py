@@ -229,6 +229,7 @@ class luxrender_halt(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'haltthreshold',
 		['haltspp','halttime'],
 		]
 	
@@ -255,6 +256,22 @@ class luxrender_halt(declarative_property_group):
 			'soft_min': 0,
 			'max': 65535,
 			'soft_max': 65535,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'haltthreshold',
+			'name': 'HaltThreshhold',
+			'description': 'Halt the rendering at this percent of noise eliminated (100=disabled )',
+			'default': 100.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+			'precision': 5,
+			'subtype': 'PERCENTAGE',
+			'unit': 'NONE',
+			'slider': True,
 			'save_in_preset': True
 		},
 	]
