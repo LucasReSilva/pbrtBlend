@@ -229,7 +229,7 @@ class luxrender_halt(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'haltthreshold',
+		['haltthreshold', 'convergencestep'],
 		['haltspp','halttime'],
 		]
 	
@@ -272,6 +272,19 @@ class luxrender_halt(declarative_property_group):
 			'subtype': 'PERCENTAGE',
 			'unit': 'NONE',
 			'slider': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'convergencestep',
+			'name': 'Convergence Step',
+			'description': 'Update steps of the convergence test',
+			'default': 32.0,
+			'min': 16.0,
+			'soft_min': 16.0,
+			'max': 512.0,
+			'soft_max': 512.0,
+			'step' : 1600,
 			'save_in_preset': True
 		},
 	]

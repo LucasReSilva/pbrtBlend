@@ -866,6 +866,10 @@ class luxrender_film(declarative_property_group):
 		if scene.luxrender_halt.haltthreshold > 0:
 			params.add_float('haltthreshold', 1 - ( scene.luxrender_halt.haltthreshold / 100.00 ))
 		
+		# Convergence Test
+		if scene.luxrender_halt.convergencestep != 32: # don`t export default yet for mainbranch compatibility
+			params.add_float('convergencestep', scene.luxrender_halt.convergencestep)
+				
 		if self.outlierrejection_k > 0 and scene.luxrender_rendermode.renderer != 'sppm':
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)
 			
