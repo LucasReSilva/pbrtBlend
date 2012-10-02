@@ -111,17 +111,14 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_integer('tilecount', 1)
 	
 	if bpy.app.version < (2, 63, 19 ):
-		if scene.render.use_color_management:
-			film_params.add_float('gamma', 1.0)
-		else:
-			film_params.add_float('gamma', 2.2)
+		film_params.add_float('gamma', 1.0) #gamma is corrected by blender if the user wanted it
 	else:
 		if scene.display_settings.display_device == "sRGB":
 			film_params.add_float('gamma', 1.0) # new default sRBG with OpenColorIO
 		elif scene.display_settings.display_device == "Rec709":
 			film_params.add_float('gamma', 1.1)
 		else:
-			film_params.add_float('gamma', 2.2)
+			film_params.add_float('gamma', 1.0) #Blender expects 1.0 back. So return 1.0
 	
 	if LUXRENDER_VERSION >= '0.8':
 		film_params \
