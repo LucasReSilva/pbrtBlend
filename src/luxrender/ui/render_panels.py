@@ -150,8 +150,6 @@ class engine(render_panel):
 			row.prop(rd, "use_color_management")
 			if rd.use_color_management == True:
 				row.prop(rd, "use_color_unpremultiply")
-		else:
-			row.prop(rd, "use_color_unpremultiply")
 		
 @LuxRenderAddon.addon_register_class
 class render_settings(render_panel):
