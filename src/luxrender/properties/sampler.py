@@ -54,7 +54,7 @@ class luxrender_sampler(declarative_property_group):
 		#'mutationrange',
 		'maxconsecrejects',
 		'usevariance',
-		'noiseaware',
+# 		'noiseaware',
 	]
 	
 	visibility = {
@@ -69,7 +69,7 @@ class luxrender_sampler(declarative_property_group):
 		'usecooldown':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]), #  { 'adaptive_largemutationprob': False },
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
-		'noiseaware':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+# 		'noiseaware':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 	}
 	
 	properties = [
@@ -137,14 +137,14 @@ class luxrender_sampler(declarative_property_group):
 			'default': False,
 			'save_in_preset': True
 		},
-		{
-			'type': 'bool',
-			'attr': 'noiseaware',
-			'name': 'Use NoiseAware',
-			'description': 'Use NoiseAware',
-			'default': False,
-			'save_in_preset': True
-		},
+# 		{
+# 			'type': 'bool',
+# 			'attr': 'noiseaware',
+# 			'name': 'Use NoiseAware',
+# 			'description': 'Use NoiseAware',
+# 			'default': False,
+# 			'save_in_preset': True
+# 		},
 		{
 			'type': 'bool',
 			'attr': 'usecooldown',
@@ -241,8 +241,8 @@ class luxrender_sampler(declarative_property_group):
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 				params.add_bool('usevariance', self.usevariance)
 				params.add_bool('usecooldown', self.usecooldown)
-				if self.noiseaware:
-					params.add_bool('noiseaware', self.noiseaware)
+# 				if self.noiseaware:
+# 					params.add_bool('noiseaware', self.noiseaware)
 
 		
 		return self.sampler, params
