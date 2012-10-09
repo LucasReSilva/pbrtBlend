@@ -69,7 +69,7 @@ class luxrender_sampler(declarative_property_group):
 		'usecooldown':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]), #  { 'adaptive_largemutationprob': False },
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
- 		'noiseaware':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
+ 		'noiseaware':					A([{ 'advanced': True }, { 'sampler': O(['lowdiscrepancy', 'metropolis']) } ]),
 	}
 	
 	properties = [
