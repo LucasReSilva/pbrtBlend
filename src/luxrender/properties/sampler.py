@@ -149,7 +149,7 @@ class luxrender_sampler(declarative_property_group):
  		},
 		{
 			'type': 'string',
-			'subtype': 'DIR_PATH',
+			'subtype': 'FILE_PATH',
 			'attr': 'usersamplingmap_filename',
 			'name': 'UserSamplingMap',
 			'description': 'Filename for User Sampling Map',
