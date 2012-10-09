@@ -872,7 +872,10 @@ class luxrender_film(declarative_property_group):
 		
 		# Filename for User Sampling Map
 		if scene.luxrender_sampler.usersamplingmap_filename != '':
-			params.add_string('usersamplingmap_filename', scene.luxrender_sampler.usersamplingmap_filename)
+			if scene.luxrender_sampler.usersamplingmap_filename.endswith('.exr'):
+				params.add_string('usersamplingmap_filename', scene.luxrender_sampler.usersamplingmap_filename)
+			else:
+				params.add_string('usersamplingmap_filename', scene.luxrender_sampler.usersamplingmap_filename + '.exr')
 				
 		if self.outlierrejection_k > 0 and scene.luxrender_rendermode.renderer != 'sppm':
 			params.add_integer('outlierrejection_k', self.outlierrejection_k)

@@ -152,7 +152,7 @@ class luxrender_sampler(declarative_property_group):
 			'subtype': 'FILE_PATH',
 			'attr': 'usersamplingmap_filename',
 			'name': 'UserSamplingMap',
-			'description': 'Filename for User Sampling Map',
+			'description': 'Filename for User Sampling Map, none = off, extender added automatically (.exr)',
 			'default': ''
 		},
 		{
