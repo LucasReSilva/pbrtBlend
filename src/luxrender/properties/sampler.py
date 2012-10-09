@@ -55,6 +55,7 @@ class luxrender_sampler(declarative_property_group):
 		'maxconsecrejects',
 		'usevariance',
  		'noiseaware',
+		'usersamplingmap_filename',
 	]
 	
 	visibility = {
@@ -145,6 +146,14 @@ class luxrender_sampler(declarative_property_group):
  			'default': False,
  			'save_in_preset': True
  		},
+		{
+			'type': 'string',
+			'subtype': 'DIR_PATH',
+			'attr': 'usersamplingmap_filename',
+			'name': 'UserSamplingMap',
+			'description': 'Filename for User Sampling Map',
+			'default': 'usmap.exr'
+		},
 		{
 			'type': 'bool',
 			'attr': 'usecooldown',
