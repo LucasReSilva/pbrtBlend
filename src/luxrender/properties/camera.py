@@ -867,11 +867,11 @@ class luxrender_film(declarative_property_group):
 			params.add_float('haltthreshold', 1 - ( scene.luxrender_halt.haltthreshold / 100.00 ))
 		
 		# Convergence Test
-		if scene.luxrender_halt.convergencestep != 32: # don`t export default yet for mainbranch compatibility
+		if scene.luxrender_halt.convergencestep != 32:
 			params.add_float('convergencestep', scene.luxrender_halt.convergencestep)
 		
 		# Filename for User Sampling Map
-		if scene.luxrender_sampler.usersamplingmap_filename != '': # don`t export default yet for mainbranch compatibility
+		if scene.luxrender_sampler.usersamplingmap_filename != '':
 			params.add_string('usersamplingmap_filename', scene.luxrender_sampler.usersamplingmap_filename)
 				
 		if self.outlierrejection_k > 0 and scene.luxrender_rendermode.renderer != 'sppm':

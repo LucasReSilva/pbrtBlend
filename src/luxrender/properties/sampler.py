@@ -71,6 +71,7 @@ class luxrender_sampler(declarative_property_group):
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
 		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
  		'noiseaware':					A([{ 'advanced': True }, { 'sampler': O(['lowdiscrepancy', 'metropolis', 'random']) } ]),
+		'usersamplingmap_filename':		A([{ 'advanced': True }, { 'sampler': O(['lowdiscrepancy', 'metropolis', 'random']) } ]),
 	}
 	
 	properties = [
