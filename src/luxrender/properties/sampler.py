@@ -53,8 +53,7 @@ class luxrender_sampler(declarative_property_group):
 		'largemutationprob',
 		#'mutationrange',
 		'maxconsecrejects',
-		'usevariance',
- 		'noiseaware',
+ 		['noiseaware', 'usevariance'],
 		'usersamplingmap_filename',
 	]
 	
