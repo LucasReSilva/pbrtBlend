@@ -250,7 +250,7 @@ class luxrender_sampler(declarative_property_group):
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 				params.add_bool('usevariance', self.usevariance)
 				params.add_bool('usecooldown', self.usecooldown)
-				
+		if self.sampler != 'erpt':
 			if self.noiseaware:
 				params.add_bool('noiseaware', self.noiseaware)
 
