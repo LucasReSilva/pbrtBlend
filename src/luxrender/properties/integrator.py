@@ -1039,8 +1039,10 @@ class luxrender_integrator(declarative_property_group):
 			#Check each integrator seperately so they don't mess with each other!
 			if self.surfaceintegrator == 'bidirectional':
 				if self.lightstrategy != ('one'):
-					LuxLog('Incompatible light strategy for Hybrid Bidir (use "one uniform").')
-					raise Exception('Incompatible render settings')
+					LuxLog('Incompatible light strategy for Hybrid Bidir (switching to "one uniform").')
+#					raise Exception('Incompatible render settings')
+			
+		hybrid_compat = scene.luxrender_rendermode.renderer == 'hybrid' and self.surfaceintegrator == 'bidirectional'
 		
 		#Exphotonmap is not compatible with light groups, warn here instead of light export code so this warning only shows once instead of per lamp
 		if scene.luxrender_lightgroups.ignore == False and self.surfaceintegrator == 'exphotonmap':
@@ -1059,11 +1061,11 @@ class luxrender_integrator(declarative_property_group):
 			params.add_integer('eyedepth', self.eyedepth) \
 				  .add_integer('lightdepth', self.lightdepth)
 			if not self.advanced:
-				params.add_string('lightpathstrategy', self.lightstrategy) #Export the regular light strategy setting for lightpath strat when in non-advanced mode, advanced mode allows them to be set independently
+				params.add_string('lightpathstrategy', self.lightstrategy if not hybrid_compat else 'one') #Export the regular light strategy setting for lightpath strat when in non-advanced mode, advanced mode allows them to be set independently
 			if self.advanced:
 				params.add_float('eyerrthreshold', self.eyerrthreshold) \
 					  .add_float('lightrrthreshold', self.lightrrthreshold) \
-					  .add_string('lightpathstrategy', self.lightpathstrategy)
+					  .add_string('lightpathstrategy', self.lightpathstrategy if not hybrid_compat else 'one')
 		
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth)
@@ -1160,6 +1162,6 @@ class luxrender_integrator(declarative_property_group):
 				params.add_integer('shadowraycount', self.shadowraycount)
 
 		if self.surfaceintegrator != 'sppm':
-			params.add_string('lightstrategy', self.lightstrategy) \
+			params.add_string('lightstrategy', self.lightstrategy if not hybrid_compat else 'one') \
 		
 		return self.surfaceintegrator, params
