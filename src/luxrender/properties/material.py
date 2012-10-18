@@ -139,6 +139,10 @@ TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(0.04,
 TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
 TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.02,0.02,0.02) ) #.02 = 1.333, the IOR of water
+TC_warp_Kd				= ColorTextureParameter('warp_Kd', 'Warp Diffuse Color',			default=(0.8,0.8,0.8) )
+TC_warp_Ks				= ColorTextureParameter('warp_Ks', 'Warp Specular Color',			default=(0.04,0.04,0.04) )
+TC_weft_Kd				= ColorTextureParameter('weft_Kd', 'Weft Diffuse Color',			default=(0.8,0.8,0.8) )
+TC_weft_Ks				= ColorTextureParameter('weft_Ks', 'Weft Specular Color',			default=(0.04,0.04,0.04) )
 
 # Fresnel Textures
 TFR_fresnel				= FresnelTextureParameter('fresnel', 'Fresnel', 					add_float_value = False)
@@ -158,6 +162,7 @@ mat_names = {
 	'metal2': 'Metal2',
 	'shinymetal': 'Shiny Metal',
 	'velvet': 'Velvet',
+	'cloth': 'Cloth',
 	'scatter': 'Scatter',
 	'mix': 'Mix',
 	'layered': 'Layered',
@@ -1884,6 +1889,8 @@ class luxrender_mat_glossy(declarative_property_group):
 		glossy_params = ParamSet()
 		
 		glossy_params.add_bool('multibounce', self.multibounce)
+		glossy_params.add_bool('separable', self.separable)
+
 		
 		if self.d_floatvalue > 0:
 			glossy_params.update( TF_d.get_paramset(self) )
@@ -1908,7 +1915,8 @@ class luxrender_mat_glossy(declarative_property_group):
 	
 	def load_paramset(self, ps):
 		psi_accept = {
-			'multibounce': 'bool'
+			'multibounce': 'bool',
+			'separable':	'separable'
 		}
 		psi_accept_keys = psi_accept.keys()
 		for psi in ps:
@@ -3152,6 +3160,104 @@ class luxrender_mat_velvet(declarative_property_group):
 				setattr(self, psi['name'], psi['value'])
 		
 		TC_Kd.load_paramset(self, ps)
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_mat_cloth(declarative_property_group):
+	ef_attach_to = ['luxrender_material']
+	alert = {}
+	
+	controls = [
+		'presetname'
+	] + \
+		TC_warp_Kd.controls + \
+		TC_warp_Ks.controls + \
+		TC_weft_Kd.controls + \
+		TC_weft_Ks.controls + \
+	[
+		['repeat_u', 'repeat_v']
+	]
+
+			
+	visibility = dict_merge(
+		TC_warp_Kd.visibility,
+		TC_warp_Ks.visibility,
+		TC_weft_Kd.visibility,
+		TC_weft_Ks.visibility
+	)
+	
+	properties = [
+		{
+			'type': 'enum',
+			'attr': 'presetname',
+			'name': 'Fabric Type',
+			'description': 'Fabric type to use',
+			'items': [
+				('denim', 'Denim', 'Denim'),
+				('silk_charmeuse', 'Silk Charmeuse', 'Silk charmeuse'),
+				('cotton_twill', 'Cotton Twill', 'Cotton twill'),
+				('wool_garbardine', 'Wool Garbardine', 'Wool Garbardine'),
+				('polyester_lining_cloth', 'Polyester Lining Cloth', 'Polyester lining cloth'),
+				('silk_shantung', 'Silk Shantung', 'Silk shantung'),
+			],
+			'default': 'denim',
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'repeat_u',
+			'name': 'Repeat U',
+			'default': 100.0,
+			'min': 1.0,
+			'soft_min': 1.0,
+			'max': 1000.0,
+			'soft_max': 1000.0,
+			'save_in_preset': True,
+		},
+		{
+			'type': 'float',
+			'attr': 'repeat_v',
+			'name': 'Repeat V',
+			'default': 100.0,
+			'min': 1.0,
+			'soft_min': 1.0,
+			'max': 1000.0,
+			'soft_max': 1000.0,
+			'save_in_preset': True,
+		},		
+	] + \
+		TC_warp_Kd.get_properties() + \
+		TC_warp_Ks.get_properties() + \
+		TC_weft_Kd.get_properties() + \
+		TC_weft_Ks.get_properties()
+	
+	def get_paramset(self, material):
+		cloth_params = ParamSet()
+		
+		cloth_params.add_string('presetname', self.presetname)
+		cloth_params.update( TC_warp_Kd.get_paramset(self) )
+		cloth_params.update( TC_warp_Ks.get_paramset(self) )
+		cloth_params.update( TC_weft_Kd.get_paramset(self) )
+		cloth_params.update( TC_weft_Ks.get_paramset(self) )
+		cloth_params.add_float('repeat_u', self.repeat_u)
+		cloth_params.add_float('repeat_v', self.repeat_v)
+		
+		return cloth_params
+	
+	def load_paramset(self, ps):
+		psi_accept = {
+			'presetname': 'string',
+			'repeat_u': 'float',
+			'repeat_v': 'float'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+		
+		TC_warp_Kd.load_paramset(self, ps)
+		TC_warp_Ks.load_paramset(self, ps)
+		TC_weft_Kd.load_paramset(self, ps)
+		TC_weft_Ks.load_paramset(self, ps)
 
 def EmissionLightGroupParameter():
 	return [
