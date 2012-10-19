@@ -3195,7 +3195,7 @@ class luxrender_mat_cloth(declarative_property_group):
 				('denim', 'Denim', 'Denim'),
 				('silk_charmeuse', 'Silk Charmeuse', 'Silk charmeuse'),
 				('cotton_twill', 'Cotton Twill', 'Cotton twill'),
-				('wool_garbardine', 'Wool Garbardine', 'Wool Garbardine'),
+				('wool_gabardine', 'Wool Gabardine', 'Wool Gabardine'),
 				('polyester_lining_cloth', 'Polyester Lining Cloth', 'Polyester lining cloth'),
 				('silk_shantung', 'Silk Shantung', 'Silk shantung'),
 			],
