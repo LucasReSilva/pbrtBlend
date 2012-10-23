@@ -456,7 +456,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				preview_context.addThread()
 			
 			while not is_finished(preview_context):
-				if self.test_break():
+				if self.test_break() or bpy.context.scene.render.engine != 'LUXRENDER_RENDER':
 					raise Exception('Render interrupted')
 				
 				# progressively update the preview
