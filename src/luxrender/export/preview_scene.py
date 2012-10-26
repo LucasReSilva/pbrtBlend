@@ -110,9 +110,13 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_string('ldr_clamp_method', 'hue') \
 		.add_integer('tilecount', 1) \
 		.add_float('convergencestep', 8)
-	
-	#Blender expects 1.0 back. So return 1.0
-	film_params.add_float('gamma', 1.0)
+
+	# workaround for too dark texture preview
+	# remove when solved in blender colormanagement
+	if tex != None and bpy.app.version > (2, 64, 4):
+		film_params.add_float('gamma', 2.2)
+	else:
+		film_params.add_float('gamma', 1.0)
 	
 	if LUXRENDER_VERSION >= '0.8':
 		film_params \
