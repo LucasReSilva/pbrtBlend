@@ -50,10 +50,10 @@ class luxrender_sampler(declarative_property_group):
 		
 #		'adaptive_largemutationprob',
 		'usecooldown',
+ 		'noiseaware',
 		'largemutationprob',
 		#'mutationrange',
 		'maxconsecrejects',
- 		['noiseaware', 'usevariance'],
 		'usersamplingmap_filename',
 	]
 	
@@ -68,8 +68,7 @@ class luxrender_sampler(declarative_property_group):
 		'largemutationprob':			A([{ 'sampler': 'metropolis' }, ]), #  { 'adaptive_largemutationprob': False },
 		'usecooldown':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]), #  { 'adaptive_largemutationprob': False },
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
-		'usevariance':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
- 		'noiseaware':					A([{ 'advanced': True }, { 'sampler': O(['lowdiscrepancy', 'metropolis', 'random']) } ]),
+ 		'noiseaware':					{ 'sampler': O(['random', 'lowdiscrepancy', 'metropolis']) },
 		'usersamplingmap_filename':		A([{ 'advanced': True }, { 'sampler': O(['lowdiscrepancy', 'metropolis', 'random']) } ]),
 	}
 	
@@ -130,19 +129,11 @@ class luxrender_sampler(declarative_property_group):
 			'max': 32768,
 			'save_in_preset': True
 		},
-		{
-			'type': 'bool',
-			'attr': 'usevariance',
-			'name': 'Use Variance',
-			'description': 'Use Variance',
-			'default': False,
-			'save_in_preset': True
-		},
  		{
  			'type': 'bool',
  			'attr': 'noiseaware',
- 			'name': 'Use NoiseAware',
- 			'description': 'Use NoiseAware',
+ 			'name': 'Use Noise-Aware',
+ 			'description': 'Enable noise-guided sampling',
  			'default': False,
  			'save_in_preset': True
  		},
@@ -243,6 +234,9 @@ class luxrender_sampler(declarative_property_group):
 		
 		if self.sampler == 'metropolis':
 			params.add_float('largemutationprob', self.largemutationprob)
+		
+		if self.sampler != 'erpt':
+			params.add_bool('noiseaware', self.noiseaware)
 
 			
 		if self.advanced:
@@ -250,11 +244,6 @@ class luxrender_sampler(declarative_property_group):
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 				params.add_bool('usevariance', self.usevariance)
 				params.add_bool('usecooldown', self.usecooldown)
-			
-			if self.sampler != 'erpt':
-				if self.noiseaware:
-					params.add_bool('noiseaware', self.noiseaware)
-
 		
 		return self.sampler, params
 
