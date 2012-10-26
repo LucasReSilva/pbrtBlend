@@ -29,7 +29,6 @@ bpy.context.scene.luxrender_sampler.sampler = 'metropolis'
 bpy.context.scene.luxrender_sampler.largemutationprob = 0.4000000059604645
 bpy.context.scene.luxrender_sampler.maxconsecrejects = 512
 bpy.context.scene.luxrender_sampler.usecooldown = False
-bpy.context.scene.luxrender_sampler.usevariance = False
 bpy.context.scene.luxrender_integrator.lightpathstrategy = 'auto'
 bpy.context.scene.luxrender_integrator.lightstrategy = 'auto'
 bpy.context.scene.luxrender_integrator.eyedepth = 48

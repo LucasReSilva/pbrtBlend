@@ -54,8 +54,8 @@ def export_preview_texture(lux_context, texture):
 		
 		mix_params = ParamSet() \
 					 .add_texture('amount', texture_name) \
-					 .add_color('tex1', [0, 0, 0]) \
-					 .add_color('tex2', [0.9, 0.9, 0.9])
+					 .add_color('tex1', [0.05, 0.05, 0.05]) \
+					 .add_color('tex2', [0.85, 0.85, 0.85])
 		
 		texture_name = texture_name + "_color"
 		ExportedTextures.texture(lux_context, texture_name, 'color', 'mix', mix_params)
@@ -73,7 +73,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	if mat.preview_render_type == 'FLAT':
 		HALTSPP = 32
 	else:
-		HALTSPP = 256
+		HALTSPP = 128
 
 	# Camera
 	if tex != None: # texture preview is always topview
@@ -108,7 +108,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_integer('haltspp', HALTSPP) \
 		.add_string('tonemapkernel', 'linear') \
 		.add_string('ldr_clamp_method', 'hue') \
-		.add_integer('tilecount', 1)
+		.add_integer('tilecount', 1) \
+		.add_float('convergencestep', 8)
 	
 	#Blender expects 1.0 back. So return 1.0
 	film_params.add_float('gamma', 1.0)
@@ -140,7 +141,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		lux_context.sampler('lowdiscrepancy', sampler_params)
 	else:
 		sampler_params = ParamSet() \
-			.add_bool('usecooldown', False)
+			.add_bool('usecooldown', False) \
+			.add_bool('noiseaware', True)
 		lux_context.sampler('metropolis', sampler_params)
 	
 	# Surface Integrator
@@ -162,7 +164,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 			.add_integer('specularrefractdepth', 4)
 		lux_context.surfaceIntegrator('distributedpath', surfaceintegrator_params)
 	else:
-		lux_context.surfaceIntegrator('bidirectional', ParamSet())
+		surfaceintegrator_params = ParamSet() \
+			.add_string('lightstrategy', 'powerimp') \
+			.add_string('lightpathstrategy', 'powerimp')
+		lux_context.surfaceIntegrator('bidirectional', surfaceintegrator_params)
 	
 	# Volume Integrator
 	lux_context.volumeIntegrator('multi', ParamSet())
@@ -252,7 +257,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		inf_gain = 0.1
 	else:
 		inf_gain = 1.2
-	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', inf_gain))
+	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', 0.0))
 	
 	# back drop
 	if mat.preview_render_type == 'FLAT' and mat_preview_xz == True and tex == None:
@@ -273,8 +278,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
 		checks_params = ParamSet() \
 			.add_texture('amount', 'checks::pattern') \
-			.add_color('tex1', [0.9, 0.9, 0.9]) \
-			.add_color('tex2', [0.0, 0.0, 0.0])
+			.add_color('tex1', [0.75, 0.75, 0.75]) \
+			.add_color('tex2', [0.05, 0.05, 0.05])
 		lux_context.texture('checks', 'color', 'mix', checks_params)
 		mat_params = ParamSet().add_texture('Kd', 'checks')
 		lux_context.material('matte', mat_params)
@@ -321,8 +326,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		lux_context.texture('checks::pattern', 'float', 'checkerboard', checks_pattern_params)
 		checks_params = ParamSet() \
 			.add_texture('amount', 'checks::pattern') \
-			.add_color('tex1', [0.9, 0.9, 0.9]) \
-			.add_color('tex2', [0.0, 0.0, 0.0])
+			.add_color('tex1', [0.75, 0.75, 0.75]) \
+			.add_color('tex2', [0.05, 0.05, 0.05])
 		lux_context.texture('checks', 'color', 'mix', checks_params)
 		mat_params = ParamSet().add_texture('Kd', 'checks')
 		lux_context.material('matte', mat_params)
