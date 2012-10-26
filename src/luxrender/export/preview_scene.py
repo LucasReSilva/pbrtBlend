@@ -257,7 +257,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		inf_gain = 0.1
 	else:
 		inf_gain = 1.2
-	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', 0.0))
+	lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', inf_gain))
 	
 	# back drop
 	if mat.preview_render_type == 'FLAT' and mat_preview_xz == True and tex == None:
