@@ -97,7 +97,7 @@ class SceneExporter(object):
 					mat = ms.material
 					if mat and mat.luxrender_emission.use_emission:
 						emit_enabled = self.scene.luxrender_lightgroups.is_enabled(mat.luxrender_emission.lightgroup)
-						emit_enabled &= (mat.luxrender_emission.L_color.v*mat.luxrender_emission.gain*mat.luxrender_emission.power*mat.luxrender_emission.efficacy) > 0.0
+						emit_enabled &= (mat.luxrender_emission.L_color.v*mat.luxrender_emission.gain*mat.luxrender_emission.power*mat.luxrender_emission.efficacy) >= 0.0
 						have_emitter |= emit_enabled
 						if have_emitter:
 							break
