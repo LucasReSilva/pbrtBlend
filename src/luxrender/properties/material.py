@@ -139,9 +139,9 @@ TC_Ks3					= ColorTextureParameter('Ks3', 'Specular color 3',					default=(0.04,
 TC_Kt					= ColorTextureParameter('Kt', 'Transmission color',					default=(1.0,1.0,1.0) )
 TC_backface_Ka			= ColorTextureParameter('backface_Ka', 'Backface Absorption color',	default=(0.0,0.0,0.0) )
 TC_backface_Ks			= ColorTextureParameter('backface_Ks', 'Backface Specular color',	default=(0.02,0.02,0.02) ) #.02 = 1.333, the IOR of water
-TC_warp_Kd				= ColorTextureParameter('warp_Kd', 'Warp Diffuse Color',			default=(0.8,0.8,0.8) )
+TC_warp_Kd				= ColorTextureParameter('warp_Kd', 'Warp Diffuse Color',			default=(0.64,0.64,0.64) )
 TC_warp_Ks				= ColorTextureParameter('warp_Ks', 'Warp Specular Color',			default=(0.04,0.04,0.04) )
-TC_weft_Kd				= ColorTextureParameter('weft_Kd', 'Weft Diffuse Color',			default=(0.8,0.8,0.8) )
+TC_weft_Kd				= ColorTextureParameter('weft_Kd', 'Weft Diffuse Color',			default=(0.64,0.64,0.64) )
 TC_weft_Ks				= ColorTextureParameter('weft_Ks', 'Weft Specular Color',			default=(0.04,0.04,0.04) )
 
 # Fresnel Textures
