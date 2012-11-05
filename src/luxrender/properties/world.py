@@ -507,7 +507,8 @@ class luxrender_lightgroup_data(declarative_property_group):
 			'description': 'Overall gain for this light group',
 			'min': 0.0,
 			'soft_min': 0.0,
-			'default': 1.0
+			'default': 1.0,
+			'precision': 4
 		}
 	]
 
