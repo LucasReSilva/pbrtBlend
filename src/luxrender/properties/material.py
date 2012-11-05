@@ -303,6 +303,7 @@ class luxrender_material(declarative_property_group):
 	# not set, then the color won't be changed.
 	master_color_map = {
 		'carpaint': 'Kd',
+		'cloth': 'warp_Kd',
 		'glass': 'Kt',
 		'roughglass': 'Kt',
 		'glossy': 'Kd',
