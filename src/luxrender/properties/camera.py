@@ -835,15 +835,15 @@ class luxrender_film(declarative_property_group):
 			params.add_string('write_exr_compressiontype', self.write_exr_compressiontype)
 			params.add_string('write_exr_zbuf_normalizationtype', self.zbuf_normalization)
 			params.add_bool('write_exr', self.write_exr)
-			if self.write_exr: params.add_string('write_exr_channels', output_channels)
+			params.add_string('write_exr_channels', output_channels)
 		
 		params.add_bool('write_png', self.write_png)
+		params.add_string('write_png_channels', output_channels)
 		if self.write_png:
-			params.add_string('write_png_channels', output_channels)
 			params.add_bool('write_png_16bit', self.write_png_16bit)
 		params.add_bool('write_tga', self.write_tga)
+		params.add_string('write_tga_channels', output_channels)
 		if self.write_tga:
-			params.add_string('write_tga_channels', output_channels)
 			params.add_bool('write_tga_ZBuf', self.write_zbuf)
 			params.add_string('write_tga_zbuf_normalizationtype', self.zbuf_normalization)
 		
