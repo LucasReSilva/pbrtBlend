@@ -280,7 +280,7 @@ class luxrender_halt(declarative_property_group):
 			'name': 'Convergence Step',
 			'description': 'Update steps of the convergence test',
 			'default': 32.0,
-			'min': 8.0,
+			'min': 4.0,
 			'soft_min': 16.0,
 			'max': 512.0,
 			'soft_max': 512.0,
