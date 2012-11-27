@@ -141,8 +141,8 @@ class luxrender_sampler(declarative_property_group):
 			'type': 'string',
 			'subtype': 'FILE_PATH',
 			'attr': 'usersamplingmap_filename',
-			'name': 'UserSamplingMap',
-			'description': 'Filename for User Sampling Map, none = off, extender added automatically (.exr)',
+			'name': 'User Sampling Map',
+			'description': 'Image map to guide sample distribution, none = disabled. Extension is added automatically (.exr)',
 			'default': ''
 		},
 		{
@@ -237,6 +237,9 @@ class luxrender_sampler(declarative_property_group):
 		
 		if self.sampler != 'erpt':
 			params.add_bool('noiseaware', self.noiseaware)
+			
+		if self.sampler != 'erpt' and self usersamplingmap_filename != '':
+			params.add_string('usersamplingmap_filename', self.usersamplingmap_filename)
 
 			
 		if self.advanced:
