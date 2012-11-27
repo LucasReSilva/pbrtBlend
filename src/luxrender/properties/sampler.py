@@ -238,7 +238,7 @@ class luxrender_sampler(declarative_property_group):
 		if self.sampler != 'erpt':
 			params.add_bool('noiseaware', self.noiseaware)
 			
-		if self.sampler != 'erpt' and self usersamplingmap_filename != '':
+		if self.sampler != 'erpt' and self.usersamplingmap_filename != '':
 			params.add_string('usersamplingmap_filename', self.usersamplingmap_filename)
 
 			
