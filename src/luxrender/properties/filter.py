@@ -171,7 +171,7 @@ class luxrender_filter(declarative_property_group):
 			'type': 'bool',
 			'attr': 'supersample',
 			'name': 'Supersample',
-			'description': 'Use filter super-sampling',
+			'description': 'Use filter super-sampling, disabling this is NOT recommended',
 			'default': True,
 			'save_in_preset': True
 		},
