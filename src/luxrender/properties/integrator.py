@@ -1033,7 +1033,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		params = ParamSet()
 		
-		#Check to make sure all settings are correct when hybrid is selected. Keep this up to date as hybrid gets new options in 0.9
+		#Check to make sure all settings are correct when hybrid is selected. Keep this up to date as hybrid gets new options in later versions
 		
 		if scene.luxrender_rendermode.renderer == 'hybrid':
 			#Check each integrator seperately so they don't mess with each other!

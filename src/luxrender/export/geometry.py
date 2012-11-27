@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import os, struct
+import os, struct, math
 
 import bpy, mathutils, math
 from bpy.app.handlers import persistent
@@ -114,7 +114,7 @@ class GeometryExporter(object):
 		export_original = True
 		# mesh data name first for portal reasons
 		ext_mesh_name = '%s_%s_ext' % (obj.data.name, self.geometry_scene.name)
-		if obj.luxrender_object.append_external_mesh:
+		if obj.luxrender_object.append_proxy:
 			if obj.luxrender_object.hide_proxy_mesh:
 				export_original = False
 			
@@ -122,10 +122,14 @@ class GeometryExporter(object):
 				mesh_definitions.append( self.ExportedMeshes.get(ext_mesh_name) )
 			else:
 				ext_params = ParamSet()
-				ext_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
-				ext_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
+				if obj.luxrender_object.proxy_type in {'plymesh', 'stlmesh'}:
+					ext_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
+					ext_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
+				if obj.luxrender_object.proxy_type in {'sphere', 'cylinder', 'cone', 'paraboloid'}:
+					ext_params.add_float('radius', obj.luxrender_object.radius)
+					ext_params.add_float('phimax', obj.luxrender_object.phimax*(180/math.pi))
 				
-				mesh_definition = (ext_mesh_name, obj.active_material.name, obj.luxrender_object.external_mesh[-3:] + 'mesh', ext_params)
+				mesh_definition = (ext_mesh_name, obj.active_material.name, obj.luxrender_object.proxy_type, ext_params)
 				mesh_definitions.append( mesh_definition )
 				
 				# Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
@@ -283,7 +287,7 @@ class GeometryExporter(object):
 						with open(ply_path, 'wb') as ply:
 							ply.write(b'ply\n')
 							ply.write(b'format binary_little_endian 1.0\n')
-							ply.write(b'comment Created by LuxBlend 2.5 exporter for LuxRender - www.luxrender.net\n')
+							ply.write(b'comment Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net\n')
 							
 							# vert_index == the number of actual verts needed
 							ply.write( ('element vertex %d\n' % vert_index).encode() )

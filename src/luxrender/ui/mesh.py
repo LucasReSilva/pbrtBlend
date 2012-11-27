@@ -40,9 +40,9 @@ class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_rendere
 	]
 	
 	def draw(self, context):
-		if context.object.luxrender_object.append_external_mesh and context.object.luxrender_object.hide_proxy_mesh:
+		if context.object.luxrender_object.append_proxy and context.object.luxrender_object.hide_proxy_mesh:
 			msg = ['Mesh options not available when',
-				   'object is using external PLY mesh',
+				   'object is used as a render proxy',
 				   'and hide proxy mesh is set.'
 				  ]
 			for t in msg:
