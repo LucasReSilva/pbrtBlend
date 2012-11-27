@@ -125,7 +125,7 @@ class GeometryExporter(object):
 				if obj.luxrender_object.proxy_type in {'plymesh', 'stlmesh'}:
 					ext_params.add_string('filename', efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
 					ext_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
-				if obj.luxrender_object.proxy_type in {'sphere', 'cylinder', 'cone', 'paraboloid'}:
+				if obj.luxrender_object.proxy_type in {'sphere', 'cylinder', 'cone', 'disk', 'paraboloid'}:
 					ext_params.add_float('radius', obj.luxrender_object.radius)
 					ext_params.add_float('phimax', obj.luxrender_object.phimax*(180/math.pi))
 				

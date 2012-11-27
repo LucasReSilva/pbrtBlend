@@ -45,10 +45,10 @@ class luxrender_object(declarative_property_group):
 	visibility = {
 		'proxy_type':		{ 'append_proxy': True },
 		'hide_proxy_mesh':	{ 'append_proxy': True },
-		'use_smoothing':	{ 'append_proxy': True, 'proxy_type': 'plymesh'},
-		'external_mesh':	{ 'append_proxy': True, 'proxy_type': 'plymesh'},
-		'radius':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'paraboloid']) },
-		'phimax':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'paraboloid']) },
+		'use_smoothing':	{ 'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
+		'external_mesh':	{ 'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
+		'radius':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid']) },
+		'phimax':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid']) },
 	}
 	properties = [
 		{
@@ -75,6 +75,7 @@ class luxrender_object(declarative_property_group):
 				('sphere', 'Sphere', 'Geometric sphere primitive'),
 				('cylinder', 'Cylinder', 'Geometric cylinder primitive'),
 				('cone', 'Cone', 'Geometric cone primitive'),
+				('disk', 'Disk', 'Geometric disk primitive'),
 				('paraboloid', 'Paraboloid', 'Geometric paraboloid primitive'),
 			], #If you add items to this, be sure they are the actual names of the primitives, this string is written directly to the scene file in export/geometry/buildMesh!
 			'default': 'plymesh'
