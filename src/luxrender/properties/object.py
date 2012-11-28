@@ -41,6 +41,7 @@ class luxrender_object(declarative_property_group):
 		'use_smoothing',
 		'external_mesh',
 		['radius','phimax'],
+		['zmin', 'zmax'],
 	]
 	visibility = {
 		'proxy_type':		{ 'append_proxy': True },
@@ -48,7 +49,9 @@ class luxrender_object(declarative_property_group):
 		'use_smoothing':	{ 'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
 		'external_mesh':	{ 'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
 		'radius':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid']) },
-		'phimax':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid']) },
+		'phimax':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid']) },		'radius':			{ 'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid']) },
+		'zmin':				{ 'append_proxy': True, 'proxy_type': 'cylinder'},
+		'zmax':				{ 'append_proxy': True, 'proxy_type': O(['cylinder', 'paraboloid']) },
 	}
 	properties = [
 		{
@@ -117,5 +120,35 @@ class luxrender_object(declarative_property_group):
 			'soft_max': 2*math.pi,
 			'subtype': 'ANGLE',
 			'unit': 'ROTATION'
+		},
+		{
+			'type': 'float',
+			'attr': 'zmin',
+			'name': 'Z Min',
+			'description': 'Distance to base of the shape along its Z axis',
+			'default': -1.0,
+			'max': 0.0,
+			'subtype': 'DISTANCE',
+			'unit': 'LENGTH',
+		},
+		{
+			'type': 'float',
+			'attr': 'zmax',
+			'name': 'Z Max',
+			'description': 'Distance to top of the shape along its Z axis',
+			'default': 1.0,
+			'min': 0.0,
+			'subtype': 'DISTANCE',
+			'unit': 'LENGTH',
+		},	
+		{
+			'type': 'float',
+			'attr': 'radius',
+			'name': 'Radius',
+			'description': 'Radius of the object',
+			'default': 1.0,
+			'min': 0.00001,
+			'subtype': 'DISTANCE',
+			'unit': 'LENGTH',
 		},
 	]

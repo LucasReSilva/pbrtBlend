@@ -128,6 +128,10 @@ class GeometryExporter(object):
 				if obj.luxrender_object.proxy_type in {'sphere', 'cylinder', 'cone', 'disk', 'paraboloid'}:
 					ext_params.add_float('radius', obj.luxrender_object.radius)
 					ext_params.add_float('phimax', obj.luxrender_object.phimax*(180/math.pi))
+				if obj.luxrender_object.proxy_type in {'cylinder', 'paraboloid'}:
+					ext_params.add_float('zmax', obj.luxrender_object.zmax)	
+				if obj.luxrender_object.proxy_type == 'cylinder':
+					ext_params.add_float('zmin', obj.luxrender_object.zmin)
 				
 				mesh_definition = (ext_mesh_name, obj.active_material.name, obj.luxrender_object.proxy_type, ext_params)
 				mesh_definitions.append( mesh_definition )
