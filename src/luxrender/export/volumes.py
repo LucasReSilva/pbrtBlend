@@ -215,6 +215,27 @@ def read_cache(smokecache, is_high_res, amplifier):
 					#print("Cell count: {0:1d}".format(cell_count))
 					struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 					
+					last_pos = cachefile.tell()
+					buffer = cachefile.read(4)
+					temp = ""
+					for i in range(len(buffer)):
+						temp = temp + chr(buffer[i])
+					new_cache = False
+					if temp[0] >= '1' and temp[1] == '.':
+						new_cache = True
+					else:
+						cachefile.seek(last_pos)
+					
+					# Try to read new header
+					if new_cache:
+						# number of fluid fields in the cache file
+						fluid_fields	= cachefile.read(SZ_UINT)
+						active_fields	= cachefile.read(SZ_UINT)
+						res_x			= cachefile.read(SZ_UINT)
+						res_y			= cachefile.read(SZ_UINT)
+						res_y			= cachefile.read(SZ_UINT)
+						dx				= cachefile.read(4)
+	
 					# Shadow values
 					compressed = struct.unpack("1B", cachefile.read(1))[0]
 					if not compressed:
