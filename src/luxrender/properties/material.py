@@ -121,7 +121,6 @@ TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface U-Roug
 TF_backface_uexponent	= FloatTextureParameter('bf_uexponent', 'Backface U-Exponent',		real_attr='backface_uexponent', add_float_value=True, min=1.0, max=1000000, default=30 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface V-Roughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 )
 TF_backface_vexponent	= FloatTextureParameter('bf_vexponent', 'Backface V-Exponent',		real_attr='backface_vexponent',	add_float_value=True, min=1.0, max=1000000, default=30 )
-TF_g					= FloatTextureParameter('g', 'Scattering asymmetry',				add_float_value=True, default=0.0, min=-1.0, max=1.0 ) # default 0.0 for Uniform
 #These are for the layered mat:
 TF_OP1					= FloatTextureParameter('opacity1', 'Opacity 1',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
 TF_OP2					= FloatTextureParameter('opacity2', 'Opacity 2',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
@@ -2769,27 +2768,43 @@ class luxrender_mat_scatter(declarative_property_group):
 	controls = [
 	] + \
 		TC_Kd.controls + \
-		TF_g.controls
+	[
+		'g'
+	]
 	
 	visibility = dict_merge(
-		TC_Kd.visibility,
-		TF_g.visibility
+		TC_Kd.visibility
 	)
 	
 	properties = [
+		{
+			'type': 'float_vector',
+			'attr': 'g',
+			'name': 'Asymmetry',
+			'description': 'Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering',
+			'default': (0.0, 0.0, 0.0),
+			'min': -1.0,
+			'soft_min': -1.0,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 4,
+			'save_in_preset': True
+		},
 	] + \
-		TC_Kd.get_properties() + \
-		TF_g.get_properties()
-	
+		TC_Kd.get_properties()
+			
 	def get_paramset(self, material):
 		scatter_params = ParamSet()
 		
 		scatter_params.update( TC_Kd.get_paramset(self) )
-		scatter_params.update( TF_g.get_paramset(self) )
-		
+		scatter_params.add_color('g', self.g)
+				
 		return scatter_params
 	
 	def load_paramset(self, ps):
+		psi_accept = {
+			'g': 'color'
+		}
 		TC_Kd.load_paramset(self, ps)
 		TF_g.load_paramset(self, ps)
 
