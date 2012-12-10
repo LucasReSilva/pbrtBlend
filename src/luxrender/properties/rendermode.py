@@ -114,6 +114,7 @@ class luxrender_rendermode(declarative_property_group):
 				('sampler', 'Sampler (traditional CPU)', 'sampler'),
 				('hybrid', 'Hybrid (CPU+GPU)', 'hybrid'),
 				('sppm', 'SPPM (CPU)', 'sppm'),
+				('slg', 'SLG (GPU)', 'slg'),
 			],
 			# 'update': lambda s,c: check_renderer_settings(c),
 			'save_in_preset': True
