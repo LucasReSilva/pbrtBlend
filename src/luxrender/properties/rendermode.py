@@ -76,7 +76,7 @@ class luxrender_rendermode(declarative_property_group):
 		elif self.rendermode == 'sppm':
 			self.renderer = 'sppm'
 		elif self.rendermode in ('slgpath', 'slgbidir'):
-			self.render = 'slg'
+			self.renderer = 'slg'
 		else:
 			self.renderer = 'sampler'
 	
