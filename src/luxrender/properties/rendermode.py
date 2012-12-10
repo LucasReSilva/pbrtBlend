@@ -64,9 +64,9 @@ class luxrender_rendermode(declarative_property_group):
 	
 	#This function sets renderer and surface integrator according to rendermode setting
 	def update_rendering_mode(self, context):
-		if self.rendermode == 'hybridpath':
+		if self.rendermode in ('slgpath', 'hybridpath'):
 			context.scene.luxrender_integrator.surfaceintegrator = 'path'
-		elif self.rendermode == 'hybridbidir':
+		elif self.rendermode in ('slgbidir', 'hybridbidir'):
 			context.scene.luxrender_integrator.surfaceintegrator = 'bidirectional'
 		else:
 			context.scene.luxrender_integrator.surfaceintegrator = self.rendermode
@@ -75,6 +75,8 @@ class luxrender_rendermode(declarative_property_group):
 			self.renderer = 'hybrid'
 		elif self.rendermode == 'sppm':
 			self.renderer = 'sppm'
+		elif self.rendermode in ('slgpath', 'slgbidir'):
+			self.render = 'slg'
 		else:
 			self.renderer = 'sampler'
 	
@@ -95,6 +97,8 @@ class luxrender_rendermode(declarative_property_group):
 				('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
 				('hybridpath', 'Hybrid Path', 'OpenCL-accelerated simple (eye-only) path tracer'),
 				('sppm', 'SPPM', 'Experimental stochastic progressive photon mapping integrator'),
+# 				('slgpath', 'SLG Path OpenCL', 'Experimental pure GPU path tracer'),
+# 				('slgbidir', 'SLG BidirVCM', 'Experimental OpenCL bidirectional/vertex merging integrator'),
 			],
 			'update': update_rendering_mode,
 			'save_in_preset': True
