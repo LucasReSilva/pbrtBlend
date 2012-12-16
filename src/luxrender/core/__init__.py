@@ -111,36 +111,39 @@ _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 def lux_output_hints(self, context):
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 
-		col = self.layout.column()
-		col.label("LuxRender Output Formats")
+		if not (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.write_files == False and not context.scene.luxrender_engine.integratedimaging): #in this case, none of these buttons do anything, so don't even bother drawing the label
+			col = self.layout.column()
+			col.label("LuxRender Output Formats")
 		row = self.layout.row()
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png", text="PNG")
-		if context.scene.camera.data.luxrender_camera.luxrender_film.write_png:
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png_16bit", text="Use 16bit PNG")
-		row = self.layout.row()
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TARGA")
-		row = self.layout.row()
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr", text="OpenEXR")
-		if context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_applyimaging", text="Tonemap EXR")
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_halftype", text="Use 16bit EXR")
+		if not (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.write_files == False): #if write-files is disabled, we are in pylux-pipe mode, regular file output is disabled
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png", text="PNG")
+			if context.scene.camera.data.luxrender_camera.luxrender_film.write_png:
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png_16bit", text="Use 16bit PNG")
 			row = self.layout.row()
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_compressiontype", text="EXR Compression")
-		if context.scene.camera.data.luxrender_camera.luxrender_film.write_tga or context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TARGA")
 			row = self.layout.row()
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_zbuf", text="Enable Z-Buffer")
-			if context.scene.camera.data.luxrender_camera.luxrender_film.write_zbuf:
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr", text="OpenEXR")
+			if context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_applyimaging", text="Tonemap EXR")
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_halftype", text="Use 16bit EXR")
 				row = self.layout.row()
-				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "zbuf_normalization", text="Z-Buffer Normalization")
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_compressiontype", text="EXR Compression")
+			if context.scene.camera.data.luxrender_camera.luxrender_film.write_tga or context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+				row = self.layout.row()
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_zbuf", text="Enable Z-Buffer")
+				if context.scene.camera.data.luxrender_camera.luxrender_film.write_zbuf:
+					row = self.layout.row()
+					row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "zbuf_normalization", text="Z-Buffer Normalization")
+			row = self.layout.row()
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm", text="Write FLM")
+			if context.scene.camera.data.luxrender_camera.luxrender_film.write_flm:
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct", text="Write FLM Directly")
 		row = self.layout.row()
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
-		if context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha or (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.integratedimaging):
+		if not (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.write_files == False): #This control does nothing in internal-pipe mode, but we need to handle it separately so we can still draw premultiply by itself for integrated imaging mode
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
+		if context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha or (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.integratedimaging): #This control must be here for integrated imaging mode, or else it is impossible to render a non-black background
 			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
-		row = self.layout.row()
-		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm", text="Write FLM")
-		if context.scene.camera.data.luxrender_camera.luxrender_film.write_flm:
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct", text="Write FLM Directly")
 		
 
 _register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))
