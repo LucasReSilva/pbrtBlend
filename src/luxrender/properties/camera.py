@@ -588,7 +588,7 @@ class luxrender_film(declarative_property_group):
 			'attr': 'write_exr_halftype',
 			'name': 'Use 16bit EXR',
 			'description': 'Use "half" (16bit float) OpenEXR format instead of 32bit float',
-			'default': True
+			'default': False
 		},
 		{
 			'type': 'enum',
