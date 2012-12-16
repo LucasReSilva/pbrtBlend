@@ -134,7 +134,7 @@ def lux_output_hints(self, context):
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "zbuf_normalization", text="Z-Buffer Normalization")
 		row = self.layout.row()
 		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
-		if context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha:
+		if context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha or (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.integratedimaging):
 			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
 		row = self.layout.row()
 		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm", text="Write FLM")
