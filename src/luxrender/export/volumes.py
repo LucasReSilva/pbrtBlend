@@ -138,25 +138,20 @@ def read_cache(smokecache, is_high_res, amplifier):
 	
 	###################################################################################################
 	# Read cache
-	# Pointcache file format:
+	# Pointcache file format v1.04:
 	#	name								   size of uncompressed data
 	#--------------------------------------------------------------------------------------------------
 	#	header								( 20 Bytes)
 	#	data_segment for shadow values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for density values		( cell_count * sizeof(float) Bytes)
-	#	data_segment for density,old values	( cell_count * sizeof(float) Bytes)
 	#	data_segment for heat values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for heat, old values	( cell_count * sizeof(float) Bytes)
 	#	data_segment for vx values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for vy values		( cell_count * sizeof(float) Bytes)
 	#	data_segment for vz values		( cell_count * sizeof(float) Bytes)
-	#	data_segment for vx, old values		( cell_count * sizeof(float) Bytes)
-	#	data_segment for vy, old values		( cell_count * sizeof(float) Bytes)
-	#	data_segment for vz, old values		( cell_count * sizeof(float) Bytes)
-	#	data_segment for obstacles values	( cell_count * sizeof(char) Bytes)
+	#	data_segment for obstacles values	( cell_count * sizeof(char) Bytes)	
 	# if simulation is high resolution additionally:
 	#	data_segment for density values		( big_cell_count * sizeof(float) Bytes)
-	#	data_segment for density,old values	( big_cell_count * sizeof(float) Bytes)
 	#	data_segment for tcu values		( cell_count * sizeof(u_int) Bytes)
 	#	data_segment for tcv values		( cell_count * sizeof(u_int) Bytes)
 	#	data_segment for tcw values		( cell_count * sizeof(u_int) Bytes)
@@ -179,6 +174,10 @@ def read_cache(smokecache, is_high_res, amplifier):
 	#
 	###################################################################################################
 	density = []
+	cell_count = 0
+	res_x = 0
+	res_y = 0
+	res_z = 0
 	cachefilepath = []
 	cachefilename = []
 	if not smokecache.is_baked:
@@ -229,12 +228,13 @@ def read_cache(smokecache, is_high_res, amplifier):
 					# Try to read new header
 					if new_cache:
 						# number of fluid fields in the cache file
-						fluid_fields	= cachefile.read(SZ_UINT)
-						active_fields	= cachefile.read(SZ_UINT)
-						res_x			= cachefile.read(SZ_UINT)
-						res_y			= cachefile.read(SZ_UINT)
-						res_y			= cachefile.read(SZ_UINT)
-						dx				= cachefile.read(4)
+						fluid_fields	= struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						active_fields	= struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						res_x		= struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						res_y		= struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						res_z		= struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						dx		= struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						cell_count = res_x*res_y*res_z						
 	
 					# Shadow values
 					compressed = struct.unpack("1B", cachefile.read(1))[0]
@@ -259,16 +259,17 @@ def read_cache(smokecache, is_high_res, amplifier):
 							props = cachefile.read(props_size)
 					
 					if is_high_res:
-						# Densitiy, old values
-						compressed = struct.unpack("1B", cachefile.read(1))[0]
-						if not compressed:
-							cachefile.read(SZ_FLOAT*cell_count)
-						else:
-							stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-							cachefile.read(stream_size)
-							if compressed == 2:
-								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-								cachefile.read(props_size)
+						if not new_cache:
+							# Densitiy, old values
+							compressed = struct.unpack("1B", cachefile.read(1))[0]
+							if not compressed:
+								cachefile.read(SZ_FLOAT*cell_count)
+							else:
+								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+								cachefile.read(stream_size)
+								if compressed == 2:
+									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+									cachefile.read(props_size)
 						
 						# Heat values
 						compressed = struct.unpack("1B", cachefile.read(1))[0]
@@ -321,36 +322,38 @@ def read_cache(smokecache, is_high_res, amplifier):
 							if compressed == 2:
 								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								cachefile.read(props_size)
-						# vx, old values
-						compressed = struct.unpack("1B", cachefile.read(1))[0]
-						if not compressed:
-							cachefile.read(SZ_FLOAT*cell_count)
-						else:
-							stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-							cachefile.read(stream_size)
-							if compressed == 2:
-								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-								cachefile.read(props_size)
-						# vy,old values
-						compressed = struct.unpack("1B", cachefile.read(1))[0]
-						if not compressed:
-							cachefile.read(SZ_FLOAT*cell_count)
-						else:
-							stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-							cachefile.read(stream_size)
-							if compressed == 2:
-								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-								cachefile.read(props_size)
-						# vz,old values
-						compressed = struct.unpack("1B", cachefile.read(1))[0]
-						if not compressed:
-							cachefile.read(SZ_FLOAT*cell_count)
-						else:
-							stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-							cachefile.read(stream_size)
-							if compressed == 2:
-								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-								cachefile.read(props_size)
+						if not new_cache:
+							# vx, old values
+							compressed = struct.unpack("1B", cachefile.read(1))[0]
+							if not compressed:
+								cachefile.read(SZ_FLOAT*cell_count)
+							else:
+								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+								cachefile.read(stream_size)
+								if compressed == 2:
+									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+									cachefile.read(props_size)
+							#vy,old values
+							compressed = struct.unpack("1B", cachefile.read(1))[0]
+							if not compressed:
+								cachefile.read(SZ_FLOAT*cell_count)
+							else:
+								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+								cachefile.read(stream_size)
+								if compressed == 2:
+									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+									cachefile.read(props_size)
+							# vz,old values
+							compressed = struct.unpack("1B", cachefile.read(1))[0]
+							if not compressed:
+								cachefile.read(SZ_FLOAT*cell_count)
+							else:
+								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+								cachefile.read(stream_size)
+								if compressed == 2:
+									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+									cachefile.read(props_size)
+
 						# Obstacle values
 						compressed = struct.unpack("1B", cachefile.read(1))[0]
 						if not compressed:
@@ -363,10 +366,32 @@ def read_cache(smokecache, is_high_res, amplifier):
 								cachefile.read(props_size)
 						
 						# dt value
-						cachefile.read(4)
+						cachefile.read(SZ_FLOAT)
 						# dx value
-						cachefile.read(4)
-						
+						cachefile.read(SZ_FLOAT)
+
+						if new_cache:
+							#p0
+							cachefile.read(3*SZ_FLOAT)
+							#p1
+							cachefile.read(3*SZ_FLOAT)
+							#dp0
+							cachefile.read(3*SZ_FLOAT)
+							#shift
+							cachefile.read(3*SZ_UINT)
+							#obj_shift_f 
+							cachefile.read(3*SZ_FLOAT)
+							#obmat
+							cachefile.read(16*SZ_FLOAT)
+							#base_res
+							cachefile.read(3*SZ_UINT)
+							#res min
+							cachefile.read(3*SZ_UINT)
+							#res max
+							cachefile.read(3*SZ_UINT)
+							#active color
+							cachefile.read(3*SZ_FLOAT)
+
 						# High resolution
 						# Density values
 						
@@ -414,11 +439,11 @@ def read_cache(smokecache, is_high_res, amplifier):
 								density.append(p_dens[i])
 						else:
 							LuxLog('Volumes: Cannot read compressed LZMA stream; no library loaded')
-			
+						
 			cachefile.close()
 			#endif cachefile exists
-			return density
-	return []
+			return (res_x, res_y, res_z, density)
+	return (0,0,0,[])
 
 def export_smoke(lux_context, scene):
 	#Search smoke domain objects
@@ -436,7 +461,11 @@ def export_smoke(lux_context, scene):
 					set = mod.domain_settings
 					resolution = set.resolution_max
 					smokecache = set.point_cache
-					density = read_cache(smokecache, set.use_high_resolution, set.amplify+1)
+					ret = read_cache(smokecache, set.use_high_resolution, set.amplify+1)
+					res_x = ret[0]
+					res_y = ret[1]
+					res_z = ret[2]
+					density = ret[3]
 
 					#standard values for volume material
 					sigma_s = [1.0, 1.0, 1.0]
@@ -453,12 +482,18 @@ def export_smoke(lux_context, scene):
 									if param[0] == 'color sigma_s': sigma_s = param[1]
 									if param[0] == 'color g': g = param[1][0]
 
-
-					max = domain.dimensions[0]
-					if (max - domain.dimensions[1]) < -eps: max = domain.dimensions[1]
-					if (max - domain.dimensions[2]) < -eps: max = domain.dimensions[2]
-					
-					big_res = [int(round(resolution*domain.dimensions[0]/max,0)),int(round(resolution*domain.dimensions[1]/max,0)),int(round(resolution*domain.dimensions[2]/max,0))]
+					if(res_x*res_y*res_z > 0):
+						#new cache format
+						big_res = []
+						big_res.append(res_x)
+						big_res.append(res_y)
+						big_res.append(res_z)
+					else:
+						max = domain.dimensions[0]
+						if (max - domain.dimensions[1]) < -eps: max = domain.dimensions[1]
+						if (max - domain.dimensions[2]) < -eps: max = domain.dimensions[2]					
+						big_res = [int(round(resolution*domain.dimensions[0]/max,0)),int(round(resolution*domain.dimensions[1]/max,0)),int(round(resolution*domain.dimensions[2]/max,0))]
+						
 					if set.use_high_resolution: big_res = [big_res[0]*(set.amplify+1), big_res[1]*(set.amplify+1), big_res[2]*(set.amplify+1)]
 
 					if len(density) == big_res[0]*big_res[1]*big_res[2]:
