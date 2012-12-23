@@ -249,13 +249,13 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 							cachefile.read(props_size)
 					
 					# Density values
-					compressed = struct.unpack("1B", cachefile.read(1))[0]
-					if not compressed:
+					density_compressed = struct.unpack("1B", cachefile.read(1))[0]
+					if not density_compressed:
 						cachefile.read(SZ_FLOAT*cell_count)
 					else:
-						stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-						stream = cachefile.read(stream_size)
-						if compressed == 2:
+						density_stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						density_stream = cachefile.read(density_stream_size)
+						if density_compressed == 2:
 							props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 							props = cachefile.read(props_size)
 					
@@ -297,13 +297,13 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 						# Fire values
 						if new_cache and flowtype >= 1:
 							# Fire values
-							compressed = struct.unpack("1B", cachefile.read(1))[0]
-							if not compressed:
+							fire_compressed = struct.unpack("1B", cachefile.read(1))[0]
+							if not fire_compressed:
 								cachefile.read(SZ_FLOAT*cell_count)
 							else:
 								fire_stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								fire_stream = cachefile.read(fire_stream_size)								
-								if compressed == 2:
+								if fire_compressed == 2:
 									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 									cachefile.read(props_size)
 						  # Fuel values
@@ -328,38 +328,38 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 									cachefile.read(props_size)
 									
-						if new_cache and flowtype >= 1:
-                            #active colors
-    						# r values
-							compressed = struct.unpack("1B", cachefile.read(1))[0]
-							if not compressed:
-								cachefile.read(SZ_FLOAT*cell_count)
-							else:
-								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]								
-								cachefile.read(stream_size)
-								if compressed == 2:
-									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-									cachefile.read(props_size)
-    						# g values
-							compressed = struct.unpack("1B", cachefile.read(1))[0]
-							if not compressed:
-								cachefile.read(SZ_FLOAT*cell_count)
-							else:
-								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]								
-								cachefile.read(stream_size)
-								if compressed == 2:
-									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-									cachefile.read(props_size)
-    						# b values
-							compressed = struct.unpack("1B", cachefile.read(1))[0]
-							if not compressed:
-								cachefile.read(SZ_FLOAT*cell_count)
-							else:
-								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-								cachefile.read(stream_size)
-								if compressed == 2:
-									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-									cachefile.read(props_size)
+#						if new_cache and flowtype >= 1:
+#                           #active colors
+#    						# r values
+#							compressed = struct.unpack("1B", cachefile.read(1))[0]
+#							if not compressed:
+#								cachefile.read(SZ_FLOAT*cell_count)
+#							else:
+#								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]								
+#								cachefile.read(stream_size)
+#								if compressed == 2:
+#									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+#									cachefile.read(props_size)
+#    						# g values
+#							compressed = struct.unpack("1B", cachefile.read(1))[0]
+#							if not compressed:
+#								cachefile.read(SZ_FLOAT*cell_count)
+#							else:
+#								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]								
+#								cachefile.read(stream_size)
+#								if compressed == 2:
+#									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+#									cachefile.read(props_size)
+#    						# b values
+#							compressed = struct.unpack("1B", cachefile.read(1))[0]
+#							if not compressed:
+#								cachefile.read(SZ_FLOAT*cell_count)
+#							else:
+#								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+#								cachefile.read(stream_size)
+#								if compressed == 2:
+#									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+#									cachefile.read(props_size)
 									
 						# vx values
 						compressed = struct.unpack("1B", cachefile.read(1))[0]
@@ -462,18 +462,17 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 							#active color
 							cachefile.read(3*SZ_FLOAT)
 
-						# High resolution
-						# Density values
-						
+						# High resolution					
 						cell_count = cell_count * amplifier * amplifier * amplifier
 						
-						compressed = struct.unpack("1B", cachefile.read(1))[0]
-						if not compressed:
+						# Density values
+						density_compressed = struct.unpack("1B", cachefile.read(1))[0]
+						if not density_compressed:
 							cachefile.read(SZ_FLOAT*cell_count)
 						else:
-							stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-							stream = cachefile.read(stream_size)
-							if compressed == 2:
+							density_stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+							density_stream = cachefile.read(density_stream_size)
+							if density_compressed == 2:
 								props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								props = cachefile.read(props_size)
 								
@@ -485,47 +484,47 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 							else:
 								fire_stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 								fire_stream = cachefile.read(fire_stream_size)								
-								if compressed == 2:
+								if fire_compressed == 2:
 									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
 									cachefile.read(props_size)								
-    						# Fuel values						
-							compressed = struct.unpack("1B", cachefile.read(1))[0]
-							if not compressed:
-								cachefile.read(SZ_FLOAT*cell_count)
-							else:
-								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-								cachefile.read(stream_size)
-								if compressed == 2:
-									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-									cachefile.read(props_size)
+#    						# Fuel values						
+#							compressed = struct.unpack("1B", cachefile.read(1))[0]
+#							if not compressed:
+#								cachefile.read(SZ_FLOAT*cell_count)
+#							else:
+#								stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+#								cachefile.read(stream_size)
+#								if compressed == 2:
+#									props_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+#									cachefile.read(props_size)
 														
-					if compressed == 1:
+					if density_compressed == 1:
 						has_lzo, lzodll = library_loader.load_lzo()
 						if has_lzo:
-							LuxLog('Volumes: De-compressing LZO stream of length {0:0d} bytes...'.format(stream_size))
+							LuxLog('Volumes: De-compressing LZO stream of length {0:0d} bytes...'.format(density_stream_size))
 							#print("Cell count: %d"%cell_count)
 							uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
 							p_dens = cast(uncomp_stream, POINTER(c_float))
 							
 							#call lzo decompressor
-							lzodll.lzo1x_decompress(stream,stream_size,p_dens,byref(outlen), None)
+							lzodll.lzo1x_decompress(density_stream, density_stream_size,p_dens,byref(outlen), None)
 							
 							for i in range(cell_count):
 								density.append(p_dens[i])
 						else:
 							LuxLog('Volumes: Cannot read compressed LZO stream; no library loaded')
 					
-					elif compressed == 2:
+					elif density_compressed == 2:
 						has_lzma, lzmadll = library_loader.load_lzma()
 						if has_lzma:
-							LuxLog('Volumes: De-compressing LZMA stream of length {0:0d} bytes...'.format(stream_size))
+							LuxLog('Volumes: De-compressing LZMA stream of length {0:0d} bytes...'.format(density_stream_size))
 							#print("Cell count: %d"%cell_count)
 							uncomp_stream = (c_float*cell_count*SZ_FLOAT)()
 							p_dens = cast(uncomp_stream, POINTER(c_float))
 							outlen = c_uint(cell_count*SZ_FLOAT)
 							
 							#call lzma decompressor
-							lzmadll.LzmaUncompress(p_dens, byref(outlen), stream, byref(c_uint(stream_size)), props, props_size)
+							lzmadll.LzmaUncompress(p_dens, byref(outlen), density_stream, byref(c_uint(density_stream_size)), props, props_size)
 							
 							for i in range(cell_count):
 								density.append(p_dens[i])
@@ -533,9 +532,6 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 							LuxLog('Volumes: Cannot read compressed LZMA stream; no library loaded')
 
 					if flowtype >= 1:
-						fire_compressed = struct.unpack("1B", cachefile.read(1))[0]
-						fire_stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
-						fire_stream = cachefile.read(fire_stream_size)	
 						if fire_compressed == 1:
 							has_lzo, lzodll = library_loader.load_lzo()
 							if has_lzo:
