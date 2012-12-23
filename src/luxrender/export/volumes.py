@@ -533,6 +533,9 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 							LuxLog('Volumes: Cannot read compressed LZMA stream; no library loaded')
 
 					if flowtype >= 1:
+						fire_compressed = struct.unpack("1B", cachefile.read(1))[0]
+						fire_stream_size = struct.unpack("1I", cachefile.read(SZ_UINT))[0]
+						fire_stream = cachefile.read(fire_stream_size)	
 						if fire_compressed == 1:
 							has_lzo, lzodll = library_loader.load_lzo()
 							if has_lzo:
