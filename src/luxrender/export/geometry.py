@@ -764,6 +764,10 @@ class GeometryExporter(object):
 		if not psys.settings.type == 'HAIR':
 			LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
 			return
+			
+		for mod in obj.modifiers:
+			if mod.type == 'PARTICLE_SYSTEM' and mod.show_render == False:
+				return
 		
 		# This should force the strand/junction objects to be instanced
 		self.objects_used_as_duplis.add(obj)
