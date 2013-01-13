@@ -42,9 +42,6 @@ class luxrender_sampler(declarative_property_group):
 		'spacer',
 		'sampler',
 		
-		'chainlength',
-		
-		'basesampler',
 		'pixelsampler',
 		'pixelsamples',
 		
@@ -59,17 +56,13 @@ class luxrender_sampler(declarative_property_group):
 	
 	visibility = {
 		'spacer':						{ 'advanced': True },
-		'chainlength':					{ 'sampler': 'erpt' },
-		'mutationrange':				{ 'advanced': True, 'sampler': O(['erpt', 'metropolis']) },
-		'basesampler':					{ 'sampler': 'erpt' },
-		'pixelsampler':					O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
-		'pixelsamples':					O([{ 'sampler': O(['lowdiscrepancy', 'random']) },			{'sampler':'erpt', 'basesampler':O(['lowdiscrepancy', 'random'])} ]),
+		'pixelsampler':					{ 'sampler': O(['lowdiscrepancy', 'random']) },
+		'pixelsamples':					{ 'sampler': O(['lowdiscrepancy', 'random']) },
 #		'adaptive_largemutationprob':	{ 'sampler': 'metropolis' },					
 		'largemutationprob':			A([{ 'sampler': 'metropolis' }, ]), #  { 'adaptive_largemutationprob': False },
 		'usecooldown':					A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]), #  { 'adaptive_largemutationprob': False },
 		'maxconsecrejects':				A([{ 'advanced': True }, { 'sampler': 'metropolis' }, ]),
- 		'noiseaware':					{ 'sampler': O(['random', 'lowdiscrepancy', 'metropolis']) },
-		'usersamplingmap_filename':		A([{ 'advanced': True }, { 'sampler': O(['lowdiscrepancy', 'metropolis', 'random']) } ]),
+		'usersamplingmap_filename':		{ 'advanced': True },
 	}
 	
 	properties = [
@@ -86,7 +79,6 @@ class luxrender_sampler(declarative_property_group):
 			'default': 'metropolis',
 			'items': [
 				('metropolis', 'Metropolis', 'Keleman-style metropolis light transport'),
-				('erpt', 'ERPT', 'Experimental energy redistribution path tracing sampler'),
 				('lowdiscrepancy', 'Low Discrepancy', 'Use a low discrepancy sequence'),
 				('random', 'Random', 'Completely random sampler')
 			],
@@ -154,26 +146,6 @@ class luxrender_sampler(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
-			'type': 'enum',
-			'attr': 'basesampler',
-			'name': 'Base Sampler',
-			'items': [
-				('random','Random', 'Use a random base sampler'),
-				('lowdiscrepancy', 'Low Discrepancy', 'Use a low discrepancy sequence for the base sampler'),
-			], #this parameter will technically accept any valid sampler. It is MEANT to only be used with random and LD, calling itself or metroplois doesn't make any sense
-			'save_in_preset': True
-		},
-		{
-			'type': 'int', 
-			'attr': 'chainlength',
-			'name': 'Chain Length',
-			'description': 'Chain Length',
-			'default': 512,
-			'min': 1,
-			'max': 32768,
-			'save_in_preset': True
-		},
-		{
 			'type': 'int', 
 			'attr': 'mutationrange',
 			'name': 'Mutation Range',
@@ -218,13 +190,9 @@ class luxrender_sampler(declarative_property_group):
 		
 		params = ParamSet()
 		
-		if self.sampler in ['random', 'lowdiscrepancy'] or (self.sampler == 'erpt' and self.basesampler in ['random', 'lowdiscrepancy']):
+		if self.sampler in ['random', 'lowdiscrepancy']:
 			params.add_integer('pixelsamples', self.pixelsamples)
 			params.add_string('pixelsampler', self.pixelsampler)
-		
-		if self.sampler == 'erpt':
-			params.add_integer('chainlength', self.chainlength)
-			params.add_string('basesampler', self.basesampler)
 		
 # 		if self.sampler == 'metropolis':
 # 			params.add_bool('adaptive_largemutationprob', self.adaptive_largemutationprob)
@@ -235,17 +203,15 @@ class luxrender_sampler(declarative_property_group):
 		if self.sampler == 'metropolis':
 			params.add_float('largemutationprob', self.largemutationprob)
 		
-		if self.sampler != 'erpt':
-			params.add_bool('noiseaware', self.noiseaware)
-			
-		if self.sampler != 'erpt' and self.usersamplingmap_filename != '':
-			params.add_string('usersamplingmap_filename', self.usersamplingmap_filename)
-
+		params.add_bool('noiseaware', self.noiseaware)
 			
 		if self.advanced:
 			if self.sampler == 'metropolis':
 				params.add_integer('maxconsecrejects', self.maxconsecrejects)
 				params.add_bool('usecooldown', self.usecooldown)
+		
+			if self.usersamplingmap_filename != '':
+				params.add_string('usersamplingmap_filename', self.usersamplingmap_filename)
 		
 		return self.sampler, params
 
