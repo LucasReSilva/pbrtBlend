@@ -94,7 +94,7 @@ class luxrender_rendermode(declarative_property_group):
 				('distributedpath', 'Distributed Path', 'Distributed path tracer'),
 				('igi', 'Instant Global Illumination', 'Instant global illumination renderer',),
 				('exphotonmap', 'Ex-Photon Map', 'Traditional photon mapping integrator'),
-				('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
+#				('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
 				('hybridpath', 'Hybrid Path', 'OpenCL-accelerated simple (eye-only) path tracer'),
 				('sppm', 'SPPM', 'Experimental stochastic progressive photon mapping integrator'),
 # 				('slgpath', 'SLG Path OpenCL', 'Experimental pure GPU path tracer'),
