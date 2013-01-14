@@ -113,7 +113,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 
 	# workaround for too dark texture preview
 	# remove when solved in blender colormanagement
-	if tex != None and bpy.app.version > (2, 64, 4):
+	if tex != None and bpy.app.version > (2, 64, 4) and bpy.app.version < (2, 65, 8):
 		film_params.add_float('gamma', 2.2)
 	else:
 		film_params.add_float('gamma', 1.0)
