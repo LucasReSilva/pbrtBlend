@@ -127,10 +127,12 @@ class luxrender_integrator(declarative_property_group):
 	controls = [
 		'advanced',
 		
+		'lightstrategy',
+		
 		# bidir +
+		'lightpathstrategy',
 		['eyedepth', 'lightdepth'],
 		['eyerrthreshold', 'lightrrthreshold'],
-		'lightpathstrategy',
 		
 		# dl +
 		'maxdepth',
@@ -218,8 +220,6 @@ class luxrender_integrator(declarative_property_group):
 				
 		# path
 		'shadowraycount',
-		'lightstrategy'
-
 	]
 	
 	visibility = {
@@ -375,7 +375,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int', 
 			'attr': 'eyedepth',
-			'name': 'Eye Depth',
+			'name': 'Max Eye Depth',
 			'description': 'Max recursion depth for ray casting from eye',
 			'default': 48,
 			'min': 1,
@@ -385,7 +385,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int', 
 			'attr': 'lightdepth',
-			'name': 'Light Depth',
+			'name': 'Max Light Depth',
 			'description': 'Max recursion depth for ray casting from light',
 			'default': 48,
 			'min': 1,
