@@ -96,7 +96,7 @@ def texture_append_visibility(vis_main, textureparam_object, vis_append):
 	return vis_main
 
 # Float Textures
-TF_bumpmap			= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',			add_float_value=True, min=-5.0, max=5.0, default=1.0, precision=6, multiply_float=True, ignore_unassigned=True, subtype='DISTANCE', unit='LENGTH' )
+TF_bumpmap			= SubGroupFloatTextureParameter('bumpmap', 'Bump Map',			add_float_value=True, min=-5.0, max=5.0, default=0.01, precision=6, multiply_float=True, ignore_unassigned=True, subtype='DISTANCE', unit='LENGTH' )
 TF_normalmap			= SubGroupFloatTextureParameter('normalmap', 'Normal Map',		add_float_value=True, min=-5.0, max=5.0, default=1.0, precision=6, multiply_float=False, ignore_unassigned=True)
 TF_amount				= FloatTextureParameter('amount', 'Mix amount',						add_float_value=True, min=0.0, default=0.5, max=1.0)
 TF_cauchyb				= FloatTextureParameter('cauchyb', 'Cauchy B',						add_float_value=True, default=0.0, min=0.0, max=1.0 ) # default 0.0 for OFF
@@ -194,6 +194,122 @@ class MATERIAL_MT_luxrender_type(bpy.types.Menu):
 			op = sl.operator('MATERIAL_OT_set_luxrender_type', text=mat_names[m_name])
 			op.mat_name = m_name
 
+
+def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF_bumpmap, TF_normalmap):
+		bump_params = ParamSet()
+		if self.normalmap_usefloattexture: #We have a normal map
+			#Get the normal map
+			texture_name = getattr(material.luxrender_material, 'normalmap_floattexturename')
+
+			if texture_name != '' and self.normalmap_usefloattexture:
+				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+				lux_texture = texture.luxrender_texture
+				params = ParamSet()
+				if lux_texture.type in ('normalmap', 'imagemap'):
+					if lux_texture.type == 'normalmap':
+						src_texture = lux_texture.luxrender_tex_normalmap
+					else:
+						src_texture = lux_texture.luxrender_tex_imagemap
+							
+					process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
+					params.add_integer('discardmipmaps', src_texture.discardmipmaps)
+					params.add_string('filtertype', src_texture.filtertype)
+					params.add_float('maxanisotropy', src_texture.maxanisotropy)
+					params.add_float('gamma', 1.0) #Don't gamma correct normal maps
+					params.add_string('wrap', src_texture.wrap)
+					params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
+					
+				elif lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
+					src_texture = texture.image
+							
+					params = ParamSet()
+					process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filepath, params, 'filename')
+					params.add_string('filtertype', 'bilinear')
+					params.add_float('gamma', 1.0) #Don't gamma correct normal maps
+					params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
+				else:
+					LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to the bump channel.' % texture_name)
+					
+				ExportedTextures.texture(
+					lux_context,
+					self.normalmap_floattexturename,
+					'float',
+					'normalmap',
+					params
+				)
+				ExportedTextures.export_new(lux_context)
+				
+				if self.normalmap_multiplyfloat:
+					ExportedTextures.texture(
+					lux_context,
+					'%s_scaled' % self.normalmap_floattexturename,
+					'float',
+					'scale',
+					ParamSet() \
+						.add_float('tex1', self.normalmap_floatvalue) \
+						.add_texture('tex2', self.normalmap_floattexturename)
+					)
+					ExportedTextures.export_new(lux_context)
+					
+					#Attach it to the bump map slot:
+					bump_params.add_texture('bumpmap', '%s_scaled' % self.normalmap_floattexturename)
+				else:
+					#Attach the normal map directly to the bump slot
+					bump_params.add_texture('bumpmap', self.normalmap_floattexturename)
+
+		if self.bumpmap_usefloattexture: # We have a bump map
+		
+			bump_params.update( TF_bumpmap.get_paramset(self) )
+				
+		if self.normalmap_usefloattexture and self.bumpmap_usefloattexture: # We have both normal and bump, need to mix them
+			
+			bumpmap_texturename = self.bumpmap_floattexturename if self.bumpmap_usefloattexture else ''
+			normalmap_floattexturename = self.normalmap_floattexturename if self.normalmap_usefloattexture else ''
+			
+			#Get the bump map
+			texture_name = getattr(material.luxrender_material, 'bumpmap_floattexturename')
+			if texture_name != '':
+				texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+				lux_texture = texture.luxrender_texture
+				if lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
+					bumpmap_texturename = '%s_float' % bumpmap_texturename
+					
+			#Build the multi-mix tex of the summed bump and normal maps
+			mm_params = ParamSet() \
+				.add_texture('tex1', bumpmap_texturename) \
+				.add_texture('tex2', normalmap_floattexturename)
+			
+			if self.bumpmap_multiplyfloat and self.normalmap_multiplyfloat:
+				weights = [self.bumpmap_floatvalue, self.normalmap_floatvalue]
+			elif self.bumpmap_multiplyfloat:
+				weights = [self.bumpmap_floatvalue, 1.0]
+			elif self.normalmap_multiplyfloat:
+				weights = [1.0, self.normalmap_floatvalue]
+			else:
+				weights = [1.0, 1.0]
+
+			# In API mode need to tell Lux how many slots explicity
+			if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
+				mm_params.add_integer('nweights', 2)
+			#Now add the actual weights
+			mm_params.add_float('weights', weights)
+			
+			mm_texturename = '%s_bump_normal_mix' % bumpmap_material_name
+			ExportedTextures.texture(
+				lux_context,
+				mm_texturename,
+				'float',
+				'multimix',
+				mm_params
+			)
+			ExportedTextures.export_new(lux_context)
+			
+			# Overwrite the old maps with the combined map
+			bump_params.add_texture('bumpmap', mm_texturename)
+		
+		return bump_params
+
+
 @LuxRenderAddon.addon_register_class
 class luxrender_material(declarative_property_group):
 	'''
@@ -239,8 +355,8 @@ class luxrender_material(declarative_property_group):
 		'Exterior',
 #		'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
 	] + \
-	TF_normalmap.controls + \
-	TF_bumpmap.controls
+		TF_normalmap.controls + \
+		TF_bumpmap.controls
 	
 	visibility = dict_merge({}, TF_bumpmap.visibility, TF_normalmap.visibility)
 	
@@ -411,115 +527,7 @@ class luxrender_material(declarative_property_group):
 				
 				# Bump and normal mapping
 				if self.type not in ['mix', 'null', 'layered']:
-				
-					if self.normalmap_usefloattexture: #We have a normal map
-						#Get the normal map
-						texture_name = getattr(material.luxrender_material, 'normalmap_floattexturename')
-	
-						if texture_name != '' and self.normalmap_usefloattexture:
-							texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
-							lux_texture = texture.luxrender_texture
-							params = ParamSet()
-							if lux_texture.type in ('normalmap', 'imagemap'):
-								if lux_texture.type == 'normalmap':
-									src_texture = lux_texture.luxrender_tex_normalmap
-								else:
-									src_texture = lux_texture.luxrender_tex_imagemap
-										
-								process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
-								params.add_integer('discardmipmaps', src_texture.discardmipmaps)
-								params.add_string('filtertype', src_texture.filtertype)
-								params.add_float('maxanisotropy', src_texture.maxanisotropy)
-								params.add_float('gamma', 1.0) #Don't gamma correct normal maps
-								params.add_string('wrap', src_texture.wrap)
-								params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
-								
-							elif lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
-								src_texture = texture.image
-										
-								params = ParamSet()
-								process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filepath, params, 'filename')
-								params.add_string('filtertype', 'bilinear')
-								params.add_float('gamma', 1.0) #Don't gamma correct normal maps
-								params.update( lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene) )
-							else:
-								LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to the bump channel.' % texture_name)
-								
-							ExportedTextures.texture(
-								lux_context,
-								self.normalmap_floattexturename,
-								'float',
-								'normalmap',
-								params
-							)
-							ExportedTextures.export_new(lux_context)
-							
-							if self.normalmap_multiplyfloat:
-								ExportedTextures.texture(
-								lux_context,
-								'%s_scaled' % self.normalmap_floattexturename,
-								'float',
-								'scale',
-								ParamSet() \
-									.add_float('tex1', self.normalmap_floatvalue) \
-									.add_texture('tex2', self.normalmap_floattexturename)
-								)
-								ExportedTextures.export_new(lux_context)
-								
-								#Attach it to the bump map slot:
-								material_params.add_texture('bumpmap', '%s_scaled' % self.normalmap_floattexturename)
-							else:
-								#Attach the normal map directly to the bump slot
-								material_params.add_texture('bumpmap', self.normalmap_floattexturename)
-
-					if self.bumpmap_usefloattexture: # We have a bump map
-					
-						material_params.update( TF_bumpmap.get_paramset(self) )
-							
-					if self.normalmap_usefloattexture and self.bumpmap_usefloattexture: # We have both normal and bump, need to mix them
-						
-						bumpmap_texturename = self.bumpmap_floattexturename if self.bumpmap_usefloattexture else ''
-						normalmap_floattexturename = self.normalmap_floattexturename if self.normalmap_usefloattexture else ''
-						
-						#Get the bump map
-						texture_name = getattr(material.luxrender_material, 'bumpmap_floattexturename')
-						if texture_name != '':
-							texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
-							lux_texture = texture.luxrender_texture
-							if lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
-								bumpmap_texturename = '%s_float' % bumpmap_texturename
-								
-						#Build the multi-mix tex of the summed bump and normal maps
-						mm_params = ParamSet() \
-							.add_texture('tex1', bumpmap_texturename) \
-							.add_texture('tex2', normalmap_floattexturename)
-						
-						if self.bumpmap_multiplyfloat and self.normalmap_multiplyfloat:
-							weights = [self.bumpmap_floatvalue, self.normalmap_floatvalue]
-						elif self.bumpmap_multiplyfloat:
-							weights = [self.bumpmap_floatvalue, 1.0]
-						elif self.normalmap_multiplyfloat:
-							weights = [1.0, self.normalmap_floatvalue]
-						else:
-							weights = [1.0, 1.0]
-	
-						# In API mode need to tell Lux how many slots explicity
-						if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
-							mm_params.add_integer('nweights', 2)
-						#Now add the actual weights
-						mm_params.add_float('weights', weights)
-						
-						ExportedTextures.texture(
-							lux_context,
-							'%s_bump_normal_mix' % material.name,
-							'float',
-							'multimix',
-							mm_params
-						)
-						ExportedTextures.export_new(lux_context)
-						
-						# Overwrite the old maps with the combined map
-						material_params.add_texture('bumpmap', '%s_bump_normal_mix' % material.name)
+					material_params.update( luxrender_bumpmap_export(self, lux_context, material, material.name, TF_bumpmap, TF_normalmap) )
 				
 				if hasattr(subtype, 'export'):
 				   subtype.export(lux_context, material)
@@ -1164,6 +1172,8 @@ TF_c_uroughness			= CoatingFloatTextureParameter('uroughness', 'U-Roughness',			
 TF_c_uexponent			= CoatingFloatTextureParameter('uexponent', 'U-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
 TF_c_vroughness			= CoatingFloatTextureParameter('vroughness', 'V-Roughness',			add_float_value=True, min=0.00001, max=0.8, default=0.075 )
 TF_c_vexponent			= CoatingFloatTextureParameter('vexponent', 'V-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
+TF_c_bumpmap			= CoatingFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, min=-5.0, max=5.0, default=0.01, precision=6, multiply_float=True, ignore_unassigned=True, subtype='DISTANCE', unit='LENGTH' )
+TF_c_normalmap			= CoatingFloatTextureParameter('normalmap', 'Normal Map',			add_float_value=True, min=-5.0, max=5.0, default=1.0, precision=6, multiply_float=False, ignore_unassigned=True)
 
 # Color Textures
 TC_c_Ka					= CoatingColorTextureParameter('Ka', 'Absorption color',			default=(0.0,0.0,0.0) )
@@ -1178,7 +1188,10 @@ class luxrender_coating(declarative_property_group):
 	ef_attach_to = ['Material']
 	alert = {}
 	
-	controls = [
+	controls = [] + \
+		TF_c_normalmap.controls + \
+		TF_c_bumpmap.controls + \
+	[
 		'multibounce',
 	] + \
 		TF_c_d.controls + \
@@ -1197,7 +1210,6 @@ class luxrender_coating(declarative_property_group):
 		TF_c_vroughness.controls + \
 		TF_c_vexponent.controls
 		
-		
 	visibility = dict_merge(
 		{
 
@@ -1215,13 +1227,17 @@ class luxrender_coating(declarative_property_group):
 		TF_c_uroughness.visibility,
 		TF_c_uexponent.visibility,
 		TF_c_vroughness.visibility,
-		TF_c_vexponent.visibility	
+		TF_c_vexponent.visibility,
+		TF_c_normalmap.visibility,
+		TF_c_bumpmap.visibility
 	)
 
 	enabled = {}
 	enabled = texture_append_visibility(enabled, TF_c_vroughness, { 'use_coating': True, 'anisotropic': True })
 	enabled = texture_append_visibility(enabled, TF_c_vexponent,  { 'use_coating': True, 'anisotropic': True })
 	
+	visibility = texture_append_visibility(visibility, TF_c_normalmap,  { 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TF_c_bumpmap,    { 'use_coating': True })
 	visibility = texture_append_visibility(visibility, TF_c_uroughness, { 'use_coating': True, 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_c_vroughness, { 'use_coating': True, 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_c_uexponent,  { 'use_coating': True, 'use_exponent': True })
@@ -1279,6 +1295,8 @@ class luxrender_coating(declarative_property_group):
 			'save_in_preset': True
 		},
 	] + \
+		TF_c_normalmap.get_properties() + \
+		TF_c_bumpmap.get_properties() + \
 		TF_c_d.get_properties() + \
 		TF_c_index.get_properties() + \
 		TC_c_Ka.get_properties() + \
@@ -1317,7 +1335,9 @@ class luxrender_coating(declarative_property_group):
 		
 		glossycoating_params.update( TF_c_uroughness.get_paramset(self) )
 		glossycoating_params.update( TF_c_vroughness.get_paramset(self) )
-				
+		
+		glossycoating_params.update( luxrender_bumpmap_export(self, lux_context, material, material.name + '_coating', TF_c_bumpmap, TF_c_normalmap) )
+		
 		return glossycoating_params
 
 @LuxRenderAddon.addon_register_class
