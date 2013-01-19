@@ -955,7 +955,7 @@ class GeometryExporter(object):
 	
 	def is_visible(self, obj, is_dupli=False):
 		ov = False
-		for lv in [ol and sl for ol,sl in zip(obj.layers, self.visibility_scene.layers)]:
+		for lv in [ol and sl and rl for ol,sl,rl in zip(obj.layers, self.visibility_scene.layers, self.visibility_scene.render.layers.active.layers)]:
 			ov |= lv
 		return (ov or is_dupli) and not obj.hide_render
 	
