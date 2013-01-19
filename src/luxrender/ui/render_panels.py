@@ -81,7 +81,11 @@ class layers(render_panel):
 		col.prop(scene, "layers", text="Scene")
 		col.label(text="")
 		col = split.column()
-				
+		col.prop(rl, "layers", text="Layer")
+		
+		split = layout.split()
+
+		col = split.column()
 		col.label(text="Passes:")
 		col.prop(rl, "use_pass_combined")
 		col.prop(rl, "use_pass_z")
