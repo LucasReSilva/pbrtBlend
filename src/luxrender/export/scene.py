@@ -94,7 +94,7 @@ class SceneExporter(object):
 				lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.efficacy > 0.0
 			have_lamp |= lamp_enabled
 		 
-		if obj.type in ['MESH', 'SURFACE', 'CURVE', 'FONT'] and GE.is_visible(obj):
+		if obj.type in ['MESH', 'SURFACE', 'CURVE', 'FONT'] and is_obj_visible(self.scene, obj):
 			for ms in obj.material_slots:
 				mat = ms.material
 				if mat and mat.luxrender_emission.use_emission:
