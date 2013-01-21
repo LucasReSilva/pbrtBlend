@@ -246,6 +246,13 @@ class ParamSet(list):
 		self.add('texture', name, str(value))
 		return self
 
+
+def is_obj_visible(scene, obj, is_dupli=False):
+	ov = False
+	for lv in [ol and sl and rl for ol,sl,rl in zip(obj.layers, scene.layers, scene.render.layers.active.layers)]:
+		ov |= lv
+	return (ov or is_dupli) and not obj.hide_render
+
 def get_worldscale(as_scalematrix=True):
 	# For usability, previev_scale is not an own property but calculated from the object dimensions
 	# A user can directly judge mappings on an adjustable object_size, we simply scale the whole preview

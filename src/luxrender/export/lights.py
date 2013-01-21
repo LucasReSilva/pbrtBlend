@@ -33,6 +33,7 @@ from extensions_framework import util as efutil
 from ..outputs.file_api import Files
 from ..export import ParamSet, get_worldscale, matrix_to_list
 from ..export import fix_matrix_order
+from ..export import is_obj_visible
 
 def attr_light(scene, lux_context, light, name, group, light_type, params, transform=None, portals=[]):
 	'''
@@ -306,7 +307,7 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 	# Then iterate for lights
 	for ob in geometry_scene.objects:
 		
-		if not ob.is_visible(visibility_scene) or ob.hide_render:
+		if not is_obj_visible(visibility_scene, ob) or ob.hide_render:
 			continue
 		
 		# skip dupli (child) objects when they are not lamps

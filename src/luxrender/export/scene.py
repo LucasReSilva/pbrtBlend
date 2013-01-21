@@ -39,6 +39,7 @@ from ..export			import materials	as export_materials
 from ..export			import geometry		as export_geometry
 from ..export			import volumes		as export_volumes
 from ..export 			import fix_matrix_order
+from ..export			import is_obj_visible
 from ..outputs			import LuxManager, LuxLog
 from ..outputs.file_api	import Files
 from ..outputs.pure_api	import LUXRENDER_VERSION
@@ -78,7 +79,7 @@ class SceneExporter(object):
 		have_lamp = False
 		have_emitter = False
 	
-		if obj.type == 'LAMP' and GE.is_visible(obj):
+		if obj.type == 'LAMP' and is_obj_visible(self.scene, obj):
 			lamp_enabled = export_lights.checkLightEnabled(self.scene, obj.data)
 			lamp_enabled &= obj.data.energy > 0.0
 			if obj.data.type == 'POINT':
