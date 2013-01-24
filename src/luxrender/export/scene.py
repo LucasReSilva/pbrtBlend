@@ -33,7 +33,7 @@ import bpy
 from extensions_framework import util as efutil
 
 # LuxRender libs
-from ..export 			import get_worldscale, object_anim_matrix, object_anim_matrices
+from ..export 			import get_worldscale, object_anim_matrices
 from ..export			import lights		as export_lights
 from ..export			import materials	as export_materials
 from ..export			import geometry		as export_geometry
@@ -215,7 +215,7 @@ class SceneExporter(object):
 			if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 				
 				STEPS = scene.camera.data.luxrender_camera.motion_blur_samples
-				anim_matrices = object_anim_matrices(scene, scene.camera, steps=STEPS, ignore_scale=True)
+				anim_matrices = object_anim_matrices(scene, scene.camera, steps=STEPS)
 				
 				if anim_matrices:
 					num_steps = len(anim_matrices)-1

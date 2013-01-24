@@ -33,7 +33,7 @@ from extensions_framework import util as efutil
 
 from ..outputs import LuxLog
 from ..outputs.file_api import Files
-from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrix, object_anim_matrices
+from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrices
 from ..export import matrix_to_list
 from ..export import fix_matrix_order
 from ..export.materials import get_material_volume_defs
