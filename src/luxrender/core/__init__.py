@@ -468,8 +468,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				# progressively update the preview
 				time.sleep(0.2) # safety-sleep
 				
-#				if preview_context.getAttribute('renderer_statistics', 'samplesPerPixel') > 24:
-#					interruptible_sleep(2.5) # update every 2.5 sec until haltthreshold kills the render
+				if preview_context.getAttribute('renderer_statistics', 'samplesPerPixel') > 12 and not preview_context.getAttribute('renderer_statistics', 'percentHaltThresholdComplete') == 100:
+					interruptible_sleep(1.8) # reduce update to every 2.0 sec until haltthreshold kills the render
 				
 				preview_context.updateStatisticsWindow()
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.getAttribute('renderer_statistics_formatted_short', '_recommended_string')))
