@@ -70,11 +70,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	mat_preview_xz = get_preview_flip(mat)
 	preview_zoom = get_preview_zoom(mat)
 
-	if mat.preview_render_type == 'FLAT':
-		HALTSPP = 32
-	else:
-		HALTSPP = 128
-
 	# Camera
 	if tex != None: # texture preview is always topview
 		lux_context.lookAt(0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0) 
@@ -104,12 +99,12 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_bool('write_png', False) \
 		.add_bool('write_tga', False) \
 		.add_bool('write_resume_flm', False) \
-		.add_integer('displayinterval', 3) \
-		.add_integer('haltspp', HALTSPP) \
+		.add_integer('displayinterval', 300) \
+		.add_float('haltthreshold', 0.005) \
 		.add_string('tonemapkernel', 'linear') \
 		.add_string('ldr_clamp_method', 'hue') \
-		.add_integer('tilecount', 1) \
-		.add_float('convergencestep', 8)
+		.add_integer('tilecount', 2) \
+		.add_float('convergencestep', 4)
 
 	# workaround for too dark texture preview
 	# remove when solved in blender colormanagement
@@ -120,14 +115,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	if bpy.app.version > (2, 64, 8):
 		film_params.add_float('linear_exposure', 2.0)
 
-	if LUXRENDER_VERSION >= '0.8':
-		film_params \
-			.add_bool('write_exr', False) \
-			.add_integer('writeinterval', 3600)
-	else:
-		film_params \
-			.add_bool('write_exr', True) \
-			.add_integer('writeinterval', 2)
+	film_params \
+		.add_bool('write_exr', True) \
+		.add_integer('writeinterval', 2)
 	lux_context.film('fleximage', film_params)
 	
 	# Pixel Filter
@@ -140,43 +130,26 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	lux_context.pixelFilter('mitchell', pixelfilter_params)
 	
 	# Sampler
-	if False:
-		sampler_params = ParamSet() \
-			.add_string('pixelsampler', 'hilbert') \
-			.add_integer('pixelsamples', 2)
-		lux_context.sampler('lowdiscrepancy', sampler_params)
-	else:
-		sampler_params = ParamSet() \
-			.add_bool('usecooldown', False) \
-			.add_bool('noiseaware', True)
-		lux_context.sampler('metropolis', sampler_params)
+	sampler_params = ParamSet() \
+		.add_bool('usecooldown', False) \
+		.add_float('largemutationprob', 0.25) \
+		.add_integer('maxconsecrejects', 1024) \
+		.add_bool('noiseaware', True)
+	lux_context.sampler('metropolis', sampler_params)
 	
 	# Surface Integrator
-	if False:
-		surfaceintegrator_params = ParamSet() \
-			.add_integer('directsamples', 1) \
-			\
-			.add_integer('diffusereflectdepth', 1) \
-			.add_integer('diffusereflectsamples', 4) \
-			.add_integer('diffuserefractdepth', 4) \
-			.add_integer('diffuserefractsamples', 1) \
-			\
-			.add_integer('glossyreflectdepth', 1) \
-			.add_integer('glossyreflectsamples', 2) \
-			.add_integer('glossyrefractdepth', 4) \
-			.add_integer('glossyrefractsamples', 1) \
-			\
-			.add_integer('specularreflectdepth', 2) \
-			.add_integer('specularrefractdepth', 4)
-		lux_context.surfaceIntegrator('distributedpath', surfaceintegrator_params)
-	else:
-		surfaceintegrator_params = ParamSet() \
-			.add_string('lightstrategy', 'powerimp') \
-			.add_string('lightpathstrategy', 'powerimp')
-		lux_context.surfaceIntegrator('bidirectional', surfaceintegrator_params)
+	surfaceintegrator_params = ParamSet() \
+		.add_string('lightstrategy', 'powerimp') \
+		.add_string('lightpathstrategy', 'powerimp') \
+		.add_integer('eyedepth', 8) \
+		.add_integer('lightdepth', 8)
+	lux_context.surfaceIntegrator('bidirectional', surfaceintegrator_params)
 	
 	# Volume Integrator
 	lux_context.volumeIntegrator('multi', ParamSet())
+	
+	#Accelerator
+	lux_context.accelerator('qbvh', ParamSet())
 	
 	lux_context.worldBegin()
 	

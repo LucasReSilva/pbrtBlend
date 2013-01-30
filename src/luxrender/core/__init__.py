@@ -432,7 +432,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			
 			# Don't render the tiny images
 			if xres <= 96:
-				raise Exception('Preview image too small (%ix%i)' % (xres,yres))
+				raise Exception('Skipping material thumbnail update, image too small (%ix%i)' % (xres,yres))
 			
 			preview_scene.preview_scene(scene, preview_context, obj=preview_objects[0], mat=pm, tex=pt)
 			
@@ -468,8 +468,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				# progressively update the preview
 				time.sleep(0.2) # safety-sleep
 				
-				if LUXRENDER_VERSION < '0.8' or preview_context.getAttribute('renderer_statistics', 'samplesPerPixel') > 24:
-					interruptible_sleep(1.8) # up to HALTSPP every 2 seconds in sum
+				if preview_context.getAttribute('renderer_statistics', 'samplesPerPixel') > 24:
+					interruptible_sleep(2.5) # update every 2.5 sec until haltthreshold kills the render
 					
 				preview_context.updateStatisticsWindow()
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.getAttribute('renderer_statistics_formatted_short', '_recommended_string')))
