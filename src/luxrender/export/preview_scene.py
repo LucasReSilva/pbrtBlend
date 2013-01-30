@@ -140,10 +140,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_bool('noiseaware', True)
 	lux_context.sampler('metropolis', sampler_params)
 	
-	# Surface Integrator
+	# Surface Integrator	# 'powerimp' crashes alot on fast multicores, so changed to 'all' for now
 	surfaceintegrator_params = ParamSet() \
-		.add_string('lightstrategy', 'all') \	# 'powerimp' crashes alot on fast multicores, so changed to 'all'
-		.add_string('lightpathstrategy', 'all') \	# 'powerimp' crashes alot on fast multicores, so changed to 'all'
+		.add_string('lightstrategy', 'all') \
+		.add_string('lightpathstrategy', 'all') \
 		.add_integer('eyedepth', 8) \
 		.add_integer('lightdepth', 8)
 	lux_context.surfaceIntegrator('bidirectional', surfaceintegrator_params)
