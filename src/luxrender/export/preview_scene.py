@@ -106,6 +106,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		.add_integer('tilecount', 2) \
 		.add_float('convergencestep', 4)
 
+	if tex != None:
+		film_params.add_float('haltthreshold', 0.999)	# testcommit to reduce texture flat rendertimes
+
 	# workaround for too dark texture preview
 	# remove when solved in blender colormanagement
 	if tex != None and bpy.app.version > (2, 64, 4) and bpy.app.version < (2, 65, 8):
@@ -139,8 +142,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	
 	# Surface Integrator
 	surfaceintegrator_params = ParamSet() \
-		.add_string('lightstrategy', 'powerimp') \
-		.add_string('lightpathstrategy', 'powerimp') \
+		.add_string('lightstrategy', 'all') \	# 'powerimp' crashes alot on fast multicores, so changed to 'all'
+		.add_string('lightpathstrategy', 'all') \	# 'powerimp' crashes alot on fast multicores, so changed to 'all'
 		.add_integer('eyedepth', 8) \
 		.add_integer('lightdepth', 8)
 	lux_context.surfaceIntegrator('bidirectional', surfaceintegrator_params)
