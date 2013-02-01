@@ -96,6 +96,10 @@ _register_elm(bl_ui.properties_scene.SCENE_PT_keying_sets)
 _register_elm(bl_ui.properties_scene.SCENE_PT_keying_set_paths)
 _register_elm(bl_ui.properties_scene.SCENE_PT_unit)
 _register_elm(bl_ui.properties_scene.SCENE_PT_color_management)
+
+if bpy.app.version > (2, 65, 8):
+	_register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_world)
+
 _register_elm(bl_ui.properties_scene.SCENE_PT_custom_props)
 
 _register_elm(bl_ui.properties_world.WORLD_PT_context_world, required=True)
