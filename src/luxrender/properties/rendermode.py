@@ -53,15 +53,15 @@ class luxrender_rendermode(declarative_property_group):
 		]
 	
 	visibility = {
-		'opencl_prefs':				{ 'renderer': O(['hybrid', 'slg']) },
-		'opencl_platform_index':	{ 'renderer': O(['hybrid', 'slg']) },
-		'configfile':				{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
-		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
-		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'opencl_prefs':				{ 'renderer': O(['hybrid']) },
+		'opencl_platform_index':	{ 'renderer': O(['hybrid']) },
+		'configfile':				{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
+		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
+		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
 		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
-		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
-		'deviceselection':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
-		'usegpus':					{ 'renderer': O(['hybrid', 'slg']) },
+		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
+		'deviceselection':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
+		'usegpus':					{ 'renderer': O(['hybrid']) },
 		}
 	
 	#This function sets renderer and surface integrator according to rendermode setting
@@ -99,8 +99,8 @@ class luxrender_rendermode(declarative_property_group):
 				('sppm', 'SPPM (Experimental)', 'Experimental stochastic progressive photon mapping integrator'),
 #				('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
 				('hybridpath', 'Hybrid Path (Experimental)', 'OpenCL-accelerated simple (eye-only) path tracer'),
-#  				('slgpath', 'SLG Path OpenCL', 'Experimental pure GPU path tracer'),
-#  				('slgbidir', 'SLG BidirVCM', 'Experimental OpenCL bidirectional/vertex merging integrator'),
+  				('slgpath', 'SLG Path OpenCL', 'Experimental pure GPU path tracer'),
+  				('slgbidir', 'SLG BidirVCM', 'Experimental OpenCL bidirectional/vertex merging integrator'),
 			],
 			'update': update_rendering_mode,
 			'save_in_preset': True
@@ -215,7 +215,7 @@ class luxrender_rendermode(declarative_property_group):
 	def api_output(self):
 		renderer_params = ParamSet()
 		
-		if self.renderer in ['hybrid', 'slg'] and self.opencl_prefs == True:
+		if self.renderer in ['hybrid'] and self.opencl_prefs == True:
 			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
 			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
 			renderer_params.add_string('configfile', self.configfile)
@@ -224,6 +224,12 @@ class luxrender_rendermode(declarative_property_group):
 			renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
 			renderer_params.add_integer('accelerator.qbvh.stacksize.max', self.qbvhstacksize)
 			renderer_params.add_string('opencl.devices.select', self.deviceselection)
+		
+		if self.renderer in ['slg'] and self.opencl_prefs == True: # this is WIP to take over some slg configs
+			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
+#			slg_devices =  "opencl.devices.select = " + self.deviceselection
+			slg_params = slg_gpu_workgroups		#+ '", "' + slg_devices
+			renderer_params.add_string('config', slg_params)
 		
 		return self.renderer, renderer_params
 
