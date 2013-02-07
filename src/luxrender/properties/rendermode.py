@@ -29,6 +29,8 @@ from extensions_framework import declarative_property_group
 from .. import LuxRenderAddon
 from ..export import ParamSet
 
+from extensions_framework.validate import Logic_OR as O
+
 #This class holds the renderingmode menu and renderer prefs. Surface integrators settings are in a seperate class, due to there being a hell of a lot of them
 @LuxRenderAddon.addon_register_class
 class luxrender_rendermode(declarative_property_group):
@@ -51,15 +53,15 @@ class luxrender_rendermode(declarative_property_group):
 		]
 	
 	visibility = {
-		'opencl_prefs':				{ 'renderer': 'hybrid' },
-		'opencl_platform_index':	{ 'renderer': 'hybrid' },
-		'configfile':				{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'deviceselection':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'usegpus':					{ 'renderer': 'hybrid' },
+		'opencl_prefs':				{ 'renderer': O(['hybrid', 'slg']) },
+		'opencl_platform_index':	{ 'renderer': O(['hybrid', 'slg']) },
+		'configfile':				{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'deviceselection':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'usegpus':					{ 'renderer': O(['hybrid', 'slg']) },
 		}
 	
 	#This function sets renderer and surface integrator according to rendermode setting
@@ -213,7 +215,7 @@ class luxrender_rendermode(declarative_property_group):
 	def api_output(self):
 		renderer_params = ParamSet()
 		
-		if self.renderer == 'hybrid' and self.opencl_prefs == True:
+		if self.renderer in ['hybrid', 'slg'] and self.opencl_prefs == True:
 			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
 			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
 			renderer_params.add_string('configfile', self.configfile)
