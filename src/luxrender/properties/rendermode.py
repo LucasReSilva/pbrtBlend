@@ -53,15 +53,15 @@ class luxrender_rendermode(declarative_property_group):
 		]
 	
 	visibility = {
-		'opencl_prefs':				{ 'renderer': O(['hybrid']) },
-		'opencl_platform_index':	{ 'renderer': O(['hybrid']) },
-		'configfile':				{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
-		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
-		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
+		'opencl_prefs':				{ 'renderer': O(['hybrid', 'slg']) },
+		'opencl_platform_index':	{ 'renderer': 'hybrid' },
+		'configfile':				{ 'opencl_prefs': True, 'renderer': 'hybrid' },
+		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
+		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
-		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
-		'deviceselection':			{ 'opencl_prefs': True, 'renderer': O(['hybrid']) },
-		'usegpus':					{ 'renderer': O(['hybrid']) },
+		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
+		'deviceselection':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
+		'usegpus':					{ 'renderer': 'hybrid' },
 		}
 	
 	#This function sets renderer and surface integrator according to rendermode setting
