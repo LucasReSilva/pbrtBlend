@@ -42,7 +42,8 @@ class luxrender_rendermode(declarative_property_group):
 	
 	controls = [
 		'rendermode',
-		['opencl_prefs', 'usegpus', 'usecpus'],
+		'opencl_prefs',
+		['usegpus', 'usecpus'],
 		'opencl_platform_index',
 		'configfile',
 		'raybuffersize',
@@ -53,16 +54,16 @@ class luxrender_rendermode(declarative_property_group):
 		]
 	
 	visibility = {
-		'opencl_prefs':				{ 'renderer': O(['hybrid', 'slg']) },
+		'opencl_prefs':				{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'configfile':				{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
+		'workgroupsize':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
 		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'deviceselection':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'usegpus':					{ 'renderer': O(['hybrid', 'slg']) },
-		'usecpus':					{ 'renderer': 'slg' },
+		'deviceselection':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
+		'usegpus':					{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
+		'usecpus':					{ 'opencl_prefs': True, 'rendermode': 'slgpath' },
 		}
 	
 	#This function sets renderer and surface integrator according to rendermode setting
@@ -238,8 +239,9 @@ class luxrender_rendermode(declarative_property_group):
 			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
 			slg_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
 			slg_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
-			slg_config_seperator = '""'
-			slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu
+			slg_devices_select =  "opencl.devices.select = " + self.deviceselection if self.deviceselection else "opencl.devices.select = " # blank
+			slg_config_seperator = '" "'
+			slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu + slg_config_seperator + slg_devices_select
 			renderer_params.add_string('config', slg_params)
 		
 		return self.renderer, renderer_params
