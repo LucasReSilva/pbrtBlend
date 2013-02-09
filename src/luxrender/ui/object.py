@@ -42,7 +42,7 @@ class ui_object(bl_ui.properties_object.ObjectButtonsPanel, property_group_rende
 	@classmethod
 	def poll(cls, context):
 		engine = context.scene.render.engine
-		return context.object and context.object.type in ['MESH','SURFACE','FONT'] and (engine in cls.COMPAT_ENGINES)
+		return context.object and context.object.type in ['MESH','SURFACE','FONT','META'] and (engine in cls.COMPAT_ENGINES)
 	
 	display_property_groups = [
 		( ('object',), 'luxrender_object' )

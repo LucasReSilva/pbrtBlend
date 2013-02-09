@@ -53,7 +53,7 @@ class luxrender_mesh(declarative_property_group):
 	Storage class for LuxRender Camera settings.
 	'''
 	
-	ef_attach_to = ['Mesh', 'SurfaceCurve', 'TextCurve', 'Curve']
+	ef_attach_to = ['Mesh', 'SurfaceCurve', 'TextCurve', 'Curve', 'MetaBall']
 	
 	controls = [
 		'mesh_type',

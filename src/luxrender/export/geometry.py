@@ -92,7 +92,8 @@ class GeometryExporter(object):
 				'MESH': self.handler_MESH,
 				'SURFACE': self.handler_MESH,
 				'CURVE': self.handler_MESH,
-				'FONT': self.handler_MESH
+				'FONT': self.handler_MESH,
+				'META': self.handler_MESH
 			}
 		}
 		
@@ -887,7 +888,7 @@ class GeometryExporter(object):
 			# attribute when inside create_dupli_list()..free_dupli_list()
 			duplis = []
 			for dupli_ob in obj.dupli_list:
-				if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
+				if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']: #metaballs are omitted from this function intentionally. Adding them causes recursion when building the ball. (add 'META' to this if you actually want that bug, it makes for some fun glitch art with particles)
 					continue
 				#if not dupli_ob.object.is_visible(self.visibility_scene) or dupli_ob.object.hide_render:
 				if not is_obj_visible(self.visibility_scene, dupli_ob.object, is_dupli=True):
