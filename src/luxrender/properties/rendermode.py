@@ -237,7 +237,7 @@ class luxrender_rendermode(declarative_property_group):
 		if self.renderer in ['slg'] and self.opencl_prefs == True: # this is WIP to take over some slg configs
 			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
 			slg_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
-			slg_use_cpu = "opencl.cpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
+			slg_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
 			slg_config_seperator = '""'
 			slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu
 			renderer_params.add_string('config', slg_params)
