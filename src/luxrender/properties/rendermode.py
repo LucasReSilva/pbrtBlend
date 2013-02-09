@@ -61,7 +61,7 @@ class luxrender_rendermode(declarative_property_group):
 		'workgroupsize':			{ 'opencl_prefs': True, 'renderer': O(['hybrid', 'slg']) },
 		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'deviceselection':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'usegpus':					{ 'renderer': 'hybrid' },
+		'usegpus':					{ 'renderer': O(['hybrid', 'slg']) },
 		}
 	
 	#This function sets renderer and surface integrator according to rendermode setting
@@ -227,8 +227,9 @@ class luxrender_rendermode(declarative_property_group):
 		
 		if self.renderer in ['slg'] and self.opencl_prefs == True: # this is WIP to take over some slg configs
 			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
-#			slg_devices =  "opencl.devices.select = " + self.deviceselection
-			slg_params = slg_gpu_workgroups		#+ '", "' + slg_devices
+			slg_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
+			slg_config_seperator = '"'", "'"'
+			slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu
 			renderer_params.add_string('config', slg_params)
 		
 		return self.renderer, renderer_params
