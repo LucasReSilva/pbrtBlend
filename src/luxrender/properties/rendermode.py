@@ -54,7 +54,7 @@ class luxrender_rendermode(declarative_property_group):
 		]
 	
 	visibility = {
-		'opencl_prefs':				{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
+		'opencl_prefs':				{ 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'configfile':				{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
@@ -101,8 +101,8 @@ class luxrender_rendermode(declarative_property_group):
 				('sppm', 'SPPM (Experimental)', 'Experimental stochastic progressive photon mapping integrator'),
 #				('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
 				('hybridpath', 'Hybrid Path (Experimental)', 'OpenCL-accelerated simple (eye-only) path tracer'),
-  				('slgpath', 'SLG Path OpenCL', 'Experimental pure GPU path tracer'),
-  				('slgbidir', 'SLG BidirVCM', 'Experimental OpenCL bidirectional/vertex merging integrator'),
+#   				('slgpath', 'SLG Path OpenCL', 'Experimental pure GPU path tracer'),
+#   				('slgbidir', 'SLG BidirVCM', 'Experimental OpenCL bidirectional/vertex merging integrator'),
 			],
 			'update': update_rendering_mode,
 			'save_in_preset': True
