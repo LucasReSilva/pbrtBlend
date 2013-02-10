@@ -144,7 +144,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	surfaceintegrator_params = ParamSet() \
 		.add_string('lightstrategy', 'all') \
 		.add_string('lightpathstrategy', 'all') \
-		.add_integer('eyedepth', 8) \
+		.add_integer('eyedepth', 12) \
 		.add_integer('lightdepth', 8)
 	lux_context.surfaceIntegrator('bidirectional', surfaceintegrator_params)
 	
