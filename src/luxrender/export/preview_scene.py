@@ -116,7 +116,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	else:
 		film_params.add_float('gamma', 1.0)
 	if bpy.app.version > (2, 64, 8):
-		film_params.add_float('linear_exposure', 2.0)
+		film_params.add_float('linear_exposure', 1.25)
 
 	film_params \
 		.add_bool('write_exr', False) \
