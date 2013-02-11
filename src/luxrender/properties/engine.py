@@ -98,7 +98,7 @@ class luxrender_testing(declarative_property_group):
 			'type': 'bool',
 			'attr': 'clay_render',
 			'name': 'Clay render',
-			'description': 'Export all materials as default "clay"',
+			'description': 'Export all non-glass materials as default "clay"',
 			'default': False
 		},
 		{
@@ -112,7 +112,7 @@ class luxrender_testing(declarative_property_group):
 			'type': 'bool',
 			'attr': 're_raise',
 			'name': 'Debug: show full trace on export error',
-			'description': '',
+			'description': 'Flash export error messages in UI',
 			'default': False
 		},
 	]
@@ -191,8 +191,8 @@ class luxrender_engine(declarative_property_group):
 			'type': 'bool',
 			'attr': 'integratedimaging',
 			'name': 'Integrated imaging workflow',
-			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support)',
-			'default': False
+			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support and is more stable, but may increase take longer to refresh)',
+			'default': True
 		},
 		{
 			'type': 'bool',
@@ -241,7 +241,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'bool',
 			'attr': 'write_files',
 			'name': 'Write to Disk',
-			'description': 'Write scene files to disk',
+			'description': 'Write scene files to disk (allows use of PLY file cache)',
 			'default': True,
 			'save_in_preset': True
 		},
