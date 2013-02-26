@@ -133,6 +133,7 @@ class luxrender_integrator(declarative_property_group):
 		'lightpathstrategy',
 		['eyedepth', 'lightdepth'],
 		['eyerrthreshold', 'lightrrthreshold'],
+		'lightraycount',
 		
 		# dl +
 		'maxdepth',
@@ -230,6 +231,7 @@ class luxrender_integrator(declarative_property_group):
 		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		'lightrrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		'lightstrategy':					{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath', 'bidirectional'])},
+		'lightraycount':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		
 		# dl +
 		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'igi', 'path']) },
@@ -443,6 +445,13 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'shadowraycount',
 			'name': 'Shadow Ray Count',
+			'default': 1,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'lightraycount',
+			'name': 'Light Ray Count',
 			'default': 1,
 			'save_in_preset': True
 		},
@@ -1066,7 +1075,8 @@ class luxrender_integrator(declarative_property_group):
 				params.add_float('eyerrthreshold', self.eyerrthreshold) \
 					  .add_float('lightrrthreshold', self.lightrrthreshold) \
 					  .add_string('lightpathstrategy', self.lightpathstrategy if not hybrid_compat else 'one') \
-					  .add_integer('shadowraycount', self.shadowraycount)
+					  .add_integer('shadowraycount', self.shadowraycount) \
+					  .add_integer('shadowraycount', self.lightraycount)
 		
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth)
