@@ -1076,7 +1076,7 @@ class luxrender_integrator(declarative_property_group):
 					  .add_float('lightrrthreshold', self.lightrrthreshold) \
 					  .add_string('lightpathstrategy', self.lightpathstrategy if not hybrid_compat else 'one') \
 					  .add_integer('shadowraycount', self.shadowraycount) \
-					  .add_integer('shadowraycount', self.lightraycount)
+					  .add_integer('lightraycount', self.lightraycount)
 		
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth)
