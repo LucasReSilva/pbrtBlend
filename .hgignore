@@ -1,0 +1,18 @@
+
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$
+syntax: glob
+*.pyc
+*.so
+*.pyd
+*.DS_Store
+liblzo2*
+liblzmadec*
+liblux*
+*.dll
+*.dylib
+
+syntax: regexp
+^.settings
