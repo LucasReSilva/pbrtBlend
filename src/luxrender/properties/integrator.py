@@ -446,6 +446,8 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'shadowraycount',
 			'name': 'Shadow Ray Count',
 			'default': 1,
+			'min': 1,
+			'max': 1024,
 			'save_in_preset': True
 		},
 		{
@@ -453,6 +455,8 @@ class luxrender_integrator(declarative_property_group):
 			'attr': 'lightraycount',
 			'name': 'Light Ray Count',
 			'default': 1,
+			'min': 1,
+			'max': 1024,
 			'save_in_preset': True
 		},
 		{
