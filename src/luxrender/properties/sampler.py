@@ -117,8 +117,8 @@ class luxrender_sampler(declarative_property_group):
 			'name': 'Max. Consecutive Rejections',
 			'description': 'Maximum amount of samples in a particular area before moving on. Setting this too low may mute lamps and caustics',
 			'default': 512,
-			'min': 0,
-			'max': 32768,
+			'min': 128,
+			'max': 2048,
 			'save_in_preset': True
 		},
  		{
