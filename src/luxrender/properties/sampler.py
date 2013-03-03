@@ -124,7 +124,7 @@ class luxrender_sampler(declarative_property_group):
  		{
  			'type': 'bool',
  			'attr': 'noiseaware',
- 			'name': 'Use Noise-Aware Sampling',
+ 			'name': 'Noise-Aware Sampling',
  			'description': 'Enable noise-guided adaptive sampling',
  			'default': False,
  			'save_in_preset': True
