@@ -42,8 +42,8 @@ class luxrender_rendermode(declarative_property_group):
 	
 	controls = [
 		'rendermode',
-		'opencl_prefs',
 		['usegpus', 'usecpus'],
+		'opencl_prefs',
 		'opencl_platform_index',
 		'configfile',
 		'raybuffersize',
@@ -62,8 +62,8 @@ class luxrender_rendermode(declarative_property_group):
 		'workgroupsize':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
 		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'deviceselection':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
-		'usegpus':					{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
-		'usecpus':					{ 'opencl_prefs': True, 'rendermode': 'slgpath' },
+		'usegpus':					{ 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
+		'usecpus':					{ 'rendermode': 'slgpath' },
 		}
 	
 	#This function sets renderer and surface integrator according to rendermode setting
@@ -112,7 +112,7 @@ class luxrender_rendermode(declarative_property_group):
 			'type': 'enum',
 			'attr': 'renderer',
 			'name': 'Renderer',
-			'description': 'Renderer type',
+			'description': 'Renderer Type',
 			'default': 'sampler',
 			'items': [
 				('sampler', 'Sampler (traditional CPU)', 'sampler'),
@@ -126,7 +126,7 @@ class luxrender_rendermode(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'opencl_prefs',
-			'name': 'Show OpenCL options',
+			'name': 'Show OpenCL Options',
 			'description': 'Enable manual OpenCL configuration options',
 			'default': False,
 			'save_in_preset': True
@@ -134,7 +134,7 @@ class luxrender_rendermode(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'opencl_platform_index',
-			'name': 'OpenCL platform index',
+			'name': 'OpenCL Platform Index',
 			'description': 'OpenCL Platform to target. Try increasing this value 1 at a time if LuxRender fails to use your GPU. -1=all platforms',
 			'default': 0,
 			'min': -1,
@@ -147,7 +147,7 @@ class luxrender_rendermode(declarative_property_group):
 			'type': 'string',
 			'subtype': 'FILE_PATH',
 			'attr': 'configfile',
-			'name': 'OpenCL config file',
+			'name': 'OpenCL Config File',
 			'description': 'Path to a machine-specific OpenCL configuration file. The settings from the lxs (set below) are used if this is not specified or found',
 			'default': '',
 			'save_in_preset': True
@@ -155,7 +155,7 @@ class luxrender_rendermode(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'raybuffersize',
-			'name': 'Ray buffer size',
+			'name': 'Ray Buffer Size',
 			'description': 'Size of ray "bundles" fed to OpenCL device',
 			'default': 8192,
 			'min': 2,
@@ -167,7 +167,7 @@ class luxrender_rendermode(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'statebuffercount',
-			'name': 'State buffer count',
+			'name': 'State Buffer Count',
 			'description': 'Numbers of ray buffers to maintain simultaneously',
 			'default': 1,
 			'min': 1,
@@ -177,7 +177,7 @@ class luxrender_rendermode(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'workgroupsize',
-			'name': 'OpenCL work group size',
+			'name': 'OpenCL Work Group Size',
 			'description': 'Size of OpenCL work group. Use 0 for auto',
 			'default': 64,
 			'min': 0,
@@ -199,7 +199,7 @@ class luxrender_rendermode(declarative_property_group):
 		{
 			'type': 'string',
 			'attr': 'deviceselection',
-			'name': 'OpenCL devices',
+			'name': 'OpenCL Devices',
 			'description': 'Enter target OpenCL devices here. Leave blank to use all available',
 			'default': '',
 			'save_in_preset': True
@@ -208,7 +208,7 @@ class luxrender_rendermode(declarative_property_group):
 			'type': 'bool',
 			'attr': 'usegpus',
 			'name': 'Use GPUs',
-			'description': 'Target GPU devices in slg or hybrid',
+			'description': 'Target GPU devices in SLG or hybrid',
 			'default': True,
 			'save_in_preset': True
 		},
@@ -216,7 +216,7 @@ class luxrender_rendermode(declarative_property_group):
 			'type': 'bool',
 			'attr': 'usecpus',
 			'name': 'Use CPUs',
-			'description': 'Target CPU devices in slg render',
+			'description': 'Target CPU devices in SLG render',
 			'default': True,
 			'save_in_preset': True
 		},
