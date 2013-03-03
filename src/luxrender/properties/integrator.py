@@ -327,7 +327,8 @@ class luxrender_integrator(declarative_property_group):
 	alert = {}
 	
 	properties = [
-		#This parameter is fed to the "integrator' context, and holds the actual surface integrator setting. The user does not interact with it directly, and it does not appear in the panels
+		#This parameter is fed to the "integrator' context, and holds the actual surface integrator setting. The user does not interact with it directly, and it does not appear in the UI.
+		#It is set via the Rendering Mode menu and update_rendering_mode function
 		{
 			'type': 'enum', 
 			'attr': 'surfaceintegrator',
@@ -445,6 +446,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'shadowraycount',
 			'name': 'Shadow Ray Count',
+			'description': 'Multiplier for the number of shadow rays traced: higher values are slower overall, but can speed convergence of direct light and soft shadows',
 			'default': 1,
 			'min': 1,
 			'max': 1024,
@@ -454,6 +456,7 @@ class luxrender_integrator(declarative_property_group):
 			'type': 'int',
 			'attr': 'lightraycount',
 			'name': 'Light Ray Count',
+			'description': 'Multiplier for the number of light paths traced: higher values can speed convergence of indirect light and caustics at the expense of reflections and refractions',
 			'default': 1,
 			'min': 1,
 			'max': 1024,
