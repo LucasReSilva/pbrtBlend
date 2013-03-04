@@ -280,13 +280,14 @@ def object_anim_matrices(scene, obj, steps=1):
 	The number of matrices returned is at most steps+1.
 	'''
 	old_sf = scene.frame_subframe
+	cur_frame = scene.frame_current
 	
 	ref_matrix = None
 	animated = False
 	
 	next_matrices = []
 	for i in range(0, steps+1):
-		scene.frame_set(scene.frame_current, subframe=i/float(steps))
+		scene.frame_set(cur_frame, subframe=i/float(steps))
 		
 		sub_matrix = obj.matrix_world.copy()
 		
@@ -300,7 +301,7 @@ def object_anim_matrices(scene, obj, steps=1):
 		next_matrices = []
 		
 	# restore subframe value
-	scene.frame_set(scene.frame_current, old_sf)
+	scene.frame_set(cur_frame, old_sf)
 	return next_matrices
 
 # hack for the matrix order api change in r42816
