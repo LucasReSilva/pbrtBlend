@@ -221,11 +221,12 @@ class luxrender_engine(declarative_property_group):
 			'type': 'enum',
 			'attr': 'binary_name',
 			'name': 'External Type',
-			'description': 'Choose full GUI or console renderer',
+			'description': 'Choose full GUI, console renderer or real-time rendering',
 			'default': 'luxrender',
 			'items': [
 				('luxrender', 'LuxRender GUI', 'luxrender'),
 				('luxconsole', 'LuxConsole', 'luxconsole'),
+				('luxvr', 'LuxVR', 'luxvr'),
 			],
 			'save_in_preset': True
 		},
