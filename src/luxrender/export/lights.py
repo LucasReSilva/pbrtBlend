@@ -150,7 +150,8 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		return True
 	
 	if light.type == 'HEMI':
-		attr_light(scene, lux_context, light, ob.name, light_group, 'infinite', light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
+		infinite_type = 'infinitesample' if light.luxrender_lamp.luxrender_lamp_hemi.hdri_infinitesample else 'infinite'
+		attr_light(scene, lux_context, light, ob.name, light_group, infinite_type, light_params, transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
 		return True
 	
 	if light.type == 'SPOT':

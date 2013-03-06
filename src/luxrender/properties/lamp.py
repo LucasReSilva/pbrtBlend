@@ -564,14 +564,17 @@ class luxrender_lamp_hemi(declarative_property_group):
 		'nsamples',
 		'gamma',
 		[0.323, 'L_colorlabel', 'L_color'],
-		'hdri_multiply'
+		'hdri_multiply',
+		'hdri_infinitesample'
 	]
 	
 	visibility = {
-		'mapping_type':		{ 'infinite_map': LO({'!=': ''}) },
-		'hdri_multiply':	{ 'infinite_map': LO({'!=': ''}) },
-		'gamma':			{ 'infinite_map': LO({'!=': ''}) },
-		'nsamples':			{ 'infinite_map': LO({'!=': ''}) },
+		'mapping_type':				{ 'infinite_map': LO({'!=': ''}) },
+		'hdri_multiply':			{ 'infinite_map': LO({'!=': ''}) },
+		'gamma':					{ 'infinite_map': LO({'!=': ''}) },
+		'nsamples':					{ 'infinite_map': LO({'!=': ''}) },
+		'hdri_infinitesample':		{ 'infinite_map': LO({'!=': ''}) },
+
 	}
 	
 	properties = TC_L.properties[:] + [
@@ -612,6 +615,13 @@ class luxrender_lamp_hemi(declarative_property_group):
 			'max': 6,
 			'soft_max': 6,
 		},
+		{
+		 	'type': 'bool',
+		 	'attr': 'hdri_infinitesample',
+		 	'name': 'Intensity Sampling',
+		 	'description': 'Use intensity based sampling for hemi texture, recommended for high contrast HDR images. Will disable use of portals for this light!',
+		 	'default': False
+	  	},
 		{
 			'type': 'int',
 			'attr': 'nsamples',
