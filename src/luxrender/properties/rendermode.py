@@ -51,6 +51,7 @@ class luxrender_rendermode(declarative_property_group):
 		'workgroupsize',
 		'qbvhstacksize',
 		'deviceselection',
+		'kernelcache'
 		]
 	
 	visibility = {
@@ -62,6 +63,7 @@ class luxrender_rendermode(declarative_property_group):
 		'workgroupsize':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
 		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'deviceselection':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
+		'kernelcache':				{ 'opencl_prefs': True, 'rendermode': O(['slgpath']) },
 		'usegpus':					{ 'rendermode': O(['hybridpath','hybridbidir','slgpath']) },
 		'usecpus':					{ 'rendermode': 'slgpath' },
 		}
@@ -205,6 +207,19 @@ class luxrender_rendermode(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'enum',
+			'attr': 'kernelcache',
+			'name': 'OpenCL Kernel Cache',
+			'description': 'Select the type of OpenCL compilation kernel cache used (in order to reduce compilation time)',
+			'default': 'NONE',
+			'items': [
+				('NONE', 'None', 'NONE'),
+				('VOLATILE', 'Volatile', 'VOLATILE'),
+				('PERSISTENT', 'Persistent', 'PERSISTENT'),
+			],
+			'save_in_preset': True
+		},
+		{
 			'type': 'bool',
 			'attr': 'usegpus',
 			'name': 'Use GPUs',
@@ -240,8 +255,9 @@ class luxrender_rendermode(declarative_property_group):
 			slg_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
 			slg_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
 			slg_devices_select =  "opencl.devices.select = " + self.deviceselection if self.deviceselection else "opencl.devices.select = " # blank
+			slg_kernel_cache = "opencl.kernelcache = " + self.kernelcache
 			slg_config_seperator = '" "'
-			slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu + slg_config_seperator + slg_devices_select
+			slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu + slg_config_seperator + slg_devices_select + slg_config_seperator + slg_kernel_cache
 			renderer_params.add_string('config', slg_params)
 		
 		return self.renderer, renderer_params
