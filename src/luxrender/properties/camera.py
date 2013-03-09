@@ -636,7 +636,7 @@ class luxrender_film(declarative_property_group):
 			'type': 'bool',
 			'attr': 'output_alpha',
 			'name': 'Enable alpha channel',
-			'description': 'Enable alpha channel. This applies to all image formats',
+			'description': 'Enable alpha channel. This applies to all image formats. Integrated imaging must be always premultiplied',
 			'default': False
 		},
 		{
@@ -824,7 +824,7 @@ class luxrender_film(declarative_property_group):
 			params.add_string('write_exr_channels', 'RGBA')
 			params.add_bool('write_exr_halftype', False)
 			params.add_bool('write_exr_applyimaging', True)
-			params.add_bool('premultiplyalpha', self.premultiply_alpha)
+			params.add_bool('premultiplyalpha', True if self.output_alpha else False) # Blender 2.66 always expects premultiplyalpha
 			params.add_bool('write_exr_ZBuf', True)
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
 			params.add_float('gamma', 1.0) #Blender is always expecting a gamma 1.0 image

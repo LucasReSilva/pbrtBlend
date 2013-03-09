@@ -148,9 +148,14 @@ def lux_output_hints(self, context):
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct", text="Write FLM Directly")
 		row = self.layout.row()
 		if not pipe_mode: #This control does nothing in internal-pipe mode, but we need to handle this row separately so we can still draw premultiply by itself for integrated imaging mode, but next to output-alpha in other modes
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
-		if ((not pipe_mode) and context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha) or (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.integratedimaging): #This control must be here for integrated imaging mode, or else it is impossible to render a non-black background
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
+			if not context.scene.luxrender_engine.integratedimaging:
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
+			else:
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Premultiplied Alpha Channel")
+				
+		if (context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha): #This control must be here for integrated imaging mode, or else it is impossible to render a non-black background
+			if not context.scene.luxrender_engine.integratedimaging:
+				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
 		
 
 _register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))
