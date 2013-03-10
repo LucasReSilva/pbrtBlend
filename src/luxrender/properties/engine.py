@@ -191,7 +191,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'bool',
 			'attr': 'integratedimaging',
 			'name': 'Integrated imaging workflow',
-			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support and is more stable, but may increase take longer to refresh)',
+			'description': 'Transfer rendered image directly to Blender without saving to disk (adds Alpha and Z-buffer support and is more stable, but may take longer to refresh)',
 			'default': True
 		},
 		{
