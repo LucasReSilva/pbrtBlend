@@ -147,7 +147,7 @@ def lux_output_hints(self, context):
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct", text="Write FLM Directly")
 		row = self.layout.row()
-		if not pipe_mode: #This control does nothing in internal-pipe mode, but we need to handle this row separately so we can still draw premultiply by itself for integrated imaging mode, but next to output-alpha in other modes
+		if not pipe_mode or context.scene.luxrender_engine.export_type == 'INT': #This control does nothing in internal-pipe mode, but we need to handle this row separately so we can still draw premultiply by itself for integrated imaging mode, but next to output-alpha in other modes
 			if not context.scene.luxrender_engine.integratedimaging:
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
 			else:
