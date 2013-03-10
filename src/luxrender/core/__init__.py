@@ -118,7 +118,7 @@ def lux_output_hints(self, context):
 	
 		pipe_mode = (context.scene.luxrender_engine.export_type == 'INT' and context.scene.luxrender_engine.write_files == False) #In this mode, we don't use use the regular interval write
 
-		if not (pipe_mode and not context.scene.luxrender_engine.integratedimaging): #in this case, none of these buttons do anything, so don't even bother drawing the label
+		if not (pipe_mode): #in this case, none of these buttons do anything, so don't even bother drawing the label
 			col = self.layout.column()
 			col.label("LuxRender Output Formats")
 		row = self.layout.row()
@@ -147,14 +147,14 @@ def lux_output_hints(self, context):
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct", text="Write FLM Directly")
 		row = self.layout.row()
-		if not pipe_mode: #This control does nothing in internal-pipe mode, but we need to handle this row separately so we can still draw premultiply by itself for integrated imaging mode, but next to output-alpha in other modes
-			if not context.scene.luxrender_engine.integratedimaging or context.scene.luxrender_engine.export_type == 'EXT':
-				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel")
-			else:
-				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Premultiplied Alpha Channel")
+	
+		if not context.scene.luxrender_engine.integratedimaging or context.scene.luxrender_engine.export_type == 'EXT':
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel") # Alpha and coupled premul option for all modes but integrated imaging
+		else:
+			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Transparent Background") # Integrated imaging always with premul named according Blender usage
 				
-		if (context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha): #This control must be here for integrated imaging mode, or else it is impossible to render a non-black background
-			if not context.scene.luxrender_engine.integratedimaging or context.scene.luxrender_engine.export_type == 'EXT':
+		if (context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha):
+			if not context.scene.luxrender_engine.integratedimaging or context.scene.luxrender_engine.export_type == 'EXT': # Premul only availyble for non integrated imaging
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
 		
 
