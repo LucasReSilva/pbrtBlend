@@ -819,7 +819,8 @@ class luxrender_film(declarative_property_group):
 			output_channels = 'RGB'
 								
 		if scene.luxrender_engine.export_type == 'INT' and scene.luxrender_engine.integratedimaging:
-			# Set up params to enable z buffer and set gamma=1.0
+			# Set up params to enable z buffer
+			# we use the colorspace gamma, else autolinear gives wrong estimation, gamma 1.0 per pixel is recalculated in pylux after
 			# Also, this requires tonemapped EXR output
 			params.add_string('write_exr_channels', 'RGBA')
 			params.add_bool('write_exr_halftype', False)
@@ -827,7 +828,6 @@ class luxrender_film(declarative_property_group):
 			params.add_bool('premultiplyalpha', True if self.output_alpha else False) # Blender 2.66 always expects premultiplyalpha
 			params.add_bool('write_exr_ZBuf', True)
 			params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
-			params.add_float('gamma', 1.0) #Blender is always expecting a gamma 1.0 image
 		else:
 			# Otherwise let the user decide on tonemapped EXR and other EXR settings
 			params.add_bool('write_exr_halftype', self.write_exr_halftype)
