@@ -240,24 +240,30 @@ class luxrender_rendermode(declarative_property_group):
 	def api_output(self):
 		renderer_params = ParamSet()
 		
-		if self.renderer in ['hybrid'] and self.opencl_prefs == True:
-			renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
+		if self.renderer in ['hybrid']:		
 			renderer_params.add_bool('opencl.gpu.use', self.usegpus)
-			renderer_params.add_string('configfile', self.configfile)
-			renderer_params.add_integer('raybuffersize', self.raybuffersize)
-			renderer_params.add_integer('statebuffercount', self.statebuffercount)
-			renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
-			renderer_params.add_integer('accelerator.qbvh.stacksize.max', self.qbvhstacksize)
-			renderer_params.add_string('opencl.devices.select', self.deviceselection)
+			if self.opencl_prefs == True:
+				renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
+				renderer_params.add_string('configfile', self.configfile)
+				renderer_params.add_integer('raybuffersize', self.raybuffersize)
+				renderer_params.add_integer('statebuffercount', self.statebuffercount)
+				renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
+				renderer_params.add_integer('accelerator.qbvh.stacksize.max', self.qbvhstacksize)
+				renderer_params.add_string('opencl.devices.select', self.deviceselection)
 		
-		if self.renderer in ['slg'] and self.opencl_prefs == True: # this is WIP to take over some slg configs
-			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
+		if self.renderer in ['slg']:
 			slg_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
 			slg_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
+			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
 			slg_devices_select =  "opencl.devices.select = " + self.deviceselection if self.deviceselection else "opencl.devices.select = " # blank
 			slg_kernel_cache = "opencl.kernelcache = " + self.kernelcache
 			slg_config_seperator = '" "'
-			slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu + slg_config_seperator + slg_devices_select + slg_config_seperator + slg_kernel_cache
+			
+			if self.opencl_prefs != True: # this is WIP to take over some slg configs
+				slg_params = slg_params = slg_use_gpu + slg_config_seperator + slg_use_cpu
+			else:
+				slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu + slg_config_seperator + slg_devices_select + slg_config_seperator + slg_kernel_cache
+					
 			renderer_params.add_string('config', slg_params)
 		
 		return self.renderer, renderer_params
