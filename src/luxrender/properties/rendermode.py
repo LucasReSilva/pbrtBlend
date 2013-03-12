@@ -257,13 +257,12 @@ class luxrender_rendermode(declarative_property_group):
 			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
 			slg_devices_select =  "opencl.devices.select = " + self.deviceselection if self.deviceselection else "opencl.devices.select = " # blank
 			slg_kernel_cache = "opencl.kernelcache = " + self.kernelcache
-			slg_config_seperator = '" "'
 			
-			if self.opencl_prefs != True: # this is WIP to take over some slg configs
-				slg_params = slg_params = slg_use_gpu + slg_config_seperator + slg_use_cpu
+			if self.opencl_prefs == False:
+				slg_params = ','.join((slg_use_gpu, slg_use_cpu)).split(',')
 			else:
-				slg_params = slg_gpu_workgroups	+ slg_config_seperator + slg_use_gpu + slg_config_seperator + slg_use_cpu + slg_config_seperator + slg_devices_select + slg_config_seperator + slg_kernel_cache
-					
+				slg_params = ','.join((slg_use_gpu, slg_use_cpu, slg_gpu_workgroups, slg_devices_select, slg_kernel_cache)).split(',')
+
 			renderer_params.add_string('config', slg_params)
 		
 		return self.renderer, renderer_params
