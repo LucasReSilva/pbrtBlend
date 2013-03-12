@@ -263,7 +263,7 @@ class luxrender_rendermode(declarative_property_group):
 				slg_extra_params = ','.join((slg_gpu_workgroups, slg_devices_select, slg_kernel_cache)).split(',')
 				slg_params += slg_extra_params
 			
-			renderer_params.add_string('config', slg_params)
+			renderer_params.add_string('config', '" "'.join(slg_params))
 		
 		return self.renderer, renderer_params
 
