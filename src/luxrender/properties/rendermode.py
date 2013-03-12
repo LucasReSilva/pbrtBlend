@@ -254,15 +254,15 @@ class luxrender_rendermode(declarative_property_group):
 		if self.renderer in ['slg']:
 			slg_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
 			slg_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
-			slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
-			slg_devices_select =  "opencl.devices.select = " + self.deviceselection if self.deviceselection else "opencl.devices.select = " # blank
-			slg_kernel_cache = "opencl.kernelcache = " + self.kernelcache
+			slg_params = ','.join((slg_use_gpu, slg_use_cpu)).split(',')
 			
-			if self.opencl_prefs == False:
-				slg_params = ','.join((slg_use_gpu, slg_use_cpu)).split(',')
-			else:
-				slg_params = ','.join((slg_use_gpu, slg_use_cpu, slg_gpu_workgroups, slg_devices_select, slg_kernel_cache)).split(',')
-
+			if self.opencl_prefs == True:
+				slg_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
+				slg_devices_select =  "opencl.devices.select = " + self.deviceselection if self.deviceselection else "opencl.devices.select = " # blank
+				slg_kernel_cache = "opencl.kernelcache = " + self.kernelcache
+				slg_extra_params = ','.join((slg_gpu_workgroups, slg_devices_select, slg_kernel_cache)).split(',')
+				slg_params += slg_extra_params
+			
 			renderer_params.add_string('config', slg_params)
 		
 		return self.renderer, renderer_params
