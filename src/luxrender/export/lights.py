@@ -234,7 +234,10 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		if light.luxrender_lamp.luxrender_lamp_area.null_lamp:		
 			mat_params = ParamSet()
 
-			mat_params.add_string('type', 'null')
+			if scene.luxrender_rendermode.renderer == 'slg': # Workaround: SLGRenderer supports only area lights with constant ConstantRGBColorTexture
+				mat_params.add_string('type', 'matte')
+			else:
+				mat_params.add_string('type', 'null')
 				
 			lux_context.makeNamedMaterial(ob.name, mat_params)
 			
