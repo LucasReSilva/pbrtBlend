@@ -794,7 +794,8 @@ class GeometryExporter(object):
 			thickness = []
 			total_segments_count = 0
 			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
-		
+
+			transform = obj.matrix_world.inverted()		
 			for pindex in range(num_parents + num_children):			
 				det.exported_objects += 1				
 				segment_count = 0
@@ -802,7 +803,7 @@ class GeometryExporter(object):
 				for step in range(0, steps):
 					co = psys.co_hair(obj, mod, pindex, step)				
 					if not co.length_squared == 0:
-						points.append(co)
+						points.append(transform*co)
 						segment_count = segment_count + 1
 
 				segments.append(segment_count)
@@ -818,7 +819,7 @@ class GeometryExporter(object):
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
 				hair_file.write(struct.pack('<I', 1+2))         #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
-				hair_file.write(struct.pack('<f', size))        #default thickness
+				hair_file.write(struct.pack('<f', size*2))      #default thickness
 				hair_file.write(struct.pack('<f', 0.0))         #default transparency
 				color = (200.0, 200.0, 200.0)
 				hair_file.write(struct.pack('<3f', *color))     #default color
@@ -833,25 +834,16 @@ class GeometryExporter(object):
 			
 			hair_mat = obj.material_slots[psys.settings.material - 1].material
 			# Export shape definition to .LXO file			
-			hairfile = (
-				(
-					'hairfile_%s'%partsys_name,
-					psys.settings.material - 1,
-					'hairfile',
-					ParamSet() \
-						.add_string('filename', hair_file_path) \
-						.add_bool('usebspline', psys.settings.use_hair_bspline) \
-						.add_integer('resolution', psys.settings.luxrender_hair.resolution)
-				),
-			)
 			self.lux_context.attributeBegin('hairfile_%s'%partsys_name)
 			self.lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
 			self.lux_context.namedMaterial(hair_mat.name)
 			self.lux_context.shape('hairfile',
 					ParamSet() \
 						.add_string('filename', hair_file_path) \
-						.add_bool('usebspline', psys.settings.use_hair_bspline) \
-						.add_integer('resolution', psys.settings.luxrender_hair.resolution)
+						.add_string('name', bpy.path.clean_name(partsys_name)) \
+						.add_point('camerapos', bpy.context.scene.camera.location)
+						#.add_bool('usebspline', psys.settings.use_hair_bspline) \
+						#.add_integer('resolution', psys.settings.luxrender_hair.resolution)
 				)
 			self.lux_context.attributeEnd()
 			self.lux_context.set_output_file(Files.MATS)
