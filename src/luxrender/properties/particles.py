@@ -46,8 +46,8 @@ class luxrender_hair(declarative_property_group):
 	'''
 	ef_attach_to = ['ParticleSettings']
 	controls = ['hair_size',
-                    #'use_binary_output',
-                    #'resolution',
+				'use_binary_output',
+				'resolution',
 	]
 
 	properties = [

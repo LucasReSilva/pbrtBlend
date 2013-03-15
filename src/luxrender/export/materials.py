@@ -308,12 +308,10 @@ def convert_texture(scene, texture, variant_hint=None):
 					d_path = os.path.dirname(efutil.filesystem_path(texture.image.filepath)) # directory containing the sequence
 					image_nr = os.path.basename(efutil.filesystem_path(texture.image.filepath))[:-4] # the count of images
 					num_len = len(image_nr) # length of image numbering
-					offset = bpy.data.textures[0].image_user.frame_offset
+					offset = bpy.data.textures[(texture.name).replace('.001', '')].image_user.frame_offset # remove tex_preview extension
 					num = int(image_nr) + (scene.frame_current -1 ) + offset
 					extender = os.path.basename(efutil.filesystem_path(texture.image.filepath))[-4:]
 					f_path = d_path + '/' + str(num).zfill(num_len) + extender
-
-					print("-----------------", offset)
 
 				if not os.path.exists(f_path):
 					raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
