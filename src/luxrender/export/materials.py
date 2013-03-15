@@ -262,7 +262,7 @@ def convert_texture(scene, texture, variant_hint=None):
 				.add_string('type', texture.wood_type.lower() )
 	
 	# Translate Blender Image/movie into lux tex
-	if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE']:
+	if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE', 'SEQUENCE']:
 		
 		extract_path = os.path.join(
 			efutil.scene_filename(),
@@ -288,7 +288,38 @@ def convert_texture(scene, texture, variant_hint=None):
 				if not os.path.exists(f_path):
 					raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
 				tex_image = efutil.filesystem_path(f_path)
-		
+
+		if texture.image.source == 'SEQUENCE':
+			if texture.image.packed_file:
+				tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.image_settings.file_format)
+				tex_image = os.path.join(extract_path, tex_image)
+				texture.image.save_render(tex_image, scene)
+			else:
+				if texture.library is not None:
+					d_path = os.path.dirname(efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))) # directory containing the sequence
+					image_nr = os.path.basename(efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath)))[:-4] # the count of images
+					num_len = len(image_nr) # length of image numbering
+					offset = bpy.data.textures[0].image_user.frame_offset
+					num = int(image_nr) + (scene.frame_current -1 ) + offset
+					extender = os.path.basename(efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath)))[-4:]
+					f_path = d_path + '/' + str(num).zfill(num_len) + extender
+
+				else:
+					d_path = os.path.dirname(efutil.filesystem_path(texture.image.filepath)) # directory containing the sequence
+					image_nr = os.path.basename(efutil.filesystem_path(texture.image.filepath))[:-4] # the count of images
+					num_len = len(image_nr) # length of image numbering
+					offset = bpy.data.textures[0].image_user.frame_offset
+					num = int(image_nr) + (scene.frame_current -1 ) + offset
+					extender = os.path.basename(efutil.filesystem_path(texture.image.filepath))[-4:]
+					f_path = d_path + '/' + str(num).zfill(num_len) + extender
+
+					print("-----------------", offset)
+
+				if not os.path.exists(f_path):
+					raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+				tex_image = efutil.filesystem_path(f_path)
+
+
 		lux_tex_name = 'imagemap'
 		sampling = texture.luxrender_texture.luxrender_tex_imagesampling
 		if variant_hint:
