@@ -301,27 +301,23 @@ def convert_texture(scene, texture, variant_hint=None):
 				seqoffset = sequence.frame_offset
 				seqstartframe = sequence.frame_start # the global frame at which the imagesequence starts
 				seqcyclic = sequence.use_cyclic
+				currentframe = scene.frame_current
 				
 				if texture.library is not None:
 					f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
 				else:
 					f_path = efutil.filesystem_path(texture.image.filepath)
 
-
-
-				totalframes = seqframes
-				currentframe = scene.frame_current
-
-				if(currentframe < seqstartframe):
+				if currentframe < seqstartframe:
 					fnumber = 1 + seqoffset
 				else:
-					fnumber = (currentframe - (seqstartframe-1)) + seqoffset
+					fnumber = currentframe - (seqstartframe-1) + seqoffset
 
-				if(fnumber > seqframes):
+				if fnumber > seqframes:
 					if seqcyclic == False:
 						fnumber = seqframes
 					else:
-						fnumber = currentframe % seqframes
+						fnumber = (currentframe - (seqstartframe-1)) % seqframes
 						if fnumber == 0:
 							fnumber = seqframes
 
