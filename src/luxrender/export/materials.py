@@ -295,23 +295,51 @@ def convert_texture(scene, texture, variant_hint=None):
 				tex_image = os.path.join(extract_path, tex_image)
 				texture.image.save_render(tex_image, scene)
 			else:
+				# sequence params from blender
+				sequence = bpy.data.textures[(texture.name).replace('.001', '')].image_user # remove tex_preview extension to avoid error
+				seqframes = sequence.frame_duration
+				seqoffset = sequence.frame_offset
+				seqstartframe = sequence.frame_start # the global frame at which the imagesequence starts
+				seqcyclic = sequence.use_cyclic
+				
 				if texture.library is not None:
-					d_path = os.path.dirname(efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))) # directory containing the sequence
-					image_nr = os.path.basename(efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath)))[:-4] # the count of images
-					num_len = len(image_nr) # length of image numbering
-					offset = bpy.data.textures[(texture.name).replace('.001', '')].image_user.frame_offset # remove tex_preview extension to get it rendered
-					num = int(image_nr) + (scene.frame_current -1 ) + offset
-					extender = os.path.basename(efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath)))[-4:]
-					f_path = d_path + '/' + str(num).zfill(num_len) + extender
-
+					f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
 				else:
-					d_path = os.path.dirname(efutil.filesystem_path(texture.image.filepath)) # directory containing the sequence
-					image_nr = os.path.basename(efutil.filesystem_path(texture.image.filepath))[:-4] # the count of images
-					num_len = len(image_nr) # length of image numbering
-					offset = bpy.data.textures[(texture.name).replace('.001', '')].image_user.frame_offset # remove tex_preview extension to get it rendered
-					num = int(image_nr) + (scene.frame_current -1 ) + offset
-					extender = os.path.basename(efutil.filesystem_path(texture.image.filepath))[-4:]
-					f_path = d_path + '/' + str(num).zfill(num_len) + extender
+					f_path = efutil.filesystem_path(texture.image.filepath)
+
+
+
+				totalframes = seqframes
+				currentframe = scene.frame_current
+
+				if(currentframe < seqstartframe):
+					fnumber = 1 + seqoffset
+				else:
+					fnumber = (currentframe - (seqstartframe-1)) + seqoffset
+
+				if(fnumber > seqframes):
+					if seqcyclic == False:
+						fnumber = seqframes
+					else:
+						fnumber = currentframe % seqframes
+
+				import re
+				def get_seq_filename(number, f_path):
+					m = re.findall(r'(\d+)', f_path)
+					if len(m) == 0:
+						return "ERR: Can't find pattern"
+					
+					rightmost_number = m[len(m)-1]
+					seq_length = len(rightmost_number)
+					
+					nstr = "%i" %number
+					new_seq_number = nstr.zfill(seq_length)
+					
+					return f_path.replace(rightmost_number, new_seq_number)
+
+				f_path = get_seq_filename(fnumber, f_path)
+				
+				#print("-----------------", f_path)
 
 				if not os.path.exists(f_path):
 					raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
