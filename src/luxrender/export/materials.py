@@ -322,6 +322,8 @@ def convert_texture(scene, texture, variant_hint=None):
 						fnumber = seqframes
 					else:
 						fnumber = currentframe % seqframes
+						if fnumber == 0:
+							fnumber = seqframes
 
 				import re
 				def get_seq_filename(number, f_path):
@@ -339,7 +341,7 @@ def convert_texture(scene, texture, variant_hint=None):
 
 				f_path = get_seq_filename(fnumber, f_path)
 				
-				#print("-----------------", f_path)
+#				print("-----------------", f_path)
 
 				if not os.path.exists(f_path):
 					raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
