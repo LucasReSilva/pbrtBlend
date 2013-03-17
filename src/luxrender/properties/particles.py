@@ -47,14 +47,23 @@ class luxrender_hair(declarative_property_group):
 	ef_attach_to = ['ParticleSettings']
 	controls = ['hair_size',
 				'use_binary_output',
-				'resolution',
+# 				'resolution',
+				'tesseltype',
+				'ribbonadaptive_maxdepth',
+				'ribbonadaptive_error',
+				'acceltype',
 	]
+	
+	visibility = {
+		'ribbonadaptive_maxdepth':		{ 'tesseltype': 'ribbonadaptive' },
+		'ribbonadaptive_error':			{ 'tesseltype': 'ribbonadaptive' },
+	}
 
 	properties = [
 		{
 			'type': 'float',
 			'attr': 'hair_size',
-			'name': 'hair size',
+			'name': 'Hair Size',
 			'description': 'Thickness of hair',
 			'default': 0.00005,
 			'min': 0.000001,
@@ -68,21 +77,63 @@ class luxrender_hair(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'use_binary_output',
-			'name': 'Use Binary output file',
+			'name': 'Use Binary Output File',
 			'description': 'Use binary hair description file for export',
-			'default': False,
+			'default': True,
 		},
 		{
 			'type': 'int',
 			'attr': 'resolution',
-			'name': 'Resolution of hair strand',
+			'name': 'Resolution of Hair Strand',
 			'description': 'Resolution of hair strand (power of 2)',			
 			'default': 3,
 			'min': 1,
 			'soft_min': 1,
 			'max': 10,
 			'soft_max': 10,
-		},                
+		}, 
+		{
+			'type': 'enum',
+			'attr': 'tesseltype',
+			'name': 'Tessellation Type',
+			'description': 'Tessellation method for hair strands' ,
+			'default': 'ribbonadaptive',
+			'items': [
+				('ribbon', 'Triangle Ribbon', 'Render hair as ribbons of triangles facing the camera'),
+				('ribbonadaptive', 'Adaptive Triangle Ribbon', 'Render hair as ribbons of triangles facing the camera, with adaptive tessellation'),
+			],
+		},
+		{
+			'type': 'int',
+			'attr': 'ribbonadaptive_maxdepth',
+			'name': 'Max Tessellation Depth',
+			'description': 'Maximum tessellation depth for adaptive triangle ribbons',			
+			'default': 8,
+			'min': 1,
+			'soft_min': 2,
+			'max': 24,
+			'soft_max': 12,
+		},
+		{
+			'type': 'float',
+			'attr': 'ribbonadaptive_error',
+			'name': 'Max Tessellation Error',
+			'description': 'Maximum tessellation error for adaptive triangle ribbons',			
+			'default': 0.1,
+			'min': 0.001,
+			'max': 0.9,
+		}, 
+		{ 
+			'type': 'enum',
+			'attr': 'acceltype',
+			'name': 'Hair Accelerator',
+			'description': 'Acceleration structure used for this hair system' ,
+			'default': 'qbvh',
+			'items': [
+				('qbvh', 'QBVH', 'SSE-accelerated quad bounding volume hierarchy'),
+				('kdtree', 'KD-Tree', 'KD-Tree'),
+			],
+		}           
 	]
 			
             

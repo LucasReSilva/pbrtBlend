@@ -841,7 +841,11 @@ class GeometryExporter(object):
 					ParamSet() \
 						.add_string('filename', hair_file_path) \
 						.add_string('name', bpy.path.clean_name(partsys_name)) \
-						.add_point('camerapos', bpy.context.scene.camera.location)
+						.add_point('camerapos', bpy.context.scene.camera.location) \
+						.add_string('tesseltype', psys.settings.luxrender_hair.tesseltype) \
+						.add_string('acceltype', psys.settings.luxrender_hair.acceltype) \
+						.add_integer('ribbonadaptive_maxdepth', psys.settings.luxrender_hair.ribbonadaptive_maxdepth) \
+						.add_float('ribbonadaptive_error', psys.settings.luxrender_hair.ribbonadaptive_error)
 						#.add_bool('usebspline', psys.settings.use_hair_bspline) \
 						#.add_integer('resolution', psys.settings.luxrender_hair.resolution)
 				)
