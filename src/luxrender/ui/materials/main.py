@@ -81,7 +81,7 @@ class ui_luxrender_material_header(luxrender_material_base):
 		if ob:
 			split.template_ID(ob, "active_material", new="material.new")
 			row = split.row()
-
+			
 			if slot:
 				row.prop(slot, "link", text="")
 			else:
