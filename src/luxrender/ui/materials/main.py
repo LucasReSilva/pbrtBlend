@@ -93,10 +93,10 @@ class ui_luxrender_material_header(luxrender_material_base):
 			split.separator()
 
 		row = self.layout.row(align=True)
-		if slot:
+		if slot and not mat.use_nodes:
 			row.label("Material type")
 			row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
-		super().draw(context)
+			super().draw(context)
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_db(luxrender_material_base):
