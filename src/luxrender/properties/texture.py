@@ -650,6 +650,8 @@ tex_names = (
 		('imagemap', 'Image Map'),
 		('normalmap', 'Normal Map'),
 		('marble', 'Marble'),
+		('hitpointcolor', 'Vertex Color'),
+		('hitpointalpha', 'Vertex Alpha'),
 		('windy', 'Windy'),
 		('wrinkled', 'Wrinkled'),
 	)),
@@ -2264,6 +2266,56 @@ class luxrender_tex_harlequin(declarative_property_group):
 		return set(), harlequin_params
 	
 	def load_paramset(self, ps):
+		pass
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_hitpointcolor(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = []
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'string',
+			'default': 'color'
+		},
+	]
+	
+	def get_paramset(self, scene, texture):
+		hitpointcolor_params = ParamSet()
+		
+		return set(), hitpointcolor_params
+	
+	def load_paramset(self, variant, ps):
+		pass
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_hitpointalpha(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = []
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'string',
+			'default': 'float'
+		},
+	]
+	
+	def get_paramset(self, scene, texture):
+		hitpointalpha_params = ParamSet()
+		
+		return set(), hitpointalpha_params
+	
+	def load_paramset(self, variant, ps):
 		pass
 
 @LuxRenderAddon.addon_register_class
