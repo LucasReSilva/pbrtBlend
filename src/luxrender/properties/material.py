@@ -710,6 +710,36 @@ class luxrender_material(declarative_property_group):
 		
 		self.set_master_color(blender_mat)
 		blender_mat.preview_render_type = blender_mat.preview_render_type
+		
+def add_nodetype(layout, type):
+	layout.operator("node.add_node", text=type.bl_label).type = type.bl_rna.identifier
+
+@LuxRenderAddon.addon_register_class
+class luxrender_mat_node_editor(bpy.types.NodeTree):
+	'''Experiment in making a node editor for Lux'''
+
+	bl_idname = 'luxrender_material_nodes'
+	bl_label = 'LuxRender Material Nodes'
+	bl_icon = 'MATERIAL'
+	
+	@classmethod
+	def poll(cls, context):
+		return context.scene.render.engine == 'LUXRENDER_RENDER'
+		
+	def draw_add_menu(self, context, layout):
+		layout.label("LuxRender Node Types")
+		add_nodetype(layout, bpy.types.luxrender_dummy_node)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_dummy_node(bpy.types.Node):
+	# Description string
+	'''A custom node'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_dummy_node'
+	# Label for nice name display
+	bl_label = 'LuxRender Node'
+	# Icon identifier
+	bl_icon = 'MATERIAL'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_compositing(declarative_property_group):
@@ -1213,12 +1243,12 @@ class luxrender_coating(declarative_property_group):
 	visibility = dict_merge(
 		{
 
-			'multibounce':      { 'use_coating': True },
+			'multibounce':	  { 'use_coating': True },
 
-			'useior':           { 'use_coating': True },
-			'draw_ior_menu':    { 'use_coating': True, 'useior': True },
-			'anisotropic':      { 'use_coating': True },
-			'use_exponent':     { 'use_coating': True }
+			'useior':		   { 'use_coating': True },
+			'draw_ior_menu':	{ 'use_coating': True, 'useior': True },
+			'anisotropic':	  { 'use_coating': True },
+			'use_exponent':	 { 'use_coating': True }
 		},
 		TF_c_d.visibility,
 		TF_c_index.visibility,
@@ -1237,16 +1267,16 @@ class luxrender_coating(declarative_property_group):
 	enabled = texture_append_visibility(enabled, TF_c_vexponent,  { 'use_coating': True, 'anisotropic': True })
 	
 	visibility = texture_append_visibility(visibility, TF_c_normalmap,  { 'use_coating': True })
-	visibility = texture_append_visibility(visibility, TF_c_bumpmap,    { 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TF_c_bumpmap,	{ 'use_coating': True })
 	visibility = texture_append_visibility(visibility, TF_c_uroughness, { 'use_coating': True, 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_c_vroughness, { 'use_coating': True, 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_c_uexponent,  { 'use_coating': True, 'use_exponent': True })
 	visibility = texture_append_visibility(visibility, TF_c_vexponent,  { 'use_coating': True, 'use_exponent': True })
 
-	visibility = texture_append_visibility(visibility, TC_c_Ks,    { 'use_coating': True, 'useior': False })
+	visibility = texture_append_visibility(visibility, TC_c_Ks,	{ 'use_coating': True, 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_c_index, { 'use_coating': True, 'useior': True })
-	visibility = texture_append_visibility(visibility, TC_c_Ka,    { 'use_coating': True })
-	visibility = texture_append_visibility(visibility, TF_c_d,     { 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TC_c_Ka,	{ 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TF_c_d,	 { 'use_coating': True })
 	
 	properties = [
 		{	# Drawn in the panel header
