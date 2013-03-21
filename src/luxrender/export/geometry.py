@@ -853,7 +853,12 @@ class GeometryExporter(object):
 			segments = []
 			points = []
 			thickness = []
+			colors = []
 			total_segments_count = 0
+			if obj.data.vertex_colors.active:
+				colorflag = 1
+			else:
+				colorflag = 0
 			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
 
 			transform = obj.matrix_world.inverted()		
@@ -867,6 +872,10 @@ class GeometryExporter(object):
 						points.append(transform*co)
 						point_count = point_count + 1
 
+					if obj.data.vertex_colors.active:						
+						col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, obj.data.vertex_colors.active_index)						
+						colors.append(col)					
+
 				if point_count > 1:
 					segments.append(point_count - 1)
 					total_segments_count = total_segments_count + point_count - 1
@@ -879,7 +888,7 @@ class GeometryExporter(object):
 				hair_file.write(b'HAIR')        #magic number
 				hair_file.write(struct.pack('<I', num_parents+num_children)) #total strand count
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
-				hair_file.write(struct.pack('<I', 1+2))         #bit array for configuration
+				hair_file.write(struct.pack('<I', 1+2+16*colorflag)) #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
 				hair_file.write(struct.pack('<f', size*2))      #default thickness
 				hair_file.write(struct.pack('<f', 0.0))         #default transparency
@@ -891,6 +900,9 @@ class GeometryExporter(object):
 				hair_file.write(struct.pack('<%dH'%(len(segments)), *segments))
 				for point in points:
 					hair_file.write(struct.pack('<3f', *point))
+				if colors:
+					for col in colors:
+						hair_file.write(struct.pack('<3f', *col))
 					
 			LuxLog('Binary hair file written: %s' % (hair_file_path))
 			
