@@ -846,7 +846,11 @@ class GeometryExporter(object):
 		
 			if psys.settings.luxrender_hair.tesseltype == 'ribbonadaptive':
 				hair_shape_params.add_integer('ribbonadaptive_maxdepth', psys.settings.luxrender_hair.ribbonadaptive_maxdepth)
-				hair_shape_params.add_float('ribbonadaptive_error', psys.settings.luxrender_hair.ribbonadaptive_error) 
+				hair_shape_params.add_float('ribbonadaptive_error', psys.settings.luxrender_hair.ribbonadaptive_error)
+	
+			if psys.settings.luxrender_hair.tesseltype == 'solid':
+				hair_shape_params.add_integer('solid_sidecount', psys.settings.luxrender_hair.solid_sidecount)
+				hair_shape_params.add_bool('solid_cap', psys.settings.luxrender_hair.solid_cap)
 			
  			# Export shape definition to .LXO file			
 			self.lux_context.attributeBegin('hairfile_%s'%partsys_name)

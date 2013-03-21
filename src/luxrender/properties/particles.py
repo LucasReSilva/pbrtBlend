@@ -51,12 +51,16 @@ class luxrender_hair(declarative_property_group):
 				'tesseltype',
 				'ribbonadaptive_maxdepth',
 				'ribbonadaptive_error',
+				'solid_sidecount',
+				'solid_cap',
 				'acceltype',
 	]
 	
 	visibility = {
 		'ribbonadaptive_maxdepth':		{ 'tesseltype': 'ribbonadaptive' },
 		'ribbonadaptive_error':			{ 'tesseltype': 'ribbonadaptive' },
+		'solid_sidecount':				{ 'tesseltype': 'solid' },
+		'solid_cap':					{ 'tesseltype': 'solid' },
 	}
 
 	properties = [
@@ -101,7 +105,7 @@ class luxrender_hair(declarative_property_group):
 			'items': [
 				('ribbon', 'Triangle Ribbon', 'Render hair as ribbons of triangles facing the camera'),
 				('ribbonadaptive', 'Adaptive Triangle Ribbon', 'Render hair as ribbons of triangles facing the camera, with adaptive tessellation'),
-				('solid', 'Solid', 'Render hairs as solid objects'),
+				('solid', 'Solid', 'Render hairs as solid mesh cylinders (memory intensive!)'),
 
 			],
 		},
@@ -115,6 +119,24 @@ class luxrender_hair(declarative_property_group):
 			'soft_min': 2,
 			'max': 24,
 			'soft_max': 12,
+		},
+		{
+			'type': 'int',
+			'attr': 'solid_sidecount',
+			'name': 'Number of Sides',
+			'description': 'Number of sides for each hair cylinder',			
+			'default': 3,
+			'min': 3,
+			'soft_min': 3,
+			'max': 64,
+			'soft_max': 8,
+		},		
+		{
+			'type': 'bool',
+			'attr': 'solid_cap',
+			'name': 'Cap Ends',
+			'description': 'Add an endcap to each hair cylinder',			
+			'default': False,
 		},
 		{
 			'type': 'float',
