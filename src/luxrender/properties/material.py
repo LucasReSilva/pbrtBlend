@@ -748,6 +748,8 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
+		add_nodetype(layout, bpy.types.luxrender_material_output_node)
+
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node(bpy.types.Node):
@@ -809,6 +811,23 @@ class luxrender_material_type_node(bpy.types.Node):
 		self.inputs.new('NodeSocketFloat', "Sigma")
 
 		self.outputs.new('NodeSocketColor', "Surface")
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_output_node(bpy.types.Node):
+	# Description string
+	'''A custom node'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_material_output_node'
+	# Label for nice name display
+	bl_label = 'LuxRender Material Output'
+	# Icon identifier
+	bl_icon = 'MATERIAL'
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketColor', "Surface")
+		self.inputs.new('NodeSocketColor', "Interior")
+		self.inputs.new('NodeSocketColor', "Exterior")
+		self.inputs.new('NodeSocketColor', "Emission")
 
 # Custom socket types
 
