@@ -917,13 +917,14 @@ class GeometryExporter(object):
 			hair_shape_params.add_string('tesseltype', psys.settings.luxrender_hair.tesseltype)
 			hair_shape_params.add_string('acceltype', psys.settings.luxrender_hair.acceltype)
 		
-			if psys.settings.luxrender_hair.tesseltype == 'ribbonadaptive':
-				hair_shape_params.add_integer('ribbonadaptive_maxdepth', psys.settings.luxrender_hair.ribbonadaptive_maxdepth)
-				hair_shape_params.add_float('ribbonadaptive_error', psys.settings.luxrender_hair.ribbonadaptive_error)
+			if psys.settings.luxrender_hair.tesseltype in ['ribbonadaptive', 'solidadaptive']:
+				hair_shape_params.add_integer('adaptive_maxdepth', psys.settings.luxrender_hair.adaptive_maxdepth)
+				hair_shape_params.add_float('adaptive_error', psys.settings.luxrender_hair.adaptive_error)
 	
-			if psys.settings.luxrender_hair.tesseltype == 'solid':
+			if psys.settings.luxrender_hair.tesseltype in ['solid', 'solidadaptive']:
 				hair_shape_params.add_integer('solid_sidecount', psys.settings.luxrender_hair.solid_sidecount)
-				hair_shape_params.add_bool('solid_cap', psys.settings.luxrender_hair.solid_cap)
+				hair_shape_params.add_bool('solid_capbottom', psys.settings.luxrender_hair.solid_capbottom)
+				hair_shape_params.add_bool('solid_captop', psys.settings.luxrender_hair.solid_captop)
 			
  			# Export shape definition to .LXO file			
 			self.lux_context.attributeBegin('hairfile_%s'%partsys_name)

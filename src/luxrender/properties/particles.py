@@ -30,7 +30,7 @@ import bpy
 
 from extensions_framework import util as efutil
 from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A
+from extensions_framework.validate import Logic_OR as O
 
 from .. import LuxRenderAddon
 from ..export import get_worldscale, get_output_filename
@@ -47,20 +47,21 @@ class luxrender_hair(declarative_property_group):
 	ef_attach_to = ['ParticleSettings']
 	controls = ['hair_size',
 				'use_binary_output',
-# 				'resolution',
 				'tesseltype',
-				'ribbonadaptive_maxdepth',
-				'ribbonadaptive_error',
 				'solid_sidecount',
-				'solid_cap',
+				['solid_capbottom', 'solid_captop'],
+				'adaptive_maxdepth',
+				'adaptive_error',
 				'acceltype',
 	]
 	
 	visibility = {
-		'ribbonadaptive_maxdepth':		{ 'tesseltype': 'ribbonadaptive' },
-		'ribbonadaptive_error':			{ 'tesseltype': 'ribbonadaptive' },
-		'solid_sidecount':				{ 'tesseltype': 'solid' },
-		'solid_cap':					{ 'tesseltype': 'solid' },
+		'adaptive_maxdepth':		{ 'tesseltype': O(['ribbonadaptive', 'solidadaptive']) },
+		'adaptive_error':			{ 'tesseltype': O(['ribbonadaptive', 'solidadaptive']) },
+		'solid_sidecount':			{ 'tesseltype': O(['solid', 'solidadaptive']) },
+		'solid_capbottom':			{ 'tesseltype': O(['solid', 'solidadaptive']) },
+		'solid_captop':				{ 'tesseltype': O(['solid', 'solidadaptive']) },
+
 	}
 
 	properties = [
@@ -81,21 +82,10 @@ class luxrender_hair(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'use_binary_output',
-			'name': 'Use Binary Output File',
-			'description': 'Use binary hair description file for export',
+			'name': 'Use Binary Strand Primitive',
+			'description': 'Use binary hair description file and strand primitive for export',
 			'default': True,
 		},
-		{
-			'type': 'int',
-			'attr': 'resolution',
-			'name': 'Resolution of Hair Strand',
-			'description': 'Resolution of hair strand (power of 2)',			
-			'default': 3,
-			'min': 1,
-			'soft_min': 1,
-			'max': 10,
-			'soft_max': 10,
-		}, 
 		{
 			'type': 'enum',
 			'attr': 'tesseltype',
@@ -106,14 +96,14 @@ class luxrender_hair(declarative_property_group):
 				('ribbon', 'Triangle Ribbon', 'Render hair as ribbons of triangles facing the camera'),
 				('ribbonadaptive', 'Adaptive Triangle Ribbon', 'Render hair as ribbons of triangles facing the camera, with adaptive tessellation'),
 				('solid', 'Solid', 'Render hairs as solid mesh cylinders (memory intensive!)'),
-
+				('solidadaptive', 'Adaptive Solid', 'Render hairs as solid mesh cylinders with adaptive tesselation'),
 			],
 		},
 		{
 			'type': 'int',
-			'attr': 'ribbonadaptive_maxdepth',
+			'attr': 'adaptive_maxdepth',
 			'name': 'Max Tessellation Depth',
-			'description': 'Maximum tessellation depth for adaptive triangle ribbons',			
+			'description': 'Maximum tessellation depth for adaptive modes.',			
 			'default': 8,
 			'min': 1,
 			'soft_min': 2,
@@ -133,16 +123,23 @@ class luxrender_hair(declarative_property_group):
 		},		
 		{
 			'type': 'bool',
-			'attr': 'solid_cap',
-			'name': 'Cap Ends',
-			'description': 'Add an endcap to each hair cylinder',			
+			'attr': 'solid_capbottom',
+			'name': 'Cap Root',
+			'description': 'Add a base cap to each hair cylinder',			
+			'default': False,
+		},
+		{
+			'type': 'bool',
+			'attr': 'solid_captop',
+			'name': 'Cap Tip',
+			'description': 'Add an end cap to each hair cylinder',			
 			'default': False,
 		},
 		{
 			'type': 'float',
-			'attr': 'ribbonadaptive_error',
+			'attr': 'adaptive_error',
 			'name': 'Max Tessellation Error',
-			'description': 'Maximum tessellation error for adaptive triangle ribbons',			
+			'description': 'Maximum tessellation error for adaptive modes',			
 			'default': 0.1,
 			'min': 0.001,
 			'max': 0.9,
