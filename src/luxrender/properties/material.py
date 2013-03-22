@@ -744,7 +744,7 @@ class luxrender_material_type_node(bpy.types.Node):
 
 	def init(self, context):
 		self.inputs.new('CustomSocketType', "Material")
-		self.outputs.new('NodeSocketColor', "Diffuse Color")
+		self.inputs.new('NodeSocketColor', "Diffuse Color")
 
 # Custom socket types
 @LuxRenderAddon.addon_register_class
@@ -780,7 +780,7 @@ class luxrender_material_type_socket(bpy.types.NodeSocket):
 
 
 	myEnumProperty = bpy.props.EnumProperty(name="Material Type", description="Luxrender Material Type", items=mat_items, default='matte')
-	
+
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, "myEnumProperty", text=self.name)
@@ -788,6 +788,10 @@ class luxrender_material_type_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (1.0, 0.4, 0.216, 0.5)
+	
+#	def execute(self, context, node):
+#		context.material.luxrender_material.set_type( myEnumProperty )
+#		return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_compositing(declarative_property_group):
