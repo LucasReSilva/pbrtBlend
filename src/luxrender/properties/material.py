@@ -728,58 +728,75 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		
 	def draw_add_menu(self, context, layout):
 		layout.label("LuxRender Node Types")
-		add_nodetype(layout, bpy.types.luxrender_material_type_node)
-
+#		add_nodetype(layout, bpy.types.luxrender_material_carpaint_node)
+		add_nodetype(layout, bpy.types.luxrender_material_cloth_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_glass2_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
+		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_null_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
+#		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node(bpy.types.Node):
 	# Description string
 	'''A custom node'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
-	bl_idname = 'luxrender_material_type_node'
+	bl_idname = 'luxrender_material_cloth_node'
 	# Label for nice name display
-	bl_label = 'LuxRender Material'
+	bl_label = 'LuxRender Cloth Material'
+	# Icon identifier
+	bl_icon = 'MATERIAL'
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketColor', "Diffuse Color")
+		self.inputs.new('luxrender_material_fabric_socket', "Cloth Fabric")
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node(bpy.types.Node):
+	# Description string
+	'''A custom node'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_material_matte_node'
+	# Label for nice name display
+	bl_label = 'LuxRender Matte Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 
 	def init(self, context):
-		self.inputs.new('CustomSocketType', "Material")
 		self.inputs.new('NodeSocketColor', "Diffuse Color")
 
 # Custom socket types
 @LuxRenderAddon.addon_register_class
-class luxrender_material_type_socket(bpy.types.NodeSocket):
+class luxrender_material_cloth_items_socket(bpy.types.NodeSocket):
 	# Description string
 	'''Custom node socket type'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
-	bl_idname = 'CustomSocketType'
+	bl_idname = 'luxrender_material_fabric_socket'
 	# Label for nice name display
-	bl_label = 'Custom Node Socket'
+	bl_label = 'Cloth Fabric Node Socket'
 
-	mat_items = [
-		("carpaint", "Carpaint", "carpaint material"),
-		("cloth", "Cloth", "cloth material"),
-		("glass", "lass", "glass material"),
-		("glass2", "Glass2", "glass2 material"),
-		("glossy", "Glossy", "glossy material"),
-		("glossycoating", "Glossycoating", "glossycoating material"),
-		("glossytranslucent", "Glossytranslucent", "glossytranslucent material"),
-		("layered", "Layered", "layered material"),
-		("matte", "Matte", "matte material"),
-		("mattetranslucent", "Mattetranslucent", "mattetranslucent material"),
-		("metal", "Metal", "metal material"),
-		("metal2", "Metal2", "metal2 material"),
-		("mirror", "Mirror", "mirror material"),
-		("mix", "Mix", "mix material"),
-		("null", "Null", "null material"),
-		("roughglass", "Roughglass", "roughglass material"),
-		("scatter", "Scatter", "scatter material"),
-		("shinymetal", "Shinymetal", "shinymetal material"),
-		("velvet", "Velvet", "velvet material"),
-	]
+	cloth_items = [
+				  ('denim', 'Denim', 'Denim'),
+				  ('silk_charmeuse', 'Silk Charmeuse', 'Silk charmeuse'),
+				  ('cotton_twill', 'Cotton Twill', 'Cotton twill'),
+				  ('wool_gabardine', 'Wool Gabardine', 'Wool Gabardine'),
+				  ('polyester_lining_cloth', 'Polyester Lining Cloth', 'Polyester lining cloth'),
+				  ('silk_shantung', 'Silk Shantung', 'Silk shantung'),
+				  ]
 
-
-	myEnumProperty = bpy.props.EnumProperty(name="Material Type", description="Luxrender Material Type", items=mat_items, default='matte')
+	myEnumProperty = bpy.props.EnumProperty(name="Material Type", description="Luxrender Material Type", items=cloth_items, default='denim')
 
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
@@ -788,10 +805,7 @@ class luxrender_material_type_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (1.0, 0.4, 0.216, 0.5)
-	
-#	def execute(self, context, node):
-#		context.material.luxrender_material.set_type( myEnumProperty )
-#		return {'FINISHED'}
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_compositing(declarative_property_group):
