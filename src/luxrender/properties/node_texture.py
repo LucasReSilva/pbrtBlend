@@ -117,6 +117,53 @@ class luxrender_texture_type_node_harlequin(bpy.types.Node):
 		self.outputs.new('NodeSocketColor', 'Color')
 		
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_musgrave(bpy.types.Node):
+	'''Musgrave texture node'''
+	bl_idname = 'luxrender_texture_blender_musgrave_node'
+	bl_label = 'Musgrave Texture'
+	bl_icon = 'TEXTURE'
+
+	musgrave_type_items = [
+		('multifractal', 'Multifractal', ''),
+		('ridged_multifractal', 'Ridged Multifractal', ''),
+		('hybrid_multifractal', 'Hybrid Multifractal', ''),
+		('hetero_terrain', 'Hetero Terrain', ''),
+		('fbm', 'FBM', ''),
+	]
+
+	musgravetype = bpy.props.EnumProperty(name='Noise Type', description='Type of noise used', items=musgrave_type_items, default='multifractal')
+	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items, default='blender_original')
+	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+	h = bpy.props.FloatProperty(name='Dimension', default=1.0)
+	lacu = bpy.props.FloatProperty(name='Lacunarity', default=2.0)
+	octs = bpy.props.FloatProperty(name='Octaves', default=2.0)
+	offset = bpy.props.FloatProperty(name='Offset', default=1.0)
+	gain = bpy.props.FloatProperty(name='Gain', default=1.0)
+	iscale = bpy.props.FloatProperty(name='Intensity', default=1.0)
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+
+
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'musgravetype')
+		layout.prop(self, 'noisebasis')
+		layout.prop(self, 'noisesize')
+		layout.prop(self, 'h')
+		layout.prop(self, 'lacu')
+		layout.prop(self, 'octs')
+		if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal', 'hetero_terrain'):
+			layout.prop(self, 'offset')
+		if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal'):
+			layout.prop(self, 'gain')
+		if self.musgravetype != 'fbm':	
+			layout.prop(self, 'iscale')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+		
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(bpy.types.Node):
 	'''Windy texture node'''
 	bl_idname = 'luxrender_texture_windy_node'

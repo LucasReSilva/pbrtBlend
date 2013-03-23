@@ -100,6 +100,7 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_clouds_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fbm_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_harlequin_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_blender_musgrave_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_wrinkled_node)
 
