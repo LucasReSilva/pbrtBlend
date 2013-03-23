@@ -67,7 +67,6 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
@@ -79,6 +78,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
+
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 
 		add_nodetype(layout, bpy.types.luxrender_material_output_node)
@@ -91,20 +91,43 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_carpaint_node'
 	# Label for nice name display
-	bl_label = 'Carpaint Material'
+	bl_label = 'Car Paint Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 	
+	carpaint_items = [
+		('-', 'Manual settings', '-'),
+		('2k acrylack', '2k Acrylack', '2k acrylack'),
+		('blue', 'Blue', 'blue'),
+		('blue matte', 'Blue Matte', 'blue matte'),
+		('bmw339', 'BMW 339', 'bmw339'),
+		('ford f8', 'Ford F8', 'ford f8'),
+		('opel titan', 'Opel Titan', 'opel titan'),
+		('polaris silber', 'Polaris Silber', 'polaris silber'),
+		('white', 'White', 'white'),
+		]
+	
+	carpaint_presets = bpy.props.EnumProperty(name="Car Paint Presets", description="Luxrender Carpaint Presets", items=carpaint_items, default='-')
+	
 	def init(self, context):
-		self.inputs.new('luxrender_material_carpaint_presets_socket', "Carpaint Presets")
-		self.inputs.new('NodeSocketFloat', "Absorbtion Depth")
-		self.inputs.new('NodeSocketColor', "Absorbtion")
 		self.inputs.new('NodeSocketColor', "Diffuse Color")
 		self.inputs.new('NodeSocketColor', "Specular Color 1")
+		self.inputs.new('NodeSocketFloat', "R1")
+		self.inputs.new('NodeSocketFloat', "M1")
 		self.inputs.new('NodeSocketColor', "Specular Color 2")
+		self.inputs.new('NodeSocketFloat', "R2")
+		self.inputs.new('NodeSocketFloat', "M2")
 		self.inputs.new('NodeSocketColor', "Specular Color 3")
+		self.inputs.new('NodeSocketFloat', "R3")
+		self.inputs.new('NodeSocketFloat', "M3")
+		self.inputs.new('NodeSocketColor', "Absorbtion Color")
+		self.inputs.new('NodeSocketFloat', "Absorbtion Depth")
+		
 
 		self.outputs.new('NodeSocketShader', "Surface")
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, "carpaint_presets")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_cloth(bpy.types.Node):
@@ -196,37 +219,6 @@ class luxrender_material_output_node(bpy.types.Node):
 		self.inputs.new('NodeSocketShader', "Emission")
 
 # Custom socket types
-
-@LuxRenderAddon.addon_register_class
-class luxrender_material_carpaint_preset_socket(bpy.types.NodeSocket):
-	# Description string
-	'''Custom node socket type'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
-	bl_idname = 'luxrender_material_carpaint_presets_socket'
-	# Label for nice name display
-	bl_label = 'Carpaint Presets Node Socket'
-	
-	carpaint_items = [
-		('-', 'Manual settings', '-'),
-		('2k acrylack', '2k Acrylack', '2k acrylack'),
-		('blue', 'Blue', 'blue'),
-		('blue matte', 'Blue Matte', 'blue matte'),
-		('bmw339', 'BMW 339', 'bmw339'),
-		('ford f8', 'Ford F8', 'ford f8'),
-		('opel titan', 'Opel Titan', 'opel titan'),
-		('polaris silber', 'Polaris Silber', 'polaris silber'),
-		('white', 'White', 'white'),
-		]
-	
-	myEnumProperty = bpy.props.EnumProperty(name="Carpaint Presets", description="Luxrender Carpaint Presets", items=carpaint_items, default='-')
-	
-	# Optional function for drawing the socket input value
-	def draw(self, context, layout, node):
-		layout.prop(self, "myEnumProperty", text=self.name)
-	
-	# Socket color
-	def draw_color(self, context, node):
-		return (1.0, 0.4, 0.216, 0.5)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
