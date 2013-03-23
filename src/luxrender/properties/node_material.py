@@ -73,7 +73,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_null_node)
+		add_nodetype(layout, bpy.types.luxrender_material_null_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
@@ -189,7 +189,7 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
 @LuxRenderAddon.addon_register_class
-class luxrender_material_type_node_matte(bpy.types.Node):
+class luxrender_material_type_node_mix(bpy.types.Node):
 	# Description string
 	'''Mix material node'''
 	bl_idname = 'luxrender_material_mix_node'
@@ -203,6 +203,19 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 
 
 		self.outputs.new('NodeSocketShader', 'Surface')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_null(bpy.types.Node):
+	# Description string
+	'''Null material node'''
+	bl_idname = 'luxrender_material_null_node'
+	bl_label = 'Null Material'
+	bl_icon = 'MATERIAL'
+
+	def init(self, context):
+		self.outputs.new('NodeSocketShader', 'Surface')
+		
+#Volume and area light nodes
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(bpy.types.Node):
