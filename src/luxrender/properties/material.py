@@ -771,7 +771,7 @@ class luxrender_material_type_node(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', "Specular Color 2")
 		self.inputs.new('NodeSocketColor', "Specular Color 3")
 
-		self.outputs.new('NodeSocketColor', "Surface")
+		self.outputs.new('NodeSocketShader', "Surface")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node(bpy.types.Node):
@@ -793,7 +793,7 @@ class luxrender_material_type_node(bpy.types.Node):
 		self.inputs.new('NodeSocketFloat', "Repeat U")
 		self.inputs.new('NodeSocketFloat', "Repeat V")
 
-		self.outputs.new('NodeSocketColor', "Surface")
+		self.outputs.new('NodeSocketShader', "Surface")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node(bpy.types.Node):
@@ -810,7 +810,7 @@ class luxrender_material_type_node(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', "Diffuse Color")
 		self.inputs.new('NodeSocketFloat', "Sigma")
 
-		self.outputs.new('NodeSocketColor', "Surface")
+		self.outputs.new('NodeSocketShader', "Surface")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(bpy.types.Node):
@@ -824,10 +824,10 @@ class luxrender_material_output_node(bpy.types.Node):
 	bl_icon = 'MATERIAL'
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', "Surface")
-		self.inputs.new('NodeSocketColor', "Interior")
-		self.inputs.new('NodeSocketColor', "Exterior")
-		self.inputs.new('NodeSocketColor', "Emission")
+		self.inputs.new('NodeSocketShader', "Surface")
+		self.inputs.new('NodeSocketShader', "Interior")
+		self.inputs.new('NodeSocketShader', "Exterior")
+		self.inputs.new('NodeSocketShader', "Emission")
 
 # Custom socket types
 
