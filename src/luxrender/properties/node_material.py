@@ -89,6 +89,17 @@ class lux_node_Lights_Menu(bpy.types.Menu):
 	def draw(self, context):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_light_area_node)
+		
+@LuxRenderAddon.addon_register_class
+class lux_node_Textures_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_textures"
+	bl_label = "Textures"
+	
+	def draw(self, context):
+		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_texture_harlequin_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
+
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Volumes_Menu(bpy.types.Menu):
@@ -116,6 +127,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		layout.label('LuxRender Node Types')
 		layout.menu("Lux_NODE_outputs")
 		layout.menu("Lux_NODE_materials")
+		layout.menu("Lux_NODE_textures")
 		layout.menu("Lux_NODE_volumes")
 		layout.menu("Lux_NODE_lights")
 
