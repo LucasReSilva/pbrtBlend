@@ -200,6 +200,27 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', "Absorption Color")
 
 		self.outputs.new('luxrender_volume_socket', "Volume")
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_light_area_node(bpy.types.Node):
+	# Description string
+	'''A custom node'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_light_area_node'
+	# Label for nice name display
+	bl_label = 'Area Light'
+	# Icon identifier
+	bl_icon = 'LAMP'
+
+	gain = bpy.props.FloatProperty(name="Gain", default=1.0)
+
+	def init(self, context):
+		self.inputs.new('NodeSocketColor', "Light Color")
+		
+		self.outputs.new('NodeSocketShader', "Emission")
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, "gain")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(bpy.types.Node):
