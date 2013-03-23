@@ -47,19 +47,12 @@ def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
 @LuxRenderAddon.addon_register_class
-class luxrender_mat_node_editor(bpy.types.NodeTree):
-	'''Experiment in making a node editor for Lux'''
-
-	bl_idname = 'luxrender_material_nodes'
-	bl_label = 'LuxRender Material Nodes'
-	bl_icon = 'MATERIAL'
+class lux_node_Materials_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_materials"
+	bl_label = "Materials"
 	
-	@classmethod
-	def poll(cls, context):
-		return context.scene.render.engine == 'LUXRENDER_RENDER'
-		
-	def draw_add_menu(self, context, layout):
-		layout.label('LuxRender Node Types')
+	def draw(self, context):
+		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_material_carpaint_node)
 		add_nodetype(layout, bpy.types.luxrender_material_cloth_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
@@ -79,13 +72,52 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
+@LuxRenderAddon.addon_register_class
+class lux_node_Outputs_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_outputs"
+	bl_label = "Outputs"
+	
+	def draw(self, context):
+		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_material_output_node)
+
+@LuxRenderAddon.addon_register_class
+class lux_node_Lights_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_lights"
+	bl_label = "Lights"
+	
+	def draw(self, context):
+		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_light_area_node)
+
+@LuxRenderAddon.addon_register_class
+class lux_node_Volumes_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_volumes"
+	bl_label = "Volumes"
+	
+	def draw(self, context):
+		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 # 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
 
-		add_nodetype(layout, bpy.types.luxrender_light_area_node)
+@LuxRenderAddon.addon_register_class
+class luxrender_mat_node_editor(bpy.types.NodeTree):
+	'''Experiment in making a node editor for Lux'''
 
-		add_nodetype(layout, bpy.types.luxrender_material_output_node)
-
+	bl_idname = 'luxrender_material_nodes'
+	bl_label = 'LuxRender Material Nodes'
+	bl_icon = 'MATERIAL'
+	
+	@classmethod
+	def poll(cls, context):
+		return context.scene.render.engine == 'LUXRENDER_RENDER'
+		
+	def draw_add_menu(self, context, layout):
+		layout.label('LuxRender Node Types')
+		layout.menu("Lux_NODE_outputs")
+		layout.menu("Lux_NODE_volumes")
+		layout.menu("Lux_NODE_lights")
+		layout.menu("Lux_NODE_materials")
 
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
