@@ -80,6 +80,8 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
+		
+		add_nodetype(layout, bpy.types.luxrender_light_area_node)
 
 		add_nodetype(layout, bpy.types.luxrender_material_output_node)
 
@@ -199,7 +201,7 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 		self.inputs.new('luxrender_fresnel_socket', "IOR")
 		self.inputs.new('NodeSocketColor', "Absorption Color")
 
-		self.outputs.new('luxrender_volume_socket', "Volume")
+		self.outputs.new('NodeSocketShader', "Volume")
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(bpy.types.Node):
