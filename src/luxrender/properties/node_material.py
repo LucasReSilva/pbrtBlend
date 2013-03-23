@@ -116,8 +116,19 @@ class luxrender_material_type_node(bpy.types.Node):
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 	
+	cloth_items = [
+		('denim', 'Denim', 'Denim'),
+		('silk_charmeuse', 'Silk Charmeuse', 'Silk charmeuse'),
+		('cotton_twill', 'Cotton Twill', 'Cotton twill'),
+		('wool_gabardine', 'Wool Gabardine', 'Wool Gabardine'),
+		('polyester_lining_cloth', 'Polyester Lining Cloth', 'Polyester lining cloth'),
+		('silk_shantung', 'Silk Shantung', 'Silk shantung'),
+		]
+
+	fabric_type = bpy.props.EnumProperty(name="Cloth Fabric", description="Luxrender Cloth Fabric", items=cloth_items, default='denim')
+
+	
 	def init(self, context):
-		self.inputs.new('luxrender_material_fabric_socket', "Cloth Fabric")
 		self.inputs.new('NodeSocketColor', "Warp Diffuse Color")
 		self.inputs.new('NodeSocketColor', "Warp Specular Color")
 		self.inputs.new('NodeSocketColor', "Weft Diffuse Color")
@@ -126,6 +137,9 @@ class luxrender_material_type_node(bpy.types.Node):
 		self.inputs.new('NodeSocketFloat', "Repeat V")
 
 		self.outputs.new('NodeSocketShader', "Surface")
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, "fabric_type")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node(bpy.types.Node):
@@ -162,34 +176,6 @@ class luxrender_material_output_node(bpy.types.Node):
 		self.inputs.new('NodeSocketShader', "Emission")
 
 # Custom socket types
-
-@LuxRenderAddon.addon_register_class
-class luxrender_material_cloth_fabric_socket(bpy.types.NodeSocket):
-	# Description string
-	'''Custom node socket type'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
-	bl_idname = 'luxrender_material_fabric_socket'
-	# Label for nice name display
-	bl_label = 'Cloth Fabric Node Socket'
-
-	cloth_items = [
-		('denim', 'Denim', 'Denim'),
-		('silk_charmeuse', 'Silk Charmeuse', 'Silk charmeuse'),
-		('cotton_twill', 'Cotton Twill', 'Cotton twill'),
-		('wool_gabardine', 'Wool Gabardine', 'Wool Gabardine'),
-		('polyester_lining_cloth', 'Polyester Lining Cloth', 'Polyester lining cloth'),
-		('silk_shantung', 'Silk Shantung', 'Silk shantung'),
-		]
-
-	myEnumProperty = bpy.props.EnumProperty(name="Cloth Fabric", description="Luxrender Cloth Fabric", items=cloth_items, default='denim')
-
-	# Optional function for drawing the socket input value
-	def draw(self, context, layout, node):
-		layout.prop(self, "myEnumProperty", text=self.name)
-	
-	# Socket color
-	def draw_color(self, context, node):
-		return (1.0, 0.4, 0.216, 0.5)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_carpaint_preset_socket(bpy.types.NodeSocket):
