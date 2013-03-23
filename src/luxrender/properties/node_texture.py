@@ -42,6 +42,70 @@ from ..export.materials import (
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
+#Define the list of noise types globally, this gets used by a few different nodes
+noise_basis_items = [
+		('blender_original', 'Blender Original', ''),
+		('original_perlin', 'Original Perlin', ''),
+		('improved_perlin', 'Improved Perlin', ''),
+		('voronoi_f1', 'Voronoi F1', ''),
+		('voronoi_f2', 'Voronoi F2', ''),
+		('voronoi_f3', 'Voronoi F3', ''),
+		('voronoi_f4', 'Voronoi F4', ''),
+		('voronoi_f2f1', 'Voronoi F2-F1', ''),
+		('voronoi_crackle', 'Voronoi Crackle', ''),
+		('cell_noise', 'Cell Noise', ''),
+		]
+
+noise_type_items = [
+	('soft_noise', 'Soft', ''),
+	('hard_noise', 'Hard', '')
+	]
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_clouds(bpy.types.Node):
+	'''Clouds texture node'''
+	bl_idname = 'luxrender_texture_blender_clouds_node'
+	bl_label = 'Clouds Texture'
+	bl_icon = 'TEXTURE'
+
+	noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items, default='soft_noise')
+	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items, default='blender_original')
+	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+	noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+
+
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'noisetype')
+		layout.prop(self, 'noisebasis')
+		layout.prop(self, 'noisesize')
+		layout.prop(self, 'noisedepth')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_fbm(bpy.types.Node):
+	'''FBM texture node'''
+	bl_idname = 'luxrender_texture_fbm_node'
+	bl_label = 'FBM Texture'
+	bl_icon = 'TEXTURE'
+
+	octaves = bpy.props.IntProperty(name='Octaves', default=8)
+	roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)
+
+
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'octaves')
+		layout.prop(self, 'roughness')
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_harlequin(bpy.types.Node):
 	'''Harlequin texture node'''
@@ -61,3 +125,21 @@ class luxrender_texture_type_node_windy(bpy.types.Node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_wrinkled(bpy.types.Node):
+	'''Wrinkled texture node'''
+	bl_idname = 'luxrender_texture_wrinkled_node'
+	bl_label = 'Wrinkled Texture'
+	bl_icon = 'TEXTURE'
+
+	octaves = bpy.props.IntProperty(name='Octaves', default=8)
+	roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)
+
+
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'octaves')
+		layout.prop(self, 'roughness')
