@@ -135,13 +135,9 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_cloth(bpy.types.Node):
-	# Description string
 	'''Cloth material node'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_cloth_node'
-	# Label for nice name display
 	bl_label = 'Cloth Material'
-	# Icon identifier
 	bl_icon = 'MATERIAL'
 	
 	cloth_items = [
@@ -173,13 +169,9 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_matte(bpy.types.Node):
-	# Description string
 	'''Matte material node'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_matte_node'
-	# Label for nice name display
 	bl_label = 'Matte Material'
-	# Icon identifier
 	bl_icon = 'MATERIAL'
 
 	def init(self, context):
@@ -190,7 +182,6 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 	
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mix(bpy.types.Node):
-	# Description string
 	'''Mix material node'''
 	bl_idname = 'luxrender_material_mix_node'
 	bl_label = 'Mix Material'
@@ -206,7 +197,6 @@ class luxrender_material_type_node_mix(bpy.types.Node):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_null(bpy.types.Node):
-	# Description string
 	'''Null material node'''
 	bl_idname = 'luxrender_material_null_node'
 	bl_label = 'Null Material'
@@ -219,13 +209,9 @@ class luxrender_material_type_node_null(bpy.types.Node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(bpy.types.Node):
-	# Description string
-	'''A custom node'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
+	'''Clear volume node'''
 	bl_idname = 'luxrender_volume_clear_node'
-	# Label for nice name display
 	bl_label = 'Clear Volume'
-	# Icon identifier
 	bl_icon = 'MATERIAL'
 
 	def init(self, context):
@@ -236,13 +222,9 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(bpy.types.Node):
-	# Description string
 	'''A custom node'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_light_area_node'
-	# Label for nice name display
 	bl_label = 'Area Light'
-	# Icon identifier
 	bl_icon = 'LAMP'
 
 	gain = bpy.props.FloatProperty(name='Gain', default=1.0)
@@ -257,20 +239,16 @@ class luxrender_light_area_node(bpy.types.Node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(bpy.types.Node):
-	# Description string
 	'''A custom node'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_output_node'
-	# Label for nice name display
 	bl_label = 'Material Output'
-	# Icon identifier
 	bl_icon = 'MATERIAL'
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketShader', 'Surface Material')
+		self.inputs.new('NodeSocketShader', 'Surface')
 		self.inputs.new('NodeSocketShader', 'Interior Volume')
 		self.inputs.new('NodeSocketShader', 'Exterior Volume')
-		self.inputs.new('NodeSocketShader', 'Light Emission')
+		self.inputs.new('NodeSocketShader', 'Emission')
 
 
 
