@@ -82,6 +82,9 @@ class ui_luxrender_material_header(luxrender_material_base):
 			split.template_ID(ob, "active_material", new="material.new")
 			row = split.row()
 			
+			if mat:
+				row.prop(mat, "use_nodes", icon='NODETREE', text="")
+			
 			if slot:
 				row.prop(slot, "link", text="")
 			else:
