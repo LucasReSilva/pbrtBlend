@@ -854,11 +854,31 @@ class GeometryExporter(object):
 			points = []
 			thickness = []
 			colors = []
+			uv_coords = []
 			total_segments_count = 0
-			if obj.data.vertex_colors.active:
+			
+			mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
+			uv_textures = mesh.tessface_uv_textures if bpy.app.version > (2, 62, 0 ) else mesh.uv_textures # bmesh
+			vertex_color = 	mesh.tessface_vertex_colors if bpy.app.version > (2, 62, 0 ) else mesh.vertex_colors # bmesh
+
+			if vertex_color.active and vertex_color.active.data:
+				vertex_color_layer = vertex_color.active.data
 				colorflag = 1
 			else:
+				vertex_color_layer = None
 				colorflag = 0
+
+			if uv_textures.active and uv_textures.active.data:
+				uv_tex = uv_textures.active.data
+				image_width = uv_tex[0].image.size[0]
+				image_height = uv_tex[0].image.size[1]
+				image_pixels = uv_tex[0].image.pixels[:]
+				colorflag = 1
+				uvflag = 1
+			else:
+				uv_tex = None
+				uvflag = 0			
+
 			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
 
 			transform = obj.matrix_world.inverted()		
@@ -872,9 +892,26 @@ class GeometryExporter(object):
 						points.append(transform*co)
 						point_count = point_count + 1
 
-					if obj.data.vertex_colors.active:						
-						col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, obj.data.vertex_colors.active_index)						
-						colors.append(col)					
+					# Uncomment to export uv coordinates into hair file
+					#if uvflag:
+					#	uv_co = psys.uv_on_emitter(mod, psys.particles[0], pindex, mesh.vertex_colors.active_index)
+					#	uv_coords.append(uv_co)
+
+					if colorflag:
+						if uvflag:
+							uv = psys.uv_on_emitter(mod, psys.particles[0], pindex, uv_textures.active_index)
+							x_co = round(uv[0] * (image_width - 1))
+							y_co = round(uv[1] * (image_height - 1))
+							
+							pixelnumber = (image_width * y_co) + x_co
+							
+							r = image_pixels[pixelnumber*4]
+							g = image_pixels[pixelnumber*4+1]
+							b = image_pixels[pixelnumber*4+2]
+							col = (r,g,b)
+						else:
+							col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, vertex_colors.active_index)
+						colors.append(col)
 
 				if point_count > 1:
 					segments.append(point_count - 1)
@@ -888,7 +925,7 @@ class GeometryExporter(object):
 				hair_file.write(b'HAIR')        #magic number
 				hair_file.write(struct.pack('<I', num_parents+num_children)) #total strand count
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
-				hair_file.write(struct.pack('<I', 1+2+16*colorflag)) #bit array for configuration
+				hair_file.write(struct.pack('<I', 1+2+16*colorflag+32*uvflag)) #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
 				hair_file.write(struct.pack('<f', size*2))      #default thickness
 				hair_file.write(struct.pack('<f', 0.0))         #default transparency
@@ -903,6 +940,11 @@ class GeometryExporter(object):
 				if colors:
 					for col in colors:
 						hair_file.write(struct.pack('<3f', *col))
+
+				# Uncomment to export uv coordinates into hair file
+				#if uvflag:
+				#	for uv in uv_coords:
+				#		hair_file.write(struct.pack('<2f', *uv))
 					
 			LuxLog('Binary hair file written: %s' % (hair_file_path))
 			
