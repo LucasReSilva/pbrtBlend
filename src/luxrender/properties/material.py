@@ -111,16 +111,16 @@ TF_R1					= FloatTextureParameter('R1', 'R1',									add_float_value=True, min=
 TF_R2					= FloatTextureParameter('R2', 'R2',									add_float_value=True, min=0.00001, max=1.0, default=0.90 )
 TF_R3					= FloatTextureParameter('R3', 'R3',									add_float_value=True, min=0.00001, max=1.0, default=0.7 )
 TF_sigma				= FloatTextureParameter('sigma', 'Sigma',							add_float_value=True, min=0.0, max=45.0 )
-TF_uroughness			= FloatTextureParameter('uroughness', 'U-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
-TF_uexponent			= FloatTextureParameter('uexponent', 'U-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
-TF_vroughness			= FloatTextureParameter('vroughness', 'V-Roughness',				add_float_value=True, min=0.00001, max=0.8, default=0.075 )
-TF_vexponent			= FloatTextureParameter('vexponent', 'V-Exponent',					add_float_value=True, min=1.0, max=1000000, default=353.556 )
+TF_uroughness			= FloatTextureParameter('uroughness', 'U-Roughness',				add_float_value=True, min=0.000001, max=0.8, default=0.075 )
+TF_uexponent			= FloatTextureParameter('uexponent', 'U-Exponent',					add_float_value=True, min=1.0, max=1000000000000, default=353.556 )
+TF_vroughness			= FloatTextureParameter('vroughness', 'V-Roughness',				add_float_value=True, min=0.000001, max=0.8, default=0.075 )
+TF_vexponent			= FloatTextureParameter('vexponent', 'V-Exponent',					add_float_value=True, min=1.0, max=1000000000000, default=353.556 )
 TF_backface_d			= FloatTextureParameter('bf_d', 'Backface absorption depth (nm)',	real_attr='backface_d', add_float_value=True, default=0.0, min=0.0, max=1500.0 ) # default 0.0 for OFF
 TF_backface_index		= FloatTextureParameter('bf_index', 'Backface IOR',					real_attr='backface_index', add_float_value=True, min=0.0, max=25.0, default=1.333333)
 TF_backface_uroughness	= FloatTextureParameter('bf_uroughness', 'Backface U-Roughness',	real_attr='backface_uroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 ) #backface roughness is high than front by default, will usually be for backs of leaves or cloth
-TF_backface_uexponent	= FloatTextureParameter('bf_uexponent', 'Backface U-Exponent',		real_attr='backface_uexponent', add_float_value=True, min=1.0, max=1000000, default=30 )
+TF_backface_uexponent	= FloatTextureParameter('bf_uexponent', 'Backface U-Exponent',		real_attr='backface_uexponent', add_float_value=True, min=1.0, max=1000000000000, default=30 )
 TF_backface_vroughness	= FloatTextureParameter('bf_vroughness', 'Backface V-Roughness',	real_attr='backface_vroughness', add_float_value=True, min=0.00001, max=1.0, default=0.25 )
-TF_backface_vexponent	= FloatTextureParameter('bf_vexponent', 'Backface V-Exponent',		real_attr='backface_vexponent',	add_float_value=True, min=1.0, max=1000000, default=30 )
+TF_backface_vexponent	= FloatTextureParameter('bf_vexponent', 'Backface V-Exponent',		real_attr='backface_vexponent',	add_float_value=True, min=1.0, max=1000000000000, default=30 )
 #These are for the layered mat:
 TF_OP1					= FloatTextureParameter('opacity1', 'Opacity 1',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
 TF_OP2					= FloatTextureParameter('opacity2', 'Opacity 2',					add_float_value=True, default=1.0, min=0.0, max=1.0 )
@@ -1168,10 +1168,10 @@ class CoatingFloatTextureParameter(FloatTextureParameter):
 # Float Textures
 TF_c_d					= CoatingFloatTextureParameter('d', 'Absorption depth (nm)',		add_float_value=True, default=0.0, min=0.0, max=2500.0 ) # default 0.0 for OFF
 TF_c_index				= CoatingFloatTextureParameter('index', 'IOR',						add_float_value=True, min=0.0, max=25.0, default=1.520) #default of something other than 1.0 so glass and roughglass render propery with defaults
-TF_c_uroughness			= CoatingFloatTextureParameter('uroughness', 'U-Roughness',			add_float_value=True, min=0.00001, max=0.8, default=0.075 )
-TF_c_uexponent			= CoatingFloatTextureParameter('uexponent', 'U-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
-TF_c_vroughness			= CoatingFloatTextureParameter('vroughness', 'V-Roughness',			add_float_value=True, min=0.00001, max=0.8, default=0.075 )
-TF_c_vexponent			= CoatingFloatTextureParameter('vexponent', 'V-Exponent',			add_float_value=True, min=1.0, max=1000000, default=353.556 )
+TF_c_uroughness			= CoatingFloatTextureParameter('uroughness', 'U-Roughness',			add_float_value=True, min=0.000001, max=0.8, default=0.075 )
+TF_c_uexponent			= CoatingFloatTextureParameter('uexponent', 'U-Exponent',			add_float_value=True, min=1.0, max=1000000000000, default=353.556 )
+TF_c_vroughness			= CoatingFloatTextureParameter('vroughness', 'V-Roughness',			add_float_value=True, min=0.000001, max=0.8, default=0.075 )
+TF_c_vexponent			= CoatingFloatTextureParameter('vexponent', 'V-Exponent',			add_float_value=True, min=1.0, max=1000000000000, default=353.556 )
 TF_c_bumpmap			= CoatingFloatTextureParameter('bumpmap', 'Bump Map',				add_float_value=True, min=-5.0, max=5.0, default=0.01, precision=6, multiply_float=True, ignore_unassigned=True, subtype='DISTANCE', unit='LENGTH' )
 TF_c_normalmap			= CoatingFloatTextureParameter('normalmap', 'Normal Map',			add_float_value=True, min=-5.0, max=5.0, default=1.0, precision=6, multiply_float=False, ignore_unassigned=True)
 

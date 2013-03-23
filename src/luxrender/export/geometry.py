@@ -230,6 +230,12 @@ class GeometryExporter(object):
 								uv_layer = uv_textures.active.data
 						else:
 							uv_layer = None
+
+						vertex_color = 	mesh.tessface_vertex_colors.active if bpy.app.version > (2, 62, 0 ) else mesh.vertex_colors.active # bmesh
+						if vertex_color:
+							vertex_color_layer = vertex_color.data
+						else:
+							vertex_color_layer = None
 						
 						# Here we work out exactly which vert+normal combinations
 						# we need to export. This is done first, and the export
@@ -238,7 +244,7 @@ class GeometryExporter(object):
 						# and that number is not known before this is done.
 						
 						# Export data
-						co_no_uv_cache = []
+						co_no_uv_vc_cache = []
 						face_vert_indices = {}		# mapping of face index to list of exported vert indices for that face
 						
 						# Caches
@@ -246,40 +252,77 @@ class GeometryExporter(object):
 						vert_use_vno = set()		# Set of vert indices that use vert normals
 						
 						vert_index = 0				# exported vert index
-						for face in ffaces_mats[i]:
+						for fidx,face in enumerate(ffaces_mats[i]):
 							fvi = []
+							if vertex_color_layer:
+								c1 = vertex_color_layer[fidx].color1
+								c2 = vertex_color_layer[fidx].color2
+								c3 = vertex_color_layer[fidx].color3
+								c4 = vertex_color_layer[fidx].color4
+
 							for j, vertex in enumerate(face.vertices):
 								v = mesh.vertices[vertex]
 								
+								if vertex_color_layer:
+									if j == 0:
+										vert_col = c1
+									elif j == 1:
+										vert_col = c2
+									elif j == 2:
+										vert_col = c3
+									elif j == 3:
+										vert_col = c4
+								
 								if face.use_smooth:
-									
 									if uv_layer:
-										vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
+										if vertex_color_layer:                                                                                        
+											vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:],
+												     (int(255*vert_col[0]),
+												      int(255*vert_col[1]),
+												      int(255*vert_col[2]))[:])
+										else:
+											vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
 									else:
-										vert_data = (v.co[:], v.normal[:])
+										if vertex_color_layer:                                                                                    
+											vert_data = (v.co[:], v.normal[:],
+												     (int(255*vert_col[0]),
+												      int(255*vert_col[1]),
+												      int(255*vert_col[2]))[:])
+										else:
+											vert_data = (v.co[:], v.normal[:])
 									
 									if vert_data not in vert_use_vno:
 										vert_use_vno.add( vert_data )
 										
-										co_no_uv_cache.append( vert_data )
+										co_no_uv_vc_cache.append( vert_data )
 										
 										vert_vno_indices[vert_data] = vert_index
 										fvi.append(vert_index)
 										
 										vert_index += 1
 									else:
-										fvi.append(vert_vno_indices[vert_data])
-									
+										fvi.append(vert_vno_indices[vert_data])									
 								else:
-									
 									if uv_layer:
-										vert_data = (v.co[:], face.normal[:], uv_layer[face.index].uv[j][:])
+										if vertex_color_layer:                                                                                    
+											vert_data = (v.co[:], face.normal[:], uv_layer[face.index].uv[j][:],
+												     (int(255*vert_col[0]),
+												      int(255*vert_col[1]),
+												      int(255*vert_col[2]))[:])
+										else:
+											vert_data = (v.co[:], face.normal[:], uv_layer[face.index].uv[j][:])
 									else:
-										vert_data = (v.co[:], face.normal[:])
-									
+										if vertex_color_layer:                                                                                    
+											vert_data = (v.co[:], face.normal[:],
+												     (int(255*vert_col[0]),
+												      int(255*vert_col[1]),
+												      int(255*vert_col[2]))[:])
+										else:
+											vert_data = (v.co[:], face.normal[:])
+
 									# All face-vert-co-no are unique, we cannot
 									# cache them
-									co_no_uv_cache.append( vert_data )
+									co_no_uv_vc_cache.append( vert_data )
 									
 									fvi.append(vert_index)
 									
@@ -309,29 +352,47 @@ class GeometryExporter(object):
 								ply.write(b'property float s\n')
 								ply.write(b'property float t\n')
 							
+							if vertex_color_layer:
+								ply.write(b'property uchar red\n')
+								ply.write(b'property uchar green\n')
+								ply.write(b'property uchar blue\n')
+
 							ply.write( ('element face %d\n' % len(ffaces_mats[i])).encode() )
 							ply.write(b'property list uchar uint vertex_indices\n')
 							
 							ply.write(b'end_header\n')
 							
-							# dump cached co/no/uv
+							# dump cached co/no/uv/vc
 							if uv_layer:
-								for co,no,uv in co_no_uv_cache:
-									ply.write( struct.pack('<3f', *co) )
-									ply.write( struct.pack('<3f', *no) )
-									ply.write( struct.pack('<2f', *uv) )
+								if vertex_color_layer:
+									for co,no,uv,vc in co_no_uv_vc_cache:
+										ply.write( struct.pack('<3f', *co) )
+										ply.write( struct.pack('<3f', *no) )
+										ply.write( struct.pack('<2f', *uv) )
+										ply.write( struct.pack('<3B', *vc) )
+								else:
+									for co,no,uv in co_no_uv_vc_cache:
+										ply.write( struct.pack('<3f', *co) )
+										ply.write( struct.pack('<3f', *no) )
+										ply.write( struct.pack('<2f', *uv) )
 							else:
-								for co,no in co_no_uv_cache:
-									ply.write( struct.pack('<3f', *co) )
-									ply.write( struct.pack('<3f', *no) )
-							
+								if vertex_color_layer:
+									for co,no,vc in co_no_uv_vc_cache:
+										ply.write( struct.pack('<3f', *co) )
+										ply.write( struct.pack('<3f', *no) )
+										ply.write( struct.pack('<3B', *vc) )
+								else:							
+									for co,no in co_no_uv_vc_cache:
+										ply.write( struct.pack('<3f', *co) )
+										ply.write( struct.pack('<3f', *no) )
+										
 							# dump face vert indices
 							for face in ffaces_mats[i]:
 								lfvi = len(face_vert_indices[face.index])
 								ply.write( struct.pack('<B', lfvi) )
 								ply.write( struct.pack('<%dI'%lfvi, *face_vert_indices[face.index]) )
 							
-							del co_no_uv_cache
+							del co_no_uv_vc_cache
 							del face_vert_indices
 						
 						LuxLog('Binary PLY file written: %s' % (ply_path))
@@ -792,7 +853,12 @@ class GeometryExporter(object):
 			segments = []
 			points = []
 			thickness = []
+			colors = []
 			total_segments_count = 0
+			if obj.data.vertex_colors.active:
+				colorflag = 1
+			else:
+				colorflag = 0
 			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
 
 			transform = obj.matrix_world.inverted()		
@@ -806,6 +872,10 @@ class GeometryExporter(object):
 						points.append(transform*co)
 						point_count = point_count + 1
 
+					if obj.data.vertex_colors.active:						
+						col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, obj.data.vertex_colors.active_index)						
+						colors.append(col)					
+
 				if point_count > 1:
 					segments.append(point_count - 1)
 					total_segments_count = total_segments_count + point_count - 1
@@ -818,11 +888,11 @@ class GeometryExporter(object):
 				hair_file.write(b'HAIR')        #magic number
 				hair_file.write(struct.pack('<I', num_parents+num_children)) #total strand count
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
-				hair_file.write(struct.pack('<I', 1+2))         #bit array for configuration
+				hair_file.write(struct.pack('<I', 1+2+16*colorflag)) #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
 				hair_file.write(struct.pack('<f', size*2))      #default thickness
 				hair_file.write(struct.pack('<f', 0.0))         #default transparency
-				color = (1.0, 1.0, 1.0)
+				color = (0.65, 0.65, 0.65)
 				hair_file.write(struct.pack('<3f', *color))     #default color
 				hair_file.write(struct.pack('<88s', info.encode())) #information
 				
@@ -830,26 +900,37 @@ class GeometryExporter(object):
 				hair_file.write(struct.pack('<%dH'%(len(segments)), *segments))
 				for point in points:
 					hair_file.write(struct.pack('<3f', *point))
+				if colors:
+					for col in colors:
+						hair_file.write(struct.pack('<3f', *col))
 					
 			LuxLog('Binary hair file written: %s' % (hair_file_path))
 			
 			hair_mat = obj.material_slots[psys.settings.material - 1].material
-			# Export shape definition to .LXO file			
+
+			#Shape parameters			
+			hair_shape_params = ParamSet()
+			
+			hair_shape_params.add_string('filename', hair_file_path)
+			hair_shape_params.add_string('name', bpy.path.clean_name(partsys_name))
+			hair_shape_params.add_point('camerapos', bpy.context.scene.camera.location)
+			hair_shape_params.add_string('tesseltype', psys.settings.luxrender_hair.tesseltype)
+			hair_shape_params.add_string('acceltype', psys.settings.luxrender_hair.acceltype)
+		
+			if psys.settings.luxrender_hair.tesseltype in ['ribbonadaptive', 'solidadaptive']:
+				hair_shape_params.add_integer('adaptive_maxdepth', psys.settings.luxrender_hair.adaptive_maxdepth)
+				hair_shape_params.add_float('adaptive_error', psys.settings.luxrender_hair.adaptive_error)
+	
+			if psys.settings.luxrender_hair.tesseltype in ['solid', 'solidadaptive']:
+				hair_shape_params.add_integer('solid_sidecount', psys.settings.luxrender_hair.solid_sidecount)
+				hair_shape_params.add_bool('solid_capbottom', psys.settings.luxrender_hair.solid_capbottom)
+				hair_shape_params.add_bool('solid_captop', psys.settings.luxrender_hair.solid_captop)
+			
+ 			# Export shape definition to .LXO file			
 			self.lux_context.attributeBegin('hairfile_%s'%partsys_name)
 			self.lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
 			self.lux_context.namedMaterial(hair_mat.name)
-			self.lux_context.shape('hairfile',
-					ParamSet() \
-						.add_string('filename', hair_file_path) \
-						.add_string('name', bpy.path.clean_name(partsys_name)) \
-						.add_point('camerapos', bpy.context.scene.camera.location) \
-						.add_string('tesseltype', psys.settings.luxrender_hair.tesseltype) \
-						.add_string('acceltype', psys.settings.luxrender_hair.acceltype) \
-						.add_integer('ribbonadaptive_maxdepth', psys.settings.luxrender_hair.ribbonadaptive_maxdepth) \
-						.add_float('ribbonadaptive_error', psys.settings.luxrender_hair.ribbonadaptive_error)
-						#.add_bool('usebspline', psys.settings.use_hair_bspline) \
-						#.add_integer('resolution', psys.settings.luxrender_hair.resolution)
-				)
+			self.lux_context.shape('hairfile', hair_shape_params)
 			self.lux_context.attributeEnd()
 			self.lux_context.set_output_file(Files.MATS)
 			mat_export_result = hair_mat.luxrender_material.export(self.visibility_scene, self.lux_context, hair_mat, mode='indirect')
