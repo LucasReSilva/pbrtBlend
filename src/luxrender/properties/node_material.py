@@ -127,6 +127,8 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 		]
 
 	fabric_type = bpy.props.EnumProperty(name="Cloth Fabric", description="Luxrender Cloth Fabric", items=cloth_items, default='denim')
+	repeat_u = bpy.props.FloatProperty(name="Repeat U", default=100.0)
+	repeat_v = bpy.props.FloatProperty(name="Repeat V", default=100.0)
 
 	
 	def init(self, context):
@@ -134,13 +136,13 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', "Warp Specular Color")
 		self.inputs.new('NodeSocketColor', "Weft Diffuse Color")
 		self.inputs.new('NodeSocketColor', "Weft Specular Color")
-		self.inputs.new('NodeSocketFloat', "Repeat U")
-		self.inputs.new('NodeSocketFloat', "Repeat V")
 
 		self.outputs.new('NodeSocketShader', "Surface")
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, "fabric_type")
+		layout.prop(self, "repeat_u")
+		layout.prop(self, "repeat_v")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_matte(bpy.types.Node):
@@ -244,4 +246,4 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	
 	# Socket color
 	def draw_color(self, context, node):
-		return (0.2, 0.3, 0.9, 1.0)
+		return (0.33, 0.6, 0.85, 1.0)
