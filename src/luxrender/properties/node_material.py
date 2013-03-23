@@ -115,9 +115,10 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 	def draw_add_menu(self, context, layout):
 		layout.label('LuxRender Node Types')
 		layout.menu("Lux_NODE_outputs")
+		layout.menu("Lux_NODE_materials")
 		layout.menu("Lux_NODE_volumes")
 		layout.menu("Lux_NODE_lights")
-		layout.menu("Lux_NODE_materials")
+
 
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
