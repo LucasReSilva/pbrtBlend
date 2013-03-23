@@ -91,7 +91,7 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_carpaint_node'
 	# Label for nice name display
-	bl_label = 'LuxRender Carpaint Material'
+	bl_label = 'Carpaint Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 	
@@ -113,7 +113,7 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_cloth_node'
 	# Label for nice name display
-	bl_label = 'LuxRender Cloth Material'
+	bl_label = 'Cloth Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 	
@@ -149,7 +149,7 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_matte_node'
 	# Label for nice name display
-	bl_label = 'LuxRender Matte Material'
+	bl_label = 'Matte Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 
@@ -166,7 +166,7 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_volume_clear_node'
 	# Label for nice name display
-	bl_label = 'LuxRender Clear Volume'
+	bl_label = 'Clear Volume'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 
@@ -183,7 +183,7 @@ class luxrender_material_output_node(bpy.types.Node):
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_output_node'
 	# Label for nice name display
-	bl_label = 'LuxRender Material Output'
+	bl_label = 'Material Output'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 	
