@@ -79,12 +79,13 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
+		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 
 		add_nodetype(layout, bpy.types.luxrender_material_output_node)
 
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
-class luxrender_material_type_node(bpy.types.Node):
+class luxrender_material_type_node_carpaint(bpy.types.Node):
 	# Description string
 	'''A custom node'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
@@ -106,7 +107,7 @@ class luxrender_material_type_node(bpy.types.Node):
 		self.outputs.new('NodeSocketShader', "Surface")
 
 @LuxRenderAddon.addon_register_class
-class luxrender_material_type_node(bpy.types.Node):
+class luxrender_material_type_node_cloth(bpy.types.Node):
 	# Description string
 	'''A custom node'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
@@ -142,7 +143,7 @@ class luxrender_material_type_node(bpy.types.Node):
 		layout.prop(self, "fabric_type")
 
 @LuxRenderAddon.addon_register_class
-class luxrender_material_type_node(bpy.types.Node):
+class luxrender_material_type_node_matte(bpy.types.Node):
 	# Description string
 	'''A custom node'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
@@ -157,6 +158,23 @@ class luxrender_material_type_node(bpy.types.Node):
 		self.inputs.new('NodeSocketFloat', "Sigma")
 
 		self.outputs.new('NodeSocketShader', "Surface")
+
+@LuxRenderAddon.addon_register_class
+class luxrender_volume_type_node_clear(bpy.types.Node):
+	# Description string
+	'''A custom node'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_volume_clear_node'
+	# Label for nice name display
+	bl_label = 'LuxRender Clear Volume'
+	# Icon identifier
+	bl_icon = 'MATERIAL'
+
+	def init(self, context):
+		self.inputs.new('luxrender_fresnel_socket', "IOR")
+		self.inputs.new('NodeSocketColor', "Absorption Color")
+
+		self.outputs.new('luxrender_volume_socket', "Volume")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(bpy.types.Node):
@@ -207,3 +225,23 @@ class luxrender_material_carpaint_preset_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (1.0, 0.4, 0.216, 0.5)
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_fresnel_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Custom node socket type'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_fresnel_socket'
+	# Label for nice name display
+	bl_label = 'IOR custom socket'
+	
+	
+	fresnel = bpy.props.FloatProperty(name="IOR", description="Index of refraction for this volume", default=1.52)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, "fresnel", text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.2, 0.3, 0.9, 1.0)
