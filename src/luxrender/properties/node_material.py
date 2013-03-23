@@ -44,7 +44,7 @@ from ..util import dict_merge
 
 
 def add_nodetype(layout, type):
-	layout.operator("node.add_node", text=type.bl_label).type = type.bl_rna.identifier
+	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
@@ -59,7 +59,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		return context.scene.render.engine == 'LUXRENDER_RENDER'
 		
 	def draw_add_menu(self, context, layout):
-		layout.label("LuxRender Node Types")
+		layout.label('LuxRender Node Types')
 		add_nodetype(layout, bpy.types.luxrender_material_carpaint_node)
 		add_nodetype(layout, bpy.types.luxrender_material_cloth_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
@@ -109,27 +109,27 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 		('white', 'White', 'white'),
 		]
 	
-	carpaint_presets = bpy.props.EnumProperty(name="Car Paint Presets", description="Luxrender Carpaint Presets", items=carpaint_items, default='-')
+	carpaint_presets = bpy.props.EnumProperty(name='Car Paint Presets', description='Luxrender Carpaint Presets', items=carpaint_items, default='-')
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', "Diffuse Color")
-		self.inputs.new('NodeSocketColor', "Specular Color 1")
-		self.inputs.new('NodeSocketFloat', "R1")
-		self.inputs.new('NodeSocketFloat', "M1")
-		self.inputs.new('NodeSocketColor', "Specular Color 2")
-		self.inputs.new('NodeSocketFloat', "R2")
-		self.inputs.new('NodeSocketFloat', "M2")
-		self.inputs.new('NodeSocketColor', "Specular Color 3")
-		self.inputs.new('NodeSocketFloat', "R3")
-		self.inputs.new('NodeSocketFloat', "M3")
-		self.inputs.new('NodeSocketColor', "Absorbtion Color")
-		self.inputs.new('NodeSocketFloat', "Absorbtion Depth")
+		self.inputs.new('NodeSocketColor', 'Diffuse Color')
+		self.inputs.new('NodeSocketColor', 'Specular Color 1')
+		self.inputs.new('NodeSocketFloat', 'R1')
+		self.inputs.new('NodeSocketFloat', 'M1')
+		self.inputs.new('NodeSocketColor', 'Specular Color 2')
+		self.inputs.new('NodeSocketFloat', 'R2')
+		self.inputs.new('NodeSocketFloat', 'M2')
+		self.inputs.new('NodeSocketColor', 'Specular Color 3')
+		self.inputs.new('NodeSocketFloat', 'R3')
+		self.inputs.new('NodeSocketFloat', 'M3')
+		self.inputs.new('NodeSocketColor', 'Absorbtion Color')
+		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth')
 		
 
-		self.outputs.new('NodeSocketShader', "Surface")
+		self.outputs.new('NodeSocketShader', 'Surface')
 		
 	def draw_buttons(self, context, layout):
-		layout.prop(self, "carpaint_presets")
+		layout.prop(self, 'carpaint_presets')
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_cloth(bpy.types.Node):
@@ -151,23 +151,23 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 		('silk_shantung', 'Silk Shantung', 'Silk shantung'),
 		]
 
-	fabric_type = bpy.props.EnumProperty(name="Cloth Fabric", description="Luxrender Cloth Fabric", items=cloth_items, default='denim')
-	repeat_u = bpy.props.FloatProperty(name="Repeat U", default=100.0)
-	repeat_v = bpy.props.FloatProperty(name="Repeat V", default=100.0)
+	fabric_type = bpy.props.EnumProperty(name='Cloth Fabric', description='Luxrender Cloth Fabric', items=cloth_items, default='denim')
+	repeat_u = bpy.props.FloatProperty(name='Repeat U', default=100.0)
+	repeat_v = bpy.props.FloatProperty(name='Repeat V', default=100.0)
 
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', "Warp Diffuse Color")
-		self.inputs.new('NodeSocketColor', "Warp Specular Color")
-		self.inputs.new('NodeSocketColor', "Weft Diffuse Color")
-		self.inputs.new('NodeSocketColor', "Weft Specular Color")
+		self.inputs.new('NodeSocketColor', 'Warp Diffuse Color')
+		self.inputs.new('NodeSocketColor', 'Warp Specular Color')
+		self.inputs.new('NodeSocketColor', 'Weft Diffuse Color')
+		self.inputs.new('NodeSocketColor', 'Weft Specular Color')
 
-		self.outputs.new('NodeSocketShader', "Surface")
+		self.outputs.new('NodeSocketShader', 'Surface')
 		
 	def draw_buttons(self, context, layout):
-		layout.prop(self, "fabric_type")
-		layout.prop(self, "repeat_u")
-		layout.prop(self, "repeat_v")
+		layout.prop(self, 'fabric_type')
+		layout.prop(self, 'repeat_u')
+		layout.prop(self, 'repeat_v')
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_matte(bpy.types.Node):
@@ -181,10 +181,10 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 	bl_icon = 'MATERIAL'
 
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', "Diffuse Color")
-		self.inputs.new('NodeSocketFloat', "Sigma")
+		self.inputs.new('NodeSocketColor', 'Diffuse Color')
+		self.inputs.new('NodeSocketFloat', 'Sigma')
 
-		self.outputs.new('NodeSocketShader', "Surface")
+		self.outputs.new('NodeSocketShader', 'Surface')
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(bpy.types.Node):
@@ -198,10 +198,10 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 	bl_icon = 'MATERIAL'
 
 	def init(self, context):
-		self.inputs.new('luxrender_fresnel_socket', "IOR")
-		self.inputs.new('NodeSocketColor', "Absorption Color")
+		self.inputs.new('luxrender_fresnel_socket', 'IOR')
+		self.inputs.new('NodeSocketColor', 'Absorption Color')
 
-		self.outputs.new('NodeSocketShader', "Volume")
+		self.outputs.new('NodeSocketShader', 'Volume')
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(bpy.types.Node):
@@ -214,15 +214,15 @@ class luxrender_light_area_node(bpy.types.Node):
 	# Icon identifier
 	bl_icon = 'LAMP'
 
-	gain = bpy.props.FloatProperty(name="Gain", default=1.0)
+	gain = bpy.props.FloatProperty(name='Gain', default=1.0)
 
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', "Light Color")
+		self.inputs.new('NodeSocketColor', 'Light Color')
 		
-		self.outputs.new('NodeSocketShader', "Emission")
+		self.outputs.new('NodeSocketShader', 'Emission')
 	
 	def draw_buttons(self, context, layout):
-		layout.prop(self, "gain")
+		layout.prop(self, 'gain')
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(bpy.types.Node):
@@ -236,10 +236,10 @@ class luxrender_material_output_node(bpy.types.Node):
 	bl_icon = 'MATERIAL'
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketShader', "Surface")
-		self.inputs.new('NodeSocketShader', "Interior")
-		self.inputs.new('NodeSocketShader', "Exterior")
-		self.inputs.new('NodeSocketShader', "Emission")
+		self.inputs.new('NodeSocketShader', 'Surface')
+		self.inputs.new('NodeSocketShader', 'Interior')
+		self.inputs.new('NodeSocketShader', 'Exterior')
+		self.inputs.new('NodeSocketShader', 'Emission')
 
 # Custom socket types
 		
@@ -253,11 +253,11 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	bl_label = 'IOR custom socket'
 	
 	
-	fresnel = bpy.props.FloatProperty(name="IOR", description="Index of refraction for this volume", default=1.52)
+	fresnel = bpy.props.FloatProperty(name='IOR', description='Index of refraction for this volume', default=1.52)
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, "fresnel", text=self.name)
+		layout.prop(self, 'fresnel', text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
