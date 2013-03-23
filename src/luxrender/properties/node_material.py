@@ -254,10 +254,10 @@ class luxrender_material_output_node(bpy.types.Node):
 	bl_icon = 'MATERIAL'
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketShader', 'Surface')
-		self.inputs.new('NodeSocketShader', 'Interior')
-		self.inputs.new('NodeSocketShader', 'Exterior')
-		self.inputs.new('NodeSocketShader', 'Emission')
+		self.inputs.new('NodeSocketShader', 'Surface Material')
+		self.inputs.new('NodeSocketShader', 'Interior Volume')
+		self.inputs.new('NodeSocketShader', 'Exterior Volume')
+		self.inputs.new('NodeSocketShader', 'Light Emission')
 
 
 
