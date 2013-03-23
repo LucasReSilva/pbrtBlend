@@ -80,16 +80,18 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
-		
+# 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
+
 		add_nodetype(layout, bpy.types.luxrender_light_area_node)
 
 		add_nodetype(layout, bpy.types.luxrender_material_output_node)
+
 
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_carpaint(bpy.types.Node):
 	# Description string
-	'''A custom node'''
+	'''Car paint material node'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_carpaint_node'
 	# Label for nice name display
@@ -134,7 +136,7 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_cloth(bpy.types.Node):
 	# Description string
-	'''A custom node'''
+	'''Cloth material node'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_material_cloth_node'
 	# Label for nice name display
@@ -257,19 +259,21 @@ class luxrender_material_output_node(bpy.types.Node):
 		self.inputs.new('NodeSocketShader', 'Exterior')
 		self.inputs.new('NodeSocketShader', 'Emission')
 
+
+
 # Custom socket types
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	# Description string
-	'''Custom node socket type'''
+	'''Fresnel texture I/O socket'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_fresnel_socket'
 	# Label for nice name display
-	bl_label = 'IOR custom socket'
+	bl_label = 'IOR socket'
 	
 	
-	fresnel = bpy.props.FloatProperty(name='IOR', description='Index of refraction for this volume', default=1.52)
+	fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52)
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
