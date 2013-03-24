@@ -923,7 +923,7 @@ class GeometryExporter(object):
 				## http://www.cemyuksel.com/research/hairmodels/
 				##
 				##File header
-				hair_file.write(b'HIR2')        #magic number
+				hair_file.write(b'HAIR')        #magic number
 				hair_file.write(struct.pack('<I', num_parents+num_children)) #total strand count
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
 				hair_file.write(struct.pack('<I', 1+2+16*colorflag+32*uvflag)) #bit array for configuration
@@ -932,8 +932,6 @@ class GeometryExporter(object):
 				hair_file.write(struct.pack('<f', 0.0))         #default transparency
 				color = (0.65, 0.65, 0.65)
 				hair_file.write(struct.pack('<3f', *color))     #default color
-				uv = (0.0, 0.0)
-				hair_file.write(struct.pack('<2f', *uv))        #default color
 				hair_file.write(struct.pack('<88s', info.encode())) #information
 				
 				##hair data
