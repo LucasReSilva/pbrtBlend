@@ -278,8 +278,10 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 	
 	for prop in luxrender_mat_metal.properties:
 		if prop['attr'].startswith('name'):
-			metal_items = prop['items'] # pulled, todo: format uppercase
-
+			metal_items = prop['items']
+			for i in range(0, len(metal_items)):
+				metal_items[i] = (metal_items[i][0], metal_items[i][0].capitalize(), metal_items[i][0])
+	
 	metal_type = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal Preset', items=metal_items, default='aluminium')
 	
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
