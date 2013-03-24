@@ -104,6 +104,16 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_wrinkled_node)
 
+@LuxRenderAddon.addon_register_class
+class lux_node_Spectra_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_spectra"
+	bl_label = "Spectra"
+	
+	def draw(self, context):
+		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_texture_blackbody_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
+
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Volumes_Menu(bpy.types.Menu):
@@ -132,6 +142,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		layout.menu("Lux_NODE_outputs")
 		layout.menu("Lux_NODE_materials")
 		layout.menu("Lux_NODE_textures")
+		layout.menu("Lux_NODE_spectra")
 		layout.menu("Lux_NODE_volumes")
 		layout.menu("Lux_NODE_lights")
 
