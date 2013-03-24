@@ -42,6 +42,8 @@ from ..export.materials import (
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
+from ..properties.material import * # for now just the big hammer for starting autogenerate sockets
+
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
@@ -61,7 +63,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 #		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
+		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
@@ -263,7 +265,40 @@ class luxrender_material_type_node_mattetranslucent(bpy.types.Node):
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_metal(bpy.types.Node):
+	'''Matte material node'''
+	bl_idname = 'luxrender_material_metal_node'
+	bl_label = 'Metal Material'
+	bl_icon = 'MATERIAL'
 	
+#	for prop in luxrender_mat_metal.properties:
+#		print("-------------", prop['type'], prop['attr']) # all properties material has
+	
+	for prop in luxrender_mat_metal.properties:
+		if prop['attr'].startswith('name'):
+			metal_items = prop['items'] # pulled, todo: format uppercase
+
+	metal_type = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal Preset', items=metal_items, default='aluminium')
+	
+	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
+	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
+		
+	def init(self, context):
+		self.inputs.new('NodeSocketFloat', 'U-Roughness')
+		self.inputs.new('NodeSocketFloat', 'V-Roughness')
+		self.inputs.new('NodeSocketFloat', 'U-Exponent')
+		self.inputs.new('NodeSocketFloat', 'V-Exponent')
+
+		
+		self.outputs.new('NodeSocketShader', 'Surface')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'metal_type')
+		layout.prop(self, 'use_anisotropy')
+		layout.prop(self, 'use_exponent')
+
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mix(bpy.types.Node):
 	'''Mix material node'''
