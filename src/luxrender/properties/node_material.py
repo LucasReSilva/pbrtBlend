@@ -318,7 +318,8 @@ class luxrender_material_type_node_metal2(bpy.types.Node):
 	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'metal2_type')
-		layout.prop(self, 'metal2_preset')
+		if metal2_type == 'preset':
+			layout.prop(self, 'metal2_preset')
 		layout.prop(self, 'use_anisotropy')
 #		layout.prop(self, 'use_exponent')
 
