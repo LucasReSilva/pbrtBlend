@@ -912,7 +912,7 @@ class GeometryExporter(object):
 							b = image_pixels[pixelnumber*4+2]
 							col = (r,g,b)
 						else:
-							col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, vertex_colors.active_index)
+							col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, vertex_color.active_index)
 
 						colors.append(col)
 
