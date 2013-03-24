@@ -2604,11 +2604,11 @@ class luxrender_mat_metal2(declarative_property_group):
 			'name': 'Preset',
 			'description': 'Metal type to use',
 			'items': [
-				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
-				('copper', 'copper', 'copper'),
-				('gold', 'gold', 'gold'),
-				('silver', 'silver', 'silver'),
-				('aluminium', 'aluminium', 'aluminium')
+				('amorphous carbon', 'Amorphous carbon', 'amorphous carbon'),
+				('copper', 'Copper', 'copper'),
+				('gold', 'Gold', 'gold'),
+				('silver', 'Silver', 'silver'),
+				('aluminium', 'Aluminium', 'aluminium')
 			],
 			'default': 'aluminium',
 			'save_in_preset': True

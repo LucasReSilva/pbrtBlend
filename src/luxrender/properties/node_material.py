@@ -64,7 +64,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
+		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
 		add_nodetype(layout, bpy.types.luxrender_material_null_node)
@@ -265,9 +265,9 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 	
 	for prop in luxrender_mat_metal.properties:
 		if prop['attr'].startswith('name'):
-			metal_items = prop['items']
+			metal_presets = prop['items']
 	
-	metal_type = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal Preset', items=metal_items, default='aluminium')
+	metal_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal Preset', items=metal_presets, default='aluminium')
 	
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic roughness', default=False)
 # 	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Use exponent', default=False)
@@ -285,6 +285,43 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 		layout.prop(self, 'metal_type')
 		layout.prop(self, 'use_anisotropy')
 # 		layout.prop(self, 'use_exponent')
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_metal2(bpy.types.Node):
+	'''Metal2 material node'''
+	bl_idname = 'luxrender_material_metal2_node'
+	bl_label = 'Metal2 Material'
+	bl_icon = 'MATERIAL'
+	
+	for prop in luxrender_mat_metal2.properties:
+		if prop['attr'].startswith('metaltype'):
+			metal2_types = prop['items']
+	
+	for prop in luxrender_mat_metal2.properties:
+		if prop['attr'].startswith('preset'):
+			metal2_presets = prop['items']
+
+	metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
+	metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
+	
+	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
+#	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketFloat', 'U-Roughness')
+		self.inputs.new('NodeSocketFloat', 'V-Roughness')
+#		self.inputs.new('NodeSocketFloat', 'U-Exponent')
+#		self.inputs.new('NodeSocketFloat', 'V-Exponent')
+		
+		
+		self.outputs.new('NodeSocketShader', 'Surface')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'metal2_type')
+		layout.prop(self, 'metal2_preset')
+		layout.prop(self, 'use_anisotropy')
+#		layout.prop(self, 'use_exponent')
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mix(bpy.types.Node):
