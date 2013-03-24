@@ -169,18 +169,10 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 	bl_label = 'Car Paint Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
-	
-	carpaint_items = [
-		('-', 'Manual settings', '-'),
-		('2k acrylack', '2k Acrylack', '2k acrylack'),
-		('blue', 'Blue', 'blue'),
-		('blue matte', 'Blue Matte', 'blue matte'),
-		('bmw339', 'BMW 339', 'bmw339'),
-		('ford f8', 'Ford F8', 'ford f8'),
-		('opel titan', 'Opel Titan', 'opel titan'),
-		('polaris silber', 'Polaris Silber', 'polaris silber'),
-		('white', 'White', 'white'),
-		]
+
+	for prop in luxrender_mat_carpaint.properties:
+		if prop['attr'].startswith('name'):
+			carpaint_items = prop['items']
 	
 	carpaint_presets = bpy.props.EnumProperty(name='Car Paint Presets', description='Luxrender Carpaint Presets', items=carpaint_items, default='-')
 	
@@ -211,14 +203,9 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 	bl_label = 'Cloth Material'
 	bl_icon = 'MATERIAL'
 	
-	cloth_items = [
-		('denim', 'Denim', 'Denim'),
-		('silk_charmeuse', 'Silk Charmeuse', 'Silk charmeuse'),
-		('cotton_twill', 'Cotton Twill', 'Cotton twill'),
-		('wool_gabardine', 'Wool Gabardine', 'Wool Gabardine'),
-		('polyester_lining_cloth', 'Polyester Lining Cloth', 'Polyester lining cloth'),
-		('silk_shantung', 'Silk Shantung', 'Silk shantung'),
-		]
+	for prop in luxrender_mat_cloth.properties:
+		if prop['attr'].startswith('presetname'):
+			cloth_items = prop['items']
 
 	fabric_type = bpy.props.EnumProperty(name='Cloth Fabric', description='Luxrender Cloth Fabric', items=cloth_items, default='denim')
 	repeat_u = bpy.props.FloatProperty(name='Repeat U', default=100.0)
@@ -279,8 +266,6 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 	for prop in luxrender_mat_metal.properties:
 		if prop['attr'].startswith('name'):
 			metal_items = prop['items']
-			for i in range(0, len(metal_items)):
-				metal_items[i] = (metal_items[i][0], metal_items[i][0].capitalize(), metal_items[i][0])
 	
 	metal_type = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal Preset', items=metal_items, default='aluminium')
 	
