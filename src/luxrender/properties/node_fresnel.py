@@ -44,6 +44,7 @@ from ..util import dict_merge
 
 from ..properties.node_material import luxrender_fresnel_socket
 
+from ..properties.texture import luxrender_tex_fresnelname
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fresnelcolor(bpy.types.Node):
@@ -57,3 +58,25 @@ class luxrender_texture_type_node_fresnelcolor(bpy.types.Node):
 
 	
 		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_fresnelname(bpy.types.Node):
+	'''Fresnel Name Node'''
+	bl_idname = 'luxrender_texture_fresnelname_node'
+	bl_label = 'Fresnel Name'
+	bl_icon = 'TEXTURE'
+
+	for prop in luxrender_tex_fresnelname.properties:
+		if prop['attr'].startswith('name'):
+			frname_presets = prop['items']
+			
+	frname_preset = bpy.props.EnumProperty(name='Preset', description='NK data presets', items=frname_presets, default='aluminium')
+	frname_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
+
+	def init(self, context):
+		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'frname_preset')
+		if self.frname_preset == 'nk':
+			layout.prop(self, 'frname_nkfile')
