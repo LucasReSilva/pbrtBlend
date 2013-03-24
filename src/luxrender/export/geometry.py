@@ -888,6 +888,11 @@ class GeometryExporter(object):
 			for pindex in range(num_parents + num_children):                        
 				det.exported_objects += 1                               
 				point_count = 0
+				
+				if num_children == 0:
+					i = pindex
+				else:
+					i = 0
 		
 				for step in range(0, steps):
 					co = psys.co_hair(obj, mod, pindex, step)                               
@@ -895,26 +900,26 @@ class GeometryExporter(object):
 						points.append(transform*co)
 						point_count = point_count + 1
 
-					if uvflag:
-						uv_co = psys.uv_on_emitter(mod, psys.particles[0], pindex, uv_textures.active_index)
-						uv_coords.append(uv_co)
-
-					if colorflag:
 						if uvflag:
-							uv = psys.uv_on_emitter(mod, psys.particles[0], pindex, uv_textures.active_index)
-							x_co = round(uv[0] * (image_width - 1))
-							y_co = round(uv[1] * (image_height - 1))
-							
-							pixelnumber = (image_width * y_co) + x_co
-							
-							r = image_pixels[pixelnumber*4]
-							g = image_pixels[pixelnumber*4+1]
-							b = image_pixels[pixelnumber*4+2]
-							col = (r,g,b)
-						else:
-							col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, vertex_color.active_index)
+							uv_co = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
+							uv_coords.append(uv_co)
 
-						colors.append(col)
+						if colorflag:
+							if uvflag:
+								uv = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
+								x_co = round(uv[0] * (image_width - 1))
+								y_co = round(uv[1] * (image_height - 1))
+							
+								pixelnumber = (image_width * y_co) + x_co
+							
+								r = image_pixels[pixelnumber*4]
+								g = image_pixels[pixelnumber*4+1]
+								b = image_pixels[pixelnumber*4+2]
+								col = (r,g,b)
+							else:
+								col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
+
+							colors.append(col)
 
 				if point_count > 1:
 					segments.append(point_count - 1)
