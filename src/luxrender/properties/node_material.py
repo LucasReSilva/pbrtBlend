@@ -115,7 +115,7 @@ class lux_node_Spectra_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
 		
 @LuxRenderAddon.addon_register_class
-class lux_node_Spectra_Menu(bpy.types.Menu):
+class lux_node_Frensel_Menu(bpy.types.Menu):
 	bl_idname = "Lux_NODE_fresnel"
 	bl_label = "Fresnel Data"
 	
