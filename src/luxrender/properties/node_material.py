@@ -303,6 +303,7 @@ class luxrender_material_type_node_metal2(bpy.types.Node):
 
 	metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
 	metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
+	metal2_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 	
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
 #	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
@@ -318,8 +319,10 @@ class luxrender_material_type_node_metal2(bpy.types.Node):
 	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'metal2_type')
-		if metal2_type == 'preset':
+		if self.metal2_type == 'preset':
 			layout.prop(self, 'metal2_preset')
+		if self.metal2_type == 'nk':
+			layout.prop(self, 'metal2_nkfile')
 		layout.prop(self, 'use_anisotropy')
 #		layout.prop(self, 'use_exponent')
 
