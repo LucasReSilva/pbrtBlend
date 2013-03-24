@@ -113,7 +113,7 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 	def draw(self, context):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
-# 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
+		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
@@ -266,6 +266,21 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
+
+		self.outputs.new('NodeSocketShader', 'Volume')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_volume_type_node_homogeneous(bpy.types.Node):
+	'''Homogeneous volume node'''
+	bl_idname = 'luxrender_volume_homogeneous_node'
+	bl_label = 'Homogeneous Volume'
+	bl_icon = 'MATERIAL'
+
+	def init(self, context):
+		self.inputs.new('luxrender_fresnel_socket', 'IOR')
+		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs.new('NodeSocketColor', 'Scattering Color')
+		self.inputs.new('NodeSocketColor', 'Asymmetry')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
 		
