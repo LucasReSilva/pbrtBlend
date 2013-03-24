@@ -42,7 +42,6 @@ from ..export.materials import (
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
-
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
@@ -61,7 +60,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 #		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
+		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
@@ -248,6 +247,21 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 
+		self.outputs.new('NodeSocketShader', 'Surface')
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_mattetranslucent(bpy.types.Node):
+	'''Matte material node'''
+	bl_idname = 'luxrender_material_mattetranslucent_node'
+	bl_label = 'Matte Translucent Material'
+	bl_icon = 'MATERIAL'
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketBool', 'Energy Conserving')
+		self.inputs.new('NodeSocketColor', 'Refection Color')
+		self.inputs.new('NodeSocketColor', 'Transmission Color')
+		self.inputs.new('NodeSocketFloat', 'Sigma')
+		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
 @LuxRenderAddon.addon_register_class
