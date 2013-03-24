@@ -282,7 +282,7 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
 	def draw_buttons(self, context, layout):
-		layout.prop(self, 'metal_type')
+		layout.prop(self, 'metal_preset')
 		layout.prop(self, 'use_anisotropy')
 # 		layout.prop(self, 'use_exponent')
 
