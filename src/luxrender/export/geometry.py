@@ -896,7 +896,7 @@ class GeometryExporter(object):
 						point_count = point_count + 1
 
 					if uvflag:
-						uv_co = psys.uv_on_emitter(mod, psys.particles[0], pindex, mesh.vertex_colors.active_index)
+						uv_co = psys.uv_on_emitter(mod, psys.particles[0], pindex, uv_textures.active_index)
 						uv_coords.append(uv_co)
 
 					if colorflag:
