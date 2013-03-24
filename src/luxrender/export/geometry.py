@@ -857,66 +857,66 @@ class GeometryExporter(object):
 			uv_coords = []
 			total_segments_count = 0
 			
-                        mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
-                        uv_textures = mesh.tessface_uv_textures if bpy.app.version > (2, 62, 0 ) else mesh.uv_textures # bmesh
-                        vertex_color =  mesh.tessface_vertex_colors if bpy.app.version > (2, 62, 0 ) else mesh.vertex_colors # bmesh
+			mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
+			uv_textures = mesh.tessface_uv_textures if bpy.app.version > (2, 62, 0 ) else mesh.uv_textures # bmesh
+			vertex_color =  mesh.tessface_vertex_colors if bpy.app.version > (2, 62, 0 ) else mesh.vertex_colors # bmesh
 
-                        if vertex_color.active and vertex_color.active.data:
-                                vertex_color_layer = vertex_color.active.data
-                                colorflag = 1
-                        else:
-                                vertex_color_layer = None
-                                colorflag = 0
+			if vertex_color.active and vertex_color.active.data:
+				vertex_color_layer = vertex_color.active.data
+				colorflag = 1
+			else:
+				vertex_color_layer = None
+				colorflag = 0
 
-                        if uv_textures.active and uv_textures.active.data:
-                                uv_tex = uv_textures.active.data
-                                if uv_tex[0].image:
-                                        image_width = uv_tex[0].image.size[0]
-                                        image_height = uv_tex[0].image.size[1]
-                                        image_pixels = uv_tex[0].image.pixels[:]
-                                        colorflag = 1
-                                else:
-                                        colorflag = 0                                        
-                                uvflag = 1
-                        else:
-                                uv_tex = None
-                                uvflag = 0                      
+			if uv_textures.active and uv_textures.active.data:
+				uv_tex = uv_textures.active.data
+				if uv_tex[0].image:
+					image_width = uv_tex[0].image.size[0]
+					image_height = uv_tex[0].image.size[1]
+					image_pixels = uv_tex[0].image.pixels[:]
+					colorflag = 1
+				else:
+					colorflag = 0                                        
+				uvflag = 1
+			else:
+				uv_tex = None
+				uvflag = 0                      
 
-                        info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
+			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
 
-                        transform = obj.matrix_world.inverted()         
-                        for pindex in range(num_parents + num_children):                        
-                                det.exported_objects += 1                               
-                                point_count = 0
-                
-                                for step in range(0, steps):
-                                        co = psys.co_hair(obj, mod, pindex, step)                               
-                                        if not co.length_squared == 0:
-                                                points.append(transform*co)
-                                                point_count = point_count + 1
+			transform = obj.matrix_world.inverted()         
+			for pindex in range(num_parents + num_children):                        
+				det.exported_objects += 1                               
+				point_count = 0
+		
+				for step in range(0, steps):
+					co = psys.co_hair(obj, mod, pindex, step)                               
+					if not co.length_squared == 0:
+						points.append(transform*co)
+						point_count = point_count + 1
 
-                                        if uvflag:
-                                                uv_co = psys.uv_on_emitter(mod, psys.particles[0], pindex, mesh.vertex_colors.active_index)
-                                                uv_coords.append(uv_co)
+					if uvflag:
+						uv_co = psys.uv_on_emitter(mod, psys.particles[0], pindex, mesh.vertex_colors.active_index)
+						uv_coords.append(uv_co)
 
-                                        if colorflag:
-                                                if uvflag:
-                                                        uv = psys.uv_on_emitter(mod, psys.particles[0], pindex, uv_textures.active_index)
-                                                        x_co = round(uv[0] * (image_width - 1))
-                                                        y_co = round(uv[1] * (image_height - 1))
-                                                        
-                                                        pixelnumber = (image_width * y_co) + x_co
-                                                        
-                                                        r = image_pixels[pixelnumber*4]
-                                                        g = image_pixels[pixelnumber*4+1]
-                                                        b = image_pixels[pixelnumber*4+2]
-                                                        col = (r,g,b)
-                                                else:
-                                                        col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, vertex_colors.active_index)
+					if colorflag:
+						if uvflag:
+							uv = psys.uv_on_emitter(mod, psys.particles[0], pindex, uv_textures.active_index)
+							x_co = round(uv[0] * (image_width - 1))
+							y_co = round(uv[1] * (image_height - 1))
+							
+							pixelnumber = (image_width * y_co) + x_co
+							
+							r = image_pixels[pixelnumber*4]
+							g = image_pixels[pixelnumber*4+1]
+							b = image_pixels[pixelnumber*4+2]
+							col = (r,g,b)
+						else:
+							col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, vertex_colors.active_index)
 
-                                                colors.append(col)
+						colors.append(col)
 
-                                if point_count > 1:
+				if point_count > 1:
 					segments.append(point_count - 1)
 					total_segments_count = total_segments_count + point_count - 1
 			hair_file_path = efutil.path_relative_to_export(hair_file_path)
