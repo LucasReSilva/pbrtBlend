@@ -900,15 +900,19 @@ class GeometryExporter(object):
 						points.append(transform*co)
 						point_count = point_count + 1
 
+						# A small optimization in order to speedup the export
+						# process: cache the uv_co value
+						uv_co = None
 						if uvflag:
 							uv_co = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
 							uv_coords.append(uv_co)
 
 						if colorflag:
 							if uvflag:
-								uv = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
-								x_co = round(uv[0] * (image_width - 1))
-								y_co = round(uv[1] * (image_height - 1))
+								if not uv_co:
+									uv_co = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
+								x_co = round(uv_co[0] * (image_width - 1))
+								y_co = round(uv_co[1] * (image_height - 1))
 							
 								pixelnumber = (image_width * y_co) + x_co
 							
