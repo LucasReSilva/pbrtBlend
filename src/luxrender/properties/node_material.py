@@ -56,8 +56,8 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_material_carpaint_node)
 		add_nodetype(layout, bpy.types.luxrender_material_cloth_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_glass2_node)
+		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
+		add_nodetype(layout, bpy.types.luxrender_material_glass2_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
@@ -241,6 +241,55 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 		layout.prop(self, 'fabric_type')
 		layout.prop(self, 'repeat_u')
 		layout.prop(self, 'repeat_v')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_glass(bpy.types.Node):
+	'''Glass material node'''
+	bl_idname = 'luxrender_material_glass_node'
+	bl_label = 'Glass Material'
+	bl_icon = 'MATERIAL'
+
+	arch = bpy.props.BoolProperty(name='Architectural', description='Skips refraction during transmission, propagates alpha and shadow rays', default=False)
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketColor', 'Transmission Color')
+		self.inputs.new('NodeSocketColor', 'Reflection Color')
+		self.inputs.new('NodeSocketFloat', 'IOR')
+		self.inputs.new('NodeSocketFloat', 'Cauchy B')
+		self.inputs.new('NodeSocketFloat', 'Film IOR')
+		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
+
+		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'arch')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_glass2(bpy.types.Node):
+	'''Glass2 material node'''
+	bl_idname = 'luxrender_material_glass2_node'
+	bl_label = 'Glass2 Material'
+	bl_icon = 'MATERIAL'
+
+	arch = bpy.props.BoolProperty(name='Architectural', description='Skips refraction during transmission, propagates alpha and shadow rays', default=False)
+	dispersion = bpy.props.BoolProperty(name='Dispersion', description='Enables chromatic dispersion, volume should have a sufficient data for this', default=False)
+	
+	def init(self, context):
+		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'arch')
+		layout.prop(self, 'dispersion')
 		
 	#This node is only for the Lux node-tree
 	@classmethod	
