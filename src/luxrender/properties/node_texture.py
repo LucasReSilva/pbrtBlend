@@ -114,21 +114,6 @@ class luxrender_texture_type_node_fbm(bpy.types.Node):
 	@classmethod	
 	def poll(cls, tree):
 		return tree.bl_idname == 'luxrender_material_nodes'
-
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_harlequin(bpy.types.Node):
-	'''Harlequin texture node'''
-	bl_idname = 'luxrender_texture_harlequin_node'
-	bl_label = 'Harlequin Texture'
-	bl_icon = 'TEXTURE'
-
-	def init(self, context):
-		self.outputs.new('NodeSocketColor', 'Color')
-		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_musgrave(bpy.types.Node):

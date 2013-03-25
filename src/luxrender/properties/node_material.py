@@ -100,7 +100,6 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_clouds_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fbm_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_harlequin_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_musgrave_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_wrinkled_node)
@@ -127,6 +126,15 @@ class lux_node_Frensel_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_fresnelcolor_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fresnelname_node)
 
+@LuxRenderAddon.addon_register_class
+class lux_node_Utilities_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_utilities"
+	bl_label = "Utilities"
+	
+	def draw(self, context):
+		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_texture_harlequin_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_uv_node)
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Volumes_Menu(bpy.types.Menu):
@@ -140,7 +148,7 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
-	'''Experiment in making a node editor for Lux'''
+	'''LuxRender Material Nodes'''
 
 	bl_idname = 'luxrender_material_nodes'
 	bl_label = 'LuxRender Material Nodes'
@@ -157,6 +165,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		layout.menu("Lux_NODE_textures")
 		layout.menu("Lux_NODE_spectra")
 		layout.menu("Lux_NODE_fresnel")
+		layout.menu("Lux_NODE_utilities")
 		layout.menu("Lux_NODE_volumes")
 		layout.menu("Lux_NODE_lights")
 
