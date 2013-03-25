@@ -537,7 +537,7 @@ class luxrender_light_area_node(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Light Color')
-		self.inputs[0].default_value = (0.8, 0.8, 0.8, 1.0)
+		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
 		
 		self.outputs.new('NodeSocketShader', 'Emission')
 	
