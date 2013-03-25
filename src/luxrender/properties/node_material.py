@@ -190,6 +190,7 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
+		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
 		self.inputs.new('NodeSocketColor', 'Specular Color 1')
 		self.inputs.new('NodeSocketFloat', 'R1')
 		self.inputs.new('NodeSocketFloat', 'M1')
@@ -231,9 +232,13 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Warp Diffuse Color')
+		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
 		self.inputs.new('NodeSocketColor', 'Warp Specular Color')
+		self.inputs[1].default_value = (0.04, 0.04, 0.04, 1.0)
 		self.inputs.new('NodeSocketColor', 'Weft Diffuse Color')
+		self.inputs[2].default_value = (0.64, 0.64, 0.64, 1.0)
 		self.inputs.new('NodeSocketColor', 'Weft Specular Color')
+		self.inputs[3].default_value = (0.04, 0.04, 0.04, 1.0)
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -258,7 +263,9 @@ class luxrender_material_type_node_glass(bpy.types.Node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Transmission Color')
+		self.inputs[0].default_value = (0.7, 0.7, 0.7, 1.0)
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
+		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
 		self.inputs.new('NodeSocketFloat', 'IOR')
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
 		self.inputs.new('NodeSocketFloat', 'Film IOR')
@@ -307,8 +314,10 @@ class luxrender_material_type_node_glossy(bpy.types.Node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
+		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 		self.inputs.new('NodeSocketColor', 'Specular Color')
+		self.inputs[2].default_value = (0.04, 0.04, 0.04, 1.0)
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
@@ -360,6 +369,7 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
+		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
