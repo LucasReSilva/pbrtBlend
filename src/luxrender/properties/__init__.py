@@ -24,3 +24,19 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+
+import bpy
+
+class luxrender_node(bpy.types.Node):
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
+class luxrender_texture_node(luxrender_node):
+	pass
+class luxrender_material_node(luxrender_node):
+	pass
+
+
+

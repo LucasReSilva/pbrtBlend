@@ -31,6 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
+from ..properties import luxrender_texture_node
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -43,7 +44,7 @@ from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_harlequin(bpy.types.Node):
+class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 	'''Harlequin texture node'''
 	bl_idname = 'luxrender_texture_harlequin_node'
 	bl_label = 'Harlequin Texture'
@@ -52,13 +53,8 @@ class luxrender_texture_type_node_harlequin(bpy.types.Node):
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-		
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_uv(bpy.types.Node):
+class luxrender_texture_type_node_uv(luxrender_texture_node):
 	'''UV texture node'''
 	bl_idname = 'luxrender_texture_uv_node'
 	bl_label = 'UV Test Texture'
@@ -67,7 +63,3 @@ class luxrender_texture_type_node_uv(bpy.types.Node):
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'

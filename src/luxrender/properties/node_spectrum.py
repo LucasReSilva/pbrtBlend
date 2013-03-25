@@ -31,6 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
+from ..properties import luxrender_texture_node
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -44,7 +45,7 @@ from ..util import dict_merge
 
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_blackbody(bpy.types.Node):
+class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 	'''Blackbody spectrum node'''
 	bl_idname = 'luxrender_texture_blackbody_node'
 	bl_label = 'Blackbody Spectrum'
@@ -59,13 +60,8 @@ class luxrender_texture_type_node_blackbody(bpy.types.Node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'temperature')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-		
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_colordepth(bpy.types.Node):
+class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 	'''Color at Depth node'''
 	bl_idname = 'luxrender_texture_colordepth_node'
 	bl_label = 'Color at Depth'
@@ -82,13 +78,8 @@ class luxrender_texture_type_node_colordepth(bpy.types.Node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'depth')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-		
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_gaussian(bpy.types.Node):
+class luxrender_texture_type_node_gaussian(luxrender_texture_node):
 	'''Gaussian spectrum node'''
 	bl_idname = 'luxrender_texture_gaussian_node'
 	bl_label = 'Gaussian Spectrum'
@@ -105,15 +96,9 @@ class luxrender_texture_type_node_gaussian(bpy.types.Node):
 		layout.prop(self, 'energy')
 		layout.prop(self, 'wavelength')
 		layout.prop(self, 'width')
-
-		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
 		
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_tabulateddata(bpy.types.Node):
+class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
 	'''Tabulated Data spectrum node'''
 	bl_idname = 'luxrender_texture_tabulateddata_node'
 	bl_label = 'Tabulated Data Spectrum'
@@ -128,7 +113,3 @@ class luxrender_texture_type_node_tabulateddata(bpy.types.Node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'data_file')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'

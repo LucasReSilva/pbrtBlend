@@ -31,6 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
+from ..properties import luxrender_texture_node
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -47,7 +48,7 @@ from ..properties.node_material import luxrender_fresnel_socket
 from ..properties.texture import luxrender_tex_fresnelname
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_fresnelcolor(bpy.types.Node):
+class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 	'''Fresnel Color Node'''
 	bl_idname = 'luxrender_texture_fresnelcolor_node'
 	bl_label = 'Fresnel Color'
@@ -57,14 +58,10 @@ class luxrender_texture_type_node_fresnelcolor(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
 	
 		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
-		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-		
+
+
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_fresnelname(bpy.types.Node):
+class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 	'''Fresnel Name Node'''
 	bl_idname = 'luxrender_texture_fresnelname_node'
 	bl_label = 'Fresnel Name'
@@ -84,8 +81,3 @@ class luxrender_texture_type_node_fresnelname(bpy.types.Node):
 		layout.prop(self, 'frname_preset')
 		if self.frname_preset == 'nk':
 			layout.prop(self, 'frname_nkfile')
-			
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'

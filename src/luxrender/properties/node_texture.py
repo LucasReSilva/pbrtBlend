@@ -31,6 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
+from ..properties import luxrender_texture_node
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -62,7 +63,7 @@ noise_type_items = [
 	]
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_blender_clouds(bpy.types.Node):
+class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 	'''Clouds texture node'''
 	bl_idname = 'luxrender_texture_blender_clouds_node'
 	bl_label = 'Clouds Texture'
@@ -87,13 +88,8 @@ class luxrender_texture_type_node_blender_clouds(bpy.types.Node):
 		layout.prop(self, 'bright')
 		layout.prop(self, 'contrast')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_fbm(bpy.types.Node):
+class luxrender_texture_type_node_fbm(luxrender_texture_node):
 	'''FBM texture node'''
 	bl_idname = 'luxrender_texture_fbm_node'
 	bl_label = 'FBM Texture'
@@ -110,13 +106,8 @@ class luxrender_texture_type_node_fbm(bpy.types.Node):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-		
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_blender_musgrave(bpy.types.Node):
+class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 	'''Musgrave texture node'''
 	bl_idname = 'luxrender_texture_blender_musgrave_node'
 	bl_label = 'Musgrave Texture'
@@ -162,13 +153,8 @@ class luxrender_texture_type_node_blender_musgrave(bpy.types.Node):
 		layout.prop(self, 'bright')
 		layout.prop(self, 'contrast')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-		
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_windy(bpy.types.Node):
+class luxrender_texture_type_node_windy(luxrender_texture_node):
 	'''Windy texture node'''
 	bl_idname = 'luxrender_texture_windy_node'
 	bl_label = 'Windy Texture'
@@ -177,13 +163,8 @@ class luxrender_texture_type_node_windy(bpy.types.Node):
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
-		
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_wrinkled(bpy.types.Node):
+class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 	'''Wrinkled texture node'''
 	bl_idname = 'luxrender_texture_wrinkled_node'
 	bl_label = 'Wrinkled Texture'
@@ -200,7 +181,3 @@ class luxrender_texture_type_node_wrinkled(bpy.types.Node):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
 		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
