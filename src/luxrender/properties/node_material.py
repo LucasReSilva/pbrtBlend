@@ -58,8 +58,8 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_cloth_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glass2_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
+		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
+		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
@@ -232,6 +232,61 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 		layout.prop(self, 'fabric_type')
 		layout.prop(self, 'repeat_u')
 		layout.prop(self, 'repeat_v')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_glossy(bpy.types.Node):
+	'''Glossy material node'''
+	bl_idname = 'luxrender_material_glossy_node'
+	bl_label = 'Glossy Material'
+	bl_icon = 'MATERIAL'
+
+	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketColor', 'Diffuse Color')
+		self.inputs.new('NodeSocketFloat', 'Sigma')
+		self.inputs.new('NodeSocketColor', 'Specular Color')
+		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
+		self.inputs.new('NodeSocketFloat', 'U-Roughness')
+		self.inputs.new('NodeSocketFloat', 'V-Roughness')
+
+		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'multibounce')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_glossycoating(bpy.types.Node):
+	'''Glossy Coating material node'''
+	bl_idname = 'luxrender_material_glossycoating_node'
+	bl_label = 'Glossy Coating Material'
+	bl_icon = 'MATERIAL'
+
+	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketShader', 'Base Material')
+		self.inputs.new('NodeSocketColor', 'Specular Color')
+		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
+		self.inputs.new('NodeSocketFloat', 'U-Roughness')
+		self.inputs.new('NodeSocketFloat', 'V-Roughness')
+
+		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'multibounce')
 		
 	#This node is only for the Lux node-tree
 	@classmethod	
