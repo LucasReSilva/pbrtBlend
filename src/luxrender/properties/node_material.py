@@ -65,7 +65,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
 		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
+		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
 		add_nodetype(layout, bpy.types.luxrender_material_null_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
@@ -467,6 +467,26 @@ class luxrender_material_type_node_metal2(bpy.types.Node):
 		layout.prop(self, 'use_anisotropy')
 #		layout.prop(self, 'use_exponent')
 
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_mirror(bpy.types.Node):
+	'''Mirror material node'''
+	bl_idname = 'luxrender_material_mirror_node'
+	bl_label = 'Mirror Material'
+	bl_icon = 'MATERIAL'
+
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketColor', 'Reflection Color')
+		self.inputs.new('NodeSocketFloat', 'Film IOR')
+		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
+
+		self.outputs.new('NodeSocketShader', 'Surface')
+		
 	#This node is only for the Lux node-tree
 	@classmethod	
 	def poll(cls, tree):
