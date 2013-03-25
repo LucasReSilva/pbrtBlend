@@ -420,9 +420,9 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'metal_preset')
-		layout.prop(self, 'use_anisotropy')
 		if self.metal_preset == 'nk':
 			layout.prop(self, 'metal_nkfile')
+		layout.prop(self, 'use_anisotropy')
 # 		layout.prop(self, 'use_exponent')
 
 	#This node is only for the Lux node-tree
