@@ -407,6 +407,7 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 	
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic roughness', default=False)
 # 	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Use exponent', default=False)
+	metal_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 		
 	def init(self, context):
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
@@ -420,6 +421,8 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'metal_preset')
 		layout.prop(self, 'use_anisotropy')
+		if self.metal_preset == 'nk':
+			layout.prop(self, 'metal_nkfile')
 # 		layout.prop(self, 'use_exponent')
 
 	#This node is only for the Lux node-tree
