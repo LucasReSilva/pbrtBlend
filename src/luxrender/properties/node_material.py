@@ -411,7 +411,9 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 		
 	def init(self, context):
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
+		self.inputs[0].default_value = 0.75
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
+		self.inputs[1].default_value = 0.75
 # 		self.inputs.new('NodeSocketFloat', 'U-Exponent')
 # 		self.inputs.new('NodeSocketFloat', 'V-Exponent')
 
