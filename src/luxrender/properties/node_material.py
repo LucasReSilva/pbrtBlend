@@ -192,15 +192,19 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
 		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
 		self.inputs.new('NodeSocketColor', 'Specular Color 1')
+		self.inputs[1].default_value = (0.5, 0.5, 0.5, 1.0)
 		self.inputs.new('NodeSocketFloat', 'R1')
 		self.inputs.new('NodeSocketFloat', 'M1')
 		self.inputs.new('NodeSocketColor', 'Specular Color 2')
+		self.inputs[4].default_value = (0.7, 0.7, 0.7, 1.0)
 		self.inputs.new('NodeSocketFloat', 'R2')
 		self.inputs.new('NodeSocketFloat', 'M2')
 		self.inputs.new('NodeSocketColor', 'Specular Color 3')
+		self.inputs[7].default_value = (0.4, 0.4, 0.4, 1.0)
 		self.inputs.new('NodeSocketFloat', 'R3')
 		self.inputs.new('NodeSocketFloat', 'M3')
 		self.inputs.new('NodeSocketColor', 'Absorbtion Color')
+		self.inputs[10].default_value = (0.0, 0.0, 0.0, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth')
 		
 
@@ -319,6 +323,7 @@ class luxrender_material_type_node_glossy(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', 'Specular Color')
 		self.inputs[2].default_value = (0.04, 0.04, 0.04, 1.0)
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs[3].default_value = (0.0, 0.0, 0.0, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
@@ -345,7 +350,9 @@ class luxrender_material_type_node_glossycoating(bpy.types.Node):
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Base Material')
 		self.inputs.new('NodeSocketColor', 'Specular Color')
+		self.inputs[2].default_value = (0.04, 0.04, 0.04, 1.0)
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
@@ -389,7 +396,9 @@ class luxrender_material_type_node_mattetranslucent(bpy.types.Node):
 	def init(self, context):
 		self.inputs.new('NodeSocketBool', 'Energy Conserving')
 		self.inputs.new('NodeSocketColor', 'Refection Color')
+		self.inputs[1].default_value = (0.7, 0.7, 0.7, 1.0)
 		self.inputs.new('NodeSocketColor', 'Transmission Color')
+		self.inputs[2].default_value = (1.0, 1.0, 1.0, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -497,6 +506,7 @@ class luxrender_material_type_node_mirror(bpy.types.Node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
+		self.inputs[0].default_value = (0.7, 0.7, 0.7, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Film IOR')
 		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
 
@@ -555,6 +565,7 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
 
 		self.outputs.new('NodeSocketShader', 'Volume')
 		
@@ -573,7 +584,9 @@ class luxrender_volume_type_node_homogeneous(bpy.types.Node):
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
 		self.inputs.new('NodeSocketColor', 'Scattering Color')
+		self.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
 		self.inputs.new('NodeSocketColor', 'Asymmetry')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
@@ -594,6 +607,7 @@ class luxrender_light_area_node(bpy.types.Node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Light Color')
+		self.inputs[0].default_value = (0.8, 0.8, 0.8, 1.0)
 		
 		self.outputs.new('NodeSocketShader', 'Emission')
 	
