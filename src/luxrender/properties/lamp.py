@@ -90,7 +90,7 @@ class LampColorTextureParameter(ColorTextureParameter):
 		}
 		return vis
 
-TC_L = LampColorTextureParameter('L', 'Colour')
+TC_L = LampColorTextureParameter('L', 'Colour', default=(1.0,1.0,1.0))
 
 @LuxRenderAddon.addon_register_class
 class luxrender_lamp(declarative_property_group):
