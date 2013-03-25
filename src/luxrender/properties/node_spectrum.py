@@ -86,3 +86,49 @@ class luxrender_texture_type_node_colordepth(bpy.types.Node):
 	@classmethod	
 	def poll(cls, tree):
 		return tree.bl_idname == 'luxrender_material_nodes'
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_gaussian(bpy.types.Node):
+	'''Gaussian spectrum node'''
+	bl_idname = 'luxrender_texture_gaussian_node'
+	bl_label = 'Gaussian Spectrum'
+	bl_icon = 'TEXTURE'
+
+	energy = bpy.props.FloatProperty(name='Energy', default=1.0, description='Relative energy level')
+	wavelength = bpy.props.FloatProperty(name='Wavelength (nm)', default=550.0, description='Center-point of the spectrum curve')
+	width = bpy.props.FloatProperty(name='Width', default=50.0, description='Width of the spectrum curve')
+
+	def init(self, context):
+		self.outputs.new('NodeSocketColor', 'Color')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'energy')
+		layout.prop(self, 'wavelength')
+		layout.prop(self, 'width')
+
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_tabulateddata(bpy.types.Node):
+	'''Tabulated Data spectrum node'''
+	bl_idname = 'luxrender_texture_tabulateddata_node'
+	bl_label = 'Tabulated Data Spectrum'
+	bl_icon = 'TEXTURE'
+
+	data_file = bpy.props.StringProperty(name='Data File', description='Data file path', subtype='FILE_PATH')
+
+
+	def init(self, context):
+		self.outputs.new('NodeSocketColor', 'Color')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'data_file')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'

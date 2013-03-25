@@ -114,6 +114,8 @@ class lux_node_Spectra_Menu(bpy.types.Menu):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_texture_blackbody_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_gaussian_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_tabulateddata_node)
 		
 @LuxRenderAddon.addon_register_class
 class lux_node_Frensel_Menu(bpy.types.Menu):
