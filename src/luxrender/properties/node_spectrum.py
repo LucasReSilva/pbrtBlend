@@ -59,6 +59,11 @@ class luxrender_texture_type_node_blackbody(bpy.types.Node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'temperature')
 		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_colordepth(bpy.types.Node):
 	'''Color at Depth node'''
@@ -76,3 +81,8 @@ class luxrender_texture_type_node_colordepth(bpy.types.Node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'depth')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'

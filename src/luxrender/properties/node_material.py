@@ -196,7 +196,12 @@ class luxrender_material_type_node_carpaint(bpy.types.Node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'carpaint_presets')
-
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_cloth(bpy.types.Node):
 	'''Cloth material node'''
@@ -225,6 +230,11 @@ class luxrender_material_type_node_cloth(bpy.types.Node):
 		layout.prop(self, 'fabric_type')
 		layout.prop(self, 'repeat_u')
 		layout.prop(self, 'repeat_v')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_matte(bpy.types.Node):
@@ -238,6 +248,11 @@ class luxrender_material_type_node_matte(bpy.types.Node):
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mattetranslucent(bpy.types.Node):
@@ -253,6 +268,11 @@ class luxrender_material_type_node_mattetranslucent(bpy.types.Node):
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal(bpy.types.Node):
@@ -286,6 +306,11 @@ class luxrender_material_type_node_metal(bpy.types.Node):
 		layout.prop(self, 'metal_preset')
 		layout.prop(self, 'use_anisotropy')
 # 		layout.prop(self, 'use_exponent')
+
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal2(bpy.types.Node):
@@ -327,6 +352,11 @@ class luxrender_material_type_node_metal2(bpy.types.Node):
 		layout.prop(self, 'use_anisotropy')
 #		layout.prop(self, 'use_exponent')
 
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mix(bpy.types.Node):
@@ -343,6 +373,11 @@ class luxrender_material_type_node_mix(bpy.types.Node):
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_null(bpy.types.Node):
 	'''Null material node'''
@@ -352,6 +387,11 @@ class luxrender_material_type_node_null(bpy.types.Node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 		
 #Volume and area light nodes
 
@@ -368,6 +408,11 @@ class luxrender_volume_type_node_clear(bpy.types.Node):
 
 		self.outputs.new('NodeSocketShader', 'Volume')
 		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_homogeneous(bpy.types.Node):
 	'''Homogeneous volume node'''
@@ -382,6 +427,11 @@ class luxrender_volume_type_node_homogeneous(bpy.types.Node):
 		self.inputs.new('NodeSocketColor', 'Asymmetry')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(bpy.types.Node):
@@ -399,6 +449,11 @@ class luxrender_light_area_node(bpy.types.Node):
 	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'gain')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(bpy.types.Node):
@@ -412,7 +467,11 @@ class luxrender_material_output_node(bpy.types.Node):
 		self.inputs.new('NodeSocketShader', 'Interior Volume')
 		self.inputs.new('NodeSocketShader', 'Exterior Volume')
 		self.inputs.new('NodeSocketShader', 'Emission')
-
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 
 # Custom socket types

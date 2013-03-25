@@ -44,17 +44,17 @@ from ..util import dict_merge
 
 #Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
-		('blender_original', 'Blender Original', ''),
-		('original_perlin', 'Original Perlin', ''),
-		('improved_perlin', 'Improved Perlin', ''),
-		('voronoi_f1', 'Voronoi F1', ''),
-		('voronoi_f2', 'Voronoi F2', ''),
-		('voronoi_f3', 'Voronoi F3', ''),
-		('voronoi_f4', 'Voronoi F4', ''),
-		('voronoi_f2f1', 'Voronoi F2-F1', ''),
-		('voronoi_crackle', 'Voronoi Crackle', ''),
-		('cell_noise', 'Cell Noise', ''),
-		]
+	('blender_original', 'Blender Original', ''),
+	('original_perlin', 'Original Perlin', ''),
+	('improved_perlin', 'Improved Perlin', ''),
+	('voronoi_f1', 'Voronoi F1', ''),
+	('voronoi_f2', 'Voronoi F2', ''),
+	('voronoi_f3', 'Voronoi F3', ''),
+	('voronoi_f4', 'Voronoi F4', ''),
+	('voronoi_f2f1', 'Voronoi F2-F1', ''),
+	('voronoi_crackle', 'Voronoi Crackle', ''),
+	('cell_noise', 'Cell Noise', ''),
+	]
 
 noise_type_items = [
 	('soft_noise', 'Soft', ''),
@@ -86,7 +86,11 @@ class luxrender_texture_type_node_blender_clouds(bpy.types.Node):
 		layout.prop(self, 'noisedepth')
 		layout.prop(self, 'bright')
 		layout.prop(self, 'contrast')
-
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fbm(bpy.types.Node):
@@ -105,6 +109,11 @@ class luxrender_texture_type_node_fbm(bpy.types.Node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_harlequin(bpy.types.Node):
@@ -115,6 +124,11 @@ class luxrender_texture_type_node_harlequin(bpy.types.Node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_musgrave(bpy.types.Node):
@@ -163,6 +177,11 @@ class luxrender_texture_type_node_blender_musgrave(bpy.types.Node):
 		layout.prop(self, 'bright')
 		layout.prop(self, 'contrast')
 		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(bpy.types.Node):
 	'''Windy texture node'''
@@ -172,6 +191,11 @@ class luxrender_texture_type_node_windy(bpy.types.Node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_wrinkled(bpy.types.Node):
@@ -190,3 +214,8 @@ class luxrender_texture_type_node_wrinkled(bpy.types.Node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'

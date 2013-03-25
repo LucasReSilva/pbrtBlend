@@ -55,9 +55,13 @@ class luxrender_texture_type_node_fresnelcolor(bpy.types.Node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
-
 	
 		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+		
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fresnelname(bpy.types.Node):
@@ -80,3 +84,8 @@ class luxrender_texture_type_node_fresnelname(bpy.types.Node):
 		layout.prop(self, 'frname_preset')
 		if self.frname_preset == 'nk':
 			layout.prop(self, 'frname_nkfile')
+			
+	#This node is only for the Lux node-tree
+	@classmethod	
+	def poll(cls, tree):
+		return tree.bl_idname == 'luxrender_material_nodes'
