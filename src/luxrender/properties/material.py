@@ -351,6 +351,7 @@ class luxrender_material(declarative_property_group):
 	
 	controls = [
 		# Type select Menu is drawn manually
+		#'nodetree', drawn manually
 		'Interior',
 		'Exterior',
 #		'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
@@ -396,6 +397,13 @@ class luxrender_material(declarative_property_group):
 		'step': 25,
 		'default': 1.0
 		},
+		{
+		'attr': 'nodetree',
+		'type': 'string',
+		'description': 'Node tree',
+		'name': 'Node Tree',
+		'default': ''
+		},
 #		{
 #			'type': 'bool',
 #			'attr': 'generatetangents',
@@ -431,6 +439,7 @@ class luxrender_material(declarative_property_group):
 		'scatter': 'Kd',
 		'velvet': 'Kd',
 	}
+	
 	
 	def reset(self, prnt=None):
 		super().reset()
@@ -480,7 +489,7 @@ class luxrender_material(declarative_property_group):
 					
 					m2 = bpy.data.materials[m2_name]
 					m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
-
+				
 				if self.type == 'glossycoating':
 					bm_name = self.luxrender_mat_glossycoating.basematerial_material
 					if bm_name == '':
@@ -1956,7 +1965,6 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 	
 	def get_paramset(self, material):
 		mattetranslucent_params = ParamSet()
-		
 		mattetranslucent_params.add_bool('energyconserving', self.energyconserving)
 		mattetranslucent_params.update( TC_Kr.get_paramset(self) )
 		mattetranslucent_params.update( TC_Kt.get_paramset(self) )

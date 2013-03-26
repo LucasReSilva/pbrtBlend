@@ -49,6 +49,32 @@ class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base):
 	preset_subdir = "luxrender/engine"
 
 @LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
+	''''''
+	bl_idname = "luxrender.add_material_nodetree"
+	bl_label = "Add LuxRender Material Nodetree"
+	bl_description = "Add a LuxRender node tree linked to this material"
+
+	#idtype = StringProperty(name="ID Type", default="material")
+
+	def execute(self, context):
+		#idtype = self.properties.idtype
+		idtype = 'material'
+		context_data = {'material':context.material, 'lamp':context.lamp }
+		idblock = context_data[idtype]
+		
+		nt = bpy.data.node_groups.new(idblock.name, type='luxrender_material_nodes')
+		nt.use_fake_user = True
+		idblock.luxrender_material.nodetree = nt.name
+
+		if idtype == 'material':
+			nt.nodes.new('luxrender_material_output_node')
+		#else:
+		#	nt.nodes.new('OutputLightShaderNode')
+
+		return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_preset_engine_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
 	'''Save the current settings as a preset'''
 	bl_idname = 'luxrender.preset_engine_add'
