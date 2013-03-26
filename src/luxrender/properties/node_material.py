@@ -70,7 +70,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
 		add_nodetype(layout, bpy.types.luxrender_material_null_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
+		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
@@ -521,6 +521,28 @@ class luxrender_material_type_node_null(luxrender_material_node):
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
 #Volume and area light nodes
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_roughglass(luxrender_material_node):
+	'''Rough Glass material node'''
+	bl_idname = 'luxrender_material_roughglass_node'
+	bl_label = 'Rough Glass Material'
+	bl_icon = 'MATERIAL'
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketColor', 'Transmission Color')
+		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs.new('NodeSocketColor', 'Reflection Color')
+		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs.new('NodeSocketFloat', 'IOR')
+		self.inputs.new('NodeSocketFloat', 'Cauchy B')
+		self.inputs.new('NodeSocketFloat', 'U-Roughness')
+		self.inputs[4].default_value = 0.075
+		self.inputs.new('NodeSocketFloat', 'V-Roughness')
+		self.inputs[5].default_value = 0.075
+
+
+		self.outputs.new('NodeSocketShader', 'Surface')
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(luxrender_material_node):
