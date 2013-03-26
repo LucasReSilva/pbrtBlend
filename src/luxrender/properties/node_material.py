@@ -54,9 +54,9 @@ def get_min_value(TextureParameter):
 	TextureParameter = TextureParameter.min
 	return TextureParameter
 
-
-print(get_min_value(TF_uroughness))
-
+def get_max_value(TextureParameter):
+	TextureParameter = TextureParameter.max
+	return TextureParameter
 
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
@@ -306,10 +306,8 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
-		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[5].default_value =get_default(TF_uroughness)
-		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[6].default_value = get_default(TF_vroughness)
+		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -330,10 +328,8 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
-		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[4].default_value = get_default(TF_uroughness)
-		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[5].default_value = get_default(TF_vroughness)
+		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -409,10 +405,8 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 	metal_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 		
 	def init(self, context):
-		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[0].default_value = get_default(TF_uroughness)
-		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[1].default_value = get_default(TF_vroughness)
+		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 # 		self.inputs.new('NodeSocketFloat', 'U-Exponent')
 # 		self.inputs.new('NodeSocketFloat', 'V-Exponent')
 
@@ -449,10 +443,8 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 #	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[0].default_value = get_default(TF_uroughness)
-		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[1].default_value = get_default(TF_vroughness)
+		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 #		self.inputs.new('NodeSocketFloat', 'U-Exponent')
 #		self.inputs.new('NodeSocketFloat', 'V-Exponent')
 		
@@ -527,10 +519,8 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
 		self.inputs.new('NodeSocketFloat', 'IOR')
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
-		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[4].default_value = get_default(TF_uroughness)
-		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[5].default_value = get_default(TF_vroughness)
+		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -924,4 +914,41 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
+	# Description string
+	'''U-Roughness socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_uroughness_socket'
+	# Label for nice name display
+	bl_label = 'U-Roughness socket'
+	
+	uroughness = bpy.props.FloatProperty(name='U-Roughness', description='U-Roughness', default=get_default(TF_uroughness), subtype='NONE', min=-get_min_value(TF_uroughness), max=get_max_value(TF_uroughness), precision=4)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'uroughness', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.33, 0.6, 0.85, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
+	# Description string
+	'''V-Roughness socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_vroughness_socket'
+	# Label for nice name display
+	bl_label = 'V-Roughness socket'
+	
+	vroughness = bpy.props.FloatProperty(name='V-Roughness', description='V-Roughness', default=get_default(TF_vroughness), subtype='NONE', min=-get_min_value(TF_vroughness), max=get_max_value(TF_vroughness), precision=4)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'vroughness', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.33, 0.6, 0.85, 1.0)
 
