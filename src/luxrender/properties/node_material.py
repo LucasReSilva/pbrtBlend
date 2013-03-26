@@ -45,6 +45,10 @@ from ..util import dict_merge
 
 from ..properties.material import * # for now just the big hammer for starting autogenerate sockets
 
+# pull default values for color inputs and add alpha value to color tuplet
+def get_default(ColorTextureParameter):
+	return ColorTextureParameter.default + (1.0,) # add alpha to color tuplet
+
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
@@ -192,21 +196,21 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
-		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
+		self.inputs[0].default_value = get_default(TC_Kd)
 		self.inputs.new('NodeSocketColor', 'Specular Color 1')
-		self.inputs[1].default_value = (0.05, 0.05, 0.05, 1.0)
+		self.inputs[1].default_value = get_default(TC_Ks1)
 		self.inputs.new('NodeSocketFloat', 'R1')
 		self.inputs.new('NodeSocketFloat', 'M1')
 		self.inputs.new('NodeSocketColor', 'Specular Color 2')
-		self.inputs[4].default_value = (0.07, 0.07, 0.07, 1.0)
+		self.inputs[4].default_value = get_default(TC_Ks2)
 		self.inputs.new('NodeSocketFloat', 'R2')
 		self.inputs.new('NodeSocketFloat', 'M2')
 		self.inputs.new('NodeSocketColor', 'Specular Color 3')
-		self.inputs[7].default_value = (0.04, 0.04, 0.04, 1.0)
+		self.inputs[7].default_value = get_default(TC_Ks3)
 		self.inputs.new('NodeSocketFloat', 'R3')
 		self.inputs.new('NodeSocketFloat', 'M3')
 		self.inputs.new('NodeSocketColor', 'Absorbtion Color')
-		self.inputs[10].default_value = (0.0, 0.0, 0.0, 1.0)
+		self.inputs[10].default_value = get_default(TC_Ka)
 		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth')
 		
 
@@ -233,13 +237,13 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Warp Diffuse Color')
-		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
+		self.inputs[0].default_value = get_default(TC_warp_Kd)
 		self.inputs.new('NodeSocketColor', 'Warp Specular Color')
-		self.inputs[1].default_value = (0.04, 0.04, 0.04, 1.0)
+		self.inputs[1].default_value = get_default(TC_warp_Ks)
 		self.inputs.new('NodeSocketColor', 'Weft Diffuse Color')
-		self.inputs[2].default_value = (0.64, 0.64, 0.64, 1.0)
+		self.inputs[2].default_value = get_default(TC_weftKd)
 		self.inputs.new('NodeSocketColor', 'Weft Specular Color')
-		self.inputs[3].default_value = (0.04, 0.04, 0.04, 1.0)
+		self.inputs[3].default_value = get_default(TC_weft_Ks)
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -259,9 +263,9 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Transmission Color')
-		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs[0].default_value = get_default(TC_Kt)
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
-		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs[1].default_value = get_default(TC_Kr)
 		self.inputs.new('NodeSocketFloat', 'IOR')
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
 		self.inputs.new('NodeSocketFloat', 'Film IOR')
@@ -300,12 +304,12 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
-		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
+		self.inputs[0].default_value = get_default(TC_Kd)
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 		self.inputs.new('NodeSocketColor', 'Specular Color')
-		self.inputs[2].default_value = (0.04, 0.04, 0.04, 1.0)
+		self.inputs[2].default_value = get_default(TC_Ks)
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
-		self.inputs[3].default_value = (0.0, 0.0, 0.0, 1.0)
+		self.inputs[3].default_value = get_default(TC_Ka)
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
 		self.inputs[5].default_value = 0.075
@@ -329,9 +333,9 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Base Material')
 		self.inputs.new('NodeSocketColor', 'Specular Color')
-		self.inputs[1].default_value = (0.04, 0.04, 0.04, 1.0)
+		self.inputs[1].default_value = get_default(TC_Ks)
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
-		self.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
+		self.inputs[2].default_value = get_default(TC_Ka)
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
 		self.inputs[4].default_value = 0.075
@@ -372,7 +376,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Diffuse Color')
-		self.inputs[0].default_value = (0.64, 0.64, 0.64, 1.0)
+		self.inputs[0].default_value = get_default(TC_Kd)
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -387,9 +391,9 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('NodeSocketBool', 'Energy Conserving')
 		self.inputs.new('NodeSocketColor', 'Refection Color')
-		self.inputs[1].default_value = (0.7, 0.7, 0.7, 1.0)
+		self.inputs[1].default_value = get_default(TC_Kr)
 		self.inputs.new('NodeSocketColor', 'Transmission Color')
-		self.inputs[2].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs[2].default_value = get_default(TC_Kt)
 		self.inputs.new('NodeSocketFloat', 'Sigma')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -484,7 +488,7 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
-		self.inputs[0].default_value = (0.7, 0.7, 0.7, 1.0)
+		self.inputs[0].default_value = get_default(TC_Kr)
 		self.inputs.new('NodeSocketFloat', 'Film IOR')
 		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
 
@@ -531,9 +535,9 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Transmission Color')
-		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs[0].default_value = get_default(TC_Kr)
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
-		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs[1].default_value = get_default(TC_Kr)
 		self.inputs.new('NodeSocketFloat', 'IOR')
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
@@ -568,7 +572,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
-		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs[1].default_value = get_default(TC_Ka)
 		self.inputs.new('NodeSocketColor', 'Scattering Color')
 		self.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
 		self.inputs.new('NodeSocketColor', 'Asymmetry')
