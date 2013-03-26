@@ -72,6 +72,7 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Transmission Color')
+		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
 		
 		self.outputs.new('NodeSocketColor', 'Color')
 		

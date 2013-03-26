@@ -56,6 +56,7 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
+		self.inputs[0].default_value = (0.7, 0.7, 0.7, 1.0)
 	
 		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
 
