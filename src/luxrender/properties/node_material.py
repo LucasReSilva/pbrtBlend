@@ -62,6 +62,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
+		add_nodetype(layout, bpy.types.luxrender_material_layered_node)
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
@@ -341,6 +342,26 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'multibounce')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_layered(luxrender_material_node):
+	'''Layered material node'''
+	bl_idname = 'luxrender_material_layered_node'
+	bl_label = 'Layered Material'
+	bl_icon = 'MATERIAL'
+
+	def init(self, context):
+		self.inputs.new('NodeSocketShader', 'Material 1')
+		self.inputs.new('NodeSocketFloat', 'Opacity 1')
+		self.inputs.new('NodeSocketShader', 'Material 2')
+		self.inputs.new('NodeSocketFloat', 'Opacity 2')
+		self.inputs.new('NodeSocketShader', 'Material 3')
+		self.inputs.new('NodeSocketFloat', 'Opacity 3')
+		self.inputs.new('NodeSocketShader', 'Material 4')
+		self.inputs.new('NodeSocketFloat', 'Opacity 4')
+
+		
+		self.outputs.new('NodeSocketShader', 'Surface')
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_matte(luxrender_material_node):
