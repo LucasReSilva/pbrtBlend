@@ -536,7 +536,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('NodeSocketColor', 'Absorption Color')
+		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
 
 		self.outputs.new('NodeSocketShader', 'Volume')
