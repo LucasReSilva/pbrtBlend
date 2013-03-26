@@ -840,4 +840,42 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Backface Absorption Color socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TC_backface_Ka_socket'
+	# Label for nice name display
+	bl_label = 'Backface Absorption socket'
+	
+	color = bpy.props.FloatVectorProperty(name='Backface Absorption Color', description='Backface Absorption Color', default=get_default(TC_backface_Ka), subtype='COLOR', min=0.0, max=1.0)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'color', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.9, 0.9, 0.0, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Backface Specular Color socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TC_backface_Ks_socket'
+	# Label for nice name display
+	bl_label = 'Backface Specular socket'
+	
+	color = bpy.props.FloatVectorProperty(name='Backface Specular Color', description='Backface Specular Color', default=get_default(TC_backface_Ks), subtype='COLOR', min=0.0, max=1.0)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'color', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.9, 0.9, 0.0, 1.0)
+
 
