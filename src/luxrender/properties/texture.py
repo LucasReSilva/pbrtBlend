@@ -651,6 +651,7 @@ tex_names = (
 		('normalmap', 'Normal Map'),
 		('marble', 'Marble'),
 		('hitpointcolor', 'Vertex Color'),
+		('hitpointgrey', 'Vertex Grey'),
 		('hitpointalpha', 'Vertex Alpha'),
 		('windy', 'Windy'),
 		('wrinkled', 'Wrinkled'),
@@ -2293,6 +2294,31 @@ class luxrender_tex_hitpointcolor(declarative_property_group):
 	def load_paramset(self, variant, ps):
 		pass
 		
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_hitpointgrey(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = []
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'string',
+			'default': 'float'
+		},
+	]
+	
+	def get_paramset(self, scene, texture):
+		hitpointgrey_params = ParamSet()
+		
+		return set(), hitpointgrey_params
+	
+	def load_paramset(self, variant, ps):
+		pass
+
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_hitpointalpha(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']

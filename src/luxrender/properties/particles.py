@@ -45,22 +45,24 @@ class luxrender_hair(declarative_property_group):
 	Storage class for LuxRender Hair Rendering settings.
 	'''
 	ef_attach_to = ['ParticleSettings']
-	controls = ['hair_size',
-				'use_binary_output',
-				'tesseltype',
-				'solid_sidecount',
-				['solid_capbottom', 'solid_captop'],
-				'adaptive_maxdepth',
-				'adaptive_error',
-				'acceltype',
+	controls = [
+			'hair_size',
+			'use_binary_output',
+			'tesseltype',
+			'solid_sidecount',
+			['solid_capbottom', 'solid_captop'],
+			'adaptive_maxdepth',
+			'adaptive_error',
+			'acceltype',
+			'export_color',
 	]
 	
 	visibility = {
 		'adaptive_maxdepth':		{ 'tesseltype': O(['ribbonadaptive', 'solidadaptive']) },
-		'adaptive_error':			{ 'tesseltype': O(['ribbonadaptive', 'solidadaptive']) },
-		'solid_sidecount':			{ 'tesseltype': O(['solid', 'solidadaptive']) },
-		'solid_capbottom':			{ 'tesseltype': O(['solid', 'solidadaptive']) },
-		'solid_captop':				{ 'tesseltype': O(['solid', 'solidadaptive']) },
+		'adaptive_error':		{ 'tesseltype': O(['ribbonadaptive', 'solidadaptive']) },
+		'solid_sidecount':		{ 'tesseltype': O(['solid', 'solidadaptive']) },
+		'solid_capbottom':		{ 'tesseltype': O(['solid', 'solidadaptive']) },
+		'solid_captop':			{ 'tesseltype': O(['solid', 'solidadaptive']) },
 
 	}
 
@@ -154,7 +156,19 @@ class luxrender_hair(declarative_property_group):
 				('qbvh', 'QBVH', 'SSE-accelerated quad bounding volume hierarchy'),
 				('kdtree', 'KD-Tree', 'KD-Tree'),
 			],
-		}           
+		},
+		{
+			'type': 'enum',
+			'attr': 'export_color',
+			'name': 'Color Export Mode',
+			'desciption': 'Mode of color export for the hair file',
+			'default': 'none',
+			'items': [
+				('vertex_color', 'Vertex Color', 'Use vertex color as hair color'),
+				('uv_texture_map', 'UV Texture Map', 'Use UV texture map as hair color'),
+				('none', 'None', 'none'),
+			],
+		}
 	]
 			
             

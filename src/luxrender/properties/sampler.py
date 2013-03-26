@@ -79,6 +79,7 @@ class luxrender_sampler(declarative_property_group):
 			'default': 'metropolis',
 			'items': [
 				('metropolis', 'Metropolis', 'Keleman-style metropolis light transport'),
+				('sobol', 'Sobol', 'Use a Sobol sequence'),
 				('lowdiscrepancy', 'Low Discrepancy', 'Use a low discrepancy sequence'),
 				('random', 'Random', 'Completely random sampler')
 			],

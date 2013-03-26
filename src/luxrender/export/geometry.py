@@ -854,27 +854,74 @@ class GeometryExporter(object):
 			points = []
 			thickness = []
 			colors = []
+			uv_coords = []
 			total_segments_count = 0
-			if obj.data.vertex_colors.active:
-				colorflag = 1
-			else:
-				colorflag = 0
+			vertex_color_layer = None
+			uv_tex = None
+			colorflag = 0
+			uvflag = 0                      
+			
+			mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
+			uv_textures = mesh.tessface_uv_textures if bpy.app.version > (2, 62, 0 ) else mesh.uv_textures # bmesh
+			vertex_color =  mesh.tessface_vertex_colors if bpy.app.version > (2, 62, 0 ) else mesh.vertex_colors # bmesh
+
+			if psys.settings.luxrender_hair.export_color == 'vertex_color':
+				if vertex_color.active and vertex_color.active.data:
+					vertex_color_layer = vertex_color.active.data
+					colorflag = 1
+
+			if uv_textures.active and uv_textures.active.data:
+				uv_tex = uv_textures.active.data
+				if psys.settings.luxrender_hair.export_color == 'uv_texture_map':
+					if uv_tex[0].image:
+						image_width = uv_tex[0].image.size[0]
+						image_height = uv_tex[0].image.size[1]
+						image_pixels = uv_tex[0].image.pixels[:]
+						colorflag = 1
+				uvflag = 1
+
 			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
 
-			transform = obj.matrix_world.inverted()		
-			for pindex in range(num_parents + num_children):			
-				det.exported_objects += 1				
+			transform = obj.matrix_world.inverted()         
+			for pindex in range(num_parents + num_children):                        
+				det.exported_objects += 1                               
 				point_count = 0
+				i = 0
+				
+				if num_children == 0:
+					i = pindex
 		
+				# A small optimization in order to speedup the export
+				# process: cache the uv_co and color value
+				uv_co = None
+				col = None
 				for step in range(0, steps):
-					co = psys.co_hair(obj, mod, pindex, step)				
+					co = psys.co_hair(obj, mod, pindex, step)                               
 					if not co.length_squared == 0:
 						points.append(transform*co)
 						point_count = point_count + 1
 
-					if obj.data.vertex_colors.active:						
-						col = psys.mcol_on_emitter(mod, psys.particles[0], pindex, obj.data.vertex_colors.active_index)						
-						colors.append(col)					
+						if uvflag:
+							if not uv_co:
+								uv_co = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
+							uv_coords.append(uv_co)
+
+						if psys.settings.luxrender_hair.export_color == 'uv_texture_map':
+							if not col:
+								x_co = round(uv_co[0] * (image_width - 1))
+								y_co = round(uv_co[1] * (image_height - 1))
+							
+								pixelnumber = (image_width * y_co) + x_co
+							
+								r = image_pixels[pixelnumber*4]
+								g = image_pixels[pixelnumber*4+1]
+								b = image_pixels[pixelnumber*4+2]
+								col = (r,g,b)
+							colors.append(col)
+						elif psys.settings.luxrender_hair.export_color == 'vertex_color':
+							if not col:
+								col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
+							colors.append(col)
 
 				if point_count > 1:
 					segments.append(point_count - 1)
@@ -888,7 +935,7 @@ class GeometryExporter(object):
 				hair_file.write(b'HAIR')        #magic number
 				hair_file.write(struct.pack('<I', num_parents+num_children)) #total strand count
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
-				hair_file.write(struct.pack('<I', 1+2+16*colorflag)) #bit array for configuration
+				hair_file.write(struct.pack('<I', 1+2+16*colorflag+32*uvflag)) #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
 				hair_file.write(struct.pack('<f', size*2))      #default thickness
 				hair_file.write(struct.pack('<f', 0.0))         #default transparency
@@ -900,9 +947,12 @@ class GeometryExporter(object):
 				hair_file.write(struct.pack('<%dH'%(len(segments)), *segments))
 				for point in points:
 					hair_file.write(struct.pack('<3f', *point))
-				if colors:
+				if colorflag:
 					for col in colors:
 						hair_file.write(struct.pack('<3f', *col))
+				if uvflag:
+					for uv in uv_coords:
+						hair_file.write(struct.pack('<2f', *uv))
 					
 			LuxLog('Binary hair file written: %s' % (hair_file_path))
 			
