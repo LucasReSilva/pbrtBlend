@@ -47,7 +47,7 @@ from ..properties.material import * # for now just the big hammer for starting a
 
 # pull default values for inputs and add alpha value to color tuplet
 def get_default(TextureParameter):
-	if len(TextureParameter.default) == 3: # is colortuplet
+	if str(TextureParameter.default).startswith("("): # is colortuplet
 		TextureParameter = TextureParameter.default + (1.0,) # add alpha to color tuplet
 	else: # is type with no len
 		TextureParameter = TextureParameter.default
