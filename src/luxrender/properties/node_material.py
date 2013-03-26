@@ -551,9 +551,8 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
-		self.inputs.new('NodeSocketColor', 'Scattering Color')
-		self.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
-		self.inputs.new('NodeSocketColor', 'Asymmetry')
+		self.inputs.new('luxrender_SC_asymmetry_socket', 'Scattering Color')
+		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
 		self.outputs.new('NodeSocketShader', 'Volume')
 		
@@ -869,6 +868,44 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 	bl_label = 'Backface Specular socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Backface Specular Color', description='Backface Specular Color', default=get_default(TC_backface_Ks), subtype='COLOR', min=0.0, max=1.0)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'color', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.9, 0.9, 0.0, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_SC_color_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Scattering Color socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_SC_color_socket'
+	# Label for nice name display
+	bl_label = 'Scattering Color socket'
+	
+	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'color', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.9, 0.9, 0.0, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Scattering asymmetry socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_SC_asymmetry_socket'
+	# Label for nice name display
+	bl_label = 'Scattering Asymmetry socket'
+	
+	color = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
