@@ -49,8 +49,8 @@ from ..properties.material import * # for now just the big hammer for starting a
 def get_TC_default(ColorTextureParameter):
 	return ColorTextureParameter.default + (1.0,) # add alpha to color tuplet
 
-def get_TF_default(FloatTextureParameter)
-	return FloatTextureParameter
+def get_TF_default(FloatTextureParameter):
+	return FloatTextureParameter.default
 
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
@@ -315,9 +315,9 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs[3].default_value = get_TC_default(TC_Ka)
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[5].default_value = 0.075
+		self.inputs[5].default_value =get_TF_default(TF_uroughness)
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[6].default_value = 0.075
+		self.inputs[6].default_value = get_TF_default(TF_vroughness)
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -341,9 +341,9 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs[2].default_value = get_TC_default(TC_Ka)
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[4].default_value = 0.075
+		self.inputs[4].default_value = get_TF_default(TF_uroughness)
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[5].default_value = 0.075
+		self.inputs[5].default_value = get_TF_default(TF_vroughness)
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -423,9 +423,9 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 		
 	def init(self, context):
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[0].default_value = 0.075
+		self.inputs[0].default_value = get_TF_default(TF_uroughness)
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[1].default_value = 0.075
+		self.inputs[1].default_value = get_TF_default(TF_vroughness)
 # 		self.inputs.new('NodeSocketFloat', 'U-Exponent')
 # 		self.inputs.new('NodeSocketFloat', 'V-Exponent')
 
@@ -463,9 +463,9 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[0].default_value = 0.075
+		self.inputs[0].default_value = get_TF_default(TF_uroughness)
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[1].default_value = 0.075
+		self.inputs[1].default_value = get_TF_default(TF_vroughness)
 #		self.inputs.new('NodeSocketFloat', 'U-Exponent')
 #		self.inputs.new('NodeSocketFloat', 'V-Exponent')
 		
@@ -544,9 +544,9 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'IOR')
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
 		self.inputs.new('NodeSocketFloat', 'U-Roughness')
-		self.inputs[4].default_value = 0.075
+		self.inputs[4].default_value = get_TF_default(TF_uroughness)
 		self.inputs.new('NodeSocketFloat', 'V-Roughness')
-		self.inputs[5].default_value = 0.075
+		self.inputs[5].default_value = get_TF_default(TF_vroughness)
 
 
 		self.outputs.new('NodeSocketShader', 'Surface')
