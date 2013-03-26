@@ -328,7 +328,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Base Material')
 		self.inputs.new('NodeSocketColor', 'Specular Color')
-		self.inputs[2].default_value = (0.04, 0.04, 0.04, 1.0)
+		self.inputs[1].default_value = (0.04, 0.04, 0.04, 1.0)
 		self.inputs.new('NodeSocketColor', 'Absorption Color')
 		self.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
