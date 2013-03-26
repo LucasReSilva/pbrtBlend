@@ -260,7 +260,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 		self.inputs.new('NodeSocketColor', 'Transmission Color')
 		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
 		self.inputs.new('NodeSocketColor', 'Reflection Color')
-		self.inputs[1].default_value = (0.7, 0.7, 0.7, 1.0)
+		self.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
 		self.inputs.new('NodeSocketFloat', 'IOR')
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
 		self.inputs.new('NodeSocketFloat', 'Film IOR')
