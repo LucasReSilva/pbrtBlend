@@ -305,7 +305,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-		self.inputs.new('NodeSocketFloat', 'Sigma')
+		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
@@ -368,7 +368,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-		self.inputs.new('NodeSocketFloat', 'Sigma')
+		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -383,7 +383,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 		self.inputs.new('NodeSocketBool', 'Energy Conserving')
 		self.inputs.new('luxrender_TC_Kr_socket', 'Refection Color')
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-		self.inputs.new('NodeSocketFloat', 'Sigma')
+		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -1001,6 +1001,25 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'vroughness', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Sigma socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_sigma_socket'
+	# Label for nice name display
+	bl_label = 'Sigma socket'
+	
+	sigma = bpy.props.FloatProperty(name='Sigma', description='Sigma', default=get_default(TF_sigma), subtype='NONE', min=-get_min_value(TF_sigma), max=get_max_value(TF_sigma), precision=4)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'sigma', text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
