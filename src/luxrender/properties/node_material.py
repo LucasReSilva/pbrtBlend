@@ -931,7 +931,7 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	
 	# Socket color
 	def draw_color(self, context, node):
-		return (0.33, 0.6, 0.85, 1.0)
+		return (0.6, 0.6, 0.6, 1.0)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
@@ -950,5 +950,5 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	
 	# Socket color
 	def draw_color(self, context, node):
-		return (0.33, 0.6, 0.85, 1.0)
+		return (0.6, 0.6, 0.6, 1.0)
 
