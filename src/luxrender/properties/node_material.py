@@ -626,7 +626,10 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -645,7 +648,10 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -664,7 +670,10 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -683,7 +692,10 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -702,7 +714,10 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -721,7 +736,10 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -740,7 +758,10 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -759,7 +780,10 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -778,7 +802,10 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -797,7 +824,10 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -816,7 +846,10 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -835,7 +868,10 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -854,7 +890,10 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -873,7 +912,10 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -892,7 +934,10 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -911,7 +956,10 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'color', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
