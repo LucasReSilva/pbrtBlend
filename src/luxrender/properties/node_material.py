@@ -611,6 +611,7 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.33, 0.6, 0.85, 1.0)
 
+##### custom color sockets ##### 
 #bpy.props.FloatVectorProperty(name="", description="", default=(0.0, 0.0, 0.0), min=sys.float_info.min, max=sys.float_info.max, soft_min=sys.float_info.min, soft_max=sys.float_info.max, step=3, precision=2, options={'ANIMATABLE'}, subtype='NONE', size=3, update=None, get=None, set=None)
 
 @LuxRenderAddon.addon_register_class
@@ -964,6 +965,8 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+
+##### custom float sockets ##### 
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
