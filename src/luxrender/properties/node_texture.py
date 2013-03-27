@@ -154,6 +154,36 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 		layout.prop(self, 'contrast')
 		
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
+	'''Vertex Colors texture node'''
+	bl_idname = 'luxrender_texture_hitpointcolor_node'
+	bl_label = 'Vertex Colors Texture'
+	bl_icon = 'TEXTURE'
+
+	def init(self, context):
+		self.outputs.new('NodeSocketColor', 'Color')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
+	'''Vertex Grey texture node'''
+	bl_idname = 'luxrender_texture_hitpointgrey_node'
+	bl_label = 'Vertex Grey Texture'
+	bl_icon = 'TEXTURE'
+
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
+	'''Vertex Alpha texture node'''
+	bl_idname = 'luxrender_texture_hitpointalpha_node'
+	bl_label = 'Vertex Alpha Texture'
+	bl_icon = 'TEXTURE'
+
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
 	'''Windy texture node'''
 	bl_idname = 'luxrender_texture_windy_node'
