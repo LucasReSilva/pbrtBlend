@@ -160,10 +160,10 @@ class luxrender_rendermode(declarative_property_group):
 			'name': 'Ray Buffer Size',
 			'description': 'Size of ray "bundles" fed to OpenCL device',
 			'default': 8192,
-			'min': 2,
-			'soft_min': 2,
-			'max': 16384,
-			'soft_max': 16384,
+			'min': 1024,
+			'soft_min': 1024,
+			'max': 65536,
+			'soft_max': 65536,
 			'save_in_preset': True
 		},
 		{
