@@ -45,17 +45,16 @@ from ..util import dict_merge
 
 from ..properties.material import * # for now just the big hammer for starting autogenerate sockets
 
-# pull default values for inputs and add alpha value to color tuplet
+# Get all float properties
+def get_props(TextureParameter, attribute):
+	for prop in TextureParameter.get_properties():
+		if prop['attr'].endswith('floatvalue'):
+			value = prop[attribute]
+	return value
+
+# Colors are simpler, so we only get the colortuple here
 def get_default(TextureParameter):
 	TextureParameter = TextureParameter.default
-	return TextureParameter
-
-def get_min_value(TextureParameter):
-	TextureParameter = TextureParameter.min
-	return TextureParameter
-
-def get_max_value(TextureParameter):
-	TextureParameter = TextureParameter.max
 	return TextureParameter
 
 def add_nodetype(layout, type):
@@ -977,7 +976,7 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'U-Roughness socket'
 	
-	uroughness = bpy.props.FloatProperty(name='U-Roughness', description='U-Roughness', default=get_default(TF_uroughness), subtype='NONE', min=-get_min_value(TF_uroughness), max=get_max_value(TF_uroughness), precision=4)
+	uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), description=get_props(TF_uroughness, 'description'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
@@ -996,7 +995,7 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'V-Roughness socket'
 	
-	vroughness = bpy.props.FloatProperty(name='V-Roughness', description='V-Roughness', default=get_default(TF_vroughness), subtype='NONE', min=-get_min_value(TF_vroughness), max=get_max_value(TF_vroughness), precision=4)
+	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
@@ -1015,7 +1014,7 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'Sigma socket'
 	
-	sigma = bpy.props.FloatProperty(name='Sigma', description='Sigma', default=get_default(TF_sigma), subtype='NONE', min=-get_min_value(TF_sigma), max=get_max_value(TF_sigma), precision=4)
+	sigma = bpy.props.FloatProperty(name=get_props(TF_sigma, 'name'), description=get_props(TF_sigma, 'description'), default=get_props(TF_sigma, 'default'), subtype=get_props(TF_sigma, 'subtype'), min=get_props(TF_sigma, 'min'), max=get_props(TF_sigma, 'max'), soft_min=get_props(TF_sigma, 'soft_min'), soft_max=get_props(TF_sigma, 'soft_max'), precision=get_props(TF_sigma, 'precision'))
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
