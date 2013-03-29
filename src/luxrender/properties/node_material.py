@@ -418,9 +418,10 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 	metal_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 		
 	def init(self, context):
-		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+#		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+#		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -430,6 +431,12 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 			layout.prop(self, 'metal_nkfile')
 		layout.prop(self, 'use_anisotropy')
 		layout.prop(self, 'use_exponent')
+		if not self.use_anisotropy and 'V-Roughness' in self.inputs.keys():
+			self.inputs.remove(self.inputs['V-Roughness'])
+			print("removed")
+		if  self.use_anisotropy and not 'V-Roughness' in self.inputs.keys():
+			self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+			print("recreated")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal2(luxrender_material_node):
