@@ -2580,7 +2580,7 @@ class luxrender_tex_imagesampling(declarative_property_group):
 				('bilinear', 'Bilinear', 'bilinear'),
 				('mipmap_trilinear', 'MipMap trilinear', 'mipmap_trilinear'),
 				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
-				('nearest', 'Nearest neighbor', 'nearest'),
+				('nearest', 'Nearest Neighbor', 'nearest'),
 			],
 			'save_in_preset': True
 		},
@@ -2680,7 +2680,7 @@ class luxrender_tex_normalmap(declarative_property_group):
 				('bilinear', 'Bilinear', 'bilinear'),
 				('mipmap_trilinear', 'MipMap trilinear', 'mipmap_trilinear'),
 				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
-				('nearest', 'Nearest neighbor', 'nearest'),
+				('nearest', 'Nearest Neighbor', 'nearest'),
 			],
 			'save_in_preset': True
 		},

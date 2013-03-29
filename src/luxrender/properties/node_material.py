@@ -112,10 +112,12 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 	
 	def draw(self, context):
 		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_texture_bump_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_clouds_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fbm_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_musgrave_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_hitpointcolor_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_normal_map_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_hitpointcolor_node) #These are drawn in the menu under the name "Vertex color/grey/alpha"
 		add_nodetype(layout, bpy.types.luxrender_texture_hitpointgrey_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_hitpointalpha_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
@@ -218,6 +220,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'M3')
 		self.inputs.new('luxrender_TC_Kd_socket', 'Absorbtion Color')
 		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -246,6 +249,7 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 		self.inputs.new('luxrender_TC_warp_Ks_socket', 'Warp Specular Color')
 		self.inputs.new('luxrender_TC_weft_Kd_socket', 'Weft Diffuse Color')
 		self.inputs.new('luxrender_TC_weft_Ks_socket', 'Weft Specular Color')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -270,6 +274,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
 		self.inputs.new('NodeSocketFloat', 'Film IOR')
 		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -287,6 +292,8 @@ class luxrender_material_type_node_glass2(luxrender_material_node):
 	dispersion = bpy.props.BoolProperty(name='Dispersion', description='Enables chromatic dispersion, volume should have a sufficient data for this', default=False)
 	
 	def init(self, context):
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+		
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
 	def draw_buttons(self, context, layout):
@@ -310,6 +317,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -332,6 +340,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -368,6 +377,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
 		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -383,6 +393,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Kr_socket', 'Refection Color')
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -411,7 +422,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 # 		self.inputs.new('NodeSocketFloat', 'U-Exponent')
 # 		self.inputs.new('NodeSocketFloat', 'V-Exponent')
-
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -449,7 +460,7 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 #		self.inputs.new('NodeSocketFloat', 'U-Exponent')
 #		self.inputs.new('NodeSocketFloat', 'V-Exponent')
-		
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -474,6 +485,7 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
 		self.inputs.new('NodeSocketFloat', 'Film IOR')
 		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
@@ -523,7 +535,7 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
-
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 
@@ -966,6 +978,26 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 		return (0.9, 0.9, 0.0, 1.0)
 
 ##### custom float sockets ##### 
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_bump_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Bump socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_bump_socket'
+	# Label for nice name display
+	bl_label = 'Bump socket'
+	
+	bump = bpy.props.FloatProperty(name='Bump')
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'bump', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
