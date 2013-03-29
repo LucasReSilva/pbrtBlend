@@ -1039,11 +1039,17 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	
 	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
 	
+	vexponent = bpy.props.FloatProperty(name=get_props(TF_vexponent, 'name'), description=get_props(TF_vexponent, 'description'), default=get_props(TF_vexponent, 'default'), subtype=get_props(TF_vexponent, 'subtype'), min=get_props(TF_vexponent, 'min'), max=get_props(TF_vexponent, 'max'), soft_min=get_props(TF_vexponent, 'soft_min'), soft_max=get_props(TF_vexponent, 'soft_max'), precision=get_props(TF_vexponent, 'precision'))
+	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'vroughness', text=self.name)
-		layout.active = node.use_anisotropy
-	
+		if not node.use_exponent:
+			layout.prop(self, 'vroughness', text='V-Roughness')
+			layout.active = node.use_anisotropy
+		else:
+			layout.prop(self, 'vexponent', text='V-Exponent')
+			layout.active = node.use_anisotropy
+
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
