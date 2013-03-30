@@ -88,6 +88,16 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
 @LuxRenderAddon.addon_register_class
+class lux_node_Inputs_Menu(bpy.types.Menu):
+	bl_idname = "Lux_NODE_inputs"
+	bl_label = "Inputs"
+	
+	def draw(self, context):
+		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_2d_coordinates_node)
+		add_nodetype(layout, bpy.types.luxrender_3d_coordinates_node)
+
+@LuxRenderAddon.addon_register_class
 class lux_node_Outputs_Menu(bpy.types.Menu):
 	bl_idname = "Lux_NODE_outputs"
 	bl_label = "Outputs"
@@ -179,6 +189,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		
 	def draw_add_menu(self, context, layout):
 		layout.label('LuxRender Node Types')
+		layout.menu("Lux_NODE_inputs")
 		layout.menu("Lux_NODE_outputs")
 		layout.menu("Lux_NODE_materials")
 		layout.menu("Lux_NODE_textures")

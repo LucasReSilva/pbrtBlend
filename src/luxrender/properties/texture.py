@@ -3680,6 +3680,8 @@ class luxrender_tex_transform(declarative_property_group):
 			'name': 'Rotate',
 			'default': (0.0, 0.0, 0.0),
 			'precision': 5,
+			'subtype': 'DIRECTION',
+			'unit': 'ROTATION',
 			'save_in_preset': True
 		},
 		{

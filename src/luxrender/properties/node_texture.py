@@ -43,7 +43,9 @@ from ..export.materials import (
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
-from ..properties.texture import luxrender_tex_normalmap
+from ..properties.texture import (
+	luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
+)
 
 #Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -63,6 +65,67 @@ noise_type_items = [
 	('soft_noise', 'Soft', ''),
 	('hard_noise', 'Hard', '')
 	]
+
+@LuxRenderAddon.addon_register_class
+class luxrender_3d_coordinates_node(luxrender_texture_node):
+	'''3D texture coordinates node'''
+	bl_idname = 'luxrender_3d_coordinates_node'
+	bl_label = '3D Texture Coordinates'
+	bl_icon = 'TEXTURE'
+
+	for prop in luxrender_tex_transform.properties:
+		if prop['attr'].startswith('coordinates'):
+			coordinate_items = prop['items']
+
+	coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
+	translate = bpy.props.FloatVectorProperty(name='Translate')
+	rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION')
+	scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
+
+
+	def init(self, context):
+		self.outputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'coordinates')
+		layout.prop(self, 'translate')
+		layout.prop(self, 'rotate')
+		layout.prop(self, 'scale')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_2d_coordinates_node(luxrender_texture_node):
+	'''2D texture coordinates node'''
+	bl_idname = 'luxrender_2d_coordinates_node'
+	bl_label = '2D Texture Coordinates'
+	bl_icon = 'TEXTURE'
+
+	for prop in luxrender_tex_mapping.properties:
+		if prop['attr'].startswith('type'):
+			coordinate_items = prop['items']
+
+	coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
+	uscale = bpy.props.FloatProperty(name='U Scale', default=1.0, min=-500.0, max=500.0)
+	vscale = bpy.props.FloatProperty(name='V Scale', default=-1.0, min=-500.0, max=500.0)
+	udelta = bpy.props.FloatProperty(name='U Offset', default=1.0, min=-500.0, max=500.0)
+	vdelta = bpy.props.FloatProperty(name='V Offset', default=1.0, min=-500.0, max=500.0)
+	v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
+	v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
+
+
+	def init(self, context):
+		self.outputs.new('luxrender_transform_socket', '2D Coordinate')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'coordinates')
+		if self.coordinates == 'planar':
+			layout.prop(self, 'v1')
+			layout.prop(self, 'v2')
+			layout.prop(self, 'udelta')
+		else:
+			layout.prop(self, 'uscale')
+			layout.prop(self, 'vscale')
+			layout.prop(self, 'udelta')
+			layout.prop(self, 'vdelta')
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_bump_map(luxrender_texture_node):
@@ -96,6 +159,7 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 
 
 	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
 	def draw_buttons(self, context, layout):
@@ -118,6 +182,7 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 
 
 	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
 	def draw_buttons(self, context, layout):
@@ -153,6 +218,7 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 
 
 	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
 	def draw_buttons(self, context, layout):
@@ -192,6 +258,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 
 
 	def init(self, context):
+		self.inputs.new('luxrender_transform_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
 	def draw_buttons(self, context, layout):
@@ -240,6 +307,7 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
 	bl_icon = 'TEXTURE'
 
 	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
 @LuxRenderAddon.addon_register_class
@@ -254,9 +322,49 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 
 
 	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
+		
+#3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names
+@LuxRenderAddon.addon_register_class
+class luxrender_coodinate_socket(bpy.types.NodeSocket):
+	# Description string
+	'''coordinate socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_coordinate_socket'
+	# Label for nice name display
+	bl_label = 'Coordinate socket'
+	
+	coordinate = bpy.props.FloatProperty()
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'coordinate', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.50, 0.25, 0.60, 1.0)
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_transform_socket(bpy.types.NodeSocket):
+	# Description string
+	'''transform socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_transform_socket'
+	# Label for nice name display
+	bl_label = 'Transform socket'
+	
+	coordinate = bpy.props.FloatProperty()
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'transform', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.65, 0.55, 0.75, 1.0)
 		
