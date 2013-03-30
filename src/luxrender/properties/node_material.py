@@ -464,28 +464,34 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 		if prop['attr'].startswith('preset'):
 			metal2_presets = prop['items']
 
-	metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
-	metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
-	metal2_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
+# 	metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
+# 	metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
+# 	metal2_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 	
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
 	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
 	
 	def init(self, context):
+		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
 	def draw_buttons(self, context, layout):
-		layout.prop(self, 'metal2_type')
-		if self.metal2_type == 'preset':
-			layout.prop(self, 'metal2_preset')
-		if self.metal2_type == 'nk':
-			layout.prop(self, 'metal2_nkfile')
+# 		layout.prop(self, 'metal2_type')
+# 		if self.metal2_type == 'preset':
+# 			layout.prop(self, 'metal2_preset')
+# 		if self.metal2_type == 'nk':
+# 			layout.prop(self, 'metal2_nkfile')
 		layout.prop(self, 'use_anisotropy')
 		layout.prop(self, 'use_exponent')
+		if not self.use_anisotropy and 'V-Roughness' in self.inputs.keys():
+			self.inputs.remove(self.inputs['V-Roughness'])
+			print("removed")
+		if  self.use_anisotropy and not 'V-Roughness' in self.inputs.keys():
+			self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+			print("recreated")
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mirror(luxrender_material_node):
