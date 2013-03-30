@@ -1107,7 +1107,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'Scattering Asymmetry socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB', default=(0.0, 0.0, 0.0), subtype='NONE', min=-1.0, max=1.0, precision=4)
+	color = bpy.props.FloatVectorProperty(name='Asymmetry', description=''Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering'', default=(0.0, 0.0, 0.0), subtype='NONE', min=-1.0, max=1.0, precision=4)
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
