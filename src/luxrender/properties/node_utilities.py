@@ -45,6 +45,7 @@ from ..util import dict_merge
 from ..properties.node_texture import (
 	variant_items, triple_variant_items
 )
+from ..properties.node_material import luxrender_fresnel_socket
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_add(luxrender_texture_node):
@@ -93,6 +94,78 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
 		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_mix(luxrender_texture_node):
+	'''Mix texture node'''
+	bl_idname = 'luxrender_texture_mix_node'
+	bl_label = 'Mix'
+	bl_icon = 'TEXTURE'
+
+	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketFloat', 'Mix Amount')
+
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'variant')
+
+		si = self.inputs.keys()
+		so = self.outputs.keys()
+		if self.variant == 'color':
+			if not 'Color 1' in si:
+				self.inputs.new('NodeSocketColor', 'Color 1')
+				self.inputs.new('NodeSocketColor', 'Color 2')
+			if 'Float 1' in si:
+				self.inputs.remove(self.inputs['Float 1'])
+				self.inputs.remove(self.inputs['Float 2'])
+			if 'IOR 1' in si:
+				self.inputs.remove(self.inputs['IOR 1'])
+				self.inputs.remove(self.inputs['IOR 2'])
+
+			if not 'Color' in so:
+				self.outputs.new('NodeSocketColor', 'Color')
+			if 'Float' in so:
+				self.outputs.remove(self.outputs['Float'])
+			if 'Fresnel' in so:
+				self.outputs.remove(self.outputs['Fresnel'])
+		
+		if self.variant == 'float':
+			if not 'Float 1' in si:
+				self.inputs.new('NodeSocketFloat', 'Float 1')
+				self.inputs.new('NodeSocketFloat', 'Float 2')
+			if 'Color 1' in si:
+				self.inputs.remove(self.inputs['Color 1'])
+				self.inputs.remove(self.inputs['Color 2'])
+			if 'IOR 1' in si:
+				self.inputs.remove(self.inputs['IOR 1'])
+				self.inputs.remove(self.inputs['IOR 2'])
+
+			if not 'Float' in so:
+				self.outputs.new('NodeSocketFloat', 'Float')
+			if 'Color' in so:
+				self.outputs.remove(self.outputs['Color'])
+			if 'Fresnel' in so:
+				self.outputs.remove(self.outputs['Fresnel'])
+		
+		if self.variant == 'fresnel':
+			if not 'IOR 1' in si:
+				self.inputs.new('luxrender_fresnel_socket', 'IOR 1')
+				self.inputs.new('luxrender_fresnel_socket', 'IOR 2')
+
+			if 'Color 1' in si:
+				self.inputs.remove(self.inputs['Color 1'])
+				self.inputs.remove(self.inputs['Color 2'])
+			if 'Float 1' in si:
+				self.inputs.remove(self.inputs['Float 1'])
+				self.inputs.remove(self.inputs['Float 2'])
+			
+			if not 'Fresnel' in so:
+				self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+			if 'Color' in so:
+				self.outputs.remove(self.outputs['Color'])
+			if 'Float' in so:
+				self.outputs.remove(self.outputs['Float'])
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_scale(luxrender_texture_node):
 	'''Scale texture node'''

@@ -166,6 +166,7 @@ class lux_node_Utilities_Menu(bpy.types.Menu):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_texture_add_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_harlequin_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_mix_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_scale_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_subtract_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_uv_node)
