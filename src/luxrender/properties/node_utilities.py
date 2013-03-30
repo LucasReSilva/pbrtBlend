@@ -83,6 +83,53 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 				self.outputs.new('NodeSocketFloat', 'Float')
 			if 'Color' in so:
 				self.outputs.remove(self.outputs['Color'])
+				
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_mix(luxrender_texture_node):
+	'''Constant texture node'''
+	bl_idname = 'luxrender_texture_constant_node'
+	bl_label = 'Value' #Mimics Cycles/Compositor "input > value" node
+	bl_icon = 'TEXTURE'
+
+	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
+	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR')
+	float = bpy.props.FloatProperty(name='Float')
+	fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0)
+
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'variant')
+		if self.variant == 'color':
+			layout.prop(self, 'color')
+		if self.variant == 'float':
+			layout.prop(self, 'float')
+		if self.variant == 'fresnel':
+			layout.prop(self, 'fresnel')
+
+		si = self.inputs.keys()
+		so = self.outputs.keys()
+		if self.variant == 'color':
+			if not 'Color' in so:
+				self.outputs.new('NodeSocketColor', 'Color')
+			if 'Float' in so:
+				self.outputs.remove(self.outputs['Float'])
+			if 'Fresnel' in so:
+				self.outputs.remove(self.outputs['Fresnel'])
+		
+		if self.variant == 'float':
+			if not 'Float' in so:
+				self.outputs.new('NodeSocketFloat', 'Float')
+			if 'Color' in so:
+				self.outputs.remove(self.outputs['Color'])
+			if 'Fresnel' in so:
+				self.outputs.remove(self.outputs['Fresnel'])
+		
+		if self.variant == 'fresnel':
+			if not 'Fresnel' in so:
+				self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+			if 'Color' in so:
+				self.outputs.remove(self.outputs['Color'])
+			if 'Float' in so:
+				self.outputs.remove(self.outputs['Float'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_harlequin(luxrender_texture_node):

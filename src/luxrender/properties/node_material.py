@@ -96,6 +96,7 @@ class lux_node_Inputs_Menu(bpy.types.Menu):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_2d_coordinates_node)
 		add_nodetype(layout, bpy.types.luxrender_3d_coordinates_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_constant_node) #Drawn as "Value", to match similar compositor/cycles node
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Outputs_Menu(bpy.types.Menu):
