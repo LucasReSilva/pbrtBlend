@@ -73,7 +73,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_glass2_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
+		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_layered_node)
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
@@ -364,7 +364,55 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'multibounce')
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
+	'''Glossytranslucent material node'''
+	bl_idname = 'luxrender_material_glossytranslucent_node'
+	bl_label = 'Glossytranslucent Material'
+	bl_icon = 'MATERIAL'
+	
+	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
+	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
+	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
+	
+	def init(self, context):
+		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
+		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth (nm)')
+		self.inputs.new('luxrender_TC_Ka_socket', 'Absorbtion Color')
+		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
+		self.outputs.new('NodeSocketShader', 'Surface')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'multibounce')
+		layout.prop(self, 'use_anisotropy')
+		layout.prop(self, 'use_exponent')
+		
+		# Roughness/Exponent representation switches
+		s = self.inputs.keys()
+		if not self.use_exponent:
+			if not 'U-Roughness' in s: self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+			if 'U-Exponent' in s: self.inputs.remove(self.inputs['U-Exponent'])
+		
+		if self.use_exponent:
+			if not 'U-Exponent' in s: self.inputs.new('luxrender_TF_uexponent_socket', 'U-Exponent')
+			if 'U-Roughness' in s: self.inputs.remove(self.inputs['U-Roughness'])
+		
+		if self.use_anisotropy:
+			if not self.use_exponent:
+				if not 'V-Roughness' in s: self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+				if 'V-Exponent' in s: self.inputs.remove(self.inputs['V-Exponent'])
+			
+			if self.use_exponent:
+				if not 'V-Exponent' in s: self.inputs.new('luxrender_TF_vexponent_socket', 'V-Exponent')
+				if 'V-Roughness' in s: self.inputs.remove(self.inputs['V-Roughness'])
+		else:
+			if 'V-Roughness' in s: self.inputs.remove(self.inputs['V-Roughness'])
+			if 'V-Exponent' in s: self.inputs.remove(self.inputs['V-Exponent'])
+
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_layered(luxrender_material_node):
 	'''Layered material node'''
@@ -1070,7 +1118,7 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'Bump socket'
 	
-	bump = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'))
+	bump = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'))
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
