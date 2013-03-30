@@ -42,7 +42,7 @@ from ..export.materials import (
 )
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
-
+from ..properties.node_material import luxrender_TC_Kt_socket
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blackbody(luxrender_texture_node):
@@ -52,7 +52,6 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 	bl_icon = 'TEXTURE'
 
 	temperature = bpy.props.FloatProperty(name='Temperature', default=6500.0)
-
 
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
@@ -69,10 +68,8 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 
 	depth = bpy.props.FloatProperty(name='Depth', default=1.0, subtype='DISTANCE', unit='LENGTH')
 
-
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', 'Transmission Color')
-		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		
 		self.outputs.new('NodeSocketColor', 'Color')
 		
