@@ -488,7 +488,6 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -580,17 +579,46 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 	bl_idname = 'luxrender_material_roughglass_node'
 	bl_label = 'Rough Glass Material'
 	bl_icon = 'MATERIAL'
+
+	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
+	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
 		self.inputs.new('NodeSocketFloat', 'IOR')
 		self.inputs.new('NodeSocketFloat', 'Cauchy B')
-		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
+
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'use_anisotropy')
+		layout.prop(self, 'use_exponent')
+		
+		# Roughness/Exponent representation switches
+		s = self.inputs.keys()
+		if not self.use_exponent and (not 'U-Roughness' in s or 'U-Exponent' in s):
+			self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+			self.inputs.remove(self.inputs['U-Exponent'])
+		
+		if self.use_exponent and ('U-Roughness' in s or not 'U-Exponent' in s):
+			self.inputs.new('luxrender_TF_uexponent_socket', 'U-Exponent')
+			self.inputs.remove(self.inputs['U-Roughness'])
+		
+		if self.use_anisotropy:
+			if not self.use_exponent and (not 'V-Roughness' in s or 'V-Exponent' in s):
+				self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+				self.inputs.remove(self.inputs['V-Exponent'])
+			
+			if self.use_exponent and ('V-Roughness' in s or not 'V-Exponent' in s):
+				self.inputs.new('luxrender_TF_vexponent_socket', 'V-Exponent')
+				self.inputs.remove(self.inputs['V-Roughness'])
+		else:
+			if 'V-Roughness' in s:
+				self.inputs.remove(self.inputs['V-Roughness'])
+			if 'V-Exponent' in s:
+				self.inputs.remove(self.inputs['V-Exponent'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(luxrender_material_node):
