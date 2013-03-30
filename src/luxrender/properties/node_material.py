@@ -429,10 +429,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 	metal_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 		
 	def init(self, context):
-#		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-#		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -442,12 +439,30 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 			layout.prop(self, 'metal_nkfile')
 		layout.prop(self, 'use_anisotropy')
 		layout.prop(self, 'use_exponent')
-		if not self.use_anisotropy and 'V-Roughness' in self.inputs.keys():
-			self.inputs.remove(self.inputs['V-Roughness'])
-			print("removed")
-		if  self.use_anisotropy and not 'V-Roughness' in self.inputs.keys():
-			self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
-			print("recreated")
+				
+		# Roughness/Exponent representation switches
+		s = self.inputs.keys()				
+		if not self.use_exponent and (not 'U-Roughness' in s or 'U-Exponent' in s):
+			self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+			self.inputs.remove(self.inputs['U-Exponent'])
+
+		if self.use_exponent and ('U-Roughness' in s or not 'U-Exponent' in s):
+			self.inputs.new('luxrender_TF_uexponent_socket', 'U-Exponent')
+			self.inputs.remove(self.inputs['U-Roughness'])
+
+		if self.use_anisotropy:
+			if not self.use_exponent and (not 'V-Roughness' in s or 'V-Exponent' in s):
+				self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+				self.inputs.remove(self.inputs['V-Exponent'])
+			
+			if self.use_exponent and ('V-Roughness' in s or not 'V-Exponent' in s):
+				self.inputs.new('luxrender_TF_vexponent_socket', 'V-Exponent')
+				self.inputs.remove(self.inputs['V-Roughness'])
+		else:
+			if 'V-Roughness' in s:
+				self.inputs.remove(self.inputs['V-Roughness'])
+			if 'V-Exponent' in s:
+				self.inputs.remove(self.inputs['V-Exponent'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal2(luxrender_material_node):
@@ -1028,25 +1043,11 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'U-Roughness socket'
 	
-	uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), description=get_props(TF_uroughness, 'description'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
-	
-	uexponent = bpy.props.FloatProperty(name=get_props(TF_uexponent, 'name'), description=get_props(TF_uexponent, 'description'), default=get_props(TF_uexponent, 'default'), subtype=get_props(TF_uexponent, 'subtype'), min=get_props(TF_uexponent, 'min'), max=get_props(TF_uexponent, 'max'), soft_min=get_props(TF_uexponent, 'soft_min'), soft_max=get_props(TF_uexponent, 'soft_max'), precision=get_props(TF_uexponent, 'precision'))
-	
-	
+	uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), description=get_props(TF_uroughness, 'description'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))	
 	
 	# Optional function for drawing the socket input valueTF_uexponent
 	def draw(self, context, layout, node):
-		if node.use_anisotropy:
-			if not node.use_exponent:
-				layout.prop(self, 'uroughness', text='U-Roughness')
-			else:
-				layout.prop(self, 'uexponent', text='U-Exponent')
-		else:
-			if not node.use_exponent:
-				layout.prop(self, 'uroughness', text='Roughness')
-			else:
-				layout.prop(self, 'uexponent', text='Exponent')
-		
+		layout.prop(self, 'uroughness', text=self.name)		
 
 	# Socket color
 	def draw_color(self, context, node):
@@ -1063,17 +1064,50 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	
 	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
 	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'vroughness', text=self.name)
+
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_uexponent_socket(bpy.types.NodeSocket):
+	# Description string
+	'''U-Exponent socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_uexponent_socket'
+	# Label for nice name display
+	bl_label = 'U-Exponent socket'
+	
+	uexponent = bpy.props.FloatProperty(name=get_props(TF_uexponent, 'name'), description=get_props(TF_uexponent, 'description'), default=get_props(TF_uexponent, 'default'), subtype=get_props(TF_uexponent, 'subtype'), min=get_props(TF_uexponent, 'min'), max=get_props(TF_uexponent, 'max'), soft_min=get_props(TF_uexponent, 'soft_min'), soft_max=get_props(TF_uexponent, 'soft_max'), precision=get_props(TF_uexponent, 'precision'))
+	
+	
+	
+	# Optional function for drawing the socket input valueTF_uexponent
+	def draw(self, context, layout, node):
+		layout.prop(self, 'uexponent', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_vexponent_socket(bpy.types.NodeSocket):
+	# Description string
+	'''V-Exponent socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_vexponent_socket'
+	# Label for nice name display
+	bl_label = 'V-Exponent socket'
+	
 	vexponent = bpy.props.FloatProperty(name=get_props(TF_vexponent, 'name'), description=get_props(TF_vexponent, 'description'), default=get_props(TF_vexponent, 'default'), subtype=get_props(TF_vexponent, 'subtype'), min=get_props(TF_vexponent, 'min'), max=get_props(TF_vexponent, 'max'), soft_min=get_props(TF_vexponent, 'soft_min'), soft_max=get_props(TF_vexponent, 'soft_max'), precision=get_props(TF_vexponent, 'precision'))
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		if not node.use_exponent:
-			layout.prop(self, 'vroughness', text='V-Roughness')
-			layout.active = node.use_anisotropy
-		else:
-			layout.prop(self, 'vexponent', text='V-Exponent')
-			layout.active = node.use_anisotropy
-
+		layout.prop(self, 'vexponent', text=self.name)
+	
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
