@@ -44,7 +44,7 @@ from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
 from ..properties.texture import (
-	luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
+	luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
 )
 
 #Define the list of noise types globally, this gets used by a few different nodes
@@ -64,6 +64,17 @@ noise_basis_items = [
 noise_type_items = [
 	('soft_noise', 'Soft', ''),
 	('hard_noise', 'Hard', '')
+	]
+
+variant_items = [
+	('color', 'Color', 'This node ouputs color data'),
+	('float', 'Float', 'This node outputs floating point data')
+	]
+	
+triple_variant_items = [
+	('color', 'Color', 'This node ouputs color data'),
+	('float', 'Float', 'This node outputs floating point data'),
+	('fresnel', 'Fresnel', 'This node outputs an optical dataset')
 	]
 
 @LuxRenderAddon.addon_register_class
@@ -188,6 +199,60 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_image_map(luxrender_texture_node):
+	'''Image map texture node'''
+	bl_idname = 'luxrender_texture_image_map_node'
+	bl_label = 'Image Map Texture'
+	bl_icon = 'TEXTURE'
+	
+	for prop in luxrender_tex_imagemap.properties:
+		if prop['attr'].startswith('filtertype'):
+			filter_items = prop['items']
+		if prop['attr'].startswith('wrap'):
+			wrap_items = prop['items']
+		if prop['attr'].startswith('channel'):
+			channel_items = prop['items']
+
+	filename = bpy.props.StringProperty(name='File Name', description='Path to the normal map', subtype='FILE_PATH')
+	variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
+	channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='mean')
+	gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0)
+	gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=-10.0, max=10.0)
+	filtertype = bpy.props.EnumProperty(name='Filter Type', description='Texture filtering method', items=filter_items, default='bilinear')
+	wrap = bpy.props.EnumProperty(name='Wrapping', description='Texture wrapping method', items=wrap_items, default='repeat')
+	maxanisotropy = bpy.props.FloatProperty(name='Max Anisotropy', default=8.0)
+	discardmipmaps = bpy.props.IntProperty(name='Discard Mipmaps', default=1)
+
+
+	def init(self, context):
+		self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'filename')
+		layout.prop(self, 'variant')
+		if self.variant == 'float':
+			layout.prop(self, 'channel')
+		layout.prop(self, 'gamma')
+		layout.prop(self, 'gain')
+		layout.prop(self, 'filtertype')
+		if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
+			layout.prop(self, 'maxanisotropy')
+			layout.prop(self, 'discardmipmaps')
+		layout.prop(self, 'wrap')
+		
+		s = self.outputs.keys()
+		if self.variant == 'color':
+			if not 'Color' in s:
+				self.outputs.new('NodeSocketColor', 'Color')
+			if 'Float' in s:
+				self.outputs.remove(self.outputs['Float'])
+		if self.variant == 'float':
+			if not 'Float' in s:
+				self.outputs.new('NodeSocketFloat', 'Float')
+			if 'Color' in s:
+				self.outputs.remove(self.outputs['Color'])
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
