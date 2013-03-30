@@ -501,12 +501,30 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 # 			layout.prop(self, 'metal2_nkfile')
 		layout.prop(self, 'use_anisotropy')
 		layout.prop(self, 'use_exponent')
-		if not self.use_anisotropy and 'V-Roughness' in self.inputs.keys():
-			self.inputs.remove(self.inputs['V-Roughness'])
-			print("removed")
-		if  self.use_anisotropy and not 'V-Roughness' in self.inputs.keys():
-			self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
-			print("recreated")
+		
+		# Roughness/Exponent representation switches
+		s = self.inputs.keys()
+		if not self.use_exponent and (not 'U-Roughness' in s or 'U-Exponent' in s):
+			self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+			self.inputs.remove(self.inputs['U-Exponent'])
+		
+		if self.use_exponent and ('U-Roughness' in s or not 'U-Exponent' in s):
+			self.inputs.new('luxrender_TF_uexponent_socket', 'U-Exponent')
+			self.inputs.remove(self.inputs['U-Roughness'])
+		
+		if self.use_anisotropy:
+			if not self.use_exponent and (not 'V-Roughness' in s or 'V-Exponent' in s):
+				self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+				self.inputs.remove(self.inputs['V-Exponent'])
+			
+			if self.use_exponent and ('V-Roughness' in s or not 'V-Exponent' in s):
+				self.inputs.new('luxrender_TF_vexponent_socket', 'V-Exponent')
+				self.inputs.remove(self.inputs['V-Roughness'])
+		else:
+			if 'V-Roughness' in s:
+				self.inputs.remove(self.inputs['V-Roughness'])
+			if 'V-Exponent' in s:
+				self.inputs.remove(self.inputs['V-Exponent'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mirror(luxrender_material_node):
