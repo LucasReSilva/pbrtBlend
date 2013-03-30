@@ -258,7 +258,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 
 
 	def init(self, context):
-		self.inputs.new('luxrender_transform_socket', '3D Coordinate')
+		self.inputs.new('luxrender_transform_socket', '2D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
 	def draw_buttons(self, context, layout):
@@ -352,13 +352,13 @@ class luxrender_coodinate_socket(bpy.types.NodeSocket):
 @LuxRenderAddon.addon_register_class
 class luxrender_transform_socket(bpy.types.NodeSocket):
 	# Description string
-	'''transform socket'''
+	'''2D transform socket'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_transform_socket'
 	# Label for nice name display
 	bl_label = 'Transform socket'
 	
-	coordinate = bpy.props.FloatProperty()
+	transform = bpy.props.FloatProperty()
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
