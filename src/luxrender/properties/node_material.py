@@ -1070,7 +1070,7 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'Bump socket'
 	
-	bump = bpy.props.FloatProperty(name='Bump')
+	bump = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'))
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
