@@ -83,7 +83,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
 		add_nodetype(layout, bpy.types.luxrender_material_null_node)
 		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
+		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
@@ -670,6 +670,19 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 			if 'V-Exponent' in s: self.inputs.remove(self.inputs['V-Exponent'])
 
 @LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_scatter(luxrender_material_node):
+	'''Scatter material node'''
+	bl_idname = 'luxrender_material_scatter_node'
+	bl_label = 'Scatter Material'
+	bl_icon = 'MATERIAL'
+	
+	def init(self, context):
+		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
+		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
+		
+		self.outputs.new('NodeSocketShader', 'Surface')
+
+@LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(luxrender_material_node):
 	'''Clear volume node'''
 	bl_idname = 'luxrender_volume_clear_node'
@@ -1099,7 +1112,6 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
-		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
