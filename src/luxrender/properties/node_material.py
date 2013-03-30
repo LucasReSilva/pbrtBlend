@@ -152,6 +152,7 @@ class lux_node_Frensel_Menu(bpy.types.Menu):
 	
 	def draw(self, context):
 		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_texture_cauchy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fresnelcolor_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fresnelname_node)
 

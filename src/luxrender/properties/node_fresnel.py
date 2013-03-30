@@ -43,8 +43,9 @@ from ..export.materials import (
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
-from ..properties.node_material import luxrender_fresnel_socket
-
+from ..properties.node_material import (
+	luxrender_fresnel_socket, luxrender_TC_Kr_socket
+)
 from ..properties.texture import luxrender_tex_fresnelname
 
 @LuxRenderAddon.addon_register_class
@@ -55,11 +56,32 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 	bl_icon = 'TEXTURE'
 
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', 'Reflection Color')
-		self.inputs[0].default_value = (0.7, 0.7, 0.7, 1.0)
+		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
 	
 		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_cauchy(luxrender_texture_node):
+	'''Cauchy Node'''
+	bl_idname = 'luxrender_texture_cauchy_node'
+	bl_label = 'Cauchy'
+	bl_icon = 'TEXTURE'
+	
+	use_ior = bpy.props.BoolProperty(name='Use IOR', default=True)
+	cauchy_n = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0)
+	cauchy_a = bpy.props.FloatProperty(name='A', default=1.458, min=0.0, max=10.0)
+	cauchy_b = bpy.props.FloatProperty(name='B', default=0.0035, min=0.0, max=10.0)
 
+	def init(self, context):
+		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'use_ior')
+		if self.use_ior:	
+			layout.prop(self, 'cauchy_n')
+		else:
+			layout.prop(self, 'cauchy_a')
+		layout.prop(self, 'cauchy_b')
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
