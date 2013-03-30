@@ -85,7 +85,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
 		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
 #		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
+		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Inputs_Menu(bpy.types.Menu):
@@ -681,6 +681,33 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_velvet(luxrender_material_node):
+	'''Velvet material node'''
+	bl_idname = 'luxrender_material_velvet_node'
+	bl_label = 'Velvet Material'
+	bl_icon = 'MATERIAL'
+
+	advanced = bpy.props.BoolProperty(name='Advanced', description='Advanced Velvet Parameters', default=False)
+	thickness = bpy.props.FloatProperty(name='Thickness', description='', default=0.1, subtype='NONE', min=-0.0, max=1.0, soft_min=-0.0, soft_max=1.0, precision=2)
+	p1 = bpy.props.FloatProperty(name='p1', description='', default=-2.0, subtype='NONE', min=-100.0, max=100.0, soft_min=-100.0, soft_max=100.0, precision=2)
+	p2 = bpy.props.FloatProperty(name='p2', description='', default=-10.0, subtype='NONE', min=-100.0, max=100.0, soft_min=-100.0, soft_max=100.0, precision=2)
+	p3 = bpy.props.FloatProperty(name='p2', description='', default=-2.0, subtype='NONE', min=-100.0, max=100.0, soft_min=-100.0, soft_max=100.0, precision=2)
+	
+	def init(self, context):
+		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
+		
+		self.outputs.new('NodeSocketShader', 'Surface')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'advanced')
+		layout.prop(self, 'thickness')
+		if self.advanced:
+			layout.prop(self, 'p1')
+			layout.prop(self, 'p2')
+			layout.prop(self, 'p3')
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(luxrender_material_node):
