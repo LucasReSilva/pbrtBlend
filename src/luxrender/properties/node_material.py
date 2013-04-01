@@ -319,10 +319,10 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-		self.inputs.new('NodeSocketFloat', 'IOR')
-		self.inputs.new('NodeSocketFloat', 'Cauchy B')
-		self.inputs.new('NodeSocketFloat', 'Film IOR')
-		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
+		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+		self.inputs.new('luxrender_TF_cauchyb_socket', 'Cauchy B')
+		self.inputs.new('luxrender_TF_film_ior_socket', 'Film IOR')
+		self.inputs.new('luxrender_TF_film_thick_socket', 'Film Thickness (nm)')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -702,8 +702,8 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-		self.inputs.new('NodeSocketFloat', 'Film IOR')
-		self.inputs.new('NodeSocketFloat', 'Film Thickness (nm)')
+		self.inputs.new('luxrender_TF_film_ior_socket', 'Film IOR')
+		self.inputs.new('luxrender_TF_film_thick_socket', 'Film Thickness (nm)')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -712,6 +712,14 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 	@classmethod	
 	def poll(cls, tree):
 		return tree.bl_idname == 'luxrender_material_nodes'
+
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'mirror'
+		
+		mirror_params = ParamSet()
+		mirror_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_material(mat_type, self.name, mirror_params)
 
 
 @LuxRenderAddon.addon_register_class
@@ -781,8 +789,8 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-		self.inputs.new('NodeSocketFloat', 'IOR')
-		self.inputs.new('NodeSocketFloat', 'Cauchy B')
+		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+		self.inputs.new('luxrender_TF_cauchyb_socket', 'Cauchy B')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -1694,6 +1702,150 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 			bumpmap_params.add_texture('bumpmap', tex_name)
 		
 		return bumpmap_params
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Cauchy B socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_cauchyb_socket'
+	# Label for nice name display
+	bl_label = 'Cauchy B socket'
+	
+	cauchyb = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'), description=get_props(TF_cauchyb, 'description'), default=get_props(TF_cauchyb, 'default'), subtype=get_props(TF_cauchyb, 'subtype'), min=get_props(TF_cauchyb, 'min'), max=get_props(TF_cauchyb, 'max'), soft_min=get_props(TF_cauchyb, 'soft_min'), soft_max=get_props(TF_cauchyb, 'soft_max'), precision=get_props(TF_cauchyb, 'precision'))
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'cauchyb', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			cauchyb_params = ParamSet() \
+				.add_texture('cauchyb', tex_name)
+		else:
+			cauchyb_params = ParamSet() \
+				.add_float('cauchyb', self.cauchyb)
+		
+		return cauchyb_params
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Thin film IOR socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_film_ior_socket'
+	# Label for nice name display
+	bl_label = 'Thin Film IOR socket'
+	
+	filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), description=get_props(TF_filmindex, 'description'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'))
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'filmindex', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			filmindex_params = ParamSet() \
+				.add_texture('filmindex', tex_name)
+		else:
+			filmindex_params = ParamSet() \
+				.add_float('filmindex', self.filmindex)
+		
+		return filmindex_params
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Thin film IOR socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_film_thick_socket'
+	# Label for nice name display
+	bl_label = 'Thin Film thickness socket'
+	
+	filmindex = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), description=get_props(TF_film, 'description'), default=get_props(TF_film, 'default'), subtype=get_props(TF_film, 'subtype'), min=get_props(TF_film, 'min'), max=get_props(TF_film, 'max'), soft_min=get_props(TF_film, 'soft_min'), soft_max=get_props(TF_film, 'soft_max'), precision=get_props(TF_film, 'precision'))
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'film', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			film_params = ParamSet() \
+				.add_texture('film', tex_name)
+		else:
+			film_params = ParamSet() \
+				.add_float('film', self.film)
+		
+		return film_params
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_ior_socket(bpy.types.NodeSocket):
+	# Description string
+	'''IOR socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_ior_socket'
+	# Label for nice name display
+	bl_label = 'IOR socket'
+	
+	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'))
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'index', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			index_params = ParamSet() \
+				.add_texture('index', tex_name)
+		else:
+			index_params = ParamSet() \
+				.add_float('index', self.index)
+		
+		return index_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
