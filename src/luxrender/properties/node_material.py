@@ -961,7 +961,7 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 		
 	def get_paramset(self, make_texture):
 		print('get_paramset diffuse color')
-		tex_node = get_linked_node(self.links[0])
+		tex_node = get_linked_node(self)
 		if tex_node:
 			print('linked from %s' % tex_node.name)
 			if not check_node_export_texture(tex_node):
