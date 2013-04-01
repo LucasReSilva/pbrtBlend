@@ -378,10 +378,9 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		for sn in ['Specular Color']:
-			socket = self.inputs.get(sn)
-			if socket:
-				socket.hide = self.use_ior
+		socket = self.inputs['Specular Color']
+		if socket:
+			socket.hide = self.use_ior
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
@@ -434,10 +433,9 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		for sn in ['Specular Color']:
-			socket = self.inputs.get(sn)
-			if socket:
-				socket.hide = self.use_ior
+		socket = self.inputs['Specular Color']
+		if socket:
+			socket.hide = self.use_ior
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
@@ -499,10 +497,9 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		for sn in ['Specular Color']:
-			socket = self.inputs.get(sn)
-			if socket:
-				socket.hide = self.use_ior
+		socket = self.inputs['Specular Color']
+		if socket:
+			socket.hide = self.use_ior
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
@@ -534,7 +531,6 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 			else:
 				menu_text = '-- Choose preset --'
 			layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-		layout.prop(self, 'multibounce')
 		layout.prop(self, 'use_anisotropy')
 
 @LuxRenderAddon.addon_register_class
