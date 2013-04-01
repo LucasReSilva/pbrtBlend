@@ -308,6 +308,16 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'arch')
 		
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'glass'
+		
+		glass_params = ParamSet()
+		glass_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		glass_params.add_bool('architectural', self.arch)
+		
+		return make_material(mat_type, self.name, glass_params)
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glass2(luxrender_material_node):
 	'''Glass2 material node'''
@@ -326,6 +336,16 @@ class luxrender_material_type_node_glass2(luxrender_material_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'arch')
 		layout.prop(self, 'dispersion')
+		
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'glass2'
+		
+		glass2_params = ParamSet()
+		
+		glass2_params.add_bool('architectural', self.arch)
+		glass2_params.add_bool('dispersion', self.dispersion)
+		
+		return make_material(mat_type, self.name, glass2_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glossy(luxrender_material_node):
@@ -641,6 +661,14 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 		else:
 			if 'V-Roughness' in s: self.inputs.remove(self.inputs['V-Roughness'])
 			if 'V-Exponent' in s: self.inputs.remove(self.inputs['V-Exponent'])
+			
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'metal2'
+		
+		metal2_params = ParamSet()
+		metal2_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_material(mat_type, self.name, metal2_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mirror(luxrender_material_node):
