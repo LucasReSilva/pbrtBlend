@@ -249,11 +249,21 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
-
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'carpaint_presets')
+		
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'carpaint'
+		
+		carpaint_params = ParamSet()
+		carpaint_params.update( get_socket_paramsets(self.inputs, make_texture) ) #have to export the sockets, or else bump/normal mapping won't work when using a preset
+	
+		if self.carpaint_presets != '-':
+			carpaint_params.add_string('name', self.carpaint_presets)
+			
+		return make_material(mat_type, self.name, carpaint_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_cloth(luxrender_material_node):
@@ -284,6 +294,18 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 		layout.prop(self, 'fabric_type')
 		layout.prop(self, 'repeat_u')
 		layout.prop(self, 'repeat_v')
+		
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'cloth'
+		
+		cloth_params = ParamSet()
+		cloth_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		cloth_params.add_string('presetname', self.fabric_type)
+		cloth_params.add_float('repeat_u', self.repeat_u)
+		cloth_params.add_float('repeat_v', self.repeat_v)
+				
+		return make_material(mat_type, self.name, cloth_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glass(luxrender_material_node):
@@ -738,8 +760,13 @@ class luxrender_material_type_node_null(luxrender_material_node):
 	def init(self, context):
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
-#Volume and area light nodes
-
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'null'
+		
+		null_params = ParamSet()		
+		
+		return make_material(mat_type, self.name, null_params)
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_roughglass(luxrender_material_node):
 	'''Rough Glass material node'''
@@ -749,6 +776,7 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
 	use_exponent = bpy.props.BoolProperty(name='Use Exponent', description='Anisotropic Roughness', default=False)
+	dispersion = bpy.props.BoolProperty(name='Dispersion', description='Enables chromatic dispersion, volume should have a sufficient data for this', default=False)
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
@@ -762,6 +790,7 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'use_anisotropy')
 		layout.prop(self, 'use_exponent')
+		layout.prop(self, 'dispersion')
 		
 		# Roughness/Exponent representation switches
 		s = self.inputs.keys()
@@ -784,6 +813,16 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 		else:
 			if 'V-Roughness' in s: self.inputs.remove(self.inputs['V-Roughness'])
 			if 'V-Exponent' in s: self.inputs.remove(self.inputs['V-Exponent'])
+
+	def export_material(self, make_material, make_texture):		
+		mat_type = 'roughglass'
+		
+		roughglass_params = ParamSet()
+		roughglass_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		roughglass_params.add_bool('dispersion', self.dispersion)
+		
+		return make_material(mat_type, self.name, roughglass_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_scatter(luxrender_material_node):
