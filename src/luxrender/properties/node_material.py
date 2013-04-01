@@ -456,6 +456,14 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
+	def export(self, material, export_material, export_texture):
+		mat_type = 'matte'
+		
+		matte_params = ParamSet()
+		matte_params.update( get_socket_paramsets(self.inputs, material, export_texture) )
+		
+		return export_material(mat_type, self.name, matte_params)
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 	'''Matte material node'''
@@ -950,6 +958,24 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, material, export_texture):
+		print('get_paramset diffuse color')
+		if self.is_linked:
+			tex_node = self.links[0].from_node
+			print('linked from %s' % tex_node.name)
+			if not check_node_export(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export(material, export_texture)
+			
+			kd_params = ParamSet() \
+				.add_texture('Kd', tex_name)
+		else:
+			kd_params = ParamSet() \
+				.add_color('Kd', self.color)
+		
+		return kd_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
