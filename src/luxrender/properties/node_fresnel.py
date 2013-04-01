@@ -110,3 +110,16 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 		layout.prop(self, 'frname_preset')
 		if self.frname_preset == 'nk':
 			layout.prop(self, 'frname_nkfile')
+			
+	def export_texture(self, make_texture):
+		fresnelname_params = ParamSet()
+		
+		if self.frname_preset == 'nk':	# use an NK data file
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(LuxManager.CurrentScene, self, self.frname_nkfile, fresnelname_params, 'filename')
+		else:
+			# use a preset name
+			fresnelname_params.add_string('name', self.frname_preset)
+
+		return make_texture('fresnel', 'fresnelname', self.name, fresnelname_params)
