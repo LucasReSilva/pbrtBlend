@@ -598,9 +598,6 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 	bl_label = 'Metal Material'
 	bl_icon = 'MATERIAL'
 	
-#	for prop in luxrender_mat_metal.properties:
-#		print("-------------", prop['type'], prop['attr']) # all properties material has
-	
 	for prop in luxrender_mat_metal.properties:
 		if prop['attr'].startswith('name'):
 			metal_presets = prop['items']
@@ -967,7 +964,9 @@ class luxrender_material_output_node(luxrender_node):
 		
 		return set()
 
-# Custom socket types
+# Custom socket types, lookup parameters here:
+# http://www.blender.org/documentation/blender_python_api_2_66a_release/bpy.props.html?highlight=bpy.props.floatproperty#bpy.props.FloatProperty
+
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	# Description string
@@ -1006,7 +1005,6 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 		return fresnel_params
 
 ##### custom color sockets ##### 
-#bpy.props.FloatVectorProperty(name="", description="", default=(0.0, 0.0, 0.0), min=sys.float_info.min, max=sys.float_info.max, soft_min=sys.float_info.min, soft_max=sys.float_info.max, step=3, precision=2, options={'ANIMATABLE'}, subtype='NONE', size=3, update=None, get=None, set=None)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
