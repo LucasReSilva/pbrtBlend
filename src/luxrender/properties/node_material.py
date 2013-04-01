@@ -634,7 +634,7 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 	bl_icon = 'MATERIAL'
 
 	def init(self, context):
-		self.inputs.new('NodeSocketFloat', 'Mix Amount')
+		self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')
 		self.inputs.new('NodeSocketShader', 'Material 1')
 		self.inputs.new('NodeSocketShader', 'Material 2')
 		
@@ -1261,6 +1261,45 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 ##### custom float sockets ##### 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_TF_amount_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Bump socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_TF_amount_socket'
+	# Label for nice name display
+	bl_label = 'Amount socket'
+	
+	amount = bpy.props.FloatProperty(name=get_props(TF_amount, 'name'), description=get_props(TF_amount, 'description'), default=get_props(TF_amount, 'default'), subtype=get_props(TF_amount, 'subtype'), unit=get_props(TF_amount, 'unit'), min=get_props(TF_amount, 'min'), max=get_props(TF_amount, 'max'), soft_min=get_props(TF_amount, 'soft_min'), soft_max=get_props(TF_amount, 'soft_max'), precision=get_props(TF_amount, 'precision'))
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		layout.prop(self, 'amount', text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+	
+	def get_paramset(self, material, export_texture):
+		print('get_paramset amount')
+		tex_node = get_linked_node(self)
+		if not tex_node is None:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export(material, export_texture)
+			
+			amount_params = ParamSet() \
+				.add_texture('amount', tex_name)
+		else:
+			print('value %f' % self.vroughness)
+			amount_params = ParamSet() \
+				.add_float('amount', self.amount)
+		
+		return amount_params
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	# Description string
 	'''Bump socket'''
@@ -1339,8 +1378,8 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	
 	def get_paramset(self, material, export_texture):
 		print('get_paramset vroughness')
-		if self.is_linked:
-			tex_node = self.links[0].from_node
+		tex_node = get_linked_node(self)
+		if not tex_node is None:
 			print('linked from %s' % tex_node.name)
 			if not check_node_export(tex_node):
 				return ParamSet()
