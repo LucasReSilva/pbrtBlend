@@ -356,6 +356,11 @@ class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
 		
+	def export(self, material, export_texture):
+		hitpointcolor_params = ParamSet()
+				
+		return export_texture('color', 'hitpointcolor', self.name, hitpointcolor_params)
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 	'''Vertex Grey texture node'''
@@ -380,6 +385,11 @@ class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def export(self, material, export_texture):
+		hitpointalpha_params = ParamSet()
+				
+		return export_texture('float', 'hitpointalpha', self.name, hitpointalpha_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
