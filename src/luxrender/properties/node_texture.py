@@ -165,6 +165,22 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'bump_height')
+		
+	def export(self, material, export_texture):
+		bumpmap_params = ParamSet() \
+			.add_float('tex1', self.bump_height)
+			
+		def export_bumpmap(socket):
+			node = get_linked_node(socket)
+			if not check_node_export(node):
+				return None
+			return node.export(material, export_texture)
+		
+		bumpmap_name = export_bumpmap(self.inputs[0])
+		
+		bumpmap_params.add_texture("tex2", bumpmap_name)
+		
+		return export_texture('float', 'scale', self.name, bumpmap_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
