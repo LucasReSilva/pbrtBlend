@@ -1344,6 +1344,21 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 
+	def get_paramset(self, material, export_texture):
+		if self.is_linked:
+			tex_node = self.links[0].from_node
+			if not check_node_export(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export(material, export_texture)
+			
+			bumpmap_params = ParamSet() \
+				.add_texture('bumpmap', tex_name)
+		else:
+			bumpmap_params = ParamSet() \
+				.add_float('bumpmap', self.bump)
+		
+		return bumpmap_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
@@ -1479,4 +1494,20 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
+		
+	def get_paramset(self, material, export_texture):
+		if self.is_linked:
+			tex_node = self.links[0].from_node
+			if not check_node_export(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export(material, export_texture)
+			
+			sigma_params = ParamSet() \
+				.add_texture('sigma', tex_name)
+		else:
+			sigma_params = ParamSet() \
+				.add_float('sigma', self.sigma)
+		
+		return sigma_params
 
