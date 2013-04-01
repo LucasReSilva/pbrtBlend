@@ -71,6 +71,12 @@ def find_node_input(node, name):
 	
 	return None
 
+
+def get_linked_node(socket):
+	if not socket.is_linked:
+		return None
+	return socket.links[0].from_node
+
 def check_node_export(node):
 	if not hasattr(node, 'export'):
 		print('No export() for node: ' + node.bl_idname)

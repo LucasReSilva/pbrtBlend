@@ -31,7 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import (luxrender_texture_node, check_node_export, check_node_get_paramset)
+from ..properties import (luxrender_texture_node, get_linked_node, check_node_export, check_node_get_paramset)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -412,12 +412,9 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 			.add_integer('octaves', self.octaves) \
 			.add_float('roughness', self.roughness)
 		
-		coord_socket = self.inputs[0]
-		if coord_socket.is_linked:
-			coord_node = coord_socket.links[0].from_node
-			print('linked to %s' % coord_node.name)
-			if check_node_get_paramset(coord_node):
-				wrinkled_params.update( coord_node.get_paramset() )
+		coord_node = get_linked_node(self.inputs[0])
+		if check_node_get_paramset(coord_node):
+			wrinkled_params.update( coord_node.get_paramset() )
 		
 		return export_texture('float', 'wrinkled', self.name, wrinkled_params)
 		

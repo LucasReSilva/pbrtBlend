@@ -31,7 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import (luxrender_node, luxrender_material_node, check_node_export, check_node_get_paramset)
+from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export, check_node_get_paramset)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -543,7 +543,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 			# use a preset name
 			metal_params.add_string('name', self.metal_preset)
 		
-		export_material(mat_type, self.name, metal_params)
+		return export_material(mat_type, self.name, metal_params)
 	
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal2(luxrender_material_node):
@@ -639,6 +639,28 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 		self.inputs.new('NodeSocketShader', 'Material 2')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
+		
+	def export(self, material, export_material, export_texture):
+		print('export node: mix')
+		
+		mat_type = 'mix'
+		
+		mix_params = ParamSet()
+		mix_params.update( get_socket_paramsets([self.inputs[0]], material, export_texture) )
+		
+		def export_submat(socket):
+			node = get_linked_node(socket)
+			if not check_node_export(node):
+				return None
+			return node.export(material, export_material, export_texture)
+		
+		mat1_name = export_submat(self.inputs[1])
+		mat2_name = export_submat(self.inputs[2])
+		
+		mix_params.add_string("namedmaterial1", mat1_name)
+		mix_params.add_string("namedmaterial2", mat2_name)
+		
+		return export_material(mat_type, self.name, mix_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_null(luxrender_material_node):
@@ -829,6 +851,8 @@ class luxrender_material_output_node(luxrender_node):
 				mat_params.add_string('type', mat_type)
 				ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
 				ExportedMaterials.export_new_named(lux_context)
+				
+				return material_name
 				
 			export_material = export_material_indirect
 		elif mode == 'direct':
