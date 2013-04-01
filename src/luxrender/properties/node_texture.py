@@ -42,7 +42,6 @@ from ..export.materials import (
 )
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
-
 from ..properties.texture import (
 	luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
 )

@@ -45,7 +45,9 @@ from ..util import dict_merge
 from ..properties.node_texture import (
 	variant_items, triple_variant_items
 )
-from ..properties.node_material import luxrender_fresnel_socket
+from ..properties.node_material import (
+	luxrender_fresnel_socket, luxrender_TF_amount_socket
+)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_add(luxrender_texture_node):
@@ -85,7 +87,7 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 				self.outputs.remove(self.outputs['Color'])
 				
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_mix(luxrender_texture_node):
+class luxrender_texture_type_node_constant(luxrender_texture_node):
 	'''Constant texture node'''
 	bl_idname = 'luxrender_texture_constant_node'
 	bl_label = 'Value' #Mimics Cycles/Compositor "input > value" node
@@ -151,7 +153,7 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketFloat', 'Mix Amount')
+		self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')
 
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'variant')
