@@ -1848,7 +1848,9 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input valueTF_uexponent
 	def draw(self, context, layout, node):
-		layout.prop(self, 'uroughness', text=self.name)
+		if node.use_anisotropy: name = 'U-Roughness'
+		else: name = 'Roughness'
+		layout.prop(self, 'uroughness', text=name)
 		
 	# Socket color
 	def draw_color(self, context, node):
