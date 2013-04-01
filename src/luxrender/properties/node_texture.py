@@ -366,6 +366,11 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
+	def export(self, material, export_texture):
+		hitpointgrey_params = ParamSet()
+				
+		return export_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
+		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
 	'''Vertex Alpha texture node'''
