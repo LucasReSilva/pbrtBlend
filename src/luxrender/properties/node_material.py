@@ -1016,6 +1016,23 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.33, 0.6, 0.85, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			fresnel_params = ParamSet() \
+				.add_texture('fresnel', tex_name)
+		else:
+			fresnel_params = ParamSet() \
+				.add_float('fresnel', self.fresnel)
+		
+		return fresnel_params
 
 ##### custom color sockets ##### 
 #bpy.props.FloatVectorProperty(name="", description="", default=(0.0, 0.0, 0.0), min=sys.float_info.min, max=sys.float_info.max, soft_min=sys.float_info.min, soft_max=sys.float_info.max, step=3, precision=2, options={'ANIMATABLE'}, subtype='NONE', size=3, update=None, get=None, set=None)
