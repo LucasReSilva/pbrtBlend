@@ -776,7 +776,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
+		self.inputs.new('luxrender_AC_socket', 'Absorption Color')
 		self.inputs[1].color = (1.0, 1.0, 1.0) # start with different default
 
 		self.outputs.new('NodeSocketShader', 'Volume')
@@ -790,7 +790,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
+		self.inputs.new('luxrender_AC_socket', 'Absorption Color')
 		self.inputs[1].color = (1.0, 1.0, 1.0) # start with different default
 		self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
@@ -936,6 +936,24 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		print('get_paramset diffuse color')
+		tex_node = get_linked_node(self)
+		if tex_node:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			ka_params = ParamSet() \
+				.add_texture('Ka', tex_name)
+		else:
+			ka_params = ParamSet() \
+				.add_color('Ka', self.color)
+		
+		return ka_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
@@ -998,6 +1016,22 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			kr_params = ParamSet() \
+				.add_texture('Kr', tex_name)
+		else:
+			kr_params = ParamSet() \
+				.add_color('Kr', self.color)
+		
+		return kr_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
@@ -1020,6 +1054,22 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			ks_params = ParamSet() \
+				.add_texture('Ks', tex_name)
+		else:
+			ks_params = ParamSet() \
+				.add_color('Ks', self.color)
+		
+		return ks_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
@@ -1042,6 +1092,22 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			ks1_params = ParamSet() \
+				.add_texture('Ks1', tex_name)
+		else:
+			ks1_params = ParamSet() \
+				.add_color('Ks1', self.color)
+		
+		return ks1_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
@@ -1064,6 +1130,22 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			ks2_params = ParamSet() \
+				.add_texture('Ks2', tex_name)
+		else:
+			ks2_params = ParamSet() \
+				.add_color('Ks2', self.color)
+		
+		return ks2_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
@@ -1086,6 +1168,22 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			ks3_params = ParamSet() \
+				.add_texture('Ks3', tex_name)
+		else:
+			ks3_params = ParamSet() \
+				.add_color('Ks3', self.color)
+		
+		return ks3_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
@@ -1108,6 +1206,22 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			kt_params = ParamSet() \
+				.add_texture('Kt', tex_name)
+		else:
+			kt_params = ParamSet() \
+				.add_color('Kt', self.color)
+		
+		return kt_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
@@ -1130,6 +1244,22 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			warp_kd_params = ParamSet() \
+				.add_texture('warp_Kd', tex_name)
+		else:
+			warp_kd_params = ParamSet() \
+				.add_color('warp_Kd', self.color)
+		
+		return warp_kd_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
@@ -1152,6 +1282,22 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			warp_ks_params = ParamSet() \
+				.add_texture('warp_Ks', tex_name)
+		else:
+			warp_ks_params = ParamSet() \
+				.add_color('warp_Ks', self.color)
+		
+		return warp_ks_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
@@ -1175,6 +1321,22 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			weft_kd_params = ParamSet() \
+				.add_texture('weft_Kd', tex_name)
+		else:
+			weft_kd_params = ParamSet() \
+				.add_color('weft_Kd', self.color)
+		
+		return weft_kd_params
+
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
 	# Description string
@@ -1196,6 +1358,22 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			weft_ks_params = ParamSet() \
+				.add_texture('weft_Ks', tex_name)
+		else:
+			weft_ks_params = ParamSet() \
+				.add_color('weft_Ks', self.color)
+		
+		return weft_ks_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
@@ -1218,6 +1396,22 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			backface_ka_params = ParamSet() \
+				.add_texture('backface_Ka', tex_name)
+		else:
+			backface_ka_params = ParamSet() \
+				.add_color('backface_Ka', self.color)
+		
+		return backface_ka_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
@@ -1241,6 +1435,58 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			backface_ks_params = ParamSet() \
+				.add_texture('backface_Ks', tex_name)
+		else:
+			backface_ks_params = ParamSet() \
+				.add_color('backface_Ks', self.color)
+		
+		return backface_ks_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_AC_color_socket(bpy.types.NodeSocket):
+	'''Volume absorption Color socket'''
+	bl_idname = 'luxrender_AC_color_socket'
+	# Label for nice name display
+	bl_label = 'Absorption Color socket'
+	
+	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			ac_params = ParamSet() \
+				.add_texture('sigma_a', tex_name)
+		else:
+			ac_params = ParamSet() \
+				.add_color('sigma_a', self.color)
+		
+		return ac_params
+
 @LuxRenderAddon.addon_register_class
 class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	# Description string
@@ -1262,27 +1508,22 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
-
-@LuxRenderAddon.addon_register_class
-class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
-	# Description string
-	'''Scattering asymmetry socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
-	bl_idname = 'luxrender_SC_asymmetry_socket'
-	# Label for nice name display
-	bl_label = 'Scattering Asymmetry socket'
-	
-	color = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), subtype='NONE', min=-1.0, max=1.0, precision=4)
-	
-	# Optional function for drawing the socket input value
-	def draw(self, context, layout, node):
-		row = layout.row()
-		row.prop(self, 'color', text='')
-		row.label(text=self.name)
-	
-	# Socket color
-	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			sc_params = ParamSet() \
+				.add_texture('sigma_s', tex_name)
+		else:
+			sc_params = ParamSet() \
+				.add_color('sigma_s', self.color)
+		
+		return sc_params
 
 ##### custom float sockets ##### 
 
@@ -1505,4 +1746,41 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 				.add_float('sigma', self.sigma)
 		
 		return sigma_params
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
+	# Description string
+	'''Scattering asymmetry socket'''
+	# Optional identifier string. If not explicitly defined, the python class name is used.
+	bl_idname = 'luxrender_SC_asymmetry_socket'
+	# Label for nice name display
+	bl_label = 'Scattering Asymmetry socket'
+	
+	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4)
+	
+	# Optional function for drawing the socket input value
+	def draw(self, context, layout, node):
+		row = layout.row()
+		row.prop(self, 'sc_asym', text='')
+		row.label(text=self.name)
+	
+	# Socket color
+	def draw_color(self, context, node):
+		return (0.63, 0.63, 0.63, 1.0)
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			sc_asym_params = ParamSet() \
+				.add_texture('g', tex_name)
+		else:
+			sc_asym_params = ParamSet() \
+				.add_float('g', self.g)
+		
+		return sc_asym_params
 
