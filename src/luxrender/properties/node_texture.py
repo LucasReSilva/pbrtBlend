@@ -428,7 +428,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 			.add_float('roughness', self.roughness)
 		
 		coord_node = get_linked_node(self.inputs[0])
-		if check_node_get_paramset(coord_node):
+		if coord_node and check_node_get_paramset(coord_node):
 			wrinkled_params.update( coord_node.get_paramset() )
 		
 		return export_texture('float', 'wrinkled', self.name, wrinkled_params)
@@ -443,11 +443,10 @@ class luxrender_coodinate_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'Coordinate socket'
 	
-	coordinate = bpy.props.FloatProperty()
-	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'coordinate', text=self.name)
+		layout.label(text=self.name)
+		
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -463,11 +462,9 @@ class luxrender_transform_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'Transform socket'
 	
-	transform = bpy.props.FloatProperty()
-	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'transform', text=self.name)
+		layout.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
