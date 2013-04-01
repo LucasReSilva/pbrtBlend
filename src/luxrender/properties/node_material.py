@@ -383,6 +383,26 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'multibounce')
+		
+	def export_material(self, make_material, make_texture):
+		mat_type = 'glossycoating'
+		
+		glossycoating_params = ParamSet()
+		glossycoating_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		glossycoating_params.add_bool('multibounce', self.multibounce)
+		
+		def export_submat(socket):
+			node = get_linked_node(socket)
+			if not check_node_export_material(node):
+				return None
+			return node.export_material(make_material, make_texture)
+		
+		basemat_name = export_submat(self.inputs[0])
+		
+		glossycoating_params.add_string("basematerial", basemat_name)
+		
+		return make_material(mat_type, self.name, glossycoating_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
