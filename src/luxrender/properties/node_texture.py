@@ -275,6 +275,23 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 				self.outputs.new('NodeSocketFloat', 'Float')
 			if 'Color' in s:
 				self.outputs.remove(self.outputs['Color'])
+
+	def export_texture(self, make_texture):
+		imagemap_params = ParamSet()
+		
+		#process_filepath_data(LuxManager.CurrentScene, self, self.filename, imagemap_params, 'filename') TODO: Find out why this chokes
+		imagemap_params.add_string('filename', self.filename)
+		if self.variant == 'float':
+			imagemap_params.add_string('channel', self.channel)
+		imagemap_params.add_string('filtertype', self.filtertype)
+		imagemap_params.add_float('gain', self.gain)
+		imagemap_params.add_float('gamma', self.gamma)
+		imagemap_params.add_string('wrap', self.wrap)
+		if self.filtertype in ('mipmap_ewa', 'mipmap_trilinear'):
+			imagemap_params.add_float('maxanisotropy', self.maxanisotropy)
+			imagemap_params.add_integer('discardmipmaps', self.discardmipmaps)
+
+		return make_texture(self.variant, 'imagemap', self.name, imagemap_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
@@ -355,6 +372,20 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 			layout.prop(self, 'maxanisotropy')
 			layout.prop(self, 'discardmipmaps')
 		layout.prop(self, 'wrap')
+
+	def export_texture(self, make_texture):
+		normalmap_params = ParamSet()
+		
+		#process_filepath_data(LuxManager.CurrentScene, self, self.filename, normalmap_params, 'filename') TODO: Find out why this chokes
+		normalmap_params.add_string('filename', self.filename)
+
+		normalmap_params.add_string('filtertype', self.filtertype)
+		normalmap_params.add_string('wrap', self.wrap)
+		if self.filtertype in ('mipmap_ewa', 'mipmap_trilinear'):
+			normalmap_params.add_float('maxanisotropy', self.maxanisotropy)
+			normalmap_params.add_integer('discardmipmaps', self.discardmipmaps)
+
+		return make_texture('float', 'normalmap', self.name, normalmap_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
