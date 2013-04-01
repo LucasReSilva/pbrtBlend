@@ -31,7 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import (luxrender_texture_node, get_linked_node, check_node_export, check_node_get_paramset)
+from ..properties import (luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -165,21 +165,16 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'bump_height')
 		
-	def export(self, material, export_texture):
+	def export_texture(self, make_texture):
 		bumpmap_params = ParamSet() \
 			.add_float('tex1', self.bump_height)
 			
-		def export_bumpmap(socket):
-			node = get_linked_node(socket)
-			if not check_node_export(node):
-				return None
-			return node.export(material, export_texture)
+		tex_node = get_linked_node(self.inputs[0])
+		if tex_node and check_node_export_texture(tex_node):
+			bumpmap_name = tex_node.export_texture(make_texture)
+			bumpmap_params.add_texture("tex2", bumpmap_name)
 		
-		bumpmap_name = export_bumpmap(self.inputs[0])
-		
-		bumpmap_params.add_texture("tex2", bumpmap_name)
-		
-		return export_texture('float', 'scale', self.name, bumpmap_params)
+		return make_texture('float', 'scale', self.name, bumpmap_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
@@ -371,10 +366,10 @@ class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
 		
-	def export(self, material, export_texture):
+	def export_texture(self, make_texture):
 		hitpointcolor_params = ParamSet()
 				
-		return export_texture('color', 'hitpointcolor', self.name, hitpointcolor_params)
+		return make_texture('color', 'hitpointcolor', self.name, hitpointcolor_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
@@ -386,10 +381,10 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
-	def export(self, material, export_texture):
+	def export_texture(self, make_texture):
 		hitpointgrey_params = ParamSet()
 				
-		return export_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
+		return make_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
@@ -401,10 +396,10 @@ class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
 		
-	def export(self, material, export_texture):
+	def export_texture(self, make_texture):
 		hitpointalpha_params = ParamSet()
 				
-		return export_texture('float', 'hitpointalpha', self.name, hitpointalpha_params)
+		return make_texture('float', 'hitpointalpha', self.name, hitpointalpha_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
@@ -436,7 +431,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
 		
-	def export(self, material, export_texture):
+	def export_texture(self, make_texture):
 		print('export wrinkled')
 		wrinkled_params = ParamSet() \
 			.add_integer('octaves', self.octaves) \
@@ -446,7 +441,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 		if coord_node and check_node_get_paramset(coord_node):
 			wrinkled_params.update( coord_node.get_paramset() )
 		
-		return export_texture('float', 'wrinkled', self.name, wrinkled_params)
+		return make_texture('float', 'wrinkled', self.name, wrinkled_params)
 		
 #3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names
 @LuxRenderAddon.addon_register_class

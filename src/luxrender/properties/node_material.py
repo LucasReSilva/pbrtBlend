@@ -31,7 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export, check_node_get_paramset)
+from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export_material, check_node_export_texture, check_node_get_paramset)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -60,13 +60,13 @@ def get_default(TextureParameter):
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
-def get_socket_paramsets(sockets, material, export_texture):
+def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
 	for socket in sockets:
 		if not hasattr(socket, 'get_paramset'):
 			print('No get_paramset() for socket %s' % socket.bl_idname)
 			continue
-		params.update( socket.get_paramset(material, export_texture) )
+		params.update( socket.get_paramset(make_texture) )
 	return params
 
 @LuxRenderAddon.addon_register_class
@@ -456,13 +456,13 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
-	def export(self, material, export_material, export_texture):
+	def export_material(self, make_material, make_texture):
 		mat_type = 'matte'
 		
 		matte_params = ParamSet()
-		matte_params.update( get_socket_paramsets(self.inputs, material, export_texture) )
+		matte_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		
-		return export_material(mat_type, self.name, matte_params)
+		return make_material(mat_type, self.name, matte_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
@@ -535,23 +535,23 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 			if 'V-Exponent' in s: self.inputs.remove(self.inputs['V-Exponent'])
 		
 	
-	def export(self, material, export_material, export_texture):
+	def export_material(self, make_material, make_texture):
 		print('export node: metal')
 		
 		mat_type = 'metal'
 		
 		metal_params = ParamSet()
-		metal_params.update( get_socket_paramsets(self.inputs, material, export_texture) )
+		metal_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		
 		if self.metal_preset == 'nk':	# use an NK data file
 			# This function resolves relative paths (even in linked library blends)
 			# and optionally encodes/embeds the data if the setting is enabled
-			process_filepath_data(LuxManager.CurrentScene, material, self.metal_nkfile, metal_params, 'filename')
+			process_filepath_data(LuxManager.CurrentScene, self, self.metal_nkfile, metal_params, 'filename')
 		else:
 			# use a preset name
 			metal_params.add_string('name', self.metal_preset)
 		
-		return export_material(mat_type, self.name, metal_params)
+		return make_material(mat_type, self.name, metal_params)
 	
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal2(luxrender_material_node):
@@ -648,19 +648,19 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
-	def export(self, material, export_material, export_texture):
+	def export_material(self, make_material, make_texture):
 		print('export node: mix')
 		
 		mat_type = 'mix'
 		
 		mix_params = ParamSet()
-		mix_params.update( get_socket_paramsets([self.inputs[0]], material, export_texture) )
+		mix_params.update( get_socket_paramsets([self.inputs[0]], make_texture) )
 		
 		def export_submat(socket):
 			node = get_linked_node(socket)
-			if not check_node_export(node):
+			if not check_node_export_material(node):
 				return None
-			return node.export(material, export_material, export_texture)
+			return node.export_material(make_material, make_texture)
 		
 		mat1_name = export_submat(self.inputs[1])
 		mat2_name = export_submat(self.inputs[2])
@@ -668,7 +668,7 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 		mix_params.add_string("namedmaterial1", mat1_name)
 		mix_params.add_string("namedmaterial2", mat2_name)
 		
-		return export_material(mat_type, self.name, mix_params)
+		return make_material(mat_type, self.name, mix_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_null(luxrender_material_node):
@@ -840,10 +840,10 @@ class luxrender_material_output_node(luxrender_node):
 		
 		tree_name = material.luxrender_material.nodetree
 		
-		export_material = None
+		make_material = None
 		if mode == 'indirect':
 			# named material exporting
-			def export_material_indirect(mat_type, mat_name, mat_params):
+			def make_material_indirect(mat_type, mat_name, mat_params):
 				nonlocal lux_context
 				nonlocal surface_node
 				nonlocal material
@@ -861,17 +861,17 @@ class luxrender_material_output_node(luxrender_node):
 				
 				return material_name
 				
-			export_material = export_material_indirect
+			make_material = make_material_indirect
 		elif mode == 'direct':
 			# direct material exporting
-			def export_material_direct(mat_type, mat_name, mat_params):
+			def make_material_direct(mat_type, mat_name, mat_params):
 				nonlocal lux_context
 				lux_context.material(mat_type, material_params)
-			export_material = export_material_direct
+			make_material = make_material_direct
 		
 		
 		# texture exporting, only one way
-		def export_texture(tex_variant, tex_type, tex_name, tex_params):
+		def make_texture(tex_variant, tex_type, tex_name, tex_params):
 			nonlocal lux_context
 			texture_name = '%s::%s' % (tree_name, tex_name)
 			with TextureCounter(texture_name):
@@ -886,8 +886,8 @@ class luxrender_material_output_node(luxrender_node):
 		# start exporting that material...
 		with MaterialCounter(material.name):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
-				if check_node_export(surface_node):
-					surface_node.export(material, export_material=export_material, export_texture=export_texture)
+				if check_node_export_material(surface_node):
+					surface_node.export_material(make_material=make_material, make_texture=make_texture)
 		
 		return set()
 
@@ -959,15 +959,15 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
-	def get_paramset(self, material, export_texture):
+	def get_paramset(self, make_texture):
 		print('get_paramset diffuse color')
-		if self.is_linked:
-			tex_node = self.links[0].from_node
+		tex_node = get_linked_node(self.links[0])
+		if tex_node:
 			print('linked from %s' % tex_node.name)
-			if not check_node_export(tex_node):
+			if not check_node_export_texture(tex_node):
 				return ParamSet()
 				
-			tex_name = tex_node.export(material, export_texture)
+			tex_name = tex_node.export_texture(make_texture)
 			
 			kd_params = ParamSet() \
 				.add_texture('Kd', tex_name)
@@ -1305,15 +1305,15 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
-	def get_paramset(self, material, export_texture):
+	def get_paramset(self, make_texture):
 		print('get_paramset amount')
 		tex_node = get_linked_node(self)
 		if not tex_node is None:
 			print('linked from %s' % tex_node.name)
-			if not check_node_export(tex_node):
+			if not check_node_export_texture(tex_node):
 				return ParamSet()
 				
-			tex_name = tex_node.export(material, export_texture)
+			tex_name = tex_node.export_texture(make_texture)
 			
 			amount_params = ParamSet() \
 				.add_texture('amount', tex_name)
@@ -1344,19 +1344,16 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 
-	def get_paramset(self, material, export_texture):
-		if self.is_linked:
-			tex_node = self.links[0].from_node
-			if not check_node_export(tex_node):
-				return ParamSet()
-				
-			tex_name = tex_node.export(material, export_texture)
+	def get_paramset(self, make_texture):
+		bumpmap_params = ParamSet()
+		
+		tex_node = get_linked_node(self)
+		
+		if tex_node and check_node_export_texture(tex_node):
+			# only export linked bumpmap sockets
+			tex_name = tex_node.export_texture(make_texture)
 			
-			bumpmap_params = ParamSet() \
-				.add_texture('bumpmap', tex_name)
-		else:
-			bumpmap_params = ParamSet() \
-				.add_float('bumpmap', self.bump)
+			bumpmap_params.add_texture('bumpmap', tex_name)
 		
 		return bumpmap_params
 
@@ -1379,20 +1376,19 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
-	def get_paramset(self, material, export_texture):
+	def get_paramset(self, make_texture):
 		print('get_paramset uroughness')
-		if self.is_linked:
-			tex_node = self.links[0].from_node
+		tex_node = get_linked_node(self)
+		if tex_node:
 			print('linked from %s' % tex_node.name)
-			if not check_node_export(tex_node):
+			if not check_node_export_texture(tex_node):
 				return ParamSet()
 				
-			tex_name = tex_node.export(material, export_texture)
+			tex_name = tex_node.export_texture(make_texture)
 			
 			roughness_params = ParamSet() \
 				.add_texture('uroughness', tex_name)
 		else:
-			print('value %f' % self.uroughness)
 			roughness_params = ParamSet() \
 				.add_float('uroughness', self.uroughness)
 		
@@ -1417,20 +1413,19 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
-	def get_paramset(self, material, export_texture):
+	def get_paramset(self, make_texture):
 		print('get_paramset vroughness')
 		tex_node = get_linked_node(self)
-		if not tex_node is None:
+		if tex_node:
 			print('linked from %s' % tex_node.name)
-			if not check_node_export(tex_node):
+			if not check_node_export_texture(tex_node):
 				return ParamSet()
 				
-			tex_name = tex_node.export(material, export_texture)
+			tex_name = tex_node.export_texture(make_texture)
 			
 			roughness_params = ParamSet() \
 				.add_texture('vroughness', tex_name)
 		else:
-			print('value %f' % self.vroughness)
 			roughness_params = ParamSet() \
 				.add_float('vroughness', self.vroughness)
 		
@@ -1495,13 +1490,13 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 		
-	def get_paramset(self, material, export_texture):
-		if self.is_linked:
-			tex_node = self.links[0].from_node
-			if not check_node_export(tex_node):
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
 				return ParamSet()
 				
-			tex_name = tex_node.export(material, export_texture)
+			tex_name = tex_node.export_texture(make_texture)
 			
 			sigma_params = ParamSet() \
 				.add_texture('sigma', tex_name)

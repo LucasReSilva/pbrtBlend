@@ -77,9 +77,15 @@ def get_linked_node(socket):
 		return None
 	return socket.links[0].from_node
 
-def check_node_export(node):
-	if not hasattr(node, 'export'):
-		print('No export() for node: ' + node.bl_idname)
+def check_node_export_material(node):
+	if not hasattr(node, 'export_material'):
+		print('No export_material() for node: ' + node.bl_idname)
+		return False
+	return True
+
+def check_node_export_texture(node):
+	if not hasattr(node, 'export_texture'):
+		print('No export_texture() for node: ' + node.bl_idname)
 		return False
 	return True
 
