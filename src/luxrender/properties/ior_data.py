@@ -364,24 +364,31 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 	def execute(self, context):
 		ior = ior_dict[self.properties.index]
 		name = self.properties.l_name
-		
-		# Detect either material or volume or texture context
-		if context.material and context.material.luxrender_material and not context.texture:
-			lm = context.material.luxrender_material
-			for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent'):
-				if lm.type == mat_type:
-					getattr(lm, 'luxrender_mat_%s'%mat_type).index_floatvalue = ior
-					getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetvalue = ior
-					getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetstring = name
-			for mat_type in ('mirror', 'shinymetal'):
-				if lm.type == mat_type:
-					getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_floatvalue = ior
-					getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_presetvalue = ior
-					getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_presetstring = name
-		elif context.texture.luxrender_texture.luxrender_tex_cauchy:
-			context.texture.luxrender_texture.luxrender_tex_cauchy.ior = ior
-			context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetvalue = ior
-			context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetstring = name
+
+		# Detect either node or material or volume or texture context
+		if 'node' in dir(context):
+#			print("--->", context.node.__class__.__name__); # need it for further implementation tests
+			lm = context.node
+			lm.index_floatvalue = ior
+			lm.index_presetvalue = ior
+			lm.index_presetstring = name
+		else:
+			if context.material and context.material.luxrender_material and not context.texture:
+				lm = context.material.luxrender_material
+				for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent'):
+					if lm.type == mat_type:
+						getattr(lm, 'luxrender_mat_%s'%mat_type).index_floatvalue = ior
+						getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetvalue = ior
+						getattr(lm, 'luxrender_mat_%s'%mat_type).index_presetstring = name
+				for mat_type in ('mirror', 'shinymetal'):
+					if lm.type == mat_type:
+						getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_floatvalue = ior
+						getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_presetvalue = ior
+						getattr(lm, 'luxrender_mat_%s'%mat_type).filmindex_presetstring = name
+			elif context.texture.luxrender_texture.luxrender_tex_cauchy:
+				context.texture.luxrender_texture.luxrender_tex_cauchy.ior = ior
+				context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetvalue = ior
+				context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetstring = name
 		return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class

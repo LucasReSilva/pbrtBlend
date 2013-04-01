@@ -376,7 +376,18 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	bl_label = 'Glossy Material'
 	bl_icon = 'MATERIAL'
 
+	def change_use_ior(self, context):
+		## Specular/IOR representation switches
+		for sn in ['Specular Color']:
+			socket = self.inputs.get(sn)
+			if socket:
+				socket.hide = self.use_ior
+	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
+	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
+	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52)
+	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
@@ -389,9 +400,17 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
-		
+
 	def draw_buttons(self, context, layout):
-		layout.prop(self, 'multibounce')
+		layout.prop(self, 'use_ior')
+		if self.use_ior:
+			layout.prop(self, 'index_floatvalue')
+			layout.prop(self, 'IOR')
+			if self.index_floatvalue == self.index_presetvalue:
+				menu_text = self.index_presetstring
+			else:
+				menu_text = '-- Choose preset --'
+			layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 
 	def export_material(self, make_material, make_texture):
 		mat_type = 'glossy'
