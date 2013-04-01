@@ -721,7 +721,6 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 		
 		return make_material(mat_type, self.name, mirror_params)
 
-
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mix(luxrender_material_node):
 	'''Mix material node'''

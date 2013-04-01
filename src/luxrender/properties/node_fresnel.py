@@ -31,7 +31,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import luxrender_texture_node
+from ..properties import (luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -44,7 +44,7 @@ from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
 from ..properties.node_material import (
-	luxrender_fresnel_socket, luxrender_TC_Kr_socket
+	luxrender_fresnel_socket, luxrender_TC_Kr_socket, get_socket_paramsets
 )
 from ..properties.texture import luxrender_tex_fresnelname
 
@@ -60,6 +60,12 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 	
 		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
 		
+	def export_texture(self, make_texture):
+		fresnelcolor_params = ParamSet()
+		fresnelcolor_params.update( get_socket_paramsets(self.inputs, make_texture) )
+
+		return make_texture('fresnel', 'fresnelcolor', self.name, fresnelcolor_params)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 	'''Cauchy Node'''
