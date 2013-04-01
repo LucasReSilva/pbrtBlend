@@ -385,7 +385,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
-	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52)
+	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52, precision=get_props(TF_index, 'precision'))
 	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
 	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	
@@ -439,7 +439,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
-	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52)
+	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52, precision=get_props(TF_index, 'precision'))
 	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
 	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	
@@ -502,7 +502,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
-	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52)
+	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52, precision=get_props(TF_index, 'precision'))
 	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
 	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
