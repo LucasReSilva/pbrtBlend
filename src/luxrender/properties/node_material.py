@@ -832,20 +832,19 @@ class luxrender_material_output_node(luxrender_node):
 		
 		tree_name = material.luxrender_material.nodetree
 		
-		root_material = True
-		
 		export_material = None
 		if mode == 'indirect':
 			# named material exporting
 			def export_material_indirect(mat_type, mat_name, mat_params):
 				nonlocal lux_context
-				nonlocal root_material
+				nonlocal surface_node
+				nonlocal material
 				
-				material_name = '%s::%s' % (tree_name, mat_name)
-				if root_material:
-					# this is the first material in the tree, use the name of the assigned material
+				if mat_name != surface_node.name:
+					material_name = '%s::%s' % (tree_name, mat_name)
+				else:
+					# this is the root material, don't alter name
 					material_name = material.name
-					root_material = False
 				
 				print('Exporting material "%s", type: "%s", name: "%s"' % (material_name, mat_type, mat_name))
 				mat_params.add_string('type', mat_type)
