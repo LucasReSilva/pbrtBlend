@@ -31,12 +31,12 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import luxrender_texture_node
+from ..properties import (luxrender_texture_node, check_node_export, check_node_get_paramset)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
-from ..export import ParamSet, process_filepath_data
+from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import (
 	MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
@@ -102,6 +102,18 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 		layout.prop(self, 'translate')
 		layout.prop(self, 'rotate')
 		layout.prop(self, 'scale')
+		
+	def get_paramset(self):
+		coord_params = ParamSet()
+		
+		ws = get_worldscale(as_scalematrix=False)
+		
+		coord_params.add_string('coordinates', self.coordinates)
+		coord_params.add_vector('translate', [i*ws for i in self.translate])
+		coord_params.add_vector('rotate', self.rotate)
+		coord_params.add_vector('scale', [i*ws for i in self.scale])
+		
+		return coord_params
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_2d_coordinates_node(luxrender_texture_node):
@@ -394,6 +406,21 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
 		
+	def export(self, material, export_texture):
+		print('export wrinkled')
+		wrinkled_params = ParamSet() \
+			.add_integer('octaves', self.octaves) \
+			.add_float('roughness', self.roughness)
+		
+		coord_socket = self.inputs[0]
+		if coord_socket.is_linked:
+			coord_node = coord_socket.links[0].from_node
+			print('linked to %s' % coord_node.name)
+			if check_node_get_paramset(coord_node):
+				wrinkled_params.update( coord_node.get_paramset() )
+		
+		return export_texture('float', 'wrinkled', self.name, wrinkled_params)
+		
 #3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names
 @LuxRenderAddon.addon_register_class
 class luxrender_coodinate_socket(bpy.types.NodeSocket):
@@ -413,7 +440,8 @@ class luxrender_coodinate_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.50, 0.25, 0.60, 1.0)
-		
+			
+	
 @LuxRenderAddon.addon_register_class
 class luxrender_transform_socket(bpy.types.NodeSocket):
 	# Description string

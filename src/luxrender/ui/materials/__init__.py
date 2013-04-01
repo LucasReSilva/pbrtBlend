@@ -43,3 +43,4 @@ class luxrender_material_sub(luxrender_material_base):
 		'''
 		return super().poll(context) and (context.material.luxrender_material.type in cls.LUX_COMPAT) and (context.material.luxrender_material.nodetree == '')
 		
+

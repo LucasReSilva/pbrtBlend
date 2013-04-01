@@ -31,14 +31,14 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import luxrender_node, luxrender_material_node
+from ..properties import (luxrender_node, luxrender_material_node, check_node_export, check_node_get_paramset)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
 from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
-	MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
+	MaterialCounter, TextureCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
@@ -59,6 +59,15 @@ def get_default(TextureParameter):
 
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
+
+def get_socket_paramsets(sockets, material, export_texture):
+	params = ParamSet()
+	for socket in sockets:
+		if not hasattr(socket, 'get_paramset'):
+			print('No get_paramset() for socket %s' % socket.bl_idname)
+			continue
+		params.update( socket.get_paramset(material, export_texture) )
+	return params
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Materials_Menu(bpy.types.Menu):
@@ -496,7 +505,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 		layout.prop(self, 'use_exponent')
 				
 		# Roughness/Exponent representation switches
-		s = self.inputs.keys()				
+		s = self.inputs.keys()
 		if not self.use_exponent:
 			if not 'U-Roughness' in s: self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 			if 'U-Exponent' in s: self.inputs.remove(self.inputs['U-Exponent'])
@@ -516,7 +525,26 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 		else:
 			if 'V-Roughness' in s: self.inputs.remove(self.inputs['V-Roughness'])
 			if 'V-Exponent' in s: self.inputs.remove(self.inputs['V-Exponent'])
-
+		
+	
+	def export(self, material, export_material, export_texture):
+		print('export node: metal')
+		
+		mat_type = 'metal'
+		
+		metal_params = ParamSet()
+		metal_params.update( get_socket_paramsets(self.inputs, material, export_texture) )
+		
+		if self.metal_preset == 'nk':	# use an NK data file
+			# This function resolves relative paths (even in linked library blends)
+			# and optionally encodes/embeds the data if the setting is enabled
+			process_filepath_data(LuxManager.CurrentScene, material, self.metal_nkfile, metal_params, 'filename')
+		else:
+			# use a preset name
+			metal_params.add_string('name', self.metal_preset)
+		
+		export_material(mat_type, self.name, metal_params)
+	
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal2(luxrender_material_node):
 	'''Metal2 material node'''
@@ -769,9 +797,70 @@ class luxrender_material_output_node(luxrender_node):
 		self.inputs.new('NodeSocketShader', 'Interior Volume')
 		self.inputs.new('NodeSocketShader', 'Exterior Volume')
 		self.inputs.new('NodeSocketShader', 'Emission')
+	
+	def export(self, scene, lux_context, material, mode='indirect'):
 		
+		print('Exporting node tree, mode: %s' % mode)
+		
+		surface_socket = self.inputs[0] # perhaps by name?
+		if not surface_socket.is_linked:
+			return set()
+		
+		surface_node = surface_socket.links[0].from_node
+		
+		tree_name = material.luxrender_material.nodetree
+		
+		root_material = True
+		
+		export_material = None
+		if mode == 'indirect':
+			# named material exporting
+			def export_material_indirect(mat_type, mat_name, mat_params):
+				nonlocal lux_context
+				nonlocal root_material
+				
+				material_name = '%s::%s' % (tree_name, mat_name)
+				if root_material:
+					# this is the first material in the tree, use the name of the assigned material
+					material_name = material.name
+					root_material = False
+				
+				print('Exporting material "%s", type: "%s", name: "%s"' % (material_name, mat_type, mat_name))
+				mat_params.add_string('type', mat_type)
+				ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
+				ExportedMaterials.export_new_named(lux_context)
+				
+			export_material = export_material_indirect
+		elif mode == 'direct':
+			# direct material exporting
+			def export_material_direct(mat_type, mat_name, mat_params):
+				nonlocal lux_context
+				lux_context.material(mat_type, material_params)
+			export_material = export_material_direct
+		
+		
+		# texture exporting, only one way
+		def export_texture(tex_variant, tex_type, tex_name, tex_params):
+			nonlocal lux_context
+			texture_name = '%s::%s' % (tree_name, tex_name)
+			with TextureCounter(texture_name):
+				
+				print('Exporting texture, variant: "%s", type: "%s", name: "%s"' % (tex_variant, tex_type, tex_name))
+				
+				ExportedTextures.texture(lux_context, texture_name, tex_variant, tex_type, tex_params)
+				ExportedTextures.export_new(lux_context)
+				
+				return texture_name
+		
+		# start exporting that material...
+		with MaterialCounter(material.name):
+			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
+				if check_node_export(surface_node):
+					surface_node.export(material, export_material=export_material, export_texture=export_texture)
+		
+		return set()
+
 # Custom socket types
-		
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	# Description string
@@ -1181,11 +1270,30 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input valueTF_uexponent
 	def draw(self, context, layout, node):
-		layout.prop(self, 'uroughness', text=self.name)		
-
+		layout.prop(self, 'uroughness', text=self.name)
+		
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
+	
+	def get_paramset(self, material, export_texture):
+		print('get_paramset uroughness')
+		if self.is_linked:
+			tex_node = self.links[0].from_node
+			print('linked from %s' % tex_node.name)
+			if not check_node_export(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export(material, export_texture)
+			
+			roughness_params = ParamSet() \
+				.add_texture('uroughness', tex_name)
+		else:
+			print('value %f' % self.uroughness)
+			roughness_params = ParamSet() \
+				.add_float('uroughness', self.uroughness)
+		
+		return roughness_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
@@ -1201,10 +1309,29 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'vroughness', text=self.name)
-
+	
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
+	
+	def get_paramset(self, material, export_texture):
+		print('get_paramset vroughness')
+		if self.is_linked:
+			tex_node = self.links[0].from_node
+			print('linked from %s' % tex_node.name)
+			if not check_node_export(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export(material, export_texture)
+			
+			roughness_params = ParamSet() \
+				.add_texture('vroughness', tex_name)
+		else:
+			print('value %f' % self.vroughness)
+			roughness_params = ParamSet() \
+				.add_float('vroughness', self.vroughness)
+		
+		return roughness_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_uexponent_socket(bpy.types.NodeSocket):

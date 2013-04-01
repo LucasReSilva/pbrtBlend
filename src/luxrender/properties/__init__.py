@@ -39,4 +39,46 @@ class luxrender_material_node(luxrender_node):
 	pass
 
 
+def find_node(material, nodetype):
+	#print('find_node: ', material, nodetype)
+	if not (material and material.luxrender_material and material.luxrender_material.nodetree):
+		return None
+		
+	nodetree =  material.luxrender_material.nodetree
+	#print('nodetree: ', nodetree)
+	
+	if nodetree == '':
+		return None
+	
+	ntree = bpy.data.node_groups[nodetree]
+	#print('ntree: ', ntree)
+	
+	for node in ntree.nodes:
+		#nt = getattr(node, "type", None)
+		nt = getattr(node, "bl_idname", None)
+		#print('node: ', node, nt, node.__class__.__name__)
+		#print(dir(node))
+		if nt == nodetype:
+			return node
+		
+	return None
 
+
+def find_node_input(node, name):
+	for input in node.inputs:
+		if input.name == name:
+			return input
+	
+	return None
+
+def check_node_export(node):
+	if not hasattr(node, 'export'):
+		print('No export() for node: ' + node.bl_idname)
+		return False
+	return True
+
+def check_node_get_paramset(node):
+	if not hasattr(node, 'get_paramset'):
+		print('No get_paramset() for node: ' + node.bl_idname)
+		return False
+	return True

@@ -30,6 +30,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
+from ..properties import find_node
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -468,10 +469,25 @@ class luxrender_material(declarative_property_group):
 			if blender_material.diffuse_color != submat_col:
 				blender_material.diffuse_color = submat_col
 	
+	def exportNodetree(self, scene, lux_context, material, mode):
+		outputNode = find_node(material, 'luxrender_material_output_node')
+		
+		print('outputNode: ', outputNode)
+		
+		if outputNode is None:
+			return set()
+			
+		
+		return outputNode.export(scene, lux_context, material, mode)
+		
+	
 	def export(self, scene, lux_context, material, mode='indirect'):
 		
 		if scene.luxrender_testing.clay_render and self.type not in ['glass', 'glass2']:
 			return {'CLAY'}
+		
+		if self.nodetree != '':
+			return self.exportNodetree(scene, lux_context, material, mode)
 		
 		with MaterialCounter(material.name):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
