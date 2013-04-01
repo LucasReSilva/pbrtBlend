@@ -1680,7 +1680,7 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
 			amount_params = ParamSet() \
 				.add_texture('amount', tex_name)
 		else:
-			print('value %f' % self.vroughness)
+			print('value %f' % self.amount)
 			amount_params = ParamSet() \
 				.add_float('amount', self.amount)
 		
