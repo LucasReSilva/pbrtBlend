@@ -31,7 +31,9 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import luxrender_texture_node
+from ..properties import (
+	luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset
+)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -251,6 +253,23 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 				self.outputs.new('NodeSocketFloat', 'Float')
 			if 'Color' in so:
 				self.outputs.remove(self.outputs['Color'])
+
+	def export_texture(self, make_texture):		
+		scale_params = ParamSet()
+		
+		def export_subtex(socket):
+			node = get_linked_node(socket)
+			if (not node) or (not check_node_export_texture(node)):
+				return None
+			return node.export_texture(make_texture)
+		
+		tex1_name = export_subtex(self.inputs[0])
+		tex2_name = export_subtex(self.inputs[1])
+		
+		scale_params.add_texture("tex1", tex1_name)
+		scale_params.add_texture("tex2", tex2_name)
+		
+		return make_texture(self.variant, 'scale', self.name, scale_params)
 				
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_subtract(luxrender_texture_node):
