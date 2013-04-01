@@ -1338,7 +1338,7 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
-		layout.prop(self, 'bump', text=self.name)
+		layout.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
