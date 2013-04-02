@@ -367,6 +367,29 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 			layout.prop(self, 'iscale')
 		layout.prop(self, 'bright')
 		layout.prop(self, 'contrast')
+
+	def export_texture(self, make_texture):
+		musgrave_params = ParamSet()
+		musgrave_params.add_string('musgravetype', self.musgravetype)
+		musgrave_params.add_string('noisebasis', self.noisebasis)
+		musgrave_params.add_float('noisesize', self.noisesize)
+		musgrave_params.add_float('h', self.h)
+		musgrave_params.add_float('lacu', self.lacu)
+		musgrave_params.add_float('octs', self.octs)
+		if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal', 'hetero_terrain'):
+			musgrave_params.add_float('offset', self.offset)
+		if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal'):
+			musgrave_params.add_float('gain', self.gain)
+		if self.musgravetype != 'fbm':
+			musgrave_params.add_float('iscale', self.iscale)
+		musgrave_params.add_float('bright', self.bright)
+		musgrave_params.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			musgrave_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_musgrave', self.name, musgrave_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_normal_map(luxrender_texture_node):
