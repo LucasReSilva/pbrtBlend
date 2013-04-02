@@ -926,7 +926,7 @@ class luxrender_material_output_node(luxrender_node):
 			# direct material exporting
 			def make_material_direct(mat_type, mat_name, mat_params):
 				nonlocal lux_context
-				lux_context.material(mat_type, material_params)
+				lux_context.material(mat_type, mat_params)
 			make_material = make_material_direct
 		
 		
