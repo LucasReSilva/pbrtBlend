@@ -159,7 +159,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 	bl_label = 'Bump Map Texture'
 	bl_icon = 'TEXTURE'
 
-	bump_height = bpy.props.FloatProperty(name='Bump Height', description='Height of the bump map', default=.001, precision=6, subtype='DISTANCE', unit='LENGTH')
+	bump_height = bpy.props.FloatProperty(name='Bump Height', description='Height of the bump map', default=.001, precision=6, subtype='DISTANCE', unit='LENGTH', step=.001)
 
 	def init(self, context):
 		self.inputs.new('NodeSocketFloat', 'Bump Value')
