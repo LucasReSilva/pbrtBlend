@@ -239,8 +239,8 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 		so = self.outputs.keys()
 		if self.variant == 'color':
 			if not 'Color 1' in si:
-				self.inputs.new('NodeSocketColor', 'Color 1')
-				self.inputs.new('NodeSocketColor', 'Color 2')
+				self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
+				self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
 			if 'Float 1' in si:
 				self.inputs.remove(self.inputs['Float 1'])
 				self.inputs.remove(self.inputs['Float 2'])
@@ -250,8 +250,8 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 				self.outputs.remove(self.outputs['Float'])
 		if self.variant == 'float':
 			if not 'Float 1' in si:
-				self.inputs.new('NodeSocketFloat', 'Float 1')
-				self.inputs.new('NodeSocketFloat', 'Float 2')
+				self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
+				self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
 			if 'Color 1' in si:
 				self.inputs.remove(self.inputs['Color 1'])
 				self.inputs.remove(self.inputs['Color 2'])
@@ -260,41 +260,30 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 			if 'Color' in so:
 				self.outputs.remove(self.outputs['Color'])
 
-	def export_texture(self, make_texture):		
+	def export_texture(self, make_texture):
 		scale_params = ParamSet()
-		
-		def export_subtex(socket):
-			node = get_linked_node(socket)
-			if (not node) or (not check_node_export_texture(node)):
-				return None
-			return node.export_texture(make_texture)
-		
-		tex1_name = export_subtex(self.inputs[0])
-		tex2_name = export_subtex(self.inputs[1])
-		
-		scale_params.add_texture("tex1", tex1_name)
-		scale_params.add_texture("tex2", tex2_name)
+		scale_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		
 		return make_texture(self.variant, 'scale', self.name, scale_params)
-				
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_subtract(luxrender_texture_node):
 	'''Subtract texture node'''
 	bl_idname = 'luxrender_texture_subtract_node'
 	bl_label = 'Subtract'
 	bl_icon = 'TEXTURE'
-
+	
 	variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
-
+	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'variant')
-
+		
 		si = self.inputs.keys()
 		so = self.outputs.keys()
 		if self.variant == 'color':
 			if not 'Color 1' in si:
-				self.inputs.new('NodeSocketColor', 'Color 1')
-				self.inputs.new('NodeSocketColor', 'Color 2')
+				self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
+				self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
 			if 'Float 1' in si:
 				self.inputs.remove(self.inputs['Float 1'])
 				self.inputs.remove(self.inputs['Float 2'])
@@ -304,8 +293,8 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
 				self.outputs.remove(self.outputs['Float'])
 		if self.variant == 'float':
 			if not 'Float 1' in si:
-				self.inputs.new('NodeSocketFloat', 'Float 1')
-				self.inputs.new('NodeSocketFloat', 'Float 2')
+				self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
+				self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
 			if 'Color 1' in si:
 				self.inputs.remove(self.inputs['Color 1'])
 				self.inputs.remove(self.inputs['Color 2'])
@@ -313,6 +302,12 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
 				self.outputs.new('NodeSocketFloat', 'Float')
 			if 'Color' in so:
 				self.outputs.remove(self.outputs['Color'])
+	
+	def export_texture(self, make_texture):
+		subtract_params = ParamSet()
+		subtract_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_texture(self.variant, 'subtract', self.name, subtract_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_uv(luxrender_texture_node):
