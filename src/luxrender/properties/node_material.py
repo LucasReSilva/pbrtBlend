@@ -393,7 +393,6 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-#		self.inputs[0].default_value = self.inputs['Diffuse Color'].color
 		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
