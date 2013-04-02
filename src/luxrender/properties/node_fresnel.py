@@ -72,9 +72,13 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_cauchy_node'
 	bl_label = 'Cauchy'
 	bl_icon = 'TEXTURE'
+	
+	def changed_preset(self, context):
+		## connect preset -> property
+		self.default_value = cauchy_n_presetvalue
 
 	use_ior = bpy.props.BoolProperty(name='Use IOR', default=True)
-	cauchy_n_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	cauchy_n_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
 	cauchy_n_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	cauchy_n = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0, precision=6)
 	cauchy_a = bpy.props.FloatProperty(name='A', default=1.458, min=0.0, max=10.0, precision=6)

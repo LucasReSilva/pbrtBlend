@@ -968,8 +968,12 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_fresnel_socket'
 	# Label for nice name display
 	bl_label = 'IOR socket'
+		
+	def changed_preset(self, context):
+		## connect preset -> property
+		self.default_value = self.fresnel_presetvalue
 	
-	fresnel_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	fresnel_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
 	fresnel_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52, precision=6)
 	default_value = fresnel
@@ -1664,8 +1668,12 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 	'''Thin film IOR socket'''
 	bl_idname = 'luxrender_TF_film_ior_socket'
 	bl_label = 'Thin Film IOR socket'
+
+	def changed_preset(self, context):
+		## connect preset -> property
+		self.default_value = self.filmindex_presetvalue
 	
-	filmindex_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	filmindex_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
 	filmindex_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), description=get_props(TF_filmindex, 'description'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'))
 	default_value = filmindex
@@ -1736,8 +1744,12 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 	'''IOR socket'''
 	bl_idname = 'luxrender_TF_ior_socket'
 	bl_label = 'IOR socket'
+	
+	def changed_preset(self, context):
+		## connect preset -> property
+		self.default_value = self.index_presetvalue
 
-	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
 	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'))
 	default_value = index
