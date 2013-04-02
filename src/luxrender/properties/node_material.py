@@ -93,7 +93,6 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_material_null_node)
 		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
 		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
-#		add_nodetype(layout, bpy.types.luxrender_material_shinymetal_node)
 		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
 
 @LuxRenderAddon.addon_register_class
@@ -698,11 +697,6 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
-		
-	#This node is only for the Lux node-tree
-	@classmethod	
-	def poll(cls, tree):
-		return tree.bl_idname == 'luxrender_material_nodes'
 
 	def export_material(self, make_material, make_texture):		
 		mat_type = 'mirror'
@@ -1004,27 +998,23 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 		
 		return fresnel_params
 
+
 ##### custom color sockets ##### 
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Absorbtion Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Ka_socket'
-	# Label for nice name display
 	bl_label = 'Absorbtion Color socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Absorbtion Color', description='Absorbtion Color', default=get_default(TC_Ka), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1048,23 +1038,18 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Diffuse Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Kd_socket'
-	# Label for nice name display
 	bl_label = 'Diffuse Color socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Diffuse Color', description='Diffuse Color', default=get_default(TC_Kd), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1088,23 +1073,18 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Reflection color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Kr_socket'
-	# Label for nice name display
 	bl_label = 'Reflection Color socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Reflection Color', description='Reflection Color', default=get_default(TC_Kr), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1126,23 +1106,18 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Specular color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Ks_socket'
-	# Label for nice name display
 	bl_label = 'Specular Color socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Specular Color', description='Specular Color', default=get_default(TC_Ks), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1164,23 +1139,18 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Specular color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Ks1_socket'
-	# Label for nice name display
 	bl_label = 'Specular Color 1 socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Specular Color 1', description='Specular Color 1', default=get_default(TC_Ks1), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1202,23 +1172,18 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Specular color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Ks2_socket'
-	# Label for nice name display
 	bl_label = 'Specular Color 2 socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Specular Color 2', description='Specular Color 2', default=get_default(TC_Ks2), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1240,23 +1205,18 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Specular color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Ks3_socket'
-	# Label for nice name display
 	bl_label = 'Specular Color 3 socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Specular Color 3', description='Specular Color 3', default=get_default(TC_Ks3), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1278,23 +1238,18 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Transmission Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_Kt_socket'
-	# Label for nice name display
 	bl_label = 'Transmission Color socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Transmission Color', description='Transmission Color', default=get_default(TC_Kt), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1316,23 +1271,18 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Warp Diffuse Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_warp_Kd_socket'
-	# Label for nice name display
 	bl_label = 'Warp Diffuse socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Warp Diffuse Color', description='Warp Diffuse Color', default=get_default(TC_warp_Kd), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1354,23 +1304,18 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Warp Diffuse Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_warp_Ks_socket'
-	# Label for nice name display
 	bl_label = 'Warp Specular socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Warp Specular Color', description='Warp Specular Color', default=get_default(TC_warp_Ks), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1392,23 +1337,18 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Weft Diffuse Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_weft_Kd_socket'
-	# Label for nice name display
 	bl_label = 'Weft Diffuse socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Weft Diffuse Color', description='Weft Diffuse Color', default=get_default(TC_weft_Kd), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 
@@ -1430,23 +1370,18 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Weft Specular Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_weft_Ks_socket'
-	# Label for nice name display
 	bl_label = 'Weft Specular socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Weft Specular Color', description='Weft Specular Color', default=get_default(TC_weft_Ks), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1468,23 +1403,18 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Backface Absorption Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_backface_Ka_socket'
-	# Label for nice name display
 	bl_label = 'Backface Absorption socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Backface Absorption Color', description='Backface Absorption Color', default=get_default(TC_backface_Ka), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1506,23 +1436,18 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Backface Specular Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TC_backface_Ks_socket'
-	# Label for nice name display
 	bl_label = 'Backface Specular socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Backface Specular Color', description='Backface Specular Color', default=get_default(TC_backface_Ks), subtype='COLOR', min=0.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 
@@ -1546,19 +1471,16 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 class luxrender_AC_color_socket(bpy.types.NodeSocket):
 	'''Volume absorption Color socket'''
 	bl_idname = 'luxrender_AC_color_socket'
-	# Label for nice name display
 	bl_label = 'Absorption Color socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1580,23 +1502,18 @@ class luxrender_AC_color_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_SC_color_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Scattering Color socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_SC_color_socket'
-	# Label for nice name display
 	bl_label = 'Scattering Color socket'
 	
 	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.alignment = 'LEFT'
 		row.prop(self, 'color', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.9, 0.9, 0.0, 1.0)
 		
@@ -1659,20 +1576,15 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_bump_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Bump socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_bump_socket'
-	# Label for nice name display
 	bl_label = 'Bump socket'
 	
 	bump = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'))
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 
@@ -1691,20 +1603,15 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Cauchy B socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_cauchyb_socket'
-	# Label for nice name display
 	bl_label = 'Cauchy B socket'
 	
 	cauchyb = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'), description=get_props(TF_cauchyb, 'description'), default=get_props(TF_cauchyb, 'default'), subtype=get_props(TF_cauchyb, 'subtype'), min=get_props(TF_cauchyb, 'min'), max=get_props(TF_cauchyb, 'max'), soft_min=get_props(TF_cauchyb, 'soft_min'), soft_max=get_props(TF_cauchyb, 'soft_max'), precision=get_props(TF_cauchyb, 'precision'))
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'cauchyb', text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
@@ -1727,20 +1634,15 @@ class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Thin film IOR socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_film_ior_socket'
-	# Label for nice name display
 	bl_label = 'Thin Film IOR socket'
 	
 	filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), description=get_props(TF_filmindex, 'description'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'))
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'filmindex', text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
@@ -1763,20 +1665,15 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Thin film IOR socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_film_thick_socket'
-	# Label for nice name display
 	bl_label = 'Thin Film thickness socket'
 	
-	filmindex = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), description=get_props(TF_film, 'description'), default=get_props(TF_film, 'default'), subtype=get_props(TF_film, 'subtype'), min=get_props(TF_film, 'min'), max=get_props(TF_film, 'max'), soft_min=get_props(TF_film, 'soft_min'), soft_max=get_props(TF_film, 'soft_max'), precision=get_props(TF_film, 'precision'))
+	film = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), description=get_props(TF_film, 'description'), default=get_props(TF_film, 'default'), subtype=get_props(TF_film, 'subtype'), min=get_props(TF_film, 'min'), max=get_props(TF_film, 'max'), soft_min=get_props(TF_film, 'soft_min'), soft_max=get_props(TF_film, 'soft_max'), precision=get_props(TF_film, 'precision'))
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'film', text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
@@ -1799,20 +1696,15 @@ class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_ior_socket(bpy.types.NodeSocket):
-	# Description string
 	'''IOR socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_ior_socket'
-	# Label for nice name display
 	bl_label = 'IOR socket'
 	
 	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'))
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'index', text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
@@ -1835,22 +1727,17 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
-	# Description string
 	'''U-Roughness socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_uroughness_socket'
-	# Label for nice name display
 	bl_label = 'U-Roughness socket'
 	
 	uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), description=get_props(TF_uroughness, 'description'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))	
 	
-	# Optional function for drawing the socket input valueTF_uexponent
 	def draw(self, context, layout, node):
 		if node.use_anisotropy: name = 'U-Roughness'
 		else: name = 'Roughness'
 		layout.prop(self, 'uroughness', text=name)
 		
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
@@ -1874,21 +1761,16 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
-	# Description string
 	'''V-Roughness socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_vroughness_socket'
-	# Label for nice name display
 	bl_label = 'V-Roughness socket'
 	
 	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'vroughness', text=self.name)
 		layout.active = node.use_anisotropy
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 	
@@ -1913,20 +1795,15 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Sigma socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_sigma_socket'
-	# Label for nice name display
 	bl_label = 'Sigma socket'
 	
 	sigma = bpy.props.FloatProperty(name=get_props(TF_sigma, 'name'), description=get_props(TF_sigma, 'description'), default=get_props(TF_sigma, 'default'), subtype=get_props(TF_sigma, 'subtype'), min=get_props(TF_sigma, 'min'), max=get_props(TF_sigma, 'max'), soft_min=get_props(TF_sigma, 'soft_min'), soft_max=get_props(TF_sigma, 'soft_max'), precision=get_props(TF_sigma, 'precision'))
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.prop(self, 'sigma', text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 		
@@ -1948,22 +1825,17 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
-	# Description string
 	'''Scattering asymmetry socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_SC_asymmetry_socket'
-	# Label for nice name display
 	bl_label = 'Scattering Asymmetry socket'
 	
 	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4)
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		row = layout.row()
 		row.prop(self, 'sc_asym', text='')
 		row.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.63, 0.63, 0.63, 1.0)
 		
