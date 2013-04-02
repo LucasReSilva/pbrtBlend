@@ -492,6 +492,15 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
 	def init(self, context):
 		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
+
+	def export_texture(self, make_texture):
+		windy_params = ParamSet()
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			wrinkled_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'windy', self.name, windy_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
