@@ -974,12 +974,13 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
+		box = layout.box()
 		if self.fresnel == self.fresnel_presetvalue:
 			menu_text = self.fresnel_presetstring
 		else:
 			menu_text = '-- Choose preset --'
-		layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-		layout.prop(self, 'fresnel', text=self.name)
+		box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+		box.prop(self, 'fresnel', text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -1648,12 +1649,13 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 	filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), description=get_props(TF_filmindex, 'description'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'))
 	
 	def draw(self, context, layout, node):
+		box = layout.box()
 		if self.filmindex == self.filmindex_presetvalue:
 			menu_text = self.filmindex_presetstring
 		else:
 			menu_text = '-- Choose preset --'
-		layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-		layout.prop(self, 'filmindex', text=self.name)
+		box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+		box.prop(self, 'filmindex', text=self.name)
 	
 	def draw_color(self, context, node):
 		return float_socket_color
@@ -1717,12 +1719,13 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'))
 	
 	def draw(self, context, layout, node):
+		box = layout.box()
 		if self.index == self.index_presetvalue:
 			menu_text = self.index_presetstring
 		else:
 			menu_text = '-- Choose preset --'
-		layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-		layout.prop(self, 'index', text=self.name)
+		box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+		box.prop(self, 'index', text=self.name)
 	
 	def draw_color(self, context, node):
 		return float_socket_color
