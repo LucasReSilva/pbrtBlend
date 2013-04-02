@@ -968,6 +968,11 @@ class luxrender_material_output_node(luxrender_node):
 # Custom socket types, lookup parameters here:
 # http://www.blender.org/documentation/blender_python_api_2_66a_release/bpy.props.html?highlight=bpy.props.floatproperty#bpy.props.FloatProperty
 
+#Store our custom socket colors here as vars, so we don't have to remember what they are on every custom socket
+float_socket_color = (0.63, 0.63, 0.63, 1.0) #Same as native NodeSocketColor
+color_socket_color = (0.9, 0.9, 0.0, 1.0) #Same as native NodeSocketFloat
+fresnel_socket_color = (0.33, 0.6, 0.85, 1.0)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	# Description string
@@ -986,7 +991,7 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	
 	# Socket color
 	def draw_color(self, context, node):
-		return (0.33, 0.6, 0.85, 1.0)
+		return fresnel_socket_color
 	
 	#Export routine for this socket
 	def get_paramset(self, make_texture):
@@ -1024,7 +1029,7 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		print('get_paramset diffuse color')
@@ -1059,7 +1064,7 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		print('get_paramset diffuse color')
@@ -1094,7 +1099,7 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1127,7 +1132,7 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1160,7 +1165,7 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1193,7 +1198,7 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1226,7 +1231,7 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1259,7 +1264,7 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1292,7 +1297,7 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1325,7 +1330,7 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1358,7 +1363,7 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1391,7 +1396,7 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1424,7 +1429,7 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1457,7 +1462,7 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1490,7 +1495,7 @@ class luxrender_AC_color_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1523,7 +1528,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.9, 0.9, 0.0, 1.0)
+		return color_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1560,7 +1565,7 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
 	
 	# Socket color
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		print('get_paramset amount')
@@ -1594,7 +1599,7 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 		layout.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 
 	def get_paramset(self, make_texture):
 		bumpmap_params = ParamSet()
@@ -1621,7 +1626,7 @@ class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'cauchyb', text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1652,7 +1657,7 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'filmindex', text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1683,7 +1688,7 @@ class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'film', text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1714,7 +1719,7 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'index', text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1747,7 +1752,7 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'uroughness', text=name)
 		
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		print('get_paramset uroughness')
@@ -1780,7 +1785,7 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 		layout.active = node.use_anisotropy
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		print('get_paramset vroughness')
@@ -1813,7 +1818,7 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'sigma', text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -1845,7 +1850,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
-		return (0.63, 0.63, 0.63, 1.0)
+		return float_socket_color
 		
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
