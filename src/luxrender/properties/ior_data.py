@@ -381,7 +381,12 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 					lm.inputs['Film IOR'].filmindex = ior
 					lm.inputs['Film IOR'].filmindex_presetvalue = ior
 					lm.inputs['Film IOR'].filmindex_presetstring = name
-					
+			for mat_type in ('node_clear', 'node_homogeneous'):
+				if ctx.endswith(mat_type):
+					lm.inputs['IOR'].fresnel = ior
+					lm.inputs['IOR'].fresnel_presetvalue = ior
+					lm.inputs['IOR'].fresnel_presetstring = name
+	
 		else:
 			if context.material and context.material.luxrender_material and not context.texture:
 				lm = context.material.luxrender_material

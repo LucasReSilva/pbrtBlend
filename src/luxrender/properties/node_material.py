@@ -838,8 +838,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_AC_socket', 'Absorption Color')
-		self.inputs[1].color = (1.0, 1.0, 1.0) # start with different default
+		self.inputs.new('luxrender_AC_color_socket', 'Absorption Color')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
 		
@@ -852,8 +851,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_AC_socket', 'Absorption Color')
-		self.inputs[1].color = (1.0, 1.0, 1.0) # start with different default
+		self.inputs.new('luxrender_AC_color_socket', 'Absorption Color')
 		self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
@@ -970,11 +968,17 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'IOR socket'
 	
-	
-	fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52)
+	fresnel_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	fresnel_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
+	fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52, precision=6)
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
+		if self.fresnel == self.fresnel_presetvalue:
+			menu_text = self.fresnel_presetstring
+		else:
+			menu_text = '-- Choose preset --'
+		layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 		layout.prop(self, 'fresnel', text=self.name)
 	
 	# Socket color
@@ -1474,7 +1478,7 @@ class luxrender_AC_color_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_AC_color_socket'
 	bl_label = 'Absorption Color socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
+	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
