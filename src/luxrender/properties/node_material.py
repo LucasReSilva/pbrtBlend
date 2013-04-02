@@ -583,19 +583,29 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
-	'''Matte material node'''
+	'''Mattetranslucent material node'''
 	bl_idname = 'luxrender_material_mattetranslucent_node'
 	bl_label = 'Matte Translucent Material'
 	bl_icon = 'MATERIAL'
 	
+	energyconsrv = bpy.props.BoolProperty(name='Energy Conserving', default=True)
+	
 	def init(self, context):
-		self.inputs.new('NodeSocketBool', 'Energy Conserving')
-		self.inputs.new('luxrender_TC_Kr_socket', 'Refection Color')
+		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
+
+	def export_material(self, make_material, make_texture):
+		mat_type = 'mattetranslucent'
+		
+		mattetranslucent_params = ParamSet()
+		mattetranslucent_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		mattetranslucent_params.add_bool('energyconserving', self.energyconsrv)
+		
+		return make_material(mat_type, self.name, mattetranslucent_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal(luxrender_material_node):
@@ -813,6 +823,14 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
+
+	def export_material(self, make_material, make_texture):
+		mat_type = 'scatter'
+		
+		scatter_params = ParamSet()
+		scatter_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_material(mat_type, self.name, scatter_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_velvet(luxrender_material_node):
