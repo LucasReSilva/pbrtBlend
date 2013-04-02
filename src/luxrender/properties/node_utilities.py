@@ -154,6 +154,10 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
+
+	def export_texture(self, make_texture):
+		harlequin_params = ParamSet()
+		return make_texture('color', 'harlequin', self.name, harlequin_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_mix(luxrender_texture_node):
@@ -328,6 +332,10 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
+
+	def export_texture(self, make_texture):
+		uvtest_params = ParamSet()
+		return make_texture('color', 'uv', self.name, uvtest_params)
 
 #Custom sockets for the mix/add/scale/subtract nodes, in all 3 variants. *sigh*
 #First, floats...
