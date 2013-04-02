@@ -100,6 +100,14 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
 		layout.prop(self, 'energy')
 		layout.prop(self, 'wavelength')
 		layout.prop(self, 'width')
+
+	def export_texture(self, make_texture):
+		gaussian_params = ParamSet()
+		gaussian_params.add_float('energy', self.energy)
+		gaussian_params.add_float('wavelength', self.wavelength)
+		gaussian_params.add_float('width', self.width)
+		
+		return make_texture('color', 'gaussian', self.name, gaussian_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
