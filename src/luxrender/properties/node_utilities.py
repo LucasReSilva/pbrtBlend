@@ -141,6 +141,10 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 			if 'Float' in so:
 				self.outputs.remove(self.outputs['Float'])
 
+	def export_texture(self, make_texture):
+		constant_params = ParamSet()		
+		return make_texture(self.variant, 'constant', self.name, constant_params)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 	'''Harlequin texture node'''
