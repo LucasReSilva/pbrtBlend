@@ -102,7 +102,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 	bl_icon = 'TEXTURE'
 
 	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
-	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR')
+	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR', min=0.0, max=1.0)
 	float = bpy.props.FloatProperty(name='Float')
 	fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0)
 
