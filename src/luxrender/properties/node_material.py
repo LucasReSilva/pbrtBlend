@@ -69,6 +69,7 @@ def get_socket_paramsets(sockets, make_texture):
 		params.update( socket.get_paramset(make_texture) )
 	return params
 
+#Create the submenus for the add-node menu
 @LuxRenderAddon.addon_register_class
 class lux_node_Materials_Menu(bpy.types.Menu):
 	bl_idname = "Lux_NODE_materials"
@@ -190,6 +191,7 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
 
+#Draw the add-node menu from the submenus created above
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
 	'''LuxRender Material Nodes'''
@@ -227,12 +229,15 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 	# Icon identifier
 	bl_icon = 'MATERIAL'
 
+    #Get menu items from old material editor properties
 	for prop in luxrender_mat_carpaint.properties:
 		if prop['attr'].startswith('name'):
 			carpaint_items = prop['items']
-	
+
+	#Definitions for non-socket properties
 	carpaint_presets = bpy.props.EnumProperty(name='Car Paint Presets', description='Luxrender Carpaint Presets', items=carpaint_items, default='-')
-	
+
+	#Definitions for sockets
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
 		self.inputs.new('luxrender_TC_Ks1_socket', 'Specular Color 1')
@@ -250,9 +255,11 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
+	#Draw the non-socket properties
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'carpaint_presets')
-		
+	
+	#Export routine for this node. This function stores code that LuxBlend will run when it exports materials.
 	def export_material(self, make_material, make_texture):		
 		mat_type = 'carpaint'
 		
@@ -980,7 +987,8 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 	# Socket color
 	def draw_color(self, context, node):
 		return (0.33, 0.6, 0.85, 1.0)
-		
+	
+	#Export routine for this socket
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
 		if tex_node:
