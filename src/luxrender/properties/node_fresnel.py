@@ -72,11 +72,13 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_cauchy_node'
 	bl_label = 'Cauchy'
 	bl_icon = 'TEXTURE'
-	
+
 	use_ior = bpy.props.BoolProperty(name='Use IOR', default=True)
-	cauchy_n = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0)
-	cauchy_a = bpy.props.FloatProperty(name='A', default=1.458, min=0.0, max=10.0)
-	cauchy_b = bpy.props.FloatProperty(name='B', default=0.0035, min=0.0, max=10.0)
+	cauchy_n_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	cauchy_n_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
+	cauchy_n = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0, precision=6)
+	cauchy_a = bpy.props.FloatProperty(name='A', default=1.458, min=0.0, max=10.0, precision=6)
+	cauchy_b = bpy.props.FloatProperty(name='B', default=0.0035, min=0.0, max=10.0, precision=6)
 
 	def init(self, context):
 		self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
@@ -84,6 +86,11 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'use_ior')
 		if self.use_ior:	
+			if self.cauchy_n == self.cauchy_n_presetvalue:
+				menu_text = self.cauchy_n_presetstring
+			else:
+				menu_text = '-- Choose preset --'
+			layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 			layout.prop(self, 'cauchy_n')
 		else:
 			layout.prop(self, 'cauchy_a')

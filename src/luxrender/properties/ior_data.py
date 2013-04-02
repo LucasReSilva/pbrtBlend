@@ -367,10 +367,10 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 
 		# Detect either node or material or volume or texture context
 		if 'node' in dir(context):
-			print("--->", context.node.__class__.__name__); # need it for further implementation tests
+#			print("--->", context.node.__class__.__name__); # need it for further implementation tests
 			lm = context.node
 			ctx = context.node.__class__.__name__
-			print("--------", ctx)
+#			print("--------", ctx)
 			for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent'):
 				if ctx.endswith(mat_type):
 					lm.inputs['IOR'].index = ior
@@ -386,6 +386,11 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 					lm.inputs['IOR'].fresnel = ior
 					lm.inputs['IOR'].fresnel_presetvalue = ior
 					lm.inputs['IOR'].fresnel_presetstring = name
+			for mat_type in ('cauchy'):
+				if ctx.endswith(mat_type):
+					lm.cauchy_n = ior
+					lm.cauchy_n_presetvalue = ior
+					lm.cauchy_n_presetstring = name
 	
 		else:
 			if context.material and context.material.luxrender_material and not context.texture:
