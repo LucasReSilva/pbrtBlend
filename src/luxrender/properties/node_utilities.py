@@ -170,8 +170,8 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 		so = self.outputs.keys()
 		if self.variant == 'color':
 			if not 'Color 1' in si:
-				self.inputs.new('NodeSocketColor', 'Color 1')
-				self.inputs.new('NodeSocketColor', 'Color 2')
+				self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
+				self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
 			if 'Float 1' in si:
 				self.inputs.remove(self.inputs['Float 1'])
 				self.inputs.remove(self.inputs['Float 2'])
@@ -188,8 +188,8 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 		
 		if self.variant == 'float':
 			if not 'Float 1' in si:
-				self.inputs.new('NodeSocketFloat', 'Float 1')
-				self.inputs.new('NodeSocketFloat', 'Float 2')
+				self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
+				self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
 			if 'Color 1' in si:
 				self.inputs.remove(self.inputs['Color 1'])
 				self.inputs.remove(self.inputs['Color 2'])
@@ -206,8 +206,8 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 		
 		if self.variant == 'fresnel':
 			if not 'IOR 1' in si:
-				self.inputs.new('luxrender_fresnel_socket', 'IOR 1')
-				self.inputs.new('luxrender_fresnel_socket', 'IOR 2')
+				self.inputs.new('luxrender_TFR_tex1_socket', 'IOR 1')
+				self.inputs.new('luxrender_TFR_tex2_socket', 'IOR 2')
 
 			if 'Color 1' in si:
 				self.inputs.remove(self.inputs['Color 1'])
@@ -222,6 +222,12 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 				self.outputs.remove(self.outputs['Color'])
 			if 'Float' in so:
 				self.outputs.remove(self.outputs['Float'])
+
+	def export_texture(self, make_texture):
+		mix_params = ParamSet()
+		mix_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_texture(self.variant, 'mix', self.name, mix_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_scale(luxrender_texture_node):
@@ -327,7 +333,7 @@ class luxrender_TF_tex1_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_tex1_socket'
 	bl_label = 'Texture 1 socket'
 	
-	tex1 = bpy.props.FloatProperty(name='Texture 1')
+	tex1 = bpy.props.FloatProperty(name='Value 1')
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'tex1', text=self.name)
@@ -357,7 +363,7 @@ class luxrender_TF_tex2_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_tex2_socket'
 	bl_label = 'Texture 2 socket'
 	
-	tex2 = bpy.props.FloatProperty(name='Texture 2')
+	tex2 = bpy.props.FloatProperty(name='Value 2')
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'tex2', text=self.name)
@@ -439,6 +445,67 @@ class luxrender_TC_tex2_socket(bpy.types.NodeSocket):
 		else:
 			tex2_params = ParamSet() \
 				.add_color('tex2', self.tex2)
+		
+		return tex2_params
+
+#And fresnel!
+@LuxRenderAddon.addon_register_class
+class luxrender_TFR_tex1_socket(bpy.types.NodeSocket):
+	'''Texture 1 socket'''
+	bl_idname = 'luxrender_TFR_tex1_socket'
+	bl_label = 'Texture 1 socket'
+	
+	tex1 = bpy.props.FloatProperty(name='IOR 1')
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'tex1', text=self.name)
+	
+	def draw_color(self, context, node):
+		return fresnel_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			tex1_params = ParamSet() \
+				.add_texture('tex1', tex_name)
+		else:
+			tex1_params = ParamSet() \
+				.add_float('tex1', self.tex1)
+		
+		return tex1_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
+	'''Texture 2 socket'''
+	bl_idname = 'luxrender_TFR_tex2_socket'
+	bl_label = 'Texture 2 socket'
+	
+	tex2 = bpy.props.FloatProperty(name='IOR 2')
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'tex2', text=self.name)
+	
+	def draw_color(self, context, node):
+		return fresnel_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			tex2_params = ParamSet() \
+				.add_texture('tex2', tex_name)
+		else:
+			tex2_params = ParamSet() \
+				.add_float('tex2', self.tex2)
 		
 		return tex2_params
 
