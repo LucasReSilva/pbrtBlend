@@ -367,11 +367,11 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 
 		# Detect either node or material or volume or texture context
 		if 'node' in dir(context):
-#			print("--->", context.node.__class__.__name__); # need it for further implementation tests
+			print("--->", context.node.__class__.__name__); # need it for further implementation tests
 			lm = context.node
-			lm.index_floatvalue = ior
-			lm.index_presetvalue = ior
-			lm.index_presetstring = name
+			lm.inputs['IOR'].index = ior
+			lm.inputs['IOR'].index_presetvalue = ior
+			lm.inputs['IOR'].index_presetstring = name
 		else:
 			if context.material and context.material.luxrender_material and not context.texture:
 				lm = context.material.luxrender_material

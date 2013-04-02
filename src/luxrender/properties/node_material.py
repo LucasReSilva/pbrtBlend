@@ -384,21 +384,19 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		socket = self.inputs['Specular Color']
-		if socket:
-			socket.hide = self.use_ior
-	
+		self.inputs['Specular Color'].hide = self.use_ior
+		self.inputs['IOR'].hide = not self.use_ior
+
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
-	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52, precision=get_props(TF_index, 'precision'))
-	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
-	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
 		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
+		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+		self.inputs['IOR'].hide = True # initial state is hidden
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
@@ -410,14 +408,6 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'multibounce')
 		layout.prop(self, 'use_ior')
-		if self.use_ior:
-			layout.prop(self, 'index_floatvalue')
-			layout.prop(self, 'IOR')
-			if self.index_floatvalue == self.index_presetvalue:
-				menu_text = self.index_presetstring
-			else:
-				menu_text = '-- Choose preset --'
-			layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 		layout.prop(self, 'use_anisotropy')
 
 	def export_material(self, make_material, make_texture):
@@ -439,20 +429,18 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		socket = self.inputs['Specular Color']
-		if socket:
-			socket.hide = self.use_ior
+		self.inputs['Specular Color'].hide = self.use_ior
+		self.inputs['IOR'].hide = not self.use_ior
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
-	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52, precision=get_props(TF_index, 'precision'))
-	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
-	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Base Material')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
+		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+		self.inputs['IOR'].hide = True # initial state is hidden
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
@@ -464,14 +452,6 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'multibounce')
 		layout.prop(self, 'use_ior')
-		if self.use_ior:
-			layout.prop(self, 'index_floatvalue')
-			layout.prop(self, 'IOR')
-			if self.index_floatvalue == self.index_presetvalue:
-				menu_text = self.index_presetstring
-			else:
-				menu_text = '-- Choose preset --'
-			layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 		layout.prop(self, 'use_anisotropy')
 		
 	def export_material(self, make_material, make_texture):
@@ -503,15 +483,11 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		socket = self.inputs['Specular Color']
-		if socket:
-			socket.hide = self.use_ior
+		self.inputs['Specular Color'].hide = self.use_ior
+		self.inputs['IOR'].hide = not self.use_ior
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
-	index_floatvalue = bpy.props.FloatProperty(name='IOR', description='IOR', default=1.52, precision=get_props(TF_index, 'precision'))
-	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
-	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False)
 	
 	def init(self, context):
@@ -520,6 +496,8 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth (nm)')
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorbtion Color')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
+		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+		self.inputs['IOR'].hide = True # initial state is hidden
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
@@ -529,14 +507,6 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'multibounce')
 		layout.prop(self, 'use_ior')
-		if self.use_ior:
-			layout.prop(self, 'index_floatvalue')
-			layout.prop(self, 'IOR')
-			if self.index_floatvalue == self.index_presetvalue:
-				menu_text = self.index_presetstring
-			else:
-				menu_text = '-- Choose preset --'
-			layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 		layout.prop(self, 'use_anisotropy')
 
 @LuxRenderAddon.addon_register_class
@@ -1730,10 +1700,17 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 	'''IOR socket'''
 	bl_idname = 'luxrender_TF_ior_socket'
 	bl_label = 'IOR socket'
-	
+
+	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'))
 	
 	def draw(self, context, layout, node):
+		if self.index == self.index_presetvalue:
+			menu_text = self.index_presetstring
+		else:
+			menu_text = '-- Choose preset --'
+		layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 		layout.prop(self, 'index', text=self.name)
 	
 	def draw_color(self, context, node):
