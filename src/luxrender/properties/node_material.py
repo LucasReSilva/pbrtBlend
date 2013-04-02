@@ -969,8 +969,8 @@ class luxrender_material_output_node(luxrender_node):
 # http://www.blender.org/documentation/blender_python_api_2_66a_release/bpy.props.html?highlight=bpy.props.floatproperty#bpy.props.FloatProperty
 
 #Store our custom socket colors here as vars, so we don't have to remember what they are on every custom socket
-float_socket_color = (0.63, 0.63, 0.63, 1.0) #Same as native NodeSocketColor
-color_socket_color = (0.9, 0.9, 0.0, 1.0) #Same as native NodeSocketFloat
+float_socket_color = (0.63, 0.63, 0.63, 1.0) #Same as native NodeSocketFloat
+color_socket_color = (0.9, 0.9, 0.0, 1.0) #Same as native NodeSocketColor
 fresnel_socket_color = (0.33, 0.6, 0.85, 1.0)
 
 @LuxRenderAddon.addon_register_class

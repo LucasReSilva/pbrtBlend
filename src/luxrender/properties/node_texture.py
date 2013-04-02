@@ -45,6 +45,9 @@ from ..util import dict_merge
 from ..properties.texture import (
 	luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
 )
+from ..properties.node_material import (
+	float_socket_color, color_socket_color, fresnel_socket_color
+)
 
 #Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -487,7 +490,6 @@ class luxrender_coodinate_socket(bpy.types.NodeSocket):
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.label(text=self.name)
-		
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -496,18 +498,13 @@ class luxrender_coodinate_socket(bpy.types.NodeSocket):
 	
 @LuxRenderAddon.addon_register_class
 class luxrender_transform_socket(bpy.types.NodeSocket):
-	# Description string
 	'''2D transform socket'''
-	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_transform_socket'
-	# Label for nice name display
 	bl_label = 'Transform socket'
 	
-	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
 		layout.label(text=self.name)
 	
-	# Socket color
 	def draw_color(self, context, node):
 		return (0.65, 0.55, 0.75, 1.0)
 		

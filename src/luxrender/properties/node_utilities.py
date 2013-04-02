@@ -48,7 +48,7 @@ from ..properties.node_texture import (
 	variant_items, triple_variant_items
 )
 from ..properties.node_material import (
-	luxrender_fresnel_socket, luxrender_TF_amount_socket
+	luxrender_fresnel_socket, luxrender_TF_amount_socket, float_socket_color, color_socket_color, fresnel_socket_color, get_socket_paramsets
 )
 
 @LuxRenderAddon.addon_register_class
@@ -67,8 +67,8 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 		so = self.outputs.keys()
 		if self.variant == 'color':
 			if not 'Color 1' in si: #If there aren't color inputs, create them
-				self.inputs.new('NodeSocketColor', 'Color 1')
-				self.inputs.new('NodeSocketColor', 'Color 2')
+				self.inputs.new('luxrender_TC_tex1_socket', 'tex1')
+				self.inputs.new('luxrender_TC_tex2_socket', 'tex2')
 			if 'Float 1' in si: #If there are float inputs, destory them
 				self.inputs.remove(self.inputs['Float 1'])
 				self.inputs.remove(self.inputs['Float 2'])
@@ -78,8 +78,8 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 				self.outputs.remove(self.outputs['Float'])
 		if self.variant == 'float':
 			if not 'Float 1' in si:
-				self.inputs.new('NodeSocketFloat', 'Float 1')
-				self.inputs.new('NodeSocketFloat', 'Float 2')
+				self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
+				self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
 			if 'Color 1' in si:
 				self.inputs.remove(self.inputs['Color 1'])
 				self.inputs.remove(self.inputs['Color 2'])
@@ -87,7 +87,13 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 				self.outputs.new('NodeSocketFloat', 'Float')
 			if 'Color' in so:
 				self.outputs.remove(self.outputs['Color'])
-				
+
+	def export_texture(self, make_texture):		
+		addtex_params = ParamSet()
+		addtex_params.update( get_socket_paramsets(self.inputs, make_texture) )
+
+		return make_texture(self.variant, 'add', self.name, addtex_params)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_constant(luxrender_texture_node):
 	'''Constant texture node'''
@@ -317,4 +323,127 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
 
 	def init(self, context):
 		self.outputs.new('NodeSocketColor', 'Color')
+
+#Custom sockets for the mix/add/scale/subtract nodes, in all 3 variants. *sigh*
+#First, floats...
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_tex1_socket(bpy.types.NodeSocket):
+	'''Texture 1 socket'''
+	bl_idname = 'luxrender_TF_tex1_socket'
+	bl_label = 'Texture 1 socket'
+	
+	tex1 = bpy.props.FloatProperty(name='Texture 1')
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'tex1', text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			tex1_params = ParamSet() \
+				.add_texture('tex1', tex_name)
+		else:
+			tex1_params = ParamSet() \
+				.add_float('tex1', self.tex1)
 		
+		return tex1_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_tex2_socket(bpy.types.NodeSocket):
+	'''Texture 2 socket'''
+	bl_idname = 'luxrender_TF_tex2_socket'
+	bl_label = 'Texture 2 socket'
+	
+	tex2 = bpy.props.FloatProperty(name='Texture 2')
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'tex2', text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			tex2_params = ParamSet() \
+				.add_texture('tex2', tex_name)
+		else:
+			tex2_params = ParamSet() \
+				.add_float('tex2', self.tex2)
+		
+		return tex2_params
+
+#Now, colors:
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_tex1_socket(bpy.types.NodeSocket):
+	'''Texture 1 socket'''
+	bl_idname = 'luxrender_TC_tex1_socket'
+	bl_label = 'Texture 1 socket'
+	
+	tex1 = bpy.props.FloatVectorProperty(name='Color 1', subtype='COLOR')
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'tex1', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			tex1_params = ParamSet() \
+				.add_texture('tex1', tex_name)
+		else:
+			tex1_params = ParamSet() \
+				.add_color('tex1', self.tex1)
+		
+		return tex1_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_tex2_socket(bpy.types.NodeSocket):
+	'''Texture 2 socket'''
+	bl_idname = 'luxrender_TC_tex2_socket'
+	bl_label = 'Texture 2 socket'
+	
+	tex2 = bpy.props.FloatVectorProperty(name='Color 2', subtype='COLOR')
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'tex2', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			tex2_params = ParamSet() \
+				.add_texture('tex2', tex_name)
+		else:
+			tex2_params = ParamSet() \
+				.add_color('tex2', self.tex2)
+		
+		return tex2_params
+
