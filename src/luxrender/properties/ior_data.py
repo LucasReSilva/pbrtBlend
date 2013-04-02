@@ -369,9 +369,19 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 		if 'node' in dir(context):
 			print("--->", context.node.__class__.__name__); # need it for further implementation tests
 			lm = context.node
-			lm.inputs['IOR'].index = ior
-			lm.inputs['IOR'].index_presetvalue = ior
-			lm.inputs['IOR'].index_presetstring = name
+			ctx = context.node.__class__.__name__
+			print("--------", ctx)
+			for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent'):
+				if ctx.endswith(mat_type):
+					lm.inputs['IOR'].index = ior
+					lm.inputs['IOR'].index_presetvalue = ior
+					lm.inputs['IOR'].index_presetstring = name
+			for mat_type in ('mirror', 'shinymetal'):
+				if ctx.endswith(mat_type):
+					lm.inputs['Film IOR'].filmindex = ior
+					lm.inputs['Film IOR'].filmindex_presetvalue = ior
+					lm.inputs['Film IOR'].filmindex_presetstring = name
+					
 		else:
 			if context.material and context.material.luxrender_material and not context.texture:
 				lm = context.material.luxrender_material

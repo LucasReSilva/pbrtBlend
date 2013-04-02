@@ -1639,9 +1639,16 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_film_ior_socket'
 	bl_label = 'Thin Film IOR socket'
 	
+	filmindex_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR')
+	filmindex_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
 	filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), description=get_props(TF_filmindex, 'description'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'))
 	
 	def draw(self, context, layout, node):
+		if self.filmindex == self.filmindex_presetvalue:
+			menu_text = self.filmindex_presetstring
+		else:
+			menu_text = '-- Choose preset --'
+		layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
 		layout.prop(self, 'filmindex', text=self.name)
 	
 	def draw_color(self, context, node):
