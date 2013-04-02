@@ -91,9 +91,11 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 
 	def export_texture(self, make_texture):
 		cauchy_params = ParamSet()
-		cauchy_params.add_float('A', self.cauchy_a)
-		cauchy_params.add_float('b', self.cauchy_b)
-		cauchy_params.add_float('ior', self.cauchy_n)
+		cauchy_params.add_float('cauchyb', self.cauchy_b)
+		if not self.use_ior:
+			cauchy_params.add_float('cauchya', self.cauchy_a)
+		else:
+			cauchy_params.add_float('index', self.cauchy_n)
 		
 		return make_texture('fresnel', 'cauchy', self.name, cauchy_params)
 
