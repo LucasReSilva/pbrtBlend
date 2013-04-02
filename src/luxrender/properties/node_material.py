@@ -398,7 +398,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
 		self.inputs['IOR'].hide = True # initial state is hidden
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
-		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
@@ -442,7 +442,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
 		self.inputs['IOR'].hide = True # initial state is hidden
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
-		self.inputs.new('NodeSocketFloat', 'Absorption Depth')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
@@ -1916,3 +1916,33 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 		
 		return sc_asym_params
 
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_d_socket(bpy.types.NodeSocket):
+	'''Absorption depth socket'''
+	bl_idname = 'luxrender_TF_d_socket'
+	bl_label = 'Absorption depth socket'
+	
+	d = bpy.props.FloatProperty(name=get_props(TF_d, 'name'), description=get_props(TF_d, 'description'), default=get_props(TF_d, 'default'), subtype=get_props(TF_d, 'subtype'), min=get_props(TF_d, 'min'), max=get_props(TF_d, 'max'), soft_min=get_props(TF_d, 'soft_min'), soft_max=get_props(TF_d, 'soft_max'), precision=get_props(TF_d, 'precision'))
+	default_value = d
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'd', text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			d_params = ParamSet() \
+				.add_texture('d', tex_name)
+		else:
+			d_params = ParamSet() \
+				.add_float('d', self.d)
+		
+		return d_params
