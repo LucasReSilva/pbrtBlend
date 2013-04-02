@@ -193,7 +193,6 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
 	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
-
 	def init(self, context):
 		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
@@ -205,6 +204,21 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 		layout.prop(self, 'noisedepth')
 		layout.prop(self, 'bright')
 		layout.prop(self, 'contrast')
+
+	def export_texture(self, make_texture):
+		clouds_params = ParamSet() \
+			.add_string('noisetype', self.noisetype) \
+			.add_string('noisebasis', self.noisebasis) \
+			.add_float('noisesize', self.noisesize) \
+			.add_integer('noisedepth', self.noisedepth) \
+			.add_float('bright', self.bright) \
+			.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			clouds_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_clouds', self.name, clouds_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fbm(luxrender_texture_node):
@@ -216,7 +230,6 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 	octaves = bpy.props.IntProperty(name='Octaves', default=8)
 	roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)
 
-
 	def init(self, context):
 		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
 		self.outputs.new('NodeSocketFloat', 'Float')
@@ -224,6 +237,17 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'octaves')
 		layout.prop(self, 'roughness')
+
+	def export_texture(self, make_texture):
+		fbm_params = ParamSet() \
+			.add_integer('octaves', self.octaves) \
+			.add_float('roughness', self.roughness)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			fbm_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'fbm', self.name, fbm_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_image_map(luxrender_texture_node):
@@ -466,7 +490,6 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 		layout.prop(self, 'roughness')
 		
 	def export_texture(self, make_texture):
-		print('export wrinkled')
 		wrinkled_params = ParamSet() \
 			.add_integer('octaves', self.octaves) \
 			.add_float('roughness', self.roughness)
