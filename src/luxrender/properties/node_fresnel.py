@@ -89,6 +89,14 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 			layout.prop(self, 'cauchy_a')
 		layout.prop(self, 'cauchy_b')
 
+	def export_texture(self, make_texture):
+		cauchy_params = ParamSet()
+		cauchy_params.add_float('A', self.cauchy_a)
+		cauchy_params.add_float('b', self.cauchy_b)
+		cauchy_params.add_float('ior', self.cauchy_n)
+		
+		return make_texture('fresnel', 'cauchy', self.name, cauchy_params)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 	'''Fresnel Name Node'''

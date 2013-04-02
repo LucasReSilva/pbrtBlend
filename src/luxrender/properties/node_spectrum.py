@@ -58,6 +58,12 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'temperature')
+
+	def export_texture(self, make_texture):
+		blackbody_params = ParamSet()
+		blackbody_params.add_float('temperature', self.temperature)
+		
+		return make_texture('color', 'blackbody', self.name, blackbody_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_colordepth(luxrender_texture_node):
