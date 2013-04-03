@@ -217,9 +217,9 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 			.add_string('brickbond', self.brickbond) \
 			.add_float('brickrun', self.brickrun) \
 			.add_float('mortarsize', self.mortarsize) \
-			.add_float('width', self.width) \
-			.add_float('depth', self.depth) \
-			.add_float('height', self.height)
+			.add_float('brickwidth', self.width) \
+			.add_float('brickdepth', self.depth) \
+			.add_float('brickheight', self.height)
 		
 		coord_node = get_linked_node(self.inputs[0])
 		if coord_node and check_node_get_paramset(coord_node):
