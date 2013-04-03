@@ -67,8 +67,8 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 		so = self.outputs.keys()
 		if self.variant == 'color':
 			if not 'Color 1' in si: #If there aren't color inputs, create them
-				self.inputs.new('luxrender_TC_tex1_socket', 'tex1')
-				self.inputs.new('luxrender_TC_tex2_socket', 'tex2')
+				self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
+				self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
 			if 'Float 1' in si: #If there are float inputs, destory them
 				self.inputs.remove(self.inputs['Float 1'])
 				self.inputs.remove(self.inputs['Float 2'])

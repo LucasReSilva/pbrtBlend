@@ -132,6 +132,7 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 	
 	def draw(self, context):
 		layout = self.layout
+		add_nodetype(layout, bpy.types.luxrender_texture_brick_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_bump_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_clouds_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fbm_node)

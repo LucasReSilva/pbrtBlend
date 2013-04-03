@@ -43,10 +43,10 @@ from ..export.materials import (
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 from ..properties.texture import (
-	luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
+	luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
 )
 from ..properties.node_material import (
-	float_socket_color, color_socket_color, fresnel_socket_color
+	float_socket_color, color_socket_color, fresnel_socket_color, get_socket_paramsets
 )
 
 #Define the list of noise types globally, this gets used by a few different nodes
@@ -151,6 +151,83 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 			layout.prop(self, 'vscale')
 			layout.prop(self, 'udelta')
 			layout.prop(self, 'vdelta')
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_brick(luxrender_texture_node):
+	'''Brick texture node'''
+	bl_idname = 'luxrender_texture_brick_node'
+	bl_label = 'Brick Texture'
+	bl_icon = 'TEXTURE'
+	
+	for prop in luxrender_tex_brick.properties:
+		if prop['attr'].startswith('brickbond'):
+			brickbond_items = prop['items']
+	
+	variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
+	brickbond = bpy.props.EnumProperty(name='Bond Type', items=brickbond_items, default='running')
+	brickrun = bpy.props.FloatProperty(name='Brick Run', default=0.5, subtype='PERCENTAGE')
+	mortarsize = bpy.props.FloatProperty(name='Mortar Size', description='Width of mortar segments', default=0.01, subtype='DISTANCE', unit='LENGTH')
+	width = bpy.props.FloatProperty(name='Width', default=0.3, subtype='DISTANCE', unit='LENGTH')
+	depth = bpy.props.FloatProperty(name='Depth', default=0.15, subtype='DISTANCE', unit='LENGTH')
+	height = bpy.props.FloatProperty(name='Height', default=0.10, subtype='DISTANCE', unit='LENGTH')
+	
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'variant')
+		layout.prop(self, 'brickbond')
+		layout.prop(self, 'brickrun')
+		layout.prop(self, 'mortarsize')
+		layout.prop(self, 'width')
+		layout.prop(self, 'depth')
+		layout.prop(self, 'height')
+
+		si = self.inputs.keys()
+		so = self.outputs.keys()
+		if self.variant == 'color':
+			if not 'Brick Color' in si: #If there aren't color inputs, create them
+				self.inputs.new('luxrender_TC_brickmodtex_socket', 'Brick Modulation Color')
+				self.inputs.new('luxrender_TC_bricktex_socket', 'Brick Color')
+				self.inputs.new('luxrender_TC_mortartex_socket', 'Mortar Color')
+			if 'Brick Value' in si: #If there are float inputs, destory them
+				self.inputs.remove(self.inputs['Brick Modulation Value'])
+				self.inputs.remove(self.inputs['Brick Value'])
+				self.inputs.remove(self.inputs['Mortar Value'])
+			if not 'Color' in so: #If there is no color output, create it
+				self.outputs.new('NodeSocketColor', 'Color')
+			if 'Float' in so: #If there is a float output, destroy it
+				self.outputs.remove(self.outputs['Float'])
+		if self.variant == 'float':
+			if not 'Brick Value' in si:
+				self.inputs.new('luxrender_TF_brickmodtex_socket', 'Brick Modulation Value')
+				self.inputs.new('luxrender_TF_bricktex_socket', 'Brick Value')
+				self.inputs.new('luxrender_TF_mortartex_socket', 'Mortar Value')
+			if 'Brick Color' in si:
+				self.inputs.remove(self.inputs['Brick Modulation Color'])
+				self.inputs.remove(self.inputs['Brick Color'])
+				self.inputs.remove(self.inputs['Mortar Color'])
+			if not 'Float' in so:
+				self.outputs.new('NodeSocketFloat', 'Float')
+			if 'Color' in so:
+				self.outputs.remove(self.outputs['Color'])
+	
+	def export_texture(self, make_texture):
+		brick_params = ParamSet() \
+			.add_string('brickbond', self.brickbond) \
+			.add_float('brickrun', self.brickrun) \
+			.add_float('mortarsize', self.mortarsize) \
+			.add_float('width', self.width) \
+			.add_float('depth', self.depth) \
+			.add_float('height', self.height)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			brick_params.update( coord_node.get_paramset() )
+		
+		brick_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_texture(self.variant, 'brick', self.name, brick_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_bump_map(luxrender_texture_node):
@@ -562,4 +639,183 @@ class luxrender_transform_socket(bpy.types.NodeSocket):
 	
 	def draw_color(self, context, node):
 		return (0.65, 0.55, 0.75, 1.0)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
+	'''brickmodtex socket'''
+	bl_idname = 'luxrender_TC_brickmodtex_socket'
+	bl_label = 'Brick modulation texture socket'
+	
+	brickmodtex = bpy.props.FloatVectorProperty(name='Brick Modulation Texture', subtype='COLOR', min=0.0, max=1.0, default=(0.9, 0.9, 0.9))
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'brickmodtex', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			brickmodtex_params = ParamSet() \
+				.add_texture('brickmodtex', tex_name)
+		else:
+			brickmodtex_params = ParamSet() \
+				.add_color('brickmodtex', self.brickmodtex)
 		
+		return brickmodtex_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
+	'''bricktex socket'''
+	bl_idname = 'luxrender_TC_bricktex_socket'
+	bl_label = 'Brick texture socket'
+	
+	bricktex = bpy.props.FloatVectorProperty(name='Brick Texture', subtype='COLOR', min=0.0, max=1.0, default=(0.8, 0.8, 0.8))
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'bricktex', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			bricktex_params = ParamSet() \
+				.add_texture('bricktex', tex_name)
+		else:
+			bricktex_params = ParamSet() \
+				.add_color('bricktex', self.bricktex)
+		
+		return bricktex_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
+	'''mortartex socket'''
+	bl_idname = 'luxrender_TC_mortartex_socket'
+	bl_label = 'Mortar texture socket'
+	
+	mortartex = bpy.props.FloatVectorProperty(name='Mortar Texture', subtype='COLOR', min=0.0, max=1.0, default=(0.1, 0.1, 0.1))
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'mortartex', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			mortartex_params = ParamSet() \
+				.add_texture('mortartex', tex_name)
+		else:
+			mortartex_params = ParamSet() \
+				.add_color('mortartex', self.mortartex)
+		
+		return mortartex_params
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_brickmodtex_socket(bpy.types.NodeSocket):
+	'''brickmodtex socket'''
+	bl_idname = 'luxrender_TF_brickmodtex_socket'
+	bl_label = 'Brick modulation texture socket'
+	
+	brickmodtex = bpy.props.FloatProperty(name='Brick Modulation Texture', min=0.0, max=1.0, default=0.9)
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'brickmodtex', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			brickmodtex_params = ParamSet() \
+				.add_texture('brickmodtex', tex_name)
+		else:
+			brickmodtex_params = ParamSet() \
+				.add_float('brickmodtex', self.brickmodtex)
+		
+		return brickmodtex_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_bricktex_socket(bpy.types.NodeSocket):
+	'''bricktex socket'''
+	bl_idname = 'luxrender_TF_bricktex_socket'
+	bl_label = 'Brick texture socket'
+	
+	bricktex = bpy.props.FloatProperty(name='Brick Texture', min=0.0, max=1.0, default=1.0)
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'bricktex', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			bricktex_params = ParamSet() \
+				.add_texture('bricktex', tex_name)
+		else:
+			bricktex_params = ParamSet() \
+				.add_float('bricktex', self.bricktex)
+		
+		return bricktex_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_mortartex_socket(bpy.types.NodeSocket):
+	'''mortartex socket'''
+	bl_idname = 'luxrender_TF_mortartex_socket'
+	bl_label = 'Mortar texture socket'
+	
+	mortartex = bpy.props.FloatProperty(name='Mortar Texture', min=0.0, max=1.0, default=0.0)
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'mortartex', text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			mortartex_params = ParamSet() \
+				.add_texture('mortartex', tex_name)
+		else:
+			mortartex_params = ParamSet() \
+				.add_float('mortartex', self.mortartex)
+		
+		return mortartex_params
