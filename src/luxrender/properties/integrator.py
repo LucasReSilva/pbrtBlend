@@ -231,7 +231,7 @@ class luxrender_integrator(declarative_property_group):
 		'eyerrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		'lightrrthreshold':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
 		'lightstrategy':					{ 'surfaceintegrator': O(['directlighting', 'exphotonmap', 'igi', 'path',  'distributedpath', 'bidirectional'])},
-		'lightraycount':					{ 'advanced': True, 'surfaceintegrator': 'bidirectional' },
+		'lightraycount':					{ 'surfaceintegrator': 'bidirectional' },
 		
 		# dl +
 		'maxdepth':							{ 'surfaceintegrator': O(['directlighting', 'igi', 'path']) },
