@@ -103,8 +103,8 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
 	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
 	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR', min=0.0, max=4.0)
-	float = bpy.props.FloatProperty(name='Float')
-	fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0)
+	float = bpy.props.FloatProperty(name='Float', precision=5)
+	fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0, precision=5)
 
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'variant')
