@@ -745,7 +745,7 @@ class luxrender_material_type_node_null(luxrender_material_node):
 		null_params = ParamSet()		
 		
 		return make_material(mat_type, self.name, null_params)
-		
+
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_roughglass(luxrender_material_node):
 	'''Rough Glass material node'''
@@ -793,7 +793,7 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
-
+	
 	def export_material(self, make_material, make_texture):
 		mat_type = 'scatter'
 		
@@ -828,6 +828,18 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
 			layout.prop(self, 'p2')
 			layout.prop(self, 'p3')
 
+	def export_material(self, make_material, make_texture):
+		mat_type = 'velvet'
+		
+		velvet_params = ParamSet()
+		velvet_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		velvet_params.add_float('thickness', self.thickness)
+		velvet_params.add_float('p1', self.p1)
+		velvet_params.add_float('p2', self.p2)
+		velvet_params.add_float('p3', self.p3)
+		
+		return make_material(mat_type, self.name, velvet_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_clear(luxrender_material_node):
