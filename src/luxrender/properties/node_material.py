@@ -66,6 +66,9 @@ def get_socket_paramsets(sockets, make_texture):
 		if not hasattr(socket, 'get_paramset'):
 			print('No get_paramset() for socket %s' % socket.bl_idname)
 			continue
+		if socket.hide:
+			print('socket %s is hidden-> no export' % socket.bl_idname)
+			continue
 		params.update( socket.get_paramset(make_texture) )
 	return params
 
