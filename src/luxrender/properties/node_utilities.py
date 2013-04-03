@@ -102,7 +102,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 	bl_icon = 'TEXTURE'
 
 	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
-	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR', min=0.0, max=1.0)
+	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR', min=0.0, max=4.0)
 	float = bpy.props.FloatProperty(name='Float')
 	fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0)
 
@@ -142,7 +142,14 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 				self.outputs.remove(self.outputs['Float'])
 
 	def export_texture(self, make_texture):
-		constant_params = ParamSet()		
+		constant_params = ParamSet()
+
+		if self.variant == 'float':
+			constant_params.add_float('value', self.float)
+		if self.variant == 'color':
+			constant_params.add_color('value', self.color)
+		if self.variant == 'fresnel':
+			constant_params.add_float('value', self.fresnel)
 		return make_texture(self.variant, 'constant', self.name, constant_params)
 
 @LuxRenderAddon.addon_register_class
