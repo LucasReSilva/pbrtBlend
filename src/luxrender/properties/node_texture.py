@@ -142,7 +142,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 		self.outputs.new('luxrender_transform_socket', '2D Coordinate')
 		
 	def draw_buttons(self, context, layout):
-		layout.prop(self, 'mapping')
+		layout.prop(self, 'coordinates')
 		if self.coordinates == 'planar':
 			layout.prop(self, 'v1')
 			layout.prop(self, 'v2')
