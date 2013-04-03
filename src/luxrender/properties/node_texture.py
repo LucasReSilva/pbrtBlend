@@ -742,7 +742,7 @@ class luxrender_TF_brickmodtex_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'brickmodtex', text=self.name)
 	
 	def draw_color(self, context, node):
-		return color_socket_color
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -772,7 +772,7 @@ class luxrender_TF_bricktex_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'bricktex', text=self.name)
 	
 	def draw_color(self, context, node):
-		return color_socket_color
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)
@@ -802,7 +802,7 @@ class luxrender_TF_mortartex_socket(bpy.types.NodeSocket):
 		layout.prop(self, 'mortartex', text=self.name)
 	
 	def draw_color(self, context, node):
-		return color_socket_color
+		return float_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)

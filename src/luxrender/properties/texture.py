@@ -1439,7 +1439,7 @@ class luxrender_tex_brick(declarative_property_group):
 				('english', 'English', 'english'),
 				('herringbone', 'Herringbone', 'herringbone'),
 				('basket', 'Basket', 'basket'),
-				('chain link', 'Chain link', 'chain link')
+				('chain link', 'Chain link', 'chain Link')
 			],
 			'save_in_preset': True
 		},
