@@ -129,10 +129,11 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 			coordinate_items = prop['items']
 
 	coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
+	center_map = bpy.props.BoolProperty(name='Center Map', default=False)
 	uscale = bpy.props.FloatProperty(name='U Scale', default=1.0, min=-500.0, max=500.0)
-	vscale = bpy.props.FloatProperty(name='V Scale', default=-1.0, min=-500.0, max=500.0)
-	udelta = bpy.props.FloatProperty(name='U Offset', default=1.0, min=-500.0, max=500.0)
-	vdelta = bpy.props.FloatProperty(name='V Offset', default=1.0, min=-500.0, max=500.0)
+	vscale = bpy.props.FloatProperty(name='V Scale', default=1.0, min=-500.0, max=500.0)
+	udelta = bpy.props.FloatProperty(name='U Offset', default=0.0, min=-500.0, max=500.0)
+	vdelta = bpy.props.FloatProperty(name='V Offset', default=0.0, min=-500.0, max=500.0)
 	v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
 	v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
 
@@ -141,7 +142,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 		self.outputs.new('luxrender_transform_socket', '2D Coordinate')
 		
 	def draw_buttons(self, context, layout):
-		layout.prop(self, 'coordinates')
+		layout.prop(self, 'mapping')
 		if self.coordinates == 'planar':
 			layout.prop(self, 'v1')
 			layout.prop(self, 'v2')
@@ -151,6 +152,39 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 			layout.prop(self, 'vscale')
 			layout.prop(self, 'udelta')
 			layout.prop(self, 'vdelta')
+
+	def get_paramset(self):
+		coord_params = ParamSet()
+
+		coord_params.add_string('mapping', self.coordinates)
+		if self.coordinates == 'planar':
+			coord_params.add_vector('v1', self.v1)
+			coord_params.add_vector('v2', self.v2)
+			coord_params.add_float('udelta', self.udelta)
+			coord_params.add_float('vdelta', self.vdelta)
+		
+		if self.coordinates =='cylindrical':
+			coord_params.add_float('uscale', self.uscale)
+			coord_params.add_float('udelta', self.udelta)
+		
+		if self.coordinates == 'spherical':
+			coord_params.add_float('uscale', self.uscale)
+			coord_params.add_float('vscale', self.vscale)
+			coord_params.add_float('udelta', self.udelta)
+			coord_params.add_float('vdelta', self.vdelta)
+		
+		if self.coordinates == 'uv':
+			coord_params.add_float('uscale', self.uscale)
+			coord_params.add_float('vscale', self.vscale * -1) # flip to match blender
+			
+			if self.center_map ==  False:
+				coord_params.add_float('udelta', self.udelta)
+				coord_params.add_float('vdelta', self.vdelta + 1) # correction for clamped types, does not harm repeat type
+			else:
+				coord_params.add_float('udelta', self.udelta +0.5*(1.0-self.uscale)) # auto-center the mapping
+				coord_params.add_float('vdelta', self.vdelta * -1 + 1-(0.5*(1.0-self.vscale))) # auto-center the mapping
+		
+		return coord_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_brick(luxrender_texture_node):
@@ -394,6 +428,10 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 		if self.filtertype in ('mipmap_ewa', 'mipmap_trilinear'):
 			imagemap_params.add_float('maxanisotropy', self.maxanisotropy)
 			imagemap_params.add_integer('discardmipmaps', self.discardmipmaps)
+				
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			imagemap_params.update( coord_node.get_paramset() )
 
 		return make_texture(self.variant, 'imagemap', self.name, imagemap_params)
 		
@@ -511,6 +549,10 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 		if self.filtertype in ('mipmap_ewa', 'mipmap_trilinear'):
 			normalmap_params.add_float('maxanisotropy', self.maxanisotropy)
 			normalmap_params.add_integer('discardmipmaps', self.discardmipmaps)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			normalmap_params.update( coord_node.get_paramset() )
 
 		return make_texture('float', 'normalmap', self.name, normalmap_params)
 		
