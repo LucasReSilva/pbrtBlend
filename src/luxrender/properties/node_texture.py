@@ -152,6 +152,8 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 			layout.prop(self, 'vscale')
 			layout.prop(self, 'udelta')
 			layout.prop(self, 'vdelta')
+		if self.coordinates == 'uv':
+			layout.prop(self, 'center_map')
 
 	def get_paramset(self):
 		coord_params = ParamSet()
