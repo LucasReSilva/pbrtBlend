@@ -62,18 +62,18 @@ def add_nodetype(layout, type):
 
 def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
-	copied_u_rougness = 0.0
+	store_urougness = 0.0
 	for socket in sockets:
 		if not hasattr(socket, 'get_paramset'):
 			print('No get_paramset() for socket %s' % socket.bl_idname)
 			continue
 		if socket.hide:
-			print('socket %s is hidden-> no export' % socket.bl_idname)
+			print('Hidden socket %s will not be exported' % socket.bl_idname)
 			continue
 		if hasattr(socket, 'uroughness'):
-			copied_u_rougness = socket.uroughness
+			store_urougness = socket.uroughness
 		if hasattr(socket, 'vroughness') and socket.sync_vroughness:
-			socket.vroughness = copied_u_rougness
+			socket.vroughness = store_urougness
 			print("Syncing U/V-Roughness")
 		params.update( socket.get_paramset(make_texture) )
 	return params
