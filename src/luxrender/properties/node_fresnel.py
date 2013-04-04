@@ -139,8 +139,8 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 			# This function resolves relative paths (even in linked library blends)
 			# and optionally encodes/embeds the data if the setting is enabled
 			process_filepath_data(LuxManager.CurrentScene, self, self.frname_nkfile, fresnelname_params, 'filename')
+			return make_texture('fresnel', 'fresnelname', self.name, fresnelname_params)
 		else:
 			# use a preset name
 			fresnelname_params.add_string('name', self.frname_preset)
-
-		return make_texture('fresnel', 'fresnelname', self.name, fresnelname_params)
+			return make_texture('fresnel', 'preset', self.name, fresnelname_params)
