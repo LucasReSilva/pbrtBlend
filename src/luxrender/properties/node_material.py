@@ -64,6 +64,7 @@ def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
 	store_urougness = 0.0
 	for socket in sockets:
+		## The material panel expects an attribute "default_value", so we map our socket values here helpwise
 		for attr in ('fresnel', 'color', 'amount', 'bump', 'cauchyb', 'filmidex', 'film', 'index', 'uroughness', 'vroughness', 'sigma', 'sc_asym', 'd'):
 			if hasattr(socket, attr):
 				value = getattr(socket, attr)
