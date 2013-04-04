@@ -64,6 +64,7 @@ def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
 	store_urougness = 0.0
 	for socket in sockets:
+		socket.default_value = socket.get_paramset(make_texture)[0][1] # hack to get the expected attribute "default_value" actualized in the material panel
 		if not hasattr(socket, 'get_paramset'):
 			print('No get_paramset() for socket %s' % socket.bl_idname)
 			continue
