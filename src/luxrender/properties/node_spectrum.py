@@ -124,4 +124,13 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'data_file')
+	
+	def export_texture(self, make_texture):
+		tabulateddata_params = ParamSet()
+
+		process_filepath_data(LuxManager.CurrentScene, self, self.data_file, tabulateddata_params, 'filename')
+
+		return make_texture('color', 'tabulateddata', self.name, tabulateddata_params)
+
+
 		
