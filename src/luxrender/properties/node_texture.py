@@ -419,8 +419,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 	def export_texture(self, make_texture):
 		imagemap_params = ParamSet()
 		
-		#process_filepath_data(LuxManager.CurrentScene, self, self.filename, imagemap_params, 'filename') TODO: Find out why this chokes
-		imagemap_params.add_string('filename', self.filename)
+		process_filepath_data(LuxManager.CurrentScene, self, self.filename, imagemap_params, 'filename')
 		if self.variant == 'float':
 			imagemap_params.add_string('channel', self.channel)
 		imagemap_params.add_string('filtertype', self.filtertype)
@@ -543,8 +542,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 	def export_texture(self, make_texture):
 		normalmap_params = ParamSet()
 		
-		#process_filepath_data(LuxManager.CurrentScene, self, self.filename, normalmap_params, 'filename') TODO: Find out why this chokes
-		normalmap_params.add_string('filename', self.filename)
+		process_filepath_data(LuxManager.CurrentScene, self, self.filename, normalmap_params, 'filename')
 
 		normalmap_params.add_string('filtertype', self.filtertype)
 		normalmap_params.add_string('wrap', self.wrap)
