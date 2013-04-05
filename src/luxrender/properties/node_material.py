@@ -265,7 +265,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		self.inputs.new('NodeSocketFloat', 'R3')
 		self.inputs.new('NodeSocketFloat', 'M3')
 		self.inputs.new('luxrender_TC_Kd_socket', 'Absorbtion Color')
-		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorbtion Depth')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -517,7 +517,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-		self.inputs.new('NodeSocketFloat', 'Absorbtion Depth (nm)')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorbtion Depth (nm)')
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorbtion Color')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
@@ -532,6 +532,16 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		layout.prop(self, 'multibounce')
 		layout.prop(self, 'use_ior')
 		layout.prop(self, 'use_anisotropy')
+
+	def export_material(self, make_material, make_texture):
+		mat_type = 'glossytranslucent'
+		
+		glossytranslucent_params = ParamSet()
+		glossytranslucent_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		glossytranslucent_params.add_bool('multibounce', self.multibounce)
+		
+		return make_material(mat_type, self.name, glossytranslucent_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_layered(luxrender_material_node):
