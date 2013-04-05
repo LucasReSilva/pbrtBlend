@@ -2396,7 +2396,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 				('green', 'Green', 'green'),
 				('blue', 'Blue', 'blue'),
 				('alpha', 'Alpha', 'alpha'),
-				('colored_mean', 'Colored mean', 'colored_mean')
+				('colored_mean', 'Colored Mean', 'colored_mean')
 			],
 			'save_in_preset': True
 		},
@@ -2415,9 +2415,9 @@ class luxrender_tex_imagemap(declarative_property_group):
 			'name': 'Filter type',
 			'items': [
 				('bilinear', 'Bilinear', 'bilinear'),
-				('mipmap_trilinear', 'MipMap trilinear', 'mipmap_trilinear'),
+				('mipmap_trilinear', 'MipMap Trilinear', 'mipmap_trilinear'),
 				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
-				('nearest', 'Nearest neighbor', 'nearest'),
+				('nearest', 'Nearest Neighbor', 'nearest'),
 			],
 			'save_in_preset': True
 		},
@@ -2678,7 +2678,7 @@ class luxrender_tex_normalmap(declarative_property_group):
 			'name': 'Filter type',
 			'items': [
 				('bilinear', 'Bilinear', 'bilinear'),
-				('mipmap_trilinear', 'MipMap trilinear', 'mipmap_trilinear'),
+				('mipmap_trilinear', 'MipMap Trilinear', 'mipmap_trilinear'),
 				('mipmap_ewa', 'MipMap EWA', 'mipmap_ewa'),
 				('nearest', 'Nearest Neighbor', 'nearest'),
 			],
