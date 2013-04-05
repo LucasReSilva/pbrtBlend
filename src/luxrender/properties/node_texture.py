@@ -433,6 +433,8 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 		coord_node = get_linked_node(self.inputs[0])
 		if coord_node and check_node_get_paramset(coord_node):
 			imagemap_params.update( coord_node.get_paramset() )
+		else:
+			imagemap_params.add_float('vscale', -1.0)
 
 		return make_texture(self.variant, 'imagemap', self.name, imagemap_params)
 		
@@ -553,6 +555,8 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 		coord_node = get_linked_node(self.inputs[0])
 		if coord_node and check_node_get_paramset(coord_node):
 			normalmap_params.update( coord_node.get_paramset() )
+		else:
+			normalmap_params.add_float('vscale', -1.0)
 
 		return make_texture('float', 'normalmap', self.name, normalmap_params)
 		

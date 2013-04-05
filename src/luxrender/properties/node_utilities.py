@@ -51,6 +51,8 @@ from ..properties.node_material import (
 	luxrender_fresnel_socket, luxrender_TF_amount_socket, float_socket_color, color_socket_color, fresnel_socket_color, get_socket_paramsets
 )
 
+from ..properties.node_texture import luxrender_transform_socket
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_add(luxrender_texture_node):
 	'''Add texture node'''
@@ -338,10 +340,19 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
 	bl_icon = 'TEXTURE'
 
 	def init(self, context):
+		self.inputs.new('luxrender_transform_socket', '2D Transform')
+		
 		self.outputs.new('NodeSocketColor', 'Color')
 
 	def export_texture(self, make_texture):
 		uvtest_params = ParamSet()
+
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			uvtest_params.update( coord_node.get_paramset() )
+		else:
+			uvtest_params.add_float('vscale', -1.0)
+		
 		return make_texture('color', 'uv', self.name, uvtest_params)
 
 #Custom sockets for the mix/add/scale/subtract nodes, in all 3 variants. *sigh*
