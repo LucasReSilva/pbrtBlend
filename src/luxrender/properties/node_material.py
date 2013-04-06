@@ -219,6 +219,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 	def poll(cls, context):
 		return context.scene.render.engine == 'LUXRENDER_RENDER'
 	
+	#This function will set the current node tree to the one belonging to the active material
 	@classmethod
 	def get_from_context(cls, context):
 		ob = context.active_object
@@ -228,11 +229,12 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 				nt_name = ma.luxrender_material.nodetree
 				if nt_name != '':
 					return bpy.data.node_groups[ma.luxrender_material.nodetree], ma, ma
+		# Uncomment if/when we make lamp nodes
 		#	elif ob and ob.type == 'LAMP':
 		#		la = ob.data
-		#		nt_name = la.renderman.nodetree
+		#		nt_name = la.luxrender_lamp.nodetree
 		#		if nt_name != '':
-		#			return bpy.data.node_groups[la.renderman.nodetree], la, la
+		#			return bpy.data.node_groups[la.luxrender_lamp.nodetree], la, la
 		return (None, None, None)
 		
 	def draw_add_menu(self, context, layout):
