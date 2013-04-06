@@ -31,7 +31,9 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import (luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset)
+from ..properties import (
+  luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset
+)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview

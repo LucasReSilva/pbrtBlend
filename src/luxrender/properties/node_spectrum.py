@@ -31,7 +31,9 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import luxrender_texture_node
+from ..properties import (
+	luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset
+)
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -42,7 +44,9 @@ from ..export.materials import (
 )
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
-from ..properties.node_material import luxrender_TC_Kt_socket
+from ..properties.node_material import (
+	luxrender_TC_Kt_socket, get_socket_paramsets
+	)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blackbody(luxrender_texture_node):
@@ -81,6 +85,13 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 		
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'depth')
+
+	def export_texture(self, make_texture):
+		colordepth_params = ParamSet()
+		colordepth_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		colordepth_params.add_float('depth', self.depth)
+		
+		return make_texture('color', 'colordepth', self.name, colordepth_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_gaussian(luxrender_texture_node):
