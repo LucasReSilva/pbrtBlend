@@ -218,6 +218,22 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 	@classmethod
 	def poll(cls, context):
 		return context.scene.render.engine == 'LUXRENDER_RENDER'
+	
+	@classmethod
+	def get_from_context(cls, context):
+		ob = context.active_object
+		if ob and ob.type not in {'LAMP', 'CAMERA'}:
+			ma = ob.active_material
+			if ma != None:
+				nt_name = ma.luxrender_material.nodetree
+				if nt_name != '':
+					return bpy.data.node_groups[ma.luxrender_material.nodetree], ma, ma
+		#	elif ob and ob.type == 'LAMP':
+		#		la = ob.data
+		#		nt_name = la.renderman.nodetree
+		#		if nt_name != '':
+		#			return bpy.data.node_groups[la.renderman.nodetree], la, la
+		return (None, None, None)
 		
 	def draw_add_menu(self, context, layout):
 		layout.label('LuxRender Node Types')
