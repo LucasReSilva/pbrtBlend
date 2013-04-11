@@ -698,7 +698,8 @@ class luxrender_film(declarative_property_group):
 			'items': [
 				('lum', 'Luminosity', 'Preserve luminosity'),
 				('hue', 'Hue', 'Preserve hue'),
-				('cut', 'Cut', 'Clip channels individually')
+				('cut', 'Cut', 'Clip channels individually'),
+				('darken', 'Darken', 'Darken highlights')
 			],
 			'default': 'cut'
 		},
