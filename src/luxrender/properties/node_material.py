@@ -64,11 +64,6 @@ def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
 	store_urougness = 0.0
 	for socket in sockets:
-		## The material panel expects an attribute "default_value", so we map our socket values here helpwise
-		for attr in ('fresnel', 'color', 'amount', 'bump', 'cauchyb', 'filmidex', 'film', 'index', 'uroughness', 'vroughness', 'sigma', 'sc_asym', 'd'):
-			if hasattr(socket, attr):
-				value = getattr(socket, attr)
-				setattr(socket, 'default_value', value)
 		if not hasattr(socket, 'get_paramset'):
 			print('No get_paramset() for socket %s' % socket.bl_idname)
 			continue
@@ -1045,10 +1040,22 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 		## connect preset -> property
 		self.default_value = self.fresnel_presetvalue
 	
+	# meaningful property
+	def fresnel_update(self, context):
+		print("updating default_value")
+	
 	fresnel_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
 	fresnel_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
-	fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52, precision=6)
-	default_value = fresnel
+	fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52, precision=6, update=fresnel_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.fresnel
+
+	def default_value_set(self, value):
+		self.fresnel = value
+
+	default_value = bpy.props.FloatProperty(name='IOR', default=1.52, precision=6, get=default_value_get, set=default_value_set)
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
@@ -1091,8 +1098,20 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Ka_socket'
 	bl_label = 'Absorbtion Color socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Absorbtion Color', description='Absorbtion Color', default=get_default(TC_Ka), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Absorbtion Color', description='Absorbtion Color', default=get_default(TC_Ka), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Absorbtion Color', default=get_default(TC_Ka), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1127,8 +1146,20 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Kd_socket'
 	bl_label = 'Diffuse Color socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Diffuse Color', description='Diffuse Color', default=get_default(TC_Kd), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Diffuse Color', description='Diffuse Color', default=get_default(TC_Kd), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Diffuse Color', default=get_default(TC_Kd), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1163,8 +1194,20 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Kr_socket'
 	bl_label = 'Reflection Color socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Reflection Color', description='Reflection Color', default=get_default(TC_Kr), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Reflection Color', description='Reflection Color', default=get_default(TC_Kr), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Reflection Color', default=get_default(TC_Kr), subtype='COLOR',get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1197,8 +1240,20 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Ks_socket'
 	bl_label = 'Specular Color socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Specular Color', description='Specular Color', default=get_default(TC_Ks), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Specular Color', description='Specular Color', default=get_default(TC_Ks), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Specular Color', default=get_default(TC_Ks), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1231,8 +1286,20 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Ks1_socket'
 	bl_label = 'Specular Color 1 socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Specular Color 1', description='Specular Color 1', default=get_default(TC_Ks1), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Specular Color 1', description='Specular Color 1', default=get_default(TC_Ks1), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Specular Color 1', default=get_default(TC_Ks1), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1265,8 +1332,20 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Ks2_socket'
 	bl_label = 'Specular Color 2 socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Specular Color 2', description='Specular Color 2', default=get_default(TC_Ks2), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Specular Color 2', description='Specular Color 2', default=get_default(TC_Ks2), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Specular Color 2', default=get_default(TC_Ks2), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1299,8 +1378,20 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Ks3_socket'
 	bl_label = 'Specular Color 3 socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Specular Color 3', description='Specular Color 3', default=get_default(TC_Ks3), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Specular Color 3', description='Specular Color 3', default=get_default(TC_Ks3), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Specular Color 3', default=get_default(TC_Ks3), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1333,8 +1424,20 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_Kt_socket'
 	bl_label = 'Transmission Color socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Transmission Color', description='Transmission Color', default=get_default(TC_Kt), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Transmission Color', description='Transmission Color', default=get_default(TC_Kt), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Transmission Color', default=get_default(TC_Kt), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1367,8 +1470,20 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_warp_Kd_socket'
 	bl_label = 'Warp Diffuse socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Warp Diffuse Color', description='Warp Diffuse Color', default=get_default(TC_warp_Kd), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Warp Diffuse Color', description='Warp Diffuse Color', default=get_default(TC_warp_Kd), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Warp Diffuse Color', default=get_default(TC_warp_Kd), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1401,8 +1516,20 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_warp_Ks_socket'
 	bl_label = 'Warp Specular socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Warp Specular Color', description='Warp Specular Color', default=get_default(TC_warp_Ks), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Warp Specular Color', description='Warp Specular Color', default=get_default(TC_warp_Ks), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Warp Specular Color', default=get_default(TC_warp_Ks), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1435,8 +1562,20 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_weft_Kd_socket'
 	bl_label = 'Weft Diffuse socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Weft Diffuse Color', description='Weft Diffuse Color', default=get_default(TC_weft_Kd), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Weft Diffuse Color', description='Weft Diffuse Color', default=get_default(TC_weft_Kd), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Weft Diffuse Color', default=get_default(TC_weft_Kd), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1469,8 +1608,20 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_weft_Ks_socket'
 	bl_label = 'Weft Specular socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Weft Specular Color', description='Weft Specular Color', default=get_default(TC_weft_Ks), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Weft Specular Color', description='Weft Specular Color', default=get_default(TC_weft_Ks), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Weft Specular Color', default=get_default(TC_weft_Ks), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1503,8 +1654,20 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_backface_Ka_socket'
 	bl_label = 'Backface Absorption socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Backface Absorption Color', description='Backface Absorption Color', default=get_default(TC_backface_Ka), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Backface Absorption Color', description='Backface Absorption Color', default=get_default(TC_backface_Ka), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Backface Absorption Color', default=get_default(TC_backface_Ka), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1537,8 +1700,20 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_backface_Ks_socket'
 	bl_label = 'Backface Specular socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Backface Specular Color', description='Backface Specular Color', default=get_default(TC_backface_Ks), subtype='COLOR', min=0.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Backface Specular Color', description='Backface Specular Color', default=get_default(TC_backface_Ks), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Backface Specular Color', default=get_default(TC_backface_Ks), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1571,8 +1746,20 @@ class luxrender_AC_color_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_AC_color_socket'
 	bl_label = 'Absorption Color socket'
 	
-	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0)
-	default_value = color
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
+	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1605,8 +1792,20 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_SC_color_socket'
 	bl_label = 'Scattering Color socket'
 	
+	# meaningful property
+	def color_update(self, context):
+		print("updating default_value")
+	
 	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
-	default_value = color
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+
+	def default_value_set(self, value):
+		self.color = value
+
+	default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1644,8 +1843,20 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
 	# Label for nice name display
 	bl_label = 'Amount socket'
 	
-	amount = bpy.props.FloatProperty(name=get_props(TF_amount, 'name'), description=get_props(TF_amount, 'description'), default=get_props(TF_amount, 'default'), subtype=get_props(TF_amount, 'subtype'), unit=get_props(TF_amount, 'unit'), min=get_props(TF_amount, 'min'), max=get_props(TF_amount, 'max'), soft_min=get_props(TF_amount, 'soft_min'), soft_max=get_props(TF_amount, 'soft_max'), precision=get_props(TF_amount, 'precision'))
-	default_value = amount
+	# meaningful property
+	def amount_update(self, context):
+		print("updating default_value")
+	
+	amount = bpy.props.FloatProperty(name=get_props(TF_amount, 'name'), description=get_props(TF_amount, 'description'), default=get_props(TF_amount, 'default'), subtype=get_props(TF_amount, 'subtype'), unit=get_props(TF_amount, 'unit'), min=get_props(TF_amount, 'min'), max=get_props(TF_amount, 'max'), soft_min=get_props(TF_amount, 'soft_min'), soft_max=get_props(TF_amount, 'soft_max'), precision=get_props(TF_amount, 'precision'), update=amount_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.amount
+
+	def default_value_set(self, value):
+		self.amount = value
+
+	default_value = bpy.props.FloatProperty(name=get_props(TF_amount, 'name'), default=get_props(TF_amount, 'default'), subtype=get_props(TF_amount, 'subtype'), unit=get_props(TF_amount, 'unit'), min=get_props(TF_amount, 'min'), max=get_props(TF_amount, 'max'), soft_min=get_props(TF_amount, 'soft_min'), soft_max=get_props(TF_amount, 'soft_max'), precision=get_props(TF_amount, 'precision'), get=default_value_get, set=default_value_set)
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node):
@@ -1680,9 +1891,21 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	'''Bump socket'''
 	bl_idname = 'luxrender_TF_bump_socket'
 	bl_label = 'Bump socket'
+
+	# meaningful property
+	def bump_update(self, context):
+		print("updating default_value")
 	
-	bump = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'))
-	default_value = bump
+	bump = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'), update=bump_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.bump
+
+	def default_value_set(self, value):
+		self.bump = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		layout.label(text=self.name)
@@ -1709,8 +1932,20 @@ class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_cauchyb_socket'
 	bl_label = 'Cauchy B socket'
 	
-	cauchyb = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'), description=get_props(TF_cauchyb, 'description'), default=get_props(TF_cauchyb, 'default'), subtype=get_props(TF_cauchyb, 'subtype'), min=get_props(TF_cauchyb, 'min'), max=get_props(TF_cauchyb, 'max'), soft_min=get_props(TF_cauchyb, 'soft_min'), soft_max=get_props(TF_cauchyb, 'soft_max'), precision=get_props(TF_cauchyb, 'precision'))
-	default_value = cauchyb
+	# meaningful property
+	def cauchyb_update(self, context):
+		print("updating default_value")
+	
+	cauchyb = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'), description=get_props(TF_cauchyb, 'description'), default=get_props(TF_cauchyb, 'default'), subtype=get_props(TF_cauchyb, 'subtype'), min=get_props(TF_cauchyb, 'min'), max=get_props(TF_cauchyb, 'max'), soft_min=get_props(TF_cauchyb, 'soft_min'), soft_max=get_props(TF_cauchyb, 'soft_max'), precision=get_props(TF_cauchyb, 'precision'), update=cauchyb_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.cauchyb
+
+	def default_value_set(self, value):
+		self.cauchyb = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'), default=get_props(TF_cauchyb, 'default'), subtype=get_props(TF_cauchyb, 'subtype'), min=get_props(TF_cauchyb, 'min'), max=get_props(TF_cauchyb, 'max'), soft_min=get_props(TF_cauchyb, 'soft_min'), soft_max=get_props(TF_cauchyb, 'soft_max'), precision=get_props(TF_cauchyb, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'cauchyb', text=self.name)
@@ -1745,10 +1980,22 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 		## connect preset -> property
 		self.default_value = self.filmindex_presetvalue
 	
+	# meaningful property
+	def filmindex_update(self, context):
+		print("updating default_value")
+	
 	filmindex_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
 	filmindex_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
-	filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), description=get_props(TF_filmindex, 'description'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'))
-	default_value = filmindex
+	filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), description=get_props(TF_filmindex, 'description'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'), update=filmindex_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.filmindex
+
+	def default_value_set(self, value):
+		self.filmindex = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'), default=get_props(TF_filmindex, 'default'), subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'), soft_min=get_props(TF_filmindex, 'soft_min'), soft_max=get_props(TF_filmindex, 'soft_max'), precision=get_props(TF_filmindex, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		box = layout.box()
@@ -1785,8 +2032,21 @@ class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_film_thick_socket'
 	bl_label = 'Thin Film thickness socket'
 	
-	film = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), description=get_props(TF_film, 'description'), default=get_props(TF_film, 'default'), subtype=get_props(TF_film, 'subtype'), min=get_props(TF_film, 'min'), max=get_props(TF_film, 'max'), soft_min=get_props(TF_film, 'soft_min'), soft_max=get_props(TF_film, 'soft_max'), precision=get_props(TF_film, 'precision'))
-	default_value =  film
+	# meaningful property
+	def film_update(self, context):
+		print("updating default_value")
+	
+	film = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), description=get_props(TF_film, 'description'), default=get_props(TF_film, 'default'), subtype=get_props(TF_film, 'subtype'), min=get_props(TF_film, 'min'), max=get_props(TF_film, 'max'), soft_min=get_props(TF_film, 'soft_min'), soft_max=get_props(TF_film, 'soft_max'), precision=get_props(TF_film, 'precision'), update=film_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.film
+
+	def default_value_set(self, value):
+		self.film = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), default=get_props(TF_film, 'default'), subtype=get_props(TF_film, 'subtype'), min=get_props(TF_film, 'min'), max=get_props(TF_film, 'max'), soft_min=get_props(TF_film, 'soft_min'), soft_max=get_props(TF_film, 'soft_max'), precision=get_props(TF_film, 'precision'), get=default_value_get, set=default_value_set)
+
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'film', text=self.name)
@@ -1820,11 +2080,23 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 	def changed_preset(self, context):
 		## connect preset -> property
 		self.default_value = self.index_presetvalue
+	
+	# meaningful property
+	def index_update(self, context):
+		print("updating default_value")
 
 	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
 	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
-	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'))
-	default_value = index
+	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'), update=index_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.index
+
+	def default_value_set(self, value):
+		self.index = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		box = layout.box()
@@ -1861,8 +2133,20 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_uroughness_socket'
 	bl_label = 'U-Roughness socket'
 	
-	uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), description=get_props(TF_uroughness, 'description'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
-	default_value = uroughness
+	# meaningful property
+	def uroughness_update(self, context):
+		print("updating default_value")
+	
+	uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), description=get_props(TF_uroughness, 'description'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), update=uroughness_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.uroughness
+
+	def default_value_set(self, value):
+		self.uroughness = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		if node.use_anisotropy: name = 'U-Roughness'
@@ -1896,9 +2180,21 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_vroughness_socket'
 	bl_label = 'V-Roughness socket'
 	
+	# meaningful property
+	def vroughness_update(self, context):
+		print("updating default_value")
+	
 	sync_vroughness = bpy.props.BoolProperty(name='Sync V', default=False)
-	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'))
-	default_value = vroughness
+	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), update=vroughness_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.vroughness
+	
+	def default_value_set(self, value):
+		self.vroughness = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'vroughness', text=self.name)
@@ -1931,9 +2227,21 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 	'''Sigma socket'''
 	bl_idname = 'luxrender_TF_sigma_socket'
 	bl_label = 'Sigma socket'
+
+	# meaningful property
+	def sigma_update(self, context):
+		print("updating default_value")
 	
-	sigma = bpy.props.FloatProperty(name=get_props(TF_sigma, 'name'), description=get_props(TF_sigma, 'description'), default=get_props(TF_sigma, 'default'), subtype=get_props(TF_sigma, 'subtype'), min=get_props(TF_sigma, 'min'), max=get_props(TF_sigma, 'max'), soft_min=get_props(TF_sigma, 'soft_min'), soft_max=get_props(TF_sigma, 'soft_max'), precision=get_props(TF_sigma, 'precision'))
-	default_value = sigma
+	sigma = bpy.props.FloatProperty(name=get_props(TF_sigma, 'name'), description=get_props(TF_sigma, 'description'), default=get_props(TF_sigma, 'default'), subtype=get_props(TF_sigma, 'subtype'), min=get_props(TF_sigma, 'min'), max=get_props(TF_sigma, 'max'), soft_min=get_props(TF_sigma, 'soft_min'), soft_max=get_props(TF_sigma, 'soft_max'), precision=get_props(TF_sigma, 'precision'), update=sigma_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.sigma
+
+	def default_value_set(self, value):
+		self.sigma = value
+
+	default_value = bpy.props.FloatProperty(name="Sigma", default=get_props(TF_sigma, 'default'), subtype=get_props(TF_sigma, 'subtype'), min=get_props(TF_sigma, 'min'), max=get_props(TF_sigma, 'max'), soft_min=get_props(TF_sigma, 'soft_min'), soft_max=get_props(TF_sigma, 'soft_max'), precision=get_props(TF_sigma, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'sigma', text=self.name)
@@ -1963,8 +2271,20 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_SC_asymmetry_socket'
 	bl_label = 'Scattering Asymmetry socket'
 	
-	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4)
-	default_value = sc_asym
+	# meaningful property
+	def sc_asym_update(self, context):
+		print("updating default_value")
+	
+	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4, update=sc_asym_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.sc_asym
+
+	def default_value_set(self, value):
+		self.sc_asym = value
+	
+	default_value = bpy.props.FloatVectorProperty(name='Asymmetry', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4, get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1996,8 +2316,20 @@ class luxrender_TF_d_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TF_d_socket'
 	bl_label = 'Absorption depth socket'
 	
-	d = bpy.props.FloatProperty(name=get_props(TF_d, 'name'), description=get_props(TF_d, 'description'), default=get_props(TF_d, 'default'), subtype=get_props(TF_d, 'subtype'), min=get_props(TF_d, 'min'), max=get_props(TF_d, 'max'), soft_min=get_props(TF_d, 'soft_min'), soft_max=get_props(TF_d, 'soft_max'), precision=get_props(TF_d, 'precision'))
-	default_value = d
+	# meaningful property
+	def d_update(self, context):
+		print("updating default_value")
+	
+	d = bpy.props.FloatProperty(name=get_props(TF_d, 'name'), description=get_props(TF_d, 'description'), default=get_props(TF_d, 'default'), subtype=get_props(TF_d, 'subtype'), min=get_props(TF_d, 'min'), max=get_props(TF_d, 'max'), soft_min=get_props(TF_d, 'soft_min'), soft_max=get_props(TF_d, 'soft_max'), precision=get_props(TF_d, 'precision'), update=d_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.d
+	
+	def default_value_set(self, value):
+		self.d = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_d, 'name'), default=get_props(TF_d, 'default'), subtype=get_props(TF_d, 'subtype'), min=get_props(TF_d, 'min'), max=get_props(TF_d, 'max'), soft_min=get_props(TF_d, 'soft_min'), soft_max=get_props(TF_d, 'soft_max'), precision=get_props(TF_d, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'd', text=self.name)
