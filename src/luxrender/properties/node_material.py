@@ -591,20 +591,25 @@ class luxrender_material_type_node_layered(luxrender_material_node):
 		
 		def export_submat(socket):
 			node = get_linked_node(socket)
-			print("-------", node)
 			if not check_node_export_material(node):
 				return None
 			return node.export_material(make_material, make_texture)
 		
-		mat1_name = export_submat(self.inputs[0])
-		mat2_name = export_submat(self.inputs[2])
-		mat3_name = export_submat(self.inputs[4])
-		mat4_name = export_submat(self.inputs[6])
+		if self.inputs[0].is_linked:
+			mat1_name = export_submat(self.inputs[0])
+			layered_params.add_string("namedmaterial1", mat1_name)
 		
-		layered_params.add_string("namedmaterial1", mat1_name)
-		layered_params.add_string("namedmaterial2", mat2_name)
-		layered_params.add_string("namedmaterial3", mat3_name)
-		layered_params.add_string("namedmaterial4", mat4_name)
+		if self.inputs[2].is_linked:
+			mat2_name = export_submat(self.inputs[2])
+			layered_params.add_string("namedmaterial2", mat2_name)
+		
+		if self.inputs[4].is_linked:
+			mat3_name = export_submat(self.inputs[4])
+			layered_params.add_string("namedmaterial3", mat3_name)
+	
+		if self.inputs[6].is_linked:
+			mat4_name = export_submat(self.inputs[6])
+			layered_params.add_string("namedmaterial4", mat4_name)
 		
 		return make_material(mat_type, self.name, layered_params)
 		
