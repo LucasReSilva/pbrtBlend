@@ -738,7 +738,7 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 
-	def export_material(self, make_material, make_texture):		
+	def export_material(self, make_material, make_texture):
 		mat_type = 'mirror'
 		
 		mirror_params = ParamSet()
@@ -909,6 +909,14 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 		self.inputs.new('luxrender_AC_color_socket', 'Absorption Color')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
+
+	def export_volume(self, make_material, make_texture):
+		vol_type = 'clear'
+		
+		clear_params = ParamSet()
+		clear_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_volume(vol_type, self.name, clear_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_homogeneous(luxrender_material_node):
@@ -945,7 +953,7 @@ class luxrender_light_area_node(luxrender_material_node):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(luxrender_node):
-	'''A custom node'''
+	'''Material output node'''
 	bl_idname = 'luxrender_material_output_node'
 	bl_label = 'Material Output'
 	bl_icon = 'MATERIAL'
@@ -1010,14 +1018,36 @@ class luxrender_material_output_node(luxrender_node):
 				ExportedTextures.export_new(lux_context)
 				
 				return texture_name
-		
+
 		# start exporting that material...
 		with MaterialCounter(material.name):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
 				if check_node_export_material(surface_node):
 					surface_node.export_material(make_material=make_material, make_texture=make_texture)
-		
 		return set()
+
+
+		#Volumes exporting:
+		int_vol_socket = self.inputs[1]
+		if not int_vol_socket.is_linked:
+			return set()
+
+		int_vol_node = int_vol_socket.links[1].from_node
+
+		ext_vol_socket = self.inputs[2]
+		if not ext_vol_socket.is_linked:
+			return set()
+
+		ext_vol_node = ext_vol_socket.links[2].from_node
+
+		def make_volume(vol_type, vol_name, vol_params):
+			nonlocal lux_context
+			vol_name = '%s::%s' % (tree_name, vol_name)
+			print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
+			
+			lux_context.makeNamedVolume(vol.name, vol_name, vol_params)
+		int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+		ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 
 # Custom socket types, lookup parameters here:
 # http://www.blender.org/documentation/blender_python_api_2_66a_release/bpy.props.html?highlight=bpy.props.floatproperty#bpy.props.FloatProperty
