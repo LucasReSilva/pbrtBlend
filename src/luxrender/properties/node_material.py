@@ -577,35 +577,36 @@ class luxrender_material_type_node_layered(luxrender_material_node):
 		self.outputs.new('NodeSocketShader', 'Surface')
 
 	
-		def export_material(self, make_material, make_texture):
-			print('export node: layered')
-			
-			mat_type = 'layered'
-			
-			layered_params = ParamSet()
-			layered_params.update( get_socket_paramsets([self.inputs[1]], make_texture) )
-			layered_params.update( get_socket_paramsets([self.inputs[3]], make_texture) )
-			layered_params.update( get_socket_paramsets([self.inputs[5]], make_texture) )
-			layered_params.update( get_socket_paramsets([self.inputs[7]], make_texture) )
-			
-			
-			def export_submat(socket):
-				node = get_linked_node(socket)
-				if not check_node_export_material(node):
-					return None
-				return node.export_material(make_material, make_texture)
-			
-			mat1_name = export_submat(self.inputs[0])
-			mat2_name = export_submat(self.inputs[2])
-			mat3_name = export_submat(self.inputs[4])
-			mat4_name = export_submat(self.inputs[6])
-			
-			layered_params.add_string("namedmaterial1", mat1_name)
-			layered_params.add_string("namedmaterial2", mat2_name)
-			layered_params.add_string("namedmaterial3", mat3_name)
-			layered_params.add_string("namedmaterial4", mat4_name)
-			
-			return make_material(mat_type, self.name, layered_params)
+	def export_material(self, make_material, make_texture):
+		print('export node: layered')
+		
+		mat_type = 'layered'
+		
+		layered_params = ParamSet()
+		layered_params.update( get_socket_paramsets([self.inputs[1]], make_texture) )
+		layered_params.update( get_socket_paramsets([self.inputs[3]], make_texture) )
+		layered_params.update( get_socket_paramsets([self.inputs[5]], make_texture) )
+		layered_params.update( get_socket_paramsets([self.inputs[7]], make_texture) )
+		
+		
+		def export_submat(socket):
+			node = get_linked_node(socket)
+			print("-------", node)
+			if not check_node_export_material(node):
+				return None
+			return node.export_material(make_material, make_texture)
+		
+		mat1_name = export_submat(self.inputs[0])
+		mat2_name = export_submat(self.inputs[2])
+		mat3_name = export_submat(self.inputs[4])
+		mat4_name = export_submat(self.inputs[6])
+		
+		layered_params.add_string("namedmaterial1", mat1_name)
+		layered_params.add_string("namedmaterial2", mat2_name)
+		layered_params.add_string("namedmaterial3", mat3_name)
+		layered_params.add_string("namedmaterial4", mat4_name)
+		
+		return make_material(mat_type, self.name, layered_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_matte(luxrender_material_node):
