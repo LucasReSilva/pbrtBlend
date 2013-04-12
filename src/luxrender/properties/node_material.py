@@ -1003,6 +1003,20 @@ class luxrender_material_output_node(luxrender_node):
 			def make_material_direct(mat_type, mat_name, mat_params):
 				nonlocal lux_context
 				lux_context.material(mat_type, mat_params)
+			
+				if mat_name != surface_node.name:
+					material_name = '%s::%s' % (tree_name, mat_name)
+				else:
+					# this is the root material, don't alter name
+					material_name = material.name
+				
+				print('Exporting material "%s", type: "%s", name: "%s"' % (material_name, mat_type, mat_name))
+				mat_params.add_string('type', mat_type)
+				ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
+				ExportedMaterials.export_new_named(lux_context)
+				
+				return material_name
+			
 			make_material = make_material_direct
 		
 		
