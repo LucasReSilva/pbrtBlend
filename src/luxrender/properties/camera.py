@@ -1288,7 +1288,8 @@ class luxrender_tonemapping(declarative_property_group):
 				('linear', 'Linear (manual)', 'linear'),
 				('autolinear', 'Linear (auto-exposure)', 'autolinear'),
 				('contrast', 'Contrast', 'contrast'),
-				('maxwhite', 'Maxwhite', 'maxwhite')
+				('maxwhite', 'Maxwhite', 'maxwhite'),
+				('falsecolors', 'False Colors', 'false color')
 			]
 		},
 		
