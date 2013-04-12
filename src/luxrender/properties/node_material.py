@@ -565,16 +565,47 @@ class luxrender_material_type_node_layered(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Material 1')
-		self.inputs.new('NodeSocketFloat', 'Opacity 1')
+		self.inputs.new('luxrender_TF_OP1_socket', 'Opacity 1')
 		self.inputs.new('NodeSocketShader', 'Material 2')
-		self.inputs.new('NodeSocketFloat', 'Opacity 2')
+		self.inputs.new('luxrender_TF_OP2_socket', 'Opacity 2')
 		self.inputs.new('NodeSocketShader', 'Material 3')
-		self.inputs.new('NodeSocketFloat', 'Opacity 3')
+		self.inputs.new('luxrender_TF_OP3_socket', 'Opacity 3')
 		self.inputs.new('NodeSocketShader', 'Material 4')
-		self.inputs.new('NodeSocketFloat', 'Opacity 4')
+		self.inputs.new('luxrender_TF_OP4_socket', 'Opacity 4')
 
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
+
+	
+		def export_material(self, make_material, make_texture):
+			print('export node: layered')
+			
+			mat_type = 'layered'
+			
+			layered_params = ParamSet()
+			layered_params.update( get_socket_paramsets([self.inputs[1]], make_texture) )
+			layered_params.update( get_socket_paramsets([self.inputs[3]], make_texture) )
+			layered_params.update( get_socket_paramsets([self.inputs[5]], make_texture) )
+			layered_params.update( get_socket_paramsets([self.inputs[7]], make_texture) )
+			
+			
+			def export_submat(socket):
+				node = get_linked_node(socket)
+				if not check_node_export_material(node):
+					return None
+				return node.export_material(make_material, make_texture)
+			
+			mat1_name = export_submat(self.inputs[0])
+			mat2_name = export_submat(self.inputs[2])
+			mat3_name = export_submat(self.inputs[4])
+			mat4_name = export_submat(self.inputs[6])
+			
+			layered_params.add_string("namedmaterial1", mat1_name)
+			layered_params.add_string("namedmaterial2", mat2_name)
+			layered_params.add_string("namedmaterial3", mat3_name)
+			layered_params.add_string("namedmaterial4", mat4_name)
+			
+			return make_material(mat_type, self.name, layered_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_matte(luxrender_material_node):
@@ -2396,3 +2427,175 @@ class luxrender_TF_d_socket(bpy.types.NodeSocket):
 				.add_float('d', self.d)
 		
 		return d_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_OP1_socket(bpy.types.NodeSocket):
+	'''Opacity1 socket'''
+	bl_idname = 'luxrender_TF_OP1_socket'
+	bl_label = 'Opacity1 socket'
+	
+	# meaningful property
+	def opacity1_update(self, context):
+		pass
+	
+	opacity1 = bpy.props.FloatProperty(name=get_props(TF_OP1, 'name'), description=get_props(TF_OP1, 'description'), default=get_props(TF_OP1, 'default'), subtype=get_props(TF_OP1, 'subtype'), min=get_props(TF_OP1, 'min'), max=get_props(TF_OP1, 'max'), soft_min=get_props(TF_OP1, 'soft_min'), soft_max=get_props(TF_OP1, 'soft_max'), precision=get_props(TF_OP1, 'precision'), update=opacity1_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.opacity1
+	
+	def default_value_set(self, value):
+		self.opacity1 = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_OP1, 'name'), default=get_props(TF_OP1, 'default'), subtype=get_props(TF_OP1, 'subtype'), min=get_props(TF_OP1, 'min'), max=get_props(TF_OP1, 'max'), soft_min=get_props(TF_OP1, 'soft_min'), soft_max=get_props(TF_OP1, 'soft_max'), precision=get_props(TF_OP1, 'precision'), get=default_value_get, set=default_value_set)
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'opacity1', text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			opacity1_params = ParamSet() \
+				.add_texture('opacity1', tex_name)
+		else:
+			opacity1_params = ParamSet() \
+				.add_float('opacity1', self.opacity1)
+		
+		return opacity1_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_OP2_socket(bpy.types.NodeSocket):
+	'''Opacity2 socket'''
+	bl_idname = 'luxrender_TF_OP2_socket'
+	bl_label = 'Opacity2 socket'
+	
+	# meaningful property
+	def opacity2_update(self, context):
+		pass
+	
+	opacity2 = bpy.props.FloatProperty(name=get_props(TF_OP2, 'name'), description=get_props(TF_OP2, 'description'), default=get_props(TF_OP2, 'default'), subtype=get_props(TF_OP2, 'subtype'), min=get_props(TF_OP2, 'min'), max=get_props(TF_OP2, 'max'), soft_min=get_props(TF_OP2, 'soft_min'), soft_max=get_props(TF_OP2, 'soft_max'), precision=get_props(TF_OP2, 'precision'), update=opacity2_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.opacity2
+	
+	def default_value_set(self, value):
+		self.opacity2 = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_OP2, 'name'), default=get_props(TF_OP2, 'default'), subtype=get_props(TF_OP2, 'subtype'), min=get_props(TF_OP2, 'min'), max=get_props(TF_OP2, 'max'), soft_min=get_props(TF_OP2, 'soft_min'), soft_max=get_props(TF_OP2, 'soft_max'), precision=get_props(TF_OP2, 'precision'), get=default_value_get, set=default_value_set)
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'opacity2', text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			opacity2_params = ParamSet() \
+				.add_texture('opacity2', tex_name)
+		else:
+			opacity2_params = ParamSet() \
+				.add_float('opacity2', self.opacity2)
+		
+		return opacity2_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_OP3_socket(bpy.types.NodeSocket):
+	'''Opacity3 socket'''
+	bl_idname = 'luxrender_TF_OP3_socket'
+	bl_label = 'Opacity3 socket'
+	
+	# meaningful property
+	def opacity3_update(self, context):
+		pass
+	
+	opacity3 = bpy.props.FloatProperty(name=get_props(TF_OP3, 'name'), description=get_props(TF_OP3, 'description'), default=get_props(TF_OP3, 'default'), subtype=get_props(TF_OP3, 'subtype'), min=get_props(TF_OP3, 'min'), max=get_props(TF_OP3, 'max'), soft_min=get_props(TF_OP3, 'soft_min'), soft_max=get_props(TF_OP3, 'soft_max'), precision=get_props(TF_OP3, 'precision'), update=opacity3_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.opacity3
+	
+	def default_value_set(self, value):
+		self.opacity3 = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_OP3, 'name'), default=get_props(TF_OP3, 'default'), subtype=get_props(TF_OP3, 'subtype'), min=get_props(TF_OP3, 'min'), max=get_props(TF_OP3, 'max'), soft_min=get_props(TF_OP3, 'soft_min'), soft_max=get_props(TF_OP3, 'soft_max'), precision=get_props(TF_OP3, 'precision'), get=default_value_get, set=default_value_set)
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'opacity3', text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			opacity3_params = ParamSet() \
+				.add_texture('opacity3', tex_name)
+		else:
+			opacity3_params = ParamSet() \
+				.add_float('opacity3', self.opacity3)
+		
+		return opacity3_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_OP4_socket(bpy.types.NodeSocket):
+	'''Opacity4 socket'''
+	bl_idname = 'luxrender_TF_OP4_socket'
+	bl_label = 'Opacity4 socket'
+	
+	# meaningful property
+	def opacity4_update(self, context):
+		pass
+	
+	opacity4 = bpy.props.FloatProperty(name=get_props(TF_OP4, 'name'), description=get_props(TF_OP4, 'description'), default=get_props(TF_OP4, 'default'), subtype=get_props(TF_OP4, 'subtype'), min=get_props(TF_OP4, 'min'), max=get_props(TF_OP4, 'max'), soft_min=get_props(TF_OP4, 'soft_min'), soft_max=get_props(TF_OP4, 'soft_max'), precision=get_props(TF_OP4, 'precision'), update=opacity4_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.opacity4
+	
+	def default_value_set(self, value):
+		self.opacity4 = value
+	
+	default_value = bpy.props.FloatProperty(name=get_props(TF_OP4, 'name'), default=get_props(TF_OP4, 'default'), subtype=get_props(TF_OP4, 'subtype'), min=get_props(TF_OP4, 'min'), max=get_props(TF_OP4, 'max'), soft_min=get_props(TF_OP4, 'soft_min'), soft_max=get_props(TF_OP4, 'soft_max'), precision=get_props(TF_OP4, 'precision'), get=default_value_get, set=default_value_set)
+	
+	def draw(self, context, layout, node):
+		layout.prop(self, 'opacity4', text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			opacity4_params = ParamSet() \
+				.add_texture('opacity4', tex_name)
+		else:
+			opacity4_params = ParamSet() \
+				.add_float('opacity4', self.opacity4)
+		
+		return opacity4_params
