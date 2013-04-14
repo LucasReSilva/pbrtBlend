@@ -244,6 +244,19 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		layout.menu("Lux_NODE_volumes")
 		layout.menu("Lux_NODE_lights")
 
+#  blender rev  >= 56012 prelimnary work
+#	def draw_add_menu(self, context):
+#		layout = self.layout
+#		layout.label(text="LuxRender Node Types")
+#		layout.operator("node.add_node", text="Inputs").type = "Lux_NODE_inputs"
+#		layout.operator("node.add_node", text="Outputs").type = "Lux_NODE_outputs"
+#		layout.operator("node.add_node", text="Material").type = "Lux_NODE_materials"
+#		layout.operator("node.add_node", text="Textures").type = "Lux_NODE_textures"
+#		layout.operator("node.add_node", text="Spectra").type = "Lux_NODE_spectra"
+#		layout.operator("node.add_node", text="Fresnel").type = "Lux_NODE_fresnel"
+#		layout.operator("node.add_node", text="Utilities").type = "Lux_NODE_utilities"
+#		layout.operator("node.add_node", text="Volumens").type = "Lux_NODE_volumes"
+#		layout.operator("node.add_node", text="Lights").type = "Lux_NODE_lights"
 
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
