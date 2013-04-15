@@ -60,6 +60,19 @@ def get_default(TextureParameter):
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
+def draw_add_menu(self, context):
+	layout = self.layout
+	layout.label('LuxRender Node Types')
+	layout.menu("Lux_NODE_inputs")
+	layout.menu("Lux_NODE_outputs")
+	layout.menu("Lux_NODE_materials")
+	layout.menu("Lux_NODE_textures")
+	layout.menu("Lux_NODE_spectra")
+	layout.menu("Lux_NODE_fresnel")
+	layout.menu("Lux_NODE_utilities")
+	layout.menu("Lux_NODE_volumes")
+	layout.menu("Lux_NODE_lights")
+
 def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
 	store_urougness = 0.0
@@ -167,7 +180,7 @@ class lux_node_Spectra_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_tabulateddata_node)
 		
 @LuxRenderAddon.addon_register_class
-class lux_node_Frensel_Menu(bpy.types.Menu):
+class lux_node_Fresnel_Menu(bpy.types.Menu):
 	bl_idname = "Lux_NODE_fresnel"
 	bl_label = "Fresnel Data"
 	
@@ -231,32 +244,6 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		#		if nt_name != '':
 		#			return bpy.data.node_groups[la.luxrender_lamp.nodetree], la, la
 		return (None, None, None)
-		
-	def draw_add_menu(self, context, layout):
-		layout.label('LuxRender Node Types')
-		layout.menu("Lux_NODE_inputs")
-		layout.menu("Lux_NODE_outputs")
-		layout.menu("Lux_NODE_materials")
-		layout.menu("Lux_NODE_textures")
-		layout.menu("Lux_NODE_spectra")
-		layout.menu("Lux_NODE_fresnel")
-		layout.menu("Lux_NODE_utilities")
-		layout.menu("Lux_NODE_volumes")
-		layout.menu("Lux_NODE_lights")
-
-#  blender rev  >= 56012 prelimnary work
-#	def draw_add_menu(self, context):
-#		layout = self.layout
-#		layout.label(text="LuxRender Node Types")
-#		layout.operator("node.add_node", text="Inputs").type = "Lux_NODE_inputs"
-#		layout.operator("node.add_node", text="Outputs").type = "Lux_NODE_outputs"
-#		layout.operator("node.add_node", text="Material").type = "Lux_NODE_materials"
-#		layout.operator("node.add_node", text="Textures").type = "Lux_NODE_textures"
-#		layout.operator("node.add_node", text="Spectra").type = "Lux_NODE_spectra"
-#		layout.operator("node.add_node", text="Fresnel").type = "Lux_NODE_fresnel"
-#		layout.operator("node.add_node", text="Utilities").type = "Lux_NODE_utilities"
-#		layout.operator("node.add_node", text="Volumens").type = "Lux_NODE_volumes"
-#		layout.operator("node.add_node", text="Lights").type = "Lux_NODE_lights"
 
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
