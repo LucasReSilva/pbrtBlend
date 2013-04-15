@@ -60,19 +60,6 @@ def get_default(TextureParameter):
 def add_nodetype(layout, type):
 	layout.operator('node.add_node', text=type.bl_label).type = type.bl_rna.identifier
 
-def draw_add_menu(self, context):
-	layout = self.layout
-	layout.label('LuxRender Node Types')
-	layout.menu("Lux_NODE_inputs")
-	layout.menu("Lux_NODE_outputs")
-	layout.menu("Lux_NODE_materials")
-	layout.menu("Lux_NODE_textures")
-	layout.menu("Lux_NODE_spectra")
-	layout.menu("Lux_NODE_fresnel")
-	layout.menu("Lux_NODE_utilities")
-	layout.menu("Lux_NODE_volumes")
-	layout.menu("Lux_NODE_lights")
-
 def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
 	store_urougness = 0.0
@@ -90,6 +77,20 @@ def get_socket_paramsets(sockets, make_texture):
 			print("Syncing U/V-Roughness")
 		params.update( socket.get_paramset(make_texture) )
 	return params
+
+#Create the mainmenu for the add-node menu
+def draw_add_menu(self, context):
+	layout = self.layout
+	layout.label('LuxRender Node Types')
+	layout.menu("Lux_NODE_inputs")
+	layout.menu("Lux_NODE_outputs")
+	layout.menu("Lux_NODE_materials")
+	layout.menu("Lux_NODE_textures")
+	layout.menu("Lux_NODE_spectra")
+	layout.menu("Lux_NODE_fresnel")
+	layout.menu("Lux_NODE_utilities")
+	layout.menu("Lux_NODE_volumes")
+	layout.menu("Lux_NODE_lights")
 
 #Create the submenus for the add-node menu
 @LuxRenderAddon.addon_register_class
