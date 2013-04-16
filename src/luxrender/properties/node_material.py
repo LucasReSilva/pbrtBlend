@@ -102,6 +102,7 @@ class lux_node_Materials_Menu(bpy.types.Menu):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_material_carpaint_node)
 		add_nodetype(layout, bpy.types.luxrender_material_cloth_node)
+		add_nodetype(layout, bpy.types.luxrender_material_doubleside_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glass2_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
@@ -341,6 +342,40 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 		cloth_params.add_float('repeat_v', self.repeat_v)
 				
 		return make_material(mat_type, self.name, cloth_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_doubleside(luxrender_material_node):
+	'''Doubel-sided material node'''
+	bl_idname = 'luxrender_material_doubleside_node'
+	bl_label = 'Double-Sided Material'
+	bl_icon = 'MATERIAL'
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketShader', 'Material 1')
+		self.inputs.new('NodeSocketShader', 'Material 2')
+		
+		self.outputs.new('NodeSocketShader', 'Surface')
+	
+	def export_material(self, make_material, make_texture):
+		print('export node: doubleside')
+		
+		mat_type = 'doubleside'
+		
+		doubleside_params = ParamSet()
+		
+		def export_submat(socket):
+			node = get_linked_node(socket)
+			if not check_node_export_material(node):
+				return None
+			return node.export_material(make_material, make_texture)
+		
+		mat1_name = export_submat(self.inputs[1])
+		mat2_name = export_submat(self.inputs[2])
+		
+		doubleside_params.add_string("namedmaterial1", mat1_name)
+		doubleside_params.add_string("namedmaterial2", mat2_name)
+		
+		return make_material(mat_type, self.name, doubleside_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glass(luxrender_material_node):
@@ -1098,6 +1133,8 @@ class luxrender_material_output_node(luxrender_node):
 			print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
 			
 			lux_context.makeNamedVolume(vol.name, vol_name, vol_params)
+				
+			return volume_name
 		int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 		ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 
