@@ -351,8 +351,8 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 	bl_icon = 'MATERIAL'
 	
 	def init(self, context):
-		self.inputs.new('NodeSocketShader', 'Material 1')
-		self.inputs.new('NodeSocketShader', 'Material 2')
+		self.inputs.new('NodeSocketShader', 'Front Material')
+		self.inputs.new('NodeSocketShader', 'Back Material')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -369,11 +369,11 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 				return None
 			return node.export_material(make_material, make_texture)
 		
-		mat1_name = export_submat(self.inputs[1])
-		mat2_name = export_submat(self.inputs[2])
+		frontmat_name = export_submat(self.inputs[1])
+		backmat_name = export_submat(self.inputs[2])
 		
-		doubleside_params.add_string("namedmaterial1", mat1_name)
-		doubleside_params.add_string("namedmaterial2", mat2_name)
+		doubleside_params.add_string("frontnamedmaterial", frontmat_name)
+		doubleside_params.add_string("backnamedmaterial", backmat_name)
 		
 		return make_material(mat_type, self.name, doubleside_params)
 		
