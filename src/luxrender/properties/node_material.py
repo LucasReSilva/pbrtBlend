@@ -350,12 +350,19 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 	bl_label = 'Double-Sided Material'
 	bl_icon = 'MATERIAL'
 	
+	usefrontforfront = bpy.props.BoolProperty(name='Use front for front', description='Use front side of front material for front side', default=True)
+	usefrontforback = bpy.props.BoolProperty(name='Use front for back', description='Use front side of back material for back side', default=True)
+
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Front Material')
 		self.inputs.new('NodeSocketShader', 'Back Material')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
-	
+
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'usefrontforfront')
+		layout.prop(self, 'usefrontforback')
+
 	def export_material(self, make_material, make_texture):
 		print('export node: doubleside')
 		
@@ -374,6 +381,8 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 		
 		doubleside_params.add_string("frontnamedmaterial", frontmat_name)
 		doubleside_params.add_string("backnamedmaterial", backmat_name)
+		doubleside_params.add_bool('usefrontforfront', self.usefrontforfront)
+		doubleside_params.add_bool('usefrontforback', self.usefrontforback)
 		
 		return make_material(mat_type, self.name, doubleside_params)
 		
