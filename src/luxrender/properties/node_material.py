@@ -72,7 +72,7 @@ def get_socket_paramsets(sockets, make_texture):
 			continue
 		if hasattr(socket, 'uroughness'):
 			store_urougness = socket.uroughness
-		if hasattr(socket, 'vroughness') and socket.sync_vroughness:
+		if hasattr(socket, 'vroughness') and socket.sync_vroughness and socket.vroughness != store_urougness:
 			socket.vroughness = store_urougness
 			print("Syncing U/V-Roughness")
 		params.update( socket.get_paramset(make_texture) )
