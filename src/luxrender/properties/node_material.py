@@ -355,7 +355,9 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Front Material')
+		self.inputs['Front Material'].name = 'Front Material'
 		self.inputs.new('NodeSocketShader', 'Back Material')
+		self.inputs['Back Material'].name = 'Back Material'
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 
