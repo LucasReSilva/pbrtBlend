@@ -379,7 +379,11 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 			return node.export_material(make_material, make_texture)
 		
 		frontmat_name = export_submat(self.inputs[0])
-		backmat_name = export_submat(self.inputs[1])
+		
+		if self.inputs[1].is_linked:
+			backmat_name = export_submat(self.inputs[1])
+		else:
+			backmat_name = export_submat(self.inputs[0])
 		
 		doubleside_params.add_string("frontnamedmaterial", frontmat_name)
 		doubleside_params.add_string("backnamedmaterial", backmat_name)
