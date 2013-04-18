@@ -41,5 +41,6 @@ class luxrender_material_sub(luxrender_material_base):
 		'''
 		Only show LuxRender panel if luxrender_material.material in LUX_COMPAT
 		'''
+		return super().poll(context) and (context.material.luxrender_material.type in cls.LUX_COMPAT) and (context.material.luxrender_material.nodetree == '')
 		
-		return super().poll(context) and context.material.luxrender_material.type in cls.LUX_COMPAT
+

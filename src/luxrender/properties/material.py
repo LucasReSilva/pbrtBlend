@@ -30,6 +30,7 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
+from ..properties import find_node
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -351,6 +352,7 @@ class luxrender_material(declarative_property_group):
 	
 	controls = [
 		# Type select Menu is drawn manually
+		#'nodetree', drawn manually
 		'Interior',
 		'Exterior',
 #		'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
@@ -396,6 +398,13 @@ class luxrender_material(declarative_property_group):
 		'step': 25,
 		'default': 1.0
 		},
+		{
+		'attr': 'nodetree',
+		'type': 'string',
+		'description': 'Node tree',
+		'name': 'Node Tree',
+		'default': ''
+		},
 #		{
 #			'type': 'bool',
 #			'attr': 'generatetangents',
@@ -432,6 +441,7 @@ class luxrender_material(declarative_property_group):
 		'velvet': 'Kd',
 	}
 	
+	
 	def reset(self, prnt=None):
 		super().reset()
 		# Also reset sub-property groups
@@ -459,10 +469,25 @@ class luxrender_material(declarative_property_group):
 			if blender_material.diffuse_color != submat_col:
 				blender_material.diffuse_color = submat_col
 	
+	def exportNodetree(self, scene, lux_context, material, mode):
+		outputNode = find_node(material, 'luxrender_material_output_node')
+		
+		print('outputNode: ', outputNode)
+		
+		if outputNode is None:
+			return set()
+			
+		
+		return outputNode.export(scene, lux_context, material, mode)
+		
+	
 	def export(self, scene, lux_context, material, mode='indirect'):
 		
 		if scene.luxrender_testing.clay_render and self.type not in ['glass', 'glass2']:
 			return {'CLAY'}
+		
+		if self.nodetree != '':
+			return self.exportNodetree(scene, lux_context, material, mode)
 		
 		with MaterialCounter(material.name):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
@@ -480,7 +505,7 @@ class luxrender_material(declarative_property_group):
 					
 					m2 = bpy.data.materials[m2_name]
 					m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
-
+				
 				if self.type == 'glossycoating':
 					bm_name = self.luxrender_mat_glossycoating.basematerial_material
 					if bm_name == '':
@@ -1213,12 +1238,12 @@ class luxrender_coating(declarative_property_group):
 	visibility = dict_merge(
 		{
 
-			'multibounce':      { 'use_coating': True },
+			'multibounce':	  { 'use_coating': True },
 
-			'useior':           { 'use_coating': True },
-			'draw_ior_menu':    { 'use_coating': True, 'useior': True },
-			'anisotropic':      { 'use_coating': True },
-			'use_exponent':     { 'use_coating': True }
+			'useior':		   { 'use_coating': True },
+			'draw_ior_menu':	{ 'use_coating': True, 'useior': True },
+			'anisotropic':	  { 'use_coating': True },
+			'use_exponent':	 { 'use_coating': True }
 		},
 		TF_c_d.visibility,
 		TF_c_index.visibility,
@@ -1237,16 +1262,16 @@ class luxrender_coating(declarative_property_group):
 	enabled = texture_append_visibility(enabled, TF_c_vexponent,  { 'use_coating': True, 'anisotropic': True })
 	
 	visibility = texture_append_visibility(visibility, TF_c_normalmap,  { 'use_coating': True })
-	visibility = texture_append_visibility(visibility, TF_c_bumpmap,    { 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TF_c_bumpmap,	{ 'use_coating': True })
 	visibility = texture_append_visibility(visibility, TF_c_uroughness, { 'use_coating': True, 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_c_vroughness, { 'use_coating': True, 'use_exponent': False })
 	visibility = texture_append_visibility(visibility, TF_c_uexponent,  { 'use_coating': True, 'use_exponent': True })
 	visibility = texture_append_visibility(visibility, TF_c_vexponent,  { 'use_coating': True, 'use_exponent': True })
 
-	visibility = texture_append_visibility(visibility, TC_c_Ks,    { 'use_coating': True, 'useior': False })
+	visibility = texture_append_visibility(visibility, TC_c_Ks,	{ 'use_coating': True, 'useior': False })
 	visibility = texture_append_visibility(visibility, TF_c_index, { 'use_coating': True, 'useior': True })
-	visibility = texture_append_visibility(visibility, TC_c_Ka,    { 'use_coating': True })
-	visibility = texture_append_visibility(visibility, TF_c_d,     { 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TC_c_Ka,	{ 'use_coating': True })
+	visibility = texture_append_visibility(visibility, TF_c_d,	 { 'use_coating': True })
 	
 	properties = [
 		{	# Drawn in the panel header
@@ -1956,7 +1981,6 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 	
 	def get_paramset(self, material):
 		mattetranslucent_params = ParamSet()
-		
 		mattetranslucent_params.add_bool('energyconserving', self.energyconserving)
 		mattetranslucent_params.update( TC_Kr.get_paramset(self) )
 		mattetranslucent_params.update( TC_Kt.get_paramset(self) )
@@ -2459,11 +2483,11 @@ class luxrender_mat_metal(declarative_property_group):
 			'description': 'Metal type to use, select "Use NK file" to input external metal data',
 			'items': [
 				('nk', 'Use NK file', 'nk'),
-				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
-				('copper', 'copper', 'copper'),
-				('gold', 'gold', 'gold'),
-				('silver', 'silver', 'silver'),
-				('aluminium', 'aluminium', 'aluminium')
+				('amorphous carbon', 'Amorphous carbon', 'amorphous carbon'),
+				('copper', 'Copper', 'copper'),
+				('gold', 'Gold', 'gold'),
+				('silver', 'Silver', 'silver'),
+				('aluminium', 'Aluminium', 'aluminium')
 			],
 			'default': 'aluminium',
 			'save_in_preset': True
@@ -2604,11 +2628,11 @@ class luxrender_mat_metal2(declarative_property_group):
 			'name': 'Preset',
 			'description': 'Metal type to use',
 			'items': [
-				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
-				('copper', 'copper', 'copper'),
-				('gold', 'gold', 'gold'),
-				('silver', 'silver', 'silver'),
-				('aluminium', 'aluminium', 'aluminium')
+				('amorphous carbon', 'Amorphous carbon', 'amorphous carbon'),
+				('copper', 'Copper', 'copper'),
+				('gold', 'Gold', 'gold'),
+				('silver', 'Silver', 'silver'),
+				('aluminium', 'Aluminium', 'aluminium')
 			],
 			'default': 'aluminium',
 			'save_in_preset': True
