@@ -2318,7 +2318,7 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	def vroughness_update(self, context):
 		pass
 	
-	sync_vroughness = bpy.props.BoolProperty(name='Sync V', default=False)
+	sync_vroughness = bpy.props.BoolProperty(name='Sync V', default=True)
 	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), update=vroughness_update)
 
 	# helper property
