@@ -38,6 +38,37 @@ class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_re
 	COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 @LuxRenderAddon.addon_register_class
+class layer_selector(render_panel):
+	'''
+	Render Layers UI panel
+	'''
+	
+	bl_label = 'Layers'
+	bl_options = {'HIDE_HEADER'}
+	bl_context = "render_layer"
+	
+	def draw(self, context):
+		#Add in Blender's layer chooser, this taken from Blender's startup/properties_render_layer.py
+		layout = self.layout
+		
+		scene = context.scene
+		rd = scene.render
+		
+		row = layout.row()
+		row.template_list("RENDERLAYER_UL_renderlayers", "", rd, "layers", rd.layers, "active_index", rows=2)
+		
+		col = row.column(align=True)
+		col.operator("scene.render_layer_add", icon='ZOOMIN', text="")
+		col.operator("scene.render_layer_remove", icon='ZOOMOUT', text="")
+		
+		row = layout.row()
+		rl = rd.layers.active
+		if rl:
+			row.prop(rl, "name")
+		
+		row.prop(rd, "use_single_layer", text="", icon_only=True)
+
+@LuxRenderAddon.addon_register_class
 class layers(render_panel):
 	'''
 	Render Layers UI panel
@@ -45,35 +76,15 @@ class layers(render_panel):
 	
 	bl_label = 'Layers'
 	bl_options = {'DEFAULT_CLOSED'}
-	
-	display_property_groups = [
-		( ('scene',), 'luxrender_lightgroups' )
-	]
+	bl_context = "render_layer"
 	
 	def draw(self, context): 
-		#Add in Blender's layer stuff, this taken from Blender's startup/properties_render.py
+		#Add in Blender's layer stuff, this taken from Blender's startup/properties_render_layer.py
 		layout = self.layout
 
 		scene = context.scene
 		rd = scene.render
-
-		row = layout.row()
-		if bpy.app.version < (2, 65, 3 ):
-			row.template_list(rd, "layers", rd.layers, "active_index", rows=2)
-		else:
-			row.template_list("RENDER_UL_renderlayers", "", rd, "layers", rd.layers, "active_index", rows=2)
-
-
-		col = row.column(align=True)
-		col.operator("scene.render_layer_add", icon='ZOOMIN', text="")
-		col.operator("scene.render_layer_remove", icon='ZOOMOUT', text="")
-
-		row = layout.row()
 		rl = rd.layers.active
-		if rl:
-			row.prop(rl, "name")
-
-		row.prop(rd, "use_single_layer", text="", icon_only=True)
 		
 		split = layout.split()
 
@@ -82,6 +93,28 @@ class layers(render_panel):
 		col.label(text="")
 		col = split.column()
 		col.prop(rl, "layers", text="Layer")
+
+@LuxRenderAddon.addon_register_class
+class passes(render_panel):
+	'''
+	Render passes UI panel
+	'''
+	
+	bl_label = 'Passes'
+	bl_options = {'DEFAULT_CLOSED'}
+	bl_context = "render_layer"
+	
+	display_property_groups = [
+	   ( ('scene',), 'luxrender_lightgroups' )
+	]
+	
+	def draw(self, context):
+		#Add in the relevant bits from Blender's passes stuff, this taken from Blender's startup/properties_render_layer.py
+		layout = self.layout
+		
+		scene = context.scene
+		rd = scene.render
+		rl = rd.layers.active
 		
 		split = layout.split()
 
@@ -103,12 +136,12 @@ class layers(render_panel):
 			# Here we draw the currently selected luxrender_volumes_data property group
 			for control in lg.controls:
 				self.draw_column(
-					control,
-					subrow.column(),
-					lg,
-					context,
-					property_group = lg
-				)
+								 control,
+								 subrow.column(),
+								 lg,
+								 context,
+								 property_group = lg
+								 )
 			row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index=lg_index
 			
 @LuxRenderAddon.addon_register_class
