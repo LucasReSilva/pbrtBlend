@@ -80,17 +80,19 @@ def get_socket_paramsets(sockets, make_texture):
 
 #Create the mainmenu for the add-node menu
 def draw_add_menu(self, context):
-	layout = self.layout
-	layout.label('LuxRender Node Types')
-	layout.menu("Lux_NODE_inputs")
-	layout.menu("Lux_NODE_outputs")
-	layout.menu("Lux_NODE_materials")
-	layout.menu("Lux_NODE_textures")
-	layout.menu("Lux_NODE_spectra")
-	layout.menu("Lux_NODE_fresnel")
-	layout.menu("Lux_NODE_utilities")
-	layout.menu("Lux_NODE_volumes")
-	layout.menu("Lux_NODE_lights")
+	if context.space_data.tree_type == 'luxrender_material_nodes':
+		print("------", context.space_data.tree_type)
+		layout = self.layout
+		layout.label('LuxRender Node Types')
+		layout.menu("Lux_NODE_inputs")
+		layout.menu("Lux_NODE_outputs")
+		layout.menu("Lux_NODE_materials")
+		layout.menu("Lux_NODE_textures")
+		layout.menu("Lux_NODE_spectra")
+		layout.menu("Lux_NODE_fresnel")
+		layout.menu("Lux_NODE_utilities")
+		layout.menu("Lux_NODE_volumes")
+		layout.menu("Lux_NODE_lights")
 
 #Create the submenus for the add-node menu
 @LuxRenderAddon.addon_register_class
