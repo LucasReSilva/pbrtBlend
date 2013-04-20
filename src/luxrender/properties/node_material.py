@@ -81,7 +81,6 @@ def get_socket_paramsets(sockets, make_texture):
 #Create the mainmenu for the add-node menu
 def draw_add_menu(self, context):
 	if context.space_data.tree_type == 'luxrender_material_nodes':
-		print("------", context.space_data.tree_type)
 		layout = self.layout
 		layout.label('LuxRender Node Types')
 		layout.menu("Lux_NODE_inputs")
