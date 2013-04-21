@@ -289,8 +289,8 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Ks3_socket', 'Specular Color 3')
 		self.inputs.new('NodeSocketFloat', 'R3')
 		self.inputs.new('NodeSocketFloat', 'M3')
-		self.inputs.new('luxrender_TC_Kd_socket', 'Absorbtion Color')
-		self.inputs.new('luxrender_TF_d_socket', 'Absorbtion Depth')
+		self.inputs.new('luxrender_TC_Kd_socket', 'Absorption Color')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -591,8 +591,8 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-		self.inputs.new('luxrender_TF_d_socket', 'Absorbtion Depth (nm)')
-		self.inputs.new('luxrender_TC_Ka_socket', 'Absorbtion Color')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
+		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
 		self.inputs['IOR'].hide = True # initial state is hidden
@@ -1245,15 +1245,15 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
-	'''Absorbtion Color socket'''
+	'''Absorption Color socket'''
 	bl_idname = 'luxrender_TC_Ka_socket'
-	bl_label = 'Absorbtion Color socket'
+	bl_label = 'Absorption Color socket'
 	
 	# meaningful property
 	def color_update(self, context):
 		pass
 	
-	color = bpy.props.FloatVectorProperty(name='Absorbtion Color', description='Absorbtion Color', default=get_default(TC_Ka), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=get_default(TC_Ka), subtype='COLOR', min=0.0, max=1.0, update=color_update)
 	
 	# helper property
 	def default_value_get(self):
@@ -1262,7 +1262,7 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
 	def default_value_set(self, value):
 		self.color = value
 
-	default_value = bpy.props.FloatVectorProperty(name='Absorbtion Color', default=get_default(TC_Ka), subtype='COLOR', get=default_value_get, set=default_value_set)
+	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', default=get_default(TC_Ka), subtype='COLOR', get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
