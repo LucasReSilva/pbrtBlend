@@ -1009,7 +1009,6 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 		self.outputs.new('NodeSocketShader', 'Volume')
 
 	def export_volume(self, make_volume, make_texture):
-		print('Exporting clear volume')
 		vol_type = 'clear'
 		
 		clear_params = ParamSet()
@@ -1031,6 +1030,14 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
 		self.outputs.new('NodeSocketShader', 'Volume')
+
+	def export_volume(self, make_volume, make_texture):
+		vol_type = 'homogeneous'
+		
+		homogeneous_params = ParamSet()
+		homogeneous_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_volume(vol_type, self.name, homogeneous_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(luxrender_material_node):
