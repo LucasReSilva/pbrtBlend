@@ -2457,7 +2457,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 				.add_texture('g', tex_name)
 		else:
 			sc_asym_params = ParamSet() \
-				.add_float('g', self.sc_asym)
+				.add_color('g', self.sc_asym)
 		
 		return sc_asym_params
 
