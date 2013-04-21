@@ -248,6 +248,15 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		#			return bpy.data.node_groups[la.luxrender_lamp.nodetree], la, la
 		return (None, None, None)
 
+	# This block updates the preview, when socket links change
+	def update(self):
+		self.refresh = True
+	
+	def acknowledge_connection(self, context):
+		self.refresh = False
+	
+	refresh = bpy.props.BoolProperty(name='Links Changed', default=False, update=acknowledge_connection)
+
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_carpaint(luxrender_material_node):
