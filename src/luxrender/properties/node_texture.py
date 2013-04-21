@@ -695,7 +695,10 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
 	brickmodtex = bpy.props.FloatVectorProperty(name='Brick Modulation Texture', subtype='COLOR', min=0.0, max=1.0, default=(0.9, 0.9, 0.9))
 	
 	def draw(self, context, layout, node):
-		layout.prop(self, 'brickmodtex', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'brickmodtex', text='')
+		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
 		return color_socket_color
@@ -725,7 +728,10 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
 	bricktex = bpy.props.FloatVectorProperty(name='Brick Texture', subtype='COLOR', min=0.0, max=1.0, default=(0.8, 0.8, 0.8))
 	
 	def draw(self, context, layout, node):
-		layout.prop(self, 'bricktex', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'bricktex', text='')
+		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
 		return color_socket_color
@@ -755,7 +761,10 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
 	mortartex = bpy.props.FloatVectorProperty(name='Mortar Texture', subtype='COLOR', min=0.0, max=1.0, default=(0.1, 0.1, 0.1))
 	
 	def draw(self, context, layout, node):
-		layout.prop(self, 'mortartex', text=self.name)
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'mortartex', text='')
+		row.label(text=self.name)
 	
 	def draw_color(self, context, node):
 		return color_socket_color
