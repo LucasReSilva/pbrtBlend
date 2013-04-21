@@ -1004,7 +1004,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_AC_color_socket', 'Absorption Color')
+		self.inputs.new('luxrender_AC_absorbtion_socket', 'Absorption Color')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
 
@@ -1025,7 +1025,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_AC_color_socket', 'Absorption Color')
+		self.inputs.new('luxrender_SC_absorbtion_socket', 'Absorption Color')
 		self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
@@ -1892,10 +1892,56 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 		return backface_ks_params
 
 @LuxRenderAddon.addon_register_class
-class luxrender_AC_color_socket(bpy.types.NodeSocket):
+class luxrender_AC_absorbtion_socket(bpy.types.NodeSocket):
 	'''Volume absorption Color socket'''
-	bl_idname = 'luxrender_AC_color_socket'
+	bl_idname = 'luxrender_AC_absorption_socket'
 	bl_label = 'Absorption Color socket'
+	
+	# meaningful property
+	def color_update(self, context):
+		pass
+	
+	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+	
+	def default_value_set(self, value):
+		self.color = value
+	
+	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
+	
+	def draw(self, context, layout, node):
+		row = layout.row()
+		row.alignment = 'LEFT'
+		row.prop(self, 'color', text='')
+		row.label(text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			ac_params = ParamSet() \
+				.add_texture('absorption', tex_name)
+		else:
+			ac_params = ParamSet() \
+				.add_color('absorption', self.color)
+		
+		return ac_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_SC_absorbtion_socket(bpy.types.NodeSocket):
+	'''Volume scatter absorption Color socket'''
+	bl_idname = 'luxrender_SC_color_socket'
+	bl_label = 'Scattering Absorption socket'
 	
 	# meaningful property
 	def color_update(self, context):
