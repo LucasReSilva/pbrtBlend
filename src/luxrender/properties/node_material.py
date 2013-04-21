@@ -1014,7 +1014,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 		clear_params = ParamSet()
 		clear_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		
-		return make_volume(vol_type, self.name, clear_params)
+		return make_volume(self.name, vol_type, clear_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_homogeneous(luxrender_material_node):
@@ -1037,11 +1037,11 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 		homogeneous_params = ParamSet()
 		homogeneous_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		
-		return make_volume(vol_type, self.name, homogeneous_params)
+		return make_volume(self.name, vol_type, homogeneous_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(luxrender_material_node):
-	'''A custom node'''
+	'''Area light node'''
 	bl_idname = 'luxrender_light_area_node'
 	bl_label = 'Area Light'
 	bl_icon = 'LAMP'
@@ -1154,13 +1154,13 @@ class luxrender_material_output_node(luxrender_node):
 		if ext_vol_socket.is_linked:
 			ext_vol_node = ext_vol_socket.links[0].from_node
 
-		def make_volume(vol_type, vol_name, vol_params):
+		def make_volume(vol_name, vol_type, vol_params):
 			nonlocal lux_context
 			vol_name = '%s::%s' % (tree_name, vol_name)
 			volume_name = vol_name
 			print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
 			
-			lux_context.makeNamedVolume(vol_type, vol_name, vol_params)
+			lux_context.makeNamedVolume(vol_name, vol_type, vol_params)
 				
 			return volume_name
 		if int_vol_socket.is_linked:
@@ -2457,7 +2457,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 				.add_texture('g', tex_name)
 		else:
 			sc_asym_params = ParamSet() \
-				.add_float('g', self.g)
+				.add_float('g', self.sc_asym)
 		
 		return sc_asym_params
 
