@@ -1140,16 +1140,12 @@ class luxrender_material_output_node(luxrender_node):
 
 		#Volumes exporting:
 		int_vol_socket = self.inputs[1]
-#		if not int_vol_socket.is_linked:
-#			return set()
-
-		int_vol_node = int_vol_socket.links[0].from_node
+		if int_vol_socket.is_linked:
+			int_vol_node = int_vol_socket.links[0].from_node
 
 		ext_vol_socket = self.inputs[2]
-#		if not ext_vol_socket.is_linked:
-#			return set()
-
-#		ext_vol_node = ext_vol_socket.links[0].from_node
+		if ext_vol_socket.is_linked:
+			ext_vol_node = ext_vol_socket.links[0].from_node
 
 		def make_volume(vol_type, vol_name, vol_params):
 			nonlocal lux_context
@@ -1160,8 +1156,10 @@ class luxrender_material_output_node(luxrender_node):
 			lux_context.makeNamedVolume(vol_type, vol_name, vol_params)
 				
 			return volume_name
-		int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
-#		ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+		if int_vol_socket.is_linked:
+			int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+		if ext_vol_socket.is_linked:
+			ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 
 		return set()
 
