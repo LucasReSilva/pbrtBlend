@@ -1008,7 +1008,8 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
 		self.outputs.new('NodeSocketShader', 'Volume')
 
-	def export_volume(self, make_material, make_texture):
+	def export_volume(self, make_volume, make_texture):
+		print('Exporting clear volume')
 		vol_type = 'clear'
 		
 		clear_params = ParamSet()
@@ -1136,32 +1137,33 @@ class luxrender_material_output_node(luxrender_node):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
 				if check_node_export_material(surface_node):
 					surface_node.export_material(make_material=make_material, make_texture=make_texture)
-		return set()
-
 
 		#Volumes exporting:
 		int_vol_socket = self.inputs[1]
-		if not int_vol_socket.is_linked:
-			return set()
+#		if not int_vol_socket.is_linked:
+#			return set()
 
-		int_vol_node = int_vol_socket.links[1].from_node
+		int_vol_node = int_vol_socket.links[0].from_node
 
 		ext_vol_socket = self.inputs[2]
-		if not ext_vol_socket.is_linked:
-			return set()
+#		if not ext_vol_socket.is_linked:
+#			return set()
 
-		ext_vol_node = ext_vol_socket.links[2].from_node
+#		ext_vol_node = ext_vol_socket.links[0].from_node
 
 		def make_volume(vol_type, vol_name, vol_params):
 			nonlocal lux_context
 			vol_name = '%s::%s' % (tree_name, vol_name)
+			volume_name = vol_name
 			print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
 			
-			lux_context.makeNamedVolume(vol.name, vol_name, vol_params)
+			lux_context.makeNamedVolume(vol_type, vol_name, vol_params)
 				
 			return volume_name
 		int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
-		ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+#		ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+
+		return set()
 
 # Custom socket types, lookup parameters here:
 # http://www.blender.org/documentation/blender_python_api_2_66a_release/bpy.props.html?highlight=bpy.props.floatproperty#bpy.props.FloatProperty
