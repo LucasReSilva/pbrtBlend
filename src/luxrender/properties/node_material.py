@@ -1004,7 +1004,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_AC_absorbtion_socket', 'Absorption Color')
+		self.inputs.new('luxrender_AC_absorption_socket', 'Absorption Color')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
 
@@ -1025,7 +1025,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
-		self.inputs.new('luxrender_SC_absorbtion_socket', 'Absorption Color')
+		self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
 		self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
 		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
@@ -1892,7 +1892,7 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 		return backface_ks_params
 
 @LuxRenderAddon.addon_register_class
-class luxrender_AC_absorbtion_socket(bpy.types.NodeSocket):
+class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
 	'''Volume absorption Color socket'''
 	bl_idname = 'luxrender_AC_absorption_socket'
 	bl_label = 'Absorption Color socket'
@@ -1938,9 +1938,9 @@ class luxrender_AC_absorbtion_socket(bpy.types.NodeSocket):
 		return ac_params
 
 @LuxRenderAddon.addon_register_class
-class luxrender_SC_absorbtion_socket(bpy.types.NodeSocket):
+class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
 	'''Volume scatter absorption Color socket'''
-	bl_idname = 'luxrender_SC_color_socket'
+	bl_idname = 'luxrender_SC_absorption_socket'
 	bl_label = 'Scattering Absorption socket'
 	
 	# meaningful property
