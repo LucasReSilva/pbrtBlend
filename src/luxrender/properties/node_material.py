@@ -1019,8 +1019,11 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 		self.outputs.new('NodeSocketShader', 'Volume')
 	
 	def draw_buttons(self, context, layout):
-		col.prop(self, 'abs_at_depth', text='Absorption @ Depth')
-		col.prop(self, 'abs_scale', text='Absorption Scale')
+		col = layout.column()
+		col.label(text='Absorption at Depth')
+		col.prop(self, 'abs_at_depth', text='')
+		col.label(text='Absorption Scale')
+		col.prop(self, 'abs_scale', text='')
 
 	def export_volume(self, make_volume, make_texture):
 		vol_type = 'clear'
@@ -1050,8 +1053,10 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 	
 	def draw_buttons(self, context, layout):
 		col = layout.column()
-		col.prop(self, 'abs_at_depth', text='Absorption @ Depth')
-		col.prop(self, 'abs_scale', text='Absorption Scale')
+		col.label(text='Absorption at Depth')
+		col.prop(self, 'abs_at_depth', text='')
+		col.label(text='Absorption Scale')
+		col.prop(self, 'abs_scale', text='')
 		col.label(text='Asymmetry')
 		col.prop(self, 'sc_asym', text='')
 
