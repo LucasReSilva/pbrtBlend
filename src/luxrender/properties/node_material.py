@@ -943,17 +943,11 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 	bl_label = 'Scatter Material'
 	bl_icon = 'MATERIAL'
 	
-	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4)
-	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
+		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
-	
-	def draw_buttons(self, context, layout):
-		col = layout.column()
-		col.label(text='Asymmetry')
-		col.prop(self, 'sc_asym', text='')
 	
 	def export_material(self, make_material, make_texture):
 		mat_type = 'scatter'
@@ -1008,22 +1002,12 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 	bl_idname = 'luxrender_volume_clear_node'
 	bl_label = 'Clear Volume'
 	bl_icon = 'MATERIAL'
-	
-	abs_at_depth = bpy.props.FloatProperty(name='Abs. at depth', description='Object will match absorption color at this depth in metres', default=1.0, min=-0.00001, max=1000.0, precision=6, subtype='DISTANCE', unit='LENGTH')
-	abs_scale = bpy.props.FloatProperty(name='Abs. scale', description='Scale the absorption by this value', default=1.0, min=-0.00001, max=1000.0, precision=6)
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('luxrender_AC_absorption_socket', 'Absorption Color')
 
 		self.outputs.new('NodeSocketShader', 'Volume')
-	
-	def draw_buttons(self, context, layout):
-		col = layout.column()
-		col.label(text='Absorption at Depth')
-		col.prop(self, 'abs_at_depth', text='')
-		col.label(text='Absorption Scale')
-		col.prop(self, 'abs_scale', text='')
 
 	def export_volume(self, make_volume, make_texture):
 		vol_type = 'clear'
@@ -1039,26 +1023,14 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 	bl_idname = 'luxrender_volume_homogeneous_node'
 	bl_label = 'Homogeneous Volume'
 	bl_icon = 'MATERIAL'
-	
-	abs_at_depth = bpy.props.FloatProperty(name='Abs. at depth', description='Object will match absorption color at this depth in metres', default=1.0, min=-0.00001, max=1000.0, precision=6, subtype='DISTANCE', unit='LENGTH')
-	abs_scale = bpy.props.FloatProperty(name='Abs. scale', description='Scale the absorption by this value', default=1.0, min=-0.00001, max=1000.0, precision=6)
-	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4)
-	
+
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
 		self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
 		self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
+		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 		
 		self.outputs.new('NodeSocketShader', 'Volume')
-	
-	def draw_buttons(self, context, layout):
-		col = layout.column()
-		col.label(text='Absorption at Depth')
-		col.prop(self, 'abs_at_depth', text='')
-		col.label(text='Absorption Scale')
-		col.prop(self, 'abs_scale', text='')
-		col.label(text='Asymmetry')
-		col.prop(self, 'sc_asym', text='')
 
 	def export_volume(self, make_volume, make_texture):
 		vol_type = 'homogeneous'
@@ -1185,7 +1157,7 @@ class luxrender_material_output_node(luxrender_node):
 
 		def make_volume(vol_name, vol_type, vol_params):
 			nonlocal lux_context
-#			vol_name = '%s::%s' % (tree_name, vol_name)
+			vol_name = '%s::%s' % (tree_name, vol_name)
 			volume_name = vol_name
 			print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
 			
@@ -1930,7 +1902,7 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
 	def color_update(self, context):
 		pass
 	
-	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-0.0, max=1.0, update=color_update)
+	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
 	
 	# helper property
 	def default_value_get(self):
@@ -1939,7 +1911,7 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
 	def default_value_set(self, value):
 		self.color = value
 	
-	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-0.0, max=1.0, update=color_update)
+	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1949,9 +1921,8 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
 	
 	def draw_color(self, context, node):
 		return color_socket_color
-
+	
 	def get_paramset(self, make_texture):
-		
 		tex_node = get_linked_node(self)
 		if tex_node:
 			if not check_node_export_texture(tex_node):
@@ -1977,7 +1948,7 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
 	def color_update(self, context):
 		pass
 	
-	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-0.0, max=1.0, update=color_update)
+	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
 	
 	# helper property
 	def default_value_get(self):
@@ -1986,7 +1957,7 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
 	def default_value_set(self, value):
 		self.color = value
 
-	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-0.0, max=1.0, update=color_update)
+	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -2023,7 +1994,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	def color_update(self, context):
 		pass
 	
-	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-0.0, max=1.0)
+	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
 	
 	# helper property
 	def default_value_get(self):
@@ -2032,7 +2003,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	def default_value_set(self, value):
 		self.color = value
 
-	default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, max=1.0)
+	default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -2491,6 +2462,51 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
 				.add_float('sigma', self.sigma)
 		
 		return sigma_params
+		
+@LuxRenderAddon.addon_register_class
+class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
+	'''Scattering asymmetry socket'''
+	bl_idname = 'luxrender_SC_asymmetry_socket'
+	bl_label = 'Scattering Asymmetry socket'
+	
+	# meaningful property
+	def sc_asym_update(self, context):
+		pass
+	
+	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4, update=sc_asym_update)
+
+	# helper property
+	def default_value_get(self):
+		return self.sc_asym
+
+	def default_value_set(self, value):
+		self.sc_asym = value
+	
+	default_value = bpy.props.FloatVectorProperty(name='Asymmetry', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4, get=default_value_get, set=default_value_set)
+	
+	def draw(self, context, layout, node):
+		row = layout.row()
+		row.prop(self, 'sc_asym', text='')
+		row.label(text=self.name)
+	
+	def draw_color(self, context, node):
+		return float_socket_color
+		
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+				
+			tex_name = tex_node.export_texture(make_texture)
+			
+			sc_asym_params = ParamSet() \
+				.add_texture('g', tex_name)
+		else:
+			sc_asym_params = ParamSet() \
+				.add_color('g', self.sc_asym)
+		
+		return sc_asym_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_d_socket(bpy.types.NodeSocket):
