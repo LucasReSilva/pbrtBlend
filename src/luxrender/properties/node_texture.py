@@ -332,6 +332,50 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 			clouds_params.update( coord_node.get_paramset() )
 		
 		return make_texture('float', 'blender_clouds', self.name, clouds_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node):
+	'''Distorted noise texture node'''
+	bl_idname = 'luxrender_texture_blender_distortednoise_node'
+	bl_label = 'Distorted Noise Texture'
+	bl_icon = 'TEXTURE'
+	
+	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items, default='blender_original')
+	type = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items, default='blender_original')
+	distamount = bpy.props.FloatProperty(name='Distortion', default=1.00)
+	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+	noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+	
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'noisebasis')
+		layout.prop(self, 'type')
+		layout.prop(self, 'distamount')
+		layout.prop(self, 'noisesize')
+		layout.prop(self, 'noisedepth')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+	
+	def export_texture(self, make_texture):
+		distortednoise_params = ParamSet() \
+			.add_string('noisebasis', self.noisebasis) \
+			.add_string('type', self.type) \
+			.add_float('noisesize', self.noisesize) \
+			.add_float('distamount', self.distamount) \
+			.add_integer('noisedepth', self.noisedepth) \
+			.add_float('bright', self.bright) \
+			.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			distortednoise_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_distortednoise', self.name, distortednoise_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fbm(luxrender_texture_node):

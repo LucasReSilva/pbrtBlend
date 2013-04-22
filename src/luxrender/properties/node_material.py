@@ -160,6 +160,7 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_brick_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_bump_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_clouds_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_blender_distortednoise_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fbm_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_image_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_musgrave_node)
