@@ -48,7 +48,7 @@ def cycles_panel_node_draw(layout, id_data, output_type, input_name):
 
 	return True
 
-def panel_node_draw(layout, id_data, output_type, input_name):
+def node_tree_selector_draw(layout, id_data, output_type):
 	#layout.prop_search(mat.luxrender_material, "nodetree", bpy.data, "node_groups")
 	layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups")
 	
@@ -57,6 +57,12 @@ def panel_node_draw(layout, id_data, output_type, input_name):
 		if id_data.luxrender_material.nodetree == '':
 			layout.operator('luxrender.add_material_nodetree', icon='NODETREE')
 			return False
+	return True
+
+def panel_node_draw(layout, id_data, output_type, input_name):
+	node = find_node(id_data, output_type)
+	if not node:
+		return False
 	else:
 		if id_data.luxrender_material.nodetree != '':
 			ntree = bpy.data.node_groups[id_data.luxrender_material.nodetree]
@@ -95,10 +101,7 @@ class ui_luxrender_material_header(luxrender_material_base):
 		if ob:
 			row = layout.row()
 
-			if bpy.app.version < (2, 65, 3 ):
-				row.template_list(ob, "material_slots", ob, "active_material_index", rows=2)
-			else:
-				row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=2)
+			row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=2)
 
 			col = row.column(align=True)
 			col.operator("object.material_slot_add", icon='ZOOMIN', text="")
@@ -118,9 +121,6 @@ class ui_luxrender_material_header(luxrender_material_base):
 			split.template_ID(ob, "active_material", new="material.new")
 			row = split.row()
 			
-			#if mat:
-			#		row.prop(mat, "use_nodes", icon='NODETREE', text="")
-			
 			if slot:
 				row.prop(slot, "link", text="")
 			else:
@@ -128,13 +128,19 @@ class ui_luxrender_material_header(luxrender_material_base):
 		elif mat:
 			split.template_ID(space, "pin_id")
 			split.separator()
-
+					
+		
+		node_tree_selector_draw(layout, mat, 'luxrender_material_output_node')
 		if not panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Surface'):
 			row = self.layout.row(align=True)
 			if slot:
 				row.label("Material type")
 				row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
 				super().draw(context)
+		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Interior Volume')
+		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Exterior Volume')
+		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
+
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_db(luxrender_material_base):
