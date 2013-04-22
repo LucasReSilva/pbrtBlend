@@ -943,6 +943,8 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 	bl_label = 'Scatter Material'
 	bl_icon = 'MATERIAL'
 	
+	sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry', description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4)
+	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
 		
