@@ -175,8 +175,10 @@ def get_material_volume_defs(m):
 			ext_vol_node = ext_vol_socket.links[0].from_node
 
 
-		int_vol_name = '%s::%s' % (tree_name, int_vol_node.name) if int_vol_socket.is_linked else ""
-		ext_vol_name = '%s::%s' % (tree_name, ext_vol_node.name) if ext_vol_socket.is_linked else ""
+#		int_vol_name = '%s::%s' % (tree_name, int_vol_node.name) if int_vol_socket.is_linked else ""
+#		ext_vol_name = '%s::%s' % (tree_name, ext_vol_node.name) if ext_vol_socket.is_linked else ""
+		int_vol_name = int_vol_node.name if int_vol_socket.is_linked else ""
+		ext_vol_name = ext_vol_node.name if ext_vol_socket.is_linked else ""
 
 		return int_vol_name, ext_vol_name
 	else:
