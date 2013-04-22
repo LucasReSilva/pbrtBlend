@@ -159,6 +159,10 @@ class ui_luxrender_material_db(luxrender_material_base):
 				else:
 					self.layout.operator('luxrender.lrmdb', text=action.label).invoke_action_id = action.aid
 
+	@classmethod
+	def poll(cls, context):
+		return context.material.luxrender_material.nodetree == ''
+
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
 	bl_label	= 'LuxRender Materials Utils'
@@ -178,6 +182,10 @@ class ui_luxrender_material_utils(luxrender_material_base):
 		
 		#row = self.layout.row(align=True)
 		#row.operator("luxrender.material_reset", icon='SOLID')
+
+	@classmethod
+	def poll(cls, context):
+		return context.material.luxrender_material.nodetree == ''
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_emission(luxrender_material_base):
@@ -215,7 +223,7 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 	def poll(cls, context):
 		if not hasattr(context.material, 'luxrender_transparency'):
 			return False
-		return super().poll(context) and context.material.luxrender_material.type != 'null'
+		return super().poll(context) and context.material.luxrender_material.type != 'null' and context.material.luxrender_material.nodetree == ''
 
 
 @LuxRenderAddon.addon_register_class
@@ -255,4 +263,4 @@ class ui_luxrender_material_coating(luxrender_material_base):
 	def poll(cls, context):
 		if not hasattr(context.material, 'luxrender_coating'):
 			return False
-		return super().poll(context)
+		return super().poll(context) and context.material.luxrender_material.nodetree == ''
