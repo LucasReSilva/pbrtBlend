@@ -85,6 +85,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 	bl_idname = 'luxrender_3d_coordinates_node'
 	bl_label = '3D Texture Coordinate'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 260
 
 	for prop in luxrender_tex_transform.properties:
 		if prop['attr'].startswith('coordinates'):
@@ -123,6 +124,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 	bl_idname = 'luxrender_2d_coordinates_node'
 	bl_label = '2D Texture Coordinate'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 
 	for prop in luxrender_tex_mapping.properties:
 		if prop['attr'].startswith('type'):
@@ -194,6 +196,7 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_brick_node'
 	bl_label = 'Brick Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 	
 	for prop in luxrender_tex_brick.properties:
 		if prop['attr'].startswith('brickbond'):
@@ -271,6 +274,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_bump_map_node'
 	bl_label = 'Bump Map Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 
 	bump_height = bpy.props.FloatProperty(name='Bump Height', description='Height of the bump map', default=.001, precision=6, subtype='DISTANCE', unit='LENGTH', step=.001)
 
@@ -298,6 +302,7 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_blender_clouds_node'
 	bl_label = 'Clouds Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 
 	noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items, default='soft_noise')
 	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items, default='blender_original')
@@ -339,6 +344,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 	bl_idname = 'luxrender_texture_blender_distortednoise_node'
 	bl_label = 'Distorted Noise Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 	
 	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items, default='blender_original')
 	type = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items, default='blender_original')
@@ -383,6 +389,7 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_fbm_node'
 	bl_label = 'FBM Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 160
 
 	octaves = bpy.props.IntProperty(name='Octaves', default=8)
 	roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)
@@ -412,6 +419,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_image_map_node'
 	bl_label = 'Image Map Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 220
 	
 	for prop in luxrender_tex_imagemap.properties:
 		if prop['attr'].startswith('filtertype'):
@@ -488,6 +496,7 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_blender_musgrave_node'
 	bl_label = 'Musgrave Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 
 	musgrave_type_items = [
 		('multifractal', 'Multifractal', ''),
@@ -559,6 +568,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_normal_map_node'
 	bl_label = 'Normal Map Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 220
 	
 	for prop in luxrender_tex_normalmap.properties:
 		if prop['attr'].startswith('filtertype'):
@@ -655,6 +665,7 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_windy_node'
 	bl_label = 'Windy Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 160
 
 	def init(self, context):
 		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
@@ -675,6 +686,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_wrinkled_node'
 	bl_label = 'Wrinkled Texture'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 160
 
 	octaves = bpy.props.IntProperty(name='Octaves', default=8)
 	roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)

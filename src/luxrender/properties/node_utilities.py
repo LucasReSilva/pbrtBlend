@@ -174,6 +174,7 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_mix_node'
 	bl_label = 'Mix'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 
 	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
 	

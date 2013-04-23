@@ -54,6 +54,7 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_blackbody_node'
 	bl_label = 'Blackbody Spectrum'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 
 	temperature = bpy.props.FloatProperty(name='Temperature', default=6500.0)
 
@@ -99,6 +100,7 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_gaussian_node'
 	bl_label = 'Gaussian Spectrum'
 	bl_icon = 'TEXTURE'
+	bl_width_minimum = 180
 
 	energy = bpy.props.FloatProperty(name='Energy', default=1.0, description='Relative energy level')
 	wavelength = bpy.props.FloatProperty(name='Wavelength (nm)', default=550.0, description='Center-point of the spectrum curve')
