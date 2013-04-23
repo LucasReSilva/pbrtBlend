@@ -137,10 +137,6 @@ class ui_luxrender_material_header(luxrender_material_base):
 				row.label("Material type")
 				row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
 				super().draw(context)
-		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Interior Volume')
-		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Exterior Volume')
-		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
-
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_db(luxrender_material_base):
@@ -203,6 +199,10 @@ class ui_luxrender_material_emission(luxrender_material_base):
 	def draw_header(self, context):
 		self.layout.prop(context.material.luxrender_emission, "use_emission", text="")
 
+	@classmethod
+	def poll(cls, context):
+		return context.material.luxrender_material.nodetree == ''
+
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_transparency(luxrender_material_base):
 	'''
@@ -264,3 +264,30 @@ class ui_luxrender_material_coating(luxrender_material_base):
 		if not hasattr(context.material, 'luxrender_coating'):
 			return False
 		return super().poll(context) and context.material.luxrender_material.nodetree == ''
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_node_volume(luxrender_material_base):
+	bl_label	= 'Volumes'
+	
+	def draw(self, context):
+		layout = self.layout
+		mat = context.material
+		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Interior Volume')
+		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Exterior Volume')
+	
+	@classmethod
+	def poll(cls, context):
+		return context.material.luxrender_material.nodetree != '' and context.scene.render.engine == 'LUXRENDER_RENDER'
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_node_emit(luxrender_material_base):
+	bl_label	= 'Light Emission'
+	
+	def draw(self, context):
+		layout = self.layout
+		mat = context.material
+		panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
+	
+	@classmethod
+	def poll(cls, context):
+		return context.material.luxrender_material.nodetree != '' and context.scene.render.engine == 'LUXRENDER_RENDER'

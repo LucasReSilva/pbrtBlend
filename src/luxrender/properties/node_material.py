@@ -211,8 +211,6 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
 
-
-#Draw the add-node menu from the submenus created above
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
 	'''LuxRender Material Nodes'''

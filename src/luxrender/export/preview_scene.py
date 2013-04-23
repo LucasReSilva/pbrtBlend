@@ -414,7 +414,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 		
 		lux_context.concatTransform(pv_transform)
 		
-		if pv_export_shape: #Any material, texture, light, or volume definitions created from the node editor do not exist until before this conditional!
+		if pv_export_shape: #Any material, texture, light, or volume definitions created from the node editor do not exist before this conditional!
 			GE = GeometryExporter(lux_context, scene)
 			GE.is_preview = True
 			GE.geometry_scene = scene
