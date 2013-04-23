@@ -83,7 +83,7 @@ triple_variant_items = [
 class luxrender_3d_coordinates_node(luxrender_texture_node):
 	'''3D texture coordinates node'''
 	bl_idname = 'luxrender_3d_coordinates_node'
-	bl_label = '3D Texture Coordinates'
+	bl_label = '3D Texture Coordinate'
 	bl_icon = 'TEXTURE'
 
 	for prop in luxrender_tex_transform.properties:
@@ -121,7 +121,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 class luxrender_2d_coordinates_node(luxrender_texture_node):
 	'''2D texture coordinates node'''
 	bl_idname = 'luxrender_2d_coordinates_node'
-	bl_label = '2D Texture Coordinates'
+	bl_label = '2D Texture Coordinate'
 	bl_icon = 'TEXTURE'
 
 	for prop in luxrender_tex_mapping.properties:
@@ -608,7 +608,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
 	'''Vertex Colors texture node'''
 	bl_idname = 'luxrender_texture_hitpointcolor_node'
-	bl_label = 'Vertex Colors Texture'
+	bl_label = 'Vertex Colors'
 	bl_icon = 'TEXTURE'
 
 	def init(self, context):
@@ -623,7 +623,7 @@ class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
 class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 	'''Vertex Grey texture node'''
 	bl_idname = 'luxrender_texture_hitpointgrey_node'
-	bl_label = 'Vertex Grey Texture'
+	bl_label = 'Vertex Mask'
 	bl_icon = 'TEXTURE'
 
 	def init(self, context):
@@ -638,7 +638,7 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
 	'''Vertex Alpha texture node'''
 	bl_idname = 'luxrender_texture_hitpointalpha_node'
-	bl_label = 'Vertex Alpha Texture'
+	bl_label = 'Vertex Alpha'
 	bl_icon = 'TEXTURE'
 
 	def init(self, context):

@@ -130,7 +130,14 @@ class lux_node_Inputs_Menu(bpy.types.Menu):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_2d_coordinates_node)
 		add_nodetype(layout, bpy.types.luxrender_3d_coordinates_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_blackbody_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_gaussian_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_tabulateddata_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_constant_node) #Drawn as "Value", to match similar compositor/cycles node
+		add_nodetype(layout, bpy.types.luxrender_texture_hitpointcolor_node) #These are drawn in the menu under the name "Vertex color/grey/alpha"
+		add_nodetype(layout, bpy.types.luxrender_texture_hitpointgrey_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_hitpointalpha_node)
+
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Outputs_Menu(bpy.types.Menu):
@@ -165,23 +172,8 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_image_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_musgrave_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_normal_map_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_hitpointcolor_node) #These are drawn in the menu under the name "Vertex color/grey/alpha"
-		add_nodetype(layout, bpy.types.luxrender_texture_hitpointgrey_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_hitpointalpha_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_wrinkled_node)
-
-@LuxRenderAddon.addon_register_class
-class lux_node_Spectra_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_spectra"
-	bl_label = "Spectra"
-	
-	def draw(self, context):
-		layout = self.layout
-		add_nodetype(layout, bpy.types.luxrender_texture_blackbody_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_gaussian_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_tabulateddata_node)
 		
 @LuxRenderAddon.addon_register_class
 class lux_node_Fresnel_Menu(bpy.types.Menu):
@@ -216,7 +208,9 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 	def draw(self, context):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
+
 
 #Draw the add-node menu from the submenus created above
 @LuxRenderAddon.addon_register_class
