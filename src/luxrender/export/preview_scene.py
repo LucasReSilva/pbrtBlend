@@ -432,7 +432,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 					if int_v != '' or ext_v != '':
 						if int_v != '': lux_context.interior(int_v)
 						if ext_v != '': lux_context.exterior(ext_v)
-					print('int_v is equal to', int_v)
 
 					if int_v == '' and bl_scene.luxrender_world.default_interior_volume != '':
 						lux_context.interior(bl_scene.luxrender_world.default_interior_volume)
@@ -447,8 +446,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 				lux_context.shape(mesh_type, mesh_params)
 		else:
 			lux_context.shape('sphere', ParamSet().add_float('radius', 1.0))
-
-		print('Getting preview volumes')
 
 		lux_context.attributeEnd()
 		
