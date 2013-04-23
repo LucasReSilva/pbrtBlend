@@ -1059,6 +1059,7 @@ class luxrender_light_area_node(luxrender_material_node):
 	bl_idname = 'luxrender_light_area_node'
 	bl_label = 'Area Light'
 	bl_icon = 'LAMP'
+	bl_width_minimum = 140
 
 	gain = bpy.props.FloatProperty(name='Gain', default=1.0)
 
@@ -1077,6 +1078,7 @@ class luxrender_material_output_node(luxrender_node):
 	bl_idname = 'luxrender_material_output_node'
 	bl_label = 'Material Output'
 	bl_icon = 'MATERIAL'
+	bl_width_minimum = 120
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Surface')
