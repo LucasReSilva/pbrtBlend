@@ -1894,7 +1894,7 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
 	def color_update(self, context):
 		pass
 	
-	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
+	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=0.0, soft_max=1.0, update=color_update)
 	
 	# helper property
 	def default_value_get(self):
@@ -1903,7 +1903,7 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
 	def default_value_set(self, value):
 		self.color = value
 	
-	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
+	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=0.0, soft_max=1.0, update=color_update)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1940,7 +1940,7 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
 	def color_update(self, context):
 		pass
 	
-	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
+	color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=0.0, soft_max=1.0, update=color_update)
 	
 	# helper property
 	def default_value_get(self):
@@ -1949,7 +1949,7 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
 	def default_value_set(self, value):
 		self.color = value
 
-	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=-1.0, max=1.0, update=color_update)
+	default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color', default=(1.0, 1.0, 1.0), subtype='COLOR', min=0.0, soft_max=1.0, update=color_update)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
@@ -1986,7 +1986,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	def color_update(self, context):
 		pass
 	
-	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
+	color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0)
 	
 	# helper property
 	def default_value_get(self):
@@ -1995,7 +1995,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 	def default_value_set(self, value):
 		self.color = value
 
-	default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=-1.0, max=1.0)
+	default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color', default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0)
 	
 	def draw(self, context, layout, node):
 		row = layout.row()
