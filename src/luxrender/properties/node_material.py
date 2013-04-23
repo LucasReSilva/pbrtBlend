@@ -87,7 +87,7 @@ def draw_add_menu(self, context):
 		layout.menu("Lux_NODE_outputs")
 		layout.menu("Lux_NODE_materials")
 		layout.menu("Lux_NODE_textures")
-		layout.menu("Lux_NODE_spectra")
+#		layout.menu("Lux_NODE_spectra")
 		layout.menu("Lux_NODE_fresnel")
 		layout.menu("Lux_NODE_utilities")
 		layout.menu("Lux_NODE_volumes")
