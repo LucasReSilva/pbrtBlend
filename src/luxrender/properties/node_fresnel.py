@@ -56,7 +56,7 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_fresnelcolor_node'
 	bl_label = 'Fresnel Color'
 	bl_icon = 'TEXTURE'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
@@ -75,7 +75,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_cauchy_node'
 	bl_label = 'Cauchy'
 	bl_icon = 'TEXTURE'
-	bl_width_minimum = 160
+	bl_width_min = 160
 	
 	def changed_preset(self, context):
 		## connect preset -> property
@@ -120,7 +120,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_fresnelname_node'
 	bl_label = 'Fresnel Name'
 	bl_icon = 'TEXTURE'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	for prop in luxrender_tex_fresnelname.properties:
 		if prop['attr'].startswith('name'):

@@ -261,7 +261,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 	bl_label = 'Car Paint Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 
     #Get menu items from old material editor properties
 	for prop in luxrender_mat_carpaint.properties:
@@ -311,7 +311,7 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 	bl_idname = 'luxrender_material_cloth_node'
 	bl_label = 'Cloth Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 	
 	for prop in luxrender_mat_cloth.properties:
 		if prop['attr'].startswith('presetname'):
@@ -354,7 +354,7 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 	bl_idname = 'luxrender_material_doubleside_node'
 	bl_label = 'Double-Sided Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 	
 	usefrontforfront = bpy.props.BoolProperty(name='Use front for front', description='Use front side of front material for front side', default=True)
 	usefrontforback = bpy.props.BoolProperty(name='Use front for back', description='Use front side of back material for back side', default=True)
@@ -404,7 +404,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 	bl_idname = 'luxrender_material_glass_node'
 	bl_label = 'Glass Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 
 	arch = bpy.props.BoolProperty(name='Architectural', description='Skips refraction during transmission, propagates alpha and shadow rays', default=False)
 	
@@ -438,7 +438,7 @@ class luxrender_material_type_node_glass2(luxrender_material_node):
 	bl_idname = 'luxrender_material_glass2_node'
 	bl_label = 'Glass2 Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	arch = bpy.props.BoolProperty(name='Architectural', description='Skips refraction during transmission, propagates alpha and shadow rays', default=False)
 	dispersion = bpy.props.BoolProperty(name='Dispersion', description='Enables chromatic dispersion, volume should have a sufficient data for this', default=False)
@@ -468,7 +468,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	bl_idname = 'luxrender_material_glossy_node'
 	bl_label = 'Glossy Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
@@ -517,7 +517,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 	bl_idname = 'luxrender_material_glossycoating_node'
 	bl_label = 'Glossy Coating Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
@@ -575,7 +575,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	bl_idname = 'luxrender_material_glossytranslucent_node'
 	bl_label = 'Glossy Translucent Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 	
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
@@ -624,7 +624,7 @@ class luxrender_material_type_node_layered(luxrender_material_node):
 	bl_idname = 'luxrender_material_layered_node'
 	bl_label = 'Layered Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Material 1')
@@ -682,7 +682,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 	bl_idname = 'luxrender_material_matte_node'
 	bl_label = 'Matte Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
@@ -705,7 +705,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 	bl_idname = 'luxrender_material_mattetranslucent_node'
 	bl_label = 'Matte Translucent Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 	
 	energyconsrv = bpy.props.BoolProperty(name='Energy Conserving', default=True)
 	
@@ -732,7 +732,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 	bl_idname = 'luxrender_material_metal_node'
 	bl_label = 'Metal Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 	
 	for prop in luxrender_mat_metal.properties:
 		if prop['attr'].startswith('name'):
@@ -783,7 +783,7 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 	bl_idname = 'luxrender_material_metal2_node'
 	bl_label = 'Metal2 Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 	
 	for prop in luxrender_mat_metal2.properties:
 		if prop['attr'].startswith('metaltype'):
@@ -832,7 +832,7 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 	bl_idname = 'luxrender_material_mirror_node'
 	bl_label = 'Mirror Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 
 	
 	def init(self, context):
@@ -857,7 +857,7 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 	bl_idname = 'luxrender_material_mix_node'
 	bl_label = 'Mix Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 
 	def init(self, context):
 		self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')
@@ -894,7 +894,7 @@ class luxrender_material_type_node_null(luxrender_material_node):
 	bl_idname = 'luxrender_material_null_node'
 	bl_label = 'Null Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	def init(self, context):
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -912,7 +912,7 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 	bl_idname = 'luxrender_material_roughglass_node'
 	bl_label = 'Rough Glass Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 180
+	bl_width_min = 180
 	
 	def change_use_anistropy(self, context):
 		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
@@ -951,7 +951,7 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 	bl_idname = 'luxrender_material_scatter_node'
 	bl_label = 'Scatter Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
@@ -973,7 +973,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
 	bl_idname = 'luxrender_material_velvet_node'
 	bl_label = 'Velvet Material'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	advanced = bpy.props.BoolProperty(name='Advanced', description='Advanced Velvet Parameters', default=False)
 	thickness = bpy.props.FloatProperty(name='Thickness', description='', default=0.1, subtype='NONE', min=-0.0, max=1.0, soft_min=-0.0, soft_max=1.0, precision=2)
@@ -1013,7 +1013,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 	bl_idname = 'luxrender_volume_clear_node'
 	bl_label = 'Clear Volume'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
@@ -1035,7 +1035,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 	bl_idname = 'luxrender_volume_homogeneous_node'
 	bl_label = 'Homogeneous Volume'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 160
+	bl_width_min = 160
 
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')
@@ -1059,7 +1059,7 @@ class luxrender_light_area_node(luxrender_material_node):
 	bl_idname = 'luxrender_light_area_node'
 	bl_label = 'Area Light'
 	bl_icon = 'LAMP'
-	bl_width_minimum = 140
+	bl_width_min = 140
 
 	gain = bpy.props.FloatProperty(name='Gain', default=1.0)
 
@@ -1078,7 +1078,7 @@ class luxrender_material_output_node(luxrender_node):
 	bl_idname = 'luxrender_material_output_node'
 	bl_label = 'Material Output'
 	bl_icon = 'MATERIAL'
-	bl_width_minimum = 120
+	bl_width_min = 120
 	
 	def init(self, context):
 		self.inputs.new('NodeSocketShader', 'Surface')
