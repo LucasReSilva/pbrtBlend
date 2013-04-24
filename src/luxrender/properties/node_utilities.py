@@ -425,7 +425,7 @@ class luxrender_TC_tex1_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_tex1_socket'
 	bl_label = 'Texture 1 socket'
 	
-	tex1 = bpy.props.FloatVectorProperty(name='Color 1', subtype='COLOR', min=0.0, max=1.0)
+	tex1 = bpy.props.FloatVectorProperty(name='Color 1', subtype='COLOR', min=0.0, soft_max=1.0)
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'tex1', text=self.name)
@@ -455,7 +455,7 @@ class luxrender_TC_tex2_socket(bpy.types.NodeSocket):
 	bl_idname = 'luxrender_TC_tex2_socket'
 	bl_label = 'Texture 2 socket'
 	
-	tex2 = bpy.props.FloatVectorProperty(name='Color 2', subtype='COLOR', min=0.0, max=1.0)
+	tex2 = bpy.props.FloatVectorProperty(name='Color 2', subtype='COLOR', min=0.0, soft_max=1.0)
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'tex2', text=self.name)
