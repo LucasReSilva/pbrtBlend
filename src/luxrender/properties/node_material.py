@@ -573,7 +573,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	'''Glossytranslucent material node'''
 	bl_idname = 'luxrender_material_glossytranslucent_node'
-	bl_label = 'Glossytranslucent Material'
+	bl_label = 'Gloss Translucent Material'
 	bl_icon = 'MATERIAL'
 	bl_width_minimum = 180
 	
