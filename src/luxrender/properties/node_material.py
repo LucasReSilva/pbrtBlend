@@ -70,11 +70,6 @@ def get_socket_paramsets(sockets, make_texture):
 		if not socket.enabled:
 			print('Disabled socket %s will not be exported' % socket.bl_idname)
 			continue
-		if hasattr(socket, 'uroughness'):
-			store_urougness = socket.uroughness
-		if hasattr(socket, 'vroughness') and socket.sync_vroughness and socket.vroughness != store_urougness:
-			socket.vroughness = store_urougness
-			print("Syncing U/V-Roughness")
 		params.update( socket.get_paramset(make_texture) )
 	return params
 
@@ -476,7 +471,8 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs['IOR'].enabled =  self.use_ior
 	
 	def change_use_anistropy(self, context):
-		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
@@ -492,6 +488,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -525,7 +522,8 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs['IOR'].enabled = self.use_ior
 	
 	def change_use_anistropy(self, context):
-		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
@@ -540,6 +538,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
@@ -583,7 +582,8 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		self.inputs['IOR'].enabled = self.use_ior
 
 	def change_use_anistropy(self, context):
-		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
@@ -600,6 +600,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -739,7 +740,8 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 			metal_presets = prop['items']
 
 	def change_use_anistropy(self, context):
-		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 	
 	metal_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal Preset', items=metal_presets, default='aluminium')
 	
@@ -750,6 +752,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -794,7 +797,8 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 			metal2_presets = prop['items']
 
 	def change_use_anistropy(self, context):
-		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 # 	metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
 # 	metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
@@ -807,6 +811,7 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -915,7 +920,8 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 	bl_width_min = 180
 	
 	def change_use_anistropy(self, context):
-		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False, update=change_use_anistropy)
 	dispersion = bpy.props.BoolProperty(name='Dispersion', description='Enables chromatic dispersion, volume should have a sufficient data for this', default=False)
@@ -928,6 +934,7 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 
@@ -2350,6 +2357,7 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	def uroughness_update(self, context):
 		pass
 	
+	sync_vroughness = bpy.props.BoolProperty(name='Sync V to U', default=True)
 	uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), description=get_props(TF_uroughness, 'description'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), update=uroughness_update)
 
 	# helper property
@@ -2379,11 +2387,24 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 				
 			tex_name = tex_node.export_texture(make_texture)
 			
-			roughness_params = ParamSet() \
-				.add_texture('uroughness', tex_name)
+			if self.sync_vroughness:
+				print("Syncing V-Roughness: ")
+				roughness_params = ParamSet() \
+					.add_texture('uroughness', tex_name) \
+					.add_texture('vroughness', tex_name)
+			else:
+				roughness_params = ParamSet() \
+					.add_texture('uroughness', tex_name)
+				
 		else:
-			roughness_params = ParamSet() \
-				.add_float('uroughness', self.uroughness)
+			if self.sync_vroughness:
+				print("Syncing V-Roughness: ")
+				roughness_params = ParamSet() \
+					.add_float('uroughness', self.uroughness) \
+					.add_float('vroughness', self.uroughness)
+			else:
+				roughness_params = ParamSet() \
+					.add_float('uroughness', self.uroughness)
 		
 		return roughness_params
 
@@ -2397,7 +2418,6 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	def vroughness_update(self, context):
 		pass
 	
-	sync_vroughness = bpy.props.BoolProperty(name='Sync V', default=True)
 	vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'), description=get_props(TF_vroughness, 'description'), default=get_props(TF_vroughness, 'default'), subtype=get_props(TF_vroughness, 'subtype'), min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'), soft_min=get_props(TF_vroughness, 'soft_min'), soft_max=get_props(TF_vroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), update=vroughness_update)
 
 	# helper property
