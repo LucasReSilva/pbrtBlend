@@ -62,7 +62,6 @@ def add_nodetype(layout, type):
 
 def get_socket_paramsets(sockets, make_texture):
 	params = ParamSet()
-	store_urougness = 0.0
 	for socket in sockets:
 		if not hasattr(socket, 'get_paramset'):
 			print('No get_paramset() for socket %s' % socket.bl_idname)
