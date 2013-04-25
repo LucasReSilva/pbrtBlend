@@ -72,7 +72,7 @@ class luxrender_hair(declarative_property_group):
 			'attr': 'hair_size',
 			'name': 'Hair Size',
 			'description': 'Thickness of hair',
-			'default': 0.00005,
+			'default': 0.001,
 			'min': 0.000001,
 			'soft_min': 0.000001,
 			'max': 1000.0,
