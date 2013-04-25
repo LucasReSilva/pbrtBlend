@@ -51,7 +51,7 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 # Exporter Property Groups need to be imported to ensure initialisation
 from ..properties import (
 	accelerator, camera, engine, filter, integrator, ior_data, lamp, lampspectrum_data,
-	material, mesh, object as prop_object, particles, rendermode, sampler, texture, world
+	material, node_material, node_texture, node_spectrum, node_fresnel, node_utilities, mesh, object as prop_object, particles, rendermode, sampler, texture, world
 )
 
 # Exporter Interface Panels need to be imported to ensure initialisation
@@ -96,6 +96,9 @@ _register_elm(bl_ui.properties_scene.SCENE_PT_keying_sets)
 _register_elm(bl_ui.properties_scene.SCENE_PT_keying_set_paths)
 _register_elm(bl_ui.properties_scene.SCENE_PT_unit)
 _register_elm(bl_ui.properties_scene.SCENE_PT_color_management)
+
+### Nodes related stuff
+_register_elm(bpy.types.NODE_MT_add.append(node_material.draw_add_menu))
 
 if bpy.app.version > (2, 65, 8):
 	_register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_world)

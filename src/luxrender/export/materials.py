@@ -32,6 +32,7 @@ from extensions_framework import util as efutil
 
 from ..export import ParamSet
 from ..outputs import LuxLog, LuxManager
+from ..properties import find_node
 
 class TextureCounter(object):
 	stack = []
@@ -156,7 +157,30 @@ def get_instance_materials(ob):
 	return obmats
 
 def get_material_volume_defs(m):
-	return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
+
+	if m.luxrender_material.nodetree:
+		outputNode = find_node(m, 'luxrender_material_output_node')
+		tree_name = m.luxrender_material.nodetree
+		
+		if outputNode is None:
+			print('Node tree is assigned, but does not contain an output node')
+			return ""
+
+		int_vol_socket = outputNode.inputs[1]
+		if int_vol_socket.is_linked:
+			int_vol_node = int_vol_socket.links[0].from_node
+		
+		ext_vol_socket = outputNode.inputs[2]
+		if ext_vol_socket.is_linked:
+			ext_vol_node = ext_vol_socket.links[0].from_node
+
+
+		int_vol_name = '%s::%s' % (tree_name, int_vol_node.name) if int_vol_socket.is_linked else ""
+		ext_vol_name = '%s::%s' % (tree_name, ext_vol_node.name) if ext_vol_socket.is_linked else ""
+
+		return int_vol_name, ext_vol_name
+	else:
+		return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
 
 def get_preview_flip(m):
 	return m.luxrender_material.mat_preview_flip_xz

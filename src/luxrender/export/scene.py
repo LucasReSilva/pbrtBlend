@@ -296,5 +296,7 @@ class SceneExporter(object):
 		
 		except Exception as err:
 			self.report({'ERROR'}, 'Export aborted: %s' % err)
+			import traceback
+			traceback.print_exc()
 			if scene.luxrender_testing.re_raise: raise err
 			return {'CANCELLED'}
