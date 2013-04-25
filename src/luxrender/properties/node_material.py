@@ -71,10 +71,7 @@ def get_socket_paramsets(sockets, make_texture):
 			print('Disabled socket %s will not be exported' % socket.bl_idname)
 			continue
 		if hasattr(socket, 'uroughness'):
-			if socket.sync_vroughness:
-				socket.name = 'Roughness'
-			else:
-				socket.name = 'U-Roughness'
+			socket.name = 'Roughness' if socket.sync_vroughness else 'U-Roughness'
 
 		params.update( socket.get_paramset(make_texture) )
 	return params
