@@ -2431,7 +2431,6 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
 	
 	def draw(self, context, layout, node):
 		layout.prop(self, 'vroughness', text=self.name)
-		layout.active = node.use_anisotropy
 	
 	def draw_color(self, context, node):
 		return float_socket_color
