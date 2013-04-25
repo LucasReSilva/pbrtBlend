@@ -98,7 +98,7 @@ _register_elm(bl_ui.properties_scene.SCENE_PT_unit)
 _register_elm(bl_ui.properties_scene.SCENE_PT_color_management)
 
 ### Nodes related stuff
-_register_elm(bpy.types.NODE_MT_add.append(node_material.draw_add_menu))
+_register_elm(bpy.types.NODE_MT_add.append(node_material.luxrender_mat_node_editor.draw_add_menu))
 
 _register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_world)
 

@@ -73,21 +73,6 @@ def get_socket_paramsets(sockets, make_texture):
 		params.update( socket.get_paramset(make_texture) )
 	return params
 
-#Create the mainmenu for the add-node menu
-def draw_add_menu(self, context):
-	if context.space_data.tree_type == 'luxrender_material_nodes':
-		layout = self.layout
-		layout.label('LuxRender Node Types')
-		layout.menu("Lux_NODE_inputs")
-		layout.menu("Lux_NODE_outputs")
-		layout.menu("Lux_NODE_materials")
-		layout.menu("Lux_NODE_textures")
-#		layout.menu("Lux_NODE_spectra")
-		layout.menu("Lux_NODE_fresnel")
-		layout.menu("Lux_NODE_utilities")
-		layout.menu("Lux_NODE_volumes")
-		layout.menu("Lux_NODE_lights")
-
 #Create the submenus for the add-node menu
 @LuxRenderAddon.addon_register_class
 class lux_node_Materials_Menu(bpy.types.Menu):
@@ -236,6 +221,20 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		#			return bpy.data.node_groups[la.luxrender_lamp.nodetree], la, la
 		return (None, None, None)
 
+	def draw_add_menu(self, context):
+		if context.space_data.tree_type == 'luxrender_material_nodes':
+			layout = self.layout
+			layout.label('LuxRender Node Types')
+			layout.menu("Lux_NODE_inputs")
+			layout.menu("Lux_NODE_outputs")
+			layout.menu("Lux_NODE_materials")
+			layout.menu("Lux_NODE_textures")
+#			layout.menu("Lux_NODE_spectra")
+			layout.menu("Lux_NODE_fresnel")
+			layout.menu("Lux_NODE_utilities")
+			layout.menu("Lux_NODE_volumes")
+			layout.menu("Lux_NODE_lights")
+	
 	# This block updates the preview, when socket links change
 	def update(self):
 		self.refresh = True
