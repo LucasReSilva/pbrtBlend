@@ -41,13 +41,6 @@ class camera(camera_panel):
 	display_property_groups = [
 		( ('camera',), 'luxrender_camera' )
 	]
-	if bpy.app.version < (2, 63, 5 ):
-		def draw(self, context):
-			if context.camera.type == 'PERSP':
-				row = self.layout.row()
-				row.prop(context.camera.luxrender_camera, 'type')
-	
-			super().draw(context)
 
 @LuxRenderAddon.addon_register_class
 class film(camera_panel):

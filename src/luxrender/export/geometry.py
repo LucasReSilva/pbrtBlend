@@ -175,7 +175,7 @@ class GeometryExporter(object):
 			
 			# collate faces by mat index
 			ffaces_mats = {}
-			mesh_faces = mesh.tessfaces if bpy.app.version > (2, 62, 1 ) else mesh.faces # bmesh
+			mesh_faces = mesh.tessfaces
 			for f in mesh_faces:
 				mi = f.material_index
 				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
@@ -225,14 +225,14 @@ class GeometryExporter(object):
 						
 						GeometryExporter.NewExportedObjects.add(obj)
 						
-						uv_textures = mesh.tessface_uv_textures if bpy.app.version > (2, 62, 0 ) else mesh.uv_textures # bmesh
+						uv_textures = mesh.tessface_uv_textures
 						if len(uv_textures) > 0:
 							if mesh.uv_textures.active and uv_textures.active.data:
 								uv_layer = uv_textures.active.data
 						else:
 							uv_layer = None
 
-						vertex_color = 	mesh.tessface_vertex_colors.active if bpy.app.version > (2, 62, 0 ) else mesh.vertex_colors.active # bmesh
+						vertex_color = 	mesh.tessface_vertex_colors.active
 						if vertex_color:
 							vertex_color_layer = vertex_color.data
 						else:
@@ -450,7 +450,7 @@ class GeometryExporter(object):
 			
 			# collate faces by mat index
 			ffaces_mats = {}
-			mesh_faces = mesh.tessfaces if bpy.app.version > (2, 62, 1 ) else mesh.faces # bmesh
+			mesh_faces = mesh.tessfaces
 			for f in mesh_faces:
 				mi = f.material_index
 				if mi not in ffaces_mats.keys(): ffaces_mats[mi] = []
@@ -480,7 +480,7 @@ class GeometryExporter(object):
 					if self.visibility_scene.luxrender_testing.object_analysis: print('  -> Material index: %d' % i)
 					if self.visibility_scene.luxrender_testing.object_analysis: print('  -> derived mesh name: %s' % mesh_name)
 					
-					uv_textures = mesh.tessface_uv_textures if bpy.app.version > (2, 62, 0 ) else mesh.uv_textures # bmesh
+					uv_textures = mesh.tessface_uv_textures
 					if len(uv_textures) > 0:
 						if uv_textures.active and uv_textures.active.data:
 							uv_layer = uv_textures.active.data
@@ -863,8 +863,8 @@ class GeometryExporter(object):
 			uvflag = 0                      
 			
 			mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
-			uv_textures = mesh.tessface_uv_textures if bpy.app.version > (2, 62, 0 ) else mesh.uv_textures # bmesh
-			vertex_color =  mesh.tessface_vertex_colors if bpy.app.version > (2, 62, 0 ) else mesh.vertex_colors # bmesh
+			uv_textures = mesh.tessface_uv_textures
+			vertex_color =  mesh.tessface_vertex_colors
 
 			if psys.settings.luxrender_hair.export_color == 'vertex_color':
 				if vertex_color.active and vertex_color.active.data:

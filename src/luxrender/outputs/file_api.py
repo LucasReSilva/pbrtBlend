@@ -183,12 +183,7 @@ class Custom_Context(object):
 		self._api('ObjectInstance ', [name, []])
 	
 	def portalInstance(self, name):
-		# Backwards compatibility
-		if LUXRENDER_VERSION < '0.8':
-			LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
-			self._api('ObjectInstance ', [name, []])
-		else:
-			self._api('PortalInstance ', [name, []])
+		self._api('PortalInstance ', [name, []])
 	
 	def renderer(self, *args):
 		self._api('Renderer', args)

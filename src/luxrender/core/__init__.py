@@ -100,8 +100,7 @@ _register_elm(bl_ui.properties_scene.SCENE_PT_color_management)
 ### Nodes related stuff
 _register_elm(bpy.types.NODE_MT_add.append(node_material.draw_add_menu))
 
-if bpy.app.version > (2, 65, 8):
-	_register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_world)
+_register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_world)
 
 _register_elm(bl_ui.properties_scene.SCENE_PT_custom_props)
 
@@ -312,12 +311,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					self.render_preview(scene)
 					return
 
-				if bpy.app.version < (2, 63, 19 ):
-					if scene.render.use_color_management == False:
-						LuxLog('WARNING: Colour Management is switched off, render results may look too dark.')
-				else:
-					if scene.display_settings.display_device != "sRGB":
-						LuxLog('WARNING: Colour Management not set to sRGB, render results may look too dark.')
+				if scene.display_settings.display_device != "sRGB":
+					LuxLog('WARNING: Colour Management not set to sRGB, render results may look too dark.')
 				
 				api_type, write_files = self.set_export_path(scene)
 				

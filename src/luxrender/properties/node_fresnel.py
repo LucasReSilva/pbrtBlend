@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Jens Verwiebe, Jason Clarke
+# Jens Verwiebe, Jason Clarke, Asbjørn Heid
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License

@@ -791,21 +791,19 @@ class luxrender_film(declarative_property_group):
 		params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
 		
 		# Camera Response Function
-		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf == 'file':
-			if scene.camera.library is not None:
-				local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
-			else:
-				local_crf_filepath = self.luxrender_colorspace.crf_file
-			local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
-			if scene.luxrender_engine.allow_file_embed():
-				from ..util import bencode_file2string
-				params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
-				encoded_data = bencode_file2string(local_crf_filepath)
-				params.add_string('cameraresponse_data', encoded_data.splitlines() )
-			else:
-				params.add_string('cameraresponse', local_crf_filepath)
-		if LUXRENDER_VERSION >= '0.8' and self.luxrender_colorspace.use_crf == 'preset':
-			params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
+		if scene.camera.library is not None:
+			local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
+		else:
+			local_crf_filepath = self.luxrender_colorspace.crf_file
+		local_crf_filepath = efutil.filesystem_path( local_crf_filepath )
+		if scene.luxrender_engine.allow_file_embed():
+			from ..util import bencode_file2string
+			params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
+			encoded_data = bencode_file2string(local_crf_filepath)
+			params.add_string('cameraresponse_data', encoded_data.splitlines() )
+		else:
+			params.add_string('cameraresponse', local_crf_filepath)
+		params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
 		
 		# Output types
 		params.add_string('filename', get_output_filename(scene))
@@ -989,15 +987,11 @@ class luxrender_colorspace(declarative_property_group):
 		
 		'gamma_label',
 		'gamma',
-	]
-	
-	if LUXRENDER_VERSION >= '0.8':
-		controls.extend([
-			'crf_label',
-			'use_crf',
-			'crf_preset_menu',
-			'crf_file'
-		])
+		'crf_label',
+		'use_crf',
+		'crf_preset_menu',
+		'crf_file'
+		]
 	
 	visibility = {
 		'preset_name':		{ 'preset': True },
