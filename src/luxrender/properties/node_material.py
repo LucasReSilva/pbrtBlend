@@ -67,8 +67,8 @@ def get_socket_paramsets(sockets, make_texture):
 		if not hasattr(socket, 'get_paramset'):
 			print('No get_paramset() for socket %s' % socket.bl_idname)
 			continue
-		if socket.hide:
-			print('Hidden socket %s will not be exported' % socket.bl_idname)
+		if not socket.enabled:
+			print('Disabled socket %s will not be exported' % socket.bl_idname)
 			continue
 		if hasattr(socket, 'uroughness'):
 			store_urougness = socket.uroughness
@@ -472,8 +472,8 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		self.inputs['Specular Color'].hide = self.use_ior
-		self.inputs['IOR'].hide = not self.use_ior
+		self.inputs['Specular Color'].enabled = not self.use_ior
+		self.inputs['IOR'].enabled =  self.use_ior
 	
 	def change_use_anistropy(self, context):
 		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
@@ -487,7 +487,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
-		self.inputs['IOR'].hide = True # initial state is hidden
+		self.inputs['IOR'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
@@ -521,8 +521,8 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		self.inputs['Specular Color'].hide = self.use_ior
-		self.inputs['IOR'].hide = not self.use_ior
+		self.inputs['Specular Color'].enabled = not self.use_ior
+		self.inputs['IOR'].enabled = self.use_ior
 	
 	def change_use_anistropy(self, context):
 		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
@@ -535,7 +535,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs.new('NodeSocketShader', 'Base Material')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
-		self.inputs['IOR'].hide = True # initial state is hidden
+		self.inputs['IOR'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
@@ -579,8 +579,8 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	
 	def change_use_ior(self, context):
 		## Specular/IOR representation switches
-		self.inputs['Specular Color'].hide = self.use_ior
-		self.inputs['IOR'].hide = not self.use_ior
+		self.inputs['Specular Color'].enabled = not self.use_ior
+		self.inputs['IOR'].enabled = self.use_ior
 
 	def change_use_anistropy(self, context):
 		self.inputs['V-Roughness'].sync_vroughness = not self.use_anisotropy
@@ -596,7 +596,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
-		self.inputs['IOR'].hide = True # initial state is hidden
+		self.inputs['IOR'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
