@@ -70,6 +70,12 @@ def get_socket_paramsets(sockets, make_texture):
 		if not socket.enabled:
 			print('Disabled socket %s will not be exported' % socket.bl_idname)
 			continue
+		if hasattr(socket, 'uroughness'):
+			if socket.sync_vroughness:
+				socket.name = 'Roughness'
+			else:
+				socket.name = 'U-Roughness'
+
 		params.update( socket.get_paramset(make_texture) )
 	return params
 
@@ -2370,9 +2376,7 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
 	default_value = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'), default=get_props(TF_uroughness, 'default'), subtype=get_props(TF_uroughness, 'subtype'), min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'), soft_min=get_props(TF_uroughness, 'soft_min'), soft_max=get_props(TF_uroughness, 'soft_max'), precision=get_props(TF_uroughness, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node):
-		if node.use_anisotropy: name = 'U-Roughness'
-		else: name = 'Roughness'
-		layout.prop(self, 'uroughness', text=name)
+		layout.prop(self, 'uroughness', text=self.name)
 		
 	def draw_color(self, context, node):
 		return float_socket_color
