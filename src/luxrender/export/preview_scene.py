@@ -109,14 +109,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	if tex != None:
 		film_params.add_float('haltthreshold', 0.999)	# testcommit to reduce texture flat rendertimes
 
-	# workaround for too dark texture preview
-	# remove when solved in blender colormanagement
-	if tex != None and bpy.app.version > (2, 64, 4) and bpy.app.version < (2, 65, 8):
-		film_params.add_float('gamma', 2.2)
-	else:
-		film_params.add_float('gamma', 1.0)
-	if bpy.app.version > (2, 64, 8):
-		film_params.add_float('linear_exposure', 1.25)
+	film_params.add_float('gamma', 1.0)
+	film_params.add_float('linear_exposure', 1.25)
 
 	film_params \
 		.add_bool('write_exr', False) \
