@@ -588,16 +588,9 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 		self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
 	
-	def change_two_sided(self, context):
-		self.inputs['Backface Specular Color'].enabled = self.use_two_sided
-	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set Specularity by IOR', default=False, update=change_use_ior)
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False, update=change_use_anistropy)
-	
-	use_two_sided = bpy.props.BoolProperty(name='Two_Sided', description='Enable surface layer multibounce', default=False, update=change_two_sided)
-	backface_use_ior = bpy.props.BoolProperty(name='Backface Use IOR', description='Set Specularity by IOR', default=False)
-	backface_use_anisotropy = bpy.props.BoolProperty(name='Backface Anisotropic Roughness', description='Anisotropic Roughness')
 	
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
@@ -611,8 +604,6 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
-		self.inputs.new('luxrender_TC_backface_Ks_socket', 'Backface Specular Color')
-		self.inputs['Backface Specular Color'].enabled = False # initial state is disabled
 		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
@@ -620,10 +611,6 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		layout.prop(self, 'multibounce')
 		layout.prop(self, 'use_ior')
 		layout.prop(self, 'use_anisotropy')
-		layout.prop(self, 'use_two_sided')
-		if self.use_two_sided:
-			layout.prop(self, 'backface_use_ior')
-			layout.prop(self, 'backface_use_anisotropy')
 
 	def export_material(self, make_material, make_texture):
 		mat_type = 'glossytranslucent'
