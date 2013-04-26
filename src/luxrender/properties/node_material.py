@@ -239,7 +239,9 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 		self.refresh = True
 	
 	def acknowledge_connection(self, context):
-		self.refresh = False
+		while self.refresh == True:
+			self.refresh = False
+			break
 	
 	refresh = bpy.props.BoolProperty(name='Links Changed', default=False, update=acknowledge_connection)
 
