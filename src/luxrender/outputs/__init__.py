@@ -49,6 +49,7 @@ from ..outputs import lbm2_api
 from ..outputs import lxm_api
 # Access lux only through pylux bindings
 from ..outputs import pure_api
+from ..properties import ExportedVolumes
 
 class LuxAPIStats(TimerThread):
 	'''
@@ -101,6 +102,7 @@ class LuxFilmDisplay(TimerThread):
 				
 				if render_end:
 					LuxLog('Final render result (%ix%i%s)' % (xres,yres,p_stats))
+					ExportedVolumes.reset_vol_list()
 				else:
 					LuxLog('Updating render result (%ix%i%s)' % (xres,yres,p_stats))
 				

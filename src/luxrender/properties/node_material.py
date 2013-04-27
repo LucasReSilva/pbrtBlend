@@ -31,7 +31,8 @@ import bpy
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
-from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export_material, check_node_export_texture, check_node_get_paramset)
+from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export_material, check_node_export_texture, check_node_get_paramset, ExportedVolumes)
+
 from ..properties.texture import (
 	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
@@ -1187,16 +1188,24 @@ class luxrender_material_output_node(luxrender_node):
 			nonlocal lux_context
 			vol_name = '%s::%s' % (tree_name, vol_name)
 			volume_name = vol_name
-			print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
 			
-			lux_context.makeNamedVolume(vol_name, vol_type, vol_params)
+			## Here we look for redundant volume definitions caused by material used more than once
+			if mode=='indirect':
+				if vol_name not in ExportedVolumes.vol_names: # was not yet exported
+					print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
+					
+					lux_context.makeNamedVolume(vol_name, vol_type, vol_params)
+					ExportedVolumes.list_exported_volumes(vol_name) # mark as exported
+					
+			else: # direct
+				lux_context.makeNamedVolume(vol_name, vol_type, vol_params)
 				
 			return volume_name
 		if int_vol_socket.is_linked:
 			int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 		if ext_vol_socket.is_linked:
 			ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
-
+		
 		return set()
 
 # Custom socket types, lookup parameters here:

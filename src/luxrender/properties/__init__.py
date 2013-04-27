@@ -38,6 +38,19 @@ class luxrender_texture_node(luxrender_node):
 class luxrender_material_node(luxrender_node):
 	pass
 
+## This functions eliminates redundant volume definitions
+class ExportedVolumes(object):
+	vol_names = []
+	
+	@staticmethod
+	def list_exported_volumes(name):
+		if name not in ExportedVolumes.vol_names:
+			ExportedVolumes.vol_names.append(name)
+	
+	@staticmethod
+	def reset_vol_list():
+		ExportedVolumes.vol_names = []
+
 
 def find_node(material, nodetype):
 	#print('find_node: ', material, nodetype)
