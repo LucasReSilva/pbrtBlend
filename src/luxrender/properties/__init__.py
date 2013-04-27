@@ -38,7 +38,7 @@ class luxrender_texture_node(luxrender_node):
 class luxrender_material_node(luxrender_node):
 	pass
 
-## This functions eliminates redundant volume definitions
+## For eliminating redundant volume definitions
 class ExportedVolumes(object):
 	vol_names = []
 	
