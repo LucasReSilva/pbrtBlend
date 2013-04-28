@@ -2072,7 +2072,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_amount_socket(bpy.types.NodeSocket):
 	# Description string
-	'''Bump socket'''
+	'''Amount socket'''
 	# Optional identifier string. If not explicitly defined, the python class name is used.
 	bl_idname = 'luxrender_TF_amount_socket'
 	# Label for nice name display
