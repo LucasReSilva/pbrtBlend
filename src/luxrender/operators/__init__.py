@@ -70,13 +70,34 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 		## Get the mat type set in editor
 		editor_type = 'luxrender_material_%s_node' % (context.material.luxrender_material.type)
 		
+		def get_vol_type(name):
+			for vol in context.scene.luxrender_volumes.volumes:
+				if vol.name == name:
+					volume_type = 'luxrender_volume_%s_node' % (vol.type)
+			return volume_type
+
 		if idtype == 'material':
 			shader =  nt.nodes.new(editor_type) # create also matnode from editor type
 			shader.location = 0,470
 			sh_out = nt.nodes.new('luxrender_material_output_node')
-			sh_out.location = 500,400
-		
+			sh_out.location = 500,400		
 			nt.links.new(shader.outputs[0],sh_out.inputs[0])
+			
+		## Get the volumes
+		if context.material.luxrender_material.Interior_volume != '':
+			vol_node = get_vol_type(context.material.luxrender_material.Interior_volume)
+			print("-----", vol_node)
+			volume_int =  nt.nodes.new(vol_node)
+			volume_int.location = 0,200
+			nt.links.new(volume_int.outputs[0],sh_out.inputs[1])
+		
+		if context.material.luxrender_material.Exterior_volume != '':
+			vol_node = get_vol_type(context.material.luxrender_material.Exterior_volume)
+			print("-----", vol_node)
+			volume_ext =  nt.nodes.new(vol_node)
+			volume_ext.location = 0,-50
+			nt.links.new(volume_ext.outputs[0],sh_out.inputs[2])
+					
 		#else:
 		#	nt.nodes.new('OutputLightShaderNode')
 		
