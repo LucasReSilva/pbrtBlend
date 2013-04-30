@@ -67,11 +67,19 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 		nt.use_fake_user = True
 		idblock.luxrender_material.nodetree = nt.name
 
+		## Get the mat type set in editor
+		editor_type = 'luxrender_material_%s_node' % (context.material.luxrender_material.type)
+		
 		if idtype == 'material':
-			nt.nodes.new('luxrender_material_output_node')
+			shader =  nt.nodes.new(editor_type) # create also matnode from editor type
+			shader.location = 0,470
+			sh_out = nt.nodes.new('luxrender_material_output_node')
+			sh_out.location = 500,400
+		
+			nt.links.new(shader.outputs[0],sh_out.inputs[0])
 		#else:
 		#	nt.nodes.new('OutputLightShaderNode')
-
+		
 		return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class
