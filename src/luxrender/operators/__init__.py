@@ -181,8 +181,6 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 			if hasattr(shader, 'metal_nkfile'):
 				shader.metal_nkfile = editor_type.filename
 
-
-
 			## Get the volumes
 					
 			def get_vol_type(name):
