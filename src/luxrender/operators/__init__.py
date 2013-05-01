@@ -151,6 +151,18 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 			if 'Sigma' in shader.inputs:
 				shader.inputs['Sigma'].sigma = editor_type.sigma_floatvalue
 
+			## non-socket parameters ( bool )
+			if hasattr(shader, 'use_ior'):
+				shader.use_ior = editor_type.useior
+			if hasattr(shader, 'multibounce'):
+				shader.multibounce = editor_type.multibounce
+			if hasattr(shader, 'use_anisotropy'):
+				shader.use_anisotropy = editor_type.anisotropic
+			if hasattr(shader, 'dispersion'):
+				shader.dispersion = editor_type.dispersion
+			if hasattr(shader, 'arch'):
+				shader.arch = editor_type.architectural
+				
 
 			## Get the volumes
 					
