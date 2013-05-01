@@ -142,8 +142,8 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 				shader.inputs['Film IOR'].filmindex = editor_type.filmindex_floatvalue
 			if 'Thin film thickness (nm)' in shader.inputs:
 				shader.inputs['Thin film thickness (nm)'].film = editor_type.film_floatvalue
-			if 'IOR' in shader.inputs:
-				shader.inputs['IOR'].index = editor_type.index_floatvalue
+			if 'IOR' in shader.inputs and hasattr(shader.inputs['IOR'], 'index'):
+				shader.inputs['IOR'].index = editor_type.index_floatvalue # not fresnel IOR
 			if 'U-Roughness' in shader.inputs:
 				shader.inputs['U-Roughness'].uroughness = editor_type.uroughness_floatvalue
 			if 'V-Roughness' in shader.inputs:
@@ -162,7 +162,26 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 				shader.dispersion = editor_type.dispersion
 			if hasattr(shader, 'arch'):
 				shader.arch = editor_type.architectural
-				
+			if hasattr(shader, 'advanced'):
+				shader.advanced = editor_type.advanced
+			
+			## non-socket parameters ( other )
+			# velvet
+			if hasattr(shader, 'thickness'):
+				shader.thickness = editor_type.thickness
+			if hasattr(shader, 'p1'):
+				shader.p1 = editor_type.p1
+			if hasattr(shader, 'p2'):
+				shader.p2 = editor_type.p2
+			if hasattr(shader, 'p3'):
+				shader.p3 = editor_type.p3
+			# metal 1
+			if hasattr(shader, 'metal_preset'):
+				shader.metal_preset = editor_type.name
+			if hasattr(shader, 'metal_nkfile'):
+				shader.metal_nkfile = editor_type.filename
+
+
 
 			## Get the volumes
 					
