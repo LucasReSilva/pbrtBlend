@@ -134,8 +134,8 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 				shader.inputs['Backface Specular Color'].color = editor_type.backface_Ks_color
 			
 			## Get material settings ( float )
-			if 'Mix amount' in shader.inputs:
-				shader.inputs['Mix amount'].amount = editor_type.amount_floatvalue
+			if 'Mix Amount' in shader.inputs:
+				shader.inputs['Mix Amount'].amount = editor_type.amount_floatvalue
 			if 'Cauchy B' in shader.inputs:
 				shader.inputs['Cauchy B'].cauchyb = editor_type.cauchyb_floatvalue
 			if 'Film IOR' in shader.inputs:
