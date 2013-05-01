@@ -98,7 +98,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 
 		if idtype == 'material':
 			shader =  nt.nodes.new(node_type) # create also matnode from editor type
-			shader.location = 0,470
+			shader.location = 0,570
 			sh_out = nt.nodes.new('luxrender_material_output_node')
 			sh_out.location = 500,400
 			nt.links.new(shader.outputs[0],sh_out.inputs[0])
