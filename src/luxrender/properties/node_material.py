@@ -2263,7 +2263,7 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
-	'''Thin film IOR socket'''
+	'''Thin film thickness socket'''
 	bl_idname = 'luxrender_TF_film_thick_socket'
 	bl_label = 'Thin Film thickness socket'
 	

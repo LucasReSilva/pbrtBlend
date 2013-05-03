@@ -140,8 +140,8 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 				shader.inputs['Cauchy B'].cauchyb = editor_type.cauchyb_floatvalue
 			if 'Film IOR' in shader.inputs:
 				shader.inputs['Film IOR'].filmindex = editor_type.filmindex_floatvalue
-			if 'Thin film thickness (nm)' in shader.inputs:
-				shader.inputs['Thin film thickness (nm)'].film = editor_type.film_floatvalue
+			if 'Film Thickness (nm)' in shader.inputs:
+				shader.inputs['Film Thickness (nm)'].film = editor_type.film_floatvalue
 			if 'IOR' in shader.inputs and hasattr(shader.inputs['IOR'], 'index'):
 				shader.inputs['IOR'].index = editor_type.index_floatvalue # not fresnel IOR
 			if 'U-Roughness' in shader.inputs:
