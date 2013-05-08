@@ -2356,11 +2356,11 @@ class luxrender_tex_fresnelname(declarative_property_group):
 			'description': 'Metal type to use, select "Use NK file" to input external metal data',
 			'items': [
 				('nk', 'Use NK file', 'nk'),
-				('amorphous carbon', 'amorphous carbon', 'amorphous carbon'),
-				('copper', 'copper', 'copper'),
-				('gold', 'gold', 'gold'),
-				('silver', 'silver', 'silver'),
-				('aluminium', 'aluminium', 'aluminium')
+				('amorphous carbon', 'Amorphous carbon', 'amorphous carbon'),
+				('copper', 'Copper', 'copper'),
+				('gold', 'Gold', 'gold'),
+				('silver', 'Silver', 'silver'),
+				('aluminium', 'Aluminium', 'aluminium')
 			],
 			'default': 'aluminium',
 			'save_in_preset': True
