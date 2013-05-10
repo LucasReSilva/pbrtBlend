@@ -98,7 +98,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 
 		if idtype == 'material':
 			shader =  nt.nodes.new(node_type) # create also matnode from editor type
-			shader.location = 0,570
+			shader.location = 200,570
 			sh_out = nt.nodes.new('luxrender_material_output_node')
 			sh_out.location = 500,400
 			nt.links.new(shader.outputs[0],sh_out.inputs[0])
@@ -192,14 +192,14 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 			if ctx_mat.Interior_volume != '':
 				vol_node = get_vol_type(ctx_mat.Interior_volume)
 				volume_int =  nt.nodes.new(vol_node)
-				volume_int.location = 0,200
+				volume_int.location = 200,200
 				nt.links.new(volume_int.outputs[0],sh_out.inputs[1])
 				volume_int.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Interior_volume].fresnel_fresnelvalue
 
 			if ctx_mat.Exterior_volume != '':
 				vol_node = get_vol_type(ctx_mat.Exterior_volume)
 				volume_ext =  nt.nodes.new(vol_node)
-				volume_ext.location = 0,-50
+				volume_ext.location = 200,-50
 				nt.links.new(volume_ext.outputs[0],sh_out.inputs[2])
 				volume_ext.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Exterior_volume].fresnel_fresnelvalue
 					
