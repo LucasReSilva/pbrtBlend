@@ -2200,10 +2200,7 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 	default_value = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'), default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'), unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'), max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'), soft_max=get_props(TF_bumpmap, 'soft_max'), precision=get_props(TF_bumpmap, 'precision'), get=default_value_get, set=default_value_set)
 	
 	def draw(self, context, layout, node, text):
-		if self.is_linked:
-			layout.label(text=self.name)
-		else:
-			layout.label(text=self.name)
+		layout.label(text=self.name)
 	
 	def draw_color(self, context, node):
 		return float_socket_color
