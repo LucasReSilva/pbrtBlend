@@ -723,10 +723,7 @@ class luxrender_coodinate_socket(bpy.types.NodeSocket):
 	
 	# Optional function for drawing the socket input value
 	def draw(self, context, layout, node, text):
-		if self.is_linked:
-			layout.label(text=self.name)
-		else:
-			layout.label(text=self.name)
+		layout.label(text=self.name)
 	
 	# Socket color
 	def draw_color(self, context, node):
@@ -740,10 +737,7 @@ class luxrender_transform_socket(bpy.types.NodeSocket):
 	bl_label = 'Transform socket'
 	
 	def draw(self, context, layout, node, text):
-		if self.is_linked:
-			layout.label(text=self.name)
-		else:
-			layout.label(text=self.name)
+		layout.label(text=self.name)
 	
 	def draw_color(self, context, node):
 		return (0.65, 0.55, 0.75, 1.0)
