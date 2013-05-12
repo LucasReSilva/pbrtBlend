@@ -75,7 +75,6 @@ class layers(render_panel):
 	'''
 	
 	bl_label = 'Layers'
-	bl_options = {'DEFAULT_CLOSED'}
 	bl_context = "render_layer"
 	
 	def draw(self, context): 
