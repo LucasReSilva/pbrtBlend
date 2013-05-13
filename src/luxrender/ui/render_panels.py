@@ -68,16 +68,16 @@ class render_settings(render_panel):
 @LuxRenderAddon.addon_register_class
 class translator(render_panel):
 	'''
-		Translator settings UI Panel
-		'''
+	Translator settings UI Panel
+	'''
 	
 	bl_label = 'LuxRender Translator'
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
-							   ( ('scene',), 'luxrender_engine' ),
-							   ( ('scene',), 'luxrender_testing' )
-							   ]
+	   ( ('scene',), 'luxrender_engine' ),
+	   ( ('scene',), 'luxrender_testing' )
+	   ]
 	
 	def draw(self, context):
 		super().draw(context)
@@ -112,14 +112,14 @@ class networking(render_panel):
 @LuxRenderAddon.addon_register_class
 class postprocessing(render_panel):
 	'''
-		Post Pro UI panel
-		'''
+	Post Pro UI panel
+	'''
 	
 	bl_label = 'Post Processing'
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	
-	#We make our own post-pro panel so we can have one without BI's option here. Theoretically, if Lux gains the ability to do lens effects through the command line/API, we could add that here
+	#We make our own post-pro panel so we can have one without BI's options here. Theoretically, if Lux gains the ability to do lens effects through the command line/API, we could add that here
 	
 	def draw(self, context):
 		layout = self.layout
@@ -137,8 +137,8 @@ class postprocessing(render_panel):
 @LuxRenderAddon.addon_register_class
 class opengl_render(render_panel):
 	'''
-		OpenGL Render UI panel
-		'''
+	OpenGL Render UI panel
+	'''
 	#Copy of Cycles' OpenGL Render panel, allows configuring of GLSL-renderer's AA and alpha settings without switching back to BI
 	
 	bl_label = "OpenGL Render"
@@ -172,7 +172,7 @@ class layer_selector(render_panel):
 	bl_context = "render_layer"
 	
 	def draw(self, context):
-		#Add in Blender's layer chooser, this taken from Blender's startup/properties_render_layer.py
+		#Add in Blender's layer chooser, this is taken from Blender's startup/properties_render_layer.py
 		layout = self.layout
 		
 		scene = context.scene
@@ -202,7 +202,7 @@ class layers(render_panel):
 	bl_context = "render_layer"
 	
 	def draw(self, context):
-		#Add in Blender's layer stuff, this taken from Blender's startup/properties_render_layer.py
+		#Add in Blender's layer stuff, this is taken from Blender's startup/properties_render_layer.py
 		layout = self.layout
 		
 		scene = context.scene
@@ -232,7 +232,7 @@ class passes(render_panel):
 							   ]
 	
 	def draw(self, context):
-		#Add in the relevant bits from Blender's passes stuff, this taken from Blender's startup/properties_render_layer.py
+		#Add in the relevant bits from Blender's passes stuff, this is taken from Blender's startup/properties_render_layer.py
 		layout = self.layout
 		
 		scene = context.scene
@@ -256,7 +256,6 @@ class passes(render_panel):
 			subrow=row.row()
 			subrow.enabled = lg.lg_enabled
 			subrow.prop(lg, 'name', text="")
-			# Here we draw the currently selected luxrender_volumes_data property group
 			for control in lg.controls:
 				self.draw_column(
 					 control,
