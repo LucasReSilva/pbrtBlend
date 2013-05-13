@@ -89,8 +89,8 @@ class luxrender_mesh(declarative_property_group):
 			'attr': 'mesh_type',
 			'name': 'Export as',
 			'items': [
-				('global', 'Use default setting', 'global'),
-				('native', 'LuxRender mesh', 'native'),
+				('global', 'Use Default Setting', 'global'),
+				('native', 'LuxRender Mesh', 'native'),
 				('binary_ply', 'Binary PLY', 'binary_ply')
 			],
 			'default': 'global'
@@ -110,7 +110,7 @@ class luxrender_mesh(declarative_property_group):
 			'type': 'bool',
 			'attr': 'portal',
 			'name': 'Exit Portal',
-			'description': 'Use this mesh as an exit portal',
+			'description': 'Use this mesh as an exit portal (geometry should be open/planar)',
 			'default': False,
 		},
 		{
@@ -141,15 +141,16 @@ class luxrender_mesh(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'sharpbound',
-			'name': 'Sharpen bounds',
+			'name': 'Sharpen Bounds',
+			'description': 'Perserve hard borders in geometry',
 			'default': False,
 		},
 		{
 			'type': 'bool',
 			'attr': 'splitnormal',
-			'name': 'Keep split edges',
+			'name': 'Keep Split Edges',
 			'default': False,
-			'description': 'Preserves effects of edge-split modifier with smooth-shaded meshes. WARNING: This will cause solid-shaded meshes to rip open!'},
+			'description': 'Preserves effects of split-edges by splitting at breaks in the normal. WARNING: This will cause solid-shaded meshes to rip open!'},
 		{
 			'type': 'int',
 			'attr': 'sublevels',
