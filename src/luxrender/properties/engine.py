@@ -97,22 +97,22 @@ class luxrender_testing(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'clay_render',
-			'name': 'Clay render',
+			'name': 'Clay Render',
 			'description': 'Export all non-glass materials as default "clay"',
 			'default': False
 		},
 		{
 			'type': 'bool',
 			'attr': 'object_analysis',
-			'name': 'Debug: print object analysis',
+			'name': 'Debug: Print Object Analysis',
 			'description': 'Show extra output as objects are processed',
 			'default': False
 		},
 		{
 			'type': 'bool',
 			'attr': 're_raise',
-			'name': 'Debug: show full trace on export error',
-			'description': 'Flash export error messages in UI',
+			'name': 'Debug: Show Error Traceback Messages',
+			'description': 'Show export error messages in the UI as well as the console',
 			'default': False
 		},
 	]
@@ -198,7 +198,7 @@ class luxrender_engine(declarative_property_group):
 			'type': 'bool',
 			'attr': 'render',
 			'name': 'Run Renderer',
-			'description': 'Run Renderer after export',
+			'description': 'Run renderer after export',
 			'default': efutil.find_config_value('luxrender', 'defaults', 'auto_start', True),
 		},
 		{
@@ -224,9 +224,9 @@ class luxrender_engine(declarative_property_group):
 			'description': 'Choose full GUI, console renderer or real-time rendering',
 			'default': 'luxrender',
 			'items': [
-				('luxrender', 'LuxRender GUI', 'luxrender'),
-				('luxconsole', 'LuxConsole', 'luxconsole'),
-				('luxvr', 'LuxVR', 'luxvr'),
+				('luxrender', 'LuxRender GUI', 'Render with the LuxRender GUI application'),
+				('luxconsole', 'LuxConsole', 'Render with LuxConsole and feed the result to the UV/Image Editor'),
+				('luxvr', 'LuxVR', 'Render with the LuxVR realtime preview tool'),
 			],
 			'save_in_preset': True
 		},
@@ -298,8 +298,8 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'fixed_seed',
-			'name': 'Use fixed seeds',
-			'description': 'Use fixed seeds for threads. Helps with keeping noise even for animations',
+			'name': 'Use Fixed Seeds',
+			'description': 'Use fixed seeds for render threads. Helps with keeping noise even for animations',
 			'default': False,
 			'save_in_preset': True
 		},
