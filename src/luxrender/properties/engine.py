@@ -272,8 +272,8 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'mesh_type',
-			'name': 'Default mesh format',
-			'description': 'Sets whether to export scene geometry as PLY files or directly in the LXO file. PLY is faster and recommended',
+			'name': 'Mesh Format',
+			'description': 'Sets whether to export scene geometry as PLY files or directly in the LXO file, PLY is faster and recommended. This can be overridden per mesh from the mesh properties panel',
 			'items': [
 				('native', 'LuxRender mesh', 'native'),
 				('binary_ply', 'Binary PLY', 'binary_ply')
@@ -284,8 +284,8 @@ class luxrender_engine(declarative_property_group):
 		{
 			'type': 'enum',
 			'attr': 'log_verbosity',
-			'name': 'Log verbosity',
-			'description': 'Logging verbosity',
+			'name': 'Log Verbosity',
+			'description': 'Logging verbosity level',
 			'default': 'default',
 			'items': [
 				('verbose', 'Verbose', 'verbose'),
