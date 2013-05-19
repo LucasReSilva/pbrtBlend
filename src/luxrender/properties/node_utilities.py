@@ -154,6 +154,28 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 			constant_params.add_float('value', self.fresnel)
 		return make_texture(self.variant, 'constant', self.name, constant_params)
 
+@LuxRenderAddon.addon_register_class #Drawn in "input" menu, since it does not have any input sockets
+class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
+	'''Glossy exponent node'''
+	bl_idname = 'luxrender_texture_glossyexponent_node'
+	bl_label = 'Glossy Exponent'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+	
+	exponent = bpy.props.FloatProperty(name='Exponent', default=350.0)
+	
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'exponent')
+	
+	def export_texture(self, make_texture):
+		glossyexponent_params = ParamSet()
+		glossyexponent_params.add_float('value', (2.0/(self.exponent+2.0))**0.5)
+		
+		return make_texture('float', 'constant', self.name, glossyexponent_params)
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 	'''Harlequin texture node'''

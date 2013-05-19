@@ -112,6 +112,7 @@ class lux_node_Inputs_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_3d_coordinates_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blackbody_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_gaussian_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_glossyexponent_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_tabulateddata_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_constant_node) #Drawn as "Value", to match similar compositor/cycles node
 		add_nodetype(layout, bpy.types.luxrender_texture_hitpointcolor_node) #These are drawn in the menu under the name "Vertex color/grey/alpha"
