@@ -157,7 +157,9 @@ class ui_luxrender_material_db(luxrender_material_base):
 
 	@classmethod
 	def poll(cls, context):
-		return context.material.luxrender_material.nodetree == '' and context.scene.render.engine == 'LUXRENDER_RENDER'
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
+		return context.material.luxrender_material.nodetree == ''
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
@@ -181,7 +183,9 @@ class ui_luxrender_material_utils(luxrender_material_base):
 
 	@classmethod
 	def poll(cls, context):
-		return context.material.luxrender_material.nodetree == '' and context.scene.render.engine == 'LUXRENDER_RENDER'
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
+		return context.material.luxrender_material.nodetree == ''
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_emission(luxrender_material_base):
@@ -201,7 +205,9 @@ class ui_luxrender_material_emission(luxrender_material_base):
 
 	@classmethod
 	def poll(cls, context):
-		return context.material.luxrender_material.nodetree == '' and context.scene.render.engine == 'LUXRENDER_RENDER'
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
+		return context.material.luxrender_material.nodetree == ''
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_transparency(luxrender_material_base):
@@ -223,7 +229,9 @@ class ui_luxrender_material_transparency(luxrender_material_base):
 	def poll(cls, context):
 		if not hasattr(context.material, 'luxrender_transparency'):
 			return False
-		return super().poll(context) and context.material.luxrender_material.type != 'null' and context.material.luxrender_material.nodetree == '' and context.scene.render.engine == 'LUXRENDER_RENDER'
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
+		return super().poll(context) and context.material.luxrender_material.type != 'null' and context.material.luxrender_material.nodetree == ''
 
 
 @LuxRenderAddon.addon_register_class
@@ -263,6 +271,8 @@ class ui_luxrender_material_coating(luxrender_material_base):
 	def poll(cls, context):
 		if not hasattr(context.material, 'luxrender_coating'):
 			return False
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
 		return super().poll(context) and context.material.luxrender_material.nodetree == ''
 
 @LuxRenderAddon.addon_register_class
@@ -277,7 +287,9 @@ class ui_luxrender_material_node_volume(luxrender_material_base):
 	
 	@classmethod
 	def poll(cls, context):
-		return context.material.luxrender_material.nodetree != '' and context.scene.render.engine == 'LUXRENDER_RENDER'
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
+		return context.material.luxrender_material.nodetree != ''
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_node_emit(luxrender_material_base):
@@ -290,4 +302,6 @@ class ui_luxrender_material_node_emit(luxrender_material_base):
 	
 	@classmethod
 	def poll(cls, context):
-		return context.material.luxrender_material.nodetree != '' and context.scene.render.engine == 'LUXRENDER_RENDER'
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
+		return context.material.luxrender_material.nodetree != ''
