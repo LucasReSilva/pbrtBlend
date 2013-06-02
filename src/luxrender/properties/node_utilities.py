@@ -97,6 +97,34 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 		return make_texture(self.variant, 'add', self.name, addtex_params)
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_bump_map(luxrender_texture_node):
+	'''Bump map texture node'''
+	bl_idname = 'luxrender_texture_bump_map_node'
+	bl_label = 'Bump'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+	
+	bump_height = bpy.props.FloatProperty(name='Bump Height', description='Height of the bump map', default=.001, precision=6, subtype='DISTANCE', unit='LENGTH', step=.001)
+	
+	def init(self, context):
+		self.inputs.new('NodeSocketFloat', 'Bump Value')
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'bump_height')
+	
+	def export_texture(self, make_texture):
+		bumpmap_params = ParamSet() \
+			.add_float('tex1', self.bump_height)
+		
+		tex_node = get_linked_node(self.inputs[0])
+		if tex_node and check_node_export_texture(tex_node):
+			bumpmap_name = tex_node.export_texture(make_texture)
+			bumpmap_params.add_texture("tex2", bumpmap_name)
+		
+		return make_texture('float', 'scale', self.name, bumpmap_params)
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_constant(luxrender_texture_node):
 	'''Constant texture node'''
 	bl_idname = 'luxrender_texture_constant_node'
