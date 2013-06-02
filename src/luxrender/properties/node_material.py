@@ -115,9 +115,9 @@ class lux_node_Inputs_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_glossyexponent_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_tabulateddata_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_constant_node) #Drawn as "Value", to match similar compositor/cycles node
-		add_nodetype(layout, bpy.types.luxrender_texture_hitpointcolor_node) #These are drawn in the menu under the name "Vertex color/grey/alpha"
+		add_nodetype(layout, bpy.types.luxrender_texture_hitpointcolor_node) #These are drawn in the menu under the name "Vertex color/mask"
 		add_nodetype(layout, bpy.types.luxrender_texture_hitpointgrey_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_hitpointalpha_node)
+#		add_nodetype(layout, bpy.types.luxrender_texture_hitpointalpha_node)
 
 
 @LuxRenderAddon.addon_register_class
@@ -488,7 +488,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
 		self.inputs['IOR'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
-		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
@@ -539,7 +539,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
 		self.inputs['IOR'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
-		self.inputs.new('luxrender_TF_d_socket', 'Absorption depth (nm)')
+		self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
@@ -2641,7 +2641,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 class luxrender_TF_d_socket(bpy.types.NodeSocket):
 	'''Absorption depth socket'''
 	bl_idname = 'luxrender_TF_d_socket'
-	bl_label = 'Absorption depth socket'
+	bl_label = 'Absorption Depth socket'
 	
 	# meaningful property
 	def d_update(self, context):

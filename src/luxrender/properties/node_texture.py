@@ -607,30 +607,39 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_hitpointgrey_node'
 	bl_label = 'Vertex Mask'
 	bl_icon = 'TEXTURE'
+	
+	for prop in luxrender_tex_imagemap.properties:
+		if prop['attr'].startswith('channel'):
+			channel_items = prop['items']
+
+	channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='mean')
 
 	def init(self, context):
 		self.outputs.new('NodeSocketFloat', 'Float')
+				
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'channel')
 		
 	def export_texture(self, make_texture):
 		hitpointgrey_params = ParamSet()
 				
 		return make_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
 		
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
-	'''Vertex Alpha texture node'''
-	bl_idname = 'luxrender_texture_hitpointalpha_node'
-	bl_label = 'Vertex Alpha'
-	bl_icon = 'TEXTURE'
+#@LuxRenderAddon.addon_register_class
+#class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
+#	'''Vertex Alpha texture node'''
+#	bl_idname = 'luxrender_texture_hitpointalpha_node'
+#	bl_label = 'Vertex Alpha'
+#	bl_icon = 'TEXTURE'
+#
+#	def init(self, context):
+#		self.outputs.new('NodeSocketFloat', 'Float')
+#		
+#	def export_texture(self, make_texture):
+#		hitpointalpha_params = ParamSet()
+#				
+#		return make_texture('float', 'hitpointalpha', self.name, hitpointalpha_params)
 
-	def init(self, context):
-		self.outputs.new('NodeSocketFloat', 'Float')
-		
-	def export_texture(self, make_texture):
-		hitpointalpha_params = ParamSet()
-				
-		return make_texture('float', 'hitpointalpha', self.name, hitpointalpha_params)
-		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
 	'''Windy texture node'''
