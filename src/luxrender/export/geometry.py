@@ -826,8 +826,14 @@ class GeometryExporter(object):
 			return
 			
 		for mod in obj.modifiers:
-			if mod.type == 'PARTICLE_SYSTEM' and mod.show_render == False:
-				return
+			if mod.type == 'PARTICLE_SYSTEM':
+				if mod.particle_system.name == psys.name:
+					break;
+
+		if not (mod.type == 'PARTICLE_SYSTEM'):
+			return
+		elif not mod.particle_system.name == psys.name or mod.show_render == False:
+			return
 				
 		LuxLog('Exporting Hair system "%s"...' % psys.name)
 
@@ -836,6 +842,12 @@ class GeometryExporter(object):
 		steps = 2**psys.settings.render_step
 		num_parents = len(psys.particles)
 		num_children = len(psys.child_particles)
+		if num_children == 0:
+			start = 0
+		else:
+			# Number of virtual parents reduces the number of exported children
+			num_virtual_parents = math.trunc(0.3 * psys.settings.virtual_parents * psys.settings.child_nbr * num_parents)
+			start = num_parents + num_virtual_parents
 		
 		partsys_name = '%s_%s'%(obj.name, psys.name)
 		det = DupliExportProgressThread()
@@ -861,6 +873,9 @@ class GeometryExporter(object):
 			uv_tex = None
 			colorflag = 0
 			uvflag = 0                      
+			image_width = 0
+			image_height = 0
+			image_pixels = []
 			
 			mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
 			uv_textures = mesh.tessface_uv_textures
@@ -883,12 +898,13 @@ class GeometryExporter(object):
 
 			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
 
-			transform = obj.matrix_world.inverted()         
-			for pindex in range(num_parents + num_children):                        
+			transform = obj.matrix_world.inverted()
+				
+			for pindex in range(start, num_parents + num_children):                        
 				det.exported_objects += 1                               
 				point_count = 0
 				i = 0
-				
+
 				if num_children == 0:
 					i = pindex
 		
@@ -907,7 +923,7 @@ class GeometryExporter(object):
 								uv_co = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
 							uv_coords.append(uv_co)
 
-						if psys.settings.luxrender_hair.export_color == 'uv_texture_map':
+						if psys.settings.luxrender_hair.export_color == 'uv_texture_map' and not len(image_pixels) == 0:
 							if not col:
 								x_co = round(uv_co[0] * (image_width - 1))
 								y_co = round(uv_co[1] * (image_height - 1))
@@ -934,7 +950,7 @@ class GeometryExporter(object):
 				##
 				##File header
 				hair_file.write(b'HAIR')        #magic number
-				hair_file.write(struct.pack('<I', num_parents+num_children)) #total strand count
+				hair_file.write(struct.pack('<I', num_parents+num_children-start)) #total strand count
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
 				hair_file.write(struct.pack('<I', 1+2+16*colorflag+32*uvflag)) #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
