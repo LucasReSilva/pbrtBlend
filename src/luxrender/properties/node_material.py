@@ -1097,7 +1097,7 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
 		heterogeneous_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		heterogeneous_params.add_float('stepsize', self.stepsize)
 		
-		return make_volume(self.name, vol_type, homogeneous_params)
+		return make_volume(self.name, vol_type, heterogeneous_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(luxrender_material_node):
