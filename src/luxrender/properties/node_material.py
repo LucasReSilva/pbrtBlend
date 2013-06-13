@@ -191,6 +191,7 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
+		add_nodetype(layout, bpy.types.luxrender_volume_heterogeneous_node)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
@@ -1065,6 +1066,36 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 		
 		homogeneous_params = ParamSet()
 		homogeneous_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		
+		return make_volume(self.name, vol_type, homogeneous_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
+	'''Heterogeneous volume node'''
+	bl_idname = 'luxrender_volume_heterogeneous_node'
+	bl_label = 'Heterogeneous Volume'
+	bl_icon = 'MATERIAL'
+	bl_width_min = 160
+	
+	stepsize = bpy.props.FloatProperty(name='Step Size', default=1.0, min=0.0, max=100.0, subtype='DISTANCE', unit='LENGTH')
+	
+	def init(self, context):
+		self.inputs.new('luxrender_fresnel_socket', 'IOR')
+		self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
+		self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
+		self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
+		
+		self.outputs.new('NodeSocketShader', 'Volume')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'stepsize')
+	
+	def export_volume(self, make_volume, make_texture):
+		vol_type = 'heterogeneous'
+		
+		heterogeneous_params = ParamSet()
+		heterogeneous_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		heterogeneous_params.add_float('stepsize', self.stepsize)
 		
 		return make_volume(self.name, vol_type, homogeneous_params)
 		
