@@ -188,8 +188,8 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 	
 	def draw(self, context):
 		layout = self.layout
-		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
+		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_heterogeneous_node)
 
