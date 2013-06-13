@@ -134,13 +134,10 @@ TC_sigma_s		= VolumeDataColorTextureParameter('sigma_s', 'Scattering',		default=
 
 def volume_types():
 	v_types =  [
-		('clear', 'Clear', 'clear')
+		('clear', 'Clear', 'clear'),
+		('homogeneous', 'Homogeneous', 'homogeneous'),
+		('heterogeneous', 'Heterogeneous', 'heterogeneous')
 	]
-	
-	if LUXRENDER_VERSION >= '0.8':
-		v_types.extend([
-			('homogeneous', 'Homogeneous', 'homogeneous')
-		])
 	
 	return v_types
 
@@ -171,12 +168,14 @@ class luxrender_volume_data(declarative_property_group):
 	[
 		'scattering_scale',
 		'g',
+		'stepsize',
 	]
 	
 	visibility = dict_merge(
 		{
-			'scattering_scale': { 'type': 'homogeneous', 'sigma_s_usecolortexture': False },
-			'g': { 'type': 'homogeneous' },
+			'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous']), 'sigma_s_usecolortexture': False },
+			'g': { 'type': O(['homogeneous', 'heterogeneous']) },
+			'stepsize': { 'type': 'heterogeneous' },
 			'depth': O([ A([{ 'type': 'clear' }, { 'absorption_usecolortexture': False }]), A([{'type': 'homogeneous' }, { 'sigma_a_usecolortexture': False }]) ])
 		},
 		TFR_IOR.visibility,
@@ -186,8 +185,8 @@ class luxrender_volume_data(declarative_property_group):
 	)
 	
 	visibility = texture_append_visibility(visibility, TC_absorption, { 'type': 'clear' })
-	visibility = texture_append_visibility(visibility, TC_sigma_a, { 'type': 'homogeneous' })
-	visibility = texture_append_visibility(visibility, TC_sigma_s, { 'type': 'homogeneous' })
+	visibility = texture_append_visibility(visibility, TC_sigma_a, { 'type': O(['homogeneous', 'heterogeneous']) })
+	visibility = texture_append_visibility(visibility, TC_sigma_s, { 'type': O(['homogeneous', 'heterogeneous']) })
 	
 	properties = [
 		{
@@ -239,7 +238,7 @@ class luxrender_volume_data(declarative_property_group):
 		{
 			'type': 'float',
 			'attr': 'scattering_scale',
-			'name': 'Scattering scale',
+			'name': 'Scattering Scale',
 			'description': 'Scattering colour will be multiplied by this value',
 			'default': 1.0,
 			'min': 0.0,
@@ -262,6 +261,21 @@ class luxrender_volume_data(declarative_property_group):
 			'precision': 4,
 			'save_in_preset': True
 		},
+		{
+			'type': 'float',
+			'attr': 'stepsize',
+			'name': 'Step Size',
+			'description': 'Scattering colour will be multiplied by this value',
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 100.0,
+			'soft_max': 100.0,
+			'precision': 3,
+			'subtype': 'DISTANCE',
+			'unit': 'LENGTH',
+			'save_in_preset': True
+		 },
 	]
 	
 	def api_output(self, lux_context):
@@ -344,7 +358,46 @@ class luxrender_volume_data(declarative_property_group):
 					ExportedTextures.export_new(lux_context)
 					# overwrite the sigma_a tex name with the scaled tex
 					vp.add_texture('sigma_a', texture_name)
-		
+
+		if self.type == 'heterogeneous':
+			def scattering_scale(i):
+				return i * self.scattering_scale
+			vp.update( TFR_IOR.get_paramset(self) )
+			vp.add_color('g', self.g)
+			vp.add_float('stepsize', self.stepsize)
+			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
+			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
+			
+			if self.absorption_usecolortexture and self.absorption_scale!=1.0:
+				
+				tex_found = False
+				for psi in vp:
+					if psi.type == 'texture' and psi.name == 'sigma_a':
+						tex_found = True
+						sigma_a_tex = psi.value
+				
+				if tex_found:
+					sv = ExportedTextures.next_scale_value()
+					texture_name = 'sigma_a_scaled_%i' % sv
+					ExportedTextures.texture(
+											 lux_context,
+											 texture_name,
+											 'color',
+											 'scale',
+											 ParamSet() \
+											 .add_color(
+														'tex1',
+														[self.absorption_scale]*3
+														) \
+											 .add_texture(
+														  'tex2',
+														  sigma_a_tex
+														  )
+											 )
+					ExportedTextures.export_new(lux_context)
+					# overwrite the sigma_a tex name with the scaled tex
+					vp.add_texture('sigma_a', texture_name)
+
 		return self.type, vp
 	
 	def load_paramset(self, world, ps):
