@@ -1101,7 +1101,7 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(luxrender_material_node):
-	'''Area light node'''
+	'''Area Light node'''
 	bl_idname = 'luxrender_light_area_node'
 	bl_label = 'Area Light'
 	bl_icon = 'LAMP'
@@ -1243,12 +1243,6 @@ class luxrender_material_output_node(luxrender_node):
 			int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 		if ext_vol_socket.is_linked:
 			ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
-	
-				
-		#Light emission
-		light_socket = self.inputs[3]
-		if light_socket.is_linked:
-			light_node = light_socket.links[0].from_node
 		
 		return set()
 
