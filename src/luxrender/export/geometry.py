@@ -39,6 +39,8 @@ from ..export import fix_matrix_order
 from ..export.materials import get_material_volume_defs
 from ..export import LuxManager
 from ..export import is_obj_visible
+from ..properties import find_node
+from ..properties.node_material import *
 
 class InvalidGeometryException(Exception):
 	pass
@@ -737,14 +739,26 @@ class GeometryExporter(object):
 				elif self.lux_context.API_TYPE == 'PURE':
 					mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context, ob_mat, mode='direct')
 				
-				object_is_emitter = ob_mat.luxrender_emission.use_emission
+				#We need to check the material's output node for a light-emission connection
+				#if ob_mat.luxrender_material.nodetree:
+				output_node = find_node(ob_mat, 'luxrender_material_output_node')
+				if output_node != None:
+					light_socket = output_node.inputs[3]
+					if light_socket.is_linked:
+						light_node = light_socket.links[0].from_node
+						object_is_emitter = light_socket.is_linked
+				else:
+					object_is_emitter = ob_mat.luxrender_emission.use_emission
 				
 				if object_is_emitter:
 					# Only add the AreaLightSource if this object's emission lightgroup is enabled
 					if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
 						if not self.visibility_scene.luxrender_lightgroups.ignore:
 							self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
-						self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
+						if not ob_mat.luxrender_material.nodetree:
+							self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
+						else:
+							self.lux_context.areaLightSource( *light_node.export(ob_mat) )
 					else:
 						object_is_emitter = False
 				

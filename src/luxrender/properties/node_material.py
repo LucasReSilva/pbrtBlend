@@ -1110,13 +1110,19 @@ class luxrender_light_area_node(luxrender_material_node):
 	gain = bpy.props.FloatProperty(name='Gain', default=1.0)
 
 	def init(self, context):
-		self.inputs.new('NodeSocketColor', 'Light Color')
-		self.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+		self.inputs.new('luxrender_TC_L_socket', 'Light Color')
 		
 		self.outputs.new('NodeSocketShader', 'Emission')
 	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'gain')
+
+	def export(self, make_texture):
+		arealight_params = ParamSet()
+		arealight_params.update( get_socket_paramsets(self.inputs, make_texture) )
+		arealight_params.add_float('gain', self.gain)
+
+		return 'area', arealight_params
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(luxrender_node):
@@ -1237,6 +1243,12 @@ class luxrender_material_output_node(luxrender_node):
 			int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 		if ext_vol_socket.is_linked:
 			ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+	
+				
+		#Light emission
+		light_socket = self.inputs[3]
+		if light_socket.is_linked:
+			light_node = light_socket.links[0].from_node
 		
 		return set()
 
@@ -2005,6 +2017,56 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
 				.add_color('backface_Ks', self.color)
 		
 		return backface_ks_params
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TC_L_socket(bpy.types.NodeSocket):
+	'''Light Color socket'''
+	bl_idname = 'luxrender_TC_L_socket'
+	bl_label = 'Light Color socket'
+	
+	# meaningful property
+	def color_update(self, context):
+		pass
+	
+	color = bpy.props.FloatVectorProperty(name='Color', description='Color', default=get_default(TC_L), subtype='COLOR', min=0.0, max=1.0, update=color_update)
+	
+	# helper property
+	def default_value_get(self):
+		return self.color
+	
+	def default_value_set(self, value):
+		self.color = value
+	
+	default_value = bpy.props.FloatVectorProperty(name='Color', default=get_default(TC_L), subtype='COLOR', get=default_value_get, set=default_value_set)
+	
+	def draw(self, context, layout, node, text):
+		if self.is_linked:
+			layout.label(text=self.name)
+		else:
+			row = layout.row()
+			row.alignment = 'LEFT'
+			row.prop(self, 'color', text='')
+			row.label(text=self.name)
+	
+	def draw_color(self, context, node):
+		return color_socket_color
+	
+	def get_paramset(self, make_texture):
+		tex_node = get_linked_node(self)
+		if tex_node:
+			print('linked from %s' % tex_node.name)
+			if not check_node_export_texture(tex_node):
+				return ParamSet()
+			
+			tex_name = tex_node.export_texture(make_texture)
+			
+			L_params = ParamSet() \
+				.add_texture('L', tex_name)
+		else:
+			L_params = ParamSet() \
+				.add_color('L', self.color)
+		
+		return L_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
