@@ -742,6 +742,8 @@ class GeometryExporter(object):
 				#We need to check the material's output node for a light-emission connection
 				#if ob_mat.luxrender_material.nodetree:
 				output_node = find_node(ob_mat, 'luxrender_material_output_node')
+				if ob_mat.luxrender_material.nodetree:
+					object_is_emitter = False
 				if output_node != None:
 					light_socket = output_node.inputs[3]
 					if light_socket.is_linked:

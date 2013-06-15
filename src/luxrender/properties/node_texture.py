@@ -191,6 +191,52 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 		return coord_params
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
+	'''Blend texture node'''
+	bl_idname = 'luxrender_texture_blender_blend_node'
+	bl_label = 'Blend Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+	
+	progression_items = [
+		('lin', 'Linear', 'linear'),
+		('quad', 'Quadratic', 'quadratic'),
+		('ease', 'Easing', 'easing'),
+		('diag', 'Diagonal', 'diagonal'),
+		('sphere', 'Spherical', 'spherical'),
+		('halo', 'Quadratic Sphere', 'quadratic sphere'),
+		('radial', 'Radial', 'radial'),
+		]
+	
+	flipxy = bpy.props.BoolProperty(name='Flip XY', description='Switch between horizontal and linear gradient', default=False)
+	type = bpy.props.EnumProperty(name='Progression', description='progression', items=progression_items, default='lin')
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+	
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'flipxy')
+		layout.prop(self, 'type')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+	
+	def export_texture(self, make_texture):
+		blend_params = ParamSet() \
+			.add_bool('flipxy', self.flipxy) \
+			.add_string('type', self.type) \
+			.add_float('bright', self.bright) \
+			.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			blend_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_blend', self.name, blend_params)
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_brick(luxrender_texture_node):
 	'''Brick texture node'''
 	bl_idname = 'luxrender_texture_brick_node'
