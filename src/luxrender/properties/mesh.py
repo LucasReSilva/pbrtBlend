@@ -220,9 +220,9 @@ class luxrender_mesh(declarative_property_group):
 			texture_name = getattr(self, 'dm_floattexturename')
 			texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 			if texture.type in ('IMAGE', 'OCEAN') and texture.luxrender_texture.type == 'BLENDER':
-				params.add_string('displacementmap', '%s_float' % self.dm_floattexturename)
+				params.add_texture('displacementmap', '%s_float' % self.dm_floattexturename)
 			else:	
-				params.add_string('displacementmap', self.dm_floattexturename)
+				params.add_texture('displacementmap', self.dm_floattexturename)
 			params.add_float('dmscale', self.dmscale)
 			params.add_float('dmoffset', self.dmoffset)
 		
