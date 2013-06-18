@@ -30,6 +30,9 @@ import bpy
 
 from extensions_framework import declarative_property_group
 
+import nodeitems_utils
+from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
+
 from .. import LuxRenderAddon
 from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export_material, check_node_export_texture, check_node_get_paramset, ExportedVolumes)
 
@@ -248,6 +251,21 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 			break
 	
 	refresh = bpy.props.BoolProperty(name='Links Changed', default=False, update=acknowledge_connection)
+
+#Embryonic node-category support. Doesn't actually do anything yet.
+class luxrender_node_category(NodeCategory):
+	@classmethod
+	def poll(cls, context):
+		return context.space_data.tree_type == 'luxrender_material_nodes'
+
+luxrender_node_catagories = [
+	luxrender_node_category("LUX_INPUT", "Input", items = [
+	NodeItem("luxrender_2d_coordinates_node"),
+	NodeItem("luxrender_3d_coordinates_node"),
+	NodeItem("luxrender_texture_blackbody_node"),
+	#	NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
+	]),
+	]
 
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
