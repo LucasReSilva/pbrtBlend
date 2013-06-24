@@ -40,7 +40,7 @@ from ..export.materials import get_material_volume_defs
 from ..export import LuxManager
 from ..export import is_obj_visible
 from ..properties import find_node
-from ..properties.node_material import *
+from ..properties.node_material import luxrender_texture_maker
 
 class InvalidGeometryException(Exception):
 	pass

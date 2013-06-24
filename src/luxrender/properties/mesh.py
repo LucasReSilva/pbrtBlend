@@ -50,7 +50,7 @@ TF_displacementmap = MeshFloatTextureParameter(
 @LuxRenderAddon.addon_register_class
 class luxrender_mesh(declarative_property_group):
 	'''
-	Storage class for LuxRender Camera settings.
+	Storage class for LuxRender Mesh settings.
 	'''
 	
 	ef_attach_to = ['Mesh', 'SurfaceCurve', 'TextCurve', 'Curve', 'MetaBall']

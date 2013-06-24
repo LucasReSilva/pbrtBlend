@@ -1149,8 +1149,7 @@ class luxrender_light_area_node(luxrender_material_node):
 	efficacy = bpy.props.FloatProperty(name='Efficacy (lm/W)', default=17.0, min=0.0)
 	iesname = bpy.props.StringProperty(name='IES Data', description='IES file path', subtype='FILE_PATH')
 	importance = bpy.props.FloatProperty(name='Importance', default=1.0, min=0.0, description='Shadow ray and light path sampling weight')
-	nsamples = bpy.props.IntProperty(name='Shadow Ray Count', default=1, min=1, max=64)
-
+	nsamples = bpy.props.IntProperty(name='Shadow Ray Count', default=1, min=1, max=64, description='Number of shadow samples per intersection')
 
 	def init(self, context):
 		self.inputs.new('luxrender_TC_L_socket', 'Light Color')
@@ -1175,7 +1174,6 @@ class luxrender_light_area_node(luxrender_material_node):
 			process_filepath_data(LuxManager.CurrentScene, self, self.iesname, arealight_params, 'iesname')
 		arealight_params.add_float('importance', self.importance)
 		arealight_params.add_integer('nsamples', self.nsamples)
-
 
 		return 'area', arealight_params
 		
