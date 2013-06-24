@@ -760,7 +760,9 @@ class GeometryExporter(object):
 						if not ob_mat.luxrender_material.nodetree:
 							self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
 						else:
-							self.lux_context.areaLightSource( *light_node.export(ob_mat) )
+							# texture exporting
+							tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
+							self.lux_context.areaLightSource( *light_node.export(tex_maker.make_texture) )
 					else:
 						object_is_emitter = False
 				

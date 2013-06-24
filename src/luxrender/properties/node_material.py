@@ -49,6 +49,24 @@ from ..util import dict_merge
 
 from ..properties.material import * # for now just the big hammer for starting autogenerate sockets
 
+
+class luxrender_texture_maker:
+	
+	def __init__(self, lux_context, root_name):
+		def _impl(tex_variant, tex_type, tex_name, tex_params):
+			nonlocal lux_context
+			texture_name = '%s::%s' % (root_name, tex_name)
+			with TextureCounter(texture_name):
+				
+				print('Exporting texture, variant: "%s", type: "%s", name: "%s"' % (tex_variant, tex_type, tex_name))
+				
+				ExportedTextures.texture(lux_context, texture_name, tex_variant, tex_type, tex_params)
+				ExportedTextures.export_new(lux_context)
+				
+				return texture_name
+				
+		self.make_texture = _impl
+
 # Get all float properties
 def get_props(TextureParameter, attribute):
 	for prop in TextureParameter.get_properties():
@@ -1214,18 +1232,8 @@ class luxrender_material_output_node(luxrender_node):
 		
 		
 		# texture exporting, only one way
-		def make_texture(tex_variant, tex_type, tex_name, tex_params):
-			nonlocal lux_context
-			texture_name = '%s::%s' % (tree_name, tex_name)
-			with TextureCounter(texture_name):
-				
-				print('Exporting texture, variant: "%s", type: "%s", name: "%s"' % (tex_variant, tex_type, tex_name))
-				
-				ExportedTextures.texture(lux_context, texture_name, tex_variant, tex_type, tex_params)
-				ExportedTextures.export_new(lux_context)
-				
-				return texture_name
-
+		make_texture = luxrender_texture_maker(lux_context, tree_name).make_texture
+		
 		# start exporting that material...
 		with MaterialCounter(material.name):
 			if not (mode=='indirect' and material.name in ExportedMaterials.exported_material_names):
