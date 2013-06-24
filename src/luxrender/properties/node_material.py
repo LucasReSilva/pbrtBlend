@@ -1142,9 +1142,15 @@ class luxrender_light_area_node(luxrender_material_node):
 	bl_idname = 'luxrender_light_area_node'
 	bl_label = 'Area Light'
 	bl_icon = 'LAMP'
-	bl_width_min = 140
+	bl_width_min = 160
 
-	gain = bpy.props.FloatProperty(name='Gain', default=1.0)
+	gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, description='Scaling factor for light intensity')
+	power = bpy.props.FloatProperty(name='Power (W)', default=100.0, min=0.0)
+	efficacy = bpy.props.FloatProperty(name='Efficacy (lm/W)', default=17.0, min=0.0)
+	iesname = bpy.props.StringProperty(name='IES Data', description='IES file path', subtype='FILE_PATH')
+	importance = bpy.props.FloatProperty(name='Importance', default=1.0, min=0.0, description='Shadow ray and light path sampling weight')
+	nsamples = bpy.props.IntProperty(name='Shadow Ray Count', default=1, min=1, max=64)
+
 
 	def init(self, context):
 		self.inputs.new('luxrender_TC_L_socket', 'Light Color')
@@ -1153,11 +1159,23 @@ class luxrender_light_area_node(luxrender_material_node):
 	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'gain')
+		layout.prop(self, 'power')
+		layout.prop(self, 'efficacy')
+		layout.prop(self, 'iesname')
+		layout.prop(self, 'importance')
+		layout.prop(self, 'nsamples')
 
 	def export(self, make_texture):
 		arealight_params = ParamSet()
 		arealight_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		arealight_params.add_float('gain', self.gain)
+		arealight_params.add_float('power', self.power)
+		arealight_params.add_float('efficacy', self.efficacy)
+		if self.iesname != '':
+			process_filepath_data(LuxManager.CurrentScene, self, self.iesname, arealight_params, 'iesname')
+		arealight_params.add_float('importance', self.importance)
+		arealight_params.add_integer('nsamples', self.nsamples)
+
 
 		return 'area', arealight_params
 		
