@@ -56,7 +56,7 @@ from ..properties import (
 
 # Exporter Interface Panels need to be imported to ensure initialisation
 from ..ui import (
-	render_panels, camera, image, lamps, mesh, object as ui_object, particles, world
+	render_panels, camera, image, lamps, mesh, node_editor, object as ui_object, particles, world
 )
 
 #Legacy material editor panels, node editor UI is initialized above
@@ -111,7 +111,7 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
 # Node-editor related stuff
-_register_elm(bpy.types.NODE_MT_add.append(node_material.luxrender_mat_node_editor.draw_add_menu))
+_register_elm(bpy.types.NODE_MT_add.append(node_editor.luxrender_mat_node_editor.draw_add_menu))
 
 ### Some additions to Blender panels for better allocation in context
 ### Use this example for such overrides
