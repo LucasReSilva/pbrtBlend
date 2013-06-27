@@ -37,17 +37,14 @@ from .. import LuxRenderAddon
 from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export_material, check_node_export_texture, check_node_get_paramset, ExportedVolumes)
 
 from ..properties.texture import (
-	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
 from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
 	MaterialCounter, TextureCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
 )
-from ..outputs import LuxManager, LuxLog
-from ..util import dict_merge
 
-from ..properties.material import * # for now just the big hammer for starting autogenerate sockets
+from ..outputs import LuxManager, LuxLog
 
 from ..properties.node_sockets import *
 

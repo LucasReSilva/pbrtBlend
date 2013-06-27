@@ -33,15 +33,14 @@ from extensions_framework import declarative_property_group
 from .. import LuxRenderAddon
 from ..properties import (luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset)
 from ..properties.texture import (
-	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
 from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import (
-	MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
+	ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
-from ..util import dict_merge
+
 from ..properties.texture import (
 	luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
 )
@@ -80,117 +79,6 @@ triple_variant_items = [
 	('float', 'Float', 'This node outputs floating point data'),
 	('fresnel', 'Fresnel', 'This node outputs an optical dataset')
 	]
-
-@LuxRenderAddon.addon_register_class
-class luxrender_3d_coordinates_node(luxrender_texture_node):
-	'''3D texture coordinates node'''
-	bl_idname = 'luxrender_3d_coordinates_node'
-	bl_label = '3D Texture Coordinate'
-	bl_icon = 'TEXTURE'
-	bl_width_min = 260
-
-	for prop in luxrender_tex_transform.properties:
-		if prop['attr'].startswith('coordinates'):
-			coordinate_items = prop['items']
-
-	coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
-	translate = bpy.props.FloatVectorProperty(name='Translate')
-	rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION')
-	scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
-
-
-	def init(self, context):
-		self.outputs.new('luxrender_coordinate_socket', '3D Coordinate')
-		
-	def draw_buttons(self, context, layout):
-		layout.prop(self, 'coordinates')
-		layout.prop(self, 'translate')
-		layout.prop(self, 'rotate')
-		layout.prop(self, 'scale')
-		
-	def get_paramset(self):
-		coord_params = ParamSet()
-		
-		ws = get_worldscale(as_scalematrix=False)
-		
-		coord_params.add_string('coordinates', self.coordinates)
-		coord_params.add_vector('translate', [i*ws for i in self.translate])
-		coord_params.add_vector('rotate', self.rotate)
-		coord_params.add_vector('scale', [i*ws for i in self.scale])
-		
-		return coord_params
-		
-@LuxRenderAddon.addon_register_class
-class luxrender_2d_coordinates_node(luxrender_texture_node):
-	'''2D texture coordinates node'''
-	bl_idname = 'luxrender_2d_coordinates_node'
-	bl_label = '2D Texture Coordinate'
-	bl_icon = 'TEXTURE'
-	bl_width_min = 180
-
-	for prop in luxrender_tex_mapping.properties:
-		if prop['attr'].startswith('type'):
-			coordinate_items = prop['items']
-
-	coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
-	center_map = bpy.props.BoolProperty(name='Center Map', default=False)
-	uscale = bpy.props.FloatProperty(name='U Scale', default=1.0, min=-500.0, max=500.0)
-	vscale = bpy.props.FloatProperty(name='V Scale', default=1.0, min=-500.0, max=500.0)
-	udelta = bpy.props.FloatProperty(name='U Offset', default=0.0, min=-500.0, max=500.0)
-	vdelta = bpy.props.FloatProperty(name='V Offset', default=0.0, min=-500.0, max=500.0)
-	v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
-	v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
-
-
-	def init(self, context):
-		self.outputs.new('luxrender_transform_socket', '2D Coordinate')
-		
-	def draw_buttons(self, context, layout):
-		layout.prop(self, 'coordinates')
-		if self.coordinates == 'planar':
-			layout.prop(self, 'v1')
-			layout.prop(self, 'v2')
-			layout.prop(self, 'udelta')
-		else:
-			layout.prop(self, 'uscale')
-			layout.prop(self, 'vscale')
-			layout.prop(self, 'udelta')
-			layout.prop(self, 'vdelta')
-		if self.coordinates == 'uv':
-			layout.prop(self, 'center_map')
-
-	def get_paramset(self):
-		coord_params = ParamSet()
-
-		coord_params.add_string('mapping', self.coordinates)
-		if self.coordinates == 'planar':
-			coord_params.add_vector('v1', self.v1)
-			coord_params.add_vector('v2', self.v2)
-			coord_params.add_float('udelta', self.udelta)
-			coord_params.add_float('vdelta', self.vdelta)
-		
-		if self.coordinates =='cylindrical':
-			coord_params.add_float('uscale', self.uscale)
-			coord_params.add_float('udelta', self.udelta)
-		
-		if self.coordinates == 'spherical':
-			coord_params.add_float('uscale', self.uscale)
-			coord_params.add_float('vscale', self.vscale)
-			coord_params.add_float('udelta', self.udelta)
-			coord_params.add_float('vdelta', self.vdelta)
-		
-		if self.coordinates == 'uv':
-			coord_params.add_float('uscale', self.uscale)
-			coord_params.add_float('vscale', self.vscale * -1) # flip to match blender
-			
-			if self.center_map ==  False:
-				coord_params.add_float('udelta', self.udelta)
-				coord_params.add_float('vdelta', self.vdelta + 1) # correction for clamped types, does not harm repeat type
-			else:
-				coord_params.add_float('udelta', self.udelta +0.5*(1.0-self.uscale)) # auto-center the mapping
-				coord_params.add_float('vdelta', self.vdelta * -1 + 1-(0.5*(1.0-self.vscale))) # auto-center the mapping
-		
-		return coord_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
@@ -634,60 +522,6 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 
 		return make_texture('float', 'normalmap', self.name, normalmap_params)
 		
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
-	'''Vertex Colors texture node'''
-	bl_idname = 'luxrender_texture_hitpointcolor_node'
-	bl_label = 'Vertex Colors'
-	bl_icon = 'TEXTURE'
-
-	def init(self, context):
-		self.outputs.new('NodeSocketColor', 'Color')
-		
-	def export_texture(self, make_texture):
-		hitpointcolor_params = ParamSet()
-				
-		return make_texture('color', 'hitpointcolor', self.name, hitpointcolor_params)
-		
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
-	'''Vertex Grey texture node'''
-	bl_idname = 'luxrender_texture_hitpointgrey_node'
-	bl_label = 'Vertex Mask'
-	bl_icon = 'TEXTURE'
-	
-	for prop in luxrender_tex_imagemap.properties:
-		if prop['attr'].startswith('channel'):
-			channel_items = prop['items']
-
-	channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='mean')
-
-	def init(self, context):
-		self.outputs.new('NodeSocketFloat', 'Float')
-				
-	def draw_buttons(self, context, layout):
-		layout.prop(self, 'channel')
-		
-	def export_texture(self, make_texture):
-		hitpointgrey_params = ParamSet()
-				
-		return make_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
-		
-#@LuxRenderAddon.addon_register_class
-#class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
-#	'''Vertex Alpha texture node'''
-#	bl_idname = 'luxrender_texture_hitpointalpha_node'
-#	bl_label = 'Vertex Alpha'
-#	bl_icon = 'TEXTURE'
-#
-#	def init(self, context):
-#		self.outputs.new('NodeSocketFloat', 'Float')
-#		
-#	def export_texture(self, make_texture):
-#		hitpointalpha_params = ParamSet()
-#				
-#		return make_texture('float', 'hitpointalpha', self.name, hitpointalpha_params)
-
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
 	'''Windy texture node'''

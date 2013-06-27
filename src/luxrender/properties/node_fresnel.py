@@ -35,15 +35,13 @@ from ..properties import (
   luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset
 )
 from ..properties.texture import (
-	FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
 from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
-	MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
+	ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
-from ..util import dict_merge
 
 from ..properties.node_sockets import (
 	luxrender_fresnel_socket, luxrender_TC_Kr_socket
