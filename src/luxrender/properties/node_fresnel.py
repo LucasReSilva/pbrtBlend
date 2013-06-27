@@ -45,9 +45,11 @@ from ..export.materials import (
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
 
-from ..properties.node_material import (
-	luxrender_fresnel_socket, luxrender_TC_Kr_socket, get_socket_paramsets
+from ..properties.node_sockets import (
+	luxrender_fresnel_socket, luxrender_TC_Kr_socket
 )
+
+from ..properties.node_material import get_socket_paramsets
 from ..properties.texture import luxrender_tex_fresnelname
 
 @LuxRenderAddon.addon_register_class

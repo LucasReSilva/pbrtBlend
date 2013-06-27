@@ -44,9 +44,8 @@ from ..export.materials import (
 )
 from ..outputs import LuxManager, LuxLog
 from ..util import dict_merge
-from ..properties.node_material import (
-	luxrender_TC_Kt_socket, get_socket_paramsets
-	)
+from ..properties.node_material import get_socket_paramsets
+from ..properties.node_sockets import luxrender_TC_Kt_socket
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blackbody(luxrender_texture_node):
