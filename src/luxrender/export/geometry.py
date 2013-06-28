@@ -901,7 +901,8 @@ class GeometryExporter(object):
 
 			info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
 
-			transform = obj.matrix_world.inverted()         
+			transform = obj.matrix_world.inverted()
+			total_strand_count = 0
 			for pindex in range(num_parents + num_children):                        
 				det.exported_objects += 1                               
 				point_count = 0
@@ -914,9 +915,11 @@ class GeometryExporter(object):
 				# process: cache the uv_co and color value
 				uv_co = None
 				col = None
+				seg_length = 1.0
 				for step in range(0, steps):
-					co = psys.co_hair(obj, mod, pindex, step)                               
-					if not co.length_squared == 0:
+					co = psys.co_hair(obj, mod, pindex, step)
+					if (step > 0): seg_length = (co-points[len(points)-1]).length_squared
+					if not (co.length_squared == 0 or seg_length == 0):
 						points.append(transform*co)
 						point_count = point_count + 1
 
@@ -942,8 +945,12 @@ class GeometryExporter(object):
 								col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
 							colors.append(col)
 
-				if point_count > 1:
+				if point_count == 1:
+					points.pop()
+					point_count = point_count - 1
+				elif point_count > 1:
 					segments.append(point_count - 1)
+					total_strand_count = total_strand_count + 1
 					total_segments_count = total_segments_count + point_count - 1
 			hair_file_path = efutil.path_relative_to_export(hair_file_path)
 			with open(hair_file_path, 'wb') as hair_file:
@@ -952,7 +959,7 @@ class GeometryExporter(object):
 				##
 				##File header
 				hair_file.write(b'HAIR')        #magic number
-				hair_file.write(struct.pack('<I', num_parents+num_children)) #total strand count
+				hair_file.write(struct.pack('<I', total_strand_count)) #total strand count
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
 				hair_file.write(struct.pack('<I', 1+2+16*colorflag+32*uvflag)) #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
