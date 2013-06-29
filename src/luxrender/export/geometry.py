@@ -916,7 +916,7 @@ class GeometryExporter(object):
 				seg_length = 1.0				
 				for step in range(0, steps):
 					co = psys.co_hair(obj, mod, pindex, step)                               
-					if (step > 0): seg_length = (co-points[len(points)-1]).length_squared 
+					if (step > 0): seg_length = (co-obj.matrix_world*points[len(points)-1]).length_squared 
 					if not (co.length_squared == 0 or seg_length == 0):
 						points.append(transform*co)
 						point_count = point_count + 1
