@@ -246,6 +246,8 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 		
 		return make_texture('float', 'blender_clouds', self.name, clouds_params)
 
+
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node):
 	'''Distorted noise texture node'''
@@ -573,3 +575,88 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 			wrinkled_params.update( coord_node.get_paramset() )
 		
 		return make_texture('float', 'wrinkled', self.name, wrinkled_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
+	'''Cloud volume texture node'''
+	bl_idname = 'luxrender_texture_type_node_vol_cloud_node'
+	bl_label = 'Cloud Volume Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+	
+	radius = bpy.props.FloatProperty(name='Radius', default=0.5, min=0.0, soft_max=0.5, description='Overall cloud radius inside the base cube')
+	noisescale = bpy.props.FloatProperty(name='Noise Scale', default=0.5, min=0.0, max=1.0, description='Strength of the noise')
+	turbulence = bpy.props.FloatProperty(name='Turbulence', default=0.01, min=0.0, soft_max=0.2, description='Size of the noise displacement')
+	sharpness = bpy.props.FloatProperty(name='Sharpness', default=6.00, description='Noise sharpness - increase for more spikey appearance')
+	noiseoffset = bpy.props.FloatProperty(name='Noise Offset', default=0.00, min=0.0, max=1.0)
+	spheres = bpy.props.IntProperty(name='Spheres', default=0, description='If greater than 0, the cloud will consist of a bunch of random spheres to mimic a cumulus, this is the number of random spheres. If set to 0, the cloud will consist of single displaced sphere')
+	octaves = bpy.props.IntProperty(name='Octaves', default=1, description='Number of octaves for the noise function')
+	omega = bpy.props.FloatProperty(name='Omega', default=0.75, min=0.0, max=1.0, description='Amount of noise per octave')
+	variability = bpy.props.FloatProperty(name='Variability', default=0.9, min=0.0, max=1.0, description='Amount of extra noise')
+	baseflatness = bpy.props.FloatProperty(name='Base Flatness', default=0.8, min=0.0, max=0.99, description='How much the base of the cloud is flattened')
+	spheresize = bpy.props.FloatProperty(name='Sphere Size', default=0.15, min=0.0, description='Maxiumum size of cumulus spheres')
+	
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'radius')
+		layout.prop(self, 'noisescale')
+		layout.prop(self, 'turbulence')
+		layout.prop(self, 'sharpness')
+		layout.prop(self, 'noiseoffset')
+		layout.prop(self, 'spheres')
+		layout.prop(self, 'octaves')
+		layout.prop(self, 'omega')
+		layout.prop(self, 'variability')
+		layout.prop(self, 'baseflatness')
+		layout.prop(self, 'spheresize')
+	
+	def export_texture(self, make_texture):
+		cloud_vol_params = ParamSet() \
+			.add_float('radius', self.radius) \
+			.add_float('noisescale', self.noisescale) \
+			.add_float('turbulence', self.turbulence) \
+			.add_float('sharpness', self.sharpness) \
+			.add_float('noiseoffset', self.noiseoffset) \
+			.add_integer('spheres', self.spheres) \
+			.add_integer('octaves', self.octaves) \
+			.add_float('omega', self.omega) \
+			.add_float('variability', self.variability) \
+			.add_float('baseflatness', self.baseflatness) \
+			.add_float('spheresize', self.spheresize)
+	
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			cloud_vol_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'cloud', self.name, cloud_vol_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
+	'''Exponential texture node'''
+	bl_idname = 'luxrender_texture_type_node_vol_exponential_node'
+	bl_label = 'Exponential Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+	
+	origin = bpy.props.FloatVectorProperty(name='Origin', description='The reference point to compute the exponential decay', default=[0.0, 0.0, 0.0])
+	updir = bpy.props.FloatVectorProperty(name='Up Vector', description='The direction of the exponential decay', default=[0.0, 0.0, 1.0])
+	decay = bpy.props.FloatProperty(name='Decay Rate', default=1.00)
+	
+	def init(self, context):
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'origin')
+		layout.prop(self, 'updir')
+		layout.prop(self, 'decay')
+	
+	def export_texture(self, make_texture):
+		exponential_params = ParamSet() \
+			.add_vector('updir', self.updir) \
+			.add_point('origin', self.origin) \
+			.add_float('decay', self.decay)
+		
+		return make_texture('float', 'exponential', self.name, exponential_params)

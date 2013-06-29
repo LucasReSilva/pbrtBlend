@@ -167,10 +167,12 @@ class lux_node_Volumes_Menu(bpy.types.Menu):
 	
 	def draw(self, context):
 		layout = self.layout
-		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_heterogeneous_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_type_node_vol_exponential_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_type_node_vol_cloud_node)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
