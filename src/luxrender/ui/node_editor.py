@@ -133,6 +133,7 @@ class lux_node_Textures_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_normal_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_wrinkled_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_blender_voronoi_node)
 		
 @LuxRenderAddon.addon_register_class
 class lux_node_Fresnel_Menu(bpy.types.Menu):
@@ -144,6 +145,7 @@ class lux_node_Fresnel_Menu(bpy.types.Menu):
 		add_nodetype(layout, bpy.types.luxrender_texture_cauchy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fresnelcolor_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fresnelname_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_sellmeier_node)
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Utilities_Menu(bpy.types.Menu):

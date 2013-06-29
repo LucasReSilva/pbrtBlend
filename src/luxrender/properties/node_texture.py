@@ -523,6 +523,70 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 			normalmap_params.add_float('vscale', -1.0)
 
 		return make_texture('float', 'normalmap', self.name, normalmap_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
+	'''Voronoi texture node'''
+	bl_idname = 'luxrender_texture_blender_voronoi_node'
+	bl_label = 'Voronoi Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+	
+	distance_items = [
+		('actual_distance', 'Actual Distance', 'actual distance'),
+		('distance_squared', 'Distance Squared', 'distance squared'),
+		('manhattan', 'Manhattan', 'manhattan'),
+		('chebychev', 'Chebychev', 'chebychev'),
+		('minkovsky_half', 'Minkowsky 1/2', 'minkowsky half'),
+		('minkovsky_four', 'Minkowsky 4', 'minkowsky four'),
+		('minkovsky', 'Minkowsky', 'minkowsky'),
+		]
+	
+	distmetric = bpy.props.EnumProperty(name='Distance Metric', description='Algorithm used to calculate distance of sample points to feature points', items=distance_items, default='actual_distance')
+	minkowsky_exp = bpy.props.FloatProperty(name='Exponent', default=1.0)
+	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+	nabla = bpy.props.FloatProperty(name='Nabla', default=0.025)
+	w1 = bpy.props.FloatProperty(name='Weight 1', default=1.0, min=0.0, max=1.0, subtype='FACTOR')
+	w2 = bpy.props.FloatProperty(name='Weight 2', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
+	w3 = bpy.props.FloatProperty(name='Weight 3', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
+	w4 = bpy.props.FloatProperty(name='Weight 4', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+	
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'distmetric')
+		layout.prop(self, 'minkowsky_exp')
+		layout.prop(self, 'noisesize')
+		layout.prop(self, 'nabla')
+		layout.prop(self, 'w1')
+		layout.prop(self, 'w2')
+		layout.prop(self, 'w3')
+		layout.prop(self, 'w4')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+	
+	def export_texture(self, make_texture):
+		voronoi_params = ParamSet() \
+			.add_string('distmetric', self.distmetric) \
+			.add_float('minkovsky_exp', self.minkowsky_exp) \
+			.add_float('noisesize', self.noisesize) \
+			.add_float('nabla', self.nabla) \
+			.add_float('w1', self.w1) \
+			.add_float('w2', self.w2) \
+			.add_float('w3', self.w3) \
+			.add_float('w4', self.w4) \
+			.add_float('bright', self.bright) \
+			.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			voronoi_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_voronoi', self.name, voronoi_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
