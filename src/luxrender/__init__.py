@@ -43,10 +43,53 @@ if 'core' in locals():
 	imp.reload(core)
 else:
 	import bpy
-	
+	from bpy.types import AddonPreferences
+	from bpy.props import StringProperty, IntProperty, BoolProperty
 	from extensions_framework import Addon
+	
+	def find_luxrender_path():
+		from os import getenv
+		from extensions_framework import util as efutil
+		return getenv(
+			# Use the env var path, if set ...
+			'LUXRENDER_ROOT',
+			# .. or load the last path from CFG file
+			efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+		)
+		
+	class LuxRenderAddonPreferences(AddonPreferences):
+		# this must match the addon name
+		bl_idname = __name__
+		
+		install_path = StringProperty(
+				name="Path to LuxRender Installation",
+				description='Path to LuxRender install directory',
+				subtype='DIR_PATH',
+				default=find_luxrender_path(),
+				)
+		
+		def draw(self, context):
+			layout = self.layout
+			#layout.label(text="This is a preferences view for our addon")
+			layout.prop(self, "install_path")
+	
 	LuxRenderAddon = Addon(bl_info)
-	register, unregister = LuxRenderAddon.init_functions()
+	
+	def get_prefs():
+		return bpy.context.user_preferences.addons[__name__].preferences
+	# patch the LuxRenderAddon class to make it easier to get the addon prefs
+	LuxRenderAddon.get_prefs = get_prefs
+	
+	addon_register, addon_unregister = LuxRenderAddon.init_functions()
+	
+	def register():
+		bpy.utils.register_class(LuxRenderAddonPreferences)
+		addon_register()
+	
+	def unregister():
+		bpy.utils.unregister_class(LuxRenderAddonPreferences)
+		addon_unregister()
+	
 	
 	# Importing the core package causes extensions_framework managed
 	# RNA class registration via @LuxRenderAddon.addon_register_class
