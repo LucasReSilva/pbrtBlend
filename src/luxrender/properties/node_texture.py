@@ -322,6 +322,20 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 			fbm_params.update( coord_node.get_paramset() )
 		
 		return make_texture('float', 'fbm', self.name, fbm_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_harlequin(luxrender_texture_node):
+	'''Harlequin texture node'''
+	bl_idname = 'luxrender_texture_harlequin_node'
+	bl_label = 'Harlequin Texture'
+	bl_icon = 'TEXTURE'
+	
+	def init(self, context):
+		self.outputs.new('NodeSocketColor', 'Color')
+	
+	def export_texture(self, make_texture):
+		harlequin_params = ParamSet()
+		return make_texture('color', 'harlequin', self.name, harlequin_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_image_map(luxrender_texture_node):
@@ -525,6 +539,29 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 		return make_texture('float', 'normalmap', self.name, normalmap_params)
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_uv(luxrender_texture_node):
+	'''UV texture node'''
+	bl_idname = 'luxrender_texture_uv_node'
+	bl_label = 'UV Test Texture'
+	bl_icon = 'TEXTURE'
+	
+	def init(self, context):
+		self.inputs.new('luxrender_transform_socket', '2D Transform')
+		
+		self.outputs.new('NodeSocketColor', 'Color')
+	
+	def export_texture(self, make_texture):
+		uvtest_params = ParamSet()
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			uvtest_params.update( coord_node.get_paramset() )
+		else:
+			uvtest_params.add_float('vscale', -1.0)
+		
+		return make_texture('color', 'uv', self.name, uvtest_params)
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
 	'''Voronoi texture node'''
 	bl_idname = 'luxrender_texture_blender_voronoi_node'
@@ -701,9 +738,9 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 	'''Exponential texture node'''
 	bl_idname = 'luxrender_texture_type_node_vol_exponential_node'
-	bl_label = 'Exponential Texture'
+	bl_label = 'Exponential Volume Texture'
 	bl_icon = 'TEXTURE'
-	bl_width_min = 180
+	bl_width_min = 200
 	
 	origin = bpy.props.FloatVectorProperty(name='Origin', description='The reference point to compute the exponential decay', default=[0.0, 0.0, 0.0])
 	updir = bpy.props.FloatVectorProperty(name='Up Vector', description='The direction of the exponential decay', default=[0.0, 0.0, 1.0])

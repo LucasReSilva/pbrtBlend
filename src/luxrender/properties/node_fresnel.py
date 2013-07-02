@@ -156,7 +156,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 	bl_idname = 'luxrender_texture_sellmeier_node'
 	bl_label = 'Sellmeier'
 	bl_icon = 'TEXTURE'
-	bl_width_min = 160
+	bl_width_min = 200
 	
 	advanced = bpy.props.BoolProperty(name='Advanced', default=False)
 	a = bpy.props.FloatProperty(name='A', default=1.0, min=0.001, max=10.0, precision=3)

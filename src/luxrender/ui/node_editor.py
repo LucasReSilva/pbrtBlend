@@ -54,35 +54,35 @@ def add_nodetype(layout, type):
 #Create the submenus for the add-node menu
 @LuxRenderAddon.addon_register_class
 class lux_node_Materials_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_materials"
-	bl_label = "Materials"
+	bl_idname = "Lux_NODE_material"
+	bl_label = "Material"
 	
 	def draw(self, context):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_material_carpaint_node)
 		add_nodetype(layout, bpy.types.luxrender_material_cloth_node)
-		add_nodetype(layout, bpy.types.luxrender_material_doubleside_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glass_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glass2_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossy_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossycoating_node)
 		add_nodetype(layout, bpy.types.luxrender_material_glossytranslucent_node)
-		add_nodetype(layout, bpy.types.luxrender_material_layered_node)
 		add_nodetype(layout, bpy.types.luxrender_material_matte_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mattetranslucent_node)
 		add_nodetype(layout, bpy.types.luxrender_material_metal_node)
 		add_nodetype(layout, bpy.types.luxrender_material_metal2_node)
 		add_nodetype(layout, bpy.types.luxrender_material_mirror_node)
-		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
-		add_nodetype(layout, bpy.types.luxrender_material_null_node)
 		add_nodetype(layout, bpy.types.luxrender_material_roughglass_node)
 		add_nodetype(layout, bpy.types.luxrender_material_scatter_node)
 		add_nodetype(layout, bpy.types.luxrender_material_velvet_node)
+		add_nodetype(layout, bpy.types.luxrender_material_null_node)
+		add_nodetype(layout, bpy.types.luxrender_material_mix_node)
+		add_nodetype(layout, bpy.types.luxrender_material_doubleside_node)
+		add_nodetype(layout, bpy.types.luxrender_material_layered_node)
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Inputs_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_inputs"
-	bl_label = "Inputs"
+	bl_idname = "Lux_NODE_input"
+	bl_label = "Input"
 	
 	def draw(self, context):
 		layout = self.layout
@@ -100,8 +100,8 @@ class lux_node_Inputs_Menu(bpy.types.Menu):
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Outputs_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_outputs"
-	bl_label = "Outputs"
+	bl_idname = "Lux_NODE_output"
+	bl_label = "Output"
 	
 	def draw(self, context):
 		layout = self.layout
@@ -109,8 +109,8 @@ class lux_node_Outputs_Menu(bpy.types.Menu):
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Lights_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_lights"
-	bl_label = "Lights"
+	bl_idname = "Lux_NODE_light"
+	bl_label = "Light"
 	
 	def draw(self, context):
 		layout = self.layout
@@ -118,21 +118,25 @@ class lux_node_Lights_Menu(bpy.types.Menu):
 		
 @LuxRenderAddon.addon_register_class
 class lux_node_Textures_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_textures"
-	bl_label = "Textures"
+	bl_idname = "Lux_NODE_texture"
+	bl_label = "Texture"
 	
 	def draw(self, context):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_blend_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_brick_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_clouds_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_type_node_vol_cloud_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_distortednoise_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_type_node_vol_exponential_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_fbm_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_harlequin_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_image_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_musgrave_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_normal_map_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_windy_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_wrinkled_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_uv_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_blender_voronoi_node)
 		
 @LuxRenderAddon.addon_register_class
@@ -149,32 +153,28 @@ class lux_node_Fresnel_Menu(bpy.types.Menu):
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Utilities_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_utilities"
-	bl_label = "Utilities"
+	bl_idname = "Lux_NODE_converter"
+	bl_label = "Converter"
 	
 	def draw(self, context):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_texture_add_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_bump_map_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_harlequin_node)
+		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_mix_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_scale_node)
 		add_nodetype(layout, bpy.types.luxrender_texture_subtract_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_uv_node)
 
 @LuxRenderAddon.addon_register_class
 class lux_node_Volumes_Menu(bpy.types.Menu):
-	bl_idname = "Lux_NODE_volumes"
-	bl_label = "Volumes"
+	bl_idname = "Lux_NODE_volume"
+	bl_label = "Volume"
 	
 	def draw(self, context):
 		layout = self.layout
 		add_nodetype(layout, bpy.types.luxrender_volume_clear_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_homogeneous_node)
 		add_nodetype(layout, bpy.types.luxrender_volume_heterogeneous_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_colordepth_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_type_node_vol_exponential_node)
-		add_nodetype(layout, bpy.types.luxrender_texture_type_node_vol_cloud_node)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
@@ -209,15 +209,15 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 	def draw_add_menu(self, context):
 		if context.space_data.tree_type == 'luxrender_material_nodes':
 			layout = self.layout
-			layout.label('LuxRender Node Types')
-			layout.menu("Lux_NODE_inputs")
-			layout.menu("Lux_NODE_outputs")
-			layout.menu("Lux_NODE_materials")
-			layout.menu("Lux_NODE_textures")
+			layout.menu("Lux_NODE_input")
+			layout.menu("Lux_NODE_output")
+			layout.menu("Lux_NODE_material")
+			layout.menu("Lux_NODE_texture")
+			layout.menu("Lux_NODE_volume")
+			layout.menu("Lux_NODE_light")
 			layout.menu("Lux_NODE_fresnel")
-			layout.menu("Lux_NODE_utilities")
-			layout.menu("Lux_NODE_volumes")
-			layout.menu("Lux_NODE_lights")
+			layout.menu("Lux_NODE_converter")
+
 	
 	# This block updates the preview, when socket links change
 	def update(self):

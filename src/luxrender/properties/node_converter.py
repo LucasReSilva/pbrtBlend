@@ -123,42 +123,6 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 			bumpmap_params.add_texture("tex2", bumpmap_name)
 		
 		return make_texture('float', 'scale', self.name, bumpmap_params)
-
-@LuxRenderAddon.addon_register_class #Drawn in "input" menu, since it does not have any input sockets
-class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
-	'''Glossy exponent node'''
-	bl_idname = 'luxrender_texture_glossyexponent_node'
-	bl_label = 'Glossy Exponent'
-	bl_icon = 'TEXTURE'
-	bl_width_min = 180
-	
-	exponent = bpy.props.FloatProperty(name='Exponent', default=350.0)
-	
-	def init(self, context):
-		self.outputs.new('NodeSocketFloat', 'Float')
-	
-	def draw_buttons(self, context, layout):
-		layout.prop(self, 'exponent')
-	
-	def export_texture(self, make_texture):
-		glossyexponent_params = ParamSet()
-		glossyexponent_params.add_float('value', (2.0/(self.exponent+2.0))**0.5)
-		
-		return make_texture('float', 'constant', self.name, glossyexponent_params)
-
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_harlequin(luxrender_texture_node):
-	'''Harlequin texture node'''
-	bl_idname = 'luxrender_texture_harlequin_node'
-	bl_label = 'Harlequin Texture'
-	bl_icon = 'TEXTURE'
-
-	def init(self, context):
-		self.outputs.new('NodeSocketColor', 'Color')
-
-	def export_texture(self, make_texture):
-		harlequin_params = ParamSet()
-		return make_texture('color', 'harlequin', self.name, harlequin_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_mix(luxrender_texture_node):
@@ -324,26 +288,3 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
 		subtract_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		
 		return make_texture(self.variant, 'subtract', self.name, subtract_params)
-		
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_uv(luxrender_texture_node):
-	'''UV texture node'''
-	bl_idname = 'luxrender_texture_uv_node'
-	bl_label = 'UV Test Texture'
-	bl_icon = 'TEXTURE'
-
-	def init(self, context):
-		self.inputs.new('luxrender_transform_socket', '2D Transform')
-		
-		self.outputs.new('NodeSocketColor', 'Color')
-
-	def export_texture(self, make_texture):
-		uvtest_params = ParamSet()
-
-		coord_node = get_linked_node(self.inputs[0])
-		if coord_node and check_node_get_paramset(coord_node):
-			uvtest_params.update( coord_node.get_paramset() )
-		else:
-			uvtest_params.add_float('vscale', -1.0)
-		
-		return make_texture('color', 'uv', self.name, uvtest_params)
