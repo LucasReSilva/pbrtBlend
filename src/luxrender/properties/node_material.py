@@ -906,7 +906,7 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
 	bl_icon = 'MATERIAL'
 	bl_width_min = 160
 	
-	stepsize = bpy.props.FloatProperty(name='Step Size', default=1.0, min=0.0, max=100.0, subtype='DISTANCE', unit='LENGTH')
+	stepsize = bpy.props.FloatProperty(name='Step Size', default=1.0, min=0.0, max=100.0, subtype='DISTANCE', unit='LENGTH', description='Length of ray marching steps, smaller values resolve more detail, but are slower')
 	
 	def init(self, context):
 		self.inputs.new('luxrender_fresnel_socket', 'IOR')

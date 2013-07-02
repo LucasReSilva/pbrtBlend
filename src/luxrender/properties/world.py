@@ -265,7 +265,7 @@ class luxrender_volume_data(declarative_property_group):
 			'type': 'float',
 			'attr': 'stepsize',
 			'name': 'Step Size',
-			'description': 'Scattering colour will be multiplied by this value',
+			'description': 'Length of ray marching steps, smaller values resolve more detail, but are slower',
 			'default': 1.0,
 			'min': 0.0,
 			'soft_min': 0.0,
