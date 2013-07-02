@@ -1,8 +1,7 @@
-
 syntax: regexp
 ^\.project$
-syntax: regexp
 ^\.pydevproject$
+^.settings
 syntax: glob
 *.pyc
 *.so
@@ -13,6 +12,6 @@ liblzmadec*
 liblux*
 *.dll
 *.dylib
+*.orig
+*.patch
 
-syntax: regexp
-^.settings
