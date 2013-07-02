@@ -46,6 +46,8 @@ else:
 	from bpy.types import AddonPreferences
 	from bpy.props import StringProperty, IntProperty, BoolProperty
 	from extensions_framework import Addon
+	import nodeitems_utils
+	from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
 	
 	def find_luxrender_path():
 		from os import getenv
@@ -84,10 +86,12 @@ else:
 	
 	def register():
 		bpy.utils.register_class(LuxRenderAddonPreferences)
+		nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_catagories)
 		addon_register()
 	
 	def unregister():
 		bpy.utils.unregister_class(LuxRenderAddonPreferences)
+		nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_catagories)
 		addon_unregister()
 	
 	
