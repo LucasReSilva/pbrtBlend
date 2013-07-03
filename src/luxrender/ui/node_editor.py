@@ -47,7 +47,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 	def poll(cls, context):
 		return context.scene.render.engine == 'LUXRENDER_RENDER'
 	
-	#This function will set the current node tree to the one belonging to the active material (code orignal from Matt Ebb's 3Delight exporter)
+	#This function will set the current node tree to the one belonging to the active material (code orignally from Matt Ebb's 3Delight exporter)
 	@classmethod
 	def get_from_context(cls, context):
 		ob = context.active_object
@@ -129,12 +129,13 @@ luxrender_node_catagories = [
 	NodeItem("luxrender_texture_blender_blend_node"),
 	NodeItem("luxrender_texture_brick_node"),
 	NodeItem("luxrender_texture_blender_clouds_node"),
-	NodeItem("luxrender_texture_type_node_vol_cloud_node"),
+	NodeItem("luxrender_texture_vol_cloud_node"),
 	NodeItem("luxrender_texture_blender_distortednoise_node"),
-	NodeItem("luxrender_texture_type_node_vol_exponential_node"),
+	NodeItem("luxrender_texture_vol_exponential_node"),
 	NodeItem("luxrender_texture_fbm_node"),
 	NodeItem("luxrender_texture_harlequin_node"),
 	NodeItem("luxrender_texture_blender_musgrave_node"),
+#	NodeItem("luxrender_texture_vol_smoke_data_node"), #Not until it's functional.....
 	NodeItem("luxrender_texture_windy_node"),
 	NodeItem("luxrender_texture_wrinkled_node"),
 	NodeItem("luxrender_texture_uv_node"),

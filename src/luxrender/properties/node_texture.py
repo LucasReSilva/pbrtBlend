@@ -680,7 +680,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 	'''Cloud volume texture node'''
-	bl_idname = 'luxrender_texture_type_node_vol_cloud_node'
+	bl_idname = 'luxrender_texture_vol_cloud_node'
 	bl_label = 'Cloud Volume Texture'
 	bl_icon = 'TEXTURE'
 	bl_width_min = 180
@@ -737,10 +737,10 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 	'''Exponential texture node'''
-	bl_idname = 'luxrender_texture_type_node_vol_exponential_node'
+	bl_idname = 'luxrender_texture_vol_exponential_node'
 	bl_label = 'Exponential Volume Texture'
 	bl_icon = 'TEXTURE'
-	bl_width_min = 200
+	bl_width_min = 230
 	
 	origin = bpy.props.FloatVectorProperty(name='Origin', description='The reference point to compute the exponential decay', default=[0.0, 0.0, 0.0])
 	updir = bpy.props.FloatVectorProperty(name='Up Vector', description='The direction of the exponential decay', default=[0.0, 0.0, 1.0])
@@ -761,3 +761,45 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 			.add_float('decay', self.decay)
 		
 		return make_texture('float', 'exponential', self.name, exponential_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
+	'''Smoke Data node'''
+	bl_idname = 'luxrender_texture_vol_smoke_data_node'
+	bl_label = 'Smoke Data Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 230
+	
+	for prop in luxrender_tex_imagemap.properties:
+		if prop['attr'].startswith('wrap'):
+			wrap_items = prop['items']
+	
+	smoke_channels = [
+	('density', 'Density', ''),
+	('fire', 'Fire', ''),
+	('temperature', 'Temperature', ''),
+	('velocity', 'Velocity', '')					  
+	]
+	
+	domain = bpy.props.StringProperty(name='Domain Object')
+	source = bpy.props.EnumProperty(name='Source', items=smoke_channels, default='density')
+	wrap = bpy.props.EnumProperty(name='Wrapping', items=wrap_items, default='black')
+		
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+	
+	def draw_buttons(self, context, layout):
+		layout.prop_search(self, "domain", bpy.data, "objects")
+		layout.prop(self, 'source')
+		layout.prop(self, 'wrap')
+	
+	def export_texture(self, make_texture):
+		smokedata_params = ParamSet() \
+			.add_string('wrap', self.wrap)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			smokedata_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'densitygrid', self.name, smokedata_params)
