@@ -134,11 +134,14 @@ luxrender_node_catagories = [
 	NodeItem("luxrender_texture_vol_exponential_node"),
 	NodeItem("luxrender_texture_fbm_node"),
 	NodeItem("luxrender_texture_harlequin_node"),
+	NodeItem("luxrender_texture_blender_marble_node"),															   
 	NodeItem("luxrender_texture_blender_musgrave_node"),
+	NodeItem("luxrender_texture_blender_stucci_node"),															   
 #	NodeItem("luxrender_texture_vol_smoke_data_node"), #Not until it's functional.....
+	NodeItem("luxrender_texture_uv_node"),															   
 	NodeItem("luxrender_texture_windy_node"),
+	NodeItem("luxrender_texture_blender_wood_node"),															   
 	NodeItem("luxrender_texture_wrinkled_node"),
-	NodeItem("luxrender_texture_uv_node"),
 	NodeItem("luxrender_texture_blender_voronoi_node"),
 	]),
 							 

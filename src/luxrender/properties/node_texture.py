@@ -413,6 +413,69 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 			imagemap_params.add_float('vscale', -1.0)
 
 		return make_texture(self.variant, 'imagemap', self.name, imagemap_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
+	'''Marble texture node'''
+	bl_idname = 'luxrender_texture_blender_marble_node'
+	bl_label = 'Marble Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+
+	marble_type_items = [
+		('soft', 'Soft', ''),
+		('sharp', 'Sharp', ''),
+		('sharper', 'Sharper', ''),
+	]
+	
+	marble_noise_items = [
+		('sin', 'Sin', ''),
+		('saw', 'Saw', ''),
+		('tri', 'Tri', ''),
+	]
+
+	type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=marble_type_items, default='soft')
+	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items, default='blender_original')
+	noisebasis2 = bpy.props.EnumProperty(name='Noise Basis 2', description='Second basis of noise used', items=marble_noise_items, default='sin')
+	noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items, default='soft_noise')
+	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+	noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
+	turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'type')
+		layout.prop(self, 'noisebasis')
+		layout.prop(self, 'noisebasis2')
+		layout.prop(self, 'noisetype')
+		layout.prop(self, 'noisesize')
+		layout.prop(self, 'noisedepth')
+		layout.prop(self, 'turbulence')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+
+	def export_texture(self, make_texture):
+		marble_params = ParamSet()
+		marble_params.add_string('type', self.type)
+		marble_params.add_string('noisebasis', self.noisebasis)
+		marble_params.add_string('noisebasis2', self.noisebasis2)
+		marble_params.add_string('noisetype', self.noisetype)
+		marble_params.add_float('noisesize', self.noisesize)
+		marble_params.add_integer('noisedepth', self.noisedepth)
+		marble_params.add_float('turbulence', self.turbulence)
+		marble_params.add_float('bright', self.bright)
+		marble_params.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			marble_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_marble', self.name, marble_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
@@ -539,6 +602,57 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 		return make_texture('float', 'normalmap', self.name, normalmap_params)
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
+	'''Stucci texture node'''
+	bl_idname = 'luxrender_texture_blender_stucci_node'
+	bl_label = 'Stucci Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+
+	stucci_type_items = [
+		('plastic', 'Plastic', ''),
+		('wall_in', 'Wall In', ''),
+		('wall_out', 'Wall Out', ''),
+	]
+
+	type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=stucci_type_items, default='plastic')
+	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items, default='blender_original')
+	noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items, default='soft_noise')
+	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+	turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'type')
+		layout.prop(self, 'noisebasis')
+		layout.prop(self, 'noisetype')
+		layout.prop(self, 'noisesize')
+		layout.prop(self, 'turbulence')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+
+	def export_texture(self, make_texture):
+		stucci_params = ParamSet()
+		stucci_params.add_string('type', self.type)
+		stucci_params.add_string('noisebasis', self.noisebasis)
+		stucci_params.add_string('noisetype', self.noisetype)
+		stucci_params.add_float('noisesize', self.noisesize)
+		stucci_params.add_float('turbulence', self.noisesize)
+		stucci_params.add_float('bright', self.bright)
+		stucci_params.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			stucci_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_stucci', self.name, stucci_params)
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_uv(luxrender_texture_node):
 	'''UV texture node'''
 	bl_idname = 'luxrender_texture_uv_node'
@@ -645,6 +759,67 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
 			wrinkled_params.update( coord_node.get_paramset() )
 		
 		return make_texture('float', 'windy', self.name, windy_params)
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
+	'''Wood texture node'''
+	bl_idname = 'luxrender_texture_blender_wood_node'
+	bl_label = 'Wood Texture'
+	bl_icon = 'TEXTURE'
+	bl_width_min = 180
+
+	wood_type_items = [
+		('bands', 'Bands', ''),
+		('rings', 'Rings', ''),
+		('bandnoise', 'Band Noise', ''),
+		('ringnoise', 'Ring Noise', ''),						 
+	]
+	
+	wood_noise_items = [
+		('sin', 'Sin', ''),
+		('saw', 'Saw', ''),
+		('tri', 'Tri', ''),
+	]
+
+	type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=wood_type_items, default='bands')
+	noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items, default='blender_original')
+	noisebasis2 = bpy.props.EnumProperty(name='Noise Basis 2', description='Second basis of noise used', items=wood_noise_items, default='sin')
+	noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items, default='soft_noise')
+	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+	turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
+	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
+	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+
+	def init(self, context):
+		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+		self.outputs.new('NodeSocketFloat', 'Float')
+		
+	def draw_buttons(self, context, layout):
+		layout.prop(self, 'type')
+		layout.prop(self, 'noisebasis')
+		layout.prop(self, 'noisebasis2')
+		layout.prop(self, 'noisetype')
+		layout.prop(self, 'noisesize')
+		layout.prop(self, 'turbulence')
+		layout.prop(self, 'bright')
+		layout.prop(self, 'contrast')
+
+	def export_texture(self, make_texture):
+		wood_params = ParamSet()
+		wood_params.add_string('type', self.type)
+		wood_params.add_string('noisebasis', self.noisebasis)
+		marble_params.add_string('noisebasis2', self.noisebasis2)
+		wood_params.add_string('noisetype', self.noisetype)
+		wood_params.add_float('noisesize', self.noisesize)
+		wood_params.add_float('turbulence', self.turbulence)
+		wood_params.add_float('bright', self.bright)
+		wood_params.add_float('contrast', self.contrast)
+		
+		coord_node = get_linked_node(self.inputs[0])
+		if coord_node and check_node_get_paramset(coord_node):
+			wood_params.update( coord_node.get_paramset() )
+		
+		return make_texture('float', 'blender_wood', self.name, wood_params)
 		
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
