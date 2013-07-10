@@ -803,7 +803,8 @@ class luxrender_film(declarative_property_group):
 			params.add_string('cameraresponse_data', encoded_data.splitlines() )
 		else:
 			params.add_string('cameraresponse', local_crf_filepath)
-		params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
+		if self.luxrender_colorspace.use_crf == 'preset':
+			params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
 		
 		# Output types
 		params.add_string('filename', get_output_filename(scene))
