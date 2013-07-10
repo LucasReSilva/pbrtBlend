@@ -91,7 +91,7 @@ else:
 	
 	def unregister():
 		bpy.utils.unregister_class(LuxRenderAddonPreferences)
-		nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_catagories)
+		nodeitems_utils.unregister_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_catagories)
 		addon_unregister()
 	
 	

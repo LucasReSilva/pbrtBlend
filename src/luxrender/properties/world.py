@@ -176,7 +176,7 @@ class luxrender_volume_data(declarative_property_group):
 			'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous']), 'sigma_s_usecolortexture': False },
 			'g': { 'type': O(['homogeneous', 'heterogeneous']) },
 			'stepsize': { 'type': 'heterogeneous' },
-			'depth': O([ A([{ 'type': 'clear' }, { 'absorption_usecolortexture': False }]), A([{'type': 'homogeneous' }, { 'sigma_a_usecolortexture': False }]) ])
+			'depth': O([ A([{ 'type': 'clear' }, { 'absorption_usecolortexture': False }]), A([{'type': O(['homogeneous', 'heterogeneous']) }, { 'sigma_a_usecolortexture': False }]) ])
 		},
 		TFR_IOR.visibility,
 		TC_absorption.visibility,
