@@ -791,7 +791,7 @@ class luxrender_film(declarative_property_group):
 		params.add_float('colorspace_blue',		[cs_object.cs_blueX,	cs_object.cs_blueY])
 		
 		# Camera Response Function
-		if self.luxrender_colorspace.use_crf == 'file':
+		if self.luxrender_colorspace.use_crf == 'file'and self.luxrender_colorspace.crf_file != '':
 			if scene.camera.library is not None:
 				local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
 			else:
