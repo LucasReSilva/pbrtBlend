@@ -621,13 +621,14 @@ class GeometryExporter(object):
 		else:
 			return not self.is_preview
 	
-	def exportShapeDefinition(self, obj, mesh_definition):
+	def exportShapeDefinition(self, obj, mesh_definition, parent=None):
 		"""
 		If the mesh is valid and instancing is allowed for this object, export
 		an objectBegin..objectEnd block containing the Shape definition.
 		"""
 		
 		me_name = mesh_definition[0]
+		me_mat_index = mesh_definition[1]
 		me_shape_type, me_shape_params = mesh_definition[2:4]
 		
 		if len(me_shape_params) == 0: return
@@ -641,9 +642,45 @@ class GeometryExporter(object):
 		if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
 			self.lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
 		me_shape_params.add_string('name', obj.name)
-		self.lux_context.shape(me_shape_type, me_shape_params)
-		self.lux_context.objectEnd()
+
+		if parent != None:
+			mat_object = parent
+		else:
+			mat_object = obj
+		try:
+			ob_mat = mat_object.material_slots[me_mat_index].material
+		except IndexError:
+			ob_mat = None
+			LuxLog('WARNING: material slot %d on object "%s" is unassigned!' %(me_mat_index+1, mat_object.name))
+
+		#Emission check
+		output_node = find_node(ob_mat, 'luxrender_material_output_node')
+		if ob_mat.luxrender_material.nodetree:
+			object_is_emitter = False
+		if output_node != None:
+			light_socket = output_node.inputs[3]
+			if light_socket.is_linked:
+				light_node = light_socket.links[0].from_node
+				object_is_emitter = light_socket.is_linked
+		else: #no node tree, so check the classic mat editor
+			object_is_emitter = ob_mat.luxrender_emission.use_emission
 		
+		if object_is_emitter:
+			# Only add the AreaLightSource if this object's emission lightgroup is enabled
+			if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
+				if not self.visibility_scene.luxrender_lightgroups.ignore:
+					self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+				if not ob_mat.luxrender_material.nodetree:
+					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
+				else:
+					# texture exporting
+					tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
+					self.lux_context.areaLightSource( *light_node.export(tex_maker.make_texture) )
+
+		self.lux_context.shape(me_shape_type, me_shape_params)
+
+		self.lux_context.objectEnd()
+
 		LuxLog('Mesh definition exported: %s' % me_name)
 	
 	def is_object_animated(self, obj, matrix=None):
@@ -729,7 +766,7 @@ class GeometryExporter(object):
 			
 			if ob_mat is not None:
 				
-				# Export material definition && check for emission
+				# Export material definition
 				if self.lux_context.API_TYPE == 'FILE':
 					self.lux_context.set_output_file(Files.MATS)
 					mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context, ob_mat, mode='indirect')
@@ -740,7 +777,6 @@ class GeometryExporter(object):
 					mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context, ob_mat, mode='direct')
 				
 				#We need to check the material's output node for a light-emission connection
-				#if ob_mat.luxrender_material.nodetree:
 				output_node = find_node(ob_mat, 'luxrender_material_output_node')
 				if ob_mat.luxrender_material.nodetree:
 					object_is_emitter = False
@@ -749,10 +785,10 @@ class GeometryExporter(object):
 					if light_socket.is_linked:
 						light_node = light_socket.links[0].from_node
 						object_is_emitter = light_socket.is_linked
-				else:
+				else: #no node tree, so check the classic mat editor
 					object_is_emitter = ob_mat.luxrender_emission.use_emission
 				
-				if object_is_emitter:
+				if object_is_emitter and not self.allow_instancing(mat_object): #If exporting an instance, we need to set emission in the ObjectBegin/End block
 					# Only add the AreaLightSource if this object's emission lightgroup is enabled
 					if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
 						if not self.visibility_scene.luxrender_lightgroups.ignore:
@@ -782,7 +818,7 @@ class GeometryExporter(object):
 			self.have_emitting_object |= object_is_emitter
 			
 			# If instancing is forbidden, just export the Shape
-			if (not self.allow_instancing(mat_object)):
+			if not self.allow_instancing(mat_object):
 				self.lux_context.shape(me_shape_type, me_shape_params)
 			# motionInstance for motion blur
 			#elif is_object_animated:
