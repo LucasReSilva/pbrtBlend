@@ -781,8 +781,8 @@ class GeometryExporter(object):
 			
 			self.have_emitting_object |= object_is_emitter
 			
-			# If the object emits, don't export instance or motioninstance, just the Shape
-			if (not self.allow_instancing(mat_object)) or object_is_emitter:
+			# If instancing is forbidden, just export the Shape
+			if (not self.allow_instancing(mat_object)):
 				self.lux_context.shape(me_shape_type, me_shape_params)
 			# motionInstance for motion blur
 			#elif is_object_animated:
