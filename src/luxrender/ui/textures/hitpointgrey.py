@@ -28,7 +28,7 @@ from ... import LuxRenderAddon
 from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
-class ui_texture_windy(luxrender_texture_base):
+class ui_texture_hitpointgrey(luxrender_texture_base):
 	bl_label = 'LuxRender Vertex Grey (hitpointgrey) Texture'
 	
 	LUX_COMPAT = {'hitpointgrey'}
