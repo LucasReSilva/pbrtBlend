@@ -118,12 +118,12 @@ class luxrender_engine(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-# 		'export_type',
+# 		'export_type', #Drawn in core/init
 # 		'binary_name',
 # 		'write_files',
 		['write_lxv',
-		'embed_filedata'],
-		
+		'export_hair'],
+		'embed_filedata',
 		'mesh_type',
 		'partial_ply',
 		['render', 'monitor_external'],
@@ -235,6 +235,13 @@ class luxrender_engine(declarative_property_group):
 			'description': 'Process and export smoke simulations',
 			'default': True,
 			'save_in_preset': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'export_hair',
+			'name': 'Export Hair',
+			'description': 'Export particle hair systems',
+			'default': True
 		},
 		{
 			'type': 'bool',

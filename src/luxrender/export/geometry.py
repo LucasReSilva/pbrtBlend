@@ -878,6 +878,9 @@ class GeometryExporter(object):
 		if not psys.settings.type == 'HAIR':
 			LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
 			return
+	
+		if bpy.context.scene.luxrender_engine.export_hair == False:
+			return
 			
 		for mod in obj.modifiers:
 			if mod.type == 'PARTICLE_SYSTEM':
