@@ -283,7 +283,7 @@ class luxrender_halt(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'haltspp',
-			'name': 'Halt SPP',
+			'name': 'Halt Samples',
 			'description': 'Halt the rendering at this number of samples/px or passes (0=disabled)',
 			'default': 0,
 			'min': 0,
@@ -295,7 +295,7 @@ class luxrender_halt(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'halttime',
-			'name': 'Halt time',
+			'name': 'Halt Time',
 			'description': 'Halt the rendering at this number seconds (0=disabled)',
 			'default': 0,
 			'min': 0,
@@ -307,17 +307,13 @@ class luxrender_halt(declarative_property_group):
 		{
 			'type': 'float',
 			'attr': 'haltthreshold',
-			'name': 'HaltThreshhold',
-			'description': 'Halt the rendering at this percentage of noise eliminated (0=disabled )',
+			'name': 'Halt Threshold',
+			'description': 'Target quality level (logarithmic % of pixels passing the convergence test)',
 			'default': 0.0,
 			'min': 0.0,
 			'soft_min': 0.0,
-			'max': 100.0,
-			'soft_max': 100.0,
-			'precision': 3,
-			'subtype': 'PERCENTAGE',
-			'unit': 'NONE',
-			'slider': True,
+			'max': 10.0,
+			'soft_max': 10.0,
 			'save_in_preset': True
 		},
 		{
