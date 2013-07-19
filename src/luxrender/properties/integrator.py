@@ -433,7 +433,7 @@ class luxrender_integrator(declarative_property_group):
 			'description': 'Strategy for choosing which lamp(s) to start light paths from',
 			'default': 'auto',
 			'items': [
-				('auto', 'Auto', 'Automatically choose between One-Uniform or All-Uniform depending on the number of lights),
+				('auto', 'Auto', 'Automatically choose between One-Uniform or All-Uniform depending on the number of lights'),
 				('one', 'One Uniform', 'A light path is started from a single lamp, chosen at random'),
 				('all', 'All Uniform', 'All lamps start a light path (this can be slow)'),
 				('importance', 'Importance', 'A single light path is started from a lamp chosen by importance value'),

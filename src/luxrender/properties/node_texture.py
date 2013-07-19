@@ -260,7 +260,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 	type = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items, default='blender_original')
 	distamount = bpy.props.FloatProperty(name='Distortion', default=1.00)
 	noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
-	noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
+	nabla = bpy.props.FloatProperty(name='Nabla', default=0.025)
 	bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
 	contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 	
@@ -273,7 +273,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 		layout.prop(self, 'type')
 		layout.prop(self, 'distamount')
 		layout.prop(self, 'noisesize')
-		layout.prop(self, 'noisedepth')
+		layout.prop(self, 'nabla')
 		layout.prop(self, 'bright')
 		layout.prop(self, 'contrast')
 	
@@ -283,7 +283,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 			.add_string('type', self.type) \
 			.add_float('noisesize', self.noisesize) \
 			.add_float('distamount', self.distamount) \
-			.add_integer('noisedepth', self.noisedepth) \
+			.add_float('nabla', self.nabla) \
 			.add_float('bright', self.bright) \
 			.add_float('contrast', self.contrast)
 		
