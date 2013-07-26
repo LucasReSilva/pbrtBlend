@@ -128,7 +128,6 @@ luxrender_node_catagories = [
 	NodeItem("luxrender_texture_normal_map_node"),
 	NodeItem("luxrender_texture_blender_blend_node"),
 	NodeItem("luxrender_texture_brick_node"),
-	NodeItem("luxrender_texture_checkerboard_node"),															   
 	NodeItem("luxrender_texture_blender_clouds_node"),
 	NodeItem("luxrender_texture_vol_cloud_node"),
 	NodeItem("luxrender_texture_blender_distortednoise_node"),

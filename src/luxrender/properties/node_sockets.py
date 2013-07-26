@@ -1283,15 +1283,15 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 	
 	def changed_preset(self, context):
 		## connect preset -> property
-		self.default_value = self.filmindex_presetvalue
+		self.default_value = self.index_presetvalue
 	
 	# meaningful property
-	def filmindex_update(self, context):
+	def index_update(self, context):
 		pass
 	
-	filmindex_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
-	filmindex_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
-	filmindex = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'), update=filmindex_update)
+	index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
+	index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
+	index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'), default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'), precision=get_props(TF_index, 'precision'), update=index_update)
 	
 	# helper property
 	def default_value_get(self):
@@ -1307,8 +1307,8 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 			layout.label(text=self.name)
 		else:
 			box = layout.box()
-			if self.index == self.filmindex_presetvalue:
-				menu_text = self.filmindex_presetstring
+			if self.index == self.index_presetvalue:
+				menu_text = self.index_presetstring
 			else:
 				menu_text = '-- Choose preset --'
 			box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
@@ -1326,13 +1326,13 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 			
 			tex_name = tex_node.export_texture(make_texture)
 			
-			filmindex_params = ParamSet() \
+			index_params = ParamSet() \
 				.add_texture('index', tex_name)
 		else:
-			filmindex_params = ParamSet() \
-				.add_float('index', self.filmindex)
+			index_params = ParamSet() \
+				.add_float('index', self.index)
 
-		return filmindex_params
+		return index_params
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):

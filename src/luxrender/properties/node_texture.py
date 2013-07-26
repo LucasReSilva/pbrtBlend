@@ -47,7 +47,7 @@ from ..properties.texture import (
 from ..properties.node_material import get_socket_paramsets
 
 from ..properties.node_sockets import (
-	luxrender_TF_brickmodtex_socket, luxrender_TF_bricktex_socket, luxrender_TF_mortartex_socket, luxrender_TF_tex1_socket, luxrender_TF_tex2_socket, luxrender_TC_brickmodtex_socket, luxrender_TC_bricktex_socket, luxrender_TC_mortartex_socket, luxrender_transform_socket, luxrender_coordinate_socket
+	luxrender_TF_brickmodtex_socket, luxrender_TF_bricktex_socket, luxrender_TF_mortartex_socket, luxrender_TC_brickmodtex_socket, luxrender_TC_bricktex_socket, luxrender_TC_mortartex_socket, luxrender_transform_socket, luxrender_coordinate_socket
 )
 
 #Define the list of noise types globally, this gets used by a few different nodes
@@ -203,53 +203,6 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 		brick_params.update( get_socket_paramsets(self.inputs, make_texture) )
 		
 		return make_texture(self.variant, 'brick', self.name, brick_params)
-
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_checkerboard(luxrender_texture_node):
-	'''Checkerboard texture node'''
-	bl_idname = 'luxrender_texture_checkerboard_node'
-	bl_label = 'Checkerboard Texture'
-	bl_icon = 'TEXTURE'
-	bl_width_min = 180
-
-	def change_dimension_socket(self, context):
-		if self.dimension == '2':
-			self.inputs['2D Coordinate'].enabled = True
-			self.inputs['3D Coordinate'].enabled = False
-		elif self.dimension == '3':
-			self.inputs['2D Coordinate'].enabled = False
-			self.inputs['3D Coordinate'].enabled = True
-
-	dimension = bpy.props.IntProperty(name='Dimensions', description='Create the pattern as 2D (UV-projected) or 3D (volumetric)', default=2, min=2, max=3, update=change_dimension_socket)
-	
-	def init(self, context):
-		self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
-		self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
-		self.inputs.new('luxrender_transform_socket', '2D Coordinate')
-		self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
-		self.inputs['2D Coordinate'].enabled = True
-		self.inputs['3D Coordinate'].enabled = True
-		
-		self.outputs.new('NodeSocketFloat', 'Float')
-		
-	def draw_buttons(self, context, layout):
-		layout.prop(self, 'dimension')
-
-	def export_texture(self, make_texture):
-		checkerboard_params = ParamSet() \
-			.add_integer('dimension', self.dimension)
-		
-		coord_node = get_linked_node(self.inputs[0])
-		if self.dimension == '3':
-			if coord_node and check_node_get_paramset(coord_node):
-				checkerboard_params.update( coord_node.get_paramset() )
-		elif self.dimension == '2':
-			if coord_node and check_node_get_paramset(coord_node):
-				checkerboard_params.update( coord_node.get_paramset() )
-			else:
-				checkerboard_params.add_float('vscale', -1.0)
-
-		return make_texture('float', 'checkerboard', self.name, checkerboard_params)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
