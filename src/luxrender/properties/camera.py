@@ -1280,12 +1280,12 @@ class luxrender_tonemapping(declarative_property_group):
 			'description': 'Choose tonemapping type',
 			'default': 'autolinear',
 			'items': [
-				('reinhard', 'Reinhard', 'reinhard'),
-				('linear', 'Linear (manual)', 'linear'),
-				('autolinear', 'Linear (auto-exposure)', 'autolinear'),
-				('contrast', 'Contrast', 'contrast'),
-				('maxwhite', 'Maxwhite', 'maxwhite'),
-				('falsecolors', 'False Colors', 'false color')
+				('reinhard', 'Reinhard', 'Reinhard non-linear tonemapping'),
+				('linear', 'Linear (manual)', 'Linear tonemapping using camera controls'),
+				('autolinear', 'Linear (auto-exposure)', 'Simple auto-exposure'),
+				('contrast', 'Contrast', 'Scaleable contrast-based tonemapping'),
+				('maxwhite', 'Maxwhite', 'Set brightest pixel as RGB 1.0'),
+				('falsecolors', 'False Colors', 'Convert image to a false color readout of irradiance levels')
 			]
 		},
 		

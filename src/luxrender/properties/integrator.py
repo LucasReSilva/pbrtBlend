@@ -472,7 +472,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'directsampleall',
-			'name': 'Sample all',
+			'name': 'Sample All',
 			'default': True,
 			'save_in_preset': True
 		},
@@ -507,7 +507,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'bool',
 			'attr': 'indirectsampleall',
-			'name': 'Sample all',
+			'name': 'Sample All',
 			'default': False,
 			'save_in_preset': True
 		},
@@ -537,12 +537,12 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'text',
 			'attr': 'lbl_diffuse',
-			'name': 'Diffuse settings',
+			'name': 'Diffuse Settings',
 		},
 		{
 			'type': 'int',
 			'attr': 'diffusereflectdepth',
-			'name': 'Reflection depth',
+			'name': 'Reflection Depth',
 			'description': 'Max recursion depth after bouncing from a diffuse surface',
 			'default': 3,
 			'min': 0,
@@ -551,8 +551,8 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'diffusereflectsamples',
-			'name': 'Reflection samples',
-			'description': 'Number of paths to start from a diffuse-reflection vertex',
+			'name': 'Reflection Samples',
+			'description': 'Number of paths to start from a diffuse surface',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -560,8 +560,8 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'diffuserefractdepth',
-			'name': 'Refraction depth',
-			'description': 'Max recursion depth after bouncing through a diffuse-refraction (translucent) surface',
+			'name': 'Refraction Depth',
+			'description': 'Max recursion depth after bouncing through a translucent surface',
 			'default': 5,
 			'min': 0,
 			'save_in_preset': True
@@ -569,8 +569,8 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'diffuserefractsamples',
-			'name': 'Refraction samples',
-			'description': 'Number of paths to start from a diffuse-refraction (translucent) vertex',
+			'name': 'Refraction Samples',
+			'description': 'Number of paths to start from a translucent surface',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -579,12 +579,12 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'text',
 			'attr': 'lbl_glossy',
-			'name': 'Glossy settings',
+			'name': 'Glossy Settings',
 		},
 		{
 			'type': 'int',
 			'attr': 'glossyreflectdepth',
-			'name': 'Reflection depth',
+			'name': 'Reflection Depth',
 			'description': 'Max recursion depth after bouncing from a glossy surface',
 			'default': 2,
 			'min': 0,
@@ -593,8 +593,8 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'glossyreflectsamples',
-			'name': 'Reflection samples',
-			'description': 'Number of paths to start from a glossy-reflection vertex',
+			'name': 'Reflection Samples',
+			'description': 'Number of paths to start from a glossy surface',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -602,7 +602,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'glossyrefractdepth',
-			'name': 'Refraction depth',
+			'name': 'Refraction Depth',
 			'description': 'Max recursion depth after bouncing through a glossy-refraction surface, such as rough glass',
 			'default': 5,
 			'min': 0,
@@ -611,8 +611,8 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'glossyrefractsamples',
-			'name': 'Refraction samples',
-			'description': 'Number of paths to start from a glossy-refraction vertex, such as rough glass',
+			'name': 'Refraction Samples',
+			'description': 'Number of paths to start from a glossy-refraction surface, such as rough glass',
 			'default': 1,
 			'min': 0,
 			'save_in_preset': True
@@ -621,12 +621,12 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'text',
 			'attr': 'lbl_specular',
-			'name': 'Specular settings',
+			'name': 'Specular Settings',
 		},
 		{
 			'type': 'int',
 			'attr': 'specularreflectdepth',
-			'name': 'Reflection depth',
+			'name': 'Reflection Depth',
 			'description': 'Max recursion depth after a specular reflection',
 			'default': 3,
 			'min': 0,
@@ -635,7 +635,7 @@ class luxrender_integrator(declarative_property_group):
 		{
 			'type': 'int',
 			'attr': 'specularrefractdepth',
-			'name': 'Refraction depth',
+			'name': 'Refraction Depth',
 			'description': 'Max recursion depth after a specular transmission, such as glass or null',
 			'default': 5,
 			'min': 0,
