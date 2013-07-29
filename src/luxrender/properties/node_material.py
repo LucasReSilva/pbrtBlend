@@ -1011,6 +1011,9 @@ class luxrender_material_output_node(luxrender_node):
 				
 				print('Exporting material "%s", type: "%s", name: "%s"' % (material_name, mat_type, mat_name))
 				mat_params.add_string('type', mat_type)
+				# DistributedPath compositing. Don't forget these!
+				if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+					mat_params.update( material.luxrender_material.luxrender_mat_compositing.get_paramset() )
 				ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
 				ExportedMaterials.export_new_named(lux_context)
 				
@@ -1031,6 +1034,9 @@ class luxrender_material_output_node(luxrender_node):
 				
 				print('Exporting material "%s", type: "%s", name: "%s"' % (material_name, mat_type, mat_name))
 				mat_params.add_string('type', mat_type)
+				# DistributedPath compositing. Don't forget these!
+				if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
+					mat_params.update( material.luxrender_material.luxrender_mat_compositing.get_paramset() )
 				ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
 				ExportedMaterials.export_new_named(lux_context)
 				

@@ -1066,7 +1066,7 @@ class luxrender_integrator(declarative_property_group):
 		
 		#Exphotonmap is not compatible with light groups, warn here instead of light export code so this warning only shows once instead of per lamp
 		if scene.luxrender_lightgroups.ignore == False and self.surfaceintegrator == 'exphotonmap':
-			LuxLog('WARNING: Ex-Photon Map does not support light groups, exporting all lights in the default group.')
+			LuxLog('WARNING: Ex. Photon Map does not support light groups, exporting all lights in the default group.')
 			
 		#Warn about multi volume integrator and homogeneous exterior
 		if scene.luxrender_world.default_exterior_volume != '':
@@ -1183,7 +1183,7 @@ class luxrender_integrator(declarative_property_group):
 			if self.advanced:
 				params.add_integer('shadowraycount', self.shadowraycount)
 
-		if self.surfaceintegrator != 'sppm':
+		if self.surfaceintegrator not in ('sppm', 'distributedpath'):
 			params.add_string('lightstrategy', self.lightstrategy if not hybrid_compat else 'one') \
 		
 		return self.surfaceintegrator, params
