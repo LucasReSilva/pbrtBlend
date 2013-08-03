@@ -73,20 +73,6 @@ class luxrender_volumeintegrator(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
-			'type': 'float',
-			'attr': 'stepsize',
-			'name': 'Step Size',
-			'description': 'Ray-marching step size. Only used for smoke simulations',
-			'default': 1.0,
-			'min': 0.0,
-			'soft_min': 0.0,
-			'max': 100.0,
-			'soft_max': 100.0,
-			'subtype': 'DISTANCE',
-			'unit': 'LENGTH',
-			'save_in_preset': True
-		},
-		{
 			'type': 'bool',
 			'attr': 'advanced',
 			'name': 'Advanced',
