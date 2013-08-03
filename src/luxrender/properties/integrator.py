@@ -91,9 +91,6 @@ class luxrender_volumeintegrator(declarative_property_group):
 		
 		params = ParamSet()
 		
-		if self.volumeintegrator != 'none':
-			params.add_float('stepsize', self.stepsize)
-		
 		return self.volumeintegrator, params
 
 @LuxRenderAddon.addon_register_class
