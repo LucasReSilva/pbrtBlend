@@ -1521,7 +1521,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
 			col.prop(self, 'sc_asym', text='')
 	
 	def draw_color(self, context, node):
-		return float_socket_color
+		return color_socket_color
 	
 	def get_paramset(self, make_texture):
 		tex_node = get_linked_node(self)

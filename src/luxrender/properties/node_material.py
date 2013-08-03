@@ -769,10 +769,10 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 		self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
 		self.inputs.new('luxrender_TF_ior_socket', 'IOR')
 		self.inputs.new('luxrender_TF_cauchyb_socket', 'Cauchy B')
-		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
 		self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
+		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
 		self.outputs.new('NodeSocketShader', 'Surface')
 
