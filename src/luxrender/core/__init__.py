@@ -148,16 +148,8 @@ def lux_output_hints(self, context):
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
 				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct", text="Write FLM Directly")
 		row = self.layout.row()
-	
-		if not context.scene.luxrender_engine.integratedimaging or context.scene.luxrender_engine.export_type == 'EXT':
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Alpha Channel") # Alpha and coupled premul option for all modes but integrated imaging
-		else:
-			row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Transparent Background") # Integrated imaging always with premul named according to Blender usage
-				
-		if (context.scene.camera.data.luxrender_camera.luxrender_film.output_alpha):
-			if not context.scene.luxrender_engine.integratedimaging or context.scene.luxrender_engine.export_type == 'EXT': # Premul only availyble for non integrated imaging
-				row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "premultiply_alpha", text="Premultiply Alpha")
-		
+
+		row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha", text="Transparent Background") # Integrated imaging always with premul named according to Blender usage
 
 _register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))
 

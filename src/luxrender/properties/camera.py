@@ -815,7 +815,7 @@ class luxrender_film(declarative_property_group):
 		
 		if self.output_alpha:
 			output_channels = 'RGBA'
-			params.add_bool('premultiplyalpha', self.premultiply_alpha)
+			params.add_bool('premultiplyalpha', True)
 		else:
 			output_channels = 'RGB'
 								
