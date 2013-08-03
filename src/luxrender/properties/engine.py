@@ -121,8 +121,7 @@ class luxrender_engine(declarative_property_group):
 # 		'export_type', #Drawn in core/init
 # 		'binary_name',
 # 		'write_files',
-		['write_lxv',
-		'export_hair'],
+		'export_hair',
 		'embed_filedata',
 		'mesh_type',
 		'partial_ply',
@@ -134,7 +133,6 @@ class luxrender_engine(declarative_property_group):
 		
 	visibility = {
 		'write_files':				{ 'export_type': 'INT' },
-		#'write_lxv':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'embed_filedata':			O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'mesh_type':				O([ {'export_type':'EXT'}, A([ {'export_type':'INT'}, {'write_files': True} ]) ]),
 		'binary_name':				{ 'export_type': 'EXT' },
@@ -225,14 +223,6 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'write_files',
 			'name': 'Write to Disk',
 			'description': 'Write scene files to disk (allows use of PLY file cache)',
-			'default': True,
-			'save_in_preset': True
-		},
-		{
-			'type': 'bool',
-			'attr': 'write_lxv',
-			'name': 'Export Smoke',
-			'description': 'Process and export smoke simulations',
 			'default': True,
 			'save_in_preset': True
 		},
