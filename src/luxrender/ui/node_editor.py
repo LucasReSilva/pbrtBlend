@@ -137,7 +137,7 @@ luxrender_node_catagories = [
 	NodeItem("luxrender_texture_blender_marble_node"),															   
 	NodeItem("luxrender_texture_blender_musgrave_node"),
 	NodeItem("luxrender_texture_blender_stucci_node"),															   
-#	NodeItem("luxrender_texture_vol_smoke_data_node"), #Not until it's functional.....
+	NodeItem("luxrender_texture_vol_smoke_data_node"),
 	NodeItem("luxrender_texture_uv_node"),															   
 	NodeItem("luxrender_texture_windy_node"),
 	NodeItem("luxrender_texture_blender_wood_node"),															   
@@ -173,5 +173,6 @@ luxrender_node_catagories = [
 							 
 	luxrender_node_category("LUX_LAYOUT", "Layout", items = [
 	NodeItem("NodeFrame"),
+#	NodeItem("NodeReroute") #not working yet
 	]),
 	]

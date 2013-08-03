@@ -36,6 +36,7 @@ from ..properties.texture import (
 	import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
 from ..export import ParamSet, get_worldscale, process_filepath_data
+from ..export.volumes import export_smoke
 from ..export.materials import (
 	ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
@@ -970,8 +971,18 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
 		layout.prop(self, 'wrap')
 	
 	def export_texture(self, make_texture):
+		grid = export_smoke(self.domain, self.source)
+		nx = grid[0]
+		ny = grid[1]
+		nz = grid[2]
+		density = grid[3]
+		
 		smokedata_params = ParamSet() \
-			.add_string('wrap', self.wrap)
+			.add_string('wrap', self.wrap) \
+			.add_integer('nx', nx) \
+			.add_integer('ny', ny) \
+			.add_integer('nz', nz) \
+			.add_float('density', density)
 		
 		coord_node = get_linked_node(self.inputs[0])
 		if coord_node and check_node_get_paramset(coord_node):

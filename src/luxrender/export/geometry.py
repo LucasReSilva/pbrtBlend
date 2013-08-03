@@ -1283,11 +1283,6 @@ class GeometryExporter(object):
 				if obj.parent and obj.parent.is_duplicator:
 					raise UnexportableObjectException(' -> parent is duplicator')
 				
-				for mod in obj.modifiers:
-					if mod.name == 'Smoke':
-						if mod.smoke_type == 'DOMAIN':
-							raise UnexportableObjectException(' -> Smoke domain')
-				
 				number_psystems = len(obj.particle_systems)
 				
 				if obj.is_duplicator and number_psystems < 1:

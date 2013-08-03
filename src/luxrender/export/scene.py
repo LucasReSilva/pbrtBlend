@@ -245,10 +245,10 @@ class SceneExporter(object):
 				s = s.background_set
 				geom_scenes.append(s)
 			
-			if scene.luxrender_engine.write_lxv:
-				if self.properties.api_type == 'FILE':
-					lux_context.set_output_file(Files.VOLM)
-				export_volumes.export_smoke(lux_context, scene)
+#			if scene.luxrender_engine.write_lxv:
+#				if self.properties.api_type == 'FILE':
+#					lux_context.set_output_file(Files.VOLM)
+#				export_volumes.export_smoke(lux_context, scene)
 			
 			# Make sure lamp textures go back into main file, not geom file
 			if self.properties.api_type in ['FILE']:

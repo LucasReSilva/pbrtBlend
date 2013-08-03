@@ -580,26 +580,26 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 			return (res_x, res_y, res_z, density, fire)
 	return (0,0,0,[],[])
 
-def export_smoke(lux_context, scene):
+def export_smoke(smoke_obj_name, channel):
 	flowtype = -1
+	smoke_obj = bpy.data.objects[smoke_obj_name]
 	domain = None
-	#Search smoke domain objects
-	for object in scene.objects:
-		for mod in object.modifiers:
-			if mod.name == 'Smoke':
-				if mod.smoke_type == 'FLOW':
-					if mod.flow_settings.smoke_flow_type == 'BOTH':
-						flowtype = 2
+	#Search smoke domain target for smoke modifiers
+	for mod in smoke_obj.modifiers:
+		if mod.name == 'Smoke':
+			if mod.smoke_type == 'FLOW':
+				if mod.flow_settings.smoke_flow_type == 'BOTH':
+					flowtype = 2
+				else:
+					if mod.flow_settings.smoke_flow_type == 'SMOKE':
+						flowtype = 0
 					else:
-						if mod.flow_settings.smoke_flow_type == 'SMOKE':
-							flowtype = 0
-						else:
-							if mod.flow_settings.smoke_flow_type == 'FIRE':
-								flowtype = 1
-				if mod.smoke_type == 'DOMAIN':
-					domain = object
-					smoke_modifier = mod
-	
+						if mod.flow_settings.smoke_flow_type == 'FIRE':
+							flowtype = 1
+			if mod.smoke_type == 'DOMAIN':
+				domain = smoke_obj
+				smoke_modifier = mod
+
 	if domain != None:
 		eps = 0.000001
 		p = []
@@ -617,26 +617,6 @@ def export_smoke(lux_context, scene):
 		density = ret[3]
 		fire = ret[4]
 
-		#standard values for volume material
-		sigma_s = [1.0, 1.0, 1.0]
-		sigma_a = [1.0, 1.0, 1.0]
-		Le = [0.0, 0.0, 0.0]
-		g = 0.0
-		
-		if hasattr(domain.active_material,'luxrender_material'):
-			int_v = domain.active_material.luxrender_material.Interior_volume
-			for volume in scene.luxrender_volumes.volumes:
-				if volume.name == int_v and volume.type == 'homogeneous':
-					data = volume.api_output(lux_context)[1]
-					for param in data:
-						if param[0] == 'color sigma_a': sigma_a = param[1]
-						if param[0] == 'color sigma_s': sigma_s = param[1]
-						if param[0] == 'color g': g = param[1][0]
-						
-		if hasattr(domain.active_material,'luxrender_emission'):
-			emission = domain.active_material.luxrender_emission
-			Le = emission.L_color * emission.gain * emission.power * emission.efficacy/100
-
 		if(res_x*res_y*res_z > 0):
 			#new cache format
 			big_res = []
@@ -651,36 +631,9 @@ def export_smoke(lux_context, scene):
 						
 		if set.use_high_resolution: big_res = [big_res[0]*(set.amplify+1), big_res[1]*(set.amplify+1), big_res[2]*(set.amplify+1)]
 
-		if len(density) == big_res[0]*big_res[1]*big_res[2]:
-			lux_context.attributeBegin(comment=domain.name, file=Files.VOLM)
-			lux_context.transform(matrix_to_list(domain.matrix_world, apply_worldscale=True))
-			volume_params = ParamSet() \
-							.add_integer('nx', big_res[0]) \
-							.add_integer('ny', big_res[1]) \
-							.add_integer('nz', big_res[2]) \
-							.add_point('p0',p[0]) \
-							.add_point('p1',p[1]) \
-							.add_float('density', density) \
-							.add_color('sigma_a', sigma_a) \
-							.add_color('sigma_s', sigma_s) \
-							.add_float('g', g)
-			lux_context.volume('volumegrid', volume_params)
-			lux_context.attributeEnd()
-			
-			if flowtype >= 1:				
-				lux_context.attributeBegin(comment=domain.name + ' Fire', file=Files.VOLM)
-				lux_context.transform(matrix_to_list(domain.matrix_world, apply_worldscale=True))
-				volume_params = ParamSet() \
-								.add_integer('nx', big_res[0]) \
-								.add_integer('ny', big_res[1]) \
-								.add_integer('nz', big_res[2]) \
-								.add_point('p0',p[0]) \
-								.add_point('p1',p[1]) \
-								.add_float('density', fire) \
-								.add_color('Le', Le) 
-				lux_context.volume('volumegrid', volume_params)
-				lux_context.attributeEnd()
-				
-			LuxLog('Volumes: Volume Exported: %s' % domain.name)
-		else:
-			LuxLog('Volumes: Volume Export failed: %s' % domain.name)
+		if channel == 'density':
+			channeldata = density
+		if channel == 'fire':
+			channeldata == fire
+
+	return (big_res[0], big_res[1], big_res[2], channeldata)
