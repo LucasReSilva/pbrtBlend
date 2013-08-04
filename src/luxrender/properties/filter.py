@@ -101,8 +101,8 @@ class luxrender_filter(declarative_property_group):
 			'name': 'Filter Width',
 			'description': 'Width of pixel filter curve. Higher values are smoother and more blurred',
 			'default': 2.0,
-			'min': 0.0,
-			'soft_min': 0.0,
+			'min': 0.5,
+			'soft_min': 0.5,
 			'max': 10.0,
 			'soft_max': 4.0,
 			'save_in_preset': True
@@ -127,10 +127,10 @@ class luxrender_filter(declarative_property_group):
 			'name': 'X Width',
 			'description': 'Width of filter in X dimension',
 			'default': 2.0,
-			'min': 0.0,
-			'soft_min': 0.0,
+			'min': 0.5,
+			'soft_min': 0.5,
 			'max': 10.0,
-			'soft_max': 10.0,
+			'soft_max': 4.0,
 			'save_in_preset': True
 		},
 		{
@@ -139,10 +139,10 @@ class luxrender_filter(declarative_property_group):
 			'name': 'Y Width',
 			'description': 'Width of filter in Y dimension',
 			'default': 2.0,
-			'min': 0.0,
-			'soft_min': 0.0,
+			'min': 0.5,
+			'soft_min': 0.5,
 			'max': 10.0,
-			'soft_max': 10.0,
+			'soft_max': 4.0,
 			'save_in_preset': True
 		},
 		{
