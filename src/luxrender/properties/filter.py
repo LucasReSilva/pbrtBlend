@@ -77,11 +77,13 @@ class luxrender_filter(declarative_property_group):
 			'description': 'Pixel splatting filter',
 			'default': 'mitchell',
 			'items': [
-				('box', 'Box', 'box'),
-				('gaussian', 'Gaussian', 'gaussian'),
-				('mitchell', 'Mitchell', 'mitchell'),
-				('sinc', 'Sinc', 'sinc'),
-				('triangle', 'Triangle', 'triangle'),
+				('box', 'Box', 'Box filter'),
+				('gaussian', 'Gaussian', 'Gaussian filter'),
+				('mitchell', 'Mitchell', 'Mitchell-Netravali filter'),
+				('sinc', 'Sinc', 'Sinc filter'),
+				('triangle', 'Triangle', 'Triangle filter'),
+				('catmullrom', 'Catmull-Rom', 'Catmull-Rom filter'),
+				('blackmanharris', 'Blackman-Harris', 'Blackman-Harris filter'),
 			],
 			'save_in_preset': True
 		},
