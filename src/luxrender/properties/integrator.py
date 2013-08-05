@@ -1062,7 +1062,8 @@ class luxrender_integrator(declarative_property_group):
 		
 		if self.surfaceintegrator == 'bidirectional':
 			params.add_integer('eyedepth', self.eyedepth) \
-				  .add_integer('lightdepth', self.lightdepth)
+				  .add_integer('lightdepth', self.lightdepth) \
+				  .add_integer('lightraycount', self.lightraycount)
 			if not self.advanced:
 				params.add_string('lightpathstrategy', self.lightstrategy if not hybrid_compat else 'one') #Export the regular light strategy setting for lightpath strat when in non-advanced mode, advanced mode allows them to be set independently
 			if self.advanced:
@@ -1070,8 +1071,7 @@ class luxrender_integrator(declarative_property_group):
 					  .add_float('lightrrthreshold', self.lightrrthreshold) \
 					  .add_string('lightpathstrategy', self.lightpathstrategy if not hybrid_compat else 'one') \
 					  .add_integer('shadowraycount', self.shadowraycount) \
-					  .add_integer('lightraycount', self.lightraycount)
-		
+
 		if self.surfaceintegrator == 'directlighting':
 			params.add_integer('maxdepth', self.maxdepth)
 			if self.advanced:
