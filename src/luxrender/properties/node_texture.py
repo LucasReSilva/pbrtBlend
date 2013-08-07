@@ -971,6 +971,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
 		layout.prop(self, 'wrap')
 	
 	def export_texture(self, make_texture):
+#		smoke_path = export_smoke(self.domain, self.source)
 		grid = export_smoke(self.domain, self.source)
 		nx = grid[0]
 		ny = grid[1]

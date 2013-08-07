@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import hashlib
+import hashlib, os
 
 import bpy
 
@@ -35,12 +35,33 @@ from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 from .. import LuxRenderAddon
 from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import add_texture_parameter, convert_texture
+from ..export.volumes import export_smoke
 from ..outputs import LuxManager
 from ..util import dict_merge, bdecode_string2file
 
 #------------------------------------------------------------------------------ 
 # Texture property group construction helpers
 #------------------------------------------------------------------------------ 
+def ObjectParameter(attr, name, description, property_group):
+	return [
+		{
+			'attr': '%s_object' % attr,
+			'type': 'string',
+			'name': '%s' % name,
+			'description': '%s' % description,
+			'save_in_preset': True
+		},
+		{
+			'type': 'prop_search',
+			'attr': attr,
+			'src': lambda s,c: s.scene,
+			'src_attr': 'objects',
+			'trg': lambda s,c: getattr(c, property_group),
+			'trg_attr': '%s_object' % attr,
+			'name': name,
+		},
+	]
+
 
 def shorten_name(n):
 	return hashlib.md5(n.encode()).hexdigest()[:21] if len(n) > 21 else n
@@ -650,6 +671,7 @@ tex_names = (
 		('imagemap', 'Image Map'),
 		('normalmap', 'Normal Map'),
 		('marble', 'Marble'),
+		('densitygrid', 'Smoke Data'),
 		('hitpointcolor', 'Vertex Color'),
 		('hitpointgrey', 'Vertex Grey'),
 		('hitpointalpha', 'Vertex Alpha'),
@@ -2145,6 +2167,84 @@ class luxrender_tex_colordepth(declarative_property_group):
 				setattr(self, psi['name'], psi['value'])
 		TC_Kt.load_paramset(self, ps)
 
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_densitygrid(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	controls = [
+		'domain',
+		'source',
+		'wrapping'
+	]
+	
+	properties = [
+	] + \
+		ObjectParameter('domain', 'Domain', 'Domain object for smoke simulation', 'luxrender_tex_densitygrid') + \
+	[
+		{
+			'attr': 'source',
+			'name': 'Source',
+			'type': 'enum',
+			'items': [
+				('density', 'Density', ''),
+				('fire', 'Fire', ''),
+				('temperature', 'Temperature', ''),
+				('velocity', 'Velocity', '')		
+			],
+			'default': 'density',
+			'save_in_preset': True
+		},
+		{
+			'attr': 'wrapping',
+			'name': 'Wrapping',
+			'type': 'enum',
+			'items': [
+				('repeat', 'Repeat', 'repeat'),
+				('black', 'Black', 'black'),
+				('white', 'White', 'white'),
+				('clamp', 'Clamp', 'clamp')
+			],
+			'default': 'black',
+			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'attr': 'variant',
+			'default': 'float'
+		},
+		
+	]
+	
+	def get_paramset(self, scene, texture):
+		grid = export_smoke(self.domain_object, self.source)
+		nx = grid[0]
+		ny = grid[1]
+		nz = grid[2]
+		density = grid[3]
+#		smoke_path = export_smoke(self.domain_object, self.source)
+#				
+#		smokedata_params = ParamSet() .add_string('wrap', self.wrapping) \
+#			.add_string('filename', smoke_path)
+		
+		smokedata_params = ParamSet() \
+			.add_string('wrap', self.wrapping) \
+			.add_integer('nx', nx) \
+			.add_integer('ny', ny) \
+			.add_integer('nz', nz) \
+			.add_float('density', density)
+
+		return {'3DMAPPING'}, smokedata_params		
+		
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'domain_object': 'string',
+			'source': 'string',
+			'wrapping': 'string'			
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'].lower(), psi['value'])
 
 @LuxRenderAddon.addon_register_class
 class luxrender_tex_dots(declarative_property_group):

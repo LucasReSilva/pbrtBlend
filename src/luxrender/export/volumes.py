@@ -31,6 +31,7 @@ import os, struct, sys
 
 # Blender Libs
 import bpy
+from extensions_framework import util as efutil
 
 # LuxRender libs
 from . import ParamSet, matrix_to_list, LuxManager
@@ -635,5 +636,26 @@ def export_smoke(smoke_obj_name, channel):
 			channeldata = density
 		if channel == 'fire':
 			channeldata == fire
+			
+#		sc_fr = '%s/%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), bpy.context.scene.name, bpy.context.scene.frame_current)
+#		if not os.path.exists( sc_fr ):
+#			os.makedirs(sc_fr)
+#
+#		smoke_filename = '%s.smoke' % bpy.path.clean_name(domain.name)
+#		smoke_path = '/'.join([sc_fr, smoke_filename])
+#
+#		with open(smoke_path, 'wb') as smoke_file:
+#			## Binary densitygrid file format 
+#			##
+#			##File header
+#			smoke_file.write(b'SMOKE')        #magic number
+#			smoke_file.write(struct.pack('<I', big_res[0])) 
+#			smoke_file.write(struct.pack('<I', big_res[1])) 
+#			smoke_file.write(struct.pack('<I', big_res[2]))
+            ##Density data 			
+#			smoke_file.write(struct.pack('<%df'%len(channeldata), *channeldata))
+#
+#		LuxLog('Binary SMOKE file written: %s' % (smoke_path))
 
 	return (big_res[0], big_res[1], big_res[2], channeldata)
+#	return (smoke_path)
