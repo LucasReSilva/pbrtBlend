@@ -161,7 +161,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 	for scn in bpy.data.scenes:
 		LuxManager.SetCurrentScene(scn)
 		for volume in scn.luxrender_volumes.volumes:
-			lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
+			if volume.type == 'heterogeneous':
+				vol_param =  ParamSet().add_color('sigma_s', (1.0, 1.0, 1.0))
+				lux_context.makeNamedVolume( volume.name, 'heterogeneous',vol_param)  
+			else:
+				lux_context.makeNamedVolume( volume.name, *volume.api_output(lux_context) )
 	
 	LuxManager.SetCurrentScene(scene) # for preview context
 	

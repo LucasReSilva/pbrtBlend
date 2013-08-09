@@ -582,80 +582,84 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 	return (0,0,0,[],[])
 
 def export_smoke(smoke_obj_name, channel):
-	flowtype = -1
-	smoke_obj = bpy.data.objects[smoke_obj_name]
-	domain = None
-	#Search smoke domain target for smoke modifiers
-	for mod in smoke_obj.modifiers:
-		if mod.name == 'Smoke':
-			if mod.smoke_type == 'FLOW':
-				if mod.flow_settings.smoke_flow_type == 'BOTH':
-					flowtype = 2
-				else:
-					if mod.flow_settings.smoke_flow_type == 'SMOKE':
-						flowtype = 0
+	if LuxManager.CurrentScene.name == 'preview':
+		return (1, 1, 1, (1.0))
+	else:
+		flowtype = -1
+		smoke_obj = bpy.data.objects[smoke_obj_name]
+		domain = None
+		#Search smoke domain target for smoke modifiers
+		for mod in smoke_obj.modifiers:
+			if mod.name == 'Smoke':
+				if mod.smoke_type == 'FLOW':
+					if mod.flow_settings.smoke_flow_type == 'BOTH':
+						flowtype = 2
 					else:
-						if mod.flow_settings.smoke_flow_type == 'FIRE':
-							flowtype = 1
-			if mod.smoke_type == 'DOMAIN':
-				domain = smoke_obj
-				smoke_modifier = mod
+						if mod.flow_settings.smoke_flow_type == 'SMOKE':
+							flowtype = 0
+						else:
+							if mod.flow_settings.smoke_flow_type == 'FIRE':
+								flowtype = 1
+				if mod.smoke_type == 'DOMAIN':
+					domain = smoke_obj
+					smoke_modifier = mod
 
-	if domain != None:
-		eps = 0.000001
-		p = []
-		# gather smoke domain settings
-		BBox = domain.bound_box
-		p.append([BBox[0][0], BBox[0][1], BBox[0][2]])
-		p.append([BBox[6][0], BBox[6][1], BBox[6][2]])
-		set = mod.domain_settings
-		resolution = set.resolution_max
-		smokecache = set.point_cache
-		ret = read_cache(smokecache, set.use_high_resolution, set.amplify+1, flowtype)
-		res_x = ret[0]
-		res_y = ret[1]
-		res_z = ret[2]
-		density = ret[3]
-		fire = ret[4]
+		if domain != None:
+			eps = 0.000001
+			p = []
+			# gather smoke domain settings
+			BBox = domain.bound_box
+			p.append([BBox[0][0], BBox[0][1], BBox[0][2]])
+			p.append([BBox[6][0], BBox[6][1], BBox[6][2]])
+			set = mod.domain_settings
+			resolution = set.resolution_max
+			smokecache = set.point_cache
+			ret = read_cache(smokecache, set.use_high_resolution, set.amplify+1, flowtype)
+			res_x = ret[0]
+			res_y = ret[1]
+			res_z = ret[2]
+			density = ret[3]
+			fire = ret[4]
 
-		if(res_x*res_y*res_z > 0):
-			#new cache format
-			big_res = []
-			big_res.append(res_x)
-			big_res.append(res_y)
-			big_res.append(res_z)
-		else:
-			max = domain.dimensions[0]
-			if (max - domain.dimensions[1]) < -eps: max = domain.dimensions[1]
-			if (max - domain.dimensions[2]) < -eps: max = domain.dimensions[2]					
-			big_res = [int(round(resolution*domain.dimensions[0]/max,0)),int(round(resolution*domain.dimensions[1]/max,0)),int(round(resolution*domain.dimensions[2]/max,0))]
+			if(res_x*res_y*res_z > 0):
+				#new cache format
+				big_res = []
+				big_res.append(res_x)
+				big_res.append(res_y)
+				big_res.append(res_z)
+			else:
+				max = domain.dimensions[0]
+				if (max - domain.dimensions[1]) < -eps: max = domain.dimensions[1]
+				if (max - domain.dimensions[2]) < -eps: max = domain.dimensions[2]					
+				big_res = [int(round(resolution*domain.dimensions[0]/max,0)),int(round(resolution*domain.dimensions[1]/max,0)),int(round(resolution*domain.dimensions[2]/max,0))]
 						
-		if set.use_high_resolution: big_res = [big_res[0]*(set.amplify+1), big_res[1]*(set.amplify+1), big_res[2]*(set.amplify+1)]
-
-		if channel == 'density':
-			channeldata = density
-		if channel == 'fire':
-			channeldata == fire
+			if set.use_high_resolution: big_res = [big_res[0]*(set.amplify+1), big_res[1]*(set.amplify+1), big_res[2]*(set.amplify+1)]
+	
+			if channel == 'density':
+				channeldata = density
+			if channel == 'fire':
+				channeldata == fire
 			
-#		sc_fr = '%s/%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), bpy.context.scene.name, bpy.context.scene.frame_current)
-#		if not os.path.exists( sc_fr ):
-#			os.makedirs(sc_fr)
+#	        	sc_fr = '%s/%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), bpy.context.scene.name, bpy.context.scene.frame_current)
+#		        if not os.path.exists( sc_fr ):
+#			        os.makedirs(sc_fr)
 #
-#		smoke_filename = '%s.smoke' % bpy.path.clean_name(domain.name)
-#		smoke_path = '/'.join([sc_fr, smoke_filename])
+#       		smoke_filename = '%s.smoke' % bpy.path.clean_name(domain.name)
+#	        	smoke_path = '/'.join([sc_fr, smoke_filename])
 #
-#		with open(smoke_path, 'wb') as smoke_file:
-#			## Binary densitygrid file format 
-#			##
-#			##File header
-#			smoke_file.write(b'SMOKE')        #magic number
-#			smoke_file.write(struct.pack('<I', big_res[0])) 
-#			smoke_file.write(struct.pack('<I', big_res[1])) 
-#			smoke_file.write(struct.pack('<I', big_res[2]))
-            ##Density data 			
-#			smoke_file.write(struct.pack('<%df'%len(channeldata), *channeldata))
+#		        with open(smoke_path, 'wb') as smoke_file:
+#			        # Binary densitygrid file format 
+#			        #
+#			        # File header
+#	        		smoke_file.write(b'SMOKE')        #magic number
+#		        	smoke_file.write(struct.pack('<I', big_res[0])) 
+#			        smoke_file.write(struct.pack('<I', big_res[1])) 
+#       			smoke_file.write(struct.pack('<I', big_res[2]))
+				# Density data 			
+#       			smoke_file.write(struct.pack('<%df'%len(channeldata), *channeldata))
 #
-#		LuxLog('Binary SMOKE file written: %s' % (smoke_path))
+#	        	LuxLog('Binary SMOKE file written: %s' % (smoke_path))
 
+		
 	return (big_res[0], big_res[1], big_res[2], channeldata)
 #	return (smoke_path)
