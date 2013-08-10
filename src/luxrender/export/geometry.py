@@ -654,28 +654,29 @@ class GeometryExporter(object):
 			LuxLog('WARNING: material slot %d on object "%s" is unassigned!' %(me_mat_index+1, mat_object.name))
 
 		#Emission check
-		output_node = find_node(ob_mat, 'luxrender_material_output_node')
-		if ob_mat.luxrender_material.nodetree:
-			object_is_emitter = False
-		if output_node != None:
-			light_socket = output_node.inputs[3]
-			if light_socket.is_linked:
-				light_node = light_socket.links[0].from_node
-				object_is_emitter = light_socket.is_linked
-		else: #no node tree, so check the classic mat editor
-			object_is_emitter = ob_mat.luxrender_emission.use_emission
-		
-		if object_is_emitter:
-			# Only add the AreaLightSource if this object's emission lightgroup is enabled
-			if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
-				if not self.visibility_scene.luxrender_lightgroups.ignore:
-					self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
-				if not ob_mat.luxrender_material.nodetree:
-					self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
-				else:
-					# texture exporting
-					tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
-					self.lux_context.areaLightSource( *light_node.export(tex_maker.make_texture) )
+		if ob_mat != None:
+			output_node = find_node(ob_mat, 'luxrender_material_output_node')
+			if ob_mat.luxrender_material.nodetree:
+				object_is_emitter = False
+			if output_node != None:
+				light_socket = output_node.inputs[3]
+				if light_socket.is_linked:
+					light_node = light_socket.links[0].from_node
+					object_is_emitter = light_socket.is_linked
+			else: #no node tree, so check the classic mat editor
+				object_is_emitter = ob_mat.luxrender_emission.use_emission
+			
+			if object_is_emitter:
+				# Only add the AreaLightSource if this object's emission lightgroup is enabled
+				if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
+					if not self.visibility_scene.luxrender_lightgroups.ignore:
+						self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+					if not ob_mat.luxrender_material.nodetree:
+						self.lux_context.areaLightSource( *ob_mat.luxrender_emission.api_output(ob_mat) )
+					else:
+						# texture exporting
+						tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
+						self.lux_context.areaLightSource( *light_node.export(tex_maker.make_texture) )
 
 		self.lux_context.shape(me_shape_type, me_shape_params)
 
