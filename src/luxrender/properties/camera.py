@@ -677,7 +677,7 @@ class luxrender_film(declarative_property_group):
 			'attr': 'outlierrejection_k',
 			'name': 'Firefly rejection',
 			'description': 'Firefly (outlier) rejection k parameter. 0=disabled',
-			'default': 5,
+			'default': 2,
 			'min': 0,
 			'soft_min': 0,
 		},
