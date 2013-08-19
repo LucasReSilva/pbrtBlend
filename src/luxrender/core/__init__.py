@@ -477,9 +477,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				LuxLog('Updating preview (%ix%i - %s)' % (xres, yres, preview_context.getAttribute('renderer_statistics_formatted_short', '_recommended_string')))
 				
 				result = self.begin_result(0, 0, xres, yres)
-				lay = result.layers[0]
 				
-				lay.rect  = preview_context.blenderCombinedDepthRects()[0]
+				if hasattr(preview_context, 'blenderCombinedDepthBuffers'):
+					# use fast buffers
+					pb, zb = preview_context.blenderCombinedDepthBuffers()
+					result.layers.foreach_set("rect", pb)
+				else:
+					lay = result.layers[0]
+					lay.rect = preview_context.blenderCombinedDepthRects()[0]
 				
 				self.end_result(result, 0) if bpy.app.version > (2, 63, 17 ) else self.end_result(result) # cycles tiles adaption
 		except Exception as exc:

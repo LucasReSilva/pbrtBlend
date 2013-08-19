@@ -118,7 +118,20 @@ class LuxFilmDisplay(TimerThread):
 					# use the framebuffer direct from pylux using a special method
 					# for this purpose, which saves doing a lot of array processing
 					# in python
-					lay.rect, lay.passes[0].rect  = self.LocalStorage['lux_context'].blenderCombinedDepthRects()
+					ctx = self.LocalStorage['lux_context']
+					
+					# the fast buffer approach only works if we set all render layers and all passes
+					# so for now, only use optimized route if one layer and one pass
+					if hasattr(ctx, 'blenderCombinedDepthBuffers') and len(result.layers) == 1 and len(result.layers[0].passes) == 1:
+						# use fast buffers
+						pb, zb = ctx.blenderCombinedDepthBuffers()
+						result.layers.foreach_set("rect", pb)
+						lay.passes.foreach_set("rect", zb)
+					else:
+						cr, zr = ctx.blenderCombinedDepthRects()
+						lay.rect = cr
+						lay.passes[0].rect = zr
+					
 				elif os.path.exists(self.LocalStorage['RE'].output_file):
 					lay.load_from_file(self.LocalStorage['RE'].output_file)
 				else:
