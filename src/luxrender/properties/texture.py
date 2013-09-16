@@ -4035,11 +4035,11 @@ class luxrender_tex_transform(declarative_property_group):
 		ws = get_worldscale(as_scalematrix=False)
 		
 		transform_params.add_vector('rotate', self.rotate)
-
+		
 		if self.coordinates == 'smoke_domain':
-			mloc = bpy.context.scene.objects.active.location
-			vloc = bpy.context.scene.objects.active.data.vertices[0].co
-			vloc_global = mloc + vloc
+			obj = bpy.context.scene.objects.active
+			vloc = bpy.context.scene.objects.active.data.vertices[0]
+			vloc_global = obj.matrix_world * vloc.co
 			d_dim = bpy.data.objects[bpy.context.scene.objects.active.name].dimensions
 			print("Auto-Setting Smoke Domain translation", vloc_global)
 			print("Auto-Setting Smoke Domain dimensions", d_dim)
