@@ -3979,7 +3979,11 @@ class luxrender_tex_transform(declarative_property_group):
 		'scale',
 	]
 	
-	visibility = {}
+	visibility = {
+	'translate': { 'coordinates': O(['global', 'globalnormal', 'local', 'localnormal', 'uv']) },
+	'rotate': { 'coordinates': O(['global', 'globalnormal', 'local', 'localnormal', 'uv']) },
+	'scale': { 'coordinates': O(['global', 'globalnormal', 'local', 'localnormal', 'uv']) },
+	}
 	
 	properties = [
 		{
@@ -3992,6 +3996,7 @@ class luxrender_tex_transform(declarative_property_group):
 				('local', 'Object', 'Use object local 3D coordinates'),
 				('localnormal', 'Object Normal', 'Use object local surface normals'),
 				('uv', 'UV', 'Use UV coordinates (x=u y=v z=0)'),
+				('smoke_domain', 'Smoke_Domain', 'Use Smoke Domain Coordinates'),
 			],
 			'default': 'global',
 			'save_in_preset': True
@@ -4010,7 +4015,7 @@ class luxrender_tex_transform(declarative_property_group):
 			'name': 'Rotate',
 			'default': (0.0, 0.0, 0.0),
 			'precision': 5,
-			'subtype': 'DIRECTION',
+#			'subtype': 'DIRECTION',
 			'unit': 'ROTATION',
 			'save_in_preset': True
 		},
@@ -4029,10 +4034,22 @@ class luxrender_tex_transform(declarative_property_group):
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
-		transform_params.add_string('coordinates', self.coordinates)
-		transform_params.add_vector('translate', [i*ws for i in self.translate])
 		transform_params.add_vector('rotate', self.rotate)
-		transform_params.add_vector('scale', [i*ws for i in self.scale])
+
+		if self.coordinates == 'smoke_domain':
+			mloc = bpy.context.scene.objects.active.location
+			vloc = bpy.context.scene.objects.active.data.vertices[0].co
+			vloc_global = mloc + vloc
+			d_dim = bpy.data.objects[bpy.context.scene.objects.active.name].dimensions
+			print("cAuto-Setting Smoke Domain translation", vloc_global)
+			print("Auto-Setting Smoke Domain dimensions", d_dim)
+			transform_params.add_string('coordinates', 'global')
+			transform_params.add_vector('translate', vloc_global)
+			transform_params.add_vector('scale', bpy.data.objects[bpy.context.scene.objects.active.name].dimensions)
+		else:
+			transform_params.add_string('coordinates', self.coordinates)
+			transform_params.add_vector('translate', [i*ws for i in self.translate])
+			transform_params.add_vector('scale', [i*ws for i in self.scale])
 		
 		return transform_params
 	
