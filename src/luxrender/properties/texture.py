@@ -4041,11 +4041,11 @@ class luxrender_tex_transform(declarative_property_group):
 			vloc = bpy.context.scene.objects.active.data.vertices[0].co
 			vloc_global = mloc + vloc
 			d_dim = bpy.data.objects[bpy.context.scene.objects.active.name].dimensions
-			print("cAuto-Setting Smoke Domain translation", vloc_global)
+			print("Auto-Setting Smoke Domain translation", vloc_global)
 			print("Auto-Setting Smoke Domain dimensions", d_dim)
 			transform_params.add_string('coordinates', 'global')
 			transform_params.add_vector('translate', vloc_global)
-			transform_params.add_vector('scale', bpy.data.objects[bpy.context.scene.objects.active.name].dimensions)
+			transform_params.add_vector('scale', d_dim)
 		else:
 			transform_params.add_string('coordinates', self.coordinates)
 			transform_params.add_vector('translate', [i*ws for i in self.translate])
