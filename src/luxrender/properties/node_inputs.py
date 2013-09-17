@@ -78,8 +78,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'coordinates')
 		if self.coordinates == 'smoke_domain':
-			layout.label(text='Not yet functional')
-#			layout.label(text=' Auto Using Smoke Domain Data')
+			layout.label(text=' Auto Using Smoke Domain Data')
 		else:
 			layout.prop(self, 'translate')
 			layout.prop(self, 'rotate')
@@ -91,24 +90,24 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 		ws = get_worldscale(as_scalematrix=False)
 		
 		coord_params.add_vector('rotate', self.rotate)
-		
-####### TODO: find the node like values #######		
-#		if self.coordinates == 'smoke_domain':
-#			for tex in bpy.data.textures:
-#				if bpy.data.textures[tex.name].luxrender_texture.type == 'densitygrid':
-#					domain = bpy.data.textures[tex.name].luxrender_texture.luxrender_tex_densitygrid.domain_object
-#			obj = bpy.context.scene.objects[domain]
-#			vloc = bpy.context.scene.objects[domain].data.vertices[0]
-#			vloc_global = obj.matrix_world * vloc.co
-#			d_dim = bpy.data.objects[domain].dimensions
-#			coord_params.add_string('coordinates', 'global')
-#			coord_params.add_vector('translate', vloc_global)
-#			coord_params.add_vector('scale', d_dim)
-#		else:
-		coord_params.add_string('coordinates', self.coordinates)
-		coord_params.add_vector('translate', [i*ws for i in self.translate])
-		coord_params.add_vector('scale', [i*ws for i in self.scale])
+			
+		if self.coordinates == 'smoke_domain':
+			for group in bpy.data.node_groups:
+				for node in bpy.data.node_groups[group.name].nodes:
+					if bpy.data.node_groups[group.name].nodes[node.name].name == 'Smoke Data Texture':
+						domain = bpy.data.node_groups[group.name].nodes[node.name].domain
 
+			obj = bpy.context.scene.objects[domain]
+			vloc = bpy.context.scene.objects[domain].data.vertices[0]
+			vloc_global = obj.matrix_world * vloc.co
+			d_dim = bpy.data.objects[domain].dimensions
+			coord_params.add_string('coordinates', 'global')
+			coord_params.add_vector('translate', vloc_global)
+			coord_params.add_vector('scale', d_dim)
+		else:
+			coord_params.add_string('coordinates', self.coordinates)
+			coord_params.add_vector('translate', [i*ws for i in self.translate])
+			coord_params.add_vector('scale', [i*ws for i in self.scale])
 		
 		return coord_params
 
