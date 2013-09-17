@@ -78,7 +78,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'coordinates')
 		if self.coordinates == 'smoke_domain':
-			layout.label(text=' Auto Using Smoke Domain Data')
+			layout.label(text='Auto Using Smoke Domain Data')
 		else:
 			layout.prop(self, 'translate')
 			layout.prop(self, 'rotate')

@@ -3977,12 +3977,14 @@ class luxrender_tex_transform(declarative_property_group):
 		'translate',
 		'rotate',
 		'scale',
+		'lbl_smoke_domain',
 	]
 	
 	visibility = {
 	'translate': { 'coordinates': O(['global', 'globalnormal', 'local', 'localnormal', 'uv']) },
 	'rotate': { 'coordinates': O(['global', 'globalnormal', 'local', 'localnormal', 'uv']) },
 	'scale': { 'coordinates': O(['global', 'globalnormal', 'local', 'localnormal', 'uv']) },
+	'lbl_smoke_domain': { 'coordinates': 'smoke_domain' },
 	}
 	
 	properties = [
@@ -4027,6 +4029,11 @@ class luxrender_tex_transform(declarative_property_group):
 			'precision': 5,
 			'save_in_preset': True
 		},
+		{
+		'type': 'text',
+		'attr': 'lbl_smoke_domain',
+		'name': 'Auto Using Smoke Domain Data'
+		},
 	]
 	
 	def get_paramset(self, scene):
@@ -4044,8 +4051,6 @@ class luxrender_tex_transform(declarative_property_group):
 			vloc = bpy.context.scene.objects[domain].data.vertices[0]
 			vloc_global = obj.matrix_world * vloc.co
 			d_dim = bpy.data.objects[domain].dimensions
-			print("Auto-Setting Smoke Domain translation", vloc_global)
-			print("Auto-Setting Smoke Domain dimensions", d_dim)
 			transform_params.add_string('coordinates', 'global')
 			transform_params.add_vector('translate', vloc_global)
 			transform_params.add_vector('scale', d_dim)
