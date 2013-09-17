@@ -4037,10 +4037,13 @@ class luxrender_tex_transform(declarative_property_group):
 		transform_params.add_vector('rotate', self.rotate)
 		
 		if self.coordinates == 'smoke_domain':
-			obj = bpy.context.scene.objects.active
-			vloc = bpy.context.scene.objects.active.data.vertices[0]
+			for tex in bpy.data.textures:
+				if bpy.data.textures[tex.name].luxrender_texture.type == 'densitygrid':
+					domain = bpy.data.textures[tex.name].luxrender_texture.luxrender_tex_densitygrid.domain_object
+			obj = bpy.context.scene.objects[domain]
+			vloc = bpy.context.scene.objects[domain].data.vertices[0]
 			vloc_global = obj.matrix_world * vloc.co
-			d_dim = bpy.data.objects[bpy.context.scene.objects.active.name].dimensions
+			d_dim = bpy.data.objects[domain].dimensions
 			print("Auto-Setting Smoke Domain translation", vloc_global)
 			print("Auto-Setting Smoke Domain dimensions", d_dim)
 			transform_params.add_string('coordinates', 'global')
