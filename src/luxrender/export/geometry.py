@@ -973,7 +973,7 @@ class GeometryExporter(object):
 				col = None
 				seg_length = 1.0				
 				for step in range(0, steps):
-					co = psys.co_hair(obj, mod, pindex, step)                               
+					co = psys.co_hair(obj, mod, pindex, step) if bpy.app.version < (2, 68, 5 ) else psys.co_hair(obj, pindex, step) # blender api change in r60251 - removed modifier argument
 					if (step > 0): seg_length = (co-obj.matrix_world*points[len(points)-1]).length_squared 
 					if not (co.length_squared == 0 or seg_length == 0):
 						points.append(transform*co)
