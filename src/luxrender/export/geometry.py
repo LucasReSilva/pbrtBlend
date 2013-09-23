@@ -1107,7 +1107,7 @@ class GeometryExporter(object):
 				points = []
 
 				for step in range(0,steps):
-					co = psys.co_hair(obj, mod, pindex, step)
+					co = psys.co_hair(obj, mod, pindex, step) if bpy.app.version < (2, 68, 5 ) else psys.co_hair(obj, pindex, step) # blender api change in r60251 - removed modifier argument
 					if not co.length_squared == 0:
 						points.append(co)
 						
