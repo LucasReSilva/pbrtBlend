@@ -47,6 +47,7 @@ class luxrender_hair(declarative_property_group):
 	ef_attach_to = ['ParticleSettings']
 	controls = [
 			'hair_size',
+			['root_width','top_width'],
 			'use_binary_output',
 			'tesseltype',
 			'solid_sidecount',
@@ -81,6 +82,30 @@ class luxrender_hair(declarative_property_group):
 			'sub_type': 'DISTANCE',
 			'unit': 'LENGTH',
 		},
+		{
+			'type': 'float',
+			'attr': 'root_width',
+			'name': 'Root',
+			'description': 'Thickness of hair at root',
+			'default': 1.0,
+			'min': 0.000001,
+			'soft_min': 0.000001,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 3,
+		},		
+		{
+			'type': 'float',
+			'attr': 'top_width',
+			'name': 'Top',
+			'description': 'Thickness of hair at top',
+			'default': 1.0,
+			'min': 0.000001,
+			'soft_min': 0.000001,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 3
+		},		
 		{
 			'type': 'bool',
 			'attr': 'use_binary_output',
