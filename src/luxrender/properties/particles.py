@@ -47,7 +47,7 @@ class luxrender_hair(declarative_property_group):
 	ef_attach_to = ['ParticleSettings']
 	controls = [
 			'hair_size',
-			['root_width','top_width'],
+			['root_width','tip_width','width_offset'],
 			'use_binary_output',
 			'tesseltype',
 			'solid_sidecount',
@@ -96,10 +96,22 @@ class luxrender_hair(declarative_property_group):
 		},		
 		{
 			'type': 'float',
-			'attr': 'top_width',
-			'name': 'Top',
-			'description': 'Thickness of hair at top',
+			'attr': 'tip_width',
+			'name': 'Tip',
+			'description': 'Thickness of hair at tip',
 			'default': 1.0,
+			'min': 0.000001,
+			'soft_min': 0.000001,
+			'max': 1.0,
+			'soft_max': 1.0,
+			'precision': 3
+		},		
+		{
+			'type': 'float',
+			'attr': 'width_offset',
+			'name': 'Offset',
+			'description': 'Offset from root for thickness variation',
+			'default': 0.0,
 			'min': 0.000001,
 			'soft_min': 0.000001,
 			'max': 1.0,

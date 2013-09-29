@@ -960,8 +960,10 @@ class GeometryExporter(object):
 			transform = obj.matrix_world.inverted()
 			total_strand_count = 0	
 			root_width = psys.settings.luxrender_hair.root_width
-			top_width = psys.settings.luxrender_hair.top_width
-			if root_width == top_width:
+			tip_width = psys.settings.luxrender_hair.tip_width
+			width_offset = psys.settings.luxrender_hair.width_offset
+			
+			if root_width == tip_width:
 				thicknessflag = 0
 				size = root_width * size
 			else:
@@ -986,7 +988,12 @@ class GeometryExporter(object):
 					if not (co.length_squared == 0 or seg_length == 0):
 						points.append(transform*co)
 						if thicknessflag:
-							thickness.append((root_width*(steps-step-1)+top_width*step)*2*size/(steps-1))
+							if step > steps*width_offset:
+								thick = (root_width*(steps-step-1)+tip_width*(step-steps*width_offset))/(steps*(1-width_offset)-1)
+							else:
+								thick = root_width
+								
+							thickness.append(thick*size)
 						point_count = point_count + 1
 
 						if uvflag:
