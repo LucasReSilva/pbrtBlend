@@ -1252,6 +1252,25 @@ class luxrender_tonemapping(declarative_property_group):
 		
 		# Contrast
 		'ywa',
+		
+		# Bloom
+		'usebloom',
+		['bloom_radius', 'bloom_weight'],
+		
+		# Glare
+		'useglare',
+		['glare_amount', 'glare_radius'], 
+		['glare_blades', 'glare_threshold'], 
+		'glare_lashes_filename',
+		'glare_pupil_filename',
+		
+		# Vignetting
+		'usevignetting',
+		['vignetting_scale'],
+		
+		# Abberation
+		'useabberation',
+		['abberation_amount'],
 	]
 	
 	visibility = {
@@ -1265,6 +1284,17 @@ class luxrender_tonemapping(declarative_property_group):
 		
 		# Contrast
 		'ywa':					{ 'type': 'contrast' },
+		
+		'bloom_radius':			{ 'usebloom': True },
+		'bloom_weight':			{ 'usebloom': True },
+		'glare_amount':			{ 'useglare': True },
+		'glare_radius':			{ 'useglare': True },
+		'glare_blades':			{ 'useglare': True },
+		'glare_threshold':		{ 'useglare': True },
+		'glare_lashes_filename':{ 'useglare': True },
+		'glare_pupil_filename':	{ 'useglare': True },
+		'vignetting_scale':		{ 'usevignetting': True },
+		'abberation_amount':	{ 'useabberation': True },
 	}
 	
 	properties = [
@@ -1335,7 +1365,144 @@ class luxrender_tonemapping(declarative_property_group):
 			'soft_min': 0.0,
 			'max': 2e5,
 			'soft_max': 2e5
-		}
+		},
+		
+		{
+			'type': 'bool',
+			'attr': 'usebloom',
+			'name': 'Bloom',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'bloom_radius',
+			'name': 'Radius',
+			'description': 'Bloom radius as a fraction of the largest image dimension',
+			'subtype': 'FACTOR',
+			'default': 0.07,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
+		{
+			'type': 'float',
+			'attr': 'bloom_weight',
+			'name': 'Amount',
+			'description': 'Amount of bloom to add to the image',
+			'subtype': 'FACTOR',
+			'default': 0.25,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
+		
+		{
+			'type': 'bool',
+			'attr': 'useglare',
+			'name': 'Glare',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'glare_amount',
+			'name': 'Amount',
+			'description': 'Amount of glare to add to the image',
+			'subtype': 'FACTOR',
+			'default': 0.03,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
+		{
+			'type': 'float',
+			'attr': 'glare_radius',
+			'name': 'Radius',
+			'description': 'Glare radius as a fraction of the largest image dimension',
+			'subtype': 'FACTOR',
+			'default': 0.03,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
+		{
+			'type': 'int',
+			'attr': 'glare_blades',
+			'name': 'Blades',
+			'description': 'Number of blades in diaphragm',
+			'default': 3,
+			'min': 3,
+			'soft_min': 3,
+			'max': 30,
+			'soft_max': 30
+		},
+		{
+			'type': 'float',
+			'attr': 'glare_threshold',
+			'name': 'Threshold',
+			'description': 'Glare threshold factor relative to max pixel intensity',
+			'subtype': 'FACTOR',
+			'default': 0.5,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
+		{
+			'type': 'string',
+			'attr': 'glare_lashes_filename',
+			'name': 'Eyelashes map',
+			'description': 'For obstacle-based glare, map of eyelashes/obstacles',
+			'subtype': 'FILE_PATH',
+		},
+		{
+			'type': 'string',
+			'attr': 'glare_pupil_filename',
+			'name': 'Pupil mask',
+			'description': 'For obstacle-based glare, pupil/diaphragm mask',
+			'subtype': 'FILE_PATH',
+		},
+		
+		{
+			'type': 'bool',
+			'attr': 'usevignetting',
+			'name': 'Vignetting',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'vignetting_scale',
+			'name': 'Scale',
+			'description': 'Vignetting scale as fraction of the image dimensions',
+			'subtype': 'FACTOR',
+			'default': 0.4,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
+		
+		{
+			'type': 'bool',
+			'attr': 'useabberation',
+			'name': 'Abberation',
+			'default': False
+		},
+		{
+			'type': 'float',
+			'attr': 'abberation_amount',
+			'name': 'Amount',
+			'description': 'Abberation amount as fraction of the image dimensions',
+			'subtype': 'FACTOR',
+			'default': 0.005,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'soft_max': 1.0
+		},
 	]
 	
 	def get_paramset(self):
@@ -1358,5 +1525,30 @@ class luxrender_tonemapping(declarative_property_group):
 			
 		if self.type == 'contrast':
 			params.add_float('contrast_ywa', self.ywa)
+		
+		if self.usebloom:
+			params.add_bool('bloom_enabled', True)
+			params.add_float('bloom_radius', self.bloom_radius)
+			params.add_float('bloom_weight', self.bloom_weight)
+		
+		# Glare
+		if self.useglare:
+			params.add_bool('glare_enabled', True)
+			params.add_float('glare_amount', self.glare_amount)
+			params.add_float('glare_radius', self.glare_radius)
+			params.add_integer('glare_blades', self.glare_blades)
+			params.add_float('glare_threshold', self.glare_threshold)
+			params.add_string('glare_lashes_filename', self.glare_lashes_filename)
+			params.add_string('glare_pupil_filename', self.glare_pupil_filename)
+		
+		# Vignetting
+		if self.usevignetting:
+			params.add_bool('vignetting_enabled', True)
+			params.add_float('vignetting_scale', self.vignetting_scale)
+		
+		# Abberation
+		if self.useabberation:
+			params.add_bool('abberation_enabled', True)
+			params.add_float('abberation_amount', self.abberation_amount)
 		
 		return params
