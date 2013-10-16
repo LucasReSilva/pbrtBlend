@@ -173,7 +173,7 @@ class luxrender_volume_data(declarative_property_group):
 	
 	visibility = dict_merge(
 		{
-			'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous']), 'sigma_s_usecolortexture': False },
+#			'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous']), 'sigma_s_usecolortexture': False },
 			'g': { 'type': O(['homogeneous', 'heterogeneous']) },
 			'stepsize': { 'type': 'heterogeneous' },
 			'depth': O([ A([{ 'type': 'clear' }, { 'absorption_usecolortexture': False }]), A([{'type': O(['homogeneous', 'heterogeneous']) }, { 'sigma_a_usecolortexture': False }]) ])
@@ -329,7 +329,7 @@ class luxrender_volume_data(declarative_property_group):
 			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
 			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
 			
-			if self.absorption_usecolortexture and self.absorption_scale!=1.0:
+			if self.sigma_a_usecolortexture and self.absorption_scale!=1.0:
 				
 				tex_found = False
 				for psi in vp:
@@ -359,6 +359,36 @@ class luxrender_volume_data(declarative_property_group):
 					# overwrite the sigma_a tex name with the scaled tex
 					vp.add_texture('sigma_a', texture_name)
 
+			if self.sigma_s_usecolortexture and self.scattering_scale!=1.0:
+				
+				tex_found = False
+				for psi in vp:
+					if psi.type == 'texture' and psi.name == 'sigma_s':
+						tex_found = True
+						sigma_s_tex = psi.value
+				
+				if tex_found:
+					sv = ExportedTextures.next_scale_value()
+					texture_name = 'sigma_s_scaled_%i' % sv
+					ExportedTextures.texture(
+						lux_context,
+						texture_name,
+						'color',
+						'scale',
+						ParamSet() \
+						.add_color(
+							'tex1',
+							[self.scattering_scale]*3
+						) \
+						.add_texture(
+							'tex2',
+							sigma_s_tex
+						)
+					)
+					ExportedTextures.export_new(lux_context)
+					# overwrite the sigma_s tex name with the scaled tex
+					vp.add_texture('sigma_s', texture_name)
+
 		if self.type == 'heterogeneous':
 			def scattering_scale(i):
 				return i * self.scattering_scale
@@ -368,7 +398,7 @@ class luxrender_volume_data(declarative_property_group):
 			vp.update( TC_sigma_a.get_paramset(self, value_transform_function=absorption_at_depth_scaled) )
 			vp.update( TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale) )
 			
-			if self.absorption_usecolortexture and self.absorption_scale!=1.0:
+			if self.sigma_a_usecolortexture and self.absorption_scale!=1.0:
 				
 				tex_found = False
 				for psi in vp:
@@ -380,23 +410,53 @@ class luxrender_volume_data(declarative_property_group):
 					sv = ExportedTextures.next_scale_value()
 					texture_name = 'sigma_a_scaled_%i' % sv
 					ExportedTextures.texture(
-											 lux_context,
-											 texture_name,
-											 'color',
-											 'scale',
-											 ParamSet() \
-											 .add_color(
-														'tex1',
-														[self.absorption_scale]*3
-														) \
-											 .add_texture(
-														  'tex2',
-														  sigma_a_tex
-														  )
-											 )
+						lux_context,
+						texture_name,
+						'color',
+						'scale',
+						ParamSet() \
+						.add_color(
+							'tex1',
+							[self.absorption_scale]*3
+						) \
+						.add_texture(
+							'tex2',
+							sigma_a_tex
+						)
+					)
 					ExportedTextures.export_new(lux_context)
 					# overwrite the sigma_a tex name with the scaled tex
 					vp.add_texture('sigma_a', texture_name)
+					
+			if self.sigma_s_usecolortexture and self.scattering_scale!=1.0:
+				
+				tex_found = False
+				for psi in vp:
+					if psi.type == 'texture' and psi.name == 'sigma_s':
+						tex_found = True
+						sigma_s_tex = psi.value
+				
+				if tex_found:
+					sv = ExportedTextures.next_scale_value()
+					texture_name = 'sigma_s_scaled_%i' % sv
+					ExportedTextures.texture(
+						lux_context,
+						texture_name,
+						'color',
+						'scale',
+						ParamSet() \
+						.add_color(
+							'tex1',
+							[self.scattering_scale]*3
+						) \
+						.add_texture(
+							'tex2',
+							sigma_s_tex
+						)
+					)
+					ExportedTextures.export_new(lux_context)
+					# overwrite the sigma_s tex name with the scaled tex
+					vp.add_texture('sigma_s', texture_name)
 
 		return self.type, vp
 	

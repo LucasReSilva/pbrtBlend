@@ -26,7 +26,7 @@
 
 import re
 
-import bpy
+import bpy, mathutils
 
 from extensions_framework import declarative_property_group
 
@@ -98,8 +98,8 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 						domain = bpy.data.node_groups[group.name].nodes[node.name].domain
 
 			obj = bpy.context.scene.objects[domain]
-			vloc = bpy.context.scene.objects[domain].data.vertices[0]
-			vloc_global = obj.matrix_world * vloc.co
+			vloc = mathutils.Vector((obj.bound_box[0][0],obj.bound_box[0][1],obj.bound_box[0][2]))
+			vloc_global = obj.matrix_world * vloc
 			d_dim = bpy.data.objects[domain].dimensions
 			coord_params.add_string('coordinates', 'global')
 			coord_params.add_vector('translate', vloc_global)

@@ -26,7 +26,7 @@
 #
 import hashlib, os
 
-import bpy
+import bpy, mathutils
 
 from extensions_framework import declarative_property_group
 from extensions_framework import util as efutil
@@ -666,7 +666,9 @@ tex_names = (
 	(
 		('brick', 'Brick'),
 		('checkerboard', 'Checkerboard'),
+                ('cloud', 'Cloud'),
 		('dots', 'Dots'),
+                ('exponential', 'Exponential'),
 		('fbm', 'FBM'),
 		('imagemap', 'Image Map'),
 		('normalmap', 'Normal Map'),
@@ -2023,6 +2025,193 @@ class luxrender_tex_checkerboard(declarative_property_group):
 		TF_tex2.load_paramset(self, ps)
 
 @LuxRenderAddon.addon_register_class
+class luxrender_tex_cloud(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = [		
+		'radius',
+		'noisescale',
+		'turbulence',
+		'sharpness',
+		'noiseoffset',
+		'spheres',
+		'octaves',
+		'omega',
+		'variability',
+		'baseflatness',
+		'spheresize'
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'string',
+			'default': 'float'
+		},
+		{
+			'type': 'float',
+			'attr': 'radius',
+			'name': 'Radius',
+			'precision': 2,
+			'description' : 'Overall cloud radius inside the base cube',
+			'default': 0.5,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'noisescale',
+			'name': 'Noise Scale',
+			'precision': 2,
+			'description' : 'Strength of the noise',
+			'default': 0.5,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'turbulence',
+			'name': 'Turbulence',
+			'precision': 2,
+			'description' : 'Size of the noise displacement',
+			'default': 0.01,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'soft_max': 0.2,			
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'sharpness',
+			'name': 'Sharpness',
+			'precision': 2,
+			'description' : 'Noise sharpness - increase for more spikey appearance',
+			'default': 6.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'noiseoffset',
+			'name': 'Noise Offset',
+			'precision': 2,
+			'description' : 'Strength of the noise',
+			'default': 0.5,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'spheres',
+			'name': 'Spheres',
+			'description' : 'If greater than 0, the cloud will consist of a bunch of random spheres to mimic a cumulus, this is the number of random spheres. If set to 0, the cloud will consist of single displaced sphere',
+			'default': 0,
+			'min': 0,
+			'soft_min': 0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int',
+			'attr': 'octaves',
+			'name': 'Octaves',
+			'description' : 'Number of octaves for the noise function',
+			'default': 1,
+			'min': 0,
+			'soft_min': 0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'omega',
+			'name': 'Omega',
+			'precision': 2,
+			'description' : 'Amount of noise per octave',
+			'default': 0.75,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'variability',
+			'name': 'Variability',
+			'precision': 2,
+			'description' : 'Amount of extra noise',
+			'default': 0.9,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'baseflatness',
+			'name': 'Base Flatness',
+			'precision': 2,
+			'description' : 'How much the base of the cloud is flattened',
+			'default': 0.8,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'max': 1.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'spheresize',
+			'name': 'Sphere Size',
+			'precision': 2,
+			'description' : 'Maxiumum size of cumulus spheres',
+			'default': 0.15,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'save_in_preset': True
+		}
+	]
+	
+	def get_paramset(self, scene, texture):
+		return {'3DMAPPING'}, ParamSet().add_float('radius', self.radius) \
+					.add_float('noisescale', self.noisescale) \
+					.add_float('turbulence', self.turbulence) \
+					.add_float('sharpness', self.sharpness) \
+					.add_float('noiseoffset', self.noiseoffset) \
+					.add_integer('spheres', self.spheres) \
+					.add_integer('octaves', self.octaves) \
+					.add_float('omega', self.omega) \
+					.add_float('variability', self.variability) \
+					.add_float('baseflatness', self.baseflatness) \
+					.add_float('spheresize', self.spheresize)
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'radius': 'float',
+			'noisescale': 'float',
+			'turbulence': 'float',
+			'sharpness': 'float',
+			'noiseoffset': 'float',
+			'spheres': 'integer',
+			'octaves': 'integer',
+			'omega': 'float',
+			'variability': 'float',
+			'baseflatness': 'float',
+			'spheresize': 'float'
+			
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+
+@LuxRenderAddon.addon_register_class
 class luxrender_tex_constant(declarative_property_group):
 	ef_attach_to = ['luxrender_texture']
 	alert = {}
@@ -2333,6 +2522,69 @@ class luxrender_tex_equalenergy(declarative_property_group):
 	def load_paramset(self, variant, ps):
 		psi_accept = {
 			'energy': 'float'
+		}
+		psi_accept_keys = psi_accept.keys()
+		for psi in ps:
+			if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
+				setattr(self, psi['name'], psi['value'])
+
+@LuxRenderAddon.addon_register_class
+class luxrender_tex_exponential(declarative_property_group):
+	ef_attach_to = ['luxrender_texture']
+	alert = {}
+	
+	controls = [		
+		'origin',
+		'updir',
+		'decay'
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'attr': 'variant',
+			'type': 'string',
+			'default': 'float'
+		},
+		{
+			'type': 'float_vector',
+			'attr': 'updir',
+			'name': 'Up Vector',
+			'default': (0.0, 0.0, 1.0),
+			'precision': 5,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float_vector',
+			'attr': 'origin',
+			'name': 'Origin',
+			'default': (0.0, 0.0, 0.0),
+			'precision': 5,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float',
+			'attr': 'decay',
+			'name': ' Decay Rate',
+			'precision': 2,
+			'default': 1.0,
+			'min': 0.0,
+			'soft_min': 0.0,
+			'save_in_preset': True
+		}
+	]
+	
+	def get_paramset(self, scene, texture):
+		return {'3DMAPPING'}, ParamSet().add_vector('updir', self.updir) \
+					.add_point('origin', self.origin) \
+					.add_float('decay', self.decay)
+	
+	def load_paramset(self, variant, ps):
+		psi_accept = {
+			'updir': 'vector',
+			'origin': 'vector',
+			'origin': 'float'
 		}
 		psi_accept_keys = psi_accept.keys()
 		for psi in ps:
@@ -4048,8 +4300,8 @@ class luxrender_tex_transform(declarative_property_group):
 				if bpy.data.textures[tex.name].luxrender_texture.type == 'densitygrid':
 					domain = bpy.data.textures[tex.name].luxrender_texture.luxrender_tex_densitygrid.domain_object
 			obj = bpy.context.scene.objects[domain]
-			vloc = bpy.context.scene.objects[domain].data.vertices[0]
-			vloc_global = obj.matrix_world * vloc.co
+			vloc = mathutils.Vector((obj.bound_box[0][0],obj.bound_box[0][1],obj.bound_box[0][2]))
+			vloc_global = obj.matrix_world * vloc
 			d_dim = bpy.data.objects[domain].dimensions
 			transform_params.add_string('coordinates', 'global')
 			transform_params.add_vector('translate', vloc_global)
