@@ -371,22 +371,22 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
 			lm = context.node
 			ctx = context.node.__class__.__name__
 #			print("--------", ctx)
-			for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent'):
+			for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent', 'node_glass', 'node_roughglass', 'node_glossy', 'node_glossycoating', 'node_glossytranslucent'):
 				if ctx.endswith(mat_type):
 					lm.inputs['IOR'].index = ior
 					lm.inputs['IOR'].index_presetvalue = ior
 					lm.inputs['IOR'].index_presetstring = name
-			for mat_type in ('mirror', 'shinymetal'):
+			for mat_type in ('mirror', 'shinymetal', 'node_mirror'):
 				if ctx.endswith(mat_type):
 					lm.inputs['Film IOR'].filmindex = ior
 					lm.inputs['Film IOR'].filmindex_presetvalue = ior
 					lm.inputs['Film IOR'].filmindex_presetstring = name
-			for mat_type in ('node_clear', 'node_homogeneous'):
+			for mat_type in ('node_clear', 'node_homogeneous', 'node_heterogeneous', 'node_metal2'):
 				if ctx.endswith(mat_type):
 					lm.inputs['IOR'].fresnel = ior
 					lm.inputs['IOR'].fresnel_presetvalue = ior
 					lm.inputs['IOR'].fresnel_presetstring = name
-			for mat_type in ('cauchy'):
+			for mat_type in ('cauchy', 'node_cauchy'):
 				if ctx.endswith(mat_type):
 					lm.cauchy_n = ior
 					lm.cauchy_n_presetvalue = ior
