@@ -1199,7 +1199,7 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 		if self.is_linked:
 			layout.label(text=self.name)
 		else:
-			if self.node.name == "Glass Material": # Glass index/filmindex presets interfere, show simple property only
+			if 'IOR' in self.node.inputs.keys(): # index/filmindex presets interfere, show simple property only then
 				layout.prop(self, 'filmindex', text=self.name)
 			else: # show presetchooser for all other mat
 				box = layout.box()
