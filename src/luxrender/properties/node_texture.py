@@ -461,16 +461,16 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
 		layout.prop(self, 'contrast')
 
 	def export_texture(self, make_texture):
-		marble_params = ParamSet()
-		marble_params.add_string('type', self.type)
-		marble_params.add_string('noisebasis', self.noisebasis)
-		marble_params.add_string('noisebasis2', self.noisebasis2)
-		marble_params.add_string('noisetype', self.noisetype)
-		marble_params.add_float('noisesize', self.noisesize)
-		marble_params.add_integer('noisedepth', self.noisedepth)
-		marble_params.add_float('turbulence', self.turbulence)
-		marble_params.add_float('bright', self.bright)
-		marble_params.add_float('contrast', self.contrast)
+		marble_params = ParamSet() \
+                                .add_string('type', self.type) \
+                                .add_string('noisebasis', self.noisebasis) \
+				.add_string('noisebasis2', self.noisebasis2) \
+				.add_string('noisetype', self.noisetype) \
+				.add_float('noisesize', self.noisesize) \
+				.add_integer('noisedepth', self.noisedepth) \
+				.add_float('turbulence', self.turbulence) \
+				.add_float('bright', self.bright) \
+				.add_float('contrast', self.contrast)
 		
 		coord_node = get_linked_node(self.inputs[0])
 		if coord_node and check_node_get_paramset(coord_node):
@@ -638,14 +638,14 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
 		layout.prop(self, 'contrast')
 
 	def export_texture(self, make_texture):
-		stucci_params = ParamSet()
-		stucci_params.add_string('type', self.type)
-		stucci_params.add_string('noisebasis', self.noisebasis)
-		stucci_params.add_string('noisetype', self.noisetype)
-		stucci_params.add_float('noisesize', self.noisesize)
-		stucci_params.add_float('turbulence', self.noisesize)
-		stucci_params.add_float('bright', self.bright)
-		stucci_params.add_float('contrast', self.contrast)
+		stucci_params = ParamSet() \
+			.add_string('type', self.type) \
+			.add_string('noisebasis', self.noisebasis) \
+			.add_string('noisetype', self.noisetype) \
+			.add_float('noisesize', self.noisesize) \
+			.add_float('turbulence', self.noisesize) \
+			.add_float('bright', self.bright) \
+			.add_float('contrast', self.contrast)
 		
 		coord_node = get_linked_node(self.inputs[0])
 		if coord_node and check_node_get_paramset(coord_node):
@@ -806,15 +806,15 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
 		layout.prop(self, 'contrast')
 
 	def export_texture(self, make_texture):
-		wood_params = ParamSet()
-		wood_params.add_string('type', self.type)
-		wood_params.add_string('noisebasis', self.noisebasis)
-		marble_params.add_string('noisebasis2', self.noisebasis2)
-		wood_params.add_string('noisetype', self.noisetype)
-		wood_params.add_float('noisesize', self.noisesize)
-		wood_params.add_float('turbulence', self.turbulence)
-		wood_params.add_float('bright', self.bright)
-		wood_params.add_float('contrast', self.contrast)
+		wood_params = ParamSet() \
+			.add_string('type', self.type) \
+			.add_string('noisebasis', self.noisebasis) \
+			.add_string('noisebasis2', self.noisebasis2) \
+			.add_string('noisetype', self.noisetype) \
+			.add_float('noisesize', self.noisesize) \
+			.add_float('turbulence', self.turbulence) \
+			.add_float('bright', self.bright) \
+			.add_float('contrast', self.contrast)
 		
 		coord_node = get_linked_node(self.inputs[0])
 		if coord_node and check_node_get_paramset(coord_node):

@@ -324,6 +324,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
+		self.inputs['U-Roughness'].name = 'Roughness'		
 		self.outputs.new('NodeSocketShader', 'Surface')
 
 	def draw_buttons(self, context, layout):
@@ -375,6 +376,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
+		self.inputs['U-Roughness'].name = 'Roughness'		
 		self.outputs.new('NodeSocketShader', 'Surface')
 		
 	def draw_buttons(self, context, layout):
@@ -437,6 +439,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
+		self.inputs['U-Roughness'].name = 'Roughness'		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
 	def draw_buttons(self, context, layout):
@@ -590,6 +593,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
+		self.inputs['U-Roughness'].name = 'Roughness'		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
 	def draw_buttons(self, context, layout):
@@ -635,7 +639,7 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 	def change_use_anistropy(self, context):
 		self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
 		self.inputs['V-Roughness'].enabled = self.use_anisotropy
-		self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+		self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy == True else 'U-Roughness'
 
 # 	metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
 # 	metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
@@ -650,6 +654,7 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
+		self.inputs['U-Roughness'].name = 'Roughness'		
 		self.outputs.new('NodeSocketShader', 'Surface')
 	
 	def draw_buttons(self, context, layout):
@@ -774,6 +779,7 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 		self.inputs['V-Roughness'].enabled = False # initial state is disabled
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
+		self.inputs['U-Roughness'].name = 'Roughness'		
 		self.outputs.new('NodeSocketShader', 'Surface')
 
 	def draw_buttons(self, context, layout):
