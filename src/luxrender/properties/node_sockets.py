@@ -1199,13 +1199,16 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
 		if self.is_linked:
 			layout.label(text=self.name)
 		else:
-			box = layout.box()
-			if self.filmindex == self.filmindex_presetvalue:
-				menu_text = self.filmindex_presetstring
-			else:
-				menu_text = '-- Choose preset --'
-			box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-			box.prop(self, 'filmindex', text=self.name)
+			if self.node.name == "Glass Material": # Glass index/filmindex presets interfere, show simple property only
+				layout.prop(self, 'filmindex', text=self.name)
+			else: # show presetchooser for all other mat
+				box = layout.box()
+				if self.filmindex == self.filmindex_presetvalue:
+					menu_text = self.filmindex_presetstring
+				else:
+					menu_text = '-- Choose preset --'
+				box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+				box.prop(self, 'filmindex', text=self.name)
 	
 	def draw_color(self, context, node):
 		return float_socket_color
