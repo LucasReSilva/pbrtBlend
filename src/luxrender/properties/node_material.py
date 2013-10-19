@@ -88,7 +88,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 	bl_label = 'Car Paint Material'
 	# Icon identifier
 	bl_icon = 'MATERIAL'
-	bl_width_min = 180
+	bl_width_min = 200
 
     #Get menu items from old material editor properties
 	for prop in luxrender_mat_carpaint.properties:
@@ -102,15 +102,15 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 	def init(self, context):
 		self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
 		self.inputs.new('luxrender_TC_Ks1_socket', 'Specular Color 1')
-		self.inputs.new('NodeSocketFloat', 'R1')
-		self.inputs.new('NodeSocketFloat', 'M1')
+		self.inputs.new('luxrender_TF_R1_socket', 'R1')
+		self.inputs.new('luxrender_TF_M1_socket', 'M1')
 		self.inputs.new('luxrender_TC_Ks2_socket', 'Specular Color 2')
-		self.inputs.new('NodeSocketFloat', 'R2')
-		self.inputs.new('NodeSocketFloat', 'M2')
+		self.inputs.new('luxrender_TF_R2_socket', 'R2')
+		self.inputs.new('luxrender_TF_M2_socket', 'M2')
 		self.inputs.new('luxrender_TC_Ks3_socket', 'Specular Color 3')
-		self.inputs.new('NodeSocketFloat', 'R3')
-		self.inputs.new('NodeSocketFloat', 'M3')
-		self.inputs.new('luxrender_TC_Kd_socket', 'Absorption Color')
+		self.inputs.new('luxrender_TF_R3_socket', 'R3')
+		self.inputs.new('luxrender_TF_M3_socket', 'M3')
+		self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
 		self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth')
 		self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 		
@@ -125,6 +125,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		mat_type = 'carpaint'
 		
 		carpaint_params = ParamSet()
+		
 		carpaint_params.update( get_socket_paramsets(self.inputs, make_texture) ) #have to export the sockets, or else bump/normal mapping won't work when using a preset
 	
 		if self.carpaint_presets != '-':
