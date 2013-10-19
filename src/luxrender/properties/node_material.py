@@ -139,11 +139,10 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		mat_type = 'carpaint'
 		
 		carpaint_params = ParamSet()
+		carpaint_params.update( get_socket_paramsets(self.inputs, make_texture) ) #have to export the sockets, or else bump/normal mapping won't work when using a preset
 			
 		if self.carpaint_presets != '-':
 			carpaint_params.add_string('name', self.carpaint_presets)
-		else:
-			carpaint_params.update( get_socket_paramsets(self.inputs, make_texture) ) #have to export the sockets, or else bump/normal mapping won't work when using a preset
 
 		return make_material(mat_type, self.name, carpaint_params)
 		
