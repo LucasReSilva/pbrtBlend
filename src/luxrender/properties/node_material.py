@@ -95,8 +95,22 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		if prop['attr'].startswith('name'):
 			carpaint_items = prop['items']
 
+	def change_is_preset(self, context):
+		# Hide unused params when using presets
+		self.inputs['Diffuse Color'].enabled = self.carpaint_presets == '-'
+		self.inputs['Specular Color 1'].enabled = self.carpaint_presets == '-'
+		self.inputs['Specular Color 2'].enabled = self.carpaint_presets == '-'
+		self.inputs['Specular Color 3'].enabled = self.carpaint_presets == '-'
+		self.inputs['M1'].enabled = self.carpaint_presets == '-'
+		self.inputs['M2'].enabled = self.carpaint_presets == '-'
+		self.inputs['M3'].enabled = self.carpaint_presets == '-'
+		self.inputs['R1'].enabled = self.carpaint_presets == '-'
+		self.inputs['R2'].enabled = self.carpaint_presets == '-'
+		self.inputs['R3'].enabled = self.carpaint_presets == '-'
+
 	#Definitions for non-socket properties
-	carpaint_presets = bpy.props.EnumProperty(name='Car Paint Presets', description='Luxrender Carpaint Presets', items=carpaint_items, default='-')
+	carpaint_presets = bpy.props.EnumProperty(name='Car Paint Presets', description='Luxrender Carpaint Presets', items=carpaint_items, default='-', update=change_is_preset)
+	is_preset = bpy.props.BoolProperty(name='Is Preset', description='', default=False)
 
 	#Definitions for sockets
 	def init(self, context):
@@ -125,12 +139,12 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 		mat_type = 'carpaint'
 		
 		carpaint_params = ParamSet()
-		
-		carpaint_params.update( get_socket_paramsets(self.inputs, make_texture) ) #have to export the sockets, or else bump/normal mapping won't work when using a preset
-	
+			
 		if self.carpaint_presets != '-':
 			carpaint_params.add_string('name', self.carpaint_presets)
-			
+		else:
+			carpaint_params.update( get_socket_paramsets(self.inputs, make_texture) ) #have to export the sockets, or else bump/normal mapping won't work when using a preset
+
 		return make_material(mat_type, self.name, carpaint_params)
 		
 @LuxRenderAddon.addon_register_class
