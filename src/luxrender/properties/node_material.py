@@ -110,7 +110,6 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 
 	#Definitions for non-socket properties
 	carpaint_presets = bpy.props.EnumProperty(name='Car Paint Presets', description='Luxrender Carpaint Presets', items=carpaint_items, default='-', update=change_is_preset)
-	is_preset = bpy.props.BoolProperty(name='Is Preset', description='', default=False)
 
 	#Definitions for sockets
 	def init(self, context):
