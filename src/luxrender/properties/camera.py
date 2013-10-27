@@ -1538,8 +1538,8 @@ class luxrender_tonemapping(declarative_property_group):
 			params.add_float('glare_radius', self.glare_radius)
 			params.add_integer('glare_blades', self.glare_blades)
 			params.add_float('glare_threshold', self.glare_threshold)
-			params.add_string('glare_lashes_filename', self.glare_lashes_filename)
-			params.add_string('glare_pupil_filename', self.glare_pupil_filename)
+			params.add_string('glarelashesfilename', self.glare_lashes_filename)
+			params.add_string('glarepupilfilename', self.glare_pupil_filename)
 		
 		# Vignetting
 		if self.usevignetting:
