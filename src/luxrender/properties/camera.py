@@ -171,7 +171,7 @@ class luxrender_camera(declarative_property_group):
 			'name': 'f/Stop',
 			'description': 'f/Stop',
 			'default': 2.8,
-			'min': 0.4,
+			'min': 0.01, # for experimental values
 			'soft_min': 0.4,
 			'max': 128.0,
 			'soft_max': 128.0,
