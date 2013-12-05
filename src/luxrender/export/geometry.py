@@ -895,7 +895,11 @@ class GeometryExporter(object):
 				
 		LuxLog('Exporting Hair system "%s"...' % psys.name)
 
-		size = psys.settings.luxrender_hair.hair_size / 2.0
+		hair_size = psys.settings.luxrender_hair.hair_size
+		root_width = psys.settings.luxrender_hair.root_width
+		tip_width = psys.settings.luxrender_hair.tip_width
+		width_offset = psys.settings.luxrender_hair.width_offset
+		
 		psys.set_resolution(self.geometry_scene, obj, 'RENDER')
 		steps = 2**psys.settings.render_step
 		num_parents = len(psys.particles)
@@ -959,13 +963,10 @@ class GeometryExporter(object):
 
 			transform = obj.matrix_world.inverted()
 			total_strand_count = 0	
-			root_width = psys.settings.luxrender_hair.root_width
-			tip_width = psys.settings.luxrender_hair.tip_width
-			width_offset = psys.settings.luxrender_hair.width_offset
 			
 			if root_width == tip_width:
 				thicknessflag = 0
-				size = root_width * size
+				hair_size *= root_width
 			else:
 				thicknessflag = 1
 				
@@ -984,16 +985,16 @@ class GeometryExporter(object):
 				seg_length = 1.0				
 				for step in range(0, steps):
 					co = psys.co_hair(obj, mod, pindex, step) if bpy.app.version < (2, 68, 5 ) else psys.co_hair(obj, pindex, step) # blender api change in r60251 - removed modifier argument
-					if (step > 0): seg_length = (co-obj.matrix_world*points[len(points)-1]).length_squared 
+					if (step > 0): seg_length = (co - obj.matrix_world * points[len(points) - 1]).length_squared 
 					if not (co.length_squared == 0 or seg_length == 0):
-						points.append(transform*co)
+						points.append(transform * co)
 						if thicknessflag:
-							if step > steps*width_offset:
-								thick = (root_width*(steps-step-1)+tip_width*(step-steps*width_offset))/(steps*(1-width_offset)-1)
+							if step > steps * width_offset:
+								thick = (root_width * (steps - step - 1) + tip_width * (step - steps * width_offset)) / (steps * (1 - width_offset) - 1)
 							else:
 								thick = root_width
 								
-							thickness.append(thick*size)
+							thickness.append(thick * hair_size)
 						point_count = point_count + 1
 
 						if uvflag:
@@ -1038,7 +1039,7 @@ class GeometryExporter(object):
 				hair_file.write(struct.pack('<I', len(points))) #total point count 
 				hair_file.write(struct.pack('<I', 1+2+4*thicknessflag+16*colorflag+32*uvflag)) #bit array for configuration
 				hair_file.write(struct.pack('<I', steps))       #default segments count
-				hair_file.write(struct.pack('<f', size*2))      #default thickness
+				hair_file.write(struct.pack('<f', hair_size))   #default thickness
 				hair_file.write(struct.pack('<f', 0.0))         #default transparency
 				color = (0.65, 0.65, 0.65)
 				hair_file.write(struct.pack('<3f', *color))     #default color
@@ -1092,6 +1093,9 @@ class GeometryExporter(object):
 	
 		else:
 			#Old export with cylinder and sphere primitives
+
+			hair_size *= root_width
+			
 			# This should force the strand/junction objects to be instanced
 			self.objects_used_as_duplis.add(obj)
 			hair_Junction = (
@@ -1099,7 +1103,7 @@ class GeometryExporter(object):
 					'HAIR_Junction_%s'%partsys_name,
 					psys.settings.material - 1,
 					'sphere',
-					ParamSet().add_float('radius', size)
+					ParamSet().add_float('radius', hair_size / 2.0)
 				),
 			)
 			hair_Strand = (
@@ -1108,7 +1112,7 @@ class GeometryExporter(object):
 					psys.settings.material - 1,
 					'cylinder',
 					ParamSet() \
-						.add_float('radius', size) \
+						.add_float('radius', hair_size / 2.0) \
 						.add_float('zmin', 0.0) \
 						.add_float('zmax', 1.0)
 				),
