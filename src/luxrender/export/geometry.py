@@ -1085,6 +1085,18 @@ class GeometryExporter(object):
 			self.lux_context.attributeBegin('hairfile_%s'%partsys_name)
 			self.lux_context.transform( matrix_to_list(obj.matrix_world, apply_worldscale=True) )
 			self.lux_context.namedMaterial(hair_mat.name)
+
+			int_v, ext_v = get_material_volume_defs(hair_mat)
+
+			if int_v != '':
+				self.lux_context.interior(int_v)
+			elif self.geometry_scene.luxrender_world.default_interior_volume != '':
+				self.lux_context.interior(self.geometry_scene.luxrender_world.default_interior_volume)
+			if ext_v != '':
+				self.lux_context.exterior(ext_v)
+			elif self.geometry_scene.luxrender_world.default_exterior_volume != '':
+				self.lux_context.exterior(self.geometry_scene.luxrender_world.default_exterior_volume)
+			
 			self.lux_context.shape('hairfile', hair_shape_params)
 			self.lux_context.attributeEnd()
 			self.lux_context.set_output_file(Files.MATS)
