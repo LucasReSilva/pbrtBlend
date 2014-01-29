@@ -638,7 +638,7 @@ def export_smoke(smoke_obj_name, channel):
 			if channel == 'density':
 				channeldata = density
 			if channel == 'fire':
-				channeldata == fire
+				channeldata = fire
 			
 #	        	sc_fr = '%s/%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), bpy.context.scene.name, bpy.context.scene.frame_current)
 #		        if not os.path.exists( sc_fr ):
