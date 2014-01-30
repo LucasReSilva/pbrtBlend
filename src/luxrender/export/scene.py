@@ -105,14 +105,11 @@ class SceneExporter(object):
 					if have_emitter:
 						break
 
-			output_node = find_node(mat, 'luxrender_material_output_node')
 			if mat.luxrender_material.nodetree:
 				output_node = find_node(mat, 'luxrender_material_output_node')
-				object_is_emitter = False
 				if output_node != None:
 					light_socket = output_node.inputs[3]
 					if light_socket.is_linked:
-						light_node = light_socket.links[0].from_node
 						have_emitter = light_socket.is_linked
 
 		if have_lamp or have_emitter:
