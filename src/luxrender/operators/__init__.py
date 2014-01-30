@@ -371,6 +371,8 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
 		else:
 			scene = bpy.data.scenes[self.properties.scene]
 		
+		LuxManager.SetActive(None)
+
 		return SceneExporter() \
 				.set_report(self.report) \
 				.set_properties(self.properties) \
