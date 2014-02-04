@@ -26,8 +26,8 @@
 
 import re
 
-import bpy, mathutils, math
-
+import bpy, mathutils
+from math import degrees, radians
 from extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
@@ -68,7 +68,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 	
 	coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
 	translate = bpy.props.FloatVectorProperty(name='Translate')
-	rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-6.283, max=6.283) # min/max in radians !
+	rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(259.99), max=radians(259.99))
 	scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
 	
 	
@@ -89,7 +89,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
-		coord_params.add_vector('rotate', [round(math.degrees(i), 2) for i in self.rotate])
+		coord_params.add_vector('rotate', [round(degrees(i), 2) for i in self.rotate])
 
 		if self.coordinates == 'smoke_domain':
 			for group in bpy.data.node_groups:
