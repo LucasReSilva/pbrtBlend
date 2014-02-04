@@ -26,7 +26,7 @@
 
 import re
 
-import bpy, mathutils
+import bpy, mathutils, math
 
 from extensions_framework import declarative_property_group
 
@@ -89,8 +89,8 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
-		coord_params.add_vector('rotate', self.rotate)
-			
+		coord_params.add_vector('rotate', [round((i*180/math.pi), 2) for i in self.rotate])
+
 		if self.coordinates == 'smoke_domain':
 			for group in bpy.data.node_groups:
 				for node in bpy.data.node_groups[group.name].nodes:
