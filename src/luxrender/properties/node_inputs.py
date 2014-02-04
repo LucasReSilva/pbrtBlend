@@ -89,7 +89,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 		
 		ws = get_worldscale(as_scalematrix=False)
 		
-		coord_params.add_vector('rotate', [round((i*180/math.pi), 2) for i in self.rotate])
+		coord_params.add_vector('rotate', [round(math.degrees(i), 2) for i in self.rotate])
 
 		if self.coordinates == 'smoke_domain':
 			for group in bpy.data.node_groups:
