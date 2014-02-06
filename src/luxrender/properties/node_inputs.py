@@ -68,7 +68,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 	
 	coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
 	translate = bpy.props.FloatVectorProperty(name='Translate')
-	rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(259.99), max=radians(259.99))
+	rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(359.99), max=radians(359.99))
 	scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
 	
 	
