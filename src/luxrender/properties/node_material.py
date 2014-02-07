@@ -318,12 +318,12 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 	def change_use_anisotropy(self, context):
 		try:
 			self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
 		except:
 			self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+		
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False, update=change_use_ior)
@@ -376,12 +376,12 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 	def change_use_anisotropy(self, context):
 		try:
 			self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
 		except:
 			self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+		
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 	
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False, update=change_use_ior)
@@ -443,12 +443,12 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 	def change_use_anisotropy(self, context):
 		try:
 			self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
 		except:
 			self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+		
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 	multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce', default=False)
 	use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False, update=change_use_ior)
@@ -608,12 +608,12 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 	def change_use_anisotropy(self, context):
 		try:
 			self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
 		except:
 			self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+		
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 	metal_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal Preset', items=metal_presets, default='aluminium')
 	
@@ -672,12 +672,12 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 	def change_use_anisotropy(self, context):
 		try:
 			self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
 		except:
 			self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+		
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 # 	metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
 # 	metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
@@ -802,12 +802,12 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 	def change_use_anisotropy(self, context):
 		try:
 			self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
 		except:
 			self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
-			self.inputs['V-Roughness'].enabled = self.use_anisotropy
 			self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+		
+		self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
 	use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness', default=False, update=change_use_anisotropy)
 	dispersion = bpy.props.BoolProperty(name='Dispersion', description='Enables chromatic dispersion, Cauchy B value should be none-zero', default=False)
