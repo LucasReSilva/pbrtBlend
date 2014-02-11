@@ -55,24 +55,24 @@ class luxrender_rendermode(declarative_property_group):
 		]
 	
 	visibility = {
-		'opencl_prefs':				{ 'rendermode': O(['hybridpath','hybridbidir','luxcorepath']) },
+		'opencl_prefs':				{ 'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl']) },
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'configfile':				{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'raybuffersize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
 		'statebuffercount':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'workgroupsize':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','luxcorepath']) },
+		'workgroupsize':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','luxcorepathocl', 'luxcorebiaspathocl']) },
 		'qbvhstacksize':			{ 'opencl_prefs': True, 'renderer': 'hybrid' },
-		'deviceselection':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','luxcorepath']) },
-		'kernelcache':				{ 'opencl_prefs': True, 'rendermode': O(['luxcorepath']) },
-		'usegpus':					{ 'rendermode': O(['hybridpath','hybridbidir','luxcorepath']) },
-		'usecpus':					{ 'rendermode': 'luxcorepath' },
+		'deviceselection':			{ 'opencl_prefs': True, 'rendermode': O(['hybridpath','hybridbidir','luxcorepathocl', 'luxcorebiaspathocl']) },
+		'kernelcache':				{ 'opencl_prefs': True, 'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl']) },
+		'usegpus':					{ 'rendermode': O(['hybridpath','hybridbidir','luxcorepathocl', 'luxcorebiaspathocl']) },
+		'usecpus':					{ 'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl']) },
 		}
 	
 	#This function sets renderer and surface integrator according to rendermode setting
 	def update_rendering_mode(self, context):
-		if self.rendermode in ('luxcorepath', 'hybridpath'):
+		if self.rendermode in ('luxcorepath', 'luxcorepathocl', 'luxcorebiaspath', 'luxcorebiaspathocl', 'hybridpath'):
 			context.scene.luxrender_integrator.surfaceintegrator = 'path'
-		elif self.rendermode in ('luxcorebidirvcm', 'hybridbidir'):
+		elif self.rendermode in ('luxcorebidir', 'luxcorebidirvcm', 'hybridbidir'):
 			context.scene.luxrender_integrator.surfaceintegrator = 'bidirectional'
 		else:
 			context.scene.luxrender_integrator.surfaceintegrator = self.rendermode
@@ -81,7 +81,7 @@ class luxrender_rendermode(declarative_property_group):
 			self.renderer = 'hybrid'
 		elif self.rendermode == 'sppm':
 			self.renderer = 'sppm'
-		elif self.rendermode in ('luxcorepath', 'luxcorebidirvcm'):
+		elif self.rendermode in ('luxcorepath', 'luxcorepathocl', 'luxcorebiaspath', 'luxcorebiaspathocl', 'luxcorebidir', 'luxcorebidirvcm'):
 			self.renderer = 'luxcore'
 		else:
 			self.renderer = 'sampler'
@@ -103,8 +103,12 @@ class luxrender_rendermode(declarative_property_group):
 				('sppm', 'SPPM (Experimental)', 'Stochastic progressive photon mapping integrator'),
 #				('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
 				('hybridpath', 'Hybrid Path', 'OpenCL-accelerated simple (eye-only) path tracer'),
-  				('luxcorepath', 'LuxCore Path OpenCL', 'Experimental pure GPU path tracer'),
-  				('luxcorebidirvcm', 'LuxCore BidirVCM', 'Experimental bidirectional/vertex merging integrator'),
+				('luxcorepath', 'LuxCore Path', 'Experimental path tracer'),
+				('luxcorepathocl', 'LuxCore Path OpenCL', 'Experimental pure OpenCL path tracer'),
+				('luxcorebiaspath', 'LuxCore Biased Path', 'Experimental biased path tracer'),
+				('luxcorebiaspathocl', 'LuxCore Biased Path OpenCL', 'Experimental pure OpenCL biased path tracer'),
+				('luxcorebidir', 'LuxCore Bidir', 'Experimental bidirectional integrator'),
+				('luxcorebidirvcm', 'LuxCore BidirVCM', 'Experimental bidirectional/vertex merging integrator'),
 			],
 			'update': update_rendering_mode,
 			'save_in_preset': True
@@ -252,6 +256,8 @@ class luxrender_rendermode(declarative_property_group):
 				renderer_params.add_string('opencl.devices.select', self.deviceselection)
 		
 		if self.renderer in ['luxcore']:
+			# LuxCoreRenderer specific parameters
+			
 			luxcore_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
 			luxcore_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
 			luxcore_params = '" "'.join((luxcore_use_gpu, luxcore_use_cpu))
@@ -263,6 +269,24 @@ class luxrender_rendermode(declarative_property_group):
 				luxcore_kernel_cache = "opencl.kernelcache = " + self.kernelcache
 				luxcore_params = '" "'.join((luxcore_params, luxcore_gpu_workgroups, luxcore_kernel_cache))
 			
+			luxcore_renderengine_type = 'PATHCPU'
+			if self.rendermode == 'luxcorepath':
+				luxcore_renderengine_type = 'PATHCPU'
+			elif self.rendermode == 'luxcorepathocl':
+				luxcore_renderengine_type = 'PATHOCL'
+			elif self.rendermode == 'luxcorebiaspath':
+				luxcore_renderengine_type = 'BIASPATHCPU'
+			elif self.rendermode == 'luxcorebiaspathocl':
+				luxcore_renderengine_type = 'BIASPATHOCL'
+			elif self.rendermode == 'luxcorebidir':
+				luxcore_renderengine_type = 'BIDIRCPU'
+			elif self.rendermode == 'luxcorebidirvm':
+				luxcore_renderengine_type = 'BIDIRCPUVM'
+			luxcore_params = '" "'.join((luxcore_params, 'renderengine.type = ' + luxcore_renderengine_type))
+
+			if self.rendermode in ['luxcorebiaspath', 'luxcorebiaspathocl']:
+				luxcore_params = '" "'.join((luxcore_params, 'tile.multipass.enable = 1'))
+
 			renderer_params.add_string('config', luxcore_params)
 		
 		return self.renderer, renderer_params
