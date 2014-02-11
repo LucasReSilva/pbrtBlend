@@ -42,6 +42,7 @@ class luxrender_rendermode(declarative_property_group):
 	
 	controls = [
 		'rendermode',
+		'luxcore_custom_properties',
 		['usegpus', 'usecpus'],
 		'opencl_prefs',
 		'opencl_platform_index',
@@ -55,6 +56,7 @@ class luxrender_rendermode(declarative_property_group):
 		]
 	
 	visibility = {
+		'luxcore_custom_properties':{ 'renderer': 'luxcore' },
 		'opencl_prefs':				{ 'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl']) },
 		'opencl_platform_index':	{ 'renderer': 'hybrid' },
 		'configfile':				{ 'opencl_prefs': True, 'renderer': 'hybrid' },
@@ -111,6 +113,14 @@ class luxrender_rendermode(declarative_property_group):
 				('luxcorebidirvcm', 'LuxCore BidirVCM', 'Experimental bidirectional/vertex merging integrator'),
 			],
 			'update': update_rendering_mode,
+			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'attr': 'luxcore_custom_properties',
+			'name': 'Custom properties',
+			'description': 'LuxCore custom properties (separated by \'|\', suggested only for advanced users)',
+			'default': '',
 			'save_in_preset': True
 		},
 		#This parameter is fed to the "renderer' context, and holds the actual renderer setting. The user does not interact with it directly, and it does not appear in the panels
@@ -286,6 +296,9 @@ class luxrender_rendermode(declarative_property_group):
 
 			if self.rendermode in ['luxcorebiaspath', 'luxcorebiaspathocl']:
 				luxcore_params = '" "'.join((luxcore_params, 'tile.multipass.enable = 1'))
+			
+			# Finally add custom properties
+			luxcore_params = '" "'.join([luxcore_params] +  self.luxcore_custom_properties.split("|"))
 
 			renderer_params.add_string('config', luxcore_params)
 		
