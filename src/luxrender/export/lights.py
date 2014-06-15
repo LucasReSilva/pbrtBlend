@@ -234,7 +234,7 @@ def exportLight(scene, lux_context, ob, matrix, portals = []):
 		if light.luxrender_lamp.luxrender_lamp_area.null_lamp:		
 			mat_params = ParamSet()
 
-			if scene.luxrender_rendermode.renderer == 'luxcorerenderer': # Workaround: LuxCoreRenderer supports only area lights with constant ConstantRGBColorTexture
+			if scene.luxrender_rendermode.renderer in ['luxcore']: # Workaround: LuxCoreRenderer supports only area lights with constant ConstantRGBColorTexture
 				mat_params.add_string('type', 'matte')
 			else:
 				mat_params.add_string('type', 'null')
