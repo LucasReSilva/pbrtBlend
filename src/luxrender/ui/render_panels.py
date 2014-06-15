@@ -135,33 +135,6 @@ class postprocessing(render_panel):
 		split.prop(rd, "dither_intensity", text="Dither", slider=True)
 
 @LuxRenderAddon.addon_register_class
-class opengl_render(render_panel):
-	'''
-	OpenGL Render UI panel
-	'''
-	#Copy of Cycles' OpenGL Render panel, allows configuring of GLSL-renderer's AA and alpha settings without switching back to BI
-	
-	bl_label = "OpenGL Render"
-	bl_options = {'DEFAULT_CLOSED'}
-	
-	def draw(self, context):
-		layout = self.layout
-		
-		rd = context.scene.render
-		
-		split = layout.split()
-		
-		col = split.column()
-		col.prop(rd, "use_antialiasing")
-		sub = col.row()
-		sub.active = rd.use_antialiasing
-		sub.prop(rd, "antialiasing_samples", expand=True)
-		
-		col = split.column()
-		col.label(text="Alpha:")
-		col.prop(rd, "alpha_mode", text="")
-
-@LuxRenderAddon.addon_register_class
 class layer_selector(render_panel):
 	'''
 	Render Layers Selector panel
