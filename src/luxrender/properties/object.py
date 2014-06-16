@@ -29,7 +29,7 @@ from ..extensions_framework import declarative_property_group
 import math
 
 from .. import LuxRenderAddon
-from extensions_framework.validate import Logic_OR as O
+from ..extensions_framework.validate import Logic_OR as O
 
 @LuxRenderAddon.addon_register_class
 class luxrender_object(declarative_property_group):

@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ..extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_Operator as LO
+from ..extensions_framework.validate import Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..export import ParamSet

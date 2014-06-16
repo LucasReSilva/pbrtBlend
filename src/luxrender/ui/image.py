@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework.ui import property_group_renderer
+from ..extensions_framework.ui import property_group_renderer
 
 from .. import LuxRenderAddon
 from ..outputs import LuxManager as LM
