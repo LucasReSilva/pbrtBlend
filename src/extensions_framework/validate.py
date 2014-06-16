@@ -122,8 +122,10 @@ class Logician(object):
             return self.test_or(member, logic)
         elif type(logic) is Logic_Operator:
             return self.test_operator(member, logic)
-        elif isinstance(logic, LambdaType) or isinstance(logic, FunctionType):
+        elif (isinstance(logic, LambdaType) or isinstance(logic, FunctionType)) and logic.__code__.co_argcount == 0:
             return logic()
+        elif (isinstance(logic, LambdaType) or isinstance(logic, FunctionType)) and logic.__code__.co_argcount == 1:
+            return logic(member)
         else:
             # compare the value, I think using Logic_Operator() here
             # allows completeness in test_operator(), but I can't put

@@ -296,6 +296,13 @@ class luxrender_engine(declarative_property_group):
 			'default': False,
 			'save_in_preset': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'preview_stop',
+			'name': 'Stop Preview',
+			'description': 'preview_stop',
+			'default': False
+		},
 	]
 	
 	def allow_file_embed(self):

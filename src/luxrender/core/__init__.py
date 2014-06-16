@@ -33,9 +33,10 @@ import time
 import threading
 import subprocess
 import sys
+import array
 
 # Blender libs
-import bpy, bl_ui
+import bpy, bgl, bl_ui
 
 # Framework libs
 from extensions_framework import util as efutil
@@ -47,6 +48,7 @@ from ..export.scene import SceneExporter
 from ..outputs import LuxManager, LuxFilmDisplay
 from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore
 
 # Exporter Property Groups need to be imported to ensure initialisation
 from ..properties import (
@@ -265,6 +267,23 @@ compatible("properties_data_camera")
 compatible("properties_particle")
 compatible("properties_data_speaker")
 
+################################################################################
+# To draw the preview pause button
+################################################################################
+
+def DrawButtonPause(self, context):
+	layout = self.layout
+	scene = context.scene
+
+	if scene.render.engine == "LUXRENDER_RENDER":
+		view = context.space_data
+
+		if view.viewport_shade == "RENDERED":
+			layout.prop(scene.luxrender_engine, "preview_stop", icon = "PAUSE", text = "")
+
+_register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
+
+################################################################################
 
 @LuxRenderAddon.addon_register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):
@@ -277,7 +296,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	bl_use_preview		= True
 	
 	render_lock = threading.Lock()
-	
+
 	def render(self, scene):
 		'''
 		scene:	bpy.types.Scene
@@ -289,66 +308,86 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		'''
 		
 		with RENDERENGINE_luxrender.render_lock:	# just render one thing at a time
-			prev_cwd = os.getcwd()
-			try:
-				self.LuxManager				= None
-				self.render_update_timer	= None
-				self.output_dir				= efutil.temp_directory()
-				self.output_file			= 'default.png'
-				
-				if scene is None:
-					LuxLog('ERROR: Scene to render is not valid')
-					return
-				
-				if scene.name == 'preview':
-					self.render_preview(scene)
-					return
+			if scene is None:
+				LuxLog('ERROR: Scene to render is not valid')
+				return
 
-				if scene.display_settings.display_device != "sRGB":
-					LuxLog('WARNING: Colour Management not set to sRGB, render results may look too dark.')
-				
-				api_type, write_files = self.set_export_path(scene)
-				
-				os.chdir(efutil.export_path)
-				
-				is_animation = hasattr(self, 'is_animation') and self.is_animation
-				make_queue = scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and write_files
-				
-				if is_animation and make_queue:
-					queue_file = efutil.export_path + '%s.%s.lxq' % (efutil.scene_filename(), bpy.path.clean_name(scene.name))
-					
-					# Open/reset a queue file
-					if scene.frame_current == scene.frame_start:
-						open(queue_file, 'w').close()
-					
-					if hasattr(self, 'update_progress'):
-						fr = scene.frame_end - scene.frame_start
-						fo = scene.frame_current - scene.frame_start
-						self.update_progress(fo/fr)
-				
-				exported_file = self.export_scene(scene)
-				if exported_file == False:
-					return	# Export frame failed, abort rendering
-				
-				if is_animation and make_queue:
-					self.LuxManager = LuxManager.GetActive()
-					self.LuxManager.lux_context.worldEnd()
-					with open(queue_file, 'a') as qf:
-						qf.write("%s\n" % exported_file)
-					
-					if scene.frame_current == scene.frame_end:
-						# run the queue
-						self.render_queue(scene, queue_file)
-				else:
-					self.render_start(scene)
-			
-			except Exception as err:
-				LuxLog('%s'%err)
-				self.report({'ERROR'}, '%s'%err)
-			
-			os.chdir(prev_cwd)
-	
-	def render_preview(self, scene):
+			if UseLuxCore():
+				self.luxcore_render(scene)
+			else:
+				self.luxrender_render(scene)
+
+	def view_update(self, context):
+		if UseLuxCore():
+			self.luxcore_view_update(context)
+
+	def view_draw(self, context):
+		if UseLuxCore():
+			self.luxcore_view_draw(context)
+
+################################################################################
+#
+# LuxRender classic API
+#
+################################################################################
+
+	def luxrender_render(self, scene):
+		prev_cwd = os.getcwd()
+		try:
+			self.LuxManager				= None
+			self.render_update_timer	= None
+			self.output_dir				= efutil.temp_directory()
+			self.output_file			= 'default.png'
+
+			if scene.name == 'preview':
+				self.luxrender_render_preview(scene)
+				return
+
+			if scene.display_settings.display_device != "sRGB":
+				LuxLog('WARNING: Colour Management not set to sRGB, render results may look too dark.')
+
+			api_type, write_files = self.set_export_path(scene)
+
+			os.chdir(efutil.export_path)
+
+			is_animation = hasattr(self, 'is_animation') and self.is_animation
+			make_queue = scene.luxrender_engine.export_type == 'EXT' and scene.luxrender_engine.binary_name == 'luxrender' and write_files
+
+			if is_animation and make_queue:
+				queue_file = efutil.export_path + '%s.%s.lxq' % (efutil.scene_filename(), bpy.path.clean_name(scene.name))
+
+				# Open/reset a queue file
+				if scene.frame_current == scene.frame_start:
+					open(queue_file, 'w').close()
+
+				if hasattr(self, 'update_progress'):
+					fr = scene.frame_end - scene.frame_start
+					fo = scene.frame_current - scene.frame_start
+					self.update_progress(fo/fr)
+
+			exported_file = self.export_scene(scene)
+			if exported_file == False:
+				return	# Export frame failed, abort rendering
+
+			if is_animation and make_queue:
+				self.LuxManager = LuxManager.GetActive()
+				self.LuxManager.lux_context.worldEnd()
+				with open(queue_file, 'a') as qf:
+					qf.write("%s\n" % exported_file)
+
+				if scene.frame_current == scene.frame_end:
+					# run the queue
+					self.render_queue(scene, queue_file)
+			else:
+				self.render_start(scene)
+
+		except Exception as err:
+			LuxLog('%s'%err)
+			self.report({'ERROR'}, '%s'%err)
+
+		os.chdir(prev_cwd)
+
+	def luxrender_render_preview(self, scene):
 		if sys.platform == 'darwin':
 			self.output_dir = efutil.filesystem_path( bpy.app.tempdir )
 		else:
@@ -361,7 +400,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		from ..outputs.pure_api import PYLUX_AVAILABLE
 		if not PYLUX_AVAILABLE:
-			self.bl_use_preview = False
 			LuxLog('ERROR: Material previews require pylux')
 			return
 		
@@ -498,7 +536,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		preview_context.cleanup()
 		
 		LM.reset()
-	
+
 	def set_export_path(self, scene):
 		# replace /tmp/ with the real %temp% folder on Windows
 		# OSX also has a special temp location that we should use
@@ -816,3 +854,227 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			LC.getAttribute('film', 'enoughSamples') == True:
 			self.LuxManager.reset()
 			self.update_stats('', '')
+
+	############################################################################
+	#
+	# LuxCore code
+	#
+	############################################################################
+
+	def luxcore_render(self, scene):
+		if scene.name == 'preview':
+			self.luxcore_render_preview(scene)
+			return
+		
+		# LuxCore libs
+		if not PYLUXCORE_AVAILABLE:
+			LuxLog('ERROR: LuxCore rendering requires pyluxcore')
+			return
+		from .. import pyluxcore
+		from ..export.luxcore_scene import BlenderSceneConverter
+		
+		try:
+			# convert the Blender scene
+			lcConfig = BlenderSceneConverter(scene).Convert()
+#			LuxLog('RenderConfig Properties:')
+#			LuxLog(str(lcConfig.GetProperties()))
+			LuxLog('Scene Properties:')
+			LuxLog(str(lcConfig.GetScene().GetProperties()))
+
+			lcSession = pyluxcore.RenderSession(lcConfig)
+
+			filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+			imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
+
+			# Start the rendering
+			lcSession.Start()
+
+			startTime = time.time()
+			lastRefreshTime = startTime
+			while not self.test_break():
+				time.sleep(0.2)
+				
+				now = time.time()
+				elapsedTimeSinceLastRefresh = now - lastRefreshTime
+				elapsedTimeSinceStart = now - startTime
+				
+				if elapsedTimeSinceStart < 5.0 or elapsedTimeSinceLastRefresh > scene.camera.data.luxrender_camera.luxrender_film.displayinterval:
+					# Print some information about the rendering progress
+
+					# Update statistics
+					lcSession.UpdateStats()
+
+					stats = lcSession.GetStats();
+					LuxLog('[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
+							stats.Get('stats.renderengine.time').GetFloat(),
+							stats.Get('stats.renderengine.pass').GetInt(),
+							(stats.Get('stats.renderengine.total.samplesec').GetFloat()  / 1000000.0),
+							(stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
+
+					# Update the image
+					lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
+
+					# Here we write the pixel values to the RenderResult
+					result = self.begin_result(0, 0, filmWidth, filmHeight)
+					layer = result.layers[0]
+					layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight, imageBufferFloat)
+					self.end_result(result)
+					
+					lastRefreshTime = now
+
+			lcSession.Stop()
+
+			LuxLog('Done.')
+		except Exception as exc:
+			LuxLog('Rendering aborted: %s' % exc)
+			import traceback
+			traceback.print_exc()
+
+	def luxcore_render_preview(self, scene):
+		# LuxCore libs
+		if not PYLUXCORE_AVAILABLE:
+			LuxLog('ERROR: LuxCore preview rendering requires pyluxcore')
+			return
+		from .. import pyluxcore
+		from ..export.luxcore_scene import BlenderSceneConverter
+		
+		try:
+			xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+			
+			# Don't render the tiny images
+			if xres <= 96:
+				raise Exception('Skipping material thumbnail update, image too small (%ix%i)' % (xres,yres))
+
+			# convert the Blender scene
+			lcConfig = BlenderSceneConverter(scene).Convert()
+			LuxLog('RenderConfig Properties:')
+			LuxLog(str(lcConfig.GetProperties()))
+			LuxLog('Scene Properties:')
+			LuxLog(str(lcConfig.GetScene().GetProperties()))
+
+			lcSession = pyluxcore.RenderSession(lcConfig)
+
+			filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+			imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
+
+			# Start the rendering
+			lcSession.Start()
+
+			startTime = time.time()
+			while not self.test_break() and time.time()- startTime < 10.0:
+				time.sleep(0.2)
+				
+				# Print some information about the rendering progress
+
+				# Update statistics
+				lcSession.UpdateStats()
+
+				stats = lcSession.GetStats();
+				LuxLog('[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
+						stats.Get('stats.renderengine.time').GetFloat(),
+						stats.Get('stats.renderengine.pass').GetInt(),
+						(stats.Get('stats.renderengine.total.samplesec').GetFloat()  / 1000000.0),
+						(stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
+
+				# Update the image
+				lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
+
+				# Here we write the pixel values to the RenderResult
+				result = self.begin_result(0, 0, filmWidth, filmHeight)
+				layer = result.layers[0]
+				layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight, imageBufferFloat)
+				self.end_result(result)
+
+			lcSession.Stop()
+
+			LuxLog('Done.')
+		except Exception as exc:
+			LuxLog('Rendering aborted: %s' % exc)
+			import traceback
+			traceback.print_exc()
+
+	############################################################################
+	# Viewport render
+	############################################################################
+
+	viewSession = None
+	viewSessionRunning = False
+	viewSessionStartTime = 0.0
+	viewFilmWidth = -1
+	viewFilmHeight = -1
+	viewImageBufferFloat = None
+
+	def luxcore_view_update(self, context):
+		# LuxCore libs
+		if not PYLUXCORE_AVAILABLE:
+			LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
+			return
+
+		if self.viewSessionRunning:
+			self.viewSession.Stop()
+			self.viewSessionRunning = False
+		if context.scene.luxrender_engine.preview_stop:
+			return
+
+		from .. import pyluxcore
+		from ..export.luxcore_scene import BlenderSceneConverter
+
+		if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
+			self.viewFilmWidth = context.region.width
+			self.viewFilmHeight = context.region.height
+			self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
+
+		########################################################################
+		# Setup the rendering
+		########################################################################
+		
+		LuxManager.SetCurrentScene(context.scene)
+
+		# convert the Blender scene
+		lcConfig = BlenderSceneConverter(context.scene).Convert(
+			imageWidth = self.viewFilmWidth,
+			imageHeight = self.viewFilmHeight)
+#		LuxLog('RenderConfig Properties:')
+#		LuxLog(str(lcConfig.GetProperties()))
+#		LuxLog('Scene Properties:')
+#		LuxLog(str(lcConfig.GetScene().GetProperties()))
+		
+		self.viewSession = pyluxcore.RenderSession(lcConfig)
+		self.viewSession.Start()
+		self.viewSessionStartTime = time.time()
+		self.viewSessionRunning = True
+
+	def luxcore_view_draw(self, context):
+		# LuxCore libs
+		if not PYLUXCORE_AVAILABLE:
+			LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
+			return
+		from .. import pyluxcore
+
+		# Check if the size of the window is changed
+		if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
+			self.luxcore_view_update(context)
+
+		# Update statistics
+		if self.viewSessionRunning:
+			self.viewSession.UpdateStats()
+
+			stats = self.viewSession.GetStats();
+			print("[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]" % (
+					stats.Get("stats.renderengine.time").GetFloat(),
+					stats.Get("stats.renderengine.pass").GetInt(),
+					(stats.Get("stats.renderengine.total.samplesec").GetFloat()  / 1000000.0),
+					(stats.Get("stats.dataset.trianglecount").GetFloat() / 1000.0)))
+
+			# Update the image buffer
+			self.viewSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, self.viewImageBufferFloat)
+		
+		# Update the screen
+		glBuffer = bgl.Buffer(bgl.GL_FLOAT, [self.viewFilmWidth * self.viewFilmHeight * 3], self.viewImageBufferFloat)
+		bgl.glRasterPos2i(0, 0)
+		bgl.glDrawPixels(self.viewFilmWidth, self.viewFilmHeight, bgl.GL_RGB, bgl.GL_FLOAT, glBuffer);
+
+		if not context.scene.luxrender_engine.preview_stop:
+			# Trigger another update
+			nextRefreshTime = 0.2 if time.time() - self.viewSessionStartTime < 5.0 else 2.0
+			threading.Timer(nextRefreshTime, self.tag_redraw).start()
