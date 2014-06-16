@@ -211,7 +211,8 @@ def render_start_options(self, context):
 	if context.scene.render.engine == 'LUXRENDER_RENDER':
 		col = self.layout.column()
 		row = self.layout.row()
-		
+
+		col.prop(context.scene.luxrender_engine, "selected_luxrender_api", text="LuxRender API")
 		col.prop(context.scene.luxrender_engine, "export_type", text="Export Type")
 		if context.scene.luxrender_engine.export_type == 'EXT':
 			col.prop(context.scene.luxrender_engine, "binary_name", text="Render Using")

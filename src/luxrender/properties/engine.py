@@ -32,6 +32,7 @@ from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_O
 
 from .. import LuxRenderAddon
 from ..outputs.pure_api import PYLUX_AVAILABLE
+from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE
 
 def check_renderer_settings(context):
 	lre = context.scene.luxrender_rendermode
@@ -195,6 +196,19 @@ class luxrender_engine(declarative_property_group):
 			'name': 'Monitor External',
 			'description': 'Monitor external GUI rendering; when selected, LuxBlend will copy the render image from the external GUI',
 			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'enum',
+			'attr': 'selected_luxrender_api',
+			'name': 'LuxRender API version',
+			'description': 'Choose between LuxRender v1.x and v2.x API',
+			'default': 'classic',
+			'items': [
+				('classic', '1.x', 'Use LuxRender v1.x API'),
+			] + [
+				('luxcore', '2.x (LuxCore)', 'Use LuxRender v2.x API')
+				] if PYLUXCORE_AVAILABLE else [],
 			'save_in_preset': True
 		},
 		{
