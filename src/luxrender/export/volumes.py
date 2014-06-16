@@ -31,7 +31,7 @@ import os, struct, sys
 
 # Blender Libs
 import bpy
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 # LuxRender libs
 from . import ParamSet, matrix_to_list, LuxManager

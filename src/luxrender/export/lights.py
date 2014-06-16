@@ -28,7 +28,7 @@ from math import degrees
 
 import bpy
 
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 from ..outputs.file_api import Files
 from ..export import ParamSet, get_worldscale, matrix_to_list

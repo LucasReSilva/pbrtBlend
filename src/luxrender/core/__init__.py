@@ -39,7 +39,7 @@ import array
 import bpy, bgl, bl_ui
 
 # Framework libs
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 # Exporter libs
 from .. import LuxRenderAddon
@@ -215,12 +215,14 @@ def render_start_options(self, context):
 		row = self.layout.row()
 
 		col.prop(context.scene.luxrender_engine, "selected_luxrender_api", text="LuxRender API")
-		col.prop(context.scene.luxrender_engine, "export_type", text="Export Type")
-		if context.scene.luxrender_engine.export_type == 'EXT':
-			col.prop(context.scene.luxrender_engine, "binary_name", text="Render Using")
-		if context.scene.luxrender_engine.export_type == 'INT':
-			row.prop(context.scene.luxrender_engine, "write_files", text="Write to Disk")
-			row.prop(context.scene.luxrender_engine, "integratedimaging", text="Integrated Imaging")
+		
+		if not UseLuxCore():
+			col.prop(context.scene.luxrender_engine, "export_type", text="Export Type")
+			if context.scene.luxrender_engine.export_type == 'EXT':
+				col.prop(context.scene.luxrender_engine, "binary_name", text="Render Using")
+			if context.scene.luxrender_engine.export_type == 'INT':
+				row.prop(context.scene.luxrender_engine, "write_files", text="Write to Disk")
+				row.prop(context.scene.luxrender_engine, "integratedimaging", text="Integrated Imaging")
 
 _register_elm(bl_ui.properties_render.RENDER_PT_render.append(render_start_options))
 
@@ -325,11 +327,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		if UseLuxCore():
 			self.luxcore_view_draw(context)
 
-################################################################################
-#
-# LuxRender classic API
-#
-################################################################################
+	############################################################################
+	#
+	# LuxRender classic API
+	#
+	############################################################################
 
 	def luxrender_render(self, scene):
 		prev_cwd = os.getcwd()
@@ -713,7 +715,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		if not scene.luxrender_engine.threads_auto:
 			cmd_args.append('--threads=%i' % scene.luxrender_engine.threads)
 			
-		#Set fixed seeds, if enabled
+		# Set fixed seeds, if enabled
 		if scene.luxrender_engine.fixed_seed:
 			cmd_args.append('--fixedseed')
 		
@@ -876,8 +878,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		try:
 			# convert the Blender scene
 			lcConfig = BlenderSceneConverter(scene).Convert()
-#			LuxLog('RenderConfig Properties:')
-#			LuxLog(str(lcConfig.GetProperties()))
+			LuxLog('RenderConfig Properties:')
+			LuxLog(str(lcConfig.GetProperties()))
 			LuxLog('Scene Properties:')
 			LuxLog(str(lcConfig.GetScene().GetProperties()))
 
@@ -945,7 +947,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			if xres <= 96:
 				raise Exception('Skipping material thumbnail update, image too small (%ix%i)' % (xres,yres))
 
-			# convert the Blender scene
+			# Convert the Blender scene
 			lcConfig = BlenderSceneConverter(scene).Convert()
 			LuxLog('RenderConfig Properties:')
 			LuxLog(str(lcConfig.GetProperties()))
@@ -1030,7 +1032,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		
 		LuxManager.SetCurrentScene(context.scene)
 
-		# convert the Blender scene
+		# Convert the Blender scene
 		lcConfig = BlenderSceneConverter(context.scene).Convert(
 			imageWidth = self.viewFilmWidth,
 			imageHeight = self.viewFilmHeight)

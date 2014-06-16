@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from ..extensions_framework import declarative_property_group
 from extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon

@@ -26,7 +26,7 @@
 #
 import bpy
 
-from extensions_framework.validate import Logician
+from ..extensions_framework.validate import Logician
 
 class EF_OT_msg(bpy.types.Operator):
     """An operator to show simple messages in the UI"""

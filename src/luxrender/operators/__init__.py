@@ -34,7 +34,7 @@ from ..outputs import LuxLog, LuxManager
 from ..export.scene import SceneExporter
 from ..export import materials as export_materials
 
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 # Per-IDPropertyGroup preset handling
 

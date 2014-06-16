@@ -28,7 +28,7 @@ import time
 
 import bpy
 
-from extensions_framework.ui import EF_OT_msg
+from ..extensions_framework.ui import EF_OT_msg
 bpy.utils.register_class(EF_OT_msg)
 del EF_OT_msg
 

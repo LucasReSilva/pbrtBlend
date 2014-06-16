@@ -27,7 +27,7 @@ import re
 
 import bpy
 
-from extensions_framework import declarative_property_group
+from ..extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
 from ..properties import find_node

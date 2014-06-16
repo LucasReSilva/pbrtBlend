@@ -30,7 +30,7 @@ import tempfile
 import bpy
 
 # Extensions_Framework Libs
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 # LuxRender libs
 from ..export 			import get_worldscale, object_anim_matrices

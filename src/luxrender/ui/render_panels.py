@@ -28,6 +28,7 @@ import bpy, bl_ui
 
 from extensions_framework.ui import property_group_renderer
 
+from ..outputs.luxcore_api import UseLuxCore
 from .. import LuxRenderAddon
 
 class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_renderer):
@@ -56,12 +57,13 @@ class render_settings(render_panel):
 	]
 	
 	def draw(self, context):
-		row = self.layout.row(align=True)
-		rd = context.scene.render
-		split = self.layout.split()
-		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
+		if not UseLuxCore():
+			row = self.layout.row(align=True)
+			rd = context.scene.render
+			split = self.layout.split()
+			row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
+			row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
+			row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		super().draw(context)
 
@@ -91,7 +93,7 @@ class networking(render_panel):
 	Networking settings UI Panel
 	'''
 	
-	bl_label = 'LuxRender Networking'
+	bl_label = 'LuxRender Networking (note: not yet supported by LuxCore)'
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
@@ -99,15 +101,16 @@ class networking(render_panel):
 	]
 	
 	def draw_header(self, context):
-		self.layout.prop(context.scene.luxrender_networking, "use_network_servers", text="")
+		if not UseLuxCore():
+			self.layout.prop(context.scene.luxrender_networking, "use_network_servers", text="")
 	
 	def draw(self, context):
-		row = self.layout.row(align=True)
-		row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
-		row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
-		
-		super().draw(context)
+		if not UseLuxCore():
+			row = self.layout.row(align=True)
+			row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
+			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
+			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
+			super().draw(context)
 
 @LuxRenderAddon.addon_register_class
 class postprocessing(render_panel):

@@ -28,7 +28,7 @@ import collections, math, os
 
 import bpy, mathutils
 
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 from ..outputs import LuxManager, LuxLog
 from ..util import bencode_file2string_with_size

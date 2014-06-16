@@ -28,7 +28,7 @@ import re
 
 import bpy
 
-from extensions_framework import declarative_property_group
+from ..extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
 from ..properties import (luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset)
