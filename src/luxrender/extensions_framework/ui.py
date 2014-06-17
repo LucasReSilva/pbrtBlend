@@ -26,6 +26,7 @@
 #
 import bpy
 
+from types import *
 from ..extensions_framework.validate import Logician
 
 class EF_OT_msg(bpy.types.Operator):
@@ -81,14 +82,20 @@ class property_group_renderer(bpy.types.Panel):
         can be a useful call in those cases.
 
         """
-        for property_group_path, property_group_name in \
-            self.display_property_groups:
-            ctx = _get_item_from_context(context, property_group_path)
-            property_group = getattr(ctx, property_group_name)
-            for p in property_group.controls:
-                self.draw_column(p, self.layout, ctx, context,
-                    property_group=property_group)
-            property_group.draw_callback(context)
+        import pprint
+        for t in self.display_property_groups:
+            property_group_path = t[0]
+            property_group_name = t[1]
+            enabled = t[2] if len(t) > 2 else True
+            if isinstance(enabled, LambdaType) or isinstance(enabled, FunctionType):
+                enabled = enabled()
+            if (enabled):
+                ctx = _get_item_from_context(context, property_group_path)
+                property_group = getattr(ctx, property_group_name)
+                for p in property_group.controls:
+                    self.draw_column(p, self.layout, ctx, context,
+                        property_group=property_group)
+                property_group.draw_callback(context)
 
     def check_visibility(self, lookup_property, property_group):
         """Determine if the lookup_property should be drawn in the Panel"""

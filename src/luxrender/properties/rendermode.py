@@ -89,7 +89,7 @@ class luxrender_rendermode(declarative_property_group):
 		else:
 			self.renderer = 'sampler'
 	
-	def available_render_mode(self, contex):
+	def available_render_modes(self, contex):
 		luxCoreModes = [
 				('luxcorepath', 'LuxCore Path', 'Experimental path tracer'),
 				('luxcorepathocl', 'LuxCore Path OpenCL', 'Experimental pure OpenCL path tracer'),
@@ -120,7 +120,7 @@ class luxrender_rendermode(declarative_property_group):
 			'description': 'Renderer and surface integrator combination to use',
 			# 'default' can't be set when 'items' is a function
 			#'default': 'bidirectional',
-			'items': available_render_mode,
+			'items': available_render_modes,
 			'update': update_rendering_mode,
 			'save_in_preset': True
 		},
@@ -132,7 +132,9 @@ class luxrender_rendermode(declarative_property_group):
 			'default': '',
 			'save_in_preset': True
 		},
-		#This parameter is fed to the "renderer' context, and holds the actual renderer setting. The user does not interact with it directly, and it does not appear in the panels
+		# This parameter is fed to the "renderer' context, and holds the actual
+		# renderer setting. The user does not interact with it directly, and it
+		# does not appear in the panels
 		{
 			'type': 'enum',
 			'attr': 'renderer',
@@ -234,7 +236,7 @@ class luxrender_rendermode(declarative_property_group):
 			'attr': 'kernelcache',
 			'name': 'OpenCL Kernel Cache',
 			'description': 'Select the type of OpenCL compilation kernel cache used (in order to reduce compilation time)',
-			'default': 'NONE',
+			'default': 'PERSISTENT',
 			'items': [
 				('NONE', 'None', 'NONE'),
 				('VOLATILE', 'Volatile', 'VOLATILE'),

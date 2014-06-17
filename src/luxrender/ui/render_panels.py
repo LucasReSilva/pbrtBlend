@@ -48,12 +48,12 @@ class render_settings(render_panel):
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_rendermode' ),
-		( ('scene',), 'luxrender_integrator' ),
-		( ('scene',), 'luxrender_sampler' ),
-		( ('scene',), 'luxrender_volumeintegrator' ),
-		( ('scene',), 'luxrender_filter' ),
-		( ('scene',), 'luxrender_accelerator' ),
-		( ('scene',), 'luxrender_halt' ),
+		( ('scene',), 'luxrender_integrator', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_sampler', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_volumeintegrator', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_filter', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
 	]
 	
 	def draw(self, context):
@@ -97,7 +97,7 @@ class networking(render_panel):
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
-		( ('scene',), 'luxrender_networking' )
+		( ('scene',), 'luxrender_networking', lambda: not UseLuxCore() )
 	]
 	
 	def draw_header(self, context):
@@ -110,7 +110,8 @@ class networking(render_panel):
 			row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
 			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
 			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
-			super().draw(context)
+		
+		super().draw(context)
 
 @LuxRenderAddon.addon_register_class
 class postprocessing(render_panel):
