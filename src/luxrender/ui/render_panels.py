@@ -77,15 +77,18 @@ class translator(render_panel):
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
-	   ( ('scene',), 'luxrender_engine' ),
-	   ( ('scene',), 'luxrender_testing' )
+	   ( ('scene',), 'luxrender_engine', lambda: not UseLuxCore() ),
+	   ( ('scene',), 'luxrender_testing', lambda: not UseLuxCore() )
 	   ]
 	
 	def draw(self, context):
-		super().draw(context)
-		
-		row = self.layout.row(align=True)
-		rd = context.scene.render
+		if not UseLuxCore():
+			super().draw(context)
+
+			row = self.layout.row(align=True)
+			rd = context.scene.render
+		else:
+			self.layout.label("Note: not yet supported by LuxCore")
 
 @LuxRenderAddon.addon_register_class
 class networking(render_panel):
@@ -93,7 +96,7 @@ class networking(render_panel):
 	Networking settings UI Panel
 	'''
 	
-	bl_label = 'LuxRender Networking (note: not yet supported by LuxCore)'
+	bl_label = 'LuxRender Networking'
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
@@ -110,6 +113,8 @@ class networking(render_panel):
 			row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
 			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
 			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
+		else:
+			self.layout.label("Note: not yet supported by LuxCore")
 		
 		super().draw(context)
 
