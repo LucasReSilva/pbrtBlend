@@ -40,22 +40,63 @@ class luxcore_enginesettings(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'engine',
+		'custom_properties',
 		# BIASPATH
+		'biaspath_tilesize',
 		'biaspath_totaldepth', 
 		['biaspath_diffusedepth', 'biaspath_glossydepth', 'biaspath_speculardepth'],
 	]
 	
 	visibility = {
 		# BIASPATH
-		'biaspath_totaldepth':			{ ScenePrefix() + 'luxrender_rendermode.rendermode': O(['luxcorebiaspath', 'luxcorebiaspathocl']) },
-		'biaspath_diffusedepth':			{ ScenePrefix() + 'luxrender_rendermode.rendermode': O(['luxcorebiaspath', 'luxcorebiaspathocl']) },
-		'biaspath_glossydepth':			{ ScenePrefix() + 'luxrender_rendermode.rendermode': O(['luxcorebiaspath', 'luxcorebiaspathocl']) },
-		'biaspath_speculardepth':			{ ScenePrefix() + 'luxrender_rendermode.rendermode': O(['luxcorebiaspath', 'luxcorebiaspathocl']) },
+		'biaspath_tilesize':			{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_totaldepth':			{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_diffusedepth':		{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_glossydepth':			{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_speculardepth':		{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 	}
 	
 	alert = {}
 	
 	properties = [
+		{
+			'type': 'enum', 
+			'attr': 'engine',
+			'name': 'Rendering engine',
+			'description': 'Render engine to use',
+			'default': 'PATHCPU',
+			'items': [
+				('PATHCPU', 'Path', 'Path tracer'),
+				('PATHOCL', 'Path OpenCL', 'Pure OpenCL path tracer'),
+				('BIASPATHCPU', 'Biased Path', 'Biased path tracer'),
+				('BIASPATHOCL', 'Biased Path OpenCL', 'Pure OpenCL biased path tracer'),
+				('BIDIRCPU', 'Bidir', 'Bidirectional path tracer'),
+				('BIDIRVMCPU', 'BidirVCM', 'Bidirectional path tracer with vertex merging'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'string',
+			'attr': 'custom_properties',
+			'name': 'Custom properties',
+			'description': 'LuxCore custom properties (separated by \'|\', suggested only for advanced users)',
+			'default': '',
+			'save_in_preset': True
+		},
+		########################################################################
+		# BIASPATH
+		########################################################################
+		{
+			'type': 'int', 
+			'attr': 'biaspath_tilesize',
+			'name': 'Tile size',
+			'description': 'Tile size in pixel',
+			'default': 32,
+			'min': 8,
+			'max': 2048,
+			'save_in_preset': True
+		},
 		{
 			'type': 'int', 
 			'attr': 'biaspath_totaldepth',

@@ -47,14 +47,14 @@ class render_settings(render_panel):
 	bl_label = 'LuxRender Render Settings'
 	
 	display_property_groups = [
-		( ('scene',), 'luxrender_rendermode' ),
-		( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
+		( ('scene',), 'luxrender_rendermode', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_integrator', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_sampler', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_volumeintegrator', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_filter', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
 	]
 	
 	def draw(self, context):

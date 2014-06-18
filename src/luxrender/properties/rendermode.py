@@ -30,8 +30,6 @@ from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..extensions_framework.validate import Logic_OR as O
 
-from ..outputs.luxcore_api import UseLuxCore
-
 #This class holds the renderingmode menu and renderer prefs. Surface integrators settings are in a seperate class, due to there being a hell of a lot of them
 @LuxRenderAddon.addon_register_class
 class luxrender_rendermode(declarative_property_group):
@@ -88,17 +86,15 @@ class luxrender_rendermode(declarative_property_group):
 			self.renderer = 'luxcore'
 		else:
 			self.renderer = 'sampler'
-	
-	def available_render_modes(self, contex):
-		luxCoreModes = [
-				('luxcorepath', 'LuxCore Path', 'Experimental path tracer'),
-				('luxcorepathocl', 'LuxCore Path OpenCL', 'Experimental pure OpenCL path tracer'),
-				('luxcorebiaspath', 'LuxCore Biased Path', 'Experimental biased path tracer'),
-				('luxcorebiaspathocl', 'LuxCore Biased Path OpenCL', 'Experimental pure OpenCL biased path tracer'),
-				('luxcorebidir', 'LuxCore Bidir', 'Experimental bidirectional integrator'),
-				('luxcorebidirvcm', 'LuxCore BidirVCM', 'Experimental bidirectional/vertex merging integrator'),
-			]
-		classicModes = [
+
+	properties = [
+		{
+			'type': 'enum', 
+			'attr': 'rendermode',
+			'name': 'Rendering Mode',
+			'description': 'Renderer and surface integrator combination to use',
+			'default': 'bidirectional',
+			'items': [
 				('bidirectional', 'Bidirectional', 'Bidirectional path tracer'),
 				('path', 'Path', 'Simple (eye-only) Path tracer'),
 				('directlighting', 'Direct Lighting', 'Direct-light (Whitted) ray tracer'),
@@ -108,19 +104,13 @@ class luxrender_rendermode(declarative_property_group):
 				('sppm', 'SPPM (Experimental)', 'Stochastic progressive photon mapping integrator'),
 #				('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
 				('hybridpath', 'Hybrid Path', 'OpenCL-accelerated simple (eye-only) path tracer'),
-		]
-
-		return luxCoreModes if UseLuxCore() else classicModes + luxCoreModes
-
-	properties = [
-		{
-			'type': 'enum', 
-			'attr': 'rendermode',
-			'name': 'Rendering Mode',
-			'description': 'Renderer and surface integrator combination to use',
-			# 'default' can't be set when 'items' is a function
-			#'default': 'bidirectional',
-			'items': available_render_modes,
+				('luxcorepath', 'LuxCore Path', 'Experimental path tracer'),
+				('luxcorepathocl', 'LuxCore Path OpenCL', 'Experimental pure OpenCL path tracer'),
+				('luxcorebiaspath', 'LuxCore Biased Path', 'Experimental biased path tracer'),
+				('luxcorebiaspathocl', 'LuxCore Biased Path OpenCL', 'Experimental pure OpenCL biased path tracer'),
+				('luxcorebidir', 'LuxCore Bidir', 'Experimental bidirectional integrator'),
+				('luxcorebidirvcm', 'LuxCore BidirVCM', 'Experimental bidirectional/vertex merging integrator'),
+			],
 			'update': update_rendering_mode,
 			'save_in_preset': True
 		},
