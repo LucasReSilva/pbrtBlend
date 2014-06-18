@@ -48,6 +48,7 @@ class render_settings(render_panel):
 	
 	display_property_groups = [
 		( ('scene',), 'luxrender_rendermode' ),
+		( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
 		( ('scene',), 'luxrender_integrator', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_sampler', lambda: not UseLuxCore() ),
 		( ('scene',), 'luxrender_volumeintegrator', lambda: not UseLuxCore() ),
@@ -128,7 +129,9 @@ class postprocessing(render_panel):
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	
-	#We make our own post-pro panel so we can have one without BI's options here. Theoretically, if Lux gains the ability to do lens effects through the command line/API, we could add that here
+	# We make our own post-pro panel so we can have one without BI's options
+	# here. Theoretically, if Lux gains the ability to do lens effects through
+	# the command line/API, we could add that here
 	
 	def draw(self, context):
 		layout = self.layout

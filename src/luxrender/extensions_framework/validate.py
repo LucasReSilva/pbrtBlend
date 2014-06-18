@@ -82,6 +82,7 @@ L.execute(TESTA)
 """
 
 from types import *
+import importlib
 
 class Logic_AND(list):
     pass
@@ -109,7 +110,12 @@ class Logician(object):
         if self.subject is None:
             raise Exception('Cannot run tests on a subject which is None')
 
-        return getattr(self.subject, member_name)
+        if (member_name.count('.') > 0):
+            # It is an absolute reference
+            return eval(member_name)
+        else:
+            # It is a member of the object
+            return getattr(self.subject, member_name)
 
     def test_logic(self, member, logic, operator='eq'):
         """Find the type of test to run on member, and perform that test"""
