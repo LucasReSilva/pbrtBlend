@@ -40,21 +40,23 @@ class luxcore_enginesettings(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		'engine',
+		'renderengine_type',
 		'custom_properties',
 		# BIASPATH
-		'biaspath_tilesize',
-		'biaspath_totaldepth', 
-		['biaspath_diffusedepth', 'biaspath_glossydepth', 'biaspath_speculardepth'],
+		'tile_size',
+		'biaspath_pathdepth_total', 
+		['biaspath_pathdepth_diffuse', 'biaspath_pathdepth_glossy', 'biaspath_pathdepth_specular'],
+		'biaspath_clamping_radiance_maxvalue',
 	]
 	
 	visibility = {
 		# BIASPATH
-		'biaspath_tilesize':			{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
-		'biaspath_totaldepth':			{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
-		'biaspath_diffusedepth':		{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
-		'biaspath_glossydepth':			{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
-		'biaspath_speculardepth':		{ 'engine': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'tile_size':							{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_pathdepth_total':				{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_pathdepth_diffuse':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_pathdepth_glossy':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_pathdepth_specular':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_clamping_radiance_maxvalue':	{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 	}
 	
 	alert = {}
@@ -62,9 +64,9 @@ class luxcore_enginesettings(declarative_property_group):
 	properties = [
 		{
 			'type': 'enum', 
-			'attr': 'engine',
+			'attr': 'renderengine_type',
 			'name': 'Rendering engine',
-			'description': 'Render engine to use',
+			'description': 'Rendering engine to use',
 			'default': 'PATHCPU',
 			'items': [
 				('PATHCPU', 'Path', 'Path tracer'),
@@ -89,7 +91,7 @@ class luxcore_enginesettings(declarative_property_group):
 		########################################################################
 		{
 			'type': 'int', 
-			'attr': 'biaspath_tilesize',
+			'attr': 'tile_size',
 			'name': 'Tile size',
 			'description': 'Tile size in pixel',
 			'default': 32,
@@ -99,7 +101,7 @@ class luxcore_enginesettings(declarative_property_group):
 		},
 		{
 			'type': 'int', 
-			'attr': 'biaspath_totaldepth',
+			'attr': 'biaspath_pathdepth_total',
 			'name': 'Max Total Depth',
 			'description': 'Max recursion total depth for a path',
 			'default': 10,
@@ -109,7 +111,7 @@ class luxcore_enginesettings(declarative_property_group):
 		},
 		{
 			'type': 'int', 
-			'attr': 'biaspath_diffusedepth',
+			'attr': 'biaspath_pathdepth_diffuse',
 			'name': 'Max Diffuse Depth',
 			'description': 'Max recursion depth for a diffuse path',
 			'default': 2,
@@ -119,7 +121,7 @@ class luxcore_enginesettings(declarative_property_group):
 		},
 		{
 			'type': 'int', 
-			'attr': 'biaspath_glossydepth',
+			'attr': 'biaspath_pathdepth_glossy',
 			'name': 'Max Glossy Depth',
 			'description': 'Max recursion depth for a glossy path',
 			'default': 1,
@@ -129,12 +131,22 @@ class luxcore_enginesettings(declarative_property_group):
 		},
 		{
 			'type': 'int', 
-			'attr': 'biaspath_speculardepth',
+			'attr': 'biaspath_pathdepth_specular',
 			'name': 'Max Specular Depth',
 			'description': 'Max recursion depth for a specular path',
 			'default': 2,
 			'min': 0,
 			'max': 2048,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float', 
+			'attr': 'biaspath_clamping_radiance_maxvalue',
+			'name': 'Radiance clamping',
+			'description': 'Max acceptable radiance value for a sample',
+			'default': 10.0,
+			'min': 0,
+			'max': 999999.0,
 			'save_in_preset': True
 		},
 	]

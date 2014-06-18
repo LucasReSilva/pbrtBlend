@@ -335,6 +335,22 @@ class BlenderSceneConverter(object):
 			self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start));
 			self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end));
 
+	def ConvertEngineSettings(self):
+		engine = self.blScene.luxcore_enginesettings.renderengine_type
+		if len(engine) == 0:
+			engine = 'PATHCPU'
+		self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
+		
+		if engine == 'BIASPATHCPU' or engine == 'BIASPATHOCL':
+			self.cfgProps.Set(pyluxcore.Property('tile.size', [self.blScene.luxcore_enginesettings.tile_size]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.total', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_total]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_diffuse]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.glossy', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_glossy]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.specular', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_specular]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', [self.blScene.luxcore_enginesettings.biaspath_clamping_radiance_maxvalue]))
+		
+		self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
+
 	def Convert(self, imageWidth = None, imageHeight = None):
 		########################################################################
 		# Convert camera definition
@@ -370,8 +386,7 @@ class BlenderSceneConverter(object):
 		# Create the configuration
 		########################################################################
 
-		self.cfgProps.Set(pyluxcore.Property('renderengine.type', ['PATHCPU']))
-		self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
+		self.ConvertEngineSettings()
 
 		# Film
 		if (not imageWidth is None) and (not imageHeight is None):
