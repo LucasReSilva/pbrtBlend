@@ -43,20 +43,43 @@ class luxcore_enginesettings(declarative_property_group):
 		'renderengine_type',
 		'custom_properties',
 		# BIASPATH
+		'label_tiles',
 		'tile_size',
+		'tile_multipass_enable',
+		'tile_multipass_convergencetest_threshold',
+		'tile_multipass_convergencetest_threshold_reduction',
+		'label_sampling',
+		'biaspath_sampling_aa_size',
+		['biaspath_sampling_diffuse_size', 'biaspath_sampling_glossy_size', 'biaspath_sampling_specular_size'],
+		'label_path_depth',
 		'biaspath_pathdepth_total', 
 		['biaspath_pathdepth_diffuse', 'biaspath_pathdepth_glossy', 'biaspath_pathdepth_specular'],
+		'label_clamping',
 		'biaspath_clamping_radiance_maxvalue',
+		'biaspath_clamping_pdf_value',
 	]
 	
 	visibility = {
 		# BIASPATH
 		'tile_size':							{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'tile_multipass_enable':				{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'tile_multipass_convergencetest_threshold':	
+												{ 'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'tile_multipass_convergencetest_threshold_reduction':
+												{ 'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'label_sampling':						{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_sampling_aa_size':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_sampling_diffuse_size':		{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_sampling_glossy_size':		{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_sampling_specular_size':		{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'label_path_depth':						{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_pathdepth_total':				{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_pathdepth_diffuse':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_pathdepth_glossy':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_pathdepth_specular':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'label_clamping':						{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_clamping_radiance_maxvalue':	{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_clamping_pdf_value':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 	}
 	
 	alert = {}
@@ -90,14 +113,97 @@ class luxcore_enginesettings(declarative_property_group):
 		# BIASPATH
 		########################################################################
 		{
+			'type': 'text', 
+			'name': 'Tiles:',
+			'attr': 'label_tiles',
+		},
+		{
 			'type': 'int', 
 			'attr': 'tile_size',
 			'name': 'Tile size',
-			'description': 'Tile size in pixel',
+			'description': 'Tile width and height in pixels',
 			'default': 32,
 			'min': 8,
 			'max': 2048,
 			'save_in_preset': True
+		},
+		{
+			'type': 'bool', 
+			'attr': 'tile_multipass_enable',
+			'name': 'Enable halt condition',
+			'description': 'Enable halt condition (and multi-pass)',
+			'default': True,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float', 
+			'attr': 'tile_multipass_convergencetest_threshold',
+			'name': 'Error threshold:',
+			'description': 'Max acceptable error for a tile',
+			'default': 0.04,
+			'min': 0.001,
+			'max': 0.9,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float', 
+			'attr': 'tile_multipass_convergencetest_threshold_reduction',
+			'name': 'Error threshold reduction:',
+			'description': 'Avoid to stop the rendering and reduce the error threshold instead (0.0 = disabled)',
+			'default': 0.0,
+			'min': 0.0,
+			'max': 0.99,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text', 
+			'name': 'Sampling:',
+			'attr': 'label_sampling',
+		},
+		{
+			'type': 'int', 
+			'attr': 'biaspath_sampling_aa_size',
+			'name': 'AA',
+			'description': 'Anti-aliasing sampling (size x size)',
+			'default': 3,
+			'min': 1,
+			'max': 64,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int', 
+			'attr': 'biaspath_sampling_diffuse_size',
+			'name': 'Diffuse materials',
+			'description': 'Diffuse materials sampling (size x size)',
+			'default': 2,
+			'min': 1,
+			'max': 64,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int', 
+			'attr': 'biaspath_sampling_glossy_size',
+			'name': 'Glossy materials',
+			'description': 'Glossy materials sampling (size x size)',
+			'default': 2,
+			'min': 1,
+			'max': 64,
+			'save_in_preset': True
+		},
+		{
+			'type': 'int', 
+			'attr': 'biaspath_sampling_specular_size',
+			'name': 'Specular materials',
+			'description': 'Specular materials sampling (size x size)',
+			'default': 1,
+			'min': 1,
+			'max': 64,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text', 
+			'name': 'Path depths:',
+			'attr': 'label_path_depth',
 		},
 		{
 			'type': 'int', 
@@ -140,6 +246,11 @@ class luxcore_enginesettings(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'text', 
+			'name': 'Clamping:',
+			'attr': 'label_clamping',
+		},
+		{
 			'type': 'float', 
 			'attr': 'biaspath_clamping_radiance_maxvalue',
 			'name': 'Radiance clamping',
@@ -147,6 +258,16 @@ class luxcore_enginesettings(declarative_property_group):
 			'default': 10.0,
 			'min': 0,
 			'max': 999999.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'float', 
+			'attr': 'biaspath_clamping_pdf_value',
+			'name': 'PDF clamping',
+			'description': 'Max acceptable PDF (0.0 = disabled)',
+			'default': 0.0,
+			'min': 0,
+			'max': 999.0,
 			'save_in_preset': True
 		},
 	]

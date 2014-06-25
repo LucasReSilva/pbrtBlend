@@ -865,6 +865,29 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	#
 	############################################################################
 
+	def PrintStats(self, lcConfig, stats):
+		engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
+		
+		if (engine == 'BIASPATHCPU' or engine == 'BIASPATHOCL'):
+			converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
+			notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
+			pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
+			
+			LuxLog('[Elapsed time: %3d][Pass %4d][Convergence %d/%d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
+					stats.Get('stats.renderengine.time').GetFloat(),
+					stats.Get('stats.renderengine.pass').GetInt(),
+					converged, converged + notconverged + pending,
+					(stats.Get('stats.renderengine.total.samplesec').GetFloat()  / 1000000.0),
+					(stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
+		else:
+			LuxLog('[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
+					stats.Get('stats.renderengine.time').GetFloat(),
+					stats.Get('stats.renderengine.pass').GetInt(),
+					(stats.Get('stats.renderengine.total.samplesec').GetFloat()  / 1000000.0),
+					(stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
+
+		return (stats.Get('stats.renderengine.convergence').GetFloat() == 1.0)
+
 	def luxcore_render(self, scene):
 		if scene.name == 'preview':
 			self.luxcore_render_preview(scene)
@@ -895,7 +918,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
 			startTime = time.time()
 			lastRefreshTime = startTime
-			while not self.test_break():
+			done = False
+			while not self.test_break() and not done:
 				time.sleep(0.2)
 				
 				now = time.time()
@@ -909,11 +933,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 					lcSession.UpdateStats()
 
 					stats = lcSession.GetStats();
-					LuxLog('[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
-							stats.Get('stats.renderengine.time').GetFloat(),
-							stats.Get('stats.renderengine.pass').GetInt(),
-							(stats.Get('stats.renderengine.total.samplesec').GetFloat()  / 1000000.0),
-							(stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
+					done = self.PrintStats(lcConfig, stats)
 
 					# Update the image
 					lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
@@ -974,11 +994,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				lcSession.UpdateStats()
 
 				stats = lcSession.GetStats();
-				LuxLog('[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
-						stats.Get('stats.renderengine.time').GetFloat(),
-						stats.Get('stats.renderengine.pass').GetInt(),
-						(stats.Get('stats.renderengine.total.samplesec').GetFloat()  / 1000000.0),
-						(stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
+				self.PrintStats(lcConfig, stats)
 
 				# Update the image
 				lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
@@ -1064,11 +1080,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			self.viewSession.UpdateStats()
 
 			stats = self.viewSession.GetStats();
-			print("[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]" % (
-					stats.Get("stats.renderengine.time").GetFloat(),
-					stats.Get("stats.renderengine.pass").GetInt(),
-					(stats.Get("stats.renderengine.total.samplesec").GetFloat()  / 1000000.0),
-					(stats.Get("stats.dataset.trianglecount").GetFloat() / 1000.0)))
+			self.PrintStats(self.viewSesison.GetRenderConfig(), stats)
 
 			# Update the image buffer
 			self.viewSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, self.viewImageBufferFloat)

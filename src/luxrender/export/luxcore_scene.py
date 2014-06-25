@@ -343,11 +343,19 @@ class BlenderSceneConverter(object):
 		
 		if engine == 'BIASPATHCPU' or engine == 'BIASPATHOCL':
 			self.cfgProps.Set(pyluxcore.Property('tile.size', [self.blScene.luxcore_enginesettings.tile_size]))
+			self.cfgProps.Set(pyluxcore.Property('tile.multipass.enable', [self.blScene.luxcore_enginesettings.tile_multipass_enable]))
+			self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', [self.blScene.luxcore_enginesettings.tile_multipass_convergencetest_threshold]))
+			self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', [self.blScene.luxcore_enginesettings.tile_multipass_convergencetest_threshold_reduction]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.aa.size', [self.blScene.luxcore_enginesettings.biaspath_sampling_aa_size]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', [self.blScene.luxcore_enginesettings.biaspath_sampling_diffuse_size]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.glossy.size', [self.blScene.luxcore_enginesettings.biaspath_sampling_glossy_size]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.specular.size', [self.blScene.luxcore_enginesettings.biaspath_sampling_specular_size]))
 			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.total', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_total]))
 			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_diffuse]))
 			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.glossy', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_glossy]))
 			self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.specular', [self.blScene.luxcore_enginesettings.biaspath_pathdepth_specular]))
 			self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', [self.blScene.luxcore_enginesettings.biaspath_clamping_radiance_maxvalue]))
+			self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.pdf.value', [self.blScene.luxcore_enginesettings.biaspath_clamping_pdf_value]))
 		
 		self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
 
