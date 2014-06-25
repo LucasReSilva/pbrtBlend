@@ -57,6 +57,9 @@ class luxcore_enginesettings(declarative_property_group):
 		'label_clamping',
 		'biaspath_clamping_radiance_maxvalue',
 		'biaspath_clamping_pdf_value',
+		'label_lights',
+		'biaspath_lights_samplingstrategy_type',
+		'biaspath_lights_nearstart',
 	]
 	
 	visibility = {
@@ -80,6 +83,10 @@ class luxcore_enginesettings(declarative_property_group):
 		'label_clamping':						{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_clamping_radiance_maxvalue':	{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_clamping_pdf_value':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'label_lights':							{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_lights_samplingstrategy_type':
+												{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		'biaspath_lights_nearstart':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 	}
 	
 	alert = {}
@@ -256,7 +263,7 @@ class luxcore_enginesettings(declarative_property_group):
 			'name': 'Radiance clamping',
 			'description': 'Max acceptable radiance value for a sample',
 			'default': 10.0,
-			'min': 0,
+			'min': 0.0,
 			'max': 999999.0,
 			'save_in_preset': True
 		},
@@ -266,8 +273,35 @@ class luxcore_enginesettings(declarative_property_group):
 			'name': 'PDF clamping',
 			'description': 'Max acceptable PDF (0.0 = disabled)',
 			'default': 0.0,
-			'min': 0,
+			'min': 0.0,
 			'max': 999.0,
+			'save_in_preset': True
+		},
+		{
+			'type': 'text', 
+			'name': 'Lights:',
+			'attr': 'label_lights',
+		},
+		{
+			'type': 'enum', 
+			'attr': 'biaspath_lights_samplingstrategy_type',
+			'name': 'Sampling strategy',
+			'description': 'How to sample multiple light sources',
+			'default': 'ALL',
+			'items': [
+				('ALL', 'ALL', 'ALL'),
+				('ONE', 'ONE', 'ONE'),
+			],
+			'save_in_preset': True
+		},
+		{
+			'type': 'float', 
+			'attr': 'biaspath_lights_nearstart',
+			'name': 'Near start',
+			'description': 'How far, from the light source, must be a point to receive light',
+			'default': 0.001,
+			'min': 0.0,
+			'max': 1000.0,
 			'save_in_preset': True
 		},
 	]
