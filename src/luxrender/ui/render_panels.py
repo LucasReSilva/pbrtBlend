@@ -68,6 +68,16 @@ class render_settings(render_panel):
 		
 		super().draw(context)
 
+		if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']:
+			# This is a "special" panel section for the list of OpenCL devices
+			for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
+				dev = context.scene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
+				row = self.layout.row()
+				row.prop(dev, 'opencl_device_enabled', text="")
+				subrow = row.row()
+				subrow.enabled = dev.opencl_device_enabled
+				subrow.label(dev.name)
+
 @LuxRenderAddon.addon_register_class
 class translator(render_panel):
 	'''

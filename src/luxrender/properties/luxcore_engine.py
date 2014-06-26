@@ -32,6 +32,30 @@ from .. import LuxRenderAddon
 from ..outputs.luxcore_api import ScenePrefix
 
 @LuxRenderAddon.addon_register_class
+class luxcore_opencl_devices(declarative_property_group):
+	'''
+	Storage class for available OpenCL devices
+	'''
+	
+	ef_attach_to = []	# not attached
+	alert = {}
+	
+	controls = [
+		# opencl_device_enabled is drawn manually in the UI class
+		'label_opencl_device_enabled'
+	]
+
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'opencl_device_enabled',
+			'name': 'Enabled',
+			'description': 'Enable this OpenCL device',
+			'default': True
+		},
+	]
+
+@LuxRenderAddon.addon_register_class
 class luxcore_enginesettings(declarative_property_group):
 	'''
 	Storage class for LuxCore engine settings.
@@ -60,10 +84,17 @@ class luxcore_enginesettings(declarative_property_group):
 		'label_lights',
 		'biaspath_lights_samplingstrategy_type',
 		'biaspath_lights_nearstart',
+		# Compute settings
+		'label_compute_settings',
+		# CPU settings
+		'native_threads_count',
+		# OpenCL settings
+		'op_opencl_device_list_update',
 	]
 	
 	visibility = {
 		# BIASPATH
+		'label_tiles':							{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'tile_size':							{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'tile_multipass_enable':				{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'tile_multipass_convergencetest_threshold':	
@@ -87,6 +118,10 @@ class luxcore_enginesettings(declarative_property_group):
 		'biaspath_lights_samplingstrategy_type':
 												{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
 		'biaspath_lights_nearstart':			{ 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL']) },
+		# CPU settings
+		'native_threads_count':					{ 'renderengine_type': O(['PATHCPU', 'BIASPATHCPU', 'BIDIRCPU', 'BIDIRVMCPU']) },
+		# OpenCL settings
+		'op_opencl_device_list_update':			{ 'renderengine_type': O(['PATHOCL', 'BIASPATHOCL']) },
 	}
 	
 	alert = {}
@@ -303,5 +338,37 @@ class luxcore_enginesettings(declarative_property_group):
 			'min': 0.0,
 			'max': 1000.0,
 			'save_in_preset': True
+		},
+		########################################################################
+		# Compute settings
+		########################################################################
+		{
+			'type': 'text', 
+			'name': 'Compute settings:',
+			'attr': 'label_compute_settings',
+		},
+		# CPU settings
+		{
+			'type': 'int', 
+			'attr': 'native_threads_count',
+			'name': 'Threads count',
+			'description': 'Number of CPU threads used for the rendering (0 = auto)',
+			'default': 0,
+			'min': 0,
+			'max': 512,
+		},
+		# OpenCL settings
+		{
+			'type': 'collection',
+			'ptype': luxcore_opencl_devices,
+			'attr': 'luxcore_opencl_devices',
+			'name': 'OpenCL Devices',
+			'items': []
+		},
+		{
+			'type': 'operator',
+			'attr': 'op_opencl_device_list_update',
+			'operator': 'luxrender.opencl_device_list_update',
+			'text': 'Update OpenCL device list',
 		},
 	]

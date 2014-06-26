@@ -358,6 +358,19 @@ class BlenderSceneConverter(object):
 			self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.pdf.value', [self.blScene.luxcore_enginesettings.biaspath_clamping_pdf_value]))
 			self.cfgProps.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type', [self.blScene.luxcore_enginesettings.biaspath_lights_samplingstrategy_type]))
 		
+		# CPU settings
+		self.cfgProps.Set(pyluxcore.Property('native.threads.count', [self.blScene.luxcore_enginesettings.native_threads_count]))
+		
+		# OpenCL settings
+		if len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
+			dev_string = ''
+			for dev_index in range(len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices)):
+				dev = self.blScene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
+				dev_string += '1' if dev.opencl_device_enabled else '0'
+
+			self.cfgProps.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
+		
+		# Accelerator settings
 		self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
 
 	def Convert(self, imageWidth = None, imageHeight = None):
