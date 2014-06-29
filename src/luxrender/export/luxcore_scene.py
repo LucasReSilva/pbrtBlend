@@ -420,8 +420,8 @@ class BlenderSceneConverter(object):
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.type', ['sun']))
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.gain', [1.0, 1.0, 1.0]))
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.dir', [0.166974, -0.59908, 0.783085]))
-		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.type', ['sky']))
-		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
+		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.type', ['sky']))
+		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.dir', [0.166974, -0.59908, 0.783085]))
 
 		########################################################################
