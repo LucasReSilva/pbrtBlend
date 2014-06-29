@@ -359,7 +359,7 @@ class BlenderSceneConverter(object):
 		
 		if luxCamera.use_dof:
 			if blCameraData.dof_object is not None:
-				self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * ((scene.camera.location - blCameraData.dof_object.location).length)));
+				self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * ((blCamera.location - blCameraData.dof_object.location).length)));
 			elif blCameraData.dof_distance > 0:
 				self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance"), ws * blCameraData.dof_distance);
 			
@@ -420,8 +420,8 @@ class BlenderSceneConverter(object):
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.type', ['sun']))
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.gain', [1.0, 1.0, 1.0]))
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.dir', [0.166974, -0.59908, 0.783085]))
-		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.type', ['sky']))
-		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
+		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.type', ['sky']))
+		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
 		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.dir', [0.166974, -0.59908, 0.783085]))
 
 		########################################################################
