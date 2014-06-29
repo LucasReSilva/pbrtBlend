@@ -253,6 +253,9 @@ class BlenderSceneConverter(object):
 			if matType == 'matte':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['matte']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
+			####################################################################
+			# Mirror
+			####################################################################
 			elif matType == 'mirror':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mirror']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kr', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
