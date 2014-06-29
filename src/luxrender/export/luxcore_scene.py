@@ -272,10 +272,22 @@ class BlenderSceneConverter(object):
 			self.scnProps.Set(pyluxcore.Property(prefix + '.emission.samples', [material.luxcore_material.emission_samples]))
 			self.scnProps.Set(pyluxcore.Property(prefix + '.bumpsamplingdistance', [material.luxcore_material.bumpsamplingdistance]))
 			
-			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.diffuse.enable', [material.luxcore_material.visibility_indirect_diffuse_enable]))
-			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.glossy.enable', [material.luxcore_material.visibility_indirect_glossy_enable]))
-			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.specular.enable', [material.luxcore_material.visibility_indirect_specular_enable]))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.diffuse.enable', material.luxcore_material.visibility_indirect_diffuse_enable))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.glossy.enable', material.luxcore_material.visibility_indirect_glossy_enable))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.specular.enable', material.luxcore_material.visibility_indirect_specular_enable))
 			
+			# LuxRender emission
+			if material.luxrender_emission.use_emission:
+				emit_enabled = self.blScene.luxrender_lightgroups.is_enabled(material.luxrender_emission.lightgroup)
+				emit_enabled &= (material.luxrender_emission.L_color.v * material.luxrender_emission.gain) > 0.0
+				if emit_enabled:
+					self.scnProps.Set(pyluxcore.Property(prefix + '.emission',
+						self.ConvertMaterialChannel(material.luxrender_emission, 'L', 'color')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.emission.gain', [
+						material.luxrender_emission.gain, material.luxrender_emission.gain, material.luxrender_emission.gain]))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.emission.power', material.luxrender_emission.power))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.emission.efficency', material.luxrender_emission.efficacy))
+					
 			self.materialsCache.add(matName)
 			return matName
 		except Exception as err:
@@ -405,13 +417,12 @@ class BlenderSceneConverter(object):
 		# Add a sky definition
 		########################################################################
 
-		self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.type', ['sun']))
-		self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.gain', [1.0, 1.0, 1.0]))
-		self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.dir', [0.166974, -0.59908, 0.783085]))
+		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.type', ['sun']))
+		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.gain', [1.0, 1.0, 1.0]))
+		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.dir', [0.166974, -0.59908, 0.783085]))
 		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.type', ['sky']))
 		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
-		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
-		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.dir', [0.166974, -0.59908, 0.783085]))
+		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.dir', [0.166974, -0.59908, 0.783085]))
 
 		########################################################################
 		# Add dummy material
