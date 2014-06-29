@@ -29,7 +29,6 @@ from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from .. import LuxRenderAddon
-from ..outputs.luxcore_api import ScenePrefix
 
 @LuxRenderAddon.addon_register_class
 class luxcore_opencl_devices(declarative_property_group):

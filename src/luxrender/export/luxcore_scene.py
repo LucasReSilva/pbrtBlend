@@ -255,6 +255,20 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
 			else:
 				return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
+
+			# LuxCore specific material settings
+			if material.luxcore_material.id != -1:
+				self.scnProps.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
+			if material.luxcore_material.emission_id != -1:
+				self.scnProps.Set(pyluxcore.Property(prefix + '.emission.id', [material.luxcore_material.light_id]))
+				
+			self.scnProps.Set(pyluxcore.Property(prefix + '.samples', [material.luxcore_material.samples]))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.emission.samples', [material.luxcore_material.emission_samples]))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.bumpsamplingdistance', [material.luxcore_material.bumpsamplingdistance]))
+			
+			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.diffuse.enable', [material.luxcore_material.visibility_indirect_diffuse_enable]))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.glossy.enable', [material.luxcore_material.visibility_indirect_glossy_enable]))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.visibility.indirect.specular.enable', [material.luxcore_material.visibility_indirect_specular_enable]))
 			
 			self.materialsCache.add(matName)
 			return matName
