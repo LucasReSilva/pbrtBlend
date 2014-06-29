@@ -1054,14 +1054,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		lcConfig = BlenderSceneConverter(context.scene).Convert(
 			imageWidth = self.viewFilmWidth,
 			imageHeight = self.viewFilmHeight)
-	
+
 		# Force PATHCPU or BIDIRCPU for preview
 		engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
 		if (engine in ['BIDIRCPU', 'BIDIRVMCPU']):
 			lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
 		else:
 			lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['PATHCPU']))
-
+			
 #		LuxLog('RenderConfig Properties:')
 #		LuxLog(str(lcConfig.GetProperties()))
 #		LuxLog('Scene Properties:')

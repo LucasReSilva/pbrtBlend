@@ -373,7 +373,8 @@ class BlenderSceneConverter(object):
 			self.cfgProps.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type', [self.blScene.luxcore_enginesettings.biaspath_lights_samplingstrategy_type]))
 		
 		# CPU settings
-		self.cfgProps.Set(pyluxcore.Property('native.threads.count', [self.blScene.luxcore_enginesettings.native_threads_count]))
+		if (self.blScene.luxcore_enginesettings.native_threads_count > 0):
+			self.cfgProps.Set(pyluxcore.Property('native.threads.count', [self.blScene.luxcore_enginesettings.native_threads_count]))
 		
 		# OpenCL settings
 		if len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
