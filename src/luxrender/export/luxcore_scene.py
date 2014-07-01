@@ -253,6 +253,7 @@ class BlenderSceneConverter(object):
 			if matType == 'matte':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['matte']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
 			####################################################################
 			# Mirror
 			####################################################################
@@ -270,6 +271,34 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.multibounce', material.luxrender_material.luxrender_mat_glossy.multibounce))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.d', self.ConvertMaterialChannel(luxMat, 'd', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
+			####################################################################
+			# Glass
+			####################################################################
+			elif matType == 'glass':
+				if material.luxrender_material.luxrender_mat_glass.architectural == False:
+					self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['glass']))
+				else:
+					self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['archglass']))
+				
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kr', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kt', self.ConvertMaterialChannel(luxMat, 'Kt', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.cauchyb', self.ConvertMaterialChannel(luxMat, 'cauchyb', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.film', self.ConvertMaterialChannel(luxMat, 'film', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.index', self.ConvertMaterialChannel(luxMat, 'index', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.filmindex', self.ConvertMaterialChannel(luxMat, 'filmindex', 'float')))
+			####################################################################
+			# Roughlass
+			####################################################################
+			elif matType == 'roughglass':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['roughglass']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kr', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kt', self.ConvertMaterialChannel(luxMat, 'Kt', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.cauchyb', self.ConvertMaterialChannel(luxMat, 'cauchyb', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.film', self.ConvertMaterialChannel(luxMat, 'film', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.index', self.ConvertMaterialChannel(luxMat, 'index', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.filmindex', self.ConvertMaterialChannel(luxMat, 'filmindex', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
 			else:
