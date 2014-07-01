@@ -271,6 +271,7 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
 				elif material.luxrender_material.luxrender_mat_metal2.metaltype == 'fresnelcolor':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.n', self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))) # i get inverted colors here, issue in luxcore or did i missed something ?
+					print("----------->", self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))
 				
 				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
@@ -335,6 +336,24 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.weft_ks', self.ConvertMaterialChannel(luxMat, 'weft_Ks', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.repeat_u', material.luxrender_material.luxrender_mat_cloth.repeat_u ))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.repeat_v', material.luxrender_material.luxrender_mat_cloth.repeat_v ))
+			####################################################################
+			# Carpaint
+			####################################################################
+			elif matType == 'carpaint':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['carpaint']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_carpaint.name))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.ka', self.ConvertMaterialChannel(luxMat, 'Ka', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.ks1', self.ConvertMaterialChannel(luxMat, 'Ks1', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.ks2', self.ConvertMaterialChannel(luxMat, 'Ks2', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.ks3', self.ConvertMaterialChannel(luxMat, 'Ks3', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.d', self.ConvertMaterialChannel(luxMat, 'd', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.m1', material.luxrender_material.luxrender_mat_carpaint.M1_floatvalue))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.m2', material.luxrender_material.luxrender_mat_carpaint.M2_floatvalue))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.m3', material.luxrender_material.luxrender_mat_carpaint.M3_floatvalue))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.r1', material.luxrender_material.luxrender_mat_carpaint.R1_floatvalue))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.r2', material.luxrender_material.luxrender_mat_carpaint.R2_floatvalue))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.r3', material.luxrender_material.luxrender_mat_carpaint.R3_floatvalue))
 			####################################################################
 			# Fallback
 			####################################################################
