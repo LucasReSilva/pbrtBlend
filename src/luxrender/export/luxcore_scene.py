@@ -259,6 +259,19 @@ class BlenderSceneConverter(object):
 			elif matType == 'mirror':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mirror']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kr', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
+			####################################################################
+			# Glossy
+			####################################################################
+			elif matType == 'glossy':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['glossy2']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.ks', self.ConvertMaterialChannel(luxMat, 'Ks', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.ka', self.ConvertMaterialChannel(luxMat, 'Ka', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.multibounce', material.luxrender_material.luxrender_mat_glossy.multibounce))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.d', self.ConvertMaterialChannel(luxMat, 'd', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
 			else:
 				return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
