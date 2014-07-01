@@ -257,7 +257,7 @@ class BlenderSceneConverter(object):
 			####################################################################
 			# Mattetranslucent
 			####################################################################
-			if matType == 'mattetranslucent':
+			elif matType == 'mattetranslucent':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mattetranslucent']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kr', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kt', self.ConvertMaterialChannel(luxMat, 'Kt', 'color')))
@@ -265,7 +265,7 @@ class BlenderSceneConverter(object):
 			####################################################################
 			# Metal2
 			####################################################################
-			if matType == 'metal2':
+			elif matType == 'metal2':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
 				if material.luxrender_material.luxrender_mat_metal2.metaltype == 'preset':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
