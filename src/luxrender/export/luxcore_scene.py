@@ -255,6 +255,26 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
 			####################################################################
+			# Mattetranslucent
+			####################################################################
+			if matType == 'mattetranslucent':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mattetranslucent']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kr', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kt', self.ConvertMaterialChannel(luxMat, 'Kt', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
+			####################################################################
+			# Metal2
+			####################################################################
+			if matType == 'metal2':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
+				if material.luxrender_material.luxrender_mat_metal2.metaltype == 'preset':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
+				elif material.luxrender_material.luxrender_mat_metal2.metaltype == 'fresnelcolor':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.n', self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))) # i get inverted colors here, issue in luxcore or did i missed something ?
+				
+				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
+			####################################################################
 			# Mirror
 			####################################################################
 			elif matType == 'mirror':
@@ -270,6 +290,7 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.index', self.ConvertMaterialChannel(luxMat, 'index', 'float')))
 				else:
 					self.scnProps.Set(pyluxcore.Property(prefix + '.ks', self.ConvertMaterialChannel(luxMat, 'Ks', 'color')))
+				
 				self.scnProps.Set(pyluxcore.Property(prefix + '.ka', self.ConvertMaterialChannel(luxMat, 'Ka', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.multibounce', material.luxrender_material.luxrender_mat_glossy.multibounce))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
