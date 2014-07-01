@@ -355,6 +355,16 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.r2', material.luxrender_material.luxrender_mat_carpaint.R2_floatvalue))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.r3', material.luxrender_material.luxrender_mat_carpaint.R3_floatvalue))
 			####################################################################
+			# Velvet
+			####################################################################
+			if matType == 'velvet':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['velvet']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.thickness', material.luxrender_material.luxrender_mat_velvet.thickness))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.p1', material.luxrender_material.luxrender_mat_velvet.p1))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.p2', material.luxrender_material.luxrender_mat_velvet.p2))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.p3', material.luxrender_material.luxrender_mat_velvet.p3))
+			####################################################################
 			# Fallback
 			####################################################################
 			else:
