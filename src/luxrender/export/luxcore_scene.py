@@ -266,7 +266,10 @@ class BlenderSceneConverter(object):
 			elif matType == 'glossy':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['glossy2']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.ks', self.ConvertMaterialChannel(luxMat, 'Ks', 'color')))
+				if material.luxrender_material.luxrender_mat_glossy.useior:
+					self.scnProps.Set(pyluxcore.Property(prefix + '.index', self.ConvertMaterialChannel(luxMat, 'index', 'float')))
+				else:
+					self.scnProps.Set(pyluxcore.Property(prefix + '.ks', self.ConvertMaterialChannel(luxMat, 'Ks', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.ka', self.ConvertMaterialChannel(luxMat, 'Ka', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.multibounce', material.luxrender_material.luxrender_mat_glossy.multibounce))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
@@ -286,6 +289,7 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kt', self.ConvertMaterialChannel(luxMat, 'Kt', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.cauchyb', self.ConvertMaterialChannel(luxMat, 'cauchyb', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.film', self.ConvertMaterialChannel(luxMat, 'film', 'float')))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.interiorior', self.ConvertMaterialChannel(luxMat, 'index', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.interiorior', self.ConvertMaterialChannel(luxMat, 'index', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.filmindex', self.ConvertMaterialChannel(luxMat, 'filmindex', 'float')))
 			####################################################################
