@@ -357,7 +357,7 @@ class BlenderSceneConverter(object):
 			####################################################################
 			# Velvet
 			####################################################################
-			if matType == 'velvet':
+			elif matType == 'velvet':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['velvet']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.thickness', material.luxrender_material.luxrender_mat_velvet.thickness))
