@@ -365,6 +365,11 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.p2', material.luxrender_material.luxrender_mat_velvet.p2))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.p3', material.luxrender_material.luxrender_mat_velvet.p3))
 			####################################################################
+			# Null
+			####################################################################
+			elif matType == 'null':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['null']))
+			####################################################################
 			# Fallback
 			####################################################################
 			else:
