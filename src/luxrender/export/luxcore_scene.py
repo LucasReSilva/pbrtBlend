@@ -248,12 +248,18 @@ class BlenderSceneConverter(object):
 			
 			prefix = 'scene.materials.' + matName
 			####################################################################
-			# Matte
+			# Matte and Roughmatte
 			####################################################################
 			if matType == 'matte':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['matte']))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
+				sigma = self.ConvertMaterialChannel(luxMat, 'sigma', 'float')
+				print("==============["+sigma+"]")
+				if sigma == '0.0':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['matte']))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
+				else:
+					self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['roughmatte']))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
 			####################################################################
 			# Mattetranslucent
 			####################################################################
@@ -585,7 +591,7 @@ class BlenderSceneConverter(object):
 		LuxLog('RenderConfig Properties:')
 		LuxLog(str(self.cfgProps))
 		LuxLog('Scene Properties:')
-		LuxLog(str(self.lcScene))
+		LuxLog(str(self.scnProps))
 
 		self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
 
