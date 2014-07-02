@@ -434,8 +434,10 @@ class BlenderSceneConverter(object):
 		for meshDefinition in meshDefinitions:
 			objName = meshDefinition[0]
 			objMatIndex = meshDefinition[1]
-			
-			# First create submats from other than first index, used for mix, coating and layer-components
+
+			####################################################################
+			# First convert submats from other than first index, used for mix-, coating- and layer-components
+			####################################################################
 			slot_count = obj.material_slots.__len__()
 			for slot_index in range(1, slot_count):
 				subMatIndex = meshDefinition[1] + slot_index
