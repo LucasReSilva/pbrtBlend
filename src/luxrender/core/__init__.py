@@ -903,10 +903,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		try:
 			# convert the Blender scene
 			lcConfig = BlenderSceneConverter(scene).Convert()
-			LuxLog('RenderConfig Properties:')
-			LuxLog(str(lcConfig.GetProperties()))
-			LuxLog('Scene Properties:')
-			LuxLog(str(lcConfig.GetScene().GetProperties()))
 
 			lcSession = pyluxcore.RenderSession(lcConfig)
 
@@ -1061,11 +1057,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
 		else:
 			lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['PATHCPU']))
-			
-#		LuxLog('RenderConfig Properties:')
-#		LuxLog(str(lcConfig.GetProperties()))
-#		LuxLog('Scene Properties:')
-#		LuxLog(str(lcConfig.GetScene().GetProperties()))
 		
 		self.viewSession = pyluxcore.RenderSession(lcConfig)
 		self.viewSession.Start()

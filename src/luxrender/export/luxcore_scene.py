@@ -581,6 +581,12 @@ class BlenderSceneConverter(object):
 		# Sampler
 		self.cfgProps.Set(pyluxcore.Property('sampler.type', ['RANDOM']))
 
+		# Debug information
+		LuxLog('RenderConfig Properties:')
+		LuxLog(str(self.cfgProps))
+		LuxLog('Scene Properties:')
+		LuxLog(str(self.lcScene))
+
 		self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
 
 		return self.lcConfig
