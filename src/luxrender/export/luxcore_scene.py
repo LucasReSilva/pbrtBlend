@@ -376,6 +376,14 @@ class BlenderSceneConverter(object):
 			elif matType == 'null':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['null']))
 			####################################################################
+			# Mix
+			####################################################################
+#			elif matType == 'mix':
+#				# Non-functional, TODO: We need first get all materials in obj.material_slots.__len__() - 1] to have acces to named materials aka submats
+#				self.scnProps.Set(pyluxcore.Property(prefix + '.material1', material.luxrender_material.luxrender_mat_mix.namedmaterial1_material))
+#				self.scnProps.Set(pyluxcore.Property(prefix + '.material2', material.luxrender_material.luxrender_mat_mix.namedmaterial2_material))
+#				self.scnProps.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxMat, 'amount', 'float')))
+			####################################################################
 			# Fallback
 			####################################################################
 			else:
