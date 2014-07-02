@@ -50,10 +50,10 @@ def FlattenStrCollection(coll):
 					yield subc
 
 def UseLuxCore():
-	return True if bpy.data.scenes['Scene'].luxrender_engine.selected_luxrender_api == 'luxcore' else False
+	return True if bpy.data.scenes[0].luxrender_engine.selected_luxrender_api == 'luxcore' else False
 
 def ScenePrefix():
-	return 'importlib.import_module(\'bpy\').data.scenes[\'Scene\'].'
+	return 'importlib.import_module(\'bpy\').data.scenes[0].'
 
 if not 'PYLUXCORE_AVAILABLE' in locals():
 	try:
