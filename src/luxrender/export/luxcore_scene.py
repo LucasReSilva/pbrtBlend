@@ -194,7 +194,51 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.gamma', [float(luxTex.gamma)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
 				self.ConvertMapping(prefix, texture)
+			####################################################################
+			# Marble
+			####################################################################
+			elif texType == 'marble':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['marble']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.scale', [float(luxTex.scale)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.variation', [float(luxTex.variation)]))
+#				self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.type', ['globalmapping3d'])) # problems to get it work atm.
+			####################################################################
+			# Mix
+			####################################################################
+			elif texType == 'mix':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mix']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.amount', [float(luxTex.amount_floatvalue)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
+			####################################################################
+			# Brick
+			####################################################################
+			elif texType == 'brick':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mix']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.brickbond', [(luxTex.brickbond)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.brickrun', [float(luxTex.brickrun)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.mortarsize', [float(luxTex.mortarsize)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.brickwidth', [float(luxTex.brickwidth)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.brickdepth', [float(luxTex.brickdepth)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.brickheight', [float(luxTex.brickheight)]))
+					
+				if luxTex.variant == 'color':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', ' '.join(str(i) for i in getattr(luxTex, 'bricktex_color'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', ' '.join(str(i) for i in getattr(luxTex, 'brickmodtex_color'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', ' '.join(str(i) for i in getattr(luxTex, 'mortartex_color'))))
+				else:
+					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', [float(luxTex.bricktex_floatvalue)]))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', [float(luxTex.brickmodtex_floatvalue)]))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', [float(luxTex.mortartex_floatvalue)]))
+#					self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.type', ['globalmapping3d'])) # problems to get it work atm.
 			else:
+				####################################################################
+				# Fallback to exception
+				####################################################################
 				raise Exception('Unknown type ' + texType + 'for texture: ' + texture.name)
 			
 			self.texturesCache.add(texName)
@@ -389,6 +433,10 @@ class BlenderSceneConverter(object):
 			else:
 				return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
+			# Common material settings
+#			if material.luxrender_material.bumpmap_usefloattexture:
+#				self.scnProps.Set(pyluxcore.Property(prefix + '.bumptex', material.luxrender_material.bumpmap_floattexturename))
+
 			# LuxCore specific material settings
 			if material.luxcore_material.id != -1:
 				self.scnProps.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
@@ -553,12 +601,12 @@ class BlenderSceneConverter(object):
 		# Add a sky definition
 		########################################################################
 
-		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.type', ['sun']))
-		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.gain', [1.0, 1.0, 1.0]))
-		#self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.dir', [0.166974, -0.59908, 0.783085]))
+		self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.type', ['sun']))
+		self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.gain', [1.0, 1.0, 1.0]))
+		self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.dir', [0.166974, -0.59908, 0.783085]))
 		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.type', ['sky']))
 		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
-		#self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.dir', [0.166974, -0.59908, 0.783085]))
+		self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.dir', [0.166974, -0.59908, 0.783085]))
 
 		########################################################################
 		# Add dummy material
@@ -597,6 +645,7 @@ class BlenderSceneConverter(object):
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
+#		self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
 
 		# Pixel Filter
 		self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['MITCHELL_SS']))
