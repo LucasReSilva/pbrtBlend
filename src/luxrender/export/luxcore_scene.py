@@ -189,8 +189,8 @@ class BlenderSceneConverter(object):
 			self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.type', ['globalmapping3d']))
 		else:
 			raise Exception('Unsupported mapping for texture: ' + texture.name)
-		# hardcoded test settings, Todo: add the real attributes
-		self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.transformation', ['10.0 0.0 0.0 0.0  0.0 10.0 0.01 0.0  0.0 0.0 10.0 0.0  0.0 0.0 0.0 1.0']))
+		# Todo: transform, rotate, scale
+
 
 	def ConvertTexture(self, texture):
 		texType = texture.luxrender_texture.type
@@ -228,7 +228,6 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
-				self.ConvertTransform(prefix, texture)
 			####################################################################
 			# Brick
 			####################################################################
