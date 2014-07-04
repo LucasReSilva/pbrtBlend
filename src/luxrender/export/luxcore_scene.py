@@ -165,7 +165,8 @@ class BlenderSceneConverter(object):
 			return []
 
 	def ConvertMapping(self, prefix, texture):
-		# Note 2DMapping is used for bilerp, checkerboard(dimension == 2), dots, imagemap, normalmap, uv, uvmask
+		# Note 2DMapping is used for: bilerp, checkerboard(dimension == 2), dots, imagemap, normalmap, uv, uvmask
+		# Blender - image
 		luxMapping = getattr(texture.luxrender_texture, 'luxrender_tex_mapping')
 		
 		if luxMapping.type == 'uv':
@@ -180,7 +181,8 @@ class BlenderSceneConverter(object):
 			raise Exception('Unsupported mapping for texture: ' + texture.name)
 
 	def ConvertTransform(self, prefix, texture):
-		# Note 3DMapping is used for checkerboard(dimension == 3), and all other not listed under 2DMapping
+	# Note 3DMapping is used for: brick, checkerboard(dimension == 3), cloud', densitygrid, exponential, fbm', marble', windy, wrinkled
+	# BLENDER - CLOUDS,DISTORTED_NOISE,MAGIC,MARBLE, MUSGRAVE,STUCCI,VORONOI, WOOD
 		luxTransform = getattr(texture.luxrender_texture, 'luxrender_tex_transform')
 
 		if luxTransform.coordinates == 'uv':
@@ -189,8 +191,8 @@ class BlenderSceneConverter(object):
 			self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.type', ['globalmapping3d']))
 		else:
 			raise Exception('Unsupported mapping for texture: ' + texture.name)
-		# Todo: transform, rotate, scale
-
+		# Todo: transform, rotate, scale - the latters shows how the values must be represented
+		self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', [1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  0.0, 0.0, 0.0, 1.0]))
 
 	def ConvertTexture(self, texture):
 		texType = texture.luxrender_texture.type
