@@ -25,6 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 import bpy
+from symbol import except_clause
 import math
 
 from .. import pyluxcore
@@ -273,7 +274,7 @@ class BlenderSceneConverter(object):
 
 		raise Exception('Unknown texture in channel' + materialChannel + ' for material ' + material.luxrender_material.type)
 
-	def ConvertMaterial(self, material):
+	def ConvertMaterial(self, material, materials):
 		try:
 			if material is None:
 				return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
@@ -300,7 +301,6 @@ class BlenderSceneConverter(object):
 			####################################################################
 			if matType == 'matte':
 				sigma = self.ConvertMaterialChannel(luxMat, 'sigma', 'float')
-				print("==============["+sigma+"]")
 				if sigma == '0.0':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['matte']))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
@@ -427,10 +427,22 @@ class BlenderSceneConverter(object):
 			# Mix
 			####################################################################
 			elif matType == 'mix':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mix']))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.material1', material.luxrender_material.luxrender_mat_mix.namedmaterial1_material))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.material2', material.luxrender_material.luxrender_mat_mix.namedmaterial2_material))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxMat, 'amount', 'float')))
+				if material.luxrender_material.luxrender_mat_mix.namedmaterial1_material == '' or material.luxrender_material.luxrender_mat_mix.namedmaterial2_material =='':
+					return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
+				else:
+					try:
+						mat1 = materials[material.luxrender_material.luxrender_mat_mix.namedmaterial1_material].material
+						mat1Name = self.ConvertMaterial(mat1, materials)
+						mat2 = materials[material.luxrender_material.luxrender_mat_mix.namedmaterial2_material].material
+						mat2Name = self.ConvertMaterial(mat2, materials)
+
+						self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mix']))
+						self.scnProps.Set(pyluxcore.Property(prefix + '.material1', mat1Name))
+						self.scnProps.Set(pyluxcore.Property(prefix + '.material2', mat2Name))
+						self.scnProps.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxMat, 'amount', 'float')))
+					except:
+						LuxLog('WARNING: unable to convert mix material: %s' % material.name)
+						return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 			####################################################################
 			# Fallback
 			####################################################################
@@ -488,15 +500,6 @@ class BlenderSceneConverter(object):
 			objMatIndex = meshDefinition[1]
 
 			####################################################################
-			# First convert submats from other than first index, used for mix-, coating- and layer-components
-			####################################################################
-			slot_count = obj.material_slots.__len__()
-			for slot_index in range(1, slot_count):
-				subMatIndex = meshDefinition[1] + slot_index
-				subMat = obj.material_slots[subMatIndex].material
-				subMatName = self.ConvertMaterial(subMat)
-
-			####################################################################
 			# Convert the (main) material
 			####################################################################
 			
@@ -506,7 +509,7 @@ class BlenderSceneConverter(object):
 				objMat = None
 				LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
 			
-			objMatName = self.ConvertMaterial(objMat)
+			objMatName = self.ConvertMaterial(objMat, obj.material_slots)
 
 			####################################################################
 			# Create the mesh
@@ -627,6 +630,10 @@ class BlenderSceneConverter(object):
 			LuxLog('Object: %s' % obj.name)
 			self.ConvertObject(obj)
 
+		# Debug information
+		LuxLog('Scene Properties:')
+		LuxLog(str(self.scnProps))
+
 		self.lcScene.Parse(self.scnProps)
 
 		########################################################################
@@ -660,8 +667,6 @@ class BlenderSceneConverter(object):
 		# Debug information
 		LuxLog('RenderConfig Properties:')
 		LuxLog(str(self.cfgProps))
-		LuxLog('Scene Properties:')
-		LuxLog(str(self.scnProps))
 
 		self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
 
