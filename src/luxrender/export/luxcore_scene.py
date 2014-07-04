@@ -217,10 +217,13 @@ class BlenderSceneConverter(object):
 			# Brick
 			####################################################################
 			elif texType == 'brick':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mix']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['brick']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.brickbond', [(luxTex.brickbond)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.brickrun', [float(luxTex.brickrun)]))
+				
+				if texture.luxrender_texture.luxrender_tex_brick.brickbond in ('running', 'flemish'):
+					self.scnProps.Set(pyluxcore.Property(prefix + '.brickrun', [float(luxTex.brickrun)]))
+				
 				self.scnProps.Set(pyluxcore.Property(prefix + '.mortarsize', [float(luxTex.mortarsize)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.brickwidth', [float(luxTex.brickwidth)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.brickdepth', [float(luxTex.brickdepth)]))
@@ -234,7 +237,8 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', [float(luxTex.bricktex_floatvalue)]))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', [float(luxTex.brickmodtex_floatvalue)]))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', [float(luxTex.mortartex_floatvalue)]))
-#					self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.type', ['globalmapping3d'])) # problems to get it work atm.
+	
+#				self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.type', ['globalmapping3d'])) # problems to get it work atm.
 			else:
 				####################################################################
 				# Fallback to exception
