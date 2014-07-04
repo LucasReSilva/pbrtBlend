@@ -165,6 +165,7 @@ class BlenderSceneConverter(object):
 			return []
 
 	def ConvertMapping(self, prefix, texture):
+		# Note 2DMapping is used for bilerp, checkerboard(dimension == 2), dots, imagemap, normalmap, uv, uvmask
 		luxMapping = getattr(texture.luxrender_texture, 'luxrender_tex_mapping')
 		
 		if luxMapping.type == 'uv':
@@ -177,6 +178,19 @@ class BlenderSceneConverter(object):
 					luxMapping.udelta + 0.5 * (1.0 - luxMapping.uscale), luxMapping.vdelta * - 1.0 + 1.0 - (0.5 * (1.0 - luxMapping.vscale))]))
 		else:
 			raise Exception('Unsupported mapping for texture: ' + texture.name)
+
+	def ConvertTransform(self, prefix, texture):
+		# Note 3DMapping is used for checkerboard(dimension == 3), and all other not listed under 2DMapping
+		luxTransform = getattr(texture.luxrender_texture, 'luxrender_tex_transform')
+
+		if luxTransform.coordinates == 'uv':
+			self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.type', ['uvmapping3d']))
+		elif luxTransform.coordinates == 'global':
+			self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.type', ['globalmapping3d']))
+		else:
+			raise Exception('Unsupported mapping for texture: ' + texture.name)
+		# hardcoded test settings, Todo: add the real attributes
+		self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.transformation', ['10.0 0.0 0.0 0.0  0.0 10.0 0.01 0.0  0.0 0.0 10.0 0.0  0.0 0.0 0.0 1.0']))
 
 	def ConvertTexture(self, texture):
 		texType = texture.luxrender_texture.type
@@ -204,7 +218,7 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.scale', [float(luxTex.scale)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variation', [float(luxTex.variation)]))
-#				self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.type', ['globalmapping3d'])) # problems to get it work atm.
+				self.ConvertTransform(prefix, texture)
 			####################################################################
 			# Mix
 			####################################################################
@@ -214,6 +228,7 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
+				self.ConvertTransform(prefix, texture)
 			####################################################################
 			# Brick
 			####################################################################
@@ -238,8 +253,7 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', [float(luxTex.bricktex_floatvalue)]))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', [float(luxTex.brickmodtex_floatvalue)]))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', [float(luxTex.mortartex_floatvalue)]))
-	
-#				self.scnProps.Set(pyluxcore.Property(prefix + 'mapping.type', ['globalmapping3d'])) # problems to get it work atm.
+				self.ConvertTransform(prefix, texture)
 			else:
 				####################################################################
 				# Fallback to exception
@@ -325,8 +339,8 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
 				elif material.luxrender_material.luxrender_mat_metal2.metaltype == 'fresnelcolor':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.n', self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))) # i get inverted colors here, issue in luxcore or did i missed something ?
-					print("----------->", self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))
-				
+#					print("----------->", self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))
+
 				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
 			####################################################################
