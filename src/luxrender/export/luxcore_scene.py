@@ -27,6 +27,7 @@
 import bpy
 from symbol import except_clause
 import math
+import mathutils
 
 from .. import pyluxcore
 from ..outputs import LuxManager, LuxLog
@@ -191,8 +192,39 @@ class BlenderSceneConverter(object):
 			self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.type', ['globalmapping3d']))
 		else:
 			raise Exception('Unsupported mapping for texture: ' + texture.name)
-		# Todo: transform, rotate, scale - the latters shows how the values must be represented
-		self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', [1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  0.0, 0.0, 0.0, 1.0]))
+
+		luxTranslate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'translate')
+		luxScale = getattr(texture.luxrender_texture.luxrender_tex_transform, 'scale')
+		luxRotate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'rotate')
+
+		# create a location matrix
+		tex_loc = mathutils.Matrix.Translation((luxTranslate))
+		
+		# create an identitiy matrix
+		tex_sca0 = mathutils.Matrix.Scale((luxScale[0]), 4)
+		tex_sca1 = mathutils.Matrix.Scale((luxScale[1]), 4)
+		tex_sca2 = mathutils.Matrix.Scale((luxScale[2]), 4)
+		tex_sca = tex_sca0 * tex_sca1 * tex_sca2
+
+		# create a rotation matrix
+		tex_rot0 = mathutils.Matrix.Rotation(math.radians(luxRotate[0]), 4, 'X')
+		tex_rot1 = mathutils.Matrix.Rotation(math.radians(luxRotate[1]), 4, 'Y')
+		tex_rot2 = mathutils.Matrix.Rotation(math.radians(luxRotate[2]), 4, 'Z')
+		tex_rot = tex_rot0 * tex_rot1 * tex_rot2
+		
+		# combine transformations
+		tex_out = tex_loc * tex_rot * tex_sca
+		
+		str_matrix = [tex_out[0][0], tex_out[0][1], tex_out[0][2], tex_out[0][3]
+											  , tex_out[1][0], tex_out[1][1], tex_out[1][2], tex_out[1][3]
+											  , tex_out[2][0], tex_out[2][1], tex_out[2][2], tex_out[2][3]
+											  , tex_out[3][0], tex_out[3][1], tex_out[3][2], tex_out[3][3]]
+
+		f_matrix = []
+		for item in str_matrix:
+			f_matrix.append(item)
+
+		self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', f_matrix))
 
 	def ConvertTexture(self, texture):
 		texType = texture.luxrender_texture.type
