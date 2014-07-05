@@ -635,7 +635,7 @@ class BlenderSceneConverter(object):
 		########################################################################
 
 		self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_CLAY_MATERIAL.type', ['matte']))
-		self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_CLAY_MATERIAL.kd', [0.7, 0.7, 0.7]))
+		self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_CLAY_MATERIAL.kd', '0.7 0.7 0.7'))
 
 		########################################################################
 		# Convert all objects
