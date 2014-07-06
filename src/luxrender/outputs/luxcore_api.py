@@ -50,7 +50,7 @@ def FlattenStrCollection(coll):
 					yield subc
 
 def UseLuxCore():
-	return True if bpy.context.scene.luxrender_engine.selected_luxrender_api == 'luxcore' == 'luxcore' else False
+	return True if bpy.context.scene.luxrender_engine.selected_luxrender_api == 'luxcore' else False
 
 def ScenePrefix():
 	return 'importlib.import_module(\'bpy\').context.scene.'
