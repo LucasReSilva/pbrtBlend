@@ -87,7 +87,6 @@ if not 'PYLUXCORE_AVAILABLE' in locals():
 				sys.path.insert(0, tdir)
 				
 				import pyluxcore
-				pyluxcore.Init(LuxCoreLogHandler)
 				LuxLog('Using dynamic pyluxcore module')
 				
 			except Exception as e:
@@ -101,6 +100,7 @@ if not 'PYLUXCORE_AVAILABLE' in locals():
 		else:
 			from .. import pyluxcore
 		
+		pyluxcore.Init(LuxCoreLogHandler)
 		LUXCORE_VERSION = pyluxcore.Version()
 
 		PYLUXCORE_AVAILABLE = True
