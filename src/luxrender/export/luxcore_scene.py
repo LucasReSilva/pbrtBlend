@@ -371,8 +371,12 @@ class BlenderSceneConverter(object):
 				if material.luxrender_material.luxrender_mat_metal2.metaltype == 'preset':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
 				elif material.luxrender_material.luxrender_mat_metal2.metaltype == 'fresnelcolor':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.n', self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))) # i get inverted colors here, issue in luxcore or did i missed something ?
-#					print("----------->", self.ConvertMaterialChannel(luxMat, 'Kr', 'color'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.n', 'fn_dummy_tex'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.k', 'fk_dummy_tex'))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.fn_dummy_tex.type', 'fresnelapproxn'))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.fn_dummy_tex.texture', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.type', 'fresnelapproxk'))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.texture', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
 
 				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
