@@ -368,15 +368,19 @@ class BlenderSceneConverter(object):
 			####################################################################
 			elif matType == 'metal2':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
-				if material.luxrender_material.luxrender_mat_metal2.metaltype == 'preset':
+				m2_type = material.luxrender_material.luxrender_mat_metal2.metaltype
+				if m2_type == 'preset':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
-				elif material.luxrender_material.luxrender_mat_metal2.metaltype == 'fresnelcolor':
+				elif m2_type == 'fresnelcolor':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.n', 'fn_dummy_tex'))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.k', 'fk_dummy_tex'))
 					self.scnProps.Set(pyluxcore.Property('scene.textures.fn_dummy_tex.type', 'fresnelapproxn'))
 					self.scnProps.Set(pyluxcore.Property('scene.textures.fn_dummy_tex.texture', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
 					self.scnProps.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.type', 'fresnelapproxk'))
 					self.scnProps.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.texture', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
+				#TODO: nk_data and fresneltex
+				else:
+					LuxLog('WARNING: Not yet supported metal2 type: %s' % m2_type)
 
 				self.scnProps.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
