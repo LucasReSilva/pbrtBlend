@@ -320,6 +320,19 @@ class BlenderSceneConverter(object):
 				return str(getattr(property_group, materialChannel + '_fresnelvalue'))
 
 		raise Exception('Unknown texture in channel' + materialChannel + ' for material ' + material.luxrender_material.type)
+				
+	def ConvertBumpChannel(self, luxMaterial, material):
+		if material.luxrender_material.bumpmap_usefloattexture:
+			texName = materiluxrender_material.bumpmap_floattexturename
+			validTexName = ToValidLuxCoreName(texName)
+			# Check if it is an already defined texture
+			if validTexName in self.texturesCache:
+				return validTexName
+				LuxLog('Texture: ' + texName)
+			
+			texture = get_texture_from_scene(self.blScene, texName)
+			if texture != False:
+				return self.ConvertTexture(texture)
 
 	def ConvertMaterial(self, material, materials):
 		try:
@@ -505,8 +518,11 @@ class BlenderSceneConverter(object):
 				return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
 			# Common material settings
-#			if material.luxrender_material.bumpmap_usefloattexture:
-#				self.scnProps.Set(pyluxcore.Property(prefix + '.bumptex', material.luxrender_material.bumpmap_floattexturename))
+			if material.luxrender_material.bumpmap_usefloattexture:
+				bumpmap = material.luxrender_material.bumpmap_floattexturename
+#				scale = material.luxrender_material.bumpmap_floatvalue
+				self.scnProps.Set(pyluxcore.Property(prefix + '.bumptex', self.ConvertBumpChannel(bumpmap, material)))
+
 
 			# LuxCore specific material settings
 			if material.luxcore_material.id != -1:
