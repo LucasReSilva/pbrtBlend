@@ -244,6 +244,13 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
 				self.ConvertMapping(prefix, texture)
 			####################################################################
+			# Normalmap
+			####################################################################
+			elif texType == 'normalmap':
+#				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['normalmap'])) # no type property here ?
+				self.scnProps.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
+				self.ConvertMapping(prefix, texture)
+			####################################################################
 			# Marble
 			####################################################################
 			elif texType == 'marble':
@@ -321,9 +328,10 @@ class BlenderSceneConverter(object):
 
 		raise Exception('Unknown texture in channel' + materialChannel + ' for material ' + material.luxrender_material.type)
 				
-	def ConvertBumpChannel(self, luxMaterial, material):
-		if material.luxrender_material.bumpmap_usefloattexture:
-			texName = materiluxrender_material.bumpmap_floattexturename
+	def ConvertCommonChannel(self, luxMap, material, type):
+		if getattr(material.luxrender_material, type +'_usefloattexture'):
+
+			texName = getattr(material.luxrender_material, '%s_floattexturename' % (type))
 			validTexName = ToValidLuxCoreName(texName)
 			# Check if it is an already defined texture
 			if validTexName in self.texturesCache:
@@ -519,9 +527,14 @@ class BlenderSceneConverter(object):
 
 			# Common material settings
 			if material.luxrender_material.bumpmap_usefloattexture:
-				bumpmap = material.luxrender_material.bumpmap_floattexturename
+				luxMap = material.luxrender_material.bumpmap_floattexturename
 #				scale = material.luxrender_material.bumpmap_floatvalue
-				self.scnProps.Set(pyluxcore.Property(prefix + '.bumptex', self.ConvertBumpChannel(bumpmap, material)))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.bumptex', self.ConvertCommonChannel(luxMap, material, 'bumpmap')))
+			
+			if material.luxrender_material.normalmap_usefloattexture:
+				luxMap = material.luxrender_material.normalmap_floattexturename
+#				scale = material.luxrender_material.normalmap_floatvalue
+				self.scnProps.Set(pyluxcore.Property(prefix + '.normaltex', self.ConvertCommonChannel(luxMap, material, 'normalmap')))
 
 
 			# LuxCore specific material settings
