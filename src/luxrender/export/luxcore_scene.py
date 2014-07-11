@@ -267,8 +267,27 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mix']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.amount', [float(luxTex.amount_floatvalue)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
+				if luxTex.variant == 'color':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
+				elif luxTex.variant == 'float':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_floatvalue'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_floatvalue'))))
+				elif luxTex.variant == 'fresnel':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_fresnelvalue'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_fresnelvalue'))))
+			####################################################################
+			# Scale
+			####################################################################
+			elif texType == 'scale':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['scale']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
+				if luxTex.variant == 'color':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
+				elif luxTex.variant == 'float':
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_floatvalue'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_floatvalue'))))
 			####################################################################
 			# Brick
 			####################################################################
