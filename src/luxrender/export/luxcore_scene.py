@@ -336,7 +336,7 @@ class BlenderSceneConverter(object):
 			texture = get_texture_from_scene(self.blScene, texName)
 			
 			if texture != False:
-				return self.ConvertTexture(texture) 
+				return self.ConvertTexture(texture)
 		else:
 			if variant == 'float':
 				return str(getattr(luxMaterial, materialChannel + '_floatvalue'))
@@ -347,10 +347,10 @@ class BlenderSceneConverter(object):
 
 		raise Exception('Unknown texture in channel' + materialChannel + ' for material ' + material.luxrender_material.type)
 				
-	def ConvertCommonChannel(self, luxMap, material, type):
-		if getattr(material.luxrender_material, type +'_usefloattexture'):
+	def ConvertCommonChannel(self, luxMap, material, variant):
+		if getattr(material.luxrender_material, variant +'_usefloattexture'):
 
-			texName = getattr(material.luxrender_material, '%s_floattexturename' % (type))
+			texName = getattr(material.luxrender_material, '%s_floattexturename' % (variant))
 			validTexName = ToValidLuxCoreName(texName)
 			# Check if it is an already defined texture
 			if validTexName in self.texturesCache:
