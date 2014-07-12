@@ -241,8 +241,6 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_blend']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.progressiontype', ''.join(str(i).lower() for i in getattr(texture, 'progression'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.direction', ''.join(str(i).lower() for i in getattr(texture, 'use_flip_axis'))))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 			####################################################################
 			# CLOUDS
 			####################################################################
@@ -252,8 +250,6 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 			####################################################################
 			# Distorted Noise
 			####################################################################
@@ -263,8 +259,6 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.distortion', [float(texture.distortion)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 			####################################################################
 			# MAGIC
 			####################################################################
@@ -272,8 +266,6 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_magic']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 			####################################################################
 			# MARBLE
 			####################################################################
@@ -286,8 +278,6 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 			####################################################################
 			# MUSGRAVE
 			####################################################################
@@ -306,7 +296,6 @@ class BlenderSceneConverter(object):
 #				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
 				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
-
 			####################################################################
 			# NOISE
 			####################################################################
@@ -325,6 +314,13 @@ class BlenderSceneConverter(object):
 			####################################################################
 			# VORONOI
 			####################################################################
+
+			####################################################################
+			# Pararameters shared by all blender textures
+			####################################################################
+
+			self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
+			self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 
 			self.texturesCache.add(texName)
 			return texName
