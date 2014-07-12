@@ -326,6 +326,9 @@ class BlenderSceneConverter(object):
 			elif bl_texType == 'VORONOI':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_voronoi']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.dismetric', ''.join(str(i).lower() for i in getattr(texture, 'distance_metric'))))
+#				self.scnProps.Set(pyluxcore.Property(prefix + '.colormode', ''.join(str(i).lower() for i in getattr(texture, 'color_mode')))) # not yet in luxcore
+				self.scnProps.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.exponent', [float(texture.minkovsky_exponent)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.w1', [float(texture.weight_1)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.w2', [float(texture.weight_2)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.w3', [float(texture.weight_3)]))
