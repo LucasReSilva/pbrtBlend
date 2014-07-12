@@ -262,7 +262,30 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noise_distortion', ''.join(str(i).lower() for i in getattr(texture, 'noise_distortion'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.distorsion', [float(texture.distortion)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.distortion', [float(texture.distortion)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
+			####################################################################
+			# MAGIC
+			####################################################################
+			elif bl_texType == 'MAGIC':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_magic']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
+			####################################################################
+			# MARBLE
+			####################################################################
+			elif bl_texType == 'MARBLE':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_marble']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.marbletype', ''.join(str(i).lower() for i in getattr(texture, 'marble_type'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis2', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis_2'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 
