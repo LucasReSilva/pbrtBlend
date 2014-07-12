@@ -232,7 +232,7 @@ class BlenderSceneConverter(object):
 		if texType == 'BLENDER':
 			texName = ToValidLuxCoreName(texture.name)
 			bl_texType = getattr(texture, 'type')
-
+			print("-------------------", bl_texType) # temporary spellcheck
 			prefix = 'scene.textures.' + texName
 			####################################################################
 			# BLEND
@@ -252,6 +252,17 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
+			####################################################################
+			# Distorted Noise
+			####################################################################
+			elif bl_texType == 'DISTORTED_NOISE':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_distortednoise']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noise_distortion', ''.join(str(i).lower() for i in getattr(texture, 'noise_distortion'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.distorsion', [float(texture.distortion)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 
