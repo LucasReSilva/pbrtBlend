@@ -232,7 +232,7 @@ class BlenderSceneConverter(object):
 		if texType == 'BLENDER':
 			texName = ToValidLuxCoreName(texture.name)
 			bl_texType = getattr(texture, 'type')
-			print("-------------------", bl_texType) # temporary spellcheck
+
 			prefix = 'scene.textures.' + texName
 			####################################################################
 			# BLEND
@@ -294,27 +294,43 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.noise_scale)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 #				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
-				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 			####################################################################
 			# NOISE
 			####################################################################
-
-
+			elif bl_texType == 'NOISE':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_noise']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
 			####################################################################
 			# STUCCI
 			####################################################################
-
-
+			elif bl_texType == 'STUCCI':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_stucci']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.stuccitype', ''.join(str(i).lower() for i in getattr(texture, 'stucci_type'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
 			####################################################################
 			# WOOD
 			####################################################################
-
-
+			elif bl_texType == 'WOOD':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_wood']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.woodtype', ''.join(str(i).lower() for i in getattr(texture, 'wood_type'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis2', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis_2'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
 			####################################################################
 			# VORONOI
 			####################################################################
-
+			elif bl_texType == 'VORONOI':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_voronoi']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.dismetric', ''.join(str(i).lower() for i in getattr(texture, 'distance_metric'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.w1', [float(texture.weight_1)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.w2', [float(texture.weight_2)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.w3', [float(texture.weight_3)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.w4', [float(texture.weight_4)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 			####################################################################
 			# Pararameters shared by all blender textures
 			####################################################################
