@@ -271,11 +271,11 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
 				elif luxTex.variant == 'float':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_floatvalue'))))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_floatvalue'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', 'tex1_floatvalue'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', 'tex2_floatvalue'))
 				elif luxTex.variant == 'fresnel':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_fresnelvalue'))))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_fresnelvalue'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', 'tex1_fresnelvalue'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', 'tex2_fresnelvalue'))
 			####################################################################
 			# Scale
 			####################################################################
@@ -286,8 +286,8 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
 					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
 				elif luxTex.variant == 'float':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_floatvalue'))))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_floatvalue'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', 'tex1_floatvalue'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', 'tex2_floatvalue'))
 			####################################################################
 			# Brick
 			####################################################################
@@ -347,10 +347,10 @@ class BlenderSceneConverter(object):
 
 		raise Exception('Unknown texture in channel' + materialChannel + ' for material ' + material.luxrender_material.type)
 				
-	def ConvertCommonChannel(self, luxMap, material, variant):
-		if getattr(material.luxrender_material, variant +'_usefloattexture'):
+	def ConvertCommonChannel(self, luxMap, material, type):
+		if getattr(material.luxrender_material, type +'_usefloattexture'):
 
-			texName = getattr(material.luxrender_material, '%s_floattexturename' % (variant))
+			texName = getattr(material.luxrender_material, '%s_floattexturename' % (type))
 			validTexName = ToValidLuxCoreName(texName)
 			# Check if it is an already defined texture
 			if validTexName in self.texturesCache:
