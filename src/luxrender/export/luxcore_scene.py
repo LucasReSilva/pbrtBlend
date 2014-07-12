@@ -334,9 +334,9 @@ class BlenderSceneConverter(object):
 			####################################################################
 			# Pararameters shared by all blender textures
 			####################################################################
-
 			self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
 			self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
+			self.ConvertTransform(prefix, texture)
 
 			self.texturesCache.add(texName)
 			return texName
