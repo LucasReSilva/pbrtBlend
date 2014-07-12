@@ -657,10 +657,10 @@ class BlenderSceneConverter(object):
 		up = list(lookat[6:9])
 		self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.orig', orig))
 		self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', target))
-		self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.up', up))
+		self.scnProps.Set(pyluxcore.Property('scene.camera.up', up))
 
 		if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
-			self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.fieldofview', [math.degrees(blCameraData.angle)]))
+			self.scnProps.Set(pyluxcore.Property('scene.camera.fieldofview', [math.degrees(blCameraData.angle)]))
 		
 		self.scnProps.Set(pyluxcore.Property("scene.camera.screenwindow", luxCamera.screenwindow(xr, yr, self.blScene, blCameraData)));
 		

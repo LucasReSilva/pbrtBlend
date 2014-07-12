@@ -34,6 +34,8 @@ import threading
 import subprocess
 import sys
 import array
+import math
+import mathutils
 
 # Blender libs
 import bpy, bgl, bl_ui
@@ -74,7 +76,7 @@ from ..ui.materials import (
 from ..ui.textures import (
 	main as tex_main, abbe, add, band, blender, bilerp, blackbody, brick, cauchy, constant, colordepth,
 	checkerboard, cloud, densitygrid, dots, equalenergy, exponential, fbm, fresnelcolor, fresnelname, gaussian,
-        harlequin, hitpointcolor, hitpointalpha, hitpointgrey, imagemap, imagesampling, normalmap,
+	harlequin, hitpointcolor, hitpointalpha, hitpointgrey, imagemap, imagesampling, normalmap,
 	lampspectrum, luxpop, marble, mix as tex_mix, multimix, sellmeier, scale, subtract, sopra, uv,
 	uvmask, windy, wrinkled, mapping, tabulateddata, transform
 )
@@ -1019,6 +1021,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	viewFilmWidth = -1
 	viewFilmHeight = -1
 	viewImageBufferFloat = None
+	viewMatrix = []
+	viewLens = -1
 
 	def luxcore_view_update(self, context):
 		# LuxCore libs
@@ -1057,6 +1061,37 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
 		else:
 			lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['PATHCPU']))
+
+		view_persp = context.region_data.view_perspective
+		self.viewMatrix = mathutils.Matrix(context.region_data.view_matrix)
+		self.viewLens = context.space_data.lens
+
+		if(view_persp != 'CAMERA'):
+			cam_rotation = context.region_data.view_rotation
+			cam_trans = mathutils.Vector((self.viewMatrix[0][3],self.viewMatrix[1][3],self.viewMatrix[2][3]))
+			cam_lookat = list(context.region_data.view_location)
+		
+			rot = mathutils.Matrix(((-self.viewMatrix[0][0],-self.viewMatrix[1][0],-self.viewMatrix[2][0]),
+				 (-self.viewMatrix[0][1],-self.viewMatrix[1][1],-self.viewMatrix[2][1]),
+				 (-self.viewMatrix[0][2],-self.viewMatrix[1][2],-self.viewMatrix[2][2])))
+		
+			cam_origin = list(rot*cam_trans)
+			cam_fov = 2*math.atan(0.5*32.0/self.viewLens)
+			cam_up = list(rot*mathutils.Vector((0,-1,0)))
+
+			scr_x = 2*self.viewFilmWidth/max(self.viewFilmWidth, self.viewFilmHeight)
+			scr_y = 2*self.viewFilmHeight/max(self.viewFilmWidth, self.viewFilmHeight)
+			screenwindow = [-scr_x, scr_x, -scr_y, scr_y]
+
+			scene = lcConfig.GetScene()		
+			scene.Parse(pyluxcore.Properties().
+				Set(pyluxcore.Property('scene.camera.lookat.target', cam_lookat)).
+				Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin)).
+				Set(pyluxcore.Property('scene.camera.up', cam_up)).
+				Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow)).
+				Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov)))
+				)		
+
 		
 		self.viewSession = pyluxcore.RenderSession(lcConfig)
 		self.viewSession.Start()
@@ -1071,7 +1106,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		from .. import pyluxcore
 
 		# Check if the size of the window is changed
-		if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
+		if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height) or (self.viewMatrix != context.region_data.view_matrix) or (self.viewLens != context.space_data.lens):
 			self.luxcore_view_update(context)
 
 		# Update statistics
