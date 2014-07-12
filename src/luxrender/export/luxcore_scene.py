@@ -235,9 +235,18 @@ class BlenderSceneConverter(object):
 
 			prefix = 'scene.textures.' + texName
 			####################################################################
+			# BLEND
+			####################################################################
+			if bl_texType == 'BLEND':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_blend']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.progressiontype', ''.join(str(i).lower() for i in getattr(texture, 'progression'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.direction', ''.join(str(i).lower() for i in getattr(texture, 'use_flip_axis'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
+			####################################################################
 			# CLOUDS
 			####################################################################
-			if bl_texType == 'CLOUDS':
+			elif bl_texType == 'CLOUDS':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_clouds']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
