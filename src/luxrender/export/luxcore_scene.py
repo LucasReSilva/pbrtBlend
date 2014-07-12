@@ -288,6 +288,24 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
+			####################################################################
+			# MUSGRAVE
+			####################################################################
+			elif bl_texType == 'MUSGRAVE':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['blender_musgrave']))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.musgravetype', ''.join(str(i).lower() for i in getattr(texture, 'musgrave_type'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.dimension_max)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.lacunarity', [float(texture.lacunarity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.offset', [float(texture.offset)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.gain', [float(texture.gain)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.octaves', [float(texture.octaves)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.noise_scale)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+#				self.scnProps.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
+				self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
 
 			self.texturesCache.add(texName)
 			return texName
