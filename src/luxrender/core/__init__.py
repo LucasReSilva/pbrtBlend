@@ -1101,6 +1101,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
 
 			if(view_persp == 'CAMERA'):
+				blcamera = context.scene.camera
 				#magic zoom formula for camera viewport zoom from blender source
 				zoom = self.viewCameraZoom
 				zoom = (1.41421 + zoom/50.0);
@@ -1111,7 +1112,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 				dx = 2.0*(self.viewCameraShiftX + self.viewCameraOffset[0]*xaspect*2.0)
 				dy = 2.0*(self.viewCameraShiftY + self.viewCameraOffset[1]*yaspect*2.0)
 				
-				cam_fov = context.scene.camera.data.angle
+				cam_fov = blcamera.data.angle				
+				luxCamera = context.scene.camera.data.luxrender_camera
+				
+				lookat = luxCamera.lookAt(blcamera)
+				cam_origin = list(lookat[0:3])
+				cam_lookat = list(lookat[3:6])
+				cam_up = list(lookat[6:9])
 
 			zoom = 2.0*zoom;
 
