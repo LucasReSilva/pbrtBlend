@@ -1023,6 +1023,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	viewImageBufferFloat = None
 	viewMatrix = []
 	viewLens = -1
+	viewCameraZoom = -1
+	viewCameraOffset = []
+	viewCameraShiftX = -1
+	viewCameraShiftY = -1
 
 	def luxcore_view_update(self, context):
 		# LuxCore libs
@@ -1065,8 +1069,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		view_persp = context.region_data.view_perspective
 		self.viewMatrix = mathutils.Matrix(context.region_data.view_matrix)
 		self.viewLens = context.space_data.lens
+		self.viewCameraZoom = context.region_data.view_camera_zoom
+		self.viewCameraOffset = list(context.region_data.view_camera_offset)
+		self.viewCameraShiftX = context.scene.camera.data.shift_x
+		self.viewCameraShiftY = context.scene.camera.data.shift_y
 
-		if(view_persp != 'CAMERA'):
+		if(view_persp != 'ORTHO'):
+			zoom = 1.0
+			dx = 0.0
+			dy = 0.0
+			xaspect = 1.0
+			yaspect = 1.0
 			cam_rotation = context.region_data.view_rotation
 			cam_trans = mathutils.Vector((self.viewMatrix[0][3],self.viewMatrix[1][3],self.viewMatrix[2][3]))
 			cam_lookat = list(context.region_data.view_location)
@@ -1079,9 +1092,35 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 			cam_fov = 2*math.atan(0.5*32.0/self.viewLens)
 			cam_up = list(rot*mathutils.Vector((0,-1,0)))
 
-			scr_x = 2*self.viewFilmWidth/max(self.viewFilmWidth, self.viewFilmHeight)
-			scr_y = 2*self.viewFilmHeight/max(self.viewFilmWidth, self.viewFilmHeight)
-			screenwindow = [-scr_x, scr_x, -scr_y, scr_y]
+			if(self.viewFilmWidth > self.viewFilmHeight):
+				xaspect = 1.0
+				yaspect = self.viewFilmHeight / self.viewFilmWidth
+			else:
+				xaspect = self.viewFilmWidth / self.viewFilmHeight
+				yaspect = 1.0
+
+
+			if(view_persp == 'CAMERA'):
+				#magic zoom formula for camera viewport zoom from blender source
+				zoom = self.viewCameraZoom
+				zoom = (1.41421 + zoom/50.0);
+				zoom = zoom*zoom;
+				zoom = 2.0/zoom;
+				
+				#camera plane offset in camera viewport
+				dx = 2.0*(self.viewCameraShiftX + self.viewCameraOffset[0]*xaspect*2.0)
+				dy = 2.0*(self.viewCameraShiftY + self.viewCameraOffset[1]*yaspect*2.0)
+				
+				cam_fov = context.scene.camera.data.angle
+
+			zoom = 2.0*zoom;
+
+			scr_left = -xaspect*zoom
+			scr_right = xaspect*zoom
+			scr_bottom = -yaspect*zoom
+			scr_top = yaspect*zoom
+
+			screenwindow = [scr_left+dx, scr_right+dx, scr_bottom+dy, scr_top+dy]
 
 			scene = lcConfig.GetScene()		
 			scene.Parse(pyluxcore.Properties().
@@ -1106,7 +1145,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 		from .. import pyluxcore
 
 		# Check if the size of the window is changed
-		if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height) or (self.viewMatrix != context.region_data.view_matrix) or (self.viewLens != context.space_data.lens):
+		if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height) or (self.viewMatrix != context.region_data.view_matrix) or (self.viewLens != context.space_data.lens) or (self.viewCameraOffset[0] != context.region_data.view_camera_offset[0]) or (self.viewCameraOffset[1] != context.region_data.view_camera_offset[1]) or (self.viewCameraZoom != context.region_data.view_camera_zoom):
 			self.luxcore_view_update(context)
 
 		# Update statistics
