@@ -606,7 +606,7 @@ def export_smoke(smoke_obj_name, channel):
 							
 		eps = 0.000001
 		if domain != None:
-			if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
+			if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 71:
 				#Blender version 2.71 supports direct access to smoke data structure
 				set = mod.domain_settings
 
