@@ -107,6 +107,8 @@ _register_elm(bl_ui.properties_scene.SCENE_PT_unit)
 _register_elm(bl_ui.properties_scene.SCENE_PT_color_management)
 
 _register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_world)
+_register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_cache)
+_register_elm(bl_ui.properties_scene.SCENE_PT_rigid_body_field_weights)
 
 _register_elm(bl_ui.properties_scene.SCENE_PT_custom_props)
 
