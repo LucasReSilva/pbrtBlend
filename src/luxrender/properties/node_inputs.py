@@ -311,14 +311,17 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 	bl_icon = 'TEXTURE'
 	
 	variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
-	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR', min=0.0, max=4.0)
+	color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR', min=0.0, max=1.0)
 	float = bpy.props.FloatProperty(name='Float', precision=5)
 	fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0, precision=5)
+	col_mult = bpy.props.FloatProperty(name='Multiply Color', default=1.0, precision=5, description='Multiply color')
 	
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'variant')
 		if self.variant == 'color':
-			layout.prop(self, 'color')
+			col = layout.column()
+			col.prop(self, 'color')
+			col.prop(self, 'col_mult')
 		if self.variant == 'float':
 			layout.prop(self, 'float')
 		if self.variant == 'fresnel':
@@ -356,7 +359,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 		if self.variant == 'float':
 			constant_params.add_float('value', self.float)
 		if self.variant == 'color':
-			constant_params.add_color('value', self.color)
+			constant_params.add_color('value', self.color * self.col_mult)
 		if self.variant == 'fresnel':
 			constant_params.add_float('value', self.fresnel)
 		return make_texture(self.variant, 'constant', self.name, constant_params)
