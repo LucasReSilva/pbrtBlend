@@ -353,7 +353,6 @@ class BlenderSceneConverter(object):
 			# Imagemap
 			####################################################################
 			if texType == 'imagemap':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['imagemap']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.gamma', [float(luxTex.gamma)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
@@ -368,7 +367,6 @@ class BlenderSceneConverter(object):
 			# Marble
 			####################################################################
 			elif texType == 'marble':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['marble']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.scale', [float(luxTex.scale)]))
@@ -378,8 +376,7 @@ class BlenderSceneConverter(object):
 			# Mix
 			####################################################################
 			elif texType == 'mix':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['mix']))
-				self.scnProps.Set(pyluxcore.Property(prefix + '.amount', [float(luxTex.amount_floatvalue)]))
+				self.scnProps.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxTex, 'amount', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				if luxTex.variant == 'color':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
@@ -394,7 +391,6 @@ class BlenderSceneConverter(object):
 			# Scale
 			####################################################################
 			elif texType == 'scale':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['scale']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				if luxTex.variant == 'color':
 					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
@@ -406,7 +402,6 @@ class BlenderSceneConverter(object):
 			# Brick
 			####################################################################
 			elif texType == 'brick':
-				self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['brick']))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.brickbond', [(luxTex.brickbond)]))
 				
@@ -432,11 +427,15 @@ class BlenderSceneConverter(object):
 				# Fallback to exception
 				####################################################################
 				raise Exception('Unknown type ' + texType + 'for texture: ' + texture.name)
-			
+
+			self.scnProps.Set(pyluxcore.Property(prefix + '.type', self.ConvertTexType(luxTex, texType))) # setting the type late assures the texture is already converted
 			self.texturesCache.add(texName)
 			return texName
 		
 		raise Exception('Unknown texture type: ' + texture.name)
+
+	def ConvertTexType(self, luxTex, texType):
+		return texType
 
 	def ConvertMaterialChannel(self, luxMaterial, materialChannel, variant):
 		if getattr(luxMaterial, materialChannel + '_use' + variant + 'texture'):
