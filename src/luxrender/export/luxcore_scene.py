@@ -379,14 +379,14 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxTex, 'amount', 'float')))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				if luxTex.variant == 'color':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'color')))
 				elif luxTex.variant == 'float':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', 'tex1_floatvalue'))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', 'tex2_floatvalue'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
 				elif luxTex.variant == 'fresnel':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', 'tex1_fresnelvalue'))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', 'tex2_fresnelvalue'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'fresnel')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'fresnel')))
 			####################################################################
 			# Scale
 			####################################################################
@@ -414,13 +414,13 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.brickheight', [float(luxTex.brickheight)]))
 					
 				if luxTex.variant == 'color':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', ' '.join(str(i) for i in getattr(luxTex, 'bricktex_color'))))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', ' '.join(str(i) for i in getattr(luxTex, 'brickmodtex_color'))))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', ' '.join(str(i) for i in getattr(luxTex, 'mortartex_color'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', self.ConvertMaterialChannel(luxTex, 'bricktex', 'color')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', self.ConvertMaterialChannel(luxTex, 'brickmodtex', 'color')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', self.ConvertMaterialChannel(luxTex, 'mortartex', 'color')))
 				else:
-					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', [float(luxTex.bricktex_floatvalue)]))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', [float(luxTex.brickmodtex_floatvalue)]))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', [float(luxTex.mortartex_floatvalue)]))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.bricktex', self.ConvertMaterialChannel(luxTex, 'bricktex', 'float')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.brickmodtex', self.ConvertMaterialChannel(luxTex, 'brickmodtex', 'float')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', self.ConvertMaterialChannel(luxTex, 'mortartex', 'float')))
 				self.ConvertTransform(prefix, texture)
 			else:
 				####################################################################
