@@ -393,11 +393,11 @@ class BlenderSceneConverter(object):
 			elif texType == 'scale':
 				self.scnProps.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				if luxTex.variant == 'color':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', ' '.join(str(i) for i in getattr(luxTex, 'tex1_color'))))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', ' '.join(str(i) for i in getattr(luxTex, 'tex2_color'))))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'color')))
 				elif luxTex.variant == 'float':
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', 'tex1_floatvalue'))
-					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', 'tex2_floatvalue'))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
+					self.scnProps.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
 			####################################################################
 			# Brick
 			####################################################################
