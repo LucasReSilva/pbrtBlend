@@ -29,9 +29,9 @@ import os
 
 import bpy
 
-from extensions_framework import util as efutil
-from extensions_framework import declarative_property_group
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A
+from ..extensions_framework import util as efutil
+from ..extensions_framework import declarative_property_group
+from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import get_worldscale, get_output_filename
@@ -505,7 +505,7 @@ class luxrender_film(declarative_property_group):
 #		'write_zbuf': O([{'write_exr': True }, { 'write_tga': True }]),
 #		'zbuf_normalization': A([{'write_zbuf': True}, O([{'write_exr': True }, { 'write_tga': True }])]),
 #	}
-	
+
 	properties = [
 		{
 			'type': 'text',

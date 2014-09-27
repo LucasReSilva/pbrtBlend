@@ -28,7 +28,7 @@ import os
 
 import bpy
 
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 from ..export import ParamSet
 from ..outputs import LuxLog, LuxManager

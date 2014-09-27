@@ -27,7 +27,7 @@
 bl_info = {
 	"name": "LuxRender",
 	"author": "LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), Jens Verwiebe, Jason Clarke (JtheNinja), Michael Klemm (neo2068)",
-	"version": (1, 3, 1),
+	"version": (1, 4, 'RC1'),
 	"blender": (2, 67, 1),
 	"api": 57908,
 	"category": "Render",
@@ -45,13 +45,13 @@ else:
 	import bpy
 	from bpy.types import AddonPreferences
 	from bpy.props import StringProperty, IntProperty, BoolProperty
-	from extensions_framework import Addon
+	from .extensions_framework import Addon
 	import nodeitems_utils
 	from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
 	
 	def find_luxrender_path():
 		from os import getenv
-		from extensions_framework import util as efutil
+		from .extensions_framework import util as efutil
 		return getenv(
 			# Use the env var path, if set ...
 			'LUXRENDER_ROOT',

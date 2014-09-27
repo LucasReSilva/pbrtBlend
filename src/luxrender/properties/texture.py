@@ -28,9 +28,9 @@ import hashlib, os
 
 import bpy, mathutils
 
-from extensions_framework import declarative_property_group
-from extensions_framework import util as efutil
-from extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
+from ..extensions_framework import declarative_property_group
+from ..extensions_framework import util as efutil
+from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..export import ParamSet, get_worldscale, process_filepath_data

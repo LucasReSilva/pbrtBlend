@@ -29,7 +29,7 @@ import os, struct, math
 import bpy, mathutils, math
 from bpy.app.handlers import persistent
 
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 from ..outputs import LuxLog
 from ..outputs.file_api import Files

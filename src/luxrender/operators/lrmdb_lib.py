@@ -30,7 +30,7 @@ Non-blender specific LRMDB interface handlers should go in here
 
 import xmlrpc.client, http.client, http.cookiejar, urllib.request, os
 
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 def make_cookie_filename():
 	fc = []

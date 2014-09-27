@@ -26,8 +26,9 @@
 #
 import bpy, bl_ui
 
-from extensions_framework.ui import property_group_renderer
+from ..extensions_framework.ui import property_group_renderer
 
+from ..outputs.luxcore_api import UseLuxCore
 from .. import LuxRenderAddon
 
 class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_renderer):
@@ -46,24 +47,36 @@ class render_settings(render_panel):
 	bl_label = 'LuxRender Render Settings'
 	
 	display_property_groups = [
-		( ('scene',), 'luxrender_rendermode' ),
-		( ('scene',), 'luxrender_integrator' ),
-		( ('scene',), 'luxrender_sampler' ),
-		( ('scene',), 'luxrender_volumeintegrator' ),
-		( ('scene',), 'luxrender_filter' ),
-		( ('scene',), 'luxrender_accelerator' ),
-		( ('scene',), 'luxrender_halt' ),
+		( ('scene',), 'luxrender_rendermode', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_integrator', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_sampler', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_volumeintegrator', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_filter', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
+		( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
 	]
 	
 	def draw(self, context):
-		row = self.layout.row(align=True)
-		rd = context.scene.render
-		split = self.layout.split()
-		row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
+		if not UseLuxCore():
+			row = self.layout.row(align=True)
+			rd = context.scene.render
+			split = self.layout.split()
+			row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
+			row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
+			row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
 		
 		super().draw(context)
+
+		if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']:
+			# This is a "special" panel section for the list of OpenCL devices
+			for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
+				dev = context.scene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
+				row = self.layout.row()
+				row.prop(dev, 'opencl_device_enabled', text="")
+				subrow = row.row()
+				subrow.enabled = dev.opencl_device_enabled
+				subrow.label(dev.name)
 
 @LuxRenderAddon.addon_register_class
 class translator(render_panel):
@@ -75,15 +88,18 @@ class translator(render_panel):
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
-	   ( ('scene',), 'luxrender_engine' ),
-	   ( ('scene',), 'luxrender_testing' )
+	   ( ('scene',), 'luxrender_engine', lambda: not UseLuxCore() ),
+	   ( ('scene',), 'luxrender_testing', lambda: not UseLuxCore() )
 	   ]
 	
 	def draw(self, context):
-		super().draw(context)
-		
-		row = self.layout.row(align=True)
-		rd = context.scene.render
+		if not UseLuxCore():
+			super().draw(context)
+
+			row = self.layout.row(align=True)
+			rd = context.scene.render
+		else:
+			self.layout.label("Note: not yet supported by LuxCore")
 
 @LuxRenderAddon.addon_register_class
 class networking(render_panel):
@@ -95,17 +111,21 @@ class networking(render_panel):
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	display_property_groups = [
-		( ('scene',), 'luxrender_networking' )
+		( ('scene',), 'luxrender_networking', lambda: not UseLuxCore() )
 	]
 	
 	def draw_header(self, context):
-		self.layout.prop(context.scene.luxrender_networking, "use_network_servers", text="")
+		if not UseLuxCore():
+			self.layout.prop(context.scene.luxrender_networking, "use_network_servers", text="")
 	
 	def draw(self, context):
-		row = self.layout.row(align=True)
-		row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
-		row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
-		row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
+		if not UseLuxCore():
+			row = self.layout.row(align=True)
+			row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
+			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
+			row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
+		else:
+			self.layout.label("Note: not yet supported by LuxCore")
 		
 		super().draw(context)
 
@@ -119,7 +139,9 @@ class postprocessing(render_panel):
 	bl_options = {'DEFAULT_CLOSED'}
 	
 	
-	#We make our own post-pro panel so we can have one without BI's options here. Theoretically, if Lux gains the ability to do lens effects through the command line/API, we could add that here
+	# We make our own post-pro panel so we can have one without BI's options
+	# here. Theoretically, if Lux gains the ability to do lens effects through
+	# the command line/API, we could add that here
 	
 	def draw(self, context):
 		layout = self.layout

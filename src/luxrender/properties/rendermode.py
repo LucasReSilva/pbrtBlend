@@ -24,12 +24,11 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from extensions_framework import declarative_property_group
+from ..extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
-
-from extensions_framework.validate import Logic_OR as O
+from ..extensions_framework.validate import Logic_OR as O
 
 #This class holds the renderingmode menu and renderer prefs. Surface integrators settings are in a seperate class, due to there being a hell of a lot of them
 @LuxRenderAddon.addon_register_class
@@ -87,7 +86,7 @@ class luxrender_rendermode(declarative_property_group):
 			self.renderer = 'luxcore'
 		else:
 			self.renderer = 'sampler'
-	
+
 	properties = [
 		{
 			'type': 'enum', 
@@ -123,7 +122,9 @@ class luxrender_rendermode(declarative_property_group):
 			'default': '',
 			'save_in_preset': True
 		},
-		#This parameter is fed to the "renderer' context, and holds the actual renderer setting. The user does not interact with it directly, and it does not appear in the panels
+		# This parameter is fed to the "renderer' context, and holds the actual
+		# renderer setting. The user does not interact with it directly, and it
+		# does not appear in the panels
 		{
 			'type': 'enum',
 			'attr': 'renderer',
@@ -225,7 +226,7 @@ class luxrender_rendermode(declarative_property_group):
 			'attr': 'kernelcache',
 			'name': 'OpenCL Kernel Cache',
 			'description': 'Select the type of OpenCL compilation kernel cache used (in order to reduce compilation time)',
-			'default': 'NONE',
+			'default': 'PERSISTENT',
 			'items': [
 				('NONE', 'None', 'NONE'),
 				('VOLATILE', 'Volatile', 'VOLATILE'),

@@ -28,7 +28,7 @@ import os
 
 import bpy
 
-import extensions_framework.util as efutil
+from ..extensions_framework import util as efutil
 
 from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION 

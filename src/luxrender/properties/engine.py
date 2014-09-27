@@ -26,12 +26,13 @@
 #
 import os
 
-from extensions_framework import declarative_property_group
-from extensions_framework import util as efutil
-from extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
+from ..extensions_framework import declarative_property_group
+from ..extensions_framework import util as efutil
+from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
 from .. import LuxRenderAddon
 from ..outputs.pure_api import PYLUX_AVAILABLE
+from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore
 
 def check_renderer_settings(context):
 	lre = context.scene.luxrender_rendermode
@@ -198,6 +199,19 @@ class luxrender_engine(declarative_property_group):
 			'save_in_preset': True
 		},
 		{
+			'type': 'enum',
+			'attr': 'selected_luxrender_api',
+			'name': 'LuxRender API version',
+			'description': 'Choose between LuxRender v1.x and v2.x API',
+			'default': 'classic',
+			'items': [
+				('classic', '1.x', 'Use LuxRender v1.x API'),
+			] + [
+				('luxcore', '2.x (LuxCore)', 'Use LuxRender v2.x API')
+				] if PYLUXCORE_AVAILABLE else [],
+			'save_in_preset': True
+		},
+		{
 			'type': 'bool',
 			'attr': 'partial_ply',
 			'name': 'Use Cached PLY Files',
@@ -289,6 +303,13 @@ class luxrender_engine(declarative_property_group):
 			'default': False,
 			'save_in_preset': True
 		},
+		{
+			'type': 'bool',
+			'attr': 'preview_stop',
+			'name': 'Stop Preview',
+			'description': 'preview_stop',
+			'default': False
+		},
 	]
 	
 	def allow_file_embed(self):
@@ -310,7 +331,7 @@ class luxrender_networking(declarative_property_group):
 		'servers':			{ 'use_network_servers': True },
 		'serverinterval':	{ 'use_network_servers': True },
 	}
-	
+
 	properties = [
 		{	# drawn in panel header
 			'type': 'bool',

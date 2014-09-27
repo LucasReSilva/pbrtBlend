@@ -34,7 +34,7 @@ from ..outputs import LuxLog, LuxManager
 from ..export.scene import SceneExporter
 from ..export import materials as export_materials
 
-from extensions_framework import util as efutil
+from ..extensions_framework import util as efutil
 
 # Per-IDPropertyGroup preset handling
 
@@ -341,6 +341,30 @@ class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
 		else:
 			w.lightgroups.remove( self.properties.lg_index )
 		w.lightgroups_index = len(w.lightgroups)-1
+		return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_opencl_device_list_update(bpy.types.Operator):
+	'''Update the OpenCL device list'''
+	
+	bl_idname = "luxrender.opencl_device_list_update"
+	bl_label = "Update the OpenCL device list"
+	
+	def invoke(self, context, event):
+		devs = context.scene.luxcore_enginesettings.luxcore_opencl_devices
+		# Clear the list
+		for i in range(len(devs)):
+			devs.remove(0)
+		
+		# Create the new list
+		from .. import pyluxcore
+		deviceList = pyluxcore.GetOpenCLDeviceList()
+		for dev in deviceList:
+			devs.add()
+			index = len(devs) - 1
+			new_dev = devs[index]
+			new_dev.name = 'Device ' + str(index) + ': '+ dev[0] + ' (' + dev[1] + ')'
+
 		return {'FINISHED'}
 
 # Export process

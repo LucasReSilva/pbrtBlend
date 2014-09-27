@@ -28,8 +28,8 @@ import time, threading, os
 
 import bpy
 
-from extensions_framework import log
-from extensions_framework.util import TimerThread, format_elapsed_time
+from ..extensions_framework import log
+from ..extensions_framework.util import TimerThread, format_elapsed_time
 
 # This def ia above the following import statements for a reason!
 def LuxLog(*args, popup=False):

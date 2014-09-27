@@ -30,7 +30,7 @@ from ... import LuxRenderAddon
 from ...properties import (find_node, find_node_input)
 from ...ui.materials import luxrender_material_base
 from ...operators.lrmdb import lrmdb_state
-
+from ...outputs.luxcore_api import UseLuxCore
 
 def cycles_panel_node_draw(layout, id_data, output_type, input_name):
 	if not id_data.use_nodes:
@@ -90,7 +90,7 @@ class ui_luxrender_material_header(luxrender_material_base):
 		return (context.material or context.object) and (engine in cls.COMPAT_ENGINES)
 	
 	display_property_groups = [
-		( ('material',), 'luxrender_material' )
+		( ('material',), 'luxrender_material' ),
 	]
 	
 	def draw(self, context):
@@ -326,5 +326,33 @@ class ui_luxrender_material_node_emit(luxrender_material_base):
 			return False
 		try:
 			return context.material.luxrender_material.nodetree != ''
+		except:
+			return False
+
+@LuxRenderAddon.addon_register_class
+class ui_luxcore_material(luxrender_material_base):
+	'''
+	Material Emission Settings
+	'''
+	
+	bl_label = 'LuxCore specific settings'
+	bl_options = {'DEFAULT_CLOSED'}
+	
+	display_property_groups = [
+		( ('material',), 'luxcore_material', lambda: UseLuxCore() ),
+	]
+
+	def draw(self, context):
+		if not UseLuxCore():
+			self.layout.label("Not available with API v1.x")
+		
+		super().draw(context)
+
+	@classmethod
+	def poll(cls, context):
+		if context.scene.render.engine != 'LUXRENDER_RENDER':
+			return False
+		try:
+			return context.material.luxrender_material.nodetree == ''
 		except:
 			return False
