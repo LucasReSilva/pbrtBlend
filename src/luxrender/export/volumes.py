@@ -55,8 +55,8 @@ class library_loader():
 	platform_search = {
 		'lzo': {
 			'darwin': [
-				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.dylib' ),
-				bpy.app.binary_path[:-7] + ver_str + '/scripts/addons/luxrender/liblzo2.dylib'
+				bpy.utils.user_resource('SCRIPTS','addons/luxrender/liblzo2.2.dylib' ),
+				bpy.app.binary_path[:-7] + ver_str + '/scripts/addons/luxrender/liblzo2.2.dylib'
 			],
 			'win32': [
 				'lzo.dll',
