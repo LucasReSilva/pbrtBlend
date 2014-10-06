@@ -203,15 +203,20 @@ def convert_texture(scene, texture, variant_hint=None):
 	
 	if texture.type == 'BLEND':
 		progression_map = {
-			'LINEAR':			'lin',
+			'LINEAR':		'lin',
 			'QUADRATIC':		'quad',
-			'EASING':			'ease',
-			'DIAGONAL':			'diag',
+			'EASING':		'ease',
+			'DIAGONAL':		'diag',
 			'SPHERICAL':		'sphere',
 			'QUADRATIC_SPHERE':	'halo',
-			'RADIAL':			'radial',
+			'RADIAL':		'radial'
 		}
-		paramset.add_bool('flipxy', texture.use_flip_axis) \
+		direction_map = {
+			'HORIZONTAL':           False,
+			'VERTICAL':		True
+		}
+
+		paramset.add_bool('flipxy', direction_map[texture.use_flip_axis]) \
 				.add_string('type', progression_map[texture.progression])
 	
 	if texture.type == 'CLOUDS':

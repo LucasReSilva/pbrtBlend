@@ -1336,7 +1336,7 @@ class GeometryExporter(object):
 				else:
 					export_originals[obj] = True
 				
-				if number_psystems > 0:
+				if number_psystems > 0 and bpy.context.scene.luxrender_engine.export_particles:
 					export_originals[obj] = False
 					if self.visibility_scene.luxrender_testing.object_analysis: print(' -> has %i particle systems' % number_psystems)
 					for psys in obj.particle_systems:

@@ -4250,7 +4250,7 @@ class luxrender_tex_transform(declarative_property_group):
 				('local', 'Object', 'Use object local 3D coordinates'),
 				('localnormal', 'Object Normal', 'Use object local surface normals'),
 				('uv', 'UV', 'Use UV coordinates (x=u y=v z=0)'),
-				('smoke_domain', 'Smoke_Domain', 'Use Smoke Domain Coordinates'),
+				('smoke_domain', 'Smoke Domain', 'Use Smoke Domain Coordinates'),
 			],
 			'default': 'global',
 			'save_in_preset': True

@@ -122,7 +122,7 @@ class luxrender_engine(declarative_property_group):
 # 		'export_type', #Drawn in core/init
 # 		'binary_name',
 # 		'write_files',
-		'export_hair',
+		['export_particles', 'export_hair'],
 		'embed_filedata',
 		'mesh_type',
 		'partial_ply',
@@ -248,6 +248,13 @@ class luxrender_engine(declarative_property_group):
 			'attr': 'export_hair',
 			'name': 'Export Hair',
 			'description': 'Export particle hair systems',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'export_particles',
+			'name': 'Export Particles',
+			'description': 'Export particle system dupli objects',
 			'default': True
 		},
 		{

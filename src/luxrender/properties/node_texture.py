@@ -951,10 +951,8 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
 			wrap_items = prop['items']
 	
 	smoke_channels = [
-	('density', 'Density', ''),
-	('fire', 'Fire', ''),
-	('temperature', 'Temperature', ''),
-	('velocity', 'Velocity', '')					  
+	('density', 'Density', 'Smoke density grid'),
+	('fire', 'Fire', 'Fire grid'),				  
 	]
 	
 	domain = bpy.props.StringProperty(name='Domain Object')
