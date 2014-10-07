@@ -299,9 +299,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 	LuxRender Engine Exporter/Integration class
 	'''
 	
-	bl_idname			= 'LUXRENDER_RENDER'
-	bl_label			= 'LuxRender'
-	bl_use_preview		= True
+	bl_idname				= 'LUXRENDER_RENDER'
+	bl_label				= 'LuxRender'
+	bl_use_preview			= True
+	bl_use_texture_preview	= True
 	
 	render_lock = threading.Lock()
 
