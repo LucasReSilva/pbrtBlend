@@ -37,9 +37,6 @@ from ..outputs import LuxLog
 def ToValidLuxCoreName(name):
 	return re.sub('[^_0-9a-zA-Z]+', '_', name)
 
-def LuxCoreLogHandler(msg):
-	LuxLog(msg)
-
 def FlattenStrCollection(coll):
 	for i in coll:
 		if isinstance(i, Iterable):
@@ -100,7 +97,7 @@ if not 'PYLUXCORE_AVAILABLE' in locals():
 		else:
 			from .. import pyluxcore
 		
-		pyluxcore.Init(LuxCoreLogHandler)
+		pyluxcore.Init()
 		LUXCORE_VERSION = pyluxcore.Version()
 
 		PYLUXCORE_AVAILABLE = True
