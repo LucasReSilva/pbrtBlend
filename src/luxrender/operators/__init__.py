@@ -87,14 +87,9 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 		if ctx_mat.type == 'velvet': editor_type = ctx_mat.luxrender_mat_velvet
 		if ctx_mat.type == 'cloth': editor_type = ctx_mat.luxrender_mat_cloth
 		if ctx_mat.type == 'scatter': editor_type = ctx_mat.luxrender_mat_scatter
+		if ctx_mat.type == 'shinymetal': editor_type = ctx_mat.luxrender_mat_shinymetal
 		if ctx_mat.type == 'mix': editor_type = ctx_mat.luxrender_mat_mix
 		if ctx_mat.type == 'layered': editor_type = ctx_mat.luxrender_mat_layered
-
-		## handling for not existent shinymetal node, just hack atm.
-		if ctx_mat.type == 'shinymetal':
-			editor_type = ctx_mat.luxrender_mat_metal2
-			node_type = 'luxrender_material_metal2_node'
-				
 
 		if idtype == 'material':
 			shader =  nt.nodes.new(node_type) # create also matnode from editor type
