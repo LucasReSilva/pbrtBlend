@@ -116,6 +116,7 @@ luxrender_node_catagories = [
 	NodeItem("luxrender_material_mirror_node"),
 	NodeItem("luxrender_material_roughglass_node"),
 	NodeItem("luxrender_material_scatter_node"),
+	NodeItem("luxrender_material_shinymetal_node"),
 	NodeItem("luxrender_material_velvet_node"),
 	NodeItem("luxrender_material_null_node"),
 	NodeItem("luxrender_material_mix_node"),
