@@ -873,7 +873,32 @@ class BlenderSceneConverter(object):
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
 #		self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
-
+		
+		# Configure AOV output
+		channels = self.blScene.luxrender_channels
+		
+		outputStringPart1 = 'film.outputs.'
+		outputStringType = '.type'
+		outputStringFilename = '.filename'
+		# list of channels that don't use a HDR format
+		LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK']
+			
+		channels = self.blScene.luxrender_channels
+		
+		for channelIndex in range(0, len(channels.properties)):
+			channel = channels.properties[channelIndex]
+			
+			if channel:
+				# channel type (e.g. "RGB_TONEMAPPED")
+				outputString = outputStringPart1 + str(channelIndex + 1) + outputStringType
+				self.cfgProps.Set(pyluxcore.Property(outputString, [channel['attr']]))
+				# output filename (e.g. "RGB_TONEMAPPED.exr")
+				suffix = '.exr'
+				if channel['attr'] in LDR_channels:
+					suffix = '.png'
+				outputString2 = outputStringPart1 + str(channelIndex + 1) + outputStringFilename
+				self.cfgProps.Set(pyluxcore.Property(outputString2, [channel['attr'] + suffix]))
+		
 		# Pixel Filter
 		self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['MITCHELL_SS']))
 
