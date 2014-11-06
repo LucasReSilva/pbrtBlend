@@ -227,19 +227,36 @@ class passes(render_panel):
 							   ]
 	
 	def draw(self, context):
-		#Add in the relevant bits from Blender's passes stuff, this is taken from Blender's startup/properties_render_layer.py
 		layout = self.layout
-		
 		scene = context.scene
-		rd = scene.render
-		rl = rd.layers.active
 		
-		split = layout.split()
-		
-		col = split.column()
-		col.label(text="Passes:")
-		col.prop(rl, "use_pass_combined")
-		col.prop(rl, "use_pass_z")
+		if UseLuxCore():
+			# Show AOV channel panel
+			channels = context.scene.luxrender_channels
+			
+			split = layout.split()
+			col = split.column()
+			col.label(text = "LuxRender Passes (AOVs):")
+			
+			for control in channels.controls:
+				self.draw_column(
+					 control,
+					 col,
+					 channels,
+					 context,
+					 property_group = channels
+					 )
+		else:
+			#Add in the relevant bits from Blender's passes stuff, this is taken from Blender's startup/properties_render_layer.py
+			rd = scene.render
+			rl = rd.layers.active
+			
+			split = layout.split()
+			
+			col = split.column()
+			col.label(text="Passes:")
+			col.prop(rl, "use_pass_combined")
+			col.prop(rl, "use_pass_z")
 		
 		super().draw(context)
 		

@@ -678,3 +678,228 @@ class luxrender_lightgroups(declarative_property_group):
 		if name != '' and name in self.lightgroups:
 			return self.lightgroups[name].lg_enabled
 		return True
+
+@LuxRenderAddon.addon_register_class
+class luxrender_channels(declarative_property_group):
+	'''
+	Storage class for LuxCore AOVs
+	'''
+	
+	ef_attach_to = ['Scene']
+	
+	controls = [
+		'RGB',
+		'RGBA',
+		'RGB_TONEMAPPED',
+		'RGBA_TONEMAPPED',
+		'ALPHA',
+		['DEPTH', 'normalize_DEPTH'],
+		'POSITION',
+		'GEOMETRY_NORMAL',
+		'SHADING_NORMAL',
+		'MATERIAL_ID',
+		['DIRECT_DIFFUSE', 'normalize_DIRECT_DIFFUSE'],
+		['DIRECT_GLOSSY', 'normalize_DIRECT_GLOSSY'],
+		'EMISSION',
+		['INDIRECT_DIFFUSE', 'normalize_INDIRECT_DIFFUSE'],
+		['INDIRECT_GLOSSY', 'normalize_INDIRECT_GLOSSY'],
+		['INDIRECT_SPECULAR', 'normalize_INDIRECT_SPECULAR'],
+		'DIRECT_SHADOW_MASK',
+		'INDIRECT_SHADOW_MASK',
+		'UV',
+		['RAYCOUNT', 'normalize_RAYCOUNT']
+	]
+	
+	visibility = {}
+	
+	properties = [
+		{
+			'type': 'bool',
+			'attr': 'RGB',
+			'name': 'RGB',
+			'description': 'Raw RGB values',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'RGBA',
+			'name': 'RGBA',
+			'description': 'Raw RGBA values',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'RGB_TONEMAPPED',
+			'name': 'RGB_TONEMAPPED',
+			'description': 'Tonemapped RGB values',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'RGBA_TONEMAPPED',
+			'name': 'RGBA_TONEMAPPED',
+			'description': 'Tonemapped RGBA values',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'ALPHA',
+			'name': 'ALPHA',
+			'description': 'Alpha value [0..1]',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'DEPTH',
+			'name': 'DEPTH',
+			'description': 'Camera distance',
+			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_DEPTH',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'POSITION',
+			'name': 'POSITION',
+			'description': 'World X, Y, Z',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'GEOMETRY_NORMAL',
+			'name': 'GEOMETRY_NORMAL',
+			'description': 'Normal vector X, Y, Z without mesh smoothing',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'SHADING_NORMAL',
+			'name': 'SHADING_NORMAL',
+			'description': 'Normal vector X, Y, Z with mesh smoothing',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'MATERIAL_ID',
+			'name': 'MATERIAL_ID',
+			'description': 'Material ID (1 color per material)',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'DIRECT_DIFFUSE',
+			'name': 'DIRECT_DIFFUSE',
+			'description': 'Diffuse R, G, B',
+			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_DIRECT_DIFFUSE',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'DIRECT_GLOSSY',
+			'name': 'DIRECT_GLOSSY',
+			'description': 'Glossy R, G, B',
+			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_DIRECT_GLOSSY',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'EMISSION',
+			'name': 'EMISSION',
+			'description': 'Emission R, G, B',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'INDIRECT_DIFFUSE',
+			'name': 'INDIRECT_DIFFUSE',
+			'description': 'Indirect diffuse R, G, B',
+			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_INDIRECT_DIFFUSE',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'INDIRECT_GLOSSY',
+			'name': 'INDIRECT_GLOSSY',
+			'description': 'Indirect glossy R, G, B',
+			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_INDIRECT_GLOSSY',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'INDIRECT_SPECULAR',
+			'name': 'INDIRECT_SPECULAR',
+			'description': 'Indirect specular R, G, B',
+			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_INDIRECT_SPECULAR',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
+		{
+			'type': 'bool',
+			'attr': 'DIRECT_SHADOW_MASK',
+			'name': 'DIRECT_SHADOW_MASK',
+			'description': 'Mask containing shadows by direct light',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'INDIRECT_SHADOW_MASK',
+			'name': 'INDIRECT_SHADOW_MASK',
+			'description': 'Mask containing shadows by indirect light',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'UV',
+			'name': 'UV',
+			'description': 'Texture coordinates U, V',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'RAYCOUNT',
+			'name': 'RAYCOUNT',
+			'description': 'Ray count per pixel',
+			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_RAYCOUNT',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		}
+	]
