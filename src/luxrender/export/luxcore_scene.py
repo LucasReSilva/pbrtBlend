@@ -888,7 +888,7 @@ class BlenderSceneConverter(object):
 		for channelIndex in range(0, len(channels.properties)):
 			channel = channels.properties[channelIndex]
 			
-			if channel:
+			if channel and not channel['attr'].startswith('normalize_'):
 				# channel type (e.g. "RGB_TONEMAPPED")
 				outputString = outputStringPart1 + str(channelIndex + 1) + outputStringType
 				self.cfgProps.Set(pyluxcore.Property(outputString, [channel['attr']]))

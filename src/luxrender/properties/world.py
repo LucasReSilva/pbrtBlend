@@ -693,21 +693,21 @@ class luxrender_channels(declarative_property_group):
 		'RGB_TONEMAPPED',
 		'RGBA_TONEMAPPED',
 		'ALPHA',
-		'DEPTH',
+		['DEPTH', 'normalize_DEPTH'],
 		'POSITION',
 		'GEOMETRY_NORMAL',
 		'SHADING_NORMAL',
 		'MATERIAL_ID',
-		'DIRECT_DIFFUSE',
-		'DIRECT_GLOSSY',
+		['DIRECT_DIFFUSE', 'normalize_DIRECT_DIFFUSE'],
+		['DIRECT_GLOSSY', 'normalize_DIRECT_GLOSSY'],
 		'EMISSION',
-		'INDIRECT_DIFFUSE',
-		'INDIRECT_GLOSSY',
-		'INDIRECT_SPECULAR',
+		['INDIRECT_DIFFUSE', 'normalize_INDIRECT_DIFFUSE'],
+		['INDIRECT_GLOSSY', 'normalize_INDIRECT_GLOSSY'],
+		['INDIRECT_SPECULAR', 'normalize_INDIRECT_SPECULAR'],
 		'DIRECT_SHADOW_MASK',
 		'INDIRECT_SHADOW_MASK',
 		'UV',
-		'RAYCOUNT',
+		['RAYCOUNT', 'normalize_RAYCOUNT']
 	]
 	
 	visibility = {}
@@ -755,6 +755,13 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Camera distance',
 			'default': False
 		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_DEPTH',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
 		{
 			'type': 'bool',
 			'attr': 'POSITION',
@@ -790,12 +797,26 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Diffuse R, G, B',
 			'default': False
 		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_DIRECT_DIFFUSE',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
 		{
 			'type': 'bool',
 			'attr': 'DIRECT_GLOSSY',
 			'name': 'DIRECT_GLOSSY',
 			'description': 'Glossy R, G, B',
 			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_DIRECT_GLOSSY',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
 		},
 		{
 			'type': 'bool',
@@ -811,6 +832,13 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect diffuse R, G, B',
 			'default': False
 		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_INDIRECT_DIFFUSE',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
 		{
 			'type': 'bool',
 			'attr': 'INDIRECT_GLOSSY',
@@ -818,12 +846,26 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect glossy R, G, B',
 			'default': False
 		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_INDIRECT_GLOSSY',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
+		},
 		{
 			'type': 'bool',
 			'attr': 'INDIRECT_SPECULAR',
 			'name': 'INDIRECT_SPECULAR',
 			'description': 'Indirect specular R, G, B',
 			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_INDIRECT_SPECULAR',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
 		},
 		{
 			'type': 'bool',
@@ -852,5 +894,12 @@ class luxrender_channels(declarative_property_group):
 			'name': 'RAYCOUNT',
 			'description': 'Ray count per pixel',
 			'default': False
+		},
+        {
+			'type': 'bool',
+			'attr': 'normalize_RAYCOUNT',
+			'name': 'Normalize',
+			'description': 'Map values to 0..1 range',
+			'default': True
 		}
 	]
