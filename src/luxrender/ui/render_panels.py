@@ -258,6 +258,8 @@ class passes(render_panel):
 			col.prop(rl, "use_pass_combined")
 			col.prop(rl, "use_pass_z")
 		
+		layout.separator() # give a little gap to seperate from AOV's
+
 		super().draw(context)
 		
 		#Light groups, this is a "special" panel section
