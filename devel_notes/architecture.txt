@@ -228,4 +228,3 @@ Similar to how materials are only exported on-demand from the objects that use
 them, textures too are only exported on-demand by the materials that use them.
 There is not a dedicated iterator which exports all textures in the scene 
 (neither is there an iterator which exports all materials in the scene).
-

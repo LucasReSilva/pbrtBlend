@@ -873,7 +873,69 @@ class BlenderSceneConverter(object):
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
 #		self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
-
+		
+		# Configure AOV output
+		# helper function
+		def createChannelOutputString(channelName, outputIndex):
+			# list of channels that don't use a HDR format
+			LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK']
+			
+			# channel type (e.g. "film.outputs.1.type")
+			outputStringType = 'film.outputs.' + str(outputIndex) + '.type'
+			self.cfgProps.Set(pyluxcore.Property(outputStringType, [channelName]))
+			# output filename (e.g. "film.outputs.1.filename")
+			suffix = '.exr'
+			if channelName in LDR_channels:
+				suffix = '.png'
+			outputStringFilename = 'film.outputs.' + str(outputIndex) + '.filename'
+			self.cfgProps.Set(pyluxcore.Property(outputStringFilename, [channelName + suffix]))
+			
+			return outputIndex + 1
+		
+		channels = self.blScene.luxrender_channels
+		outputIndex = 1
+		
+		if channels.RGB:
+			outputIndex = createChannelOutputString('RGB', outputIndex)
+		if channels.RGBA:
+			outputIndex = createChannelOutputString('RGBA', outputIndex)
+		if channels.RGB_TONEMAPPED:
+			outputIndex = createChannelOutputString('RGB_TONEMAPPED', outputIndex)
+		if channels.RGBA_TONEMAPPED:
+			outputIndex = createChannelOutputString('RGBA_TONEMAPPED', outputIndex)
+		if channels.ALPHA:
+			outputIndex = createChannelOutputString('ALPHA', outputIndex)
+		if channels.DEPTH:
+			outputIndex = createChannelOutputString('DEPTH', outputIndex)
+		if channels.POSITION:
+			outputIndex = createChannelOutputString('POSITION', outputIndex)
+		if channels.GEOMETRY_NORMAL:
+			outputIndex = createChannelOutputString('GEOMETRY_NORMAL', outputIndex)
+		if channels.SHADING_NORMAL:
+			outputIndex = createChannelOutputString('SHADING_NORMAL', outputIndex)
+		if channels.MATERIAL_ID:
+			outputIndex = createChannelOutputString('MATERIAL_ID', outputIndex)
+		if channels.DIRECT_DIFFUSE:
+			outputIndex = createChannelOutputString('DIRECT_DIFFUSE', outputIndex)
+		if channels.DIRECT_GLOSSY:
+			outputIndex = createChannelOutputString('DIRECT_GLOSSY', outputIndex)
+		if channels.EMISSION:
+			outputIndex = createChannelOutputString('EMISSION', outputIndex)
+		if channels.INDIRECT_DIFFUSE:
+			outputIndex = createChannelOutputString('INDIRECT_DIFFUSE', outputIndex)
+		if channels.INDIRECT_GLOSSY:
+			outputIndex = createChannelOutputString('INDIRECT_GLOSSY', outputIndex)
+		if channels.INDIRECT_SPECULAR:
+			outputIndex = createChannelOutputString('INDIRECT_SPECULAR', outputIndex)
+		if channels.DIRECT_SHADOW_MASK:
+			outputIndex = createChannelOutputString('DIRECT_SHADOW_MASK', outputIndex)
+		if channels.INDIRECT_SHADOW_MASK:
+			outputIndex = createChannelOutputString('INDIRECT_SHADOW_MASK', outputIndex)
+		if channels.UV:
+			outputIndex = createChannelOutputString('UV', outputIndex)
+		if channels.RAYCOUNT:
+			outputIndex = createChannelOutputString('RAYCOUNT', outputIndex)
+		
 		# Pixel Filter
 		self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['MITCHELL_SS']))
 
