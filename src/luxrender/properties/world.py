@@ -762,7 +762,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Camera distance',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_DEPTH',
 			'name': 'Normalize',
@@ -804,7 +804,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Diffuse R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_DIRECT_DIFFUSE',
 			'name': 'Normalize',
@@ -818,7 +818,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Glossy R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_DIRECT_GLOSSY',
 			'name': 'Normalize',
@@ -839,7 +839,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect diffuse R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_INDIRECT_DIFFUSE',
 			'name': 'Normalize',
@@ -853,7 +853,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect glossy R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_INDIRECT_GLOSSY',
 			'name': 'Normalize',
@@ -867,7 +867,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect specular R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_INDIRECT_SPECULAR',
 			'name': 'Normalize',
@@ -902,7 +902,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Ray count per pixel',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_RAYCOUNT',
 			'name': 'Normalize',
