@@ -236,7 +236,6 @@ class passes(render_panel):
 			
 			split = layout.split()
 			col = split.column()
-			col.label(text = "LuxRender Passes (AOVs):")
 			
 			for control in channels.controls:
 				self.draw_column(

@@ -634,8 +634,9 @@ class luxrender_lightgroups(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		['lightgroups_label', 'op_lg_add'],
-		'ignore',
+		'lightgroups_label',
+		['ignore',
+		'op_lg_add'],
 	]
 	
 	visibility = {}
@@ -688,6 +689,7 @@ class luxrender_channels(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'aov_label',
 		'RGB',
 		'RGBA',
 		'RGB_TONEMAPPED',
@@ -713,6 +715,11 @@ class luxrender_channels(declarative_property_group):
 	visibility = {}
 	
 	properties = [
+		{
+			'type': 'text',
+			'name': 'LuxRender Passes (AOVs)',
+			'attr': 'aov_label',
+		},
 		{
 			'type': 'bool',
 			'attr': 'RGB',
