@@ -634,8 +634,9 @@ class luxrender_lightgroups(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
-		['lightgroups_label', 'op_lg_add'],
-		'ignore',
+		'lightgroups_label',
+		['ignore',
+		'op_lg_add'],
 	]
 	
 	visibility = {}
@@ -688,6 +689,7 @@ class luxrender_channels(declarative_property_group):
 	ef_attach_to = ['Scene']
 	
 	controls = [
+		'aov_label',
 		'saveToDisk',
 		'RGB',
 		'RGBA',
@@ -720,6 +722,25 @@ class luxrender_channels(declarative_property_group):
 			'name': 'Save passes to disk',
 			'description': 'Save the passes to the harddisk after rendering',
 			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'saveToDisk',
+			'name': 'Save passes to disk',
+			'description': 'Save the passes to the harddisk after rendering',
+			'default': False
+		},
+		{
+			'type': 'bool',
+			'attr': 'saveToDisk',
+			'name': 'Save passes to disk',
+			'description': 'Save the passes to the harddisk after rendering',
+			'default': False
+		},
+		{
+			'type': 'text',
+			'name': 'LuxRender Passes (AOVs)',
+			'attr': 'aov_label',
 		},
 		{
 			'type': 'bool',
@@ -763,7 +784,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Camera distance',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_DEPTH',
 			'name': 'Normalize',
@@ -805,7 +826,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Diffuse R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_DIRECT_DIFFUSE',
 			'name': 'Normalize',
@@ -819,7 +840,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Glossy R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_DIRECT_GLOSSY',
 			'name': 'Normalize',
@@ -840,7 +861,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect diffuse R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_INDIRECT_DIFFUSE',
 			'name': 'Normalize',
@@ -854,7 +875,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect glossy R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_INDIRECT_GLOSSY',
 			'name': 'Normalize',
@@ -868,7 +889,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Indirect specular R, G, B',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_INDIRECT_SPECULAR',
 			'name': 'Normalize',
@@ -903,7 +924,7 @@ class luxrender_channels(declarative_property_group):
 			'description': 'Ray count per pixel',
 			'default': False
 		},
-        {
+		{
 			'type': 'bool',
 			'attr': 'normalize_RAYCOUNT',
 			'name': 'Normalize',
