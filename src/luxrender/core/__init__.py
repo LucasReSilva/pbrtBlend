@@ -1056,6 +1056,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     blenderImage.save()
                 # end of function definition
 
+            channelCalcStartTime = time.time()
+            LuxLog('Importing AOV channels into Blender...')
+            
             channels = scene.luxrender_channels
             
             if channels.RGB:
@@ -1099,7 +1102,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if channels.RAYCOUNT:
                 convertChannelToImage('RAYCOUNT', True, pyluxcore.FilmOutputType.RAYCOUNT, 'f', 0.0, 1, channels.normalize_RAYCOUNT, channels.saveToDisk)
             
-					
+            channelCalcTime = time.time() - channelCalcStartTime
+            LuxLog('AOV conversion took %i seconds' % channelCalcTime)
+            		
             lcSession.Stop()
 
             LuxLog('Done.')
