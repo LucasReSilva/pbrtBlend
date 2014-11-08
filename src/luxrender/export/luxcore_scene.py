@@ -24,7 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
+import bpy, os
+from ..extensions_framework import util as efutil
 from symbol import except_clause
 import math
 import mathutils
@@ -335,11 +336,43 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.w4', [float(texture.weight_4)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 			####################################################################
+			# VORONOI
+			####################################################################
+			elif bl_texType == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE', 'SEQUENCE']:
+				extract_path = os.path.join(
+											efutil.scene_filename(),
+											bpy.path.clean_name(self.blScene.name),
+											'%05d' % self.blScene.frame_current
+											)
+											
+				if texture.image.source == 'GENERATED':
+					tex_image = 'luxblend_baked_image_%s.%s' % (bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+					tex_image = os.path.join(extract_path, tex_image)
+					texture.image.save_render(tex_image, self.blScene)
+				
+				if texture.image.source == 'FILE':
+					if texture.image.packed_file:
+						tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+						tex_image = os.path.join(extract_path, tex_image)
+						texture.image.save_render(tex_image, self.blScene)
+					else:
+						if texture.library is not None:
+							f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
+						else:
+							f_path = efutil.filesystem_path(texture.image.filepath)
+						if not os.path.exists(f_path):
+							raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+						tex_image = efutil.filesystem_path(f_path)
+
+				self.scnProps.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
+				self.ConvertMapping(prefix, texture)
+			####################################################################
 			# Pararameters shared by all blender textures
 			####################################################################
 			self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
 			self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
-			self.ConvertTransform(prefix, texture)
+			if bl_texType != 'IMAGE':
+				self.ConvertTransform(prefix, texture)
 
 			self.texturesCache.add(texName)
 			return texName
