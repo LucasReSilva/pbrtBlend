@@ -344,21 +344,26 @@ class BlenderSceneConverter(object):
 											bpy.path.clean_name(self.blScene.name),
 											'%05d' % self.blScene.frame_current
 											)
+											
+				if texture.image.source == 'GENERATED':
+					tex_image = 'luxblend_baked_image_%s.%s' % (bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+					tex_image = os.path.join(extract_path, tex_image)
+					texture.image.save_render(tex_image, self.blScene)
+				
 				if texture.image.source == 'FILE':
 					if texture.image.packed_file:
-						tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), scene.render.image_settings.file_format)
+						tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
 						tex_image = os.path.join(extract_path, tex_image)
-						texture.image.save_render(tex_image, scene)
+						texture.image.save_render(tex_image, self.blScene)
 					else:
 						if texture.library is not None:
 							f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
 						else:
-							print("---------", texture.image.filepath)
 							f_path = efutil.filesystem_path(texture.image.filepath)
 						if not os.path.exists(f_path):
 							raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
 						tex_image = efutil.filesystem_path(f_path)
-				print("---------", tex_image)
+
 				self.scnProps.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
 				self.ConvertMapping(prefix, texture)
 			####################################################################
