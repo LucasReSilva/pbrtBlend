@@ -724,20 +724,6 @@ class luxrender_channels(declarative_property_group):
 			'default': False
 		},
 		{
-			'type': 'bool',
-			'attr': 'saveToDisk',
-			'name': 'Save passes to disk',
-			'description': 'Save the passes to the harddisk after rendering',
-			'default': False
-		},
-		{
-			'type': 'bool',
-			'attr': 'saveToDisk',
-			'name': 'Save passes to disk',
-			'description': 'Save the passes to the harddisk after rendering',
-			'default': False
-		},
-		{
 			'type': 'text',
 			'name': 'LuxRender Passes (AOVs)',
 			'attr': 'aov_label',
