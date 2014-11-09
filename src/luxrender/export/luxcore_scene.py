@@ -24,7 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
+import bpy, os
+from ..extensions_framework import util as efutil
 from symbol import except_clause
 import math
 import mathutils
@@ -36,6 +37,18 @@ from ..export import get_worldscale
 from ..export.materials import get_texture_from_scene
 
 class BlenderSceneConverter(object):
+	
+	scalers_count = 0
+	
+	@staticmethod
+	def next_scale_value():
+		BlenderSceneConverter.scalers_count+=1
+		return BlenderSceneConverter.scalers_count
+	
+	@staticmethod
+	def clear():
+		BlenderSceneConverter.scalers_count = 0
+	
 	def __init__(self, blScene):
 		LuxManager.SetCurrentScene(blScene)
 
@@ -335,11 +348,95 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.w4', [float(texture.weight_4)]))
 				self.scnProps.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 			####################################################################
+			# IMAGE/MOVIE/SEQUENCE
+			####################################################################
+			elif bl_texType == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE', 'SEQUENCE']:
+				extract_path = os.path.join(
+											efutil.scene_filename(),
+											bpy.path.clean_name(self.blScene.name),
+											'%05d' % self.blScene.frame_current
+											)
+											
+				if texture.image.source == 'GENERATED':
+					tex_image = 'luxblend_baked_image_%s.%s' % (bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+					tex_image = os.path.join(extract_path, tex_image)
+					texture.image.save_render(tex_image, self.blScene)
+				
+				if texture.image.source == 'FILE':
+					if texture.image.packed_file:
+						tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+						tex_image = os.path.join(extract_path, tex_image)
+						texture.image.save_render(tex_image, self.blScene)
+					else:
+						if texture.library is not None:
+							f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
+						else:
+							f_path = efutil.filesystem_path(texture.image.filepath)
+						if not os.path.exists(f_path):
+							raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+						tex_image = efutil.filesystem_path(f_path)
+
+				if texture.image.source == 'SEQUENCE':
+					if texture.image.packed_file:
+						tex_image = 'luxblend_extracted_image_%s.%s' % (bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+						tex_image = os.path.join(extract_path, tex_image)
+						texture.image.save_render(tex_image, self.blScene)
+					else:
+						# sequence params from blender
+						sequence = bpy.data.textures[(texture.name).replace('.001', '')].image_user # remove tex_preview extension to avoid error
+						seqframes = sequence.frame_duration
+						seqoffset = sequence.frame_offset
+						seqstartframe = sequence.frame_start # the global frame at which the imagesequence starts
+						seqcyclic = sequence.use_cyclic
+						currentframe = self.blScene.frame_current
+						
+						if texture.library is not None:
+							f_path = efutil.filesystem_path(bpy.path.abspath( texture.image.filepath, texture.library.filepath))
+						else:
+							f_path = efutil.filesystem_path(texture.image.filepath)
+						
+						if currentframe < seqstartframe:
+							fnumber = 1 + seqoffset
+						else:
+							fnumber = currentframe - (seqstartframe-1) + seqoffset
+						
+						if fnumber > seqframes:
+							if seqcyclic == False:
+								fnumber = seqframes
+							else:
+								fnumber = (currentframe - (seqstartframe-1)) % seqframes
+								if fnumber == 0:
+									fnumber = seqframes
+					
+						import re
+						def get_seq_filename(number, f_path):
+							m = re.findall(r'(\d+)', f_path)
+							if len(m) == 0:
+								return "ERR: Can't find pattern"
+							
+							rightmost_number = m[len(m)-1]
+							seq_length = len(rightmost_number)
+							
+							nstr = "%i" %number
+							new_seq_number = nstr.zfill(seq_length)
+							
+							return f_path.replace(rightmost_number, new_seq_number)
+						
+						f_path = get_seq_filename(fnumber, f_path)
+
+						if not os.path.exists(f_path):
+							raise Exception('Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+						tex_image = efutil.filesystem_path(f_path)
+
+				self.scnProps.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
+				self.ConvertMapping(prefix, texture)
+			####################################################################
 			# Pararameters shared by all blender textures
 			####################################################################
 			self.scnProps.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
 			self.scnProps.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
-			self.ConvertTransform(prefix, texture)
+			if bl_texType != 'IMAGE':
+				self.ConvertTransform(prefix, texture)
 
 			self.texturesCache.add(texName)
 			return texName
@@ -447,9 +544,25 @@ class BlenderSceneConverter(object):
 			LuxLog('Texture: ' + texName)
 			
 			texture = get_texture_from_scene(self.blScene, texName)
-			
 			if texture != False:
-				return self.ConvertTexture(texture)
+				if hasattr(luxMaterial, '%s_multiplycolor' % materialChannel) and getattr(luxMaterial, '%s_multiplycolor' % materialChannel):
+					self.ConvertTexture(texture)
+					sv = BlenderSceneConverter.next_scale_value()
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.type' % (texName, sv), ['scale']))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture1' % (texName, sv), ' '.join(str(i) for i in (getattr(luxMaterial, materialChannel + '_color')))))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture2' % (texName, sv), ['%s'% texName]))
+					return '%s_scaled_%i' % (texName, sv)
+				
+				elif hasattr(luxMaterial, '%s_multiplyfloat' % materialChannel) and getattr(luxMaterial, '%s_multiplyfloat' % materialChannel):
+					self.ConvertTexture(texture)
+					sv = BlenderSceneConverter.next_scale_value()
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.type' % (texName, sv), ['scale']))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture1' % (texName, sv), float(getattr(luxMaterial, '%s_floatvalue' % materialChannel))))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture2' % (texName, sv), ['%s'% texName]))
+					return '%s_scaled_%i' % (texName, sv)
+				
+				else:
+					return self.ConvertTexture(texture)
 		else:
 			if variant == 'float':
 				return str(getattr(luxMaterial, materialChannel + '_floatvalue'))
@@ -472,7 +585,15 @@ class BlenderSceneConverter(object):
 			
 			texture = get_texture_from_scene(self.blScene, texName)
 			if texture != False:
-				return self.ConvertTexture(texture)
+				if hasattr(material.luxrender_material, '%s_multiplyfloat' % type) and getattr(material.luxrender_material, '%s_multiplyfloat' % type):
+					self.ConvertTexture(texture)
+					sv = BlenderSceneConverter.next_scale_value()
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.type' % (texName, sv), ['scale']))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture1' % (texName, sv), float(getattr(material.luxrender_material, '%s_floatvalue' % type))))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture2' % (texName, sv), ['%s'% texName]))
+					return '%s_scaled_%i' % (texName, sv)
+				else:
+					return self.ConvertTexture(texture)
 
 	def ConvertMaterial(self, material, materials):
 		try:
@@ -733,7 +854,8 @@ class BlenderSceneConverter(object):
 			
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.material', [objMatName]))
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
-	
+			BlenderSceneConverter.clear() # for scaler_scount etc.
+
 	def ConvertCamera(self, imageWidth = None, imageHeight = None):
 		blCamera = self.blScene.camera
 		blCameraData = blCamera.data
