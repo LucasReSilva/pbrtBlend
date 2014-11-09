@@ -552,6 +552,15 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture1' % (texName, sv), ' '.join(str(i) for i in (getattr(luxMaterial, materialChannel + '_color')))))
 					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture2' % (texName, sv), ['%s'% texName]))
 					return '%s_scaled_%i' % (texName, sv)
+				
+				elif hasattr(luxMaterial, '%s_multiplyfloat' % materialChannel) and getattr(luxMaterial, '%s_multiplyfloat' % materialChannel):
+					self.ConvertTexture(texture)
+					sv = BlenderSceneConverter.next_scale_value()
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.type' % (texName, sv), ['scale']))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture1' % (texName, sv), float(getattr(luxMaterial, '%s_floatvalue' % materialChannel))))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture2' % (texName, sv), ['%s'% texName]))
+					return '%s_scaled_%i' % (texName, sv)
+				
 				else:
 					return self.ConvertTexture(texture)
 		else:
