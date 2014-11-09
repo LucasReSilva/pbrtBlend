@@ -585,8 +585,8 @@ class BlenderSceneConverter(object):
 			LuxLog('Texture: ' + texName)
 			
 			texture = get_texture_from_scene(self.blScene, texName)
-			texName = ToValidLuxCoreName(texture.name)
 			if texture != False:
+				texName = ToValidLuxCoreName(texture.name)
 				if hasattr(material.luxrender_material, '%s_multiplyfloat' % type) and getattr(material.luxrender_material, '%s_multiplyfloat' % type):
 					self.ConvertTexture(texture)
 					sv = BlenderSceneConverter.next_scale_value()
