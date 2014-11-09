@@ -37,6 +37,18 @@ from ..export import get_worldscale
 from ..export.materials import get_texture_from_scene
 
 class BlenderSceneConverter(object):
+	
+	scalers_count = 0
+	
+	@staticmethod
+	def next_scale_value():
+		BlenderSceneConverter.scalers_count+=1
+		return BlenderSceneConverter.scalers_count
+	
+	@staticmethod
+	def clear():
+		BlenderSceneConverter.scalers_count = 0
+	
 	def __init__(self, blScene):
 		LuxManager.SetCurrentScene(blScene)
 
@@ -557,7 +569,15 @@ class BlenderSceneConverter(object):
 			
 			texture = get_texture_from_scene(self.blScene, texName)
 			if texture != False:
-				return self.ConvertTexture(texture)
+				if hasattr(material.luxrender_material, '%s_multiplyfloat' % type) and getattr(material.luxrender_material, '%s_multiplyfloat' % type):
+					self.ConvertTexture(texture)
+					sv = BlenderSceneConverter.next_scale_value()
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.type' % (texName, sv), ['scale']))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture1' % (texName, sv), float(getattr(material.luxrender_material, '%s_floatvalue' % type))))
+					self.scnProps.Set(pyluxcore.Property('scene.textures.%s_scaled_%i.texture2' % (texName, sv), ['%s'% texName]))
+					return '%s_scaled_%i' % (texName, sv)
+				else:
+					return self.ConvertTexture(texture)
 
 	def ConvertMaterial(self, material, materials):
 		try:
@@ -818,7 +838,8 @@ class BlenderSceneConverter(object):
 			
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.material', [objMatName]))
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
-	
+				BlenderSceneConverter.clear() # for scaler_scount etc.
+
 	def ConvertCamera(self, imageWidth = None, imageHeight = None):
 		blCamera = self.blScene.camera
 		blCameraData = blCamera.data
