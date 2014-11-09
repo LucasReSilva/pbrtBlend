@@ -838,7 +838,7 @@ class BlenderSceneConverter(object):
 			
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.material', [objMatName]))
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
-				BlenderSceneConverter.clear() # for scaler_scount etc.
+			BlenderSceneConverter.clear() # for scaler_scount etc.
 
 	def ConvertCamera(self, imageWidth = None, imageHeight = None):
 		blCamera = self.blScene.camera
