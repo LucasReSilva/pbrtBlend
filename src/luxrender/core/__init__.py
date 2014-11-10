@@ -901,10 +901,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return (stats.Get('stats.renderengine.convergence').GetFloat() == 1.0)
 
     def normalizeChannel(self, channel_buffer):
+        isInf = math.isinf
+        
         # find max value
         maxValue = 0.0
         for elem in channel_buffer:
-            if elem > maxValue and not (math.isnan(elem) or math.isinf(elem)):
+            if elem > maxValue and not isInf(elem):
                 maxValue = elem
 
         if maxValue > 0.0:
@@ -929,19 +931,25 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if channelName == 'MATERIAL_ID':
             # MATERIAL_ID needs special treatment
+            channel_buffer_converted = [None] * (filmWidth * filmHeight * 4)
             lcSession.GetFilm().GetOutputUInt(outputType, channel_buffer)
 
             mask_red = 0xff0000
             mask_green = 0xff00
             mask_blue = 0xff
 
+            k = 0
             for i in range(0, len(channel_buffer)):
                 red = float((channel_buffer[i] & mask_red) >> 16) / 255.0
                 green = float((channel_buffer[i] & mask_green) >> 8) / 255.0
                 blue = float(channel_buffer[i] & mask_blue) / 255.0
 
-                channel_buffer_converted.extend([red, green, blue, 1.0])
-
+                channel_buffer_converted[k] = red
+                channel_buffer_converted[k + 1] = green
+                channel_buffer_converted[k + 2] = blue
+                channel_buffer_converted[k + 3] = 1.0
+                k += 4
+                
         else:
             if channelName in ['DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK']:
                 # workaround for bug in LuxCore (fixed in future builds)
