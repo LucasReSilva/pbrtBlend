@@ -1126,10 +1126,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'UV', True, pyluxcore.FilmOutputType.UV, 'f', 0.0, 2, False, channels.saveToDisk)
             if channels.RAYCOUNT:
                 self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'RAYCOUNT', True, pyluxcore.FilmOutputType.RAYCOUNT, 'f', 0.0, 1, channels.normalize_RAYCOUNT, channels.saveToDisk)
+                
+            # test for MATERIAL_ID_MASK
+            #self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'MATERIAL_ID_MASK', True, pyluxcore.FilmOutputType.MATERIAL_ID_MASK, 'f', 0.0, 1, False, channels.saveToDisk)
             
             channelCalcTime = time.time() - channelCalcStartTime
             LuxLog('AOV conversion took %i seconds' % channelCalcTime)
-                    
+            
             lcSession.Stop()
 
             LuxLog('Done.')
