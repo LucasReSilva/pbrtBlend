@@ -62,14 +62,14 @@ class BlenderSceneConverter(object):
 		self.materialsCache = set()
 		self.texturesCache = set()
 	
-	def createChannelOutputString(self, channelName, material_id = -1):
+	def createChannelOutputString(self, channelName, id = -1):
 		'''
 		Creates a config string for LuxCore AOV output
 		'''
 		self.outputCounter += 1
 		
 		# list of channels that don't use a HDR format
-		LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK']
+		LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK', 'BY_MATERIAL_ID']
 		
 		# channel type (e.g. "film.outputs.1.type")
 		outputStringType = 'film.outputs.' + str(self.outputCounter) + '.type'
@@ -80,10 +80,10 @@ class BlenderSceneConverter(object):
 		outputStringFilename = 'film.outputs.' + str(self.outputCounter) + '.filename'
 		self.cfgProps.Set(pyluxcore.Property(outputStringFilename, [channelName + suffix]))
 		
-		# only for MATERIAL_ID_MASK
-		if material_id != -1:
+		# output id
+		if id != -1:
 			outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
-			self.cfgProps.Set(pyluxcore.Property(outputStringId, [material_id]))
+			self.cfgProps.Set(pyluxcore.Property(outputStringId, [id]))
 	
 	def ConvertObjectGeometry(self, obj):
 		try:
@@ -819,6 +819,8 @@ class BlenderSceneConverter(object):
 				self.scnProps.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
 				if material.luxcore_material.create_MATERIAL_ID_MASK:
 					self.createChannelOutputString('MATERIAL_ID_MASK', material.luxcore_material.id)
+				if material.luxcore_material.create_BY_MATERIAL_ID:
+					self.createChannelOutputString('BY_MATERIAL_ID', material.luxcore_material.id)
 				
 			if material.luxcore_material.emission_id != -1:
 				self.scnProps.Set(pyluxcore.Property(prefix + '.emission.id', [material.luxcore_material.light_id]))

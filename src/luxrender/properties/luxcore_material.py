@@ -41,6 +41,7 @@ class luxcore_material(declarative_property_group):
 	controls = [
 		['id', 'emission_id'],
 		'create_MATERIAL_ID_MASK',
+		'create_BY_MATERIAL_ID',
 		['samples', 'emission_samples'],
 		'bumpsamplingdistance',
 		['visibility_indirect_diffuse_enable', 'visibility_indirect_glossy_enable', 'visibility_indirect_specular_enable'],
@@ -83,6 +84,13 @@ class luxcore_material(declarative_property_group):
 			'attr': 'create_MATERIAL_ID_MASK',
 			'name': 'MATERIAL_ID_MASK pass',
 			'description': 'Create a mask for this material (AOV channel)',
+			'default': False,
+		},
+		{
+			'type': 'bool', 
+			'attr': 'create_BY_MATERIAL_ID',
+			'name': 'BY_MATERIAL_ID pass',
+			'description': 'Create a pass containing only objects with this material ID (AOV channel)',
 			'default': False,
 		},
 		{
