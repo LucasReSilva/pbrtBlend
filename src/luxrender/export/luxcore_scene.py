@@ -39,6 +39,8 @@ from ..export.materials import get_texture_from_scene
 class BlenderSceneConverter(object):
 	
 	scalers_count = 0
+	# Amount of output channels (AOVs)
+	outputCounter = 0
 	
 	@staticmethod
 	def next_scale_value():
@@ -59,6 +61,29 @@ class BlenderSceneConverter(object):
 		
 		self.materialsCache = set()
 		self.texturesCache = set()
+	
+	def createChannelOutputString(self, channelName, material_id = -1):
+		'''
+		Creates a config string for LuxCore AOV output
+		'''
+		self.outputCounter += 1
+		
+		# list of channels that don't use a HDR format
+		LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK']
+		
+		# channel type (e.g. "film.outputs.1.type")
+		outputStringType = 'film.outputs.' + str(self.outputCounter) + '.type'
+		self.cfgProps.Set(pyluxcore.Property(outputStringType, [channelName]))
+		
+		# output filename (e.g. "film.outputs.1.filename")
+		suffix = ('.png' if (channelName in LDR_channels) else '.exr')
+		outputStringFilename = 'film.outputs.' + str(self.outputCounter) + '.filename'
+		self.cfgProps.Set(pyluxcore.Property(outputStringFilename, [channelName + suffix]))
+		
+		# only for MATERIAL_ID_MASK
+		if material_id != -1:
+			outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
+			self.cfgProps.Set(pyluxcore.Property(outputStringId, [material_id]))
 	
 	def ConvertObjectGeometry(self, obj):
 		try:
@@ -795,9 +820,12 @@ class BlenderSceneConverter(object):
 			# LuxCore specific material settings
 			if material.luxcore_material.id != -1:
 				self.scnProps.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
+				if material.luxcore_material.create_MATERIAL_ID_MASK:
+					self.createChannelOutputString('MATERIAL_ID_MASK', material.luxcore_material.id)
+				
 			if material.luxcore_material.emission_id != -1:
 				self.scnProps.Set(pyluxcore.Property(prefix + '.emission.id', [material.luxcore_material.light_id]))
-				
+			
 			self.scnProps.Set(pyluxcore.Property(prefix + '.samples', [material.luxcore_material.samples]))
 			self.scnProps.Set(pyluxcore.Property(prefix + '.emission.samples', [material.luxcore_material.emission_samples]))
 			self.scnProps.Set(pyluxcore.Property(prefix + '.bumpsamplingdistance', [material.luxcore_material.bumpsamplingdistance]))
@@ -936,7 +964,7 @@ class BlenderSceneConverter(object):
 		
 		# Accelerator settings
 		self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
-
+		
 	def Convert(self, imageWidth = None, imageHeight = None):
 		########################################################################
 		# Convert camera definition
@@ -999,66 +1027,48 @@ class BlenderSceneConverter(object):
 #		self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
 		
 		# Configure AOV output
-		# helper function
-		def createChannelOutputString(channelName, outputIndex):
-			# list of channels that don't use a HDR format
-			LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK']
-			
-			# channel type (e.g. "film.outputs.1.type")
-			outputStringType = 'film.outputs.' + str(outputIndex) + '.type'
-			self.cfgProps.Set(pyluxcore.Property(outputStringType, [channelName]))
-			# output filename (e.g. "film.outputs.1.filename")
-			suffix = '.exr'
-			if channelName in LDR_channels:
-				suffix = '.png'
-			outputStringFilename = 'film.outputs.' + str(outputIndex) + '.filename'
-			self.cfgProps.Set(pyluxcore.Property(outputStringFilename, [channelName + suffix]))
-			
-			return outputIndex + 1
-		
 		channels = self.blScene.luxrender_channels
-		outputIndex = 1
 		
 		if channels.RGB:
-			outputIndex = createChannelOutputString('RGB', outputIndex)
+			self.createChannelOutputString('RGB')
 		if channels.RGBA:
-			outputIndex = createChannelOutputString('RGBA', outputIndex)
+			self.createChannelOutputString('RGBA')
 		if channels.RGB_TONEMAPPED:
-			outputIndex = createChannelOutputString('RGB_TONEMAPPED', outputIndex)
+			self.createChannelOutputString('RGB_TONEMAPPED')
 		if channels.RGBA_TONEMAPPED:
-			outputIndex = createChannelOutputString('RGBA_TONEMAPPED', outputIndex)
+			self.createChannelOutputString('RGBA_TONEMAPPED')
 		if channels.ALPHA:
-			outputIndex = createChannelOutputString('ALPHA', outputIndex)
+			self.createChannelOutputString('ALPHA')
 		if channels.DEPTH:
-			outputIndex = createChannelOutputString('DEPTH', outputIndex)
+			self.createChannelOutputString('DEPTH')
 		if channels.POSITION:
-			outputIndex = createChannelOutputString('POSITION', outputIndex)
+			self.createChannelOutputString('POSITION')
 		if channels.GEOMETRY_NORMAL:
-			outputIndex = createChannelOutputString('GEOMETRY_NORMAL', outputIndex)
+			self.createChannelOutputString('GEOMETRY_NORMAL')
 		if channels.SHADING_NORMAL:
-			outputIndex = createChannelOutputString('SHADING_NORMAL', outputIndex)
+			self.createChannelOutputString('SHADING_NORMAL')
 		if channels.MATERIAL_ID:
-			outputIndex = createChannelOutputString('MATERIAL_ID', outputIndex)
+			self.createChannelOutputString('MATERIAL_ID')
 		if channels.DIRECT_DIFFUSE:
-			outputIndex = createChannelOutputString('DIRECT_DIFFUSE', outputIndex)
+			self.createChannelOutputString('DIRECT_DIFFUSE')
 		if channels.DIRECT_GLOSSY:
-			outputIndex = createChannelOutputString('DIRECT_GLOSSY', outputIndex)
+			self.createChannelOutputString('DIRECT_GLOSSY')
 		if channels.EMISSION:
-			outputIndex = createChannelOutputString('EMISSION', outputIndex)
+			self.createChannelOutputString('EMISSION')
 		if channels.INDIRECT_DIFFUSE:
-			outputIndex = createChannelOutputString('INDIRECT_DIFFUSE', outputIndex)
+			self.createChannelOutputString('INDIRECT_DIFFUSE')
 		if channels.INDIRECT_GLOSSY:
-			outputIndex = createChannelOutputString('INDIRECT_GLOSSY', outputIndex)
+			self.createChannelOutputString('INDIRECT_GLOSSY')
 		if channels.INDIRECT_SPECULAR:
-			outputIndex = createChannelOutputString('INDIRECT_SPECULAR', outputIndex)
+			self.createChannelOutputString('INDIRECT_SPECULAR')
 		if channels.DIRECT_SHADOW_MASK:
-			outputIndex = createChannelOutputString('DIRECT_SHADOW_MASK', outputIndex)
+			self.createChannelOutputString('DIRECT_SHADOW_MASK')
 		if channels.INDIRECT_SHADOW_MASK:
-			outputIndex = createChannelOutputString('INDIRECT_SHADOW_MASK', outputIndex)
+			self.createChannelOutputString('INDIRECT_SHADOW_MASK')
 		if channels.UV:
-			outputIndex = createChannelOutputString('UV', outputIndex)
+			self.createChannelOutputString('UV')
 		if channels.RAYCOUNT:
-			outputIndex = createChannelOutputString('RAYCOUNT', outputIndex)
+			self.createChannelOutputString('RAYCOUNT')
 		
 		# Pixel Filter
 		self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['MITCHELL_SS']))
