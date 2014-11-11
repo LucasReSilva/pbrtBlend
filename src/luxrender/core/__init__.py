@@ -951,20 +951,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 k += 4
                 
         else:
-            if channelName in ['DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK']:
-                # workaround for bug in LuxCore (fixed in future builds)
-                channel_buffer = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
-
             lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer)
 
             # spread value to RGBA format
 
-            if channelName in ['DIRECT_SHADOW_MASK', 'INDIRECT_SHADOW_MASK']:
-                # workaround for bug in LuxCore (fixed in future builds)
-                for i in range(0, (filmWidth * filmHeight)):
-                    channel_buffer_converted.extend([channel_buffer[i], channel_buffer[i], channel_buffer[i], 1.0])
-
-            elif arrayDepth == 1:
+            if arrayDepth == 1:
                 if getattr(pyluxcore, "ConvertFilmChannelOutput_1xFloat_To_4xFloatList", None) != None:
                     channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_1xFloat_To_4xFloatList(filmWidth, filmHeight, channel_buffer, normalize)
                 else:
@@ -1128,6 +1119,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'RAYCOUNT', True, pyluxcore.FilmOutputType.RAYCOUNT, 'f', 0.0, 1, channels.normalize_RAYCOUNT, channels.saveToDisk)
                 
             # test for MATERIAL_ID_MASK
+            '''
+            props = lcSession.GetRenderConfig().GetProperties()
+            
+            ids = set()
+            for i in props.GetAllUniqueSubNames("film.outputs"):
+                if props.Get(i + ".type").GetString() == "MATERIAL_ID_MASK":
+                    ids.add(props.Get(i + ".id").GetInt())
+            
+            for i in ids:
+                print("MATERIAL_ID_MASK ID => %d" % i)
+            '''
             #self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'MATERIAL_ID_MASK', True, pyluxcore.FilmOutputType.MATERIAL_ID_MASK, 'f', 0.0, 1, False, channels.saveToDisk)
             # test for BY_MATERIAL_ID
             #self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'BY_MATERIAL_ID', True, pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, False, channels.saveToDisk)
