@@ -41,6 +41,8 @@ class BlenderSceneConverter(object):
 	scalers_count = 0
 	# Amount of output channels (AOVs)
 	outputCounter = 0
+	material_id_mask_counter = 0
+	by_material_id_counter = 0
 	
 	@staticmethod
 	def next_scale_value():
@@ -66,6 +68,24 @@ class BlenderSceneConverter(object):
 		'''
 		Creates a config string for LuxCore AOV output
 		'''
+		
+		# the OpenCL engines only support 1 MATERIAL_ID_MASK and 1 BY_MATERIAL_ID channel
+		engine = self.blScene.luxcore_enginesettings.renderengine_type
+		if engine in ['BIASPATHOCL', 'PATHOCL']:
+			if channelName == 'MATERIAL_ID_MASK':
+				if self.material_id_mask_counter == 0:
+					self.material_id_mask_counter += 1
+				else:
+					# don't create the output channel
+					return 
+				
+			elif channelName == 'BY_MATERIAL_ID':
+				if self.by_material_id_counter == 0:
+					self.by_material_id_counter += 1
+				else:
+					# don't create the output channel
+					return 
+		
 		self.outputCounter += 1
 		
 		# list of channels that don't use a HDR format

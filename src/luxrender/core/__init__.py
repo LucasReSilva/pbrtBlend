@@ -913,16 +913,22 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             for i in range(0, len(channel_buffer)):
                 channel_buffer[i] = channel_buffer[i] / maxValue
 
-    # Convert AOVs to Blender images
-    # Example arguments:
-    # channelName:        RGB
-    # useHDR:             False
-    # outputType:         pyluxcore.FilmOutputType.RGB
-    # arrayType:         'f'
-    # arrayInitValue:     0.0
-    # arrayDepth:         3
-    # normalize:          False
-    def convertChannelToImage(self, lcSession, filmWidth, filmHeight, channelName, useHDR, outputType, arrayType, arrayInitValue, arrayDepth, normalize, saveToDisk):
+    def convertChannelToImage(self, lcSession, filmWidth, filmHeight, channelName, useHDR, outputType, arrayType, arrayInitValue, arrayDepth, normalize, saveToDisk, buffer_id = -1):
+        '''
+	    Convert AOVs to Blender images
+	    
+	    Example arguments:
+	    channelName:        RGB
+	    useHDR:             False
+	    outputType:         pyluxcore.FilmOutputType.RGB
+	    arrayType:         'f'
+	    arrayInitValue:     0.0
+	    arrayDepth:         3
+	    normalize:          False
+	    saveToDisk:         False
+	    
+	    buffer_id is used only for obtaining the right MATERIAL_ID_MASK and BY_MATERIAL_ID buffer
+	    '''
         from .. import pyluxcore
         # raw channel buffer
         channel_buffer = array.array(arrayType, [arrayInitValue] * (filmWidth * filmHeight * arrayDepth))
@@ -951,7 +957,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 k += 4
                 
         else:
-            lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer)
+            if channelName in ['MATERIAL_ID_MASK', 'BY_MATERIAL_ID'] and buffer_id != -1:
+                lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer, buffer_id)
+            else:
+                lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer)
 
             # spread value to RGBA format
 
@@ -995,9 +1004,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             else:
                 channel_buffer_converted = channel_buffer
 
-        # remove channel from Blender if it already exists and has no users (to prevent duplicates)
         imageName = 'pass_' + str(channelName)
+        if buffer_id != -1:
+            imageName += '_' + str(buffer_id)
 
+        # remove channel from Blender if it already exists and has no users (to prevent duplicates)
         for image in bpy.data.images:
             if image.name == imageName and not image.users:
                 bpy.data.images.remove(image)
@@ -1118,21 +1129,26 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if channels.RAYCOUNT:
                 self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'RAYCOUNT', True, pyluxcore.FilmOutputType.RAYCOUNT, 'f', 0.0, 1, channels.normalize_RAYCOUNT, channels.saveToDisk)
                 
-            # test for MATERIAL_ID_MASK
-            '''
             props = lcSession.GetRenderConfig().GetProperties()
-            
-            ids = set()
+            # Convert all MATERIAL_ID_MASK channels
+            mask_ids = set()
             for i in props.GetAllUniqueSubNames("film.outputs"):
                 if props.Get(i + ".type").GetString() == "MATERIAL_ID_MASK":
+                    mask_ids.add(props.Get(i + ".id").GetInt())
+            
+            for i in range(len(mask_ids)):
+                self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'MATERIAL_ID_MASK', False, pyluxcore.FilmOutputType.MATERIAL_ID_MASK, 'f', 0.0, 1, False, channels.saveToDisk, i)
+                
+            '''
+            # Convert all BY_MATERIAL_ID channels
+            ids = set()
+            for i in props.GetAllUniqueSubNames("film.outputs"):
+                if props.Get(i + ".type").GetString() == "BY_MATERIAL_ID":
                     ids.add(props.Get(i + ".id").GetInt())
             
-            for i in ids:
-                print("MATERIAL_ID_MASK ID => %d" % i)
+            for i in range(len(ids)):
+                self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'BY_MATERIAL_ID', True, pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, False, channels.saveToDisk, i)
             '''
-            #self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'MATERIAL_ID_MASK', True, pyluxcore.FilmOutputType.MATERIAL_ID_MASK, 'f', 0.0, 1, False, channels.saveToDisk)
-            # test for BY_MATERIAL_ID
-            #self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'BY_MATERIAL_ID', True, pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, False, channels.saveToDisk)
             
             channelCalcTime = time.time() - channelCalcStartTime
             LuxLog('AOV conversion took %i seconds' % channelCalcTime)
