@@ -545,12 +545,14 @@ class BlenderSceneConverter(object):
 					self.scnProps.Set(pyluxcore.Property(prefix + '.mortartex', self.ConvertMaterialChannel(luxTex, 'mortartex', 'float')))
 				self.ConvertTransform(prefix, texture)
 			else:
-				####################################################################
-				# Fallback to exception
-				####################################################################
+			####################################################################
+			# Fallback to exception
+			####################################################################
 				raise Exception('Unknown type ' + texType + 'for texture: ' + texture.name)
 
-			self.scnProps.Set(pyluxcore.Property(prefix + '.type', self.ConvertTexType(luxTex, texType))) # setting the type late assures the texture is already converted
+			if texType != 'normalmap':
+				self.scnProps.Set(pyluxcore.Property(prefix + '.type', self.ConvertTexType(luxTex, texType)))
+
 			self.texturesCache.add(texName)
 			return texName
 		
