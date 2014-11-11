@@ -585,8 +585,8 @@ class BlenderSceneConverter(object):
 		if getattr(luxMaterial, materialChannel + '_use' + variant + 'texture'):
 			texName = getattr(luxMaterial, '%s_%stexturename' % (materialChannel, variant))
 			validTexName = ToValidLuxCoreName(texName)
-			# Check if it is an already defined texture
-			if validTexName in self.texturesCache:
+			# Check if it is an already defined texture, but texture with different multipliers must allow multiple  instances !
+			if validTexName in self.texturesCache and not (getattr(luxMaterial, '%s_multiplycolor' % materialChannel) or getattr(luxMaterial, '%s_multiplyfloat' % materialChannel)):
 				return validTexName
 			LuxLog('Texture: ' + texName)
 			
@@ -625,8 +625,8 @@ class BlenderSceneConverter(object):
 
 			texName = getattr(material.luxrender_material, '%s_floattexturename' % (type))
 			validTexName = ToValidLuxCoreName(texName)
-			# Check if it is an already defined texture
-			if validTexName in self.texturesCache:
+			# Check if it is an already defined texture, but texture with different multipliers must allow multiple  instances !
+			if validTexName in self.texturesCache and not getattr(luxMaterial, '%s_multiplyfloat' % materialChannel):
 				return validTexName
 			LuxLog('Texture: ' + texName)
 			
@@ -905,7 +905,6 @@ class BlenderSceneConverter(object):
 			
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.material', [objMatName]))
 			self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
-			BlenderSceneConverter.clear() # for scaler_scount etc.
 
 	def ConvertCamera(self, imageWidth = None, imageHeight = None):
 		blCamera = self.blScene.camera
@@ -1102,5 +1101,6 @@ class BlenderSceneConverter(object):
 		LuxLog(str(self.cfgProps))
 
 		self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
+		BlenderSceneConverter.clear() # for scalers_count etc.
 
 		return self.lcConfig
