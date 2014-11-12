@@ -1139,7 +1139,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             for i in range(len(mask_ids)):
                 self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'MATERIAL_ID_MASK', False, pyluxcore.FilmOutputType.MATERIAL_ID_MASK, 'f', 0.0, 1, False, channels.saveToDisk, i)
                 
-            '''
             # Convert all BY_MATERIAL_ID channels
             ids = set()
             for i in props.GetAllUniqueSubNames("film.outputs"):
@@ -1147,8 +1146,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     ids.add(props.Get(i + ".id").GetInt())
             
             for i in range(len(ids)):
-                self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'BY_MATERIAL_ID', True, pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, False, channels.saveToDisk, i)
-            '''
+                self.convertChannelToImage(lcSession, filmWidth, filmHeight, 'BY_MATERIAL_ID', True, pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, True, channels.saveToDisk, i)
             
             channelCalcTime = time.time() - channelCalcStartTime
             LuxLog('AOV conversion took %i seconds' % channelCalcTime)
