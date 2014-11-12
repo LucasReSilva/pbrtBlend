@@ -589,7 +589,7 @@ class BlenderSceneConverter(object):
 			texName = getattr(luxMaterial, '%s_%stexturename' % (materialChannel, variant))
 			is_multiplied = getattr(luxMaterial, '%s_multiply%s' % (materialChannel, variant))
 			validTexName = ToValidLuxCoreName(texName)
-			# Check if it is an already defined texture, but texture with different multipliers must allow multiple instances !
+			# Check if it is an already defined texture, but texture with different multipliers must not stop here
 			if validTexName in self.texturesCache and not is_multiplied:
 				return validTexName
 			LuxLog('Texture: ' + texName)
@@ -639,7 +639,7 @@ class BlenderSceneConverter(object):
 			is_multiplied = getattr(material.luxrender_material, '%s_multiplyfloat' % type)
 			texName = getattr(material.luxrender_material, '%s_floattexturename' % (type))
 			validTexName = ToValidLuxCoreName(texName)
-			# Check if it is an already defined texture, but texture with different multipliers must allow multiple instances !
+			# Check if it is an already defined texture, but texture with different multipliers must not stop here
 			if validTexName in self.texturesCache and not is_multiplied:
 				return validTexName
 			LuxLog('Texture: ' + texName)
@@ -647,7 +647,7 @@ class BlenderSceneConverter(object):
 			texture = get_texture_from_scene(self.blScene, texName)
 			if texture != False:
 
-				if hasattr(material.luxrender_material, '%s_multiplyfloat' % type) and getattr(material.luxrender_material, '%s_multiplyfloat' % type):
+				if hasattr(material.luxrender_material, '%s_multiplyfloat' % type) and is_multiplied:
 					texName = self.ConvertTexture(texture)
 					sv = BlenderSceneConverter.next_scale_value()
 					sctexName = '%s_scaled_%i' % (texName, sv)
