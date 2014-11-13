@@ -527,8 +527,8 @@ class BlenderSceneConverter(object):
 				else:
 					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
 					self.ConvertTransform(prefix, texture)
-#				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)]))
-				props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float'))) # not yet in luxcore
+#				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
+				props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
 				props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
 			####################################################################
 			# DOTS
