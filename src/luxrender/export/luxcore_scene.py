@@ -287,7 +287,7 @@ class BlenderSceneConverter(object):
 	def ConvertTexture(self, texture):
 		texType = texture.luxrender_texture.type
 		
-		props = pyluxcore.Properties()
+		props = pyluxcore.Properties() if texType != 'BLENDER' else self.scnProps
 		
 		if texType == 'BLENDER':
 			texName = ToValidLuxCoreName(texture.name)
