@@ -527,6 +527,18 @@ class BlenderSceneConverter(object):
 				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
 				self.ConvertTransform(prefix, texture)
 			####################################################################
+			# WINDY
+			####################################################################
+			elif texType == 'windy':
+				self.ConvertTransform(prefix, texture)
+			####################################################################
+			# WRINKLED
+			####################################################################
+			elif texType == 'wrinkled':
+				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
+				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
+				self.ConvertTransform(prefix, texture)
+			####################################################################
 			# CHECKERBOARD
 			####################################################################
 			elif texType == 'checkerboard':
