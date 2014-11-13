@@ -518,6 +518,13 @@ class BlenderSceneConverter(object):
 				props.Set(pyluxcore.Property(prefix + '.variation', [float(luxTex.variation)]))
 				self.ConvertTransform(prefix, texture)
 			####################################################################
+			# FBM
+			####################################################################
+			elif texType == 'fbm':
+				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
+				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
+				self.ConvertTransform(prefix, texture)
+			####################################################################
 			# CHECKERBOARD
 			####################################################################
 			elif texType == 'checkerboard':
