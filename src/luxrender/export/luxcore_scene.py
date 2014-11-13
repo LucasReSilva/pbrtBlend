@@ -521,15 +521,15 @@ class BlenderSceneConverter(object):
 			# CHECKERBOARD
 			####################################################################
 			elif texType == 'checkerboard':
+#				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
+				props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
+				props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
 				if texture.luxrender_texture.luxrender_tex_checkerboard.dimension == 2:
 					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard2d']))
 					self.ConvertMapping(prefix, texture)
 				else:
 					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
 					self.ConvertTransform(prefix, texture)
-#				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
-				props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
-				props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
 			####################################################################
 			# DOTS
 			####################################################################
