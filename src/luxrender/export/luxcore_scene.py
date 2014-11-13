@@ -518,6 +518,13 @@ class BlenderSceneConverter(object):
 				props.Set(pyluxcore.Property(prefix + '.variation', [float(luxTex.variation)]))
 				self.ConvertTransform(prefix, texture)
 			####################################################################
+			# DOTS
+			####################################################################
+			elif texType == 'dots':
+				props.Set(pyluxcore.Property(prefix + '.inside', self.ConvertMaterialChannel(luxTex, 'inside', 'float')))
+				props.Set(pyluxcore.Property(prefix + '.outside', self.ConvertMaterialChannel(luxTex, 'outside', 'float')))
+				self.ConvertMapping(prefix, texture)
+			####################################################################
 			# Mix
 			####################################################################
 			elif texType == 'mix':
