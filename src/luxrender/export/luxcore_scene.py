@@ -320,81 +320,6 @@ class BlenderSceneConverter(object):
 				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
 				props.Set(pyluxcore.Property(prefix + '.distortion', [float(texture.distortion)]))
 			####################################################################
-			# MAGIC
-			####################################################################
-			elif bl_texType == 'MAGIC':
-				props.Set(pyluxcore.Property(prefix + '.type', ['blender_magic']))
-				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
-				props.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
-			####################################################################
-			# MARBLE
-			####################################################################
-			elif bl_texType == 'MARBLE':
-				props.Set(pyluxcore.Property(prefix + '.type', ['blender_marble']))
-				props.Set(pyluxcore.Property(prefix + '.marbletype', ''.join(str(i).lower() for i in getattr(texture, 'marble_type'))))
-				props.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
-				props.Set(pyluxcore.Property(prefix + '.noisebasis2', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis_2'))))
-				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-				props.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
-				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
-				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
-			####################################################################
-			# MUSGRAVE
-			####################################################################
-			elif bl_texType == 'MUSGRAVE':
-				props.Set(pyluxcore.Property(prefix + '.type', ['blender_musgrave']))
-				props.Set(pyluxcore.Property(prefix + '.musgravetype', ''.join(str(i).lower() for i in getattr(texture, 'musgrave_type'))))
-				props.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
-				props.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.dimension_max)]))
-				props.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
-				props.Set(pyluxcore.Property(prefix + '.lacunarity', [float(texture.lacunarity)]))
-				props.Set(pyluxcore.Property(prefix + '.offset', [float(texture.offset)]))
-				props.Set(pyluxcore.Property(prefix + '.gain', [float(texture.gain)]))
-				props.Set(pyluxcore.Property(prefix + '.octaves', [float(texture.octaves)]))
-				props.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.noise_scale)]))
-				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-#				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
-			####################################################################
-			# NOISE
-			####################################################################
-			elif bl_texType == 'NOISE':
-				props.Set(pyluxcore.Property(prefix + '.type', ['blender_noise']))
-				props.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
-			####################################################################
-			# STUCCI
-			####################################################################
-			elif bl_texType == 'STUCCI':
-				props.Set(pyluxcore.Property(prefix + '.type', ['blender_stucci']))
-				props.Set(pyluxcore.Property(prefix + '.stuccitype', ''.join(str(i).lower() for i in getattr(texture, 'stucci_type'))))
-				props.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
-				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
-				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
-			####################################################################
-			# WOOD
-			####################################################################
-			elif bl_texType == 'WOOD':
-				props.Set(pyluxcore.Property(prefix + '.type', ['blender_wood']))
-				props.Set(pyluxcore.Property(prefix + '.woodtype', ''.join(str(i).lower() for i in getattr(texture, 'wood_type'))))
-				props.Set(pyluxcore.Property(prefix + '.noisebasis2', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis_2'))))
-				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
-				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
-			####################################################################
-			# VORONOI
-			####################################################################
-			elif bl_texType == 'VORONOI':
-				props.Set(pyluxcore.Property(prefix + '.type', ['blender_voronoi']))
-				props.Set(pyluxcore.Property(prefix + '.dismetric', ''.join(str(i).lower() for i in getattr(texture, 'distance_metric'))))
-#				props.Set(pyluxcore.Property(prefix + '.colormode', ''.join(str(i).lower() for i in getattr(texture, 'color_mode')))) # not yet in luxcore
-				props.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
-				props.Set(pyluxcore.Property(prefix + '.exponent', [float(texture.minkovsky_exponent)]))
-				props.Set(pyluxcore.Property(prefix + '.w1', [float(texture.weight_1)]))
-				props.Set(pyluxcore.Property(prefix + '.w2', [float(texture.weight_2)]))
-				props.Set(pyluxcore.Property(prefix + '.w3', [float(texture.weight_3)]))
-				props.Set(pyluxcore.Property(prefix + '.w4', [float(texture.weight_4)]))
-				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-			####################################################################
 			# IMAGE/MOVIE/SEQUENCE
 			####################################################################
 			elif bl_texType == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE', 'SEQUENCE']:
@@ -476,7 +401,82 @@ class BlenderSceneConverter(object):
 						tex_image = efutil.filesystem_path(f_path)
 
 				props.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
-				self.ConvertMapping(prefix, texture)
+				self.ConvertMapping(prefix, texture)			
+			####################################################################
+			# MAGIC
+			####################################################################
+			elif bl_texType == 'MAGIC':
+				props.Set(pyluxcore.Property(prefix + '.type', ['blender_magic']))
+				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
+				props.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
+			####################################################################
+			# MARBLE
+			####################################################################
+			elif bl_texType == 'MARBLE':
+				props.Set(pyluxcore.Property(prefix + '.type', ['blender_marble']))
+				props.Set(pyluxcore.Property(prefix + '.marbletype', ''.join(str(i).lower() for i in getattr(texture, 'marble_type'))))
+				props.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
+				props.Set(pyluxcore.Property(prefix + '.noisebasis2', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis_2'))))
+				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+				props.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
+				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
+				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
+			####################################################################
+			# MUSGRAVE
+			####################################################################
+			elif bl_texType == 'MUSGRAVE':
+				props.Set(pyluxcore.Property(prefix + '.type', ['blender_musgrave']))
+				props.Set(pyluxcore.Property(prefix + '.musgravetype', ''.join(str(i).lower() for i in getattr(texture, 'musgrave_type'))))
+				props.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
+				props.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.dimension_max)]))
+				props.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
+				props.Set(pyluxcore.Property(prefix + '.lacunarity', [float(texture.lacunarity)]))
+				props.Set(pyluxcore.Property(prefix + '.offset', [float(texture.offset)]))
+				props.Set(pyluxcore.Property(prefix + '.gain', [float(texture.gain)]))
+				props.Set(pyluxcore.Property(prefix + '.octaves', [float(texture.octaves)]))
+				props.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.noise_scale)]))
+				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+#				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
+			####################################################################
+			# NOISE
+			####################################################################
+			elif bl_texType == 'NOISE':
+				props.Set(pyluxcore.Property(prefix + '.type', ['blender_noise']))
+				props.Set(pyluxcore.Property(prefix + '.noisedepth', [float(texture.noise_depth)]))
+			####################################################################
+			# STUCCI
+			####################################################################
+			elif bl_texType == 'STUCCI':
+				props.Set(pyluxcore.Property(prefix + '.type', ['blender_stucci']))
+				props.Set(pyluxcore.Property(prefix + '.stuccitype', ''.join(str(i).lower() for i in getattr(texture, 'stucci_type'))))
+				props.Set(pyluxcore.Property(prefix + '.noisebasis', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis'))))
+				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
+				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
+			####################################################################
+			# VORONOI
+			####################################################################
+			elif bl_texType == 'VORONOI':
+				props.Set(pyluxcore.Property(prefix + '.type', ['blender_voronoi']))
+				props.Set(pyluxcore.Property(prefix + '.dismetric', ''.join(str(i).lower() for i in getattr(texture, 'distance_metric'))))
+#				props.Set(pyluxcore.Property(prefix + '.colormode', ''.join(str(i).lower() for i in getattr(texture, 'color_mode')))) # not yet in luxcore
+				props.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
+				props.Set(pyluxcore.Property(prefix + '.exponent', [float(texture.minkovsky_exponent)]))
+				props.Set(pyluxcore.Property(prefix + '.w1', [float(texture.weight_1)]))
+				props.Set(pyluxcore.Property(prefix + '.w2', [float(texture.weight_2)]))
+				props.Set(pyluxcore.Property(prefix + '.w3', [float(texture.weight_3)]))
+				props.Set(pyluxcore.Property(prefix + '.w4', [float(texture.weight_4)]))
+				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))			
+			####################################################################
+			# WOOD
+			####################################################################
+			elif bl_texType == 'WOOD':
+				props.Set(pyluxcore.Property(prefix + '.type', ['blender_wood']))
+				props.Set(pyluxcore.Property(prefix + '.woodtype', ''.join(str(i).lower() for i in getattr(texture, 'wood_type'))))
+				props.Set(pyluxcore.Property(prefix + '.noisebasis2', ''.join(str(i).lower() for i in getattr(texture, 'noise_basis_2'))))
+				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type'))))
+				props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
+				props.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
 			####################################################################
 			# Pararameters shared by all blender textures
 			####################################################################
@@ -494,80 +494,11 @@ class BlenderSceneConverter(object):
 			luxTex = getattr(texture.luxrender_texture, 'luxrender_tex_' + texType)
 
 			prefix = 'scene.textures.' + texName
+			
 			####################################################################
-			# Imagemap
+			# ADD
 			####################################################################
-			if texType == 'imagemap':
-				props.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
-				props.Set(pyluxcore.Property(prefix + '.gamma', [float(luxTex.gamma)]))
-				props.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
-				if luxTex.variant == 'float':
-					props.Set(pyluxcore.Property(prefix + '.channel', [(luxTex.channel)]))
-				self.ConvertMapping(prefix, texture)
-			####################################################################
-			# Normalmap
-			####################################################################
-			elif texType == 'normalmap':
-				props.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
-				self.ConvertMapping(prefix, texture)
-			####################################################################
-			# Marble
-			####################################################################
-			elif texType == 'marble':
-				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
-				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
-				props.Set(pyluxcore.Property(prefix + '.scale', [float(luxTex.scale)]))
-				props.Set(pyluxcore.Property(prefix + '.variation', [float(luxTex.variation)]))
-				self.ConvertTransform(prefix, texture)
-			####################################################################
-			# FBM
-			####################################################################
-			elif texType == 'fbm':
-				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
-				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
-				self.ConvertTransform(prefix, texture)
-			####################################################################
-			# WINDY
-			####################################################################
-			elif texType == 'windy':
-				self.ConvertTransform(prefix, texture)
-			####################################################################
-			# WRINKLED
-			####################################################################
-			elif texType == 'wrinkled':
-				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
-				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
-				self.ConvertTransform(prefix, texture)
-			####################################################################
-			# UV
-			####################################################################
-			elif texType == 'uv':
-				self.ConvertMapping(prefix, texture)
-			####################################################################
-			# CHECKERBOARD
-			####################################################################
-			elif texType == 'checkerboard':
-#				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
-				props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
-				props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
-				if texture.luxrender_texture.luxrender_tex_checkerboard.dimension == 2:
-					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard2d']))
-					self.ConvertMapping(prefix, texture)
-				else:
-					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
-					self.ConvertTransform(prefix, texture)
-			####################################################################
-			# DOTS
-			####################################################################
-			elif texType == 'dots':
-				props.Set(pyluxcore.Property(prefix + '.inside', self.ConvertMaterialChannel(luxTex, 'inside', 'float')))
-				props.Set(pyluxcore.Property(prefix + '.outside', self.ConvertMaterialChannel(luxTex, 'outside', 'float')))
-				self.ConvertMapping(prefix, texture)
-			####################################################################
-			# Mix
-			####################################################################
-			elif texType == 'mix':
-				props.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxTex, 'amount', 'float')))
+			if texType == 'add':
 				props.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				if luxTex.variant == 'color':
 					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
@@ -575,9 +506,6 @@ class BlenderSceneConverter(object):
 				elif luxTex.variant == 'float':
 					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
 					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
-				elif luxTex.variant == 'fresnel':
-					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'fresnel')))
-					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'fresnel')))
 			####################################################################
 			# BAND
 			####################################################################
@@ -592,28 +520,6 @@ class BlenderSceneConverter(object):
 						i += 1
 				else:
 					LuxLog('WARNING: Not yet supported variant: %s' % luxTex.variant)
-			####################################################################
-			# Scale
-			####################################################################
-			elif texType == 'scale':
-				props.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
-				if luxTex.variant == 'color':
-					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
-					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'color')))
-				elif luxTex.variant == 'float':
-					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
-					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
-			####################################################################
-			# ADD
-			####################################################################
-			elif texType == 'add':
-				props.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
-				if luxTex.variant == 'color':
-					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
-					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'color')))
-				elif luxTex.variant == 'float':
-					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
-					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
 			####################################################################
 			# Brick
 			####################################################################
@@ -638,11 +544,106 @@ class BlenderSceneConverter(object):
 					props.Set(pyluxcore.Property(prefix + '.brickmodtex', self.ConvertMaterialChannel(luxTex, 'brickmodtex', 'float')))
 					props.Set(pyluxcore.Property(prefix + '.mortartex', self.ConvertMaterialChannel(luxTex, 'mortartex', 'float')))
 				self.ConvertTransform(prefix, texture)
+			####################################################################
+			# CHECKERBOARD
+			####################################################################
+			elif texType == 'checkerboard':
+#				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
+				props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
+				props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
+				if texture.luxrender_texture.luxrender_tex_checkerboard.dimension == 2:
+					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard2d']))
+					self.ConvertMapping(prefix, texture)
+				else:
+					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
+					self.ConvertTransform(prefix, texture)
+			####################################################################
+			# DOTS
+			####################################################################
+			elif texType == 'dots':
+				props.Set(pyluxcore.Property(prefix + '.inside', self.ConvertMaterialChannel(luxTex, 'inside', 'float')))
+				props.Set(pyluxcore.Property(prefix + '.outside', self.ConvertMaterialChannel(luxTex, 'outside', 'float')))
+				self.ConvertMapping(prefix, texture)
+			####################################################################
+			# FBM
+			####################################################################
+			elif texType == 'fbm':
+				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
+				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
+				self.ConvertTransform(prefix, texture)
+			####################################################################
+			# Imagemap
+			####################################################################
+			elif texType == 'imagemap':
+				props.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
+				props.Set(pyluxcore.Property(prefix + '.gamma', [float(luxTex.gamma)]))
+				props.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
+				if luxTex.variant == 'float':
+					props.Set(pyluxcore.Property(prefix + '.channel', [(luxTex.channel)]))
+				self.ConvertMapping(prefix, texture)
+			####################################################################
+			# Normalmap
+			####################################################################
+			elif texType == 'normalmap':
+				props.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
+				self.ConvertMapping(prefix, texture)
+			####################################################################
+			# Marble
+			####################################################################
+			elif texType == 'marble':
+				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
+				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
+				props.Set(pyluxcore.Property(prefix + '.scale', [float(luxTex.scale)]))
+				props.Set(pyluxcore.Property(prefix + '.variation', [float(luxTex.variation)]))
+				self.ConvertTransform(prefix, texture)
+			####################################################################
+			# Mix
+			####################################################################
+			elif texType == 'mix':
+				props.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxTex, 'amount', 'float')))
+				props.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
+				if luxTex.variant == 'color':
+					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
+					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'color')))
+				elif luxTex.variant == 'float':
+					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
+					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
+				elif luxTex.variant == 'fresnel':
+					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'fresnel')))
+					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'fresnel')))
+			####################################################################
+			# Scale
+			####################################################################
+			elif texType == 'scale':
+				props.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
+				if luxTex.variant == 'color':
+					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
+					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'color')))
+				elif luxTex.variant == 'float':
+					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
+					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
+			####################################################################
+			# UV
+			####################################################################
+			elif texType == 'uv':
+				self.ConvertMapping(prefix, texture)
+			####################################################################
+			# WINDY
+			####################################################################
+			elif texType == 'windy':
+				self.ConvertTransform(prefix, texture)
+			####################################################################
+			# WRINKLED
+			####################################################################
+			elif texType == 'wrinkled':
+				props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
+				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
+				self.ConvertTransform(prefix, texture)
 			else:
 			####################################################################
 			# Fallback to exception
 			####################################################################
-				raise Exception('Unknown type ' + texType + 'for texture: ' + texture.name)
+				raise Exception('Unknown type ' + texType + ' for texture: ' + texture.name)
 
 			if texType not in ('normalmap', 'checkerboard'):
 				props.Set(pyluxcore.Property(prefix + '.type', self.ConvertTexType(luxTex, texType)))
