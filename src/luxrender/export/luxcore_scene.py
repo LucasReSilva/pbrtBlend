@@ -1092,8 +1092,11 @@ class BlenderSceneConverter(object):
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
 		self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
-#		self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
 		
+		# Deprecated but used for backwardscompatibility
+		if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha') == True:
+			self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
+
 		# Configure AOV output
 		channels = self.blScene.luxrender_channels
 		
