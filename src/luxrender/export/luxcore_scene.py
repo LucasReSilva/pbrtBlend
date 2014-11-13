@@ -501,6 +501,8 @@ class BlenderSceneConverter(object):
 				props.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
 				props.Set(pyluxcore.Property(prefix + '.gamma', [float(luxTex.gamma)]))
 				props.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
+				if luxTex.variant == 'float':
+					props.Set(pyluxcore.Property(prefix + '.channel', [(luxTex.channel)]))
 				self.ConvertMapping(prefix, texture)
 			####################################################################
 			# Normalmap
