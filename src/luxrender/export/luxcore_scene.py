@@ -562,6 +562,20 @@ class BlenderSceneConverter(object):
 					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'fresnel')))
 					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'fresnel')))
 			####################################################################
+			# BAND
+			####################################################################
+			elif texType == 'band':
+				props.Set(pyluxcore.Property(prefix + '.amount', self.ConvertMaterialChannel(luxTex, 'amount', 'float')))
+				props.Set(pyluxcore.Property(prefix + '.offsets', [(luxTex.noffsets)]))
+				if luxTex.variant == 'color':
+					for i in range(0, luxTex.noffsets):
+						props.Set(pyluxcore.Property(prefix + '.offset%d' % i, [float(getattr(luxTex, 'offsetcolor%s' % str(i + 1)))]))
+						spectrum = self.ConvertMaterialChannel(luxTex, 'tex%s' % str(i + 1), 'color').split(" ")
+						props.Set(pyluxcore.Property(prefix + '.value%d' % i, [float(spectrum[0]),float(spectrum[1]),float(spectrum[2])]))
+						i += 1
+				else:
+					LuxLog('WARNING: Not yet supported variant: %s' % luxTex.variant)
+			####################################################################
 			# Scale
 			####################################################################
 			elif texType == 'scale':
