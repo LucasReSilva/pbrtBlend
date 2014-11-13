@@ -518,6 +518,19 @@ class BlenderSceneConverter(object):
 				props.Set(pyluxcore.Property(prefix + '.variation', [float(luxTex.variation)]))
 				self.ConvertTransform(prefix, texture)
 			####################################################################
+			# CHECKERBOARD
+			####################################################################
+			elif texType == 'checkerboard':
+				if texture.luxrender_texture.luxrender_tex_checkerboard.dimension == 2:
+					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard2d']))
+					self.ConvertMapping(prefix, texture)
+				else:
+					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
+					self.ConvertTransform(prefix, texture)
+#				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)]))
+				props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float'))) # not yet in luxcore
+				props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
+			####################################################################
 			# DOTS
 			####################################################################
 			elif texType == 'dots':
@@ -580,7 +593,7 @@ class BlenderSceneConverter(object):
 			####################################################################
 				raise Exception('Unknown type ' + texType + 'for texture: ' + texture.name)
 
-			if texType != 'normalmap':
+			if texType not in ('normalmap', 'checkerboard'):
 				props.Set(pyluxcore.Property(prefix + '.type', self.ConvertTexType(luxTex, texType)))
 
 			self.scnProps.Set(props)
