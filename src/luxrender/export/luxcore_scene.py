@@ -539,6 +539,11 @@ class BlenderSceneConverter(object):
 				props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
 				self.ConvertTransform(prefix, texture)
 			####################################################################
+			# UV
+			####################################################################
+			elif texType == 'uv':
+				self.ConvertMapping(prefix, texture)
+			####################################################################
 			# CHECKERBOARD
 			####################################################################
 			elif texType == 'checkerboard':
@@ -591,6 +596,17 @@ class BlenderSceneConverter(object):
 			# Scale
 			####################################################################
 			elif texType == 'scale':
+				props.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
+				if luxTex.variant == 'color':
+					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
+					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'color')))
+				elif luxTex.variant == 'float':
+					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
+					props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertMaterialChannel(luxTex, 'tex2', 'float')))
+			####################################################################
+			# ADD
+			####################################################################
+			elif texType == 'add':
 				props.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
 				if luxTex.variant == 'color':
 					props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'color')))
