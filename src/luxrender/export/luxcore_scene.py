@@ -519,7 +519,7 @@ class BlenderSceneConverter(object):
 						props.Set(pyluxcore.Property(prefix + '.value%d' % i, [float(spectrum[0]),float(spectrum[1]),float(spectrum[2])]))
 						i += 1
 				else:
-					LuxLog('WARNING: Not yet supported variant: %s' % luxTex.variant)
+					LuxLog('WARNING: Unsupported variant %s for texture: %s' % (luxTex.variant, texture.name))
 			####################################################################
 			# Brick
 			####################################################################
@@ -557,6 +557,18 @@ class BlenderSceneConverter(object):
 				else:
 					props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
 					self.ConvertTransform(prefix, texture)
+			####################################################################
+			# CONSTANT
+			####################################################################
+			elif texType == 'constant':
+				if luxTex.variant == 'color':
+					props.Set(pyluxcore.Property(prefix + '.type', ['constfloat3']))
+					props.Set(pyluxcore.Property(prefix + '.value', [luxTex.colorvalue[0],luxTex.colorvalue[1],luxTex.colorvalue[2]]))
+				elif luxTex.variant == 'float':
+					props.Set(pyluxcore.Property(prefix + '.type', ['constfloat1']))
+					props.Set(pyluxcore.Property(prefix + '.value', [float(luxTex.floatvalue)]))
+				else:
+					LuxLog('WARNING: Unsupported variant %s for texture: %s' % (luxTex.variant, texture.name))
 			####################################################################
 			# DOTS
 			####################################################################
@@ -645,7 +657,7 @@ class BlenderSceneConverter(object):
 			####################################################################
 				raise Exception('Unknown type ' + texType + ' for texture: ' + texture.name)
 
-			if texType not in ('normalmap', 'checkerboard'):
+			if texType not in ('normalmap', 'checkerboard', 'constant'):
 				props.Set(pyluxcore.Property(prefix + '.type', self.ConvertTexType(luxTex, texType)))
 
 			self.scnProps.Set(props)
