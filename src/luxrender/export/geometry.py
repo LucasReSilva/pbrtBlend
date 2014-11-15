@@ -886,7 +886,7 @@ class GeometryExporter(object):
 		for mod in obj.modifiers:
 			if mod.type == 'PARTICLE_SYSTEM':
 				if mod.particle_system.name == psys.name:
-					break;
+					break
 
 		if not (mod.type == 'PARTICLE_SYSTEM'):
 			return

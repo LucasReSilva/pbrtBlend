@@ -46,7 +46,7 @@ config_paths.extend(sp)
 path_relative_to_export() can make all exported paths relative to
 this one.
 """
-export_path = '';
+export_path = ''
 
 def path_relative_to_export(p):
     """Return a path that is relative to the export path"""

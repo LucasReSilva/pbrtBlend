@@ -217,7 +217,7 @@ class BlenderSceneConverter(object):
 			del ffaces_mats
 			bpy.data.meshes.remove(mesh)
 
-			return mesh_definitions;
+			return mesh_definitions
 
 		except Exception as err:
 			LuxLog('Object export failed, skipping this object:\n%s' % err)
@@ -750,7 +750,7 @@ class BlenderSceneConverter(object):
 
 			matIsTransparent = False
 			if material.type in ['glass', 'glass2', 'null']:
-				matIsTransparent == True
+				matIsTransparent = True
 
 			if self.blScene.luxrender_testing.clay_render and matIsTransparent == False:
 				return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
@@ -1031,23 +1031,23 @@ class BlenderSceneConverter(object):
 		if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
 			self.scnProps.Set(pyluxcore.Property('scene.camera.fieldofview', [math.degrees(blCameraData.angle)]))
 		
-		self.scnProps.Set(pyluxcore.Property("scene.camera.screenwindow", luxCamera.screenwindow(xr, yr, self.blScene, blCameraData)));
+		self.scnProps.Set(pyluxcore.Property("scene.camera.screenwindow", luxCamera.screenwindow(xr, yr, self.blScene, blCameraData)))
 		
 		if luxCamera.use_dof:
 			# Do not world-scale this, it is already in meters !
-			self.scnProps.Set(pyluxcore.Property("scene.camera.lensradius", (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)));
+			self.scnProps.Set(pyluxcore.Property("scene.camera.lensradius", (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)))
 		
 		ws = get_worldscale(as_scalematrix = False)
 		
 		if luxCamera.use_dof:
 			if blCameraData.dof_object is not None:
-				self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * ((blCamera.location - blCameraData.dof_object.location).length)));
+				self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * ((blCamera.location - blCameraData.dof_object.location).length)))
 			elif blCameraData.dof_distance > 0:
-				self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance"), ws * blCameraData.dof_distance);
+				self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance"), ws * blCameraData.dof_distance)
 			
 		if luxCamera.use_clipping:
-			self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start));
-			self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end));
+			self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))
+			self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
 
 	def ConvertEngineSettings(self):
 		engine = self.blScene.luxcore_enginesettings.renderengine_type
