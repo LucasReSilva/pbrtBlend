@@ -484,7 +484,7 @@ class luxrender_material(declarative_property_group):
 	def export(self, scene, lux_context, material, mode='indirect'):
 		mat_is_transparent = False
 		if self.type in ['glass', 'glass2', 'null']:
-			mat_is_transparent == True
+			mat_is_transparent = True
 		
 		if scene.luxrender_testing.clay_render and mat_is_transparent == False:
 			return {'CLAY'}
