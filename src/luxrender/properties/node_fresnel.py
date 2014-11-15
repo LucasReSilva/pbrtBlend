@@ -151,7 +151,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 			return make_texture('fresnel', 'preset', self.name, fresnelname_params)
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_cauchy(luxrender_texture_node):
+class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
 	'''Sellmeier Node'''
 	bl_idname = 'luxrender_texture_sellmeier_node'
 	bl_label = 'Sellmeier'
