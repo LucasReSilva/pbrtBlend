@@ -854,7 +854,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 		return make_texture('float', 'wrinkled', self.name, wrinkled_params)
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_vol_cloud(luxrender_texture_node):
+class luxrender_texture_type_node_cloud(luxrender_texture_node):
 	'''Cloud volume texture node'''
 	bl_idname = 'luxrender_texture_vol_cloud_node'
 	bl_label = 'Cloud Volume Texture'
@@ -911,7 +911,7 @@ class luxrender_texture_type_node_vol_cloud(luxrender_texture_node):
 		return make_texture('float', 'cloud', self.name, cloud_vol_params)
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_exponential(luxrender_texture_node):
+class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 	'''Exponential texture node'''
 	bl_idname = 'luxrender_texture_vol_exponential_node'
 	bl_label = 'Exponential Volume Texture'
