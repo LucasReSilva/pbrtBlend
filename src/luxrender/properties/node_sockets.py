@@ -75,11 +75,8 @@ fresnel_socket_color = (0.33, 0.6, 0.85, 1.0)
 
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
-    # Description string
     """Fresnel texture I/O socket"""
-    # Optional identifier string. If not explicitly defined, the python class name is used.
     bl_idname = 'luxrender_fresnel_socket'
-    # Label for nice name display
     bl_label = 'IOR socket'
 
     def changed_preset(self, context):
@@ -111,10 +108,12 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
             layout.label(text=self.name)
         else:
             box = layout.box()
+
             if self.fresnel == self.fresnel_presetvalue:
                 menu_text = self.fresnel_presetstring
             else:
                 menu_text = '-- Choose preset --'
+
             box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
             box.prop(self, 'fresnel', text=self.name)
 
@@ -125,8 +124,10 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
     # Export routine for this socket
     def get_paramset(self, make_texture):
         tex_node = get_linked_node(self)
+
         if tex_node:
             print('linked from %s' % tex_node.name)
+
             if not check_node_export_texture(tex_node):
                 return ParamSet()
 
@@ -182,18 +183,17 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
     def get_paramset(self, make_texture):
         print('get_paramset diffuse color')
         tex_node = get_linked_node(self)
+
         if tex_node:
             print('linked from %s' % tex_node.name)
+
             if not check_node_export_texture(tex_node):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            ka_params = ParamSet() \
-                .add_texture('Ka', tex_name)
+            ka_params = ParamSet().add_texture('Ka', tex_name)
         else:
-            ka_params = ParamSet() \
-                .add_color('Ka', self.color)
+            ka_params = ParamSet().add_color('Ka', self.color)
 
         return ka_params
 
@@ -238,16 +238,14 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
         tex_node = get_linked_node(self)
         if tex_node:
             print('linked from %s' % tex_node.name)
+
             if not check_node_export_texture(tex_node):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            kd_params = ParamSet() \
-                .add_texture('Kd', tex_name)
+            kd_params = ParamSet().add_texture('Kd', tex_name)
         else:
-            kd_params = ParamSet() \
-                .add_color('Kd', self.color)
+            kd_params = ParamSet().add_color('Kd', self.color)
 
         return kd_params
 
@@ -295,12 +293,9 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            kr_params = ParamSet() \
-                .add_texture('Kr', tex_name)
+            kr_params = ParamSet().add_texture('Kr', tex_name)
         else:
-            kr_params = ParamSet() \
-                .add_color('Kr', self.color)
+            kr_params = ParamSet().add_color('Kr', self.color)
 
         return kr_params
 
@@ -348,12 +343,9 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            ks_params = ParamSet() \
-                .add_texture('Ks', tex_name)
+            ks_params = ParamSet() .add_texture('Ks', tex_name)
         else:
-            ks_params = ParamSet() \
-                .add_color('Ks', self.color)
+            ks_params = ParamSet().add_color('Ks', self.color)
 
         return ks_params
 
@@ -401,12 +393,9 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            ks1_params = ParamSet() \
-                .add_texture('Ks1', tex_name)
+            ks1_params = ParamSet().add_texture('Ks1', tex_name)
         else:
-            ks1_params = ParamSet() \
-                .add_color('Ks1', self.color)
+            ks1_params = ParamSet().add_color('Ks1', self.color)
 
         return ks1_params
 
@@ -454,12 +443,9 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            ks2_params = ParamSet() \
-                .add_texture('Ks2', tex_name)
+            ks2_params = ParamSet().add_texture('Ks2', tex_name)
         else:
-            ks2_params = ParamSet() \
-                .add_color('Ks2', self.color)
+            ks2_params = ParamSet().add_color('Ks2', self.color)
 
         return ks2_params
 
@@ -507,12 +493,9 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            ks3_params = ParamSet() \
-                .add_texture('Ks3', tex_name)
+            ks3_params = ParamSet().add_texture('Ks3', tex_name)
         else:
-            ks3_params = ParamSet() \
-                .add_color('Ks3', self.color)
+            ks3_params = ParamSet().add_color('Ks3', self.color)
 
         return ks3_params
 
@@ -560,12 +543,9 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            kt_params = ParamSet() \
-                .add_texture('Kt', tex_name)
+            kt_params = ParamSet().add_texture('Kt', tex_name)
         else:
-            kt_params = ParamSet() \
-                .add_color('Kt', self.color)
+            kt_params = ParamSet().add_color('Kt', self.color)
 
         return kt_params
 
@@ -614,11 +594,9 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
 
             tex_name = tex_node.export_texture(make_texture)
 
-            warp_kd_params = ParamSet() \
-                .add_texture('warp_Kd', tex_name)
+            warp_kd_params = ParamSet().add_texture('warp_Kd', tex_name)
         else:
-            warp_kd_params = ParamSet() \
-                .add_color('warp_Kd', self.color)
+            warp_kd_params = ParamSet().add_color('warp_Kd', self.color)
 
         return warp_kd_params
 
@@ -666,12 +644,9 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            warp_ks_params = ParamSet() \
-                .add_texture('warp_Ks', tex_name)
+            warp_ks_params = ParamSet().add_texture('warp_Ks', tex_name)
         else:
-            warp_ks_params = ParamSet() \
-                .add_color('warp_Ks', self.color)
+            warp_ks_params = ParamSet().add_color('warp_Ks', self.color)
 
         return warp_ks_params
 
@@ -720,11 +695,9 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
 
             tex_name = tex_node.export_texture(make_texture)
 
-            weft_kd_params = ParamSet() \
-                .add_texture('weft_Kd', tex_name)
+            weft_kd_params = ParamSet().add_texture('weft_Kd', tex_name)
         else:
-            weft_kd_params = ParamSet() \
-                .add_color('weft_Kd', self.color)
+            weft_kd_params = ParamSet().add_color('weft_Kd', self.color)
 
         return weft_kd_params
 
@@ -772,12 +745,9 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            weft_ks_params = ParamSet() \
-                .add_texture('weft_Ks', tex_name)
+            weft_ks_params = ParamSet().add_texture('weft_Ks', tex_name)
         else:
-            weft_ks_params = ParamSet() \
-                .add_color('weft_Ks', self.color)
+            weft_ks_params = ParamSet().add_color('weft_Ks', self.color)
 
         return weft_ks_params
 
@@ -825,12 +795,9 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            backface_ka_params = ParamSet() \
-                .add_texture('backface_Ka', tex_name)
+            backface_ka_params = ParamSet().add_texture('backface_Ka', tex_name)
         else:
-            backface_ka_params = ParamSet() \
-                .add_color('backface_Ka', self.color)
+            backface_ka_params = ParamSet().add_color('backface_Ka', self.color)
 
         return backface_ka_params
 
@@ -878,12 +845,9 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            backface_ks_params = ParamSet() \
-                .add_texture('backface_Ks', tex_name)
+            backface_ks_params = ParamSet().add_texture('backface_Ks', tex_name)
         else:
-            backface_ks_params = ParamSet() \
-                .add_color('backface_Ks', self.color)
+            backface_ks_params = ParamSet().add_color('backface_Ks', self.color)
 
         return backface_ks_params
 
@@ -931,12 +895,9 @@ class luxrender_TC_L_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            L_params = ParamSet() \
-                .add_texture('L', tex_name)
+            L_params = ParamSet().add_texture('L', tex_name)
         else:
-            L_params = ParamSet() \
-                .add_color('L', self.color)
+            L_params = ParamSet().add_color('L', self.color)
 
         return L_params
 
@@ -985,12 +946,9 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            ac_params = ParamSet() \
-                .add_texture('absorption', tex_name)
+            ac_params = ParamSet().add_texture('absorption', tex_name)
         else:
-            ac_params = ParamSet() \
-                .add_color('absorption', self.color)
+            ac_params = ParamSet().add_color('absorption', self.color)
 
         return ac_params
 
@@ -1039,12 +997,9 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            ac_params = ParamSet() \
-                .add_texture('sigma_a', tex_name)
+            ac_params = ParamSet().add_texture('sigma_a', tex_name)
         else:
-            ac_params = ParamSet() \
-                .add_color('sigma_a', self.color)
+            ac_params = ParamSet().add_color('sigma_a', self.color)
 
         return ac_params
 
@@ -1091,12 +1046,9 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            sc_params = ParamSet() \
-                .add_texture('sigma_s', tex_name)
+            sc_params = ParamSet().add_texture('sigma_s', tex_name)
         else:
-            sc_params = ParamSet() \
-                .add_color('sigma_s', self.color)
+            sc_params = ParamSet().add_color('sigma_s', self.color)
 
         return sc_params
 
@@ -1105,11 +1057,8 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_amount_socket(bpy.types.NodeSocket):
-    # Description string
     """Amount socket"""
-    # Optional identifier string. If not explicitly defined, the python class name is used.
     bl_idname = 'luxrender_TF_amount_socket'
-    # Label for nice name display
     bl_label = 'Amount socket'
 
     # meaningful property
@@ -1158,13 +1107,10 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            amount_params = ParamSet() \
-                .add_texture('amount', tex_name)
+            amount_params = ParamSet().add_texture('amount', tex_name)
         else:
             print('value %f' % self.amount)
-            amount_params = ParamSet() \
-                .add_float('amount', self.amount)
+            amount_params = ParamSet().add_float('amount', self.amount)
 
         return amount_params
 
@@ -1212,13 +1158,11 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 
     def get_paramset(self, make_texture):
         bumpmap_params = ParamSet()
-
         tex_node = get_linked_node(self)
 
         if tex_node and check_node_export_texture(tex_node):
             # only export linked bumpmap sockets
             tex_name = tex_node.export_texture(make_texture)
-
             bumpmap_params.add_texture('bumpmap', tex_name)
 
         return bumpmap_params
@@ -1275,12 +1219,9 @@ class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            cauchyb_params = ParamSet() \
-                .add_texture('cauchyb', tex_name)
+            cauchyb_params = ParamSet().add_texture('cauchyb', tex_name)
         else:
-            cauchyb_params = ParamSet() \
-                .add_float('cauchyb', self.cauchyb)
+            cauchyb_params = ParamSet().add_float('cauchyb', self.cauchyb)
 
         return cauchyb_params
 
@@ -1334,10 +1275,12 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
                 layout.prop(self, 'filmindex', text=self.name)
             else:  # show presetchooser for all other mat
                 box = layout.box()
+
                 if self.filmindex == self.filmindex_presetvalue:
                     menu_text = self.filmindex_presetstring
                 else:
                     menu_text = '-- Choose preset --'
+
                 box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
                 box.prop(self, 'filmindex', text=self.name)
 
@@ -1352,12 +1295,9 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            filmindex_params = ParamSet() \
-                .add_texture('filmindex', tex_name)
+            filmindex_params = ParamSet().add_texture('filmindex', tex_name)
         else:
-            filmindex_params = ParamSet() \
-                .add_float('filmindex', self.filmindex)
+            filmindex_params = ParamSet().add_float('filmindex', self.filmindex)
 
         return filmindex_params
 
@@ -1410,12 +1350,9 @@ class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            film_params = ParamSet() \
-                .add_texture('film', tex_name)
+            film_params = ParamSet().add_texture('film', tex_name)
         else:
-            film_params = ParamSet() \
-                .add_float('film', self.film)
+            film_params = ParamSet().add_float('film', self.film)
 
         return film_params
 
@@ -1461,10 +1398,12 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
             layout.label(text=self.name)
         else:
             box = layout.box()
+
             if self.index == self.index_presetvalue:
                 menu_text = self.index_presetstring
             else:
                 menu_text = '-- Choose preset --'
+
             box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
             box.prop(self, 'index', text=self.name)
 
@@ -1480,11 +1419,9 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 
             tex_name = tex_node.export_texture(make_texture)
 
-            index_params = ParamSet() \
-                .add_texture('index', tex_name)
+            index_params = ParamSet().add_texture('index', tex_name)
         else:
-            index_params = ParamSet() \
-                .add_float('index', self.index)
+            index_params = ParamSet().add_float('index', self.index)
 
         return index_params
 
@@ -1619,12 +1556,9 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            roughness_params = ParamSet() \
-                .add_texture('vroughness', tex_name)
+            roughness_params = ParamSet().add_texture('vroughness', tex_name)
         else:
-            roughness_params = ParamSet() \
-                .add_float('vroughness', self.vroughness)
+            roughness_params = ParamSet().add_float('vroughness', self.vroughness)
 
         return roughness_params
 
@@ -1675,12 +1609,9 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            sigma_params = ParamSet() \
-                .add_texture('sigma', tex_name)
+            sigma_params = ParamSet().add_texture('sigma', tex_name)
         else:
-            sigma_params = ParamSet() \
-                .add_float('sigma', self.sigma)
+            sigma_params = ParamSet().add_float('sigma', self.sigma)
 
         return sigma_params
 
@@ -1728,12 +1659,9 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            sc_asym_params = ParamSet() \
-                .add_texture('g', tex_name)
+            sc_asym_params = ParamSet().add_texture('g', tex_name)
         else:
-            sc_asym_params = ParamSet() \
-                .add_color('g', self.sc_asym)
+            sc_asym_params = ParamSet().add_color('g', self.sc_asym)
 
         return sc_asym_params
 
@@ -1784,12 +1712,9 @@ class luxrender_TF_d_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            d_params = ParamSet() \
-                .add_texture('d', tex_name)
+            d_params = ParamSet().add_texture('d', tex_name)
         else:
-            d_params = ParamSet() \
-                .add_float('d', self.d)
+            d_params = ParamSet().add_float('d', self.d)
 
         return d_params
 
@@ -1840,12 +1765,9 @@ class luxrender_TF_OP1_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            opacity1_params = ParamSet() \
-                .add_texture('opacity1', tex_name)
+            opacity1_params = ParamSet().add_texture('opacity1', tex_name)
         else:
-            opacity1_params = ParamSet() \
-                .add_float('opacity1', self.opacity1)
+            opacity1_params = ParamSet().add_float('opacity1', self.opacity1)
 
         return opacity1_params
 
@@ -1896,12 +1818,9 @@ class luxrender_TF_OP2_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            opacity2_params = ParamSet() \
-                .add_texture('opacity2', tex_name)
+            opacity2_params = ParamSet().add_texture('opacity2', tex_name)
         else:
-            opacity2_params = ParamSet() \
-                .add_float('opacity2', self.opacity2)
+            opacity2_params = ParamSet().add_float('opacity2', self.opacity2)
 
         return opacity2_params
 
@@ -1952,12 +1871,9 @@ class luxrender_TF_OP3_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            opacity3_params = ParamSet() \
-                .add_texture('opacity3', tex_name)
+            opacity3_params = ParamSet().add_texture('opacity3', tex_name)
         else:
-            opacity3_params = ParamSet() \
-                .add_float('opacity3', self.opacity3)
+            opacity3_params = ParamSet().add_float('opacity3', self.opacity3)
 
         return opacity3_params
 
@@ -2008,12 +1924,9 @@ class luxrender_TF_OP4_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            opacity4_params = ParamSet() \
-                .add_texture('opacity4', tex_name)
+            opacity4_params = ParamSet().add_texture('opacity4', tex_name)
         else:
-            opacity4_params = ParamSet() \
-                .add_float('opacity4', self.opacity4)
+            opacity4_params = ParamSet().add_float('opacity4', self.opacity4)
 
         return opacity4_params
 
@@ -2066,12 +1979,9 @@ class luxrender_TF_M1_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            M1_params = ParamSet() \
-                .add_texture('M1', tex_name)
+            M1_params = ParamSet().add_texture('M1', tex_name)
         else:
-            M1_params = ParamSet() \
-                .add_float('M1', self.M1)
+            M1_params = ParamSet().add_float('M1', self.M1)
 
         return M1_params
 
@@ -2122,12 +2032,9 @@ class luxrender_TF_M2_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            M2_params = ParamSet() \
-                .add_texture('M2', tex_name)
+            M2_params = ParamSet().add_texture('M2', tex_name)
         else:
-            M2_params = ParamSet() \
-                .add_float('M2', self.M2)
+            M2_params = ParamSet().add_float('M2', self.M2)
 
         return M2_params
 
@@ -2178,12 +2085,9 @@ class luxrender_TF_M3_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            M3_params = ParamSet() \
-                .add_texture('M3', tex_name)
+            M3_params = ParamSet().add_texture('M3', tex_name)
         else:
-            M3_params = ParamSet() \
-                .add_float('M3', self.M3)
+            M3_params = ParamSet().add_float('M3', self.M3)
 
         return M3_params
 
@@ -2234,12 +2138,9 @@ class luxrender_TF_R1_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            R1_params = ParamSet() \
-                .add_texture('R1', tex_name)
+            R1_params = ParamSet().add_texture('R1', tex_name)
         else:
-            R1_params = ParamSet() \
-                .add_float('R1', self.R1)
+            R1_params = ParamSet().add_float('R1', self.R1)
 
         return R1_params
 
@@ -2290,12 +2191,9 @@ class luxrender_TF_R2_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            R2_params = ParamSet() \
-                .add_texture('R2', tex_name)
+            R2_params = ParamSet().add_texture('R2', tex_name)
         else:
-            R2_params = ParamSet() \
-                .add_float('R2', self.R2)
+            R2_params = ParamSet().add_float('R2', self.R2)
 
         return R2_params
 
@@ -2346,12 +2244,9 @@ class luxrender_TF_R3_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            R3_params = ParamSet() \
-                .add_texture('R3', tex_name)
+            R3_params = ParamSet().add_texture('R3', tex_name)
         else:
-            R3_params = ParamSet() \
-                .add_float('R3', self.R3)
+            R3_params = ParamSet().add_float('R3', self.R3)
 
         return R3_params
 
@@ -2386,12 +2281,9 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            brickmodtex_params = ParamSet() \
-                .add_texture('brickmodtex', tex_name)
+            brickmodtex_params = ParamSet().add_texture('brickmodtex', tex_name)
         else:
-            brickmodtex_params = ParamSet() \
-                .add_color('brickmodtex', self.brickmodtex)
+            brickmodtex_params = ParamSet().add_color('brickmodtex', self.brickmodtex)
 
         return brickmodtex_params
 
@@ -2424,12 +2316,9 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            bricktex_params = ParamSet() \
-                .add_texture('bricktex', tex_name)
+            bricktex_params = ParamSet().add_texture('bricktex', tex_name)
         else:
-            bricktex_params = ParamSet() \
-                .add_color('bricktex', self.bricktex)
+            bricktex_params = ParamSet().add_color('bricktex', self.bricktex)
 
         return bricktex_params
 
@@ -2462,12 +2351,9 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            mortartex_params = ParamSet() \
-                .add_texture('mortartex', tex_name)
+            mortartex_params = ParamSet().add_texture('mortartex', tex_name)
         else:
-            mortartex_params = ParamSet() \
-                .add_color('mortartex', self.mortartex)
+            mortartex_params = ParamSet().add_color('mortartex', self.mortartex)
 
         return mortartex_params
 
@@ -2496,12 +2382,9 @@ class luxrender_TF_brickmodtex_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            brickmodtex_params = ParamSet() \
-                .add_texture('brickmodtex', tex_name)
+            brickmodtex_params = ParamSet().add_texture('brickmodtex', tex_name)
         else:
-            brickmodtex_params = ParamSet() \
-                .add_float('brickmodtex', self.brickmodtex)
+            brickmodtex_params = ParamSet().add_float('brickmodtex', self.brickmodtex)
 
         return brickmodtex_params
 
@@ -2530,12 +2413,9 @@ class luxrender_TF_bricktex_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            bricktex_params = ParamSet() \
-                .add_texture('bricktex', tex_name)
+            bricktex_params = ParamSet().add_texture('bricktex', tex_name)
         else:
-            bricktex_params = ParamSet() \
-                .add_float('bricktex', self.bricktex)
+            bricktex_params = ParamSet().add_float('bricktex', self.bricktex)
 
         return bricktex_params
 
@@ -2564,12 +2444,9 @@ class luxrender_TF_mortartex_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            mortartex_params = ParamSet() \
-                .add_texture('mortartex', tex_name)
+            mortartex_params = ParamSet().add_texture('mortartex', tex_name)
         else:
-            mortartex_params = ParamSet() \
-                .add_float('mortartex', self.mortartex)
+            mortartex_params = ParamSet().add_float('mortartex', self.mortartex)
 
         return mortartex_params
 
@@ -2600,12 +2477,9 @@ class luxrender_TF_tex1_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            tex1_params = ParamSet() \
-                .add_texture('tex1', tex_name)
+            tex1_params = ParamSet().add_texture('tex1', tex_name)
         else:
-            tex1_params = ParamSet() \
-                .add_float('tex1', self.tex1)
+            tex1_params = ParamSet().add_float('tex1', self.tex1)
 
         return tex1_params
 
@@ -2634,12 +2508,9 @@ class luxrender_TF_tex2_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            tex2_params = ParamSet() \
-                .add_texture('tex2', tex_name)
+            tex2_params = ParamSet().add_texture('tex2', tex_name)
         else:
-            tex2_params = ParamSet() \
-                .add_float('tex2', self.tex2)
+            tex2_params = ParamSet().add_float('tex2', self.tex2)
 
         return tex2_params
 
@@ -2670,11 +2541,9 @@ class luxrender_TC_tex1_socket(bpy.types.NodeSocket):
 
             tex_name = tex_node.export_texture(make_texture)
 
-            tex1_params = ParamSet() \
-                .add_texture('tex1', tex_name)
+            tex1_params = ParamSet().add_texture('tex1', tex_name)
         else:
-            tex1_params = ParamSet() \
-                .add_color('tex1', self.tex1)
+            tex1_params = ParamSet().add_color('tex1', self.tex1)
 
         return tex1_params
 
@@ -2703,12 +2572,9 @@ class luxrender_TC_tex2_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            tex2_params = ParamSet() \
-                .add_texture('tex2', tex_name)
+            tex2_params = ParamSet().add_texture('tex2', tex_name)
         else:
-            tex2_params = ParamSet() \
-                .add_color('tex2', self.tex2)
+            tex2_params = ParamSet().add_color('tex2', self.tex2)
 
         return tex2_params
 
@@ -2738,12 +2604,9 @@ class luxrender_TFR_tex1_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            tex1_params = ParamSet() \
-                .add_texture('tex1', tex_name)
+            tex1_params = ParamSet().add_texture('tex1', tex_name)
         else:
-            tex1_params = ParamSet() \
-                .add_float('tex1', self.tex1)
+            tex1_params = ParamSet().add_float('tex1', self.tex1)
 
         return tex1_params
 
@@ -2772,12 +2635,9 @@ class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
                 return ParamSet()
 
             tex_name = tex_node.export_texture(make_texture)
-
-            tex2_params = ParamSet() \
-                .add_texture('tex2', tex_name)
+            tex2_params = ParamSet().add_texture('tex2', tex_name)
         else:
-            tex2_params = ParamSet() \
-                .add_float('tex2', self.tex2)
+            tex2_params = ParamSet().add_float('tex2', self.tex2)
 
         return tex2_params
 
@@ -2785,11 +2645,8 @@ class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
 # 3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names
 @LuxRenderAddon.addon_register_class
 class luxrender_coordinate_socket(bpy.types.NodeSocket):
-    # Description string
     """coordinate socket"""
-    # Optional identifier string. If not explicitly defined, the python class name is used.
     bl_idname = 'luxrender_coordinate_socket'
-    # Label for nice name display
     bl_label = 'Coordinate socket'
 
     # Optional function for drawing the socket input value
@@ -2798,7 +2655,7 @@ class luxrender_coordinate_socket(bpy.types.NodeSocket):
 
     # Socket color
     def draw_color(self, context, node):
-        return (0.50, 0.25, 0.60, 1.0)
+        return 0.50, 0.25, 0.60, 1.0
 
 
 @LuxRenderAddon.addon_register_class
@@ -2811,4 +2668,4 @@ class luxrender_transform_socket(bpy.types.NodeSocket):
         layout.label(text=self.name)
 
     def draw_color(self, context, node):
-        return (0.65, 0.55, 0.75, 1.0)
+        return 0.65, 0.55, 0.75, 1.0

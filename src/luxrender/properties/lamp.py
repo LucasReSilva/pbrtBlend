@@ -137,6 +137,7 @@ class luxrender_lamp(declarative_property_group):
     def get_paramset(self):
         params = ParamSet()
         params.add_float('importance', self.importance)
+
         return params
 
 
@@ -148,6 +149,7 @@ class luxrender_lamp_basic(declarative_property_group):
     def get_paramset(self, lamp_object):
         params = ParamSet()
         params.update(TC_L.get_paramset(self))
+
         return params
 
 
@@ -252,6 +254,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
         params.add_bool('flipz', self.flipz)
         params.add_float('power', self.power)
         params.add_float('efficacy', self.efficacy)
+
         return params
 
 
@@ -265,6 +268,7 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
         'power',
         'efficacy'
     ]
+
     visibility = dict_merge(
         luxrender_lamp_basic.visibility,
         {'mapname': {'projector': True}},
@@ -316,8 +320,10 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
         params = super().get_paramset(lamp_object)
         params.add_float('power', self.power)
         params.add_float('efficacy', self.efficacy)
+
         if self.projector:
             params.add_string('mapname', self.mapname)
+
         return params
 
 
@@ -572,6 +578,7 @@ class luxrender_lamp_area(declarative_property_group):
         params.add_float('efficacy', self.efficacy)
         params.update(TC_L.get_paramset(self))
         params.add_integer('nsamples', self.nsamples)
+
         return params
 
 
@@ -660,17 +667,18 @@ class luxrender_lamp_hemi(declarative_property_group):
     def get_paramset(self, lamp_object):
         params = ParamSet()
 
-        if self.infinite_map != '':
+        if self.infinite_map:
             if lamp_object.library is not None:
                 hdri_path = bpy.path.abspath(self.infinite_map, lamp_object.library.filepath)
             else:
                 hdri_path = self.infinite_map
+
             params.add_string('mapname', efutil.path_relative_to_export(hdri_path))
             params.add_string('mapping', self.mapping_type)
             params.add_float('gamma', self.gamma)
             params.add_integer('nsamples', self.nsamples)
 
-        if self.infinite_map == '' or self.hdri_multiply:
+        if not self.infinite_map or self.hdri_multiply:
             params.add_color('L', self.L_color)
 
         return params

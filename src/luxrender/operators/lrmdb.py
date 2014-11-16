@@ -119,7 +119,8 @@ class _lrmdb_state(lrmdb_client):
                 if mat_header['published'] == 1 and mat_header['type'] == 'Material':
                     mn = mat_header['name']
                     es = mat_header['estimated_size']
-                    dmn = ('%s %s' % (mn, es)) if es != '' else mn
+                    dmn = ('%s %s' % (mn, es)) if es else mn
+
                     self.actions.append(
                         LrmdbActionButton(
                             dmn,

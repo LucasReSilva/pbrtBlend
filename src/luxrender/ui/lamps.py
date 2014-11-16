@@ -92,15 +92,16 @@ class ui_luxrender_lamp_spot(lamps_panel):
         if context.lamp is not None:
             wide_ui = context.region.width > narrowui
             super().draw(context)
+
             # SPOT LAMP: Blender Properties
             if context.lamp.type == 'SPOT':
-
                 projector = context.lamp.luxrender_lamp.luxrender_lamp_spot.projector
 
                 if wide_ui and not projector:
                     col = self.layout.row()
                 else:
                     col = self.layout.column()
+
                 col.prop(context.lamp, "spot_size", text="Size")
 
                 if not projector:
@@ -152,18 +153,19 @@ class ui_luxrender_lamp_area(lamps_panel):
         if context.lamp is not None:
             wide_ui = context.region.width > narrowui
             super().draw(context)
+
             # AREA LAMP: Blender Properties
             if context.lamp.type == 'AREA':
-
                 if wide_ui:
                     col = self.layout.row()
                 else:
                     col = self.layout.column()
-                col.row().prop(context.lamp, "shape", expand=True)
 
+                col.row().prop(context.lamp, "shape", expand=True)
                 sub = col.column(align=True)
-                if (context.lamp.shape == 'SQUARE'):
+
+                if context.lamp.shape == 'SQUARE':
                     sub.prop(context.lamp, "size")
-                elif (context.lamp.shape == 'RECTANGLE'):
+                elif context.lamp.shape == 'RECTANGLE':
                     sub.prop(context.lamp, "size", text="Size X")
                     sub.prop(context.lamp, "size_y", text="Size Y")

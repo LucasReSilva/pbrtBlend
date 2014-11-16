@@ -96,8 +96,10 @@ def texture_append_visibility(vis_main, textureparam_object, vis_append):
         if 'attr' in prop.keys():
             if not prop['attr'] in vis_main.keys():
                 vis_main[prop['attr']] = {}
+
             for vk, vi in vis_append.items():
                 vis_main[prop['attr']][vk] = vi
+
     return vis_main
 
 # Float Textures
@@ -115,10 +117,13 @@ TF_film = FloatTextureParameter('film', 'Thin film thickness (nm)', add_float_va
                                 max=2500.0)  # default 0.0 for OFF
 TF_filmindex = FloatTextureParameter('filmindex', 'Film IOR', add_float_value=True, default=1.3333, min=1.0,
                                      max=6.0)  # default 1.3333 for a coating of a water-based solution
+
 # default of something other than 1.0 so glass and roughglass render propery with defaults
 TF_index = FloatTextureParameter('index', 'IOR', add_float_value=True, min=0.0, max=25.0, default=1.520)
+
 # carpaint defaults set for a basic gray clearcoat paint job, as a "setting suggestion"
 TF_M1 = FloatTextureParameter('M1', 'M1', add_float_value=True, default=0.250, min=0.0001, max=1.0)
+
 # set m1-3 min to .0001, carpaint will take 0.0 as being max (1.0)
 TF_M2 = FloatTextureParameter('M2', 'M2', add_float_value=True, default=0.100, min=0.0001, max=1.0)
 TF_M3 = FloatTextureParameter('M3', 'M3', add_float_value=True, default=0.015, min=0.0001, max=1.0)
@@ -138,6 +143,7 @@ TF_backface_d = FloatTextureParameter('bf_d', 'Backface absorption depth (nm)', 
                                       add_float_value=True, default=0.0, min=0.0, max=1500.0)  # default 0.0 for OFF
 TF_backface_index = FloatTextureParameter('bf_index', 'Backface IOR', real_attr='backface_index', add_float_value=True,
                                           min=0.0, max=25.0, default=1.333333)
+
 # backface roughness is high than front by default, will usually be for backs of leaves or cloth
 TF_backface_uroughness = FloatTextureParameter('bf_uroughness', 'Backface U-Roughness', real_attr='backface_uroughness',
                                                add_float_value=True, min=0.00001, max=1.0, default=0.25)
@@ -147,6 +153,7 @@ TF_backface_vroughness = FloatTextureParameter('bf_vroughness', 'Backface V-Roug
                                                add_float_value=True, min=0.00001, max=1.0, default=0.25)
 TF_backface_vexponent = FloatTextureParameter('bf_vexponent', 'Backface V-Exponent', real_attr='backface_vexponent',
                                               add_float_value=True, min=1.0, max=1000000000000, default=30)
+
 # These are for the layered mat:
 TF_OP1 = FloatTextureParameter('opacity1', 'Opacity 1', add_float_value=True, default=1.0, min=0.0, max=1.0)
 TF_OP2 = FloatTextureParameter('opacity2', 'Opacity 2', add_float_value=True, default=1.0, min=0.0, max=1.0)
@@ -156,6 +163,7 @@ TF_OP4 = FloatTextureParameter('opacity4', 'Opacity 4', add_float_value=True, de
 # Color Textures
 TC_Ka = ColorTextureParameter('Ka', 'Absorption color', default=(0.0, 0.0, 0.0))
 TC_Kd = ColorTextureParameter('Kd', 'Diffuse color', default=(0.64, 0.64, 0.64))
+
 # 1.0 reflection color is not sane for mirror or shinymetal, 0.7 does not signifcantly affect glass or roughglass
 TC_Kr = ColorTextureParameter('Kr', 'Reflection color', default=(0.7, 0.7, 0.7))
 TC_Ks = ColorTextureParameter('Ks', 'Specular color', default=(0.04, 0.04, 0.04))
@@ -164,6 +172,7 @@ TC_Ks2 = ColorTextureParameter('Ks2', 'Specular color 2', default=(0.07, 0.07, 0
 TC_Ks3 = ColorTextureParameter('Ks3', 'Specular color 3', default=(0.04, 0.04, 0.04))
 TC_Kt = ColorTextureParameter('Kt', 'Transmission color', default=(1.0, 1.0, 1.0))
 TC_backface_Ka = ColorTextureParameter('backface_Ka', 'Backface Absorption color', default=(0.0, 0.0, 0.0))
+
 # .02 = 1.333, the IOR of water
 TC_backface_Ks = ColorTextureParameter('backface_Ks', 'Backface Specular color', default=(0.02, 0.02, 0.02))
 TC_warp_Kd = ColorTextureParameter('warp_Kd', 'Warp Diffuse Color', default=(0.64, 0.64, 0.64))
@@ -220,6 +229,7 @@ class MATERIAL_MT_luxrender_type(bpy.types.Menu):
 
     def draw(self, context):
         sl = self.layout
+
         for m_name in sorted(mat_names.keys()):
             op = sl.operator('MATERIAL_OT_set_luxrender_type', text=mat_names[m_name])
             op.mat_name = m_name
@@ -231,10 +241,11 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
         # Get the normal map
         texture_name = getattr(material.luxrender_material, 'normalmap_floattexturename')
 
-        if texture_name != '' and self.normalmap_usefloattexture:
+        if texture_name and self.normalmap_usefloattexture:
             texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
             lux_texture = texture.luxrender_texture
             params = ParamSet()
+
             if lux_texture.type in ('normalmap', 'imagemap'):
                 if lux_texture.type == 'normalmap':
                     src_texture = lux_texture.luxrender_tex_normalmap
@@ -248,7 +259,6 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
                 params.add_float('gamma', 1.0)  # Don't gamma correct normal maps
                 params.add_string('wrap', src_texture.wrap)
                 params.update(lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene))
-
             elif lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
                 src_texture = texture.image
 
@@ -268,6 +278,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
                 'normalmap',
                 params
             )
+
             ExportedTextures.export_new(lux_context)
 
             if self.normalmap_multiplyfloat:
@@ -289,20 +300,19 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
                 bump_params.add_texture('bumpmap', self.normalmap_floattexturename)
 
     if self.bumpmap_usefloattexture:  # We have a bump map
-
         bump_params.update(TF_bumpmap.get_paramset(self))
 
     # We have both normal and bump, need to mix them
     if self.normalmap_usefloattexture and self.bumpmap_usefloattexture:
-
         bumpmap_texturename = self.bumpmap_floattexturename if self.bumpmap_usefloattexture else ''
         normalmap_floattexturename = self.normalmap_floattexturename if self.normalmap_usefloattexture else ''
 
         # Get the bump map
         texture_name = getattr(material.luxrender_material, 'bumpmap_floattexturename')
-        if texture_name != '':
+        if texture_name:
             texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
             lux_texture = texture.luxrender_texture
+
             if lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
                 bumpmap_texturename = '%s_float' % bumpmap_texturename
 
@@ -323,6 +333,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
         # In API mode need to tell Lux how many slots explicity
         if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
             mm_params.add_integer('nweights', 2)
+
         # Now add the actual weights
         mm_params.add_float('weights', weights)
 
@@ -334,6 +345,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
             'multimix',
             mm_params
         )
+
         ExportedTextures.export_new(lux_context)
 
         # Overwrite the old maps with the combined map
@@ -345,8 +357,8 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
 @LuxRenderAddon.addon_register_class
 class luxrender_material(declarative_property_group):
     """
-	Storage class for LuxRender Material settings.
-	"""
+    Storage class for LuxRender Material settings.
+    """
 
     ef_attach_to = ['Material']
     alert = {}
@@ -354,7 +366,6 @@ class luxrender_material(declarative_property_group):
     def set_viewport_properties(self, context):
         # This function is exectued when changing the material type
         # it will update several properties of the blender material so the viewport better matches the Lux material
-
         # Kill spec intensity for matte materials
         if self.type in ('matte', 'mattetranslucent', 'scatter'):
             context.material.specular_intensity = 0
@@ -472,6 +483,7 @@ class luxrender_material(declarative_property_group):
 
     def reset(self, prnt=None):
         super().reset()
+
         # Also reset sub-property groups
         for a in mat_names.keys():
             getattr(self, 'luxrender_mat_%s' % a).reset()
@@ -488,7 +500,7 @@ class luxrender_material(declarative_property_group):
         CAVEAT: you can only call this method in an operator context.
         """
 
-        if blender_material == None:
+        if blender_material is None:
             return
 
         if self.type in self.master_color_map.keys():
@@ -513,10 +525,10 @@ class luxrender_material(declarative_property_group):
         if self.type in ['glass', 'glass2', 'null']:
             mat_is_transparent = True
 
-        if scene.luxrender_testing.clay_render and mat_is_transparent == False:
+        if scene.luxrender_testing.clay_render and not mat_is_transparent:
             return {'CLAY'}
 
-        if self.nodetree != '':
+        if self.nodetree:
             return self.exportNodetree(scene, lux_context, material, mode)
 
         with MaterialCounter(material.name):
@@ -524,13 +536,14 @@ class luxrender_material(declarative_property_group):
                 if self.type == 'mix':
                     # First export the other mix mats
                     m1_name = self.luxrender_mat_mix.namedmaterial1_material
-                    if m1_name == '':
+                    if not m1_name:
                         raise Exception('Unassigned mix material slot 1 on material %s' % material.name)
+
                     m1 = bpy.data.materials[m1_name]
                     m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
-
                     m2_name = self.luxrender_mat_mix.namedmaterial2_material
-                    if m2_name == '':
+
+                    if not m2_name:
                         raise Exception('Unassigned mix material slot 2 on material %s' % material.name)
 
                     m2 = bpy.data.materials[m2_name]
@@ -538,43 +551,49 @@ class luxrender_material(declarative_property_group):
 
                 if self.type == 'glossycoating':
                     bm_name = self.luxrender_mat_glossycoating.basematerial_material
-                    if bm_name == '':
+
+                    if not bm_name:
                         raise Exception('No base material assigned!')
+
                     bm = bpy.data.materials[bm_name]
                     bm.luxrender_material.export(scene, lux_context, bm, 'indirect')
 
                 if self.type == 'layered':
                     m1_name = self.luxrender_mat_layered.namedmaterial1_material
-                    if m1_name == '':
+
+                    if not m1_name:
                         raise Exception('Unassigned layered material slot 1 on material %s' % material.name)
+
                     m1 = bpy.data.materials[m1_name]
                     m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
-
                     m2_name = self.luxrender_mat_layered.namedmaterial2_material
-                    if m2_name != '':  # core layered mat simply stops when finding empty slot
+
+                    if m2_name:  # core layered mat simply stops when finding empty slot
                         m2 = bpy.data.materials[m2_name]
                         m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
 
                     m3_name = self.luxrender_mat_layered.namedmaterial3_material
-                    if m3_name != '':
+
+                    if m3_name:
                         m3 = bpy.data.materials[m3_name]
                         m3.luxrender_material.export(scene, lux_context, m3, 'indirect')
 
                     m4_name = self.luxrender_mat_layered.namedmaterial4_material
-                    if m4_name != '':
+
+                    if m4_name:
                         m4 = bpy.data.materials[m4_name]
                         m4.luxrender_material.export(scene, lux_context, m4, 'indirect')
 
                 material_params = ParamSet()
-
                 subtype = getattr(self, 'luxrender_mat_%s' % self.type)
-
                 alpha_type = None
+
                 # find alpha texture if material should be transparent
                 if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
                     alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
 
                 coating_params = None
+
                 # find coating if material should be coated
                 if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
                     coating_params = material.luxrender_coating.export(lux_context, material)
@@ -595,21 +614,19 @@ class luxrender_material(declarative_property_group):
 
                 mat_type = self.type
 
-                if coating_params != None:
+                if coating_params is not None:
                     # export coating
-
                     material_params.add_string('type', mat_type)
 
                     ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_base', material_params)
                     ExportedMaterials.export_new_named(lux_context)
-
 
                     # replace material params with glossycoating
                     mat_type = 'glossycoating'
                     material_params = coating_params \
                         .add_string('basematerial', material.name + '_base')
 
-                if alpha_type != None:
+                if alpha_type is not None:
                     # export mix for transparency
                     material_params.add_string('type', mat_type)
                     ExportedMaterials.makeNamedMaterial(lux_context, material.name + '_null',
@@ -622,6 +639,7 @@ class luxrender_material(declarative_property_group):
                     material_params = ParamSet() \
                         .add_string('namedmaterial1', material.name + '_null') \
                         .add_string('namedmaterial2', material.name + '_mat')
+
                     if alpha_type == 'float':
                         material_params.add_float('amount', alpha_amount)
                     else:
@@ -665,21 +683,19 @@ class luxrender_material(declarative_property_group):
         for lbm2_obj in lbm2['objects']:
             # Add back all the textures
             if lbm2_obj['type'] == 'Texture':
-
                 # parse variant and type first
                 vt_matches = re.match('"(.*)" "(.*)"', lbm2_obj['extra_tokens'])
                 if vt_matches.lastindex != 2:
                     continue  # not a valid texture!
 
                 variant, tex_type = vt_matches.groups()
-
                 tex_slot = blender_mat.texture_slots.add()
+
                 if lbm2_obj['name'] not in bpy.data.textures:
                     bpy.data.textures.new(name=shorten_name(lbm2_obj['name']), type='NONE')
 
                 blender_tex = bpy.data.textures[shorten_name(lbm2_obj['name'])]
                 tex_slot.texture = blender_tex
-
                 lxt = bpy.data.textures[shorten_name(lbm2_obj['name'])].luxrender_texture
 
                 # Restore default texture settings
@@ -707,12 +723,12 @@ class luxrender_material(declarative_property_group):
 
                 # Update an existing material with data from lbm2
                 lxm = bpy.data.materials[shorten_name(lbm2_obj['name'])].luxrender_material
+
                 # reset this material
                 lxm.reset(prnt=bpy.data.materials[shorten_name(lbm2_obj['name'])])
 
                 # Set up bump map
                 TF_bumpmap.load_paramset(lxm, lbm2_obj['paramset'])
-
                 subtype = None
 
                 # First iterate for the material type, because
@@ -723,7 +739,7 @@ class luxrender_material(declarative_property_group):
                         lxm.set_type(paramsetitem['value'])
                         subtype = getattr(lxm, 'luxrender_mat_%s' % paramsetitem['value'])
 
-                if subtype != None:
+                if subtype is not None:
                     subtype.load_paramset(lbm2_obj['paramset'])
 
                 material_index += 1
@@ -748,8 +764,8 @@ class luxrender_material(declarative_property_group):
                     volm.name = lbm2_obj['name']
 
                 volm.reset()
-
                 volm.type = vt_matches.groups()[0]
+
                 # load paramset will also assign any textures used to the world
                 volm.load_paramset(context.scene.world, lbm2_obj['paramset'])
 
@@ -757,6 +773,7 @@ class luxrender_material(declarative_property_group):
         if 'metadata' in lbm2.keys():
             if 'interior' in lbm2['metadata'].keys():
                 self.Interior_volume = lbm2['metadata']['interior']
+
             if 'exterior' in lbm2['metadata'].keys():
                 self.Exterior_volume = lbm2['metadata']['exterior']
 
@@ -885,6 +902,7 @@ def link_anisotropy(self, context, chan='u'):
     if not self.anisotropic and not self.use_exponent:
         if chan == 'v':
             return
+
         self.vroughness_floatvalue = self.uroughness_floatvalue
         self.vroughness_usefloattexture = self.uroughness_usefloattexture
         self.vroughness_floattexturename = self.uroughness_floattexturename
@@ -893,6 +911,7 @@ def link_anisotropy(self, context, chan='u'):
     if not self.anisotropic and self.use_exponent:
         if chan == 'v':
             return
+
         self.vexponent_floatvalue = self.uexponent_floatvalue
         self.vexponent_usefloattexture = self.uexponent_usefloattexture
         self.vexponent_floattexturename = self.uexponent_floattexturename
@@ -903,6 +922,7 @@ def link_backface_anisotropy(self, context, chan='u'):
     if not self.bf_anisotropic and not self.bf_exponent:
         if chan == 'v':
             return
+
         self.bf_vroughness_floatvalue = self.bf_uroughness_floatvalue
         self.bf_vroughness_usefloattexture = self.bf_uroughness_usefloattexture
         self.bf_vroughness_floattexturename = self.bf_uroughness_floattexturename
@@ -911,6 +931,7 @@ def link_backface_anisotropy(self, context, chan='u'):
     if not self.bf_anisotropic and self.bf_exponent:
         if chan == 'v':
             return
+
         self.bf_vexponent_floatvalue = self.bf_uexponent_floatvalue
         self.bf_vexponent_usefloattexture = self.bf_uexponent_usefloattexture
         self.bf_vexponent_floattexturename = self.bf_uexponent_floattexturename
@@ -1035,7 +1056,6 @@ class luxrender_transparency(declarative_property_group):
     """
     Storage class for LuxRender Material alpha transparency settings.
     """
-
     ef_attach_to = ['Material']
     alert = {}
 
@@ -1121,7 +1141,6 @@ class luxrender_transparency(declarative_property_group):
 
     def export(self, lux_context, material):
         lux_material = getattr(material.luxrender_material, 'luxrender_mat_%s' % material.luxrender_material.type)
-
         alpha_type = None
 
         if self.alpha_source == 'texture':
@@ -1154,6 +1173,7 @@ class luxrender_transparency(declarative_property_group):
                     'mix',
                     params
                 )
+
                 ExportedTextures.export_new(lux_context)
 
         elif self.alpha_source == 'constant':
@@ -1163,9 +1183,10 @@ class luxrender_transparency(declarative_property_group):
             # grab base texture in case it's not diffuse channel
             texture_name = getattr(lux_material,
                                    '%s_colortexturename' % self.sourceMap[material.luxrender_material.type])
-            if texture_name != '':
+            if texture_name:
                 texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
                 lux_texture = texture.luxrender_texture
+
                 if lux_texture.type == 'imagemap':
                     src_texture = lux_texture.luxrender_tex_imagemap
 
@@ -1195,6 +1216,7 @@ class luxrender_transparency(declarative_property_group):
                         'imagemap',
                         params
                     )
+
                     ExportedTextures.export_new(lux_context)
                 elif texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE':
                     src_texture = texture.image
@@ -1226,7 +1248,7 @@ class luxrender_transparency(declarative_property_group):
                     ExportedTextures.export_new(lux_context)
                 else:
                     LuxLog('Texture %s is not an alpha map!' % texture_name)
-        if alpha_type == None:
+        if alpha_type is None:
             LuxLog('WARNING: Invalid alpha texture for material ''%s'', disabling transparency' % material.name)
             return None, None
 
@@ -1247,6 +1269,7 @@ class CoatingFloatTextureParameter(FloatTextureParameter):
 # Float Textures
 TF_c_d = CoatingFloatTextureParameter('d', 'Absorption depth (nm)', add_float_value=True, default=0.0, min=0.0,
                                       max=2500.0)  # default 0.0 for OFF
+
 # default of something other than 1.0 so glass and roughglass render propery with defaults
 TF_c_index = CoatingFloatTextureParameter('index', 'IOR', add_float_value=True, min=0.0, max=25.0, default=1.520)
 TF_c_uroughness = CoatingFloatTextureParameter('uroughness', 'U-Roughness', add_float_value=True, min=0.000001, max=0.8,
@@ -1271,8 +1294,8 @@ TC_c_Ks = CoatingColorTextureParameter('Ks', 'Specular color', default=(0.04, 0.
 @LuxRenderAddon.addon_register_class
 class luxrender_coating(declarative_property_group):
     """
-	Storage class for LuxRender Material glossy coating settings.
-	"""
+    Storage class for LuxRender Material glossy coating settings.
+    """
 
     ef_attach_to = ['Material']
     alert = {}
@@ -1538,7 +1561,9 @@ class luxrender_mat_carpaint(declarative_property_group):
         psi_accept = {
             'name': 'string'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -1623,7 +1648,9 @@ class luxrender_mat_glass(declarative_property_group):
         psi_accept = {
             'architectural': 'bool',
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -1678,7 +1705,9 @@ class luxrender_mat_glass2(declarative_property_group):
             'architectural': 'bool',
             'dispersion': 'bool',
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -1770,11 +1799,13 @@ class luxrender_mat_roughglass(declarative_property_group):
     for prop in properties:
         if prop['attr'].startswith('uexponent'):
             prop['update'] = gen_CB_update_roughness('u')
+
         if prop['attr'].startswith('vexponent'):
             prop['update'] = gen_CB_update_roughness('v')
 
         if prop['attr'].startswith('uroughness'):
             prop['update'] = gen_CB_update_exponent('u')
+
         if prop['attr'].startswith('vroughness'):
             prop['update'] = gen_CB_update_exponent('v')
 
@@ -1802,7 +1833,9 @@ class luxrender_mat_roughglass(declarative_property_group):
         psi_accept = {
             'dispersion': 'bool',
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -1930,11 +1963,13 @@ class luxrender_mat_glossy(declarative_property_group):
     for prop in properties:
         if prop['attr'].startswith('uexponent'):
             prop['update'] = gen_CB_update_roughness('u')
+
         if prop['attr'].startswith('vexponent'):
             prop['update'] = gen_CB_update_roughness('v')
 
         if prop['attr'].startswith('uroughness'):
             prop['update'] = gen_CB_update_exponent('u')
+
         if prop['attr'].startswith('vroughness'):
             prop['update'] = gen_CB_update_exponent('v')
 
@@ -1970,7 +2005,9 @@ class luxrender_mat_glossy(declarative_property_group):
             'multibounce': 'bool',
             'separable': 'separable'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -2062,7 +2099,9 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
         psi_accept = {
             'energyconserving': 'bool'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -2273,21 +2312,25 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
     for prop in properties:
         if prop['attr'].startswith('uexponent'):
             prop['update'] = gen_CB_update_roughness('u')
+
         if prop['attr'].startswith('vexponent'):
             prop['update'] = gen_CB_update_roughness('v')
 
         if prop['attr'].startswith('uroughness'):
             prop['update'] = gen_CB_update_exponent('u')
+
         if prop['attr'].startswith('vroughness'):
             prop['update'] = gen_CB_update_exponent('v')
 
         if prop['attr'].startswith('bf_uexponent'):
             prop['update'] = gen_CB_update_backface_roughness('u')
+
         if prop['attr'].startswith('bf_vexponent'):
             prop['update'] = gen_CB_update_backface_roughness('v')
 
         if prop['attr'].startswith('bf_uroughness'):
             prop['update'] = gen_CB_update_backface_exponent('u')
+
         if prop['attr'].startswith('bf_vroughness'):
             prop['update'] = gen_CB_update_backface_exponent('v')
 
@@ -2339,7 +2382,9 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
             'backface_multibounce': 'bool',
             'onesided': 'bool'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -2466,11 +2511,13 @@ class luxrender_mat_glossycoating(declarative_property_group):
     for prop in properties:
         if prop['attr'].startswith('uexponent'):
             prop['update'] = gen_CB_update_roughness('u')
+
         if prop['attr'].startswith('vexponent'):
             prop['update'] = gen_CB_update_roughness('v')
 
         if prop['attr'].startswith('uroughness'):
             prop['update'] = gen_CB_update_exponent('u')
+
         if prop['attr'].startswith('vroughness'):
             prop['update'] = gen_CB_update_exponent('v')
 
@@ -2492,7 +2539,6 @@ class luxrender_mat_glossycoating(declarative_property_group):
 
         glossycoating_params.update(TF_uroughness.get_paramset(self))
         glossycoating_params.update(TF_vroughness.get_paramset(self))
-
         glossycoating_params.add_string('basematerial', self.basematerial_material)
 
         return glossycoating_params
@@ -2502,7 +2548,9 @@ class luxrender_mat_glossycoating(declarative_property_group):
             'multibounce': 'bool',
             'basematerial': 'string'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -2597,22 +2645,22 @@ class luxrender_mat_metal(declarative_property_group):
     for prop in properties:
         if prop['attr'].startswith('uexponent'):
             prop['update'] = gen_CB_update_roughness('u')
+
         if prop['attr'].startswith('vexponent'):
             prop['update'] = gen_CB_update_roughness('v')
 
         if prop['attr'].startswith('uroughness'):
             prop['update'] = gen_CB_update_exponent('u')
+
         if prop['attr'].startswith('vroughness'):
             prop['update'] = gen_CB_update_exponent('v')
 
     def get_paramset(self, material):
         metal_params = ParamSet()
-
         metal_params.update(TF_uroughness.get_paramset(self))
         metal_params.update(TF_vroughness.get_paramset(self))
 
         if self.name == 'nk':  # use an NK data file
-
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
             process_filepath_data(LuxManager.CurrentScene, material, self.filename, metal_params, 'filename')
@@ -2626,7 +2674,9 @@ class luxrender_mat_metal(declarative_property_group):
             'name': 'string',
             'filename': 'string'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -2743,11 +2793,13 @@ class luxrender_mat_metal2(declarative_property_group):
     for prop in properties:
         if prop['attr'].startswith('uexponent'):
             prop['update'] = gen_CB_update_roughness('u')
+
         if prop['attr'].startswith('vexponent'):
             prop['update'] = gen_CB_update_roughness('v')
 
         if prop['attr'].startswith('uroughness'):
             prop['update'] = gen_CB_update_exponent('u')
+
         if prop['attr'].startswith('vroughness'):
             prop['update'] = gen_CB_update_exponent('v')
 
@@ -2771,7 +2823,6 @@ class luxrender_mat_metal2(declarative_property_group):
 
         if self.metaltype == 'preset':
             fresnelname_params = ParamSet()
-
             fresnelname_params.add_string('name', self.preset)
 
             ExportedTextures.texture(
@@ -2796,11 +2847,11 @@ class luxrender_mat_metal2(declarative_property_group):
                 'fresnelname',
                 fresnelname_params
             )
+
             ExportedTextures.export_new(lux_context)
 
     def get_paramset(self, material):
         metal2_params = ParamSet()
-
         metal2_params.update(TF_uroughness.get_paramset(self))
         metal2_params.update(TF_vroughness.get_paramset(self))
 
@@ -2852,7 +2903,6 @@ class luxrender_mat_scatter(declarative_property_group):
 
     def get_paramset(self, material):
         scatter_params = ParamSet()
-
         scatter_params.update(TC_Kd.get_paramset(self))
         scatter_params.add_color('g', self.g)
 
@@ -2862,6 +2912,7 @@ class luxrender_mat_scatter(declarative_property_group):
         psi_accept = {
             'g': 'color'
         }
+
         TC_Kd.load_paramset(self, ps)
         TF_g.load_paramset(self, ps)
 
@@ -2943,17 +2994,18 @@ class luxrender_mat_shinymetal(declarative_property_group):
     for prop in properties:
         if prop['attr'].startswith('uexponent'):
             prop['update'] = gen_CB_update_roughness('u')
+
         if prop['attr'].startswith('vexponent'):
             prop['update'] = gen_CB_update_roughness('v')
 
         if prop['attr'].startswith('uroughness'):
             prop['update'] = gen_CB_update_exponent('u')
+
         if prop['attr'].startswith('vroughness'):
             prop['update'] = gen_CB_update_exponent('v')
 
     def get_paramset(self, material):
         shinymetal_params = ParamSet()
-
         shinymetal_params.update(TF_film.get_paramset(self))
         shinymetal_params.update(TF_filmindex.get_paramset(self))
         shinymetal_params.update(TC_Kr.get_paramset(self))
@@ -3005,7 +3057,6 @@ class luxrender_mat_mirror(declarative_property_group):
 
     def get_paramset(self, material):
         mirror_params = ParamSet()
-
         mirror_params.update(TF_film.get_paramset(self))
         mirror_params.update(TF_filmindex.get_paramset(self))
         mirror_params.update(TC_Kr.get_paramset(self))
@@ -3039,7 +3090,6 @@ class luxrender_mat_mix(declarative_property_group):
 
     def get_paramset(self, material):
         mix_params = ParamSet()
-
         mix_params.add_string('namedmaterial1', self.namedmaterial1_material)
         mix_params.add_string('namedmaterial2', self.namedmaterial2_material)
         mix_params.update(TF_amount.get_paramset(self))
@@ -3051,7 +3101,9 @@ class luxrender_mat_mix(declarative_property_group):
             'namedmaterial1': 'string',
             'namedmaterial2': 'string'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, '%s_material' % psi['name'], shorten_name(psi['value']))
@@ -3095,7 +3147,6 @@ class luxrender_mat_layered(declarative_property_group):
 
     def get_paramset(self, material):
         layered_params = ParamSet()
-
         layered_params.add_string('namedmaterial1', self.namedmaterial1_material)
         layered_params.add_string('namedmaterial2', self.namedmaterial2_material)
         layered_params.add_string('namedmaterial3', self.namedmaterial3_material)
@@ -3114,7 +3165,9 @@ class luxrender_mat_layered(declarative_property_group):
             'namedmaterial3': 'string',
             'namedmaterial4': 'string'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, '%s_material' % psi['name'], shorten_name(psi['value']))
@@ -3214,10 +3267,9 @@ class luxrender_mat_velvet(declarative_property_group):
 
     def get_paramset(self, material):
         velvet_params = ParamSet()
-
         velvet_params.update(TC_Kd.get_paramset(self))
-
         velvet_params.add_float('thickness', self.thickness)
+
         if self.advanced:
             velvet_params.add_float('p1', self.p1)
             velvet_params.add_float('p2', self.p2)
@@ -3232,7 +3284,9 @@ class luxrender_mat_velvet(declarative_property_group):
             'p2': 'float',
             'p3': 'float',
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -3310,7 +3364,6 @@ class luxrender_mat_cloth(declarative_property_group):
 
     def get_paramset(self, material):
         cloth_params = ParamSet()
-
         cloth_params.add_string('presetname', self.presetname)
         cloth_params.update(TC_warp_Kd.get_paramset(self))
         cloth_params.update(TC_warp_Ks.get_paramset(self))
@@ -3327,7 +3380,9 @@ class luxrender_mat_cloth(declarative_property_group):
             'repeat_u': 'float',
             'repeat_v': 'float'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -3370,9 +3425,9 @@ TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0, 1.0, 1
 
 @LuxRenderAddon.addon_register_class
 class luxrender_emission(declarative_property_group):
-    '''
-	Storage class for LuxRender Material emission settings.
-	'''
+    """
+    Storage class for LuxRender Material emission settings.
+    """
 
     ef_attach_to = ['Material']
     alert = {}
@@ -3499,6 +3554,7 @@ class luxrender_emission(declarative_property_group):
 
     def api_output(self, obj):
         lg_gain = 1.0
+
         if self.lightgroup in LuxManager.CurrentScene.luxrender_lightgroups.lightgroups:
             lg_gain = LuxManager.CurrentScene.luxrender_lightgroups.lightgroups[self.lightgroup].gain
 
@@ -3509,9 +3565,10 @@ class luxrender_emission(declarative_property_group):
             .add_float('efficacy', self.efficacy) \
             .add_integer('nsamples', self.nsamples)
         arealightsource_params.update(TC_L.get_paramset(self))
-        if self.iesname != '':
 
+        if self.iesname:
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
             process_filepath_data(LuxManager.CurrentScene, obj, self.iesname, arealightsource_params, 'iesname')
+
         return 'area', arealightsource_params

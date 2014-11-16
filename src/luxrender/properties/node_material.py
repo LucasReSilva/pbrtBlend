@@ -55,6 +55,7 @@ class luxrender_texture_maker:
         def _impl(tex_variant, tex_type, tex_name, tex_params):
             nonlocal lux_context
             texture_name = '%s::%s' % (root_name, tex_name)
+
             with TextureCounter(texture_name):
                 print('Exporting texture, variant: "%s", type: "%s", name: "%s"' % (tex_variant, tex_type, tex_name))
 
@@ -68,14 +69,18 @@ class luxrender_texture_maker:
 
 def get_socket_paramsets(sockets, make_texture):
     params = ParamSet()
+
     for socket in sockets:
         if not hasattr(socket, 'get_paramset'):
             print('No get_paramset() for socket %s' % socket.bl_idname)
             continue
+
         if not socket.enabled:
             print('Disabled socket %s will not be exported' % socket.bl_idname)
             continue
+
         params.update(socket.get_paramset(make_texture))
+
     return params
 
 
@@ -174,7 +179,6 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
         self.inputs.new('luxrender_TC_weft_Kd_socket', 'Weft Diffuse Color')
         self.inputs.new('luxrender_TC_weft_Ks_socket', 'Weft Specular Color')
         self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
@@ -214,7 +218,6 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
         self.inputs['Front Material'].name = 'Front Material'
         self.inputs.new('NodeSocketShader', 'Back Material')
         self.inputs['Back Material'].name = 'Back Material'
-
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
@@ -230,8 +233,10 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 
         def export_submat(socket):
             node = get_linked_node(socket)
+
             if not check_node_export_material(node):
                 return None
+
             return node.export_material(make_material, make_texture)
 
         frontmat_name = export_submat(self.inputs[0])
@@ -443,8 +448,10 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
         def export_submat(socket):
             node = get_linked_node(socket)
+
             if not check_node_export_material(node):
                 return None
+
             return node.export_material(make_material, make_texture)
 
         basemat_name = export_submat(self.inputs[0])
@@ -550,8 +557,10 @@ class luxrender_material_type_node_layered(luxrender_material_node):
 
         def export_submat(socket):
             node = get_linked_node(socket)
+
             if not check_node_export_material(node):
                 return None
+
             return node.export_material(make_material, make_texture)
 
         if self.inputs[0].is_linked:
@@ -665,8 +674,10 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'metal_preset')
+
         if self.metal_preset == 'nk':
             layout.prop(self, 'metal_nkfile')
+
         layout.prop(self, 'use_anisotropy')
 
     def export_material(self, make_material, make_texture):
@@ -799,8 +810,10 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 
         def export_submat(socket):
             node = get_linked_node(socket)
+
             if not check_node_export_material(node):
                 return None
+
             return node.export_material(make_material, make_texture)
 
         mat1_name = export_submat(self.inputs[1])
@@ -978,6 +991,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'advanced')
         layout.prop(self, 'thickness')
+
         if self.advanced:
             layout.prop(self, 'p1')
             layout.prop(self, 'p2')
@@ -1114,8 +1128,10 @@ class luxrender_light_area_node(luxrender_material_node):
         arealight_params.add_float('gain', self.gain)
         arealight_params.add_float('power', self.power)
         arealight_params.add_float('efficacy', self.efficacy)
-        if self.iesname != '':
+
+        if self.iesname:
             process_filepath_data(LuxManager.CurrentScene, self, self.iesname, arealight_params, 'iesname')
+
         arealight_params.add_float('importance', self.importance)
         arealight_params.add_integer('nsamples', self.nsamples)
 
@@ -1164,9 +1180,11 @@ class luxrender_material_output_node(luxrender_node):
 
                 print('Exporting material "%s", type: "%s", name: "%s"' % (material_name, mat_type, mat_name))
                 mat_params.add_string('type', mat_type)
+
                 # DistributedPath compositing. Don't forget these!
                 if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
                     mat_params.update(material.luxrender_material.luxrender_mat_compositing.get_paramset())
+
                 ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
                 ExportedMaterials.export_new_named(lux_context)
 
@@ -1187,9 +1205,11 @@ class luxrender_material_output_node(luxrender_node):
 
                 print('Exporting material "%s", type: "%s", name: "%s"' % (material_name, mat_type, mat_name))
                 mat_params.add_string('type', mat_type)
+
                 # DistributedPath compositing. Don't forget these!
                 if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
                     mat_params.update(material.luxrender_material.luxrender_mat_compositing.get_paramset())
+
                 ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
                 ExportedMaterials.export_new_named(lux_context)
 
@@ -1225,10 +1245,8 @@ class luxrender_material_output_node(luxrender_node):
             if mode == 'indirect':
                 if vol_name not in ExportedVolumes.vol_names:  # was not yet exported
                     print('Exporting volume, type: "%s", name: "%s"' % (vol_type, vol_name))
-
                     lux_context.makeNamedVolume(vol_name, vol_type, vol_params)
                     ExportedVolumes.list_exported_volumes(vol_name)  # mark as exported
-
             else:  # direct
                 lux_context.makeNamedVolume(vol_name, vol_type, vol_params)
 
@@ -1236,6 +1254,7 @@ class luxrender_material_output_node(luxrender_node):
 
         if int_vol_socket.is_linked:
             int_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+
         if ext_vol_socket.is_linked:
             ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 

@@ -119,9 +119,9 @@ class GeometryExporter(object):
             return self.ExportedObjects.get(obj_cache_key)
 
         mesh_definitions = []
-
         export_original = True
-        # mesh data name first for portal reasons
+
+        # Mesh data name first for portal reasons
         ext_mesh_name = '%s_%s_ext' % (obj.data.name, self.geometry_scene.name)
         if obj.luxrender_object.append_proxy:
             if obj.luxrender_object.hide_proxy_mesh:
@@ -155,16 +155,20 @@ class GeometryExporter(object):
         if export_original:
             # Choose the mesh export type, if set, or use the default
             mesh_type = obj.data.luxrender_mesh.mesh_type
+
             # If the rendering is INT and not writing to disk, we must use native mesh format
             internal_nofiles = self.visibility_scene.luxrender_engine.export_type == 'INT' and not \
                 self.visibility_scene.luxrender_engine.write_files
+
             global_type = 'native' if internal_nofiles else self.visibility_scene.luxrender_engine.mesh_type
+
             if mesh_type == 'native' or (mesh_type == 'global' and global_type == 'native'):
                 mesh_definitions.extend(self.buildNativeMesh(obj))
             if mesh_type == 'binary_ply' or (mesh_type == 'global' and global_type == 'binary_ply'):
                 mesh_definitions.extend(self.buildBinaryPLYMesh(obj))
 
         self.ExportedObjects.add(obj_cache_key, mesh_definitions)
+
         return mesh_definitions
 
     def buildBinaryPLYMesh(self, obj):
@@ -176,23 +180,26 @@ class GeometryExporter(object):
         attributeBegin..attributeEnd scope, depending if instancing is allowed.
         The actual geometry will be dumped to a binary ply file.
         """
+        mesh_definitions = []
         try:
-            mesh_definitions = []
             mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
             if mesh is None:
                 raise UnexportableObjectException('Cannot create render/export mesh')
 
-            # collate faces by mat index
+            # Collate faces by mat index
             ffaces_mats = {}
             mesh_faces = mesh.tessfaces
+
             for f in mesh_faces:
                 mi = f.material_index
+
                 if mi not in ffaces_mats.keys():
                     ffaces_mats[mi] = []
                 ffaces_mats[mi].append(f)
-            material_indices = ffaces_mats.keys()
 
+            material_indices = ffaces_mats.keys()
             number_of_mats = len(mesh.materials)
+
             if number_of_mats > 0:
                 iterator_range = range(number_of_mats)
             else:
@@ -214,15 +221,17 @@ class GeometryExporter(object):
                     sc_fr = '%s/%s/%s/%05d' % (
                         efutil.export_path, efutil.scene_filename(), bpy.path.clean_name(self.geometry_scene.name),
                         self.visibility_scene.frame_current)
+
                     if not os.path.exists(sc_fr):
                         os.makedirs(sc_fr)
 
                     def make_plyfilename():
-                        ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
-                        mesh_name = '%s_%04d_m%03d' % (obj.data.name, ply_serial, i)
-                        ply_filename = '%s.ply' % bpy.path.clean_name(mesh_name)
-                        ply_path = '/'.join([sc_fr, ply_filename])
-                        return mesh_name, ply_path
+                        _ply_serial = self.ExportedPLYs.serial(mesh_cache_key)
+                        _mesh_name = '%s_%04d_m%03d' % (obj.data.name, _ply_serial, i)
+                        _ply_filename = '%s.ply' % bpy.path.clean_name(_mesh_name)
+                        _ply_path = '/'.join([sc_fr, _ply_filename])
+
+                        return _mesh_name, _ply_path
 
                     mesh_name, ply_path = make_plyfilename()
 
@@ -234,23 +243,24 @@ class GeometryExporter(object):
 
                     # skip writing the PLY file if the box is checked
                     skip_exporting = obj in self.KnownExportedObjects and not obj in self.KnownModifiedObjects
-                    if not os.path.exists(ply_path) or not (
-                                self.visibility_scene.luxrender_engine.partial_ply and skip_exporting):
+
+                    if not os.path.exists(ply_path) or not (self.visibility_scene.luxrender_engine.partial_ply and
+                                                                skip_exporting):
 
                         GeometryExporter.NewExportedObjects.add(obj)
 
                         uv_textures = mesh.tessface_uv_textures
+                        vertex_color = mesh.tessface_vertex_colors.active
+
+                        uv_layer = None
+                        vertex_color_layer = None
+
                         if len(uv_textures) > 0:
                             if mesh.uv_textures.active and uv_textures.active.data:
                                 uv_layer = uv_textures.active.data
-                        else:
-                            uv_layer = None
 
-                        vertex_color = mesh.tessface_vertex_colors.active
                         if vertex_color:
                             vertex_color_layer = vertex_color.data
-                        else:
-                            vertex_color_layer = None
 
                         # Here we work out exactly which vert+normal combinations
                         # we need to export. This is done first, and the export
@@ -264,10 +274,13 @@ class GeometryExporter(object):
 
                         # Caches
                         # mapping of vert index to exported vert index for verts with vert normals
+
                         vert_vno_indices = {}
                         vert_use_vno = set()  # Set of vert indices that use vert normals
-
                         vert_index = 0  # exported vert index
+
+                        c1 = c2 = c3 = c4 = None
+
                         for fidx, face in enumerate(ffaces_mats[i]):
                             fvi = []
                             if vertex_color_layer:
@@ -339,9 +352,7 @@ class GeometryExporter(object):
                                     # All face-vert-co-no are unique, we cannot
                                     # cache them
                                     co_no_uv_vc_cache.append(vert_data)
-
                                     fvi.append(vert_index)
-
                                     vert_index += 1
 
                             face_vert_indices[face.index] = fvi
@@ -411,25 +422,17 @@ class GeometryExporter(object):
                             del co_no_uv_vc_cache
                             del face_vert_indices
 
-                        LuxLog('Binary PLY file written: %s' % (ply_path))
+                        LuxLog('Binary PLY file written: %s' % ply_path)
                     else:
                         LuxLog('Skipping already exported PLY: %s' % mesh_name)
 
                     # Export the shape definition to LXO
-                    shape_params = ParamSet().add_string(
-                        'filename',
-                        efutil.path_relative_to_export(ply_path)
-                    )
+                    shape_params = ParamSet().add_string('filename', efutil.path_relative_to_export(ply_path))
 
                     # Add subdiv etc options
                     shape_params.update(obj.data.luxrender_mesh.get_paramset())
 
-                    mesh_definition = (
-                        mesh_name,
-                        i,
-                        'plymesh',
-                        shape_params
-                    )
+                    mesh_definition = (mesh_name, i, 'plymesh', shape_params)
                     mesh_definitions.append(mesh_definition)
 
                     # Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
@@ -457,8 +460,8 @@ class GeometryExporter(object):
         attributeBegin..attributeEnd scope, depending if instancing is allowed.
         """
 
+        mesh_definitions = []
         try:
-            mesh_definitions = []
             mesh = obj.to_mesh(self.geometry_scene, True, 'RENDER')
             if mesh is None:
                 raise UnexportableObjectException('Cannot create render/export mesh')
@@ -466,14 +469,17 @@ class GeometryExporter(object):
             # collate faces by mat index
             ffaces_mats = {}
             mesh_faces = mesh.tessfaces
+
             for f in mesh_faces:
                 mi = f.material_index
+
                 if mi not in ffaces_mats.keys():
                     ffaces_mats[mi] = []
                 ffaces_mats[mi].append(f)
-            material_indices = ffaces_mats.keys()
 
+            material_indices = ffaces_mats.keys()
             number_of_mats = len(mesh.materials)
+
             if number_of_mats > 0:
                 iterator_range = range(number_of_mats)
             else:
@@ -486,6 +492,7 @@ class GeometryExporter(object):
 
                     # If this mesh/mat-index combo has already been processed, get it from the cache
                     mesh_cache_key = (self.geometry_scene, obj.data, i)
+
                     if self.allow_instancing(obj) and self.ExportedMeshes.have(mesh_cache_key):
                         mesh_definitions.append(self.ExportedMeshes.get(mesh_cache_key))
                         continue
@@ -501,11 +508,11 @@ class GeometryExporter(object):
                         print('  -> derived mesh name: %s' % mesh_name)
 
                     uv_textures = mesh.tessface_uv_textures
+                    uv_layer = None
+
                     if len(uv_textures) > 0:
                         if uv_textures.active and uv_textures.active.data:
                             uv_layer = uv_textures.active.data
-                    else:
-                        uv_layer = None
 
                     # Export data
                     points = []
@@ -585,12 +592,7 @@ class GeometryExporter(object):
                     # Add other properties from LuxRender Mesh panel
                     shape_params.update(obj.data.luxrender_mesh.get_paramset())
 
-                    mesh_definition = (
-                        mesh_name,
-                        i,
-                        'mesh',
-                        shape_params
-                    )
+                    mesh_definition = (mesh_name, i, 'mesh', shape_params)
                     mesh_definitions.append(mesh_definition)
 
                     # Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
@@ -634,9 +636,11 @@ class GeometryExporter(object):
         # the same shared base mesh.
         if hasattr(obj, 'modifiers') and len(obj.modifiers) > 0 and obj.data.users > 1:
             instance = False
+
             for mod in obj.modifiers:
                 # Allow non-deforming modifiers
                 instance |= mod.type in ('COLLISION', 'PARTICLE_INSTANCE', 'PARTICLE_SYSTEM', 'SMOKE')
+
             return instance
         else:
             return not self.is_preview
@@ -662,9 +666,10 @@ class GeometryExporter(object):
         # an objectInstance won't be exported for it.
         if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
             self.lux_context.transform(matrix_to_list(obj.matrix_world, apply_worldscale=True))
+
         me_shape_params.add_string('name', obj.name)
 
-        if parent != None:
+        if parent is not None:
             mat_object = parent
         else:
             mat_object = obj
@@ -674,33 +679,36 @@ class GeometryExporter(object):
             ob_mat = None
             LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (me_mat_index + 1, mat_object.name))
 
-            # Emission check
-        if ob_mat != None:
+        # Emission check
+        if ob_mat is not None:
             output_node = find_node(ob_mat, 'luxrender_material_output_node')
-            if ob_mat.luxrender_material.nodetree:
-                object_is_emitter = False
-            if output_node != None:
+            object_is_emitter = False
+            light_node = None
+
+            if output_node is not None:
                 light_socket = output_node.inputs[3]
+
                 if light_socket.is_linked:
                     light_node = light_socket.links[0].from_node
                     object_is_emitter = light_socket.is_linked
-            else:  # no node tree, so check the classic mat editor
+            else:
+                # No node tree, so check the classic mat editor
                 object_is_emitter = ob_mat.luxrender_emission.use_emission
 
-            if object_is_emitter:
-                # Only add the AreaLightSource if this object's emission lightgroup is enabled
-                if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
-                    if not self.visibility_scene.luxrender_lightgroups.ignore:
-                        self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
-                    if not ob_mat.luxrender_material.nodetree:
-                        self.lux_context.areaLightSource(*ob_mat.luxrender_emission.api_output(ob_mat))
-                    else:
-                        # texture exporting
-                        tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
-                        self.lux_context.areaLightSource(*light_node.export(tex_maker.make_texture))
+            # Only add the AreaLightSource if this object's emission lightgroup is enabled
+            if object_is_emitter and \
+                    self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
+                if not self.visibility_scene.luxrender_lightgroups.ignore:
+                    self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+
+                if not ob_mat.luxrender_material.nodetree:
+                    self.lux_context.areaLightSource(*ob_mat.luxrender_emission.api_output(ob_mat))
+                elif light_node is not None:
+                    # Texture exporting
+                    tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
+                    self.lux_context.areaLightSource(*light_node.export(tex_maker.make_texture))
 
         self.lux_context.shape(me_shape_type, me_shape_params)
-
         self.lux_context.objectEnd()
 
         LuxLog('Mesh definition exported: %s' % me_name)
@@ -714,6 +722,7 @@ class GeometryExporter(object):
 
         # object motion blur
         is_object_animated = False
+
         if self.visibility_scene.camera.data.luxrender_camera.usemblur and \
                 self.visibility_scene.camera.data.luxrender_camera.objectmblur:
             if matrix is not None and matrix[1] is not None:
@@ -722,11 +731,11 @@ class GeometryExporter(object):
             else:
                 # grab a bunch of fractional-frame fcurve_matrices and export
                 # several motionInstances for non-linear motion blur
-                STEPS = self.geometry_scene.camera.data.luxrender_camera.motion_blur_samples
+                steps = self.geometry_scene.camera.data.luxrender_camera.motion_blur_samples
 
                 # object_anim_matrices returns steps+1 matrices, ie start and end of frame
                 # we don't want the start matrix
-                next_matrices = object_anim_matrices(self.geometry_scene, obj, STEPS)[1:]
+                next_matrices = object_anim_matrices(self.geometry_scene, obj, steps)[1:]
 
                 is_object_animated = len(next_matrices) > 0
 
@@ -735,26 +744,25 @@ class GeometryExporter(object):
         return is_object_animated, next_matrices
 
     def exportShapeInstances(self, obj, mesh_definitions, matrix=None, parent=None):
-
         # Don't export instances of portal meshes
         if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
             return
+
         # or empty definitions
         if len(mesh_definitions) < 1:
             return
 
         self.lux_context.attributeBegin(comment=obj.name, file=Files.GEOM)
-
         is_object_animated, next_matrices = self.is_object_animated(obj, matrix)
 
         # object translation/rotation/scale
         if is_object_animated:
             num_steps = len(next_matrices)
             fsps = float(num_steps) * self.visibility_scene.render.fps / self.visibility_scene.render.fps_base
-            step_times = [(i) / fsps for i in range(0, num_steps + 1)]
+            step_times = [i / fsps for i in range(0, num_steps + 1)]
             self.lux_context.motionBegin(step_times)
-        # then export first matrix as normal
 
+        # then export first matrix as normal
         if matrix is not None:
             self.lux_context.transform(matrix_to_list(matrix[0], apply_worldscale=True))
         else:
@@ -776,10 +784,11 @@ class GeometryExporter(object):
         use_inner_scope = len(mesh_definitions) > 1
         for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
             me_shape_params.add_string('name', obj.name)
+
             if use_inner_scope:
                 self.lux_context.attributeBegin()
 
-            if parent != None:
+            if parent is not None:
                 mat_object = parent
             else:
                 mat_object = obj
@@ -791,40 +800,45 @@ class GeometryExporter(object):
                 LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (me_mat_index + 1, mat_object.name))
 
             if ob_mat is not None:
-
                 # Export material definition
                 if self.lux_context.API_TYPE == 'FILE':
                     self.lux_context.set_output_file(Files.MATS)
                     mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context,
                                                                          ob_mat, mode='indirect')
                     self.lux_context.set_output_file(Files.GEOM)
+
                     if not 'CLAY' in mat_export_result:
                         self.lux_context.namedMaterial(ob_mat.name)
                 elif self.lux_context.API_TYPE == 'PURE':
                     mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context,
                                                                          ob_mat, mode='direct')
 
-                    # We need to check the material's output node for a light-emission connection
+                # We need to check the material's output node for a light-emission connection
                 output_node = find_node(ob_mat, 'luxrender_material_output_node')
+                light_node = None
+
                 if ob_mat.luxrender_material.nodetree:
                     object_is_emitter = False
-                if output_node != None:
+
+                if output_node is not None:
                     light_socket = output_node.inputs[3]
+
                     if light_socket.is_linked:
                         light_node = light_socket.links[0].from_node
                         object_is_emitter = light_socket.is_linked
                 else:  # no node tree, so check the classic mat editor
                     object_is_emitter = ob_mat.luxrender_emission.use_emission
 
-                if object_is_emitter and not self.allow_instancing(
-                        mat_object):  # If exporting an instance, we need to set emission in the ObjectBegin/End block
+                # If exporting an instance, we need to set emission in the ObjectBegin/End block
+                if object_is_emitter and not self.allow_instancing(mat_object):
                     # Only add the AreaLightSource if this object's emission lightgroup is enabled
                     if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
                         if not self.visibility_scene.luxrender_lightgroups.ignore:
                             self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+
                         if not ob_mat.luxrender_material.nodetree:
                             self.lux_context.areaLightSource(*ob_mat.luxrender_emission.api_output(ob_mat))
-                        else:
+                        elif light_node is not None:
                             # texture exporting
                             tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
                             self.lux_context.areaLightSource(*light_node.export(tex_maker.make_texture))
@@ -832,13 +846,13 @@ class GeometryExporter(object):
                         object_is_emitter = False
 
                 int_v, ext_v = get_material_volume_defs(ob_mat)
-                if int_v != '':
+                if int_v:
                     self.lux_context.interior(int_v)
-                elif self.geometry_scene.luxrender_world.default_interior_volume != '':
+                elif self.geometry_scene.luxrender_world.default_interior_volume:
                     self.lux_context.interior(self.geometry_scene.luxrender_world.default_interior_volume)
-                if ext_v != '':
+                if ext_v:
                     self.lux_context.exterior(ext_v)
-                elif self.geometry_scene.luxrender_world.default_exterior_volume != '':
+                elif self.geometry_scene.luxrender_world.default_exterior_volume:
                     self.lux_context.exterior(self.geometry_scene.luxrender_world.default_exterior_volume)
 
             else:
@@ -866,9 +880,9 @@ class GeometryExporter(object):
 
         def Basispolynom(controlpoints, i, u, degree):
             if degree == 0:
-                temp = 0
+                _temp = 0
                 if (controlpoints[i] <= u) and (u < controlpoints[i + 1]):
-                    temp = 1
+                    _temp = 1
             else:
                 N0 = Basispolynom(controlpoints, i, u, degree - 1)
                 N1 = Basispolynom(controlpoints, i + 1, u, degree - 1)
@@ -883,8 +897,8 @@ class GeometryExporter(object):
                     sum2 = (controlpoints[i + 1 + degree] - u) / (
                         controlpoints[i + 1 + degree] - controlpoints[i + 1]) * N1
 
-                temp = sum1 + sum2
-            return temp
+                _temp = sum1 + sum2
+            return _temp
 
         for i in range(len(points) + degree + 1):
             if i <= degree:
@@ -914,7 +928,7 @@ class GeometryExporter(object):
             LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
             return
 
-        if bpy.context.scene.luxrender_engine.export_hair == False:
+        if not bpy.context.scene.luxrender_engine.export_hair:
             return
 
         for mod in obj.modifiers:
@@ -922,9 +936,9 @@ class GeometryExporter(object):
                 if mod.particle_system.name == psys.name:
                     break
 
-        if not (mod.type == 'PARTICLE_SYSTEM'):
+        if not mod.type == 'PARTICLE_SYSTEM':
             return
-        elif not mod.particle_system.name == psys.name or mod.show_render == False:
+        elif not mod.particle_system.name == psys.name or not mod.show_render:
             return
 
         LuxLog('Exporting Hair system "%s"...' % psys.name)
@@ -938,6 +952,7 @@ class GeometryExporter(object):
         steps = 2 ** psys.settings.render_step
         num_parents = len(psys.particles)
         num_children = len(psys.child_particles)
+
         if num_children == 0:
             start = 0
         else:
@@ -956,6 +971,7 @@ class GeometryExporter(object):
             sc_fr = '%s/%s/%s/%05d' % (
                 efutil.export_path, efutil.scene_filename(), bpy.path.clean_name(self.geometry_scene.name),
                 self.visibility_scene.frame_current)
+
             if not os.path.exists(sc_fr):
                 os.makedirs(sc_fr)
 
@@ -1020,30 +1036,34 @@ class GeometryExporter(object):
                 uv_co = None
                 col = None
                 seg_length = 1.0
+
                 for step in range(0, steps):
                     # blender api change in r60251 - removed modifier argument
                     co = psys.co_hair(obj, mod, pindex, step) if bpy.app.version < (2, 68, 5 ) else psys.co_hair(obj,
                                                                                                                  pindex,
                                                                                                                  step)
-                    if (step > 0):
+                    if step > 0:
                         seg_length = (co - obj.matrix_world * points[len(points) - 1]).length_squared
+
                     if not (co.length_squared == 0 or seg_length == 0):
                         points.append(transform * co)
+
                         if thicknessflag:
                             if step > steps * width_offset:
-                                thick = (
-                                            root_width * (steps - step - 1) + tip_width * (
+                                thick = (root_width * (steps - step - 1) + tip_width * (
                                             step - steps * width_offset)) / (
                                             steps * (1 - width_offset) - 1)
                             else:
                                 thick = root_width
 
                             thickness.append(thick * hair_size)
-                        point_count = point_count + 1
+
+                        point_count += + 1
 
                         if uvflag:
                             if not uv_co:
                                 uv_co = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
+
                             uv_coords.append(uv_co)
 
                         if psys.settings.luxrender_hair.export_color == 'uv_texture_map' and not len(image_pixels) == 0:
@@ -1057,21 +1077,25 @@ class GeometryExporter(object):
                                 g = image_pixels[pixelnumber * 4 + 1]
                                 b = image_pixels[pixelnumber * 4 + 2]
                                 col = (r, g, b)
+
                             colors.append(col)
                         elif psys.settings.luxrender_hair.export_color == 'vertex_color':
                             if not col:
                                 col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
+
                             colors.append(col)
 
                 if point_count == 1:
                     points.pop()
+
                     if thicknessflag:
                         thickness.pop()
-                    point_count = point_count - 1
+                    point_count -= 1
                 elif point_count > 1:
                     segments.append(point_count - 1)
-                    total_strand_count = total_strand_count + 1
+                    total_strand_count += 1
                     total_segments_count = total_segments_count + point_count - 1
+
             hair_file_path = efutil.path_relative_to_export(hair_file_path)
             with open(hair_file_path, 'wb') as hair_file:
                 # Binary hair file format from
@@ -1093,14 +1117,18 @@ class GeometryExporter(object):
 
                 # hair data
                 hair_file.write(struct.pack('<%dH' % (len(segments)), *segments))
+
                 for point in points:
                     hair_file.write(struct.pack('<3f', *point))
+
                 if thicknessflag:
                     for thickn in thickness:
                         hair_file.write(struct.pack('<1f', thickn))
+
                 if colorflag:
                     for col in colors:
                         hair_file.write(struct.pack('<3f', *col))
+
                 if uvflag:
                     for uv in uv_coords:
                         hair_file.write(struct.pack('<2f', *uv))
@@ -1134,13 +1162,14 @@ class GeometryExporter(object):
 
             int_v, ext_v = get_material_volume_defs(hair_mat)
 
-            if int_v != '':
+            if int_v:
                 self.lux_context.interior(int_v)
-            elif self.geometry_scene.luxrender_world.default_interior_volume != '':
+            elif self.geometry_scene.luxrender_world.default_interior_volume:
                 self.lux_context.interior(self.geometry_scene.luxrender_world.default_interior_volume)
-            if ext_v != '':
+
+            if ext_v:
                 self.lux_context.exterior(ext_v)
-            elif self.geometry_scene.luxrender_world.default_exterior_volume != '':
+            elif self.geometry_scene.luxrender_world.default_exterior_volume:
                 self.lux_context.exterior(self.geometry_scene.luxrender_world.default_exterior_volume)
 
             self.lux_context.shape('hairfile', hair_shape_params)
@@ -1152,7 +1181,6 @@ class GeometryExporter(object):
 
         else:
             # Old export with cylinder and sphere primitives
-
             hair_size *= root_width
 
             # This should force the strand/junction objects to be instanced
@@ -1314,8 +1342,10 @@ class GeometryExporter(object):
 
                 # Check for group layer visibility, if the object is in a group
                 gviz = len(do.users_group) == 0
+
                 for grp in do.users_group:
                     gviz |= True in [a & b for a, b in zip(do.layers, grp.layers)]
+
                 if not gviz:
                     continue
 
@@ -1447,7 +1477,7 @@ class GeometryExporter(object):
 def lux_scene_update(context):
     if bpy.data.objects.is_updated:
         for ob in bpy.data.objects:
-            if ob == None:
+            if ob is None:
                 continue
                 # if ob.is_updated_data:
             # print('updated_data', ob.name)
@@ -1456,7 +1486,7 @@ def lux_scene_update(context):
 
             # only flag as updated if either modifiers or
             # mesh data is updated
-            if ob.is_updated_data or (ob.data != None and ob.data.is_updated):
+            if ob.is_updated_data or (ob.data is not None and ob.data.is_updated):
                 GeometryExporter.KnownModifiedObjects.add(ob)
 
 

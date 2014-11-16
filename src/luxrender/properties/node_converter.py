@@ -74,22 +74,28 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
             if not 'Color 1' in si:  # If there aren't color inputs, create them
                 self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
                 self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+
             if 'Float 1' in si:  # If there are float inputs, destory them
                 self.inputs.remove(self.inputs['Float 1'])
                 self.inputs.remove(self.inputs['Float 2'])
+
             if not 'Color' in so:  # If there is no color output, create it
                 self.outputs.new('NodeSocketColor', 'Color')
+
             if 'Float' in so:  # If there is a float output, destroy it
                 self.outputs.remove(self.outputs['Float'])
         if self.variant == 'float':
             if not 'Float 1' in si:
                 self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
                 self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
                 self.inputs.remove(self.inputs['Color 2'])
+
             if not 'Float' in so:
                 self.outputs.new('NodeSocketFloat', 'Float')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
 
@@ -123,6 +129,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
             .add_float('tex1', self.bump_height)
 
         tex_node = get_linked_node(self.inputs[0])
+
         if tex_node and check_node_export_texture(tex_node):
             bumpmap_name = tex_node.export_texture(make_texture)
             bumpmap_params.add_texture("tex2", bumpmap_name)
@@ -148,21 +155,26 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 
         si = self.inputs.keys()
         so = self.outputs.keys()
+
         if self.variant == 'color':
             if not 'Color 1' in si:
                 self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
                 self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+
             if 'Float 1' in si:
                 self.inputs.remove(self.inputs['Float 1'])
                 self.inputs.remove(self.inputs['Float 2'])
+
             if 'IOR 1' in si:
                 self.inputs.remove(self.inputs['IOR 1'])
                 self.inputs.remove(self.inputs['IOR 2'])
 
             if not 'Color' in so:
                 self.outputs.new('NodeSocketColor', 'Color')
+
             if 'Float' in so:
                 self.outputs.remove(self.outputs['Float'])
+
             if 'Fresnel' in so:
                 self.outputs.remove(self.outputs['Fresnel'])
 
@@ -170,17 +182,21 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
             if not 'Float 1' in si:
                 self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
                 self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
                 self.inputs.remove(self.inputs['Color 2'])
+
             if 'IOR 1' in si:
                 self.inputs.remove(self.inputs['IOR 1'])
                 self.inputs.remove(self.inputs['IOR 2'])
 
             if not 'Float' in so:
                 self.outputs.new('NodeSocketFloat', 'Float')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
+
             if 'Fresnel' in so:
                 self.outputs.remove(self.outputs['Fresnel'])
 
@@ -192,14 +208,17 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
                 self.inputs.remove(self.inputs['Color 2'])
+
             if 'Float 1' in si:
                 self.inputs.remove(self.inputs['Float 1'])
                 self.inputs.remove(self.inputs['Float 2'])
 
             if not 'Fresnel' in so:
                 self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
+
             if 'Float' in so:
                 self.outputs.remove(self.outputs['Float'])
 
@@ -224,26 +243,33 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 
         si = self.inputs.keys()
         so = self.outputs.keys()
+
         if self.variant == 'color':
             if not 'Color 1' in si:
                 self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
                 self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+
             if 'Float 1' in si:
                 self.inputs.remove(self.inputs['Float 1'])
                 self.inputs.remove(self.inputs['Float 2'])
+
             if not 'Color' in so:
                 self.outputs.new('NodeSocketColor', 'Color')
+
             if 'Float' in so:
                 self.outputs.remove(self.outputs['Float'])
         if self.variant == 'float':
             if not 'Float 1' in si:
                 self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
                 self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
                 self.inputs.remove(self.inputs['Color 2'])
+
             if not 'Float' in so:
                 self.outputs.new('NodeSocketFloat', 'Float')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
 
@@ -272,22 +298,29 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
             if not 'Color 1' in si:
                 self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
                 self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+
             if 'Float 1' in si:
                 self.inputs.remove(self.inputs['Float 1'])
                 self.inputs.remove(self.inputs['Float 2'])
+
             if not 'Color' in so:
                 self.outputs.new('NodeSocketColor', 'Color')
+
             if 'Float' in so:
                 self.outputs.remove(self.outputs['Float'])
+
         if self.variant == 'float':
             if not 'Float 1' in si:
                 self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
                 self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
                 self.inputs.remove(self.inputs['Color 2'])
+
             if not 'Float' in so:
                 self.outputs.new('NodeSocketFloat', 'Float')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
 

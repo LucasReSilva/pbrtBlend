@@ -72,9 +72,9 @@ def attr_light(scene, lux_context, light, name, group, light_type, params, trans
         lux_context.transformBegin(file=Files.MAIN)
         lux_context.scale(-1, 1, 1)
 
-    if light.luxrender_lamp.Exterior_volume != '':
+    if light.luxrender_lamp.Exterior_volume:
         lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-    elif scene.luxrender_world.default_exterior_volume != '':
+    elif scene.luxrender_world.default_exterior_volume:
         lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 
     lux_context.lightSource(light_type, params)
@@ -114,7 +114,7 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         lg_gain = scene.luxrender_lightgroups.lightgroups[light_group].gain
 
     # Light groups don't work with exphotonmap
-    if scene.luxrender_lightgroups.ignore or light.luxrender_lamp.lightgroup == "" or\
+    if scene.luxrender_lightgroups.ignore or not light.luxrender_lamp.lightgroup or \
                     scene.luxrender_integrator.surfaceintegrator == 'exphotonmap':
         light_group = 'default'
 
@@ -124,11 +124,12 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         .add_float('importance', light.luxrender_lamp.importance)
 
     ies_data = ParamSet()
-    if light.luxrender_lamp.iesname != '':
+    if light.luxrender_lamp.iesname:
         if light.library is not None:
             iespath = bpy.path.abspath(light.luxrender_lamp.iesname, light.library.filepath)
         else:
             iespath = light.luxrender_lamp.iesname
+
         ies_data = ParamSet().add_string('iesname', efutil.path_relative_to_export(iespath))
 
     # Params from light sub-types
@@ -140,11 +141,14 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         invmatrix = fix_matrix_order(invmatrix)  # matrix indexing hack
         sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
         legacy_sky = light.luxrender_lamp.luxrender_lamp_sun.legacy_sky
+
         if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type in ['sun', 'sunsky']:
             light_params.add_vector('sundir', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
+
         if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type == 'distant':
             light_params.add_point('from', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
             light_params.add_point('to', (0, 0, 0))  # This combo will produce the same result as sundir
+
         if not legacy_sky and sunsky_type not in ['sun', 'distant']:  # new skymodel
             if sunsky_type == 'sky':
                 attr_light(scene, lux_context, light, ob.name, light_group, 'sky2', light_params, portals=portals)
@@ -152,6 +156,7 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
                 attr_light(scene, lux_context, light, ob.name, light_group, 'sunsky2', light_params, portals=portals)
         else:  # Use light definition itself, old sky model, sun only, or distant, as needed.
             attr_light(scene, lux_context, light, ob.name, light_group, sunsky_type, light_params, portals=portals)
+
         return True
 
     if light.type == 'HEMI':
@@ -181,9 +186,10 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
 
     if light.type == 'POINT':
         light_params.update(ies_data)
+
         # Here the use sphere option kicks in. If true, export an spherical area light
         # (using Lux's geometric sphere primitive) rather than a true point light
-        if light.luxrender_lamp.luxrender_lamp_point.usesphere == True and\
+        if light.luxrender_lamp.luxrender_lamp_point.usesphere and \
                         scene.luxrender_rendermode.renderer != 'hybrid':  # no sphere primitives with hybrid!
             light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
             # Add this in manually, it is not used for the true point and thus is not in the normal parameter set
@@ -192,9 +198,9 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
             lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
             lux_context.lightGroup(light_group, [])
 
-            if light.luxrender_lamp.Exterior_volume != '':
+            if light.luxrender_lamp.Exterior_volume:
                 lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-            elif scene.luxrender_world.default_exterior_volume != '':
+            elif scene.luxrender_world.default_exterior_volume:
                 lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 
             if light.luxrender_lamp.luxrender_lamp_point.null_lamp:
@@ -239,9 +245,9 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
         lux_context.lightGroup(light_group, [])
 
-        if light.luxrender_lamp.Exterior_volume != '':
+        if light.luxrender_lamp.Exterior_volume:
             lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-        elif scene.luxrender_world.default_exterior_volume != '':
+        elif scene.luxrender_world.default_exterior_volume:
             lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 
         if light.luxrender_lamp.luxrender_lamp_area.null_lamp:
@@ -258,7 +264,6 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
             lux_context.namedMaterial(ob.name)
 
         lux_context.areaLightSource('area', light_params)
-
         areax = light.size
 
         if light.shape == 'SQUARE':
@@ -318,7 +323,9 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
         if not k[1] in mesh_def_keys.keys():
             mesh_def_keys[k[1]] = []
         mesh_def_keys[k[1]].append(k)
+
     mesh_def_keys_keys = mesh_def_keys.keys()
+
     for obdata in mesh_def_keys_keys:
         # match the mesh data against the keys in mesh_definitions
         if obdata.luxrender_mesh.portal:
@@ -327,7 +334,6 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 
     # Then iterate for lights
     for ob in geometry_scene.objects:
-
         if not is_obj_visible(visibility_scene, ob) or ob.hide_render:
             continue
 
@@ -344,6 +350,7 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
             for dupli_ob in ob.dupli_list:
                 if dupli_ob.object.type != 'LAMP':
                     continue
+
                 have_light |= exportLight(visibility_scene, lux_context, dupli_ob.object, dupli_ob.matrix,
                                           portal_shapes)
 
@@ -355,4 +362,3 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
                 have_light |= exportLight(visibility_scene, lux_context, ob, ob.matrix_world, portal_shapes)
 
     return have_light
-

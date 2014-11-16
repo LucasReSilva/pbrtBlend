@@ -262,7 +262,8 @@ class luxrender_rendermode(declarative_property_group):
 
         if self.renderer in ['hybrid']:
             renderer_params.add_bool('opencl.gpu.use', self.usegpus)
-            if self.opencl_prefs == True:
+
+            if self.opencl_prefs:
                 renderer_params.add_integer('opencl.platform.index', self.opencl_platform_index)
                 renderer_params.add_string('configfile', self.configfile)
                 renderer_params.add_integer('raybuffersize', self.raybuffersize)
@@ -273,21 +274,21 @@ class luxrender_rendermode(declarative_property_group):
 
         if self.renderer in ['luxcore']:
             # LuxCoreRenderer specific parameters
-
             luxcore_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
             luxcore_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
             luxcore_params = '" "'.join((luxcore_use_gpu, luxcore_use_cpu))
 
-            if self.opencl_prefs == True:
+            if self.opencl_prefs:
                 luxcore_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
                 luxcore_devices_select = "opencl.devices.select = " + \
                                          self.deviceselection if self.deviceselection else ""  # blank
                 luxcore_params = '" "'.join(
-                    (luxcore_params, luxcore_devices_select)) if luxcore_devices_select != "" else luxcore_params
+                    (luxcore_params, luxcore_devices_select)) if luxcore_devices_select else luxcore_params
                 luxcore_kernel_cache = "opencl.kernelcache = " + self.kernelcache
                 luxcore_params = '" "'.join((luxcore_params, luxcore_gpu_workgroups, luxcore_kernel_cache))
 
             luxcore_renderengine_type = 'PATHCPU'
+
             if self.rendermode == 'luxcorepath':
                 luxcore_renderengine_type = 'PATHCPU'
             elif self.rendermode == 'luxcorepathocl':
@@ -300,6 +301,7 @@ class luxrender_rendermode(declarative_property_group):
                 luxcore_renderengine_type = 'BIDIRCPU'
             elif self.rendermode == 'luxcorebidirvcm':
                 luxcore_renderengine_type = 'BIDIRVMCPU'
+
             luxcore_params = '" "'.join((luxcore_params, 'renderengine.type = ' + luxcore_renderengine_type))
 
             if self.rendermode in ['luxcorebiaspath', 'luxcorebiaspathocl']:
@@ -307,7 +309,6 @@ class luxrender_rendermode(declarative_property_group):
 
             # Finally add custom properties
             luxcore_params = '" "'.join([luxcore_params] + self.luxcore_custom_properties.split("|"))
-
             renderer_params.add_string('config', luxcore_params)
 
         return self.renderer, renderer_params
@@ -315,9 +316,9 @@ class luxrender_rendermode(declarative_property_group):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_halt(declarative_property_group):
-    '''
+    """
     Storage class for LuxRender Halt settings.
-    '''
+    """
 
     ef_attach_to = ['Scene']
 

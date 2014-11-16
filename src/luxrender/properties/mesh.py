@@ -210,23 +210,27 @@ class luxrender_mesh(declarative_property_group):
         # check if subdivision is used
         if self.subdiv != 'None':
             params.add_string('subdivscheme', self.subdiv)
+
             if self.subdiv == 'loop':
                 params.add_integer('nsubdivlevels', self.sublevels)
             elif self.subdiv == 'microdisplacement':
                 params.add_integer('nsubdivlevels', self.mdsublevels)
+
             params.add_bool('dmnormalsmooth', self.nsmooth)
             params.add_bool('dmsharpboundary', self.sharpbound)
             params.add_bool('dmnormalsplit', self.splitnormal)
 
         export_dm = TF_displacementmap.get_paramset(self)
 
-        if self.dm_floattexturename != '' and len(export_dm) > 0:
+        if self.dm_floattexturename and len(export_dm) > 0:
             texture_name = getattr(self, 'dm_floattexturename')
             texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+
             if texture.type in ('IMAGE', 'OCEAN') and texture.luxrender_texture.type == 'BLENDER':
                 params.add_texture('displacementmap', '%s_float' % self.dm_floattexturename)
             else:
                 params.add_texture('displacementmap', self.dm_floattexturename)
+
             params.add_float('dmscale', self.dmscale)
             params.add_float('dmoffset', self.dmoffset)
 

@@ -142,7 +142,7 @@ class lrmdb_client(object):
 
     @classmethod
     def server_instance(cls):
-        if cls.server == None:
+        if cls.server is None:
             cls.server = xmlrpc.client.ServerProxy(
                 "http://www.luxrender.net/lrmdb2/ixr",
                 transport=CookieTransport()

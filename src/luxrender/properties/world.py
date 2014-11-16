@@ -348,8 +348,8 @@ class luxrender_volume_data(declarative_property_group):
             vp.update(TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale))
 
             if self.sigma_a_usecolortexture and self.absorption_scale != 1.0:
-
                 tex_found = False
+
                 for psi in vp:
                     if psi.type == 'texture' and psi.name == 'sigma_a':
                         tex_found = True
@@ -373,13 +373,14 @@ class luxrender_volume_data(declarative_property_group):
                             sigma_a_tex
                         )
                     )
+
                     ExportedTextures.export_new(lux_context)
                     # overwrite the sigma_a tex name with the scaled tex
                     vp.add_texture('sigma_a', texture_name)
 
             if self.sigma_s_usecolortexture and self.scattering_scale != 1.0:
-
                 tex_found = False
+
                 for psi in vp:
                     if psi.type == 'texture' and psi.name == 'sigma_s':
                         tex_found = True
@@ -403,6 +404,7 @@ class luxrender_volume_data(declarative_property_group):
                             sigma_s_tex
                         )
                     )
+
                     ExportedTextures.export_new(lux_context)
                     # overwrite the sigma_s tex name with the scaled tex
                     vp.add_texture('sigma_s', texture_name)
@@ -418,8 +420,8 @@ class luxrender_volume_data(declarative_property_group):
             vp.update(TC_sigma_s.get_paramset(self, value_transform_function=scattering_scale))
 
             if self.sigma_a_usecolortexture and self.absorption_scale != 1.0:
-
                 tex_found = False
+
                 for psi in vp:
                     if psi.type == 'texture' and psi.name == 'sigma_a':
                         tex_found = True
@@ -448,8 +450,8 @@ class luxrender_volume_data(declarative_property_group):
                     vp.add_texture('sigma_a', texture_name)
 
             if self.sigma_s_usecolortexture and self.scattering_scale != 1.0:
-
                 tex_found = False
+
                 for psi in vp:
                     if psi.type == 'texture' and psi.name == 'sigma_s':
                         tex_found = True
@@ -483,7 +485,9 @@ class luxrender_volume_data(declarative_property_group):
         psi_accept = {
             'g': 'color'
         }
+
         psi_accept_keys = psi_accept.keys()
+
         for psi in ps:
             if psi['name'] in psi_accept_keys and psi['type'].lower() == psi_accept[psi['name']]:
                 setattr(self, psi['name'], psi['value'])
@@ -504,21 +508,26 @@ class luxrender_volume_data(declarative_property_group):
 
         def find_scale(Sr, Sg, Sb):
             scale_val = 100000.0
+
             # simultaneously scale all abs values to a sensible range
             while not (sct_col_in_range(Sr * scale_val) and sct_col_in_range(Sg * scale_val) and sct_col_in_range(
                         Sb * scale_val)):
                 scale_val /= 10
+
                 # bail out at minimum scale if we can't find a perfect solution
                 if scale_val < 1e-6:
                     break
+
             return scale_val
 
         # get the raw value from the paramset, value assigned via TC_sigma_s.load_paramset
         # will already have been clamped to (0,1)
         sct_col = [0.0, 0.0, 0.0]
+
         for psi in ps:
             if psi['type'] == 'color' and psi['name'] == 'sigma_s':
                 sct_col = psi['value']
+
         scl_val = find_scale(*sct_col)
         self.scattering_scale = 1 / scl_val
         self.sigma_s_color = [c * scl_val for c in sct_col]
@@ -526,39 +535,46 @@ class luxrender_volume_data(declarative_property_group):
         # reverse the absorption_at_depth process
         def rev_aad_in_range(val):
             abs = math.e ** -val
+
             return abs >= 0.01 and abs <= 0.99
 
         def find_depth(Ar, Ag, Ab):
             depth_val = 100000.0
+
             # simultaneously scale all abs values to a sensible range
             while not (rev_aad_in_range(Ar * depth_val) and rev_aad_in_range(Ag * depth_val) and rev_aad_in_range(
                         Ab * depth_val)):
                 depth_val /= 10
+
                 # bail out at minimum depth if we can't find a perfect solution
                 if depth_val < 1e-6:
                     break
+
             return depth_val
 
         if self.type == 'clear':
             abs_col = [1.0, 1.0, 1.0]
+
             # get the raw value from the paramset, value assigned via TC_absorption.load_paramset
             # will already have been clamped to (0,1)
             for psi in ps:
                 if psi['type'] == 'color' and psi['name'] == 'absorption':
                     abs_col = psi['value']
-            self.depth = find_depth(*abs_col)
 
+            self.depth = find_depth(*abs_col)
             self.absorption_color = [math.e ** -(c * self.depth) for c in abs_col]
 
         if self.type == 'homogeneous':
             abs_col = [1.0, 1.0, 1.0]
+
             # get the raw value from the paramset, value assigned via TC_sigma_a.load_paramset
             # will already have been clamped to (0,1)
+
             for psi in ps:
                 if psi['type'] == 'color' and psi['name'] == 'sigma_a':
                     abs_col = psi['value']
-            self.depth = find_depth(*abs_col)
 
+            self.depth = find_depth(*abs_col)
             self.sigma_a_color = [math.e ** -(c * self.depth) for c in abs_col]
 
 
@@ -702,8 +718,9 @@ class luxrender_lightgroups(declarative_property_group):
     ]
 
     def is_enabled(self, name):
-        if name != '' and name in self.lightgroups:
+        if name and name in self.lightgroups:
             return self.lightgroups[name].lg_enabled
+
         return True
 
 

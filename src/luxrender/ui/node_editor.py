@@ -55,24 +55,27 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
         ob = context.active_object
         if ob and ob.type not in {'LAMP', 'CAMERA'}:
             ma = ob.active_material
-            if ma != None:
+
+            if ma is not None:
                 nt_name = ma.luxrender_material.nodetree
-                if nt_name != '':
+
+                if nt_name:
                     return bpy.data.node_groups[ma.luxrender_material.nodetree], ma, ma
         # Uncomment if/when we make lamp nodes
         # elif ob and ob.type == 'LAMP':
         #     la = ob.data
         #     nt_name = la.luxrender_lamp.nodetree
-        #     if nt_name != '':
+        #     if nt_name:
         #         return bpy.data.node_groups[la.luxrender_lamp.nodetree], la, la
-        return (None, None, None)
+
+        return None, None, None
 
     # This block updates the preview, when socket links change
     def update(self):
         self.refresh = True
 
     def acknowledge_connection(self, context):
-        while self.refresh == True:
+        while self.refresh:
             self.refresh = False
             break
 

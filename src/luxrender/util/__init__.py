@@ -59,6 +59,7 @@ class bEncoder(object):
             with io.StringIO() as fDes:
                 fDes.name = '<string>'
                 self._Encode(fSrc, fDes)
+
                 return fDes.getvalue()
 
     def _Encode(self, fSrc, fDes):

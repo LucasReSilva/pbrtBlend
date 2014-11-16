@@ -1046,12 +1046,13 @@ class luxrender_integrator(declarative_property_group):
 
         # Exphotonmap is not compatible with light groups, warn here instead of light export code so
         # this warning only shows once instead of per lamp
-        if scene.luxrender_lightgroups.ignore == False and self.surfaceintegrator == 'exphotonmap':
+        if not scene.luxrender_lightgroups.ignore and self.surfaceintegrator == 'exphotonmap':
             LuxLog('WARNING: Ex. Photon Map does not support light groups, exporting all lights in the default group.')
 
         # Warn about multi volume integrator and homogeneous exterior
-        if scene.luxrender_world.default_exterior_volume != '':
+        if scene.luxrender_world.default_exterior_volume:
             ext_v = scene.luxrender_world.default_exterior_volume
+
             for volume in scene.luxrender_volumes.volumes:
                 if volume.name == ext_v and volume.type == 'homogeneous' and \
                                 scene.luxrender_volumeintegrator.volumeintegrator == 'multi':
@@ -1064,11 +1065,13 @@ class luxrender_integrator(declarative_property_group):
             params.add_integer('eyedepth', self.eyedepth) \
                 .add_integer('lightdepth', self.lightdepth) \
                 .add_integer('lightraycount', self.lightraycount)
+
             if not self.advanced:
                 # Export the regular light strategy setting for lightpath strat when in non-advanced mode,
                 # advanced mode allows them to be set independently
                 params.add_string('lightpathstrategy',
                                   self.lightstrategy if not hybrid_compat else 'one')
+
             if self.advanced:
                 params.add_float('eyerrthreshold', self.eyerrthreshold) \
                     .add_float('lightrrthreshold', self.lightrrthreshold) \
@@ -1077,6 +1080,7 @@ class luxrender_integrator(declarative_property_group):
 
         if self.surfaceintegrator == 'directlighting':
             params.add_integer('maxdepth', self.maxdepth)
+
             if self.advanced:
                 params.add_integer('shadowraycount', self.shadowraycount)
 
@@ -1089,6 +1093,7 @@ class luxrender_integrator(declarative_property_group):
                 .add_float('alpha', self.alpha) \
                 .add_bool('includeenvironment', self.includeenvironment) \
                 .add_bool('directlightsampling', self.directlightsampling)
+
             if self.advanced:
                 params.add_bool('storeglossy', self.storeglossy) \
                     .add_bool('useproba', self.useproba) \
@@ -1111,6 +1116,7 @@ class luxrender_integrator(declarative_property_group):
                 .add_integer('glossyrefractsamples', self.glossyrefractsamples) \
                 .add_integer('specularreflectdepth', self.specularreflectdepth) \
                 .add_integer('specularrefractdepth', self.specularrefractdepth)
+
             if self.advanced:
                 params.add_bool('directsampleall', self.directsampleall) \
                     .add_bool('directdiffuse', self.directdiffuse) \
@@ -1142,11 +1148,13 @@ class luxrender_integrator(declarative_property_group):
                 .add_float('gatherangle', self.gatherangle) \
                 .add_string('rrstrategy', self.rrstrategy) \
                 .add_float('rrcontinueprob', self.rrcontinueprob)
+
             # Export maxeyedepth as maxdepth, since that is actually the switch the scene file accepts
             if self.advanced:
                 params.add_float('distancethreshold', self.distancethreshold) \
                     .add_string('photonmapsfile', self.photonmapsfile) \
                     .add_integer('shadowraycount', self.shadowraycount)
+
             if self.debugmode:
                 params.add_bool('dbg_enabledirect', self.dbg_enabledirect) \
                     .add_bool('dbg_enableradiancemap', self.dbg_enableradiancemap) \
@@ -1166,6 +1174,7 @@ class luxrender_integrator(declarative_property_group):
                 .add_string('rrstrategy', self.rrstrategy) \
                 .add_bool('includeenvironment', self.includeenvironment) \
                 .add_bool('directlightsampling', self.directlightsampling)
+
             if self.advanced:
                 params.add_integer('shadowraycount', self.shadowraycount)
 

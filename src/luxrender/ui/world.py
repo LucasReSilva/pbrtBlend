@@ -54,7 +54,6 @@ class volumes_base(object):
     """
     Interior/Exterior Volumes Settings
     """
-
     bl_label = 'LuxRender Volumes'
 
     display_property_groups = [
@@ -66,7 +65,6 @@ class volumes_base(object):
         This is a draw callback from property_group_renderer, due
         to ef_callback item in luxrender_volume_data.properties
         """
-
         vi = context.scene.luxrender_volumes.volumes_index
         lv = context.scene.luxrender_volumes.volumes[vi]
 
@@ -90,11 +88,13 @@ class volumes_base(object):
         if len(context.scene.luxrender_volumes.volumes) > 0:
             current_vol_ind = context.scene.luxrender_volumes.volumes_index
             current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+
             # 'name' is not a member of current_vol.properties,
             # so we draw it explicitly
             self.layout.prop(
                 current_vol, 'name'
             )
+
             # Here we draw the currently selected luxrender_volumes_data property group
             for control in current_vol.controls:
                 self.draw_column(
@@ -115,10 +115,10 @@ class volumes_world(volumes_base, world_panel):
 class volumes_material(volumes_base, luxrender_material_base):
     @classmethod
     def poll(cls, context):
-        return super().poll(context) and ( \
-            context.material.luxrender_material.Interior_volume != '' \
-            or \
-            context.material.luxrender_material.Exterior_volume != ''
+        return super().poll(context) and (
+            context.material.luxrender_material.Interior_volume
+            or
+            context.material.luxrender_material.Exterior_volume
         )
 
 
@@ -144,6 +144,7 @@ class lightgroups_base(object):
             subrow = row.row()
             subrow.enabled = lg.lg_enabled
             subrow.prop(lg, 'name', text="")
+
             # Here we draw the currently selected luxrender_lightgroups_data property group
             for control in lg.controls:
                 self.draw_column(
@@ -153,6 +154,7 @@ class lightgroups_base(object):
                     context,
                     property_group=lg
                 )
+
             row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index
 
 
@@ -165,4 +167,4 @@ class lightgroups_world(lightgroups_base, world_panel):
 class lightgroups_lamps(lightgroups_base, lamps_panel):
     @classmethod
     def poll(cls, context):
-        return super().poll(context) and context.lamp.luxrender_lamp.lightgroup != ''
+        return super().poll(context) and context.lamp.luxrender_lamp.lightgroup

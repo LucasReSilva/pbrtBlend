@@ -42,34 +42,39 @@ def check_renderer_settings(context):
     def clear_renderer_alert():
         if 'surfaceintegrator' in lri.alert.keys():
             del lri.alert['surfaceintegrator']
+
         if 'lightstrategy' in lri.alert.keys():
             del lri.alert['lightstrategy']
+
         if 'advanced' in lri.alert.keys():
             del lri.alert['advanced']
 
     # Check hybrid renderer and surfaceintegrator compatibility
     hybrid_valid = (lri.surfaceintegrator == 'path' and lri.lightstrategy in ['one', 'all', 'auto'])
+
     if ((lre.renderer == 'hybrid' and hybrid_valid) or lre.renderer != 'hybrid'):
         clear_renderer_alert()
     elif lre.renderer == 'hybrid' and not hybrid_valid:
         # These logical tests should evaluate to True if the setting is incompatible
         lri.alert['surfaceintegrator'] = {'surfaceintegrator': LO({'!=': ['path', 'bidirectional']})}
         lri.alert['lightstrategy'] = {'lightstrategy': LO({'!=': ['one', 'all', 'auto']})}
+
         return
 
     # check compatible SPPM mode
     sppm_valid = lri.surfaceintegrator == 'sppm'
+
     if ((lre.renderer == 'sppm' and sppm_valid) or lre.renderer != 'sppm'):
         clear_renderer_alert()
     elif lre.renderer == 'sppm' and not sppm_valid:
         lri.alert['surfaceintegrator'] = {'surfaceintegrator': LO({'!=': 'sppm'})}
+
         return
 
 
 def find_apis():
-    apis = [
-        ('EXT', 'External', 'EXT'),
-    ]
+    apis = [('EXT', 'External', 'EXT'),]
+
     if PYLUX_AVAILABLE:
         apis.append(('INT', 'Internal', 'INT'))
 
@@ -119,9 +124,9 @@ class luxrender_testing(declarative_property_group):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_engine(declarative_property_group):
-    '''
+    """
     Storage class for LuxRender Engine settings.
-    '''
+    """
 
     ef_attach_to = ['Scene']
 
@@ -363,7 +368,7 @@ class luxrender_engine(declarative_property_group):
     ]
 
     def allow_file_embed(self):
-        saving_files = (self.export_type == 'EXT' or (self.export_type == 'INT' and self.write_files == True))
+        saving_files = (self.export_type == 'EXT' or (self.export_type == 'INT' and self.write_files))
 
         return self.is_saving_lbm2 or (saving_files and self.embed_filedata)
 

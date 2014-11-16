@@ -120,31 +120,34 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 
 _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
-### Some additions to Blender panels for better allocation in context
-### Use this example for such overrides
 
+# Some additions to Blender panels for better allocation in context
+# Use this example for such overrides
 # Add output format flags to output panel
 def lux_output_hints(self, context):
     if context.scene.render.engine == 'LUXRENDER_RENDER':
 
         # In this mode, we don't use use the regular interval write
         pipe_mode = (context.scene.luxrender_engine.export_type == 'INT' and
-                     context.scene.luxrender_engine.write_files == False)
+                     not context.scene.luxrender_engine.write_files)
 
         # in this case, none of these buttons do anything, so don't even bother drawing the label
-        if not (pipe_mode):
+        if not pipe_mode:
             col = self.layout.column()
             col.label("LuxRender Output Formats")
         row = self.layout.row()
         if not pipe_mode:
             row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png", text="PNG")
+
             if context.scene.camera.data.luxrender_camera.luxrender_film.write_png:
                 row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png_16bit",
                          text="Use 16bit PNG")
+
             row = self.layout.row()
             row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TARGA")
             row = self.layout.row()
             row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr", text="OpenEXR")
+
             if context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
                 row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_applyimaging",
                          text="Tonemap EXR")
@@ -153,17 +156,21 @@ def lux_output_hints(self, context):
                 row = self.layout.row()
                 row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_compressiontype",
                          text="EXR Compression")
+
             if context.scene.camera.data.luxrender_camera.luxrender_film.write_tga or \
                     context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
                 row = self.layout.row()
                 row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_zbuf",
                          text="Enable Z-Buffer")
+
                 if context.scene.camera.data.luxrender_camera.luxrender_film.write_zbuf:
                     row = self.layout.row()
                     row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "zbuf_normalization",
                              text="Z-Buffer Normalization")
+
             row = self.layout.row()
             row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm", text="Write FLM")
+
             if context.scene.camera.data.luxrender_camera.luxrender_film.write_flm:
                 row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
                 row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct",
@@ -219,7 +226,7 @@ def lux_use_dof(self, context):
         row = self.layout.row()
 
         row.prop(context.camera.luxrender_camera, "use_dof", text="Use Depth of Field")
-        if context.camera.luxrender_camera.use_dof == True:
+        if context.camera.luxrender_camera.use_dof:
             row.prop(context.camera.luxrender_camera, "autofocus", text="Auto Focus")
 
             row = self.layout.row()
@@ -257,9 +264,8 @@ _register_elm(bl_ui.properties_render.RENDER_PT_render.append(render_start_optio
 @classmethod
 def blender_texture_poll(cls, context):
     tex = context.texture
-    show = tex and \
-           ((tex.type == cls.tex_type and not tex.use_nodes) and \
-            (context.scene.render.engine in cls.COMPAT_ENGINES))
+    show = tex and ((tex.type == cls.tex_type and not tex.use_nodes) and
+                    (context.scene.render.engine in cls.COMPAT_ENGINES))
 
     if context.scene.render.engine == 'LUXRENDER_RENDER':
         show = show and tex.luxrender_texture.type == 'BLENDER'
@@ -281,9 +287,11 @@ blender_texture_ui_list = [
     bl_ui.properties_texture.TEXTURE_PT_wood,
     bl_ui.properties_texture.TEXTURE_PT_ocean,
 ]
+
 for blender_texture_ui in blender_texture_ui_list:
     _register_elm(blender_texture_ui)
     blender_texture_ui.poll = blender_texture_poll
+
 
 # compatible() copied from blender repository (netrender)
 def compatible(mod):
@@ -298,11 +306,7 @@ compatible("properties_data_camera")
 compatible("properties_particle")
 compatible("properties_data_speaker")
 
-################################################################################
 # To draw the preview pause button
-################################################################################
-
-
 def DrawButtonPause(self, context):
     layout = self.layout
     scene = context.scene
@@ -315,8 +319,6 @@ def DrawButtonPause(self, context):
 
 
 _register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
-
-################################################################################
 
 
 @LuxRenderAddon.addon_register_class
@@ -391,7 +393,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             if is_animation and make_queue:
                 queue_file = efutil.export_path + '%s.%s.lxq' % (
-                efutil.scene_filename(), bpy.path.clean_name(scene.name))
+                    efutil.scene_filename(), bpy.path.clean_name(scene.name))
 
                 # Open/reset a queue file
                 if scene.frame_current == scene.frame_start:
@@ -403,7 +405,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.update_progress(fo / fr)
 
             exported_file = self.export_scene(scene)
-            if exported_file == False:
+            if not exported_file:
                 return  # Export frame failed, abort rendering
 
             if is_animation and make_queue:
@@ -452,23 +454,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         objects_mats[obj] = []
                     objects_mats[obj].append(mat)
 
-        PREVIEW_TYPE = None  # 'MATERIAL' or 'TEXTURE'
+        preview_type = None  # 'MATERIAL' or 'TEXTURE'
 
         # find objects that are likely to be the preview objects
         preview_objects = [o for o in objects_mats.keys() if o.name.startswith('preview')]
         if len(preview_objects) > 0:
-            PREVIEW_TYPE = 'MATERIAL'
+            preview_type = 'MATERIAL'
         else:
             preview_objects = [o for o in objects_mats.keys() if o.name.startswith('texture')]
             if len(preview_objects) > 0:
-                PREVIEW_TYPE = 'TEXTURE'
+                preview_type = 'TEXTURE'
 
-        if PREVIEW_TYPE == None:
+        if preview_type is None:
             return
 
         # TODO: scene setup based on PREVIEW_TYPE
 
-        # find the materials attached to the likely preview object
+        # Find the materials attached to the likely preview object
         likely_materials = objects_mats[preview_objects[0]]
         if len(likely_materials) < 1:
             print('no preview materials')
@@ -478,7 +480,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         pt = None
         LuxLog('Rendering material preview: %s' % pm.name)
 
-        if PREVIEW_TYPE == 'TEXTURE':
+        if preview_type == 'TEXTURE':
             pt = pm.active_texture
 
         LM = LuxManager(
@@ -548,14 +550,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 time.sleep(0.2)  # safety-sleep
 
                 if preview_context.getAttribute('renderer_statistics', 'samplesPerPixel') > 6:
-                    if PREVIEW_TYPE == 'TEXTURE':
+                    if preview_type == 'TEXTURE':
                         interruptible_sleep(0.8)  # reduce update to every 1.0 sec until haltthreshold kills the render
                     else:
                         interruptible_sleep(1.8)  # reduce update to every 2.0 sec until haltthreshold kills the render
 
                 preview_context.updateStatisticsWindow()
-                LuxLog('Updating preview (%ix%i - %s)' % (
-                xres, yres, preview_context.getAttribute('renderer_statistics_formatted_short', '_recommended_string')))
+                LuxLog('Updating preview (%ix%i - %s)' % (xres, yres,
+                        preview_context.getAttribute('renderer_statistics_formatted_short', '_recommended_string')))
 
                 result = self.begin_result(0, 0, xres, yres)
 
@@ -567,8 +569,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     lay = result.layers[0]
                     lay.rect = preview_context.blenderCombinedDepthRects()[0]
 
-                self.end_result(result, 0) if bpy.app.version > (2, 63, 17 ) else self.end_result(
-                    result)  # cycles tiles adaption
+                # Cycles tiles adaption
+                self.end_result(result, 0) if bpy.app.version > (2, 63, 17 ) else self.end_result(result)
         except Exception as exc:
             LuxLog('Preview aborted: %s' % exc)
 
@@ -585,6 +587,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # OSX also has a special temp location that we should use
         fp = scene.render.filepath
         output_path_split = list(os.path.split(fp))
+
         if sys.platform in ('win32', 'darwin') and output_path_split[0] == '/tmp':
             output_path_split[0] = efutil.temp_directory()
             fp = '/'.join(output_path_split)
@@ -609,7 +612,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.output_dir = efutil.filesystem_path(bpy.app.tempdir)
                 else:
                     self.output_dir = efutil.temp_directory()
-
         else:
             api_type = 'FILE'
             write_files = True
@@ -630,7 +632,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if scene.luxrender_engine.export_type == 'INT':
             # Set up networking before export so that we get better server usage
-            if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers != '':
+            if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers:
                 LM.lux_context.setNetworkServerUpdateInterval(scene.luxrender_networking.serverinterval)
                 for server in scene.luxrender_networking.servers.split(','):
                     LM.lux_context.addServer(server.strip())
@@ -722,7 +724,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         print('luxrender_path: ', luxrender_path)
 
-        if luxrender_path == '':
+        if not luxrender_path:
             return ['']
 
         if luxrender_path[-1] != '/':
@@ -769,7 +771,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if scene.luxrender_engine.fixed_seed:
             cmd_args.append('--fixedseed')
 
-        if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers != '':
+        if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers:
             for server in scene.luxrender_networking.servers.split(','):
                 cmd_args.append('--useserver')
                 cmd_args.append(server.strip())
@@ -870,14 +872,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     })
                     framebuffer_thread.set_kick_period(scene.camera.data.luxrender_camera.luxrender_film.writeinterval)
                     framebuffer_thread.start()
-                    while luxrender_process.poll() == None and not self.test_break():
+                    while luxrender_process.poll() is None and not self.test_break():
                         self.render_update_timer = threading.Timer(1, self.process_wait_timer)
                         self.render_update_timer.start()
                         if self.render_update_timer.isAlive():
                             self.render_update_timer.join()
 
                     # If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
-                    if luxrender_process.poll() == None and scene.luxrender_engine.binary_name != 'luxrender':
+                    if luxrender_process.poll() is None and scene.luxrender_engine.binary_name != 'luxrender':
                         # Use SIGTERM because that's the only one supported on Windows
                         luxrender_process.send_signal(subprocess.signal.SIGTERM)
 
@@ -908,7 +910,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if self.test_break() or \
                         LC.statistics('filmIsReady') == 1.0 or \
                         LC.statistics('terminated') == 1.0 or \
-                        LC.getAttribute('film', 'enoughSamples') == True:
+                        LC.getAttribute('film', 'enoughSamples'):
             self.LuxManager.reset()
             self.update_stats('', '')
 
@@ -919,9 +921,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     ############################################################################
 
     def PrintStats(self, lcConfig, stats):
-        engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
+        lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
 
-        if (engine == 'BIASPATHCPU' or engine == 'BIASPATHOCL'):
+        if lc_engine == 'BIASPATHCPU' or lc_engine == 'BIASPATHOCL':
             converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
@@ -939,7 +941,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
                 (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
 
-        return (stats.Get('stats.renderengine.convergence').GetFloat() == 1.0)
+        return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
 
     def normalizeChannel(self, channel_buffer):
         isInf = math.isinf
@@ -1007,7 +1009,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # spread value to RGBA format
 
             if arrayDepth == 1:
-                if getattr(pyluxcore, "ConvertFilmChannelOutput_1xFloat_To_4xFloatList", None) != None:
+                if getattr(pyluxcore, "ConvertFilmChannelOutput_1xFloat_To_4xFloatList", None) is not None:
                     channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_1xFloat_To_4xFloatList(filmWidth,
                                                                                                          filmHeight,
                                                                                                          channel_buffer,
@@ -1021,7 +1023,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             # UV channel, just add 0.0 for B and 1.0 for A components
             elif arrayDepth == 2:
-                if getattr(pyluxcore, "ConvertFilmChannelOutput_2xFloat_To_4xFloatList", None) != None:
+                if getattr(pyluxcore, "ConvertFilmChannelOutput_2xFloat_To_4xFloatList", None) is not None:
                     channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_2xFloat_To_4xFloatList(filmWidth,
                                                                                                          filmHeight,
                                                                                                          channel_buffer,
@@ -1037,7 +1039,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             # RGB channels: just add 1.0 as alpha component
             elif arrayDepth == 3:
-                if getattr(pyluxcore, "ConvertFilmChannelOutput_3xFloat_To_4xFloatList", None) != None:
+                if getattr(pyluxcore, "ConvertFilmChannelOutput_3xFloat_To_4xFloatList", None) is not None:
                     channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_4xFloatList(filmWidth,
                                                                                                          filmHeight,
                                                                                                          channel_buffer,
@@ -1061,9 +1063,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             imageName += '_' + str(buffer_id)
 
         # remove channel from Blender if it already exists and has no users (to prevent duplicates)
-        for image in bpy.data.images:
-            if image.name == imageName and not image.users:
-                bpy.data.images.remove(image)
+        for bl_image in bpy.data.images:
+            if bl_image.name == imageName and not bl_image.users:
+                bpy.data.images.remove(bl_image)
 
         # write converted buffer with RGBA values to Blender image
         blenderImage = bpy.data.images.new(imageName, alpha=False, width=filmWidth, height=filmHeight,
@@ -1072,13 +1074,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # write image to file
         suffix = '.png'
-        format = 'PNG'
+        image_format = 'PNG'
         if useHDR:
             suffix = '.exr'
-            format = 'OPEN_EXR'
+            image_format = 'OPEN_EXR'
 
         blenderImage.filepath_raw = '//' + imageName + suffix
-        blenderImage.file_format = format
+        blenderImage.file_format = image_format
         if saveToDisk:
             blenderImage.save()
 
@@ -1363,7 +1365,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # Force PATHCPU or BIDIRCPU for preview
         engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
-        if (engine in ['BIDIRCPU', 'BIDIRVMCPU']):
+        if engine in ['BIDIRCPU', 'BIDIRVMCPU']:
             lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
         else:
             lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['PATHCPU']))
@@ -1376,7 +1378,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         self.viewCameraShiftX = context.scene.camera.data.shift_x
         self.viewCameraShiftY = context.scene.camera.data.shift_y
 
-        if (view_persp != 'ORTHO'):
+        if view_persp != 'ORTHO':
             zoom = 1.0
             dx = 0.0
             dy = 0.0
@@ -1394,19 +1396,19 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             cam_fov = 2 * math.atan(0.5 * 32.0 / self.viewLens)
             cam_up = list(rot * mathutils.Vector((0, -1, 0)))
 
-            if (self.viewFilmWidth > self.viewFilmHeight):
+            if self.viewFilmWidth > self.viewFilmHeight:
                 xaspect = 1.0
                 yaspect = self.viewFilmHeight / self.viewFilmWidth
             else:
                 xaspect = self.viewFilmWidth / self.viewFilmHeight
                 yaspect = 1.0
 
-            if (view_persp == 'CAMERA'):
+            if view_persp == 'CAMERA':
                 blcamera = context.scene.camera
                 #magic zoom formula for camera viewport zoom from blender source
                 zoom = self.viewCameraZoom
                 zoom = (1.41421 + zoom / 50.0)
-                zoom = zoom * zoom
+                zoom *= zoom
                 zoom = 2.0 / zoom
 
                 #camera plane offset in camera viewport
@@ -1421,7 +1423,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 cam_lookat = list(lookat[3:6])
                 cam_up = list(lookat[6:9])
 
-            zoom = 2.0 * zoom
+            zoom *= 2.0
 
             scr_left = -xaspect * zoom
             scr_right = xaspect * zoom

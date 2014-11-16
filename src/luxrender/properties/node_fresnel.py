@@ -61,7 +61,6 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 
     def init(self, context):
         self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-
         self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
 
     def export_texture(self, make_texture):
@@ -80,7 +79,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
     bl_width_min = 160
 
     def changed_preset(self, context):
-        # # connect preset -> property
+        # connect preset -> property
         self.default_value = cauchy_n_presetvalue
 
     use_ior = bpy.props.BoolProperty(name='Use IOR', default=True)
@@ -95,20 +94,24 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'use_ior')
+
         if self.use_ior:
             if self.cauchy_n == self.cauchy_n_presetvalue:
                 menu_text = self.cauchy_n_presetstring
             else:
                 menu_text = '-- Choose preset --'
+
             layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
             layout.prop(self, 'cauchy_n')
         else:
             layout.prop(self, 'cauchy_a')
+
         layout.prop(self, 'cauchy_b')
 
     def export_texture(self, make_texture):
         cauchy_params = ParamSet()
         cauchy_params.add_float('cauchyb', self.cauchy_b)
+
         if not self.use_ior:
             cauchy_params.add_float('cauchya', self.cauchy_a)
         else:
@@ -138,6 +141,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'frname_preset')
+
         if self.frname_preset == 'nk':
             layout.prop(self, 'frname_nkfile')
 
@@ -148,10 +152,12 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
             process_filepath_data(LuxManager.CurrentScene, self, self.frname_nkfile, fresnelname_params, 'filename')
+
             return make_texture('fresnel', 'fresnelname', self.name, fresnelname_params)
         else:
             # use a preset name
             fresnelname_params.add_string('name', self.frname_preset)
+
             return make_texture('fresnel', 'preset', self.name, fresnelname_params)
 
 
@@ -173,15 +179,19 @@ class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'advanced')
+
         if self.advanced:
             layout.prop(self, 'a')
+
         layout.prop(self, 'b')
         layout.prop(self, 'c')
 
     def export_texture(self, make_texture):
         sellmeier_params = ParamSet()
+
         if self.advanced:
             sellmeier_params.add_float('A', self.a)
+
         sellmeier_params.add_float('B', tuple(self.b))
         sellmeier_params.add_float('C', tuple(self.c))
 

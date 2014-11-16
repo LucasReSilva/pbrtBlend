@@ -74,7 +74,6 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
                                            max=radians(359.99))
     scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
 
-
     def init(self, context):
         self.outputs.new('luxrender_coordinate_socket', '3D Coordinate')
 
@@ -136,12 +135,12 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
     v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
     v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
 
-
     def init(self, context):
         self.outputs.new('luxrender_transform_socket', '2D Coordinate')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
+
         if self.coordinates == 'planar':
             layout.prop(self, 'v1')
             layout.prop(self, 'v2')
@@ -151,6 +150,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
             layout.prop(self, 'vscale')
             layout.prop(self, 'udelta')
             layout.prop(self, 'vdelta')
+
         if self.coordinates == 'uv':
             layout.prop(self, 'center_map')
 
@@ -178,7 +178,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
             coord_params.add_float('uscale', self.uscale)
             coord_params.add_float('vscale', self.vscale * -1)  # flip to match blender
 
-            if self.center_map == False:
+            if not self.center_map:
                 coord_params.add_float('udelta', self.udelta)
                 coord_params.add_float('vdelta',
                                        self.vdelta + 1)  # correction for clamped types, does not harm repeat type
@@ -224,7 +224,6 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 
     def init(self, context):
         self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
@@ -300,7 +299,6 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
 
     data_file = bpy.props.StringProperty(name='Data File', description='Data file path', subtype='FILE_PATH')
 
-
     def init(self, context):
         self.outputs.new('NodeSocketColor', 'Color')
 
@@ -330,38 +328,48 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'variant')
+
         if self.variant == 'color':
             col = layout.column()
             col.prop(self, 'color')
             col.prop(self, 'col_mult')
+
         if self.variant == 'float':
             layout.prop(self, 'float')
+
         if self.variant == 'fresnel':
             layout.prop(self, 'fresnel')
 
         si = self.inputs.keys()
         so = self.outputs.keys()
+
         if self.variant == 'color':
             if not 'Color' in so:
                 self.outputs.new('NodeSocketColor', 'Color')
+
             if 'Float' in so:
                 self.outputs.remove(self.outputs['Float'])
+
             if 'Fresnel' in so:
                 self.outputs.remove(self.outputs['Fresnel'])
 
         if self.variant == 'float':
             if not 'Float' in so:
                 self.outputs.new('NodeSocketFloat', 'Float')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
+
             if 'Fresnel' in so:
                 self.outputs.remove(self.outputs['Fresnel'])
 
         if self.variant == 'fresnel':
             if not 'Fresnel' in so:
                 self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
+
             if 'Float' in so:
                 self.outputs.remove(self.outputs['Float'])
 
@@ -370,10 +378,13 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
         if self.variant == 'float':
             constant_params.add_float('value', self.float)
+
         if self.variant == 'color':
             constant_params.add_color('value', self.color * self.col_mult)
+
         if self.variant == 'fresnel':
             constant_params.add_float('value', self.fresnel)
+
         return make_texture(self.variant, 'constant', self.name, constant_params)
 
 

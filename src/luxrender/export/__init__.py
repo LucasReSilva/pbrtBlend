@@ -95,7 +95,7 @@ class ParamSetItem(list):
     def getSize(self, vl=None):
         sz = 0
 
-        if vl == None:
+        if vl is None:
             vl = self.value
             sz += 100  # Rough overhead for encoded paramset item
 
@@ -120,20 +120,20 @@ class ParamSetItem(list):
         flen = float(len(lst))
 
         if False:  # flen > fcnt:
-            # LIST WRAPPING DISABLED BECAUSE IT IS HIDEOUSLY EXPENSIVE
-            str = ''
+            # List wrapping disabled because it is hideously expensive
+            s = ''
             if type == 'f':
                 for row in range(math.ceil(flen / fcnt)):
-                    str += ' '.join(['%0.15f' % i for i in lst[(row * cnt):(row + 1) * cnt]]) + '\n'
+                    s += ' '.join(['%0.15f' % i for i in lst[(row * cnt):(row + 1) * cnt]]) + '\n'
             elif type == 'i':
                 for row in range(math.ceil(flen / fcnt)):
-                    str += ' '.join(['%i' % i for i in lst[(row * cnt):(row + 1) * cnt]]) + '\n'
+                    s += ' '.join(['%i' % i for i in lst[(row * cnt):(row + 1) * cnt]]) + '\n'
         else:
             if type == 'f':
-                str = ' '.join(['%0.15f' % i for i in lst])
+                s = ' '.join(['%0.15f' % i for i in lst])
             elif type == 'i':
-                str = ' '.join(['%i' % i for i in lst])
-        return str
+                s = ' '.join(['%i' % i for i in lst])
+        return s
 
     def to_string(self):
         fs_num = '"%s %s" [%s]'
@@ -259,10 +259,13 @@ def is_obj_visible(scene, obj, is_dupli=False):
 
 
 def get_worldscale(as_scalematrix=True):
-    # For usability, previev_scale is not an own property but calculated from the object dimensions
-    # A user can directly judge mappings on an adjustable object_size, we simply scale the whole preview
+    """
+    For usability, previev_scale is not an own property but calculated from the object dimensions
+    A user can directly judge mappings on an adjustable object_size, we simply scale the whole preview
+    """
     preview_scale = bpy.context.scene.luxrender_world.preview_object_size / 2
-    # this is a safety net to prevent previewscale affecting render
+
+    # This is a safety net to prevent previewscale affecting render
     ws = 1 / preview_scale if LuxManager.CurrentScene.name == "preview" else 1
 
     scn_us = LuxManager.CurrentScene.unit_settings
@@ -279,13 +282,13 @@ def get_worldscale(as_scalematrix=True):
 
 
 def object_anim_matrices(scene, obj, steps=1):
-    '''
+    """
     steps		Number of interpolation steps per frame
 
     Returns a list of animated matrices for the object, with the given number of
     per-frame interpolation steps.
     The number of matrices returned is at most steps+1.
-    '''
+    """
     old_sf = scene.frame_subframe
     cur_frame = scene.frame_current
 
@@ -298,7 +301,7 @@ def object_anim_matrices(scene, obj, steps=1):
 
         sub_matrix = obj.matrix_world.copy()
 
-        if ref_matrix == None:
+        if ref_matrix is None:
             ref_matrix = sub_matrix
         animated |= sub_matrix != ref_matrix
 
@@ -329,13 +332,13 @@ else:
 
 
 def matrix_to_list(matrix, apply_worldscale=False):
-    '''
+    """
     matrix		  Matrix
 
     Flatten a 4x4 matrix into a list
 
     Returns list[16]
-    '''
+    """
 
     if apply_worldscale:
         matrix = matrix.copy()
@@ -349,9 +352,9 @@ def matrix_to_list(matrix, apply_worldscale=False):
     else:
         matrix = fix_matrix_order(matrix)  # matrix indexing hack
 
-    l = [matrix[0][0], matrix[1][0], matrix[2][0], matrix[3][0], \
-         matrix[0][1], matrix[1][1], matrix[2][1], matrix[3][1], \
-         matrix[0][2], matrix[1][2], matrix[2][2], matrix[3][2], \
+    l = [matrix[0][0], matrix[1][0], matrix[2][0], matrix[3][0],
+         matrix[0][1], matrix[1][1], matrix[2][1], matrix[3][1],
+         matrix[0][2], matrix[1][2], matrix[2][2], matrix[3][2],
          matrix[0][3], matrix[1][3], matrix[2][3], matrix[3][3]]
 
     return [float(i) for i in l]
@@ -362,7 +365,7 @@ def process_filepath_data(scene, obj, file_path, paramset, parameter_name):
     library_filepath = obj.library.filepath if (hasattr(obj, 'library') and obj.library) else ''
     file_library_path = efutil.filesystem_path(bpy.path.abspath(file_path, library_filepath))
     file_relative = efutil.filesystem_path(file_library_path) if (
-    hasattr(obj, 'library') and obj.library) else efutil.filesystem_path(file_path)
+        hasattr(obj, 'library') and obj.library) else efutil.filesystem_path(file_path)
 
     if scene.luxrender_engine.allow_file_embed():
         paramset.add_string(parameter_name, file_basename)

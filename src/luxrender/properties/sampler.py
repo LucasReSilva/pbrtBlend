@@ -217,7 +217,7 @@ class luxrender_sampler(declarative_property_group):
                 params.add_integer('maxconsecrejects', self.maxconsecrejects)
                 params.add_bool('usecooldown', self.usecooldown)
 
-            if self.usersamplingmap_filename != '':
+            if self.usersamplingmap_filename:
                 params.add_string('usersamplingmap_filename', self.usersamplingmap_filename)
 
         return self.sampler, params

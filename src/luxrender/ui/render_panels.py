@@ -98,7 +98,6 @@ class translator(render_panel):
     def draw(self, context):
         if not UseLuxCore():
             super().draw(context)
-
             row = self.layout.row(align=True)
             rd = context.scene.render
         else:
@@ -240,7 +239,6 @@ class passes(render_panel):
         if UseLuxCore():
             # Show AOV channel panel
             channels = context.scene.luxrender_channels
-
             split = layout.split()
             col = split.column()
 
@@ -257,9 +255,7 @@ class passes(render_panel):
             # taken from Blender's startup/properties_render_layer.py
             rd = scene.render
             rl = rd.layers.active
-
             split = layout.split()
-
             col = split.column()
             col.label(text="Passes:")
             col.prop(rl, "use_pass_combined")
@@ -277,6 +273,7 @@ class passes(render_panel):
             subrow = row.row()
             subrow.enabled = lg.lg_enabled
             subrow.prop(lg, 'name', text="")
+
             for control in lg.controls:
                 self.draw_column(
                     control,
@@ -285,4 +282,5 @@ class passes(render_panel):
                     context,
                     property_group=lg
                 )
+
             row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index

@@ -65,7 +65,7 @@ def find_node(material, nodetype):
     nodetree = material.luxrender_material.nodetree
     #print('nodetree: ', nodetree)
 
-    if nodetree == '':
+    if not nodetree:
         return None
 
     ntree = bpy.data.node_groups[nodetree]
@@ -76,6 +76,7 @@ def find_node(material, nodetype):
         nt = getattr(node, "bl_idname", None)
         #print('node: ', node, nt, node.__class__.__name__)
         #print(dir(node))
+
         if nt == nodetype:
             return node
 

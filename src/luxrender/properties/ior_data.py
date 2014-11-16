@@ -372,6 +372,7 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
             lm = context.node
             ctx = context.node.__class__.__name__
             # print("--------", ctx)
+
             for mat_type in (
                     'glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent', 'node_glass',
                     'node_roughglass', 'node_glossy', 'node_glossycoating', 'node_glossytranslucent'):
@@ -379,16 +380,19 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
                     lm.inputs['IOR'].index = ior
                     lm.inputs['IOR'].index_presetvalue = ior
                     lm.inputs['IOR'].index_presetstring = name
+
             for mat_type in ('mirror', 'shinymetal', 'node_mirror'):
                 if ctx.endswith(mat_type):
                     lm.inputs['Film IOR'].filmindex = ior
                     lm.inputs['Film IOR'].filmindex_presetvalue = ior
                     lm.inputs['Film IOR'].filmindex_presetstring = name
+
             for mat_type in ('node_clear', 'node_homogeneous', 'node_heterogeneous', 'node_metal2'):
                 if ctx.endswith(mat_type):
                     lm.inputs['IOR'].fresnel = ior
                     lm.inputs['IOR'].fresnel_presetvalue = ior
                     lm.inputs['IOR'].fresnel_presetstring = name
+
             for mat_type in ('cauchy', 'node_cauchy'):
                 if ctx.endswith(mat_type):
                     lm.cauchy_n = ior
@@ -448,11 +452,13 @@ class LUXRENDER_OT_set_coating_ior_preset(bpy.types.Operator):
     def execute(self, context):
         ior = ior_dict[self.properties.index]
         name = self.properties.l_name
+
         if context.material and context.material.luxrender_coating:
             lc = context.material.luxrender_coating
             lc.index_floatvalue = ior
             lc.index_presetvalue = ior
             lc.index_presetstring = name
+
         return {'FINISHED'}
 
 
@@ -460,8 +466,9 @@ def draw_generator(operator, m_names):
     def draw(self, context):
         sl = self.layout.row()
         for i, (m_name, m_index) in enumerate(m_names):
-            if (i % 20 == 0):
+            if i % 20 == 0:
                 cl = sl.column()
+
             op = cl.operator(operator, text=m_name)
             op.index = m_index
             op.l_name = m_name
@@ -484,12 +491,14 @@ def create_ior_menu(name, opname):
                 }
             ))
         )
+
     return submenus
 
 
 class LUXRENDER_MT_ior_presets_base(bpy.types.Menu):
     def draw(self, context):
         sl = self.layout
+
         for sm in self.submenus:
             sl.menu(sm.bl_idname)
 

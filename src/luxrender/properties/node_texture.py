@@ -126,6 +126,7 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
             .add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             blend_params.update(coord_node.get_paramset())
 
@@ -167,30 +168,38 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 
         si = self.inputs.keys()
         so = self.outputs.keys()
+
         if self.variant == 'color':
             if not 'Brick Color' in si:  # If there aren't color inputs, create them
                 self.inputs.new('luxrender_TC_brickmodtex_socket', 'Brick Modulation Color')
                 self.inputs.new('luxrender_TC_bricktex_socket', 'Brick Color')
                 self.inputs.new('luxrender_TC_mortartex_socket', 'Mortar Color')
+
             if 'Brick Value' in si:  # If there are float inputs, destory them
                 self.inputs.remove(self.inputs['Brick Modulation Value'])
                 self.inputs.remove(self.inputs['Brick Value'])
                 self.inputs.remove(self.inputs['Mortar Value'])
+
             if not 'Color' in so:  # If there is no color output, create it
                 self.outputs.new('NodeSocketColor', 'Color')
+
             if 'Float' in so:  # If there is a float output, destroy it
                 self.outputs.remove(self.outputs['Float'])
+
         if self.variant == 'float':
             if not 'Brick Value' in si:
                 self.inputs.new('luxrender_TF_brickmodtex_socket', 'Brick Modulation Value')
                 self.inputs.new('luxrender_TF_bricktex_socket', 'Brick Value')
                 self.inputs.new('luxrender_TF_mortartex_socket', 'Mortar Value')
+
             if 'Brick Color' in si:
                 self.inputs.remove(self.inputs['Brick Modulation Color'])
                 self.inputs.remove(self.inputs['Brick Color'])
                 self.inputs.remove(self.inputs['Mortar Color'])
+
             if not 'Float' in so:
                 self.outputs.new('NodeSocketFloat', 'Float')
+
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
 
@@ -204,6 +213,7 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
             .add_float('brickheight', self.height)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             brick_params.update(coord_node.get_paramset())
 
@@ -251,6 +261,7 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
             .add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             clouds_params.update(coord_node.get_paramset())
 
@@ -299,6 +310,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
             .add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             distortednoise_params.update(coord_node.get_paramset())
 
@@ -330,6 +342,7 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
             .add_float('roughness', self.roughness)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             fbm_params.update(coord_node.get_paramset())
 
@@ -386,22 +399,28 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'filename')
         layout.prop(self, 'variant')
+
         if self.variant == 'float':
             layout.prop(self, 'channel')
+
         layout.prop(self, 'gamma')
         layout.prop(self, 'gain')
         layout.prop(self, 'filtertype')
+
         if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
             layout.prop(self, 'maxanisotropy')
             layout.prop(self, 'discardmipmaps')
+
         layout.prop(self, 'wrap')
 
         s = self.outputs.keys()
+
         if self.variant == 'color':
             if not 'Color' in s:
                 self.outputs.new('NodeSocketColor', 'Color')
             if 'Float' in s:
                 self.outputs.remove(self.outputs['Float'])
+
         if self.variant == 'float':
             if not 'Float' in s:
                 self.outputs.new('NodeSocketFloat', 'Float')
@@ -410,19 +429,22 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
     def export_texture(self, make_texture):
         imagemap_params = ParamSet()
-
         process_filepath_data(LuxManager.CurrentScene, self, self.filename, imagemap_params, 'filename')
+
         if self.variant == 'float':
             imagemap_params.add_string('channel', self.channel)
+
         imagemap_params.add_string('filtertype', self.filtertype)
         imagemap_params.add_float('gain', self.gain)
         imagemap_params.add_float('gamma', self.gamma)
         imagemap_params.add_string('wrap', self.wrap)
+
         if self.filtertype in ('mipmap_ewa', 'mipmap_trilinear'):
             imagemap_params.add_float('maxanisotropy', self.maxanisotropy)
             imagemap_params.add_integer('discardmipmaps', self.discardmipmaps)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             imagemap_params.update(coord_node.get_paramset())
         else:
@@ -493,6 +515,7 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
             .add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             marble_params.update(coord_node.get_paramset())
 
@@ -540,12 +563,16 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
         layout.prop(self, 'h')
         layout.prop(self, 'lacu')
         layout.prop(self, 'octs')
+
         if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal', 'hetero_terrain'):
             layout.prop(self, 'offset')
+
         if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal'):
             layout.prop(self, 'gain')
+
         if self.musgravetype != 'fbm':
             layout.prop(self, 'iscale')
+
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -557,16 +584,21 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
         musgrave_params.add_float('h', self.h)
         musgrave_params.add_float('lacu', self.lacu)
         musgrave_params.add_float('octs', self.octs)
+
         if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal', 'hetero_terrain'):
             musgrave_params.add_float('offset', self.offset)
+
         if self.musgravetype in ('ridged_multifractal', 'hybrid_multifractal'):
             musgrave_params.add_float('gain', self.gain)
+
         if self.musgravetype != 'fbm':
             musgrave_params.add_float('iscale', self.iscale)
+
         musgrave_params.add_float('bright', self.bright)
         musgrave_params.add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             musgrave_params.update(coord_node.get_paramset())
 
@@ -602,23 +634,25 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'filename')
         layout.prop(self, 'filtertype')
+
         if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
             layout.prop(self, 'maxanisotropy')
             layout.prop(self, 'discardmipmaps')
+
         layout.prop(self, 'wrap')
 
     def export_texture(self, make_texture):
         normalmap_params = ParamSet()
-
         process_filepath_data(LuxManager.CurrentScene, self, self.filename, normalmap_params, 'filename')
-
         normalmap_params.add_string('filtertype', self.filtertype)
         normalmap_params.add_string('wrap', self.wrap)
+
         if self.filtertype in ('mipmap_ewa', 'mipmap_trilinear'):
             normalmap_params.add_float('maxanisotropy', self.maxanisotropy)
             normalmap_params.add_integer('discardmipmaps', self.discardmipmaps)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             normalmap_params.update(coord_node.get_paramset())
         else:
@@ -676,6 +710,7 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
             .add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             stucci_params.update(coord_node.get_paramset())
 
@@ -696,8 +731,8 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
 
     def export_texture(self, make_texture):
         uvtest_params = ParamSet()
-
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             uvtest_params.update(coord_node.get_paramset())
         else:
@@ -767,6 +802,7 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
             .add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             voronoi_params.update(coord_node.get_paramset())
 
@@ -789,6 +825,7 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
         windy_params = ParamSet()
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             wrinkled_params.update(coord_node.get_paramset())
 
@@ -854,6 +891,7 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
             .add_float('contrast', self.contrast)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             wood_params.update(coord_node.get_paramset())
 
@@ -886,6 +924,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
             .add_float('roughness', self.roughness)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             wrinkled_params.update(coord_node.get_paramset())
 
@@ -955,6 +994,7 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
             .add_float('spheresize', self.spheresize)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             cloud_vol_params.update(coord_node.get_paramset())
 
@@ -1039,6 +1079,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
             .add_float('density', density)
 
         coord_node = get_linked_node(self.inputs[0])
+
         if coord_node and check_node_get_paramset(coord_node):
             smokedata_params.update(coord_node.get_paramset())
 

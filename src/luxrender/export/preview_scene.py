@@ -57,13 +57,12 @@ def export_preview_texture(lux_context, texture):
     # if lux_tex_variant == 'color':
     ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name, paramset)
     if lux_tex_variant == 'float':
-
         mix_params = ParamSet() \
             .add_texture('amount', texture_name) \
             .add_color('tex1', [0.05, 0.05, 0.05]) \
             .add_color('tex2', [0.85, 0.85, 0.85])
 
-        texture_name = texture_name + "_color"
+        texture_name += "_color"
         ExportedTextures.texture(lux_context, texture_name, 'color', 'mix', mix_params)
 
     elif lux_tex_variant != 'color':
@@ -77,14 +76,12 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     preview_zoom = get_preview_zoom(mat)
 
     # Camera
-    if tex != None:  # texture preview is always topview
+    if tex is not None:  # texture preview is always topview
         lux_context.lookAt(0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
         camera_params = ParamSet().add_float('fov', 22.5)
-
-    elif mat.preview_render_type == 'FLAT' and mat_preview_xz == False and tex == None:  # mat preview XZ-flip
+    elif mat.preview_render_type == 'FLAT' and not mat_preview_xz and tex is None:  # mat preview XZ-flip
         lux_context.lookAt(0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
         camera_params = ParamSet().add_float('fov', 22.5 / preview_zoom)
-
     else:
         lux_context.lookAt(0.0, -3.0, 0.5, 0.0, -2.0, 0.5, 0.0, 0.0, 1.0)  # standard sideview
         camera_params = ParamSet().add_float('fov', 22.5 / preview_zoom)
@@ -113,7 +110,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
         .add_integer('tilecount', 2) \
         .add_float('convergencestep', 4)
 
-    if tex != None:
+    if tex is not None:
         film_params.add_float('haltthreshold', 0.999)  # testcommit to reduce texture flat rendertimes
 
     film_params.add_float('gamma', 1.0)
@@ -156,14 +153,13 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 
     # Accelerator
     lux_context.accelerator('qbvh', ParamSet())
-
     lux_context.worldBegin()
-
     bl_scene = LuxManager.CurrentScene  # actual blender scene keeping default volumes
 
     # Collect volumes from all scenes *sigh*
     for scn in bpy.data.scenes:
         LuxManager.SetCurrentScene(scn)
+
         for volume in scn.luxrender_volumes.volumes:
             if volume.type == 'heterogeneous':
                 vol_param = ParamSet().add_color('sigma_s', (1.0, 1.0, 1.0))
@@ -178,7 +174,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     # A user can directly judge mappings on an adjustable object_size, we simply scale the whole preview
     preview_scale = bl_scene.luxrender_world.preview_object_size / 2
     lux_context.attributeBegin()
-    if mat.preview_render_type == 'FLAT' and mat_preview_xz == True:
+    if mat.preview_render_type == 'FLAT' and mat_preview_xz:
         lux_context.transform([
             0.5, 0.0, 0.0, 0.0,
             0.0, 0.5, 0.0, 0.0,
@@ -191,8 +187,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
             .add_texture('L', 'pL') \
             .add_float('gain', 1.5 / preview_scale) \
             .add_float('importance', 1.0)
-
-    elif mat.preview_render_type == 'FLAT' and mat_preview_xz == False:
+    elif mat.preview_render_type == 'FLAT' and not mat_preview_xz:
         lux_context.transform([
             0.5, 0.0, 0.0, 0.0,
             0.0, 0.5, 0.0, 0.0,
@@ -206,7 +201,6 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
             .add_texture('L', 'pL') \
             .add_float('gain', 7.0 / preview_scale) \
             .add_float('importance', 1.0)
-
     else:
         lux_context.transform([
             0.5996068120002747, 0.800294816493988, 2.980232594040899e-08, 0.0,
@@ -221,10 +215,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
             .add_float('gain', 1.0 / preview_scale) \
             .add_float('importance', 1.0)
 
-    if bl_scene.luxrender_world.default_exterior_volume != '':
+    if bl_scene.luxrender_world.default_exterior_volume:
         lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
-    lux_context.areaLightSource('area', light_params)
 
+    lux_context.areaLightSource('area', light_params)
     areax = 1
     areay = 1
     points = [-areax / 2.0, areay / 2.0, 0.0, areax / 2.0, areay / 2.0, 0.0, areax / 2.0, -areay / 2.0, 0.0,
@@ -236,21 +230,24 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     shape_params.add_integer('indices', [0, 1, 2, 0, 2, 3])
     shape_params.add_point('P', points)
 
-    if tex == None:
+    if tex is None:
         lux_context.shape('trianglemesh', shape_params)
+
     lux_context.attributeEnd()
 
     # Add a background color (light)
-    if bl_scene.luxrender_world.default_exterior_volume != '':
+    if bl_scene.luxrender_world.default_exterior_volume:
         lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
-    if tex == None:
+
+    if tex is None:
         inf_gain = 0.1
     else:
         inf_gain = 1.2
+
     lux_context.lightSource('infinite', ParamSet().add_float('gain', inf_gain).add_float('importance', inf_gain))
 
     # back drop
-    if mat.preview_render_type == 'FLAT' and mat_preview_xz == True and tex == None:
+    if mat.preview_render_type == 'FLAT' and mat_preview_xz and tex is None:
         lux_context.attributeBegin()
         lux_context.transform([
             5.0, 0.0, 0.0, 0.0,
@@ -304,6 +301,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
             0.0, 0.0, 5.0, 0.0,
             0.0, 0.0, 0.0, 1.0
         ])
+
         if mat.preview_render_type == 'FLAT':
             lux_context.translate(-0.31, -0.22, -1.2)
 
@@ -360,9 +358,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
         ])
         lux_context.shape('loopsubdiv', bd_shape_params)
 
-    if bl_scene.luxrender_world.default_interior_volume != '':
+    if bl_scene.luxrender_world.default_interior_volume:
         lux_context.interior(bl_scene.luxrender_world.default_interior_volume)
-    if bl_scene.luxrender_world.default_exterior_volume != '':
+
+    if bl_scene.luxrender_world.default_exterior_volume:
         lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
 
     lux_context.attributeEnd()
@@ -380,8 +379,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
         pv_export_shape = True
 
         if mat.preview_render_type == 'FLAT':
-            if tex == None:
-                if mat_preview_xz == True:
+            if tex is None:
+                if mat_preview_xz:
                     lux_context.scale(1, 1, 8)
                     lux_context.rotate(90, 1, 0, 0)
                     pv_transform = [
@@ -405,9 +404,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
                 0.0, 0.0, 0.1, 0.0,
                 0.0, 0.0, 0.5, 1.0
             ]
+
         if mat.preview_render_type == 'CUBE':
             lux_context.scale(0.8, 0.8, 0.8)
             lux_context.rotate(-35, 0, 0, 1)
+
         if mat.preview_render_type == 'MONKEY':
             pv_transform = [
                 1.0573405027389526, 0.6340668201446533, 0.0, 0.0,
@@ -415,8 +416,10 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
                 0.5213892459869385, -0.8694445490837097, 0.7015902996063232, 0.0,
                 0.0, 0.0, 0.5, 1.0
             ]
+
         if mat.preview_render_type == 'HAIR':
             pv_export_shape = False
+
         if mat.preview_render_type == 'SPHERE_A':
             pv_export_shape = False
 
@@ -428,8 +431,9 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
             GE = GeometryExporter(lux_context, scene)
             GE.is_preview = True
             GE.geometry_scene = scene
+
             for mesh_mat, mesh_name, mesh_type, mesh_params in GE.buildNativeMesh(obj):
-                if tex != None:
+                if tex is not None:
                     lux_context.transformBegin()
                     lux_context.identity()
                     texture_name = export_preview_texture(lux_context, tex)
@@ -439,27 +443,34 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
                 else:
                     mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
                     int_v, ext_v = get_material_volume_defs(mat)
-                    if int_v != '' or ext_v != '':
-                        if int_v != '':
+
+                    if int_v or ext_v:
+                        if int_v:
                             lux_context.interior(int_v)
-                        if ext_v != '':
+
+                        if ext_v:
                             lux_context.exterior(ext_v)
 
-                    if int_v == '' and bl_scene.luxrender_world.default_interior_volume != '':
+                    if not int_v and bl_scene.luxrender_world.default_interior_volume:
                         lux_context.interior(bl_scene.luxrender_world.default_interior_volume)
-                    if ext_v == '' and bl_scene.luxrender_world.default_exterior_volume != '':
+
+                    if not ext_v and bl_scene.luxrender_world.default_exterior_volume:
                         lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
 
                     output_node = find_node(mat, 'luxrender_material_output_node')
+
                     if mat.luxrender_material.nodetree:
                         object_is_emitter = False
-                        if output_node != None:
+
+                        if output_node is not None:
                             light_socket = output_node.inputs[3]
+
                             if light_socket.is_linked:
                                 light_node = light_socket.links[0].from_node
                                 object_is_emitter = light_socket.is_linked
                     else:
                         object_is_emitter = hasattr(mat, 'luxrender_emission') and mat.luxrender_emission.use_emission
+
                     if object_is_emitter:
                         if not mat.luxrender_material.nodetree:
                             # lux_context.lightGroup(mat.luxrender_emission.lightgroup, [])
@@ -475,7 +486,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
         lux_context.attributeEnd()
 
     # Default 'Camera' Exterior, just before WorldEnd
-    if bl_scene.luxrender_world.default_exterior_volume != '':
+    if bl_scene.luxrender_world.default_exterior_volume:
         lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
 
     return int(xr), int(yr)

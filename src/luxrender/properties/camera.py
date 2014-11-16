@@ -325,6 +325,7 @@ class luxrender_camera(declarative_property_group):
         """
         if matrix is None:
             matrix = camera.matrix_world.copy()
+
         ws = get_worldscale()
         matrix *= ws
         ws = get_worldscale(as_scalematrix=False)
@@ -332,6 +333,7 @@ class luxrender_camera(declarative_property_group):
         matrix[0][3] *= ws
         matrix[1][3] *= ws
         matrix[2][3] *= ws
+
         # transpose to extract columns
         # TODO - update to matrix.col when available
         matrix = matrix.transposed()
@@ -339,6 +341,7 @@ class luxrender_camera(declarative_property_group):
         forwards = -matrix[2]
         target = (pos + forwards)
         up = matrix[1]
+
         return pos[:3] + target[:3] + up[:3]
 
     def screenwindow(self, xr, yr, scene, cam):
@@ -380,15 +383,17 @@ class luxrender_camera(declarative_property_group):
 
         # If we are using cropwindow, we want the full-frame screenwindow.
         # See border render handling code elsewhere in this file (do a search for "border")
-        if scene.render.use_border and not (scene.render.use_crop_to_border == False and (
-                        scene.luxrender_engine.render == False or (
+        if scene.render.use_border and not (
+                    not scene.render.use_crop_to_border and (
+                        not scene.luxrender_engine.render or (
                                     scene.luxrender_engine.export_type == 'EXT' and
                                     scene.luxrender_engine.binary_name == 'luxrender' and
-                                    scene.luxrender_engine.monitor_external == False))):
-            (x1, x2, y1, y2) = [
+                                    not scene.luxrender_engine.monitor_external))):
+            x1, x2, y1, y2 = [
                 scene.render.border_min_x, scene.render.border_max_x,
                 scene.render.border_min_y, scene.render.border_max_y
             ]
+
             sw = [
                 sw[0] * (1 - x1) + sw[1] * x1,
                 sw[0] * (1 - x2) + sw[1] * x2,
@@ -403,25 +408,27 @@ class luxrender_camera(declarative_property_group):
         Calculate the camera exposure time in seconds
         """
         fps = LuxManager.CurrentScene.render.fps / LuxManager.CurrentScene.render.fps_base
-
         time = 1.0
+
         if self.exposure_mode == 'normalised':
             time = (self.exposure_end_norm - self.exposure_start_norm) / fps
+
         if self.exposure_mode == 'absolute':
             time = (self.exposure_end_abs - self.exposure_start_abs)
+
         if self.exposure_mode == 'degrees':
             time = (self.exposure_degrees_end - self.exposure_degrees_start) / (fps * 2 * math.pi)
 
         return time
 
     def api_output(self, scene, is_cam_animated):
-        '''
+        """
         scene           bpy.types.scene
 
         Format this class's members into a LuxRender ParamSet
 
         Returns tuple
-        '''
+        """
 
         cam = scene.camera.data
         xr, yr = self.luxrender_film.resolution(scene)
@@ -433,14 +440,16 @@ class luxrender_camera(declarative_property_group):
 
         params.add_float('screenwindow', self.screenwindow(xr, yr, scene, cam))
         params.add_bool('autofocus', False)
-
         fps = scene.render.fps / scene.render.fps_base
+
         if self.exposure_mode == 'normalised':
             params.add_float('shutteropen', self.exposure_start_norm / fps)
             params.add_float('shutterclose', self.exposure_end_norm / fps)
+
         if self.exposure_mode == 'absolute':
             params.add_float('shutteropen', self.exposure_start_abs)
             params.add_float('shutterclose', self.exposure_end_abs)
+
         if self.exposure_mode == 'degrees':
             params.add_float('shutteropen', self.exposure_degrees_start / (fps * 2 * math.pi))
             params.add_float('shutterclose', self.exposure_degrees_end / (fps * 2 * math.pi))
@@ -472,8 +481,9 @@ class luxrender_camera(declarative_property_group):
             # update the camera settings with motion blur settings
             params.add_string('shutterdistribution', self.shutterdistribution)
 
-        cam_type = 'orthographic' if cam.type == 'ORTHO' else self.type if bpy.app.version < (
-            2, 63, 5 ) else 'environment' if cam.type == 'PANO' else 'perspective'
+        cam_type = 'orthographic' if cam.type == 'ORTHO' else self.type if bpy.app.version < (2, 63, 5) else \
+            'environment' if cam.type == 'PANO' else 'perspective'
+
         return cam_type, params
 
 
@@ -724,7 +734,6 @@ class luxrender_film(declarative_property_group):
 
         Returns     tuple(2) (floats)
         """
-
         xr = scene.render.resolution_x * scene.render.resolution_percentage / 100.0
         yr = scene.render.resolution_y * scene.render.resolution_percentage / 100.0
 
@@ -746,9 +755,7 @@ class luxrender_film(declarative_property_group):
         Returns     tuple(2) (string, list)
         """
         scene = LuxManager.CurrentScene
-
         xr, yr = self.resolution(scene)
-
         params = ParamSet()
 
         # Border rendering handler, this gets a bit tricky. Blender ALWAYS expects to get back a cropped image,
@@ -759,6 +766,7 @@ class luxrender_film(declarative_property_group):
                     scene.render.border_min_x, scene.render.border_max_x,
                     scene.render.border_min_y, scene.render.border_max_y
                 ]
+
                 # Set resolution
                 # This is a new method of "rounding" the cropped image to match blenders expected rectangle_size
                 # I tested this with several cases which failed with the former rounding, pls check - Jens
@@ -770,27 +778,27 @@ class luxrender_film(declarative_property_group):
             if not scene.render.use_crop_to_border:
                 # If run-renderer (scene.luxrender_engine.render) is disabled or we are in un-monitored external mode,
                 # we do not return the image to Blender and Lux must pad the image itself
-                if scene.luxrender_engine.render == False or (
+                if not scene.luxrender_engine.render or (
                                     scene.luxrender_engine.export_type == 'EXT' and
                                     scene.luxrender_engine.binary_name == 'luxrender' and
-                                scene.luxrender_engine.monitor_external == False):
+                                    not scene.luxrender_engine.monitor_external):
                     # Subtract scene.render.border Y values from 1 to translate between Blender and Lux conventions
                     cropwindow = [
                         scene.render.border_min_x, scene.render.border_max_x,
                         1 - scene.render.border_min_y, 1 - scene.render.border_max_y
                     ]
+
                     params.add_float('cropwindow', cropwindow)
                     params.add_integer('xresolution', xr)  # Don't forget to set full frame resolution
                     params.add_integer('yresolution', yr)
-
-
                 else:
                     # We are returning the image to blender which will pad for us,
                     # so have LuxRender send back a cropped frame anyway
-                    (x1, x2, y1, y2) = [
+                    x1, x2, y1, y2 = [
                         scene.render.border_min_x, scene.render.border_max_x,
                         scene.render.border_min_y, scene.render.border_max_y
                     ]
+
                     # Set resolution
                     # This is a new method of "rounding" the cropped image to match blenders expected rectangle_size
                     # I tested this with several cases which failed with the former rounding, pls check - Jens
@@ -801,7 +809,6 @@ class luxrender_film(declarative_property_group):
             # Set resolution
             params.add_integer('xresolution', xr)
             params.add_integer('yresolution', yr)
-
 
         # ColourSpace
         if self.luxrender_colorspace.preset:
@@ -816,11 +823,12 @@ class luxrender_film(declarative_property_group):
         params.add_float('colorspace_blue', [cs_object.cs_blueX, cs_object.cs_blueY])
 
         # Camera Response Function
-        if self.luxrender_colorspace.use_crf == 'file' and self.luxrender_colorspace.crf_file != '':
+        if self.luxrender_colorspace.use_crf == 'file' and self.luxrender_colorspace.crf_file:
             if scene.camera.library is not None:
                 local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
             else:
                 local_crf_filepath = self.luxrender_colorspace.crf_file
+
             local_crf_filepath = efutil.filesystem_path(local_crf_filepath)
             if scene.luxrender_engine.allow_file_embed():
                 from ..util import bencode_file2string
@@ -830,6 +838,7 @@ class luxrender_film(declarative_property_group):
                 params.add_string('cameraresponse_data', encoded_data.splitlines())
             else:
                 params.add_string('cameraresponse', local_crf_filepath)
+
         if self.luxrender_colorspace.use_crf == 'preset':
             params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
 
@@ -869,10 +878,13 @@ class luxrender_film(declarative_property_group):
 
         params.add_bool('write_png', self.write_png)
         params.add_string('write_png_channels', output_channels)
+
         if self.write_png:
             params.add_bool('write_png_16bit', self.write_png_16bit)
+
         params.add_bool('write_tga', self.write_tga)
         params.add_string('write_tga_channels', output_channels)
+
         if self.write_tga:
             params.add_bool('write_tga_ZBuf', self.write_zbuf)
             params.add_string('write_tga_zbuf_normalizationtype', self.zbuf_normalization)
@@ -901,7 +913,7 @@ class luxrender_film(declarative_property_group):
             params.add_float('convergencestep', scene.luxrender_halt.convergencestep)
 
         # Filename for User Sampling Map
-        if scene.luxrender_sampler.usersamplingmap_filename != '':
+        if scene.luxrender_sampler.usersamplingmap_filename:
             if scene.luxrender_sampler.usersamplingmap_filename.endswith('.exr'):
                 params.add_string('usersamplingmap_filename', scene.luxrender_sampler.usersamplingmap_filename)
             else:
@@ -915,7 +927,7 @@ class luxrender_film(declarative_property_group):
         # update the film settings with tonemapper settings
         params.update(self.luxrender_tonemapping.get_paramset())
 
-        return ('fleximage', params)
+        return 'fleximage', params
 
 # Valid CRF preset names (case sensitive):
 # See lux/core/cameraresponse.cpp to keep this up to date
@@ -994,10 +1006,12 @@ class CAMERA_MT_luxrender_crf(bpy.types.Menu):
     # Flat-list menu system
     def draw(self, context):
         lt = self.layout.row()
+
         for i, crf_name in enumerate(sorted(crf_preset_names)):
             # Create a new column every 20 items
-            if (i % 20 == 0):
+            if i % 20 == 0:
                 cl = lt.column()
+
             op = cl.operator('CAMERA_OT_set_luxrender_crf', text=crf_name)
             op.preset_name = crf_name
 
@@ -1547,9 +1561,7 @@ class luxrender_tonemapping(declarative_property_group):
 
     def get_paramset(self):
         cam = LuxManager.CurrentScene.camera.data
-
         params = ParamSet()
-
         params.add_string('tonemapkernel', self.type)
 
         if self.type == 'reinhard':

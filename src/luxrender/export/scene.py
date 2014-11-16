@@ -50,7 +50,6 @@ class SceneExporterProperties(object):
     """
     Mimics the properties member contained within EXPORT_OT_LuxRender operator
     """
-
     filename = ''
     directory = ''
     api_type = ''
@@ -84,32 +83,41 @@ class SceneExporter(object):
         if obj.type == 'LAMP' and is_obj_visible(self.scene, obj):
             lamp_enabled = export_lights.checkLightEnabled(self.scene, obj.data)
             lamp_enabled &= obj.data.energy > 0.0
+
             if obj.data.type == 'POINT':
                 lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_point.L_color.v > 0.0
+
             if obj.data.type == 'SPOT':
                 lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_spot.L_color.v > 0.0
+
             if obj.data.type == 'HEMI':
                 lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_hemi.L_color.v > 0.0
+
             if obj.data.type == 'AREA':
                 lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.L_color.v > 0.0
                 lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.power > 0.0
                 lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.efficacy > 0.0
+
             have_lamp |= lamp_enabled
 
         if obj.type in ['MESH', 'SURFACE', 'CURVE', 'FONT', 'META'] and is_obj_visible(self.scene, obj):
             for ms in obj.material_slots:
                 mat = ms.material
+
                 if mat and mat.luxrender_emission.use_emission:
                     emit_enabled = self.scene.luxrender_lightgroups.is_enabled(mat.luxrender_emission.lightgroup)
                     emit_enabled &= (mat.luxrender_emission.L_color.v * mat.luxrender_emission.gain) > 0.0
                     have_emitter |= emit_enabled
+
                     if have_emitter:
                         break
 
                 if mat.luxrender_material.nodetree:
                     output_node = find_node(mat, 'luxrender_material_output_node')
-                    if output_node != None:
+
+                    if output_node is not None:
                         light_socket = output_node.inputs[3]
+
                         if light_socket.is_linked:
                             have_emitter = light_socket.is_linked
 
@@ -195,7 +203,7 @@ class SceneExporter(object):
                     lxs_filename,
                 )
 
-            if lux_context == False:
+            if not lux_context:
                 raise Exception('Lux context is not valid for export to %s' % self.properties.filename)
 
             export_materials.ExportedMaterials.clear()
@@ -216,6 +224,7 @@ class SceneExporter(object):
 
             # Set up camera, view and film
             is_cam_animated = False
+
             if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
 
                 STEPS = scene.camera.data.luxrender_camera.motion_blur_samples
@@ -229,6 +238,7 @@ class SceneExporter(object):
 
                     for m in anim_matrices:
                         lux_context.lookAt(*scene.camera.data.luxrender_camera.lookAt(scene.camera, m))
+
                     lux_context.motionEnd()
                     is_cam_animated = True
 
@@ -239,13 +249,13 @@ class SceneExporter(object):
             lux_context.film(*scene.camera.data.luxrender_camera.luxrender_film.api_output())
 
             lux_context.worldBegin()
-
             lights_in_export = False
 
             # Find linked 'background_set' scenes
             geom_scenes = [scene]
             s = scene
-            while s.background_set != None:
+
+            while s.background_set is not None:
                 s = s.background_set
                 geom_scenes.append(s)
 
@@ -259,12 +269,14 @@ class SceneExporter(object):
                     self.report({'INFO'}, 'Exporting volume data')
                     if self.properties.api_type == 'FILE':
                         lux_context.set_output_file(Files.MATS)
+
                     for volume in geom_scene.luxrender_volumes.volumes:
                         lux_context.makeNamedVolume(volume.name, *volume.api_output(lux_context))
 
                 self.report({'INFO'}, 'Exporting geometry')
                 if self.properties.api_type == 'FILE':
                     lux_context.set_output_file(Files.GEOM)
+
                 lights_in_export |= GE.iterateScene(geom_scene)
 
             for geom_scene in geom_scenes:
@@ -275,13 +287,13 @@ class SceneExporter(object):
                 self.report({'INFO'}, 'Exporting lights')
                 lights_in_export |= export_lights.lights(lux_context, geom_scene, scene, GE.ExportedMeshes)
 
-            if lights_in_export == False:
+            if not lights_in_export:
                 raise Exception('No lights in exported data!')
 
             # Default 'Camera' Exterior
-            if scene.camera.data.luxrender_camera.Exterior_volume != '':
+            if scene.camera.data.luxrender_camera.Exterior_volume:
                 lux_context.exterior(scene.camera.data.luxrender_camera.Exterior_volume)
-            elif scene.luxrender_world.default_exterior_volume != '':
+            elif scene.luxrender_world.default_exterior_volume:
                 lux_context.exterior(scene.luxrender_world.default_exterior_volume)
 
             if self.properties.write_all_files:
@@ -298,6 +310,8 @@ class SceneExporter(object):
             import traceback
 
             traceback.print_exc()
+
             if scene.luxrender_testing.re_raise:
                 raise err
+
             return {'CANCELLED'}

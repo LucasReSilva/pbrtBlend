@@ -117,6 +117,7 @@ class MaterialCounter(object):
     def __enter__(self):
         if self.ident in MaterialCounter.stack:
             raise Exception("Recursion in material assignment: %s" % ' -> '.join(MaterialCounter.stack))
+
         MaterialCounter.stack.append(self.ident)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -180,10 +181,12 @@ def get_material_volume_defs(m):
             return ""
 
         int_vol_socket = outputNode.inputs[1]
+
         if int_vol_socket.is_linked:
             int_vol_node = int_vol_socket.links[0].from_node
 
         ext_vol_socket = outputNode.inputs[2]
+
         if ext_vol_socket.is_linked:
             ext_vol_node = ext_vol_socket.links[0].from_node
 
@@ -308,7 +311,6 @@ def convert_texture(scene, texture, variant_hint=None):
 
     # Translate Blender Image/movie into lux tex
     if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE', 'SEQUENCE']:
-
         extract_path = os.path.join(
             efutil.scene_filename(),
             bpy.path.clean_name(scene.name),
@@ -325,6 +327,7 @@ def convert_texture(scene, texture, variant_hint=None):
             if texture.image.packed_file:
                 tex_image = 'luxblend_extracted_image_%s.%s' % (
                     bpy.path.clean_name(texture.name), scene.render.image_settings.file_format)
+
                 tex_image = os.path.join(extract_path, tex_image)
                 texture.image.save_render(tex_image, scene)
             else:
@@ -335,18 +338,21 @@ def convert_texture(scene, texture, variant_hint=None):
                 if not os.path.exists(f_path):
                     raise Exception(
                         'Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+
                 tex_image = efutil.filesystem_path(f_path)
 
         if texture.image.source == 'SEQUENCE':
             if texture.image.packed_file:
                 tex_image = 'luxblend_extracted_image_%s.%s' % (
                     bpy.path.clean_name(texture.name), scene.render.image_settings.file_format)
+
                 tex_image = os.path.join(extract_path, tex_image)
                 texture.image.save_render(tex_image, scene)
             else:
                 # sequence params from blender
-                sequence = bpy.data.textures[
-                    (texture.name).replace('.001', '')].image_user  # remove tex_preview extension to avoid error
+                # remove tex_preview extension to avoid error
+                sequence = bpy.data.textures[texture.name.replace('.001', '')].image_user
+
                 seqframes = sequence.frame_duration
                 seqoffset = sequence.frame_offset
                 seqstartframe = sequence.frame_start  # the global frame at which the imagesequence starts
@@ -364,10 +370,11 @@ def convert_texture(scene, texture, variant_hint=None):
                     fnumber = currentframe - (seqstartframe - 1) + seqoffset
 
                 if fnumber > seqframes:
-                    if seqcyclic == False:
+                    if not seqcyclic:
                         fnumber = seqframes
                     else:
                         fnumber = (currentframe - (seqstartframe - 1)) % seqframes
+
                         if fnumber == 0:
                             fnumber = seqframes
 
@@ -375,6 +382,7 @@ def convert_texture(scene, texture, variant_hint=None):
 
                 def get_seq_filename(number, f_path):
                     m = re.findall(r'(\d+)', f_path)
+
                     if len(m) == 0:
                         return "ERR: Can't find pattern"
 
@@ -393,17 +401,22 @@ def convert_texture(scene, texture, variant_hint=None):
                 if not os.path.exists(f_path):
                     raise Exception(
                         'Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
+
                 tex_image = efutil.filesystem_path(f_path)
 
         lux_tex_name = 'imagemap'
         sampling = texture.luxrender_texture.luxrender_tex_imagesampling
+
         if variant_hint:
             variant = variant_hint
         else:
             variant = 'color'
+
         paramset.add_string('filename', tex_image)
+
         if variant_hint == float:
             paramset.add_string('channel', sampling.channel)
+
         paramset.add_integer('discardmipmaps', sampling.discardmipmaps)
         paramset.add_float('gain', sampling.gain)
         paramset.add_float('gamma', sampling.gamma)
@@ -433,6 +446,7 @@ def convert_texture(scene, texture, variant_hint=None):
                 variant = variant_hint
             else:
                 variant = 'color'
+
             paramset.add_string('filename', tex_image)
             paramset.add_float('gamma', 1.0)
             mapping_type = '2D'
@@ -453,19 +467,21 @@ def value_transform_passthrough(val):
 
 
 def get_texture_from_scene(scene, tex_name):
-    if scene.world != None:
+    if scene.world is not None:
         for tex_slot in scene.world.texture_slots:
-            if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
+            if tex_slot is not None and tex_slot.texture is not None and tex_slot.texture.name == tex_name:
                 return tex_slot.texture
+
     for obj in scene.objects:
         for mat_slot in obj.material_slots:
-            if mat_slot != None and mat_slot.material != None:
+            if mat_slot is not None and mat_slot.material is not None:
                 for tex_slot in mat_slot.material.texture_slots:
-                    if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
+                    if tex_slot is not None and tex_slot.texture is not None and tex_slot.texture.name == tex_name:
                         return tex_slot.texture
+
         if obj.type == 'LAMP':
             for tex_slot in obj.data.texture_slots:
-                if tex_slot != None and tex_slot.texture != None and tex_slot.texture.name == tex_name:
+                if tex_slot is not None and tex_slot.texture is not None and tex_slot.texture.name == tex_name:
                     return tex_slot.texture
 
     # Last but not least, look in global bpy.data
@@ -490,17 +506,15 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
     params = ParamSet()
 
     if hasattr(property_group, '%s_use%stexture' % (lux_prop_name, variant)):
-
         export_param_name = getattr(property_group, lux_prop_name)
 
-        if value_transform_function == None:
+        if value_transform_function is None:
             value_transform_function = value_transform_passthrough
 
         if getattr(property_group, '%s_use%stexture' % (lux_prop_name, variant)):
             texture_name = getattr(property_group, '%s_%stexturename' % (lux_prop_name, variant))
-            if texture_name != '':
+            if texture_name:
                 with TextureCounter(texture_name):
-
                     texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 
                     if texture != False:

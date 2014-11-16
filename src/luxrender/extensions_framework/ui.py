@@ -92,19 +92,24 @@ class property_group_renderer(bpy.types.Panel):
             property_group_path = t[0]
             property_group_name = t[1]
             enabled = t[2] if len(t) > 2 else True
+
             if isinstance(enabled, LambdaType) or isinstance(enabled, FunctionType):
                 enabled = enabled()
+
             if (enabled):
                 ctx = _get_item_from_context(context, property_group_path)
                 property_group = getattr(ctx, property_group_name)
+
                 for p in property_group.controls:
                     self.draw_column(p, self.layout, ctx, context,
                                      property_group=property_group)
+
                 property_group.draw_callback(context)
 
     def check_visibility(self, lookup_property, property_group):
         """Determine if the lookup_property should be drawn in the Panel"""
         vt = Logician(property_group)
+
         if lookup_property in property_group.visibility.keys():
             if hasattr(property_group, lookup_property):
                 member = getattr(property_group, lookup_property)
@@ -119,11 +124,13 @@ class property_group_renderer(bpy.types.Panel):
     def check_enabled(self, lookup_property, property_group):
         """Determine if the lookup_property should be enabled in the Panel"""
         et = Logician(property_group)
+
         if lookup_property in property_group.enabled.keys():
             if hasattr(property_group, lookup_property):
                 member = getattr(property_group, lookup_property)
             else:
                 member = None
+
             return et.test_logic(member,
                                  property_group.enabled[lookup_property])
         else:
@@ -132,6 +139,7 @@ class property_group_renderer(bpy.types.Panel):
     def check_alert(self, lookup_property, property_group):
         """Determine if the lookup_property should be in an alert state in the Panel"""
         et = Logician(property_group)
+
         if lookup_property in property_group.alert.keys():
             if hasattr(property_group, lookup_property):
                 member = getattr(property_group, lookup_property)
@@ -179,16 +187,14 @@ class property_group_renderer(bpy.types.Panel):
                                      property_group)
         else:
             if self.check_visibility(control_list_item, property_group):
-
                 for current_property in property_group.properties:
                     if current_property['attr'] == control_list_item:
                         current_property_keys = current_property.keys()
-
                         sub_layout_created = False
+
                         if not self.check_enabled(control_list_item, property_group):
                             last_layout = layout
                             sub_layout_created = True
-
                             layout = layout.row()
                             layout.enabled = False
 
@@ -196,41 +202,43 @@ class property_group_renderer(bpy.types.Panel):
                             if not sub_layout_created:
                                 last_layout = layout
                                 sub_layout_created = True
+
                             layout = layout.row()
                             layout.alert = True
 
+                        # XXX: tomb: this is a very weird way of doing it - what about
+                        # just foo=current_property.get(key, default_value)?
                         if 'type' in current_property_keys:
-                            if current_property['type'] in ['int', 'float',
-                                                            'float_vector', 'string']:
+                            if current_property['type'] in ['int', 'float', 'float_vector', 'string']:
                                 layout.prop(
                                     property_group,
                                     control_list_item,
                                     text=current_property['name'],
-                                    expand=current_property['expand'] \
-                                        if 'expand' in current_property_keys \
+                                    expand=current_property['expand']
+                                        if 'expand' in current_property_keys
                                         else False,
-                                    slider=current_property['slider'] \
-                                        if 'slider' in current_property_keys \
+                                    slider=current_property['slider']
+                                        if 'slider' in current_property_keys
                                         else False,
-                                    toggle=current_property['toggle'] \
-                                        if 'toggle' in current_property_keys \
+                                    toggle=current_property['toggle']
+                                        if 'toggle' in current_property_keys
                                         else False,
-                                    icon_only=current_property['icon_only'] \
-                                        if 'icon_only' in current_property_keys \
+                                    icon_only=current_property['icon_only']
+                                        if 'icon_only' in current_property_keys
                                         else False,
-                                    event=current_property['event'] \
-                                        if 'event' in current_property_keys \
+                                    event=current_property['event']
+                                        if 'event' in current_property_keys
                                         else False,
-                                    full_event=current_property['full_event'] \
-                                        if 'full_event' in current_property_keys \
+                                    full_event=current_property['full_event']
+                                        if 'full_event' in current_property_keys
                                         else False,
-                                    emboss=current_property['emboss'] \
-                                        if 'emboss' in current_property_keys \
+                                    emboss=current_property['emboss']
+                                        if 'emboss' in current_property_keys
                                         else True,
                                 )
+
                             if current_property['type'] in ['enum']:
-                                if 'use_menu' in current_property_keys and \
-                                        current_property['use_menu']:
+                                if 'use_menu' in current_property_keys and current_property['use_menu']:
                                     layout.prop_menu_enum(
                                         property_group,
                                         control_list_item,
@@ -241,26 +249,26 @@ class property_group_renderer(bpy.types.Panel):
                                         property_group,
                                         control_list_item,
                                         text=current_property['name'],
-                                        expand=current_property['expand'] \
-                                            if 'expand' in current_property_keys \
+                                        expand=current_property['expand']
+                                            if 'expand' in current_property_keys
                                             else False,
-                                        slider=current_property['slider'] \
-                                            if 'slider' in current_property_keys \
+                                        slider=current_property['slider']
+                                            if 'slider' in current_property_keys
                                             else False,
-                                        toggle=current_property['toggle'] \
-                                            if 'toggle' in current_property_keys \
+                                        toggle=current_property['toggle']
+                                            if 'toggle' in current_property_keys
                                             else False,
-                                        icon_only=current_property['icon_only'] \
-                                            if 'icon_only' in current_property_keys \
+                                        icon_only=current_property['icon_only']
+                                            if 'icon_only' in current_property_keys
                                             else False,
-                                        event=current_property['event'] \
-                                            if 'event' in current_property_keys \
+                                        event=current_property['event']
+                                            if 'event' in current_property_keys
                                             else False,
-                                        full_event=current_property['full_event'] \
-                                            if 'full_event' in current_property_keys \
+                                        full_event=current_property['full_event']
+                                            if 'full_event' in current_property_keys
                                             else False,
-                                        emboss=current_property['emboss'] \
-                                            if 'emboss' in current_property_keys \
+                                        emboss=current_property['emboss']
+                                            if 'emboss' in current_property_keys
                                             else True,
                                     )
                             if current_property['type'] in ['bool']:
@@ -268,20 +276,20 @@ class property_group_renderer(bpy.types.Panel):
                                     property_group,
                                     control_list_item,
                                     text=current_property['name'],
-                                    toggle=current_property['toggle'] \
-                                        if 'toggle' in current_property_keys \
+                                    toggle=current_property['toggle']
+                                        if 'toggle' in current_property_keys
                                         else False,
-                                    icon_only=current_property['icon_only'] \
-                                        if 'icon_only' in current_property_keys \
+                                    icon_only=current_property['icon_only']
+                                        if 'icon_only' in current_property_keys
                                         else False,
-                                    event=current_property['event'] \
-                                        if 'event' in current_property_keys \
+                                    event=current_property['event']
+                                        if 'event' in current_property_keys
                                         else False,
-                                    full_event=current_property['full_event'] \
-                                        if 'full_event' in current_property_keys \
+                                    full_event=current_property['full_event']
+                                        if 'full_event' in current_property_keys
                                         else False,
-                                    emboss=current_property['emboss'] \
-                                        if 'emboss' in current_property_keys \
+                                    emboss=current_property['emboss']
+                                        if 'emboss' in current_property_keys
                                         else True,
                                 )
                             elif current_property['type'] in ['operator']:

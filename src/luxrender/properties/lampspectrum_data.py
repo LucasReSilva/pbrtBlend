@@ -192,6 +192,7 @@ class TEXTURE_MT_lampspectrum_presets(bpy.types.Menu):
 
     def draw(self, context):
         sl = self.layout
+
         for sm in self.submenus:
             sl.menu(sm.bl_idname)
 

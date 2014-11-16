@@ -43,12 +43,15 @@ class luxrender_ui_rendering_controls(property_group_renderer):
     @classmethod
     def poll(cls, context):
         eng = context.scene.render.engine in cls.COMPAT_ENGINES
+
         if eng:
-            lma = LM.GetActive() != None and LM.GetActive().started
+            lma = LM.GetActive() is not None and LM.GetActive().started
+
             if lma:
                 cls.ctx = LM.GetActive().lux_context
-                ctxc = cls.ctx != None and cls.ctx.API_TYPE == 'PURE'
+                ctxc = cls.ctx is not None and cls.ctx.API_TYPE == 'PURE'
                 csd = context.space_data
+
                 return PYLUX_AVAILABLE and ctxc and csd
 
         return False
@@ -69,7 +72,7 @@ class luxrender_ui_rendering_controls(property_group_renderer):
         # 3. Give queue to FrameBuffer thread, replacing values as needed
         # 4. FB will empty its own queue into the Context upon the next image update call
 
-        if self.ctx != None and self.ctx.API_TYPE == 'PURE':
+        if self.ctx is not None and self.ctx.API_TYPE == 'PURE':
             pylux = self.ctx.PYLUX
             tm_data = context.scene.camera.data.luxrender_camera.luxrender_film.luxrender_tonemapping
             tm_map = {

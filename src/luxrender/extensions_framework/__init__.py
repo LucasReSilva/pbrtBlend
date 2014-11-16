@@ -42,6 +42,7 @@ def log(str, popup=False, module_name='EF'):
     """
     print("[%s %s] %s" %
           (module_name, time.strftime('%Y-%b-%d %H:%M:%S'), str))
+
     if popup:
         bpy.ops.ef.msg(
             msg_type='WARNING',
@@ -183,6 +184,7 @@ class declarative_property_group(bpy.types.PropertyGroup):
             for property_group_parent in cls.ef_attach_to:
                 if property_group_parent is not None:
                     prototype = getattr(bpy.types, property_group_parent)
+
                     if not hasattr(prototype, cls.__name__):
                         init_properties(prototype, [{
                                                         'type': 'pointer',
