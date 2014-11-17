@@ -92,7 +92,7 @@ class Custom_Context(object):
             self.set_filename(scene, 'default')
 
         # Prevent trying to write to a file that isn't open
-        if self.files[ind] == None:
+        if self.files[ind] is None:
             ind = 0
 
         self.files[ind].write('%s%s\n' % ('\t' * tabs, st))
@@ -226,8 +226,10 @@ class Custom_Context(object):
 
     def worldBegin(self, *args):
         self.wf(Files.MAIN, '\nWorldBegin')
+
         if self.files[Files.MAIN] is not None:
             # Include the other files if they exist
+
             for idx in [Files.MATS, Files.GEOM, Files.VOLM]:
                 if os.path.exists(self.file_names[idx]):
                     self.wf(Files.MAIN, '\nInclude "%s"' % efutil.path_relative_to_export(self.file_names[idx]))
@@ -305,11 +307,13 @@ class Custom_Context(object):
 
     def makeNamedMaterial(self, name, params):
         self.wf(Files.MATS, '\nMakeNamedMaterial "%s"' % name)
+
         for p in params:
             self.wf(Files.MATS, p.to_string(), 1)
 
     def makeNamedVolume(self, name, type, params):
         self.wf(Files.MATS, '\nMakeNamedVolume "%s" "%s"' % (name, type))
+
         for p in params:
             self.wf(Files.MATS, p.to_string(), 1)
 
@@ -321,11 +325,13 @@ class Custom_Context(object):
 
     def volume(self, type, params):
         self.wf(Files.VOLM, '\nVolume "%s"' % type)
+
         for p in params:
             self.wf(Files.VOLM, p.to_string(), 1)
 
     def texture(self, name, type, texture, params):
         self.wf(Files.MATS, '\nTexture "%s" "%s" "%s"' % (name, type, texture))
+
         for p in params:
             self.wf(Files.MATS, p.to_string(), 1)
 
@@ -396,12 +402,14 @@ class Custom_Context(object):
             # propagate networking settings
             if self.use_network_servers:
                 c.setNetworkServerUpdateInterval(self.serverinterval)
+
                 for s in self.servers:
                     c.addServer(s)
 
             c.parse(filename, async)
 
             self.PYLUX = c.PYLUX
+
             return c
         else:
             raise Exception('This method requires pylux')

@@ -47,7 +47,7 @@ class Custom_Context(object):
         self.output_file.write('# LXM File saved by LuxBlend25\n')
 
     def close(self):
-        if self.output_file != None:
+        if self.output_file is not None:
             self.output_file.close()
 
     def getRenderingServersStatus(self):
@@ -77,6 +77,7 @@ class Custom_Context(object):
         # name is a string, and params a list
         name, params = args
         self.wf('\n%s "%s"' % (identifier, name))
+
         for p in params:
             self.wf(p.to_string(), 1)
 

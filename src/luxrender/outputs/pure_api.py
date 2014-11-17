@@ -111,9 +111,9 @@ if not 'PYLUX_AVAILABLE' in locals():
                 pylux.Context.transformBegin(self)
 
             def logVerbosity(self, verbosity):
-                '''
+                """
                 verbose, default, quiet, very-quiet
-                '''
+                """
                 try:
                     filterMap = {
                         'verbose': pylux.ErrorSeverity.LUX_DEBUG,
@@ -143,6 +143,7 @@ if not 'PYLUX_AVAILABLE' in locals():
                     'samplesPx': 0.0,
                     'efficiency': 0.0,
                 }
+
                 stats_format = {
                     'secElapsed': format_elapsed_time,
                     'samplesSec': lambda x: 'Samples/Sec: %0.2f' % x,
@@ -150,11 +151,13 @@ if not 'PYLUX_AVAILABLE' in locals():
                     'samplesPx': lambda x: 'Samples/Px: %0.2f' % x,
                     'efficiency': lambda x: 'Efficiency: %0.2f %%' % x,
                 }
+
                 for k in stats_dict.keys():
                     stats_dict[k] = self.statistics(k)
 
                     stats_string = ' | '.join(['%s' % stats_format[k](v) for k, v in stats_dict.items()])
                     network_servers = self.getServerCount()
+
                     if network_servers > 0:
                         stats_string += ' | %i Network Servers Active' % network_servers
 
@@ -167,10 +170,12 @@ if not 'PYLUX_AVAILABLE' in locals():
 
             def getRenderingServersStatus(self):
                 server_list = []
+
                 for i in range(self.getServerCount()):
                     rsi = pylux.RenderingServerInfo()
                     pylux.Context.getRenderingServersStatus(self, rsi, i + 1)
                     server_list.append(rsi)
+
                 return server_list
 
             Custom_Context.getRenderingServersStatus = getRenderingServersStatus

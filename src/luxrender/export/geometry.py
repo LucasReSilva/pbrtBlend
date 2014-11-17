@@ -1303,7 +1303,7 @@ class GeometryExporter(object):
 
             self.ExportedObjectsDuplis.add(obj, True)
 
-            obj.dupli_list_create(self.visibility_scene)
+            obj.dupli_list_create(self.visibility_scene, settings='RENDER')
             if not obj.dupli_list:
                 raise Exception('cannot create dupli list for object %s' % obj.name)
 

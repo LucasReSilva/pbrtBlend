@@ -110,7 +110,7 @@ class LuxFilmDisplay(TimerThread):
 
                 result = self.LocalStorage['RE'].begin_result(0, 0, xres, yres)
 
-                if result == None:
+                if result is None:
                     err_msg = 'ERROR: Cannot not load render result: begin_result() returned None.\
                      LuxFilmThread will terminate'
                     LuxLog(err_msg)
@@ -212,21 +212,20 @@ class LuxManager(object):
         Returns LuxManager object
         """
 
-        if api_type == 'FILE':
-            Context = file_api.Custom_Context
-        elif api_type == 'API':
-            Context = pure_api.Custom_Context
-        elif api_type == 'LBM2':
-            Context = lbm2_api.Custom_Context
-        elif api_type == 'LXM':
-            Context = lxm_api.Custom_Context
-        else:
+        context = {
+            'FILE': file_api.Custom_Context,
+            'API': pure_api.Custom_Context,
+            'LBM2': lbm2_api.Custom_Context,
+            'LXM': lxm_api.Custom_Context
+        }.get(api_type)
+
+        if context is None:
             raise Exception('Unknown exporter API type "%s"' % api_type)
 
         if manager_name is not '':
             manager_name = ' (%s)' % manager_name
-        self.lux_context = Context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
 
+        self.lux_context = context('LuxContext %04i%s' % (LuxManager.get_context_number(), manager_name))
         self.reset()
 
     def start(self):
@@ -247,6 +246,7 @@ class LuxManager(object):
         while self.lux_context.statistics('sceneIsReady') != 1.0:
             wait_timer = threading.Timer(0.3, self.null_wait)
             wait_timer.start()
+
             if wait_timer.isAlive():
                 wait_timer.join()
 
@@ -285,6 +285,7 @@ class LuxManager(object):
 
         if not self.started:
             return
+
         self.started = False
 
         # Stop the framebuffer update thread
