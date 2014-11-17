@@ -61,7 +61,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
     # idtype = StringProperty(name="ID Type", default="material")
 
     def execute(self, context):
-        #idtype = self.properties.idtype
+        # idtype = self.properties.idtype
         idtype = 'material'
         context_data = {'material': context.material, 'lamp': context.lamp}
         idblock = context_data[idtype]
@@ -76,28 +76,45 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         # Get the mat type set in editor, todo: find a more iterative way to get context
         node_type = 'luxrender_material_%s_node' % ctx_mat.type
 
-        editor_type_lookup_dict = {
-            'matte': ctx_mat.luxrender_mat_matte,
-            'mattetranslucent': ctx_mat.luxrender_mat_mattetranslucent,
-            'glossy': ctx_mat.luxrender_mat_glossy,
-            'glossycoating': ctx_mat.luxrender_mat_glossycoating,
-            'glossytranslucent': ctx_mat.luxrender_mat_glossytranslucent,
-            'glass': ctx_mat.luxrender_mat_glass,
-            'glass2': ctx_mat.luxrender_mat_glass2,
-            'roughglass': ctx_mat.luxrender_mat_roughglass,
-            'mirror': ctx_mat.luxrender_mat_mirror,
-            'carpaint': ctx_mat.luxrender_mat_carpaint,
-            'metal': ctx_mat.luxrender_mat_metal,
-            'metal2': ctx_mat.luxrender_mat_metal2,
-            'velvet': ctx_mat.luxrender_mat_velvet,
-            'cloth': ctx_mat.luxrender_mat_cloth,
-            'scatter': ctx_mat.luxrender_mat_scatter,
-            'shinymetal': ctx_mat.luxrender_mat_shinymetal,
-            'mix': ctx_mat.luxrender_mat_mix,
-            'layered': ctx_mat.luxrender_mat_layered,
-        }
+        if ctx_mat.type == 'matte':
+            editor_type = ctx_mat.luxrender_mat_matte
+        if ctx_mat.type == 'mattetranslucent':
+            editor_type = ctx_mat.luxrender_mat_mattetranslucent
+        if ctx_mat.type == 'glossy':
+            editor_type = ctx_mat.luxrender_mat_glossy
+        if ctx_mat.type == 'glossycoating':
+            editor_type = ctx_mat.luxrender_mat_glossycoating
+        if ctx_mat.type == 'glossytranslucent':
+            editor_type = ctx_mat.luxrender_mat_glossytranslucent
+        if ctx_mat.type == 'glass':
+            editor_type = ctx_mat.luxrender_mat_glass
+        if ctx_mat.type == 'glass2':
+            editor_type = ctx_mat.luxrender_mat_glass2
+        if ctx_mat.type == 'roughglass':
+            editor_type = ctx_mat.luxrender_mat_roughglass
+        if ctx_mat.type == 'mirror':
+            editor_type = ctx_mat.luxrender_mat_mirror
+        if ctx_mat.type == 'carpaint':
+            editor_type = ctx_mat.luxrender_mat_carpaint
+        if ctx_mat.type == 'metal':
+            editor_type = ctx_mat.luxrender_mat_metal
+        if ctx_mat.type == 'metal2':
+            editor_type = ctx_mat.luxrender_mat_metal2
+        if ctx_mat.type == 'velvet':
+            editor_type = ctx_mat.luxrender_mat_velvet
+        if ctx_mat.type == 'cloth':
+            editor_type = ctx_mat.luxrender_mat_cloth
+        if ctx_mat.type == 'scatter':
+            editor_type = ctx_mat.luxrender_mat_scatter
+        if ctx_mat.type == 'mix':
+            editor_type = ctx_mat.luxrender_mat_mix
+        if ctx_mat.type == 'layered':
+            editor_type = ctx_mat.luxrender_mat_layered
 
-        editor_type = editor_type_lookup_dict.get(ctx_mat.type)
+        # handling for not existent shinymetal node, just hack atm.
+        if ctx_mat.type == 'shinymetal':
+            editor_type = ctx_mat.luxrender_mat_metal2
+            node_type = 'luxrender_material_metal2_node'
 
         if idtype == 'material':
             shader = nt.nodes.new(node_type)  # create also matnode from editor type
@@ -106,27 +123,35 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             sh_out.location = 500, 400
             nt.links.new(shader.outputs[0], sh_out.inputs[0])
 
-            color_lookup_dict = {
-                'Absorption Color': editor_type.Ka_color,
-                'Diffuse Color': editor_type.Kd_color,
-                'Reflection Color': editor_type.Kr_color,
-                'Specular Color': editor_type.Ks_color,
-                'Specular Color 1': editor_type.Ks1_color,
-                'Specular Color 2': editor_type.Ks2_color,
-                'Specular Color 3': editor_type.Ks3_color,
-                'Transmission Color': editor_type.Kt_color,
-                'Warp Diffuse Color': editor_type.warp_Kd_color,
-                'Warp Specular Color': editor_type.warp_Ks_color,
-                'Weft Diffuse Color': editor_type.weft_Kd_color,
-                'Weft Specular Color': editor_type.weft_Ks_color,
-                'Backface Absorption Color': editor_type.backface_Ka_color,
-                'Backface Specular Color': editor_type.backface_Ks_color
-            }
-
             # Get material settings ( color )
-            for input_name in shader.inputs:
-                if input_name in color_lookup_dict:
-                    shader.inputs[input_name].color = color_lookup_dict[input_name]
+            if 'Absorption Color' in shader.inputs:
+                shader.inputs['Absorption Color'].color = editor_type.Ka_color
+            if 'Diffuse Color' in shader.inputs:
+                shader.inputs['Diffuse Color'].color = editor_type.Kd_color
+            if 'Reflection Color' in shader.inputs:
+                shader.inputs['Reflection Color'].color = editor_type.Kr_color
+            if 'Specular Color' in shader.inputs:
+                shader.inputs['Specular Color'].color = editor_type.Ks_color
+            if 'Specular Color 1' in shader.inputs:
+                shader.inputs['Specular Color 1'].color = editor_type.Ks1_color
+            if 'Specular Color 2' in shader.inputs:
+                shader.inputs['Specular Color 2'].color = editor_type.Ks2_color
+            if 'Specular Color 3' in shader.inputs:
+                shader.inputs['Specular Color 3'].color = editor_type.Ks3_color
+            if 'Transmission Color' in shader.inputs:
+                shader.inputs['Transmission Color'].color = editor_type.Kt_color
+            if 'Warp Diffuse Color' in shader.inputs:
+                shader.inputs['Warp Diffuse Color'].color = editor_type.warp_Kd_color
+            if 'Warp Specular Color' in shader.inputs:
+                shader.inputs['Warp Specular Color'].color = editor_type.warp_Ks_color
+            if 'Weft Diffuse Color' in shader.inputs:
+                shader.inputs['Weft Diffuse Color'].color = editor_type.weft_Kd_color
+            if 'Weft Specular Color' in shader.inputs:
+                shader.inputs['Weft Specular Color'].color = editor_type.weft_Ks_color
+            if 'Backface Absorption Color' in shader.inputs:
+                shader.inputs['Backface Absorption Color'].color = editor_type.backface_Ka_color
+            if 'Backface Specular Color' in shader.inputs:
+                shader.inputs['Backface Specular Color'].color = editor_type.backface_Ks_color
 
             # Get various material settings ( float )
             if 'Mix Amount' in shader.inputs:
@@ -734,7 +759,7 @@ def material_converter(report, scene, blender_mat):
                         color = Kd_stack[n][2]
 
                         if tex.use_color_ramp:
-                            #TODO: Implement band texture conversion
+                            # TODO: Implement band texture conversion
                             mix_tex_slot = blender_mat.texture_slots.add()
                             alpha_tex_slot = blender_mat.texture_slots.add()
                             color_tex_slot = blender_mat.texture_slots.add()
@@ -796,7 +821,7 @@ def material_converter(report, scene, blender_mat):
                                 mix_params.tex1_usecolortexture = True
                                 mix_params.tex1_colortexturename = Lux_TexName[n - 1]
                         else:
-                            #Add mix texture for blender internal textures
+                            # Add mix texture for blender internal textures
                             mix_tex_slot = blender_mat.texture_slots.add()
                             mix_tex_slot.use = True
                             mix_tex = mix_tex_slot.texture = bpy.data.textures.new('Lux::%s' % tex.name, 'NONE')
@@ -820,8 +845,8 @@ def material_converter(report, scene, blender_mat):
                     luxmat.Kd_colortexturename = mix_tex.name
 
                 pass
-            #else:
-            #luxmat.Kd_usecolortexture = False
+                # else:
+                #luxmat.Kd_usecolortexture = False
 
         if luxrender_mat.type in ('glossy'):
             if len(Ks_stack) == 1:
