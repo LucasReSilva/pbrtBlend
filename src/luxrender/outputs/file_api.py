@@ -72,6 +72,7 @@ class Custom_Context(object):
 
     def __init__(self, name):
         self.context_name = name
+        self.has_volumes_file = False
 
     def wf(self, ind, st, tabs=0):
         """
@@ -134,12 +135,7 @@ class Custom_Context(object):
         self.files.append(open(self.file_names[Files.GEOM], 'w'))
         self.wf(Files.GEOM, '# Geometry File')
 
-        self.file_names.append('%s/LuxRender-Volumes.lxv' % subdir)
-        if LXV:
-            self.files.append(open(self.file_names[Files.VOLM], 'w'))
-            self.wf(Files.VOLM, '# Volume File')
-        else:
-            self.files.append(None)
+        self.files.append(None)
 
         self.set_output_file(Files.MAIN)
 
@@ -231,7 +227,7 @@ class Custom_Context(object):
             # Include the other files if they exist
 
             for idx in [Files.MATS, Files.GEOM, Files.VOLM]:
-                if os.path.exists(self.file_names[idx]):
+                if idx < len(self.file_names) and os.path.exists(self.file_names[idx]):
                     self.wf(Files.MAIN, '\nInclude "%s"' % efutil.path_relative_to_export(self.file_names[idx]))
 
     def lightGroup(self, *args):
@@ -324,6 +320,12 @@ class Custom_Context(object):
         self._api('Exterior ', [name, []])
 
     def volume(self, type, params):
+        if not self.has_volumes_file:
+            self.file_names.append('%s/LuxRender-Volumes.lxv' % subdir)
+            self.files.insert(-1, open(self.file_names[Files.VOLM], 'w'))
+            self.wf(Files.VOLM, '# Volume File')
+            self.has_volumes_file = True
+
         self.wf(Files.VOLM, '\nVolume "%s"' % type)
 
         for p in params:
