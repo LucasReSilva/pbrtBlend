@@ -942,6 +942,28 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
 
         return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
+        
+    def CreateBlenderStats(self, lcConfig, stats):
+        lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
+        
+        output = ''
+
+        if lc_engine == 'BIASPATHCPU' or lc_engine == 'BIASPATHOCL':
+            converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
+            notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
+            pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
+                
+            output = ('Pass' + str(stats.Get('stats.renderengine.pass').GetInt()) + '| Convergence ' + str(converged) + '/') + (
+                        str(converged + notconverged + pending) + ' | Avg. samples/sec ') + (
+                        ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
+                        'M on ' + ('%.1f' % (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0))) + (
+                        'K tris')
+        else:
+            output = ('Pass ' + str(stats.Get('stats.renderengine.pass').GetInt()) + ' | Avg. samples/sec ') + (
+                        ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
+                        'M on ' + ('%.1f' % (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)) + 'K tris' )
+
+        return output
 
     def normalizeChannel(self, channel_buffer):
         isInf = math.isinf
@@ -1092,6 +1114,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
             LuxLog('ERROR: LuxCore rendering requires pyluxcore')
+            self.report({'ERROR'}, 'LuxCore rendering requires pyluxcore')
             return
         from .. import pyluxcore
         from ..export.luxcore_scene import BlenderSceneConverter
@@ -1127,6 +1150,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                     stats = lcSession.GetStats()
                     done = self.PrintStats(lcConfig, stats)
+                    
+                    blender_stats = self.CreateBlenderStats(lcConfig, stats)
+                    self.update_stats('Rendering...', blender_stats)
 
                     # Update the image
                     lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
