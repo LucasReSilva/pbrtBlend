@@ -953,7 +953,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
                 
-            output = ('Pass' + str(stats.Get('stats.renderengine.pass').GetInt()) + '| Convergence ' + str(converged) + '/') + (
+            output = ('Pass ' + str(stats.Get('stats.renderengine.pass').GetInt()) + '| Convergence ' + str(converged) + '/') + (
                         str(converged + notconverged + pending) + ' | Avg. samples/sec ') + (
                         ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
                         'M on ' + ('%.1f' % (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0))) + (
@@ -1168,6 +1168,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             channelCalcStartTime = time.time()
             LuxLog('Importing AOV channels into Blender...')
+            self.update_stats('Importing AOV channels into Blender...', '')
 
             channels = scene.luxrender_channels
 
