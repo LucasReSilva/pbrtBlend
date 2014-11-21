@@ -1471,7 +1471,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Dynamic updates
         ########################################################################
         
-        use_fallback = True
+        update_everything = True
         
         # only preview region size has changed
         if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
@@ -1501,33 +1501,53 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
             # when the preview region size is changed, nothing else can change
             return
-            
-        if (context.active_object.name == context.scene.camera.name):
-            use_fallback = False
-            
-            LuxLog('Dynamic updates: updating camera')
-            self.viewSession.BeginSceneEdit()
-            self.build_viewport_camera(self.lcConfig, context, pyluxcore)
-            self.viewSession.EndSceneEdit()
         
         # check objects for updates
         if bpy.data.objects.is_updated:
             for ob in bpy.data.objects:
                 if ob == None:
-                    print("ob was None")
                     continue
                     
                 if ob.is_updated_data:
-                    print("%s: Mesh was edited\n" % ob.name)
+                    print("Dynamic updates: updating mesh of object %s" % ob.name)
+                    # missing
                     
                 if ob.is_updated:
-                    print("%s: Object was moved" % ob.name)
+                    if ob.name == context.scene.camera.name:
+                        update_everything = False
+                        
+                        LuxLog('Dynamic updates: updating camera')
+                        self.viewSession.BeginSceneEdit()
+                        self.build_viewport_camera(self.lcConfig, context, pyluxcore)
+                        self.viewSession.EndSceneEdit()
+                    else:
+                        update_everything = False
+                    
+                        print("Dynamic updates: updating object: %s" % ob.name)
+                        self.viewSession.BeginSceneEdit()
+                        
+                        converter = BlenderSceneConverter(context.scene)
+                        converter.ConvertObject(ob)
+                        
+                        scene = self.lcConfig.GetScene()
+                        scene.Parse(pyluxcore.Properties().Set(converter.scnProps))
+                        
+                        self.viewSession.EndSceneEdit()
+        else:
+            LuxLog('Dynamic updates: no objects changed')
+            
+            # check for changes in materials
+            
+            
+            # check for changes in rendersettings
+            
+            update_everything = False
                         
         ########################################################################
         # Fallback: if no known object transformations took place, update whole scene
         ########################################################################
         
-        if use_fallback:
+        if update_everything:
             LuxLog('Dynamic updates: fallback, re-exporting whole scene')
             LuxManager.SetCurrentScene(context.scene)
 
