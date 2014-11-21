@@ -1471,6 +1471,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Dynamic updates
         ########################################################################
         
+        use_fallback = True
+        
         # only preview region size has changed
         if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
             self.viewFilmWidth = context.region.width
@@ -1497,6 +1499,54 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
             
+            # when the preview region size is changed, nothing else can change
+            return
+            
+        if (context.active_object.name == context.scene.camera.name):
+            use_fallback = False
+            
+            LuxLog('Dynamic updates: updating camera')
+            self.viewSession.BeginSceneEdit()
+            self.build_viewport_camera(self.lcConfig, context, pyluxcore)
+            self.viewSession.EndSceneEdit()
+        
+        # check objects for updates
+        if bpy.data.objects.is_updated:
+            for ob in bpy.data.objects:
+                if ob == None:
+                    print("ob was None")
+                    continue
+                    
+                if ob.is_updated_data:
+                    print("%s: Mesh was edited\n" % ob.name)
+                    
+                if ob.is_updated:
+                    print("%s: Object was moved" % ob.name)
+                        
+        ########################################################################
+        # Fallback: if no known object transformations took place, update whole scene
+        ########################################################################
+        
+        if use_fallback:
+            LuxLog('Dynamic updates: fallback, re-exporting whole scene')
+            LuxManager.SetCurrentScene(context.scene)
+
+            # Convert the Blender scene
+            self.lcConfig = BlenderSceneConverter(context.scene).Convert(
+                imageWidth=self.viewFilmWidth,
+                imageHeight=self.viewFilmHeight)
+                
+            if self.viewSessionRunning:
+                self.viewSession.Stop()
+                self.viewSessionRunning = False
+            
+            self.build_viewport_camera(self.lcConfig, context, pyluxcore)
+        
+            self.viewSession = pyluxcore.RenderSession(self.lcConfig)
+            self.viewSession.Start()
+            self.viewSessionStartTime = time.time()
+            self.viewSessionRunning = True
+        
     '''
     # old function
     
