@@ -34,6 +34,7 @@ from .. import pyluxcore
 from ..outputs import LuxManager, LuxLog
 from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..export import get_worldscale
+from ..export import is_obj_visible
 from ..export.materials import get_texture_from_scene
 
 
@@ -110,7 +111,7 @@ class BlenderSceneConverter(object):
         try:
             mesh_definitions = []
 
-            if obj.hide_render:
+            if not is_obj_visible(self.blScene, obj):
                 return mesh_definitions
 
             mesh = obj.to_mesh(self.blScene, True, 'RENDER')
