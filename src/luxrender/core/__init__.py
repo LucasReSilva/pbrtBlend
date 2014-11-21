@@ -1686,6 +1686,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             stats = self.viewSession.GetStats()
             self.PrintStats(self.viewSession.GetRenderConfig(), stats)
+                    
+            blender_stats = self.CreateBlenderStats(self.lcConfig, stats)
+            self.update_stats('Rendering...', blender_stats)
 
             # Update the image buffer
             self.viewSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
