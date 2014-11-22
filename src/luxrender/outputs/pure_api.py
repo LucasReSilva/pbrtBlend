@@ -24,21 +24,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from .. import find_luxrender_path
 from ..outputs import LuxLog
-import sys
+from .. import import_bindings_module
 
 if not 'PYLUX_AVAILABLE' in locals():
     # If pylux is not available, revert to 0.8 feature set
     LUXRENDER_VERSION = '0.8'
 
     try:
-        lux_path = find_luxrender_path()
-        LuxLog('Assuming pylux module location is {}'.format(lux_path))
-        if not lux_path in sys.path:
-            sys.path.insert(0, lux_path)
-        import pylux
-
+        pylux = import_bindings_module('pylux')
         LUXRENDER_VERSION = pylux.version()
 
         class Custom_Context(pylux.Context):
