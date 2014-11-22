@@ -24,13 +24,12 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from .. import find_luxrender_path
-import sys
 import re
 import bpy
 
 from collections import Iterable
 from ..outputs import LuxLog
+from .. import import_bindings_module
 
 
 def ToValidLuxCoreName(name):
@@ -57,12 +56,7 @@ def ScenePrefix():
 
 if not 'PYLUXCORE_AVAILABLE' in locals():
     try:
-        lux_path = find_luxrender_path()
-        LuxLog('Assuming pyluxcore module location is {}'.format(lux_path))
-        if not lux_path in sys.path:
-            sys.path.insert(0, lux_path)
-        import pyluxcore
-
+        pyluxcore = import_bindings_module('pyluxcore')
         pyluxcore.Init()
         LUXCORE_VERSION = pyluxcore.Version()
 

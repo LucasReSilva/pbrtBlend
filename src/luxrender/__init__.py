@@ -39,6 +39,32 @@ bl_info = {
     "description": "LuxRender integration for Blender"
 }
 
+def find_luxrender_path():
+    from os import getenv
+    from .extensions_framework import util as efutil
+
+    return getenv(  # Use the env var path, if set ...
+                    'LUXRENDER_ROOT',  # .. or load the last path from CFG file
+                    efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+    )
+
+def import_bindings_module(name):
+    """Import Lux Python bindings module (e.g. pylux)."""
+    import os.path
+    import sys
+    import importlib
+    from .outputs import LuxLog
+
+    if sys.platform == 'darwin':
+        return importlib.import_module('.' + name, package=os.path.split(
+                            os.path.dirname(os.path.abspath(__file__)))[1])
+    else:
+        lux_path = find_luxrender_path()
+        LuxLog('Assuming pylux module location is {}'.format(lux_path))
+        if not lux_path in sys.path:
+            sys.path.insert(0, lux_path)
+        return importlib.import_module(name)
+
 if 'core' in locals():
     import imp
 
@@ -50,15 +76,6 @@ else:
     from .extensions_framework import Addon
     import nodeitems_utils
     from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
-
-    def find_luxrender_path():
-        from os import getenv
-        from .extensions_framework import util as efutil
-
-        return getenv(  # Use the env var path, if set ...
-                        'LUXRENDER_ROOT',  # .. or load the last path from CFG file
-                        efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
-        )
 
     class LuxRenderAddonPreferences(AddonPreferences):
         # this must match the addon name
