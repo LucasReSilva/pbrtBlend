@@ -50,12 +50,14 @@ def find_luxrender_path():
 
 def import_bindings_module(name):
     """Import Lux Python bindings module (e.g. pylux)."""
+    import os.path
     import sys
     import importlib
     from .outputs import LuxLog
 
     if sys.platform == 'darwin':
-        return importlib.import_module(name)
+        return importlib.import_module('.' + name, package=os.path.split(
+                            os.path.dirname(os.path.abspath(__file__)))[1])
     else:
         lux_path = find_luxrender_path()
         LuxLog('Assuming pylux module location is {}'.format(lux_path))
