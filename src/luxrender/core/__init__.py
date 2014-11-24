@@ -1528,10 +1528,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     else:
                         LuxLog("Dynamic updates: updating object: %s" % ob.name)
                         
+                        self.viewSession.BeginSceneEdit()
                         converter = BlenderSceneConverter(context.scene, self.viewSession)
                         converter.ConvertObject(ob)
                         
-                        self.viewSession.BeginSceneEdit()
                         lcScene = self.lcConfig.GetScene()
                         lcScene.Parse(converter.scnProps)
                         
