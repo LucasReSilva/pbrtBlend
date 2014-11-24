@@ -55,15 +55,15 @@ def import_bindings_module(name):
     import importlib
     from .outputs import LuxLog
 
-    if sys.platform == 'darwin':
-        return importlib.import_module('.' + name, package=os.path.split(
-                            os.path.dirname(os.path.abspath(__file__)))[1])
-    else:
-        lux_path = find_luxrender_path()
-        LuxLog('Assuming pylux module location is {}'.format(lux_path))
-        if not lux_path in sys.path:
-            sys.path.insert(0, lux_path)
-        return importlib.import_module(name)
+    #if sys.platform == 'darwin':
+    return importlib.import_module('.' + name, package=os.path.split(
+                        os.path.dirname(os.path.abspath(__file__)))[1])
+    #else:
+    #    lux_path = find_luxrender_path()
+    #    LuxLog('Assuming pylux module location is {}'.format(lux_path))
+    #    if not lux_path in sys.path:
+    #        sys.path.insert(0, lux_path)
+    #    return importlib.import_module(name)
 
 if 'core' in locals():
     import imp
