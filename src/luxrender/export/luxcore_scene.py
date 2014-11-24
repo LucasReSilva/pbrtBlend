@@ -55,11 +55,15 @@ class BlenderSceneConverter(object):
     def clear():
         BlenderSceneConverter.scalers_count = 0
 
-    def __init__(self, blScene):
+    def __init__(self, blScene, lcSession = None):
         LuxManager.SetCurrentScene(blScene)
 
         self.blScene = blScene
-        self.lcScene = pyluxcore.Scene()
+        if lcSession:
+           self.lcScene = lcSession.GetRenderConfig().GetScene()
+        else:
+           self.lcScene = pyluxcore.Scene()
+
         self.scnProps = pyluxcore.Properties()
         self.cfgProps = pyluxcore.Properties()
 
