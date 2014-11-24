@@ -1489,7 +1489,6 @@ def lux_scene_update(context):
             if ob.is_updated_data or (ob.data is not None and ob.data.is_updated):
                 GeometryExporter.KnownModifiedObjects.add(ob)
 
-
 @persistent
 def lux_scene_load(context):
     # clear known list on scene load
