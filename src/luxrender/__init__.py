@@ -55,15 +55,32 @@ def import_bindings_module(name):
     import importlib
     from .outputs import LuxLog
 
-    #if sys.platform == 'darwin':
-    return importlib.import_module('.' + name, package=os.path.split(
-                        os.path.dirname(os.path.abspath(__file__)))[1])
-    #else:
-    #    lux_path = find_luxrender_path()
-    #    LuxLog('Assuming pylux module location is {}'.format(lux_path))
-    #    if not lux_path in sys.path:
-    #        sys.path.insert(0, lux_path)
-    #    return importlib.import_module(name)
+    def _import_bindings_module(path, name, relative=False):
+        LuxLog('Attempting to import {} module '
+               'from "{}"'.format(name, path))
+        sys.path.insert(0, path)
+        if relative:
+            package = os.path.split(path)[1]
+            module = importlib.import_module('.' + name, package=package)
+        else:
+            module = importlib.import_module(name)
+        LuxLog('{} module imported successfully'.format(name.title()))
+        del sys.path[0]
+        return module
+
+    lux_path = find_luxrender_path() \
+            or bpy.context.user_preferences.addons[__name__].preferences
+    luxblend_path = os.path.dirname(os.path.abspath(__file__))
+    if sys.platform == 'darwin':
+        return _import_bindings_module(luxblend_path, name, True)
+    else:
+        try:
+            module = _import_bindings_module(lux_path, name)
+        except ImportError:
+            LuxLog('Failed to import {} module '
+                   'from "{}"'.format(name, lux_path))
+            module = _import_bindings_module(luxblend_path, name)
+        return module
 
 if 'core' in locals():
     import imp
