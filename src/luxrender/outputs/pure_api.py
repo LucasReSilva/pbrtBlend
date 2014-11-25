@@ -148,7 +148,7 @@ if not 'PYLUX_AVAILABLE' in locals():
         LuxLog('Using pylux version %s' % LUXRENDER_VERSION)
 
     except ImportError as err:
-        LuxLog('WARNING: Binary pylux module not available! Visit http://www.luxrender.net/ to \
-            obtain one for your system.')
-        LuxLog(' (ImportError was: %s)' % err)
+        LuxLog('WARNING: Binary pylux module not available! Visit '
+               'http://www.luxrender.net/ to obtain one for your system.')
+        LuxLog('(ImportError was: %s)' % err)
         PYLUX_AVAILABLE = False
