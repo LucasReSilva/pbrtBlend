@@ -58,14 +58,19 @@ def import_bindings_module(name):
     def _import_bindings_module(path, name, relative=False):
         LuxLog('Attempting to import {} module '
                'from "{}"'.format(name, path))
-        sys.path.insert(0, path)
         if relative:
             package = os.path.split(path)[1]
             module = importlib.import_module('.' + name, package=package)
         else:
-            module = importlib.import_module(name)
+            if path not in sys.path:
+                sys.path.insert(0, path)
+            try:
+                module = importlib.import_module(name)
+            except ImportError:
+                raise
+            finally:
+                del sys.path[0]
         LuxLog('{} module imported successfully'.format(name.title()))
-        del sys.path[0]
         return module
 
     lux_path = find_luxrender_path() \
@@ -79,7 +84,7 @@ def import_bindings_module(name):
         except ImportError:
             LuxLog('Failed to import {} module '
                    'from "{}"'.format(name, lux_path))
-            module = _import_bindings_module(luxblend_path, name)
+            module = _import_bindings_module(luxblend_path, name, True)
         return module
 
 if 'core' in locals():
