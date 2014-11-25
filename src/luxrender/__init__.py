@@ -62,8 +62,7 @@ def import_bindings_module(name):
             package = os.path.split(path)[1]
             module = importlib.import_module('.' + name, package=package)
         else:
-            if path not in sys.path:
-                sys.path.insert(0, path)
+            sys.path.insert(0, path)
             try:
                 module = importlib.import_module(name)
             except ImportError:
