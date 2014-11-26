@@ -1183,7 +1183,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * (
                 (blCamera.location - blCameraData.dof_object.location).length)))
             elif blCameraData.dof_distance > 0:
-                self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance"), ws * blCameraData.dof_distance)
+                self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * blCameraData.dof_distance))
 
         if luxCamera.use_clipping:
             self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))
