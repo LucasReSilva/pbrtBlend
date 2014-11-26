@@ -24,6 +24,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+from os import getenv
+from .extensions_framework import util as efutil
+
+
 bl_info = {
     "name": "LuxRender",
     "author": "LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), \
@@ -40,9 +44,6 @@ bl_info = {
 }
 
 def find_luxrender_path():
-    from os import getenv
-    from .extensions_framework import util as efutil
-
     return getenv(  # Use the env var path, if set ...
                     'LUXRENDER_ROOT',  # .. or load the last path from CFG file
                     efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
@@ -72,8 +73,7 @@ def import_bindings_module(name):
         LuxLog('{} module imported successfully'.format(name.title()))
         return module
 
-    lux_path = find_luxrender_path() \
-            or bpy.context.user_preferences.addons[__name__].preferences
+    lux_path = find_luxrender_path()
     luxblend_path = os.path.dirname(os.path.abspath(__file__))
     if sys.platform == 'darwin':
         return _import_bindings_module(luxblend_path, name, True)
@@ -98,6 +98,18 @@ else:
     import nodeitems_utils
     from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
 
+    def set_luxrender_path(self, path):
+        """Save Lux install path to persistent disk storage."""
+        if not path:
+            return
+        efutil.write_config_value('luxrender', 'defaults', 'install_path',
+                                  efutil.filesystem_path(path))
+
+    def get_luxrender_path(self):
+        """Load Lux install path from persistent disk storage."""
+        return efutil.find_config_value('luxrender', 'defaults',
+                                        'install_path', '')
+
     class LuxRenderAddonPreferences(AddonPreferences):
         # this must match the addon name
         bl_idname = __name__
@@ -107,6 +119,8 @@ else:
             description='Path to LuxRender install directory',
             subtype='DIR_PATH',
             default=find_luxrender_path(),
+            get=get_luxrender_path,
+            set=set_luxrender_path
         )
 
         def draw(self, context):
@@ -115,13 +129,6 @@ else:
             layout.prop(self, "install_path")
 
     LuxRenderAddon = Addon(bl_info)
-
-    def get_prefs():
-        return bpy.context.user_preferences.addons[__name__].preferences
-
-    # patch the LuxRenderAddon class to make it easier to get the addon prefs
-    LuxRenderAddon.get_prefs = get_prefs
-
     addon_register, addon_unregister = LuxRenderAddon.init_functions()
 
     def register():

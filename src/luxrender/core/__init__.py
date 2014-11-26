@@ -719,8 +719,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'auto_start': start_rendering
         }
 
-        addon_prefs = LuxRenderAddon.get_prefs()
-        luxrender_path = efutil.filesystem_path(addon_prefs.install_path)
+        luxrender_path = efutil.filesystem_path(efutil.find_config_value(
+                              'luxrender', 'defaults', 'install_path', ''))
 
         print('luxrender_path: ', luxrender_path)
 
@@ -942,17 +942,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
 
         return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
-        
+
     def CreateBlenderStats(self, lcConfig, stats):
         lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
-        
+
         output = ''
 
         if lc_engine == 'BIASPATHCPU' or lc_engine == 'BIASPATHOCL':
             converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
-                
+
             output = ('Pass ' + str(stats.Get('stats.renderengine.pass').GetInt()) + '| Convergence ' + str(converged) + '/') + (
                         str(converged + notconverged + pending) + ' | Avg. samples/sec ') + (
                         ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
@@ -1150,7 +1150,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                     stats = lcSession.GetStats()
                     done = self.PrintStats(lcConfig, stats)
-                    
+
                     blender_stats = self.CreateBlenderStats(lcConfig, stats)
                     self.update_stats('Rendering...', blender_stats)
 
