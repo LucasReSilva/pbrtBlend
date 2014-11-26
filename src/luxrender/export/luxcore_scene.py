@@ -30,9 +30,8 @@ from symbol import except_clause
 import math
 import mathutils
 
-from .. import pyluxcore
 from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import ToValidLuxCoreName
+from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName
 from ..export import get_worldscale
 from ..export import is_obj_visible
 from ..export import ParamSet
@@ -473,7 +472,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.octaves', [float(texture.octaves)]))
                 props.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.noise_scale)]))
                 props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-            #				props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
+            #               props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
             ####################################################################
             # NOISE
             ####################################################################
@@ -500,7 +499,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.type', ['blender_voronoi']))
                 props.Set(pyluxcore.Property(prefix + '.dismetric',
                                              ''.join(str(i).lower() for i in getattr(texture, 'distance_metric'))))
-                #				props.Set(pyluxcore.Property(prefix + '.colormode', ''.join(str(i).lower() for i in getattr(texture, 'color_mode')))) # not yet in luxcore
+                #               props.Set(pyluxcore.Property(prefix + '.colormode', ''.join(str(i).lower() for i in getattr(texture, 'color_mode')))) # not yet in luxcore
                 props.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
                 props.Set(pyluxcore.Property(prefix + '.exponent', [float(texture.minkovsky_exponent)]))
                 props.Set(pyluxcore.Property(prefix + '.w1', [float(texture.weight_1)]))
@@ -605,7 +604,7 @@ class BlenderSceneConverter(object):
             # CHECKERBOARD
             ####################################################################
             elif texType == 'checkerboard':
-                #				props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
+                #               props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
                 props.Set(
                     pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
                 props.Set(
@@ -1269,7 +1268,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * (
                 (blCamera.location - blCameraData.dof_object.location).length)))
             elif blCameraData.dof_distance > 0:
-                self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance"), ws * blCameraData.dof_distance)
+                self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * blCameraData.dof_distance))
 
         if luxCamera.use_clipping:
             self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))

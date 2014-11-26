@@ -240,7 +240,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
                 volume_ext.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Exterior_volume].fresnel_fresnelvalue
 
         #else:
-        #	nt.nodes.new('OutputLightShaderNode')
+        #   nt.nodes.new('OutputLightShaderNode')
 
         return {'FINISHED'}
 
@@ -410,7 +410,7 @@ class LUXRENDER_OT_opencl_device_list_update(bpy.types.Operator):
             devs.remove(0)
 
         # Create the new list
-        from .. import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
 
         deviceList = pyluxcore.GetOpenCLDeviceList()
         for dev in deviceList:

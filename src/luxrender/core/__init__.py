@@ -719,8 +719,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'auto_start': start_rendering
         }
 
-        addon_prefs = LuxRenderAddon.get_prefs()
-        luxrender_path = efutil.filesystem_path(addon_prefs.install_path)
+        luxrender_path = efutil.filesystem_path(efutil.find_config_value(
+                              'luxrender', 'defaults', 'install_path', ''))
 
         print('luxrender_path: ', luxrender_path)
 
@@ -942,17 +942,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
 
         return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
-        
+
     def CreateBlenderStats(self, lcConfig, stats):
         lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
-        
+
         output = ''
 
         if lc_engine == 'BIASPATHCPU' or lc_engine == 'BIASPATHOCL':
             converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
-                
+
             output = ('Pass ' + str(stats.Get('stats.renderengine.pass').GetInt()) + '| Convergence ' + str(converged) + '/') + (
                         str(converged + notconverged + pending) + ' | Avg. samples/sec ') + (
                         ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
@@ -995,7 +995,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         buffer_id is used only for obtaining the right MATERIAL_ID_MASK and BY_MATERIAL_ID buffer
         """
-        from .. import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
         # raw channel buffer
         channel_buffer = array.array(arrayType, [arrayInitValue] * (filmWidth * filmHeight * arrayDepth))
         # buffer for converted array (to RGBA)
@@ -1116,7 +1116,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             LuxLog('ERROR: LuxCore rendering requires pyluxcore')
             self.report({'ERROR'}, 'LuxCore rendering requires pyluxcore')
             return
-        from .. import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
         from ..export.luxcore_scene import BlenderSceneConverter
 
         try:
@@ -1150,7 +1150,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                     stats = lcSession.GetStats()
                     done = self.PrintStats(lcConfig, stats)
-                    
+
                     blender_stats = self.CreateBlenderStats(lcConfig, stats)
                     self.update_stats('Rendering...', blender_stats)
 
@@ -1286,7 +1286,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if not PYLUXCORE_AVAILABLE:
             LuxLog('ERROR: LuxCore preview rendering requires pyluxcore')
             return
-        from .. import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
         from ..export.luxcore_scene import BlenderSceneConverter
 
         try:
@@ -1364,6 +1364,36 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lastMaterialSettings = ''
 
     def build_viewport_camera(self, lcConfig, context, pyluxcore):
+        from ..outputs.luxcore_api import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
+        from ..export.luxcore_scene import BlenderSceneConverter
+
+        if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
+            self.viewFilmWidth = context.region.width
+            self.viewFilmHeight = context.region.height
+            self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
+
+        ########################################################################
+        # Setup the rendering
+        ########################################################################
+
+        LuxManager.SetCurrentScene(context.scene)
+
+        # Convert the Blender scene
+        lcConfig = BlenderSceneConverter(context.scene).Convert(
+            imageWidth=self.viewFilmWidth,
+            imageHeight=self.viewFilmHeight)
+
+        # Force PATHCPU or BIDIRCPU for preview
+        engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
+        if engine in ['BIDIRCPU', 'BIDIRVMCPU']:
+            lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
+        else:
+            lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['PATHCPU']))
+
         view_persp = context.region_data.view_perspective
         self.viewMatrix = mathutils.Matrix(context.region_data.view_matrix)
         self.viewLens = context.space_data.lens
@@ -1624,7 +1654,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if not PYLUXCORE_AVAILABLE:
             LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
             return
-        from .. import pyluxcore
+        from ..outputs.luxcore_api import pyluxcore
 
         # Check if the size of the window is changed
         if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height) or (
