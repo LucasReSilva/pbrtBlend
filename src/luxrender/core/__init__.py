@@ -1364,36 +1364,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lastMaterialSettings = ''
 
     def build_viewport_camera(self, lcConfig, context, pyluxcore):
-        from ..outputs.luxcore_api import pyluxcore
-        from ..outputs.luxcore_api import pyluxcore
-        from ..outputs.luxcore_api import pyluxcore
-        from ..outputs.luxcore_api import pyluxcore
-        from ..outputs.luxcore_api import pyluxcore
-        from ..export.luxcore_scene import BlenderSceneConverter
-
-        if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
-            self.viewFilmWidth = context.region.width
-            self.viewFilmHeight = context.region.height
-            self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
-
-        ########################################################################
-        # Setup the rendering
-        ########################################################################
-
-        LuxManager.SetCurrentScene(context.scene)
-
-        # Convert the Blender scene
-        lcConfig = BlenderSceneConverter(context.scene).Convert(
-            imageWidth=self.viewFilmWidth,
-            imageHeight=self.viewFilmHeight)
-
-        # Force PATHCPU or BIDIRCPU for preview
-        engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
-        if engine in ['BIDIRCPU', 'BIDIRVMCPU']:
-            lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
-        else:
-            lcConfig.GetProperties().Set(pyluxcore.Property('renderengine.type', ['PATHCPU']))
-
         view_persp = context.region_data.view_perspective
         self.viewMatrix = mathutils.Matrix(context.region_data.view_matrix)
         self.viewLens = context.space_data.lens
@@ -1473,8 +1443,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
         if context.scene.luxrender_engine.preview_stop:
             return
-            
-        from .. import pyluxcore
+        
+        from ..outputs.luxcore_api import pyluxcore
         from ..export.luxcore_scene import BlenderSceneConverter
         
         if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1):
