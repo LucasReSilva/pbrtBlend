@@ -1198,6 +1198,10 @@ class BlenderSceneConverter(object):
                 if 'theta' in params_keyValue:
                     theta = params_keyValue['theta']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
+
+        else:
+            raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
+
         
     def ConvertObject(self, obj):
         # #######################################################################
