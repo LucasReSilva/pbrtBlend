@@ -1156,6 +1156,15 @@ class BlenderSceneConverter(object):
         params_keyValue = {}
         for param in params_converted:
             params_keyValue[param[0]] = param[1]
+
+        energy = params_keyValue['gain']
+        position = bpy.data.objects[luxcore_name].location
+
+        if light.type in ('AREA', 'POINT', 'SPOT'):
+            lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
+            L_col = getattr(lux_lamp, 'L_color')
+            power = getattr(lux_lamp, 'power')
+            efficacy = getattr(lux_lamp, 'efficacy')
         
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
@@ -1198,6 +1207,14 @@ class BlenderSceneConverter(object):
                 if 'theta' in params_keyValue:
                     theta = params_keyValue['theta']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
+
+        elif light.type == 'POINT':
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['point']))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [position[0], position[1], position[2]]))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', [L_col[0], L_col[1],L_col[2]]))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', [power]))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', [efficacy]))
+
 
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
