@@ -1159,12 +1159,13 @@ class BlenderSceneConverter(object):
 
         energy = params_keyValue['gain']
         position = bpy.data.objects[luxcore_name].location
+        lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
 
-        if light.type in ('AREA', 'POINT', 'SPOT'):
-            lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
-            L_col = getattr(lux_lamp, 'L_color') * energy
-            power = getattr(lux_lamp, 'power')
-            efficacy = getattr(lux_lamp, 'efficacy')
+        if getattr(lux_lamp, 'L_color') and not (hasattr(lux_lamp, 'sunsky_type') and getattr(lux_lamp, 'sunsky_type') != 'distant'):
+            spectrum = getattr(lux_lamp, 'L_color')
+            gain_spectrum =[spectrum[0] * energy, spectrum[1] * energy, spectrum[2] * energy]
+        else:
+            gain_spectrum = [energy, energy, energy]
         
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
@@ -1208,16 +1209,16 @@ class BlenderSceneConverter(object):
                     theta = params_keyValue['theta']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
 
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', [energy, energy, energy]))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
 
         elif light.type == 'POINT':
-            if getattr(lux_lamp, 'usesphere'):
-                print("------------------------", getattr(lux_lamp, 'pointsize'))
+ #           if getattr(lux_lamp, 'usesphere'):
+ #               print("------------------------", getattr(lux_lamp, 'pointsize'))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['point']))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [position[0], position[1], position[2]]))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', [L_col[0], L_col[1],L_col[2]]))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', [power]))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', [efficacy]))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
 
         else:
