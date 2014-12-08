@@ -487,7 +487,7 @@ class luxrender_lamp_sun(declarative_property_group):
             'max': math.pi,
             'soft_max': math.pi,
             'subtype': 'ANGLE',
-            # Angle params are already in radians, which is what theta is, so no conversion is necessary
+            # Angle params is in radians, so conversion is necessary
             'unit': 'ROTATION'
         },
     ]
@@ -498,7 +498,7 @@ class luxrender_lamp_sun(declarative_property_group):
         params.add_integer('nsamples', self.nsamples)
 
         if self.sunsky_type == 'distant':
-            params.add_float('theta', self.theta),
+            params.add_float('theta', math.degrees(self.theta)),
             params.update(TC_L.get_paramset(self))
 
         if self.sunsky_type != 'distant':

@@ -231,7 +231,8 @@ class Custom_Context(object):
                     self.wf(Files.MAIN, '\nInclude "%s"' % efutil.path_relative_to_export(self.file_names[idx]))
 
     def lightGroup(self, *args):
-        self._api('LightGroup', args)
+        if args[0] != '':
+            self._api('LightGroup', args)
 
     def lightSource(self, *args):
         self._api('LightSource', args)
