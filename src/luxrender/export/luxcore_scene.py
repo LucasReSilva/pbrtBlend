@@ -1185,12 +1185,12 @@ class BlenderSceneConverter(object):
                 turbidity = params_keyValue['turbidity']
                 
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.type', ['sun']))
-                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.turbidity', [turbidity]))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 
                 if 'relsize' in params_keyValue:
                     relsize = params_keyValue['relsize']
-                    self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.relsize', [relsize]))
+                    self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.relsize', [relsize]))
                 
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
@@ -1256,7 +1256,12 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
             
         if obj.type == 'LAMP':
-            self.ConvertLight(obj)
+            try:
+                self.ConvertLight(obj)
+            except Exception as err:
+                LuxLog('Light export failed, skipping light: %s\n%s' % (obj.name, err))
+                import traceback
+                traceback.print_exc()
             
 
     def ConvertCamera(self, imageWidth=None, imageHeight=None):
