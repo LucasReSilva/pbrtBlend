@@ -956,25 +956,28 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.vroughness',
                                              self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
 
+                # Backface values
                 if material.luxrender_material.luxrender_mat_glossytranslucent.two_sided:
-                    if material.luxrender_material.luxrender_mat_glossy.bf_useior:
-                        props.Set(
-                            pyluxcore.Property(prefix + '.index_bf', self.ConvertMaterialChannel(luxMat, 'bf_index', 'float')))
+                    if material.luxrender_material.luxrender_mat_glossytranslucent.bf_useior:
+                        props.Set(pyluxcore.Property(prefix + '.index_bf',
+                                                     self.ConvertMaterialChannel(luxMat, 'bf_index', 'float')))
                     else:
-                        props.Set(pyluxcore.Property(prefix + '.ks_bf', self.ConvertMaterialChannel(luxMat, 'backface_Ks', 'color')))
+                        props.Set(pyluxcore.Property(prefix + '.ks_bf',
+                                                     self.ConvertMaterialChannel(luxMat, 'backface_Ks', 'color')))
 
-                    props.Set(pyluxcore.Property(prefix + '.ka_bf', self.ConvertMaterialChannel(luxMat, 'backface_Ka', 'color')))
+                    props.Set(pyluxcore.Property(prefix + '.ka_bf',
+                                                 self.ConvertMaterialChannel(luxMat, 'backface_Ka', 'color')))
                     props.Set(pyluxcore.Property(prefix + '.multibounce_bf',
                                     material.luxrender_material.luxrender_mat_glossytranslucent.backface_multibounce))
 
-                    props.Set(pyluxcore.Property(prefix + '.d_bf', self.ConvertMaterialChannel(luxMat, 'bf_d', 'float')))
+                    props.Set(pyluxcore.Property(prefix + '.d_bf',
+                                                 self.ConvertMaterialChannel(luxMat, 'bf_d', 'float')))
 
                     props.Set(pyluxcore.Property(prefix + '.uroughness_bf',
                                              self.ConvertMaterialChannel(luxMat, 'bf_uroughness', 'float')))
 
                     props.Set(pyluxcore.Property(prefix + '.vroughness_bf',
                                              self.ConvertMaterialChannel(luxMat, 'bf_vroughness', 'float')))
-
 
             ####################################################################
             # Glass
