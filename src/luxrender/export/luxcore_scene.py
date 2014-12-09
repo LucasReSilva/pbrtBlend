@@ -1263,6 +1263,12 @@ class BlenderSceneConverter(object):
                     theta = params_keyValue['theta']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
 
+        elif light.type == 'HEMI':
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', getattr(lux_lamp, 'infinite_map')))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
+#            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.shift', getattr(lux_lamp, '????')))
+
         elif light.type == 'POINT':
  #           if getattr(lux_lamp, 'usesphere'):
  #               print("------------------------", getattr(lux_lamp, 'pointsize'))
