@@ -1220,10 +1220,9 @@ class BlenderSceneConverter(object):
             spectrum = getattr(lux_lamp, 'L_color') * energy
             gain_spectrum = [spectrum[0], spectrum[1], spectrum[2]]
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
         else:
             gain_spectrum = [energy, energy, energy]
-
-        self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
 
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
@@ -1241,6 +1240,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
                 
                 if 'relsize' in params_keyValue:
                     relsize = params_keyValue['relsize']
@@ -1255,6 +1255,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
                 
             if sunsky_type == 'distant':
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
