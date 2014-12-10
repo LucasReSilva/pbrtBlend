@@ -32,7 +32,7 @@ import mathutils
 
 from ..outputs import LuxManager, LuxLog
 from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName
-from ..export import get_worldscale
+from ..export import get_worldscale, matrix_to_list
 from ..export import is_obj_visible
 from ..export import ParamSet
 from ..export import fix_matrix_order
@@ -1223,6 +1223,9 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
         else:
             gain_spectrum = [energy, energy, energy]
+
+        transform = matrix_to_list(obj.matrix_world.inverted())
+        self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
