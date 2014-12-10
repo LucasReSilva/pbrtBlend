@@ -1215,8 +1215,8 @@ class BlenderSceneConverter(object):
         else:
             gain_spectrum = [energy, energy, energy]
 
-        transform = matrix_to_list(obj.matrix_world.inverted())
-        self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
+#        transform = matrix_to_list(obj.matrix_world.inverted())
+#        self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
@@ -1268,7 +1268,8 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', getattr(lux_lamp, 'infinite_map')))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
-#            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.shift', getattr(lux_lamp, '????')))
+            transform = matrix_to_list(obj.matrix_world.inverted())
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         elif light.type == 'POINT':
  #           if getattr(lux_lamp, 'usesphere'):
