@@ -285,16 +285,7 @@ class BlenderSceneConverter(object):
         tex_rot = tex_rot0 * tex_rot1 * tex_rot2
 
         # combine transformations
-        tex_out = tex_loc * tex_sca * tex_rot
-
-        str_matrix = [tex_out[0][0], tex_out[0][1], tex_out[0][2], tex_out[0][3],
-                      tex_out[1][0], tex_out[1][1], tex_out[1][2], tex_out[1][3],
-                      tex_out[2][0], tex_out[2][1], tex_out[2][2], tex_out[2][3],
-                      tex_out[3][0], tex_out[3][1], tex_out[3][2], tex_out[3][3]]
-
-        f_matrix = []
-        for item in str_matrix:
-            f_matrix.append(item)
+        f_matrix = matrix_to_list(tex_loc * tex_sca * tex_rot)
 
         self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', f_matrix))
 
