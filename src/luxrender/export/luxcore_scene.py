@@ -1188,6 +1188,10 @@ class BlenderSceneConverter(object):
         return [parsed[0], param[1]]
     
     def ConvertLight(self, obj):
+        
+        if obj.hide_render:
+            return
+
         light = obj.data
         luxcore_name = ToValidLuxCoreName(obj.name)
         
@@ -1215,12 +1219,12 @@ class BlenderSceneConverter(object):
         if getattr(lux_lamp, 'L_color') and not (hasattr(lux_lamp, 'sunsky_type') and getattr(lux_lamp, 'sunsky_type') != 'distant'):
             spectrum = getattr(lux_lamp, 'L_color') * energy
             gain_spectrum = [spectrum[0], spectrum[1], spectrum[2]]
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
         else:
             gain_spectrum = [energy, energy, energy]
 
-        self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
         self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
-        
+
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
             invmatrix = fix_matrix_order(invmatrix)  # matrix indexing hack
@@ -1236,6 +1240,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.type', ['sun']))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 
                 if 'relsize' in params_keyValue:
                     relsize = params_keyValue['relsize']
@@ -1249,6 +1254,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.type', [skyVersion]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 
             if sunsky_type == 'distant':
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
@@ -1281,7 +1287,7 @@ class BlenderSceneConverter(object):
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
-        
+
     def ConvertObject(self, obj):
         # #######################################################################
         # Convert the object geometry
