@@ -1435,7 +1435,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov)))
             )
 	
-    def luxcore_view_update(self, context):
+    def luxcore_view_update(self, context, updateCamera=False):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
             LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
@@ -1476,8 +1476,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         
         update_everything = True
         
-        # only preview region size has changed
-        if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
+        # only preview region size or camera position has changed
+        if updateCamera:
             self.viewFilmWidth = context.region.width
             self.viewFilmHeight = context.region.height
             self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
@@ -1591,8 +1591,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.lastRenderSettings = str(engineConverter.cfgProps)
                 update_everything = False
             
-            if context.active_object.name == context.scene.camera.name:
-                update_everything = False
+            #if context.active_object.name == context.scene.camera.name:
+            #    update_everything = False
                         
         ########################################################################
         # Fallback: if scene modification is unknown, update whole scene
@@ -1632,7 +1632,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.viewCameraOffset[0] != context.region_data.view_camera_offset[0]) or (
             self.viewCameraOffset[1] != context.region_data.view_camera_offset[1]) or (
             self.viewCameraZoom != context.region_data.view_camera_zoom):
-            self.luxcore_view_update(context)
+            self.luxcore_view_update(context, updateCamera=True)
 
         # Update statistics
         if self.viewSessionRunning:

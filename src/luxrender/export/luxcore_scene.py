@@ -1180,7 +1180,7 @@ class BlenderSceneConverter(object):
     
     def ConvertLight(self, obj):
         
-        if obj.hide_render:
+        if not is_obj_visible(self.blScene, obj):
             return
 
         light = obj.data
@@ -1276,7 +1276,6 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [position[0], position[1], position[2]]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
-
 
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)

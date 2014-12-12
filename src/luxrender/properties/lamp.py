@@ -672,7 +672,7 @@ class luxrender_lamp_hemi(declarative_property_group):
                 hdri_path = bpy.path.abspath(self.infinite_map, lamp_object.library.filepath)
             else:
                 hdri_path = self.infinite_map
-
+            
             params.add_string('mapname', efutil.path_relative_to_export(hdri_path))
             params.add_string('mapping', self.mapping_type)
             params.add_float('gamma', self.gamma)

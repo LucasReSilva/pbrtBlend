@@ -56,6 +56,7 @@ export_path = ''
 def path_relative_to_export(p):
     """Return a path that is relative to the export path"""
     global export_path
+    
     p = filesystem_path(p)
     ep = os.path.dirname(export_path)
 
