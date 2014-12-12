@@ -1262,8 +1262,11 @@ class BlenderSceneConverter(object):
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
 
         elif light.type == 'HEMI':
+            infinite_map_path = getattr(lux_lamp, 'infinite_map')
+            infinite_map_path_abs = bpy.path.abspath(infinite_map_path)
+        
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', getattr(lux_lamp, 'infinite_map')))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
             transform = matrix_to_list(obj.matrix_world.inverted())
             transform[0] *=  -1 # match lux
