@@ -1443,6 +1443,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
         if context.scene.luxrender_engine.preview_stop:
             return
+            
+        # get update starttime in milliseconds
+        view_update_startTime = int(round(time.time() * 1000))
         
         from ..outputs.luxcore_api import pyluxcore
         from ..export.luxcore_scene import BlenderSceneConverter
@@ -1466,7 +1469,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.build_viewport_camera(self.lcConfig, context, pyluxcore)
     
             self.viewSession = pyluxcore.RenderSession(self.lcConfig)
-            self.viewSession.Start()
+            
+            try:
+                self.viewSession.Start()
+            except Exception as exc:
+                LuxLog('View update aborted: %s' % exc)
+                
+                self.lcConfig = None
+                self.viewSession = None
+                
+                import traceback
+                traceback.print_exc()
+                
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
         
@@ -1478,6 +1492,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         
         # only preview region size or camera position has changed
         if updateCamera:
+            LuxLog("Dynamic updates: updating preview camera")
+        
             self.viewFilmWidth = context.region.width
             self.viewFilmHeight = context.region.height
             self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
@@ -1503,6 +1519,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.viewSessionRunning = True
             
             # when the preview region size is changed, nothing else can change
+            # report time it took to update
+            view_update_time = int(round(time.time() * 1000)) - view_update_startTime
+            LuxLog("Dynamic updates: update took %dms" % view_update_time)
             return
         
         # check objects for updates
@@ -1536,10 +1555,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         lcScene.Parse(converter.scnProps)
                         
                         self.viewSession.EndSceneEdit()
-                        
-                        LuxLog("added/updated scene definition:")
-                        LuxLog(converter.scnProps)
-                        
         else:
             LuxLog('Dynamic updates: no objects changed, checking materials and config')
             
@@ -1549,6 +1564,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
             for material in bpy.data.materials:
                 matConverter.ConvertMaterial(material, bpy.data.materials)
+            
+            # prevent triggering a useless material update on startup
+            #if self.lastMaterialSettings == '':
+            #    self.lastMaterialSettings = str(matConverter.scnProps)
             
             if self.lastMaterialSettings != str(matConverter.scnProps):
                 # material settings have changed, update them
@@ -1568,6 +1587,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             engineConverter = BlenderSceneConverter(context.scene)
             engineConverter.ConvertEngineSettings()
             
+            # prevent triggering a useless renderconfig update on startup
+            #if self.lastRenderSettings == '':
+            #    self.lastRenderSettings = str(engineConverter.cfgProps)
+            
             if self.lastRenderSettings != str(engineConverter.cfgProps):
                 # renderengine config has changed, update it
                 LuxLog("Dynamic updates: updating renderengine configuration")
@@ -1583,7 +1606,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
                 # Re-start the rendering
                 self.viewSession = pyluxcore.RenderSession(self.lcConfig)
-                self.viewSession.Start()
+                
+                try:
+                    self.viewSession.Start()
+                except Exception as exc:
+                    LuxLog('View update aborted: %s' % exc)
+                
+                    self.lcConfig = None
+                    self.viewSession = None
+                
+                    import traceback
+                    traceback.print_exc()
+                
                 self.viewSessionStartTime = time.time()
                 self.viewSessionRunning = True
                 
@@ -1618,6 +1652,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.viewSession.Start()
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
+            
+        # report time it took to update
+        view_update_time = int(round(time.time() * 1000)) - view_update_startTime
+        LuxLog("Dynamic updates: update took %dms" % view_update_time)
 
     def luxcore_view_draw(self, context):
         # LuxCore libs
