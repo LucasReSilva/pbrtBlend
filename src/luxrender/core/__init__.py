@@ -1566,10 +1566,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 matConverter.ConvertMaterial(material, bpy.data.materials)
             
             # prevent triggering a useless material update on startup
-            #if self.lastMaterialSettings == '':
-            #    self.lastMaterialSettings = str(matConverter.scnProps)
-            
-            if self.lastMaterialSettings != str(matConverter.scnProps):
+            if self.lastMaterialSettings == '':
+                self.lastMaterialSettings = str(matConverter.scnProps)
+            elif self.lastMaterialSettings != str(matConverter.scnProps):
                 # material settings have changed, update them
                 LuxLog("Dynamic updates: updating all materials")
                 
@@ -1581,6 +1580,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # save settings to compare with next update
                 self.lastMaterialSettings = str(matConverter.scnProps)
                 update_everything = False
+            BlenderSceneConverter.clear()
                 
             # check for changes in renderengine configuration
             # for now, just update whole renderengine configuration
@@ -1588,10 +1588,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             engineConverter.ConvertEngineSettings()
             
             # prevent triggering a useless renderconfig update on startup
-            #if self.lastRenderSettings == '':
-            #    self.lastRenderSettings = str(engineConverter.cfgProps)
-            
-            if self.lastRenderSettings != str(engineConverter.cfgProps):
+            if self.lastRenderSettings == '':
+                self.lastRenderSettings = str(engineConverter.cfgProps)
+            elif self.lastRenderSettings != str(engineConverter.cfgProps):
                 # renderengine config has changed, update it
                 LuxLog("Dynamic updates: updating renderengine configuration")
                 
@@ -1632,6 +1631,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Fallback: if scene modification is unknown, update whole scene
         ########################################################################
         
+        '''
         if update_everything:
             LuxLog('Dynamic updates: fallback, re-exporting whole scene')
             LuxManager.SetCurrentScene(context.scene)
@@ -1652,6 +1652,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.viewSession.Start()
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
+        '''
             
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
