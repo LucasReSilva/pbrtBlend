@@ -90,6 +90,8 @@ class device_settings(render_panel):
                 subrow = row.row()
                 subrow.enabled = dev.opencl_device_enabled
                 subrow.label(dev.name)
+        else:
+            self.layout.label("No OpenCL Mode Selected")
 
 @LuxRenderAddon.addon_register_class
 class translator(render_panel):
