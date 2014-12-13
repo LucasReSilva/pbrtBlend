@@ -1364,6 +1364,39 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))
             self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
 
+    def ConvertImagepipelineSettings(self):
+        lux_camera = self.blScene.camera.data.luxrender_camera
+        tonemapping_settings = lux_camera.luxrender_film.luxrender_tonemapping
+        
+        if tonemapping_settings.type == 'linear':
+            sensitivity = lux_camera.sensitivity
+            exposure = lux_camera.exposure_time()
+            fstop = lux_camera.fstop
+        
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_LUXLINEAR']))
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.sensitivity', [sensitivity]))
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.exposure', [exposure]))
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.fstop', [fstop]))
+        elif tonemapping_settings.type == 'reinhard':
+            prescale = tonemapping_settings.reinhard_prescale
+            postscale = tonemapping_settings.reinhard_postscale
+            burn = tonemapping_settings.reinhard_burn
+            
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_REINHARD02']))
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.prescale', [prescale]))
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.postscale', [postscale]))
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.burn', [burn]))
+        else:
+            # use autolinear as fallback
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
+            
+        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
+        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
+        
+        # Deprecated but used for backwardscompatibility
+        if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
+            self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
+
     def ConvertSamplerSettings(self):
         sampler_settings = self.blScene.luxcore_samplersettings
         
@@ -1434,11 +1467,11 @@ class BlenderSceneConverter(object):
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
         
-        # Pixel Filter
+    def ConvertConfig(self):
+        self.ConvertEngineSettings()
         self.ConvertFilterSettings()
-
-        # Sampler
         self.ConvertSamplerSettings()
+        self.ConvertImagepipelineSettings()
         
     def Convert(self, imageWidth=None, imageHeight=None):
         # #######################################################################
@@ -1468,7 +1501,7 @@ class BlenderSceneConverter(object):
         ########################################################################
         # Create the configuration
         ########################################################################
-        self.ConvertEngineSettings()
+        self.ConvertConfig()
 
         # Film
         if (not imageWidth is None) and (not imageHeight is None):
@@ -1479,39 +1512,6 @@ class BlenderSceneConverter(object):
 
         self.cfgProps.Set(pyluxcore.Property('film.width', [filmWidth]))
         self.cfgProps.Set(pyluxcore.Property('film.height', [filmHeight]))
-
-        # Image Pipeline
-        lux_camera = self.blScene.camera.data.luxrender_camera
-        tonemapping_settings = lux_camera.luxrender_film.luxrender_tonemapping
-        
-        if tonemapping_settings.type == 'linear':
-            sensitivity = lux_camera.sensitivity
-            exposure = lux_camera.exposure_time()
-            fstop = lux_camera.fstop
-        
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_LUXLINEAR']))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.sensitivity', [sensitivity]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.exposure', [exposure]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.fstop', [fstop]))
-        elif tonemapping_settings.type == 'reinhard':
-            prescale = tonemapping_settings.reinhard_prescale
-            postscale = tonemapping_settings.reinhard_postscale
-            burn = tonemapping_settings.reinhard_burn
-            
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_REINHARD02']))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.prescale', [prescale]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.postscale', [postscale]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.burn', [burn]))
-        else:
-            # use autolinear as fallback
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
-            
-        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
-        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
-
-        # Deprecated but used for backwardscompatibility
-        if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
-            self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
 
         # Configure AOV output
         channels = self.blScene.luxrender_channels

@@ -1585,7 +1585,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # check for changes in renderengine configuration
             # for now, just update whole renderengine configuration
             engineConverter = BlenderSceneConverter(context.scene)
-            engineConverter.ConvertEngineSettings()
+            engineConverter.ConvertConfig()
             
             # prevent triggering a useless renderconfig update on startup
             if self.lastRenderSettings == '':
