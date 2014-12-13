@@ -83,8 +83,8 @@ class luxcore_enginesettings(declarative_property_group):
         'label_lights',
         'biaspath_lights_samplingstrategy_type',
         'biaspath_lights_nearstart',  # Compute settings
-        'label_compute_settings',  # CPU settings
-        'native_threads_count',  # OpenCL settings
+        'label_compute_settings',  # OpenCL settings
+        'native_threads_count',  # CPU settings
         'op_opencl_device_list_update',
     ]
 
