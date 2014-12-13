@@ -57,6 +57,7 @@ class render_settings(render_panel):
         ( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
+        ( ('scene',), 'luxcore_samplersettings', lambda: UseLuxCore() ),
     ]
 
     def draw(self, context):

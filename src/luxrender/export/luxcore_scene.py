@@ -1417,24 +1417,22 @@ class BlenderSceneConverter(object):
 
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
-
+        
+    def ConvertSamplerSettings(self):
+        sampler_settings = self.blScene.luxcore_samplersettings
+        
+        self.cfgProps.Set(pyluxcore.Property('sampler.type', [sampler_settings.sampler_type]))
+        
+        if sampler_settings.advanced and sampler_settings.sampler_type in 'METROPOLIS':
+            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [sampler_settings.largesteprate]))
+            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [sampler_settings.maxconsecutivereject]))
+            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.imagemutationrate', [sampler_settings.imagemutationrate]))
+            
     def Convert(self, imageWidth=None, imageHeight=None):
         # #######################################################################
         # Convert camera definition
         ########################################################################
         self.ConvertCamera(imageWidth=imageWidth, imageHeight=imageHeight)
-
-        ########################################################################
-        # Add a sky definition
-        ########################################################################
-        '''
-        self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.type', ['sun']))
-        self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.gain', [1.0, 1.0, 1.0]))
-        self.scnProps.Set(pyluxcore.Property('scene.lights.sunlight.dir', [0.166974, -0.59908, 0.783085]))
-        self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.type', ['sky']))
-        self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.gain', [1.0, 1.0, 1.0]))
-        self.scnProps.Set(pyluxcore.Property('scene.lights.skylight.dir', [0.166974, -0.59908, 0.783085]))
-        '''
 
         ########################################################################
         # Add dummy material
@@ -1551,7 +1549,7 @@ class BlenderSceneConverter(object):
         self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['MITCHELL_SS']))
 
         # Sampler
-        self.cfgProps.Set(pyluxcore.Property('sampler.type', ['RANDOM']))
+        self.ConvertSamplerSettings()
 
         # Debug information
         LuxLog('RenderConfig Properties:')

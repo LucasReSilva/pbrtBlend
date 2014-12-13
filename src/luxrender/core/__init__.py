@@ -57,7 +57,7 @@ from ..properties import (
     accelerator, camera, engine, filter, integrator, ior_data, lamp, lampspectrum_data,
     material, node_material, node_inputs, node_texture, node_fresnel, node_converter,
     mesh, object as prop_object, particles, rendermode, sampler, texture, world,
-    luxcore_engine, luxcore_material
+    luxcore_engine, luxcore_sampler, luxcore_material
 )
 
 # Exporter Interface Panels need to be imported to ensure initialisation
