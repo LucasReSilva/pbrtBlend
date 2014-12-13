@@ -1209,10 +1209,11 @@ class BlenderSceneConverter(object):
         lightgroup_id = getattr(light.luxrender_lamp, 'lightgroup')
         lightgroup_enabled = self.blScene.luxrender_lightgroups.lightgroups[lightgroup_id].lg_enabled
 
-        if lightgroup_id != '' and lightgroup_enabled:
-            energy *= self.blScene.luxrender_lightgroups.lightgroups[lightgroup_id].gain
-        else:
-            energy = 0 # use gain for muting to keep geometry exported
+        if lightgroup_id != '':
+            if lightgroup_enabled:
+                energy *= self.blScene.luxrender_lightgroups.lightgroups[lightgroup_id].gain
+            else:
+                energy = 0 # use gain for muting to keep geometry exported
 
 
         if getattr(lux_lamp, 'L_color') and not (hasattr(lux_lamp, 'sunsky_type') and getattr(lux_lamp, 'sunsky_type') != 'distant'):
