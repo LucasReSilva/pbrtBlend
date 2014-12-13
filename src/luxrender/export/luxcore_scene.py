@@ -1364,6 +1364,22 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))
             self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
 
+    def ConvertSamplerSettings(self):
+        sampler_settings = self.blScene.luxcore_samplersettings
+        
+        self.cfgProps.Set(pyluxcore.Property('sampler.type', [sampler_settings.sampler_type]))
+        
+        if sampler_settings.advanced and sampler_settings.sampler_type in 'METROPOLIS':
+            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [sampler_settings.largesteprate]))
+            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [sampler_settings.maxconsecutivereject]))
+            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.imagemutationrate', [sampler_settings.imagemutationrate]))
+            
+    def ConvertFilterSettings(self):
+        filter_settings = self.blScene.luxcore_filtersettings
+        
+        self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_settings.filter_type]))
+        self.cfgProps.Set(pyluxcore.Property('film.filter.width', [filter_settings.filter_width]))
+        
     def ConvertEngineSettings(self):
         engine = self.blScene.luxcore_enginesettings.renderengine_type
         if len(engine) == 0:
@@ -1418,16 +1434,12 @@ class BlenderSceneConverter(object):
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
         
-    def ConvertSamplerSettings(self):
-        sampler_settings = self.blScene.luxcore_samplersettings
+        # Pixel Filter
+        self.ConvertFilterSettings()
+
+        # Sampler
+        self.ConvertSamplerSettings()
         
-        self.cfgProps.Set(pyluxcore.Property('sampler.type', [sampler_settings.sampler_type]))
-        
-        if sampler_settings.advanced and sampler_settings.sampler_type in 'METROPOLIS':
-            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [sampler_settings.largesteprate]))
-            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [sampler_settings.maxconsecutivereject]))
-            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.imagemutationrate', [sampler_settings.imagemutationrate]))
-            
     def Convert(self, imageWidth=None, imageHeight=None):
         # #######################################################################
         # Convert camera definition
@@ -1544,12 +1556,6 @@ class BlenderSceneConverter(object):
             self.createChannelOutputString('UV')
         if channels.RAYCOUNT:
             self.createChannelOutputString('RAYCOUNT')
-
-        # Pixel Filter
-        self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['MITCHELL_SS']))
-
-        # Sampler
-        self.ConvertSamplerSettings()
 
         # Debug information
         LuxLog('RenderConfig Properties:')
