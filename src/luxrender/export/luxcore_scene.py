@@ -1269,7 +1269,7 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
             transform = matrix_to_list(obj.matrix_world.inverted())
-            transform[0] *=  -1 # match lux
+            transform = fix_matrix_order(transform)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         elif light.type == 'POINT':
