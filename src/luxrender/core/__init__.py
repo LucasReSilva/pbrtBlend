@@ -1631,7 +1631,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Fallback: if scene modification is unknown, update whole scene
         ########################################################################
         
-        '''
         if update_everything:
             LuxLog('Dynamic updates: fallback, re-exporting whole scene')
             LuxManager.SetCurrentScene(context.scene)
@@ -1652,7 +1651,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.viewSession.Start()
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
-        '''
             
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
