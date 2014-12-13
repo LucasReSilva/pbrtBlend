@@ -72,6 +72,15 @@ class render_settings(render_panel):
 
         super().draw(context)
 
+@LuxRenderAddon.addon_register_class
+class device_settings(render_panel):
+    """
+    OpenCL Devices UI Panel
+    """
+
+    bl_label = 'LuxRender OpenCL Device List'
+
+    def draw(self, context):
         if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']:
             # This is a "special" panel section for the list of OpenCL devices
             for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
@@ -81,7 +90,6 @@ class render_settings(render_panel):
                 subrow = row.row()
                 subrow.enabled = dev.opencl_device_enabled
                 subrow.label(dev.name)
-
 
 @LuxRenderAddon.addon_register_class
 class translator(render_panel):
