@@ -1188,7 +1188,9 @@ class BlenderSceneConverter(object):
     def ConvertLight(self, obj):
         
         if not is_obj_visible(self.blScene, obj):
-            return
+            hide_lamp = True
+        else:
+            hide_lamp = False
 
         light = obj.data
         luxcore_name = ToValidLuxCoreName(obj.name)
@@ -1210,7 +1212,7 @@ class BlenderSceneConverter(object):
 
         # Common light params
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
-        energy = params_keyValue['gain']
+        energy = params_keyValue['gain'] if hide_lamp == False else 0 # workaround for no lights render recovery
         position = bpy.data.objects[obj.name].location
         importance = params_keyValue['importance']
         lightgroup_id = getattr(light.luxrender_lamp, 'lightgroup')
