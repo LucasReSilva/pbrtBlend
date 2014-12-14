@@ -1483,6 +1483,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
+            
+            # if there was no viewSession, we don't need to check for dynamic updates
+            return
         
         ########################################################################
         # Dynamic updates
@@ -1518,10 +1521,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
             
-            # when the preview region size is changed, nothing else can change
             # report time it took to update
             view_update_time = int(round(time.time() * 1000)) - view_update_startTime
             LuxLog("Dynamic updates: update took %dms" % view_update_time)
+            
+            # when the preview region size is changed, nothing else can change
             return
         
         # check objects for updates
@@ -1531,20 +1535,30 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     continue
                     
                 if ob.is_updated_data:
+                    # edit mode update: re-export mesh
                     LuxLog("Dynamic updates: updating data of object %s" % ob.name)
-                    # missing
-                    # note: currently one of the few cases triggering the fallback
-                    # (by leaving update_everything set to True)
+                    
+                    self.viewSession.BeginSceneEdit()
+                    converter = BlenderSceneConverter(context.scene, self.viewSession)
+                    converter.ConvertObject(ob)
+                        
+                    lcScene = self.lcConfig.GetScene()
+                    lcScene.Parse(converter.scnProps)
+                        
+                    self.viewSession.EndSceneEdit()
+                    update_everything = False
                     
                 if ob.is_updated:
                     update_everything = False
                     
                     if ob.name == context.scene.camera.name:
+                        # only camera update necessary
                         LuxLog('Dynamic updates: updating camera: %s' % ob.name)
                         self.viewSession.BeginSceneEdit()
                         self.build_viewport_camera(self.lcConfig, context, pyluxcore)
                         self.viewSession.EndSceneEdit()
                     else:
+                        # object transformation
                         LuxLog("Dynamic updates: updating object: %s" % ob.name)
                         
                         self.viewSession.BeginSceneEdit()
@@ -1560,6 +1574,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
             # check for changes in materials
             # for now, just update all materials
+            matStartTime = int(round(time.time() * 1000))
+            
             matConverter = BlenderSceneConverter(context.scene)
             
             for material in bpy.data.materials:
@@ -1580,10 +1596,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # save settings to compare with next update
                 self.lastMaterialSettings = str(matConverter.scnProps)
                 update_everything = False
+                
             BlenderSceneConverter.clear()
+            LuxLog("Dynamic updates: material update check took %dms" % (int(round(time.time() * 1000)) - matStartTime))
                 
             # check for changes in renderengine configuration
             # for now, just update whole renderengine configuration
+            confStartTime = int(round(time.time() * 1000))
+            
             engineConverter = BlenderSceneConverter(context.scene)
             engineConverter.ConvertConfig()
             
@@ -1616,6 +1636,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 
                     import traceback
                     traceback.print_exc()
+                    return
                 
                 self.viewSessionStartTime = time.time()
                 self.viewSessionRunning = True
@@ -1624,8 +1645,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.lastRenderSettings = str(engineConverter.cfgProps)
                 update_everything = False
             
-            #if context.active_object.name == context.scene.camera.name:
-            #    update_everything = False
+            LuxLog("Dynamic updates: configuration update check took %dms" % (int(round(time.time() * 1000)) - confStartTime))
                         
         ########################################################################
         # Fallback: if scene modification is unknown, update whole scene
