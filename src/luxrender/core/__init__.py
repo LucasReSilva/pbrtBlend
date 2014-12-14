@@ -1540,7 +1540,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     
                     self.viewSession.BeginSceneEdit()
                     converter = BlenderSceneConverter(context.scene, self.viewSession)
-                    converter.ConvertObject(ob)
+                    converter.ConvertObject(ob, preview=True, update_mesh=True, update_transform=True)
                         
                     lcScene = self.lcConfig.GetScene()
                     lcScene.Parse(converter.scnProps)
@@ -1563,7 +1563,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         
                         self.viewSession.BeginSceneEdit()
                         converter = BlenderSceneConverter(context.scene, self.viewSession)
-                        converter.ConvertObject(ob)
+                        converter.ConvertObject(ob, preview=True, update_mesh=False, update_transform=True)
                         
                         lcScene = self.lcConfig.GetScene()
                         lcScene.Parse(converter.scnProps)
