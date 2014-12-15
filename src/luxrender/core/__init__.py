@@ -996,6 +996,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         buffer_id is used only for obtaining the right MATERIAL_ID_MASK and BY_MATERIAL_ID buffer
         """
         from ..outputs.luxcore_api import pyluxcore
+        
+        self.update_stats('Importing AOV channels into Blender...', 'Channel: ' + channelName)
+        
         # raw channel buffer
         channel_buffer = array.array(arrayType, [arrayInitValue] * (filmWidth * filmHeight * arrayDepth))
         # buffer for converted array (to RGBA)
@@ -1178,7 +1181,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             channelCalcStartTime = time.time()
             LuxLog('Importing AOV channels into Blender...')
-            self.update_stats('Importing AOV channels into Blender...', '')
 
             channels = scene.luxrender_channels
 

@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy, os
+import bpy, os, time
 from ..extensions_framework import util as efutil
 from symbol import except_clause
 import math
@@ -120,6 +120,8 @@ class BlenderSceneConverter(object):
             if not is_obj_visible(self.blScene, obj):
                 return mesh_definitions
 
+            #convert_blender_start = int(round(time.time() * 1000)) #### DEBUG
+	
             mode = 'PREVIEW' if preview else 'RENDER'
             mesh = obj.to_mesh(self.blScene, True, mode)
             if mesh is None:
@@ -127,6 +129,13 @@ class BlenderSceneConverter(object):
                 return mesh_definitions
                 
             mesh.update(calc_tessface=True)
+            
+            # check if user cancelled export
+            if self.renderengine.test_break():
+                return mesh_definitions
+            
+            #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
+            #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
             # Collate faces by mat index
             ffaces_mats = {}
@@ -231,6 +240,8 @@ class BlenderSceneConverter(object):
             del ffaces_mats
             bpy.data.meshes.remove(mesh)
 
+            #print("export took %dms" % (int(round(time.time() * 1000)) - convert_lux_start)) #### DEBUG
+			
             return mesh_definitions
 
         except Exception as err:
