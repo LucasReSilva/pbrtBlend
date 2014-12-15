@@ -35,7 +35,6 @@ from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName
 from ..export import get_worldscale, matrix_to_list
 from ..export import is_obj_visible
 from ..export import ParamSet
-from ..export import fix_matrix_order
 from ..export.materials import get_texture_from_scene
 from math import degrees
 
@@ -1243,7 +1242,6 @@ class BlenderSceneConverter(object):
         # Individual light params
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
-            invmatrix = fix_matrix_order(invmatrix)  # matrix indexing hack
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
             
             sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
@@ -1294,9 +1292,9 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
-            transform = matrix_to_list(obj.matrix_world.inverted())
-            transform = fix_matrix_order(transform)
-            #transform[0] *=  -1 # match lux
+            hemi_fix = mathutils.Matrix.Scale(1.0, 4) # create new scale matrix 4x4
+            hemi_fix[0][0] = -1.0 # mirror the hdri_map
+            transform = matrix_to_list(hemi_fix * obj.matrix_world.inverted())
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         elif light.type == 'POINT':
