@@ -1301,7 +1301,9 @@ class BlenderSceneConverter(object):
  #           if getattr(lux_lamp, 'usesphere'):
  #               print("------------------------", getattr(lux_lamp, 'pointsize'))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['point']))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [position[0], position[1], position[2]]))
+            transform = matrix_to_list(obj.matrix_world)
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
