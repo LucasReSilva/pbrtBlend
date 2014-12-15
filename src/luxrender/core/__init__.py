@@ -1309,7 +1309,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 raise Exception('Skipping material thumbnail update, image too small (%ix%i)' % (xres, yres))
 
             # Convert the Blender scene
-            lcConfig = BlenderSceneConverter(scene).Convert()
+            lcConfig = BlenderSceneConverter(scene, renderengine = self).Convert()
             LuxLog('RenderConfig Properties:')
             LuxLog(str(lcConfig.GetProperties()))
             LuxLog('Scene Properties:')
@@ -1472,7 +1472,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             LuxManager.SetCurrentScene(context.scene)
 
             # Convert the Blender scene
-            self.lcConfig = BlenderSceneConverter(context.scene).Convert(
+            self.lcConfig = BlenderSceneConverter(context.scene, renderengine = self).Convert(
                 imageWidth=self.viewFilmWidth,
                 imageHeight=self.viewFilmHeight)
                 
@@ -1556,7 +1556,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     LuxLog("Dynamic updates: updating data of object %s" % ob.name)
                     
                     self.viewSession.BeginSceneEdit()
-                    converter = BlenderSceneConverter(context.scene, self.viewSession)
+                    converter = BlenderSceneConverter(context.scene, self.viewSession, renderengine = self)
                     converter.ConvertObject(ob, preview=True, update_mesh=True, update_transform=True)
                         
                     lcScene = self.lcConfig.GetScene()
@@ -1579,7 +1579,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         LuxLog("Dynamic updates: updating object: %s" % ob.name)
                         
                         self.viewSession.BeginSceneEdit()
-                        converter = BlenderSceneConverter(context.scene, self.viewSession)
+                        converter = BlenderSceneConverter(context.scene, self.viewSession, renderengine = self)
                         converter.ConvertObject(ob, preview=True, update_mesh=False, update_transform=True)
                         
                         lcScene = self.lcConfig.GetScene()

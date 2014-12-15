@@ -131,7 +131,7 @@ class BlenderSceneConverter(object):
             mesh.update(calc_tessface=True)
             
             # check if user cancelled export
-            if self.renderengine.test_break():
+            if self.renderengine is not None and self.renderengine.test_break():
                 return mesh_definitions
             
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
@@ -1515,7 +1515,8 @@ class BlenderSceneConverter(object):
         self.ConvertImagepipelineSettings()
         
     def Convert(self, imageWidth=None, imageHeight=None):
-        self.renderengine.update_stats('Exporting...', '')
+        if self.renderengine is not None:
+            self.renderengine.update_stats('Exporting...', '')
     
         # #######################################################################
         # Convert camera definition
@@ -1537,7 +1538,9 @@ class BlenderSceneConverter(object):
                 break
                 
             LuxLog('Converting object: %s' % obj.name)
-            self.renderengine.update_stats('Exporting...', 'Object: ' + obj.name)
+            if self.renderengine is not None:
+                self.renderengine.update_stats('Exporting...', 'Object: ' + obj.name)
+                
             self.ConvertObject(obj)
 
         # Debug information
@@ -1549,7 +1552,8 @@ class BlenderSceneConverter(object):
         ########################################################################
         # Create the configuration
         ########################################################################
-        self.renderengine.update_stats('Exporting...', 'Setting up renderengine configuration')
+        if self.renderengine is not None:
+            self.renderengine.update_stats('Exporting...', 'Setting up renderengine configuration')
         self.ConvertConfig()
 
         # Film
@@ -1612,7 +1616,8 @@ class BlenderSceneConverter(object):
 
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
         BlenderSceneConverter.clear()  # for scalers_count etc.
-
-        self.renderengine.update_stats('Exporting...', 'Starting LuxRender')
+        
+        if self.renderengine is not None:
+            self.renderengine.update_stats('Exporting...', 'Starting LuxRender')
 		
         return self.lcConfig
