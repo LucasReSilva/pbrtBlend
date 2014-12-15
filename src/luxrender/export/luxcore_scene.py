@@ -35,7 +35,6 @@ from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName
 from ..export import get_worldscale, matrix_to_list
 from ..export import is_obj_visible
 from ..export import ParamSet
-from ..export import fix_matrix_order
 from ..export.materials import get_texture_from_scene
 from math import degrees
 
@@ -1243,7 +1242,6 @@ class BlenderSceneConverter(object):
         # Individual light params
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
-            invmatrix = fix_matrix_order(invmatrix)  # matrix indexing hack
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
             
             sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
