@@ -1365,8 +1365,11 @@ class BlenderSceneConverter(object):
         if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
             self.scnProps.Set(pyluxcore.Property('scene.camera.fieldofview', [math.degrees(blCameraData.angle)]))
 
-        self.scnProps.Set(
-            pyluxcore.Property("scene.camera.screenwindow", luxCamera.screenwindow(xr, yr, self.blScene, blCameraData)))
+        # border rendering
+        if self.blScene.render.use_border:
+            width, height = luxCamera.luxrender_film.resolution(self.blScene)
+            self.scnProps.Set(pyluxcore.Property("scene.camera.screenwindow", luxCamera.screenwindow(
+                                            width, height, self.blScene, blCameraData, luxcore_export=True)))
 
         if luxCamera.use_dof:
             # Do not world-scale this, it is already in meters !

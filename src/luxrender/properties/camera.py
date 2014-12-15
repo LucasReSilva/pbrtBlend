@@ -344,11 +344,12 @@ class luxrender_camera(declarative_property_group):
 
         return pos[:3] + target[:3] + up[:3]
 
-    def screenwindow(self, xr, yr, scene, cam):
+    def screenwindow(self, xr, yr, scene, cam, luxcore_export=False):
         """
-        xr          float
-        yr          float
-        cam        bpy.types.camera
+        xr              float
+        yr              float
+        cam             bpy.types.camera
+        luxcore_export  bool (leave crop handling to Blender)
 
         Calculate LuxRender camera's screenwindow parameter
 
@@ -383,12 +384,13 @@ class luxrender_camera(declarative_property_group):
 
         # If we are using cropwindow, we want the full-frame screenwindow.
         # See border render handling code elsewhere in this file (do a search for "border")
-        if scene.render.use_border and not (
+        if (scene.render.use_border and not (
                     not scene.render.use_crop_to_border and (
                         not scene.luxrender_engine.render or (
                                     scene.luxrender_engine.export_type == 'EXT' and
                                     scene.luxrender_engine.binary_name == 'luxrender' and
-                                    not scene.luxrender_engine.monitor_external))):
+                                    not scene.luxrender_engine.monitor_external)))) or (
+                                    luxcore_export):
             x1, x2, y1, y2 = [
                 scene.render.border_min_x, scene.render.border_max_x,
                 scene.render.border_min_y, scene.render.border_max_y

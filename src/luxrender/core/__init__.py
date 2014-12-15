@@ -1120,12 +1120,22 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         from ..export.luxcore_scene import BlenderSceneConverter
 
         try:
+            filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+        
+            if scene.render.use_border:
+                x_min, x_max, y_min, y_max = [
+                    scene.render.border_min_x, scene.render.border_max_x,
+                    scene.render.border_min_y, scene.render.border_max_y
+                ]
+            
+                filmWidth = int(filmWidth * x_max - filmWidth * x_min)
+                filmHeight = int(filmHeight * y_max - filmHeight * y_min)
+        
             # convert the Blender scene
-            lcConfig = BlenderSceneConverter(scene).Convert()
+            lcConfig = BlenderSceneConverter(scene).Convert(filmWidth, filmHeight)
 
             lcSession = pyluxcore.RenderSession(lcConfig)
-
-            filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+            
             imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
 
             # Start the rendering
