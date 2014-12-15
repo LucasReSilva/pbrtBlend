@@ -37,6 +37,7 @@ from ..export import is_obj_visible
 from ..export import ParamSet
 from ..export import fix_matrix_order
 from ..export.materials import get_texture_from_scene
+from math import degrees
 
 class BlenderSceneConverter(object):
     scalers_count = 0
@@ -1228,6 +1229,7 @@ class BlenderSceneConverter(object):
         else:
             gain_spectrum = [energy, energy, energy]
 
+        # Individual light params
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
             invmatrix = fix_matrix_order(invmatrix)  # matrix indexing hack
@@ -1294,12 +1296,25 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
+        elif light.type == 'SPOT':
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
+            transform = matrix_to_list(obj.matrix_world)
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
+            coneangle = degrees(light.spot_size) * 0.5
+            conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.coneangle', coneangle ))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.conedeltaangle', conedeltaangle ))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
+
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
 
     def ConvertObject(self, obj, preview=False, update_mesh=True, update_transform=True):
-        # #######################################################################
+        # ######################################################################
         # Convert the object geometry
         ########################################################################
         meshDefinitions = []
