@@ -1478,7 +1478,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if self.viewSession is None:
             self.build_viewport_camera(self.lcConfig, context, pyluxcore)
     
-            self.viewSession = pyluxcore.RenderSession(self.lcConfig)
+            try:
+                self.viewSession = pyluxcore.RenderSession(self.lcConfig)
+            except Exception as exc:
+                self.update_stats('Error: ', str(exc))
+                return
             
             try:
                 self.viewSession.Start()
@@ -1490,6 +1494,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 
                 import traceback
                 traceback.print_exc()
+                return
                 
             self.viewSessionStartTime = time.time()
             self.viewSessionRunning = True
