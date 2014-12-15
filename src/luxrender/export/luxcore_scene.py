@@ -1186,7 +1186,6 @@ class BlenderSceneConverter(object):
         return [parsed[0], param[1]]
     
     def ConvertLight(self, obj):
-        
         if not is_obj_visible(self.blScene, obj):
             hide_lamp = True
         else:
@@ -1212,7 +1211,7 @@ class BlenderSceneConverter(object):
 
         # Common light params
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
-        energy = params_keyValue['gain'] if hide_lamp == False else 0 # workaround for no lights render recovery
+        energy = params_keyValue['gain'] if not hide_lamp else 0 # workaround for no lights render recovery
         position = bpy.data.objects[obj.name].location
         importance = params_keyValue['importance']
         lightgroup_id = getattr(light.luxrender_lamp, 'lightgroup')
@@ -1343,16 +1342,10 @@ class BlenderSceneConverter(object):
                 traceback.print_exc()
             
 
-    def ConvertCamera(self, imageWidth=None, imageHeight=None):
+    def ConvertCamera(self):
         blCamera = self.blScene.camera
         blCameraData = blCamera.data
         luxCamera = blCameraData.luxrender_camera
-
-        if (not imageWidth is None) and (not imageHeight is None):
-            xr = imageWidth
-            yr = imageHeight
-        else:
-            xr, yr = luxCamera.luxrender_film.resolution(self.blScene)
 
         lookat = luxCamera.lookAt(blCamera)
         orig = list(lookat[0:3])
@@ -1502,7 +1495,7 @@ class BlenderSceneConverter(object):
         # #######################################################################
         # Convert camera definition
         ########################################################################
-        self.ConvertCamera(imageWidth=imageWidth, imageHeight=imageHeight)
+        self.ConvertCamera()
 
         ########################################################################
         # Add dummy material
