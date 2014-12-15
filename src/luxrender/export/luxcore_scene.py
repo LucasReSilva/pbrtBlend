@@ -1308,7 +1308,7 @@ class BlenderSceneConverter(object):
             coneangle = degrees(light.spot_size) * 0.5
             conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.coneangle', coneangle ))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '..conedeltaangle', conedeltaangle )) # seems not to work
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.conedeltaangle', conedeltaangle ))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
