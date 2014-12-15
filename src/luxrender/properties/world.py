@@ -735,6 +735,8 @@ class luxrender_channels(declarative_property_group):
     controls = [
         'aov_label',
         'saveToDisk',
+        'disable_aovs',
+        'spacer',
         'RGB',
         'RGBA',
         'RGB_TONEMAPPED',
@@ -761,6 +763,11 @@ class luxrender_channels(declarative_property_group):
 
     properties = [
         {
+            'type': 'text',
+            'name': 'LuxRender Passes (AOVs)',
+            'attr': 'aov_label',
+        },
+        {
             'type': 'bool',
             'attr': 'saveToDisk',
             'name': 'Save passes to disk',
@@ -768,9 +775,16 @@ class luxrender_channels(declarative_property_group):
             'default': False
         },
         {
+            'type': 'bool',
+            'attr': 'disable_aovs',
+            'name': 'Disable all passes',
+            'description': 'Useful for testrendering',
+            'default': False
+        },
+        {
             'type': 'text',
-            'name': 'LuxRender Passes (AOVs)',
-            'attr': 'aov_label',
+            'attr': 'spacer',
+            'name': '',
         },
         {
             'type': 'bool',

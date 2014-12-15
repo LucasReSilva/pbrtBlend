@@ -1569,46 +1569,47 @@ class BlenderSceneConverter(object):
         # Configure AOV output
         channels = self.blScene.luxrender_channels
 
-        if channels.RGB:
-            self.createChannelOutputString('RGB')
-        if channels.RGBA:
-            self.createChannelOutputString('RGBA')
-        if channels.RGB_TONEMAPPED:
-            self.createChannelOutputString('RGB_TONEMAPPED')
-        if channels.RGBA_TONEMAPPED:
-            self.createChannelOutputString('RGBA_TONEMAPPED')
-        if channels.ALPHA:
-            self.createChannelOutputString('ALPHA')
-        if channels.DEPTH:
-            self.createChannelOutputString('DEPTH')
-        if channels.POSITION:
-            self.createChannelOutputString('POSITION')
-        if channels.GEOMETRY_NORMAL:
-            self.createChannelOutputString('GEOMETRY_NORMAL')
-        if channels.SHADING_NORMAL:
-            self.createChannelOutputString('SHADING_NORMAL')
-        if channels.MATERIAL_ID:
-            self.createChannelOutputString('MATERIAL_ID')
-        if channels.DIRECT_DIFFUSE:
-            self.createChannelOutputString('DIRECT_DIFFUSE')
-        if channels.DIRECT_GLOSSY:
-            self.createChannelOutputString('DIRECT_GLOSSY')
-        if channels.EMISSION:
-            self.createChannelOutputString('EMISSION')
-        if channels.INDIRECT_DIFFUSE:
-            self.createChannelOutputString('INDIRECT_DIFFUSE')
-        if channels.INDIRECT_GLOSSY:
-            self.createChannelOutputString('INDIRECT_GLOSSY')
-        if channels.INDIRECT_SPECULAR:
-            self.createChannelOutputString('INDIRECT_SPECULAR')
-        if channels.DIRECT_SHADOW_MASK:
-            self.createChannelOutputString('DIRECT_SHADOW_MASK')
-        if channels.INDIRECT_SHADOW_MASK:
-            self.createChannelOutputString('INDIRECT_SHADOW_MASK')
-        if channels.UV:
-            self.createChannelOutputString('UV')
-        if channels.RAYCOUNT:
-            self.createChannelOutputString('RAYCOUNT')
+        if not channels.disable_aovs:
+	        if channels.RGB:
+	            self.createChannelOutputString('RGB')
+	        if channels.RGBA:
+	            self.createChannelOutputString('RGBA')
+	        if channels.RGB_TONEMAPPED:
+	            self.createChannelOutputString('RGB_TONEMAPPED')
+	        if channels.RGBA_TONEMAPPED:
+	            self.createChannelOutputString('RGBA_TONEMAPPED')
+	        if channels.ALPHA:
+	            self.createChannelOutputString('ALPHA')
+	        if channels.DEPTH:
+	            self.createChannelOutputString('DEPTH')
+	        if channels.POSITION:
+	            self.createChannelOutputString('POSITION')
+	        if channels.GEOMETRY_NORMAL:
+	            self.createChannelOutputString('GEOMETRY_NORMAL')
+	        if channels.SHADING_NORMAL:
+	            self.createChannelOutputString('SHADING_NORMAL')
+	        if channels.MATERIAL_ID:
+	            self.createChannelOutputString('MATERIAL_ID')
+	        if channels.DIRECT_DIFFUSE:
+	            self.createChannelOutputString('DIRECT_DIFFUSE')
+	        if channels.DIRECT_GLOSSY:
+	            self.createChannelOutputString('DIRECT_GLOSSY')
+	        if channels.EMISSION:
+	            self.createChannelOutputString('EMISSION')
+	        if channels.INDIRECT_DIFFUSE:
+	            self.createChannelOutputString('INDIRECT_DIFFUSE')
+	        if channels.INDIRECT_GLOSSY:
+	            self.createChannelOutputString('INDIRECT_GLOSSY')
+	        if channels.INDIRECT_SPECULAR:
+	            self.createChannelOutputString('INDIRECT_SPECULAR')
+	        if channels.DIRECT_SHADOW_MASK:
+	            self.createChannelOutputString('DIRECT_SHADOW_MASK')
+	        if channels.INDIRECT_SHADOW_MASK:
+	            self.createChannelOutputString('INDIRECT_SHADOW_MASK')
+	        if channels.UV:
+	            self.createChannelOutputString('UV')
+	        if channels.RAYCOUNT:
+	            self.createChannelOutputString('RAYCOUNT')
 
         # Debug information
         LuxLog('RenderConfig Properties:')
