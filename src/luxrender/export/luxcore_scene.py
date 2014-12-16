@@ -36,7 +36,6 @@ from ..export import get_worldscale, matrix_to_list
 from ..export import is_obj_visible
 from ..export import ParamSet
 from ..export.materials import get_texture_from_scene
-from math import degrees
 
 class BlenderSceneConverter(object):
     scalers_count = 0
@@ -1318,18 +1317,21 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
         elif light.type == 'SPOT':
+            coneangle = math.degrees(light.spot_size) * 0.5
+            conedeltaangle = math.degrees(light.spot_size * 0.5 * light.spot_blend)
             if getattr(lux_lamp, 'projector'):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['projection']))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', getattr(lux_lamp, 'mapname')))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.fov', coneangle * 2))
             else:
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
 
-            transform = matrix_to_list(obj.matrix_world)
+            spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z') # match to lux
+            transform = matrix_to_list(spot_fix * obj.matrix_world)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
-            coneangle = degrees(light.spot_size) * 0.5
-            conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
+
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.coneangle', coneangle ))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.conedeltaangle', conedeltaangle ))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
