@@ -1328,7 +1328,8 @@ class BlenderSceneConverter(object):
             else:
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
 
-            transform = matrix_to_list(obj.matrix_world)
+            spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z') # match to lux
+            transform = matrix_to_list(obj.matrix_world * spot_fix)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
