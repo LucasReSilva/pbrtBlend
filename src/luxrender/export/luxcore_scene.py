@@ -1308,7 +1308,12 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
         elif light.type == 'SPOT':
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
+            if getattr(lux_lamp, 'projector'):
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['projection']))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', getattr(lux_lamp, 'mapname')))
+            else:
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
+
             transform = matrix_to_list(obj.matrix_world)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
