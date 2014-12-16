@@ -1232,6 +1232,9 @@ class BlenderSceneConverter(object):
                 energy = 0 # use gain for muting to keep geometry exported
 
         if getattr(lux_lamp, 'L_color') and not (hasattr(lux_lamp, 'sunsky_type') and getattr(lux_lamp, 'sunsky_type') != 'distant'):
+            iesfile = getattr(light.luxrender_lamp, 'iesname')
+            if iesfile != '':
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
             spectrum = getattr(lux_lamp, 'L_color') * energy
             gain_spectrum = [spectrum[0], spectrum[1], spectrum[2]]
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
@@ -1300,7 +1303,14 @@ class BlenderSceneConverter(object):
         elif light.type == 'POINT':
  #           if getattr(lux_lamp, 'usesphere'):
  #               print("------------------------", getattr(lux_lamp, 'pointsize'))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['point']))
+            if iesfile:
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['mappoint']))
+            else:
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['point']))
+
+            if getattr(lux_lamp, 'flipz'):
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.flipz', lux_lamp.flipz))
+
             transform = matrix_to_list(obj.matrix_world)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
