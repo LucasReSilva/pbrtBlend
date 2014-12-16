@@ -1320,14 +1320,15 @@ class BlenderSceneConverter(object):
             coneangle = math.degrees(light.spot_size) * 0.5
             conedeltaangle = math.degrees(light.spot_size * 0.5 * light.spot_blend)
             if getattr(lux_lamp, 'projector'):
+                projector_map_path = getattr(lux_lamp, 'mapname')
+                projector_map_path_abs = bpy.path.abspath(projector_map_path)
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['projection']))
-                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', getattr(lux_lamp, 'mapname')))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', projector_map_path_abs))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.fov', coneangle * 2))
             else:
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
 
-            spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z') # match to lux
-            transform = matrix_to_list(spot_fix * obj.matrix_world)
+            transform = matrix_to_list(obj.matrix_world)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
