@@ -65,8 +65,17 @@ class luxcore_enginesettings(declarative_property_group):
 
     controls = [
         'renderengine_type',
-        'custom_properties',  # BIASPATH
-        'label_tiles',
+        # BIDIR
+        ['bidir_eyedepth', 'bidir_lightdepth'],
+        # PATH
+        'path_maxdepth',
+        # BIDIRVMCPU
+        'bidirvm_lightpath_count',
+        ['bidirvm_startradius_scale', 'bidirvm_alpha'],
+        # ALL
+        'custom_properties', 
+        # BIASPATH
+        'label_tiles',  
         'tile_size',
         'tile_multipass_enable',
         'tile_multipass_convergencetest_threshold',
@@ -88,7 +97,17 @@ class luxcore_enginesettings(declarative_property_group):
         'op_opencl_device_list_update',
     ]
 
-    visibility = {  # BIASPATH
+    visibility = {
+                    # BIDIR
+                    'bidir_eyedepth': {'renderengine_type': 'BIDIRCPU'},
+                    'bidir_lightdepth': {'renderengine_type': 'BIDIRCPU'},
+                    # PATH
+                    'path_maxdepth': {'renderengine_type': O(['PATHCPU', 'PATHOCL'])},
+                    # BIDIRVM
+                    'bidirvm_lightpath_count': {'renderengine_type': 'BIDIRVMCPU'},
+                    'bidirvm_startradius_scale': {'renderengine_type': 'BIDIRVMCPU'}, 
+                    'bidirvm_alpha': {'renderengine_type': 'BIDIRVMCPU'},
+                    # BIASPATH
                     'label_tiles': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'tile_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'tile_multipass_enable': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
@@ -146,8 +165,68 @@ class luxcore_enginesettings(declarative_property_group):
             'description': 'LuxCore custom properties (separated by \'|\', suggested only for advanced users)',
             'default': '',
             'save_in_preset': True
-        },  # BIASPATH
+        },  
+        {   # BIDIR
+            'type': 'int',
+            'attr': 'bidir_eyedepth',
+            'name': 'Max Eye Depth',
+            'description': 'Max recursion depth for ray casting from eye',
+            'default': 16,
+            'min': 1,
+            'max': 2048,
+            'save_in_preset': True
+        },  
         {
+            'type': 'int',
+            'attr': 'bidir_lightdepth',
+            'name': 'Max Light Depth',
+            'description': 'Max recursion depth for ray casting from light',
+            'default': 16,
+            'min': 1,
+            'max': 2048,
+            'save_in_preset': True
+        },  
+        {   # PATH
+            'type': 'int',
+            'attr': 'path_maxdepth',
+            'name': 'Max. Depth',
+            'description': 'Max recursion depth for ray casting from eye',
+            'default': 16,
+            'min': 1,
+            'max': 2048,
+            'save_in_preset': True
+        },
+        {   # BIDIRVM
+            'type': 'int',
+            'attr': 'bidirvm_lightpath_count',
+            'name': 'Lightpath Count',
+            'description': '',
+            'default': 16384,
+            'min': 1,
+            'max': 64000,
+            'save_in_preset': True
+        },
+        {
+            'type': 'float',
+            'attr': 'bidirvm_startradius_scale',
+            'name': 'Startradius',
+            'description': '',
+            'default': 0.003,
+            'min': 0.0000001,
+            'max': 10.0,
+            'save_in_preset': True
+        },
+        {
+            'type': 'float',
+            'attr': 'bidirvm_alpha',
+            'name': 'Alpha',
+            'description': '',
+            'default': 0.95,
+            'min': 0.0,
+            'max': 10.0,
+            'save_in_preset': True
+        },
+        {   # BIASPATH
             'type': 'text',
             'name': 'Tiles:',
             'attr': 'label_tiles',

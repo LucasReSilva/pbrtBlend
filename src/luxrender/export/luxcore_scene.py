@@ -1478,52 +1478,64 @@ class BlenderSceneConverter(object):
         self.cfgProps.Set(pyluxcore.Property('film.filter.width', [filter_settings.filter_width]))
         
     def ConvertEngineSettings(self):
-        engine = self.blScene.luxcore_enginesettings.renderengine_type
+        engine_settings = self.blScene.luxcore_enginesettings
+        engine = engine_settings.renderengine_type
         if len(engine) == 0:
             engine = 'PATHCPU'
         self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
 
-        if engine == 'BIASPATHCPU' or engine == 'BIASPATHOCL':
-            self.cfgProps.Set(pyluxcore.Property('tile.size', [self.blScene.luxcore_enginesettings.tile_size]))
+        if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
+            self.cfgProps.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
             self.cfgProps.Set(pyluxcore.Property('tile.multipass.enable',
-                                                 [self.blScene.luxcore_enginesettings.tile_multipass_enable]))
+                                                 [engine_settings.tile_multipass_enable]))
             self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', [
-                self.blScene.luxcore_enginesettings.tile_multipass_convergencetest_threshold]))
+                                                 engine_settings.tile_multipass_convergencetest_threshold]))
             self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', [
-                self.blScene.luxcore_enginesettings.tile_multipass_convergencetest_threshold_reduction]))
+                engine_settings.tile_multipass_convergencetest_threshold_reduction]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.aa.size',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_sampling_aa_size]))
+                                                 [engine_settings.biaspath_sampling_aa_size]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.diffuse.size',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_sampling_diffuse_size]))
+                                                 [engine_settings.biaspath_sampling_diffuse_size]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.glossy.size',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_sampling_glossy_size]))
+                                                 [engine_settings.biaspath_sampling_glossy_size]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.specular.size',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_sampling_specular_size]))
+                                                 [engine_settings.biaspath_sampling_specular_size]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.total',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_pathdepth_total]))
+                                                 [engine_settings.biaspath_pathdepth_total]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.diffuse',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_pathdepth_diffuse]))
+                                                 [engine_settings.biaspath_pathdepth_diffuse]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.glossy',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_pathdepth_glossy]))
+                                                 [engine_settings.biaspath_pathdepth_glossy]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.specular',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_pathdepth_specular]))
+                                                 [engine_settings.biaspath_pathdepth_specular]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', [
-                self.blScene.luxcore_enginesettings.biaspath_clamping_radiance_maxvalue]))
+                                                 engine_settings.biaspath_clamping_radiance_maxvalue]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.pdf.value',
-                                                 [self.blScene.luxcore_enginesettings.biaspath_clamping_pdf_value]))
+                                                 [engine_settings.biaspath_clamping_pdf_value]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type', [
-                self.blScene.luxcore_enginesettings.biaspath_lights_samplingstrategy_type]))
-
+                                                 engine_settings.biaspath_lights_samplingstrategy_type]))
+        elif engine in ['PATHCPU', 'PATHOCL']:
+            self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
+        elif engine in ['BIDIRCPU']:
+            self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
+            self.cfgProps.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
+        elif engine in ['BIDIRVMCPU']:
+            self.cfgProps.Set(pyluxcore.Property('bidirvm.lightpath.count', 
+                                                 [engine_settings.bidirvm_lightpath_count]))
+            self.cfgProps.Set(pyluxcore.Property('bidirvm.startradius.scale', 
+                                                 [engine_settings.bidirvm_startradius_scale]))
+            self.cfgProps.Set(pyluxcore.Property('bidirvm.alpha', [engine_settings.bidirvm_alpha]))
+        
         # CPU settings
-        if (self.blScene.luxcore_enginesettings.native_threads_count > 0):
+        if (engine_settings.native_threads_count > 0):
             self.cfgProps.Set(
-                pyluxcore.Property('native.threads.count', [self.blScene.luxcore_enginesettings.native_threads_count]))
+                pyluxcore.Property('native.threads.count', [engine_settings.native_threads_count]))
 
         # OpenCL settings
-        if len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
+        if len(engine_settings.luxcore_opencl_devices) > 0:
             dev_string = ''
-            for dev_index in range(len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices)):
-                dev = self.blScene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
+            for dev_index in range(len(engine_settings.luxcore_opencl_devices)):
+                dev = engine_settings.luxcore_opencl_devices[dev_index]
                 dev_string += '1' if dev.opencl_device_enabled else '0'
 
             self.cfgProps.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
