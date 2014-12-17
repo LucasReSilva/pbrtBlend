@@ -1533,7 +1533,7 @@ class BlenderSceneConverter(object):
         self.ConvertSamplerSettings()
         self.ConvertImagepipelineSettings()
         
-    def Convert(self, imageWidth=None, imageHeight=None):
+    def Convert(self, imageWidth = None, imageHeight = None):
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', '')
     
