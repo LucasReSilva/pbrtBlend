@@ -1424,7 +1424,7 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))
             self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
 
-    def ConvertImagepipelineSettings(self):
+    def ConvertImagepipelineSettings(self, realtime_preview = False):
         lux_camera = self.blScene.camera.data.luxrender_camera
         tonemapping_settings = lux_camera.luxrender_film.luxrender_tonemapping
         
@@ -1450,8 +1450,12 @@ class BlenderSceneConverter(object):
             # use autolinear as fallback
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
             
+        # gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
         self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
-        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
+        if realtime_preview:
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
+        else:
+            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [1.0]))
         
         # Deprecated but used for backwardscompatibility
         if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
@@ -1527,13 +1531,13 @@ class BlenderSceneConverter(object):
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
         
-    def ConvertConfig(self):
+    def ConvertConfig(self, realtime_preview = False):
         self.ConvertEngineSettings()
         self.ConvertFilterSettings()
         self.ConvertSamplerSettings()
-        self.ConvertImagepipelineSettings()
+        self.ConvertImagepipelineSettings(realtime_preview)
         
-    def Convert(self, imageWidth = None, imageHeight = None):
+    def Convert(self, imageWidth = None, imageHeight = None, realtime_preview = False):
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', '')
     
@@ -1573,7 +1577,7 @@ class BlenderSceneConverter(object):
         ########################################################################
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', 'Setting up renderengine configuration')
-        self.ConvertConfig()
+        self.ConvertConfig(realtime_preview)
 
         # Film
         if (not imageWidth is None) and (not imageHeight is None):

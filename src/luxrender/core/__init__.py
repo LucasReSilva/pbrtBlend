@@ -1396,6 +1396,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     # store renderengine configuration and material definitions of last update
     lastRenderSettings = ''
     lastMaterialSettings = ''
+    update_counter = 0
 
     def build_viewport_camera(self, lcConfig, context, pyluxcore):
         view_persp = context.region_data.view_perspective
@@ -1607,6 +1608,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
         # get update starttime in milliseconds
         view_update_startTime = int(round(time.time() * 1000))
+        # debug
+        self.update_counter += 1
+        print("update_counter:", self.update_counter)
         
         if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1):
             self.viewFilmWidth = context.region.width
@@ -1620,7 +1624,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # Convert the Blender scene
             self.lcConfig = BlenderSceneConverter(context.scene, renderengine = self).Convert(
                 imageWidth=self.viewFilmWidth,
-                imageHeight=self.viewFilmHeight)
+                imageHeight=self.viewFilmHeight,
+                realtime_preview = True)
                 
         # check for session
         if self.viewSession is None:
@@ -1673,7 +1678,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # Convert the Blender scene
             self.lcConfig = BlenderSceneConverter(context.scene).Convert(
                 imageWidth=self.viewFilmWidth,
-                imageHeight=self.viewFilmHeight)
+                imageHeight=self.viewFilmHeight,
+                realtime_preview = True)
                 
             if self.viewSessionRunning:
                 self.viewSession.Stop()
