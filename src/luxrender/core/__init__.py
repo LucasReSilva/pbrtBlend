@@ -1685,7 +1685,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewSession = None
                 
                 configConverter = BlenderSceneConverter(context.scene, renderengine = self)
-                configConverter.ConvertConfig()
+                configConverter.ConvertConfig(realtime_preview = True)
                 # save settings to compare with next update
                 self.lastRenderSettings = str(configConverter.cfgProps)
                 
