@@ -1579,8 +1579,8 @@ class BlenderSceneConverter(object):
             self.ConvertObject(obj)
 
         # Debug information
-        LuxLog('Scene Properties:')
-        LuxLog(str(self.scnProps))
+        #LuxLog('Scene Properties:')
+        #LuxLog(str(self.scnProps))
 
         self.lcScene.Parse(self.scnProps)
 
@@ -1647,8 +1647,8 @@ class BlenderSceneConverter(object):
 	            self.createChannelOutputString('RAYCOUNT')
 
         # Debug information
-        LuxLog('RenderConfig Properties:')
-        LuxLog(str(self.cfgProps))
+        #LuxLog('RenderConfig Properties:')
+        #LuxLog(str(self.cfgProps))
 
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
         BlenderSceneConverter.clear()  # for scalers_count etc.
