@@ -95,6 +95,21 @@ class device_settings(render_panel):
             self.layout.label("No OpenCL Mode Selected")
 
 @LuxRenderAddon.addon_register_class
+class realtime_settings(render_panel):
+    """
+    Realtime preview settings
+    """
+
+    bl_label = 'LuxRender Realtime Preview Settings'
+
+    display_property_groups = [
+        ( ('scene',), 'luxcore_realtimesettings', lambda: UseLuxCore() ),
+    ]
+	
+    def draw(self, context):
+        super().draw(context)
+			
+@LuxRenderAddon.addon_register_class
 class translator(render_panel):
     """
     Translator settings UI Panel
