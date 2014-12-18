@@ -65,6 +65,7 @@ class luxcore_enginesettings(declarative_property_group):
 
     controls = [
         'renderengine_type',
+        'advanced',
         # BIDIR
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH
@@ -98,15 +99,16 @@ class luxcore_enginesettings(declarative_property_group):
     ]
 
     visibility = {
+                    'custom_properties': {'advanced': True},
                     # BIDIR
                     'bidir_eyedepth': {'renderengine_type': 'BIDIRCPU'},
                     'bidir_lightdepth': {'renderengine_type': 'BIDIRCPU'},
                     # PATH
                     'path_maxdepth': {'renderengine_type': O(['PATHCPU', 'PATHOCL'])},
                     # BIDIRVM
-                    'bidirvm_lightpath_count': {'renderengine_type': 'BIDIRVMCPU'},
-                    'bidirvm_startradius_scale': {'renderengine_type': 'BIDIRVMCPU'}, 
-                    'bidirvm_alpha': {'renderengine_type': 'BIDIRVMCPU'},
+                    'bidirvm_lightpath_count': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
+                    'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'}, 
+                    'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
                     # BIASPATH
                     'label_tiles': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'tile_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
@@ -159,6 +161,14 @@ class luxcore_enginesettings(declarative_property_group):
             'save_in_preset': True
         },
         {
+            'type': 'bool',
+            'attr': 'advanced',
+            'name': 'Advanced Engine Settings',
+            'description': 'Configure advanced engine settings',
+            'default': False,
+            'save_in_preset': True
+        },
+        {
             'type': 'string',
             'attr': 'custom_properties',
             'name': 'Custom properties',
@@ -201,19 +211,19 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'bidirvm_lightpath_count',
             'name': 'Lightpath Count',
             'description': '',
-            'default': 16384,
-            'min': 1,
-            'max': 64000,
+            'default': 16000,
+            'min': 1000,
+            'max': 1000000,
             'save_in_preset': True
         },
         {
             'type': 'float',
             'attr': 'bidirvm_startradius_scale',
-            'name': 'Startradius',
+            'name': 'Startradius Scale',
             'description': '',
             'default': 0.003,
-            'min': 0.0000001,
-            'max': 10.0,
+            'min': 0.0001,
+            'max': 0.1,
             'save_in_preset': True
         },
         {
@@ -222,8 +232,8 @@ class luxcore_enginesettings(declarative_property_group):
             'name': 'Alpha',
             'description': '',
             'default': 0.95,
-            'min': 0.0,
-            'max': 10.0,
+            'min': 0.5,
+            'max': 0.99,
             'save_in_preset': True
         },
         {   # BIASPATH

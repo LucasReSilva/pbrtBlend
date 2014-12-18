@@ -72,7 +72,7 @@ class luxcore_samplersettings(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'advanced',
-            'name': 'Advanced',
+            'name': 'Advanced Sampler Settings',
             'description': 'Configure advanced sampler settings',
             'default': False,
             'save_in_preset': True
