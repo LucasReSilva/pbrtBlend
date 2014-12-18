@@ -1407,7 +1407,7 @@ class BlenderSceneConverter(object):
                                             width, height, self.blScene, blCameraData, luxcore_export=True)))
 
         if luxCamera.use_dof:
-            # Do not world-scale this, it is already in meters !
+            # Do not world-scale this, it is already in meters!
             self.scnProps.Set(
                 pyluxcore.Property("scene.camera.lensradius", (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)))
 
@@ -1452,10 +1452,8 @@ class BlenderSceneConverter(object):
             
         # gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
         self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
-        if realtime_preview:
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [2.2]))
-        else:
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [1.0]))
+        gamma_value = 2.2 if realtime_preview else 1.0
+        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [gamma_value]))
         
         # Deprecated but used for backwardscompatibility
         if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
