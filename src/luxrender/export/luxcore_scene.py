@@ -59,9 +59,10 @@ class BlenderSceneConverter(object):
         self.blScene = blScene
         self.renderengine = renderengine
         if lcSession:
-           self.lcScene = lcSession.GetRenderConfig().GetScene()
+            self.lcScene = lcSession.GetRenderConfig().GetScene()
         else:
-           self.lcScene = pyluxcore.Scene()
+            imageScale = self.blScene.luxcore_scenesettings.imageScale
+            self.lcScene = pyluxcore.Scene(imageScale)
 
         self.scnProps = pyluxcore.Properties()
         self.cfgProps = pyluxcore.Properties()
@@ -1343,7 +1344,7 @@ class BlenderSceneConverter(object):
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
 
-    def ConvertObject(self, obj, preview=False, update_mesh=True, update_transform=True):
+    def ConvertObject(self, obj, preview = False, update_mesh = True, update_transform = True):
         # ######################################################################
         # Convert the object geometry
         ########################################################################

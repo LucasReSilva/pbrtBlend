@@ -58,7 +58,7 @@ from ..properties import (
     accelerator, camera, engine, filter, integrator, ior_data, lamp, lampspectrum_data,
     material, node_material, node_inputs, node_texture, node_fresnel, node_converter,
     mesh, object as prop_object, particles, rendermode, sampler, texture, world,
-    luxcore_engine, luxcore_sampler, luxcore_filter, luxcore_material
+    luxcore_engine, luxcore_sampler, luxcore_filter, luxcore_scene, luxcore_material
 )
 
 # Exporter Interface Panels need to be imported to ensure initialisation
@@ -1716,12 +1716,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if update_changes.cause_mesh:
                 for ob in update_changes.changed_objects_mesh:
                     LuxLog('Mesh update: ' + ob.name)
-                    converter.ConvertObject(ob, preview = True, update_mesh = True, update_transform = True)
+                    converter.ConvertObject(ob, preview = True, 
+                                            update_mesh = True, 
+                                            update_transform = True)
             
             if update_changes.cause_light or update_changes.cause_objectTransform:
                 for ob in update_changes.changed_objects_transform:
                     LuxLog('Transformation update: ' + ob.name)
-                    converter.ConvertObject(ob, preview = True, update_mesh = False, update_transform = True)
+                    converter.ConvertObject(ob, preview = True, 
+                                            update_mesh = False, 
+                                            update_transform = True)
             
             if update_changes.cause_materials:
                 LuxLog('Materials update')
