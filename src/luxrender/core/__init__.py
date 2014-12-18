@@ -1606,6 +1606,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # check which changes took place
         if update_changes is None:
             update_changes = self.find_update_changes(context)
+            
+        # skip useless second update triggered by Blender at startup
+        if self.update_counter == 2 and update_changes.cause_unknown:
+            LuxLog('Dynamic updates: skipping useless second update at startup')
+            return
         
         print("============ Debug ================")
         print("changed_objects_transform", update_changes.changed_objects_transform)
