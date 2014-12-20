@@ -764,7 +764,7 @@ class BlenderSceneConverter(object):
             LuxLog('Texture: ' + texName)
 
             texture = get_texture_from_scene(self.blScene, texName)
-            if not texture:
+            if texture:
                 if hasattr(luxMaterial, '%s_multiplycolor' % materialChannel) and is_multiplied:
                     texName = self.ConvertTexture(texture)
                     sv = BlenderSceneConverter.next_scale_value()
@@ -793,8 +793,8 @@ class BlenderSceneConverter(object):
                         getattr(luxMaterial, '%s_fresnelvalue' % materialChannel))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', ['%s' % texName]))
                     return sctexName
-            else:
-                return self.ConvertTexture(texture)
+                else:
+                    return self.ConvertTexture(texture)
         else:
             if variant == 'float':
                 return str(getattr(luxMaterial, materialChannel + '_floatvalue'))
