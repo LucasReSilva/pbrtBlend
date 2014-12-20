@@ -1397,6 +1397,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     # store renderengine configuration and material definitions of last update
     lastRenderSettings = ''
     lastMaterialSettings = ''
+    lastVisibilitySettings = None
     update_counter = 0
 
     def build_viewport_camera(self, lcConfig, context, pyluxcore):
@@ -1522,66 +1523,81 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         
         if not self.viewSessionRunning or self.lcConfig is None or self.viewSession is None:
             update_changes.set_cause(startViewportRender = True)
-        else:
-            if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
-                    self.viewFilmWidth != context.region.width) or (
-                    self.viewFilmHeight != context.region.height):
-                update_changes.set_cause(config = True)
+            
+        # check if filmsize has changed
+        elif (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
+                self.viewFilmWidth != context.region.width) or (
+                self.viewFilmHeight != context.region.height):
+            update_changes.set_cause(config = True)
+            
+        elif bpy.data.objects.is_updated:
+            # check if visibility of objects was changed
+            print(self.lastVisibilitySettings)
+            if self.lastVisibilitySettings is None:
+                self.lastVisibilitySettings = set(context.visible_objects)
+            else:
+                objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
+                objectsToRemove = self.lastVisibilitySettings - set(context.visible_objects)
+                
+                if len(objectsToAdd) > 0:
+                    update_changes.set_cause(mesh = True)
+                    update_changes.changed_objects_mesh.extend(objectsToAdd)
+                    
+                # Note: removing objects still missing
+            
+            self.lastVisibilitySettings = set(context.visible_objects)
             
             # check objects for updates
-            if bpy.data.objects.is_updated:
-                for ob in bpy.data.objects:
-                    if ob == None:
-                        continue
-                        
-                    if ob.is_updated_data:
-                        if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
-                            update_changes.set_cause(mesh = True)
-                            update_changes.changed_objects_mesh.append(ob)
-                        elif ob.type in ['LAMP']:
-                            update_changes.set_cause(light = True)
-                            update_changes.changed_objects_transform.append(ob)
-                        elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
-                            # camera settings have changed, this includes tonemapping
-                            update_changes.set_cause(camera = True, config = True)
-                        
-                    if ob.is_updated:
-                        if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'EMPTY']:
-                            update_changes.set_cause(objectTransform = True)
-                            update_changes.changed_objects_transform.append(ob)
-                        elif ob.type in ['LAMP']:
-                            update_changes.set_cause(light = True)
-                            update_changes.changed_objects_transform.append(ob)
-                        elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
-                            update_changes.set_cause(camera = True)
-            else:
-                # no objects were changed
-                # check for changes in materials
-                matConverter = BlenderSceneConverter(context.scene)
-                
-                for material in bpy.data.materials:
-                    matConverter.ConvertMaterial(material, bpy.data.materials)
-                
-                if self.lastMaterialSettings == '':
-                    self.lastMaterialSettings = str(matConverter.scnProps)
-                elif self.lastMaterialSettings != str(matConverter.scnProps):
-                    # material settings have changed
-                    update_changes.set_cause(materials = True)
+            for ob in bpy.data.objects:
+                if ob == None:
+                    continue
+                   
+                if ob.is_updated_data:
+                    if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
+                        update_changes.set_cause(mesh = True)
+                        update_changes.changed_objects_mesh.append(ob)
+                    elif ob.type in ['LAMP']:
+                        update_changes.set_cause(light = True)
+                        update_changes.changed_objects_transform.append(ob)
+                    elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
+                        # camera settings have changed, this includes tonemapping
+                        update_changes.set_cause(camera = True, config = True)
                     
-                    # save settings to compare with next update
-                    #self.lastMaterialSettings = str(matConverter.scnProps)
-                    
+                if ob.is_updated:
+                    if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'EMPTY']:
+                        update_changes.set_cause(objectTransform = True)
+                        update_changes.changed_objects_transform.append(ob)
+                    elif ob.type in ['LAMP']:
+                        update_changes.set_cause(light = True)
+                        update_changes.changed_objects_transform.append(ob)
+                    elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
+                        update_changes.set_cause(camera = True)
+        else:
+            # no objects were changed
+            # check for changes in materials
+            matConverter = BlenderSceneConverter(context.scene)
+                
+            for material in bpy.data.materials:
+                matConverter.ConvertMaterial(material, bpy.data.materials)
+            
+            if self.lastMaterialSettings == '':
+                self.lastMaterialSettings = str(matConverter.scnProps)
                 BlenderSceneConverter.clear()
-                    
-                # check for changes in renderengine configuration
-                configConverter = BlenderSceneConverter(context.scene)
-                configConverter.ConvertConfig()
-                
-                if self.lastRenderSettings == '':
-                    self.lastRenderSettings = str(configConverter.cfgProps)
-                elif self.lastRenderSettings != str(configConverter.cfgProps):
-                    # renderengine config has changed
-                    update_changes.set_cause(config = True)
+            elif self.lastMaterialSettings != str(matConverter.scnProps):
+                # material settings have changed
+                update_changes.set_cause(materials = True)
+                BlenderSceneConverter.clear()
+                return update_changes
+            
+            # check for changes in renderengine configuration
+            configConverter = BlenderSceneConverter(context.scene)
+            configConverter.ConvertConfig()
+            
+            if self.lastRenderSettings == '':
+                self.lastRenderSettings = str(configConverter.cfgProps)
+            elif self.lastRenderSettings != str(configConverter.cfgProps):
+                # renderengine config has changed
+                update_changes.set_cause(config = True)
         
         return update_changes
     
@@ -1616,13 +1632,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         print("============ Debug ================")
         print("changed_objects_transform", update_changes.changed_objects_transform)
         print("changed_objects_mesh", update_changes.changed_objects_mesh)
-        print("  Updated caused by:")
+        print("    Update caused by:")
         print("unknown", update_changes.cause_unknown)
         print("startViewportRender", update_changes.cause_startViewportRender)
         print("mesh", update_changes.cause_mesh)
         print("light", update_changes.cause_light)
         print("camera", update_changes.cause_camera)
         print("objectTransform", update_changes.cause_objectTransform)
+        print("layers", update_changes.cause_layers)
         print("materials", update_changes.cause_materials)
         print("config", update_changes.cause_config)
         print("===================================")
@@ -1713,7 +1730,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.build_viewport_camera(self.lcConfig, context, pyluxcore)
             
             converter = BlenderSceneConverter(context.scene, self.viewSession, renderengine = self)
-                
+            
+            if update_changes.cause_materials:
+                LuxLog('Materials update')
+                converter.clear()
+                for material in bpy.data.materials:
+                    converter.ConvertMaterial(material, bpy.data.materials)
+                self.lastMaterialSettings = str(converter.scnProps)
+                converter.clear()
+            
             if update_changes.cause_mesh:
                 for ob in update_changes.changed_objects_mesh:
                     LuxLog('Mesh update: ' + ob.name)
@@ -1727,13 +1752,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     converter.ConvertObject(ob, preview = True, 
                                             update_mesh = False, 
                                             update_transform = True)
-            
-            if update_changes.cause_materials:
-                LuxLog('Materials update')
-                converter.clear()
-                for material in bpy.data.materials:
-                    converter.ConvertMaterial(material, bpy.data.materials)
-                converter.clear()
             
             # parse scene changes and end sceneEdit
             lcScene.Parse(converter.scnProps)
@@ -1754,6 +1772,7 @@ class UpdateChanges:
         self.cause_light = False
         self.cause_camera = False
         self.cause_objectTransform = False
+        self.cause_layers = False
         self.cause_materials = False
         self.cause_config = False
         
@@ -1763,6 +1782,7 @@ class UpdateChanges:
                   light = None, 
                   camera = None, 
                   objectTransform = None, 
+                  layers = None,
                   materials = None, 
                   config = None):
         # automatically switch off unkown
@@ -1778,6 +1798,8 @@ class UpdateChanges:
             self.cause_camera = camera 
         if objectTransform is not None:
             self.cause_objectTransform = objectTransform 
+        if layers is not None:
+            self.cause_layers = layers
         if materials is not None:
             self.cause_materials = materials 
         if config is not None:
