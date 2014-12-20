@@ -59,6 +59,7 @@ class luxcore_filtersettings(declarative_property_group):
                 ('MITCHELL_SS', 'Mitchell_SS', 'desc'),
                 ('BOX', 'Box', 'desc'),
                 ('GAUSSIAN', 'Gaussian', 'desc'),
+                ('NONE', 'None', 'Disable pixel filtering')
             ],
             'save_in_preset': True
         },

@@ -1575,7 +1575,7 @@ class BlenderSceneConverter(object):
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
 
-    def ConvertConfig(self, realtime_preview=False):
+    def ConvertConfig(self, realtime_preview = False):
         realtime_settings = self.blScene.luxcore_realtimesettings
 
         if realtime_preview and not realtime_settings.use_finalrender_settings:
@@ -1605,10 +1605,13 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('sampler.type', [realtime_settings.sampler_type]))
 
             # Filter settings
-            if engine == 'PATHOCL':
-                self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['NONE']))
-            else:
-                self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['GAUSSIAN']))
+            if realtime_settings.device_type == 'CPU':
+                filter_type = realtime_settings.filter_type_cpu
+            elif realtime_settings.device_type == 'OCL':
+                filter_type = realtime_settings.filter_type_ocl
+            
+            self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_type]))
+            if filter_type != 'NONE':
                 self.cfgProps.Set(pyluxcore.Property('film.filter.width', [1.5]))
         else:
             # Config for final render
@@ -1715,8 +1718,8 @@ class BlenderSceneConverter(object):
             self.ConvertObject(obj)
 
         # Debug information
-        # LuxLog('Scene Properties:')
-        # LuxLog(str(self.scnProps))
+        LuxLog('Scene Properties:')
+        LuxLog(str(self.scnProps))
 
         self.lcScene.Parse(self.scnProps)
 
@@ -1783,8 +1786,8 @@ class BlenderSceneConverter(object):
                 self.createChannelOutputString('RAYCOUNT')
 
         # Debug information
-        # LuxLog('RenderConfig Properties:')
-        # LuxLog(str(self.cfgProps))
+        LuxLog('RenderConfig Properties:')
+        LuxLog(str(self.cfgProps))
 
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
         BlenderSceneConverter.clear()  # for scalers_count etc.

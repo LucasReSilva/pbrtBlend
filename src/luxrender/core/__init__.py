@@ -1591,7 +1591,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
             # check for changes in renderengine configuration
             configConverter = BlenderSceneConverter(context.scene)
-            configConverter.ConvertConfig()
+            configConverter.ConvertConfig(realtime_preview = True)
             
             if self.lastRenderSettings == '':
                 self.lastRenderSettings = str(configConverter.cfgProps)

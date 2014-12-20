@@ -44,7 +44,9 @@ class luxcore_realtimesettings(declarative_property_group):
         'advanced',
         'cpu_renderengine_type',
         'ocl_renderengine_type',
-        'sampler_type'
+        'sampler_type',
+        'filter_type_cpu',
+        'filter_type_ocl'
     ]
 
     visibility = {
@@ -52,7 +54,9 @@ class luxcore_realtimesettings(declarative_property_group):
                     'advanced': {'use_finalrender_settings': False},
                     'cpu_renderengine_type': {'advanced': True, 'device_type': 'CPU', 'use_finalrender_settings': False},
                     'ocl_renderengine_type': {'advanced': True, 'device_type': 'OCL', 'use_finalrender_settings': False},
-                    'sampler_type': {'advanced': True, 'use_finalrender_settings': False}
+                    'sampler_type': {'advanced': True, 'use_finalrender_settings': False},
+                    'filter_type_cpu': {'advanced': True, 'use_finalrender_settings': False, 'device_type': 'CPU'},
+                    'filter_type_ocl': {'advanced': True, 'use_finalrender_settings': False, 'device_type': 'OCL'}
     }
 
     alert = {}
@@ -118,7 +122,33 @@ class luxcore_realtimesettings(declarative_property_group):
             'items': [
                 ('METROPOLIS', 'Metropolis', 'Use in complex lighting situations'),
                 ('SOBOL', 'Sobol', 'Use in simple lighting situations'),
-                ('RANDOM', 'Random', 'Completely random sampler, not recommended')
+                ('RANDOM', 'Random', 'Completely random sampler')
+            ],
+            'save_in_preset': True
+        },
+        {
+            'type': 'enum',
+            'attr': 'filter_type_cpu',
+            'name': 'Filter',
+            'description': 'Pixel filter to use',
+            'default': 'GAUSSIAN',
+            'items': [
+                ('BLACKMANHARRIS', 'Blackman-Harris', 'Blackman-Harris filter with width 1.5'),
+                ('GAUSSIAN', 'Gaussian', 'Gaussian filter with width 1.5'),
+                ('NONE', 'None', 'Disable pixel filtering')
+            ],
+            'save_in_preset': True
+        },
+        {
+            'type': 'enum',
+            'attr': 'filter_type_ocl',
+            'name': 'Filter',
+            'description': 'Pixel filter to use',
+            'default': 'NONE',
+            'items': [
+                ('BLACKMANHARRIS', 'Blackman-Harris', 'Blackman-Harris filter with width 1.5'),
+                ('GAUSSIAN', 'Gaussian', 'Gaussian filter with width 1.5'),
+                ('NONE', 'None', 'Disable pixel filtering (fastest)')
             ],
             'save_in_preset': True
         },
