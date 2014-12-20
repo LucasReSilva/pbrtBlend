@@ -1609,7 +1609,7 @@ class BlenderSceneConverter(object):
                 filter_type = realtime_settings.filter_type_cpu
             elif realtime_settings.device_type == 'OCL':
                 filter_type = realtime_settings.filter_type_ocl
-            
+
             self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_type]))
             if filter_type != 'NONE':
                 self.cfgProps.Set(pyluxcore.Property('film.filter.width', [1.5]))

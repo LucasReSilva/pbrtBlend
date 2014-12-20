@@ -372,7 +372,7 @@ def get_expanded_file_name(obj, file_path):
     file_relative = efutil.filesystem_path(file_library_path) if (
         hasattr(obj, 'library') and obj.library) else efutil.filesystem_path(file_path)
 
-    return file_relative, file_basename
+    return os.path.abspath(file_relative), file_basename
 
 
 def process_filepath_data(scene, obj, file_path, paramset, parameter_name):
