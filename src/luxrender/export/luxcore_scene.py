@@ -31,11 +31,13 @@ import math
 import mathutils
 
 from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName
+from ..outputs.luxcore_api import pyluxcore
+from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..export import get_worldscale, matrix_to_list
 from ..export import is_obj_visible
 from ..export import ParamSet
 from ..export.materials import get_texture_from_scene
+
 
 class BlenderSceneConverter(object):
     scalers_count = 0
@@ -53,7 +55,7 @@ class BlenderSceneConverter(object):
     def clear():
         BlenderSceneConverter.scalers_count = 0
 
-    def __init__(self, blScene, lcSession = None, renderengine = None):
+    def __init__(self, blScene, lcSession=None, renderengine=None):
         LuxManager.SetCurrentScene(blScene)
 
         self.blScene = blScene
@@ -119,20 +121,20 @@ class BlenderSceneConverter(object):
             if not is_obj_visible(self.blScene, obj):
                 return mesh_definitions
 
-            #convert_blender_start = int(round(time.time() * 1000)) #### DEBUG
-	
+            # convert_blender_start = int(round(time.time() * 1000)) #### DEBUG
+
             mode = 'PREVIEW' if preview else 'RENDER'
             mesh = obj.to_mesh(self.blScene, True, mode)
             if mesh is None:
                 LuxLog('Cannot create render/export object: %s' % obj.name)
                 return mesh_definitions
-                
+
             mesh.update(calc_tessface=True)
-            
+
             # check if user cancelled export
             if self.renderengine is not None and self.renderengine.test_break():
                 return mesh_definitions
-            
+
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
@@ -161,7 +163,7 @@ class BlenderSceneConverter(object):
                         continue
 
                     mesh_name = '%s-%s_m%03d' % (obj.data.name, self.blScene.name, i)
-                    
+
                     if update_mesh:
                         uv_textures = mesh.tessface_uv_textures
                         uv_layer = None
@@ -180,21 +182,21 @@ class BlenderSceneConverter(object):
                         vert_vno_indices = {}  # Mapping of vert index to exported vert index for verts with vert normals
                         vert_use_vno = set()  # Set of vert indices that use vert normals
                         vert_index = 0  # Exported vert index
-	
+
                         for face in ffaces_mats[i]:
                             fvi = []
                             for j, vertex in enumerate(face.vertices):
                                 v = mesh.vertices[vertex]
-	
+
                                 if face.use_smooth:
                                     if uv_layer:
                                         vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
                                     else:
                                         vert_data = (v.co[:], v.normal[:], tuple())
-	
+
                                     if vert_data not in vert_use_vno:
                                         vert_use_vno.add(vert_data)
-	
+
                                         points.append(vert_data[0])
                                         normals.append(vert_data[1])
                                         uvs.append(vert_data[2])
@@ -240,7 +242,7 @@ class BlenderSceneConverter(object):
             bpy.data.meshes.remove(mesh)
 
             #print("export took %dms" % (int(round(time.time() * 1000)) - convert_lux_start)) #### DEBUG
-			
+
             return mesh_definitions
 
         except Exception as err:
@@ -356,14 +358,14 @@ class BlenderSceneConverter(object):
 
                 if texture.image.source == 'GENERATED':
                     tex_image = 'luxblend_baked_image_%s.%s' % (
-                    bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+                        bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
                     tex_image = os.path.join(extract_path, tex_image)
                     texture.image.save_render(tex_image, self.blScene)
 
                 if texture.image.source == 'FILE':
                     if texture.image.packed_file:
                         tex_image = 'luxblend_extracted_image_%s.%s' % (
-                        bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+                            bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
                         tex_image = os.path.join(extract_path, tex_image)
                         texture.image.save_render(tex_image, self.blScene)
                     else:
@@ -382,7 +384,7 @@ class BlenderSceneConverter(object):
                 if texture.image.source == 'SEQUENCE':
                     if texture.image.packed_file:
                         tex_image = 'luxblend_extracted_image_%s.%s' % (
-                        bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
+                            bpy.path.clean_name(texture.name), self.blScene.render.image_settings.file_format)
                         tex_image = os.path.join(extract_path, tex_image)
                         texture.image.save_render(tex_image, self.blScene)
                     else:
@@ -478,7 +480,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.octaves', [float(texture.octaves)]))
                 props.Set(pyluxcore.Property(prefix + '.dimension', [float(texture.noise_scale)]))
                 props.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
-            #               props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
+            # props.Set(pyluxcore.Property(prefix + '.noisetype', ''.join(str(i).lower() for i in getattr(texture, 'noise_type')))) # not in blender !
             ####################################################################
             # NOISE
             ####################################################################
@@ -610,7 +612,7 @@ class BlenderSceneConverter(object):
             # CHECKERBOARD
             ####################################################################
             elif texType == 'checkerboard':
-                #               props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
+                # props.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
                 props.Set(
                     pyluxcore.Property(prefix + '.texture1', self.ConvertMaterialChannel(luxTex, 'tex1', 'float')))
                 props.Set(
@@ -654,7 +656,11 @@ class BlenderSceneConverter(object):
             # Imagemap
             ####################################################################
             elif texType == 'imagemap':
-                props.Set(pyluxcore.Property(prefix + '.file', [luxTex.filename]))
+                filename = luxTex.filename
+                if filename.startswith("//"):
+                    filename = os.path.abspath(filename[2:])
+
+                props.Set(pyluxcore.Property(prefix + '.file', [filename]))
                 props.Set(pyluxcore.Property(prefix + '.gamma', [float(luxTex.gamma)]))
                 props.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
                 if luxTex.variant == 'float':
@@ -758,7 +764,7 @@ class BlenderSceneConverter(object):
             LuxLog('Texture: ' + texName)
 
             texture = get_texture_from_scene(self.blScene, texName)
-            if texture != False:
+            if not texture:
                 if hasattr(luxMaterial, '%s_multiplycolor' % materialChannel) and is_multiplied:
                     texName = self.ConvertTexture(texture)
                     sv = BlenderSceneConverter.next_scale_value()
@@ -787,9 +793,8 @@ class BlenderSceneConverter(object):
                         getattr(luxMaterial, '%s_fresnelvalue' % materialChannel))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', ['%s' % texName]))
                     return sctexName
-
-                else:
-                    return self.ConvertTexture(texture)
+            else:
+                return self.ConvertTexture(texture)
         else:
             if variant == 'float':
                 return str(getattr(luxMaterial, materialChannel + '_floatvalue'))
@@ -799,7 +804,7 @@ class BlenderSceneConverter(object):
                 return str(getattr(luxMaterial, materialChannel + '_fresnelvalue'))
 
         raise Exception(
-            'Unknown texture in channel' + materialChannel + ' for material ' + material.luxrender_material.type)
+            'Unknown texture in channel' + materialChannel + ' for material ' + luxMaterial.luxrender_material.type)
 
     def ConvertCommonChannel(self, luxMap, material, type):
         if getattr(material.luxrender_material, type + '_usefloattexture'):
@@ -855,7 +860,11 @@ class BlenderSceneConverter(object):
             # Matte and Roughmatte
             ####################################################################
             if matType == 'matte':
+                # import pydevd
+                # pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
+
                 sigma = self.ConvertMaterialChannel(luxMat, 'sigma', 'float')
+
                 if sigma == '0.0':
                     props.Set(pyluxcore.Property(prefix + '.type', ['matte']))
                     props.Set(pyluxcore.Property(prefix + '.kd', self.ConvertMaterialChannel(luxMat, 'Kd', 'color')))
@@ -895,7 +904,7 @@ class BlenderSceneConverter(object):
                     props.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.type', 'fresnelapproxk'))
                     props.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.texture',
                                                  self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
-                #TODO: nk_data and fresneltex
+                # TODO: nk_data and fresneltex
                 else:
                     LuxLog('WARNING: Not yet supported metal2 type: %s' % m2_type)
 
@@ -974,16 +983,16 @@ class BlenderSceneConverter(object):
                     props.Set(pyluxcore.Property(prefix + '.ka_bf',
                                                  self.ConvertMaterialChannel(luxMat, 'backface_Ka', 'color')))
                     props.Set(pyluxcore.Property(prefix + '.multibounce_bf',
-                                    material.luxrender_material.luxrender_mat_glossytranslucent.backface_multibounce))
+                                                 material.luxrender_material.luxrender_mat_glossytranslucent.backface_multibounce))
 
                     props.Set(pyluxcore.Property(prefix + '.d_bf',
                                                  self.ConvertMaterialChannel(luxMat, 'bf_d', 'float')))
 
                     props.Set(pyluxcore.Property(prefix + '.uroughness_bf',
-                                             self.ConvertMaterialChannel(luxMat, 'bf_uroughness', 'float')))
+                                                 self.ConvertMaterialChannel(luxMat, 'bf_uroughness', 'float')))
 
                     props.Set(pyluxcore.Property(prefix + '.vroughness_bf',
-                                             self.ConvertMaterialChannel(luxMat, 'bf_vroughness', 'float')))
+                                                 self.ConvertMaterialChannel(luxMat, 'bf_vroughness', 'float')))
 
             ####################################################################
             # Glass
@@ -1008,6 +1017,22 @@ class BlenderSceneConverter(object):
 
                 props.Set(pyluxcore.Property(prefix + '.filmindex', self.ConvertMaterialChannel(luxMat,
                                                                                                 'filmindex', 'float')))
+            ####################################################################
+            # Glass2
+            ####################################################################
+            elif matType == 'glass2':
+                if not material.luxrender_material.luxrender_mat_glass.architectural:
+                    props.Set(pyluxcore.Property(prefix + '.type', ['glass']))
+                else:
+                    props.Set(pyluxcore.Property(prefix + '.type', ['archglass']))
+
+                props.Set(pyluxcore.Property(prefix + '.kr', '1.0 1.0 1.0'))
+                props.Set(pyluxcore.Property(prefix + '.kt', '1.0 1.0 1.0'))
+
+                if hasattr(material.luxrender_material, "Interior_volume") and \
+                    material.luxrender_material.Interior_volume:
+                    props.Set(pyluxcore.Property(prefix + '.volume.interior',
+                                                 material.luxrender_material.Interior_volume))
             ####################################################################
             # Roughlass
             ####################################################################
@@ -1095,7 +1120,7 @@ class BlenderSceneConverter(object):
             ####################################################################
             elif matType == 'mix':
                 if not material.luxrender_material.luxrender_mat_mix.namedmaterial1_material or \
-                                not material.luxrender_material.luxrender_mat_mix.namedmaterial2_material:
+                        not material.luxrender_material.luxrender_mat_mix.namedmaterial2_material:
                     return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
                 else:
                     try:
@@ -1177,22 +1202,22 @@ class BlenderSceneConverter(object):
 
             traceback.print_exc()
             return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
-    
+
     def ConvertParamToLuxcoreProperty(self, param):
         """
         Convert Luxrender parameters of the form
         ['float gain', 1.0]
         to LuxCore property format
-        
+
         Returns list of parsed values without type specifier
         e.g. ['gain', 1.0]
         """
-        
+
         parsed = param[0].split(' ')
         parsed.pop(0)
-        
+
         return [parsed[0], param[1]]
-    
+
     def ConvertLight(self, obj):
         if not is_obj_visible(self.blScene, obj):
             hide_lamp = True
@@ -1201,25 +1226,25 @@ class BlenderSceneConverter(object):
 
         light = obj.data
         luxcore_name = ToValidLuxCoreName(obj.name)
-        
+
         light_params = ParamSet() \
-        .add_float('gain', light.energy) \
-        .add_float('importance', light.luxrender_lamp.importance)
+            .add_float('gain', light.energy) \
+            .add_float('importance', light.luxrender_lamp.importance)
 
         # Params from light sub-types
         light_params.update(getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower()).get_paramset(obj))
-        
+
         params_converted = []
         for rawParam in light_params:
             params_converted.append(self.ConvertParamToLuxcoreProperty(rawParam))
-        
+
         params_keyValue = {}
         for param in params_converted:
             params_keyValue[param[0]] = param[1]
 
         # Common light params
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
-        energy = params_keyValue['gain'] if not hide_lamp else 0 # workaround for no lights render recovery
+        energy = params_keyValue['gain'] if not hide_lamp else 0  # workaround for no lights render recovery
         position = bpy.data.objects[obj.name].location
         importance = params_keyValue['importance']
         lightgroup_id = getattr(light.luxrender_lamp, 'lightgroup')
@@ -1229,9 +1254,10 @@ class BlenderSceneConverter(object):
             if lightgroup_enabled:
                 energy *= self.blScene.luxrender_lightgroups.lightgroups[lightgroup_id].gain
             else:
-                energy = 0 # use gain for muting to keep geometry exported
+                energy = 0  # use gain for muting to keep geometry exported
 
-        if getattr(lux_lamp, 'L_color') and not (hasattr(lux_lamp, 'sunsky_type') and getattr(lux_lamp, 'sunsky_type') != 'distant'):
+        if getattr(lux_lamp, 'L_color') and not (
+                    hasattr(lux_lamp, 'sunsky_type') and getattr(lux_lamp, 'sunsky_type') != 'distant'):
             iesfile = getattr(light.luxrender_lamp, 'iesname')
             if iesfile != '':
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
@@ -1246,44 +1272,44 @@ class BlenderSceneConverter(object):
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
-            
+
             sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
             legacy_sky = light.luxrender_lamp.luxrender_lamp_sun.legacy_sky
-            
+
             if 'sun' in sunsky_type:
                 name = luxcore_name + '_sun'
                 turbidity = params_keyValue['turbidity']
-                
+
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.type', ['sun']))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
-                
+
                 if 'relsize' in params_keyValue:
                     relsize = params_keyValue['relsize']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.relsize', [relsize]))
-                
+
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
                 turbidity = params_keyValue['turbidity']
                 skyVersion = 'sky' if legacy_sky else 'sky2'
-                
+
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.type', [skyVersion]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
-                
+
             if sunsky_type == 'distant':
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
                 colorRaw = light.luxrender_lamp.luxrender_lamp_sun.L_color
                 color = [colorRaw[0], colorRaw[1], colorRaw[2]]
-            
+
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['distant']))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', color))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.direction', distant_dir))
-                
+
                 if 'theta' in params_keyValue:
                     theta = params_keyValue['theta']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
@@ -1291,18 +1317,18 @@ class BlenderSceneConverter(object):
         elif light.type == 'HEMI':
             infinite_map_path = getattr(lux_lamp, 'infinite_map')
             infinite_map_path_abs = bpy.path.abspath(infinite_map_path)
-        
+
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
-            hemi_fix = mathutils.Matrix.Scale(1.0, 4) # create new scale matrix 4x4
-            hemi_fix[0][0] = -1.0 # mirror the hdri_map
+            hemi_fix = mathutils.Matrix.Scale(1.0, 4)  # create new scale matrix 4x4
+            hemi_fix[0][0] = -1.0  # mirror the hdri_map
             transform = matrix_to_list(hemi_fix * obj.matrix_world.inverted())
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         elif light.type == 'POINT':
- #           if getattr(lux_lamp, 'usesphere'):
- #               print("------------------------", getattr(lux_lamp, 'pointsize'))
+            # if getattr(lux_lamp, 'usesphere'):
+            #               print("------------------------", getattr(lux_lamp, 'pointsize'))
             if iesfile:
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['mappoint']))
             else:
@@ -1315,7 +1341,8 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
+            self.scnProps.Set(
+                pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
         elif light.type == 'SPOT':
             coneangle = math.degrees(light.spot_size) * 0.5
@@ -1324,27 +1351,29 @@ class BlenderSceneConverter(object):
                 projector_map_path = getattr(lux_lamp, 'mapname')
                 projector_map_path_abs = bpy.path.abspath(projector_map_path)
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['projection']))
-                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', projector_map_path_abs))
+                self.scnProps.Set(
+                    pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', projector_map_path_abs))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.fov', coneangle * 2))
             else:
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
 
-            spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z') # match to lux
+            spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')  # match to lux
             transform = matrix_to_list(obj.matrix_world * spot_fix)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
 
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.coneangle', coneangle ))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.conedeltaangle', conedeltaangle ))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.coneangle', coneangle))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.conedeltaangle', conedeltaangle))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
+            self.scnProps.Set(
+                pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
 
-    def ConvertObject(self, obj, preview = False, update_mesh = True, update_transform = True):
+    def ConvertObject(self, obj, preview=False, update_mesh=True, update_transform=True):
         # ######################################################################
         # Convert the object geometry
         ########################################################################
@@ -1371,19 +1400,20 @@ class BlenderSceneConverter(object):
             ####################################################################
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.material', [objMatName]))
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
-            
+
             if update_transform:
                 transform = matrix_to_list(obj.matrix_world)
                 self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.transformation', transform))
-            
+
         if obj.type == 'LAMP':
             try:
                 self.ConvertLight(obj)
             except Exception as err:
                 LuxLog('Light export failed, skipping light: %s\n%s' % (obj.name, err))
                 import traceback
+
                 traceback.print_exc()
-            
+
 
     def ConvertCamera(self):
         blCamera = self.blScene.camera
@@ -1405,7 +1435,7 @@ class BlenderSceneConverter(object):
         if self.blScene.render.use_border:
             width, height = luxCamera.luxrender_film.resolution(self.blScene)
             self.scnProps.Set(pyluxcore.Property("scene.camera.screenwindow", luxCamera.screenwindow(
-                                            width, height, self.blScene, blCameraData, luxcore_export=True)))
+                width, height, self.blScene, blCameraData, luxcore_export=True)))
 
         if luxCamera.use_dof:
             # Do not world-scale this, it is already in meters!
@@ -1417,7 +1447,7 @@ class BlenderSceneConverter(object):
         if luxCamera.use_dof:
             if blCameraData.dof_object is not None:
                 self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * (
-                (blCamera.location - blCameraData.dof_object.location).length)))
+                    (blCamera.location - blCameraData.dof_object.location).length)))
             elif blCameraData.dof_distance > 0:
                 self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * blCameraData.dof_distance))
 
@@ -1425,15 +1455,15 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))
             self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
 
-    def ConvertImagepipelineSettings(self, realtime_preview = False):
+    def ConvertImagepipelineSettings(self, realtime_preview=False):
         lux_camera = self.blScene.camera.data.luxrender_camera
         tonemapping_settings = lux_camera.luxrender_film.luxrender_tonemapping
-        
+
         if tonemapping_settings.type == 'linear':
             sensitivity = lux_camera.sensitivity
             exposure = lux_camera.exposure_time()
             fstop = lux_camera.fstop
-        
+
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_LUXLINEAR']))
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.sensitivity', [sensitivity]))
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.exposure', [exposure]))
@@ -1442,7 +1472,7 @@ class BlenderSceneConverter(object):
             prescale = tonemapping_settings.reinhard_prescale
             postscale = tonemapping_settings.reinhard_postscale
             burn = tonemapping_settings.reinhard_burn
-            
+
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_REINHARD02']))
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.prescale', [prescale]))
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.postscale', [postscale]))
@@ -1450,32 +1480,34 @@ class BlenderSceneConverter(object):
         else:
             # use autolinear as fallback
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
-            
+
         # gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
         self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
         gamma_value = 2.2 if realtime_preview else 1.0
         self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [gamma_value]))
-        
+
         # Deprecated but used for backwardscompatibility
         if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
             self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
 
     def ConvertSamplerSettings(self):
         sampler_settings = self.blScene.luxcore_samplersettings
-        
+
         self.cfgProps.Set(pyluxcore.Property('sampler.type', [sampler_settings.sampler_type]))
-        
+
         if sampler_settings.advanced and sampler_settings.sampler_type in 'METROPOLIS':
             self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [sampler_settings.largesteprate]))
-            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [sampler_settings.maxconsecutivereject]))
-            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.imagemutationrate', [sampler_settings.imagemutationrate]))
-            
+            self.cfgProps.Set(
+                pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [sampler_settings.maxconsecutivereject]))
+            self.cfgProps.Set(
+                pyluxcore.Property('sampler.metropolis.imagemutationrate', [sampler_settings.imagemutationrate]))
+
     def ConvertFilterSettings(self):
         filter_settings = self.blScene.luxcore_filtersettings
-        
+
         self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_settings.filter_type]))
         self.cfgProps.Set(pyluxcore.Property('film.filter.width', [filter_settings.filter_width]))
-        
+
     def ConvertEngineSettings(self):
         engine_settings = self.blScene.luxcore_enginesettings
         engine = engine_settings.renderengine_type
@@ -1488,7 +1520,7 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('tile.multipass.enable',
                                                  [engine_settings.tile_multipass_enable]))
             self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', [
-                                                 engine_settings.tile_multipass_convergencetest_threshold]))
+                engine_settings.tile_multipass_convergencetest_threshold]))
             self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', [
                 engine_settings.tile_multipass_convergencetest_threshold_reduction]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.aa.size',
@@ -1508,25 +1540,25 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.specular',
                                                  [engine_settings.biaspath_pathdepth_specular]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', [
-                                                 engine_settings.biaspath_clamping_radiance_maxvalue]))
+                engine_settings.biaspath_clamping_radiance_maxvalue]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.pdf.value',
                                                  [engine_settings.biaspath_clamping_pdf_value]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type', [
-                                                 engine_settings.biaspath_lights_samplingstrategy_type]))
+                engine_settings.biaspath_lights_samplingstrategy_type]))
         elif engine in ['PATHCPU', 'PATHOCL']:
             self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
         elif engine in ['BIDIRCPU']:
             self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
             self.cfgProps.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
         elif engine in ['BIDIRVMCPU']:
-            self.cfgProps.Set(pyluxcore.Property('bidirvm.lightpath.count', 
+            self.cfgProps.Set(pyluxcore.Property('bidirvm.lightpath.count',
                                                  [engine_settings.bidirvm_lightpath_count]))
-            self.cfgProps.Set(pyluxcore.Property('bidirvm.startradius.scale', 
+            self.cfgProps.Set(pyluxcore.Property('bidirvm.startradius.scale',
                                                  [engine_settings.bidirvm_startradius_scale]))
             self.cfgProps.Set(pyluxcore.Property('bidirvm.alpha', [engine_settings.bidirvm_alpha]))
-        
+
         # CPU settings
-        if (engine_settings.native_threads_count > 0):
+        if engine_settings.native_threads_count > 0:
             self.cfgProps.Set(
                 pyluxcore.Property('native.threads.count', [engine_settings.native_threads_count]))
 
@@ -1541,10 +1573,10 @@ class BlenderSceneConverter(object):
 
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
-        
-    def ConvertConfig(self, realtime_preview = False):
+
+    def ConvertConfig(self, realtime_preview=False):
         realtime_settings = self.blScene.luxcore_realtimesettings
-    
+
         if realtime_preview and not realtime_settings.use_finalrender_settings:
             # Renderengine
             if realtime_settings.device_type == 'CPU':
@@ -1553,9 +1585,9 @@ class BlenderSceneConverter(object):
                 engine = realtime_settings.ocl_renderengine_type
             else:
                 engine = 'PATHCPU'
-                
+
             self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
-            
+
             # OpenCL settings
             if len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
                 dev_string = ''
@@ -1567,10 +1599,10 @@ class BlenderSceneConverter(object):
 
             # Accelerator settings
             self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
-            
+
             # Sampler settings
             self.cfgProps.Set(pyluxcore.Property('sampler.type', [realtime_settings.sampler_type]))
-            
+
             # Filter settings
             if engine == 'PATHOCL':
                 self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['NONE']))
@@ -1582,13 +1614,39 @@ class BlenderSceneConverter(object):
             self.ConvertEngineSettings()
             self.ConvertFilterSettings()
             self.ConvertSamplerSettings()
-            
+
         self.ConvertImagepipelineSettings(realtime_preview)
-        
-    def Convert(self, imageWidth = None, imageHeight = None, realtime_preview = False):
+
+    def convert_volume(self, volume):
+        def absorption_at_depth_scaled(abs_col):
+            for i in range(len(abs_col)):
+                v = float(abs_col[i])
+                depth = volume.depth
+                scale = volume.absorption_scale
+                abs_col[i] = (-math.log(max([v, 1e-30])) / depth) * scale * (v == 1.0 and -1 or 1)
+
+        name = ToValidLuxCoreName(volume.name)
+
+        self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.type' % name, [volume.type]))
+
+        if volume.type == "clear":
+            abs_col = [volume.absorption_color.r, volume.absorption_color.g, volume.absorption_color.b]
+            absorption_at_depth_scaled(abs_col)
+
+            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.absorption' % name,
+                                                 '%s %s %s' % (abs_col[0],
+                                                               abs_col[1],
+                                                               abs_col[2])))
+
+            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.ior' % name,
+                                                 '%s' % volume.fresnel_fresnelvalue))
+
+        self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.priority' % name, volume.priority))
+
+    def Convert(self, imageWidth=None, imageHeight=None, realtime_preview=False):
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', '')
-    
+
         # #######################################################################
         # Convert camera definition
         ########################################################################
@@ -1601,21 +1659,39 @@ class BlenderSceneConverter(object):
         self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_CLAY_MATERIAL.kd', '0.7 0.7 0.7'))
 
         ########################################################################
+        # Default volume
+        ########################################################################
+        if self.blScene.camera.data.luxrender_camera.Exterior_volume:
+            # Default volume from camera exterior
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default',
+                                                 [self.blScene.camera.data.luxrender_camera.Exterior_volume]))
+        elif self.blScene.luxrender_world.default_exterior_volume:
+            # Default volume from world
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default',
+                                                 [self.blScene.luxrender_world.default_exterior_volume]))
+
+        ########################################################################
+        # Convert all volumes
+        ########################################################################
+        for volume in self.blScene.luxrender_volumes.volumes:
+            self.convert_volume(volume)
+
+        ########################################################################
         # Convert all objects
         ########################################################################
         for obj in self.blScene.objects:
             # cancel export when user hits 'Esc'
             if self.renderengine is not None and self.renderengine.test_break():
                 break
-                
+
             LuxLog('Converting object: %s' % obj.name)
             if self.renderengine is not None:
                 self.renderengine.update_stats('Exporting...', 'Object: ' + obj.name)
-                
+
             self.ConvertObject(obj)
 
         # Debug information
-        #LuxLog('Scene Properties:')
+        # LuxLog('Scene Properties:')
         #LuxLog(str(self.scnProps))
 
         self.lcScene.Parse(self.scnProps)
@@ -1628,7 +1704,7 @@ class BlenderSceneConverter(object):
         self.ConvertConfig(realtime_preview)
 
         # Film
-        if (not imageWidth is None) and (not imageHeight is None):
+        if imageWidth is not None and imageHeight is not None:
             filmWidth = imageWidth
             filmHeight = imageHeight
         else:
@@ -1641,46 +1717,46 @@ class BlenderSceneConverter(object):
         channels = self.blScene.luxrender_channels
 
         if not channels.disable_aovs and not realtime_preview:
-	        if channels.RGB:
-	            self.createChannelOutputString('RGB')
-	        if channels.RGBA:
-	            self.createChannelOutputString('RGBA')
-	        if channels.RGB_TONEMAPPED:
-	            self.createChannelOutputString('RGB_TONEMAPPED')
-	        if channels.RGBA_TONEMAPPED:
-	            self.createChannelOutputString('RGBA_TONEMAPPED')
-	        if channels.ALPHA:
-	            self.createChannelOutputString('ALPHA')
-	        if channels.DEPTH:
-	            self.createChannelOutputString('DEPTH')
-	        if channels.POSITION:
-	            self.createChannelOutputString('POSITION')
-	        if channels.GEOMETRY_NORMAL:
-	            self.createChannelOutputString('GEOMETRY_NORMAL')
-	        if channels.SHADING_NORMAL:
-	            self.createChannelOutputString('SHADING_NORMAL')
-	        if channels.MATERIAL_ID:
-	            self.createChannelOutputString('MATERIAL_ID')
-	        if channels.DIRECT_DIFFUSE:
-	            self.createChannelOutputString('DIRECT_DIFFUSE')
-	        if channels.DIRECT_GLOSSY:
-	            self.createChannelOutputString('DIRECT_GLOSSY')
-	        if channels.EMISSION:
-	            self.createChannelOutputString('EMISSION')
-	        if channels.INDIRECT_DIFFUSE:
-	            self.createChannelOutputString('INDIRECT_DIFFUSE')
-	        if channels.INDIRECT_GLOSSY:
-	            self.createChannelOutputString('INDIRECT_GLOSSY')
-	        if channels.INDIRECT_SPECULAR:
-	            self.createChannelOutputString('INDIRECT_SPECULAR')
-	        if channels.DIRECT_SHADOW_MASK:
-	            self.createChannelOutputString('DIRECT_SHADOW_MASK')
-	        if channels.INDIRECT_SHADOW_MASK:
-	            self.createChannelOutputString('INDIRECT_SHADOW_MASK')
-	        if channels.UV:
-	            self.createChannelOutputString('UV')
-	        if channels.RAYCOUNT:
-	            self.createChannelOutputString('RAYCOUNT')
+            if channels.RGB:
+                self.createChannelOutputString('RGB')
+            if channels.RGBA:
+                self.createChannelOutputString('RGBA')
+            if channels.RGB_TONEMAPPED:
+                self.createChannelOutputString('RGB_TONEMAPPED')
+            if channels.RGBA_TONEMAPPED:
+                self.createChannelOutputString('RGBA_TONEMAPPED')
+            if channels.ALPHA:
+                self.createChannelOutputString('ALPHA')
+            if channels.DEPTH:
+                self.createChannelOutputString('DEPTH')
+            if channels.POSITION:
+                self.createChannelOutputString('POSITION')
+            if channels.GEOMETRY_NORMAL:
+                self.createChannelOutputString('GEOMETRY_NORMAL')
+            if channels.SHADING_NORMAL:
+                self.createChannelOutputString('SHADING_NORMAL')
+            if channels.MATERIAL_ID:
+                self.createChannelOutputString('MATERIAL_ID')
+            if channels.DIRECT_DIFFUSE:
+                self.createChannelOutputString('DIRECT_DIFFUSE')
+            if channels.DIRECT_GLOSSY:
+                self.createChannelOutputString('DIRECT_GLOSSY')
+            if channels.EMISSION:
+                self.createChannelOutputString('EMISSION')
+            if channels.INDIRECT_DIFFUSE:
+                self.createChannelOutputString('INDIRECT_DIFFUSE')
+            if channels.INDIRECT_GLOSSY:
+                self.createChannelOutputString('INDIRECT_GLOSSY')
+            if channels.INDIRECT_SPECULAR:
+                self.createChannelOutputString('INDIRECT_SPECULAR')
+            if channels.DIRECT_SHADOW_MASK:
+                self.createChannelOutputString('DIRECT_SHADOW_MASK')
+            if channels.INDIRECT_SHADOW_MASK:
+                self.createChannelOutputString('INDIRECT_SHADOW_MASK')
+            if channels.UV:
+                self.createChannelOutputString('UV')
+            if channels.RAYCOUNT:
+                self.createChannelOutputString('RAYCOUNT')
 
         # Debug information
         #LuxLog('RenderConfig Properties:')
@@ -1688,8 +1764,11 @@ class BlenderSceneConverter(object):
 
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
         BlenderSceneConverter.clear()  # for scalers_count etc.
-        
+
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', 'Starting LuxRender')
-		
+
+#        import pydevd
+#        pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
+
         return self.lcConfig

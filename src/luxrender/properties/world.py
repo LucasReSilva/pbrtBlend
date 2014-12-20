@@ -182,6 +182,7 @@ class luxrender_volume_data(declarative_property_group):
                    'scattering_scale',
                    'g',
                    'stepsize',
+                   'priority'
                ]
 
     visibility = dict_merge(
@@ -292,10 +293,24 @@ class luxrender_volume_data(declarative_property_group):
                          'unit': 'LENGTH',
                          'save_in_preset': True
                      },
+                     {
+                         'type': 'int',
+                         'attr': 'priority',
+                         'name': 'Volume priority',
+                         'description': 'Volume priority (LuxCore only), volumes with higher values gets priority if \
+                         there is overlap',
+                         'default': 0,
+                         'min': 0,
+                         'max': 65535,
+                         'save_in_preset': True
+                     },
                  ]
 
     def api_output(self, lux_context):
         vp = ParamSet()
+
+#        import pydevd
+#        pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
 
         def absorption_at_depth_scaled(i):
             # This is copied from the old LuxBlend, I don't pretend to understand it, DH
