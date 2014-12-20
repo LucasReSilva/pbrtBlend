@@ -1543,10 +1543,9 @@ class BlenderSceneConverter(object):
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
         
     def ConvertConfig(self, realtime_preview = False):
-        if realtime_preview:
-            # Config for realtime preview
-            realtime_settings = self.blScene.luxcore_realtimesettings
-            
+        realtime_settings = self.blScene.luxcore_realtimesettings
+    
+        if realtime_preview and not realtime_settings.use_finalrender_settings:
             # Renderengine
             if realtime_settings.device_type == 'CPU':
                 engine = realtime_settings.cpu_renderengine_type
@@ -1573,8 +1572,11 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('sampler.type', [realtime_settings.sampler_type]))
             
             # Filter settings
-            self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['GAUSSIAN']))
-            self.cfgProps.Set(pyluxcore.Property('film.filter.width', [1.5]))
+            if engine == 'PATHOCL':
+                self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['NONE']))
+            else:
+                self.cfgProps.Set(pyluxcore.Property('film.filter.type', ['GAUSSIAN']))
+                self.cfgProps.Set(pyluxcore.Property('film.filter.width', [1.5]))
         else:
             # Config for final render
             self.ConvertEngineSettings()

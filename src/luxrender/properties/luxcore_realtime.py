@@ -39,6 +39,7 @@ class luxcore_realtimesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
+        'use_finalrender_settings',
         'device_type', 
         'advanced',
         'cpu_renderengine_type',
@@ -47,18 +48,28 @@ class luxcore_realtimesettings(declarative_property_group):
     ]
 
     visibility = {
-                    'cpu_renderengine_type': {'advanced': True, 'device_type': 'CPU'},
-                    'ocl_renderengine_type': {'advanced': True, 'device_type': 'OCL'},
-                    'sampler_type': {'advanced': True}
+                    'device_type': {'use_finalrender_settings': False},
+                    'advanced': {'use_finalrender_settings': False},
+                    'cpu_renderengine_type': {'advanced': True, 'device_type': 'CPU', 'use_finalrender_settings': False},
+                    'ocl_renderengine_type': {'advanced': True, 'device_type': 'OCL', 'use_finalrender_settings': False},
+                    'sampler_type': {'advanced': True, 'use_finalrender_settings': False}
     }
 
     alert = {}
 
     properties = [
         {
+            'type': 'bool',
+            'attr': 'use_finalrender_settings',
+            'name': 'Use Final Render Settings',
+            'description': 'Use the final render settings for the realtime preview',
+            'default': False,
+            'save_in_preset': True
+        },
+        {
             'type': 'enum',
             'attr': 'device_type',
-            'name': 'Device:',
+            'name': 'Device',
             'description': 'CPU rendering has lower latency, GPU rendering is faster',
             'default': 'CPU',
             'items': [
