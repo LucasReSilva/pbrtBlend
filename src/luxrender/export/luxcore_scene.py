@@ -135,8 +135,8 @@ class BlenderSceneConverter(object):
             if self.renderengine is not None and self.renderengine.test_break():
                 return mesh_definitions
 
-            #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
-            #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
+            # print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
+            # convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
             # Collate faces by mat index
             ffaces_mats = {}
@@ -241,7 +241,7 @@ class BlenderSceneConverter(object):
             del ffaces_mats
             bpy.data.meshes.remove(mesh)
 
-            #print("export took %dms" % (int(round(time.time() * 1000)) - convert_lux_start)) #### DEBUG
+            # print("export took %dms" % (int(round(time.time() * 1000)) - convert_lux_start)) #### DEBUG
 
             return mesh_definitions
 
@@ -507,7 +507,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.type', ['blender_voronoi']))
                 props.Set(pyluxcore.Property(prefix + '.dismetric',
                                              ''.join(str(i).lower() for i in getattr(texture, 'distance_metric'))))
-                #               props.Set(pyluxcore.Property(prefix + '.colormode', ''.join(str(i).lower() for i in getattr(texture, 'color_mode')))) # not yet in luxcore
+                # props.Set(pyluxcore.Property(prefix + '.colormode', ''.join(str(i).lower() for i in getattr(texture, 'color_mode')))) # not yet in luxcore
                 props.Set(pyluxcore.Property(prefix + '.intensity', [float(texture.noise_intensity)]))
                 props.Set(pyluxcore.Property(prefix + '.exponent', [float(texture.minkovsky_exponent)]))
                 props.Set(pyluxcore.Property(prefix + '.w1', [float(texture.weight_1)]))
@@ -983,7 +983,7 @@ class BlenderSceneConverter(object):
                     props.Set(pyluxcore.Property(prefix + '.ka_bf',
                                                  self.ConvertMaterialChannel(luxMat, 'backface_Ka', 'color')))
                     props.Set(pyluxcore.Property(prefix + '.multibounce_bf',
-                                                 material.luxrender_material.luxrender_mat_glossytranslucent.backface_multibounce))
+                                    material.luxrender_material.luxrender_mat_glossytranslucent.backface_multibounce))
 
                     props.Set(pyluxcore.Property(prefix + '.d_bf',
                                                  self.ConvertMaterialChannel(luxMat, 'bf_d', 'float')))
@@ -1030,7 +1030,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.kt', '1.0 1.0 1.0'))
 
                 if hasattr(material.luxrender_material, "Interior_volume") and \
-                    material.luxrender_material.Interior_volume:
+                        material.luxrender_material.Interior_volume:
                     props.Set(pyluxcore.Property(prefix + '.volume.interior',
                                                  material.luxrender_material.Interior_volume))
             ####################################################################
@@ -1114,7 +1114,10 @@ class BlenderSceneConverter(object):
             ####################################################################
             elif matType == 'null':
                 props.Set(pyluxcore.Property(prefix + '.type', ['null']))
-
+                if hasattr(material.luxrender_material, "Interior_volume") and \
+                        material.luxrender_material.Interior_volume:
+                    props.Set(pyluxcore.Property(prefix + '.volume.interior',
+                                                 material.luxrender_material.Interior_volume))
             ####################################################################
             # Mix
             ####################################################################
@@ -1328,7 +1331,7 @@ class BlenderSceneConverter(object):
 
         elif light.type == 'POINT':
             # if getattr(lux_lamp, 'usesphere'):
-            #               print("------------------------", getattr(lux_lamp, 'pointsize'))
+            # print("------------------------", getattr(lux_lamp, 'pointsize'))
             if iesfile:
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['mappoint']))
             else:
@@ -1629,7 +1632,7 @@ class BlenderSceneConverter(object):
 
         self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.type' % name, [volume.type]))
 
-        if volume.type == "clear":
+        if volume.type == 'clear':
             abs_col = [volume.absorption_color.r, volume.absorption_color.g, volume.absorption_color.b]
             absorption_at_depth_scaled(abs_col)
 
@@ -1637,9 +1640,32 @@ class BlenderSceneConverter(object):
                                                  '%s %s %s' % (abs_col[0],
                                                                abs_col[1],
                                                                abs_col[2])))
+        elif volume.type in ['homogeneous', 'heterogeneous']:
+            abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
+            absorption_at_depth_scaled(abs_col)
 
-            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.ior' % name,
-                                                 '%s' % volume.fresnel_fresnelvalue))
+            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.absorption' % name,
+                                                 '%s %s %s' % (abs_col[0],
+                                                               abs_col[1],
+                                                               abs_col[2])))
+
+            s_col = [volume.sigma_s_color.r, volume.sigma_s_color.g, volume.sigma_s_color.b]
+
+            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.scattering' % name,
+                                                 '%s %s %s' % (s_col[0],
+                                                               s_col[1],
+                                                               s_col[2])))
+
+            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.asymmetry' % name,
+                                                 '%s %s %s' % (volume.g[0],
+                                                               volume.g[1],
+                                                               volume.g[2])))
+
+            if volume.type == 'heterogenous':
+                self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.steps.size' % name, volume.stepsize))
+
+        self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.ior' % name,
+                                             '%s' % volume.fresnel_fresnelvalue))
 
         self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.priority' % name, volume.priority))
 
@@ -1692,7 +1718,7 @@ class BlenderSceneConverter(object):
 
         # Debug information
         # LuxLog('Scene Properties:')
-        #LuxLog(str(self.scnProps))
+        # LuxLog(str(self.scnProps))
 
         self.lcScene.Parse(self.scnProps)
 
@@ -1759,8 +1785,8 @@ class BlenderSceneConverter(object):
                 self.createChannelOutputString('RAYCOUNT')
 
         # Debug information
-        #LuxLog('RenderConfig Properties:')
-        #LuxLog(str(self.cfgProps))
+        # LuxLog('RenderConfig Properties:')
+        # LuxLog(str(self.cfgProps))
 
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
         BlenderSceneConverter.clear()  # for scalers_count etc.
@@ -1768,7 +1794,7 @@ class BlenderSceneConverter(object):
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', 'Starting LuxRender')
 
-#        import pydevd
-#        pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
+        #        import pydevd
+        #        pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
 
         return self.lcConfig

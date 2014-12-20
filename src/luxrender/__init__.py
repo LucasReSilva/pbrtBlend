@@ -26,13 +26,15 @@
 #
 from os import getenv
 from .extensions_framework import util as efutil
+import sys
 
+sys.path.append("/home/tomb/Projects/PyCharm/luxblend25/src/luxrender/pycharm-debug-py3k.egg")
 
 bl_info = {
     "name": "LuxRender",
     "author": "LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), \
     Jens Verwiebe, Jason Clarke (JtheNinja), Michael Klemm (neo2068)",
-    "version": (1, 4, 'RC2'),
+    "version": (1, 4, 'RC3'),
     "blender": (2, 67, 1),
     "api": 57908,
     "category": "Render",
