@@ -26,7 +26,9 @@
 #
 from os import getenv
 from .extensions_framework import util as efutil
+import sys
 
+sys.path.append("/home/tomb/Projects/PyCharm/luxblend25/src/luxrender/pycharm-debug-py3k.egg")
 
 bl_info = {
     "name": "LuxRender",
