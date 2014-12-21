@@ -45,7 +45,7 @@ from ..extensions_framework import util as efutil
 
 # Exporter libs
 from .. import LuxRenderAddon
-from ..export import get_output_filename
+from ..export import get_output_filename, get_worldscale
 from ..export.scene import SceneExporter
 from ..outputs import LuxManager, LuxFilmDisplay
 from ..outputs import LuxLog
@@ -1410,6 +1410,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         self.viewCameraShiftY = context.scene.camera.data.shift_y
 
         if view_persp != 'ORTHO':
+            lensradius = 0.0
+            focaldistance = 0.0
+            
             zoom = 1.0
             dx = 0.0
             dy = 0.0
@@ -1453,6 +1456,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 cam_origin = list(lookat[0:3])
                 cam_lookat = list(lookat[3:6])
                 cam_up = list(lookat[6:9])
+        
+                if luxCamera.use_dof:
+                    # Do not world-scale this, it is already in meters!
+                    lensradius = (blcamera.data.lens / 1000.0) / (2.0 * luxCamera.fstop)
+        
+                ws = get_worldscale(as_scalematrix = False)
+        
+                if luxCamera.use_dof:
+                    if blcamera.data.dof_object is not None:
+                        focaldistance = ws * ((blcamera.location - blcamera.data.dof_object.location).length)
+                    elif blcamera.data.dof_distance > 0:
+                        focaldistance = ws * blcamera.data.dof_distance
 
             zoom *= 2.0
 
@@ -1469,7 +1484,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin)).
                         Set(pyluxcore.Property('scene.camera.up', cam_up)).
                         Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow)).
-                        Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov)))
+                        Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov))).
+                        Set(pyluxcore.Property('scene.camera.lensradius', lensradius)).
+                        Set(pyluxcore.Property('scene.camera.focaldistance', focaldistance))
             )
     
     def luxcore_view_draw(self, context):
