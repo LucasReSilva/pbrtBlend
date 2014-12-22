@@ -95,7 +95,7 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_lights_nearstart',  # Compute settings
         'label_compute_settings',  # OpenCL settings
         'native_threads_count',  # CPU settings
-        'op_opencl_device_list_update',
+        # 'op_opencl_device_list_update',
     ]
 
     visibility = {
@@ -138,7 +138,7 @@ class luxcore_enginesettings(declarative_property_group):
                     'native_threads_count': {
                         'renderengine_type': O(['PATHCPU', 'BIASPATHCPU', 'BIDIRCPU', 'BIDIRVMCPU'])},
                     # OpenCL settings
-                    'op_opencl_device_list_update': {'renderengine_type': O(['PATHOCL', 'BIASPATHOCL'])},
+                    # 'op_opencl_device_list_update': {'renderengine_type': O(['PATHOCL', 'BIASPATHOCL'])},
     }
 
     alert = {}
