@@ -1028,8 +1028,9 @@ class BlenderSceneConverter(object):
 
                 if hasattr(material.luxrender_material, "Interior_volume") and \
                         material.luxrender_material.Interior_volume:
+                    validInteriorName =  ToValidLuxCoreName(material.luxrender_material.Interior_volume)
                     props.Set(pyluxcore.Property(prefix + '.volume.interior',
-                                                 material.luxrender_material.Interior_volume))
+                                                 validInteriorName))
             ####################################################################
             # Roughlass
             ####################################################################
