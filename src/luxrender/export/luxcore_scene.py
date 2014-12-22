@@ -1114,8 +1114,9 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.type', ['null']))
                 if hasattr(material.luxrender_material, "Interior_volume") and \
                         material.luxrender_material.Interior_volume:
+                    validInteriorName =  ToValidLuxCoreName(material.luxrender_material.Interior_volume)
                     props.Set(pyluxcore.Property(prefix + '.volume.interior',
-                                                 material.luxrender_material.Interior_volume))
+                                                 validInteriorName))
             ####################################################################
             # Mix
             ####################################################################
