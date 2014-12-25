@@ -1353,7 +1353,6 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.scnProps.Set(
                 pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', color))
 
         elif light.type == 'SPOT':
             coneangle = math.degrees(light.spot_size) * 0.5
