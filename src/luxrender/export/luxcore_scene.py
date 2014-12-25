@@ -1258,18 +1258,26 @@ class BlenderSceneConverter(object):
             else:
                 energy = 0  # use gain for muting to keep geometry exported
 
-        if getattr(lux_lamp, 'L_color') and not (
-                    hasattr(lux_lamp, 'sunsky_type') and getattr(lux_lamp, 'sunsky_type') != 'distant'):
+        gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum !
+
+        if getattr(lux_lamp, 'L_color'): # all but sunsky models
             iesfile = getattr(light.luxrender_lamp, 'iesname')
             iesfile, basename = get_expanded_file_name(light, iesfile)
             if iesfile != '':
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
-            spectrum = getattr(lux_lamp, 'L_color') * energy
-            gain_spectrum = [spectrum[0], spectrum[1], spectrum[2]]
+
+            # Workaround for lights without color, multiply gain with color here
+            if (light.type == 'HEMI' and (not getattr(lux_lamp, 'infinite_map')
+                                          or getattr(lux_lamp, 'hdri_multiply'))) or light.type == 'SPOT':
+                colorRaw = getattr(lux_lamp, 'L_color') * energy
+                gain_spectrum = [colorRaw[0], colorRaw[1], colorRaw[2]]
+            else:
+                colorRaw = getattr(lux_lamp, 'L_color')
+                color = [colorRaw[0], colorRaw[1], colorRaw[2]]
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', color))
+
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
-        else:
-            gain_spectrum = [energy, energy, energy]
 
         # Individual light params
         if light.type == 'SUN':
@@ -1306,11 +1314,8 @@ class BlenderSceneConverter(object):
 
             if sunsky_type == 'distant':
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
-                colorRaw = light.luxrender_lamp.luxrender_lamp_sun.L_color
-                color = [colorRaw[0], colorRaw[1], colorRaw[2]]
 
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['distant']))
-                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', color))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.direction', distant_dir))
 
                 if 'theta' in params_keyValue:
@@ -1319,9 +1324,13 @@ class BlenderSceneConverter(object):
 
         elif light.type == 'HEMI':
             infinite_map_path = getattr(lux_lamp, 'infinite_map')
-            infinite_map_path_abs, basename = get_expanded_file_name(light, infinite_map_path)
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
-            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
+            if infinite_map_path:
+                infinite_map_path_abs, basename = get_expanded_file_name(light, infinite_map_path)
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
+            else:
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['constantinfinite']))
+
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
             hemi_fix = mathutils.Matrix.Scale(1.0, 4)  # create new scale matrix 4x4
             hemi_fix[0][0] = -1.0  # mirror the hdri_map
@@ -1463,7 +1472,7 @@ class BlenderSceneConverter(object):
 
         if tonemapping_settings.type == 'linear':
             sensitivity = lux_camera.sensitivity
-            exposure = lux_camera.exposure_time()
+            exposure = lux_camera.exposure_time() if not realtime_preview else lux_camera.exposure_time() * 2.25
             fstop = lux_camera.fstop
 
             self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_LUXLINEAR']))

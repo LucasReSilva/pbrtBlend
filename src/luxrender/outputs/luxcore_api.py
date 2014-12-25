@@ -67,4 +67,5 @@ if not 'PYLUXCORE_AVAILABLE' in locals():
         LuxLog('WARNING: Binary pyluxcore module not available! Visit '
                'http://www.luxrender.net/ to obtain one for your system.')
         LuxLog('(ImportError was: %s)' % err)
+        pyluxcore = None
         PYLUXCORE_AVAILABLE = False
