@@ -1267,7 +1267,8 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
 
             # Workaround for lights without color, multiply gain with color here
-            if (light.type == 'HEMI' and (not getattr(lux_lamp, 'infinite_map') or getattr(lux_lamp, 'hdri_multiply'))) or light.type == 'SPOT':
+            if (light.type == 'HEMI' and (not getattr(lux_lamp, 'infinite_map')
+                                          or getattr(lux_lamp, 'hdri_multiply'))) or light.type == 'SPOT':
                 colorRaw = getattr(lux_lamp, 'L_color') * energy
                 gain_spectrum = [colorRaw[0], colorRaw[1], colorRaw[2]]
             else:
