@@ -127,8 +127,10 @@ else:
 
         def draw(self, context):
             layout = self.layout
-            # layout.label(text="This is a preferences view for our addon")
             layout.prop(self, "install_path")
+            layout.label(text="After updating LuxRender installation path "
+                         "please restart Blender for changes to take "
+                         "effect.")
 
     LuxRenderAddon = Addon(bl_info)
     addon_register, addon_unregister = LuxRenderAddon.init_functions()
