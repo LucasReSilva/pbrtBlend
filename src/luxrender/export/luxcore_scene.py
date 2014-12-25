@@ -1266,7 +1266,7 @@ class BlenderSceneConverter(object):
             if iesfile != '':
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
 
-            # Workaround for lights without color, musltply gain with color here
+            # Workaround for lights without color, multiply gain with color here
             if (light.type == 'HEMI' and (not getattr(lux_lamp, 'infinite_map') or getattr(lux_lamp, 'hdri_multiply'))) or light.type == 'SPOT':
                 colorRaw = getattr(lux_lamp, 'L_color') * energy
                 gain_spectrum = [colorRaw[0], colorRaw[1], colorRaw[2]]
@@ -1316,7 +1316,6 @@ class BlenderSceneConverter(object):
 
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['distant']))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.direction', distant_dir))
-                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', color))
 
                 if 'theta' in params_keyValue:
                     theta = params_keyValue['theta']
