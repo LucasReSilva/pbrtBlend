@@ -28,6 +28,7 @@ import bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
+from ..outputs.luxcore_api import UseLuxCore
 from .. import LuxRenderAddon
 
 narrowui = 180
@@ -142,7 +143,8 @@ class ui_luxrender_lamp_area(lamps_panel):
     bl_label = 'LuxRender Area Lamp'
 
     display_property_groups = [
-        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_area' )
+        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_area' ),
+        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_laser', lambda: UseLuxCore() )
     ]
 
     @classmethod

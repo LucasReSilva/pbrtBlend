@@ -1379,7 +1379,22 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.scnProps.Set(
                 pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
-
+        
+        elif light.type == 'AREA':
+            transform = matrix_to_list(obj.matrix_world)
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
+            
+            if light.luxrender_lamp.luxrender_lamp_laser.is_laser:
+                # Laser lamp
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['laser']))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.radius', [light.size]))
+            else:
+                # Area lamp
+                # TODO: create plane and add emitting material (null or matte)
+                pass
+                
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
@@ -1660,7 +1675,10 @@ class BlenderSceneConverter(object):
                                                                abs_col[1],
                                                                abs_col[2])))
 
-            s_col = [volume.sigma_s_color.r, volume.sigma_s_color.g, volume.sigma_s_color.b]
+            scale = volume.scattering_scale
+            s_col = [volume.sigma_s_color.r * scale, 
+                     volume.sigma_s_color.g * scale, 
+                     volume.sigma_s_color.b * scale]
 
             self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.scattering' % name,
                                                  '%s %s %s' % (s_col[0],

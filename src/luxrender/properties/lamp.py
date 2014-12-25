@@ -682,3 +682,24 @@ class luxrender_lamp_hemi(declarative_property_group):
             params.add_color('L', self.L_color)
 
         return params
+        
+#####################################
+
+@LuxRenderAddon.addon_register_class
+class luxrender_lamp_laser(declarative_property_group):
+    ef_attach_to = ['luxrender_lamp']
+
+    controls = [
+        'is_laser'
+    ]
+
+    properties = [
+        {
+            'type': 'bool',
+            'attr': 'is_laser',
+            'name': 'Laser',
+            'description': 'Use as laser light source (emits a straight beam of light, radius is the size of the area light',
+            'default': False,
+            'save_in_preset': True
+        }
+    ]
