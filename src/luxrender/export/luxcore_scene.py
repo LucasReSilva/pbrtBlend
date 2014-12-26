@@ -1282,7 +1282,7 @@ class BlenderSceneConverter(object):
 
         gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum !
 
-        if getattr(lux_lamp, 'L_color') and not light.type == 'SUN': # all but sunsky models
+        if getattr(lux_lamp, 'L_color':
             iesfile = getattr(light.luxrender_lamp, 'iesname')
             iesfile, basename = get_expanded_file_name(light, iesfile)
             if iesfile != '':
