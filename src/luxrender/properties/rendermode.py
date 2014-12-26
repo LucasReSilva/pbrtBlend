@@ -50,7 +50,7 @@ class luxrender_rendermode(declarative_property_group):
         'statebuffercount',
         'workgroupsize',
         'qbvhstacksize',
-        'deviceselection',
+        # 'deviceselection',
         'kernelcache'
     ]
 
@@ -64,8 +64,8 @@ class luxrender_rendermode(declarative_property_group):
         'workgroupsize': {'opencl_prefs': True,
                           'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl'])},
         'qbvhstacksize': {'opencl_prefs': True, 'renderer': 'hybrid'},
-        'deviceselection': {'opencl_prefs': True,
-                            'rendermode': O(['hybridpath', 'hybridbidir'])},
+        # 'deviceselection': {'opencl_prefs': True,
+        #                     'rendermode': O(['hybridpath', 'hybridbidir'])},
         'kernelcache': {'opencl_prefs': True, 'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl'])},
         'usegpus': {'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl'])},
         'usecpus': {'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl'])},
@@ -217,14 +217,14 @@ class luxrender_rendermode(declarative_property_group):
             'max': 64,
             'save_in_preset': True
         },
-        {
-            'type': 'string',
-            'attr': 'deviceselection',
-            'name': 'OpenCL Devices',
-            'description': 'Enter target OpenCL devices here. Leave blank to use all available',
-            'default': '',
-            'save_in_preset': True
-        },
+        # {
+        #     'type': 'string',
+        #     'attr': 'deviceselection',
+        #     'name': 'OpenCL Devices',
+        #     'description': 'Enter target OpenCL devices here. Leave blank to use all available',
+        #     'default': '',
+        #     'save_in_preset': True
+        # },
         {
             'type': 'enum',
             'attr': 'kernelcache',
@@ -260,6 +260,15 @@ class luxrender_rendermode(declarative_property_group):
     def api_output(self):
         renderer_params = ParamSet()
 
+        if self.opencl_prefs:
+            import bpy
+            engine_settings = bpy.context.scene.luxcore_enginesettings
+            if len(engine_settings.luxcore_opencl_devices) > 0:
+                dev_string = ''
+                for dev_index in range(len(engine_settings.luxcore_opencl_devices)):
+                    dev = engine_settings.luxcore_opencl_devices[dev_index]
+                    dev_string += '1' if dev.opencl_device_enabled else '0'
+
         if self.renderer in ['hybrid']:
             renderer_params.add_bool('opencl.gpu.use', self.usegpus)
 
@@ -270,7 +279,7 @@ class luxrender_rendermode(declarative_property_group):
                 renderer_params.add_integer('statebuffercount', self.statebuffercount)
                 renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
                 renderer_params.add_integer('accelerator.qbvh.stacksize.max', self.qbvhstacksize)
-                renderer_params.add_string('opencl.devices.select', self.deviceselection)
+                renderer_params.add_string('opencl.devices.select', dev_string)
 
         if self.renderer in ['luxcore']:
             # LuxCoreRenderer specific parameters
@@ -280,14 +289,6 @@ class luxrender_rendermode(declarative_property_group):
 
             if self.opencl_prefs:
                 luxcore_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
-                import bpy
-                engine_settings = bpy.context.scene.luxcore_enginesettings
-                if len(engine_settings.luxcore_opencl_devices) > 0:
-                    dev_string = ''
-                    for dev_index in range(len(engine_settings.luxcore_opencl_devices)):
-                        dev = engine_settings.luxcore_opencl_devices[dev_index]
-                        dev_string += '1' if dev.opencl_device_enabled else '0'
-
                 luxcore_devices_select = "opencl.devices.select = " + dev_string
                 luxcore_params = '" "'.join(
                     (luxcore_params, luxcore_devices_select)) if luxcore_devices_select else luxcore_params
