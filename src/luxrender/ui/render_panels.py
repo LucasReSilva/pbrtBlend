@@ -82,8 +82,9 @@ class device_settings(render_panel):
     bl_label = 'LuxRender OpenCL Device List'
 
     def draw(self, context):
-        if context.scene.luxrender_rendermode.rendermode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl']\
-            or (UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']):
+        if (context.scene.luxrender_rendermode.rendermode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl']\
+            or (UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']))\
+                and bpy.context.scene.luxrender_rendermode.opencl_prefs:
             self.layout.operator('luxrender.opencl_device_list_update')
             # This is a "special" panel section for the list of OpenCL devices
             for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
@@ -91,10 +92,10 @@ class device_settings(render_panel):
                 row = self.layout.row()
                 row.prop(dev, 'opencl_device_enabled', text="")
                 subrow = row.row()
-                subrow.enabled = dev.opencl_device_enabled and bpy.context.scene.luxrender_rendermode.opencl_prefs
+                subrow.enabled = dev.opencl_device_enabled
                 subrow.label(dev.name)
         else:
-            self.layout.label("No OpenCL Mode Selected")
+            self.layout.label("Inactive")
 
 @LuxRenderAddon.addon_register_class
 class realtime_settings(render_panel):
