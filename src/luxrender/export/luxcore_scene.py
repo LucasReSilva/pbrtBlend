@@ -42,6 +42,7 @@ from ..export.materials import get_texture_from_scene
 
 class BlenderSceneConverter(object):
     scalers_count = 0
+    unique_material_number = 0
     # Amount of output channels (AOVs)
     outputCounter = 0
     material_id_mask_counter = 0
@@ -53,8 +54,14 @@ class BlenderSceneConverter(object):
         return BlenderSceneConverter.scalers_count
 
     @staticmethod
+    def get_unique_name(name):
+        BlenderSceneConverter.unique_material_number += 1
+        return (name + str(BlenderSceneConverter.unique_material_number))
+
+    @staticmethod
     def clear():
         BlenderSceneConverter.scalers_count = 0
+        BlenderSceneConverter.unique_material_number = 0
 
     def __init__(self, blScene, lcSession=None, renderengine=None):
         LuxManager.SetCurrentScene(blScene)
@@ -73,7 +80,19 @@ class BlenderSceneConverter(object):
         self.materialsCache = set()
         self.texturesCache = set()
 
-
+    def check_name_collision(self, name):
+        """
+        checks if name is colliding with material or other volume names
+        name: string (has to be a valid LuxCore name)
+        
+        returns: bool (does name collide with existing names)
+        """
+        
+        names = self.scnProps.GetAllUniqueSubNames("scene.volumes")
+        names.extend(self.scnProps.GetAllUniqueSubNames("scene.materials"))
+        names_stripped = [str(elem).replace("scene.volumes.", "", 1).replace("scene.materials.", "", 1) for elem in names]
+        
+        return name in names_stripped
 
     def createChannelOutputString(self, channelName, id=-1):
         """
@@ -848,6 +867,9 @@ class BlenderSceneConverter(object):
             # Check if it is an already defined material
             if matName in self.materialsCache:
                 return matName
+
+            if self.check_name_collision(matName):
+                matName = self.get_unique_name(matName)
 
             LuxLog('Material: ' + material.name)
 
@@ -1655,6 +1677,9 @@ class BlenderSceneConverter(object):
                 abs_col[i] = (-math.log(max([v, 1e-30])) / depth) * scale * (v == 1.0 and -1 or 1)
 
         name = ToValidLuxCoreName(volume.name)
+        
+        if self.check_name_collision(name):
+            name = self.get_unique_name(name)
 
         self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.type' % name, [volume.type]))
 
@@ -1689,6 +1714,9 @@ class BlenderSceneConverter(object):
                                                  '%s %s %s' % (volume.g[0],
                                                                volume.g[1],
                                                                volume.g[2])))
+
+            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.multiscattering' % name,
+                                                 [volume.multiscattering]))
 
             if volume.type == 'heterogenous':
                 self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.steps.size' % name, volume.stepsize))

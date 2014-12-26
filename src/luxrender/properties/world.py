@@ -182,7 +182,8 @@ class luxrender_volume_data(declarative_property_group):
                    'scattering_scale',
                    'g',
                    'stepsize',
-                   'priority'
+                   'priority',
+                   'multiscattering'
                ]
 
     visibility = dict_merge(
@@ -191,7 +192,8 @@ class luxrender_volume_data(declarative_property_group):
             'g': {'type': O(['homogeneous', 'heterogeneous'])},
             'stepsize': {'type': 'heterogeneous'},
             'depth': O([A([{'type': 'clear'}, {'absorption_usecolortexture': False}]),
-                        A([{'type': O(['homogeneous', 'heterogeneous'])}, {'sigma_a_usecolortexture': False}])])
+                        A([{'type': O(['homogeneous', 'heterogeneous'])}, {'sigma_a_usecolortexture': False}])]),
+            'multiscattering': {'type': O(['homogeneous', 'heterogeneous'])}
         },
         TFR_IOR.visibility,
         TC_absorption.visibility,
@@ -297,11 +299,20 @@ class luxrender_volume_data(declarative_property_group):
                          'type': 'int',
                          'attr': 'priority',
                          'name': 'Volume priority',
-                         'description': 'Volume priority (LuxCore only), volumes with higher values gets priority if \
-                         there is overlap',
+                         'description': '[LuxCore only] Volume priority, volumes with higher values gets priority if \
+there is overlap',
                          'default': 0,
                          'min': 0,
                          'max': 65535,
+                         'save_in_preset': True
+                     },
+                     {
+                         'type': 'bool',
+                         'attr': 'multiscattering',
+                         'name': 'Multiscattering',
+                         'description': '[LuxCore only] Compute multiple scattering events in this volume (recommended \
+for volumes with high scattering scale)',
+                         'default': False,
                          'save_in_preset': True
                      },
                  ]
