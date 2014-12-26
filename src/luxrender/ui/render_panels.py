@@ -91,7 +91,7 @@ class device_settings(render_panel):
                 row = self.layout.row()
                 row.prop(dev, 'opencl_device_enabled', text="")
                 subrow = row.row()
-                subrow.enabled = dev.opencl_device_enabled
+                subrow.enabled = dev.opencl_device_enabled and bpy.context.scene.luxrender_rendermode.opencl_prefs
                 subrow.label(dev.name)
         else:
             self.layout.label("No OpenCL Mode Selected")
