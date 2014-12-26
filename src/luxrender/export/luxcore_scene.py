@@ -1282,8 +1282,8 @@ class BlenderSceneConverter(object):
 
         gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum !
 
-        if getattr(lux_lamp, 'L_color') and (
-                    light.type == 'SUN' and getattr(lux_lamp, 'sunsky_type') == 'distant'):
+        if getattr(lux_lamp, 'L_color') and not (
+                    light.type == 'SUN' and getattr(lux_lamp, 'sunsky_type') != 'distant'):
             iesfile = getattr(light.luxrender_lamp, 'iesname')
             iesfile, basename = get_expanded_file_name(light, iesfile)
             if iesfile != '':
