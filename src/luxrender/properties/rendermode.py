@@ -50,7 +50,6 @@ class luxrender_rendermode(declarative_property_group):
         'statebuffercount',
         'workgroupsize',
         'qbvhstacksize',
-        # 'deviceselection',
         'kernelcache'
     ]
 
@@ -64,8 +63,6 @@ class luxrender_rendermode(declarative_property_group):
         'workgroupsize': {'opencl_prefs': True,
                           'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl'])},
         'qbvhstacksize': {'opencl_prefs': True, 'renderer': 'hybrid'},
-        # 'deviceselection': {'opencl_prefs': True,
-        #                     'rendermode': O(['hybridpath', 'hybridbidir'])},
         'kernelcache': {'opencl_prefs': True, 'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl'])},
         'usegpus': {'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl'])},
         'usecpus': {'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl'])},
@@ -217,14 +214,6 @@ class luxrender_rendermode(declarative_property_group):
             'max': 64,
             'save_in_preset': True
         },
-        # {
-        #     'type': 'string',
-        #     'attr': 'deviceselection',
-        #     'name': 'OpenCL Devices',
-        #     'description': 'Enter target OpenCL devices here. Leave blank to use all available',
-        #     'default': '',
-        #     'save_in_preset': True
-        # },
         {
             'type': 'enum',
             'attr': 'kernelcache',
