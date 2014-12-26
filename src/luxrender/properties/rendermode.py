@@ -268,7 +268,7 @@ class luxrender_rendermode(declarative_property_group):
                 renderer_params.add_integer('statebuffercount', self.statebuffercount)
                 renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
                 renderer_params.add_integer('accelerator.qbvh.stacksize.max', self.qbvhstacksize)
-                renderer_params.add_string('opencl.devices.select', dev_string)
+                renderer_params.add_string('opencl.devices.select', dev_string if '1' in dev_string else "" # blank)
 
         if self.renderer in ['luxcore']:
             # LuxCoreRenderer specific parameters
@@ -278,7 +278,7 @@ class luxrender_rendermode(declarative_property_group):
 
             if self.opencl_prefs:
                 luxcore_gpu_workgroups = "opencl.gpu.workgroup.size = " + str(self.workgroupsize)
-                luxcore_devices_select = "opencl.devices.select = " + dev_string
+                luxcore_devices_select = "opencl.devices.select = " + dev_string if '1' in dev_string else "" # blank
                 luxcore_params = '" "'.join(
                     (luxcore_params, luxcore_devices_select)) if luxcore_devices_select else luxcore_params
                 luxcore_kernel_cache = "opencl.kernelcache = " + self.kernelcache
