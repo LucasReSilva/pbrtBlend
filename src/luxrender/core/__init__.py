@@ -1140,24 +1140,29 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight,
                    show_converged, show_unconverged, show_pending):
         """
-        draws outlines for notconverged and pending tiles directly into 
-        the imageBuffer
+        draws outlines for specified tile types directly into the imageBuffer
         
         scene: Blender scene object
-        stats: LuxCore stats
+        stats: LuxCore stats (from LuxCore session)
         imageBuffer: list of tuples of floats, e.g. [(r, g, b, a), ...]
         """
         
         def draw_tile_type(count, coords, color):
+            """
+        	draws all tiles at the given coordinates with given color
+        	"""
             for i in range(count):
                 offset_x = coords[i * 2]
                 offset_y = coords[i * 2 + 1]
-                width = min(tile_size, filmWidth - offset_x - 1)
-                height = min(tile_size, filmHeight - offset_y - 1)
+                width = min(tile_size, filmWidth - offset_x) + 1
+                height = min(tile_size, filmHeight - offset_y) + 1
                 
                 draw_tile_outline(offset_x, offset_y, width, height, color)
         
         def draw_tile_outline(offset_x, offset_y, width, height, color):
+            """
+        	draws the outline of one tile
+        	"""
             for y in range(offset_y, offset_y + height):
                 sliceStart = y * filmWidth + offset_x
                 sliceEnd = sliceStart + width
