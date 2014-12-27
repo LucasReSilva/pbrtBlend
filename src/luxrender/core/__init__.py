@@ -1146,6 +1146,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         stats: LuxCore stats (from LuxCore session)
         imageBuffer: list of tuples of floats, e.g. [(r, g, b, a), ...]
         """
+        tile_size = scene.luxcore_enginesettings.tile_size
         
         def draw_tile_type(count, coords, color):
             """
@@ -1168,19 +1169,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 sliceEnd = sliceStart + width
                 
                 if y == offset_y or y == offset_y + height - 1:
-                    # top and bottom lines
+                    # bottom and top lines
                     imageBuffer[sliceStart:sliceEnd] = [color] * width
                 else:
                     # left and right sides
-                    imageBuffer[sliceStart] = color
-                    imageBuffer[sliceEnd - 1] = color
+                    imageBuffer[sliceStart:sliceStart + 1] = [color]
+                    imageBuffer[sliceEnd - 1:sliceEnd] = [color]
         
         # measure time (debug)
         #tile_draw_starttime = int(round(time.time() * 1000))
         
         # collect stats
-        tile_size = scene.luxcore_enginesettings.tile_size
-        
         count_converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
         count_notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
         count_pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
