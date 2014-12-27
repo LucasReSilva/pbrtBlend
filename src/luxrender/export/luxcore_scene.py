@@ -1719,9 +1719,6 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.multiscattering' % name,
                                                  [volume.multiscattering]))
 
-            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.samples' % name,
-                                                 [9]))
-
             if volume.type == 'heterogenous':
                 self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.steps.size' % name, volume.stepsize))
 
