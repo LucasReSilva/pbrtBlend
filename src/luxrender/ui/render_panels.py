@@ -57,9 +57,13 @@ class render_settings(render_panel):
         ( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
-        ( ('scene',), 'luxcore_samplersettings', lambda: UseLuxCore() ),
-        ( ('scene',), 'luxcore_filtersettings', lambda: UseLuxCore() ),
+        ( ('scene',), 'luxcore_samplersettings', lambda: UseLuxCore() 
+            and not bpy.context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']),
+        ( ('scene',), 'luxcore_filtersettings', lambda: UseLuxCore()
+            and not bpy.context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']),
         ( ('scene',), 'luxcore_scenesettings', lambda: UseLuxCore() ),
+        ( ('scene',), 'luxcore_tile_highlighting', lambda: UseLuxCore()
+            and bpy.context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']),
     ]
 
     def draw(self, context):
@@ -83,8 +87,10 @@ class device_settings(render_panel):
 
     def draw(self, context):
         if (context.scene.luxrender_rendermode.rendermode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl']
-            and bpy.context.scene.luxrender_rendermode.opencl_prefs)\
-            or (UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']):
+                and bpy.context.scene.luxrender_rendermode.opencl_prefs)\
+                or (UseLuxCore() and (
+                context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']
+                or context.scene.luxcore_realtimesettings.device_type == 'OCL')):
             self.layout.operator('luxrender.opencl_device_list_update')
             # This is a "special" panel section for the list of OpenCL devices
             for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):

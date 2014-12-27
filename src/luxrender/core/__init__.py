@@ -59,12 +59,13 @@ from ..properties import (
     material, node_material, node_inputs, node_texture, node_fresnel, node_converter,
     mesh, object as prop_object, particles, rendermode, sampler, texture, world,
     luxcore_engine, luxcore_sampler, luxcore_filter, luxcore_scene, luxcore_material, 
-    luxcore_realtime
+    luxcore_realtime, luxcore_tile_highlighting
 )
 
 # Exporter Interface Panels need to be imported to ensure initialisation
 from ..ui import (
-    render_panels, camera, image, lamps, mesh, node_editor, object as ui_object, particles, world
+    render_panels, camera, image, lamps, mesh, node_editor, object as ui_object, particles, world,
+    imageeditor_panel
 )
 
 # Legacy material editor panels, node editor UI is initialized above
@@ -1136,7 +1137,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if saveToDisk:
             blenderImage.save()
 
-    def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight):
+    def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight,
+                   show_converged, show_unconverged, show_pending):
         """
         draws outlines for notconverged and pending tiles directly into 
         the imageBuffer
@@ -1174,18 +1176,21 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # collect stats
         tile_size = scene.luxcore_enginesettings.tile_size
         
-        #count_converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
+        count_converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
         count_notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
         count_pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
         
-        #if count_converged > 0:
-        #    coords_converged = stats.Get('stats.biaspath.tiles.converged.coords').GetInts()
-        if count_notconverged > 0:
+        if count_converged > 0 and show_converged:
+            coords_converged = stats.Get('stats.biaspath.tiles.converged.coords').GetInts()
+            color_green = (0.0, 1.0, 0.0, 1.0)
+            draw_tile_type(count_converged, coords_converged, color_green)
+            
+        if count_notconverged > 0 and show_unconverged:
             coords_notconverged = stats.Get('stats.biaspath.tiles.notconverged.coords').GetInts()
             color_red = (1.0, 0.0, 0.0, 1.0)
             draw_tile_type(count_notconverged, coords_notconverged, color_red)
             
-        if count_pending > 0:
+        if count_pending > 0 and show_pending:
             coords_pending = stats.Get('stats.biaspath.tiles.pending.coords').GetInts()
             color_yellow = (1.0, 1.0, 0.0, 1.0)
             draw_tile_type(count_pending, coords_pending, color_yellow)
@@ -1264,9 +1269,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
                                                                                            imageBufferFloat)
                     
-                    if scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']:
-                        # mark tiles (notconverged and pending)
-                        self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight)
+                    if (scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] and
+                            scene.luxcore_tile_highlighting.use_tile_highlighting):
+                        show_converged = scene.luxcore_tile_highlighting.show_converged
+                        show_unconverged = scene.luxcore_tile_highlighting.show_unconverged
+                        show_pending = scene.luxcore_tile_highlighting.show_pending
+                        # mark tiles
+                        self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight, 
+                                        show_converged, show_unconverged, show_pending)
                     
                     layer.rect = tempImage
                     self.update_result(result)
