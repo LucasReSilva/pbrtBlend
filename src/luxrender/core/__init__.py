@@ -1183,6 +1183,32 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         # bug)
                         pass
         
+        def draw_tile_corners(offset_x, offset_y, width, height, color):
+            """
+            draws only the corners of one tile
+            (not finished, looks ugly)
+            """
+            for y in range(offset_y, offset_y + height):
+                cornerLeftStart = y * filmWidth + offset_x
+                cornerRightEnd = cornerLeftStart + width
+                cornerSize = int(width / 8)
+                cornerLeftEnd = cornerLeftStart + cornerSize
+                cornerRightStart = cornerRightEnd - cornerSize
+        	    
+                if y == offset_y or y == offset_y + height - 1:
+                    # bottom and top
+                    replace = [color] * cornerSize
+                    imageBuffer[cornerLeftStart:cornerLeftEnd] = replace
+                    imageBuffer[cornerRightStart:cornerRightEnd] = replace
+                elif y < offset_y + cornerSize or y > offset_y + height - cornerSize:
+                    # sides
+                    try:
+                        imageBuffer[cornerLeftStart] = color
+                        imageBuffer[cornerRightEnd] = color
+                    except IndexError:
+                        print("tile drawing out of range!")
+                        pass
+        
         # measure time (debug)
         #tile_draw_starttime = int(round(time.time() * 1000))
         
