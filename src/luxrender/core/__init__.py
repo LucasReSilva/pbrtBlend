@@ -923,6 +923,28 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     #
     ############################################################################
 
+    def set_export_path_luxcore(self, scene):
+        # replace /tmp/ with the real %temp% folder on Windows
+        # OSX also has a special temp location that we should use
+        fp = scene.render.filepath
+        output_path_split = list(os.path.split(fp))
+
+        if sys.platform in ('win32', 'darwin') and output_path_split[0] == '/tmp':
+            output_path_split[0] = efutil.temp_directory()
+            fp = '/'.join(output_path_split)
+
+        scene_path = efutil.filesystem_path(fp)
+
+        if os.path.isdir(scene_path):
+            self.output_dir = scene_path
+        else:
+            self.output_dir = os.path.dirname(scene_path)
+
+        if self.output_dir[-1] not in ('/', '\\'):
+            self.output_dir += '/'
+
+        efutil.export_path = self.output_dir
+
     def PrintStats(self, lcConfig, stats):
         lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
 
@@ -1132,8 +1154,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             suffix = '.exr'
             image_format = 'OPEN_EXR'
 
-        blenderImage.filepath_raw = '//' + imageName + suffix
+        imageName = get_output_filename(scene) + "_" + imageName + suffix
+        blenderImage.filepath_raw = self.output_dir + imageName
         blenderImage.file_format = image_format
+        
         if saveToDisk:
             blenderImage.save()
 
@@ -1250,6 +1274,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         from ..export.luxcore_scene import BlenderSceneConverter
 
         try:
+            self.set_export_path_luxcore(scene)
+        
             filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
         
             if scene.render.use_border:
