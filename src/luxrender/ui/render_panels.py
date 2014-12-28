@@ -83,7 +83,7 @@ class device_settings(render_panel):
     OpenCL Devices UI Panel
     """
 
-    bl_label = 'LuxRender OpenCL Device List'
+    bl_label = 'LuxRender Compute Settings'
 
     def draw(self, context):
         if (context.scene.luxrender_rendermode.rendermode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl']
@@ -101,7 +101,11 @@ class device_settings(render_panel):
                 subrow.enabled = dev.opencl_device_enabled
                 subrow.label(dev.name)
         else:
-            self.layout.label("Inactive")
+            if 'luxcore' in context.scene.luxrender_rendermode.rendermode or UseLuxCore():
+                threads = context.scene.luxcore_enginesettings
+                self.layout.prop(threads, 'native_threads_count')
+            else:
+                self.layout.label("Inactive")
 
 @LuxRenderAddon.addon_register_class
 class realtime_settings(render_panel):
