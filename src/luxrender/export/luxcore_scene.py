@@ -136,7 +136,7 @@ class BlenderSceneConverter(object):
             outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
             self.cfgProps.Set(pyluxcore.Property(outputStringId, [id]))
 
-    def ConvertObjectGeometry(self, obj, preview=False, update_mesh=True):
+    def ConvertObjectGeometry(self, obj, preview = False, update_mesh = True):
         try:
             mesh_definitions = []
 

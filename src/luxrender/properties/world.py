@@ -785,7 +785,37 @@ class luxrender_channels(declarative_property_group):
         ['RAYCOUNT', 'normalize_RAYCOUNT']
     ]
 
-    visibility = {}
+    visibility = {
+        'saveToDisk': {'disable_aovs': False},
+        'spacer': {'disable_aovs': False},
+        'RGB': {'disable_aovs': False},
+        'RGBA': {'disable_aovs': False},
+        'RGB_TONEMAPPED': {'disable_aovs': False},
+        'RGBA_TONEMAPPED': {'disable_aovs': False},
+        'ALPHA': {'disable_aovs': False},
+        'DEPTH': {'disable_aovs': False}, 
+        'normalize_DEPTH': {'disable_aovs': False},
+        'POSITION': {'disable_aovs': False},
+        'GEOMETRY_NORMAL': {'disable_aovs': False},
+        'SHADING_NORMAL': {'disable_aovs': False},
+        'MATERIAL_ID': {'disable_aovs': False},
+        'DIRECT_DIFFUSE': {'disable_aovs': False}, 
+        'normalize_DIRECT_DIFFUSE': {'disable_aovs': False},
+        'DIRECT_GLOSSY': {'disable_aovs': False}, 
+        'normalize_DIRECT_GLOSSY': {'disable_aovs': False},
+        'EMISSION': {'disable_aovs': False},
+        'INDIRECT_DIFFUSE': {'disable_aovs': False}, 
+        'normalize_INDIRECT_DIFFUSE': {'disable_aovs': False},
+        'INDIRECT_GLOSSY': {'disable_aovs': False}, 
+        'normalize_INDIRECT_GLOSSY': {'disable_aovs': False},
+        'INDIRECT_SPECULAR': {'disable_aovs': False}, 
+        'normalize_INDIRECT_SPECULAR': {'disable_aovs': False},
+        'DIRECT_SHADOW_MASK': {'disable_aovs': False},
+        'INDIRECT_SHADOW_MASK': {'disable_aovs': False},
+        'UV': {'disable_aovs': False},
+        'RAYCOUNT': {'disable_aovs': False},
+        'normalize_RAYCOUNT': {'disable_aovs': False},
+    }
 
     properties = [
         {
