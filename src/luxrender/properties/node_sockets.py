@@ -91,6 +91,7 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
     fresnel_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
     fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52, precision=6,
                                       update=fresnel_update)
+    needs_link = bpy.props.BoolProperty(name='Metal Fresnel', default=False) # for hiding inappropiate ui elements
 
     # helper property
     def default_value_get(self):
@@ -104,7 +105,7 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 
     # Optional function for drawing the socket input value
     def draw(self, context, layout, node, text):
-        if self.is_linked:
+        if self.is_linked or self.needs_link:
             layout.label(text=self.name)
         else:
             box = layout.box()
