@@ -1155,8 +1155,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             for i in range(count):
                 offset_x = coords[i * 2]
                 offset_y = coords[i * 2 + 1]
-                width = min(tile_size, filmWidth - offset_x) + 1
-                height = min(tile_size, filmHeight - offset_y) + 1
+                width = min(tile_size + 1, filmWidth - offset_x)
+                height = min(tile_size + 1, filmHeight - offset_y)
                 
                 draw_tile_outline(offset_x, offset_y, width, height, color)
         
@@ -1173,8 +1173,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     imageBuffer[sliceStart:sliceEnd] = [color] * width
                 else:
                     # left and right sides
-                    imageBuffer[sliceStart:sliceStart + 1] = [color]
-                    imageBuffer[sliceEnd - 1:sliceEnd] = [color]
+                    imageBuffer[sliceStart] = color
+                    try:
+                        imageBuffer[sliceEnd - 1] = color
+                    except IndexError:
+                        # catch this so render does not crash when we try to 
+                        # draw outside the imageBuffer (should not happen
+                        # anymore, but leave it in in case there's an unknown
+                        # bug)
+                        pass
         
         # measure time (debug)
         #tile_draw_starttime = int(round(time.time() * 1000))
