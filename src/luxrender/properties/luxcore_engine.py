@@ -132,20 +132,29 @@ class luxcore_enginesettings(declarative_property_group):
                     'biaspath_pathdepth_glossy': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_specular': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'label_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_clamping_radiance_maxvalue': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_clamping_pdf_value': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'label_lights': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    'biaspath_clamping_radiance_maxvalue': 
+                    	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    'biaspath_clamping_pdf_value': 
+                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
+                    'label_lights': 
+                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
                     'biaspath_lights_samplingstrategy_type':
-                        {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_lights_nearstart': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                        A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
+                    'biaspath_lights_nearstart': 
+                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
                     # Sampler settings, show for all but BIASPATH
                     'sampler_type': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
-                    'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
-                    'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
+                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
+                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
+                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     # Filter settings, show for all but BIASPATH
-                    'filter_type': A([{'advanced': True}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
-                    'filter_width': A([{'advanced': True}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'filter_type': A([{'advanced': True}, 
+                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'filter_width': A([{'advanced': True}, 
+                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     # CPU settings
                     # 'native_threads_count': {
                     #     'renderengine_type': O(['PATHCPU', 'BIASPATHCPU', 'BIDIRCPU', 'BIDIRVMCPU'])},
@@ -391,7 +400,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'biaspath_clamping_radiance_maxvalue',
             'name': 'Radiance clamping',
             'description': 'Max acceptable radiance value for a sample',
-            'default': 10.0,
+            'default': 10000.0,
             'min': 0.0,
             'max': 999999.0,
             'save_in_preset': True
