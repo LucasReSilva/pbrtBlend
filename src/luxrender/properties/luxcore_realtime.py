@@ -39,6 +39,8 @@ class luxcore_realtimesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
+        'label_halt',
+        ['halt_samples', 'halt_time'],
         'use_finalrender_settings',
         'device_type', 
         'advanced',
@@ -62,6 +64,33 @@ class luxcore_realtimesettings(declarative_property_group):
     alert = {}
 
     properties = [
+        {
+            'type': 'text',
+            'attr': 'label_halt',
+            'name': 'Realtime Preview Halt Conditions:',
+        },
+        {
+            'type': 'int',
+            'attr': 'halt_samples',
+            'name': 'Halt Samples',
+            'description': 'Preview will pause at specified amount of samples (0 = disabled)',
+            'default': 0,
+            'min': 0,
+            'max': 1000000,
+            'soft_max': 1000,
+            'save_in_preset': True
+        },
+        {
+            'type': 'int',
+            'attr': 'halt_time',
+            'name': 'Halt Time',
+            'description': 'Preview will pause after specified amount of seconds (0 = disabled)',
+            'default': 0,
+            'min': 0,
+            'max': 500000,
+            'soft_max': 3600,
+            'save_in_preset': True
+        },
         {
             'type': 'bool',
             'attr': 'use_finalrender_settings',
