@@ -45,10 +45,9 @@ class luxcore_tile_highlighting(declarative_property_group):
 
     controls = [
                   'use_tile_highlighting',
-                  'label_display',
-                  'show_converged',
-                  'show_unconverged',
-                  'show_pending',
+                  'show_converged', 
+                  'show_unconverged', 
+                  'show_pending'
     ]
     
     visibility = {
@@ -66,11 +65,6 @@ class luxcore_tile_highlighting(declarative_property_group):
             'description': 'Highlight tiles',
             'default': True,
             'save_in_preset': True
-        },
-        {
-            'type': 'text',
-            'attr': 'label_display',
-            'name': 'Show Tile Types:'
         },
         {
             'type': 'bool',
