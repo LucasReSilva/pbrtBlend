@@ -26,7 +26,7 @@
 #
 
 from ..extensions_framework import declarative_property_group
-from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
+from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO, Logic_AND as A
 
 from .. import LuxRenderAddon
 
@@ -73,11 +73,9 @@ class luxcore_enginesettings(declarative_property_group):
         # BIDIRVMCPU
         'bidirvm_lightpath_count',
         ['bidirvm_startradius_scale', 'bidirvm_alpha'],
-        # ALL
+        # all engines
         'custom_properties', 
         # BIASPATH
-        'label_tiles',  
-        'tile_size',
         'tile_multipass_enable',
         'tile_multipass_convergencetest_threshold',
         'tile_multipass_convergencetest_threshold_reduction',
@@ -92,8 +90,16 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_clamping_pdf_value',
         'label_lights',
         'biaspath_lights_samplingstrategy_type',
-        'biaspath_lights_nearstart',  # Compute settings
-        # 'label_compute_settings',  # OpenCL settings
+        'biaspath_lights_nearstart',
+        # Sampler settings (for all but BIASPATH)
+        'sampler_type',
+        'largesteprate',
+        'maxconsecutivereject',
+        'imagemutationrate',
+        # Filter settings (for all but BIASPATH)
+        'filter_type',
+        'filter_width',
+        # 'label_compute_settings',  # OpenCL settings, Compute settings
         # 'native_threads_count',  # CPU settings
         # 'op_opencl_device_list_update',
     ]
@@ -110,8 +116,6 @@ class luxcore_enginesettings(declarative_property_group):
                     'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'}, 
                     'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
                     # BIASPATH
-                    'label_tiles': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'tile_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'tile_multipass_enable': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'tile_multipass_convergencetest_threshold':
                         {'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
@@ -134,6 +138,14 @@ class luxcore_enginesettings(declarative_property_group):
                     'biaspath_lights_samplingstrategy_type':
                         {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_lights_nearstart': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    # Sampler settings, show for all but BIASPATH
+                    'sampler_type': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
+                    'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    # Filter settings, show for all but BIASPATH
+                    'filter_type': A([{'advanced': True}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'filter_width': A([{'advanced': True}, {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     # CPU settings
                     # 'native_threads_count': {
                     #     'renderengine_type': O(['PATHCPU', 'BIASPATHCPU', 'BIDIRCPU', 'BIDIRVMCPU'])},
@@ -163,7 +175,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'advanced',
-            'name': 'Advanced Engine Settings',
+            'name': 'Advanced Settings',
             'description': 'Configure advanced engine settings',
             'default': False,
             'save_in_preset': True
@@ -420,12 +432,91 @@ class luxcore_enginesettings(declarative_property_group):
             'min': 0.0,
             'max': 1000.0,
             'save_in_preset': True
-        },  # Compute settings
+        },  
+        # Sampler settings
+        {
+            'type': 'enum',
+            'attr': 'sampler_type',
+            'name': 'Sampler',
+            'description': 'Pixel sampling algorithm to use',
+            'default': 'METROPOLIS',
+            'items': [
+                ('METROPOLIS', 'Metropolis', 'Keleman-style metropolis light transport'),
+                ('SOBOL', 'Sobol', 'Use a Sobol sequence'),
+                ('RANDOM', 'Random', 'Completely random sampler')
+            ],
+            'save_in_preset': True
+        },
+        {
+            'type': 'float',
+            'attr': 'largesteprate',
+            'name': 'Large Mutation Probability',
+            'description': 'Probability of a completely random mutation rather than a guided one. Lower values \
+            increase sampler strength',
+            'default': 0.4,
+            'min': 0,
+            'max': 1,
+            'slider': True,
+            'save_in_preset': True
+        },
+        {
+            'type': 'int',
+            'attr': 'maxconsecutivereject',
+            'name': 'Max. Consecutive Rejections',
+            'description': 'Maximum amount of samples in a particular area before moving on. Setting this too low \
+            may mute lamps and caustics',
+            'default': 512,
+            'min': 128,
+            'max': 2048,
+            'save_in_preset': True
+        },
+        {
+            'type': 'float',
+            'attr': 'imagemutationrate',
+            'name': 'Image Mutation Rate',
+            'description': '',
+            'default': 0.1,
+            'min': 0,
+            'max': 1,
+            'slider': True,
+            'save_in_preset': True
+        },
+        # Filter settings
+        {
+            'type': 'enum',
+            'attr': 'filter_type',
+            'name': 'Filter',
+            'description': 'Pixel filter to use',
+            'default': 'BLACKMANHARRIS',
+            'items': [
+                ('BLACKMANHARRIS', 'Blackman-Harris', 'desc'),
+                ('MITCHELL', 'Mitchell', 'desc'),
+                ('MITCHELL_SS', 'Mitchell_SS', 'desc'),
+                ('BOX', 'Box', 'desc'),
+                ('GAUSSIAN', 'Gaussian', 'desc'),
+                ('NONE', 'None', 'Disable pixel filtering')
+            ],
+            'save_in_preset': True
+        },
+        {
+            'type': 'float',
+            'attr': 'filter_width',
+            'name': 'Filter Width',
+            'description': 'Width of pixel filter curve. Higher values are smoother and more blurred',
+            'default': 2.0,
+            'min': 0.5,
+            'soft_min': 0.5,
+            'max': 10.0,
+            'soft_max': 4.0,
+            'save_in_preset': True
+        },
+        # Compute settings
         {
             'type': 'text',
             'name': 'Compute settings:',
             'attr': 'label_compute_settings',
-        },  # CPU settings
+        },  
+        # CPU settings
         {
             'type': 'int',
             'attr': 'native_threads_count',
@@ -434,7 +525,8 @@ class luxcore_enginesettings(declarative_property_group):
             'default': 0,
             'min': 0,
             'max': 512,
-        },  # OpenCL settings
+        },  
+        # OpenCL settings
         {
             'type': 'collection',
             'ptype': luxcore_opencl_devices,

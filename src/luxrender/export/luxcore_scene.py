@@ -1540,22 +1540,22 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
 
     def ConvertSamplerSettings(self):
-        sampler_settings = self.blScene.luxcore_samplersettings
+        engine_settings = self.blScene.luxcore_enginesettings
 
-        self.cfgProps.Set(pyluxcore.Property('sampler.type', [sampler_settings.sampler_type]))
+        self.cfgProps.Set(pyluxcore.Property('sampler.type', [engine_settings.sampler_type]))
 
-        if sampler_settings.advanced and sampler_settings.sampler_type in 'METROPOLIS':
-            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [sampler_settings.largesteprate]))
+        if engine_settings.advanced and engine_settings.sampler_type == 'METROPOLIS':
+            self.cfgProps.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [engine_settings.largesteprate]))
             self.cfgProps.Set(
-                pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [sampler_settings.maxconsecutivereject]))
+                pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [engine_settings.maxconsecutivereject]))
             self.cfgProps.Set(
-                pyluxcore.Property('sampler.metropolis.imagemutationrate', [sampler_settings.imagemutationrate]))
+                pyluxcore.Property('sampler.metropolis.imagemutationrate', [engine_settings.imagemutationrate]))
 
     def ConvertFilterSettings(self):
-        filter_settings = self.blScene.luxcore_filtersettings
+        engine_settings = self.blScene.luxcore_enginesettings
 
-        self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_settings.filter_type]))
-        self.cfgProps.Set(pyluxcore.Property('film.filter.width', [filter_settings.filter_width]))
+        self.cfgProps.Set(pyluxcore.Property('film.filter.type', [engine_settings.filter_type]))
+        self.cfgProps.Set(pyluxcore.Property('film.filter.width', [engine_settings.filter_width]))
 
     def ConvertEngineSettings(self):
         engine_settings = self.blScene.luxcore_enginesettings
