@@ -1683,7 +1683,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if not context.scene.luxrender_engine.preview_stop:
             # Trigger another update
             nextRefreshTime = 0.2 if time.time() - self.viewSessionStartTime < 5.0 else 2.0
-            threading.Timer(nextRefreshTime, self.tag_redraw).start()
+            #threading.Timer(nextRefreshTime, self.tag_redraw).start() # crashes Blender on some OS's
+            self.tag_redraw()
 
     def find_update_changes(self, context):
         # find out what triggered the update (default: unknown)
