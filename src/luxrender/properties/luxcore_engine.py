@@ -76,9 +76,6 @@ class luxcore_enginesettings(declarative_property_group):
         # all engines
         'custom_properties', 
         # BIASPATH
-        'tile_multipass_enable',
-        'tile_multipass_convergencetest_threshold',
-        'tile_multipass_convergencetest_threshold_reduction',
         'label_sampling',
         'biaspath_sampling_aa_size',
         ['biaspath_sampling_diffuse_size', 'biaspath_sampling_glossy_size', 'biaspath_sampling_specular_size'],
@@ -101,7 +98,11 @@ class luxcore_enginesettings(declarative_property_group):
         'filter_width',
         # Halt condition settings (halt time and halt spp)
         'label_halt',
-        ['halt_samples', 'halt_time']
+        ['halt_samples', 'halt_time'],
+        # BIASPATH specific halt condition
+        'tile_multipass_enable',
+        'tile_multipass_convergencetest_threshold',
+        'tile_multipass_convergencetest_threshold_reduction',
         # 'label_compute_settings',  # OpenCL settings, Compute settings
         # 'native_threads_count',  # CPU settings
         # 'op_opencl_device_list_update',
@@ -278,8 +279,8 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'tile_multipass_enable',
-            'name': 'Enable halt condition',
-            'description': 'Enable halt condition (and multi-pass)',
+            'name': 'Enable Multipass (Adaptive Rendering)',
+            'description': 'Continue rendering until the error threshold is reached',
             'default': True,
             'save_in_preset': True
         },
@@ -287,7 +288,7 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'float',
             'attr': 'tile_multipass_convergencetest_threshold',
             'name': 'Error threshold:',
-            'description': 'Max acceptable error for a tile',
+            'description': 'Max acceptable error for a tile, lower values mean less noise',
             'default': 0.04,
             'min': 0.001,
             'max': 0.9,
@@ -297,7 +298,7 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'float',
             'attr': 'tile_multipass_convergencetest_threshold_reduction',
             'name': 'Error threshold reduction:',
-            'description': 'Avoid to stop the rendering and reduce the error threshold instead (0.0 = disabled)',
+            'description': 'Avoid to stop the rendering after all tiles have converged and reduce the error threshold instead (0.0 = disabled)',
             'default': 0.0,
             'min': 0.0,
             'max': 0.99,
@@ -557,7 +558,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'text',
             'attr': 'label_halt',
-            'name': 'Halt Condition',
+            'name': 'Halt Conditions:',
         },
         {
             'type': 'int',
