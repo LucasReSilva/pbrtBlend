@@ -224,7 +224,7 @@ class postprocessing(render_panel):
 
             super().draw(context)
 
-            # Light groups, this is a "special" panel section
+            # Image pipeline, this is a "special" panel section
             for elem_index in range(len(context.scene.luxcore_imagepipeline_settings.elements)):
                 elem = context.scene.luxcore_imagepipeline_settings.elements[elem_index]
                 
@@ -242,25 +242,6 @@ class postprocessing(render_panel):
                         context,
                         property_group = context.scene.luxcore_imagepipeline_settings
                     )
-                
-                '''
-                row = self.layout.row()
-                row.prop(lg, 'lg_enabled', text="")
-                subrow = row.row()
-                subrow.enabled = lg.lg_enabled
-                subrow.prop(lg, 'name', text="")
-
-                for control in lg.controls:
-                    self.draw_column(
-                        control,
-                        subrow.column(),
-                        lg,
-                        context,
-                        property_group=lg
-                    )
-
-                row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index
-                '''
 
 @LuxRenderAddon.addon_register_class
 class layer_selector(render_panel):
