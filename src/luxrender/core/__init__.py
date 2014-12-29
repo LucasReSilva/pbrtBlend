@@ -1547,9 +1547,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     viewCameraOffset = []
     viewCameraShiftX = -1
     viewCameraShiftY = -1
-    # store renderengine configuration and material definitions of last update
+    # store renderengine configuration of last update
     lastRenderSettings = ''
-    lastMaterialSettings = ''
     lastVisibilitySettings = None
     update_counter = 0
 
@@ -1742,23 +1741,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         update_changes.changed_objects_transform.append(ob)
                     elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
                         update_changes.set_cause(camera = True)
+        elif bpy.data.materials.is_updated:
+            for mat in bpy.data.materials:
+                if mat.is_updated:
+                    update_changes.changed_materials.append(mat)
+                    update_changes.set_cause(materials = True)
         else:
             # no objects were changed
-            # check for changes in materials
-            matConverter = BlenderSceneConverter(context.scene)
-                
-            for material in bpy.data.materials:
-                matConverter.ConvertMaterial(material, bpy.data.materials)
-            
-            if self.lastMaterialSettings == '':
-                self.lastMaterialSettings = str(matConverter.scnProps)
-                BlenderSceneConverter.clear()
-            elif self.lastMaterialSettings != str(matConverter.scnProps):
-                # material settings have changed
-                update_changes.set_cause(materials = True)
-                BlenderSceneConverter.clear()
-                return update_changes
-            
             # check for changes in renderengine configuration
             configConverter = BlenderSceneConverter(context.scene)
             configConverter.ConvertConfig(realtime_preview = True)
@@ -1904,9 +1893,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if update_changes.cause_materials:
                 LuxLog('Materials update')
                 converter.clear()
-                for material in bpy.data.materials:
+                for material in update_changes.changed_materials:
                     converter.ConvertMaterial(material, bpy.data.materials)
-                self.lastMaterialSettings = str(converter.scnProps)
                 converter.clear()
             
             if update_changes.cause_mesh:
@@ -1935,6 +1923,7 @@ class UpdateChanges:
     def __init__(self):
         self.changed_objects_transform = []
         self.changed_objects_mesh = []
+        self.changed_materials = []
         
         self.cause_unknown = True
         self.cause_startViewportRender = False
