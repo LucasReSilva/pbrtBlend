@@ -1355,7 +1355,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             lcSession.Stop()
 
-            if not scene.luxrender_channels.disable_aovs:
+            if scene.luxrender_channels.enable_aovs:
                 channelCalcStartTime = time.time()
                 LuxLog('Importing AOV channels into Blender...')
     

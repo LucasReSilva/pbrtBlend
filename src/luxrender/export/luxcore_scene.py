@@ -1800,7 +1800,7 @@ class BlenderSceneConverter(object):
         # Configure AOV output
         channels = self.blScene.luxrender_channels
 
-        if not channels.disable_aovs and not realtime_preview:
+        if channels.enable_aovs and not realtime_preview:
             if channels.RGB:
                 self.createChannelOutputString('RGB')
             if channels.RGBA:
