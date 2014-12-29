@@ -984,7 +984,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         'M on ' + ('%.1f' % (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0))) + (
                         'K tris')
         else:
-            output = ('Pass ' + str(stats.Get('stats.renderengine.pass').GetInt()) + ' | Avg. samples/sec ') + (
+            output = (str(stats.Get('stats.renderengine.pass').GetInt()) + ' Samples | Avg. samples/sec ') + (
                         ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
                         'M on ' + ('%.1f' % (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)) + 'K tris' )
 
@@ -1306,6 +1306,31 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 now = time.time()
                 elapsedTimeSinceLastRefresh = now - lastRefreshTime
                 elapsedTimeSinceStart = now - startTime
+                
+                # Update statistics
+                lcSession.UpdateStats()
+                stats = lcSession.GetStats()
+                
+                # Print some information about the rendering progress
+                done = self.PrintStats(lcConfig, stats)
+
+                blender_stats = self.CreateBlenderStats(lcConfig, stats)
+                self.update_stats('Rendering...', blender_stats)
+                
+                # check if any halt conditions are met
+                halt_samples = scene.luxcore_enginesettings.halt_samples
+                halt_time = scene.luxcore_enginesettings.halt_time
+                
+                rendered_samples = stats.Get('stats.renderengine.pass').GetInt()
+                rendered_time = stats.Get('stats.renderengine.time').GetFloat()
+                
+                if halt_samples != 0 and rendered_samples > halt_samples:
+                    LuxLog("Halt condition met: samples")
+                    done = True
+                    
+                if halt_time != 0 and rendered_time > halt_time:
+                    LuxLog("Halt condition met: time")
+                    done = True
 
                 displayInterval = scene.camera.data.luxrender_camera.luxrender_film.displayinterval
                 # use higher displayInterval for the first 10 seconds
@@ -1313,15 +1338,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     displayInterval = 1.0
 
                 if elapsedTimeSinceLastRefresh > displayInterval:
-                    # Print some information about the rendering progress
-                    # Update statistics
-                    lcSession.UpdateStats()
-
-                    stats = lcSession.GetStats()
-                    done = self.PrintStats(lcConfig, stats)
-
-                    blender_stats = self.CreateBlenderStats(lcConfig, stats)
-                    self.update_stats('Rendering...', blender_stats)
 
                     # Update the image
                     lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)

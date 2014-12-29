@@ -99,6 +99,9 @@ class luxcore_enginesettings(declarative_property_group):
         # Filter settings (for all but BIASPATH)
         'filter_type',
         'filter_width',
+        # Halt condition settings (halt time and halt spp)
+        'label_halt',
+        ['halt_samples', 'halt_time']
         # 'label_compute_settings',  # OpenCL settings, Compute settings
         # 'native_threads_count',  # CPU settings
         # 'op_opencl_device_list_update',
@@ -548,5 +551,34 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'op_opencl_device_list_update',
             'operator': 'luxrender.opencl_device_list_update',
             'text': 'Update OpenCL device list',
+        },
+        
+        # Halt condition settings (halt time and halt spp)
+        {
+            'type': 'text',
+            'attr': 'label_halt',
+            'name': 'Halt Condition',
+        },
+        {
+            'type': 'int',
+            'attr': 'halt_samples',
+            'name': 'Halt Samples',
+            'description': 'Rendering process will stop at specified amount of samples (0 = disabled)',
+            'default': 0,
+            'min': 0,
+            'max': 1000000,
+            'soft_max': 1000,
+            'save_in_preset': True
+        },
+        {
+            'type': 'int',
+            'attr': 'halt_time',
+            'name': 'Halt Time',
+            'description': 'Rendering process will stop after specified amount of seconds (0 = disabled)',
+            'default': 0,
+            'min': 0,
+            'max': 500000,
+            'soft_max': 3600,
+            'save_in_preset': True
         },
     ]
