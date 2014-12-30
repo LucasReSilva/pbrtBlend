@@ -71,6 +71,7 @@ class luxcore_enginesettings(declarative_property_group):
         # PATH
         'path_maxdepth',
         # BIDIRVMCPU
+        ['bidirvm_eyedepth', 'bidirvm_lightdepth'],
         'bidirvm_lightpath_count',
         ['bidirvm_startradius_scale', 'bidirvm_alpha'],
         # all engines
@@ -116,6 +117,8 @@ class luxcore_enginesettings(declarative_property_group):
                     # PATH
                     'path_maxdepth': {'renderengine_type': O(['PATHCPU', 'PATHOCL'])},
                     # BIDIRVM
+                    'bidirvm_eyedepth': {'renderengine_type': 'BIDIRVMCPU'},
+                    'bidirvm_lightdepth': {'renderengine_type': 'BIDIRVMCPU'},
                     'bidirvm_lightpath_count': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
                     'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'}, 
                     'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
@@ -232,6 +235,26 @@ class luxcore_enginesettings(declarative_property_group):
             'save_in_preset': True
         },
         {   # BIDIRVM
+            'type': 'int',
+            'attr': 'bidirvm_eyedepth',
+            'name': 'Max Eye Depth',
+            'description': 'Max recursion depth for ray casting from eye',
+            'default': 16,
+            'min': 1,
+            'max': 2048,
+            'save_in_preset': True
+        },  
+        {
+            'type': 'int',
+            'attr': 'bidirvm_lightdepth',
+            'name': 'Max Light Depth',
+            'description': 'Max recursion depth for ray casting from light',
+            'default': 16,
+            'min': 1,
+            'max': 2048,
+            'save_in_preset': True
+        },  
+        {   
             'type': 'int',
             'attr': 'bidirvm_lightpath_count',
             'name': 'Lightpath Count',

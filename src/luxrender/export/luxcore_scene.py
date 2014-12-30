@@ -1600,6 +1600,8 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
             self.cfgProps.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
         elif engine in ['BIDIRVMCPU']:
+            self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidirvm_eyedepth]))
+            self.cfgProps.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidirvm_lightdepth]))
             self.cfgProps.Set(pyluxcore.Property('bidirvm.lightpath.count',
                                                  [engine_settings.bidirvm_lightpath_count]))
             self.cfgProps.Set(pyluxcore.Property('bidirvm.startradius.scale',
