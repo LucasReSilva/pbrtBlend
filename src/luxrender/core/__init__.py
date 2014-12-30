@@ -1356,7 +1356,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.update_stats('Rendering...', blender_stats)
                 
                 # check if any halt conditions are met
-                done = self.haltConditionMet(scene, stats)
+                done = done or self.haltConditionMet(scene, stats)
 
                 displayInterval = scene.camera.data.luxrender_camera.luxrender_film.displayinterval
                 # use higher displayInterval for the first 10 seconds
@@ -1388,6 +1388,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                     lastRefreshTime = now
 
+            # Update the image
+            lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
             # write final render result
             result = self.begin_result(0, 0, filmWidth, filmHeight)
             layer = result.layers[0]
