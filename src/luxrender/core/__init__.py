@@ -969,24 +969,45 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
 
     def CreateBlenderStats(self, lcConfig, stats):
-        lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
+        engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
+        
+        engine_dict = {
+            'PATHCPU' : 'Path',
+            'PATHOCL' : 'Path OpenCL',
+            'BIASPATHCPU' : 'Biased Path',
+            'BIASPATHOCL' : 'Biased Path OpenCL',
+            'BIDIRCPU' : 'Bidir',
+            'BIDIRVMCPU' : 'BidirVCM'
+        }
+        
+        sampler = lcConfig.GetProperties().Get('sampler.type').GetString()
+        
+        sampler_dict = {
+            'RANDOM' : 'Random',
+            'SOBOL' : 'Sobol',
+            'METROPOLIS' : 'Metropolis'
+        }
 
-        output = ''
-
-        if lc_engine == 'BIASPATHCPU' or lc_engine == 'BIASPATHOCL':
+        if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
             converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
 
-            output = ('Pass ' + str(stats.Get('stats.renderengine.pass').GetInt()) + '| Convergence ' + str(converged) + '/') + (
-                        str(converged + notconverged + pending) + ' | Avg. samples/sec ') + (
-                        ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
-                        'M on ' + ('%.1f' % (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0))) + (
-                        'K tris')
+            output = 'Pass %d | Tiles: %d/%d Converged | Avg. samples/sec %3.2fM | %.1fK tris | %s + %s' % (
+                    stats.Get('stats.renderengine.pass').GetInt(),
+                    converged,
+                    (converged + notconverged + pending),
+                    (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
+                    (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0),
+                    engine_dict[engine],
+                    sampler_dict[sampler])
         else:
-            output = (str(stats.Get('stats.renderengine.pass').GetInt()) + ' Samples | Avg. samples/sec ') + (
-                        ('%3.2f' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0))) + (
-                        'M on ' + ('%.1f' % (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)) + 'K tris' )
+            output = '%d Samples | Avg. samples/sec %3.2fM | %.1fK tris | %s + %s' % (
+                    stats.Get('stats.renderengine.pass').GetInt(),
+                    (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
+                    (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0),
+                    engine_dict[engine],
+                    sampler_dict[sampler])
 
         return output
 
