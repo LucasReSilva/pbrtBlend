@@ -968,9 +968,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
 
-    def CreateBlenderStats(self, lcConfig, stats):
+    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview = False):
         engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
-        
         engine_dict = {
             'PATHCPU' : 'Path',
             'PATHOCL' : 'Path OpenCL',
@@ -981,35 +980,61 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         }
         
         sampler = lcConfig.GetProperties().Get('sampler.type').GetString()
-        
         sampler_dict = {
             'RANDOM' : 'Random',
             'SOBOL' : 'Sobol',
             'METROPOLIS' : 'Metropolis'
         }
 
+        # Statistics that are the same for all renderengines
+        stats_main = 'samples/sec %3.2fM | %.1fK tris | %s + %s' % (
+                (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
+                (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0),
+                engine_dict[engine],
+                sampler_dict[sampler])
+
+        stats_tiles = ''
+        stats_time = ''
+        stats_samples = ''
+        
+        # Tile stats
         if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
             converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
 
-            output = 'Pass %d | Tiles: %d/%d Converged | Avg. samples/sec %3.2fM | %.1fK tris | %s + %s' % (
-                    stats.Get('stats.renderengine.pass').GetInt(),
+            stats_tiles = 'Tiles: %d/%d Converged | ' % (
                     converged,
-                    (converged + notconverged + pending),
-                    (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
-                    (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0),
-                    engine_dict[engine],
-                    sampler_dict[sampler])
+                    (converged + notconverged + pending))
+        
+        if realtime_preview:
+            halt_samples = scene.luxcore_realtimesettings.halt_samples
+            halt_time = scene.luxcore_realtimesettings.halt_time
         else:
-            output = '%d Samples | Avg. samples/sec %3.2fM | %.1fK tris | %s + %s' % (
+            halt_samples = scene.luxcore_enginesettings.halt_samples
+            halt_time = scene.luxcore_enginesettings.halt_time
+        
+        # Add time stats for realtime preview because Blender doesn't display it there
+        if realtime_preview and halt_time == 0:
+            stats_time = 'Time: %.1fs | ' % (stats.Get('stats.renderengine.time').GetFloat())
+        elif halt_time != 0:
+            stats_time = 'Time: %.1fs/%ds | ' % (
+                    stats.Get('stats.renderengine.time').GetFloat(),
+                    halt_time)
+            
+        # Samples/Passes stats
+        samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
+        if halt_samples != 0:
+            stats_samples = '%s: %d/%d | ' % (
+                    samples_term,
                     stats.Get('stats.renderengine.pass').GetInt(),
-                    (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
-                    (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0),
-                    engine_dict[engine],
-                    sampler_dict[sampler])
+                    halt_samples)
+        else:
+            stats_samples = '%s: %d | ' % (
+                    samples_term,
+                    stats.Get('stats.renderengine.pass').GetInt())
 
-        return output
+        return '%s%s%s%s' % (stats_time, stats_samples, stats_tiles, stats_main)
 
     def haltConditionMet(self, scene, stats, realtime_preview = False):
         """
@@ -1352,7 +1377,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Print some information about the rendering progress
                 done = self.PrintStats(lcConfig, stats)
 
-                blender_stats = self.CreateBlenderStats(lcConfig, stats)
+                blender_stats = self.CreateBlenderStats(lcConfig, stats, scene)
                 self.update_stats('Rendering...', blender_stats)
                 
                 # check if any halt conditions are met
@@ -1693,12 +1718,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             return
         
         # Check if the size of the window is changed
-        if (self.viewFilmWidth != context.region.width) or (self.viewFilmHeight != context.region.height):
+        if (self.viewFilmWidth != context.region.width) or (
+                self.viewFilmHeight != context.region.height):
             update_changes = UpdateChanges()
             update_changes.set_cause(config = True)
             self.luxcore_view_update(context, update_changes)
             
-        elif (self.viewMatrix != context.region_data.view_matrix) or (self.viewLens != context.space_data.lens) or (
+        elif (self.viewMatrix != context.region_data.view_matrix) or (
+                self.viewLens != context.space_data.lens) or (
                 self.viewCameraOffset[0] != context.region_data.view_camera_offset[0]) or (
                 self.viewCameraOffset[1] != context.region_data.view_camera_offset[1]) or (
                 self.viewCameraZoom != context.region_data.view_camera_zoom):
@@ -1712,10 +1739,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             stats = self.viewSession.GetStats()
             
             stop_redraw = (context.scene.luxrender_engine.preview_stop or 
-                            self.haltConditionMet(context.scene, stats, realtime_preview = True))
+                    self.haltConditionMet(context.scene, stats, realtime_preview = True))
                     
             # update statistic display in Blender
-            blender_stats = self.CreateBlenderStats(self.lcConfig, stats)
+            blender_stats = self.CreateBlenderStats(self.lcConfig, 
+                                                    stats, 
+                                                    context.scene, 
+                                                    realtime_preview = True)
             if stop_redraw:
                 self.update_stats('Paused', blender_stats)
             else:
