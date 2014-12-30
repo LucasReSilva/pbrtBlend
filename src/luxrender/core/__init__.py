@@ -1581,6 +1581,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lcConfig = None
     viewSession = None
     viewSessionRunning = False
+    viewSessionPaused = False
     viewSessionStartTime = 0.0
     viewFilmWidth = -1
     viewFilmHeight = -1
@@ -1732,9 +1733,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if stop_redraw:
             # Pause rendering
+            self.viewSessionPaused = True
             self.viewSession.BeginSceneEdit()
         else:
             # Trigger another update
+            self.viewSessionPaused = False
             self.tag_redraw()
 
     def find_update_changes(self, context):
@@ -1831,6 +1834,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     ##########################################################################
     #                        Dynamic Updates
     ##########################################################################
+    
+        # resume rendering if it was paused
+        if self.viewSessionPaused:
+            self.viewSessionPaused = False
+            if self.viewSession is not None:
+                self.viewSession.EndSceneEdit()
     
         # check which changes took place
         if update_changes is None:
