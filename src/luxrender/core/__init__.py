@@ -990,6 +990,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         return output
 
+    def haltConditionMet(self, scene, stats, realtime_preview = False):
+        """
+        Checks if any halt conditions are met
+        """
+        if realtime_preview:
+            halt_samples = scene.luxcore_realtimesettings.halt_samples
+            halt_time = scene.luxcore_realtimesettings.halt_time
+        else:
+            halt_samples = scene.luxcore_enginesettings.halt_samples
+            halt_time = scene.luxcore_enginesettings.halt_time
+        
+        rendered_samples = stats.Get('stats.renderengine.pass').GetInt()
+        rendered_time = stats.Get('stats.renderengine.time').GetFloat()
+            
+        return (halt_samples != 0 and rendered_samples >= halt_samples) or (
+                halt_time != 0 and rendered_time >= halt_time)
+
     def normalizeChannel(self, channel_buffer):
         isInf = math.isinf
 
@@ -1318,19 +1335,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.update_stats('Rendering...', blender_stats)
                 
                 # check if any halt conditions are met
-                halt_samples = scene.luxcore_enginesettings.halt_samples
-                halt_time = scene.luxcore_enginesettings.halt_time
-                
-                rendered_samples = stats.Get('stats.renderengine.pass').GetInt()
-                rendered_time = stats.Get('stats.renderengine.time').GetFloat()
-                
-                if halt_samples != 0 and rendered_samples >= halt_samples:
-                    LuxLog("Halt condition met: samples")
-                    done = True
-                    
-                if halt_time != 0 and rendered_time >= halt_time:
-                    LuxLog("Halt condition met: time")
-                    done = True
+                done = self.haltConditionMet(scene, stats)
 
                 displayInterval = scene.camera.data.luxrender_camera.luxrender_film.displayinterval
                 # use higher displayInterval for the first 10 seconds
@@ -1680,31 +1685,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Update statistics
         if self.viewSessionRunning:
             self.viewSession.UpdateStats()
-
             stats = self.viewSession.GetStats()
-            #self.PrintStats(self.viewSession.GetRenderConfig(), stats)
-                    
-            blender_stats = self.CreateBlenderStats(self.lcConfig, stats)
-            self.update_stats('Rendering...', blender_stats)
             
-            # check if a halt conditon is met
-            halt_samples = context.scene.luxcore_realtimesettings.halt_samples
-            halt_time = context.scene.luxcore_realtimesettings.halt_time
-
-            rendered_samples = stats.Get('stats.renderengine.pass').GetInt()
-            rendered_time = stats.Get('stats.renderengine.time').GetFloat()
-            
-            if halt_samples != 0 and rendered_samples > halt_samples:
-                LuxLog("Halt condition met: samples")
-                done = True
-                
-            if halt_time != 0 and rendered_time > halt_time:
-                LuxLog("Halt condition met: time")
-                done = True
-
             stop_redraw = (context.scene.luxrender_engine.preview_stop or 
-                            (halt_samples != 0 and rendered_samples >= halt_samples) or
-                            (halt_time != 0 and rendered_time >= halt_time))
+                            self.haltConditionMet(context.scene, stats, realtime_preview = True))
+                    
+            # update statistic display in Blender
+            blender_stats = self.CreateBlenderStats(self.lcConfig, stats)
+            if stop_redraw:
+                self.update_stats('Paused', blender_stats)
+            else:
+                self.update_stats('Rendering', blender_stats)
             
             # Update the image buffer
             self.viewSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
@@ -1716,25 +1707,22 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         bgl.glRasterPos2i(0, 0)
         bgl.glDrawPixels(self.viewFilmWidth, self.viewFilmHeight, bgl.GL_RGB, bgl.GL_FLOAT, glBuffer)
 
-        if not stop_redraw:
-            # Trigger another update
-            #nextRefreshTime = 0.2 if time.time() - self.viewSessionStartTime < 5.0 else 2.0
-            #threading.Timer(nextRefreshTime, self.tag_redraw).start() # crashes Blender on some OS's
-            self.tag_redraw()
+        if stop_redraw:
+            # Pause rendering
+            self.viewSession.BeginSceneEdit()
         else:
-            # Pause rendering - TODO: should not stop the viewsession, just pause it...
-            if self.viewSessionRunning:
-                self.viewSession.Stop()
-                self.viewSessionRunning = False
-            self.viewSession = None
+            # Trigger another update
+            self.tag_redraw()
 
     def find_update_changes(self, context):
         # find out what triggered the update (default: unknown)
         update_changes = UpdateChanges()
         
-        if not self.viewSessionRunning or self.lcConfig is None or self.viewSession is None:
+        if (not self.viewSessionRunning or 
+        		self.lcConfig is None or 
+        		self.viewSession is None):
             update_changes.set_cause(startViewportRender = True)
-            
+        
         # check if filmsize has changed
         elif (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
                 self.viewFilmWidth != context.region.width) or (
