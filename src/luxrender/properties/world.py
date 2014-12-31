@@ -702,7 +702,7 @@ class luxrender_lightgroups(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        'lightgroups_label',
+        # 'lightgroups_label',
         ['ignore',
          'op_lg_add'],
     ]
@@ -759,7 +759,7 @@ class luxrender_channels(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        'aov_label',
+        # 'aov_label',
         ['enable_aovs', 'saveToDisk'],
         #'spacer',
         'label_info_film',

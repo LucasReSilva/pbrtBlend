@@ -306,7 +306,7 @@ class passes_lg(render_panel):
     Render passes UI panel
     """
 
-    bl_label = 'Lightgroups'
+    bl_label = 'LuxRender Lightgroups'
     bl_options = {'DEFAULT_CLOSED'}
     bl_context = "render_layer"
 
@@ -348,7 +348,7 @@ class passes_aov(render_panel):
     Render passes UI panel
     """
 
-    bl_label = 'Passes'
+    bl_label = 'LuxRender Passes'
     bl_options = {'DEFAULT_CLOSED'}
     bl_context = "render_layer"
 
@@ -386,4 +386,3 @@ class passes_aov(render_panel):
             col.prop(rl, "use_pass_z")
 
         layout.separator()  # give a little gap to seperate next panel
-        
