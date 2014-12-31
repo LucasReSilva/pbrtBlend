@@ -163,7 +163,7 @@ class luxcore_enginesettings(declarative_property_group):
                     'filter_width': A([{'advanced': True}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     # Don't show halt samples setting for BIASPATH
-                    'halt_samples': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}
+                    #'halt_samples': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}
                     # CPU settings
                     # 'native_threads_count': {
                     #     'renderengine_type': O(['PATHCPU', 'BIASPATHCPU', 'BIDIRCPU', 'BIDIRVMCPU'])},
