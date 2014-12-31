@@ -760,34 +760,50 @@ class luxrender_channels(declarative_property_group):
 
     controls = [
         'aov_label',
-        'enable_aovs',
-        'saveToDisk',
-        'spacer',
+        ['enable_aovs', 'saveToDisk'],
+        #'spacer',
+        'label_info_film',
         'RGB',
         'RGBA',
         'RGB_TONEMAPPED',
         'RGBA_TONEMAPPED',
         'ALPHA',
-        ['DEPTH', 'normalize_DEPTH'],
-        'POSITION',
-        'GEOMETRY_NORMAL',
-        'SHADING_NORMAL',
+        'label_info_material',
         'MATERIAL_ID',
+        'EMISSION',
+        'label_info_directlight',
         ['DIRECT_DIFFUSE', 'normalize_DIRECT_DIFFUSE'],
         ['DIRECT_GLOSSY', 'normalize_DIRECT_GLOSSY'],
-        'EMISSION',
+        'label_info_indirectlight',
         ['INDIRECT_DIFFUSE', 'normalize_INDIRECT_DIFFUSE'],
         ['INDIRECT_GLOSSY', 'normalize_INDIRECT_GLOSSY'],
         ['INDIRECT_SPECULAR', 'normalize_INDIRECT_SPECULAR'],
+        'label_info_geometry',
+        ['DEPTH', 'normalize_DEPTH'],
+        'POSITION',
+        'SHADING_NORMAL',
+        'GEOMETRY_NORMAL',
+        'UV',
+        'label_info_shadow',
         'DIRECT_SHADOW_MASK',
         'INDIRECT_SHADOW_MASK',
-        'UV',
+        'label_info_render',
         ['RAYCOUNT', 'normalize_RAYCOUNT']
     ]
 
     visibility = {
+        # Menu buttons
         'saveToDisk': {'enable_aovs': True},
-        'spacer': {'enable_aovs': True},
+        #'spacer': {'enable_aovs': True},
+        # Info labels
+        'label_info_film': {'enable_aovs': True},
+        'label_info_material': {'enable_aovs': True},
+        'label_info_directlight': {'enable_aovs': True},
+        'label_info_indirectlight': {'enable_aovs': True},
+        'label_info_geometry': {'enable_aovs': True},
+        'label_info_shadow': {'enable_aovs': True},
+        'label_info_render': {'enable_aovs': True},
+        # AOVs
         'RGB': {'enable_aovs': True},
         'RGBA': {'enable_aovs': True},
         'RGB_TONEMAPPED': {'enable_aovs': True},
@@ -818,6 +834,7 @@ class luxrender_channels(declarative_property_group):
     }
 
     properties = [
+        # Menu buttons
         {
             'type': 'text',
             'name': 'LuxRender Passes (AOVs)',
@@ -827,14 +844,14 @@ class luxrender_channels(declarative_property_group):
             'type': 'bool',
             'attr': 'enable_aovs',
             'name': 'Enable',
-            'description': 'Useful for testrendering',
+            'description': 'Enable AOVs',
             'default': True
         },
         {
             'type': 'bool',
             'attr': 'saveToDisk',
-            'name': 'Save passes to disk',
-            'description': 'Save the passes to the harddisk after rendering',
+            'name': 'Save',
+            'description': 'Save the passes to the output path after rendering',
             'default': False
         },
         {
@@ -842,46 +859,83 @@ class luxrender_channels(declarative_property_group):
             'attr': 'spacer',
             'name': '',
         },
+        # Info labels
+        {
+            'type': 'text',
+            'attr': 'label_info_film',
+            'name': 'Film Information:',
+        },
+        {
+            'type': 'text',
+            'attr': 'label_info_material',
+            'name': 'Material Information:',
+        },
+        {
+            'type': 'text',
+            'attr': 'label_info_directlight',
+            'name': 'Direct Light Information:',
+        },
+        {
+            'type': 'text',
+            'attr': 'label_info_indirectlight',
+            'name': 'Indirect Light Information:',
+        },
+        {
+            'type': 'text',
+            'attr': 'label_info_geometry',
+            'name': 'Geometry Information:',
+        },
+        {
+            'type': 'text',
+            'attr': 'label_info_shadow',
+            'name': 'Shadow Information:',
+        },
+        {
+            'type': 'text',
+            'attr': 'label_info_render',
+            'name': 'Render Information:',
+        },
+        # AOVs
         {
             'type': 'bool',
             'attr': 'RGB',
             'name': 'RGB',
-            'description': 'Raw RGB values',
+            'description': 'Raw RGB values (HDR)',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'RGBA',
             'name': 'RGBA',
-            'description': 'Raw RGBA values',
+            'description': 'Raw RGBA values (HDR)',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'RGB_TONEMAPPED',
-            'name': 'RGB_TONEMAPPED',
-            'description': 'Tonemapped RGB values',
+            'name': 'RGB Tonemapped',
+            'description': 'Tonemapped RGB values (LDR)',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'RGBA_TONEMAPPED',
-            'name': 'RGBA_TONEMAPPED',
-            'description': 'Tonemapped RGBA values',
+            'name': 'RGBA Tonemapped',
+            'description': 'Tonemapped RGBA values (LDR)',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'ALPHA',
-            'name': 'ALPHA',
+            'name': 'Alpha',
             'description': 'Alpha value [0..1]',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'DEPTH',
-            'name': 'DEPTH',
-            'description': 'Camera distance',
+            'name': 'Depth',
+            'description': 'Distance from camera',
             'default': False
         },
         {
@@ -894,35 +948,35 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'POSITION',
-            'name': 'POSITION',
+            'name': 'Position',
             'description': 'World X, Y, Z',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'GEOMETRY_NORMAL',
-            'name': 'GEOMETRY_NORMAL',
+            'name': 'Geometry Normal',
             'description': 'Normal vector X, Y, Z without mesh smoothing',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'SHADING_NORMAL',
-            'name': 'SHADING_NORMAL',
+            'name': 'Shading Normal',
             'description': 'Normal vector X, Y, Z with mesh smoothing',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'MATERIAL_ID',
-            'name': 'MATERIAL_ID',
+            'name': 'Material ID',
             'description': 'Material ID (1 color per material)',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'DIRECT_DIFFUSE',
-            'name': 'DIRECT_DIFFUSE',
+            'name': 'Diffuse',
             'description': 'Diffuse R, G, B',
             'default': False
         },
@@ -936,7 +990,7 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'DIRECT_GLOSSY',
-            'name': 'DIRECT_GLOSSY',
+            'name': 'Glossy',
             'description': 'Glossy R, G, B',
             'default': False
         },
@@ -950,14 +1004,14 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'EMISSION',
-            'name': 'EMISSION',
+            'name': 'Emission',
             'description': 'Emission R, G, B',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'INDIRECT_DIFFUSE',
-            'name': 'INDIRECT_DIFFUSE',
+            'name': 'Diffuse',
             'description': 'Indirect diffuse R, G, B',
             'default': False
         },
@@ -971,7 +1025,7 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'INDIRECT_GLOSSY',
-            'name': 'INDIRECT_GLOSSY',
+            'name': 'Glossy',
             'description': 'Indirect glossy R, G, B',
             'default': False
         },
@@ -985,8 +1039,8 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'INDIRECT_SPECULAR',
-            'name': 'INDIRECT_SPECULAR',
-            'description': 'Indirect specular R, G, B',
+            'name': 'Specular',
+            'description': 'Indirect specular (glass) R, G, B',
             'default': False
         },
         {
@@ -999,14 +1053,14 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'DIRECT_SHADOW_MASK',
-            'name': 'DIRECT_SHADOW_MASK',
+            'name': 'Direct Shadow Mask',
             'description': 'Mask containing shadows by direct light',
             'default': False
         },
         {
             'type': 'bool',
             'attr': 'INDIRECT_SHADOW_MASK',
-            'name': 'INDIRECT_SHADOW_MASK',
+            'name': 'Indirect Shadow Mask',
             'description': 'Mask containing shadows by indirect light',
             'default': False
         },
@@ -1020,7 +1074,7 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'RAYCOUNT',
-            'name': 'RAYCOUNT',
+            'name': 'Raycount',
             'description': 'Ray count per pixel',
             'default': False
         },
