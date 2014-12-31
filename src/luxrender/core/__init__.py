@@ -1174,6 +1174,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         imageName = 'pass_' + str(channelName)
         if buffer_id != -1:
             imageName += '_' + str(buffer_id)
+            
+        if normalize:
+            imageName += '_normalized'
 
         # remove channel from Blender if it already exists and has no users (to prevent duplicates)
         for bl_image in bpy.data.images:
@@ -1213,7 +1216,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # write image to file
         suffix = '.png'
         image_format = 'PNG'
-        if useHDR:
+        if useHDR and not normalize:
             suffix = '.exr'
             image_format = 'OPEN_EXR'
 
