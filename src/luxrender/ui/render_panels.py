@@ -300,6 +300,47 @@ class layers(render_panel):
         col = split.column()
         col.prop(rl, "layers", text="Layer")
 
+@LuxRenderAddon.addon_register_class
+class passes_lg(render_panel):
+    """
+    Render passes UI panel
+    """
+
+    bl_label = 'Lightgroups'
+    bl_options = {'DEFAULT_CLOSED'}
+    bl_context = "render_layer"
+
+    display_property_groups = [
+        ( ('scene',), 'luxrender_lightgroups' )
+    ]
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+
+        super().draw(context)
+
+        # Light groups, this is a "special" panel section
+        for lg_index in range(len(context.scene.luxrender_lightgroups.lightgroups)):
+            lg = context.scene.luxrender_lightgroups.lightgroups[lg_index]
+            row = self.layout.row()
+            row.prop(lg, 'lg_enabled', text="")
+            subrow = row.row()
+            subrow.enabled = lg.lg_enabled
+            subrow.prop(lg, 'name', text="")
+
+            for control in lg.controls:
+                self.draw_column(
+                    control,
+                    subrow.column(),
+                    lg,
+                    context,
+                    property_group=lg
+                )
+
+            row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index
+
+        layout.separator()  # give a little gap to seperate next panel
 
 @LuxRenderAddon.addon_register_class
 class passes_aov(render_panel):
@@ -345,46 +386,4 @@ class passes_aov(render_panel):
             col.prop(rl, "use_pass_z")
 
         layout.separator()  # give a little gap to seperate next panel
-
-@LuxRenderAddon.addon_register_class
-class passes_lg(render_panel):
-    """
-    Render passes UI panel
-    """
-
-    bl_label = 'Lightgroups'
-    bl_options = {'DEFAULT_CLOSED'}
-    bl_context = "render_layer"
-
-    display_property_groups = [
-        ( ('scene',), 'luxrender_lightgroups' )
-    ]
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-
-        super().draw(context)
-
-        # Light groups, this is a "special" panel section
-        for lg_index in range(len(context.scene.luxrender_lightgroups.lightgroups)):
-            lg = context.scene.luxrender_lightgroups.lightgroups[lg_index]
-            row = self.layout.row()
-            row.prop(lg, 'lg_enabled', text="")
-            subrow = row.row()
-            subrow.enabled = lg.lg_enabled
-            subrow.prop(lg, 'name', text="")
-
-            for control in lg.controls:
-                self.draw_column(
-                    control,
-                    subrow.column(),
-                    lg,
-                    context,
-                    property_group=lg
-                )
-
-            row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index
-
-        layout.separator()  # give a little gap to seperate next panel
-
+        
