@@ -386,3 +386,5 @@ class passes_lg(render_panel):
 
             row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index
 
+        layout.separator()  # give a little gap to seperate next panel
+
