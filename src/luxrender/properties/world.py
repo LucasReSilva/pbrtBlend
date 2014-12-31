@@ -761,7 +761,7 @@ class luxrender_channels(declarative_property_group):
     controls = [
         # 'aov_label',
         ['enable_aovs', 'saveToDisk'],
-        #'spacer',
+        'spacer',
         'label_info_film',
         'RGB',
         'RGBA',
@@ -794,7 +794,7 @@ class luxrender_channels(declarative_property_group):
     visibility = {
         # Menu buttons
         'saveToDisk': {'enable_aovs': True},
-        #'spacer': {'enable_aovs': True},
+        'spacer': {'enable_aovs': True},
         # Info labels
         'label_info_film': {'enable_aovs': True},
         'label_info_material': {'enable_aovs': True},
@@ -810,27 +810,27 @@ class luxrender_channels(declarative_property_group):
         'RGBA_TONEMAPPED': {'enable_aovs': True},
         'ALPHA': {'enable_aovs': True},
         'DEPTH': {'enable_aovs': True}, 
-        'normalize_DEPTH': {'enable_aovs': True},
+        'normalize_DEPTH': A([{'enable_aovs': True}, {'DEPTH': True}]),
         'POSITION': {'enable_aovs': True},
         'GEOMETRY_NORMAL': {'enable_aovs': True},
         'SHADING_NORMAL': {'enable_aovs': True},
         'MATERIAL_ID': {'enable_aovs': True},
         'DIRECT_DIFFUSE': {'enable_aovs': True}, 
-        'normalize_DIRECT_DIFFUSE': {'enable_aovs': True},
+        'normalize_DIRECT_DIFFUSE': A([{'enable_aovs': True}, {'DIRECT_DIFFUSE': True}]),
         'DIRECT_GLOSSY': {'enable_aovs': True}, 
-        'normalize_DIRECT_GLOSSY': {'enable_aovs': True},
+        'normalize_DIRECT_GLOSSY': A([{'enable_aovs': True}, {'DIRECT_GLOSSY': True}]),
         'EMISSION': {'enable_aovs': True},
         'INDIRECT_DIFFUSE': {'enable_aovs': True}, 
-        'normalize_INDIRECT_DIFFUSE': {'enable_aovs': True},
+        'normalize_INDIRECT_DIFFUSE': A([{'enable_aovs': True}, {'INDIRECT_DIFFUSE': True}]),
         'INDIRECT_GLOSSY': {'enable_aovs': True}, 
-        'normalize_INDIRECT_GLOSSY': {'enable_aovs': True},
+        'normalize_INDIRECT_GLOSSY': A([{'enable_aovs': True}, {'INDIRECT_GLOSSY': True}]),
         'INDIRECT_SPECULAR': {'enable_aovs': True}, 
-        'normalize_INDIRECT_SPECULAR': {'enable_aovs': True},
+        'normalize_INDIRECT_SPECULAR': A([{'enable_aovs': True}, {'INDIRECT_SPECULAR': True}]),
         'DIRECT_SHADOW_MASK': {'enable_aovs': True},
         'INDIRECT_SHADOW_MASK': {'enable_aovs': True},
         'UV': {'enable_aovs': True},
         'RAYCOUNT': {'enable_aovs': True},
-        'normalize_RAYCOUNT': {'enable_aovs': True},
+        'normalize_RAYCOUNT': A([{'enable_aovs': True}, {'RAYCOUNT': True}]),
     }
 
     properties = [
@@ -844,7 +844,7 @@ class luxrender_channels(declarative_property_group):
             'type': 'bool',
             'attr': 'enable_aovs',
             'name': 'Enable',
-            'description': 'Enable AOVs',
+            'description': 'Enable LuxRender Passes',
             'default': True
         },
         {
