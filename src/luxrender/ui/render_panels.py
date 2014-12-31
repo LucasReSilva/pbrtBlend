@@ -302,7 +302,7 @@ class layers(render_panel):
 
 
 @LuxRenderAddon.addon_register_class
-class passes(render_panel):
+class passes_aov(render_panel):
     """
     Render passes UI panel
     """
@@ -344,7 +344,25 @@ class passes(render_panel):
             col.prop(rl, "use_pass_combined")
             col.prop(rl, "use_pass_z")
 
-        layout.separator()  # give a little gap to seperate from AOV's
+        layout.separator()  # give a little gap to seperate next panel
+
+@LuxRenderAddon.addon_register_class
+class passes_lg(render_panel):
+    """
+    Render passes UI panel
+    """
+
+    bl_label = 'Lightgroups'
+    bl_options = {'DEFAULT_CLOSED'}
+    bl_context = "render_layer"
+
+    display_property_groups = [
+        ( ('scene',), 'luxrender_lightgroups' )
+    ]
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
 
         super().draw(context)
 
@@ -367,3 +385,4 @@ class passes(render_panel):
                 )
 
             row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index
+
