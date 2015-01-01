@@ -993,6 +993,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 engine_dict[engine],
                 sampler_dict[sampler])
 
+        
+        # Progress
+        progress_time = 0.0
+        progress_samples = 0.0
+        progress_tiles = 0.0
+        # Statistics strings
         stats_tiles = ''
         stats_time = ''
         stats_samples = ''
@@ -1003,9 +1009,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
 
-            stats_tiles = 'Tiles: %d/%d Converged | ' % (
-                    converged,
-                    (converged + notconverged + pending))
+            tiles_amount = converged + notconverged + pending
+            stats_tiles = 'Tiles: %d/%d Converged | ' % (converged, tiles_amount)
+            progress_tiles = float(converged) / float(tiles_amount)
         
         if realtime_preview:
             halt_samples = scene.luxcore_realtimesettings.halt_samples
@@ -1014,25 +1020,38 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             halt_samples = scene.luxcore_enginesettings.halt_samples
             halt_time = scene.luxcore_enginesettings.halt_time
         
+        # Time stats
+        time_running = stats.Get('stats.renderengine.time').GetFloat()
         # Add time stats for realtime preview because Blender doesn't display it there
         if realtime_preview and halt_time == 0:
-            stats_time = 'Time: %.1fs | ' % (stats.Get('stats.renderengine.time').GetFloat())
+            stats_time = 'Time: %.1fs | ' % (time_running)
+        # For final renderings, only display time if it is set as halt condition
         elif halt_time != 0:
             stats_time = 'Time: %.1fs/%ds | ' % (
-                    stats.Get('stats.renderengine.time').GetFloat(),
+                    time_running,
                     halt_time)
+            if not realtime_preview:
+                progress_time = time_running / float(halt_time)
             
         # Samples/Passes stats
+        samples_count = stats.Get('stats.renderengine.pass').GetInt()
         samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
         if halt_samples != 0:
             stats_samples = '%s: %d/%d | ' % (
                     samples_term,
-                    stats.Get('stats.renderengine.pass').GetInt(),
+                    samples_count,
                     halt_samples)
+            if not realtime_preview:
+                progress_samples = float(samples_count) / float(halt_samples)
         else:
             stats_samples = '%s: %d | ' % (
                     samples_term,
-                    stats.Get('stats.renderengine.pass').GetInt())
+                    samples_count)
+                
+        # update progressbar (final render only)    
+        if not realtime_preview:
+            progress = max([progress_time, progress_samples, progress_tiles])
+            self.update_progress(progress)
 
         return '%s%s%s%s' % (stats_time, stats_samples, stats_tiles, stats_main)
 
