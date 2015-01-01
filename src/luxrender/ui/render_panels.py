@@ -86,8 +86,9 @@ class device_settings(render_panel):
 
     def draw(self, context):
         engine_settings = context.scene.luxcore_enginesettings
+        render_mode = context.scene.luxrender_rendermode.rendermode
     
-        if (context.scene.luxrender_rendermode.rendermode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl']
+        if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl']
                 and bpy.context.scene.luxrender_rendermode.opencl_prefs)\
                 or (UseLuxCore() and (
                 context.scene.luxcore_enginesettings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']
@@ -102,7 +103,7 @@ class device_settings(render_panel):
                 subrow.enabled = dev.opencl_device_enabled
                 subrow.label(dev.name)
         else:
-            if 'luxcore' in context.scene.luxrender_rendermode.rendermode or UseLuxCore():
+            if ('luxcore' in render_mode and not 'ocl' in render_mode) or UseLuxCore():
                 self.layout.prop(engine_settings, 'native_threads_count')
             else:
                 self.layout.label("Inactive")
