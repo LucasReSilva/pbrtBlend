@@ -1857,11 +1857,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         update_changes.changed_objects_transform.append(ob)
                     elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
                         update_changes.set_cause(camera = True)
+                        
         elif bpy.data.materials.is_updated:
             for mat in bpy.data.materials:
                 if mat.is_updated:
                     update_changes.changed_materials.append(mat)
                     update_changes.set_cause(materials = True)
+                    
+        elif bpy.data.textures.is_updated:
+            for tex in bpy.data.textures:
+                if tex.is_updated:
+                    for mat in tex.users_material:
+                        update_changes.changed_materials.append(mat)
+                        update_changes.set_cause(materials = True)
+        
         else:
             # no objects were changed
             # check for changes in renderengine configuration
