@@ -966,8 +966,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
                 (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
 
-        return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
-
     def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview = False, time_until_update = -1):
         """
         Returns: string of formatted statistics
@@ -1079,7 +1077,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         rendered_time = stats.Get('stats.renderengine.time').GetFloat()
             
         return (halt_samples != 0 and rendered_samples >= halt_samples) or (
-                halt_time != 0 and rendered_time >= halt_time)
+                halt_time != 0 and rendered_time >= halt_time) or (
+                stats.Get('stats.renderengine.convergence').GetFloat() == 1.0)
 
     def normalizeChannel(self, channel_buffer):
         isInf = math.isinf
@@ -1412,14 +1411,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 stats = lcSession.GetStats()
                 
                 # Print some information about the rendering progress
-                done = self.PrintStats(lcConfig, stats)
+                #self.PrintStats(lcConfig, stats)
 
                 blender_stats = self.CreateBlenderStats(lcConfig, stats, scene, 
                         time_until_update = displayInterval - elapsedTimeSinceLastRefresh)
                 self.update_stats('Rendering...', blender_stats)
                 
                 # check if any halt conditions are met
-                done = done or self.haltConditionMet(scene, stats)
+                done = self.haltConditionMet(scene, stats)
 
                 if elapsedTimeSinceLastRefresh > displayInterval:
                     # Update the image

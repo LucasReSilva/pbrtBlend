@@ -1306,6 +1306,7 @@ class BlenderSceneConverter(object):
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
+            samples = params_keyValue['nsamples']
 
             sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
             legacy_sky = light.luxrender_lamp.luxrender_lamp_sun.legacy_sky
@@ -1319,6 +1320,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
 
                 if 'relsize' in params_keyValue:
                     relsize = params_keyValue['relsize']
@@ -1334,6 +1336,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
 
             if sunsky_type == 'distant':
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
@@ -1765,14 +1768,28 @@ class BlenderSceneConverter(object):
         ########################################################################
         # Convert all objects
         ########################################################################
+        objects_amount = len(self.blScene.objects)
+        objects_counter = 0
+        
         for obj in self.blScene.objects:
             # cancel export when user hits 'Esc'
             if self.renderengine is not None and self.renderengine.test_break():
                 break
 
-            LuxLog('Converting object: %s' % obj.name)
+            objects_counter += 1
+            LuxLog('Converting object: %s (%d of %d)' % (
+                    obj.name, 
+                    objects_counter, 
+                    objects_amount))
+            		
+            
             if self.renderengine is not None:
-                self.renderengine.update_stats('Exporting...', 'Object: ' + obj.name)
+                self.renderengine.update_stats('Exporting...', 'Object: %s (%d of %d)' % (
+                                                               obj.name, 
+                                                               objects_counter, 
+                                                               objects_amount))
+                progress = float(objects_counter) / float(objects_amount)
+                self.renderengine.update_progress(progress)
 
             self.ConvertObject(obj)
 
