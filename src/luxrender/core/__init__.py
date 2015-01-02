@@ -1861,8 +1861,19 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         elif bpy.data.materials.is_updated:
             for mat in bpy.data.materials:
                 if mat.is_updated:
-                    update_changes.changed_materials.append(mat)
-                    update_changes.set_cause(materials = True)
+                    if mat.luxrender_emission.use_emission:
+                        # re-export users of this material to prevent pyluxcore crash
+                        for ob in bpy.data.objects:
+                            for slot in ob.material_slots:
+                                if slot.material == mat:
+                                    update_changes.changed_objects_mesh.append(ob)
+                                    
+                        if len(update_changes.changed_objects_mesh) > 0:
+                            update_changes.set_cause(mesh = True)
+                    else:
+                        # material is not emitting light, only update this material
+                        update_changes.changed_materials.append(mat)
+                        update_changes.set_cause(materials = True)
                     
         elif bpy.data.textures.is_updated:
             for tex in bpy.data.textures:
@@ -1922,6 +1933,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         print("============ Debug ================")
         print("changed_objects_transform", update_changes.changed_objects_transform)
         print("changed_objects_mesh", update_changes.changed_objects_mesh)
+        print("changed_materials", update_changes.changed_materials)
         print("    Update caused by:")
         print("unknown", update_changes.cause_unknown)
         print("startViewportRender", update_changes.cause_startViewportRender)
