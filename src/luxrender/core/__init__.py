@@ -968,7 +968,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
 
-    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview = False):
+    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview = False, time_until_update = -1):
+        """
+        Returns: string of formatted statistics
+        """
+    
         engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
         engine_dict = {
             'PATHCPU' : 'Path',
@@ -987,12 +991,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         }
 
         # Statistics that are the same for all renderengines
-        stats_main = 'samples/sec %3.2fM | %.1fK tris | %s + %s' % (
+        stats_main = 'Samples/Sec %3.2fM | %.1fK tris | %s + %s' % (
                 (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
                 (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0),
                 engine_dict[engine],
                 sampler_dict[sampler])
 
+        # show remaining time until next film update (final render only)
+        if not realtime_preview and time_until_update > 0.0:
+            stats_main += ' | Next update in %.1fs' % (time_until_update)
+        elif time_until_update != -1:
+            stats_main += ' | Updating preview...'
         
         # Progress
         progress_time = 0.0
@@ -1119,19 +1128,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             mask_red = 0xff0000
             mask_green = 0xff00
             mask_blue = 0xff
-
+            
             k = 0
             for i in range(0, len(channel_buffer)):
-                red = float((channel_buffer[i] & mask_red) >> 16) / 255.0
-                green = float((channel_buffer[i] & mask_green) >> 8) / 255.0
-                blue = float(channel_buffer[i] & mask_blue) / 255.0
-
-                channel_buffer_converted[k] = red
-                channel_buffer_converted[k + 1] = green
-                channel_buffer_converted[k + 2] = blue
-                channel_buffer_converted[k + 3] = 1.0
+                rgba_raw = channel_buffer[i]
+                
+                rgba_converted = [
+                    float((rgba_raw & mask_red) >> 16) / 255.0,
+                    float((rgba_raw & mask_green) >> 8) / 255.0,
+                    float(rgba_raw & mask_blue) / 255.0,
+                    1.0
+                ]
+                
+                channel_buffer_converted[k:k + 4] = rgba_converted
                 k += 4
-
         else:
             if channelName in ['MATERIAL_ID_MASK', 'BY_MATERIAL_ID'] and buffer_id != -1:
                 lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer, buffer_id)
@@ -1391,7 +1401,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 now = time.time()
                 elapsedTimeSinceLastRefresh = now - lastRefreshTime
                 elapsedTimeSinceStart = now - startTime
-                
+
+                displayInterval = scene.camera.data.luxrender_camera.luxrender_film.displayinterval
+                # use higher displayInterval for the first 10 seconds
+                if elapsedTimeSinceStart < 10.0:
+                    displayInterval = 1.0
+                    
                 # Update statistics
                 lcSession.UpdateStats()
                 stats = lcSession.GetStats()
@@ -1399,19 +1414,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Print some information about the rendering progress
                 done = self.PrintStats(lcConfig, stats)
 
-                blender_stats = self.CreateBlenderStats(lcConfig, stats, scene)
+                blender_stats = self.CreateBlenderStats(lcConfig, stats, scene, 
+                        time_until_update = displayInterval - elapsedTimeSinceLastRefresh)
                 self.update_stats('Rendering...', blender_stats)
                 
                 # check if any halt conditions are met
                 done = done or self.haltConditionMet(scene, stats)
 
-                displayInterval = scene.camera.data.luxrender_camera.luxrender_film.displayinterval
-                # use higher displayInterval for the first 10 seconds
-                if elapsedTimeSinceStart < 10.0:
-                    displayInterval = 1.0
-
                 if elapsedTimeSinceLastRefresh > displayInterval:
-
                     # Update the image
                     lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
