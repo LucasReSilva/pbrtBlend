@@ -989,9 +989,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         }
 
         # Statistics that are the same for all renderengines
-        stats_main = 'Samples/Sec %3.2fM | %.1fK tris | %s + %s' % (
+        stats_main = 'Samples/Sec %3.2fM | %s + %s' % (
                 (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
-                (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0),
                 engine_dict[engine],
                 sampler_dict[sampler])
 
