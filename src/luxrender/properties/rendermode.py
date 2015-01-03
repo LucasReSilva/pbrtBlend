@@ -252,8 +252,8 @@ class luxrender_rendermode(declarative_property_group):
         if self.opencl_prefs:
             import bpy
             engine_settings = bpy.context.scene.luxcore_enginesettings
+            dev_string = ''
             if len(engine_settings.luxcore_opencl_devices) > 0:
-                dev_string = ''
                 for dev_index in range(len(engine_settings.luxcore_opencl_devices)):
                     dev = engine_settings.luxcore_opencl_devices[dev_index]
                     dev_string += '1' if dev.opencl_device_enabled else '0'
