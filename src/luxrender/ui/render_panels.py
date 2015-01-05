@@ -106,7 +106,7 @@ class device_settings(render_panel):
             # self.layout.label("LuxCore Threads")
             self.layout.prop(engine_settings, 'native_threads_count')
 
-        else:
+        if not UseLuxCore() and not 'ocl' in render_mode:
             # self.layout.label("Classic Threads")
             threads = context.scene.luxrender_engine
             row = self.layout.row()
