@@ -101,14 +101,13 @@ class device_settings(render_panel):
                 subrow.enabled = dev.opencl_device_enabled
                 subrow.label(dev.name)
 
-        if ('luxcore' in render_mode and not 'ocl' in render_mode)\
-                or UseLuxCore() and not ('OCL' in engine_settings\
+        if UseLuxCore() and not ('OCL' in engine_settings\
                 or context.scene.luxcore_realtimesettings.device_type == 'OCL'):
-            self.layout.label("LuxCore Threads")
+            # self.layout.label("LuxCore Threads")
             self.layout.prop(engine_settings, 'native_threads_count')
 
-        if not 'luxcore' in render_mode:
-            self.layout.label("Classic Threads")
+        else:
+            # self.layout.label("Classic Threads")
             threads = context.scene.luxrender_engine
             row = self.layout.row()
             row.prop(threads, 'threads_auto')
