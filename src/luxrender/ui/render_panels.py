@@ -104,10 +104,17 @@ class device_settings(render_panel):
         if ('luxcore' in render_mode and not 'ocl' in render_mode)\
                 or UseLuxCore() and not ('OCL' in engine_settings\
                 or context.scene.luxcore_realtimesettings.device_type == 'OCL'):
+            self.layout.label("LuxCore Threads")
             self.layout.prop(engine_settings, 'native_threads_count')
-        else:
-            self.layout.label("Inactive")
-                
+
+        if not 'luxcore' in render_mode:
+            self.layout.label("Classic Threads")
+            threads = context.scene.luxrender_engine
+            row = self.layout.row()
+            row.prop(threads, 'threads_auto')
+            if not threads.threads_auto:
+                row.prop(threads, 'threads')
+
         # Tile settings
         if context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']:
             tile_highlighting_settings = context.scene.luxcore_tile_highlighting

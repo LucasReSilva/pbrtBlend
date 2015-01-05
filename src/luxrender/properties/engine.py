@@ -139,8 +139,9 @@ class luxrender_engine(declarative_property_group):
         'mesh_type',
         'partial_ply',
         ['render', 'monitor_external'],
-        ['threads_auto', 'fixed_seed'],
-        'threads',
+        'fixed_seed',
+        # ['threads_auto', 'fixed_seed'],
+        # 'threads',
         'log_verbosity',
         ['min_epsilon', 'max_epsilon'],
     ]
