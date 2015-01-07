@@ -33,6 +33,7 @@ import mathutils
 from ..outputs import LuxManager, LuxLog
 from ..outputs.luxcore_api import pyluxcore
 from ..outputs.luxcore_api import ToValidLuxCoreName
+from ..outputs.luxcore_api import LUXCORE_VERSION
 from ..export import get_worldscale, matrix_to_list
 from ..export import is_obj_visible
 from ..export import get_expanded_file_name
@@ -179,12 +180,25 @@ class BlenderSceneConverter(object):
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
-            if False:
-                mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
-                lcObjName = ToValidLuxCoreName(mesh_name)
+            if LUXCORE_VERSION[:3] >= '1.5':
+                LuxLog("Using c++ accelerated mesh transformation")
+                if update_mesh:
+                    mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
+                    lcObjName = ToValidLuxCoreName(mesh_name)
 
-                meshInfoList = self.DefineBlenderMesh(lcObjName, mesh)
-                mesh_definitions.extend(meshInfoList)
+                    meshInfoList = self.DefineBlenderMesh(lcObjName, mesh)
+                    mesh_definitions.extend(meshInfoList)
+                else:
+                    number_of_mats = len(mesh.materials)
+                    if number_of_mats > 0:
+                        iterator_range = range(number_of_mats)
+                    else:
+                        iterator_range = [0]
+
+                    for i in iterator_range:
+                        mesh_name = '%s-%s_m%03d' % (obj.data.name, self.blScene.name, i)
+                        lcObjName = ToValidLuxCoreName(mesh_name)
+                        mesh_definitions.append((lcObjName, i))
             else:
                 # Collate faces by mat index
                 ffaces_mats = {}
@@ -215,15 +229,17 @@ class BlenderSceneConverter(object):
                         if update_mesh:
                             uv_textures = mesh.tessface_uv_textures
                             uv_layer = None
-
                             if len(uv_textures) > 0:
                                 if uv_textures.active and uv_textures.active.data:
                                     uv_layer = uv_textures.active.data
+
+                            color_layer = mesh.tessface_vertex_colors.data if mesh.tessface_vertex_colors.active else None
 
                             # Export data
                             points = []
                             normals = []
                             uvs = []
+                            cols = []
                             face_vert_indices = []  # List of face vert indices
 
                             # Caches
@@ -237,10 +253,9 @@ class BlenderSceneConverter(object):
                                     v = mesh.vertices[vertex]
 
                                     if face.use_smooth:
-                                        if uv_layer:
-                                            vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
-                                        else:
-                                            vert_data = (v.co[:], v.normal[:], tuple())
+                                        vert_data = (v.co[:], v.normal[:],
+                                                     uv_layer[face.index].uv[j][:] if uv_layer else tuple(),
+                                                     color_layer[face.index].color[j][:] if color_layer else tuple())
 
                                         if vert_data not in vert_use_vno:
                                             vert_use_vno.add(vert_data)
@@ -248,6 +263,7 @@ class BlenderSceneConverter(object):
                                             points.append(vert_data[0])
                                             normals.append(vert_data[1])
                                             uvs.append(vert_data[2])
+                                            cols.append(vert_data[3])
 
                                             vert_vno_indices[vert_data] = vert_index
                                             fvi.append(vert_index)
@@ -263,6 +279,8 @@ class BlenderSceneConverter(object):
                                         normals.append(face.normal[:])
                                         if uv_layer:
                                             uvs.append(uv_layer[face.index].uv[j][:])
+                                        if color_layer:
+                                            cols.append(color_layer[face.index].color[j][:])
 
                                         fvi.append(vert_index)
 
@@ -280,7 +298,7 @@ class BlenderSceneConverter(object):
                         lcObjName = ToValidLuxCoreName(mesh_name)
                         if update_mesh:
                             self.lcScene.DefineMesh('Mesh-' + lcObjName, points, face_vert_indices, normals,
-                                                    uvs if uv_layer else None, None, None)
+                                                    uvs if uv_layer else None, cols if color_layer else None, None)
                         mesh_definitions.append((lcObjName, i))
 
                     except Exception as err:
@@ -928,6 +946,27 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.kr', self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
                 props.Set(pyluxcore.Property(prefix + '.kt', self.ConvertMaterialChannel(luxMat, 'Kt', 'color')))
                 props.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
+
+            ####################################################################
+            # Metal (for keeping bw compat., but use metal2 )
+            ####################################################################
+            elif matType == 'metal':
+                props.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
+                m_type = material.luxrender_material.luxrender_mat_metal.name
+
+                if m_type != 'nk':
+                    props.Set(
+                        pyluxcore.Property(prefix + '.preset', m_type))
+
+                # TODO: nk_data
+                else:
+                    LuxLog('WARNING: Not yet supported metal type: %s' % m_type)
+
+                props.Set(pyluxcore.Property(prefix + '.uroughness',
+                                             self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
+
+                props.Set(pyluxcore.Property(prefix + '.vroughness',
+                                             self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
 
             ####################################################################
             # Metal2
