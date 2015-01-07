@@ -145,8 +145,7 @@ class BlenderSceneConverter(object):
             texCoords = uv_textures.active.data[0].as_pointer()
         else:
             texCoords = 0
-        print("@@@@" + str(len(uv_textures)))
-        print("$$$$" + str(texCoords))
+
         vertex_color = mesh.tessface_vertex_colors.active
         if vertex_color:
             vertexColors = vertex_color.data[0].as_pointer()
@@ -228,15 +227,17 @@ class BlenderSceneConverter(object):
                         if update_mesh:
                             uv_textures = mesh.tessface_uv_textures
                             uv_layer = None
-
                             if len(uv_textures) > 0:
                                 if uv_textures.active and uv_textures.active.data:
                                     uv_layer = uv_textures.active.data
+
+                            color_layer = mesh.tessface_vertex_colors.data if mesh.tessface_vertex_colors.active else None
 
                             # Export data
                             points = []
                             normals = []
                             uvs = []
+                            cols = []
                             face_vert_indices = []  # List of face vert indices
 
                             # Caches
@@ -250,10 +251,9 @@ class BlenderSceneConverter(object):
                                     v = mesh.vertices[vertex]
 
                                     if face.use_smooth:
-                                        if uv_layer:
-                                            vert_data = (v.co[:], v.normal[:], uv_layer[face.index].uv[j][:])
-                                        else:
-                                            vert_data = (v.co[:], v.normal[:], tuple())
+                                        vert_data = (v.co[:], v.normal[:],
+                                                     uv_layer[face.index].uv[j][:] if uv_layer else tuple(),
+                                                     color_layer[face.index].color[j][:] if color_layer else tuple())
 
                                         if vert_data not in vert_use_vno:
                                             vert_use_vno.add(vert_data)
@@ -261,6 +261,7 @@ class BlenderSceneConverter(object):
                                             points.append(vert_data[0])
                                             normals.append(vert_data[1])
                                             uvs.append(vert_data[2])
+                                            cols.append(vert_data[3])
 
                                             vert_vno_indices[vert_data] = vert_index
                                             fvi.append(vert_index)
@@ -276,6 +277,8 @@ class BlenderSceneConverter(object):
                                         normals.append(face.normal[:])
                                         if uv_layer:
                                             uvs.append(uv_layer[face.index].uv[j][:])
+                                        if color_layer:
+                                            cols.append(color_layer[face.index].color[j][:])
 
                                         fvi.append(vert_index)
 
@@ -293,7 +296,7 @@ class BlenderSceneConverter(object):
                         lcObjName = ToValidLuxCoreName(mesh_name)
                         if update_mesh:
                             self.lcScene.DefineMesh('Mesh-' + lcObjName, points, face_vert_indices, normals,
-                                                    uvs if uv_layer else None, None, None)
+                                                    uvs if uv_layer else None, cols if color_layer else None, None)
                         mesh_definitions.append((lcObjName, i))
 
                     except Exception as err:
