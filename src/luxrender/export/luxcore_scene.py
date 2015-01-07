@@ -145,7 +145,8 @@ class BlenderSceneConverter(object):
             texCoords = uv_textures.active.data[0].as_pointer()
         else:
             texCoords = 0
-
+        print("@@@@" + str(len(uv_textures)))
+        print("$$$$" + str(texCoords))
         vertex_color = mesh.tessface_vertex_colors.active
         if vertex_color:
             vertexColors = vertex_color.data[0].as_pointer()
@@ -179,7 +180,7 @@ class BlenderSceneConverter(object):
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
-            if False:
+            if True:
                 if update_mesh:
                     mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
                     lcObjName = ToValidLuxCoreName(mesh_name)
