@@ -946,6 +946,27 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.sigma', self.ConvertMaterialChannel(luxMat, 'sigma', 'float')))
 
             ####################################################################
+            # Metal (for keeping bw compat., but use metal2 )
+            ####################################################################
+            elif matType == 'metal':
+                props.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
+                m_type = material.luxrender_material.luxrender_mat_metal.name
+
+                if m_type != 'nk':
+                    props.Set(
+                        pyluxcore.Property(prefix + '.preset', m_type))
+
+                # TODO: nk_data
+                else:
+                    LuxLog('WARNING: Not yet supported metal type: %s' % m_type)
+
+                props.Set(pyluxcore.Property(prefix + '.uroughness',
+                                             self.ConvertMaterialChannel(luxMat, 'uroughness', 'float')))
+
+                props.Set(pyluxcore.Property(prefix + '.vroughness',
+                                             self.ConvertMaterialChannel(luxMat, 'vroughness', 'float')))
+
+            ####################################################################
             # Metal2
             ####################################################################
             elif matType == 'metal2':
