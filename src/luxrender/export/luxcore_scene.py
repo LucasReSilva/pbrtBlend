@@ -69,7 +69,7 @@ class BlenderSceneConverter(object):
 
         self.blScene = blScene
         self.renderengine = renderengine
-        if lcSession:
+        if lcSession is not None:
             self.lcScene = lcSession.GetRenderConfig().GetScene()
         else:
             imageScale = self.blScene.luxcore_scenesettings.imageScale
@@ -1346,7 +1346,7 @@ class BlenderSceneConverter(object):
             else:
                 energy = 0  # use gain for muting to keep geometry exported
 
-        gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum !
+        gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum!
 
         if getattr(lux_lamp, 'L_color') and not (
                     light.type == 'SUN' and getattr(lux_lamp, 'sunsky_type') != 'distant') and not (
@@ -1495,15 +1495,26 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.power', [light.luxrender_lamp.luxrender_lamp_area.power]))
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.efficiency', [light.luxrender_lamp.luxrender_lamp_area.efficacy]))
-                
-                # add object and mesh
+                # assign material to object
                 self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.material', [mat_name]))
-                self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.vertices', [1, 1, 0, 
-                                                                                                     1, -1, 0, 
-                                                                                                     -1, -1, 0, 
-                                                                                                     -1, 1, 0]))
-                self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.faces', [0, 1, 2,
-                                                                                                  2, 3, 0]))
+                
+                # add mesh
+                mesh_name = 'Mesh-' + luxcore_name
+                if not self.lcScene.IsMeshDefined(mesh_name):
+                    vertices = [
+                            (1, 1, 0), 
+                            (1, -1, 0), 
+                            (-1, -1, 0), 
+                            (-1, 1, 0)
+                    ]
+                    faces = [
+                            (0, 1, 2),
+                            (2, 3, 0)
+                    ]
+                    self.lcScene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
+                # assign mesh to object
+                self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.ply', [mesh_name]))
+                    
                 # copy transformation of area lamp object
                 scale_matrix = mathutils.Matrix()
                 #scale_matrix[0][0] = light.size / 2.0
