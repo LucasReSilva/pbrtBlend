@@ -180,11 +180,23 @@ class BlenderSceneConverter(object):
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
             if False:
-                mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
-                lcObjName = ToValidLuxCoreName(mesh_name)
+                if update_mesh:
+                    mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
+                    lcObjName = ToValidLuxCoreName(mesh_name)
 
-                meshInfoList = self.DefineBlenderMesh(lcObjName, mesh)
-                mesh_definitions.extend(meshInfoList)
+                    meshInfoList = self.DefineBlenderMesh(lcObjName, mesh)
+                    mesh_definitions.extend(meshInfoList)
+                else:
+                    number_of_mats = len(mesh.materials)
+                    if number_of_mats > 0:
+                        iterator_range = range(number_of_mats)
+                    else:
+                        iterator_range = [0]
+
+                    for i in iterator_range:
+                        mesh_name = '%s-%s_m%03d' % (obj.data.name, self.blScene.name, i)
+                        lcObjName = ToValidLuxCoreName(mesh_name)
+                        mesh_definitions.append((lcObjName, i))
             else:
                 # Collate faces by mat index
                 ffaces_mats = {}
