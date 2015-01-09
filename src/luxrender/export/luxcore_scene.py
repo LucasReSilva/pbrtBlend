@@ -33,7 +33,6 @@ import mathutils
 from ..outputs import LuxManager, LuxLog
 from ..outputs.luxcore_api import pyluxcore
 from ..outputs.luxcore_api import ToValidLuxCoreName
-from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE
 from ..export import get_worldscale, matrix_to_list
 from ..export import is_obj_visible
 from ..export import get_expanded_file_name
@@ -179,7 +178,7 @@ class BlenderSceneConverter(object):
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
-            if getattr(pyluxcore, "DefineBlenderMesh", None) is not None:
+            if not getattr(pyluxcore, "DefineBlenderMesh", None):
                 LuxLog("Using c++ accelerated mesh export")
                 if update_mesh:
                     mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
