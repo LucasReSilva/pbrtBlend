@@ -177,8 +177,8 @@ class BlenderSceneConverter(object):
 
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
-
-            if not getattr(pyluxcore, "DefineBlenderMesh", None):
+            print("------------------------", getattr(pyluxcore, "DefineBlenderMesh", None))
+            if getattr(pyluxcore, "DefineBlenderMesh", None) is not None:
                 LuxLog("Using c++ accelerated mesh export")
                 if update_mesh:
                     mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
