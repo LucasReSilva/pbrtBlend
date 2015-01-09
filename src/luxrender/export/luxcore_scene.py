@@ -85,7 +85,6 @@ class BlenderSceneConverter(object):
         """
         checks if name is colliding with material or other volume names
         name: string (has to be a valid LuxCore name)
-        
         returns: bool (does name collide with existing names)
         """
         
@@ -97,7 +96,7 @@ class BlenderSceneConverter(object):
 
     def createChannelOutputString(self, channelName, id=-1):
         """
-        Creates a config string for LuxCore AOV output
+        Sets configuration properties for LuxCore AOV output
         """
 
         # the OpenCL engines only support 1 MATERIAL_ID_MASK and 1 BY_MATERIAL_ID channel
@@ -180,11 +179,8 @@ class BlenderSceneConverter(object):
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
-            if PYLUXCORE_AVAILABLE:
-                from ..outputs.luxcore_api import LUXCORE_VERSION
-
-            if LUXCORE_VERSION[:3] >= '1.5':
-                LuxLog("Using c++ accelerated mesh transformation")
+            if getattr(pyluxcore, "DefineBlenderMesh", None) is not None:
+                LuxLog("Using c++ accelerated mesh export")
                 if update_mesh:
                     mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
                     lcObjName = ToValidLuxCoreName(mesh_name)
@@ -203,6 +199,7 @@ class BlenderSceneConverter(object):
                         lcObjName = ToValidLuxCoreName(mesh_name)
                         mesh_definitions.append((lcObjName, i))
             else:
+                LuxLog("Using classic python mesh export (c++ acceleration not available)")
                 # Collate faces by mat index
                 ffaces_mats = {}
                 mesh_faces = mesh.tessfaces
