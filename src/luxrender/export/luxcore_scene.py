@@ -1368,7 +1368,9 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
 
-        # Individual light params
+        ####################################################################
+        # Sun (includes sun, sky, distant)
+        ####################################################################
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
@@ -1414,6 +1416,9 @@ class BlenderSceneConverter(object):
                     theta = params_keyValue['theta']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
 
+        ####################################################################
+        # Hemi (infinite)
+        ####################################################################
         elif light.type == 'HEMI':
             infinite_map_path = getattr(lux_lamp, 'infinite_map')
             if infinite_map_path:
@@ -1429,6 +1434,9 @@ class BlenderSceneConverter(object):
             transform = matrix_to_list(hemi_fix * obj.matrix_world.inverted())
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
+        ####################################################################
+        # Point
+        ####################################################################
         elif light.type == 'POINT':
             # if getattr(lux_lamp, 'usesphere'):
             # print("------------------------", getattr(lux_lamp, 'pointsize'))
@@ -1447,6 +1455,9 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(
                 pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
 
+        ####################################################################
+        # Spot (includes projector)
+        ####################################################################
         elif light.type == 'SPOT':
             coneangle = math.degrees(light.spot_size) * 0.5
             conedeltaangle = math.degrees(light.spot_size * 0.5 * light.spot_blend)
@@ -1472,6 +1483,9 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(
                 pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
         
+        ####################################################################
+        # Area (includes laser)
+        ####################################################################
         elif light.type == 'AREA':
             if light.luxrender_lamp.luxrender_lamp_laser.is_laser:
                 transform = matrix_to_list(obj.matrix_world)
@@ -1516,16 +1530,16 @@ class BlenderSceneConverter(object):
                     
                 # copy transformation of area lamp object
                 scale_matrix = mathutils.Matrix()
-                #scale_matrix[0][0] = light.size / 2.0
-                #scale_matrix[1][1] = light.size_y / 2.0 if light.shape == 'RECTANGLE' else light.size / 2.0
+                scale_matrix[0][0] = light.size / 2.0
+                scale_matrix[1][1] = light.size_y / 2.0 if light.shape == 'RECTANGLE' else light.size / 2.0
                 rotation_matrix = obj.rotation_euler.to_matrix()
                 rotation_matrix.resize_4x4()
-                transform_matrix = scale_matrix * rotation_matrix
+                transform_matrix = mathutils.Matrix()
                 transform_matrix[0][3] = obj.location.x
                 transform_matrix[1][3] = obj.location.y
                 transform_matrix[2][3] = obj.location.z
                 
-                transform = matrix_to_list(transform_matrix)
+                transform = matrix_to_list(rotation_matrix * scale_matrix * transform_matrix)
                 self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.transformation', transform))
                 
         else:
@@ -1899,7 +1913,7 @@ class BlenderSceneConverter(object):
                 self.renderengine.update_progress(progress)
 
             self.ConvertObject(obj)
-
+        
         # Debug information
         LuxLog('Scene Properties:')
         LuxLog(str(self.scnProps))
