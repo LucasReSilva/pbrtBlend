@@ -1538,7 +1538,7 @@ class BlenderSceneConverter(object):
                 transform_matrix[1][3] = obj.location.y
                 transform_matrix[2][3] = obj.location.z
                 
-                transform = matrix_to_list(rotation_matrix * scale_matrix * transform_matrix)
+                transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix)
                 self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.transformation', transform))
                 
         else:
