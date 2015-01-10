@@ -233,6 +233,7 @@ class postprocessing(render_panel):
             super().draw(context)
 
             # Image pipeline, this is a "special" panel section
+            '''
             for elem_index in range(len(context.scene.luxcore_imagepipeline_settings.elements)):
                 elem = context.scene.luxcore_imagepipeline_settings.elements[elem_index]
                 
@@ -250,6 +251,11 @@ class postprocessing(render_panel):
                         context,
                         property_group = context.scene.luxcore_imagepipeline_settings
                     )
+            '''
+    
+    def draw_crf_preset_menu(self, context):
+        self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',
+                         text=context.scene.luxcore_imagepipeline_settings.crf_preset)
 
 @LuxRenderAddon.addon_register_class
 class layer_selector(render_panel):

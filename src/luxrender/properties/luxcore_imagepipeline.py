@@ -25,61 +25,193 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
+import bpy
+
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 
 
-@LuxRenderAddon.addon_register_class
-class luxrender_imagepipeline_element(declarative_property_group):
-    """
-    Storage class for LuxRender imagepipeline elements. The
-    luxcore_imagepipeline_settings object will store 1 or more of
-    these in its CollectionProperty 'elements'.
-    """
+# Valid CRF preset names (case sensitive):
+# See lux/core/cameraresponse.cpp to keep this up to date
+crf_preset_names = [s.strip() for s in
+                    """Advantix_100CD
+                    Advantix_200CD
+                    Advantix_400CD
+                    Agfachrome_ctpecisa_200CD
+                    Agfachrome_ctprecisa_100CD
+                    Agfachrome_rsx2_050CD
+                    Agfachrome_rsx2_100CD
+                    Agfachrome_rsx2_200CD
+                    Agfacolor_futura_100CD
+                    Agfacolor_futura_200CD
+                    Agfacolor_futura_400CD
+                    Agfacolor_futuraII_100CD
+                    Agfacolor_futuraII_200CD
+                    Agfacolor_futuraII_400CD
+                    Agfacolor_hdc_100_plusCD
+                    Agfacolor_hdc_200_plusCD
+                    Agfacolor_hdc_400_plusCD
+                    Agfacolor_optimaII_100CD
+                    Agfacolor_optimaII_200CD
+                    Agfacolor_ultra_050_CD
+                    Agfacolor_vista_100CD
+                    Agfacolor_vista_200CD
+                    Agfacolor_vista_400CD
+                    Agfacolor_vista_800CD
+                    Ektachrome_100_plusCD
+                    Ektachrome_100CD
+                    Ektachrome_320TCD
+                    Ektachrome_400XCD
+                    Ektachrome_64CD
+                    Ektachrome_64TCD
+                    Ektachrome_E100SCD
+                    F125CD
+                    F250CD
+                    F400CD
+                    FCICD
+                    Gold_100CD
+                    Gold_200CD
+                    Kodachrome_200CD
+                    Kodachrome_25CD
+                    Kodachrome_64CD
+                    Max_Zoom_800CD
+                    Portra_100TCD
+                    Portra_160NCCD
+                    Portra_160VCCD
+                    Portra_400NCCD
+                    Portra_400VCCD
+                    Portra_800CD""".splitlines()]
 
-    ef_attach_to = []  # not attached
+@LuxRenderAddon.addon_register_class
+class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
+    bl_idname = 'imagepipeline.set_luxrender_crf'
+    bl_label = 'Set LuxRender Film Response Function'
+
+    preset_name = bpy.props.StringProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene and \
+               context.scene.luxcore_imagepipeline_settings
+
+    def execute(self, context):
+        context.scene.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
+        return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class IMAGEPIPELINE_MT_luxrender_crf(bpy.types.Menu):
+    bl_label = 'CRF Preset'
+
+    # Flat-list menu system
+    def draw(self, context):
+        lt = self.layout.row()
+
+        for i, crf_name in enumerate(sorted(crf_preset_names)):
+            # Create a new column every 20 items
+            if i % 20 == 0:
+                cl = lt.column()
+
+            op = cl.operator('IMAGEPIPELINE_OT_set_luxrender_crf', text=crf_name)
+            op.preset_name = crf_name
+
+@LuxRenderAddon.addon_register_class
+class luxcore_imagepipeline_settings(declarative_property_group):
+    """
+    Storage class for LuxCore imagepipeline settings.
+    """
+    
+    ef_attach_to = ['Scene']
+    
     alert = {}
 
-    
-    controls = [  # drawn manually in the UI class (ui/render_panels.py)
-        'type',
+    controls = [
+        'imagepipeline_label',
+        # Output switcher
+        'label_output_switcher', 
+        'output_switcher_pass',
+        # Tonemapper
+        'label_tonemapper',
         'tonemapper_type',
+        'linear_scale',
+        'reinhard_prescale',
+        'reinhard_postscale',
+        'reinhard_burn',
+        # Film response
+        'crf_label',
+        'use_crf',
+        'crf_preset_menu',
+        'crf_file',
+        # Gamma
+        'label_gamma',
+        'gamma',
     ]
     
-    '''
     visibility = {
-        'tonemapper_type': {'type': 'tonemapper'},
-        # TODO: the rest
+        'linear_scale': {'tonemapper_type': 'TONEMAP_LINEAR'},
+        'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
+        'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
+        'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
+        'crf_preset_menu': {'use_crf': 'preset'},
+        'crf_file': {'use_crf': 'file'},
     }
-    '''
-    
+
     properties = [
         {
+            'type': 'text',
+            'attr': 'imagepipeline_label',
+            'name': 'LuxCore Image Pipeline',
+        },
+        # Output switcher
+        {
+            'type': 'text',
+            'attr': 'label_output_switcher',
+            'name': 'Output Switcher:',
+        },
+        {
             'type': 'enum',
-            'attr': 'type',
-            'name': 'Element Type',
-            'description': 'Type of the imagepipeline element',
-            'default': 'tonemapper',
+            'attr': 'output_switcher_pass',
+            'name': '',
+            'description': 'Use a pass instead of normal output',
+            'default': 'disabled',
             'items': [
-                ('tonemapper', 'Tonemapper', 'A tonemapper converts the image from HDR to LDR'),
-                ('gamma_correct', 'Gamma Correction', 'Blender expects 1.0 as input gamma for rendered images'),
-                ('output_switcher', 'Output Switcher', 'Makes it possible to use AOVs as elements in the imagepipeline'),
+                ('disabled', 'Disabled', 'Don\'t use the output switcher'),
+                ('ALPHA', 'Alpha', 'desc'),
+                ('MATERIAL_ID', 'Material ID', 'desc'),
+                ('EMISSION', 'Emission', 'desc'),
+                ('DIRECT_DIFFUSE', 'Direct Diffuse', 'desc'),
+                ('DIRECT_GLOSSY', 'Direct Glossy', 'desc'),
+                ('INDIRECT_DIFFUSE', 'Indirect Diffuse', 'desc'),
+                ('INDIRECT_GLOSSY', 'Indirect Glossy', 'desc'),
+                ('INDIRECT_SPECULAR', 'Indirect Specular', 'desc'),
+                ('DEPTH', 'Depth', 'desc'),
+                ('POSITION', 'Position', 'desc'),
+                ('SHADING_NORMAL', 'Shading Normal', 'desc'),
+                ('GEOMETRY_NORMAL', 'Geometry Normal', 'desc'),
+                ('UV', 'UV', 'desc'),
+                ('DIRECT_SHADOW_MASK', 'Direct Shadow Mask', 'desc'),
+                ('INDIRECT_SHADOW_MASK', 'Indirect Shadow Mask', 'desc'),
+                ('RAYCOUNT', 'Raycount', 'desc'),
             ],
             'save_in_preset': True
         },
         # Tonemapper
         {
+            'type': 'text',
+            'attr': 'label_tonemapper',
+            'name': 'Tonemapper:',
+        },
+        {
             'type': 'enum',
             'attr': 'tonemapper_type',
-            'name': 'Tonemapper',
-            'description': 'A tonemapper converts the image from HDR to LDR',
+            'name': '',
+            'description': 'The tonemapper converts the image from HDR to LDR',
             'default': 'TONEMAP_AUTOLINEAR',
             'items': [
                 ('TONEMAP_AUTOLINEAR', 'Linear (Auto)', 'Simple auto-exposure'),
                 ('TONEMAP_LINEAR', 'Linear', 'Brightness is controlled by the scale value'),
-                ('TONEMAP_LUXLINEAR', 'Linear (Manual)', 'Uses camera settings (ISO, f-stop and shuttertime)'),
+                ('TONEMAP_LUXLINEAR', 'Linear (Camera Settings)', 'Uses camera settings (ISO, f-stop and shuttertime)'),
                 ('TONEMAP_REINHARD02', 'Reinhard', 'Non-linear tonemapper that adapts to the image brightness'),
             ],
             'save_in_preset': True
@@ -134,7 +266,48 @@ class luxrender_imagepipeline_element(declarative_property_group):
             'soft_max': 25.0,
             'save_in_preset': True
         },
+        # Camera/Film response function (crf)
+        {
+            'attr': 'crf_label',
+            'type': 'text',
+            'name': 'Film Response Function:',
+        },
+        {
+            'attr': 'use_crf',
+            'type': 'enum',
+            'name': 'Use Film Response',
+            'default': 'none',
+            'items': [
+                ('none', 'None', 'Don\'t use a Film Response'),
+                ('file', 'File', 'Load a Film Response from file'),
+                ('preset', 'Preset', 'Use a built-in Film Response Preset'),
+            ],
+            'expand': True
+        },
+        {
+            'type': 'ef_callback',
+            'attr': 'crf_preset_menu',
+            'method': 'draw_crf_preset_menu',
+        },
+        {
+            'attr': 'crf_file',
+            'type': 'string',
+            'subtype': 'FILE_PATH',
+            'name': 'File',
+            'default': '',
+        },
+        {
+            'attr': 'crf_preset',
+            'type': 'string',
+            'name': 'Film Reponse Preset',
+            'default': 'Film Response Preset',
+        },
         # Gamma correction settings
+        {
+            'attr': 'label_gamma',
+            'type': 'text',
+            'name': 'Gamma Correction:',
+        },
         {
             'type': 'float',
             'attr': 'gamma',
@@ -146,50 +319,5 @@ class luxrender_imagepipeline_element(declarative_property_group):
             'max': 20.0,
             'soft_max': 4.0,
             'save_in_preset': True
-        },
-        # Output switcher settings
-        # TODO: enum of AOV channels
-    ]
-
-@LuxRenderAddon.addon_register_class
-class luxcore_imagepipeline_settings(declarative_property_group):
-    """
-    Storage class for LuxCore imagepipeline settings.
-    """
-    
-    ef_attach_to = ['Scene']
-    
-    alert = {}
-
-    controls = [
-        'imagepipeline_label',
-        ['ignore',
-         'op_lg_add'],
-    ]
-
-    properties = [
-        {
-            'type': 'text',
-            'name': 'Image Pipeline',
-            'attr': 'imagepipeline_label',
-        },
-        {
-            'type': 'collection',
-            'ptype': luxrender_imagepipeline_element,
-            'name': 'elements',
-            'attr': 'elements',
-            'items': []
-        },
-        {
-            'type': 'int',
-            'name': 'element_index',
-            'attr': 'element_index',
-        },
-        {
-            'type': 'operator',
-            'attr': 'op_element_add',
-            'operator': 'luxrender.lightgroup_add',
-            'text': 'Add',
-            'icon': 'ZOOMIN',
         },
     ]

@@ -1639,35 +1639,57 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
 
     def ConvertImagepipelineSettings(self, realtime_preview=False):
-        lux_camera = self.blScene.camera.data.luxrender_camera
-        tonemapping_settings = lux_camera.luxrender_film.luxrender_tonemapping
-
-        if tonemapping_settings.type == 'linear':
+        imagepipeline_settings = self.blScene.luxcore_imagepipeline_settings
+        index = 0
+        prefix = 'film.imagepipeline.'
+        
+        # Output switcher
+        if imagepipeline_settings.output_switcher_pass != 'disabled':
+            channel = imagepipeline_settings.output_switcher_pass
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['OUTPUT_SWITCHER']))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.channel', [channel]))
+            index += 1
+        
+        # Tonemapper
+        tonemapper = imagepipeline_settings.tonemapper_type
+        self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', [tonemapper]))
+        
+        if tonemapper == 'TONEMAP_LINEAR':
+            scale = imagepipeline_settings.linear_scale
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.scale', [scale]))
+        elif tonemapper == 'TONEMAP_REINHARD02':
+            prescale = imagepipeline_settings.reinhard_prescale
+            postscale = imagepipeline_settings.reinhard_postscale
+            burn = imagepipeline_settings.reinhard_burn
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.prescale', [prescale]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.postscale', [postscale]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.burn', [burn]))
+        elif tonemapper == 'TONEMAP_LUXLINEAR':
+            lux_camera = self.blScene.camera.data.luxrender_camera
             sensitivity = lux_camera.sensitivity
             exposure = lux_camera.exposure_time() if not realtime_preview else lux_camera.exposure_time() * 2.25
             fstop = lux_camera.fstop
-
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_LUXLINEAR']))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.sensitivity', [sensitivity]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.exposure', [exposure]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.fstop', [fstop]))
-        elif tonemapping_settings.type == 'reinhard':
-            prescale = tonemapping_settings.reinhard_prescale
-            postscale = tonemapping_settings.reinhard_postscale
-            burn = tonemapping_settings.reinhard_burn
-
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_REINHARD02']))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.prescale', [prescale]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.postscale', [postscale]))
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.burn', [burn]))
-        else:
-            # use autolinear as fallback
-            self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
-
-        # gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
-        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.type', ['GAMMA_CORRECTION']))
-        gamma_value = 2.2 if realtime_preview else 1.0
-        self.cfgProps.Set(pyluxcore.Property('film.imagepipeline.1.value', [gamma_value]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.sensitivity', [sensitivity]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.exposure', [exposure]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.fstop', [fstop]))
+        
+        index += 1
+        
+        # Camera response function
+        if imagepipeline_settings.use_crf == 'file':
+            # todo
+            pass
+            # index += 1
+        elif imagepipeline_settings.use_crf == 'preset':
+            pass
+            # index += 1
+            
+        # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
+        self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
+        gamma_value = 2.2 if realtime_preview else imagepipeline_settings.gamma
+        self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.value', [gamma_value]))
+        
+        index += 1
 
         # Deprecated but used for backwardscompatibility
         if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
