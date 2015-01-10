@@ -1719,6 +1719,10 @@ class BlenderSceneConverter(object):
                 engine_settings.biaspath_lights_samplingstrategy_type]))
         elif engine in ['PATHCPU', 'PATHOCL']:
             self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
+            self.cfgProps.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', [
+                engine_settings.biaspath_clamping_radiance_maxvalue]))
+            self.cfgProps.Set(pyluxcore.Property('path.clamping.pdf.value',
+                                                 [engine_settings.biaspath_clamping_pdf_value]))
         elif engine in ['BIDIRCPU']:
             self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
             self.cfgProps.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))

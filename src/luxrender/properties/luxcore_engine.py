@@ -138,11 +138,11 @@ class luxcore_enginesettings(declarative_property_group):
                     'biaspath_pathdepth_diffuse': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_glossy': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_specular': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'label_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    'label_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
                     'biaspath_clamping_radiance_maxvalue': 
-                    	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
                     'biaspath_clamping_pdf_value': 
-                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
+                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])}]),
                     'label_lights': 
                     	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
                     'biaspath_lights_samplingstrategy_type':
@@ -160,8 +160,10 @@ class luxcore_enginesettings(declarative_property_group):
                     # Filter settings, show for all but BIASPATH
                     'filter_type': A([{'advanced': True}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    # don't show filter width if NONE filter is selected
                     'filter_width': A([{'advanced': True}, 
-                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
+                    	{'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])}]),
                     # Don't show halt samples setting for BIASPATH
                     #'halt_samples': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}
                     # CPU settings
@@ -429,7 +431,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'biaspath_clamping_radiance_maxvalue',
             'name': 'Radiance clamping',
             'description': 'Max acceptable radiance value for a sample',
-            'default': 10000.0,
+            'default': 0.0,
             'min': 0.0,
             'max': 999999.0,
             'save_in_preset': True
