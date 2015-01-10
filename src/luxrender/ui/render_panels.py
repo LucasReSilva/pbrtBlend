@@ -153,7 +153,8 @@ class translator(render_panel):
 
     display_property_groups = [
         ( ('scene',), 'luxrender_engine', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_testing', lambda: not UseLuxCore() )
+        ( ('scene',), 'luxrender_testing', lambda: not UseLuxCore() ),
+        ( ('scene',), 'luxcore_translatorsettings', lambda: UseLuxCore() ),
     ]
 
     def draw(self, context):
@@ -162,8 +163,8 @@ class translator(render_panel):
             row = self.layout.row(align=True)
             rd = context.scene.render
         else:
-            self.layout.label("Note: not yet supported by LuxCore")
-
+            #self.layout.label("Note: not yet supported by LuxCore")
+            super().draw(context)
 
 @LuxRenderAddon.addon_register_class
 class networking(render_panel):

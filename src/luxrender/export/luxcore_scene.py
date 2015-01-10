@@ -1546,9 +1546,7 @@ class BlenderSceneConverter(object):
 
 
     def ConvertObject(self, obj, preview=False, update_mesh=True, update_transform=True):
-        # ######################################################################
         # Convert the object geometry
-        ########################################################################
         meshDefinitions = []
         meshDefinitions.extend(self.ConvertObjectGeometry(obj, preview, update_mesh))
 
@@ -1556,20 +1554,33 @@ class BlenderSceneConverter(object):
             objName = meshDefinition[0]
             objMatIndex = meshDefinition[1]
 
-            ####################################################################
             # Convert the (main) material
-            ####################################################################
             try:
                 objMat = obj.material_slots[objMatIndex].material
+                
+                # material override (clay render)
+                translator_settings = self.blScene.luxcore_translatorsettings
+                if translator_settings.override_materials:
+                    matType = objMat.luxrender_material.type
+                    if 'glass' in matType:
+                        if translator_settings.override_glass:
+                            objMat = None
+                    elif matType == 'null':
+                        if translator_settings.override_null:
+                            objMat = None
+                    elif objMat.luxrender_emission.use_emission:
+                        if translator_settings.override_lights:
+                            objMat = None
+                    else:
+                        # all materials that are not glass, lights or null
+                        objMat = None
             except IndexError:
                 objMat = None
                 LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
 
             objMatName = self.ConvertMaterial(objMat, obj.material_slots)
 
-            ####################################################################
             # Create the mesh
-            ####################################################################
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.material', [objMatName]))
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
 

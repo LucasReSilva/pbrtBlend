@@ -59,7 +59,7 @@ from ..properties import (
     material, node_material, node_inputs, node_texture, node_fresnel, node_converter,
     mesh, object as prop_object, particles, rendermode, sampler, texture, world,
     luxcore_engine, luxcore_scene, luxcore_material, luxcore_realtime, 
-    luxcore_tile_highlighting, luxcore_imagepipeline
+    luxcore_tile_highlighting, luxcore_imagepipeline, luxcore_translator
 )
 
 # Exporter Interface Panels need to be imported to ensure initialisation
