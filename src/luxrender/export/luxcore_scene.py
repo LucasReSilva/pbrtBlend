@@ -1752,44 +1752,57 @@ class BlenderSceneConverter(object):
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
 
+    def ConvertRealtimeSettings(self):
+        realtime_settings = self.blScene.luxcore_realtimesettings
+    
+        # Renderengine
+        if realtime_settings.device_type == 'CPU':
+            engine = realtime_settings.cpu_renderengine_type
+        elif realtime_settings.device_type == 'OCL':
+            engine = realtime_settings.ocl_renderengine_type
+        else:
+            engine = 'PATHCPU'
+
+        self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
+        
+        # use clamping settings
+        if engine in ['PATHCPU', 'PATHOCL']:
+            engine_settings = self.blScene.luxcore_enginesettings
+            self.cfgProps.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', [
+                                             engine_settings.biaspath_clamping_radiance_maxvalue]))
+            self.cfgProps.Set(pyluxcore.Property('path.clamping.pdf.value',
+                                             [engine_settings.biaspath_clamping_pdf_value]))
+
+        # OpenCL settings
+        if len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
+            dev_string = ''
+            for dev_index in range(len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices)):
+                dev = self.blScene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
+                dev_string += '1' if dev.opencl_device_enabled else '0'
+
+            self.cfgProps.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
+
+        # Accelerator settings
+        self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
+
+        # Sampler settings
+        self.cfgProps.Set(pyluxcore.Property('sampler.type', [realtime_settings.sampler_type]))
+
+        # Filter settings
+        if realtime_settings.device_type == 'CPU':
+            filter_type = realtime_settings.filter_type_cpu
+        elif realtime_settings.device_type == 'OCL':
+            filter_type = realtime_settings.filter_type_ocl
+
+        self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_type]))
+        if filter_type != 'NONE':
+            self.cfgProps.Set(pyluxcore.Property('film.filter.width', [1.5]))
+    
     def ConvertConfig(self, realtime_preview = False):
         realtime_settings = self.blScene.luxcore_realtimesettings
 
         if realtime_preview and not realtime_settings.use_finalrender_settings:
-            # Renderengine
-            if realtime_settings.device_type == 'CPU':
-                engine = realtime_settings.cpu_renderengine_type
-            elif realtime_settings.device_type == 'OCL':
-                engine = realtime_settings.ocl_renderengine_type
-            else:
-                engine = 'PATHCPU'
-
-            self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
-
-            # OpenCL settings
-            if len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
-                dev_string = ''
-                for dev_index in range(len(self.blScene.luxcore_enginesettings.luxcore_opencl_devices)):
-                    dev = self.blScene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
-                    dev_string += '1' if dev.opencl_device_enabled else '0'
-
-                self.cfgProps.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
-
-            # Accelerator settings
-            self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
-
-            # Sampler settings
-            self.cfgProps.Set(pyluxcore.Property('sampler.type', [realtime_settings.sampler_type]))
-
-            # Filter settings
-            if realtime_settings.device_type == 'CPU':
-                filter_type = realtime_settings.filter_type_cpu
-            elif realtime_settings.device_type == 'OCL':
-                filter_type = realtime_settings.filter_type_ocl
-
-            self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_type]))
-            if filter_type != 'NONE':
-                self.cfgProps.Set(pyluxcore.Property('film.filter.width', [1.5]))
+            self.ConvertRealtimeSettings()
         else:
             # Config for final render
             self.ConvertEngineSettings()
