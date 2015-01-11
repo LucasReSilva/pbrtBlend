@@ -1672,23 +1672,19 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.sensitivity', [sensitivity]))
             self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.exposure', [exposure]))
             self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.fstop', [fstop]))
-        
         index += 1
         
         # Camera response function
-        if imagepipeline_settings.use_crf == 'file':
-            # todo
-            pass
-            # index += 1
-        elif imagepipeline_settings.use_crf == 'preset':
-            pass
-            # index += 1
+        if imagepipeline_settings.crf_preset != 'None':
+            preset = imagepipeline_settings.crf_preset
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['CAMERA_RESPONSE_FUNC']))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.name', [preset]))
+            index += 1
             
         # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
         self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
         gamma_value = 2.2 if realtime_preview else imagepipeline_settings.gamma
         self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.value', [gamma_value]))
-        
         index += 1
 
         # Deprecated but used for backwardscompatibility

@@ -29,6 +29,7 @@ import bpy
 
 from ..extensions_framework.ui import property_group_renderer
 
+from ..outputs.luxcore_api import UseLuxCore
 from .. import LuxRenderAddon
 
 
@@ -51,8 +52,8 @@ class film(camera_panel):
 
     display_property_groups = [
         ( ('camera', 'luxrender_camera'), 'luxrender_film' ),
-        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_colorspace' ),
-        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_tonemapping' ),
+        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_colorspace', lambda: not UseLuxCore() ),
+        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_tonemapping',lambda: not UseLuxCore() ),
     ]
 
     def draw_crf_preset_menu(self, context):

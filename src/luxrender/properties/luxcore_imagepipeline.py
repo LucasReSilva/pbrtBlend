@@ -28,7 +28,6 @@
 import bpy
 
 from ..extensions_framework import declarative_property_group
-from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 
@@ -36,7 +35,8 @@ from .. import LuxRenderAddon
 # Valid CRF preset names (case sensitive):
 # See lux/core/cameraresponse.cpp to keep this up to date
 crf_preset_names = [s.strip() for s in
-                    """Advantix_100CD
+                    """None
+                    Advantix_100CD
                     Advantix_200CD
                     Advantix_400CD
                     Agfachrome_ctpecisa_200CD
@@ -127,25 +127,19 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     alert = {}
 
     controls = [
-        'imagepipeline_label',
         # Output switcher
-        'label_output_switcher', 
-        'output_switcher_pass',
+        ['label_output_switcher', 'output_switcher_pass'],
         # Tonemapper
-        'label_tonemapper',
-        'tonemapper_type',
+        ['label_tonemapper', 'tonemapper_type'],
         'linear_scale',
         'reinhard_prescale',
         'reinhard_postscale',
         'reinhard_burn',
         # Film response
-        'crf_label',
-        'use_crf',
+        'crf_label', 
         'crf_preset_menu',
-        'crf_file',
         # Gamma
-        'label_gamma',
-        'gamma',
+        ['label_gamma', 'gamma'],
     ]
     
     visibility = {
@@ -153,46 +147,39 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
-        'crf_preset_menu': {'use_crf': 'preset'},
-        'crf_file': {'use_crf': 'file'},
     }
 
     properties = [
-        {
-            'type': 'text',
-            'attr': 'imagepipeline_label',
-            'name': 'LuxCore Image Pipeline',
-        },
         # Output switcher
         {
             'type': 'text',
             'attr': 'label_output_switcher',
-            'name': 'Output Switcher:',
+            'name': 'Input Pass:',
         },
         {
             'type': 'enum',
             'attr': 'output_switcher_pass',
             'name': '',
-            'description': 'Use a pass instead of normal output',
+            'description': 'Pass to use as imagepipeline input (has to be enabled in the renderlayer/passes settings!)',
             'default': 'disabled',
             'items': [
-                ('disabled', 'Disabled', 'Don\'t use the output switcher'),
-                ('ALPHA', 'Alpha', 'desc'),
-                ('MATERIAL_ID', 'Material ID', 'desc'),
-                ('EMISSION', 'Emission', 'desc'),
-                ('DIRECT_DIFFUSE', 'Direct Diffuse', 'desc'),
-                ('DIRECT_GLOSSY', 'Direct Glossy', 'desc'),
-                ('INDIRECT_DIFFUSE', 'Indirect Diffuse', 'desc'),
-                ('INDIRECT_GLOSSY', 'Indirect Glossy', 'desc'),
-                ('INDIRECT_SPECULAR', 'Indirect Specular', 'desc'),
-                ('DEPTH', 'Depth', 'desc'),
-                ('POSITION', 'Position', 'desc'),
-                ('SHADING_NORMAL', 'Shading Normal', 'desc'),
-                ('GEOMETRY_NORMAL', 'Geometry Normal', 'desc'),
-                ('UV', 'UV', 'desc'),
-                ('DIRECT_SHADOW_MASK', 'Direct Shadow Mask', 'desc'),
-                ('INDIRECT_SHADOW_MASK', 'Indirect Shadow Mask', 'desc'),
-                ('RAYCOUNT', 'Raycount', 'desc'),
+                ('disabled', 'RGB (Default)', 'RGB colors (beauty/combined pass)'),
+                ('ALPHA', 'Alpha', ''),
+                ('MATERIAL_ID', 'Material ID', ''),
+                ('EMISSION', 'Emission', ''),
+                ('DIRECT_DIFFUSE', 'Direct Diffuse', ''),
+                ('DIRECT_GLOSSY', 'Direct Glossy', ''),
+                ('INDIRECT_DIFFUSE', 'Indirect Diffuse', ''),
+                ('INDIRECT_GLOSSY', 'Indirect Glossy', ''),
+                ('INDIRECT_SPECULAR', 'Indirect Specular', ''),
+                ('DEPTH', 'Depth', ''),
+                ('POSITION', 'Position', ''),
+                ('SHADING_NORMAL', 'Shading Normal', ''),
+                ('GEOMETRY_NORMAL', 'Geometry Normal', ''),
+                ('UV', 'UV', ''),
+                ('DIRECT_SHADOW_MASK', 'Direct Shadow Mask', ''),
+                ('INDIRECT_SHADOW_MASK', 'Indirect Shadow Mask', ''),
+                ('RAYCOUNT', 'Raycount', ''),
             ],
             'save_in_preset': True
         },
@@ -220,7 +207,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         {
             'type': 'float',
             'attr': 'linear_scale',
-            'name': 'Scale',
+            'name': 'Brightness',
             'description': 'Brightness factor of the image',
             'default': 1.0,
             'min': 0.0,
@@ -273,34 +260,16 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'name': 'Film Response Function:',
         },
         {
-            'attr': 'use_crf',
-            'type': 'enum',
-            'name': 'Use Film Response',
-            'default': 'none',
-            'items': [
-                ('none', 'None', 'Don\'t use a Film Response'),
-                ('file', 'File', 'Load a Film Response from file'),
-                ('preset', 'Preset', 'Use a built-in Film Response Preset'),
-            ],
-            'expand': True
-        },
-        {
             'type': 'ef_callback',
             'attr': 'crf_preset_menu',
             'method': 'draw_crf_preset_menu',
         },
         {
-            'attr': 'crf_file',
-            'type': 'string',
-            'subtype': 'FILE_PATH',
-            'name': 'File',
-            'default': '',
-        },
-        {
             'attr': 'crf_preset',
             'type': 'string',
             'name': 'Film Reponse Preset',
-            'default': 'Film Response Preset',
+            'default': 'None',
+            'save_in_preset': True
         },
         # Gamma correction settings
         {

@@ -194,6 +194,27 @@ class networking(render_panel):
 
         super().draw(context)
 
+@LuxRenderAddon.addon_register_class
+class imagepipeline(render_panel):
+    """
+    LuxCore Imagepipeline settings UI Panel
+    """
+
+    bl_label = 'LuxRender Imagepipeline'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    display_property_groups = [
+        ( ('scene',), 'luxcore_imagepipeline_settings' ),
+    ]
+
+    def draw(self, context):
+        if UseLuxCore():
+            layout = self.layout
+            super().draw(context)
+    
+    def draw_crf_preset_menu(self, context):
+        self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',
+                         text=context.scene.luxcore_imagepipeline_settings.crf_preset)
 
 @LuxRenderAddon.addon_register_class
 class postprocessing(render_panel):
@@ -207,11 +228,6 @@ class postprocessing(render_panel):
     # We make our own post-pro panel so we can have one without BI's options
     # here. Theoretically, if Lux gains the ability to do lens effects through
     # the command line/API, we could add that here
-    
-    # LuxCore image pipeline
-    display_property_groups = [
-        ( ('scene',), 'luxcore_imagepipeline_settings', lambda: UseLuxCore() ),
-    ]
 
     def draw(self, context):
         layout = self.layout
@@ -231,27 +247,6 @@ class postprocessing(render_panel):
             layout.separator()
 
             super().draw(context)
-
-            # Image pipeline, this is a "special" panel section
-            '''
-            for elem_index in range(len(context.scene.luxcore_imagepipeline_settings.elements)):
-                elem = context.scene.luxcore_imagepipeline_settings.elements[elem_index]
-                
-                row = self.layout.row()
-                row.prop(elem, 'type', text ='')
-                
-                split = layout.split()
-                col = split.column()
-
-                for control in elem.controls:
-                    self.draw_column(
-                        control,
-                        col,
-                        context.scene.luxcore_imagepipeline_settings,
-                        context,
-                        property_group = context.scene.luxcore_imagepipeline_settings
-                    )
-            '''
     
     def draw_crf_preset_menu(self, context):
         self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',

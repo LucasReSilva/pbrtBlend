@@ -1847,8 +1847,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         update_changes.set_cause(light = True)
                         update_changes.changed_objects_transform.append(ob)
                     elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
-                        # camera settings have changed, this includes tonemapping
-                        update_changes.set_cause(camera = True, config = True)
+                        # check if render configuration is affected 
+                        # this is the case if the tonemapper is set to "Linear (Camera Settings)"
+                        if context.scene.luxcore_imagepipeline_settings.tonemapper_type == 'TONEMAP_LUXLINEAR':
+                            update_changes.set_cause(config = True)
+                        
+                        update_changes.set_cause(camera = True)
                     
                 if ob.is_updated:
                     if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'EMPTY']:
