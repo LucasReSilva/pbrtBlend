@@ -1681,6 +1681,15 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.name', [preset]))
             index += 1
             
+        # Contour lines for IRRADIANCE pass
+        if imagepipeline_settings.output_switcher_pass == 'IRRADIANCE':
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['CONTOUR_LINES']))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.range', [imagepipeline_settings.contour_range]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.scale', [imagepipeline_settings.contour_scale]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.steps', [imagepipeline_settings.contour_steps]))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.zerogridsize', [imagepipeline_settings.contour_zeroGridSize]))
+            index += 1
+            
         # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
         self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
         gamma_value = 2.2 if realtime_preview else imagepipeline_settings.gamma
@@ -1985,7 +1994,9 @@ class BlenderSceneConverter(object):
         # Configure AOV output
         channels = self.blScene.luxrender_channels
 
-        if channels.enable_aovs and not realtime_preview:
+        if channels.enable_aovs and (
+                    not realtime_preview or 
+                    self.blScene.luxcore_imagepipeline_settings.output_switcher_pass != 'disabled'):
             if channels.RGB:
                 self.createChannelOutputString('RGB')
             if channels.RGBA:
@@ -2026,6 +2037,8 @@ class BlenderSceneConverter(object):
                 self.createChannelOutputString('UV')
             if channels.RAYCOUNT:
                 self.createChannelOutputString('RAYCOUNT')
+            if channels.IRRADIANCE:
+                self.createChannelOutputString('IRRADIANCE')
 
         # Debug information
         LuxLog('RenderConfig Properties:')

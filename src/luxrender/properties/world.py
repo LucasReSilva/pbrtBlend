@@ -788,7 +788,8 @@ class luxrender_channels(declarative_property_group):
         'DIRECT_SHADOW_MASK',
         'INDIRECT_SHADOW_MASK',
         'label_info_render',
-        ['RAYCOUNT', 'normalize_RAYCOUNT']
+        ['RAYCOUNT', 'normalize_RAYCOUNT'],
+        'IRRADIANCE'
     ]
 
     visibility = {
@@ -831,6 +832,7 @@ class luxrender_channels(declarative_property_group):
         'UV': {'enable_aovs': True},
         'RAYCOUNT': {'enable_aovs': True},
         'normalize_RAYCOUNT': A([{'enable_aovs': True}, {'RAYCOUNT': True}]),
+        'IRRADIANCE': {'enable_aovs': True},
     }
 
     properties = [
@@ -1084,5 +1086,12 @@ class luxrender_channels(declarative_property_group):
             'name': 'Normalize',
             'description': 'Map values to 0..1 range',
             'default': True
-        }
+        },
+        {
+            'type': 'bool',
+            'attr': 'IRRADIANCE',
+            'name': 'Irradiance',
+            'description': 'Surface irradiance',
+            'default': False
+        },
     ]

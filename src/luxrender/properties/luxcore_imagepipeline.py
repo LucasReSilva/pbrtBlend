@@ -129,6 +129,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     controls = [
         # Output switcher
         ['label_output_switcher', 'output_switcher_pass'],
+        ['contour_scale', 'contour_range'], 
+        ['contour_steps', 'contour_zeroGridSize'],
         # Tonemapper
         ['label_tonemapper', 'tonemapper_type'],
         'linear_scale',
@@ -143,6 +145,10 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     ]
     
     visibility = {
+        'contour_scale': {'output_switcher_pass': 'IRRADIANCE'},
+        'contour_range': {'output_switcher_pass': 'IRRADIANCE'},
+        'contour_steps': {'output_switcher_pass': 'IRRADIANCE'},
+        'contour_zeroGridSize': {'output_switcher_pass': 'IRRADIANCE'},
         'linear_scale': {'tonemapper_type': 'TONEMAP_LINEAR'},
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
@@ -180,7 +186,57 @@ class luxcore_imagepipeline_settings(declarative_property_group):
                 ('DIRECT_SHADOW_MASK', 'Direct Shadow Mask', ''),
                 ('INDIRECT_SHADOW_MASK', 'Indirect Shadow Mask', ''),
                 ('RAYCOUNT', 'Raycount', ''),
+                ('IRRADIANCE', 'Irradiance', '')
             ],
+            'save_in_preset': True
+        },
+        # Contour lines settings (only for IRRADIANCE pass)
+        {
+            'type': 'float',
+            'attr': 'contour_scale',
+            'name': 'Scale',
+            'description': 'Scale',
+            'default': 179.0,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 100000.0,
+            'soft_max': 500.0,
+            'save_in_preset': True
+        },
+        {
+            'type': 'float',
+            'attr': 'contour_range',
+            'name': 'Range',
+            'description': 'Max range of irradiance values (unit: lux), minimum is always 0',
+            'default': 100.0,
+            'min': 0.0,
+            'soft_min': 0.0,
+            'max': 100000.0,
+            'soft_max': 500.0,
+            'save_in_preset': True
+        },
+        {
+            'type': 'int',
+            'attr': 'contour_steps',
+            'name': 'Steps',
+            'description': 'Number of steps to draw in interval range',
+            'default': 8,
+            'min': 0,
+            'soft_min': 2,
+            'max': 1000,
+            'soft_max': 50,
+            'save_in_preset': True
+        },
+        {
+            'type': 'int',
+            'attr': 'contour_zeroGridSize',
+            'name': 'Grid Size',
+            'description': 'size of the black grid to draw on image where irradiance values are not avilable (-1 => no grid, 0 => all black, >0 => size of the black grid)',
+            'default': 8,
+            'min': -1,
+            'soft_min': -1,
+            'max': 1000,
+            'soft_max': 20,
             'save_in_preset': True
         },
         # Tonemapper

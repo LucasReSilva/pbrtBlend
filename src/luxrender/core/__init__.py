@@ -1535,6 +1535,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'RAYCOUNT', True,
                                                pyluxcore.FilmOutputType.RAYCOUNT, 'f', 0.0, 1, channels.normalize_RAYCOUNT,
                                                channels.saveToDisk)
+                if channels.IRRADIANCE:
+                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'IRRADIANCE', True,
+                                               pyluxcore.FilmOutputType.IRRADIANCE, 'f', 0.0, 3, False,
+                                               channels.saveToDisk)
     
                 props = lcSession.GetRenderConfig().GetProperties()
                 # Convert all MATERIAL_ID_MASK channels
