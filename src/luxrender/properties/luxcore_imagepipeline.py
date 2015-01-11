@@ -166,7 +166,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'type': 'enum',
             'attr': 'output_switcher_pass',
             'name': '',
-            'description': 'Pass to use as imagepipeline input (has to be enabled in the renderlayer/passes settings!)',
+            'description': 'Pass to use as imagepipeline input',
             'default': 'disabled',
             'items': [
                 ('disabled', 'RGB (Default)', 'RGB colors (beauty/combined pass)'),

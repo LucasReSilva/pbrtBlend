@@ -138,7 +138,7 @@ class ui_luxrender_material_header(luxrender_material_base):
         node_tree_selector_draw(layout, mat, 'luxrender_material_output_node')
         if not panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Surface'):
             row = self.layout.row(align=True)
-            if slot.name:
+            if slot is not None and slot.name:
                 row.label("Material type")
                 row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
                 super().draw(context)
