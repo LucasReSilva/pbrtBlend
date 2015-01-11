@@ -134,9 +134,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         # Tonemapper
         ['label_tonemapper', 'tonemapper_type'],
         'linear_scale',
-        'reinhard_prescale',
-        'reinhard_postscale',
-        'reinhard_burn',
+        ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
         # Film response
         'crf_label', 
         'crf_preset_menu',
