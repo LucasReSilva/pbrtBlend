@@ -1848,6 +1848,7 @@ class BlenderSceneConverter(object):
             self.ConvertSamplerSettings()
 
         self.ConvertImagepipelineSettings(realtime_preview)
+        self.ConvertChannelSettings(realtime_preview)
 
     def convert_volume(self, volume):
         def absorption_at_depth_scaled(abs_col):
@@ -1906,6 +1907,54 @@ class BlenderSceneConverter(object):
                                              '%s' % volume.fresnel_fresnelvalue))
 
         self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.priority' % name, volume.priority))
+
+    def ConvertChannelSettings(self, realtime_preview=False):
+        channels = self.blScene.luxrender_channels
+        output_switcher_channel = self.blScene.luxcore_imagepipeline_settings.output_switcher_pass
+
+        if channels.enable_aovs and (not realtime_preview or output_switcher_channel != 'disabled'):
+            if channels.RGB:
+                self.createChannelOutputString('RGB')
+            if channels.RGBA:
+                self.createChannelOutputString('RGBA')
+            if channels.RGB_TONEMAPPED:
+                self.createChannelOutputString('RGB_TONEMAPPED')
+            if channels.RGBA_TONEMAPPED:
+                self.createChannelOutputString('RGBA_TONEMAPPED')
+            if channels.ALPHA or output_switcher_channel == 'ALPHA':
+                self.createChannelOutputString('ALPHA')
+            if channels.DEPTH or output_switcher_channel == 'DEPTH':
+                self.createChannelOutputString('DEPTH')
+            if channels.POSITION or output_switcher_channel == 'POSITION':
+                self.createChannelOutputString('POSITION')
+            if channels.GEOMETRY_NORMAL or output_switcher_channel == 'GEOMETRY_NORMAL':
+                self.createChannelOutputString('GEOMETRY_NORMAL')
+            if channels.SHADING_NORMAL or output_switcher_channel == 'SHADING_NORMAL':
+                self.createChannelOutputString('SHADING_NORMAL')
+            if channels.MATERIAL_ID or output_switcher_channel == 'MATERIAL_ID':
+                self.createChannelOutputString('MATERIAL_ID')
+            if channels.DIRECT_DIFFUSE or output_switcher_channel == 'DIRECT_DIFFUSE':
+                self.createChannelOutputString('DIRECT_DIFFUSE')
+            if channels.DIRECT_GLOSSY or output_switcher_channel == 'DIRECT_GLOSSY':
+                self.createChannelOutputString('DIRECT_GLOSSY')
+            if channels.EMISSION or output_switcher_channel == 'EMISSION':
+                self.createChannelOutputString('EMISSION')
+            if channels.INDIRECT_DIFFUSE or output_switcher_channel == 'INDIRECT_DIFFUSE':
+                self.createChannelOutputString('INDIRECT_DIFFUSE')
+            if channels.INDIRECT_GLOSSY or output_switcher_channel == 'INDIRECT_GLOSSY':
+                self.createChannelOutputString('INDIRECT_GLOSSY')
+            if channels.INDIRECT_SPECULAR or output_switcher_channel == 'INDIRECT_SPECULAR':
+                self.createChannelOutputString('INDIRECT_SPECULAR')
+            if channels.DIRECT_SHADOW_MASK or output_switcher_channel == 'DIRECT_SHADOW_MASK':
+                self.createChannelOutputString('DIRECT_SHADOW_MASK')
+            if channels.INDIRECT_SHADOW_MASK or output_switcher_channel == 'INDIRECT_SHADOW_MASK':
+                self.createChannelOutputString('INDIRECT_SHADOW_MASK')
+            if channels.UV or output_switcher_channel == 'UV':
+                self.createChannelOutputString('UV')
+            if channels.RAYCOUNT or output_switcher_channel == 'RAYCOUNT':
+                self.createChannelOutputString('RAYCOUNT')
+            if channels.IRRADIANCE or output_switcher_channel == 'IRRADIANCE':
+                self.createChannelOutputString('IRRADIANCE')
 
     def Convert(self, imageWidth=None, imageHeight=None, realtime_preview=False):
         if self.renderengine is not None:
@@ -1990,55 +2039,6 @@ class BlenderSceneConverter(object):
 
         self.cfgProps.Set(pyluxcore.Property('film.width', [filmWidth]))
         self.cfgProps.Set(pyluxcore.Property('film.height', [filmHeight]))
-
-        # Configure AOV output
-        channels = self.blScene.luxrender_channels
-
-        if channels.enable_aovs and (
-                    not realtime_preview or 
-                    self.blScene.luxcore_imagepipeline_settings.output_switcher_pass != 'disabled'):
-            if channels.RGB:
-                self.createChannelOutputString('RGB')
-            if channels.RGBA:
-                self.createChannelOutputString('RGBA')
-            if channels.RGB_TONEMAPPED:
-                self.createChannelOutputString('RGB_TONEMAPPED')
-            if channels.RGBA_TONEMAPPED:
-                self.createChannelOutputString('RGBA_TONEMAPPED')
-            if channels.ALPHA:
-                self.createChannelOutputString('ALPHA')
-            if channels.DEPTH:
-                self.createChannelOutputString('DEPTH')
-            if channels.POSITION:
-                self.createChannelOutputString('POSITION')
-            if channels.GEOMETRY_NORMAL:
-                self.createChannelOutputString('GEOMETRY_NORMAL')
-            if channels.SHADING_NORMAL:
-                self.createChannelOutputString('SHADING_NORMAL')
-            if channels.MATERIAL_ID:
-                self.createChannelOutputString('MATERIAL_ID')
-            if channels.DIRECT_DIFFUSE:
-                self.createChannelOutputString('DIRECT_DIFFUSE')
-            if channels.DIRECT_GLOSSY:
-                self.createChannelOutputString('DIRECT_GLOSSY')
-            if channels.EMISSION:
-                self.createChannelOutputString('EMISSION')
-            if channels.INDIRECT_DIFFUSE:
-                self.createChannelOutputString('INDIRECT_DIFFUSE')
-            if channels.INDIRECT_GLOSSY:
-                self.createChannelOutputString('INDIRECT_GLOSSY')
-            if channels.INDIRECT_SPECULAR:
-                self.createChannelOutputString('INDIRECT_SPECULAR')
-            if channels.DIRECT_SHADOW_MASK:
-                self.createChannelOutputString('DIRECT_SHADOW_MASK')
-            if channels.INDIRECT_SHADOW_MASK:
-                self.createChannelOutputString('INDIRECT_SHADOW_MASK')
-            if channels.UV:
-                self.createChannelOutputString('UV')
-            if channels.RAYCOUNT:
-                self.createChannelOutputString('RAYCOUNT')
-            if channels.IRRADIANCE:
-                self.createChannelOutputString('IRRADIANCE')
 
         # Debug information
         LuxLog('RenderConfig Properties:')
