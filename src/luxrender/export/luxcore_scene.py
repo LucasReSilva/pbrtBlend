@@ -1790,6 +1790,13 @@ class BlenderSceneConverter(object):
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
 
+        # Custom Properties
+        if engine_settings.advanced and engine_settings.custom_properties:
+            custom_params = engine_settings.custom_properties.replace(" ", "").split("|")
+            for prop in custom_params:
+                prop = prop.split('=')
+                self.cfgProps.Set(pyluxcore.Property(prop[0], prop[1]))
+
     def ConvertRealtimeSettings(self):
         realtime_settings = self.blScene.luxcore_realtimesettings
     
