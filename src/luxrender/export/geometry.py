@@ -785,6 +785,9 @@ class GeometryExporter(object):
         for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
             me_shape_params.add_string('name', obj.name)
 
+            if me_mat_index == '':
+                me_mat_index = 0
+
             if use_inner_scope:
                 self.lux_context.attributeBegin()
 
