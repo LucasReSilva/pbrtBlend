@@ -1795,7 +1795,6 @@ class BlenderSceneConverter(object):
             custom_params = engine_settings.custom_properties.replace(" ", "").split("|")
             for prop in custom_params:
                 prop = prop.split('=')
-                print("--------------", prop)
                 self.cfgProps.Set(pyluxcore.Property(prop[0], prop[1]))
 
     def ConvertRealtimeSettings(self):
