@@ -93,11 +93,11 @@ class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene and \
-               context.scene.luxcore_imagepipeline_settings
+        return context.camera.luxrender_camera.luxrender_film and \
+               context.camera.luxrender_camera.luxrender_film.luxcore_imagepipeline_settings
 
     def execute(self, context):
-        context.scene.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
+        context.camera.luxrender_camera.luxrender_film.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
         return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class
@@ -122,7 +122,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     Storage class for LuxCore imagepipeline settings.
     """
     
-    ef_attach_to = ['Scene']
+    ef_attach_to = ['luxrender_film']
     
     alert = {}
 

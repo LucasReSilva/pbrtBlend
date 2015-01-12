@@ -70,7 +70,7 @@ class imagepipeline(camera_panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('scene',), 'luxcore_imagepipeline_settings' ),
+        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxcore_imagepipeline_settings' ),
     ]
 
     def draw(self, context):
@@ -80,4 +80,4 @@ class imagepipeline(camera_panel):
 
     def draw_crf_preset_menu(self, context):
         self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',
-                         text=context.scene.luxcore_imagepipeline_settings.crf_preset)
+                         text=context.camera.luxrender_camera.luxrender_film.luxcore_imagepipeline_settings.crf_preset)

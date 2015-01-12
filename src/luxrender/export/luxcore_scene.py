@@ -1639,7 +1639,7 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
 
     def ConvertImagepipelineSettings(self, realtime_preview=False):
-        imagepipeline_settings = self.blScene.luxcore_imagepipeline_settings
+        imagepipeline_settings = self.blScene.camera.data.luxrender_camera.luxrender_film.luxcore_imagepipeline_settings
         index = 0
         prefix = 'film.imagepipeline.'
         
@@ -1909,10 +1909,11 @@ class BlenderSceneConverter(object):
         self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.priority' % name, volume.priority))
 
     def ConvertChannelSettings(self, realtime_preview=False):
+        luxrender_film = self.blScene.camera.data.luxrender_camera.luxrender_film
+        output_switcher_channel = luxrender_film.luxcore_imagepipeline_settings.output_switcher_pass
         channels = self.blScene.luxrender_channels
-        output_switcher_channel = self.blScene.luxcore_imagepipeline_settings.output_switcher_pass
 
-        if channels.enable_aovs and (not realtime_preview or output_switcher_channel != 'disabled'):
+        if (channels.enable_aovs and not realtime_preview) or output_switcher_channel != 'disabled':
             if channels.RGB:
                 self.createChannelOutputString('RGB')
             if channels.RGBA:
