@@ -972,12 +972,11 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
     filter_glob = bpy.props.StringProperty(default='*.ply', options={'HIDDEN'})
     use_filter = bpy.props.BoolProperty(default=True, options={'HIDDEN'})
 
-    preview_faces_percent = bpy.props.IntProperty(default = 30, 
-                                                  soft_min = 5,
-                                                  min = 1, 
-                                                  max = 90, 
-                                                  name = 'Proxy Faces Percent', 
-                                                  subtype = 'PERCENTAGE')
+    decimate_ratio = bpy.props.FloatProperty(default = 0.98,
+                                               min = 0.1,
+                                               soft_min = 0.9,
+                                               max = 1.0,
+                                               name = 'Simplify Factor')
     
     #preview_faces_amount = bpy.props.IntProperty(default=0, name='Proxy Faces')
     #object_faces_amount = bpy.props.IntProperty(default=0, name='PLY Mesh Faces', options={'SKIP_SAVE'})
@@ -990,13 +989,13 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
     def execute(self, context):
         for obj in context.selected_objects:
             if obj.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
-                print('Exporting object ' + obj.name + ' to PLY file...')
                 
                 try:
                     mesh = obj.to_mesh(context.scene, True, 'RENDER')
                     if mesh is None:
                         raise UnexportableObjectException('Cannot create export mesh from Blender object')
                     mesh.name = obj.data.name + '_proxy'
+                    print('Exporting object ' + obj.name + ' as proxy')
 
                     # Collate faces by mat index
                     ffaces_mats = {}
@@ -1036,7 +1035,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                             #    test = bpy.ops.luxrender.confirm_dialog_operator('INVOKE_DEFAULT')
                             #    print("operator returned:", test)
 
-                            if not os.path.exists(ply_path) or self.overwrite:
+                            if (not os.path.exists(ply_path) or self.overwrite) and not obj.luxrender_object.append_proxy:
                                 uv_textures = mesh.tessface_uv_textures
                                 vertex_color = mesh.tessface_vertex_colors.active
 
@@ -1225,43 +1224,35 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                                     bpy.data.meshes.remove(old_mesh)
                                 
                                 #################################################################
-                                # Delete a percentage of faces to create a lowpoly preview mesh
+                                # Create lowpoly preview mesh with decimate modifier
                                 #################################################################
-                                # save settings to restore them later
-                                original_select_mode = bpy.context.tool_settings.mesh_select_mode[:]
-                                
-                                #bpy.ops.object.mode_set(mode='OBJECT')
-                                bpy.context.tool_settings.mesh_select_mode = [False,False,True]
-                                bpy.ops.object.mode_set(mode='EDIT')
-                                # deselect everything
-                                bpy.ops.mesh.select_all(action = 'DESELECT')
-                                bpy.ops.mesh.select_random(percent = (100 - self.preview_faces_percent))
-                                bpy.ops.mesh.delete(type='FACE')
-                                bpy.ops.object.mode_set(mode='OBJECT')
-                                
-                                # restore settings
-                                bpy.context.tool_settings.mesh_select_mode = original_select_mode
+                                decimate = obj.modifiers.new('proxy_decimate', 'DECIMATE')
+                                decimate.ratio = 1.0 - self.decimate_ratio
+                                bpy.ops.object.modifier_apply(apply_as = 'DATA', modifier = decimate.name)
                                 
                                 #################################################################
                                 # Set exported PLY as proxy file
                                 #################################################################
                                 obj.luxrender_object.append_proxy = True
-                                
+
                                 # check if the object had smooth faces
+
                                 was_smooth = False
                                 for poly in mesh.polygons:
-                                    if f.use_smooth:
+                                    if poly.use_smooth:
                                         was_smooth = True
                                         break
-                                
+
                                 if was_smooth:
-                                    obj.luxrender_object.use_smoothing = True      
-                                    
+                                    obj.luxrender_object.use_smoothing = True
+
                                 # set path to PLY
                                 obj.luxrender_object.external_mesh = ply_path
-                                
+
+                                print("Created proxy object")
                             else:
-                                LuxLog('PLY file %s already exists, skipping it' % ply_path)
+                                LuxLog('PLY file %s already exists or object %s is already a proxy, skipping it' % (
+                                    ply_path, obj.name))
 
                         except InvalidGeometryException as err:
                             LuxLog('Mesh export failed, skipping this mesh: %s' % err)
