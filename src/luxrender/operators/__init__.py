@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 # Blender Libs
-import bpy, bl_operators
+import bpy, bl_operators, bmesh
 import json, math, os, struct
 
 # LuxRender Libs
@@ -963,11 +963,7 @@ class UnexportableObjectException(Exception):
         
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
-    """
-    Export an object as ply file, replace the original mesh with a preview
-    version and set path to the exported ply file.
-    This operator is available as a menu item in File -> Export
-    """
+    """Export an object as ply file, replace the original mesh with a preview version and set path to the exported ply file."""
     
     bl_idname = 'export.export_luxrender_proxy'
     bl_label = 'Export LuxRender Proxy'
@@ -976,10 +972,16 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
     filter_glob = bpy.props.StringProperty(default='*.ply', options={'HIDDEN'})
     use_filter = bpy.props.BoolProperty(default=True, options={'HIDDEN'})
 
-    preview_faces_percent = bpy.props.IntProperty(default=1000, name='Proxy Faces Percent', subtype='PERCENTAGE')
-    preview_faces_amount = bpy.props.IntProperty(default=0, name='Proxy Faces')
-    object_faces_amount = bpy.props.IntProperty(default=0, name='PLY Mesh Faces', options={'SKIP_SAVE'})
-    display_overwrite_warning = bpy.props.BoolProperty(default=True, name="Ask before overwriting")
+    preview_faces_percent = bpy.props.IntProperty(default = 30, 
+                                                  soft_min = 5,
+                                                  min = 1, 
+                                                  max = 90, 
+                                                  name = 'Proxy Faces Percent', 
+                                                  subtype = 'PERCENTAGE')
+    
+    #preview_faces_amount = bpy.props.IntProperty(default=0, name='Proxy Faces')
+    #object_faces_amount = bpy.props.IntProperty(default=0, name='PLY Mesh Faces', options={'SKIP_SAVE'})
+    overwrite = bpy.props.BoolProperty(default=True, name="Overwrite Existing Files")
 
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
@@ -994,6 +996,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                     mesh = obj.to_mesh(context.scene, True, 'RENDER')
                     if mesh is None:
                         raise UnexportableObjectException('Cannot create export mesh from Blender object')
+                    mesh.name = obj.data.name + '_proxy'
 
                     # Collate faces by mat index
                     ffaces_mats = {}
@@ -1033,8 +1036,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                             #    test = bpy.ops.luxrender.confirm_dialog_operator('INVOKE_DEFAULT')
                             #    print("operator returned:", test)
 
-                            if not os.path.exists(ply_path):
-
+                            if not os.path.exists(ply_path) or self.overwrite:
                                 uv_textures = mesh.tessface_uv_textures
                                 vertex_color = mesh.tessface_vertex_colors.active
 
@@ -1209,14 +1211,63 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                                     del face_vert_indices
 
                                 LuxLog('Binary PLY file written: %s' % ply_path)
+                                
+                                #################################################################
+                                # Replace original mesh with exported mesh
+                                #################################################################
+                                old_mesh = obj.data
+                                # remove modifiers
+                                obj.modifiers.clear()
+                                # link new mesh
+                                obj.data = mesh
+                                # delete old mesh
+                                if not old_mesh.users:
+                                    bpy.data.meshes.remove(old_mesh)
+                                
+                                #################################################################
+                                # Delete a percentage of faces to create a lowpoly preview mesh
+                                #################################################################
+                                # save settings to restore them later
+                                original_select_mode = bpy.context.tool_settings.mesh_select_mode[:]
+                                
+                                #bpy.ops.object.mode_set(mode='OBJECT')
+                                bpy.context.tool_settings.mesh_select_mode = [False,False,True]
+                                bpy.ops.object.mode_set(mode='EDIT')
+                                # deselect everything
+                                bpy.ops.mesh.select_all(action = 'DESELECT')
+                                bpy.ops.mesh.select_random(percent = (100 - self.preview_faces_percent))
+                                bpy.ops.mesh.delete(type='FACE')
+                                bpy.ops.object.mode_set(mode='OBJECT')
+                                
+                                # restore settings
+                                bpy.context.tool_settings.mesh_select_mode = original_select_mode
+                                
+                                #################################################################
+                                # Set exported PLY as proxy file
+                                #################################################################
+                                obj.luxrender_object.append_proxy = True
+                                
+                                # check if the object had smooth faces
+                                was_smooth = False
+                                for poly in mesh.polygons:
+                                    if f.use_smooth:
+                                        was_smooth = True
+                                        break
+                                
+                                if was_smooth:
+                                    obj.luxrender_object.use_smoothing = True      
+                                    
+                                # set path to PLY
+                                obj.luxrender_object.external_mesh = ply_path
+                                
                             else:
-                                LuxLog('Skipping already exported PLY: %s' % mesh_name)
+                                LuxLog('PLY file %s already exists, skipping it' % ply_path)
 
                         except InvalidGeometryException as err:
                             LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 
                     del ffaces_mats
-                    bpy.data.meshes.remove(mesh)
+                    #bpy.data.meshes.remove(mesh)
 
                 except UnexportableObjectException as err:
                     LuxLog('Object export failed, skipping this object: %s' % err)
