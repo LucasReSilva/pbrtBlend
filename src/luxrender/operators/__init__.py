@@ -25,8 +25,8 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 # Blender Libs
-import bpy, bl_operators, bmesh
-import json, math, os, struct
+import bpy, bl_operators
+import json, math, os, struct, mathutils
 
 # LuxRender Libs
 from .. import LuxRenderAddon
@@ -988,9 +988,28 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
     def execute(self, context):
         for obj in context.selected_objects:
             if obj.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
+                # make sure mesh has only one user (is NOT duplicated with Alt+D
+                if obj.data.users > 1:
+                    print("[Object: %s] Can't make proxy from multiuser mesh" % obj.name)
+                    print("-----------------")
+                    continue
+
                 #################################################################
                 # Prepare object for PLY export
                 #################################################################
+                # don't make curves a proxy when their geometry contains no faces
+                if obj.type == 'CURVE':
+                    test_mesh = obj.to_mesh(context.scene, True, 'RENDER')
+                    if len(test_mesh.polygons) == 0:
+                        print("[Object: %s] Skipping curve object because of missing faces" % obj.name)
+                        print("-----------------")
+                        continue
+                    bpy.data.meshes.remove(test_mesh)
+
+                # make sure object is of type 'MESH'
+                if obj.type in ['CURVE', 'SURFACE', 'META', 'FONT']:
+                    bpy.ops.object.convert(target = 'MESH')
+
                 # rename object
                 obj.name = obj.name + '_lux_proxy'
 
@@ -1010,6 +1029,8 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
 
                 # save bounding box for later use
                 dimensions = obj.dimensions.copy()
+                # clear parent
+                bpy.ops.object.parent_clear(type = 'CLEAR_KEEP_TRANSFORM')
 
                 # split object by materials
                 bpy.ops.mesh.separate(type = 'MATERIAL')
@@ -1022,7 +1043,6 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                 created_objects = []
                 for name in names:
                     created_objects.append(bpy.data.objects[name])
-                print("Split object by materials:", created_objects)
 
                 # create bounding box cube and parent objects to it
                 if used_materials_amount > 1:
@@ -1032,21 +1052,28 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
 
                     bounding_cube = context.active_object
                     bounding_cube.name = obj.name + '_boundingBox'
-                    bounding_cube.dimensions = dimensions
-                    bpy.ops.object.transform_apply(location = False,
-                                                   rotation = True,
-                                                   scale = True)
                     bounding_cube.draw_type = 'WIRE'
                     bounding_cube.hide_render = True
 
+                    bounding_cube.dimensions = dimensions
+                    bpy.ops.object.transform_apply(location = False,
+                                                   rotation = False,
+                                                   scale = True)
+
                     for object in created_objects:
-                        object.parent = bounding_cube
+                        object.select = True
+                        bpy.ops.object.parent_set(type = 'OBJECT', keep_transform = False)
+                        object.select = False
 
                 #################################################################
                 # Export split objects to PLY files
                 #################################################################
                 for object in created_objects:
                     proxy_mesh, ply_path = self.export_ply(context, object)
+
+                    if proxy_mesh is None or ply_path is None:
+                        print("[Object: %s] Could not export object" % object.name)
+                        continue
 
                     #################################################################
                     # Create lowpoly preview mesh with decimate modifier
@@ -1074,17 +1101,19 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                     # set path to PLY
                     object.luxrender_object.external_mesh = ply_path
 
-                    print("Created proxy object %s" % object.name)
+                    print("[Object: %s] Created proxy object" % object.name)
+                    print("-----------------")
             
         return {'FINISHED'}
 
     def export_ply(self, context, obj):
         try:
+            ply_path = None
             mesh = obj.to_mesh(context.scene, True, 'RENDER')
             if mesh is None:
                 raise UnexportableObjectException('Failed to create export mesh from Blender object')
             mesh.name = obj.data.name + '_proxy'
-            print('Exporting object ' + obj.name + ' as proxy')
+            print('[Object: %s] Exporting PLY...' % obj.name)
 
             # Collate faces by mat index
             ffaces_mats = {}
@@ -1293,19 +1322,21 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                             del co_no_uv_vc_cache
                             del face_vert_indices
 
-                        print('Binary PLY file written: %s' % ply_path)
+                        print('[Object: %s] Binary PLY file written: %s' % (obj.name, ply_path))
                         return mesh, ply_path
                     else:
-                        print('PLY file %s already exists or object %s is already a proxy, skipping it' % (
-                            ply_path, obj.name))
+                        print('[Object: %s] PLY file %s already exists or object is already a proxy, skipping it' % (
+                            obj.name, ply_path))
 
                 except InvalidGeometryException as err:
-                    print('Mesh export failed, skipping this mesh: %s' % err)
+                    print('[Object: %s] Mesh export failed, skipping this mesh: %s' % (obj.name, err))
 
             del ffaces_mats
+            return mesh, ply_path
 
         except UnexportableObjectException as err:
-            print('Object export failed, skipping this object: %s' % err)
+            print('[Object: %s] Object export failed, skipping this object: %s' % (obj.name, err))
+            return None, None
 
 # Register operator in Blender File -> Export menu
 proxy_menu_func = lambda self, context: self.layout.operator("export.export_luxrender_proxy", text="Export LuxRender Proxy")
