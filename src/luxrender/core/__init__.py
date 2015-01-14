@@ -1424,19 +1424,25 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     # Here we write the pixel values to the RenderResult
                     result = self.begin_result(0, 0, filmWidth, filmHeight)
                     layer = result.layers[0]
-                    tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
-                                                                                           imageBufferFloat)
+
                     
                     if (scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] and
                             scene.luxcore_tile_highlighting.use_tile_highlighting):
+                        tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
+                                                                                              filmHeight,
+                                                                                              imageBufferFloat)
                         # mark tiles
                         self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight, 
                                         scene.luxcore_tile_highlighting.show_converged,
                                         scene.luxcore_tile_highlighting.show_unconverged,
                                         scene.luxcore_tile_highlighting.show_pending)
-                    layer.rect = tempImage
+                        layer.rect = tempImage
+                    else:
+                        layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
+                                                                                               filmHeight,
+                                                                                               imageBufferFloat)
+
                     self.end_result(result)
-                    del tempImage
 
                     lastRefreshTime = now
 
