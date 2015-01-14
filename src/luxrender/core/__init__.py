@@ -1410,14 +1410,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Update statistics
                 lcSession.UpdateStats()
                 stats = lcSession.GetStats()
-                
-                # Print some information about the rendering progress
-                #self.PrintStats(lcConfig, stats)
-
                 blender_stats = self.CreateBlenderStats(lcConfig, stats, scene, 
                         time_until_update = displayInterval - elapsedTimeSinceLastRefresh)
                 self.update_stats('Rendering...', blender_stats)
-                
+
                 # check if any halt conditions are met
                 done = self.haltConditionMet(scene, stats)
 
@@ -1433,15 +1429,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     
                     if (scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] and
                             scene.luxcore_tile_highlighting.use_tile_highlighting):
-                        show_converged = scene.luxcore_tile_highlighting.show_converged
-                        show_unconverged = scene.luxcore_tile_highlighting.show_unconverged
-                        show_pending = scene.luxcore_tile_highlighting.show_pending
                         # mark tiles
                         self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight, 
-                                        show_converged, show_unconverged, show_pending)
-                    
+                                        scene.luxcore_tile_highlighting.show_converged,
+                                        scene.luxcore_tile_highlighting.show_unconverged,
+                                        scene.luxcore_tile_highlighting.show_pending)
                     layer.rect = tempImage
-                    self.update_result(result)
+                    self.end_result(result)
+                    del tempImage
 
                     lastRefreshTime = now
 
