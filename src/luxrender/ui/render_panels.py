@@ -148,7 +148,7 @@ class translator(render_panel):
     Translator settings UI Panel
     """
 
-    bl_label = 'LuxRender Translator'
+    bl_label = 'LuxRender Export Settings'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [

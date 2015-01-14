@@ -488,7 +488,6 @@ class luxrender_camera(declarative_property_group):
 
         return cam_type, params
 
-
 @LuxRenderAddon.addon_register_class
 class luxrender_film(declarative_property_group):
     ef_attach_to = ['luxrender_camera']

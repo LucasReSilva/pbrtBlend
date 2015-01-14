@@ -966,7 +966,8 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
     """Export an object as ply file, replace the original mesh with a preview version and set path to the exported ply file."""
     
     bl_idname = 'export.export_luxrender_proxy'
-    bl_label = 'Export LuxRender Proxy'
+    bl_label = 'Export as LuxRender Proxy'
+    bl_description = 'Converts selected objects to LuxRender proxies (simple preview geometry, original mesh is loaded at rendertime)'
     
     directory = bpy.props.StringProperty(name='PLY directory')
     filter_glob = bpy.props.StringProperty(default='*.ply', options={'HIDDEN'})

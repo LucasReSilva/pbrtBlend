@@ -1402,10 +1402,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 elapsedTimeSinceLastRefresh = now - lastRefreshTime
                 elapsedTimeSinceStart = now - startTime
 
-                displayInterval = scene.camera.data.luxrender_camera.luxrender_film.displayinterval
+                displayInterval = scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings.displayinterval
                 # use higher displayInterval for the first 10 seconds
                 if elapsedTimeSinceStart < 10.0:
-                    displayInterval = 1.0
+                    displayInterval = 2.0
                     
                 # Update statistics
                 lcSession.UpdateStats()

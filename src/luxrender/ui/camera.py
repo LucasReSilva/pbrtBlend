@@ -51,7 +51,7 @@ class film(camera_panel):
     bl_label = 'LuxRender Film'
 
     display_property_groups = [
-        ( ('camera', 'luxrender_camera'), 'luxrender_film' ),
+        ( ('camera', 'luxrender_camera'), 'luxrender_film', lambda: not UseLuxCore() ),
         ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_colorspace', lambda: not UseLuxCore() ),
         ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_tonemapping',lambda: not UseLuxCore() ),
     ]
@@ -70,7 +70,7 @@ class imagepipeline(camera_panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxcore_imagepipeline_settings' ),
+        ( ('camera', 'luxrender_camera'), 'luxcore_imagepipeline_settings' ),
     ]
 
     def draw(self, context):
@@ -80,4 +80,4 @@ class imagepipeline(camera_panel):
 
     def draw_crf_preset_menu(self, context):
         self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',
-                         text=context.camera.luxrender_camera.luxrender_film.luxcore_imagepipeline_settings.crf_preset)
+                         text=context.camera.luxrender_camera.luxcore_imagepipeline_settings.crf_preset)

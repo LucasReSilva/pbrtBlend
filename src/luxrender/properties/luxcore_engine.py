@@ -66,6 +66,8 @@ class luxcore_enginesettings(declarative_property_group):
     controls = [
         'renderengine_type',
         'advanced',
+        'label_custom_properties',
+        'custom_properties',
         # BIDIR
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH
@@ -74,8 +76,6 @@ class luxcore_enginesettings(declarative_property_group):
         ['bidirvm_eyedepth', 'bidirvm_lightdepth'],
         'bidirvm_lightpath_count',
         ['bidirvm_startradius_scale', 'bidirvm_alpha'],
-        # all engines
-        'custom_properties', 
         # BIASPATH
         'label_sampling',
         'biaspath_sampling_aa_size',
@@ -110,6 +110,7 @@ class luxcore_enginesettings(declarative_property_group):
     ]
 
     visibility = {
+                    'label_custom_properties': {'advanced': True},
                     'custom_properties': {'advanced': True},
                     # BIDIR
                     'bidir_eyedepth': {'renderengine_type': 'BIDIRCPU'},
@@ -201,9 +202,14 @@ class luxcore_enginesettings(declarative_property_group):
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_custom_properties',
+            'name': 'Custom properties:',
+        },
+        {
             'type': 'string',
             'attr': 'custom_properties',
-            'name': 'Custom properties',
+            'name': '',
             'description': 'LuxCore custom properties (separated by \'|\', suggested only for advanced users)',
             'default': '',
             'save_in_preset': True

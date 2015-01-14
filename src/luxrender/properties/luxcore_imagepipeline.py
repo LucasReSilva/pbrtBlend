@@ -93,16 +93,17 @@ class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.camera.luxrender_camera.luxrender_film and \
-               context.camera.luxrender_camera.luxrender_film.luxcore_imagepipeline_settings
+        return context.camera.luxrender_camera and \
+               context.camera.luxrender_camera.luxcore_imagepipeline_settings
 
     def execute(self, context):
-        context.camera.luxrender_camera.luxrender_film.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
+        context.camera.luxrender_camera.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
         return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class
 class IMAGEPIPELINE_MT_luxrender_crf(bpy.types.Menu):
     bl_label = 'CRF Preset'
+    bl_description = 'Simulate analog film'
 
     # Flat-list menu system
     def draw(self, context):
@@ -122,7 +123,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     Storage class for LuxCore imagepipeline settings.
     """
     
-    ef_attach_to = ['luxrender_film']
+    ef_attach_to = ['luxrender_camera']
     
     alert = {}
 
@@ -140,6 +141,11 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'crf_preset_menu',
         # Gamma
         ['label_gamma', 'gamma'],
+        # Intervals
+        'spacer_intervals',
+        'label_intervals',
+        ['writeinterval_png', 'writeinterval_flm'],
+        'displayinterval',
     ]
     
     visibility = {
@@ -197,8 +203,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 179.0,
             'min': 0.0,
             'soft_min': 0.0,
-            'max': 100000.0,
-            'soft_max': 500.0,
+            'soft_max': 1000.0,
             'save_in_preset': True
         },
         {
@@ -209,8 +214,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 100.0,
             'min': 0.0,
             'soft_min': 0.0,
-            'max': 100000.0,
-            'soft_max': 500.0,
+            'soft_max': 1000.0,
             'save_in_preset': True
         },
         {
@@ -221,7 +225,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 8,
             'min': 0,
             'soft_min': 2,
-            'max': 1000,
             'soft_max': 50,
             'save_in_preset': True
         },
@@ -233,7 +236,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 8,
             'min': -1,
             'soft_min': -1,
-            'max': 1000,
             'soft_max': 20,
             'save_in_preset': True
         },
@@ -311,12 +313,12 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         {
             'attr': 'crf_label',
             'type': 'text',
-            'name': 'Film Response Function:',
+            'name': 'Analog Film Simulation:',
         },
         {
             'type': 'ef_callback',
             'attr': 'crf_preset_menu',
-            'method': 'draw_crf_preset_menu',
+            'method': 'draw_crf_preset_menu'
         },
         {
             'attr': 'crf_preset',
@@ -341,6 +343,47 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'soft_min': -1,
             'max': 20.0,
             'soft_max': 4.0,
+            'save_in_preset': True
+        },
+        # Update and save intervals
+        {
+            'attr': 'spacer_intervals',
+            'type': 'text',
+            'name': '',
+        },
+        {
+            'attr': 'label_intervals',
+            'type': 'text',
+            'name': 'Write Intervals:',
+        },
+        {
+            'type': 'int',
+            'attr': 'writeinterval_png',
+            'name': 'PNG',
+            'description': 'Period for writing images to disk (seconds)',
+            'default': 180,
+            'min': 2,
+            'soft_min': 2,
+            'save_in_preset': True
+        },
+        {
+            'type': 'int',
+            'attr': 'writeinterval_flm',
+            'name': 'FLM',
+            'description': 'Period for writing flm files to disk (seconds)',
+            'default': 900,
+            'min': 2,
+            'soft_min': 2,
+            'save_in_preset': True
+        },
+        {
+            'type': 'int',
+            'attr': 'displayinterval',
+            'name': 'Preview Interval',
+            'description': 'Period for updating rendering on screen (seconds)',
+            'default': 10,
+            'min': 1,
+            'soft_min': 3,
             'save_in_preset': True
         },
     ]
