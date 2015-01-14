@@ -968,22 +968,63 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
     bl_idname = 'export.export_luxrender_proxy'
     bl_label = 'Export as LuxRender Proxy'
     bl_description = 'Converts selected objects to LuxRender proxies (simple preview geometry, original mesh is loaded at rendertime)'
-    
-    directory = bpy.props.StringProperty(name='PLY directory')
-    filter_glob = bpy.props.StringProperty(default='*.ply', options={'HIDDEN'})
-    use_filter = bpy.props.BoolProperty(default=True, options={'HIDDEN'})
 
-    proxy_quality = bpy.props.FloatProperty(default = 0.05,
-                                            min = 0.001,
+    original_facecount = bpy.props.IntProperty(name = 'Original Facecount', default = 1)
+    # hidden properties
+    directory = bpy.props.StringProperty(name = 'PLY directory')
+    filter_glob = bpy.props.StringProperty(default = '*.ply', options = {'HIDDEN'})
+    use_filter = bpy.props.BoolProperty(default = True, options = {'HIDDEN'})
+
+    def set_proxy_facecount(self, value):
+        self["proxy_facecount"] = value
+        self["proxy_quality"] = float(value) / float(self.original_facecount)
+
+    def get_proxy_facecount(self):
+        try:
+            return self["proxy_facecount"]
+        except KeyError:
+            print("keyerror in get proxy facecount")
+            return 0
+
+    def set_proxy_quality(self, value):
+        self["proxy_quality"] = value
+        self["proxy_facecount"] = self.original_facecount * self.proxy_quality
+
+    def get_proxy_quality(self):
+        try:
+            return self["proxy_quality"]
+        except KeyError:
+            print("keyerror in get proxy quality")
+            return .5
+
+    proxy_facecount = bpy.props.IntProperty(name = 'Proxy Facecount',
+                                            min = 1,
+                                            default = 5000,
+                                            subtype = 'UNSIGNED',
+                                            set = set_proxy_facecount,
+                                            get = get_proxy_facecount)
+    proxy_quality = bpy.props.FloatProperty(name = 'Preview Mesh Quality',
+                                            default = 0.02,
+                                            soft_min = 0.001,
                                             max = 1.0,
                                             soft_max = 0.5,
-                                            name = 'Preview Mesh Quality')
+                                            subtype = 'UNSIGNED',
+                                            set = set_proxy_quality,
+                                            get = get_proxy_quality)
 
-    overwrite = bpy.props.BoolProperty(default = True,
-                                       name = "Overwrite Existing Files")
+    overwrite = bpy.props.BoolProperty(default = True, name = "Overwrite Existing Files")
 
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
+
+        active_obj = context.active_object
+        if active_obj is not None:
+            test_mesh = active_obj.to_mesh(context.scene, True, 'RENDER')
+            self.original_facecount = len(test_mesh.polygons) * 2
+            bpy.data.meshes.remove(test_mesh)
+
+        self.proxy_facecount = 5000
+
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
@@ -1079,6 +1120,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                     #################################################################
                     # Create lowpoly preview mesh with decimate modifier
                     #################################################################
+                    context.scene.objects.active = object
                     decimate = object.modifiers.new('proxy_decimate', 'DECIMATE')
                     decimate.ratio = self.proxy_quality
                     bpy.ops.object.modifier_apply(apply_as = 'DATA', modifier = decimate.name)
