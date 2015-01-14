@@ -895,15 +895,12 @@ class BlenderSceneConverter(object):
                     return self.ConvertTexture(texture)
 
     def ConvertMaterial(self, material, materials):
+        """
+        material: material to convert
+        materials: all materials that are assigned to the same object as material
+        """
         try:
             if material is None:
-                return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
-
-            matIsTransparent = False
-            if material.type in ['glass', 'glass2', 'null']:
-                matIsTransparent = True
-
-            if self.blScene.luxrender_testing.clay_render and not matIsTransparent:
                 return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
             matName = ToValidLuxCoreName(material.name)
@@ -1577,7 +1574,7 @@ class BlenderSceneConverter(object):
             except IndexError:
                 objMat = None
                 LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
-
+            
             objMatName = self.ConvertMaterial(objMat, obj.material_slots)
 
             # Create the mesh
