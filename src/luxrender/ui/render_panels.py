@@ -219,16 +219,6 @@ class postprocessing(render_panel):
         col.prop(rd, "use_sequencer")
 
         split.prop(rd, "dither_intensity", text="Dither", slider=True)
-        
-        if UseLuxCore():
-            # draw imagepipeline settings
-            layout.separator()
-
-            super().draw(context)
-    
-    def draw_crf_preset_menu(self, context):
-        self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',
-                         text=context.scene.luxcore_imagepipeline_settings.crf_preset)
 
 @LuxRenderAddon.addon_register_class
 class layer_selector(render_panel):

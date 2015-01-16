@@ -1344,6 +1344,8 @@ class BlenderSceneConverter(object):
 
         gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum!
 
+        # not for distant light,
+        # not for area lamps (because these are meshlights and gain is controlled by material settings
         if getattr(lux_lamp, 'L_color') and not (
                     light.type == 'SUN' and getattr(lux_lamp, 'sunsky_type') != 'distant') and not (
                     light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
@@ -1495,9 +1497,13 @@ class BlenderSceneConverter(object):
             else:
                 # Area lamp workaround: create plane and add emitting material
                 mat_name = luxcore_name + '_helper_mat'
-                raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy
+                # TODO: match with API 1.x
+                # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
+                raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (get_worldscale(as_scalematrix=False) ** 2) #* 20000
                 emission_color = [raw_color[0], raw_color[1], raw_color[2]]
-                
+
+                #light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
+
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', ['matte']))
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', [0.0, 0.0, 0.0]))
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
