@@ -50,6 +50,7 @@ from ..export.scene import SceneExporter
 from ..outputs import LuxManager, LuxFilmDisplay
 from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore, pyluxcore
 from ..export.luxcore_scene import BlenderSceneConverter
 
@@ -333,6 +334,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     bl_idname = 'LUXRENDER_RENDER'
     bl_label = 'LuxRender'
     bl_use_preview = True
+    #bl_preview_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, 'export', 'material_preview_scene', 'test.blend'))
     bl_use_texture_preview = True
 
     render_lock = threading.Lock()
@@ -1596,6 +1598,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             LuxLog(str(lcConfig.GetProperties()))
             LuxLog('Scene Properties:')
             LuxLog(str(lcConfig.GetScene().GetProperties()))
+            # add a lamp (hack for Blender's preview scene, which does not contain any lights
+            lcConfig.GetScene().Parse(pyluxcore.Properties().
+                                      Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['sky'])))
 
             lcSession = pyluxcore.RenderSession(lcConfig)
 
@@ -1810,7 +1815,33 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def find_update_changes(self, context):
         # find out what triggered the update (default: unknown)
         update_changes = UpdateChanges()
-        
+
+
+        # check if visibility of objects was changed
+        if self.lastVisibilitySettings is None:
+            print("vissettings where None")
+            self.lastVisibilitySettings = set(context.visible_objects)
+        else:
+            objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
+            objectsToRemove = self.lastVisibilitySettings - set(context.visible_objects)
+            print("lastvissettings:", self.lastVisibilitySettings)
+            print("objectsToAdd:", objectsToAdd)
+            print("objectsToRemove:", objectsToRemove)
+
+            if len(objectsToAdd) > 0:
+                print("len(objectsToAdd):", len(objectsToAdd))
+                update_changes.set_cause(mesh = True)
+                update_changes.changed_objects_mesh.extend(objectsToAdd)
+
+            if len(objectsToRemove) > 0:
+                print("len(objectsToRemove):", len(objectsToRemove))
+                update_changes.set_cause(objectsRemoved = True)
+                update_changes.removed_objects.extend(objectsToRemove)
+
+        self.lastVisibilitySettings = set(context.visible_objects)
+        print("new vis settings:", self.lastVisibilitySettings)
+
+
         if (not self.viewSessionRunning or 
         		self.lcConfig is None or 
         		self.viewSession is None):
@@ -1821,25 +1852,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewFilmWidth != context.region.width) or (
                 self.viewFilmHeight != context.region.height):
             update_changes.set_cause(config = True)
-            
+
         elif bpy.data.objects.is_updated:
-            # check if visibility of objects was changed
-            if self.lastVisibilitySettings is None:
-                self.lastVisibilitySettings = set(context.visible_objects)
-            else:
-                objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
-                objectsToRemove = self.lastVisibilitySettings - set(context.visible_objects)
-                
-                if len(objectsToAdd) > 0:
-                    update_changes.set_cause(mesh = True)
-                    update_changes.changed_objects_mesh.extend(objectsToAdd)
-                    
-                if len(objectsToRemove) > 0:
-                    update_changes.set_cause(objectsRemoved = True)
-                    update_changes.removed_objects.extend(objectsToRemove)
-            
-            self.lastVisibilitySettings = set(context.visible_objects)
-            
             # check objects for updates
             for ob in bpy.data.objects:
                 if ob == None:
@@ -2067,6 +2081,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 for ob in update_changes.removed_objects:
                     LuxLog('Removing object: ' + ob.name)
                     # missing
+                    print("old object count:", lcScene.GetObjectCount())
+
+                    lux_name = ToValidLuxCoreName(ob.name)
+                    lcScene.DeleteObject(lux_name)
+
+                    print("new object count:", lcScene.GetObjectCount())
             
             # Debug output
             print("\nUpdated scene properties:\n", converter.scnProps, "\n")
