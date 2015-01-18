@@ -1824,9 +1824,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         else:
             objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
             objectsToRemove = self.lastVisibilitySettings - set(context.visible_objects)
-            print("lastvissettings:", self.lastVisibilitySettings)
-            print("objectsToAdd:", objectsToAdd)
-            print("objectsToRemove:", objectsToRemove)
+            #print("lastvissettings:", self.lastVisibilitySettings)
+            #print("objectsToAdd:", objectsToAdd)
+            #print("objectsToRemove:", objectsToRemove)
 
             if len(objectsToAdd) > 0:
                 print("len(objectsToAdd):", len(objectsToAdd))
@@ -1839,7 +1839,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 update_changes.removed_objects.extend(objectsToRemove)
 
         self.lastVisibilitySettings = set(context.visible_objects)
-        print("new vis settings:", self.lastVisibilitySettings)
+        #print("new vis settings:", self.lastVisibilitySettings)
 
 
         if (not self.viewSessionRunning or 

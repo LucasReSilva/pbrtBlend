@@ -135,7 +135,7 @@ class BlenderSceneConverter(object):
             outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
             self.cfgProps.Set(pyluxcore.Property(outputStringId, [id]))
 
-    def DefineBlenderMesh(self, name, mesh):
+    def DefineBlenderMeshAccelerated(self, name, mesh):
         faces = mesh.tessfaces[0].as_pointer()
         vertices = mesh.vertices[0].as_pointer()
 
@@ -154,25 +154,106 @@ class BlenderSceneConverter(object):
         return self.lcScene.DefineBlenderMesh(name, len(mesh.tessfaces), faces, len(mesh.vertices),
                                        vertices, texCoords, vertexColors)
 
+    def DefineBlenderMeshDeprecated(self, name, mesh):
+        uv_textures = mesh.tessface_uv_textures
+        uv_layer = None
+        if len(uv_textures) > 0:
+            if uv_textures.active and uv_textures.active.data:
+                uv_layer = uv_textures.active.data
+
+        color_layer = mesh.tessface_vertex_colors.data if mesh.tessface_vertex_colors.active else None
+
+        # Export data
+        points = []
+        normals = []
+        uvs = []
+        cols = []
+        face_vert_indices = []  # List of face vert indices
+
+        # Caches
+        vert_vno_indices = {}  # Mapping of vert index to exported vert index for verts with vert normals
+        vert_use_vno = set()  # Set of vert indices that use vert normals
+        vert_index = 0  # Exported vert index
+
+        for face in ffaces_mats[i]:
+            fvi = []
+            for j, vertex in enumerate(face.vertices):
+                v = mesh.vertices[vertex]
+
+                if face.use_smooth:
+                    vert_data = (v.co[:], v.normal[:],
+                                 uv_layer[face.index].uv[j][:] if uv_layer else tuple(),
+                                 color_layer[face.index].color[j][:] if color_layer else tuple())
+
+                    if vert_data not in vert_use_vno:
+                        vert_use_vno.add(vert_data)
+
+                        points.append(vert_data[0])
+                        normals.append(vert_data[1])
+                        uvs.append(vert_data[2])
+                        cols.append(vert_data[3])
+
+                        vert_vno_indices[vert_data] = vert_index
+                        fvi.append(vert_index)
+
+                        vert_index += 1
+                    else:
+                        fvi.append(vert_vno_indices[vert_data])
+
+                else:
+                    # all face-vert-co-no are unique, we cannot
+                    # cache them
+                    points.append(v.co[:])
+                    normals.append(face.normal[:])
+                    if uv_layer:
+                        uvs.append(uv_layer[face.index].uv[j][:])
+                    if color_layer:
+                        cols.append(color_layer[face.index].color[j][:])
+
+                    fvi.append(vert_index)
+
+                    vert_index += 1
+
+            # For Lux, we need to triangulate quad faces
+            face_vert_indices.append(tuple(fvi[0:3]))
+            if len(fvi) == 4:
+                face_vert_indices.append((fvi[0], fvi[2], fvi[3]))
+
+        del vert_vno_indices
+        del vert_use_vno
+
+        self.lcScene.DefineMesh('Mesh-' + lcObjName, points, face_vert_indices, normals,
+                                uvs if uv_layer else None, cols if color_layer else None, None)
+
+    def CreateExportMesh(self, obj, apply_modifiers, preview):
+        mode = 'PREVIEW' if preview else 'RENDER'
+        mesh = obj.to_mesh(self.blScene, apply_modifiers, mode)
+
+        mesh.update(calc_tessface = True)
+
+        return mesh
+
     def ConvertObjectGeometry(self, obj, preview = False, update_mesh = True):
         try:
             mesh_definitions = []
+            mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
 
-            if not is_obj_visible(self.blScene, obj):
+            if (not is_obj_visible(self.blScene, obj) or
+                        obj.data.luxrender_mesh.portal or
+                        obj.type not in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT'] or
+                        (self.renderengine is not None and self.renderengine.test_break())):
                 return mesh_definitions
 
             #convert_blender_start = int(round(time.time() * 1000)) #### DEBUG
 
-            mode = 'PREVIEW' if preview else 'RENDER'
-            mesh = obj.to_mesh(self.blScene, True, mode)
+            # applying modifiers takes time, so don't do it if we won't update the mesh anyway
+            if update_mesh:
+                mesh = self.CreateExportMesh(obj, True, preview)
+            else:
+                mesh = self.CreateExportMesh(obj, False, preview)
+
             if mesh is None:
                 LuxLog('Cannot create render/export object: %s' % obj.name)
-                return mesh_definitions
-
-            mesh.update(calc_tessface=True)
-
-            # check if user cancelled export
-            if self.renderengine is not None and self.renderengine.test_break():
                 return mesh_definitions
 
             #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
@@ -181,10 +262,9 @@ class BlenderSceneConverter(object):
             if getattr(pyluxcore.Scene, "DefineBlenderMesh", None) is not None:
                 LuxLog("Using c++ accelerated mesh export")
                 if update_mesh:
-                    mesh_name = '%s-%s_m' % (obj.data.name, self.blScene.name)
                     lcObjName = ToValidLuxCoreName(mesh_name)
 
-                    meshInfoList = self.DefineBlenderMesh(lcObjName, mesh)
+                    meshInfoList = self.DefineBlenderMeshAccelerated(lcObjName, mesh)
                     mesh_definitions.extend(meshInfoList)
                 else:
                     number_of_mats = len(mesh.materials)
@@ -194,7 +274,7 @@ class BlenderSceneConverter(object):
                         iterator_range = [0]
 
                     for i in iterator_range:
-                        mesh_name = '%s-%s_m%03d' % (obj.data.name, self.blScene.name, i)
+                        mesh_name += '%03d' % i
                         lcObjName = ToValidLuxCoreName(mesh_name)
                         mesh_definitions.append((lcObjName, i))
             else:
@@ -223,85 +303,16 @@ class BlenderSceneConverter(object):
                         if i not in material_indices:
                             continue
 
-                        mesh_name = '%s-%s_m%03d' % (obj.data.name, self.blScene.name, i)
-
-                        if update_mesh:
-                            uv_textures = mesh.tessface_uv_textures
-                            uv_layer = None
-                            if len(uv_textures) > 0:
-                                if uv_textures.active and uv_textures.active.data:
-                                    uv_layer = uv_textures.active.data
-
-                            color_layer = mesh.tessface_vertex_colors.data if mesh.tessface_vertex_colors.active else None
-
-                            # Export data
-                            points = []
-                            normals = []
-                            uvs = []
-                            cols = []
-                            face_vert_indices = []  # List of face vert indices
-
-                            # Caches
-                            vert_vno_indices = {}  # Mapping of vert index to exported vert index for verts with vert normals
-                            vert_use_vno = set()  # Set of vert indices that use vert normals
-                            vert_index = 0  # Exported vert index
-
-                            for face in ffaces_mats[i]:
-                                fvi = []
-                                for j, vertex in enumerate(face.vertices):
-                                    v = mesh.vertices[vertex]
-
-                                    if face.use_smooth:
-                                        vert_data = (v.co[:], v.normal[:],
-                                                     uv_layer[face.index].uv[j][:] if uv_layer else tuple(),
-                                                     color_layer[face.index].color[j][:] if color_layer else tuple())
-
-                                        if vert_data not in vert_use_vno:
-                                            vert_use_vno.add(vert_data)
-
-                                            points.append(vert_data[0])
-                                            normals.append(vert_data[1])
-                                            uvs.append(vert_data[2])
-                                            cols.append(vert_data[3])
-
-                                            vert_vno_indices[vert_data] = vert_index
-                                            fvi.append(vert_index)
-
-                                            vert_index += 1
-                                        else:
-                                            fvi.append(vert_vno_indices[vert_data])
-
-                                    else:
-                                        # all face-vert-co-no are unique, we cannot
-                                        # cache them
-                                        points.append(v.co[:])
-                                        normals.append(face.normal[:])
-                                        if uv_layer:
-                                            uvs.append(uv_layer[face.index].uv[j][:])
-                                        if color_layer:
-                                            cols.append(color_layer[face.index].color[j][:])
-
-                                        fvi.append(vert_index)
-
-                                        vert_index += 1
-
-                                # For Lux, we need to triangulate quad faces
-                                face_vert_indices.append(tuple(fvi[0:3]))
-                                if len(fvi) == 4:
-                                    face_vert_indices.append((fvi[0], fvi[2], fvi[3]))
-
-                            del vert_vno_indices
-                            del vert_use_vno
-
-                        # Define a new mesh
+                        mesh_name += '%03d' % i
                         lcObjName = ToValidLuxCoreName(mesh_name)
+
                         if update_mesh:
-                            self.lcScene.DefineMesh('Mesh-' + lcObjName, points, face_vert_indices, normals,
-                                                    uvs if uv_layer else None, cols if color_layer else None, None)
+                            self.DefineBlenderMeshDeprecated(lcObjName, mesh)
+
                         mesh_definitions.append((lcObjName, i))
 
                     except Exception as err:
-                        LuxLog('Mesh export failed, skipping this mesh:\n%s' % err)
+                        LuxLog('Mesh export failed, skipping this mesh: %s\n' % err)
 
                 del ffaces_mats
 
@@ -312,7 +323,7 @@ class BlenderSceneConverter(object):
             return mesh_definitions
 
         except Exception as err:
-            LuxLog('Mesh export failed, skipping mesh of object:\n%s' % err)
+            LuxLog('Mesh export failed, skipping mesh of object: %s\n' % err)
             return []
 
     def ConvertMapping(self, prefix, texture):
