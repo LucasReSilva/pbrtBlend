@@ -905,7 +905,7 @@ class BlenderSceneConverter(object):
                 else:
                     return self.ConvertTexture(texture)
 
-    def ConvertMaterial(self, material, materials):
+    def ConvertMaterial(self, material, materials, no_conversion = False):
         """
         material: material to convert
         materials: all materials that are assigned to the same object as material
@@ -915,6 +915,10 @@ class BlenderSceneConverter(object):
                 return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
             matName = ToValidLuxCoreName(material.name)
+
+            # in realtimepreview, we sometimes only need the name
+            if no_conversion and self.lcScene.IsMaterialDefined(matName):
+                return matName
 
             # Check if it is an already defined material
             if matName in self.materialsCache:
@@ -1559,7 +1563,7 @@ class BlenderSceneConverter(object):
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
 
-    def ConvertObject(self, obj, preview=False, update_mesh=True, update_transform=True):
+    def ConvertObject(self, obj, preview = False, update_mesh = True, update_transform = True, update_material = True):
         # Convert the object geometry
         meshDefinitions = []
         meshDefinitions.extend(self.ConvertObjectGeometry(obj, preview, update_mesh))
@@ -1571,7 +1575,7 @@ class BlenderSceneConverter(object):
             # Convert the (main) material
             try:
                 objMat = obj.material_slots[objMatIndex].material
-                
+
                 # material override (clay render)
                 translator_settings = self.blScene.luxcore_translatorsettings
                 if translator_settings.override_materials:
@@ -1591,10 +1595,9 @@ class BlenderSceneConverter(object):
             except IndexError:
                 objMat = None
                 LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
-            
-            objMatName = self.ConvertMaterial(objMat, obj.material_slots)
 
-            # Create the mesh
+            objMatName = self.ConvertMaterial(objMat, obj.material_slots, no_conversion = not update_material)
+
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.material', [objMatName]))
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + objName + '.ply', ['Mesh-' + objName]))
 

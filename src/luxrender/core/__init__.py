@@ -1871,8 +1871,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     
                 if ob.is_updated:
                     if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'EMPTY']:
-                        update_changes.set_cause(objectTransform = True)
-                        update_changes.changed_objects_transform.append(ob)
+                        # check if a new material was assigned
+                        if ob.data.is_updated:
+                            update_changes.set_cause(mesh = True)
+                            update_changes.changed_objects_mesh.append(ob)
+                        else:
+                            update_changes.set_cause(objectTransform = True)
+                            update_changes.changed_objects_transform.append(ob)
                     elif ob.type in ['LAMP']:
                         update_changes.set_cause(light = True)
                         update_changes.changed_objects_transform.append(ob)
@@ -2075,7 +2080,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     LuxLog('Transformation update: ' + ob.name)
                     converter.ConvertObject(ob, preview = True, 
                                             update_mesh = False, 
-                                            update_transform = True)
+                                            update_transform = True,
+                                            update_material = False)
                                             
             if update_changes.cause_objectsRemoved:
                 for ob in update_changes.removed_objects:
