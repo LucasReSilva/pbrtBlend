@@ -1614,7 +1614,7 @@ class BlenderSceneConverter(object):
             for export_data in self.exported_meshes[obj.data]:
                 name = self.GenerateMeshName(obj.data.name, export_data.matIndex)
                 # make name unique, but reproducable
-                name += obj.name
+                name += ToValidLuxCoreName(obj.name)
 
                 self.SetObjectProperties(name, export_data.lcMeshName, export_data.lcMaterialName, transform)
         else:
@@ -2093,9 +2093,7 @@ class BlenderSceneConverter(object):
             
             if self.renderengine is not None:
                 self.renderengine.update_stats('Exporting...', 'Object: %s (%d of %d)' % (
-                                                               obj.name, 
-                                                               objects_counter, 
-                                                               objects_amount))
+                                               obj.name, objects_counter, objects_amount))
                 progress = float(objects_counter) / float(objects_amount)
                 self.renderengine.update_progress(progress)
 
@@ -2141,9 +2139,10 @@ class BlenderSceneConverter(object):
 
         print("Cached meshes: (" + str(len(self.exported_meshes)) + ")")
         for key in self.exported_meshes:
-            print("-----")
-            print(key.name)
-            for elem in self.exported_meshes[key]:
-                print(elem)
+            if key is not None:
+                print("-----")
+                print(key.name)
+                for elem in self.exported_meshes[key]:
+                    print(elem)
 
         return self.lcConfig
