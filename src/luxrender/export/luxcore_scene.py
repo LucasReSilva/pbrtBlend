@@ -154,7 +154,7 @@ class BlenderSceneConverter(object):
         return self.lcScene.DefineBlenderMesh(name, len(mesh.tessfaces), faces, len(mesh.vertices),
                                        vertices, texCoords, vertexColors)
 
-    def DefineBlenderMeshDeprecated(self, name, mesh):
+    def DefineBlenderMeshDeprecated(self, name, mesh, ffaces_mats, index):
         uv_textures = mesh.tessface_uv_textures
         uv_layer = None
         if len(uv_textures) > 0:
@@ -175,7 +175,7 @@ class BlenderSceneConverter(object):
         vert_use_vno = set()  # Set of vert indices that use vert normals
         vert_index = 0  # Exported vert index
 
-        for face in ffaces_mats[i]:
+        for face in ffaces_mats[index]:
             fvi = []
             for j, vertex in enumerate(face.vertices):
                 v = mesh.vertices[vertex]
@@ -222,7 +222,7 @@ class BlenderSceneConverter(object):
         del vert_vno_indices
         del vert_use_vno
 
-        self.lcScene.DefineMesh('Mesh-' + lcObjName, points, face_vert_indices, normals,
+        self.lcScene.DefineMesh('Mesh-' + name, points, face_vert_indices, normals,
                                 uvs if uv_layer else None, cols if color_layer else None, None)
 
     def CreateExportMesh(self, obj, apply_modifiers, preview):
@@ -307,7 +307,7 @@ class BlenderSceneConverter(object):
                         lcObjName = ToValidLuxCoreName(mesh_name)
 
                         if update_mesh:
-                            self.DefineBlenderMeshDeprecated(lcObjName, mesh)
+                            self.DefineBlenderMeshDeprecated(lcObjName, mesh, ffaces_mats, i)
 
                         mesh_definitions.append((lcObjName, i))
 

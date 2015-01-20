@@ -968,7 +968,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
                 (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
 
-    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview = False, time_until_update = -1):
+    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview = False, time_until_update = -1.0):
         """
         Returns: string of formatted statistics
         """
@@ -1394,32 +1394,34 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # Start the rendering
             lcSession.Start()
 
+            imagepipeline_settings = scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
             startTime = time.time()
-            lastRefreshTime = startTime
+            lastImageDisplay = startTime
             done = False
+
             while not self.test_break() and not done:
                 time.sleep(0.2)
 
                 now = time.time()
-                elapsedTimeSinceLastRefresh = now - lastRefreshTime
+                timeSinceDisplay = now - lastImageDisplay
                 elapsedTimeSinceStart = now - startTime
 
-                displayInterval = scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings.displayinterval
-                # use higher displayInterval for the first 10 seconds
+                interval_display = imagepipeline_settings.displayinterval
+                # use lower display interval for the first 10 seconds
                 if elapsedTimeSinceStart < 10.0:
-                    displayInterval = 2.0
+                    interval_display = 2.0
                     
                 # Update statistics
                 lcSession.UpdateStats()
                 stats = lcSession.GetStats()
                 blender_stats = self.CreateBlenderStats(lcConfig, stats, scene, 
-                        time_until_update = displayInterval - elapsedTimeSinceLastRefresh)
+                        time_until_update = interval_display - timeSinceDisplay)
                 self.update_stats('Rendering...', blender_stats)
 
                 # check if any halt conditions are met
                 done = self.haltConditionMet(scene, stats)
 
-                if elapsedTimeSinceLastRefresh > displayInterval:
+                if timeSinceDisplay > interval_display:
                     # Update the image
                     lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
@@ -1446,7 +1448,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                     self.end_result(result)
 
-                    lastRefreshTime = now
+                    lastImageDisplay = now
 
             # Update the image
             lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
