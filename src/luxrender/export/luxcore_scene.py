@@ -54,9 +54,9 @@ class ExportedObjectData(object):
 
     def __str__(self):
         output = ("lcObjName: " + self.lcObjName +
-                  ", lcMeshName: " + self.lcMeshName +
-                  ", lcMaterialName: " + self.lcMaterialName +
-                  ", matIndex: " + str(self.matIndex))
+                  ",\nlcMeshName: " + self.lcMeshName +
+                  ",\nlcMaterialName: " + self.lcMaterialName +
+                  ",\nmatIndex: " + str(self.matIndex))
         return output
 
 class BlenderSceneConverter(object):
@@ -67,9 +67,11 @@ class BlenderSceneConverter(object):
     material_id_mask_counter = 0
     by_material_id_counter = 0
 
-    # Name cache: contains key value pairs of the types:
-    # BlenderMesh : ExportedObjectData
-    # where ExportedObjectData contains the luxcore object, mesh and material names and the material index
+    # Cache with the following structure:
+    # {obj.data : [ {obj : ExportedObjectData} ] }
+    # obj.data is the main key, it points to a list that contains one entry per material index (because objects are
+    # split by their material). This list contains dicts for each object using the mesh (obj.data).
+    # ExportedObjectData contains the luxcore object, mesh and material names and the material index
     exported_meshes = {}
 
     @staticmethod
@@ -86,6 +88,14 @@ class BlenderSceneConverter(object):
     def clear():
         BlenderSceneConverter.scalers_count = 0
         BlenderSceneConverter.unique_material_number = 0
+
+    @staticmethod
+    def get_export_cache():
+        return BlenderSceneConverter.exported_meshes
+
+    @staticmethod
+    def clear_export_cache():
+        BlenderSceneConverter.exported_meshes = {}
 
     def __init__(self, blScene, lcSession=None, renderengine=None):
         LuxManager.SetCurrentScene(blScene)
@@ -273,15 +283,6 @@ class BlenderSceneConverter(object):
                         obj.data.luxrender_mesh.portal or
                         (self.renderengine is not None and self.renderengine.test_break())):
                 return mesh_definitions
-
-            # check if mesh is already in cache
-            #if obj.data in self.exported_meshes:
-            #    print("found mesh \"%s\" of object \"%s\" in cache, skipping export" % (obj.data.name, obj.name))
-
-            #    for exported_mesh_data in self.exported_meshes[obj.data]:
-            #        mesh_definitions.append((exported_mesh_data.lcObjName, exported_mesh_data.matIndex))
-
-            #    return mesh_definitions
 
             #convert_blender_start = int(round(time.time() * 1000)) #### DEBUG
 
@@ -1611,26 +1612,35 @@ class BlenderSceneConverter(object):
             return
 
         transform = matrix_to_list(obj.matrix_world) if update_transform else None
+        exported_meshes = BlenderSceneConverter.get_export_cache()
 
-        if obj.data in self.exported_meshes:
-            if obj in self.exported_meshes[obj.data]:
+        # check if mesh was already exported
+        if obj.data in exported_meshes:
+            obj_cache_elem = None
+
+            # check if obj is already "registered" to use this mesh
+            for elem in exported_meshes[obj.data]:
+                if obj in elem:
+                    obj_cache_elem = elem
+
+            if obj_cache_elem is not None:
                 print("[Mesh: %s][Object: %s] obj already in cache" % (obj.data.name, obj.name))
 
                 # read from cache
-                for export_data in self.exported_meshes[obj.data][obj]:
-                    name = ToValidLuxCoreName(obj.name + str(export_data.matIndex))
-                    self.SetObjectProperties(name, export_data.lcMeshName, export_data.lcMaterialName, transform)
+                for export_data in obj_cache_elem[obj]:
+                    self.SetObjectProperties(export_data.lcObjName, export_data.lcMeshName, export_data.lcMaterialName, transform)
             else:
                 print("[Mesh: %s][Object: %s] no obj entry, creating one" % (obj.data.name, obj.name))
 
                 # load existing data from first entry
-                export_data_list = list(self.exported_meshes[obj.data][0].items())[0][1]
+                export_data_list = list(exported_meshes[obj.data][0].items())[0][1]
 
                 cache_data = []
                 for export_data in export_data_list:
                     print("loaded export data:")
                     print(str(export_data))
 
+                    # create unique name for the lcObject
                     name = ToValidLuxCoreName(obj.name + str(export_data.matIndex))
                     new_export_data = ExportedObjectData(name, export_data.lcMeshName, export_data.lcMaterialName, export_data.matIndex)
                     cache_data.append(new_export_data)
@@ -1642,8 +1652,9 @@ class BlenderSceneConverter(object):
 
                 # create new cache entry
                 cache_entry = {obj : cache_data}
-                # save to cache
-                self.exported_meshes[obj.data].append(cache_entry)
+                # add obj to cache
+                BlenderSceneConverter.exported_meshes[obj.data].append(cache_entry)
+
         else:
             print("[Mesh: %s][Object: %s] mesh not in cache, exporting" % (obj.data.name, obj.name))
 
@@ -1688,7 +1699,7 @@ class BlenderSceneConverter(object):
 
                 self.SetObjectProperties(lcObjName, objMeshName, objMatName, transform)
 
-            self.exported_meshes[obj.data] = [{obj : cache_data}]
+            exported_meshes[obj.data] = [{obj : cache_data}]
 
         if obj.type == 'LAMP':
             try:
@@ -2071,7 +2082,7 @@ class BlenderSceneConverter(object):
             self.renderengine.update_stats('Exporting...', '')
 
         # clear cache
-        self.exported_meshes = {}
+        BlenderSceneConverter.clear_export_cache()
 
         # #######################################################################
         # Convert camera definition
@@ -2165,18 +2176,5 @@ class BlenderSceneConverter(object):
 
         #        import pydevd
         #        pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
-
-        #print("Cached meshes: (" + str(len(self.exported_meshes)) + ")")
-        #print(self.exported_meshes)
-        '''
-        for mesh in self.exported_meshes:
-            if mesh is not None:
-                for obj in self.exported_meshes[mesh]:
-                    print("-----")
-                    print(mesh.name)
-                    print(obj.name)
-                    for elem in self.exported_meshes[mesh][obj]:
-                        print(elem)
-        '''
 
         return self.lcConfig

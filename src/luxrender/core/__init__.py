@@ -2064,6 +2064,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if update_changes.cause_light or update_changes.cause_objectTransform:
                 for ob in update_changes.changed_objects_transform:
                     LuxLog('Transformation update: ' + ob.name)
+
+                    print("!")
+                    print("objects in cache: ")
+                    for elem in list(BlenderSceneConverter.exported_meshes.items()):
+                        print(elem)
+                        print("-----")
+                    print("!")
+
                     converter.ConvertObject(ob, preview = True, 
                                             update_mesh = False, 
                                             update_transform = True,
