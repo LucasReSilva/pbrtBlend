@@ -28,6 +28,7 @@
 import bpy
 
 from ..extensions_framework import declarative_property_group
+from ..extensions_framework.validate import Logic_AND as A
 
 from .. import LuxRenderAddon
 
@@ -128,6 +129,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     alert = {}
 
     controls = [
+        'advanced',
         # Output switcher
         ['label_output_switcher', 'output_switcher_pass'],
         ['contour_scale', 'contour_range'], 
@@ -149,17 +151,29 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     ]
     
     visibility = {
-        'contour_scale': {'output_switcher_pass': 'IRRADIANCE'},
-        'contour_range': {'output_switcher_pass': 'IRRADIANCE'},
-        'contour_steps': {'output_switcher_pass': 'IRRADIANCE'},
-        'contour_zeroGridSize': {'output_switcher_pass': 'IRRADIANCE'},
+        'label_output_switcher': {'advanced': True},
+        'output_switcher_pass': {'advanced': True},
+        'contour_scale': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
+        'contour_range': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
+        'contour_steps': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
+        'contour_zeroGridSize': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
         'linear_scale': {'tonemapper_type': 'TONEMAP_LINEAR'},
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
+        'label_gamma': {'advanced': True},
+        'gamma': {'advanced': True}
     }
 
     properties = [
+        {
+            'type': 'bool',
+            'attr': 'advanced',
+            'name': 'Advanced',
+            'description': 'Configure advanced settings',
+            'default': False,
+            'save_in_preset': True
+        },
         # Output switcher
         {
             'type': 'text',

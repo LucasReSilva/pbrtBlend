@@ -1818,7 +1818,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # find out what triggered the update (default: unknown)
         update_changes = UpdateChanges()
 
-
         # check if visibility of objects was changed
         if self.lastVisibilitySettings is None:
             print("vissettings where None")
@@ -2084,9 +2083,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     print("new object count:", lcScene.GetObjectCount())
             
             # Debug output
-            print("------- Updated scene properties: ------")
+            print("Updated scene properties:")
             print(converter.scnProps)
-            print("----------------------------------------")
+            print("")
             
             # parse scene changes and end sceneEdit
             lcScene.Parse(converter.scnProps)
