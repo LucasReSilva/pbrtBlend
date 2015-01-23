@@ -1932,12 +1932,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
         if self.test_break() or context.scene.luxrender_engine.preview_stop:
             return
-            
+
+        print("\n###########################################################")
+
         # get update starttime in milliseconds
         view_update_startTime = int(round(time.time() * 1000))
         # debug
         self.update_counter += 1
-        print("update_counter:", self.update_counter)
+        print("Viewport Update", self.update_counter)
     
     ##########################################################################
     #                        Dynamic Updates
@@ -2064,13 +2066,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if update_changes.cause_light or update_changes.cause_objectTransform:
                 for ob in update_changes.changed_objects_transform:
                     LuxLog('Transformation update: ' + ob.name)
-
-                    print("!")
-                    print("objects in cache: ")
-                    for elem in list(BlenderSceneConverter.exported_meshes.items()):
-                        print(elem)
-                        print("-----")
-                    print("!")
 
                     converter.ConvertObject(ob, preview = True, 
                                             update_mesh = False, 

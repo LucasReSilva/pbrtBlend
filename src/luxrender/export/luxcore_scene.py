@@ -1637,16 +1637,10 @@ class BlenderSceneConverter(object):
 
                 cache_data = []
                 for export_data in export_data_list:
-                    print("loaded export data:")
-                    print(str(export_data))
-
                     # create unique name for the lcObject
                     name = ToValidLuxCoreName(obj.name + str(export_data.matIndex))
                     new_export_data = ExportedObjectData(name, export_data.lcMeshName, export_data.lcMaterialName, export_data.matIndex)
                     cache_data.append(new_export_data)
-
-                    print("new export data:")
-                    print(str(new_export_data))
 
                     self.SetObjectProperties(name, export_data.lcMeshName, export_data.lcMaterialName, transform)
 
