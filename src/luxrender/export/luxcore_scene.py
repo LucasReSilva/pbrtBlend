@@ -1713,6 +1713,7 @@ class BlenderSceneConverter(object):
             for elem in exported_meshes[obj.data]:
                 if obj in elem:
                     obj_cache_elem = elem
+                    break
 
             if obj_cache_elem is not None and not dupli:
                 print("[Mesh: %s][Object: %s] obj already in cache" % (obj.data.name, obj.name))
@@ -1721,7 +1722,8 @@ class BlenderSceneConverter(object):
                 for export_data in obj_cache_elem[obj]:
                     self.SetObjectProperties(export_data.lcObjName, export_data.lcMeshName, export_data.lcMaterialName, transform)
             else:
-                print("[Mesh: %s][Object: %s] no obj entry, creating one" % (obj.data.name, obj.name))
+                if not dupli:
+                    print("[Mesh: %s][Object: %s] no obj entry, creating one" % (obj.data.name, obj.name))
 
                 # load existing data from first entry
                 export_data_list = list(exported_meshes[obj.data][0].items())[0][1]
@@ -1733,6 +1735,10 @@ class BlenderSceneConverter(object):
                     if dupli:
                         name += '_dupli_' + str(self.dupli_number)
                         self.dupli_number += 1
+                        print("Exported dupli", name)
+
+                        if self.dupli_number % 100 == 0 and self.renderengine is not None:
+                            self.renderengine.update_stats('Exporting...', 'Exported Dupli %s' % name)
 
                     new_export_data = ExportedObjectData(name, export_data.lcMeshName, export_data.lcMaterialName, export_data.matIndex)
                     cache_data.append(new_export_data)
