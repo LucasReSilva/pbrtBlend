@@ -40,6 +40,7 @@ class luxcore_translatorsettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
+        ['export_particles', 'export_hair'],
         'override_materials',
         ['override_glass', 'override_lights', 'override_null'],
         'label_debug',
@@ -55,6 +56,20 @@ class luxcore_translatorsettings(declarative_property_group):
     alert = {}
 
     properties = [
+        {
+            'type': 'bool',
+            'attr': 'export_particles',
+            'name': 'Export Particles',
+            'default': True,
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'export_hair',
+            'name': 'Export Hair',
+            'default': True,
+            'save_in_preset': True
+        },
         {
             'type': 'bool',
             'attr': 'override_materials',

@@ -1677,12 +1677,15 @@ class BlenderSceneConverter(object):
         # check if object is particle emitter
         if len(obj.particle_systems) > 0:
             convert_object = False
+
             for psys in obj.particle_systems:
                 convert_object = convert_object or psys.settings.use_render_emitter
-                if psys.settings.render_type in ['OBJECT', 'GROUP']:
-                    self.ConvertDuplis(obj)
-                elif psys.settings.render_type == 'PATH':
-                    self.ConvertHair()
+
+                if self.blScene.luxcore_translatorsettings.export_particles:
+                    if psys.settings.render_type in ['OBJECT', 'GROUP']:
+                        self.ConvertDuplis(obj)
+                    elif psys.settings.render_type == 'PATH':
+                        self.ConvertHair()
 
         # check if object is duplicator
         if obj.is_duplicator and len(obj.particle_systems) < 1:
