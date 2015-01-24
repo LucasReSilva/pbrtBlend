@@ -67,6 +67,8 @@ class BlenderSceneConverter(object):
     material_id_mask_counter = 0
     by_material_id_counter = 0
 
+    dupli_number = 0
+
     # Cache with the following structure:
     # {obj.data : [ {obj : ExportedObjectData} ] }
     # obj.data is the main key, it points to a list that contains one entry per material index (because objects are
@@ -1600,6 +1602,64 @@ class BlenderSceneConverter(object):
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
+    def ConvertDuplis(self, obj):
+        """
+        Converts duplis and OBJECT and GROUP particle systems
+        """
+        print("Exporting duplis...")
+
+        try:
+            obj.dupli_list_create(self.blScene, settings = 'RENDER')
+            if not obj.dupli_list:
+                raise Exception('cannot create dupli list for object %s' % obj.name)
+
+            # Create our own DupliOb list to work around incorrect layers
+            # attribute when inside create_dupli_list()..free_dupli_list()
+            duplis = []
+            for dupli_ob in obj.dupli_list:
+                # metaballs are omitted from this function intentionally. Adding them causes recursion when building
+                # the ball. (add 'META' to this if you actually want that bug, it makes for some fun glitch
+                # art with particles)
+                if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
+                    continue
+                    # if not dupli_ob.object.is_visible(self.visibility_scene) or dupli_ob.object.hide_render:
+                if not is_obj_visible(self.blScene, dupli_ob.object, is_dupli = True):
+                    continue
+
+                duplis.append(
+                    (
+                        dupli_ob.object,
+                        dupli_ob.matrix.copy()
+                    )
+                )
+
+            obj.dupli_list_clear()
+
+            # dupli object, dupli matrix
+            for dupli_object, dupli_matrix in duplis:
+                # Check for group layer visibility, if the object is in a group
+                group_visible = len(dupli_object.users_group) == 0
+
+                for group in dupli_object.users_group:
+                    group_visible |= True in [a & b for a, b in zip(dupli_object.layers, group.layers)]
+
+                if not group_visible:
+                    continue
+
+                self.ConvertObject(dupli_object, matrix = dupli_matrix, dupli = True)
+
+            del duplis
+
+            print("Dupli export finished")
+        except Exception as err:
+            LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
+
+    def ConvertHair(self):
+        """
+        Converts PATH type particle systems (hair systems)
+        """
+        print("Hair export not supported yet")
+
     def SetObjectProperties(self, lcObjName, lcMeshName, lcMatName, transform):
         self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.material', [lcMatName]))
         self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.ply', [lcMeshName]))
@@ -1607,11 +1667,42 @@ class BlenderSceneConverter(object):
         if transform is not None:
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
 
-    def ConvertObject(self, obj, preview = False, update_mesh = True, update_transform = True, update_material = True):
-        if not is_obj_visible(self.blScene, obj) or obj is None or obj.data is None:
+    def ConvertObject(self, obj, matrix = None, dupli = False, preview = False,
+                      update_mesh = True, update_transform = True, update_material = True):
+        if obj is None or obj.data is None:
             return
 
-        transform = matrix_to_list(obj.matrix_world) if update_transform else None
+        convert_object = True
+
+        # check if object is particle emitter
+        if len(obj.particle_systems) > 0:
+            convert_object = False
+            for psys in obj.particle_systems:
+                convert_object = convert_object or psys.settings.use_render_emitter
+                if psys.settings.render_type in ['OBJECT', 'GROUP']:
+                    self.ConvertDuplis(obj)
+                elif psys.settings.render_type == 'PATH':
+                    self.ConvertHair()
+
+        # check if object is duplicator
+        if obj.is_duplicator and len(obj.particle_systems) < 1:
+            if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
+                self.ConvertDuplis(obj)
+
+        # Some dupli types should hide the original
+        if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
+            convert_object = False
+
+        if not is_obj_visible(self.blScene, obj, is_dupli = dupli) or not convert_object:
+            return
+
+        transform = None
+        if update_transform:
+            if matrix is not None:
+                transform = matrix_to_list(matrix)
+            else:
+                transform = matrix_to_list(obj.matrix_world)
+
         exported_meshes = BlenderSceneConverter.get_export_cache()
 
         # check if mesh was already exported
@@ -1623,7 +1714,7 @@ class BlenderSceneConverter(object):
                 if obj in elem:
                     obj_cache_elem = elem
 
-            if obj_cache_elem is not None:
+            if obj_cache_elem is not None and not dupli:
                 print("[Mesh: %s][Object: %s] obj already in cache" % (obj.data.name, obj.name))
 
                 # read from cache
@@ -1639,6 +1730,10 @@ class BlenderSceneConverter(object):
                 for export_data in export_data_list:
                     # create unique name for the lcObject
                     name = ToValidLuxCoreName(obj.name + str(export_data.matIndex))
+                    if dupli:
+                        name += '_dupli_' + str(self.dupli_number)
+                        self.dupli_number += 1
+
                     new_export_data = ExportedObjectData(name, export_data.lcMeshName, export_data.lcMaterialName, export_data.matIndex)
                     cache_data.append(new_export_data)
 
@@ -2112,25 +2207,25 @@ class BlenderSceneConverter(object):
         ########################################################################
         objects_amount = len(self.blScene.objects)
         objects_counter = 0
-        
+
+        LuxLog("Converting objects:")
+
         for obj in self.blScene.objects:
             # cancel export when user hits 'Esc'
             if self.renderengine is not None and self.renderengine.test_break():
                 break
 
+            # display progress messages in log and UI
             objects_counter += 1
-            LuxLog('Converting object: %s (%d of %d)' % (
-                    obj.name, 
-                    objects_counter, 
-                    objects_amount))
-                    
-            
+            message = 'Object: %s (%d of %d)' % (obj.name, objects_counter, objects_amount)
+            progress = float(objects_counter) / float(objects_amount)
+            print('[' + str(int(progress * 100)) + '%] ' + message)
+
             if self.renderengine is not None:
-                self.renderengine.update_stats('Exporting...', 'Object: %s (%d of %d)' % (
-                                               obj.name, objects_counter, objects_amount))
-                progress = float(objects_counter) / float(objects_amount)
+                self.renderengine.update_stats('Exporting...', message)
                 self.renderengine.update_progress(progress)
 
+            # convert object
             self.ConvertObject(obj)
         
         # Debug information
