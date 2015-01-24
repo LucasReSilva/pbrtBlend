@@ -2094,12 +2094,12 @@ class BlenderSceneConverter(object):
         ########################################################################
         if self.blScene.camera.data.luxrender_camera.Exterior_volume:
             # Default volume from camera exterior
-            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default',
-                                                 [self.blScene.camera.data.luxrender_camera.Exterior_volume]))
+            volume = ToValidLuxCoreName(self.blScene.camera.data.luxrender_camera.Exterior_volume)
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
         elif self.blScene.luxrender_world.default_exterior_volume:
             # Default volume from world
-            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default',
-                                                 [self.blScene.luxrender_world.default_exterior_volume]))
+            volume = ToValidLuxCoreName(self.blScene.luxrender_world.default_exterior_volume)
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
 
         ########################################################################
         # Convert all volumes
