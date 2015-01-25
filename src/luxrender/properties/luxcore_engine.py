@@ -68,6 +68,7 @@ class luxcore_enginesettings(declarative_property_group):
         'advanced',
         'label_custom_properties',
         'custom_properties',
+        'instancing',
         # BIDIR
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH
@@ -111,6 +112,7 @@ class luxcore_enginesettings(declarative_property_group):
 
     visibility = {
                     'label_custom_properties': {'advanced': True},
+                    'instancing': {'advanced': True},
                     'custom_properties': {'advanced': True},
                     # BIDIR
                     'bidir_eyedepth': {'renderengine_type': 'BIDIRCPU'},
@@ -213,7 +215,15 @@ class luxcore_enginesettings(declarative_property_group):
             'description': 'LuxCore custom properties (separated by \'|\', suggested only for advanced users)',
             'default': '',
             'save_in_preset': True
-        },  
+        },
+        {
+            'type': 'bool',
+            'attr': 'instancing',
+            'name': 'Use Instancing',
+            'description': 'Lower memory usage for instances (like particles), but also lower rendering speed',
+            'default': True,
+            'save_in_preset': True
+        },
         {   # BIDIR
             'type': 'int',
             'attr': 'bidir_eyedepth',

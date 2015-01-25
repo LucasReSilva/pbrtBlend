@@ -1999,7 +1999,7 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
 
         # Accelerator settings
-        self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [False]))
+        self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [engine_settings.instancing]))
 
         # Custom Properties
         if engine_settings.advanced and engine_settings.custom_properties:
@@ -2176,6 +2176,8 @@ class BlenderSceneConverter(object):
                 self.createChannelOutputString('IRRADIANCE')
 
     def Convert(self, imageWidth=None, imageHeight=None, realtime_preview=False):
+        export_start = time.time()
+
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', '')
 
@@ -2217,7 +2219,7 @@ class BlenderSceneConverter(object):
         objects_amount = len(self.blScene.objects)
         objects_counter = 0
 
-        LuxLog("Converting objects:")
+        LuxLog('Converting objects:')
 
         for obj in self.blScene.objects:
             # cancel export when user hits 'Esc'
@@ -2267,10 +2269,20 @@ class BlenderSceneConverter(object):
             LuxLog(str(self.cfgProps))
 
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
+
         BlenderSceneConverter.clear()  # for scalers_count etc.
 
+        # show messages about export
+        export_time = time.time() - export_start
+        print('Export took %.1f seconds' % export_time)
         if self.renderengine is not None:
-            self.renderengine.update_stats('Exporting...', 'Starting LuxRender')
+            engine = self.blScene.luxcore_enginesettings.renderengine_type
+            if 'OCL' in engine:
+                message = 'Compiling OpenCL Kernels...'
+            else:
+                message = 'Starting LuxRender...'
+
+            self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
 
         #        import pydevd
         #        pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
