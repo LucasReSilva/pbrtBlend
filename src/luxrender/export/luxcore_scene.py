@@ -1770,8 +1770,8 @@ class BlenderSceneConverter(object):
 
                     # material override (clay render)
                     translator_settings = self.blScene.luxcore_translatorsettings
-                    if translator_settings.override_materials:
-                        matType = objMat.luxrender_material.type
+                    matType = objMat.luxrender_material.type
+                    if translator_settings.override_materials and matType != 'mix':
                         if 'glass' in matType:
                             if translator_settings.override_glass:
                                 objMat = None
