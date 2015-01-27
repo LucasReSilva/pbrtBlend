@@ -1030,15 +1030,15 @@ class BlenderSceneConverter(object):
                     props.Set(
                         pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
                 elif m2_type == 'fresnelcolor':
-                    props.Set(pyluxcore.Property(prefix + '.n', 'fn_dummy_tex'))
-                    props.Set(pyluxcore.Property(prefix + '.k', 'fk_dummy_tex'))
-                    props.Set(pyluxcore.Property('scene.textures.fn_dummy_tex.type', 'fresnelapproxn'))
-
-                    props.Set(pyluxcore.Property('scene.textures.fn_dummy_tex.texture',
+                    fn_dummy_tex = '%s_fn_dummy_tex' % matName
+                    fk_dummy_tex = '%s_fk_dummy_tex' % matName
+                    props.Set(pyluxcore.Property(prefix + '.n', fn_dummy_tex))
+                    props.Set(pyluxcore.Property(prefix + '.k', fk_dummy_tex))
+                    props.Set(pyluxcore.Property('scene.textures.' + fn_dummy_tex + '.type', 'fresnelapproxn'))
+                    props.Set(pyluxcore.Property('scene.textures.' + fn_dummy_tex + '.texture',
                                                  self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
-
-                    props.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.type', 'fresnelapproxk'))
-                    props.Set(pyluxcore.Property('scene.textures.fk_dummy_tex.texture',
+                    props.Set(pyluxcore.Property('scene.textures.' + fk_dummy_tex + '.type', 'fresnelapproxk'))
+                    props.Set(pyluxcore.Property('scene.textures.' + fk_dummy_tex + '.texture',
                                                  self.ConvertMaterialChannel(luxMat, 'Kr', 'color')))
                 # TODO: nk_data and fresneltex
                 else:
