@@ -974,6 +974,19 @@ class BlenderSceneConverter(object):
             props = pyluxcore.Properties()
             prefix = 'scene.materials.' + matName
 
+            # material override (clay render)
+            translator_settings = self.blScene.luxcore_translatorsettings
+            if translator_settings.override_materials and matType != 'mix':
+                if 'glass' in matType:
+                    if translator_settings.override_glass:
+                        return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
+                elif matType == 'null':
+                    if translator_settings.override_null:
+                        return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
+                else:
+                    # all materials that are not glass, lights or null
+                    return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
+
             # ###################################################################
             # Matte and Roughmatte
             ####################################################################
@@ -1285,16 +1298,17 @@ class BlenderSceneConverter(object):
             else:
                 return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
-            # Common material settings
-            if material.luxrender_material.bumpmap_usefloattexture:
-                luxMap = material.luxrender_material.bumpmap_floattexturename
-                props.Set(
-                    pyluxcore.Property(prefix + '.bumptex', self.ConvertCommonChannel(luxMap, material, 'bumpmap')))
+            if not translator_settings.override_materials:
+                # Common material settings
+                if material.luxrender_material.bumpmap_usefloattexture:
+                    luxMap = material.luxrender_material.bumpmap_floattexturename
+                    props.Set(
+                        pyluxcore.Property(prefix + '.bumptex', self.ConvertCommonChannel(luxMap, material, 'bumpmap')))
 
-            if material.luxrender_material.normalmap_usefloattexture:
-                luxMap = material.luxrender_material.normalmap_floattexturename
-                props.Set(
-                    pyluxcore.Property(prefix + '.normaltex', self.ConvertCommonChannel(luxMap, material, 'normalmap')))
+                if material.luxrender_material.normalmap_usefloattexture:
+                    luxMap = material.luxrender_material.normalmap_floattexturename
+                    props.Set(
+                        pyluxcore.Property(prefix + '.normaltex', self.ConvertCommonChannel(luxMap, material, 'normalmap')))
 
 
             # LuxCore specific material settings
@@ -1320,19 +1334,20 @@ class BlenderSceneConverter(object):
             props.Set(pyluxcore.Property(prefix + '.visibility.indirect.specular.enable',
                                          material.luxcore_material.visibility_indirect_specular_enable))
 
-            # LuxRender emission
-            if material.luxrender_emission.use_emission:
-                emit_enabled = self.blScene.luxrender_lightgroups.is_enabled(material.luxrender_emission.lightgroup)
-                emit_enabled &= (material.luxrender_emission.L_color.v * material.luxrender_emission.gain) > 0.0
-                if emit_enabled:
-                    props.Set(pyluxcore.Property(prefix + '.emission',
-                                                 self.ConvertMaterialChannel(material.luxrender_emission, 'L',
-                                                                             'color')))
-                    props.Set(pyluxcore.Property(prefix + '.emission.gain', [
-                        material.luxrender_emission.gain, material.luxrender_emission.gain,
-                        material.luxrender_emission.gain]))
-                    props.Set(pyluxcore.Property(prefix + '.emission.power', material.luxrender_emission.power))
-                    props.Set(pyluxcore.Property(prefix + '.emission.efficency', material.luxrender_emission.efficacy))
+            if not (translator_settings.override_materials and translator_settings.override_lights):
+                # LuxRender emission
+                if material.luxrender_emission.use_emission:
+                    emit_enabled = self.blScene.luxrender_lightgroups.is_enabled(material.luxrender_emission.lightgroup)
+                    emit_enabled &= (material.luxrender_emission.L_color.v * material.luxrender_emission.gain) > 0.0
+                    if emit_enabled:
+                        props.Set(pyluxcore.Property(prefix + '.emission',
+                                                     self.ConvertMaterialChannel(material.luxrender_emission, 'L',
+                                                                                 'color')))
+                        props.Set(pyluxcore.Property(prefix + '.emission.gain', [
+                            material.luxrender_emission.gain, material.luxrender_emission.gain,
+                            material.luxrender_emission.gain]))
+                        props.Set(pyluxcore.Property(prefix + '.emission.power', material.luxrender_emission.power))
+                        props.Set(pyluxcore.Property(prefix + '.emission.efficency', material.luxrender_emission.efficacy))
 
             self.scnProps.Set(props)
             self.materialsCache.add(matName)
@@ -1561,9 +1576,13 @@ class BlenderSceneConverter(object):
 
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', ['matte']))
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', [0.0, 0.0, 0.0]))
-                self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.power', [light.luxrender_lamp.luxrender_lamp_area.power]))
                 self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.efficiency', [light.luxrender_lamp.luxrender_lamp_area.efficacy]))
+
+                translator_settings = self.blScene.luxcore_translatorsettings
+                if not (translator_settings.override_materials and translator_settings.override_lights):
+                    self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
+
                 # assign material to object
                 self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.material', [mat_name]))
                 
@@ -1767,23 +1786,6 @@ class BlenderSceneConverter(object):
                 # Convert the (main) material
                 try:
                     objMat = obj.material_slots[objMatIndex].material
-
-                    # material override (clay render)
-                    translator_settings = self.blScene.luxcore_translatorsettings
-                    matType = objMat.luxrender_material.type
-                    if translator_settings.override_materials and matType != 'mix':
-                        if 'glass' in matType:
-                            if translator_settings.override_glass:
-                                objMat = None
-                        elif matType == 'null':
-                            if translator_settings.override_null:
-                                objMat = None
-                        elif objMat.luxrender_emission.use_emission:
-                            if translator_settings.override_lights:
-                                objMat = None
-                        else:
-                            # all materials that are not glass, lights or null
-                            objMat = None
                 except IndexError:
                     objMat = None
                     LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
