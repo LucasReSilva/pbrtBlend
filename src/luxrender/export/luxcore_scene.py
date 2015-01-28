@@ -1314,9 +1314,9 @@ class BlenderSceneConverter(object):
             # LuxCore specific material settings
             if material.luxcore_material.id != -1:
                 props.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
-                if material.luxcore_material.create_MATERIAL_ID_MASK:
+                if material.luxcore_material.create_MATERIAL_ID_MASK and self.blScene.luxrender_channels.enable_aovs:
                     self.createChannelOutputString('MATERIAL_ID_MASK', material.luxcore_material.id)
-                if material.luxcore_material.create_BY_MATERIAL_ID:
+                if material.luxcore_material.create_BY_MATERIAL_ID and self.blScene.luxrender_channels.enable_aovs:
                     self.createChannelOutputString('BY_MATERIAL_ID', material.luxcore_material.id)
 
             if material.luxcore_material.emission_id != -1:

@@ -1600,7 +1600,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             LuxLog(str(lcConfig.GetProperties()))
             LuxLog('Scene Properties:')
             LuxLog(str(lcConfig.GetScene().GetProperties()))
-            # add a lamp (hack for Blender's preview scene, which does not contain any lights
+            # add a lamp (hack for Blender's preview scene, which does not contain any lights)
             lcConfig.GetScene().Parse(pyluxcore.Properties().
                                       Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['sky'])))
 
