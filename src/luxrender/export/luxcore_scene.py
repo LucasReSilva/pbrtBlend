@@ -282,8 +282,7 @@ class BlenderSceneConverter(object):
             # check if the object should not/cannot be exported
             if (not is_obj_visible(self.blScene, obj) or
                         obj.type not in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT'] or
-                        obj.data.luxrender_mesh.portal or
-                        (self.renderengine is not None and self.renderengine.test_break())):
+                        obj.data.luxrender_mesh.portal):
                 return mesh_definitions
 
             #convert_blender_start = int(round(time.time() * 1000)) #### DEBUG
@@ -1688,10 +1687,27 @@ class BlenderSceneConverter(object):
 
     def ConvertObject(self, obj, matrix = None, dupli = False, preview = False,
                       update_mesh = True, update_transform = True, update_material = True):
-        if obj is None or obj.data is None:
+        if obj is None or obj.data is None or (self.renderengine is not None and self.renderengine.test_break()):
             return
 
         convert_object = True
+
+        transform = None
+        if update_transform:
+            if matrix is not None:
+                transform = matrix_to_list(matrix)
+            else:
+                transform = matrix_to_list(obj.matrix_world)
+
+        # check if object is proxy
+        if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
+            convert_object = not obj.luxrender_object.hide_proxy_mesh
+
+            path = efutil.path_relative_to_export(obj.luxrender_object.external_mesh)
+            name = ToValidLuxCoreName(obj.name)
+            material = self.ConvertMaterial(obj.active_material, obj.material_slots, no_conversion = not update_material)
+
+            self.SetObjectProperties(name, path, material, transform)
 
         # check if object is particle emitter
         if len(obj.particle_systems) > 0:
@@ -1717,13 +1733,6 @@ class BlenderSceneConverter(object):
 
         if not is_obj_visible(self.blScene, obj, is_dupli = dupli) or not convert_object:
             return
-
-        transform = None
-        if update_transform:
-            if matrix is not None:
-                transform = matrix_to_list(matrix)
-            else:
-                transform = matrix_to_list(obj.matrix_world)
 
         exported_meshes = BlenderSceneConverter.get_export_cache()
 
