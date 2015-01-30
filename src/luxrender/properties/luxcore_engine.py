@@ -184,7 +184,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'renderengine_type',
             'name': 'Rendering engine',
             'description': 'Rendering engine to use',
-            'default': 'PATHCPU',
+            'default': 'BIDIRCPU',
             'items': [
                 ('PATHCPU', 'Path', 'Path tracer'),
                 ('PATHOCL', 'Path OpenCL', 'Pure OpenCL path tracer'),
