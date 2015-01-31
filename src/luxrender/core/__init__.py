@@ -2052,7 +2052,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 LuxLog('Materials update')
                 converter.clear()
                 for material in update_changes.changed_materials:
-                    converter.ConvertMaterial(material, bpy.data.materials)
+                    converter.ConvertMaterial(material)
                 converter.clear()
             
             if update_changes.cause_mesh:

@@ -944,10 +944,10 @@ class BlenderSceneConverter(object):
                 else:
                     return self.ConvertTexture(texture)
 
-    def ConvertMaterial(self, material, materials, no_conversion = False):
+    def ConvertMaterial(self, material, materials = None, no_conversion = False):
         """
         material: material to convert
-        materials: all materials that are assigned to the same object as material
+        materials: obj.material_slots
         """
         try:
             if material is None:
@@ -1177,11 +1177,6 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.kr', '1.0 1.0 1.0'))
                 props.Set(pyluxcore.Property(prefix + '.kt', '1.0 1.0 1.0'))
 
-                if hasattr(material.luxrender_material, "Interior_volume") and \
-                        material.luxrender_material.Interior_volume:
-                    validInteriorName =  ToValidLuxCoreName(material.luxrender_material.Interior_volume)
-                    props.Set(pyluxcore.Property(prefix + '.volume.interior',
-                                                 validInteriorName))
             ####################################################################
             # Roughlass
             ####################################################################
@@ -1263,11 +1258,7 @@ class BlenderSceneConverter(object):
             ####################################################################
             elif matType == 'null':
                 props.Set(pyluxcore.Property(prefix + '.type', ['null']))
-                if hasattr(material.luxrender_material, "Interior_volume") and \
-                        material.luxrender_material.Interior_volume:
-                    validInteriorName =  ToValidLuxCoreName(material.luxrender_material.Interior_volume)
-                    props.Set(pyluxcore.Property(prefix + '.volume.interior',
-                                                 validInteriorName))
+
             ####################################################################
             # Mix
             ####################################################################
@@ -1277,9 +1268,19 @@ class BlenderSceneConverter(object):
                     return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
                 else:
                     try:
-                        mat1 = materials[material.luxrender_material.luxrender_mat_mix.namedmaterial1_material].material
+                        material_1_name = material.luxrender_material.luxrender_mat_mix.namedmaterial1_material
+                        material_2_name = material.luxrender_material.luxrender_mat_mix.namedmaterial2_material
+
+                        if materials is not None:
+                            # obj.material_slots passed as argument
+                            mat1 = materials[material_1_name].material
+                            mat2 = materials[material_2_name].material
+                        else:
+                            # no material_slots available, get materials from bpy.data.materials
+                            mat1 = bpy.data.materials[material_1_name]
+                            mat2 = bpy.data.materials[material_2_name]
+
                         mat1Name = self.ConvertMaterial(mat1, materials)
-                        mat2 = materials[material.luxrender_material.luxrender_mat_mix.namedmaterial2_material].material
                         mat2Name = self.ConvertMaterial(mat2, materials)
 
                         props.Set(pyluxcore.Property(prefix + '.type', ['mix']))
@@ -1287,8 +1288,8 @@ class BlenderSceneConverter(object):
                         props.Set(pyluxcore.Property(prefix + '.material2', mat2Name))
                         props.Set(pyluxcore.Property(prefix + '.amount',
                                                      self.ConvertMaterialChannel(luxMat, 'amount', 'float')))
-                    except:
-                        LuxLog('WARNING: unable to convert mix material: %s' % material.name)
+                    except Exception as err:
+                        LuxLog('WARNING: unable to convert mix material %s\n%s' % (material.name, err))
                         return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
             ####################################################################
@@ -1308,6 +1309,18 @@ class BlenderSceneConverter(object):
                     luxMap = material.luxrender_material.normalmap_floattexturename
                     props.Set(
                         pyluxcore.Property(prefix + '.normaltex', self.ConvertCommonChannel(luxMap, material, 'normalmap')))
+
+                # Interior volume
+                if hasattr(material.luxrender_material, "Interior_volume") and \
+                        material.luxrender_material.Interior_volume:
+                    validInteriorName =  ToValidLuxCoreName(material.luxrender_material.Interior_volume)
+                    props.Set(pyluxcore.Property(prefix + '.volume.interior', validInteriorName))
+
+                # Exterior volume
+                if hasattr(material.luxrender_material, "Exterior_volume") and \
+                        material.luxrender_material.Exterior_volume:
+                    validExteriorName =  ToValidLuxCoreName(material.luxrender_material.Exterior_volume)
+                    props.Set(pyluxcore.Property(prefix + '.volume.exterior', validExteriorName))
 
             # LuxCore specific material settings
             if material.luxcore_material.id != -1:
@@ -1369,6 +1382,7 @@ class BlenderSceneConverter(object):
 
             self.scnProps.Set(props)
             self.materialsCache.add(matName)
+
             if use_alpha_transparency:
                 self.materialsCache.add(name_mix)
                 return name_mix
