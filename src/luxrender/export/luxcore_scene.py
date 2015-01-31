@@ -76,6 +76,8 @@ class BlenderSceneConverter(object):
     # ExportedObjectData contains the luxcore object, mesh and material names and the material index
     exported_meshes = {}
 
+    volumes_cache = {}
+
     @staticmethod
     def next_scale_value():
         BlenderSceneConverter.scalers_count += 1
@@ -84,7 +86,7 @@ class BlenderSceneConverter(object):
     @staticmethod
     def get_unique_name(name):
         BlenderSceneConverter.unique_material_number += 1
-        return (name + " " + str(BlenderSceneConverter.unique_material_number))
+        return (name + "_" + str(BlenderSceneConverter.unique_material_number) + "u")
 
     @staticmethod
     def clear():
@@ -949,6 +951,20 @@ class BlenderSceneConverter(object):
         material: material to convert
         materials: obj.material_slots
         """
+
+        def set_volumes(prefix):
+            # Interior volume
+            if hasattr(material.luxrender_material, "Interior_volume") and \
+                    material.luxrender_material.Interior_volume:
+                validInteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Interior_volume]
+                props.Set(pyluxcore.Property(prefix + '.volume.interior', validInteriorName))
+
+            # Exterior volume
+            if hasattr(material.luxrender_material, "Exterior_volume") and \
+                    material.luxrender_material.Exterior_volume:
+                validExteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Exterior_volume]
+                props.Set(pyluxcore.Property(prefix + '.volume.exterior', validExteriorName))
+
         try:
             if material is None:
                 return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
@@ -1310,17 +1326,7 @@ class BlenderSceneConverter(object):
                     props.Set(
                         pyluxcore.Property(prefix + '.normaltex', self.ConvertCommonChannel(luxMap, material, 'normalmap')))
 
-                # Interior volume
-                if hasattr(material.luxrender_material, "Interior_volume") and \
-                        material.luxrender_material.Interior_volume:
-                    validInteriorName =  ToValidLuxCoreName(material.luxrender_material.Interior_volume)
-                    props.Set(pyluxcore.Property(prefix + '.volume.interior', validInteriorName))
-
-                # Exterior volume
-                if hasattr(material.luxrender_material, "Exterior_volume") and \
-                        material.luxrender_material.Exterior_volume:
-                    validExteriorName =  ToValidLuxCoreName(material.luxrender_material.Exterior_volume)
-                    props.Set(pyluxcore.Property(prefix + '.volume.exterior', validExteriorName))
+                set_volumes(prefix)
 
             # LuxCore specific material settings
             if material.luxcore_material.id != -1:
@@ -1372,13 +1378,39 @@ class BlenderSceneConverter(object):
 
                 name_null = 'LUXBLEND_LUXCORE_NULL_MATERIAL' # created in self.Convert()
 
-                mix_prefix = 'scene.materials.' + name_mix
+                alpha = [0.0]
 
+                alpha_source = material.luxrender_transparency.alpha_source
+                if alpha_source == 'texture':
+                    if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
+                        texture = bpy.data.textures[material.luxrender_transparency.alpha_floattexturename]
+                        alpha = self.ConvertTexture(texture)
+
+                        if material.luxrender_transparency.inverse:
+                            sv = BlenderSceneConverter.next_scale_value()
+                            inverter_name = alpha + '_inverter_' + str(sv)
+                            inverter_prefix = 'scene.textures.' + inverter_name
+
+                            props.Set(pyluxcore.Property(inverter_prefix + '.type', ['mix']))
+                            props.Set(pyluxcore.Property(inverter_prefix + '.amount', alpha))
+                            props.Set(pyluxcore.Property(inverter_prefix + '.texture1', [1.0]))
+                            props.Set(pyluxcore.Property(inverter_prefix + '.texture2', [0.0]))
+
+                            alpha = inverter_name
+
+                elif alpha_source == 'constant':
+                    alpha = material.luxrender_transparency.alpha_value
+                else:
+                    LuxLog('WARNING: unsupported alpha transparency mode (%s) used on material %s' %
+                           (alpha_source, material.name))
+
+                mix_prefix = 'scene.materials.' + name_mix
                 props.Set(pyluxcore.Property(mix_prefix + '.type', ['mix']))
                 props.Set(pyluxcore.Property(mix_prefix + '.material1', matName))
                 props.Set(pyluxcore.Property(mix_prefix + '.material2', name_null))
-                props.Set(pyluxcore.Property(mix_prefix + '.amount', [0.5]))
-                #                             self.ConvertMaterialChannel(luxMat, 'amount', 'float')))
+                props.Set(pyluxcore.Property(mix_prefix + '.amount', alpha))
+
+                set_volumes(mix_prefix)
 
             self.scnProps.Set(props)
             self.materialsCache.add(matName)
@@ -1790,6 +1822,7 @@ class BlenderSceneConverter(object):
                 for export_data in obj_cache_elem[obj]:
                     self.SetObjectProperties(export_data.lcObjName, export_data.lcMeshName, export_data.lcMaterialName, transform)
             else:
+                # don't spam the log during dupli export
                 if not dupli:
                     print("[Mesh: %s][Object: %s] no obj entry, creating one" % (obj.data.name, obj.name))
 
@@ -2128,6 +2161,9 @@ class BlenderSceneConverter(object):
         
         if self.check_name_collision(name):
             name = self.get_unique_name(name)
+
+        # add to cache
+        BlenderSceneConverter.volumes_cache[volume.name] = name
 
         self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.type' % name, [volume.type]))
 

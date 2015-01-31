@@ -2058,17 +2058,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if update_changes.cause_mesh:
                 for ob in update_changes.changed_objects_mesh:
                     LuxLog('Mesh update: ' + ob.name)
-                    converter.ConvertObject(ob, preview = True, 
-                                            update_mesh = True, 
-                                            update_transform = True)
+                    converter.ConvertObject(ob, preview = True, update_mesh = True, update_transform = True)
             
             if update_changes.cause_light or update_changes.cause_objectTransform:
                 for ob in update_changes.changed_objects_transform:
                     LuxLog('Transformation update: ' + ob.name)
 
-                    converter.ConvertObject(ob, preview = True, 
-                                            update_mesh = False, 
-                                            update_transform = True,
+                    converter.ConvertObject(ob, preview = True, update_mesh = False, update_transform = True,
                                             update_material = False)
                                             
             if update_changes.cause_objectsRemoved:
