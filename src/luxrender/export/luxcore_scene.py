@@ -1309,7 +1309,6 @@ class BlenderSceneConverter(object):
                     props.Set(
                         pyluxcore.Property(prefix + '.normaltex', self.ConvertCommonChannel(luxMap, material, 'normalmap')))
 
-
             # LuxCore specific material settings
             if material.luxcore_material.id != -1:
                 props.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
@@ -1348,9 +1347,33 @@ class BlenderSceneConverter(object):
                         props.Set(pyluxcore.Property(prefix + '.emission.power', material.luxrender_emission.power))
                         props.Set(pyluxcore.Property(prefix + '.emission.efficency', material.luxrender_emission.efficacy))
 
+            # alpha transparency
+            use_alpha_transparency = False
+            name_mix = matName + '_alpha_mix'
+
+            if self.check_name_collision(name_mix):
+                name_mix = self.get_unique_name(name_mix)
+
+            if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
+                use_alpha_transparency = True
+
+                name_null = 'LUXBLEND_LUXCORE_NULL_MATERIAL' # created in self.Convert()
+
+                mix_prefix = 'scene.materials.' + name_mix
+
+                props.Set(pyluxcore.Property(mix_prefix + '.type', ['mix']))
+                props.Set(pyluxcore.Property(mix_prefix + '.material1', matName))
+                props.Set(pyluxcore.Property(mix_prefix + '.material2', name_null))
+                props.Set(pyluxcore.Property(mix_prefix + '.amount', [0.5]))
+                #                             self.ConvertMaterialChannel(luxMat, 'amount', 'float')))
+
             self.scnProps.Set(props)
             self.materialsCache.add(matName)
-            return matName
+            if use_alpha_transparency:
+                self.materialsCache.add(name_mix)
+                return name_mix
+            else:
+                return matName
         except Exception as err:
             LuxLog('Material export failed, skipping material: %s\n%s' % (material.name, err))
             import traceback
@@ -2201,10 +2224,12 @@ class BlenderSceneConverter(object):
         self.ConvertCamera()
 
         ########################################################################
-        # Add dummy material
+        # Add dummy materials
         ########################################################################
         self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_CLAY_MATERIAL.type', ['matte']))
         self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_CLAY_MATERIAL.kd', '0.7 0.7 0.7'))
+
+        self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_NULL_MATERIAL.type', ['null']))
 
         ########################################################################
         # Default volume
