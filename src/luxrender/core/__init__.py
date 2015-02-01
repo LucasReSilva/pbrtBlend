@@ -362,6 +362,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def view_update(self, context):
         if UseLuxCore():
             self.luxcore_view_update(context)
+        else:
+            self.update_stats('ERROR: Viewport rendering is only available when API 2.x is selected!', '')
 
     def view_draw(self, context):
         if UseLuxCore():
@@ -1432,10 +1434,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     
                     if (scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] and
                             scene.luxcore_tile_highlighting.use_tile_highlighting):
+                        # use a temp image because layer.rect does not support list slicing
                         tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
                                                                                               filmHeight,
                                                                                               imageBufferFloat)
-                        # mark tiles
+                        # draw tile outlines
                         self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight, 
                                         scene.luxcore_tile_highlighting.show_converged,
                                         scene.luxcore_tile_highlighting.show_unconverged,
