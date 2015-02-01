@@ -1917,12 +1917,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # check for changes in renderengine configuration
             configConverter = BlenderSceneConverter(context.scene)
             configConverter.ConvertConfig(realtime_preview = True)
-            
+
+            newRenderSettings = (str(configConverter.cfgProps) +
+                                 str(scene.luxcore_realtimesettings.halt_samples) +
+                                 str(scene.luxcore_realtimesettings.halt_time))
+
             if self.lastRenderSettings == '':
-                self.lastRenderSettings = str(configConverter.cfgProps)
-            elif self.lastRenderSettings != str(configConverter.cfgProps):
+                self.lastRenderSettings = newRenderSettings
+            elif self.lastRenderSettings != newRenderSettings:
                 # renderengine config has changed
                 update_changes.set_cause(config = True)
+                # save settings to compare with next update
+                self.lastRenderSettings = newRenderSettings
         
         return update_changes
     
@@ -2024,8 +2030,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 
                 configConverter = BlenderSceneConverter(context.scene, renderengine = self)
                 configConverter.ConvertConfig(realtime_preview = True)
-                # save settings to compare with next update
-                self.lastRenderSettings = str(configConverter.cfgProps)
                 
                 # change config
                 self.lcConfig.Parse(configConverter.cfgProps)
