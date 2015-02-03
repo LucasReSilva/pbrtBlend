@@ -1572,16 +1572,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                channels.saveToDisk, i)
 
                 # Convert all RADIANCE_GROUP channels
-                lightgroup_ids = set()
-                for i in props.GetAllUniqueSubNames("film.outputs"):
-                    if props.Get(i + ".type").GetString() == "RADIANCE_GROUP":
-                        lightgroup_ids.add(props.Get(i + ".id").GetInt())
+                lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
+                print("lightgroup_count:", str(lightgroup_count))
 
-                print("lightgroup_ids: " + str(lightgroup_ids))
-
-                for i in range(len(lightgroup_ids)):
+                for i in range(lightgroup_count):
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'RADIANCE_GROUP', True,
-                                               pyluxcore.FilmOutputType.RADIANCE_GROUP, 'f', 0.0, 3, True,
+                                               pyluxcore.FilmOutputType.RADIANCE_GROUP, 'f', 0.0, 3, False,
                                                channels.saveToDisk, i)
     
                 channelCalcTime = time.time() - channelCalcStartTime
