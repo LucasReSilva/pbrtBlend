@@ -64,8 +64,8 @@ class luxcore_enginesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        'renderengine_type',
         'advanced',
+        'renderengine_type',
         'label_custom_properties',
         'custom_properties',
         'instancing',
@@ -105,9 +105,7 @@ class luxcore_enginesettings(declarative_property_group):
         'tile_multipass_enable',
         'tile_multipass_convergencetest_threshold',
         'tile_multipass_convergencetest_threshold_reduction',
-        # 'label_compute_settings',  # OpenCL settings, Compute settings
-        # 'native_threads_count',  # CPU settings
-        # 'op_opencl_device_list_update',
+
     ]
 
     visibility = {
@@ -141,7 +139,7 @@ class luxcore_enginesettings(declarative_property_group):
                     'biaspath_pathdepth_diffuse': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_glossy': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_specular': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'label_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
+                    'label_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_clamping_radiance_maxvalue': 
                     	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
                     'biaspath_clamping_pdf_value': 
@@ -167,13 +165,6 @@ class luxcore_enginesettings(declarative_property_group):
                     'filter_width': A([{'advanced': True}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
                     	{'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])}]),
-                    # Don't show halt samples setting for BIASPATH
-                    #'halt_samples': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}
-                    # CPU settings
-                    # 'native_threads_count': {
-                    #     'renderengine_type': O(['PATHCPU', 'BIASPATHCPU', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    # OpenCL settings
-                    # 'op_opencl_device_list_update': {'renderengine_type': O(['PATHOCL', 'BIASPATHOCL'])},
     }
 
     alert = {}
@@ -182,7 +173,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'enum',
             'attr': 'renderengine_type',
-            'name': 'Rendering engine',
+            'name': 'Engine',
             'description': 'Rendering engine to use',
             'default': 'BIDIRCPU',
             'items': [
@@ -249,7 +240,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'path_maxdepth',
             'name': 'Max. Depth',
             'description': 'Max recursion depth for ray casting from eye',
-            'default': 16,
+            'default': 8,
             'min': 1,
             'max': 2048,
             'save_in_preset': True
@@ -410,7 +401,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'biaspath_pathdepth_diffuse',
-            'name': 'Max Diffuse Depth',
+            'name': 'Diffuse',
             'description': 'Max recursion depth for a diffuse path',
             'default': 2,
             'min': 0,
@@ -420,7 +411,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'biaspath_pathdepth_glossy',
-            'name': 'Max Glossy Depth',
+            'name': 'Glossy',
             'description': 'Max recursion depth for a glossy path',
             'default': 1,
             'min': 0,
@@ -430,7 +421,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'biaspath_pathdepth_specular',
-            'name': 'Max Specular Depth',
+            'name': 'Specular',
             'description': 'Max recursion depth for a specular path',
             'default': 2,
             'min': 0,
@@ -445,8 +436,8 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'float',
             'attr': 'biaspath_clamping_radiance_maxvalue',
-            'name': 'Radiance clamping',
-            'description': 'Max acceptable radiance value for a sample',
+            'name': 'Clamping',
+            'description': 'Max acceptable radiance value for a sample (0.0 = disabled). Used to prevent fireflies',
             'default': 0.0,
             'min': 0.0,
             'max': 999999.0,
@@ -497,9 +488,9 @@ class luxcore_enginesettings(declarative_property_group):
             'description': 'Pixel sampling algorithm to use',
             'default': 'METROPOLIS',
             'items': [
-                ('METROPOLIS', 'Metropolis', 'Keleman-style metropolis light transport'),
-                ('SOBOL', 'Sobol', 'Use a Sobol sequence'),
-                ('RANDOM', 'Random', 'Completely random sampler')
+                ('METROPOLIS', 'Metropolis', 'Recommended for scenes with difficult lighting (caustics, indoors)'),
+                ('SOBOL', 'Sobol', 'Recommended for scenes with simple lighting (outdoors, studio setups)'),
+                ('RANDOM', 'Random', 'Completely random sampler, not recommended')
             ],
             'save_in_preset': True
         },
@@ -545,12 +536,12 @@ class luxcore_enginesettings(declarative_property_group):
             'description': 'Pixel filter to use',
             'default': 'BLACKMANHARRIS',
             'items': [
-                ('BLACKMANHARRIS', 'Blackman-Harris', 'desc'),
-                ('MITCHELL', 'Mitchell', 'desc'),
-                ('MITCHELL_SS', 'Mitchell_SS', 'desc'),
-                ('BOX', 'Box', 'desc'),
-                ('GAUSSIAN', 'Gaussian', 'desc'),
-                ('NONE', 'None', 'Disable pixel filtering')
+                ('BLACKMANHARRIS', 'Blackman-Harris', 'default'),
+                ('MITCHELL', 'Mitchell', 'can produce black ringing artifacts around bright pixels'),
+                ('MITCHELL_SS', 'Mitchell_SS', ''),
+                ('BOX', 'Box', ''),
+                ('GAUSSIAN', 'Gaussian', ''),
+                ('NONE', 'None', 'Disable pixel filtering. Fastest setting when rendering on GPU')
             ],
             'save_in_preset': True
         },

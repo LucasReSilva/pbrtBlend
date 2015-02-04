@@ -122,7 +122,7 @@ class luxcore_realtimesettings(declarative_property_group):
         {
             'type': 'enum',
             'attr': 'cpu_renderengine_type',
-            'name': 'Rendering engine',
+            'name': 'Engine',
             'description': 'Rendering engine to use',
             'default': 'PATHCPU',
             'items': [
@@ -134,7 +134,7 @@ class luxcore_realtimesettings(declarative_property_group):
         {
             'type': 'enum',
             'attr': 'ocl_renderengine_type',
-            'name': 'Rendering engine',
+            'name': 'Engine',
             'description': 'Rendering engine to use',
             'default': 'PATHOCL',
             'items': [

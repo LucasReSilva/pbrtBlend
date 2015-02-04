@@ -139,14 +139,14 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'linear_scale',
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
         # Film response
-        'crf_label', 
+        'crf_label',
         'crf_preset_menu',
         # Gamma
         ['label_gamma', 'gamma'],
         # Intervals
-        'spacer_intervals',
+        #'spacer_intervals',
         'label_intervals',
-        ['writeinterval_png', 'writeinterval_flm'],
+        #['writeinterval_png', 'writeinterval_flm'],
         'displayinterval',
     ]
     
