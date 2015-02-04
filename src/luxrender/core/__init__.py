@@ -1919,8 +1919,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             configConverter.ConvertConfig(realtime_preview = True)
 
             newRenderSettings = (str(configConverter.cfgProps) +
-                                 str(scene.luxcore_realtimesettings.halt_samples) +
-                                 str(scene.luxcore_realtimesettings.halt_time))
+                                 str(context.scene.luxcore_realtimesettings.halt_samples) +
+                                 str(context.scene.luxcore_realtimesettings.halt_time))
 
             if self.lastRenderSettings == '':
                 self.lastRenderSettings = newRenderSettings
