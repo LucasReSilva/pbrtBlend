@@ -1111,7 +1111,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         normalize:          False
         saveToDisk:         False
 
-        buffer_id is used only for obtaining the right MATERIAL_ID_MASK and BY_MATERIAL_ID buffer
+        buffer_id is used for obtaining the right MATERIAL_ID_MASK, BY_MATERIAL_ID or RADIANCE_GROUP buffer
         """
         from ..outputs.luxcore_api import pyluxcore
         
@@ -1145,7 +1145,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 channel_buffer_converted[k:k + 4] = rgba_converted
                 k += 4
         else:
-            if channelName in ['MATERIAL_ID_MASK', 'BY_MATERIAL_ID'] and buffer_id != -1:
+            if channelName in ['MATERIAL_ID_MASK', 'BY_MATERIAL_ID', 'RADIANCE_GROUP'] and buffer_id != -1:
                 lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer, buffer_id)
             else:
                 lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer)
@@ -1568,6 +1568,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 for i in range(len(ids)):
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'BY_MATERIAL_ID', True,
                                                pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, False,
+                                               channels.saveToDisk, i)
+
+                # Convert all RADIANCE_GROUP channels
+                lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
+                print("lightgroup_count:", str(lightgroup_count))
+
+                for i in range(lightgroup_count):
+                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'RADIANCE_GROUP', True,
+                                               pyluxcore.FilmOutputType.RADIANCE_GROUP, 'f', 0.0, 3, False,
                                                channels.saveToDisk, i)
     
                 channelCalcTime = time.time() - channelCalcStartTime
