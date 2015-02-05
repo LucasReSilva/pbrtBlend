@@ -1570,6 +1570,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, False,
                                                channels.saveToDisk, i)
 
+                ''' disabled because it crashes with LuxCore 1.4 (fixed in 1.5)
                 # Convert all RADIANCE_GROUP channels
                 lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
                 print("lightgroup_count:", str(lightgroup_count))
@@ -1578,6 +1579,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'RADIANCE_GROUP', True,
                                                pyluxcore.FilmOutputType.RADIANCE_GROUP, 'f', 0.0, 3, False,
                                                channels.saveToDisk, i)
+                '''
     
                 channelCalcTime = time.time() - channelCalcStartTime
                 LuxLog('AOV conversion took %i seconds' % channelCalcTime)
@@ -1675,6 +1677,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     viewCameraShiftY = -1
     # store renderengine configuration of last update
     lastRenderSettings = ''
+    lastVolumeSettings = ''
     lastVisibilitySettings = None
     update_counter = 0
 
@@ -1837,23 +1840,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         else:
             objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
             objectsToRemove = self.lastVisibilitySettings - set(context.visible_objects)
-            #print("lastvissettings:", self.lastVisibilitySettings)
-            #print("objectsToAdd:", objectsToAdd)
-            #print("objectsToRemove:", objectsToRemove)
 
             if len(objectsToAdd) > 0:
-                print("len(objectsToAdd):", len(objectsToAdd))
                 update_changes.set_cause(mesh = True)
                 update_changes.changed_objects_mesh.extend(objectsToAdd)
 
             if len(objectsToRemove) > 0:
-                print("len(objectsToRemove):", len(objectsToRemove))
                 update_changes.set_cause(objectsRemoved = True)
                 update_changes.removed_objects.extend(objectsToRemove)
 
         self.lastVisibilitySettings = set(context.visible_objects)
-        #print("new vis settings:", self.lastVisibilitySettings)
-
 
         if (not self.viewSessionRunning or 
         		self.lcConfig is None or 
@@ -1861,12 +1857,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             update_changes.set_cause(startViewportRender = True)
         
         # check if filmsize has changed
-        elif (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
+        if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
                 self.viewFilmWidth != context.region.width) or (
                 self.viewFilmHeight != context.region.height):
             update_changes.set_cause(config = True)
 
-        elif bpy.data.objects.is_updated:
+        if bpy.data.objects.is_updated:
             # check objects for updates
             for ob in bpy.data.objects:
                 if ob == None:
@@ -1897,7 +1893,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
                         update_changes.set_cause(camera = True)
                         
-        elif bpy.data.materials.is_updated:
+        if bpy.data.materials.is_updated:
             for mat in bpy.data.materials:
                 if mat.is_updated:
                     if mat.luxrender_emission.use_emission:
@@ -1914,30 +1910,39 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         update_changes.changed_materials.append(mat)
                         update_changes.set_cause(materials = True)
                     
-        elif bpy.data.textures.is_updated:
+        if bpy.data.textures.is_updated:
             for tex in bpy.data.textures:
                 if tex.is_updated:
                     for mat in tex.users_material:
                         update_changes.changed_materials.append(mat)
                         update_changes.set_cause(materials = True)
-        
-        else:
-            # no objects were changed
-            # check for changes in renderengine configuration
-            configConverter = BlenderSceneConverter(context.scene)
-            configConverter.ConvertConfig(realtime_preview = True)
 
-            newRenderSettings = (str(configConverter.cfgProps) +
-                                 str(context.scene.luxcore_realtimesettings.halt_samples) +
-                                 str(context.scene.luxcore_realtimesettings.halt_time))
+        converter = BlenderSceneConverter(context.scene)
 
-            if self.lastRenderSettings == '':
-                self.lastRenderSettings = newRenderSettings
-            elif self.lastRenderSettings != newRenderSettings:
-                # renderengine config has changed
-                update_changes.set_cause(config = True)
-                # save settings to compare with next update
-                self.lastRenderSettings = newRenderSettings
+        # check for changes in volume configuration
+        converter.ConvertVolumes()
+        newVolumeSettings = str(converter.scnProps)
+
+        if self.lastVolumeSettings == '':
+            self.lastVolumeSettings = newVolumeSettings
+        elif self.lastVolumeSettings != newVolumeSettings:
+            update_changes.set_cause(volumes = True)
+            self.lastVolumeSettings = newVolumeSettings
+
+        # check for changes in renderengine configuration
+        converter.ConvertConfig(realtime_preview = True)
+
+        newRenderSettings = (str(converter.cfgProps) +
+                             str(context.scene.luxcore_realtimesettings.halt_samples) +
+                             str(context.scene.luxcore_realtimesettings.halt_time))
+
+        if self.lastRenderSettings == '':
+            self.lastRenderSettings = newRenderSettings
+        elif self.lastRenderSettings != newRenderSettings:
+            # renderengine config has changed
+            update_changes.set_cause(config = True)
+            # save settings to compare with next update
+            self.lastRenderSettings = newRenderSettings
         
         return update_changes
     
@@ -1978,11 +1983,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             return
 
         update_changes.print_updates()
-        
-        if update_changes.cause_unknown or update_changes.cause_startViewportRender:
+
+        if update_changes.cause_unknown:
+            print('WARNING: Update cause unknown, skipping update')
+
+        elif update_changes.cause_startViewportRender:
             try:
-                if update_changes.cause_unknown:
-                    LuxLog('Fallback, re-exporting whole scene (update cause unknown)')
                 if update_changes.cause_startViewportRender:
                     LuxLog('Starting viewport render')
                 
@@ -2084,15 +2090,41 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                             update_material = False)
                                             
             if update_changes.cause_objectsRemoved:
+                pass
+                '''
                 for ob in update_changes.removed_objects:
                     LuxLog('Removing object: ' + ob.name)
-                    # missing
+
                     print("old object count:", lcScene.GetObjectCount())
 
-                    lux_name = ToValidLuxCoreName(ob.name)
-                    lcScene.DeleteObject(lux_name)
+                    # get luxcore name from converter
+                    cache = BlenderSceneConverter.exported_meshes
+                    luxcore_name = ''
+
+                    try:
+                        print(ob.data)
+
+                        cached_objects = cache[ob.data]
+                        for elem in cached_objects:
+                            print(elem)
+                            if ob in elem:
+                                print("  found object!")
+                                exportedObjectData = elem[ob]
+                                luxcore_name = exportedObjectData.lcObjName
+                                print("  object lcName: %s" % luxcore_name)
+                                break
+
+                    except KeyError:
+                        print("Object not found in cache")
+
+                    if luxcore_name != '':
+                        lcScene.DeleteObject(luxcore_name)
 
                     print("new object count:", lcScene.GetObjectCount())
+                '''
+
+            if update_changes.cause_volumes:
+                converter.ConvertVolumes()
             
             # Debug output
             print("Updated scene properties:")
@@ -2127,6 +2159,7 @@ class UpdateChanges:
         self.cause_materials = False
         self.cause_config = False
         self.cause_objectsRemoved = False
+        self.cause_volumes = False
         
     def set_cause(self,
                   startViewportRender = None, 
@@ -2137,7 +2170,8 @@ class UpdateChanges:
                   layers = None,
                   materials = None, 
                   config = None,
-                  objectsRemoved = None):
+                  objectsRemoved = None,
+                  volumes = None):
         # automatically switch off unkown
         self.cause_unknown = False
         
@@ -2159,6 +2193,8 @@ class UpdateChanges:
             self.cause_config = config 
         if objectsRemoved is not None:
             self.cause_objectsRemoved = objectsRemoved
+        if volumes is not None:
+            self.cause_volumes = volumes
             
     def print_updates(self):
         print("===== Realtime update information: =====")
@@ -2191,5 +2227,7 @@ class UpdateChanges:
             print("objects where removed:")
             for obj in self.removed_objects:
                 print("    " + obj.name)
+        if self.cause_volumes:
+            print("volumes changed")
 
         print("========================================")

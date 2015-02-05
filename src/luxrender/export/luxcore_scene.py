@@ -59,6 +59,27 @@ class ExportedObjectData(object):
                   ",\nmatIndex: " + str(self.matIndex))
         return output
 
+# not finished, not in use yet
+class ExportCache(object):
+    cache = {}
+
+    def add_blender_object(self, obj):
+        """
+
+        :param obj: Blender object
+        :return:
+        """
+        pass
+
+    def get_luxcore_data(self, obj = None, mesh = None):
+        """
+
+        :param obj: Blender object
+        :param mesh: Blender mesh (obj.data)
+        :return: ExportedObjectData
+        """
+        pass
+
 class BlenderSceneConverter(object):
     scalers_count = 0
     unique_material_number = 0
@@ -1856,10 +1877,10 @@ class BlenderSceneConverter(object):
                     if dupli:
                         name += '_dupli_' + str(self.dupli_number)
                         self.dupli_number += 1
-                        print("Exported dupli", name)
 
                         if self.dupli_number % 100 == 0 and self.renderengine is not None:
                             self.renderengine.update_stats('Exporting...', 'Exported Dupli %s' % name)
+                            print("Exported dupli", name)
 
                     new_export_data = ExportedObjectData(name, export_data.lcMeshName, export_data.lcMaterialName, export_data.matIndex)
                     cache_data.append(new_export_data)
@@ -1908,7 +1929,6 @@ class BlenderSceneConverter(object):
                 import traceback
 
                 traceback.print_exc()
-
 
     def ConvertCamera(self):
         blCamera = self.blScene.camera
@@ -2168,7 +2188,22 @@ class BlenderSceneConverter(object):
 
         self.ConvertImagepipelineSettings(realtime_preview)
         self.ConvertChannelSettings(realtime_preview)
-        self.ConvertLightgroups()
+        #self.ConvertLightgroups() # disabled because it crashes LuxCore 1.4
+
+    def ConvertVolumes(self):
+        # default volumes
+        if self.blScene.camera.data.luxrender_camera.Exterior_volume:
+            # Default volume from camera exterior
+            volume = ToValidLuxCoreName(self.blScene.camera.data.luxrender_camera.Exterior_volume)
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
+        elif self.blScene.luxrender_world.default_exterior_volume:
+            # Default volume from world
+            volume = ToValidLuxCoreName(self.blScene.luxrender_world.default_exterior_volume)
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
+
+        # convert all volumes
+        for volume in self.blScene.luxrender_volumes.volumes:
+            self.convert_volume(volume)
 
     def convert_volume(self, volume):
         def absorption_at_depth_scaled(abs_col):
@@ -2308,22 +2343,9 @@ class BlenderSceneConverter(object):
         self.scnProps.Set(pyluxcore.Property('scene.materials.LUXBLEND_LUXCORE_NULL_MATERIAL.type', ['null']))
 
         ########################################################################
-        # Default volume
-        ########################################################################
-        if self.blScene.camera.data.luxrender_camera.Exterior_volume:
-            # Default volume from camera exterior
-            volume = ToValidLuxCoreName(self.blScene.camera.data.luxrender_camera.Exterior_volume)
-            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
-        elif self.blScene.luxrender_world.default_exterior_volume:
-            # Default volume from world
-            volume = ToValidLuxCoreName(self.blScene.luxrender_world.default_exterior_volume)
-            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
-
-        ########################################################################
         # Convert all volumes
         ########################################################################
-        for volume in self.blScene.luxrender_volumes.volumes:
-            self.convert_volume(volume)
+        self.ConvertVolumes()
 
         ########################################################################
         # Convert all objects
