@@ -1775,6 +1775,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if not PYLUXCORE_AVAILABLE:
             LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
             return
+
+        stop_redraw = False
         
         # Check if the size of the window is changed
         if (self.viewFilmWidth != context.region.width) or (

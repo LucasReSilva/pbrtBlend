@@ -1809,6 +1809,19 @@ class BlenderSceneConverter(object):
             else:
                 transform = matrix_to_list(obj.matrix_world)
 
+        # check if object is clipping plane
+        if obj.luxrender_object.clipping_plane:
+            position = [obj.location.x, obj.location.y, obj.location.z]
+            normal_vector = obj.rotation_euler.to_matrix() * mathutils.Vector((0.0, 0.0, 1.0))
+            normal = [normal_vector.x, normal_vector.y, normal_vector.z]
+
+            self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [1]))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.center', position))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.normal', normal))
+
+            # don't export clipping plane object
+            return
+
         # check if object is proxy
         if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
             convert_object = not obj.luxrender_object.hide_proxy_mesh
@@ -2122,13 +2135,6 @@ class BlenderSceneConverter(object):
         # Accelerator settings
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [engine_settings.instancing]))
 
-        # Custom Properties
-        if engine_settings.advanced and engine_settings.custom_properties:
-            custom_params = engine_settings.custom_properties.replace(" ", "").split("|")
-            for prop in custom_params:
-                prop = prop.split('=')
-                self.cfgProps.Set(pyluxcore.Property(prop[0], prop[1]))
-
     def ConvertRealtimeSettings(self):
         realtime_settings = self.blScene.luxcore_realtimesettings
     
@@ -2174,7 +2180,16 @@ class BlenderSceneConverter(object):
         self.cfgProps.Set(pyluxcore.Property('film.filter.type', [filter_type]))
         if filter_type != 'NONE':
             self.cfgProps.Set(pyluxcore.Property('film.filter.width', [1.5]))
-    
+
+    def ConvertCustomProps(self):
+        engine_settings = self.blScene.luxcore_enginesettings
+        # Custom Properties
+        if engine_settings.advanced and engine_settings.custom_properties:
+            custom_params = engine_settings.custom_properties.replace(" ", "").split("|")
+            for prop in custom_params:
+                prop = prop.split('=')
+                self.cfgProps.Set(pyluxcore.Property(prop[0], prop[1]))
+
     def ConvertConfig(self, realtime_preview = False):
         realtime_settings = self.blScene.luxcore_realtimesettings
 
@@ -2186,6 +2201,7 @@ class BlenderSceneConverter(object):
             self.ConvertFilterSettings()
             self.ConvertSamplerSettings()
 
+        self.ConvertCustomProps()
         self.ConvertImagepipelineSettings(realtime_preview)
         self.ConvertChannelSettings(realtime_preview)
         #self.ConvertLightgroups() # disabled because it crashes LuxCore 1.4
