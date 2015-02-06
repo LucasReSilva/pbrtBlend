@@ -43,6 +43,7 @@ class luxrender_object(declarative_property_group):
         'external_mesh',
         ['radius', 'phimax'],
         ['zmin', 'zmax'],
+        'clipping_plane'
     ]
     visibility = {
         'proxy_type': {'append_proxy': True},
@@ -53,6 +54,7 @@ class luxrender_object(declarative_property_group):
         'phimax': {'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid'])},
         'zmin': {'append_proxy': True, 'proxy_type': 'cylinder'},
         'zmax': {'append_proxy': True, 'proxy_type': O(['cylinder', 'paraboloid'])},
+        'clipping_plane': {'append_proxy': False},
     }
     properties = [
         {
@@ -153,5 +155,12 @@ class luxrender_object(declarative_property_group):
             'min': 0.00001,
             'subtype': 'DISTANCE',
             'unit': 'LENGTH',
+        },
+        {
+            'type': 'bool',
+            'attr': 'clipping_plane',
+            'name': 'Use As Camera Clipping Plane',
+            'description': 'Note: only supported by LuxCore (API 2.x), only position of origin and rotation are used, use a plane as object and only transform it in object mode',
+            'default': False
         },
     ]
