@@ -1826,7 +1826,7 @@ class BlenderSceneConverter(object):
         if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
             convert_object = not obj.luxrender_object.hide_proxy_mesh
 
-            path = bpy.path.abspath(obj.luxrender_object.external_mesh)
+            path = efutil.filesystem_path(obj.luxrender_object.external_mesh)
             name = ToValidLuxCoreName(obj.name)
             material = self.ConvertMaterial(obj.active_material, obj.material_slots, no_conversion = not update_material)
 
