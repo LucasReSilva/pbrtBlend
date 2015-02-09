@@ -322,7 +322,8 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
         params.add_float('efficacy', self.efficacy)
 
         if self.projector:
-            params.add_string('mapname', self.mapname)
+            projector_path = self.mapname
+            params.add_string('mapname', efutil.path_relative_to_export(projector_path))
 
         return params
 
