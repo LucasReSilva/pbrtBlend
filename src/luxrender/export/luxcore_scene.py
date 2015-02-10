@@ -383,6 +383,8 @@ class BlenderSceneConverter(object):
 
                     except Exception as err:
                         LuxLog('Mesh export failed, skipping this mesh: %s\n' % err)
+                        import traceback
+                        traceback.print_exc()
 
                 del ffaces_mats
 
@@ -394,6 +396,8 @@ class BlenderSceneConverter(object):
 
         except Exception as err:
             LuxLog('Mesh export failed, skipping mesh of object: %s\n' % err)
+            import traceback
+            traceback.print_exc()
             return []
 
     def ConvertMapping(self, prefix, texture):
@@ -879,10 +883,25 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
                 props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
                 self.ConvertTransform(prefix, texture)
+            ####################################################################
+            # Vertex Color
+            ####################################################################
+            elif texType == 'hitpointcolor':
+                pass
+            ####################################################################
+            # Vertex Color (black/white)
+            ####################################################################
+            elif texType == 'hitpointgrey':
+                pass
+            ####################################################################
+            # Vertex Color (alpha)
+            ####################################################################
+            elif texType == 'hitpointalpha':
+                pass
+            ####################################################################
+            # Fallback to exception
+            ####################################################################
             else:
-                ####################################################################
-                # Fallback to exception
-                ####################################################################
                 raise Exception('Unknown type ' + texType + ' for texture: ' + texture.name)
 
             if texType not in ('normalmap', 'checkerboard', 'constant'):
@@ -1335,6 +1354,8 @@ class BlenderSceneConverter(object):
                                                      self.ConvertMaterialChannel(luxMat, 'amount', 'float')))
                     except Exception as err:
                         LuxLog('WARNING: unable to convert mix material %s\n%s' % (material.name, err))
+                        import traceback
+                        traceback.print_exc()
                         return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
             ####################################################################
@@ -1464,8 +1485,8 @@ class BlenderSceneConverter(object):
         except Exception as err:
             LuxLog('Material export failed, skipping material: %s\n%s' % (material.name, err))
             import traceback
-
             traceback.print_exc()
+
             return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
     def ConvertParamToLuxcoreProperty(self, param):
@@ -1781,6 +1802,8 @@ class BlenderSceneConverter(object):
             print("Dupli export finished")
         except Exception as err:
             LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
+            import traceback
+            traceback.print_exc()
 
     def ConvertHair(self):
         """
@@ -1940,7 +1963,6 @@ class BlenderSceneConverter(object):
             except Exception as err:
                 LuxLog('Light export failed, skipping light: %s\n%s' % (obj.name, err))
                 import traceback
-
                 traceback.print_exc()
 
     def ConvertCamera(self):
