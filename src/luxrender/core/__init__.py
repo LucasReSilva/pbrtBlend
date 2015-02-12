@@ -334,7 +334,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     bl_idname = 'LUXRENDER_RENDER'
     bl_label = 'LuxRender'
     bl_use_preview = True
-    #bl_preview_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, 'export', 'material_preview_scene', 'test.blend'))
     bl_use_texture_preview = True
 
     render_lock = threading.Lock()
@@ -1606,17 +1605,29 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             # Don't render the tiny images
             if xres <= 96:
-                raise Exception('Skipping material thumbnail update, image too small (%ix%i)' % (xres, yres))
+                #raise Exception('Skipping material thumbnail update, image too small (%ix%i)' % (xres, yres))
+                return # don't spam the log
 
+            LuxLog('Starting preview render...')
             # Convert the Blender scene
             lcConfig = BlenderSceneConverter(scene, renderengine = self).Convert()
-            LuxLog('RenderConfig Properties:')
-            LuxLog(str(lcConfig.GetProperties()))
-            LuxLog('Scene Properties:')
-            LuxLog(str(lcConfig.GetScene().GetProperties()))
-            # add a lamp (hack for Blender's preview scene, which does not contain any lights)
+            #LuxLog('RenderConfig Properties:')
+            #LuxLog(str(lcConfig.GetProperties()))
+            #LuxLog('Scene Properties:')
+            #LuxLog(str(lcConfig.GetScene().GetProperties()))
+
+            # Add a lamp (hack for Blender's preview scene, which does not contain any lights)
             lcConfig.GetScene().Parse(pyluxcore.Properties().
-                                      Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['sky'])))
+                    Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['point'])).
+                    Set(pyluxcore.Property('scene.lights.preview_lamp.position', [12, -12, 8])))
+
+            # config for preview
+            cfgProps = pyluxcore.Properties()
+            cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_LINEAR']))
+            cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.scale', [200.0]))
+            cfgProps.Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
+            cfgProps.Set(pyluxcore.Property('sampler.type', ['SOBOL']))
+            lcConfig.Parse(cfgProps)
 
             lcSession = pyluxcore.RenderSession(lcConfig)
 
@@ -1627,16 +1638,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             lcSession.Start()
 
             startTime = time.time()
-            while not self.test_break() and time.time() - startTime < 10.0:
+            while not self.test_break() and time.time() - startTime < 4.0:
                 time.sleep(0.2)
 
                 # Print some information about the rendering progress
 
                 # Update statistics
                 lcSession.UpdateStats()
-
-                stats = lcSession.GetStats()
-                self.PrintStats(lcConfig, stats)
+                #stats = lcSession.GetStats()
+                #self.PrintStats(lcConfig, stats)
 
                 # Update the image
                 lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
@@ -1649,8 +1659,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.end_result(result)
 
             lcSession.Stop()
-
-            LuxLog('Done.')
+            LuxLog('Preview render done.')
         except Exception as exc:
             LuxLog('Rendering aborted: %s' % exc)
             import traceback

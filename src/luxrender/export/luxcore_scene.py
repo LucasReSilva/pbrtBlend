@@ -2159,6 +2159,7 @@ class BlenderSceneConverter(object):
 
     def ConvertRealtimeSettings(self):
         realtime_settings = self.blScene.luxcore_realtimesettings
+        engine_settings = self.blScene.luxcore_enginesettings
     
         # Renderengine
         if realtime_settings.device_type == 'CPU':
@@ -2170,9 +2171,8 @@ class BlenderSceneConverter(object):
 
         self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
         
-        # use clamping settings
+        # use global clamping settings
         if engine in ['PATHCPU', 'PATHOCL']:
-            engine_settings = self.blScene.luxcore_enginesettings
             self.cfgProps.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', [
                                              engine_settings.biaspath_clamping_radiance_maxvalue]))
             self.cfgProps.Set(pyluxcore.Property('path.clamping.pdf.value',
@@ -2187,7 +2187,7 @@ class BlenderSceneConverter(object):
 
             self.cfgProps.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
 
-        # Accelerator settings
+        # Accelerator settings (global)
         self.cfgProps.Set(pyluxcore.Property('accelerator.instances.enable', [engine_settings.instancing]))
 
         # Sampler settings
