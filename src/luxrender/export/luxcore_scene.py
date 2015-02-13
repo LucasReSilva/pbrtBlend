@@ -228,7 +228,7 @@ class BlenderSceneConverter(object):
             if uv_textures.active and uv_textures.active.data:
                 uv_layer = uv_textures.active.data
 
-        color_layer = mesh.tessface_vertex_colors.data if mesh.tessface_vertex_colors.active else None
+        color_layer = mesh.tessface_vertex_colors.active.data if mesh.tessface_vertex_colors.active else None
 
         # Export data
         points = []
@@ -247,10 +247,21 @@ class BlenderSceneConverter(object):
             for j, vertex in enumerate(face.vertices):
                 v = mesh.vertices[vertex]
 
+                if color_layer:
+                    if j == 0:
+                        vert_col = color_layer[face.index].color1
+                    elif j == 1:
+                        vert_col = color_layer[face.index].color2
+                    elif j == 2:
+                        vert_col = color_layer[face.index].color3
+                    elif j == 3:
+                        vert_col = color_layer[face.index].color4
+                    vert_col = tuple(vert_col[0:3])
+
                 if face.use_smooth:
                     vert_data = (v.co[:], v.normal[:],
                                  uv_layer[face.index].uv[j][:] if uv_layer else tuple(),
-                                 color_layer[face.index].color[j][:] if color_layer else tuple())
+                                 vert_col if color_layer else tuple())
 
                     if vert_data not in vert_use_vno:
                         vert_use_vno.add(vert_data)
@@ -275,7 +286,7 @@ class BlenderSceneConverter(object):
                     if uv_layer:
                         uvs.append(uv_layer[face.index].uv[j][:])
                     if color_layer:
-                        cols.append(color_layer[face.index].color[j][:])
+                        cols.append(vert_col)
 
                     fvi.append(vert_index)
 
