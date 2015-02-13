@@ -879,6 +879,22 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.octaves', [float(luxTex.octaves)]))
                 props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
                 self.ConvertTransform(prefix, texture)
+            ####################################################################
+            # HitPointColor
+            ####################################################################
+            elif texType == 'hitpointcolor':
+                pass
+            ####################################################################
+            #  HitPointAlpha
+            ####################################################################
+            elif texType == 'hitpointalpha':
+                pass
+            ####################################################################
+            # HitPointColor
+            ####################################################################
+            elif texType == 'hitpointgrey':
+                # It looks like LuxBlend doesn't support channel parameter
+                pass
             else:
                 ####################################################################
                 # Fallback to exception
