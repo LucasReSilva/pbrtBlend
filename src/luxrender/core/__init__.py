@@ -1687,6 +1687,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     # store renderengine configuration of last update
     lastRenderSettings = ''
     lastVolumeSettings = ''
+    lastHaltConditions = []
     lastVisibilitySettings = None
     update_counter = 0
 
@@ -1841,12 +1842,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.tag_redraw()
 
     def find_update_changes(self, context):
-        # find out what triggered the update (default: unknown)
+        """
+        Find out what triggered the update (default: unknown)
+        """
         update_changes = UpdateChanges()
 
         # check if visibility of objects was changed
         if self.lastVisibilitySettings is None:
-            print("vissettings where None")
             self.lastVisibilitySettings = set(context.visible_objects)
         else:
             objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
@@ -1940,12 +1942,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             update_changes.set_cause(volumes = True)
             self.lastVolumeSettings = newVolumeSettings
 
+        # check for changes in halt conditions
+        newHaltConditions = [context.scene.luxcore_realtimesettings.halt_samples,
+                             context.scene.luxcore_realtimesettings.halt_time]
+
+        if len(self.lastHaltConditions) == 0:
+            self.lastHaltConditions = newHaltConditions
+        elif self.lastHaltConditions != newHaltConditions:
+            update_changes.set_cause(haltconditions = True)
+            self.lastHaltConditions = newHaltConditions
+
         # check for changes in renderengine configuration
         converter.ConvertConfig(realtime_preview = True)
 
-        newRenderSettings = (str(converter.cfgProps) +
-                             str(context.scene.luxcore_realtimesettings.halt_samples) +
-                             str(context.scene.luxcore_realtimesettings.halt_time))
+        newRenderSettings = str(converter.cfgProps)
 
         if self.lastRenderSettings == '':
             self.lastRenderSettings = newRenderSettings
@@ -1997,6 +2007,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if update_changes.cause_unknown:
             print('WARNING: Update cause unknown, skipping update')
+
+        elif update_changes.cause_haltconditions:
+            pass
 
         elif update_changes.cause_startViewportRender:
             try:
@@ -2171,6 +2184,7 @@ class UpdateChanges:
         self.cause_config = False
         self.cause_objectsRemoved = False
         self.cause_volumes = False
+        self.cause_haltconditions = False
         
     def set_cause(self,
                   startViewportRender = None, 
@@ -2182,7 +2196,8 @@ class UpdateChanges:
                   materials = None, 
                   config = None,
                   objectsRemoved = None,
-                  volumes = None):
+                  volumes = None,
+                  haltconditions = None):
         # automatically switch off unkown
         self.cause_unknown = False
         
@@ -2206,6 +2221,8 @@ class UpdateChanges:
             self.cause_objectsRemoved = objectsRemoved
         if volumes is not None:
             self.cause_volumes = volumes
+        if haltconditions is not None:
+            self.cause_haltconditions = haltconditions
             
     def print_updates(self):
         print("===== Realtime update information: =====")
@@ -2240,5 +2257,7 @@ class UpdateChanges:
                 print("    " + obj.name)
         if self.cause_volumes:
             print("volumes changed")
+        if self.cause_haltconditions:
+            print("halt conditions changed")
 
         print("========================================")
