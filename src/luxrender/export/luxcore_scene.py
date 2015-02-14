@@ -1963,6 +1963,10 @@ class BlenderSceneConverter(object):
                 traceback.print_exc()
 
     def ConvertCamera(self):
+        """
+        For final rendering
+        """
+
         blCamera = self.blScene.camera
         blCameraData = blCamera.data
         luxCamera = blCameraData.luxrender_camera
@@ -1981,26 +1985,117 @@ class BlenderSceneConverter(object):
         # border rendering
         if self.blScene.render.use_border:
             width, height = luxCamera.luxrender_film.resolution(self.blScene)
-            self.scnProps.Set(pyluxcore.Property("scene.camera.screenwindow", luxCamera.screenwindow(
+            self.scnProps.Set(pyluxcore.Property('scene.camera.screenwindow', luxCamera.screenwindow(
                 width, height, self.blScene, blCameraData, luxcore_export=True)))
 
         if luxCamera.use_dof:
             # Do not world-scale this, it is already in meters!
             self.scnProps.Set(
-                pyluxcore.Property("scene.camera.lensradius", (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)))
+                pyluxcore.Property('scene.camera.lensradius', (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)))
 
         ws = get_worldscale(as_scalematrix=False)
 
         if luxCamera.use_dof:
             if blCameraData.dof_object is not None:
-                self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * (
+                self.scnProps.Set(pyluxcore.Property('scene.camera.focaldistance', ws * (
                     (blCamera.location - blCameraData.dof_object.location).length)))
             elif blCameraData.dof_distance > 0:
-                self.scnProps.Set(pyluxcore.Property("scene.camera.focaldistance", ws * blCameraData.dof_distance))
+                self.scnProps.Set(pyluxcore.Property('scene.camera.focaldistance', ws * blCameraData.dof_distance))
 
         if luxCamera.use_clipping:
-            self.scnProps.Set(pyluxcore.Property("scene.camera.cliphither", ws * blCameraData.clip_start))
-            self.scnProps.Set(pyluxcore.Property("scene.camera.clipyon", ws * blCameraData.clip_end))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.cliphither', ws * blCameraData.clip_start))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.clipyon', ws * blCameraData.clip_end))
+
+    def ConvertViewportCamera(self, context):
+        """
+        For viewport rendering
+        :param context:
+        """
+
+        view_persp = context.region_data.view_perspective
+        view_matrix = mathutils.Matrix(context.region_data.view_matrix)
+        view_lens = context.space_data.lens
+        view_camera_zoom = context.region_data.view_camera_zoom
+        view_camera_offset = list(context.region_data.view_camera_offset)
+        view_camera_shift_x = context.scene.camera.data.shift_x
+        view_camera_shift_y = context.scene.camera.data.shift_y
+
+        if view_persp == 'ORTHO':
+             if renderengine is not None:
+                renderengine.update_stats('Error', 'Orthographic camera is not supported')
+        else:
+            lensradius = 0.0
+            focaldistance = 0.0
+
+            zoom = 1.0
+            dx = 0.0
+            dy = 0.0
+            cam_trans = mathutils.Vector((view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]))
+            cam_lookat = list(context.region_data.view_location)
+
+            rot = mathutils.Matrix(((-view_matrix[0][0], -view_matrix[1][0], -view_matrix[2][0]),
+                                    (-view_matrix[0][1], -view_matrix[1][1], -view_matrix[2][1]),
+                                    (-view_matrix[0][2], -view_matrix[1][2], -view_matrix[2][2])))
+
+            cam_origin = list(rot * cam_trans)
+            cam_fov = 2 * math.atan(0.5 * 32.0 / view_lens)
+            cam_up = list(rot * mathutils.Vector((0, -1, 0)))
+
+            if context.region.width > context.region.height:
+                xaspect = 1.0
+                yaspect = context.region.height / context.region.width
+            else:
+                xaspect = context.region.width / context.region.height
+                yaspect = 1.0
+
+            if view_persp == 'CAMERA':
+                blcamera = context.scene.camera
+                #magic zoom formula for camera viewport zoom from blender source
+                zoom = view_camera_zoom
+                zoom = (1.41421 + zoom / 50.0)
+                zoom *= zoom
+                zoom = 2.0 / zoom
+
+                #camera plane offset in camera viewport
+                dx = 2.0 * (view_camera_shift_x + view_camera_offset[0] * xaspect * 2.0)
+                dy = 2.0 * (view_camera_shift_y + view_camera_offset[1] * yaspect * 2.0)
+
+                cam_fov = blcamera.data.angle
+                luxCamera = context.scene.camera.data.luxrender_camera
+
+                lookat = luxCamera.lookAt(blcamera)
+                cam_origin = list(lookat[0:3])
+                cam_lookat = list(lookat[3:6])
+                cam_up = list(lookat[6:9])
+
+                if luxCamera.use_dof:
+                    # Do not world-scale this, it is already in meters!
+                    lensradius = (blcamera.data.lens / 1000.0) / (2.0 * luxCamera.fstop)
+
+                ws = get_worldscale(as_scalematrix = False)
+
+                if luxCamera.use_dof:
+                    if blcamera.data.dof_object is not None:
+                        focaldistance = ws * ((blcamera.location - blcamera.data.dof_object.location).length)
+                    elif blcamera.data.dof_distance > 0:
+                        focaldistance = ws * blcamera.data.dof_distance
+
+            zoom *= 2.0
+
+            scr_left = -xaspect * zoom
+            scr_right = xaspect * zoom
+            scr_bottom = -yaspect * zoom
+            scr_top = yaspect * zoom
+
+            screenwindow = [scr_left + dx, scr_right + dx, scr_bottom + dy, scr_top + dy]
+
+            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', cam_lookat))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.up', cam_up))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov)))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.lensradius', lensradius))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.focaldistance', focaldistance))
 
     def ConvertImagepipelineSettings(self, realtime_preview=False):
         imagepipeline_settings = self.blScene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
@@ -2352,7 +2447,7 @@ class BlenderSceneConverter(object):
             for i in range(len(self.lightgroups_cache)):
                 self.createChannelOutputString('RADIANCE_GROUP', i)
 
-    def Convert(self, imageWidth=None, imageHeight=None, realtime_preview=False):
+    def Convert(self, imageWidth = None, imageHeight = None, realtime_preview = False, context = None):
         export_start = time.time()
 
         if self.renderengine is not None:
@@ -2364,7 +2459,10 @@ class BlenderSceneConverter(object):
         # #######################################################################
         # Convert camera definition
         ########################################################################
-        self.ConvertCamera()
+        if realtime_preview:
+            self.ConvertViewportCamera(context)
+        else:
+            self.ConvertCamera()
 
         ########################################################################
         # Add dummy materials

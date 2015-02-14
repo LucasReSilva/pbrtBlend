@@ -72,7 +72,7 @@ class luxcore_realtimesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'halt_samples',
-            'name': 'Halt Samples',
+            'name': 'Samples',
             'description': 'Preview will pause at specified amount of samples (0 = disabled)',
             'default': 25,
             'min': 0,
@@ -83,7 +83,7 @@ class luxcore_realtimesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'halt_time',
-            'name': 'Halt Time',
+            'name': 'Time',
             'description': 'Preview will pause after specified amount of seconds (0 = disabled)',
             'default': 10,
             'min': 0,

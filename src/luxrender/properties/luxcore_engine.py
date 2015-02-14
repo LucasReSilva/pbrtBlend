@@ -597,7 +597,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'halt_samples',
-            'name': 'Halt Samples',
+            'name': 'Samples',
             'description': 'Rendering process will stop at specified amount of samples (0 = disabled)',
             'default': 0,
             'min': 0,
@@ -608,7 +608,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'halt_time',
-            'name': 'Halt Time',
+            'name': 'Time',
             'description': 'Rendering process will stop after specified amount of seconds (0 = disabled)',
             'default': 0,
             'min': 0,
