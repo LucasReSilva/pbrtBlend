@@ -82,7 +82,6 @@ class ExportCache(object):
 
 class BlenderSceneConverter(object):
     scalers_count = 0
-    unique_material_number = 0
     # Amount of output channels (AOVs)
     outputCounter = 0
     material_id_mask_counter = 0
@@ -99,29 +98,6 @@ class BlenderSceneConverter(object):
 
     volumes_cache = {}
     lightgroups_cache = {}
-
-    @staticmethod
-    def next_scale_value():
-        BlenderSceneConverter.scalers_count += 1
-        return BlenderSceneConverter.scalers_count
-
-    @staticmethod
-    def get_unique_name(name):
-        BlenderSceneConverter.unique_material_number += 1
-        return (name + "_" + str(BlenderSceneConverter.unique_material_number) + "u")
-
-    @staticmethod
-    def clear():
-        BlenderSceneConverter.scalers_count = 0
-        BlenderSceneConverter.unique_material_number = 0
-
-    @staticmethod
-    def get_export_cache():
-        return BlenderSceneConverter.exported_meshes
-
-    @staticmethod
-    def clear_export_cache():
-        BlenderSceneConverter.exported_meshes = {}
 
     def __init__(self, blScene, lcSession=None, renderengine=None):
         LuxManager.SetCurrentScene(blScene)
@@ -140,18 +116,32 @@ class BlenderSceneConverter(object):
         self.materialsCache = set()
         self.texturesCache = set()
 
-    def check_name_collision(self, name):
-        """
-        checks if name is colliding with material or other volume names
-        name: string (has to be a valid LuxCore name)
-        returns: bool (does name collide with existing names)
-        """
-        
-        names = self.scnProps.GetAllUniqueSubNames("scene.volumes")
-        names.extend(self.scnProps.GetAllUniqueSubNames("scene.materials"))
-        names_stripped = [str(elem).replace("scene.volumes.", "", 1).replace("scene.materials.", "", 1) for elem in names]
-        
-        return name in names_stripped
+    @staticmethod
+    def next_scale_value():
+        BlenderSceneConverter.scalers_count += 1
+        return BlenderSceneConverter.scalers_count
+
+    @staticmethod
+    def generate_material_name(rawMatName):
+        # materials and volumes must not have the same names
+        return ToValidLuxCoreName(rawMatName) + '-m'
+
+    @staticmethod
+    def generate_volume_name(rawVolName):
+        # materials and volumes must not have the same names
+        return ToValidLuxCoreName(rawVolName) + '-v'
+
+    @staticmethod
+    def clear():
+        BlenderSceneConverter.scalers_count = 0
+
+    @staticmethod
+    def get_export_cache():
+        return BlenderSceneConverter.exported_meshes
+
+    @staticmethod
+    def clear_export_cache():
+        BlenderSceneConverter.exported_meshes = {}
 
     def createChannelOutputString(self, channelName, id=-1):
         """
@@ -179,6 +169,8 @@ class BlenderSceneConverter(object):
         if channelName == 'RADIANCE_GROUP':
             if id > 7 and is_ocl_engine:
                 # don't create the output channel
+                LuxLog('WARNING: OpenCL engines support a maximum of 8 lightgroups! Skipping this lightgroup (ID: %d)'
+                       % id)
                 return
 
         self.outputCounter += 1
@@ -1028,7 +1020,7 @@ class BlenderSceneConverter(object):
             if material is None:
                 return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
-            matName = ToValidLuxCoreName(material.name)
+            matName = BlenderSceneConverter.generate_material_name(material.name)
 
             # in realtimepreview, we sometimes only need the name
             if no_conversion and self.lcScene.IsMaterialDefined(matName):
@@ -1038,10 +1030,7 @@ class BlenderSceneConverter(object):
             if matName in self.materialsCache:
                 return matName
 
-            if self.check_name_collision(matName):
-                matName = self.get_unique_name(matName)
-
-            LuxLog('Material: ' + material.name)
+            LuxLog('Converting material \"%s\"' % material.name)
 
             matType = material.luxrender_material.type
             luxMat = getattr(material.luxrender_material, 'luxrender_mat_' + matType)
@@ -1442,9 +1431,6 @@ class BlenderSceneConverter(object):
             # TODO: add support for diffuse/mean, diffuse/alpha etc.
             use_alpha_transparency = False
             name_mix = matName + '_alpha_mix'
-
-            if self.check_name_collision(name_mix):
-                name_mix = self.get_unique_name(name_mix)
 
             if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
                 use_alpha_transparency = True
@@ -2243,11 +2229,11 @@ class BlenderSceneConverter(object):
         # default volumes
         if self.blScene.camera.data.luxrender_camera.Exterior_volume:
             # Default volume from camera exterior
-            volume = ToValidLuxCoreName(self.blScene.camera.data.luxrender_camera.Exterior_volume)
+            volume = BlenderSceneConverter.generate_volume_name(self.blScene.camera.data.luxrender_camera.Exterior_volume)
             self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
         elif self.blScene.luxrender_world.default_exterior_volume:
             # Default volume from world
-            volume = ToValidLuxCoreName(self.blScene.luxrender_world.default_exterior_volume)
+            volume = BlenderSceneConverter.generate_volume_name(self.blScene.luxrender_world.default_exterior_volume)
             self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
 
         # convert all volumes
@@ -2262,10 +2248,7 @@ class BlenderSceneConverter(object):
                 scale = volume.absorption_scale
                 abs_col[i] = (-math.log(max([v, 1e-30])) / depth) * scale * (v == 1.0 and -1 or 1)
 
-        name = ToValidLuxCoreName(volume.name)
-        
-        if self.check_name_collision(name):
-            name = self.get_unique_name(name)
+        name = BlenderSceneConverter.generate_volume_name(volume.name)
 
         # add to cache
         BlenderSceneConverter.volumes_cache[volume.name] = name
