@@ -1960,12 +1960,14 @@ class BlenderSceneConverter(object):
                 normal_vector = obj.rotation_euler.to_matrix() * mathutils.Vector((0.0, 0.0, 1.0))
                 normal = [normal_vector.x, normal_vector.y, normal_vector.z]
 
-                self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [1]))
+                self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [True]))
                 self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.center', position))
                 self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.normal', normal))
             except KeyError:
                 # no valid clipping plane object selected
-                pass
+                self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [False]))
+        else:
+            self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [False]))
 
     def ConvertCamera(self):
         """
