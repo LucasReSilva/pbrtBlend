@@ -1829,19 +1829,6 @@ class BlenderSceneConverter(object):
             else:
                 transform = matrix_to_list(obj.matrix_world)
 
-        # check if object is clipping plane
-        if obj.luxrender_object.clipping_plane:
-            position = [obj.location.x, obj.location.y, obj.location.z]
-            normal_vector = obj.rotation_euler.to_matrix() * mathutils.Vector((0.0, 0.0, 1.0))
-            normal = [normal_vector.x, normal_vector.y, normal_vector.z]
-
-            self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [1]))
-            self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.center', position))
-            self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.normal', normal))
-
-            # don't export clipping plane object
-            return
-
         # check if object is proxy
         if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
             convert_object = not obj.luxrender_object.hide_proxy_mesh
@@ -1962,6 +1949,24 @@ class BlenderSceneConverter(object):
                 import traceback
                 traceback.print_exc()
 
+    def convert_clipping_plane(self, lux_camera_settings):
+        if lux_camera_settings.enable_clipping_plane:
+            obj_name = lux_camera_settings.clipping_plane_obj
+
+            try:
+                obj = bpy.data.objects[obj_name]
+
+                position = [obj.location.x, obj.location.y, obj.location.z]
+                normal_vector = obj.rotation_euler.to_matrix() * mathutils.Vector((0.0, 0.0, 1.0))
+                normal = [normal_vector.x, normal_vector.y, normal_vector.z]
+
+                self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [1]))
+                self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.center', position))
+                self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.normal', normal))
+            except KeyError:
+                # no valid clipping plane object selected
+                pass
+
     def ConvertCamera(self):
         """
         For final rendering
@@ -2006,6 +2011,9 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.camera.cliphither', ws * blCameraData.clip_start))
             self.scnProps.Set(pyluxcore.Property('scene.camera.clipyon', ws * blCameraData.clip_end))
 
+        # arbitrary clipping plane
+        self.convert_clipping_plane(luxCamera)
+
     def ConvertViewportCamera(self, context):
         """
         For viewport rendering
@@ -2019,6 +2027,8 @@ class BlenderSceneConverter(object):
         view_camera_offset = list(context.region_data.view_camera_offset)
         view_camera_shift_x = context.scene.camera.data.shift_x
         view_camera_shift_y = context.scene.camera.data.shift_y
+
+        luxCamera = context.scene.camera.data.luxrender_camera
 
         if view_persp == 'ORTHO':
              if renderengine is not None:
@@ -2061,7 +2071,6 @@ class BlenderSceneConverter(object):
                 dy = 2.0 * (view_camera_shift_y + view_camera_offset[1] * yaspect * 2.0)
 
                 cam_fov = blcamera.data.angle
-                luxCamera = context.scene.camera.data.luxrender_camera
 
                 lookat = luxCamera.lookAt(blcamera)
                 cam_origin = list(lookat[0:3])
@@ -2096,6 +2105,9 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov)))
             self.scnProps.Set(pyluxcore.Property('scene.camera.lensradius', lensradius))
             self.scnProps.Set(pyluxcore.Property('scene.camera.focaldistance', focaldistance))
+
+            # arbitrary clipping plane
+            self.convert_clipping_plane(luxCamera)
 
     def ConvertImagepipelineSettings(self, realtime_preview=False):
         imagepipeline_settings = self.blScene.camera.data.luxrender_camera.luxcore_imagepipeline_settings

@@ -60,6 +60,29 @@ def CameraVolumeParameter(attr, name):
         },
     ]
 
+def ArbitraryClippingPlane():
+    """
+    LuxCore arbitrary clipping plane
+    The user selects an object and its rotation and location are used as clipping plane parameters
+    """
+    return [
+        {
+            'attr': 'clipping_plane_obj',
+            'type': 'string',
+            'name': 'clipping_plane_obj',
+            'description': 'Arbitrary clipping plane object (only rotation and location are used)',
+        },
+        {
+            'type': 'prop_search',
+            'attr': 'clipping_plane_selector',
+            'src': lambda s, c: s.scene,
+            'src_attr': 'objects',
+            'trg': lambda s, c: c.luxrender_camera,
+            'trg_attr': 'clipping_plane_obj',
+            'name': 'Plane'
+        },
+    ]
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_camera(declarative_property_group):
@@ -81,6 +104,8 @@ class luxrender_camera(declarative_property_group):
         'motion_blur_samples',
         'shutterdistribution',
         ['cammblur', 'objectmblur'],
+        'enable_clipping_plane',
+        'clipping_plane_selector'
         # [0.3, 'use_dof','autofocus', 'use_clipping'], # moved to blender panels visually
         # 'blades',
         #       ['distribution', 'power'],
@@ -101,9 +126,10 @@ class luxrender_camera(declarative_property_group):
         'motion_blur_samples': {'usemblur': True},
         'cammblur': {'usemblur': True},
         'objectmblur': {'usemblur': True},
+        'clipping_plane_selector': {'enable_clipping_plane': True},
     }
 
-    properties = CameraVolumeParameter('Exterior', 'Exterior') + [
+    properties = CameraVolumeParameter('Exterior', 'Exterior') + ArbitraryClippingPlane() + [
         {
             'type': 'bool',
             'attr': 'use_clipping',
@@ -314,6 +340,13 @@ class luxrender_camera(declarative_property_group):
             'attr': 'objectmblur',
             'name': 'Object Motion Blur',
             'default': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'enable_clipping_plane',
+            'name': 'Use Arbitrary Clipping Plane',
+            'description': 'LuxCore only',
+            'default': False
         },
     ]
 
