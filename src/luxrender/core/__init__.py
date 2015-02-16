@@ -1395,6 +1395,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # Start the rendering
             lcSession.Start()
 
+            # immediately end the rendering if 'FILESAVER' engine is used
+            if scene.luxcore_translatorsettings.use_filesaver:
+                lcSession.Stop()
+                return
+
             imagepipeline_settings = scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
             startTime = time.time()
             lastImageDisplay = startTime

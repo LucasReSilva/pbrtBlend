@@ -43,6 +43,7 @@ class luxcore_translatorsettings(declarative_property_group):
         ['export_particles', 'export_hair'],
         'override_materials',
         ['override_glass', 'override_lights', 'override_null'],
+        'use_filesaver',
         'label_debug',
         'print_config'
     ]
@@ -99,6 +100,14 @@ class luxcore_translatorsettings(declarative_property_group):
             'attr': 'override_null',
             'name': 'Null',
             'description': 'Replace null materials, too',
+            'default': False,
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'use_filesaver',
+            'name': 'Only Export Files',
+            'description': 'Instead of rendering, only export CFG/SCN files to output path',
             'default': False,
             'save_in_preset': True
         },

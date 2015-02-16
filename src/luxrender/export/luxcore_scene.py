@@ -2196,7 +2196,15 @@ class BlenderSceneConverter(object):
         engine = engine_settings.renderengine_type
         if len(engine) == 0:
             engine = 'PATHCPU'
-        self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
+
+        if self.blScene.luxcore_translatorsettings.use_filesaver:
+            output_path = efutil.filesystem_path(self.blScene.render.filepath)
+
+            self.cfgProps.Set(pyluxcore.Property('renderengine.type', ['FILESAVER']))
+            self.cfgProps.Set(pyluxcore.Property('filesaver.directory', [output_path]))
+            self.cfgProps.Set(pyluxcore.Property('filesaver.renderengine.type', [engine]))
+        else:
+            self.cfgProps.Set(pyluxcore.Property('renderengine.type', [engine]))
 
         if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
             self.cfgProps.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
