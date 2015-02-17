@@ -2027,10 +2027,8 @@ class BlenderSceneConverter(object):
         view_lens = context.space_data.lens
         view_camera_zoom = context.region_data.view_camera_zoom
         view_camera_offset = list(context.region_data.view_camera_offset)
-        view_camera_shift_x = context.scene.camera.data.shift_x
-        view_camera_shift_y = context.scene.camera.data.shift_y
 
-        luxCamera = context.scene.camera.data.luxrender_camera
+        luxCamera = context.scene.camera.data.luxrender_camera if context.scene.camera is not None else None
 
         if view_persp == 'ORTHO':
              if renderengine is not None:
@@ -2069,6 +2067,8 @@ class BlenderSceneConverter(object):
                 zoom = 2.0 / zoom
 
                 #camera plane offset in camera viewport
+                view_camera_shift_x = context.scene.camera.data.shift_x
+                view_camera_shift_y = context.scene.camera.data.shift_y
                 dx = 2.0 * (view_camera_shift_x + view_camera_offset[0] * xaspect * 2.0)
                 dy = 2.0 * (view_camera_shift_y + view_camera_offset[1] * yaspect * 2.0)
 
@@ -2109,9 +2109,13 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.camera.focaldistance', focaldistance))
 
             # arbitrary clipping plane
-            self.convert_clipping_plane(luxCamera)
+            if luxCamera is not None:
+                self.convert_clipping_plane(luxCamera)
 
     def ConvertImagepipelineSettings(self, realtime_preview=False):
+        if self.blScene.camera is None:
+            return
+
         imagepipeline_settings = self.blScene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
         index = 0
         prefix = 'film.imagepipeline.'
@@ -2344,7 +2348,7 @@ class BlenderSceneConverter(object):
 
     def ConvertVolumes(self):
         # default volumes
-        if self.blScene.camera.data.luxrender_camera.Exterior_volume:
+        if self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.Exterior_volume:
             # Default volume from camera exterior
             volume = BlenderSceneConverter.generate_volume_name(self.blScene.camera.data.luxrender_camera.Exterior_volume)
             self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
@@ -2416,6 +2420,9 @@ class BlenderSceneConverter(object):
         self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.priority' % name, volume.priority))
 
     def ConvertChannelSettings(self, realtime_preview=False):
+        if self.blScene.camera is None:
+            return
+
         luxrender_camera = self.blScene.camera.data.luxrender_camera
         output_switcher_channel = luxrender_camera.luxcore_imagepipeline_settings.output_switcher_pass
         channels = self.blScene.luxrender_channels
