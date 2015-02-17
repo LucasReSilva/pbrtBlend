@@ -1762,135 +1762,141 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         """
         update_changes = UpdateChanges()
 
-        # check if visibility of objects was changed
-        if self.lastVisibilitySettings is None:
+        try:
+            # check if visibility of objects was changed
+            if self.lastVisibilitySettings is None:
+                self.lastVisibilitySettings = set(context.visible_objects)
+            else:
+                objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
+                objectsToRemove = self.lastVisibilitySettings - set(context.visible_objects)
+
+                if len(objectsToAdd) > 0:
+                    update_changes.set_cause(mesh = True)
+                    update_changes.changed_objects_mesh.extend(objectsToAdd)
+
+                if len(objectsToRemove) > 0:
+                    update_changes.set_cause(objectsRemoved = True)
+                    update_changes.removed_objects.extend(objectsToRemove)
+
             self.lastVisibilitySettings = set(context.visible_objects)
-        else:
-            objectsToAdd = set(context.visible_objects) - self.lastVisibilitySettings
-            objectsToRemove = self.lastVisibilitySettings - set(context.visible_objects)
 
-            if len(objectsToAdd) > 0:
-                update_changes.set_cause(mesh = True)
-                update_changes.changed_objects_mesh.extend(objectsToAdd)
+            if (not self.viewSessionRunning or
+                    self.lcConfig is None or
+                    self.viewSession is None):
+                update_changes.set_cause(startViewportRender = True)
 
-            if len(objectsToRemove) > 0:
-                update_changes.set_cause(objectsRemoved = True)
-                update_changes.removed_objects.extend(objectsToRemove)
+            # check if filmsize has changed
+            if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
+                    self.viewFilmWidth != context.region.width) or (
+                    self.viewFilmHeight != context.region.height):
+                update_changes.set_cause(config = True)
 
-        self.lastVisibilitySettings = set(context.visible_objects)
+            if bpy.data.objects.is_updated:
+                # check objects for updates
+                for ob in bpy.data.objects:
+                    if ob == None:
+                        continue
 
-        if (not self.viewSessionRunning or 
-        		self.lcConfig is None or 
-        		self.viewSession is None):
-            update_changes.set_cause(startViewportRender = True)
-        
-        # check if filmsize has changed
-        if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
-                self.viewFilmWidth != context.region.width) or (
-                self.viewFilmHeight != context.region.height):
-            update_changes.set_cause(config = True)
-
-        if bpy.data.objects.is_updated:
-            # check objects for updates
-            for ob in bpy.data.objects:
-                if ob == None:
-                    continue
-                   
-                if ob.is_updated_data:
-                    if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
-                        update_changes.set_cause(mesh = True)
-                        update_changes.changed_objects_mesh.append(ob)
-                    elif ob.type in ['LAMP']:
-                        update_changes.set_cause(light = True)
-                        update_changes.changed_objects_transform.append(ob)
-                    elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
-                        update_changes.set_cause(camera = True, config = True)
-                    
-                if ob.is_updated:
-                    if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'EMPTY']:
-                        # check if a new material was assigned
-                        if ob.data.is_updated:
+                    if ob.is_updated_data:
+                        if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
                             update_changes.set_cause(mesh = True)
                             update_changes.changed_objects_mesh.append(ob)
-                        else:
-                            update_changes.set_cause(objectTransform = True)
+                        elif ob.type in ['LAMP']:
+                            update_changes.set_cause(light = True)
                             update_changes.changed_objects_transform.append(ob)
-                    elif ob.type in ['LAMP']:
-                        update_changes.set_cause(light = True)
-                        update_changes.changed_objects_transform.append(ob)
-                    elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
-                        update_changes.set_cause(camera = True)
-                        
-        if bpy.data.materials.is_updated:
-            for mat in bpy.data.materials:
-                if mat.is_updated:
-                    if mat.luxrender_emission.use_emission:
-                        # re-export users of this material to prevent pyluxcore crash
-                        for ob in bpy.data.objects:
-                            for slot in ob.material_slots:
-                                if slot.material == mat:
-                                    update_changes.changed_objects_mesh.append(ob)
-                                    
-                        if len(update_changes.changed_objects_mesh) > 0:
-                            update_changes.set_cause(mesh = True)
-                    else:
-                        # material is not emitting light, only update this material
-                        update_changes.changed_materials.append(mat)
-                        update_changes.set_cause(materials = True)
-                    
-        if bpy.data.textures.is_updated:
-            for tex in bpy.data.textures:
-                if tex.is_updated:
-                    for mat in tex.users_material:
-                        update_changes.changed_materials.append(mat)
-                        update_changes.set_cause(materials = True)
+                        elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
+                            update_changes.set_cause(camera = True, config = True)
 
-        # check if camera settings have changed
-        camera_converter = BlenderSceneConverter(context.scene)
-        camera_converter.ConvertViewportCamera(context)
-        newCameraSettings = str(camera_converter.scnProps)
+                    if ob.is_updated:
+                        if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'EMPTY']:
+                            # check if a new material was assigned
+                            if ob.data.is_updated:
+                                update_changes.set_cause(mesh = True)
+                                update_changes.changed_objects_mesh.append(ob)
+                            else:
+                                update_changes.set_cause(objectTransform = True)
+                                update_changes.changed_objects_transform.append(ob)
+                        elif ob.type in ['LAMP']:
+                            update_changes.set_cause(light = True)
+                            update_changes.changed_objects_transform.append(ob)
+                        elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
+                            update_changes.set_cause(camera = True)
 
-        if self.lastCameraSettings == '':
-            self.lastCameraSettings = newCameraSettings
-        elif self.lastCameraSettings != newCameraSettings:
-            update_changes.set_cause(camera = True)
-            self.lastCameraSettings = newCameraSettings
+            if bpy.data.materials.is_updated:
+                for mat in bpy.data.materials:
+                    if mat.is_updated:
+                        if mat.luxrender_emission.use_emission:
+                            # re-export users of this material to prevent pyluxcore crash
+                            for ob in bpy.data.objects:
+                                for slot in ob.material_slots:
+                                    if slot.material == mat:
+                                        update_changes.changed_objects_mesh.append(ob)
 
-        converter = BlenderSceneConverter(context.scene)
+                            if len(update_changes.changed_objects_mesh) > 0:
+                                update_changes.set_cause(mesh = True)
+                        else:
+                            # material is not emitting light, only update this material
+                            update_changes.changed_materials.append(mat)
+                            update_changes.set_cause(materials = True)
 
-        # check for changes in volume configuration
-        converter.ConvertVolumes()
-        newVolumeSettings = str(converter.scnProps)
+            if bpy.data.textures.is_updated:
+                for tex in bpy.data.textures:
+                    if tex.is_updated:
+                        for mat in tex.users_material:
+                            update_changes.changed_materials.append(mat)
+                            update_changes.set_cause(materials = True)
 
-        if self.lastVolumeSettings == '':
-            self.lastVolumeSettings = newVolumeSettings
-        elif self.lastVolumeSettings != newVolumeSettings:
-            update_changes.set_cause(volumes = True)
-            self.lastVolumeSettings = newVolumeSettings
+            # check if camera settings have changed
+            camera_converter = BlenderSceneConverter(context.scene)
+            camera_converter.ConvertViewportCamera(context)
+            newCameraSettings = str(camera_converter.scnProps)
 
-        # check for changes in halt conditions
-        newHaltConditions = [context.scene.luxcore_realtimesettings.halt_samples,
-                             context.scene.luxcore_realtimesettings.halt_time]
+            if self.lastCameraSettings == '':
+                self.lastCameraSettings = newCameraSettings
+            elif self.lastCameraSettings != newCameraSettings:
+                update_changes.set_cause(camera = True)
+                self.lastCameraSettings = newCameraSettings
 
-        if len(self.lastHaltConditions) == 0:
-            self.lastHaltConditions = newHaltConditions
-        elif self.lastHaltConditions != newHaltConditions:
-            update_changes.set_cause(haltconditions = True)
-            self.lastHaltConditions = newHaltConditions
+            converter = BlenderSceneConverter(context.scene)
 
-        # check for changes in renderengine configuration
-        converter.ConvertConfig(realtime_preview = True)
+            # check for changes in volume configuration
+            converter.ConvertVolumes()
+            newVolumeSettings = str(converter.scnProps)
 
-        newRenderSettings = str(converter.cfgProps)
+            if self.lastVolumeSettings == '':
+                self.lastVolumeSettings = newVolumeSettings
+            elif self.lastVolumeSettings != newVolumeSettings:
+                update_changes.set_cause(volumes = True)
+                self.lastVolumeSettings = newVolumeSettings
 
-        if self.lastRenderSettings == '':
-            self.lastRenderSettings = newRenderSettings
-        elif self.lastRenderSettings != newRenderSettings:
-            # renderengine config has changed
-            update_changes.set_cause(config = True)
-            # save settings to compare with next update
-            self.lastRenderSettings = newRenderSettings
-        
+            # check for changes in halt conditions
+            newHaltConditions = [context.scene.luxcore_realtimesettings.halt_samples,
+                                 context.scene.luxcore_realtimesettings.halt_time]
+
+            if len(self.lastHaltConditions) == 0:
+                self.lastHaltConditions = newHaltConditions
+            elif self.lastHaltConditions != newHaltConditions:
+                update_changes.set_cause(haltconditions = True)
+                self.lastHaltConditions = newHaltConditions
+
+            # check for changes in renderengine configuration
+            converter.ConvertConfig(realtime_preview = True)
+
+            newRenderSettings = str(converter.cfgProps)
+
+            if self.lastRenderSettings == '':
+                self.lastRenderSettings = newRenderSettings
+            elif self.lastRenderSettings != newRenderSettings:
+                # renderengine config has changed
+                update_changes.set_cause(config = True)
+                # save settings to compare with next update
+                self.lastRenderSettings = newRenderSettings
+        except Exception as exc:
+            LuxLog('Update check failed: %s' % exc)
+            self.report({'ERROR'}, str(exc))
+            import traceback
+            traceback.print_exc()
+
         return update_changes
     
     def luxcore_view_update(self, context, update_changes = None):

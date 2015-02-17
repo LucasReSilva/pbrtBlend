@@ -2031,8 +2031,7 @@ class BlenderSceneConverter(object):
         luxCamera = context.scene.camera.data.luxrender_camera if context.scene.camera is not None else None
 
         if view_persp == 'ORTHO':
-             if renderengine is not None:
-                renderengine.update_stats('Error', 'Orthographic camera is not supported')
+            raise Exception('Orthographic camera is not supported')
         else:
             lensradius = 0.0
             focaldistance = 0.0
