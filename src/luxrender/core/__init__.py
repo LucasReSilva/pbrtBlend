@@ -1977,7 +1977,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewSessionRunning = True
             except Exception as exc:
                 LuxLog('View update aborted: %s' % exc)
-                self.update_stats('Error: ', str(exc))
+
+                message = str(exc)
+                if message == 'An empty DataSet can not be preprocessed':
+                    # more user-friendly error message
+                    message = 'The scene does not contain any meshes'
+
+                self.update_stats('Error: ', message)
                 
                 self.lcConfig = None
                 self.viewSession = None
