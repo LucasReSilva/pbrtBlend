@@ -281,9 +281,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'description': 'Brightness factor of the image',
             'default': 1.0,
             'min': 0.0,
-            'soft_min': 0.0,
-            'max': 10000.0,
-            'soft_max': 10.0,
+            'soft_min': 0.001,
+            'soft_max': 100.0,
             'save_in_preset': True
         },
         # Reinhard tonemapper settings

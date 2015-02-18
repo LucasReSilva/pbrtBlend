@@ -59,26 +59,45 @@ class ExportedObjectData(object):
                   ",\nmatIndex: " + str(self.matIndex))
         return output
 
-# not finished, not in use yet
+class ExportedObject(object):
+    blender_object = None
+    blender_data = None
+    # split by material
+    luxcore_data = []
+
+    def __init__(self, obj, obj_data, luxcore_data):
+        self.blender_object = obj
+        self.blender_data = obj_data
+        self.luxcore_data = luxcore_data
+
 class ExportCache(object):
     cache = {}
 
-    def add_blender_object(self, obj):
-        """
+    def __init__(self):
+        self.cache = {}
 
-        :param obj: Blender object
-        :return:
-        """
-        pass
+    def add_obj(self, obj, luxcore_data):
+        exported_object = ExportedObject(obj, obj.data, luxcore_data)
+        self.cache[obj] = exported_object
+        self.cache[obj.data] = exported_object
 
-    def get_luxcore_data(self, obj = None, mesh = None):
-        """
+    def has_obj(self, obj):
+        return obj in self.cache
 
-        :param obj: Blender object
-        :param mesh: Blender mesh (obj.data)
-        :return: ExportedObjectData
-        """
-        pass
+    def has_obj_data(self, obj_data):
+        return obj_data in self.cache
+
+    def get_exported_object_key_obj(self, obj):
+        try:
+            return self.cache[obj]
+        except KeyError:
+            return None
+
+    def get_exported_object_key_data(self, obj_data):
+        try:
+            return self.cache[obj_data]
+        except KeyError:
+            return None
 
 class BlenderSceneConverter(object):
     scalers_count = 0
@@ -89,12 +108,7 @@ class BlenderSceneConverter(object):
 
     dupli_number = 0
 
-    # Cache with the following structure:
-    # {obj.data : [ {obj : ExportedObjectData} ] }
-    # obj.data is the main key, it points to a list that contains one entry per material index (because objects are
-    # split by their material). This list contains dicts for each object using the mesh (obj.data).
-    # ExportedObjectData contains the luxcore object, mesh and material names and the material index
-    exported_meshes = {}
+    export_cache = ExportCache()
 
     volumes_cache = {}
     lightgroups_cache = {}
@@ -137,11 +151,11 @@ class BlenderSceneConverter(object):
 
     @staticmethod
     def get_export_cache():
-        return BlenderSceneConverter.exported_meshes
+        return BlenderSceneConverter.export_cache
 
     @staticmethod
     def clear_export_cache():
-        BlenderSceneConverter.exported_meshes = {}
+        BlenderSceneConverter.export_cache = ExportCache()
 
     def createChannelOutputString(self, channelName, id=-1):
         """
@@ -1772,12 +1786,7 @@ class BlenderSceneConverter(object):
                 if not is_obj_visible(self.blScene, dupli_ob.object, is_dupli = True):
                     continue
 
-                duplis.append(
-                    (
-                        dupli_ob.object,
-                        dupli_ob.matrix.copy()
-                    )
-                )
+                duplis.append((dupli_ob.object, dupli_ob.matrix.copy()))
 
             obj.dupli_list_clear()
 
@@ -1819,6 +1828,15 @@ class BlenderSceneConverter(object):
                       update_mesh = True, update_transform = True, update_material = True):
         if obj is None or obj.data is None or (self.renderengine is not None and self.renderengine.test_break()):
             return
+
+        if obj.type == 'LAMP':
+            try:
+                self.ConvertLight(obj)
+                return
+            except Exception as err:
+                LuxLog('Light export failed, skipping light: %s\n%s' % (obj.name, err))
+                import traceback
+                traceback.print_exc()
 
         convert_object = True
 
@@ -1864,36 +1882,29 @@ class BlenderSceneConverter(object):
         if not is_obj_visible(self.blScene, obj, is_dupli = dupli) or not convert_object:
             return
 
-        exported_meshes = BlenderSceneConverter.get_export_cache()
+        cache = BlenderSceneConverter.export_cache
 
         # check if mesh was already exported
-        if obj.data in exported_meshes:
-            obj_cache_elem = None
-
-            # check if obj is already "registered" to use this mesh
-            for elem in exported_meshes[obj.data]:
-                if obj in elem:
-                    obj_cache_elem = elem
-                    break
-
-            if obj_cache_elem is not None and not dupli:
+        if cache.has_obj_data(obj.data):
+            # check if this object was already exported
+            if cache.has_obj(obj) and not dupli:
                 print("[Mesh: %s][Object: %s] obj already in cache" % (obj.data.name, obj.name))
 
-                # read from cache
-                for export_data in obj_cache_elem[obj]:
-                    self.SetObjectProperties(export_data.lcObjName, export_data.lcMeshName, export_data.lcMaterialName, transform)
+                # read from cache (to update transformation)
+                exported_object = cache.get_exported_object_key_obj(obj)
+                for exported_object_data in exported_object.luxcore_data:
+                    self.SetObjectProperties(exported_object_data.lcObjName, exported_object_data.lcMeshName,
+                                             exported_object_data.lcMaterialName, transform)
             else:
-                # don't spam the log during dupli export
                 if not dupli:
                     print("[Mesh: %s][Object: %s] no obj entry, creating one" % (obj.data.name, obj.name))
 
-                # load existing data from first entry
-                export_data_list = list(exported_meshes[obj.data][0].items())[0][1]
+                exported_object = cache.get_exported_object_key_data(obj.data)
+                new_luxcore_data = []
 
-                cache_data = []
-                for export_data in export_data_list:
+                for exported_object_data in exported_object.luxcore_data:
                     # create unique name for the lcObject
-                    name = ToValidLuxCoreName(obj.name + str(export_data.matIndex))
+                    name = ToValidLuxCoreName(obj.name + str(exported_object_data.matIndex))
                     if dupli:
                         name += '_dupli_' + str(self.dupli_number)
                         self.dupli_number += 1
@@ -1902,22 +1913,23 @@ class BlenderSceneConverter(object):
                             self.renderengine.update_stats('Exporting...', 'Exported Dupli %s' % name)
                             print("Exported dupli", name)
 
-                    new_export_data = ExportedObjectData(name, export_data.lcMeshName, export_data.lcMaterialName, export_data.matIndex)
-                    cache_data.append(new_export_data)
+                    new_exported_object_data = ExportedObjectData(name,
+                                                                  exported_object_data.lcMeshName,
+                                                                  exported_object_data.lcMaterialName,
+                                                                  exported_object_data.matIndex)
+                    new_luxcore_data.append(new_exported_object_data)
 
-                    self.SetObjectProperties(name, export_data.lcMeshName, export_data.lcMaterialName, transform)
+                    self.SetObjectProperties(name, exported_object_data.lcMeshName,
+                                             exported_object_data.lcMaterialName, transform)
 
-                # create new cache entry
-                cache_entry = {obj : cache_data}
-                # add obj to cache
-                BlenderSceneConverter.exported_meshes[obj.data].append(cache_entry)
-
+                # create new entry in cache
+                cache.add_obj(obj, new_luxcore_data)
         else:
             print("[Mesh: %s][Object: %s] mesh not in cache, exporting" % (obj.data.name, obj.name))
 
             meshDefinitions = []
             meshDefinitions.extend(self.ConvertObjectGeometry(obj, preview, update_mesh))
-            cache_data = []
+            luxcore_data = []
 
             for meshDefinition in meshDefinitions:
                 lcObjName = meshDefinition[0]
@@ -1935,19 +1947,11 @@ class BlenderSceneConverter(object):
 
                 # Add to cache
                 exported_object_data = ExportedObjectData(lcObjName, objMeshName, objMatName, objMatIndex)
-                cache_data.append(exported_object_data)
+                luxcore_data.append(exported_object_data)
 
                 self.SetObjectProperties(lcObjName, objMeshName, objMatName, transform)
 
-            exported_meshes[obj.data] = [{obj : cache_data}]
-
-        if obj.type == 'LAMP':
-            try:
-                self.ConvertLight(obj)
-            except Exception as err:
-                LuxLog('Light export failed, skipping light: %s\n%s' % (obj.name, err))
-                import traceback
-                traceback.print_exc()
+            cache.add_obj(obj, luxcore_data)
 
     def convert_clipping_plane(self, lux_camera_settings):
         if lux_camera_settings.enable_clipping_plane:
