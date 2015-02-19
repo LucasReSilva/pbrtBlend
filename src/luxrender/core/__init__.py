@@ -2054,38 +2054,22 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                             update_material = False)
                                             
             if update_changes.cause_objectsRemoved:
-                pass
-                '''
                 for ob in update_changes.removed_objects:
                     LuxLog('Removing object: ' + ob.name)
 
                     print("old object count:", lcScene.GetObjectCount())
 
                     # get luxcore name from converter
-                    cache = BlenderSceneConverter.exported_meshes
+                    cache = converter.get_export_cache()
                     luxcore_name = ''
 
-                    try:
-                        print(ob.data)
+                    if cache.has_obj(ob):
+                        exported_object = cache.get_exported_object_key_obj(ob)
 
-                        cached_objects = cache[ob.data]
-                        for elem in cached_objects:
-                            print(elem)
-                            if ob in elem:
-                                print("  found object!")
-                                exportedObjectData = elem[ob]
-                                luxcore_name = exportedObjectData.lcObjName
-                                print("  object lcName: %s" % luxcore_name)
-                                break
-
-                    except KeyError:
-                        print("Object not found in cache")
-
-                    if luxcore_name != '':
-                        lcScene.DeleteObject(luxcore_name)
+                        for exported_object_data in exported_object.luxcore_data:
+                            lcScene.DeleteObject(exported_object_data.lcObjName)
 
                     print("new object count:", lcScene.GetObjectCount())
-                '''
 
             if update_changes.cause_volumes:
                 converter.ConvertVolumes()
