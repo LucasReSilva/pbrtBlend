@@ -106,6 +106,7 @@ class BlenderSceneConverter(object):
     material_id_mask_counter = 0
     by_material_id_counter = 0
 
+    dupli_amount = 0
     dupli_number = 0
 
     export_cache = ExportCache()
@@ -1762,7 +1763,7 @@ class BlenderSceneConverter(object):
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
-    def ConvertDuplis(self, obj):
+    def ConvertDuplis(self, obj, particle_system):
         """
         Converts duplis and OBJECT and GROUP particle systems
         """
@@ -1772,6 +1773,8 @@ class BlenderSceneConverter(object):
             obj.dupli_list_create(self.blScene, settings = 'RENDER')
             if not obj.dupli_list:
                 raise Exception('cannot create dupli list for object %s' % obj.name)
+
+            self.dupli_amount = len(obj.dupli_list)
 
             # Create our own DupliOb list to work around incorrect layers
             # attribute when inside create_dupli_list()..free_dupli_list()
@@ -1801,9 +1804,10 @@ class BlenderSceneConverter(object):
                 if not group_visible:
                     continue
 
-                self.ConvertObject(dupli_object, matrix = dupli_matrix, dupli = True)
+                self.ConvertObject(dupli_object, matrix = dupli_matrix, dupli = True, particle_sytem = particle_system)
 
             del duplis
+            self.dupli_number = 0
 
             print("Dupli export finished")
         except Exception as err:
@@ -1851,7 +1855,7 @@ class BlenderSceneConverter(object):
 
         return luxcore_data
 
-    def ConvertObject(self, obj, matrix = None, dupli = False, preview = False,
+    def ConvertObject(self, obj, matrix = None, dupli = False, particle_sytem = '', preview = False,
                       update_mesh = True, update_transform = True, update_material = True):
         if obj is None or obj.data is None or (self.renderengine is not None and self.renderengine.test_break()):
             return
@@ -1893,7 +1897,7 @@ class BlenderSceneConverter(object):
 
                 if self.blScene.luxcore_translatorsettings.export_particles:
                     if psys.settings.render_type in ['OBJECT', 'GROUP']:
-                        self.ConvertDuplis(obj)
+                        self.ConvertDuplis(obj, psys.name)
                     elif psys.settings.render_type == 'PATH':
                         self.ConvertHair()
 
@@ -1937,12 +1941,12 @@ class BlenderSceneConverter(object):
                     # create unique name for the lcObject
                     name = ToValidLuxCoreName(obj.name + str(exported_object_data.matIndex))
                     if dupli:
-                        name += '_dupli_' + str(self.dupli_number)
+                        name += '_%s_%d' % (particle_sytem, self.dupli_number)
                         self.dupli_number += 1
 
                         if self.dupli_number % 100 == 0 and self.renderengine is not None:
-                            self.renderengine.update_stats('Exporting...', 'Exported Dupli %s' % name)
-                            print("Exported dupli", name)
+                            dupli_percent = float(self.dupli_number) / self.dupli_amount * 100.0
+                            self.renderengine.update_stats('Exporting...', 'Particle system %s (%d%%)' % (particle_sytem, dupli_percent))
 
                     new_exported_object_data = ExportedObjectData(name,
                                                                   exported_object_data.lcMeshName,
