@@ -45,18 +45,21 @@ class ExportedObjectData(object):
     lcMeshName = ''
     lcMaterialName = ''
     matIndex = 0
+    lightType = ''
 
-    def __init__(self, lcObjName, lcMeshName, lcMaterialName, matIndex):
+    def __init__(self, lcObjName, lcMeshName = '', lcMaterialName = '', matIndex = 0, lightType = ''):
         self.lcObjName = lcObjName
         self.lcMeshName = lcMeshName
         self.lcMaterialName = lcMaterialName
         self.matIndex = matIndex
+        self.lightType = lightType
 
     def __str__(self):
-        output = ("lcObjName: " + self.lcObjName +
-                  ",\nlcMeshName: " + self.lcMeshName +
-                  ",\nlcMaterialName: " + self.lcMaterialName +
-                  ",\nmatIndex: " + str(self.matIndex))
+        output = ('lcObjName: ' + self.lcObjName +
+                  ',\nlcMeshName: ' + self.lcMeshName +
+                  ',\nlcMaterialName: ' + self.lcMaterialName +
+                  ',\nmatIndex: ' + str(self.matIndex) +
+                  ',\nlightType: ' + self.lightType)
         return output
 
 class ExportedObject(object):
@@ -194,11 +197,11 @@ class BlenderSceneConverter(object):
         LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK',
                         'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK', 'BY_MATERIAL_ID']
 
-        # channel type (e.g. "film.outputs.1.type")
+        # channel type (e.g. 'film.outputs.1.type')
         outputStringType = 'film.outputs.' + str(self.outputCounter) + '.type'
         self.cfgProps.Set(pyluxcore.Property(outputStringType, [channelName]))
 
-        # output filename (e.g. "film.outputs.1.filename")
+        # output filename (e.g. 'film.outputs.1.filename')
         suffix = ('.png' if (channelName in LDR_channels) else '.exr')
         outputStringFilename = 'film.outputs.' + str(self.outputCounter) + '.filename'
         filename = channelName + suffix if id == -1 else channelName + '_' + str(id) + suffix
@@ -346,11 +349,11 @@ class BlenderSceneConverter(object):
                 LuxLog('Cannot create render/export object: %s' % obj.name)
                 return mesh_definitions
 
-            #print("blender obj.to_mesh took %dms" % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
+            #print('blender obj.to_mesh took %dms' % (int(round(time.time() * 1000)) - convert_blender_start)) #### DEBUG
             #convert_lux_start = int(round(time.time() * 1000)) #### DEBUG
 
-            if getattr(pyluxcore.Scene, "DefineBlenderMesh", None) is not None:
-                #LuxLog("Using c++ accelerated mesh export")
+            if getattr(pyluxcore.Scene, 'DefineBlenderMesh', None) is not None:
+                #LuxLog('Using c++ accelerated mesh export')
                 if update_mesh:
                     lcMeshName = self.GenerateMeshName(obj)
 
@@ -367,7 +370,7 @@ class BlenderSceneConverter(object):
                         lcMeshName = self.GenerateMeshName(obj, i)
                         mesh_definitions.append((lcMeshName, i))
             else:
-                #LuxLog("Using classic python mesh export (c++ acceleration not available)")
+                #LuxLog('Using classic python mesh export (c++ acceleration not available)')
                 # Collate faces by mat index
                 ffaces_mats = {}
                 mesh_faces = mesh.tessfaces
@@ -408,7 +411,7 @@ class BlenderSceneConverter(object):
 
             bpy.data.meshes.remove(mesh)
 
-            #print("export took %dms" % (int(round(time.time() * 1000)) - convert_lux_start)) #### DEBUG
+            #print('export took %dms' % (int(round(time.time() * 1000)) - convert_lux_start)) #### DEBUG
 
             return mesh_definitions
 
@@ -590,12 +593,12 @@ class BlenderSceneConverter(object):
                         def get_seq_filename(number, f_path):
                             m = re.findall(r'(\d+)', f_path)
                             if len(m) == 0:
-                                return "ERR: Can't find pattern"
+                                return 'ERR: Can\'t find pattern'
 
                             rightmost_number = m[len(m) - 1]
                             seq_length = len(rightmost_number)
 
-                            nstr = "%i" % number
+                            nstr = '%i' % number
                             new_seq_number = nstr.zfill(seq_length)
 
                             return f_path.replace(rightmost_number, new_seq_number)
@@ -740,7 +743,7 @@ class BlenderSceneConverter(object):
                     for i in range(0, luxTex.noffsets):
                         props.Set(pyluxcore.Property(prefix + '.offset%d' % i,
                                                      [float(getattr(luxTex, 'offsetcolor%s' % str(i + 1)))]))
-                        spectrum = self.ConvertMaterialChannel(luxTex, 'tex%s' % str(i + 1), 'color').split(" ")
+                        spectrum = self.ConvertMaterialChannel(luxTex, 'tex%s' % str(i + 1), 'color').split(' ')
                         props.Set(pyluxcore.Property(prefix + '.value%d' % i,
                                                      [float(spectrum[0]), float(spectrum[1]), float(spectrum[2])]))
                         i += 1
@@ -1020,13 +1023,13 @@ class BlenderSceneConverter(object):
 
         def set_volumes(prefix):
             # Interior volume
-            if hasattr(material.luxrender_material, "Interior_volume") and \
+            if hasattr(material.luxrender_material, 'Interior_volume') and \
                     material.luxrender_material.Interior_volume:
                 validInteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Interior_volume]
                 props.Set(pyluxcore.Property(prefix + '.volume.interior', validInteriorName))
 
             # Exterior volume
-            if hasattr(material.luxrender_material, "Exterior_volume") and \
+            if hasattr(material.luxrender_material, 'Exterior_volume') and \
                     material.luxrender_material.Exterior_volume:
                 validExteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Exterior_volume]
                 props.Set(pyluxcore.Property(prefix + '.volume.exterior', validExteriorName))
@@ -1045,7 +1048,7 @@ class BlenderSceneConverter(object):
             if matName in self.materialsCache:
                 return matName
 
-            LuxLog('Converting material \"%s\"' % material.name)
+            LuxLog('Converting material \'%s\'' % material.name)
 
             matType = material.luxrender_material.type
             luxMat = getattr(material.luxrender_material, 'luxrender_mat_' + matType)
@@ -1528,7 +1531,7 @@ class BlenderSceneConverter(object):
         # data to cache all exported lights later
         luxcore_data = []
         if light.type != 'SUN':
-            luxcore_data.append(ExportedObjectData(luxcore_name, '', '', 0))
+            luxcore_data.append(ExportedObjectData(luxcore_name, lightType = light.type))
 
         light_params = ParamSet() \
             .add_float('gain', light.energy) \
@@ -1597,7 +1600,7 @@ class BlenderSceneConverter(object):
 
             if 'sun' in sunsky_type:
                 name = luxcore_name + '_sun'
-                luxcore_data.append(ExportedObjectData(name, '', '', 0))
+                luxcore_data.append(ExportedObjectData(name, lightType = light.type))
 
                 turbidity = params_keyValue['turbidity']
 
@@ -1614,7 +1617,7 @@ class BlenderSceneConverter(object):
 
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
-                luxcore_data.append(ExportedObjectData(name, '', '', 0))
+                luxcore_data.append(ExportedObjectData(name, lightType = light.type))
 
                 turbidity = params_keyValue['turbidity']
                 skyVersion = 'sky' if legacy_sky else 'sky2'
@@ -1627,7 +1630,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
 
             if sunsky_type == 'distant':
-                luxcore_data.append(ExportedObjectData(luxcore_name, '', '', 0))
+                luxcore_data.append(ExportedObjectData(luxcore_name, lightType = light.type))
 
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
 
@@ -1661,7 +1664,7 @@ class BlenderSceneConverter(object):
         ####################################################################
         elif light.type == 'POINT':
             # if getattr(lux_lamp, 'usesphere'):
-            # print("------------------------", getattr(lux_lamp, 'pointsize'))
+            # print('------------------------', getattr(lux_lamp, 'pointsize'))
             if iesfile:
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['mappoint']))
             else:
@@ -1781,7 +1784,7 @@ class BlenderSceneConverter(object):
         """
         Converts duplis and OBJECT and GROUP particle systems
         """
-        print("Exporting duplis...")
+        print('Exporting duplis...')
 
         try:
             obj.dupli_list_create(self.blScene, settings = 'RENDER')
@@ -1823,7 +1826,7 @@ class BlenderSceneConverter(object):
             del duplis
             self.dupli_number = 0
 
-            print("Dupli export finished")
+            print('Dupli export finished')
         except Exception as err:
             LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
             import traceback
@@ -1833,7 +1836,7 @@ class BlenderSceneConverter(object):
         """
         Converts PATH type particle systems (hair systems)
         """
-        print("Hair export not supported yet")
+        print('Hair export not supported yet')
 
     def SetObjectProperties(self, lcObjName, lcMeshName, lcMatName, transform):
         self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.material', [lcMatName]))
@@ -1856,7 +1859,7 @@ class BlenderSceneConverter(object):
                 objMat = obj.material_slots[objMatIndex].material
             except IndexError:
                 objMat = None
-                LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
+                LuxLog('WARNING: material slot %d on object \"%s\" is unassigned!' % (objMatIndex + 1, obj.name))
 
             objMatName = self.ConvertMaterial(objMat, obj.material_slots, no_conversion = not update_material)
             objMeshName = 'Mesh-' + lcObjName
@@ -2352,7 +2355,7 @@ class BlenderSceneConverter(object):
         engine_settings = self.blScene.luxcore_enginesettings
         # Custom Properties
         if engine_settings.advanced and engine_settings.custom_properties:
-            custom_params = engine_settings.custom_properties.replace(" ", "").split("|")
+            custom_params = engine_settings.custom_properties.replace(' ', '').split('|')
             for prop in custom_params:
                 prop = prop.split('=')
                 self.cfgProps.Set(pyluxcore.Property(prop[0], prop[1]))

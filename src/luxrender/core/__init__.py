@@ -1685,6 +1685,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     viewSession = None
     viewSessionRunning = False
     viewSessionPaused = False
+    sceneEditActive = False
     viewSessionStartTime = 0.0
     viewFilmWidth = -1
     viewFilmHeight = -1
@@ -1755,8 +1756,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if stop_redraw:
             # Pause rendering
-            self.viewSessionPaused = True
-            self.viewSession.BeginSceneEdit()
+            if not self.viewSessionPaused:
+                self.viewSessionPaused = True
+                if not self.sceneEditActive:
+                    self.viewSession.BeginSceneEdit()
+                    self.sceneEditActive = True
+                    print("BeginSceneEdit() (render paused)")
         else:
             # Trigger another update
             self.viewSessionPaused = False
@@ -1929,8 +1934,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # resume rendering if it was paused
         if self.viewSessionPaused:
             self.viewSessionPaused = False
-            if self.viewSession is not None:
+            if self.viewSession is not None and self.sceneEditActive:
                 self.viewSession.EndSceneEdit()
+                self.sceneEditActive = False
+                print('EndSceneEdit() (render was paused)')
     
         # check which changes took place
         if update_changes is None:
@@ -2028,10 +2035,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewSession.Start()
                 self.viewSessionStartTime = time.time()
                 self.viewSessionRunning = True
-        
+
             # begin sceneEdit
             lcScene = self.lcConfig.GetScene()
-            self.viewSession.BeginSceneEdit()
+            if not self.sceneEditActive:
+                self.viewSession.BeginSceneEdit()
+                self.sceneEditActive = True
+                print("BeginSceneEdit() (updates started)")
 
             converter = BlenderSceneConverter(context.scene, self.viewSession, renderengine = self)
 
@@ -2068,13 +2078,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                         # loop through object components (split by materials)
                         for exported_object_data in exported_object.luxcore_data:
-                            # TODO: special case of area lights not taken into account yet
-                            if ob.type == 'LAMP':
-                                print('removing lamp %s (luxcore name: %s)' % (ob.name, exported_object_data.lcObjName))
-                                lcScene.DeleteLight(exported_object_data.lcObjName)
+                            luxcore_name = exported_object_data.lcObjName
+                            light_type = exported_object_data.lightType
+
+                            if ob.type == 'LAMP' and light_type != 'AREA':
+                                print('removing light %s (luxcore name: %s)' % (ob.name, luxcore_name))
+                                lcScene.DeleteLight(luxcore_name)
                             else:
-                                print('removing object %s (luxcore name: %s)' % (ob.name, exported_object_data.lcObjName))
-                                lcScene.DeleteObject(exported_object_data.lcObjName)
+                                print('removing object %s (luxcore name: %s)' % (ob.name, luxcore_name))
+                                lcScene.DeleteObject(luxcore_name)
 
             if update_changes.cause_volumes:
                 converter.ConvertVolumes()
@@ -2086,7 +2098,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
             # parse scene changes and end sceneEdit
             lcScene.Parse(converter.scnProps)
-            self.viewSession.EndSceneEdit()
+            if self.sceneEditActive:
+                self.viewSession.EndSceneEdit()
+                self.sceneEditActive = False
+                print("EndSceneEdit() (updates finished)")
         
         # reset viewSessionStartTime after an update
         self.viewSessionStartTime = time.time()
