@@ -1857,7 +1857,7 @@ class BlenderSceneConverter(object):
 
     def ConvertObject(self, obj, matrix = None, dupli = False, particle_sytem = '', preview = False,
                       update_mesh = True, update_transform = True, update_material = True):
-        if obj is None or obj.data is None or (self.renderengine is not None and self.renderengine.test_break()):
+        if obj is None or (self.renderengine is not None and self.renderengine.test_break()):
             return
 
         if obj.type == 'LAMP':
@@ -1904,7 +1904,7 @@ class BlenderSceneConverter(object):
         # check if object is duplicator
         if obj.is_duplicator and len(obj.particle_systems) < 1:
             if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                self.ConvertDuplis(obj)
+                self.ConvertDuplis(obj, obj.name)
 
         # Some dupli types should hide the original
         if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
@@ -1919,7 +1919,7 @@ class BlenderSceneConverter(object):
         if cache.has_obj_data(obj.data):
             # check if this object was already exported
             if cache.has_obj(obj) and not dupli:
-                print("[Mesh: %s][Object: %s] obj already in cache" % (obj.data.name, obj.name))
+                print('[Data: %s][Object: %s] obj already in cache' % (obj.data.name, obj.name))
 
                 if update_mesh and obj.data.users < 2:
                     # re-export mesh (disabled for multiuser meshes because it crashes Blender)
@@ -1932,7 +1932,7 @@ class BlenderSceneConverter(object):
                                                  exported_object_data.lcMaterialName, transform)
             else:
                 if not dupli:
-                    print("[Mesh: %s][Object: %s] no obj entry, creating one" % (obj.data.name, obj.name))
+                    print('[Data: %s][Object: %s] no obj entry, creating one' % (obj.data.name, obj.name))
 
                 exported_object = cache.get_exported_object_key_data(obj.data)
                 new_luxcore_data = []
@@ -1946,7 +1946,7 @@ class BlenderSceneConverter(object):
 
                         if self.dupli_number % 100 == 0 and self.renderengine is not None:
                             dupli_percent = float(self.dupli_number) / self.dupli_amount * 100.0
-                            self.renderengine.update_stats('Exporting...', 'Particle system %s (%d%%)' % (particle_sytem, dupli_percent))
+                            self.renderengine.update_stats('Exporting...', 'Duplicator %s (%d%%)' % (particle_sytem, dupli_percent))
 
                     new_exported_object_data = ExportedObjectData(name,
                                                                   exported_object_data.lcMeshName,
@@ -1960,7 +1960,7 @@ class BlenderSceneConverter(object):
                 # create new entry in cache
                 cache.add_obj(obj, new_luxcore_data)
         else:
-            print("[Mesh: %s][Object: %s] mesh not in cache, exporting" % (obj.data.name, obj.name))
+            print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data.name, obj.name))
             cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform))
 
     def convert_clipping_plane(self, lux_camera_settings):
