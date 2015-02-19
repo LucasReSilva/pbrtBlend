@@ -1824,6 +1824,33 @@ class BlenderSceneConverter(object):
         if transform is not None:
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
 
+    def ExportMesh(self, obj, preview, update_mesh, update_material, transform):
+        meshDefinitions = []
+        meshDefinitions.extend(self.ConvertObjectGeometry(obj, preview, update_mesh))
+        luxcore_data = []
+
+        for meshDefinition in meshDefinitions:
+            lcObjName = meshDefinition[0]
+            objMatIndex = meshDefinition[1]
+
+            # Convert the (main) material
+            try:
+                objMat = obj.material_slots[objMatIndex].material
+            except IndexError:
+                objMat = None
+                LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
+
+            objMatName = self.ConvertMaterial(objMat, obj.material_slots, no_conversion = not update_material)
+            objMeshName = 'Mesh-' + lcObjName
+
+            # Add to cache
+            exported_object_data = ExportedObjectData(lcObjName, objMeshName, objMatName, objMatIndex)
+            luxcore_data.append(exported_object_data)
+
+            self.SetObjectProperties(lcObjName, objMeshName, objMatName, transform)
+
+        return luxcore_data
+
     def ConvertObject(self, obj, matrix = None, dupli = False, preview = False,
                       update_mesh = True, update_transform = True, update_material = True):
         if obj is None or obj.data is None or (self.renderengine is not None and self.renderengine.test_break()):
@@ -1890,11 +1917,15 @@ class BlenderSceneConverter(object):
             if cache.has_obj(obj) and not dupli:
                 print("[Mesh: %s][Object: %s] obj already in cache" % (obj.data.name, obj.name))
 
-                # read from cache (to update transformation)
-                exported_object = cache.get_exported_object_key_obj(obj)
-                for exported_object_data in exported_object.luxcore_data:
-                    self.SetObjectProperties(exported_object_data.lcObjName, exported_object_data.lcMeshName,
-                                             exported_object_data.lcMaterialName, transform)
+                if update_mesh and obj.data.users < 2:
+                    # re-export mesh (disabled for multiuser meshes because it crashes Blender)
+                    cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform))
+                else:
+                    # read from cache (only transformation update required)
+                    exported_object = cache.get_exported_object_key_obj(obj)
+                    for exported_object_data in exported_object.luxcore_data:
+                        self.SetObjectProperties(exported_object_data.lcObjName, exported_object_data.lcMeshName,
+                                                 exported_object_data.lcMaterialName, transform)
             else:
                 if not dupli:
                     print("[Mesh: %s][Object: %s] no obj entry, creating one" % (obj.data.name, obj.name))
@@ -1926,32 +1957,7 @@ class BlenderSceneConverter(object):
                 cache.add_obj(obj, new_luxcore_data)
         else:
             print("[Mesh: %s][Object: %s] mesh not in cache, exporting" % (obj.data.name, obj.name))
-
-            meshDefinitions = []
-            meshDefinitions.extend(self.ConvertObjectGeometry(obj, preview, update_mesh))
-            luxcore_data = []
-
-            for meshDefinition in meshDefinitions:
-                lcObjName = meshDefinition[0]
-                objMatIndex = meshDefinition[1]
-
-                # Convert the (main) material
-                try:
-                    objMat = obj.material_slots[objMatIndex].material
-                except IndexError:
-                    objMat = None
-                    LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (objMatIndex + 1, obj.name))
-
-                objMatName = self.ConvertMaterial(objMat, obj.material_slots, no_conversion = not update_material)
-                objMeshName = 'Mesh-' + lcObjName
-
-                # Add to cache
-                exported_object_data = ExportedObjectData(lcObjName, objMeshName, objMatName, objMatIndex)
-                luxcore_data.append(exported_object_data)
-
-                self.SetObjectProperties(lcObjName, objMeshName, objMatName, transform)
-
-            cache.add_obj(obj, luxcore_data)
+            cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform))
 
     def convert_clipping_plane(self, lux_camera_settings):
         if lux_camera_settings.enable_clipping_plane:
