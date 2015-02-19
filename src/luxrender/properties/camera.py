@@ -38,6 +38,7 @@ from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
 from ..export import fix_matrix_order
 from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.luxcore_api import UseLuxCore
 
 
 def CameraVolumeParameter(attr, name):
@@ -126,7 +127,8 @@ class luxrender_camera(declarative_property_group):
         'motion_blur_samples': {'usemblur': True},
         'cammblur': {'usemblur': True},
         'objectmblur': {'usemblur': True},
-        'clipping_plane_selector': {'enable_clipping_plane': True},
+        'enable_clipping_plane': lambda: UseLuxCore(),
+        'clipping_plane_selector': A([{'enable_clipping_plane': True}, lambda: UseLuxCore()])
     }
 
     properties = CameraVolumeParameter('Exterior', 'Exterior') + ArbitraryClippingPlane() + [
