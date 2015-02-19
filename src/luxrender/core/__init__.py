@@ -1405,6 +1405,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             lastImageDisplay = startTime
             done = False
 
+            # magic formula to compute optimal display interval
+            display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
+            LuxLog('Recommmended minimum display interval: %.1fs' % display_interval)
+
             while not self.test_break() and not done:
                 time.sleep(0.2)
 
@@ -1412,22 +1416,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 timeSinceDisplay = now - lastImageDisplay
                 elapsedTimeSinceStart = now - startTime
 
-                interval_display = imagepipeline_settings.displayinterval
-                # use lower display interval for the first 10 seconds
-                if elapsedTimeSinceStart < 10.0:
-                    interval_display = 2.0
+                # use user-definde display interval after the first 15 seconds
+                if elapsedTimeSinceStart > 15.0:
+                    display_interval = imagepipeline_settings.displayinterval
                     
                 # Update statistics
                 lcSession.UpdateStats()
                 stats = lcSession.GetStats()
                 blender_stats = self.CreateBlenderStats(lcConfig, stats, scene, 
-                        time_until_update = interval_display - timeSinceDisplay)
+                        time_until_update = display_interval - timeSinceDisplay)
                 self.update_stats('Rendering...', blender_stats)
 
                 # check if any halt conditions are met
                 done = self.haltConditionMet(scene, stats)
 
-                if timeSinceDisplay > interval_display:
+                if timeSinceDisplay > display_interval:
+                    display_start = time.time()
+
                     # Update the image
                     lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
@@ -1455,6 +1460,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.end_result(result)
 
                     lastImageDisplay = now
+                    LuxLog('Imagebuffer update took %.1fs' % (time.time() - display_start))
 
             # Update the image
             lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
@@ -2055,21 +2061,20 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                             
             if update_changes.cause_objectsRemoved:
                 for ob in update_changes.removed_objects:
-                    LuxLog('Removing object: ' + ob.name)
-
-                    print("old object count:", lcScene.GetObjectCount())
-
-                    # get luxcore name from converter
                     cache = converter.get_export_cache()
-                    luxcore_name = ''
 
                     if cache.has_obj(ob):
                         exported_object = cache.get_exported_object_key_obj(ob)
 
+                        # loop through object components (split by materials)
                         for exported_object_data in exported_object.luxcore_data:
-                            lcScene.DeleteObject(exported_object_data.lcObjName)
-
-                    print("new object count:", lcScene.GetObjectCount())
+                            # TODO: special case of area lights not taken into account yet
+                            if ob.type == 'LAMP':
+                                print('removing lamp %s (luxcore name: %s)' % (ob.name, exported_object_data.lcObjName))
+                                lcScene.DeleteLight(exported_object_data.lcObjName)
+                            else:
+                                print('removing object %s (luxcore name: %s)' % (ob.name, exported_object_data.lcObjName))
+                                lcScene.DeleteObject(exported_object_data.lcObjName)
 
             if update_changes.cause_volumes:
                 converter.ConvertVolumes()
@@ -2090,7 +2095,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
         LuxLog("Dynamic updates: update took %dms" % view_update_time)
             
-class UpdateChanges:
+class UpdateChanges(object):
     def __init__(self):
         self.changed_objects_transform = []
         self.changed_objects_mesh = []

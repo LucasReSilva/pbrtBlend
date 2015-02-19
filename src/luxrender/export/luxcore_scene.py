@@ -1525,6 +1525,11 @@ class BlenderSceneConverter(object):
         light = obj.data
         luxcore_name = ToValidLuxCoreName(obj.name)
 
+        # data to cache all exported lights later
+        luxcore_data = []
+        if light.type != 'SUN':
+            luxcore_data.append(ExportedObjectData(luxcore_name, '', '', 0))
+
         light_params = ParamSet() \
             .add_float('gain', light.energy) \
             .add_float('importance', light.luxrender_lamp.importance)
@@ -1592,6 +1597,8 @@ class BlenderSceneConverter(object):
 
             if 'sun' in sunsky_type:
                 name = luxcore_name + '_sun'
+                luxcore_data.append(ExportedObjectData(name, '', '', 0))
+
                 turbidity = params_keyValue['turbidity']
 
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.type', ['sun']))
@@ -1607,6 +1614,8 @@ class BlenderSceneConverter(object):
 
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
+                luxcore_data.append(ExportedObjectData(name, '', '', 0))
+
                 turbidity = params_keyValue['turbidity']
                 skyVersion = 'sky' if legacy_sky else 'sky2'
 
@@ -1618,6 +1627,8 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
 
             if sunsky_type == 'distant':
+                luxcore_data.append(ExportedObjectData(luxcore_name, '', '', 0))
+
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
 
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['distant']))
@@ -1763,6 +1774,9 @@ class BlenderSceneConverter(object):
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + luxcore_name)
 
+        # create cache entry
+        BlenderSceneConverter.export_cache.add_obj(obj, luxcore_data)
+
     def ConvertDuplis(self, obj, particle_system):
         """
         Converts duplis and OBJECT and GROUP particle systems
@@ -1863,11 +1877,11 @@ class BlenderSceneConverter(object):
         if obj.type == 'LAMP':
             try:
                 self.ConvertLight(obj)
-                return
             except Exception as err:
                 LuxLog('Light export failed, skipping light: %s\n%s' % (obj.name, err))
                 import traceback
                 traceback.print_exc()
+            return
 
         convert_object = True
 
