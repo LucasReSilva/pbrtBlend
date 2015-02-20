@@ -1462,6 +1462,9 @@ class BlenderSceneConverter(object):
                     if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
                         texture = bpy.data.textures[material.luxrender_transparency.alpha_floattexturename]
                         alpha = self.ConvertTexture(texture)
+                        # Set the image tex to variant 'float' and channel to 'alpha', mandatory
+                        bpy.data.textures[alpha].luxrender_texture.luxrender_tex_imagemap.variant = 'float'
+                        bpy.data.textures[alpha].luxrender_texture.luxrender_tex_imagemap.channel = 'alpha'
 
                         if material.luxrender_transparency.inverse:
                             sv = BlenderSceneConverter.next_scale_value()
