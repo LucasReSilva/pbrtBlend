@@ -1483,8 +1483,8 @@ class BlenderSceneConverter(object):
 
                 mix_prefix = 'scene.materials.' + name_mix
                 props.Set(pyluxcore.Property(mix_prefix + '.type', ['mix']))
-                props.Set(pyluxcore.Property(mix_prefix + '.material1', matName))
-                props.Set(pyluxcore.Property(mix_prefix + '.material2', name_null))
+                props.Set(pyluxcore.Property(mix_prefix + '.material1', name_null))
+                props.Set(pyluxcore.Property(mix_prefix + '.material2', matName))
                 props.Set(pyluxcore.Property(mix_prefix + '.amount', alpha))
 
                 set_volumes(mix_prefix)
