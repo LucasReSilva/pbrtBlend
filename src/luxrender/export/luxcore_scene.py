@@ -114,8 +114,8 @@ class BlenderSceneConverter(object):
 
     export_cache = ExportCache()
 
-    volumes_cache = {}
-    lightgroups_cache = {}
+    volumes_cache = {} # Structure: {volume.name : luxcore_name}
+    lightgroups_cache = {} # Structure: {lightgroup_name : luxcore_ID}
 
     def __init__(self, blScene, lcSession=None, renderengine=None):
         LuxManager.SetCurrentScene(blScene)
@@ -142,12 +142,12 @@ class BlenderSceneConverter(object):
     @staticmethod
     def generate_material_name(rawMatName):
         # materials and volumes must not have the same names
-        return ToValidLuxCoreName(rawMatName) + '-m'
+        return ToValidLuxCoreName(rawMatName) + '-mat'
 
     @staticmethod
     def generate_volume_name(rawVolName):
         # materials and volumes must not have the same names
-        return ToValidLuxCoreName(rawVolName) + '-v'
+        return ToValidLuxCoreName(rawVolName) + '-vol'
 
     @staticmethod
     def clear():
@@ -1943,7 +1943,7 @@ class BlenderSceneConverter(object):
         if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
             convert_object = False
 
-        if not is_obj_visible(self.blScene, obj, is_dupli = is_dupli) or not convert_object:
+        if not is_obj_visible(self.blScene, obj, is_dupli = is_dupli) or not convert_object or obj.data is None:
             return
 
         cache = BlenderSceneConverter.export_cache
@@ -1965,7 +1965,7 @@ class BlenderSceneConverter(object):
                                                  exported_object_data.lcMaterialName, transform)
             else:
                 if not is_dupli:
-                    print('[Data: %s][Object: %s] no obj entry, creating one' % (obj.data, obj.name))
+                    print('[Data: %s][Object: %s] no obj entry, creating one' % (obj.data.name, obj.name))
 
                 exported_object = cache.get_exported_object_key_data(obj.data)
                 new_luxcore_data = []
@@ -1993,7 +1993,7 @@ class BlenderSceneConverter(object):
                 # create new entry in cache
                 cache.add_obj(obj, new_luxcore_data)
         else:
-            print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data, obj.name))
+            print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data.name, obj.name))
             cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli))
 
     def convert_clipping_plane(self, lux_camera_settings):
@@ -2429,54 +2429,36 @@ class BlenderSceneConverter(object):
                 abs_col[i] = (-math.log(max([v, 1e-30])) / depth) * scale * (v == 1.0 and -1 or 1)
 
         name = BlenderSceneConverter.generate_volume_name(volume.name)
+        prefix = 'scene.volumes.' + name
 
         # add to cache
         BlenderSceneConverter.volumes_cache[volume.name] = name
 
-        self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.type' % name, [volume.type]))
+        self.scnProps.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
+        self.scnProps.Set(pyluxcore.Property(prefix + '.ior', volume.fresnel_fresnelvalue))
+        self.scnProps.Set(pyluxcore.Property(prefix + '.priority', volume.priority))
 
         if volume.type == 'clear':
             abs_col = [volume.absorption_color.r, volume.absorption_color.g, volume.absorption_color.b]
             absorption_at_depth_scaled(abs_col)
 
-            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.absorption' % name,
-                                                 '%s %s %s' % (abs_col[0],
-                                                               abs_col[1],
-                                                               abs_col[2])))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.absorption', [abs_col[0], abs_col[1], abs_col[2]]))
+
         elif volume.type in ['homogeneous', 'heterogeneous']:
             abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
             absorption_at_depth_scaled(abs_col)
-
-            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.absorption' % name,
-                                                 '%s %s %s' % (abs_col[0],
-                                                               abs_col[1],
-                                                               abs_col[2])))
-
             scale = volume.scattering_scale
-            s_col = [volume.sigma_s_color.r * scale, 
-                     volume.sigma_s_color.g * scale, 
+            s_col = [volume.sigma_s_color.r * scale,
+                     volume.sigma_s_color.g * scale,
                      volume.sigma_s_color.b * scale]
 
-            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.scattering' % name,
-                                                 '%s %s %s' % (s_col[0],
-                                                               s_col[1],
-                                                               s_col[2])))
-
-            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.asymmetry' % name,
-                                                 '%s %s %s' % (volume.g[0],
-                                                               volume.g[1],
-                                                               volume.g[2])))
-
-            self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.multiscattering' % name,
-                                                 [volume.multiscattering]))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.absorption', [abs_col[0], abs_col[1], abs_col[2]]))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.scattering', [s_col[0], s_col[1], s_col[2]]))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.asymmetry', [volume.g[0], volume.g[1], volume.g[2]]))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.multiscattering', [volume.multiscattering]))
 
             if volume.type == 'heterogenous':
-                self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.steps.size' % name, volume.stepsize))
-
-        self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.ior' % name,
-                                             '%s' % volume.fresnel_fresnelvalue))
-
-        self.scnProps.Set(pyluxcore.Property('scene.volumes.%s.priority' % name, volume.priority))
+                self.scnProps.Set(pyluxcore.Property(prefix + '.steps.size', volume.stepsize))
 
     def ConvertChannelSettings(self, realtime_preview=False):
         if self.blScene.camera is None:
@@ -2566,7 +2548,7 @@ class BlenderSceneConverter(object):
         self.ConvertVolumes()
 
         ########################################################################
-        # Convert all objects
+        # Convert all objects (and materials and textures)
         ########################################################################
         objects_amount = len(self.blScene.objects)
         objects_counter = 0
@@ -2594,7 +2576,7 @@ class BlenderSceneConverter(object):
         # Debug information
         if self.blScene.luxcore_translatorsettings.print_config:
             LuxLog('Scene Properties:')
-            LuxLog(str(self.scnProps))
+            print(str(self.scnProps))
 
         self.lcScene.Parse(self.scnProps)
 
@@ -2618,25 +2600,18 @@ class BlenderSceneConverter(object):
         # Debug information
         if self.blScene.luxcore_translatorsettings.print_config:
             LuxLog('RenderConfig Properties:')
-            LuxLog(str(self.cfgProps))
+            print(str(self.cfgProps))
 
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
 
-        BlenderSceneConverter.clear()  # for scalers_count etc.
+        BlenderSceneConverter.clear()  # reset scalers_count etc.
 
         # show messages about export
         export_time = time.time() - export_start
         print('Export took %.1f seconds' % export_time)
         if self.renderengine is not None:
             engine = self.blScene.luxcore_enginesettings.renderengine_type
-            if 'OCL' in engine:
-                message = 'Compiling OpenCL Kernels...'
-            else:
-                message = 'Starting LuxRender...'
-
+            message = 'Compiling OpenCL Kernels...' if 'OCL' in engine else 'Starting LuxRender...'
             self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
-
-        #        import pydevd
-        #        pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
 
         return self.lcConfig
