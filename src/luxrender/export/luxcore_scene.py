@@ -2196,10 +2196,10 @@ class BlenderSceneConverter(object):
             index += 1
             
         # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
-        self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
-        gamma_value = 2.2 if realtime_preview else imagepipeline_settings.gamma
-        self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.value', [gamma_value]))
-        index += 1
+        if realtime_preview:
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
+            self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.value', [2.2]))
+            index += 1
 
         # Deprecated but used for backwardscompatibility
         if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
