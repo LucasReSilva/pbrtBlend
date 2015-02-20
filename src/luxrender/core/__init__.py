@@ -1145,8 +1145,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 k += 4
         else:
             if channelName in ['MATERIAL_ID_MASK', 'BY_MATERIAL_ID', 'RADIANCE_GROUP'] and buffer_id != -1:
+                LuxLog('Importing pass %s with ID %d' % (outputType, buffer_id))
                 lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer, buffer_id)
             else:
+                LuxLog('Importing pass %s' % outputType)
                 lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer)
 
             # spread value to RGBA format
