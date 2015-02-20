@@ -1947,7 +1947,7 @@ class BlenderSceneConverter(object):
                                                  exported_object_data.lcMaterialName, transform)
             else:
                 if not is_dupli:
-                    print('[Data: %s][Object: %s] no obj entry, creating one' % (obj.data.name, obj.name))
+                    print('[Data: %s][Object: %s] no obj entry, creating one' % (obj.data, obj.name))
 
                 exported_object = cache.get_exported_object_key_data(obj.data)
                 new_luxcore_data = []
@@ -1975,7 +1975,7 @@ class BlenderSceneConverter(object):
                 # create new entry in cache
                 cache.add_obj(obj, new_luxcore_data)
         else:
-            print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data.name, obj.name))
+            print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data, obj.name))
             cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli))
 
     def convert_clipping_plane(self, lux_camera_settings):
