@@ -1580,19 +1580,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                pyluxcore.FilmOutputType.BY_MATERIAL_ID, 'f', 0.0, 3, False,
                                                channels.saveToDisk, i)
 
-                ''' disabled because it crashes with LuxCore 1.4 (fixed in 1.5)
-                # Convert all RADIANCE_GROUP channels
-                lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
-                print("lightgroup_count:", str(lightgroup_count))
-
-                for i in range(lightgroup_count):
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'RADIANCE_GROUP', True,
-                                               pyluxcore.FilmOutputType.RADIANCE_GROUP, 'f', 0.0, 3, False,
-                                               channels.saveToDisk, i)
-                '''
+                from ..outputs.luxcore_api import LUXCORE_VERSION
+                # crashes in 1.4
+                if LUXCORE_VERSION[:3] >= '1.5':
+                    # Convert all RADIANCE_GROUP channels
+                    lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
+                    for i in range(lightgroup_count):
+                        self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'RADIANCE_GROUP', True,
+                                                   pyluxcore.FilmOutputType.RADIANCE_GROUP, 'f', 0.0, 3, False,
+                                                   channels.saveToDisk, i)
     
                 channelCalcTime = time.time() - channelCalcStartTime
-                LuxLog('AOV conversion took %i seconds' % channelCalcTime)
+                LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)
                 # End of AOV import
 
             LuxLog('Done.')

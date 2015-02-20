@@ -1553,14 +1553,26 @@ class BlenderSceneConverter(object):
         energy = params_keyValue['gain'] if not hide_lamp else 0  # workaround for no lights render recovery
         position = bpy.data.objects[obj.name].location
         importance = params_keyValue['importance']
-        lightgroup_id = getattr(light.luxrender_lamp, 'lightgroup')
+        lightgroup = getattr(light.luxrender_lamp, 'lightgroup')
+        lightgroup_id = -1 # for luxcore RADIANCE_GROUP
 
-        if lightgroup_id != '':
-            lightgroup_enabled = self.blScene.luxrender_lightgroups.lightgroups[lightgroup_id].lg_enabled
+        if lightgroup != '':
+            lightgroup_enabled = self.blScene.luxrender_lightgroups.lightgroups[lightgroup].lg_enabled
             if lightgroup_enabled:
-                energy *= self.blScene.luxrender_lightgroups.lightgroups[lightgroup_id].gain
+                energy *= self.blScene.luxrender_lightgroups.lightgroups[lightgroup].gain
+
+                if lightgroup in self.lightgroups_cache:
+                    # lightgroup already has a luxcore id, use it
+                    lightgroup_id = self.lightgroups_cache[lightgroup]
+                else:
+                    # this is the first material to use this lightgroup, add an entry with a new id
+                    lightgroup_id = len(self.lightgroups_cache)
+                    self.lightgroups_cache[lightgroup] = lightgroup_id
             else:
                 energy = 0  # use gain for muting to keep geometry exported
+
+        if lightgroup_id != -1 and light.type != 'SUN':
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
         gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum!
 
@@ -1601,6 +1613,8 @@ class BlenderSceneConverter(object):
             if 'sun' in sunsky_type:
                 name = luxcore_name + '_sun'
                 luxcore_data.append(ExportedObjectData(name, lightType = light.type))
+                if lightgroup_id != -1:
+                    self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = params_keyValue['turbidity']
 
@@ -1618,6 +1632,8 @@ class BlenderSceneConverter(object):
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
                 luxcore_data.append(ExportedObjectData(name, lightType = light.type))
+                if lightgroup_id != -1:
+                    self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = params_keyValue['turbidity']
                 skyVersion = 'sky' if legacy_sky else 'sky2'
@@ -1631,6 +1647,8 @@ class BlenderSceneConverter(object):
 
             if sunsky_type == 'distant':
                 luxcore_data.append(ExportedObjectData(luxcore_name, lightType = light.type))
+                if lightgroup_id != -1:
+                    self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
 
@@ -2200,6 +2218,14 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
             self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.value', [2.2]))
             index += 1
+        else:
+            # prevent crash in 1.4 without gamma correction
+            from ..outputs.luxcore_api import LUXCORE_VERSION
+
+            if LUXCORE_VERSION[:3] >= '1.5':
+                self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
+                self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.value', [1.0]))
+                index += 1
 
         # Deprecated but used for backwardscompatibility
         if getattr(self.blScene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
@@ -2372,7 +2398,12 @@ class BlenderSceneConverter(object):
         self.ConvertCustomProps()
         self.ConvertImagepipelineSettings(realtime_preview)
         self.ConvertChannelSettings(realtime_preview)
-        #self.ConvertLightgroups() # disabled because it crashes LuxCore 1.4
+
+        from ..outputs.luxcore_api import LUXCORE_VERSION
+        # crashes in 1.4
+        if LUXCORE_VERSION[:3] >= '1.5':
+            if not realtime_preview:
+                self.ConvertLightgroups()
 
     def ConvertVolumes(self):
         # default volumes
