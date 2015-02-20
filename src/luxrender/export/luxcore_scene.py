@@ -2222,7 +2222,7 @@ class BlenderSceneConverter(object):
             # prevent crash in 1.4 without gamma correction
             from ..outputs.luxcore_api import LUXCORE_VERSION
 
-            if LUXCORE_VERSION[:3] >= '1.5':
+            if LUXCORE_VERSION[:3] < '1.5':
                 self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
                 self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.value', [1.0]))
                 index += 1
