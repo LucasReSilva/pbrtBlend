@@ -141,8 +141,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         # Film response
         'crf_label',
         'crf_preset_menu',
-        # Gamma
-        ['label_gamma', 'gamma'],
         # Intervals
         #'spacer_intervals',
         'label_intervals',
@@ -161,8 +159,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
-        'label_gamma': {'advanced': True},
-        'gamma': {'advanced': True}
     }
 
     properties = [
@@ -338,24 +334,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'type': 'string',
             'name': 'Film Reponse Preset',
             'default': 'None',
-            'save_in_preset': True
-        },
-        # Gamma correction settings
-        {
-            'attr': 'label_gamma',
-            'type': 'text',
-            'name': 'Gamma Correction:',
-        },
-        {
-            'type': 'float',
-            'attr': 'gamma',
-            'name': 'Gamma',
-            'description': 'Gamma factor to apply (note: Blender expects 1.0 from rendered images)',
-            'default': 1.0,
-            'min': -20,
-            'soft_min': -1,
-            'max': 20.0,
-            'soft_max': 4.0,
             'save_in_preset': True
         },
         # Update and save intervals
