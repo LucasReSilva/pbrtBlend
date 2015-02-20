@@ -193,9 +193,9 @@ class BlenderSceneConverter(object):
 
         self.outputCounter += 1
 
-        # list of channels that don't use a HDR format
+        # list of channels that don't use an HDR format
         LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK',
-                        'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK', 'BY_MATERIAL_ID']
+                        'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK']
 
         # channel type (e.g. 'film.outputs.1.type')
         outputStringType = 'film.outputs.' + str(self.outputCounter) + '.type'
