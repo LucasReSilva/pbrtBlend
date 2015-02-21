@@ -1512,7 +1512,7 @@ class BlenderSceneConverter(object):
                         props.Set(pyluxcore.Property('scene.textures.%s.file' % texName, [base.filename]))
                         props.Set(pyluxcore.Property('scene.textures.%s.mapping.type' % texName, ['uvmapping2d']))
                         props.Set(pyluxcore.Property('scene.textures.%s.type' % texName, ['imagemap']))
-                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvscale' % texName, [ mapping.uscale , mapping.uscale * -1.0]))
+                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvscale' % texName, [ mapping.uscale , mapping.vscale * -1.0]))
                         props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvdelta' % texName, [mapping.udelta, mapping.vdelta]))
                         props.Set(pyluxcore.Property('scene.textures.%s.channel' % texName, channelMap[alpha_source]))
                         alpha = texName
