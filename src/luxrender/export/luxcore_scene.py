@@ -478,12 +478,18 @@ class BlenderSceneConverter(object):
 
         self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', f_matrix))
 
-    def ConvertTexture(self, texture):
+    def ConvertTexture(self, texture, luxcore_name = ''):
+        """
+        :param texture: Blender texture (from bpy.data.textures)
+        :param luxcore_name: optional target luxcore name to use for the texture (no check for duplicate!)
+        :return: luxcore name of the exported texture
+        """
+
         texType = texture.luxrender_texture.type
         props = pyluxcore.Properties()
 
         if texType == 'BLENDER':
-            texName = ToValidLuxCoreName(texture.name)
+            texName = ToValidLuxCoreName(texture.name) if luxcore_name == '' else luxcore_name
             bl_texType = getattr(texture, 'type')
 
             prefix = 'scene.textures.' + texName
@@ -611,6 +617,11 @@ class BlenderSceneConverter(object):
                         tex_image = efutil.filesystem_path(f_path)
 
                 props.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
+
+                props.Set(pyluxcore.Property(prefix + '.gamma', [texture.luxrender_texture.luxrender_tex_imagesampling.gamma]))
+                props.Set(pyluxcore.Property(prefix + '.gain', [texture.luxrender_texture.luxrender_tex_imagesampling.gain]))
+                #props.Set(pyluxcore.Property(prefix + '.channel', [texture.luxrender_texture.luxrender_tex_imagesampling.channel]))
+
                 self.ConvertMapping(prefix, texture)
             ####################################################################
             # MAGIC
@@ -1382,6 +1393,9 @@ class BlenderSceneConverter(object):
             else:
                 return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
+            ####################################################################
+            # Common settings for all material types
+            ####################################################################
             if not translator_settings.override_materials:
                 # Common material settings
                 if material.luxrender_material.bumpmap_usefloattexture:
@@ -1446,7 +1460,6 @@ class BlenderSceneConverter(object):
                         props.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
 
             # alpha transparency
-            # TODO: add support for diffuse/mean, diffuse/alpha etc.
             use_alpha_transparency = False
             name_mix = matName + '_alpha_mix'
 
@@ -1473,10 +1486,14 @@ class BlenderSceneConverter(object):
                 }
 
                 alpha_source = material.luxrender_transparency.alpha_source
+
                 if alpha_source == 'texture':
                     if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
-                        texture = bpy.data.textures[material.luxrender_transparency.alpha_floattexturename]
-                        alpha = self.ConvertTexture(texture)
+                        texture_name = material.luxrender_transparency.alpha_floattexturename
+                        texture = bpy.data.textures[texture_name]
+                        alpha = self.ConvertTexture(texture, ToValidLuxCoreName(texture_name + material.name + '_alpha'))
+
+                        props.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', ['alpha']))
 
                         if material.luxrender_transparency.inverse:
                             sv = BlenderSceneConverter.next_scale_value()
@@ -1495,28 +1512,25 @@ class BlenderSceneConverter(object):
 
                 # diffusealpha, diffusemean, diffuseintensity
                 elif material.luxrender_material.type in sourceMap:
-                #get base texture
-                    texture = getattr(luxMat,
-                                   '%s_colortexturename' % sourceMap[material.luxrender_material.type])
+                    # Get base texture name
+                    texture_name = getattr(luxMat, '%s_colortexturename' % sourceMap[material.luxrender_material.type])
 
-                    if bpy.data.textures[texture].luxrender_texture.type == 'imagemap':
+                    try:
+                        # Get blender texture
+                        texture = bpy.data.textures[texture_name]
+                        # Export texture, get luxcore texture name
+                        alpha = self.ConvertTexture(texture, ToValidLuxCoreName(texture_name + material.name + '_alpha'))
+
                         channelMap = {
                         'diffusealpha': 'alpha',
                         'diffusemean': 'mean',
                         'diffuseintensity': 'colored_mean',
                         }
+                        props.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', [channelMap[alpha_source]]))
 
-                        texName = ToValidLuxCoreName(texture) + '_alpha'
-                        base = bpy.data.textures[texture].luxrender_texture.luxrender_tex_imagemap
-                        mapping = bpy.data.textures[texture].luxrender_texture.luxrender_tex_mapping
-                        props.Set(pyluxcore.Property('scene.textures.%s.file' % texName, [base.filename]))
-                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.type' % texName, ['uvmapping2d']))
-                        props.Set(pyluxcore.Property('scene.textures.%s.type' % texName, ['imagemap']))
-                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvscale' % texName, [ mapping.uscale , mapping.vscale * -1.0]))
-                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvdelta' % texName, [mapping.udelta, mapping.vdelta]))
-                        props.Set(pyluxcore.Property('scene.textures.%s.channel' % texName, channelMap[alpha_source]))
-                        alpha = texName
-
+                    except KeyError:
+                        LuxLog('Texturename %s is not in bpy.data.textures' % texture_name)
+                        use_alpha_transparency = False
                     elif texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE':
 
                         channelMap = {
@@ -1536,20 +1550,18 @@ class BlenderSceneConverter(object):
                         props.Set(pyluxcore.Property('scene.textures.%s.channel' % texName, channelMap[alpha_source]))
                         alpha = texName
 
-                    else:
-                        LuxLog('Texture %s is not an alpha map!' % texture)
-
                 else:
-                    LuxLog('WARNING: unsupported alpha transparency mode (%s) used on material %s' %
-                           (alpha_source, material.name))
+                    LuxLog('WARNING: alpha transparency not supported for material type %s' % material.luxrender_material.type)
+                    use_alpha_transparency = False
 
-                mix_prefix = 'scene.materials.' + name_mix
-                props.Set(pyluxcore.Property(mix_prefix + '.type', ['mix']))
-                props.Set(pyluxcore.Property(mix_prefix + '.material1', name_null))
-                props.Set(pyluxcore.Property(mix_prefix + '.material2', matName))
-                props.Set(pyluxcore.Property(mix_prefix + '.amount', alpha))
+                if use_alpha_transparency:
+                    mix_prefix = 'scene.materials.' + name_mix
+                    props.Set(pyluxcore.Property(mix_prefix + '.type', ['mix']))
+                    props.Set(pyluxcore.Property(mix_prefix + '.material1', name_null))
+                    props.Set(pyluxcore.Property(mix_prefix + '.material2', matName))
+                    props.Set(pyluxcore.Property(mix_prefix + '.amount', alpha))
 
-                set_volumes(mix_prefix)
+                    set_volumes(mix_prefix)
 
             self.scnProps.Set(props)
             self.materialsCache.add(matName)
