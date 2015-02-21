@@ -1457,6 +1457,21 @@ class BlenderSceneConverter(object):
 
                 alpha = [0.0]
 
+                sourceMap = {
+                'carpaint': 'Kd',
+                'glass': 'Kr',
+                'glossy': 'Kd',
+                'glossytranslucent': 'Kd',
+                'matte': 'Kd',
+                'mattetranslucent': 'Kr',
+                'mirror': 'Kr',
+                'roughglass': 'Kr',
+                'scatter': 'Kd',
+                'shinymetal': 'Kr',
+                'velvet': 'Kd',
+                'metal2': 'Kr',
+                }
+
                 alpha_source = material.luxrender_transparency.alpha_source
                 if alpha_source == 'texture':
                     if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
@@ -1477,6 +1492,26 @@ class BlenderSceneConverter(object):
 
                 elif alpha_source == 'constant':
                     alpha = material.luxrender_transparency.alpha_value
+
+                # diffusealpha, diffusemean, diffuseintensity
+                elif material.luxrender_material.type in sourceMap:
+                #get base texture
+                    texture = getattr(luxMat,
+                                   '%s_colortexturename' % sourceMap[material.luxrender_material.type])
+
+                    channelMap = {
+                    'diffusealpha': 'alpha',
+                    'diffusemean': 'mean',
+                    'diffuseintensity': 'colored_mean',
+                    }
+
+                    texName = ToValidLuxCoreName(texture) + '_alpha'
+                    diffuse_name = bpy.data.textures[texture].luxrender_texture.luxrender_tex_imagemap.filename
+                    props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.file', [diffuse_name]))
+                    props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.type', ['imagemap']))
+                    props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.channel', channelMap[alpha_source]))
+                    alpha = texName
+
                 else:
                     LuxLog('WARNING: unsupported alpha transparency mode (%s) used on material %s' %
                            (alpha_source, material.name))
