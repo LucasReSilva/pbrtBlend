@@ -486,13 +486,14 @@ class BlenderSceneConverter(object):
         """
 
         texType = texture.luxrender_texture.type
+        texName = ToValidLuxCoreName(texture.name) if luxcore_name == '' else luxcore_name
+        prefix = 'scene.textures.' + texName
+
         props = pyluxcore.Properties()
 
         if texType == 'BLENDER':
-            texName = ToValidLuxCoreName(texture.name) if luxcore_name == '' else luxcore_name
             bl_texType = getattr(texture, 'type')
 
-            prefix = 'scene.textures.' + texName
             # ###################################################################
             # BLEND
             ####################################################################
@@ -723,10 +724,9 @@ class BlenderSceneConverter(object):
             self.texturesCache.add(texName)
             return texName
 
-        if texType != 'BLENDER':
-            texName = ToValidLuxCoreName(texture.name)
+        else:
+            # texType != 'BLENDER'
             luxTex = getattr(texture.luxrender_texture, 'luxrender_tex_' + texType)
-            prefix = 'scene.textures.' + texName
 
             # ###################################################################
             # ADD
