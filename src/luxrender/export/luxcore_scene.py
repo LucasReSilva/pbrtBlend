@@ -1499,18 +1499,22 @@ class BlenderSceneConverter(object):
                     texture = getattr(luxMat,
                                    '%s_colortexturename' % sourceMap[material.luxrender_material.type])
 
-                    channelMap = {
-                    'diffusealpha': 'alpha',
-                    'diffusemean': 'mean',
-                    'diffuseintensity': 'colored_mean',
-                    }
+                    if bpy.data.textures[texture].luxrender_texture.type == 'imagemap':
+                        channelMap = {
+                        'diffusealpha': 'alpha',
+                        'diffusemean': 'mean',
+                        'diffuseintensity': 'colored_mean',
+                        }
 
-                    texName = ToValidLuxCoreName(texture) + '_alpha'
-                    diffuse_name = bpy.data.textures[texture].luxrender_texture.luxrender_tex_imagemap.filename
-                    props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.file', [diffuse_name]))
-                    props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.type', ['imagemap']))
-                    props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.channel', channelMap[alpha_source]))
-                    alpha = texName
+                        texName = ToValidLuxCoreName(texture) + '_alpha'
+                        diffuse_name = bpy.data.textures[texture].luxrender_texture.luxrender_tex_imagemap.filename
+                        props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.file', [diffuse_name]))
+                        props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.type', ['imagemap']))
+                        props.Set(pyluxcore.Property('scene.textures.' + 'Texture_001_alpha.channel', channelMap[alpha_source]))
+                        alpha = texName
+
+                    else:
+                        LuxLog('Texture %s is not an alpha map!' % texture)
 
                 else:
                     LuxLog('WARNING: unsupported alpha transparency mode (%s) used on material %s' %
