@@ -724,8 +724,7 @@ class BlenderSceneConverter(object):
             self.texturesCache.add(texName)
             return texName
 
-        else:
-            # texType != 'BLENDER'
+        elif texType != 'BLENDER':
             luxTex = getattr(texture.luxrender_texture, 'luxrender_tex_' + texType)
 
             # ###################################################################
@@ -1418,9 +1417,6 @@ class BlenderSceneConverter(object):
                 if material.luxcore_material.create_BY_MATERIAL_ID and self.blScene.luxrender_channels.enable_aovs:
                     self.createChannelOutputString('BY_MATERIAL_ID', material.luxcore_material.id)
 
-            if material.luxcore_material.emission_id != -1:
-                props.Set(pyluxcore.Property(prefix + '.emission.id', [material.luxcore_material.light_id]))
-
             props.Set(pyluxcore.Property(prefix + '.samples', [material.luxcore_material.samples]))
             props.Set(pyluxcore.Property(prefix + '.emission.samples', [material.luxcore_material.emission_samples]))
             props.Set(
@@ -1448,16 +1444,17 @@ class BlenderSceneConverter(object):
                         props.Set(pyluxcore.Property(prefix + '.emission.power', material.luxrender_emission.power))
                         props.Set(pyluxcore.Property(prefix + '.emission.efficency', material.luxrender_emission.efficacy))
 
-                        lightgroup = material.luxrender_emission.lightgroup
-                        if lightgroup in self.lightgroups_cache:
-                            # there is already an material with this lightgroup, use the same id
-                            lightgroup_id = self.lightgroups_cache[lightgroup]
-                        else:
-                            # this is the first material to use this lightgroup, add an entry with a new id
-                            lightgroup_id = len(self.lightgroups_cache)
-                            self.lightgroups_cache[lightgroup] = lightgroup_id
+                        if not self.blScene.luxrender_lightgroups.ignore:
+                            lightgroup = material.luxrender_emission.lightgroup
+                            if lightgroup in self.lightgroups_cache:
+                                # there is already an material with this lightgroup, use the same id
+                                lightgroup_id = self.lightgroups_cache[lightgroup]
+                            else:
+                                # this is the first material to use this lightgroup, add an entry with a new id
+                                lightgroup_id = len(self.lightgroups_cache)
+                                self.lightgroups_cache[lightgroup] = lightgroup_id
 
-                        props.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
+                            props.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
 
             # alpha transparency
             use_alpha_transparency = False
@@ -1626,7 +1623,7 @@ class BlenderSceneConverter(object):
             else:
                 energy = 0  # use gain for muting to keep geometry exported
 
-        if lightgroup_id != -1 and light.type != 'SUN':
+        if lightgroup_id != -1 and light.type != 'SUN' and not self.blScene.luxrender_lightgroups.ignore:
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
         gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum!
@@ -1668,7 +1665,7 @@ class BlenderSceneConverter(object):
             if 'sun' in sunsky_type:
                 name = luxcore_name + '_sun'
                 luxcore_data.append(ExportedObjectData(name, lightType = light.type))
-                if lightgroup_id != -1:
+                if lightgroup_id != -1 and not self.blScene.luxrender_lightgroups.ignore:
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = params_keyValue['turbidity']
@@ -1687,7 +1684,7 @@ class BlenderSceneConverter(object):
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
                 luxcore_data.append(ExportedObjectData(name, lightType = light.type))
-                if lightgroup_id != -1:
+                if lightgroup_id != -1 and not self.blScene.luxrender_lightgroups.ignore:
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = params_keyValue['turbidity']
@@ -1702,7 +1699,7 @@ class BlenderSceneConverter(object):
 
             if sunsky_type == 'distant':
                 luxcore_data.append(ExportedObjectData(luxcore_name, lightType = light.type))
-                if lightgroup_id != -1:
+                if lightgroup_id != -1 and not self.blScene.luxrender_lightgroups.ignore:
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
