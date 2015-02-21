@@ -1507,9 +1507,13 @@ class BlenderSceneConverter(object):
                         }
 
                         texName = ToValidLuxCoreName(texture) + '_alpha'
-                        diffuse_name = bpy.data.textures[texture].luxrender_texture.luxrender_tex_imagemap.filename
-                        props.Set(pyluxcore.Property('scene.textures.%s.file' % texName, [diffuse_name]))
+                        base = bpy.data.textures[texture].luxrender_texture.luxrender_tex_imagemap
+                        mapping = bpy.data.textures[texture].luxrender_texture.luxrender_tex_mapping
+                        props.Set(pyluxcore.Property('scene.textures.%s.file' % texName, [base.filename]))
+                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.type' % texName, ['uvmapping2d']))
                         props.Set(pyluxcore.Property('scene.textures.%s.type' % texName, ['imagemap']))
+                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvscale' % texName, [ mapping.uscale , mapping.uscale * -1.0]))
+                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvdelta' % texName, [mapping.udelta, mapping.vdelta]))
                         props.Set(pyluxcore.Property('scene.textures.%s.channel' % texName, channelMap[alpha_source]))
                         alpha = texName
 
