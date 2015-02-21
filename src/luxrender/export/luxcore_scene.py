@@ -1531,25 +1531,6 @@ class BlenderSceneConverter(object):
                     except KeyError:
                         LuxLog('Texturename %s is not in bpy.data.textures' % texture_name)
                         use_alpha_transparency = False
-                    elif texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE':
-
-                        channelMap = {
-                        'diffusealpha': 'alpha',
-                        'diffusemean': 'mean',
-                        'diffuseintensity': 'colored_mean',
-                        }
-
-                        texName = ToValidLuxCoreName(texture) + '_alpha'
-                        base = bpy.data.textures[texture].name
-                        mapping = bpy.data.textures[texture].luxrender_texture.luxrender_tex_mapping
-                        props.Set(pyluxcore.Property('scene.textures.%s.file' % texName, [base.filename]))
-                        #props.Set(pyluxcore.Property('scene.textures.%s.mapping.type' % texName, ['uvmapping2d']))
-                        props.Set(pyluxcore.Property('scene.textures.%s.type' % texName, ['imagemap']))
-                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvscale' % texName, [ mapping.uscale , mapping.vscale * -1.0]))
-                        props.Set(pyluxcore.Property('scene.textures.%s.mapping.uvdelta' % texName, [mapping.udelta, mapping.vdelta]))
-                        props.Set(pyluxcore.Property('scene.textures.%s.channel' % texName, channelMap[alpha_source]))
-                        alpha = texName
-
                 else:
                     LuxLog('WARNING: alpha transparency not supported for material type %s' % material.luxrender_material.type)
                     use_alpha_transparency = False
