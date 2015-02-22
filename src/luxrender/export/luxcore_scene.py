@@ -936,7 +936,7 @@ class BlenderSceneConverter(object):
                 raise Exception('Unknown type ' + texType + ' for texture: ' + texture.name)
 
             if texType not in ('normalmap', 'checkerboard', 'constant'):
-                props.Set(pyluxcore.Property(prefix + '.type', self.ConvertTexType(luxTex, texType)))
+                props.Set(pyluxcore.Property(prefix + '.type', texType))
 
             self.scnProps.Set(props)
             self.texturesCache.add(texName)
@@ -944,11 +944,8 @@ class BlenderSceneConverter(object):
 
         raise Exception('Unknown texture type: ' + texture.name)
 
-    def ConvertTexType(self, luxTex, texType):
-        return texType
-
     def ConvertMaterialChannel(self, luxMaterial, materialChannel, variant):
-        if getattr(luxMaterial, materialChannel + '_use' + variant + 'texture'):
+        if getattr(luxMaterial, '%s_use%stexture' % (materialChannel, variant)):
             texName = getattr(luxMaterial, '%s_%stexturename' % (materialChannel, variant))
             is_multiplied = getattr(luxMaterial, '%s_multiply%s' % (materialChannel, variant))
             validTexName = ToValidLuxCoreName(texName)
@@ -963,30 +960,38 @@ class BlenderSceneConverter(object):
                     texName = self.ConvertTexture(texture)
                     sv = BlenderSceneConverter.next_scale_value()
                     sctexName = '%s_scaled_%i' % (texName, sv)
+
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', ' '.join(
                         str(i) for i in (getattr(luxMaterial, materialChannel + '_color')))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', [texName]))
+
                     return sctexName
 
                 elif hasattr(luxMaterial, '%s_multiplyfloat' % materialChannel) and is_multiplied:
                     texName = self.ConvertTexture(texture)
                     sv = BlenderSceneConverter.next_scale_value()
                     sctexName = '%s_scaled_%i' % (texName, sv)
+
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', float(
                         getattr(luxMaterial, '%s_floatvalue' % materialChannel))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', [texName]))
+
                     return sctexName
+
                 elif hasattr(luxMaterial, '%s_multiplyfresnel' % materialChannel) and is_multiplied:
                     texName = self.ConvertTexture(texture)
                     sv = BlenderSceneConverter.next_scale_value()
                     sctexName = '%s_scaled_%i' % (texName, sv)
+
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', float(
                         getattr(luxMaterial, '%s_fresnelvalue' % materialChannel))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', [texName]))
+
                     return sctexName
+
                 else:
                     return self.ConvertTexture(texture)
         else:
@@ -1001,9 +1006,9 @@ class BlenderSceneConverter(object):
             'Unknown texture in channel' + materialChannel + ' for material ' + luxMaterial.luxrender_material.type)
 
     def ConvertCommonChannel(self, luxMap, material, type):
-        if getattr(material.luxrender_material, type + '_usefloattexture'):
+        if getattr(material.luxrender_material, '%s_usefloattexture' % type):
             is_multiplied = getattr(material.luxrender_material, '%s_multiplyfloat' % type)
-            texName = getattr(material.luxrender_material, '%s_floattexturename' % (type))
+            texName = getattr(material.luxrender_material, '%s_floattexturename' % type)
             validTexName = ToValidLuxCoreName(texName)
             # Check if it is an already defined texture, but texture with different multipliers must not stop here
             if validTexName in self.texturesCache and not is_multiplied:
@@ -1011,17 +1016,19 @@ class BlenderSceneConverter(object):
             LuxLog('Texture: ' + texName)
 
             texture = get_texture_from_scene(self.blScene, texName)
-            if texture != False:
-
+            if texture:
                 if hasattr(material.luxrender_material, '%s_multiplyfloat' % type) and is_multiplied:
                     texName = self.ConvertTexture(texture)
                     sv = BlenderSceneConverter.next_scale_value()
                     sctexName = '%s_scaled_%i' % (texName, sv)
+
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', float(
                         getattr(material.luxrender_material, '%s_floatvalue' % type))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', ['%s' % texName]))
+
                     return sctexName
+                
                 else:
                     return self.ConvertTexture(texture)
 
