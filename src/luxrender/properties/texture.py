@@ -35,6 +35,7 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 from .. import LuxRenderAddon
 from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import add_texture_parameter, convert_texture
+from ..outputs.luxcore_api import UseLuxCore
 from ..export.volumes import export_smoke
 from ..outputs import LuxManager
 from ..util import dict_merge, bdecode_string2file
@@ -194,6 +195,10 @@ def check_texture_variant(self, context, attr, expected_variant):
         return
 
     valid = False
+
+    # Disable all alerts due luxcore can handle either variant
+    if UseLuxCore():
+        return
 
     if tn in bpy.data.textures:
         lt = bpy.data.textures[tn].luxrender_texture
