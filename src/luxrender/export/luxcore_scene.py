@@ -1986,7 +1986,7 @@ class BlenderSceneConverter(object):
                     elif psys.settings.render_type == 'PATH':
                         self.ConvertHair()
 
-        # check if object is duplicator
+        # Check if object is duplicator
         if obj.is_duplicator and len(obj.particle_systems) < 1:
             if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
                 self.ConvertDuplis(obj, obj.name)
@@ -2000,13 +2000,14 @@ class BlenderSceneConverter(object):
 
         cache = BlenderSceneConverter.export_cache
 
-        # check if mesh was already exported
+        # Check if mesh was already exported
         if cache.has_obj_data(obj.data):
-            # check if this object was already exported
+            # Check if this object was already exported
             if cache.has_obj(obj) and not is_dupli:
+                # object was already exported
                 print('[Data: %s][Object: %s] obj already in cache' % (obj.data.name, obj.name))
 
-                if update_mesh and obj.data.users < 2:
+                if update_mesh and obj.data.users == 1:
                     # re-export mesh (disabled for multiuser meshes because it crashes Blender)
                     cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli))
                 else:
@@ -2016,14 +2017,16 @@ class BlenderSceneConverter(object):
                         self.SetObjectProperties(exported_object_data.lcObjName, exported_object_data.lcMeshName,
                                                  exported_object_data.lcMaterialName, transform)
             else:
+                # Mesh data is already exported, but this object is not yet "registered" to use it
                 if not is_dupli:
+                    # Don't spam the log when thousands of duplis are exported
                     print('[Data: %s][Object: %s] no obj entry, creating one' % (obj.data.name, obj.name))
 
                 exported_object = cache.get_exported_object_key_data(obj.data)
                 new_luxcore_data = []
 
                 for exported_object_data in exported_object.luxcore_data:
-                    # create unique name for the lcObject
+                    # Create unique name for the lcObject
                     name = ToValidLuxCoreName(obj.name + str(exported_object_data.matIndex))
                     if is_dupli:
                         name += '_%s_%d' % (particle_sytem, self.dupli_number)
@@ -2042,7 +2045,7 @@ class BlenderSceneConverter(object):
                     self.SetObjectProperties(name, exported_object_data.lcMeshName,
                                              exported_object_data.lcMaterialName, transform)
 
-                # create new entry in cache
+                # Create new entry in cache
                 cache.add_obj(obj, new_luxcore_data)
         else:
             print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data.name, obj.name))
@@ -2063,14 +2066,14 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.center', position))
                 self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.normal', normal))
             except KeyError:
-                # no valid clipping plane object selected
+                # No valid clipping plane object selected
                 self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [False]))
         else:
             self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [False]))
 
     def ConvertCamera(self):
         """
-        For final rendering
+        Camera for final rendering
         """
 
         blCamera = self.blScene.camera
@@ -2117,8 +2120,7 @@ class BlenderSceneConverter(object):
 
     def ConvertViewportCamera(self, context):
         """
-        For viewport rendering
-        :param context:
+        Camera for viewport rendering
         """
 
         view_persp = context.region_data.view_perspective
@@ -2228,7 +2230,7 @@ class BlenderSceneConverter(object):
         # Tonemapper
         tonemapper = imagepipeline_settings.tonemapper_type
         self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.type', [tonemapper]))
-        
+        # Note: TONEMAP_AUTOLINEAR has no parameters and is thus not in the if/elif block
         if tonemapper == 'TONEMAP_LINEAR':
             scale = imagepipeline_settings.linear_scale
             self.cfgProps.Set(pyluxcore.Property(prefix + str(index) + '.scale', [scale]))
@@ -2320,10 +2322,10 @@ class BlenderSceneConverter(object):
             self.cfgProps.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
             self.cfgProps.Set(pyluxcore.Property('tile.multipass.enable',
                                                  [engine_settings.tile_multipass_enable]))
-            self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', [
-                engine_settings.tile_multipass_convergencetest_threshold]))
-            self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', [
-                engine_settings.tile_multipass_convergencetest_threshold_reduction]))
+            self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold',
+                                                 [engine_settings.tile_multipass_convergencetest_threshold]))
+            self.cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction',
+                                                 [engine_settings.tile_multipass_convergencetest_threshold_reduction]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.aa.size',
                                                  [engine_settings.biaspath_sampling_aa_size]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.sampling.diffuse.size',
@@ -2340,16 +2342,16 @@ class BlenderSceneConverter(object):
                                                  [engine_settings.biaspath_pathdepth_glossy]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.specular',
                                                  [engine_settings.biaspath_pathdepth_specular]))
-            self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', [
-                engine_settings.biaspath_clamping_radiance_maxvalue]))
+            self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue',
+                                                 [engine_settings.biaspath_clamping_radiance_maxvalue]))
             self.cfgProps.Set(pyluxcore.Property('biaspath.clamping.pdf.value',
                                                  [engine_settings.biaspath_clamping_pdf_value]))
-            self.cfgProps.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type', [
-                engine_settings.biaspath_lights_samplingstrategy_type]))
+            self.cfgProps.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type',
+                                                 [engine_settings.biaspath_lights_samplingstrategy_type]))
         elif engine in ['PATHCPU', 'PATHOCL']:
             self.cfgProps.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
-            self.cfgProps.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', [
-                engine_settings.biaspath_clamping_radiance_maxvalue]))
+            self.cfgProps.Set(pyluxcore.Property('path.clamping.radiance.maxvalue',
+                                                 [engine_settings.biaspath_clamping_radiance_maxvalue]))
             self.cfgProps.Set(pyluxcore.Property('path.clamping.pdf.value',
                                                  [engine_settings.biaspath_clamping_pdf_value]))
         elif engine in ['BIDIRCPU']:
@@ -2616,7 +2618,7 @@ class BlenderSceneConverter(object):
             objects_counter += 1
             message = 'Object: %s (%d of %d)' % (obj.name, objects_counter, objects_amount)
             progress = float(objects_counter) / float(objects_amount)
-            print('[' + str(int(progress * 100)) + '%] ' + message)
+            print('[%d%%] %s' % ((progress * 100), message))
 
             if self.renderengine is not None:
                 self.renderengine.update_stats('Exporting...', message)
@@ -2654,11 +2656,12 @@ class BlenderSceneConverter(object):
             LuxLog('RenderConfig Properties:')
             print(str(self.cfgProps))
 
+        # Create config
         self.lcConfig = pyluxcore.RenderConfig(self.cfgProps, self.lcScene)
 
         BlenderSceneConverter.clear()  # reset scalers_count etc.
 
-        # show messages about export
+        # Show messages about export
         export_time = time.time() - export_start
         print('Export took %.1f seconds' % export_time)
         if self.renderengine is not None:

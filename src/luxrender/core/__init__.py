@@ -1411,7 +1411,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 filmWidth = int(filmWidth * x_max - filmWidth * x_min)
                 filmHeight = int(filmHeight * y_max - filmHeight * y_min)
         
-            # convert the Blender scene
+            # Convert the Blender scene
             lcConfig = BlenderSceneConverter(scene, renderengine = self).Convert(filmWidth, filmHeight)
 
             lcSession = pyluxcore.RenderSession(lcConfig)
@@ -1421,7 +1421,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # Start the rendering
             lcSession.Start()
 
-            # immediately end the rendering if 'FILESAVER' engine is used
+            # Immediately end the rendering if 'FILESAVER' engine is used
             if scene.luxcore_translatorsettings.use_filesaver:
                 lcSession.Stop()
                 return
@@ -1431,7 +1431,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             lastImageDisplay = startTime
             done = False
 
-            # magic formula to compute optimal display interval
+            # Magic formula to compute optimal display interval
             display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
             LuxLog('Recommmended minimum display interval: %.1fs' % display_interval)
 
@@ -1442,7 +1442,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 timeSinceDisplay = now - lastImageDisplay
                 elapsedTimeSinceStart = now - startTime
 
-                # use user-definde display interval after the first 15 seconds
+                # Use user-definde display interval after the first 15 seconds
                 if elapsedTimeSinceStart > 15.0:
                     display_interval = imagepipeline_settings.displayinterval
                     
@@ -1457,7 +1457,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 done = self.haltConditionMet(scene, stats)
 
                 if timeSinceDisplay > display_interval:
-                    display_start = time.time()
+                    #display_start = time.time()
 
                     # Update the image
                     lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
@@ -1486,7 +1486,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.end_result(result)
 
                     lastImageDisplay = now
-                    LuxLog('Imagebuffer update took %.1fs' % (time.time() - display_start))
+                    #LuxLog('Imagebuffer update took %.1fs' % (time.time() - display_start))
 
             # Update the image
             lcSession.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
@@ -1522,7 +1522,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                'ALPHA', channels.saveToDisk)
                 if channels.DEPTH:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'DEPTH', channels.saveToDisk, normalize = channels.normalize_DEPTH)
+                                               'DEPTH', channels.saveToDisk,
+                                               normalize = channels.normalize_DEPTH)
                 if channels.POSITION:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
                                                'POSITION', channels.saveToDisk)
@@ -1537,22 +1538,27 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                'MATERIAL_ID', channels.saveToDisk)
                 if channels.DIRECT_DIFFUSE:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'DIRECT_DIFFUSE', channels.saveToDisk, normalize = channels.normalize_DIRECT_DIFFUSE)
+                                               'DIRECT_DIFFUSE', channels.saveToDisk,
+                                               normalize = channels.normalize_DIRECT_DIFFUSE)
                 if channels.DIRECT_GLOSSY:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'DIRECT_GLOSSY', channels.saveToDisk, normalize = channels.normalize_DIRECT_GLOSSY)
+                                               'DIRECT_GLOSSY', channels.saveToDisk,
+                                               normalize = channels.normalize_DIRECT_GLOSSY)
                 if channels.EMISSION:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
                                                'EMISSION', channels.saveToDisk)
                 if channels.INDIRECT_DIFFUSE:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'INDIRECT_DIFFUSE', channels.saveToDisk, normalize = channels.normalize_INDIRECT_DIFFUSE)
+                                               'INDIRECT_DIFFUSE', channels.saveToDisk,
+                                               normalize = channels.normalize_INDIRECT_DIFFUSE)
                 if channels.INDIRECT_GLOSSY:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'INDIRECT_GLOSSY', channels.saveToDisk, normalize = channels.normalize_INDIRECT_GLOSSY)
+                                               'INDIRECT_GLOSSY', channels.saveToDisk,
+                                               normalize = channels.normalize_INDIRECT_GLOSSY)
                 if channels.INDIRECT_SPECULAR:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'INDIRECT_SPECULAR', channels.saveToDisk, normalize = channels.normalize_INDIRECT_SPECULAR)
+                                               'INDIRECT_SPECULAR', channels.saveToDisk,
+                                               normalize = channels.normalize_INDIRECT_SPECULAR)
                 if channels.DIRECT_SHADOW_MASK:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
                                                'DIRECT_SHADOW_MASK', channels.saveToDisk)
@@ -1564,7 +1570,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                'UV', channels.saveToDisk)
                 if channels.RAYCOUNT:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'RAYCOUNT', channels.saveToDisk, normalize = channels.normalize_RAYCOUNT)
+                                               'RAYCOUNT', channels.saveToDisk,
+                                               normalize = channels.normalize_RAYCOUNT)
                 if channels.IRRADIANCE:
                     self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
                                                'IRRADIANCE', channels.saveToDisk)
