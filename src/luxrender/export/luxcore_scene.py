@@ -1961,7 +1961,7 @@ class BlenderSceneConverter(object):
             if matrix is not None:
                 transform = matrix_to_list(matrix)
             else:
-                transform = matrix_to_list(obj.matrix_world)
+                transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
 
         # check if object is proxy
         if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
