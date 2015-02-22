@@ -956,38 +956,14 @@ class BlenderSceneConverter(object):
 
             texture = get_texture_from_scene(self.blScene, texName)
             if texture:
-                if hasattr(luxMaterial, '%s_multiplycolor' % materialChannel) and is_multiplied:
+                if hasattr(luxMaterial, '%s_multiply%s' % (materialChannel, variant)) and is_multiplied:
                     texName = self.ConvertTexture(texture)
                     sv = BlenderSceneConverter.next_scale_value()
                     sctexName = '%s_scaled_%i' % (texName, sv)
 
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', ' '.join(
-                        str(i) for i in (getattr(luxMaterial, materialChannel + '_color')))))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', [texName]))
-
-                    return sctexName
-
-                elif hasattr(luxMaterial, '%s_multiplyfloat' % materialChannel) and is_multiplied:
-                    texName = self.ConvertTexture(texture)
-                    sv = BlenderSceneConverter.next_scale_value()
-                    sctexName = '%s_scaled_%i' % (texName, sv)
-
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', float(
-                        getattr(luxMaterial, '%s_floatvalue' % materialChannel))))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', [texName]))
-
-                    return sctexName
-
-                elif hasattr(luxMaterial, '%s_multiplyfresnel' % materialChannel) and is_multiplied:
-                    texName = self.ConvertTexture(texture)
-                    sv = BlenderSceneConverter.next_scale_value()
-                    sctexName = '%s_scaled_%i' % (texName, sv)
-
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', float(
-                        getattr(luxMaterial, '%s_fresnelvalue' % materialChannel))))
+                        str(i) for i in (getattr(luxMaterial, materialChannel + '_%s' % variant)))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', [texName]))
 
                     return sctexName
