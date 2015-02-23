@@ -189,7 +189,7 @@ class luxrender_volume_data(declarative_property_group):
 
     visibility = dict_merge(
         {
-            # 'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous']), 'sigma_s_usecolortexture': False },
+            'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous'])},
             'g': {'type': O(['homogeneous', 'heterogeneous'])},
             'stepsize': {'type': 'heterogeneous'},
             'depth': O([A([{'type': 'clear'}, {'absorption_usecolortexture': False}]),
