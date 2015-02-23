@@ -2529,7 +2529,15 @@ class BlenderSceneConverter(object):
 
             # Scattering color
             if volume.sigma_s_usecolortexture:
-                s_col = self.convert_volume_channel(volume, 'sigma_s', 'color')
+                if volume.scattering_scale != 1.0:
+                    s_source = self.convert_volume_channel(volume, 'sigma_s', 'color')
+                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.type', ['scale']))
+                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.texture1', volume.scattering_scale))
+                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.texture2', s_source))
+                    s_col = name + '_scatterscaling'
+                else:
+                    s_col = self.convert_volume_channel(volume, 'sigma_s', 'color')
+
             else:
                 s_col = [volume.sigma_s_color.r * volume.scattering_scale,
                          volume.sigma_s_color.g * volume.scattering_scale,
