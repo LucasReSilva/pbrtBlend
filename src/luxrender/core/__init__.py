@@ -1584,7 +1584,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         mask_ids.add(props.Get(i + '.id').GetInt())
     
                 for i in range(len(mask_ids)):
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'MATERIAL_ID_MASK', channels.saveToDisk, buffer_id = i)
+                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                               'MATERIAL_ID_MASK', channels.saveToDisk, buffer_id = i)
     
                 # Convert all BY_MATERIAL_ID channels
                 ids = set()
@@ -1593,7 +1594,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         ids.add(props.Get(i + '.id').GetInt())
     
                 for i in range(len(ids)):
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'BY_MATERIAL_ID', channels.saveToDisk, buffer_id = i)
+                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                               'BY_MATERIAL_ID', channels.saveToDisk, buffer_id = i)
 
                 from ..outputs.luxcore_api import LUXCORE_VERSION
                 # crashes in 1.4
@@ -1601,7 +1603,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     # Convert all RADIANCE_GROUP channels
                     lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
                     for i in range(lightgroup_count):
-                        self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight, 'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
+                        self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                                   'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
     
                 channelCalcTime = time.time() - channelCalcStartTime
                 LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)
@@ -1705,7 +1708,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     # store renderengine configuration of last update
     lastRenderSettings = ''
     lastVolumeSettings = ''
-    lastHaltConditions = []
+    lastHaltTime = -1
+    lastHaltSamples = -1
     lastCameraSettings = ''
     lastVisibilitySettings = None
     update_counter = 0
@@ -1893,14 +1897,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.lastVolumeSettings = newVolumeSettings
 
             # check for changes in halt conditions
-            newHaltConditions = [context.scene.luxcore_realtimesettings.halt_samples,
-                                 context.scene.luxcore_realtimesettings.halt_time]
+            newHaltTime = context.scene.luxcore_realtimesettings.halt_time
+            newHaltSamples = context.scene.luxcore_realtimesettings.halt_samples
 
-            if len(self.lastHaltConditions) == 0:
-                self.lastHaltConditions = newHaltConditions
-            elif self.lastHaltConditions != newHaltConditions:
-                update_changes.set_cause(haltconditions = True)
-                self.lastHaltConditions = newHaltConditions
+            if self.lastHaltTime != -1 and self.lastHaltSamples != -1:
+                if newHaltTime > self.lastHaltTime or newHaltSamples > self.lastHaltSamples:
+                    update_changes.set_cause(haltconditions = True)
+
+            self.lastHaltTime = newHaltTime
+            self.lastHaltSamples = newHaltSamples
 
             # check for changes in renderengine configuration
             converter.ConvertConfig(realtime_preview = True)
@@ -1939,21 +1944,21 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         self.update_counter += 1
         print('Viewport Update', self.update_counter)
     
-    ##########################################################################
-    #                        Dynamic Updates
-    ##########################################################################
-    
+        ##########################################################################
+        #                        Dynamic Updates
+        ##########################################################################
+
+        # check which changes took place
+        if update_changes is None:
+            update_changes = self.find_update_changes(context)
+
         # resume rendering if it was paused
-        if self.viewSessionPaused:
+        if self.viewSessionPaused and not update_changes.cause_unknown:
             self.viewSessionPaused = False
             if self.viewSession is not None and self.sceneEditActive:
                 self.viewSession.EndSceneEdit()
                 self.sceneEditActive = False
                 print('EndSceneEdit() (render was paused)')
-    
-        # check which changes took place
-        if update_changes is None:
-            update_changes = self.find_update_changes(context)
             
         # skip useless second update triggered by Blender at startup
         if self.update_counter == 2 and update_changes.cause_unknown:
@@ -1972,7 +1977,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             try:
                 self.lastRenderSettings = ''
                 self.lastVolumeSettings = ''
-                self.lastHaltConditions = []
+                self.lastHaltTime = -1
+                self.lastHaltSamples = -1
                 self.lastCameraSettings = ''
                 self.lastVisibilitySettings = None
                 self.update_counter = 0
