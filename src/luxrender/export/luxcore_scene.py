@@ -2513,8 +2513,10 @@ class BlenderSceneConverter(object):
         else:
             ior_val = volume.fresnel_fresnelvalue
 
-        # Absorption color
-        if volume.sigma_a_usecolortexture:
+        # Absorption
+        if volume.absorption_usecolortexture:
+            abs_col = self.convert_volume_channel(volume, 'absorption', 'color')
+        elif volume.sigma_a_usecolortexture:
             abs_col = self.convert_volume_channel(volume, 'sigma_a', 'color')
         else:
             abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
