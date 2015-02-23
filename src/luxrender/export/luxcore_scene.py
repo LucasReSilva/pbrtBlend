@@ -962,8 +962,13 @@ class BlenderSceneConverter(object):
                     sctexName = '%s_scaled_%i' % (texName, sv)
 
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.type', ['scale']))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', ' '.join(
+                    if variant == 'color':
+                        self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', ' '.join(
                         str(i) for i in (getattr(luxMaterial, materialChannel + '_%s' % variant)))))
+                    else:
+                        self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture1', str(getattr(
+                            luxMaterial, materialChannel + '_%svalue' % variant))))
+
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + sctexName + '.texture2', [texName]))
 
                     return sctexName
