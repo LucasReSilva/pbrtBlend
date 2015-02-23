@@ -2457,10 +2457,10 @@ class BlenderSceneConverter(object):
         for volume in self.blScene.luxrender_volumes.volumes:
             self.convert_volume(volume)
 
-    def convert_volume_channel(self, volume, type):
-        if getattr(volume, '%s_usecolortexture' % type):
-            is_multiplied = getattr(volume, '%s_multiplycolor' % type)
-            tex_name = getattr(volume, '%s_colortexturename' % type)
+    def convert_volume_channel(self, volume, type, variant):
+        if getattr(volume, '%s_use%stexture' % (type, variant)):
+            is_multiplied = getattr(volume, '%s_multiply%s' % (type, variant))
+            tex_name = getattr(volume, '%s_%stexturename' % (type, variant))
             luxcore_tex_name = ToValidLuxCoreName(tex_name)
             # Check if it is an already defined texture, but texture with different multipliers must not stop here
             if luxcore_tex_name in self.texturesCache and not is_multiplied:
@@ -2470,14 +2470,18 @@ class BlenderSceneConverter(object):
 
             texture = get_texture_from_scene(self.blScene, tex_name)
             if texture:
-                if hasattr(volume, '%s_multiplycolor' % type) and is_multiplied:
+                if hasattr(volume, '%s_multiply%s' % (type, variant)) and is_multiplied:
                     tex_name = self.ConvertTexture(texture)
                     scale_value = BlenderSceneConverter.next_scale_value()
                     scale_tex_name = '%s_scaled_%i' % (tex_name, scale_value)
 
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.type', ['scale']))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.texture1',
-                                                         list(getattr(volume, '%s_color' % type))))
+                    if variant == 'color':
+                        self.scnProps.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.texture1',
+                                                         list(getattr(volume, '%s_%s' % (type, variant)))))
+                    else:
+                        self.scnProps.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.texture1',
+                                     str(getattr(volume, '%s_%svalue' % (type, variant)))))
                     self.scnProps.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.texture2',
                                                          ['%s' % tex_name]))
 
@@ -2500,16 +2504,22 @@ class BlenderSceneConverter(object):
         # add to cache
         BlenderSceneConverter.volumes_cache[volume.name] = name
 
+        # IOR Fresnel
+        if volume.fresnel_usefresneltexture:
+            ior_val = self.convert_volume_channel(volume, 'fresnel', 'fresnel')
+        else:
+            ior_val = volume.fresnel_fresnelvalue
+
         # Absorption color
         if volume.sigma_a_usecolortexture:
-            abs_col = self.convert_volume_channel(volume, 'sigma_a')
+            abs_col = self.convert_volume_channel(volume, 'sigma_a', 'color')
         else:
             abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
             absorption_at_depth_scaled(abs_col)
 
         self.scnProps.Set(pyluxcore.Property(prefix + '.absorption', abs_col))
         self.scnProps.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
-        self.scnProps.Set(pyluxcore.Property(prefix + '.ior', volume.fresnel_fresnelvalue))
+        self.scnProps.Set(pyluxcore.Property(prefix + '.ior', ior_val))
         self.scnProps.Set(pyluxcore.Property(prefix + '.priority', volume.priority))
 
         if volume.type in ['homogeneous', 'heterogeneous']:
