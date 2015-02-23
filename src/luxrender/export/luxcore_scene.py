@@ -2501,8 +2501,8 @@ class BlenderSceneConverter(object):
         BlenderSceneConverter.volumes_cache[volume.name] = name
 
         # Absorption color
-        if volume.absorption_usecolortexture:
-            abs_col = self.convert_volume_channel(volume, 'absorption')
+        if volume.sigma_a_usecolortexture:
+            abs_col = self.convert_volume_channel(volume, 'sigma_a')
         else:
             abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
             absorption_at_depth_scaled(abs_col)
