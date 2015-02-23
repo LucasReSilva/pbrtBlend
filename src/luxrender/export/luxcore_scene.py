@@ -2514,13 +2514,18 @@ class BlenderSceneConverter(object):
             ior_val = volume.fresnel_fresnelvalue
 
         # Absorption
-        if volume.absorption_usecolortexture:
-            abs_col = self.convert_volume_channel(volume, 'absorption', 'color')
-        elif volume.sigma_a_usecolortexture:
-            abs_col = self.convert_volume_channel(volume, 'sigma_a', 'color')
+        if volume.type == 'clear':
+            if volume.absorption_usecolortexture:
+                abs_col = self.convert_volume_channel(volume, 'absorption', 'color')
+            else:
+                abs_col = [volume.absorption_color.r, volume.absorption_color.g, volume.absorption_color.b]
+                absorption_at_depth_scaled(abs_col)
         else:
-            abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
-            absorption_at_depth_scaled(abs_col)
+            if volume.sigma_a_usecolortexture:
+                abs_col = self.convert_volume_channel(volume, 'sigma_a', 'color')
+            else:
+                abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
+                absorption_at_depth_scaled(abs_col)
 
         self.scnProps.Set(pyluxcore.Property(prefix + '.absorption', abs_col))
         self.scnProps.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
