@@ -740,9 +740,10 @@ class BlenderSceneConverter(object):
             ####################################################################
             # SUBTRACT
             ####################################################################
-            if texType == 'subtract':
-                props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertTextureChannel(luxTex, 'tex1', luxTex.variant)))
-                props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertTextureChannel(luxTex, 'tex2', luxTex.variant)))
+            # not yet supported in luxcore, but we could use add and inverting props
+            #elif texType == 'subtract':
+            #    props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertTextureChannel(luxTex, 'tex1', luxTex.variant)))
+            #    props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertTextureChannel(luxTex, 'tex2', luxTex.variant)))
             ####################################################################
             # BAND
             ####################################################################
