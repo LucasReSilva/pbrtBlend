@@ -794,7 +794,9 @@ class luxrender_channels(declarative_property_group):
         'IRRADIANCE'
     ]
 
-    visibility = {
+    visibility = {}
+
+    enabled = {
         # Menu buttons
         'saveToDisk': {'enable_aovs': True},
         'spacer': {'enable_aovs': True},
@@ -812,22 +814,22 @@ class luxrender_channels(declarative_property_group):
         'RGB_TONEMAPPED': {'enable_aovs': True},
         'RGBA_TONEMAPPED': {'enable_aovs': True},
         'ALPHA': {'enable_aovs': True},
-        'DEPTH': {'enable_aovs': True}, 
+        'DEPTH': {'enable_aovs': True},
         'normalize_DEPTH': A([{'enable_aovs': True}, {'DEPTH': True}]),
         'POSITION': {'enable_aovs': True},
         'GEOMETRY_NORMAL': {'enable_aovs': True},
         'SHADING_NORMAL': {'enable_aovs': True},
         'MATERIAL_ID': {'enable_aovs': True},
-        'DIRECT_DIFFUSE': {'enable_aovs': True}, 
+        'DIRECT_DIFFUSE': {'enable_aovs': True},
         'normalize_DIRECT_DIFFUSE': A([{'enable_aovs': True}, {'DIRECT_DIFFUSE': True}]),
-        'DIRECT_GLOSSY': {'enable_aovs': True}, 
+        'DIRECT_GLOSSY': {'enable_aovs': True},
         'normalize_DIRECT_GLOSSY': A([{'enable_aovs': True}, {'DIRECT_GLOSSY': True}]),
         'EMISSION': {'enable_aovs': True},
-        'INDIRECT_DIFFUSE': {'enable_aovs': True}, 
+        'INDIRECT_DIFFUSE': {'enable_aovs': True},
         'normalize_INDIRECT_DIFFUSE': A([{'enable_aovs': True}, {'INDIRECT_DIFFUSE': True}]),
-        'INDIRECT_GLOSSY': {'enable_aovs': True}, 
+        'INDIRECT_GLOSSY': {'enable_aovs': True},
         'normalize_INDIRECT_GLOSSY': A([{'enable_aovs': True}, {'INDIRECT_GLOSSY': True}]),
-        'INDIRECT_SPECULAR': {'enable_aovs': True}, 
+        'INDIRECT_SPECULAR': {'enable_aovs': True},
         'normalize_INDIRECT_SPECULAR': A([{'enable_aovs': True}, {'INDIRECT_SPECULAR': True}]),
         'DIRECT_SHADOW_MASK': {'enable_aovs': True},
         'INDIRECT_SHADOW_MASK': {'enable_aovs': True},
