@@ -1485,6 +1485,8 @@ class BlenderSceneConverter(object):
         energy = params_keyValue['gain'] if not hide_lamp else 0  # workaround for no lights render recovery
         position = bpy.data.objects[obj.name].location
         importance = params_keyValue['importance']
+
+        # Lightgroup
         lightgroup = getattr(light.luxrender_lamp, 'lightgroup')
         lightgroup_id = -1 # for luxcore RADIANCE_GROUP
 
@@ -1503,8 +1505,18 @@ class BlenderSceneConverter(object):
             else:
                 energy = 0  # use gain for muting to keep geometry exported
 
+        # Don't set lightgroup for sun because it might be split into sun + sky
         if lightgroup_id != -1 and light.type != 'SUN' and not self.blScene.luxrender_lightgroups.ignore:
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
+
+        # Visibility settings for indirect rays (not for sun because it might be split into sun + sky)
+        if light.type != 'SUN':
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.diffuse.enable',
+                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.glossy.enable',
+                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+            self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
+                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
         gain_spectrum = [energy, energy, energy] # luxcore gain is spectrum!
 
@@ -1561,6 +1573,14 @@ class BlenderSceneConverter(object):
                     relsize = params_keyValue['relsize']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.relsize', [relsize]))
 
+                # Settings for indirect light visibility
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.diffuse.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.glossy.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.specular.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
                 luxcore_data.append(ExportedObjectData(name, lightType = light.type))
@@ -1577,6 +1597,14 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
 
+                # Settings for indirect light visibility
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.diffuse.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.glossy.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.specular.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+
             if sunsky_type == 'distant':
                 luxcore_data.append(ExportedObjectData(luxcore_name, lightType = light.type))
                 if lightgroup_id != -1 and not self.blScene.luxrender_lightgroups.ignore:
@@ -1590,6 +1618,14 @@ class BlenderSceneConverter(object):
                 if 'theta' in params_keyValue:
                     theta = params_keyValue['theta']
                     self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
+
+                # Settings for indirect light visibility
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.diffuse.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.glossy.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
         ####################################################################
         # Hemi (infinite)

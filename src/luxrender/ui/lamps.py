@@ -171,3 +171,27 @@ class ui_luxrender_lamp_area(lamps_panel):
                 elif context.lamp.shape == 'RECTANGLE':
                     sub.prop(context.lamp, "size", text="Size X")
                     sub.prop(context.lamp, "size_y", text="Size Y")
+
+
+@LuxRenderAddon.addon_register_class
+class ui_luxcore_lamp(lamps_panel):
+    """
+    LuxCore light settings
+    """
+
+    bl_label = 'LuxCore specific settings'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    display_property_groups = [
+        ( ('lamp', 'luxrender_lamp' ), 'luxcore_lamp', lambda: UseLuxCore() )
+    ]
+
+    def draw(self, context):
+        if not UseLuxCore():
+            self.layout.label("Not available with API v1.x")
+
+        super().draw(context)
+
+    @classmethod
+    def poll(cls, context):
+        return super().poll(context)
