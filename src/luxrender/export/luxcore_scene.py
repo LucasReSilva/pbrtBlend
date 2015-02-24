@@ -2317,6 +2317,8 @@ class BlenderSceneConverter(object):
 
         if self.blScene.luxcore_translatorsettings.use_filesaver:
             output_path = efutil.filesystem_path(self.blScene.render.filepath)
+            if not os.path.isdir(output_path):
+                os.makedirs(output_path)
 
             self.cfgProps.Set(pyluxcore.Property('renderengine.type', ['FILESAVER']))
             self.cfgProps.Set(pyluxcore.Property('filesaver.directory', [output_path]))
