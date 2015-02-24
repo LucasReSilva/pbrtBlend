@@ -734,7 +734,7 @@ class BlenderSceneConverter(object):
             ####################################################################
             # ADD/SUBTRACT
             ####################################################################
-            if texType in  ('add', 'subtract') :
+            if texType in ('add', 'subtract'):
                 props.Set(pyluxcore.Property(prefix + '.texture1', self.ConvertTextureChannel(luxTex, 'tex1', luxTex.variant)))
                 props.Set(pyluxcore.Property(prefix + '.texture2', self.ConvertTextureChannel(luxTex, 'tex2', luxTex.variant)))
             ####################################################################
