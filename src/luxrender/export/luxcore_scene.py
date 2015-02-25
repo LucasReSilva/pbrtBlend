@@ -1832,7 +1832,6 @@ class BlenderSceneConverter(object):
         if transform is not None:
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
 
-        '''
         # Motion blur
         if self.blScene.camera.data.luxrender_camera.usemblur and self.blScene.camera.data.luxrender_camera.objectmblur:
             print('exporting motion blur')
@@ -1846,12 +1845,10 @@ class BlenderSceneConverter(object):
                 step_times = [(i) / fsps for i in range(0, num_steps + 1)]
 
                 for i in range(len(anim_matrices)):
-                    print('i =', i)
-                    #time = float(i) / (len(anim_matrices) - 1)
+                    time = float(i) / (len(anim_matrices) - 1)
                     matrix = matrix_to_list(anim_matrices[i])
-                    self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.time' % (lcObjName, i + 1), step_times[i]))
-                    self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.transformation' % (lcObjName, i + 1), matrix))
-        '''
+                    self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.time' % (lcObjName, i), time))
+                    self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.transformation' % (lcObjName, i), matrix))
 
 
     def ExportMesh(self, obj, preview, update_mesh, update_material, transform, is_dupli):
