@@ -1846,7 +1846,7 @@ class BlenderSceneConverter(object):
 
                 for i in range(len(anim_matrices)):
                     time = float(i) / (len(anim_matrices) - 1)
-                    matrix = matrix_to_list(anim_matrices[i])
+                    matrix = matrix_to_list(anim_matrices[i].inverted())
                     self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.time' % (lcObjName, i), time))
                     self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.transformation' % (lcObjName, i), matrix))
 
@@ -2009,6 +2009,23 @@ class BlenderSceneConverter(object):
         else:
             self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [False]))
 
+    def convert_shutter(self, lux_camera_settings):
+        # Shutter open/close
+        fps = self.blScene.render.fps / self.blScene.render.fps_base
+
+        if lux_camera_settings.exposure_mode == 'normalised':
+            shutter_open = lux_camera_settings.exposure_start_norm / fps
+            shutter_close = lux_camera_settings.exposure_end_norm / fps
+        elif lux_camera_settings.exposure_mode == 'absolute':
+            shutter_open = lux_camera_settings.exposure_start_abs
+            shutter_close = lux_camera_settings.exposure_end_abs
+        elif lux_camera_settings.exposure_mode == 'degrees':
+            shutter_open = lux_camera_settings.exposure_degrees_start / (fps * 2 * math.pi)
+            shutter_close = lux_camera_settings.exposure_degrees_end / (fps * 2 * math.pi)
+
+        self.scnProps.Set(pyluxcore.Property('scene.camera.shutteropen', shutter_open))
+        self.scnProps.Set(pyluxcore.Property('scene.camera.shutterclose', shutter_close))
+
     def ConvertCamera(self):
         """
         Camera for final rendering
@@ -2061,20 +2078,7 @@ class BlenderSceneConverter(object):
         '''
 
         # Shutter open/close
-        fps = self.blScene.render.fps / self.blScene.render.fps_base
-
-        if luxCamera.exposure_mode == 'normalised':
-            shutter_open = luxCamera.exposure_start_norm / fps
-            shutter_close = luxCamera.exposure_end_norm / fps
-        elif luxCamera.exposure_mode == 'absolute':
-            shutter_open = luxCamera.exposure_start_abs
-            shutter_close = luxCamera.exposure_end_abs
-        elif luxCamera.exposure_mode == 'degrees':
-            shutter_open = luxCamera.exposure_degrees_start / (fps * 2 * math.pi)
-            shutter_close = luxCamera.exposure_degrees_end / (fps * 2 * math.pi)
-
-        self.scnProps.Set(pyluxcore.Property('scene.camera.shutteropen', shutter_open))
-        self.scnProps.Set(pyluxcore.Property('scene.camera.shutterclose', shutter_close))
+        self.convert_shutter(luxCamera)
 
         # Field of view
         if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
@@ -2137,6 +2141,7 @@ class BlenderSceneConverter(object):
                                     (-view_matrix[0][2], -view_matrix[1][2], -view_matrix[2][2])))
 
             cam_origin = list(rot * cam_trans)
+
             cam_fov = 2 * math.atan(0.5 * 32.0 / view_lens)
             cam_up = list(rot * mathutils.Vector((0, -1, 0)))
 
@@ -2197,9 +2202,11 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.camera.lensradius', lensradius))
             self.scnProps.Set(pyluxcore.Property('scene.camera.focaldistance', focaldistance))
 
-            # arbitrary clipping plane
             if luxCamera is not None:
+                # arbitrary clipping plane
                 self.convert_clipping_plane(luxCamera)
+                # Shutter open/close
+                self.convert_shutter(luxCamera)
 
     def ConvertImagepipelineSettings(self, realtime_preview=False):
         if self.blScene.camera is None:
