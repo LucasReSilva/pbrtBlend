@@ -2024,31 +2024,15 @@ class BlenderSceneConverter(object):
         self.scnProps.Set(pyluxcore.Property('scene.camera.shutteropen', shutter_open))
         self.scnProps.Set(pyluxcore.Property('scene.camera.shutterclose', shutter_close))
 
-    def ConvertCamera(self):
-        """
-        Camera for final rendering
-        """
+    def convert_camera_motion_blur(self, blCamera):
+        luxCamera = blCamera.data.luxrender_camera
 
-        blCamera = self.blScene.camera
-        blCameraData = blCamera.data
-        luxCamera = blCameraData.luxrender_camera
-
-        # Transformation
-        #transform = matrix_to_list(blCamera.matrix_world, apply_worldscale = True)
-        #self.scnProps.Set(pyluxcore.Property('scene.camera.transformation', transform))
-
-        # Lookat
-        lookat = luxCamera.lookAt(blCamera)
-        orig = list(lookat[0:3])
-        target = list(lookat[3:6])
-        up = list(lookat[6:9])
-
-        self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.orig', orig))
-        self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', target))
-        self.scnProps.Set(pyluxcore.Property('scene.camera.up', up))
-
-        # Motion blur
         if luxCamera.usemblur and luxCamera.cammblur:
+            # Complete transformation is handled by motion.x.transformation below
+            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.orig', [0, 0, 0]))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', [0, 0, -1]))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.up', [0, 1, 0]))
+
             STEPS = luxCamera.motion_blur_samples
             anim_matrices = object_anim_matrices(self.blScene, blCamera, steps=STEPS)
 
@@ -2063,9 +2047,31 @@ class BlenderSceneConverter(object):
 
                 for i in range(len(anim_matrices)):
                     time = float(i) / (len(anim_matrices) - 1)
-                    matrix = matrix_to_list(anim_matrices[i].inverted())
+                    matrix = matrix_to_list(anim_matrices[i])
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.time' % i, time))
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.transformation' % i, matrix))
+        else:
+            # No camera motion blur
+            lookat = luxCamera.lookAt(blCamera)
+            orig = list(lookat[0:3])
+            target = list(lookat[3:6])
+            up = list(lookat[6:9])
+
+            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.orig', orig))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', target))
+            self.scnProps.Set(pyluxcore.Property('scene.camera.up', up))
+
+    def ConvertCamera(self):
+        """
+        Camera for final rendering
+        """
+
+        blCamera = self.blScene.camera
+        blCameraData = blCamera.data
+        luxCamera = blCameraData.luxrender_camera
+
+        # Motion blur
+        self.convert_camera_motion_blur(blCamera)
 
         # Shutter open/close
         self.convert_shutter(luxCamera)
@@ -2139,7 +2145,7 @@ class BlenderSceneConverter(object):
                 yaspect = 1.0
 
             if view_persp == 'CAMERA':
-                blcamera = context.scene.camera
+                blCamera = context.scene.camera
                 #magic zoom formula for camera viewport zoom from blender source
                 zoom = view_camera_zoom
                 zoom = (1.41421 + zoom / 50.0)
@@ -2152,24 +2158,24 @@ class BlenderSceneConverter(object):
                 dx = 2.0 * (view_camera_shift_x + view_camera_offset[0] * xaspect * 2.0)
                 dy = 2.0 * (view_camera_shift_y + view_camera_offset[1] * yaspect * 2.0)
 
-                cam_fov = blcamera.data.angle
+                cam_fov = blCamera.data.angle
 
-                lookat = luxCamera.lookAt(blcamera)
+                lookat = luxCamera.lookAt(blCamera)
                 cam_origin = list(lookat[0:3])
                 cam_lookat = list(lookat[3:6])
                 cam_up = list(lookat[6:9])
 
                 if luxCamera.use_dof:
                     # Do not world-scale this, it is already in meters!
-                    lensradius = (blcamera.data.lens / 1000.0) / (2.0 * luxCamera.fstop)
+                    lensradius = (blCamera.data.lens / 1000.0) / (2.0 * luxCamera.fstop)
 
                 ws = get_worldscale(as_scalematrix = False)
 
                 if luxCamera.use_dof:
-                    if blcamera.data.dof_object is not None:
-                        focaldistance = ws * ((blcamera.location - blcamera.data.dof_object.location).length)
-                    elif blcamera.data.dof_distance > 0:
-                        focaldistance = ws * blcamera.data.dof_distance
+                    if blCamera.data.dof_object is not None:
+                        focaldistance = ws * ((blCamera.location - blCamera.data.dof_object.location).length)
+                    elif blCamera.data.dof_distance > 0:
+                        focaldistance = ws * blCamera.data.dof_distance
 
             zoom *= 2.0
 
