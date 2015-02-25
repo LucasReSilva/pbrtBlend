@@ -1834,15 +1834,13 @@ class BlenderSceneConverter(object):
 
         # Motion blur
         if self.blScene.camera.data.luxrender_camera.usemblur and self.blScene.camera.data.luxrender_camera.objectmblur:
-            print('exporting motion blur')
-
             steps = self.blScene.camera.data.luxrender_camera.motion_blur_samples
             anim_matrices = object_anim_matrices(self.blScene, obj, steps = steps)
 
             if anim_matrices:
-                num_steps = len(anim_matrices)
-                fsps = float(num_steps) * self.blScene.render.fps / self.blScene.render.fps_base
-                step_times = [(i) / fsps for i in range(0, num_steps + 1)]
+                #num_steps = len(anim_matrices)
+                #fsps = float(num_steps) * self.blScene.render.fps / self.blScene.render.fps_base
+                #step_times = [(i) / fsps for i in range(0, num_steps + 1)]
 
                 for i in range(len(anim_matrices)):
                     time = float(i) / (len(anim_matrices) - 1)
@@ -2035,6 +2033,10 @@ class BlenderSceneConverter(object):
         blCameraData = blCamera.data
         luxCamera = blCameraData.luxrender_camera
 
+        # Transformation
+        #transform = matrix_to_list(blCamera.matrix_world, apply_worldscale = True)
+        #self.scnProps.Set(pyluxcore.Property('scene.camera.transformation', transform))
+
         # Lookat
         lookat = luxCamera.lookAt(blCamera)
         orig = list(lookat[0:3])
@@ -2045,16 +2047,15 @@ class BlenderSceneConverter(object):
         self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', target))
         self.scnProps.Set(pyluxcore.Property('scene.camera.up', up))
 
-        '''
         # Motion blur
         if luxCamera.usemblur and luxCamera.cammblur:
             STEPS = luxCamera.motion_blur_samples
-            anim_matrices = object_anim_matrices_luxcore(self.blScene, blCamera, steps=STEPS)
+            anim_matrices = object_anim_matrices(self.blScene, blCamera, steps=STEPS)
 
             if anim_matrices:
-                num_steps = len(anim_matrices) - 1
-                fsps = float(num_steps) * self.blScene.render.fps / self.blScene.render.fps_base
-                step_times = [(i) / fsps for i in range(0, num_steps + 1)]
+                #num_steps = len(anim_matrices) - 1
+                #fsps = float(num_steps) * self.blScene.render.fps / self.blScene.render.fps_base
+                #step_times = [(i) / fsps for i in range(0, num_steps + 1)]
 
                 #print('num_steps:', num_steps)
                 #print('fsps:', fsps)
@@ -2062,20 +2063,9 @@ class BlenderSceneConverter(object):
 
                 for i in range(len(anim_matrices)):
                     time = float(i) / (len(anim_matrices) - 1)
-                    matrix = matrix_to_list(anim_matrices[i])
+                    matrix = matrix_to_list(anim_matrices[i].inverted())
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.time' % i, time))
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.transformation' % i, matrix))
-        '''
-
-
-        '''
-        self.scnProps.Set(pyluxcore.Property('scene.camera.motion.0.time', [0]))
-        self.scnProps.Set(pyluxcore.Property('scene.camera.motion.0.transformation',
-                [1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  -0.1, 0.0, 0.0, 1.0]))
-        self.scnProps.Set(pyluxcore.Property('scene.camera.motion.1.time', [1]))
-        self.scnProps.Set(pyluxcore.Property('scene.camera.motion.1.transformation',
-                [1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  0.4, 0.0, 0.0, 1.0]))
-        '''
 
         # Shutter open/close
         self.convert_shutter(luxCamera)
@@ -2133,17 +2123,13 @@ class BlenderSceneConverter(object):
             zoom = 1.0
             dx = 0.0
             dy = 0.0
-            cam_trans = mathutils.Vector((view_matrix[0][3], view_matrix[1][3], view_matrix[2][3]))
-            cam_lookat = list(context.region_data.view_location)
 
-            rot = mathutils.Matrix(((-view_matrix[0][0], -view_matrix[1][0], -view_matrix[2][0]),
-                                    (-view_matrix[0][1], -view_matrix[1][1], -view_matrix[2][1]),
-                                    (-view_matrix[0][2], -view_matrix[1][2], -view_matrix[2][2])))
-
-            cam_origin = list(rot * cam_trans)
+            lookat = luxCamera.lookAt(context.scene.camera, view_matrix.inverted())
+            cam_origin = list(lookat[0:3])
+            cam_lookat = list(lookat[3:6])
+            cam_up = list(lookat[6:9])
 
             cam_fov = 2 * math.atan(0.5 * 32.0 / view_lens)
-            cam_up = list(rot * mathutils.Vector((0, -1, 0)))
 
             if context.region.width > context.region.height:
                 xaspect = 1.0
