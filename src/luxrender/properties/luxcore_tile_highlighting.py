@@ -72,6 +72,7 @@ class luxcore_tile_highlighting(declarative_property_group):
             'name': 'Converged',
             'description': 'Show finished tiles',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
         {
@@ -80,6 +81,7 @@ class luxcore_tile_highlighting(declarative_property_group):
             'name': 'Unconverged',
             'description': 'Show unfinished tiles',
             'default': False,
+            'toggle': True,
             'save_in_preset': True
         },
         {
@@ -88,6 +90,7 @@ class luxcore_tile_highlighting(declarative_property_group):
             'name': 'Pending',
             'description': 'Show tiles that are actively rendered',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
     ]

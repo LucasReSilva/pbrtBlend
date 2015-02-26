@@ -45,6 +45,8 @@ class luxcore_lamp(declarative_property_group):
     ]
 
     visibility = {
+        'label_light_visibility':
+            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
         'visibility_indirect_diffuse_enable':
             {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
         'visibility_indirect_glossy_enable':

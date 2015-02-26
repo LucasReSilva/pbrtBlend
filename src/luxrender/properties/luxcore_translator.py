@@ -83,31 +83,34 @@ class luxcore_translatorsettings(declarative_property_group):
             'type': 'bool',
             'attr': 'override_glass',
             'name': 'Glass',
-            'description': 'Replace glass materials, too',
+            'description': 'Replace glass materials with clay',
             'default': False,
+            'toggle': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'override_lights',
             'name': 'Emission',
-            'description': 'Replace light emitting materials, too (turning them off)',
+            'description': 'Replace light emitting materials with clay (turning them off)',
             'default': False,
+            'toggle': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'override_null',
             'name': 'Null',
-            'description': 'Replace null materials, too',
+            'description': 'Replace null materials with clay',
             'default': False,
+            'toggle': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'use_filesaver',
             'name': 'Only Export Files',
-            'description': 'Instead of rendering, only export CFG/SCN files to output path',
+            'description': 'Instead of rendering, only export CFG/SCN files, meshes and textures to output path',
             'default': False,
             'save_in_preset': True
         },

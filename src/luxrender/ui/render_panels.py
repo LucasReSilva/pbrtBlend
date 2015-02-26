@@ -122,10 +122,10 @@ class device_settings(render_panel):
             self.layout.prop(tile_highlighting_settings, 'use_tile_highlighting')
             
             if tile_highlighting_settings.use_tile_highlighting:
-                tiletypes_row = self.layout.row()
-                tiletypes_row.prop(tile_highlighting_settings, 'show_converged')
-                tiletypes_row.prop(tile_highlighting_settings, 'show_unconverged')
-                tiletypes_row.prop(tile_highlighting_settings, 'show_pending')
+                tiletypes_row = self.layout.row(align=True)
+                tiletypes_row.prop(tile_highlighting_settings, 'show_converged', toggle=True)
+                tiletypes_row.prop(tile_highlighting_settings, 'show_unconverged', toggle=True)
+                tiletypes_row.prop(tile_highlighting_settings, 'show_pending', toggle=True)
 
 @LuxRenderAddon.addon_register_class
 class realtime_settings(render_panel):
