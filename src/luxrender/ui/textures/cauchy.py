@@ -38,6 +38,14 @@ class ui_texture_cauchy(luxrender_texture_base):
         ( ('texture', 'luxrender_texture'), 'luxrender_tex_cauchy' )
     ]
 
+    def draw(self, context):
+        row = self.layout.row(align=True)
+        row.label('LuxRender type')
+        row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
+        self.layout.separator()
+
+        super().draw(context)
+        
     def draw_ior_menu(self, context):
         """
         This is a draw callback from property_group_renderer, due
