@@ -1646,9 +1646,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             #LuxLog(str(lcConfig.GetScene().GetProperties()))
 
             # Add a lamp (hack for Blender's preview scene, which does not contain any lights)
-            lcConfig.GetScene().Parse(pyluxcore.Properties().
+            if bpy.data.materials[0].preview_render_type != 'FLAT':
+                lcConfig.GetScene().Parse(pyluxcore.Properties().
+                        Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['point'])).
+                        Set(pyluxcore.Property('scene.lights.preview_lamp.position', [12, -12, 8])))
+            else:
+                lcConfig.GetScene().Parse(pyluxcore.Properties().
                     Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['point'])).
-                    Set(pyluxcore.Property('scene.lights.preview_lamp.position', [12, -12, 8])))
+                    Set(pyluxcore.Property('scene.lights.preview_lamp.position', [10, -20, 8])).
+                    Set(pyluxcore.Property('scene.lights.preview_lamp.gain', [10, 10, 10])))
 
             # config for preview
             cfgProps = pyluxcore.Properties()
