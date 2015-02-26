@@ -218,6 +218,7 @@ class luxrender_volume_data(declarative_property_group):
                          'attr': 'type',
                          'name': 'Type',
                          'items': volume_types(),
+                         'expand': True,
                          'save_in_preset': True
                      },
                  ] + \
