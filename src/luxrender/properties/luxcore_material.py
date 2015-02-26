@@ -46,13 +46,15 @@ class luxcore_material(declarative_property_group):
         'create_BY_MATERIAL_ID',
         ['samples', 'emission_samples'],
         'bumpsamplingdistance',
-        ['visibility_indirect_diffuse_enable', 'visibility_indirect_glossy_enable',
-         'visibility_indirect_specular_enable'],
+        'label_material_visibility',
+        ['visibility_indirect_diffuse_enable', 'visibility_indirect_glossy_enable', 'visibility_indirect_specular_enable'],
     ]
 
     visibility = {
         'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
         'bumpsamplingdistance': {'advanced': True},
+        'label_material_visibility': {
+        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
         'emission_samples': {
         ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
         'visibility_indirect_diffuse_enable':
@@ -141,27 +143,35 @@ class luxcore_material(declarative_property_group):
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_material_visibility',
+            'name': 'Visibility for indirect rays:'
+        },
+        {
             'type': 'bool',
             'attr': 'visibility_indirect_diffuse_enable',
-            'name': 'Diffuse indirect visibility',
+            'name': 'Diffuse',
             'description': 'Enable material visibility for indirect rays',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'visibility_indirect_glossy_enable',
-            'name': 'Glossy indirect visibility',
+            'name': 'Glossy',
             'description': 'Enable material visibility for glossy rays',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'visibility_indirect_specular_enable',
-            'name': 'Specular indirect visibility',
+            'name': 'Specular',
             'description': 'Enable material visibility for specular rays',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
     ]

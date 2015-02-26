@@ -40,6 +40,7 @@ class luxcore_lamp(declarative_property_group):
     ef_attach_to = ['luxrender_lamp']
 
     controls = [
+        'label_light_visibility',
         ['visibility_indirect_diffuse_enable', 'visibility_indirect_glossy_enable', 'visibility_indirect_specular_enable'],
     ]
 
@@ -56,27 +57,35 @@ class luxcore_lamp(declarative_property_group):
 
     properties = [
         {
+            'type': 'text',
+            'attr': 'label_light_visibility',
+            'name': 'Visibility for indirect rays:'
+        },
+        {
             'type': 'bool',
             'attr': 'visibility_indirect_diffuse_enable',
-            'name': 'Diffuse indirect visibility',
+            'name': 'Diffuse',
             'description': 'Enable material visibility for indirect rays',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'visibility_indirect_glossy_enable',
-            'name': 'Glossy indirect visibility',
+            'name': 'Glossy',
             'description': 'Enable material visibility for glossy rays',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'visibility_indirect_specular_enable',
-            'name': 'Specular indirect visibility',
+            'name': 'Specular',
             'description': 'Enable material visibility for specular rays',
             'default': True,
+            'toggle': True,
             'save_in_preset': True
         },
     ]
