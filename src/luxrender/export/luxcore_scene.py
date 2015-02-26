@@ -480,6 +480,11 @@ class BlenderSceneConverter(object):
         self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', f_matrix))
 
     def ConvertColorRamp(self, texture, texName):
+        """
+        :param texture: Blender texture
+        :param texName: luxcore name of child texture
+        :return: texturename to be used in the parent slot (either the original texture or the band texture)
+        """
         if texture.use_color_ramp:
             ramp = texture.color_ramp
             ramp_luxcore_name = texName + '_colorramp'
@@ -974,8 +979,10 @@ class BlenderSceneConverter(object):
 
     def ConvertMaterial(self, material, materials = None, no_conversion = False):
         """
-        material: material to convert
-        materials: obj.material_slots
+        :param material: material to convert
+        ::param materials: obj.material_slots
+        ::param no_conversion: don't convert material (for some realtime preview cases)
+        :return: luxcore name of the exported material to be used in the parent slot
         """
 
         def set_volumes(prefix):
@@ -1845,7 +1852,7 @@ class BlenderSceneConverter(object):
         """
         print('Hair export not supported yet')
 
-    def SetObjectProperties(self, obj, lcObjName, lcMeshName, lcMatName, transform):
+    def SetObjectProperties(self, obj, lcObjName, lcMeshName, lcMatName, transform, anim_matrices):
         self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.material', [lcMatName]))
         self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.ply', [lcMeshName]))
 
@@ -1853,26 +1860,15 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
 
         # Motion blur
-        if (self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.usemblur and
-                self.blScene.camera.data.luxrender_camera.objectmblur):
-            print('exporting motion blur')
-
-            steps = self.blScene.camera.data.luxrender_camera.motion_blur_samples
-            anim_matrices = object_anim_matrices(self.blScene, obj, steps = steps)
-
-            if anim_matrices:
-                #num_steps = len(anim_matrices)
-                #fsps = float(num_steps) * self.blScene.render.fps / self.blScene.render.fps_base
-                #step_times = [(i) / fsps for i in range(0, num_steps + 1)]
-
-                for i in range(len(anim_matrices)):
-                    time = float(i) / (len(anim_matrices) - 1)
-                    matrix = matrix_to_list(anim_matrices[i].inverted())
-                    self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.time' % (lcObjName, i), time))
-                    self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.transformation' % (lcObjName, i), matrix))
+        if anim_matrices:
+            for i in range(len(anim_matrices)):
+                time = float(i) / (len(anim_matrices) - 1)
+                matrix = matrix_to_list(anim_matrices[i].inverted())
+                self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.time' % (lcObjName, i), time))
+                self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.transformation' % (lcObjName, i), matrix))
 
 
-    def ExportMesh(self, obj, preview, update_mesh, update_material, transform, is_dupli):
+    def ExportMesh(self, obj, preview, update_mesh, update_material, transform, is_dupli, anim_matrices):
         meshDefinitions = []
         meshDefinitions.extend(self.ConvertObjectGeometry(obj, preview, update_mesh, is_dupli))
         luxcore_data = []
@@ -1895,15 +1891,16 @@ class BlenderSceneConverter(object):
             exported_object_data = ExportedObjectData(lcObjName, objMeshName, objMatName, objMatIndex)
             luxcore_data.append(exported_object_data)
 
-            self.SetObjectProperties(obj, lcObjName, objMeshName, objMatName, transform)
+            self.SetObjectProperties(obj, lcObjName, objMeshName, objMatName, transform, anim_matrices)
 
         return luxcore_data
 
     def ConvertObject(self, obj, matrix = None, is_dupli = False, particle_sytem = '', preview = False,
                       update_mesh = True, update_transform = True, update_material = True):
-        if obj is None or (self.renderengine is not None and self.renderengine.test_break()):
+        if obj is None or obj.type == 'CAMERA' or (self.renderengine is not None and self.renderengine.test_break()):
             return
 
+        # Light export
         if obj.type == 'LAMP':
             try:
                 self.ConvertLight(obj)
@@ -1913,8 +1910,7 @@ class BlenderSceneConverter(object):
                 traceback.print_exc()
             return
 
-        convert_object = True
-
+        # Transformation
         transform = None
         if update_transform:
             if matrix is not None:
@@ -1922,7 +1918,17 @@ class BlenderSceneConverter(object):
             else:
                 transform = matrix_to_list(obj.matrix_world, apply_worldscale = True)
 
-        # check if object is proxy
+        # Motion Blur
+        anim_matrices = None
+        if (self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.usemblur and
+                self.blScene.camera.data.luxrender_camera.objectmblur):
+            steps = self.blScene.camera.data.luxrender_camera.motion_blur_samples
+            anim_matrices = object_anim_matrices(self.blScene, obj, steps = steps)
+
+        # Check if object should be converted
+        convert_object = True
+
+        # Check if object is proxy
         if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
             convert_object = not obj.luxrender_object.hide_proxy_mesh
 
@@ -1930,9 +1936,9 @@ class BlenderSceneConverter(object):
             name = ToValidLuxCoreName(obj.name)
             material = self.ConvertMaterial(obj.active_material, obj.material_slots, no_conversion = not update_material)
 
-            self.SetObjectProperties(obj, name, path, material, transform)
+            self.SetObjectProperties(obj, name, path, material, transform, anim_matrices)
 
-        # check if object is particle emitter
+        # Check if object is particle emitter
         if len(obj.particle_systems) > 0:
             convert_object = False
 
@@ -1968,13 +1974,14 @@ class BlenderSceneConverter(object):
 
                 if update_mesh and obj.data.users == 1:
                     # re-export mesh (disabled for multiuser meshes because it crashes Blender)
-                    cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli))
+                    cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli,
+                                                       anim_matrices))
                 else:
                     # read from cache (only transformation update required)
                     exported_object = cache.get_exported_object_key_obj(obj)
                     for exported_object_data in exported_object.luxcore_data:
                         self.SetObjectProperties(obj, exported_object_data.lcObjName, exported_object_data.lcMeshName,
-                                                 exported_object_data.lcMaterialName, transform)
+                                                 exported_object_data.lcMaterialName, transform, anim_matrices)
             else:
                 # Mesh data is already exported, but this object is not yet "registered" to use it
                 if not is_dupli:
@@ -2002,13 +2009,14 @@ class BlenderSceneConverter(object):
                     new_luxcore_data.append(new_exported_object_data)
 
                     self.SetObjectProperties(obj, name, exported_object_data.lcMeshName,
-                                             exported_object_data.lcMaterialName, transform)
+                                             exported_object_data.lcMaterialName, transform, anim_matrices)
 
                 # Create new entry in cache
                 cache.add_obj(obj, new_luxcore_data)
         else:
             print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data.name, obj.name))
-            cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli))
+            cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli,
+                                               anim_matrices))
 
     def convert_clipping_plane(self, lux_camera_settings):
         if lux_camera_settings.enable_clipping_plane:
@@ -2060,29 +2068,22 @@ class BlenderSceneConverter(object):
             anim_matrices = object_anim_matrices(self.blScene, blCamera, steps=STEPS)
 
             if anim_matrices:
-                #num_steps = len(anim_matrices) - 1
-                #fsps = float(num_steps) * self.blScene.render.fps / self.blScene.render.fps_base
-                #step_times = [(i) / fsps for i in range(0, num_steps + 1)]
-
-                #print('num_steps:', num_steps)
-                #print('fsps:', fsps)
-                #print('step_times:', step_times)
-
                 for i in range(len(anim_matrices)):
                     time = float(i) / (len(anim_matrices) - 1)
                     matrix = matrix_to_list(anim_matrices[i])
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.time' % i, time))
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.transformation' % i, matrix))
-        else:
-            # No camera motion blur
-            lookat = luxCamera.lookAt(blCamera)
-            orig = list(lookat[0:3])
-            target = list(lookat[3:6])
-            up = list(lookat[6:9])
+                return
 
-            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.orig', orig))
-            self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', target))
-            self.scnProps.Set(pyluxcore.Property('scene.camera.up', up))
+        # No camera motion blur
+        lookat = luxCamera.lookAt(blCamera)
+        orig = list(lookat[0:3])
+        target = list(lookat[3:6])
+        up = list(lookat[6:9])
+
+        self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.orig', orig))
+        self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', target))
+        self.scnProps.Set(pyluxcore.Property('scene.camera.up', up))
 
     def convert_lookat(self, matrix):
         """
