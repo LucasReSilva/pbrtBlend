@@ -1869,14 +1869,20 @@ class BlenderSceneConverter(object):
         try:
             duplis = self.create_dupli_list(obj)
 
+            animated = False
             if (self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.usemblur and
                     self.blScene.camera.data.luxrender_camera.objectmblur):
                 dupli_matrices = self.dupli_anim_matrices(self.blScene, obj, len(duplis))
 
                 # Add motion blur matrices to dupli information
                 if dupli_matrices:
+                    animated = True
                     for i in range(len(duplis)):
                         duplis[i] = (duplis[i][0], duplis[i][1], dupli_matrices[i])
+
+            if not animated:
+                for i in range(len(duplis)):
+                        duplis[i] = (duplis[i][0], duplis[i][1], None)
 
             # dupli object, dupli matrix
             for dupli_object, dupli_matrix, anim_matrices in duplis:
