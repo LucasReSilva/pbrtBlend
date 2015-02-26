@@ -37,11 +37,3 @@ class ui_texture_exponential(luxrender_texture_base):
     display_property_groups = [
         ( ('texture', 'luxrender_texture'), 'luxrender_tex_exponential' )
     ]
-
-    def draw(self, context):
-        row = self.layout.row(align=True)
-        row.label('LuxRender type')
-        row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
-        self.layout.separator()
-
-        super().draw(context)
