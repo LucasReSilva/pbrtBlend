@@ -35,6 +35,7 @@ from ..outputs.luxcore_api import pyluxcore
 from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..export import get_worldscale
 from ..export import matrix_to_list
+from ..export import fix_matrix_order
 from ..export import object_anim_matrices
 from ..export import is_obj_visible
 from ..export import get_expanded_file_name
@@ -477,6 +478,26 @@ class BlenderSceneConverter(object):
 
         self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', f_matrix))
 
+    def ConvertColorRamp(self, texture, texName):
+        if texture.use_color_ramp:
+            ramp = texture.color_ramp
+            ramp_luxcore_name = texName + '_colorramp'
+            ramp_prefix = 'scene.textures.' + ramp_luxcore_name
+
+            self.scnProps.Set(pyluxcore.Property(ramp_prefix + '.type', 'band'))
+            self.scnProps.Set(pyluxcore.Property(ramp_prefix + '.amount', texName))
+            self.scnProps.Set(pyluxcore.Property(ramp_prefix + '.offsets', len(ramp.elements)))
+
+            for i in range(len(ramp.elements)):
+                position = ramp.elements[i].position
+                color = list(ramp.elements[i].color[:3]) # Ignore alpha
+                self.scnProps.Set(pyluxcore.Property(ramp_prefix + '.offset%d' % i, position))
+                self.scnProps.Set(pyluxcore.Property(ramp_prefix + '.value%d' % i, color))
+
+            return ramp_luxcore_name
+        else:
+            return texName
+
     def ConvertTexture(self, texture, luxcore_name = ''):
         """
         :param texture: Blender texture (from bpy.data.textures)
@@ -724,7 +745,7 @@ class BlenderSceneConverter(object):
 
             self.scnProps.Set(props)
             self.texturesCache.add(texName)
-            return texName
+            return self.ConvertColorRamp(texture, texName)
 
         elif texType != 'BLENDER':
             luxTex = getattr(texture.luxrender_texture, 'luxrender_tex_' + texType)
@@ -904,7 +925,7 @@ class BlenderSceneConverter(object):
 
             self.scnProps.Set(props)
             self.texturesCache.add(texName)
-            return texName
+            return self.ConvertColorRamp(texture, texName)
 
         raise Exception('Unknown texture type: ' + texture.name)
 
@@ -1833,7 +1854,8 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
 
         # Motion blur
-        if self.blScene.camera.data.luxrender_camera.usemblur and self.blScene.camera.data.luxrender_camera.objectmblur:
+        if (self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.usemblur and
+                self.blScene.camera.data.luxrender_camera.objectmblur):
             steps = self.blScene.camera.data.luxrender_camera.motion_blur_samples
             anim_matrices = object_anim_matrices(self.blScene, obj, steps = steps)
 
@@ -2061,6 +2083,30 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.camera.lookat.target', target))
             self.scnProps.Set(pyluxcore.Property('scene.camera.up', up))
 
+    def convert_lookat(self, matrix):
+        """
+        Derive a list describing 3 points for a LuxRender LookAt statement
+        Copied from properties/camera.py because realtime preview needs access to this without a camera object
+
+        Returns     tuple(9) (floats)
+        """
+        ws = get_worldscale()
+        matrix *= ws
+        ws = get_worldscale(as_scalematrix=False)
+        matrix = fix_matrix_order(matrix)  # matrix indexing hack
+        matrix[0][3] *= ws
+        matrix[1][3] *= ws
+        matrix[2][3] *= ws
+
+        # transpose to extract columns
+        matrix = matrix.transposed()
+        pos = matrix[3]
+        forwards = -matrix[2]
+        target = (pos + forwards)
+        up = matrix[1]
+
+        return pos[:3] + target[:3] + up[:3]
+
     def ConvertCamera(self):
         """
         Camera for final rendering
@@ -2130,7 +2176,7 @@ class BlenderSceneConverter(object):
             dx = 0.0
             dy = 0.0
 
-            lookat = luxCamera.lookAt(context.scene.camera, view_matrix.inverted())
+            lookat = self.convert_lookat(view_matrix.inverted())
             cam_origin = list(lookat[0:3])
             cam_lookat = list(lookat[3:6])
             cam_up = list(lookat[6:9])

@@ -147,9 +147,9 @@ TC_sigma_s = VolumeDataColorTextureParameter('sigma_s', 'Scattering', default=(0
 
 def volume_types():
     v_types = [
-        ('clear', 'Clear', 'clear'),
-        ('homogeneous', 'Homogeneous', 'homogeneous'),
-        ('heterogeneous', 'Heterogeneous', 'heterogeneous')
+        ('clear', 'Clear', 'Use for clear/colored glass'),
+        ('homogeneous', 'Homogeneous', 'Use for volumes with uniform scattering, e.g. milk, skin, orange juice'),
+        ('heterogeneous', 'Heterogeneous', 'Use for volumes with non-uniform scattering, e.g. clouds')
     ]
 
     return v_types

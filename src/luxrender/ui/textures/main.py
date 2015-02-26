@@ -26,13 +26,14 @@
 #
 from ... import LuxRenderAddon
 from ...ui.textures import luxrender_texture_base
+from ...outputs.luxcore_api import UseLuxCore
 
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_main(luxrender_texture_base):
-    """
+    '''
     Texture Editor UI Panel
-    """
+    '''
 
     bl_label = 'LuxRender Textures'
     bl_options = {'HIDE_HEADER'}
@@ -43,9 +44,9 @@ class ui_texture_main(luxrender_texture_base):
 
     @classmethod
     def poll(cls, context):
-        """
+        '''
         Only show LuxRender panel with 'Plugin' texture type
-        """
+        '''
 
         tex = context.texture
         return tex and \
@@ -54,6 +55,12 @@ class ui_texture_main(luxrender_texture_base):
 
     def draw(self, context):
         row = self.layout.row(align=True)
-        row.label("LuxRender type")
+        row.label('LuxRender type')
         row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
+
+        if UseLuxCore():
+            self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
+            if context.texture.use_color_ramp:
+                self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
+
         super().draw(context)
