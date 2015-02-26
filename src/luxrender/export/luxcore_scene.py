@@ -1480,10 +1480,7 @@ class BlenderSceneConverter(object):
         return [parsed[0], param[1]]
 
     def ConvertLight(self, obj):
-        if not is_obj_visible(self.blScene, obj):
-            hide_lamp = True
-        else:
-            hide_lamp = False
+        hide_lamp = not is_obj_visible(self.blScene, obj)
 
         light = obj.data
         luxcore_name = ToValidLuxCoreName(obj.name)
@@ -1796,36 +1793,93 @@ class BlenderSceneConverter(object):
         # create cache entry
         BlenderSceneConverter.export_cache.add_obj(obj, luxcore_data)
 
-    def ConvertDuplis(self, obj, particle_system):
-        """
-        Converts duplis and OBJECT and GROUP particle systems
-        """
-        print('Exporting duplis of duplicator %s' % particle_system)
+    def create_dupli_list(self, obj):
+        obj.dupli_list_create(self.blScene, settings = 'RENDER')
+        if not obj.dupli_list:
+            raise Exception('cannot create dupli list for object %s' % obj.name)
 
-        try:
+        # Create our own DupliOb list to work around incorrect layers
+        # attribute when inside create_dupli_list()..free_dupli_list()
+        duplis = []
+        for dupli_ob in obj.dupli_list:
+            # metaballs are omitted from this function intentionally. Adding them causes recursion when building
+            # the ball.
+            if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
+                continue
+            if not is_obj_visible(self.blScene, dupli_ob.object, is_dupli = True):
+                continue
+
+            duplis.append((dupli_ob.object, dupli_ob.matrix.copy()))
+
+        obj.dupli_list_clear()
+        self.dupli_amount = len(duplis)
+        return duplis
+
+    def dupli_anim_matrices(self, scene, obj, dupli_amount, steps=1):
+        """
+        steps		Number of interpolation steps per frame
+
+        Returns a list of animated matrices for the object, with the given number of
+        per-frame interpolation steps.
+        The number of matrices returned is at most steps+1.
+        """
+        old_sf = scene.frame_subframe
+        cur_frame = scene.frame_current
+
+        ref_matrix = None
+        animated = False
+
+        dupli_matrices = [[] for x in range(dupli_amount)]
+        for i in range(0, steps + 1):
+            scene.frame_set(cur_frame, subframe=i / float(steps))
+
             obj.dupli_list_create(self.blScene, settings = 'RENDER')
-            if not obj.dupli_list:
-                raise Exception('cannot create dupli list for object %s' % obj.name)
 
-            # Create our own DupliOb list to work around incorrect layers
-            # attribute when inside create_dupli_list()..free_dupli_list()
-            duplis = []
-            for dupli_ob in obj.dupli_list:
-                # metaballs are omitted from this function intentionally. Adding them causes recursion when building
-                # the ball. (add 'META' to this if you actually want that bug, it makes for some fun glitch
-                # art with particles)
+            for k in range(dupli_amount):
+                dupli_ob = obj.dupli_list[k]
+
                 if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
                     continue
                 if not is_obj_visible(self.blScene, dupli_ob.object, is_dupli = True):
                     continue
 
-                duplis.append((dupli_ob.object, dupli_ob.matrix.copy()))
+                sub_matrix = dupli_ob.matrix.copy()
+
+                if ref_matrix is None:
+                    ref_matrix = sub_matrix
+                animated |= sub_matrix != ref_matrix
+
+                dupli_matrices[k].append(sub_matrix)
 
             obj.dupli_list_clear()
-            self.dupli_amount = len(duplis)
+
+        if not animated:
+            dupli_matrices = []
+
+        # restore subframe value
+        scene.frame_set(cur_frame, old_sf)
+        return dupli_matrices
+
+    def ConvertDuplis(self, obj, duplicator_name):
+        """
+        Converts duplis and OBJECT and GROUP particle systems
+        """
+        print('Exporting duplis of duplicator %s' % duplicator_name)
+
+        try:
+            duplis = self.create_dupli_list(obj)
+
+            if (self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.usemblur and
+                    self.blScene.camera.data.luxrender_camera.objectmblur):
+                dupli_matrices = self.dupli_anim_matrices(self.blScene, obj, len(duplis))
+
+                # Add motion blur matrices to dupli information
+                if dupli_matrices:
+                    for i in range(len(duplis)):
+                        duplis[i] = (duplis[i][0], duplis[i][1], dupli_matrices[i])
 
             # dupli object, dupli matrix
-            for dupli_object, dupli_matrix in duplis:
+            for dupli_object, dupli_matrix, anim_matrices in duplis:
                 # Check for group layer visibility, if the object is in a group
                 group_visible = len(dupli_object.users_group) == 0
 
@@ -1835,7 +1889,8 @@ class BlenderSceneConverter(object):
                 if not group_visible:
                     continue
 
-                self.ConvertObject(dupli_object, matrix = dupli_matrix, is_dupli = True, particle_sytem = particle_system)
+                self.ConvertObject(dupli_object, matrix = dupli_matrix, is_dupli = True,
+                                   duplicator_name = duplicator_name, anim_matrices = anim_matrices)
 
             del duplis
             self.dupli_number = 0
@@ -1895,8 +1950,8 @@ class BlenderSceneConverter(object):
 
         return luxcore_data
 
-    def ConvertObject(self, obj, matrix = None, is_dupli = False, particle_sytem = '', preview = False,
-                      update_mesh = True, update_transform = True, update_material = True):
+    def ConvertObject(self, obj, matrix = None, is_dupli = False, duplicator_name = '', anim_matrices = None,
+                      preview = False, update_mesh = True, update_transform = True, update_material = True):
         if obj is None or obj.type == 'CAMERA' or (self.renderengine is not None and self.renderengine.test_break()):
             return
 
@@ -1919,9 +1974,8 @@ class BlenderSceneConverter(object):
                 transform = matrix_to_list(obj.matrix_world, apply_worldscale = True)
 
         # Motion Blur
-        anim_matrices = None
-        if (self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.usemblur and
-                self.blScene.camera.data.luxrender_camera.objectmblur):
+        if (self.blScene.camera is not None and not is_dupli and self.blScene.camera.data.luxrender_camera.usemblur
+                    and self.blScene.camera.data.luxrender_camera.objectmblur):
             steps = self.blScene.camera.data.luxrender_camera.motion_blur_samples
             anim_matrices = object_anim_matrices(self.blScene, obj, steps = steps)
 
@@ -1995,12 +2049,12 @@ class BlenderSceneConverter(object):
                     # Create unique name for the lcObject
                     name = ToValidLuxCoreName(obj.name + str(exported_object_data.matIndex))
                     if is_dupli:
-                        name += '_%s_%d' % (particle_sytem, self.dupli_number)
+                        name += '_%s_%d' % (duplicator_name, self.dupli_number)
                         self.dupli_number += 1
 
                         if self.dupli_number % 100 == 0 and self.renderengine is not None:
                             dupli_percent = float(self.dupli_number) / self.dupli_amount * 100.0
-                            self.renderengine.update_stats('Exporting...', 'Duplicator %s (%d%%)' % (particle_sytem, dupli_percent))
+                            self.renderengine.update_stats('Exporting...', 'Duplicator %s (%d%%)' % (duplicator_name, dupli_percent))
 
                     new_exported_object_data = ExportedObjectData(name,
                                                                   exported_object_data.lcMeshName,
