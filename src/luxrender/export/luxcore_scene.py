@@ -975,7 +975,7 @@ class BlenderSceneConverter(object):
                 return str(getattr(luxMat_or_volume, materialChannel + '_%svalue' % type))
 
         raise Exception(
-            'Unknown texture in channel' + materialChannel + ' for material ' + luxMat_or_volume.luxrender_material.type)
+            'Unknown texture in channel' + materialChannel + ' for material ' + luxMat_or_volume.type)
 
     def ConvertMaterial(self, material, materials = None, no_conversion = False):
         """
@@ -1793,68 +1793,37 @@ class BlenderSceneConverter(object):
         # create cache entry
         BlenderSceneConverter.export_cache.add_obj(obj, luxcore_data)
 
-    def create_dupli_list(self, obj):
-        obj.dupli_list_create(self.blScene, settings = 'RENDER')
-        if not obj.dupli_list:
-            raise Exception('cannot create dupli list for object %s' % obj.name)
-
-        # Create our own DupliOb list to work around incorrect layers
-        # attribute when inside create_dupli_list()..free_dupli_list()
-        duplis = []
-        for dupli_ob in obj.dupli_list:
-            # metaballs are omitted from this function intentionally. Adding them causes recursion when building
-            # the ball.
-            if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
-                continue
-            if not is_obj_visible(self.blScene, dupli_ob.object, is_dupli = True):
-                continue
-
-            duplis.append((dupli_ob.object, dupli_ob.matrix.copy()))
-
-        obj.dupli_list_clear()
-        self.dupli_amount = len(duplis)
-        return duplis
-
-    def dupli_anim_matrices(self, scene, obj, dupli_amount, steps=1):
+    def dupli_anim_matrices(self, scene, obj, steps=1):
         """
-        steps		Number of interpolation steps per frame
-
-        Returns a list of animated matrices for the object, with the given number of
-        per-frame interpolation steps.
+        Returns a dict of animated matrices for all duplis of the object, key is the persistent_id of the duplis
         The number of matrices returned is at most steps+1.
         """
         old_sf = scene.frame_subframe
         cur_frame = scene.frame_current
 
-        ref_matrix = None
         animated = False
 
-        dupli_matrices = [[] for x in range(dupli_amount)]
+        dupli_matrices = {}
         for i in range(0, steps + 1):
-            scene.frame_set(cur_frame, subframe=i / float(steps))
+            scene.frame_set(cur_frame, subframe = i / steps)
 
             obj.dupli_list_create(self.blScene, settings = 'RENDER')
 
-            for k in range(dupli_amount):
-                dupli_ob = obj.dupli_list[k]
-
-                if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
-                    continue
-                if not is_obj_visible(self.blScene, dupli_ob.object, is_dupli = True):
-                    continue
-
+            for dupli_ob in obj.dupli_list:
                 sub_matrix = dupli_ob.matrix.copy()
 
-                if ref_matrix is None:
-                    ref_matrix = sub_matrix
-                animated |= sub_matrix != ref_matrix
+                if dupli_ob.persistent_id in dupli_matrices:
+                    ref_matrix = dupli_matrices[dupli_ob.persistent_id][-1]
+                    animated |= sub_matrix != ref_matrix
 
-                dupli_matrices[k].append(sub_matrix)
+                    dupli_matrices[dupli_ob.persistent_id].append(sub_matrix)
+                else:
+                    dupli_matrices[dupli_ob.persistent_id] = [sub_matrix]
 
             obj.dupli_list_clear()
 
         if not animated:
-            dupli_matrices = []
+            dupli_matrices = None
 
         # restore subframe value
         scene.frame_set(cur_frame, old_sf)
@@ -1867,43 +1836,36 @@ class BlenderSceneConverter(object):
         print('Exporting duplis of duplicator %s' % duplicator_name)
 
         try:
-            duplis = self.create_dupli_list(obj)
+            dupli_matrices = None
 
-            animated = False
+            # Motion blur
             if (self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.usemblur and
                     self.blScene.camera.data.luxrender_camera.objectmblur):
-                dupli_matrices = self.dupli_anim_matrices(self.blScene, obj, len(duplis))
+                dupli_matrices = self.dupli_anim_matrices(self.blScene, obj)
 
-                # Add motion blur matrices to dupli information
-                if dupli_matrices:
-                    animated = True
-                    for i in range(len(duplis)):
-                        duplis[i] = (duplis[i][0], duplis[i][1], dupli_matrices[i])
+            obj.dupli_list_create(self.blScene, settings = 'RENDER')
+            self.dupli_amount = len(obj.dupli_list)
 
-            if not animated:
-                for i in range(len(duplis)):
-                        duplis[i] = (duplis[i][0], duplis[i][1], None)
+            for dupli_ob in obj.dupli_list:
+                anim_matrices = None
 
-            # dupli object, dupli matrix
-            for dupli_object, dupli_matrix, anim_matrices in duplis:
-                # Check for group layer visibility, if the object is in a group
-                group_visible = len(dupli_object.users_group) == 0
+                if dupli_matrices is not None:
+                    # duplis are animated
+                    if dupli_ob.persistent_id in dupli_matrices:
+                        anim_matrices = dupli_matrices[dupli_ob.persistent_id]
+                        print("found entry, len(anim_matrices) =", len(anim_matrices))
+                    else:
+                        print("didn't find entry")
 
-                for group in dupli_object.users_group:
-                    group_visible |= True in [a & b for a, b in zip(dupli_object.layers, group.layers)]
-
-                if not group_visible:
-                    continue
-
-                self.ConvertObject(dupli_object, matrix = dupli_matrix, is_dupli = True,
+                self.ConvertObject(dupli_ob.object, matrix = dupli_ob.matrix.copy(), is_dupli = True,
                                    duplicator_name = duplicator_name, anim_matrices = anim_matrices)
 
-            del duplis
+            obj.dupli_list_clear()
             self.dupli_number = 0
 
             print('Dupli export finished')
         except Exception as err:
-            LuxLog('Error in ConvertDuplis for object %s: %s' % (obj, err))
+            LuxLog('Error in ConvertDuplis for object %s: %s' % (obj.name, err))
             import traceback
             traceback.print_exc()
 
@@ -1920,10 +1882,10 @@ class BlenderSceneConverter(object):
         if transform is not None:
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
 
-        # Motion blur
-        if anim_matrices:
+        # Motion blur (needs at least 2 matrices in anim_matrices)
+        if anim_matrices and len(anim_matrices) > 1:
             for i in range(len(anim_matrices)):
-                time = float(i) / (len(anim_matrices) - 1)
+                time = i / (len(anim_matrices) - 1)
                 matrix = matrix_to_list(anim_matrices[i].inverted())
                 self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.time' % (lcObjName, i), time))
                 self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.transformation' % (lcObjName, i), matrix))
@@ -2003,7 +1965,7 @@ class BlenderSceneConverter(object):
             convert_object = False
 
             for psys in obj.particle_systems:
-                convert_object = convert_object or psys.settings.use_render_emitter
+                convert_object |= psys.settings.use_render_emitter
 
                 if self.blScene.luxcore_translatorsettings.export_particles:
                     if psys.settings.render_type in ['OBJECT', 'GROUP']:
@@ -2573,72 +2535,77 @@ class BlenderSceneConverter(object):
             self.convert_volume(volume)
 
     def convert_volume(self, volume):
-        def absorption_at_depth_scaled(abs_col):
-            for i in range(len(abs_col)):
-                v = float(abs_col[i])
-                depth = volume.depth
-                scale = volume.absorption_scale
-                abs_col[i] = (-math.log(max([v, 1e-30])) / depth) * scale * (v == 1.0 and -1 or 1)
+        try:
+            def absorption_at_depth_scaled(abs_col):
+                for i in range(len(abs_col)):
+                    v = float(abs_col[i])
+                    depth = volume.depth
+                    scale = volume.absorption_scale
+                    abs_col[i] = (-math.log(max([v, 1e-30])) / depth) * scale * (v == 1.0 and -1 or 1)
 
-        print('Converting volume: %s' % volume.name)
+            print('Converting volume: %s' % volume.name)
 
-        name = BlenderSceneConverter.generate_volume_name(volume.name)
-        prefix = 'scene.volumes.' + name
+            name = BlenderSceneConverter.generate_volume_name(volume.name)
+            prefix = 'scene.volumes.' + name
 
-        # add to cache
-        BlenderSceneConverter.volumes_cache[volume.name] = name
+            # add to cache
+            BlenderSceneConverter.volumes_cache[volume.name] = name
 
-        # IOR Fresnel
-        if volume.fresnel_usefresneltexture:
-            ior_val = self.ConvertTextureChannel(volume, 'fresnel', 'fresnel')
-        else:
-            ior_val = volume.fresnel_fresnelvalue
-
-        # Absorption
-        if volume.type == 'clear':
-            if volume.absorption_usecolortexture:
-                abs_col = self.ConvertTextureChannel(volume, 'absorption', 'color')
+            # IOR Fresnel
+            if volume.fresnel_usefresneltexture:
+                ior_val = self.ConvertTextureChannel(volume, 'fresnel', 'fresnel')
             else:
-                abs_col = [volume.absorption_color.r, volume.absorption_color.g, volume.absorption_color.b]
-                absorption_at_depth_scaled(abs_col)
-        else:
-            if volume.sigma_a_usecolortexture:
-                abs_col = self.ConvertTextureChannel(volume, 'sigma_a', 'color')
+                ior_val = volume.fresnel_fresnelvalue
+
+            # Absorption
+            if volume.type == 'clear':
+                if volume.absorption_usecolortexture:
+                    abs_col = self.ConvertTextureChannel(volume, 'absorption', 'color')
+                else:
+                    abs_col = [volume.absorption_color.r, volume.absorption_color.g, volume.absorption_color.b]
+                    absorption_at_depth_scaled(abs_col)
             else:
-                abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
-                absorption_at_depth_scaled(abs_col)
+                if volume.sigma_a_usecolortexture:
+                    abs_col = self.ConvertTextureChannel(volume, 'sigma_a', 'color')
+                else:
+                    abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
+                    absorption_at_depth_scaled(abs_col)
 
-        self.scnProps.Set(pyluxcore.Property(prefix + '.absorption', abs_col))
-        self.scnProps.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
-        self.scnProps.Set(pyluxcore.Property(prefix + '.ior', ior_val))
-        self.scnProps.Set(pyluxcore.Property(prefix + '.priority', volume.priority))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.absorption', abs_col))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.ior', ior_val))
+            self.scnProps.Set(pyluxcore.Property(prefix + '.priority', volume.priority))
 
-        if volume.type in ['homogeneous', 'heterogeneous']:
+            if volume.type in ['homogeneous', 'heterogeneous']:
 
-            # Scattering color
-            if volume.sigma_s_usecolortexture:
-                s_source = self.ConvertTextureChannel(volume, 'sigma_s', 'color')
-
-                if volume.scattering_scale != 1.0:
+                # Scattering color
+                if volume.sigma_s_usecolortexture:
                     s_source = self.ConvertTextureChannel(volume, 'sigma_s', 'color')
 
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.type', ['scale']))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.texture1', volume.scattering_scale))
-                    self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.texture2', s_source))
-                    s_col = name + '_scatterscaling'
+                    if volume.scattering_scale != 1.0:
+                        s_source = self.ConvertTextureChannel(volume, 'sigma_s', 'color')
+
+                        self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.type', ['scale']))
+                        self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.texture1', volume.scattering_scale))
+                        self.scnProps.Set(pyluxcore.Property('scene.textures.' + name + '_scatterscaling.texture2', s_source))
+                        s_col = name + '_scatterscaling'
+                    else:
+                        s_col = s_source
                 else:
-                    s_col = s_source
-            else:
-                s_col = [volume.sigma_s_color.r * volume.scattering_scale,
-                         volume.sigma_s_color.g * volume.scattering_scale,
-                         volume.sigma_s_color.b * volume.scattering_scale]
+                    s_col = [volume.sigma_s_color.r * volume.scattering_scale,
+                             volume.sigma_s_color.g * volume.scattering_scale,
+                             volume.sigma_s_color.b * volume.scattering_scale]
 
-            self.scnProps.Set(pyluxcore.Property(prefix + '.scattering', s_col))
-            self.scnProps.Set(pyluxcore.Property(prefix + '.asymmetry', list(volume.g)))
-            self.scnProps.Set(pyluxcore.Property(prefix + '.multiscattering', [volume.multiscattering]))
+                self.scnProps.Set(pyluxcore.Property(prefix + '.scattering', s_col))
+                self.scnProps.Set(pyluxcore.Property(prefix + '.asymmetry', list(volume.g)))
+                self.scnProps.Set(pyluxcore.Property(prefix + '.multiscattering', [volume.multiscattering]))
 
-        if volume.type == 'heterogenous':
-            self.scnProps.Set(pyluxcore.Property(prefix + '.steps.size', volume.stepsize))
+            if volume.type == 'heterogenous':
+                self.scnProps.Set(pyluxcore.Property(prefix + '.steps.size', volume.stepsize))
+        except Exception as err:
+            LuxLog('Volume export failed, skipping volume: %s\n%s' % (volume.name, err))
+            import traceback
+            traceback.print_exc()
 
     def ConvertChannelSettings(self, realtime_preview=False):
         if self.blScene.camera is None:
