@@ -1652,9 +1652,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         Set(pyluxcore.Property('scene.lights.preview_lamp.position', [12, -12, 8])))
             else:
                 lcConfig.GetScene().Parse(pyluxcore.Properties().
-                    Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['point'])).
+                    Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['constantinfinite'])).
                     Set(pyluxcore.Property('scene.lights.preview_lamp.position', [10, -20, 8])).
-                    Set(pyluxcore.Property('scene.lights.preview_lamp.gain', [10, 10, 10])))
+                    Set(pyluxcore.Property('scene.lights.preview_lamp.gain', [0.004, 0.004, 0.004])))
 
             # config for preview
             cfgProps = pyluxcore.Properties()
