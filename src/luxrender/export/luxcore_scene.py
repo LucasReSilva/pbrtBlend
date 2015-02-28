@@ -1815,6 +1815,8 @@ class BlenderSceneConverter(object):
                 if dupli_ob.persistent_id in dupli_matrices:
                     ref_matrix = dupli_matrices[dupli_ob.persistent_id][-1]
                     animated |= sub_matrix != ref_matrix
+                    if sub_matrix == ref_matrix:
+                        print('DEBUG: matrices are identical')
 
                     dupli_matrices[dupli_ob.persistent_id].append(sub_matrix)
                 else:
@@ -1845,6 +1847,9 @@ class BlenderSceneConverter(object):
 
             obj.dupli_list_create(self.blScene, settings = 'RENDER')
             self.dupli_amount = len(obj.dupli_list)
+
+            print("len(obj.dupli_list):", len(obj.dupli_list))
+            print("len(dupli_matrices):", len(dupli_matrices))
 
             for dupli_ob in obj.dupli_list:
                 anim_matrices = None
@@ -2669,6 +2674,8 @@ class BlenderSceneConverter(object):
 
         if self.renderengine is not None:
             self.renderengine.update_stats('Exporting...', '')
+        print('')
+        LuxLog('Exporting Blender scene to LuxCore...')
 
         # clear cache
         BlenderSceneConverter.clear_export_cache()
