@@ -1613,7 +1613,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)
                 # End of AOV import
 
-            LuxLog('Done.')
+            LuxLog('Done.\n')
         except Exception as exc:
             LuxLog('Rendering aborted: %s' % exc)
             self.report({'ERROR'}, str(exc))
