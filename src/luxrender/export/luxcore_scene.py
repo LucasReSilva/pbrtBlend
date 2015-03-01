@@ -1821,7 +1821,18 @@ class BlenderSceneConverter(object):
             self.dupli_number = 0
 
             for dupli_ob in obj.dupli_list:
-                self.ConvertObject(dupli_ob.object, matrix = dupli_ob.matrix.copy(), is_dupli = True,
+                dupli_object = dupli_ob.object
+
+                # Check for group layer visibility, if the object is in a group
+                group_visible = len(dupli_object.users_group) == 0
+
+                for group in dupli_object.users_group:
+                    group_visible |= True in [a & b for a, b in zip(dupli_object.layers, group.layers)]
+
+                if not group_visible:
+                    continue
+
+                self.ConvertObject(dupli_object, matrix = dupli_ob.matrix.copy(), is_dupli = True,
                                    duplicator_name = duplicator_name)
 
             obj.dupli_list_clear()
@@ -1867,7 +1878,9 @@ class BlenderSceneConverter(object):
                 # Calculate matrix for each particle
                 # I'm not using obj.dupli_list[i].matrix because it contains wrong positions
                 for particle in particle_dupliobj_dict:
-                    scale = particle_dupliobj_dict[particle][0].scale * particle.size
+                    dupli_object = particle_dupliobj_dict[particle][0]
+
+                    scale = dupli_object.scale * particle.size
                     scale_matrix = mathutils.Matrix()
                     scale_matrix[0][0] = scale.x
                     scale_matrix[1][1] = scale.y
@@ -1972,6 +1985,15 @@ class BlenderSceneConverter(object):
                 traceback.print_exc()
             return
 
+        # Check if object is duplicator (before visiblity check because duplicators can be hidden
+        if obj.is_duplicator and len(obj.particle_systems) < 1:
+            if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
+                self.ConvertDuplis(obj, obj.name)
+
+        # Check visibility
+        if not is_obj_visible(self.blScene, obj, is_dupli = is_dupli):
+            return
+
         # Transformation
         transform = None
         if update_transform:
@@ -1999,7 +2021,7 @@ class BlenderSceneConverter(object):
 
             self.SetObjectProperties(obj, name, path, material, transform, anim_matrices)
 
-        # Check if object is particle emitter
+        # Check if object is particle/hair emitter
         if len(obj.particle_systems) > 0:
             convert_object = False
 
@@ -2012,16 +2034,11 @@ class BlenderSceneConverter(object):
                     elif psys.settings.render_type == 'PATH':
                         self.ConvertHair()
 
-        # Check if object is duplicator
-        if obj.is_duplicator and len(obj.particle_systems) < 1:
-            if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                self.ConvertDuplis(obj, obj.name)
-
         # Some dupli types should hide the original
         if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
             convert_object = False
 
-        if not is_obj_visible(self.blScene, obj, is_dupli = is_dupli) or not convert_object or obj.data is None:
+        if not convert_object or obj.data is None:
             return
 
         cache = BlenderSceneConverter.export_cache
