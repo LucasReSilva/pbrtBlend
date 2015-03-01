@@ -1896,9 +1896,11 @@ class BlenderSceneConverter(object):
 
                     transform = transform_matrix * rotation_matrix * scale_matrix
 
+                    # Only use motion blur for living particles
                     if particle.alive_state == 'ALIVE':
-                        # Only use motion blur (and append new matrices) for living particles
-                        particle_dupliobj_dict[particle][1].append(transform)
+                        # Don't append matrix if it is identical to the previous one
+                        if particle_dupliobj_dict[particle][1][-1:] != transform:
+                            particle_dupliobj_dict[particle][1].append(transform)
                     else:
                         # Overwrite old matrix
                         particle_dupliobj_dict[particle][1] = [transform]
@@ -2206,11 +2208,10 @@ class BlenderSceneConverter(object):
         if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
             self.scnProps.Set(pyluxcore.Property('scene.camera.fieldofview', [math.degrees(blCameraData.angle)]))
 
-        # border rendering
-        if self.blScene.render.use_border:
-            width, height = luxCamera.luxrender_film.resolution(self.blScene)
-            self.scnProps.Set(pyluxcore.Property('scene.camera.screenwindow', luxCamera.screenwindow(
-                width, height, self.blScene, blCameraData, luxcore_export=True)))
+        # screenwindow (for border rendering and camera shift)
+        width, height = luxCamera.luxrender_film.resolution(self.blScene)
+        self.scnProps.Set(pyluxcore.Property('scene.camera.screenwindow', luxCamera.screenwindow(
+            width, height, self.blScene, blCameraData, luxcore_export=True)))
 
         if luxCamera.use_dof:
             # Do not world-scale this, it is already in meters!
