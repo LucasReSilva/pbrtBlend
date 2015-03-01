@@ -829,7 +829,7 @@ class BlenderSceneConverter(object):
             #     props.Set(pyluxcore.Property(prefix + '.turbulence', [float(luxTex.turbulence)]))
             #     props.Set(pyluxcore.Property(prefix + '.sharpness', [float(luxTex.sharpness)]))
             #     props.Set(pyluxcore.Property(prefix + '.noiseoffset', [float(luxTex.noiseoffset)]))
-            #     props.Set(pyluxcore.Property(prefix + '.noiseoffset', [luxTex.noiseoffset]))
+            #     props.Set(pyluxcore.Property(prefix + '.spheres', [luxTex.spheres]))
             #     props.Set(pyluxcore.Property(prefix + '.octaves', [luxTex.octaves)])
             #     props.Set(pyluxcore.Property(prefix + '.omega', [float(luxTex.omega)]))
             #     props.Set(pyluxcore.Property(prefix + '.variability', [float(luxTex.variability)]))
