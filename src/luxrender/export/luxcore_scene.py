@@ -1550,8 +1550,9 @@ class BlenderSceneConverter(object):
         if lightgroup_id != -1 and light.type != 'SUN' and not self.blScene.luxrender_lightgroups.ignore:
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
-        # Visibility settings for indirect rays (not for sun because it might be split into sun + sky)
-        if light.type != 'SUN':
+        # Visibility settings for indirect rays (not for sun because it might be split into sun + sky,
+        # and not for area light because it needs a different prefix (scene.materials.)
+        if light.type != 'SUN' and not (light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.diffuse.enable',
                                                  light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.glossy.enable',
@@ -1748,9 +1749,11 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.radius', [light.size]))
             else:
+                # TODO: visibility for indirect rays
+
                 # Area lamp workaround: create plane and add emitting material
                 mat_name = luxcore_name + '_helper_mat'
-                # TODO: match with API 1.x
+                # TODO: match brightness with API 1.x
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
                 raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (get_worldscale(as_scalematrix=False) ** 2)
                 emission_color = [raw_color[0], raw_color[1], raw_color[2]]
