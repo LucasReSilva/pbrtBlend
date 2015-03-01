@@ -821,6 +821,22 @@ class BlenderSceneConverter(object):
                     props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
                     self.ConvertTransform(prefix, texture)
             ####################################################################
+            # Cloud
+            ####################################################################
+            # elif texType == 'cloud':
+            #     props.Set(pyluxcore.Property(prefix + '.radius', [float(luxTex.radius)]))
+            #     props.Set(pyluxcore.Property(prefix + '.noisescale', [float(luxTex.noisescale)]))
+            #     props.Set(pyluxcore.Property(prefix + '.turbulence', [float(luxTex.turbulence)]))
+            #     props.Set(pyluxcore.Property(prefix + '.sharpness', [float(luxTex.sharpness)]))
+            #     props.Set(pyluxcore.Property(prefix + '.noiseoffset', [float(luxTex.noiseoffset)]))
+            #     props.Set(pyluxcore.Property(prefix + '.spheres', [luxTex.spheres]))
+            #     props.Set(pyluxcore.Property(prefix + '.octaves', [luxTex.octaves)])
+            #     props.Set(pyluxcore.Property(prefix + '.omega', [float(luxTex.omega)]))
+            #     props.Set(pyluxcore.Property(prefix + '.variability', [float(luxTex.variability)]))
+            #     props.Set(pyluxcore.Property(prefix + '.baseflatness', [float(luxTex.baseflatness)]))
+            #     props.Set(pyluxcore.Property(prefix + '.spheresize', [float(luxTex.spheresize)]))
+            #     self.ConvertTransform(prefix, texture)
+            ####################################################################
             # CONSTANT
             ####################################################################
             elif texType == 'constant':
