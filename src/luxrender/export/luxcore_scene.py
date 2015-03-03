@@ -44,40 +44,37 @@ from ..export.materials import get_texture_from_scene
 
 
 class ExportedObjectData(object):
-    lcObjName = ''
-    lcMeshName = ''
-    lcMaterialName = ''
-    matIndex = 0
-    lightType = ''
-
     def __init__(self, lcObjName, lcMeshName = '', lcMaterialName = '', matIndex = 0, lightType = ''):
+        """
+        :param lcObjName: Unique, "exported" name, used by LuxCore to reference the object
+        :param lcMeshName: Unique name of the mesh, used by LuxCore to reference the mesh
+        :param lcMaterialName: Unique name of the material, used by LuxCore to reference the material
+        :param matIndex: Index of the material slot of the original Blender object (objects are split by material)
+        :param lightType: Blender light type (e.g. 'SUN', 'AREA'), used to handle area lights different than other
+                          lights in realtime preview updates
+        """
         self.lcObjName = lcObjName
         self.lcMeshName = lcMeshName
         self.lcMaterialName = lcMaterialName
         self.matIndex = matIndex
         self.lightType = lightType
 
-    def __str__(self):
-        output = ('lcObjName: ' + self.lcObjName +
-                  ',\nlcMeshName: ' + self.lcMeshName +
-                  ',\nlcMaterialName: ' + self.lcMaterialName +
-                  ',\nmatIndex: ' + str(self.matIndex) +
-                  ',\nlightType: ' + self.lightType)
-        return output
-
 class ExportedObject(object):
-    blender_object = None
-    blender_data = None
-    # split by material
-    luxcore_data = []
-
     def __init__(self, obj, obj_data, luxcore_data):
+        """
+        :param obj: Blender object
+        :param obj_data: Blender object data
+        :param luxcore_data: List of ExportedObjectData instances (one per material)
+        """
         self.blender_object = obj
         self.blender_data = obj_data
         self.luxcore_data = luxcore_data
 
 class ExportCache(object):
-    cache = {}
+    """
+    Basically a name cache storing the mapping of Blender objects/Blender data to the corresponding exported
+    LuxCore objects
+    """
 
     def __init__(self):
         self.cache = {}
@@ -922,19 +919,9 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
                 self.ConvertTransform(prefix, texture)
             ####################################################################
-            # Vertex Color
+            # Vertex Colors
             ####################################################################
-            elif texType == 'hitpointcolor':
-                pass
-            ####################################################################
-            # Vertex Color (black/white)
-            ####################################################################
-            elif texType == 'hitpointgrey':
-                pass
-            ####################################################################
-            # Vertex Color (alpha)
-            ####################################################################
-            elif texType == 'hitpointalpha':
+            elif texType in ['hitpointcolor', 'hitpointgrey', 'hitpointalpha']:
                 pass
             ####################################################################
             # Fallback to exception
@@ -1812,14 +1799,15 @@ class BlenderSceneConverter(object):
         # create cache entry
         BlenderSceneConverter.export_cache.add_obj(obj, luxcore_data)
 
-    def ConvertDuplis(self, obj, duplicator_name):
+    def ConvertDuplis(self, obj, duplicator_name, preview):
         """
         Converts duplis and OBJECT and GROUP particle systems
         """
         print('Exporting duplis of duplicator %s' % duplicator_name)
 
         try:
-            obj.dupli_list_create(self.blScene, settings = 'RENDER')
+            mode = 'VIEWPORT' if preview else 'RENDER'
+            obj.dupli_list_create(self.blScene, settings = mode)
             self.dupli_amount = len(obj.dupli_list)
             self.dupli_number = 0
 
@@ -1847,7 +1835,7 @@ class BlenderSceneConverter(object):
             traceback.print_exc()
 
 
-    def ConvertParticles(self, obj, particle_system):
+    def ConvertParticles(self, obj, particle_system, preview):
         print('Exporting particle system %s...' % particle_system.name)
 
         try:
@@ -1865,7 +1853,8 @@ class BlenderSceneConverter(object):
                          p.alive_state == 'UNBORN' and particle_system.settings.show_unborn) or (
                          p.alive_state in ['DEAD', 'DYING'] and particle_system.settings.use_dead)]
 
-            obj.dupli_list_create(self.blScene, settings = 'RENDER')
+            mode = 'VIEWPORT' if preview else 'RENDER'
+            obj.dupli_list_create(self.blScene, settings = mode)
             self.dupli_amount = len(obj.dupli_list)
             self.dupli_number = 0
 
@@ -1993,7 +1982,7 @@ class BlenderSceneConverter(object):
         # Check if object is duplicator (before visiblity check because duplicators can be hidden
         if obj.is_duplicator and len(obj.particle_systems) < 1:
             if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                self.ConvertDuplis(obj, obj.name)
+                self.ConvertDuplis(obj, obj.name, preview)
 
         # Check visibility
         if not is_obj_visible(self.blScene, obj, is_dupli = is_dupli):
@@ -2035,7 +2024,7 @@ class BlenderSceneConverter(object):
 
                 if self.blScene.luxcore_translatorsettings.export_particles:
                     if psys.settings.render_type in ['OBJECT', 'GROUP']:
-                        self.ConvertParticles(obj, psys)
+                        self.ConvertParticles(obj, psys, preview)
                     elif psys.settings.render_type == 'PATH':
                         self.ConvertHair()
 
