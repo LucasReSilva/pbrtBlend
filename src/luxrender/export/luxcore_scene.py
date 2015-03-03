@@ -647,7 +647,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.gamma', [texture.luxrender_texture.luxrender_tex_imagesampling.gamma]))
                 props.Set(pyluxcore.Property(prefix + '.gain', [texture.luxrender_texture.luxrender_tex_imagesampling.gain]))
 
-                if bpy.data.images[os.path.basename(f_path)].use_alpha:
+                if texture.image.use_alpha:
                     props.Set(pyluxcore.Property(prefix + '.channel', [texture.luxrender_texture.luxrender_tex_imagesampling.channel]))
 
                 self.ConvertMapping(prefix, texture)
