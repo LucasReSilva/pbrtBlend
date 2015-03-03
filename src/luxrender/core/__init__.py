@@ -951,7 +951,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def PrintStats(self, lcConfig, stats):
         lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
 
-        if lc_engine == 'BIASPATHCPU' or lc_engine == 'BIASPATHOCL':
+        if lc_engine in ['BIASPATHCPU', 'BIASPATHOCL']:
             converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()

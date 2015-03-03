@@ -467,7 +467,6 @@ class BlenderSceneConverter(object):
         tex_sca[1][1] = luxScale[1] # Y
         tex_sca[2][2] = luxScale[2] # Z
 
-
         # create a rotation matrix
         tex_rot0 = mathutils.Matrix.Rotation(math.radians(luxRotate[0]), 4, 'X')
         tex_rot1 = mathutils.Matrix.Rotation(math.radians(luxRotate[1]), 4, 'Y')
@@ -475,7 +474,7 @@ class BlenderSceneConverter(object):
         tex_rot = tex_rot0 * tex_rot1 * tex_rot2
 
         # combine transformations
-        f_matrix = matrix_to_list(tex_loc * tex_sca * tex_rot)
+        f_matrix = matrix_to_list(tex_loc * tex_rot * tex_sca, apply_worldscale=True, invert=True)
 
         self.scnProps.Set(pyluxcore.Property(prefix + '.mapping.transformation', f_matrix))
 
@@ -1684,7 +1683,7 @@ class BlenderSceneConverter(object):
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
             hemi_fix = mathutils.Matrix.Scale(1.0, 4)  # create new scale matrix 4x4
             hemi_fix[0][0] = -1.0  # mirror the hdri_map
-            transform = matrix_to_list(hemi_fix * obj.matrix_world.inverted())
+            transform = matrix_to_list(hemi_fix * obj.matrix_world.inverted(), apply_worldscale=True)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         ####################################################################
@@ -1701,7 +1700,7 @@ class BlenderSceneConverter(object):
             if getattr(lux_lamp, 'flipz'):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.flipz', lux_lamp.flipz))
 
-            transform = matrix_to_list(obj.matrix_world)
+            transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
@@ -1725,7 +1724,7 @@ class BlenderSceneConverter(object):
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
 
             spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')  # match to lux
-            transform = matrix_to_list(obj.matrix_world * spot_fix)
+            transform = matrix_to_list(obj.matrix_world * spot_fix, apply_worldscale=True)
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
@@ -1742,7 +1741,7 @@ class BlenderSceneConverter(object):
         elif light.type == 'AREA':
             if light.luxrender_lamp.luxrender_lamp_laser.is_laser:
                 # Laser lamp
-                transform = matrix_to_list(obj.matrix_world)
+                transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
                 self.scnProps.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['laser']))
@@ -1803,7 +1802,7 @@ class BlenderSceneConverter(object):
                 transform_matrix[1][3] = obj.location.y
                 transform_matrix[2][3] = obj.location.z
                 
-                transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix)
+                transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix, apply_worldscale=True)
                 self.scnProps.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.transformation', transform))
                 
         else:
@@ -2153,7 +2152,7 @@ class BlenderSceneConverter(object):
             if anim_matrices:
                 for i in range(len(anim_matrices)):
                     time = float(i) / (len(anim_matrices) - 1)
-                    matrix = matrix_to_list(anim_matrices[i])
+                    matrix = matrix_to_list(anim_matrices[i], apply_worldscale=True)
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.time' % i, time))
                     self.scnProps.Set(pyluxcore.Property('scene.camera.motion.%d.transformation' % i, matrix))
                 return
