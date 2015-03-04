@@ -2104,23 +2104,57 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                             update_material = False)
                                             
             if update_changes.cause_objectsRemoved:
+                def remove_object(ob, exported_object):
+                    # loop through object components (split by materials)
+                    for exported_object_data in exported_object.luxcore_data:
+                        luxcore_name = exported_object_data.lcObjName
+                        light_type = exported_object_data.lightType
+
+                        if ob.type == 'LAMP' and light_type != 'AREA':
+                            print('removing light %s (luxcore name: %s)' % (ob.name, luxcore_name))
+                            lcScene.DeleteLight(luxcore_name)
+                        else:
+                            print('removing object %s (luxcore name: %s)' % (ob.name, luxcore_name))
+                            lcScene.DeleteObject(luxcore_name)
+
+                cache = converter.get_export_cache()
+
                 for ob in update_changes.removed_objects:
-                    cache = converter.get_export_cache()
+                    if cache.has(ob):
+                        exported_object = cache.get_exported_object(ob)
+                        remove_object(ob, exported_object)
 
-                    if cache.has_obj(ob):
-                        exported_object = cache.get_exported_object_key_obj(ob)
+                # Remove particles/duplis
+                for ob in update_changes.removed_objects:
+                    # Dupliverts/frames/groups etc.
+                    if ob.is_duplicator and len(ob.particle_systems) == 0:
+                        ob.dupli_list_create(context.scene, settings = 'VIEWPORT')
 
-                        # loop through object components (split by materials)
-                        for exported_object_data in exported_object.luxcore_data:
-                            luxcore_name = exported_object_data.lcObjName
-                            light_type = exported_object_data.lightType
+                        for dupli_ob in ob.dupli_list:
+                            dupli_key = (dupli_ob.object, ob)
 
-                            if ob.type == 'LAMP' and light_type != 'AREA':
-                                print('removing light %s (luxcore name: %s)' % (ob.name, luxcore_name))
-                                lcScene.DeleteLight(luxcore_name)
-                            else:
-                                print('removing object %s (luxcore name: %s)' % (ob.name, luxcore_name))
-                                lcScene.DeleteObject(luxcore_name)
+                            if cache.has(dupli_key):
+                                exported_object = cache.get_exported_object(dupli_key)
+                                remove_object(ob, exported_object)
+
+                        ob.dupli_list_clear()
+
+                    # Particle systems
+                    elif len(ob.particle_systems) > 0:
+                        for psys in ob.particle_systems:
+                            ob.dupli_list_create(context.scene, settings = 'VIEWPORT')
+
+                            if len(ob.dupli_list) > 0:
+                                dupli_ob = ob.dupli_list[0]
+                                dupli_key = (dupli_ob.object, psys)
+
+                                if cache.has(dupli_key):
+                                    exported_object_list = cache.get_exported_object(dupli_key)
+
+                                    for exported_object in exported_object_list:
+                                        remove_object(ob, exported_object)
+
+                            ob.dupli_list_clear()
 
             if update_changes.cause_volumes:
                 converter.ConvertVolumes()

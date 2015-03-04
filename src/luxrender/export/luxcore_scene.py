@@ -79,28 +79,26 @@ class ExportCache(object):
     def __init__(self):
         self.cache = {}
 
-    def add_obj(self, obj, luxcore_data):
+    def add_obj(self, obj, luxcore_data, dupli_key = ()):
         exported_object = ExportedObject(obj, obj.data, luxcore_data)
         self.cache[obj] = exported_object
         self.cache[obj.data] = exported_object
 
-    def has_obj(self, obj):
-        return obj in self.cache
+        if dupli_key:
+            if dupli_key in self.cache:
+                self.cache[dupli_key].append(exported_object)
+            else:
+                self.cache[dupli_key] = [exported_object]
 
-    def has_obj_data(self, obj_data):
-        return obj_data in self.cache
+    def has(self, key):
+        return key in self.cache
 
-    def get_exported_object_key_obj(self, obj):
+    def get_exported_object(self, key):
         try:
-            return self.cache[obj]
+            return self.cache[key]
         except KeyError:
             return None
 
-    def get_exported_object_key_data(self, obj_data):
-        try:
-            return self.cache[obj_data]
-        except KeyError:
-            return None
 
 class BlenderSceneConverter(object):
     scalers_count = 0
@@ -321,8 +319,8 @@ class BlenderSceneConverter(object):
 
     def CreateExportMesh(self, obj, apply_modifiers, preview):
         mode = 'PREVIEW' if preview else 'RENDER'
-        mesh = obj.to_mesh(self.blScene, apply_modifiers, mode)
 
+        mesh = obj.to_mesh(self.blScene, apply_modifiers, mode)
         mesh.update(calc_tessface = True)
 
         return mesh
@@ -1799,11 +1797,11 @@ class BlenderSceneConverter(object):
         # create cache entry
         BlenderSceneConverter.export_cache.add_obj(obj, luxcore_data)
 
-    def ConvertDuplis(self, obj, duplicator_name, preview):
+    def ConvertDuplis(self, obj, duplicator, preview):
         """
         Converts duplis and OBJECT and GROUP particle systems
         """
-        print('Exporting duplis of duplicator %s' % duplicator_name)
+        print('Exporting duplis of duplicator %s' % duplicator.name)
 
         try:
             mode = 'VIEWPORT' if preview else 'RENDER'
@@ -1824,7 +1822,7 @@ class BlenderSceneConverter(object):
                     continue
 
                 self.ConvertObject(dupli_object, matrix = dupli_ob.matrix.copy(), is_dupli = True,
-                                   duplicator_name = duplicator_name)
+                                   duplicator = duplicator)
 
             obj.dupli_list_clear()
 
@@ -1833,7 +1831,6 @@ class BlenderSceneConverter(object):
             LuxLog('Error in ConvertDuplis for object %s: %s' % (obj.name, err))
             import traceback
             traceback.print_exc()
-
 
     def ConvertParticles(self, obj, particle_system, preview):
         print('Exporting particle system %s...' % particle_system.name)
@@ -1906,7 +1903,7 @@ class BlenderSceneConverter(object):
                 anim_matrices = particle_dupliobj_dict[particle][1]
 
                 self.ConvertObject(dupli_object, matrix = anim_matrices[0], is_dupli = True,
-                                       duplicator_name = particle_system.name, anim_matrices = anim_matrices)
+                                       duplicator = particle_system, anim_matrices = anim_matrices)
 
             print('Particle export finished')
         except Exception as err:
@@ -1963,7 +1960,7 @@ class BlenderSceneConverter(object):
 
         return luxcore_data
 
-    def ConvertObject(self, obj, matrix = None, is_dupli = False, duplicator_name = '', anim_matrices = None,
+    def ConvertObject(self, obj, matrix = None, is_dupli = False, duplicator = None, anim_matrices = None,
                       preview = False, update_mesh = True, update_transform = True, update_material = True):
 
         if obj is None or obj.type == 'CAMERA' or (self.renderengine is not None and self.renderengine.test_break()):
@@ -1978,11 +1975,6 @@ class BlenderSceneConverter(object):
                 import traceback
                 traceback.print_exc()
             return
-
-        # Check if object is duplicator (before visiblity check because duplicators can be hidden
-        if obj.is_duplicator and len(obj.particle_systems) < 1:
-            if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                self.ConvertDuplis(obj, obj.name, preview)
 
         # Check visibility
         if not is_obj_visible(self.blScene, obj, is_dupli = is_dupli):
@@ -2028,6 +2020,11 @@ class BlenderSceneConverter(object):
                     elif psys.settings.render_type == 'PATH':
                         self.ConvertHair()
 
+        # Check if object is duplicator
+        if obj.is_duplicator and len(obj.particle_systems) < 1:
+            if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
+                self.ConvertDuplis(obj, obj, preview)
+
         # Some dupli types should hide the original
         if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
             convert_object = False
@@ -2038,9 +2035,9 @@ class BlenderSceneConverter(object):
         cache = BlenderSceneConverter.export_cache
 
         # Check if mesh was already exported
-        if cache.has_obj_data(obj.data):
+        if cache.has(obj.data):
             # Check if this object was already exported
-            if cache.has_obj(obj) and not is_dupli:
+            if cache.has(obj) and not is_dupli:
                 # object was already exported
                 print('[Data: %s][Object: %s] obj already in cache' % (obj.data.name, obj.name))
 
@@ -2050,7 +2047,7 @@ class BlenderSceneConverter(object):
                                                        anim_matrices))
                 else:
                     # read from cache (only transformation update required)
-                    exported_object = cache.get_exported_object_key_obj(obj)
+                    exported_object = cache.get_exported_object(obj)
                     for exported_object_data in exported_object.luxcore_data:
                         self.SetObjectProperties(obj, exported_object_data.lcObjName, exported_object_data.lcMeshName,
                                                  exported_object_data.lcMaterialName, transform, anim_matrices)
@@ -2060,19 +2057,21 @@ class BlenderSceneConverter(object):
                     # Don't spam the log when thousands of duplis are exported
                     print('[Data: %s][Object: %s] no obj entry, creating one' % (obj.data.name, obj.name))
 
-                exported_object = cache.get_exported_object_key_data(obj.data)
+                exported_object = cache.get_exported_object(obj.data)
                 new_luxcore_data = []
 
                 for exported_object_data in exported_object.luxcore_data:
                     # Create unique name for the lcObject
-                    name = ToValidLuxCoreName(obj.name + str(exported_object_data.matIndex))
+                    name = obj.name + str(exported_object_data.matIndex)
                     if is_dupli:
-                        name += '_%s_%d' % (duplicator_name, self.dupli_number)
+                        name += '_%s_%d' % (duplicator.name, self.dupli_number)
                         self.dupli_number += 1
 
                         if self.dupli_number % 100 == 0 and self.renderengine is not None:
                             dupli_percent = float(self.dupli_number) / self.dupli_amount * 100.0
-                            self.renderengine.update_stats('Exporting...', 'Duplicator %s (%d%%)' % (duplicator_name, dupli_percent))
+                            self.renderengine.update_stats('Exporting...', 'Duplicator %s (%d%%)' % (duplicator.name, dupli_percent))
+
+                    name = ToValidLuxCoreName(name)
 
                     new_exported_object_data = ExportedObjectData(name,
                                                                   exported_object_data.lcMeshName,
@@ -2083,8 +2082,13 @@ class BlenderSceneConverter(object):
                     self.SetObjectProperties(obj, name, exported_object_data.lcMeshName,
                                              exported_object_data.lcMaterialName, transform, anim_matrices)
 
+                if is_dupli:
+                    dupli_key = (obj, duplicator)
+                else:
+                    dupli_key = ()
+
                 # Create new entry in cache
-                cache.add_obj(obj, new_luxcore_data)
+                cache.add_obj(obj, new_luxcore_data, dupli_key)
         else:
             print('[Data: %s][Object: %s] mesh not in cache, exporting' % (obj.data.name, obj.name))
             cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli,
