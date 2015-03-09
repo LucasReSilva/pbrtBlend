@@ -780,6 +780,11 @@ class BlenderSceneConverter(object):
                 else:
                     LuxLog('WARNING: Unsupported variant %s for texture: %s' % (luxTex.variant, texture.name))
             ####################################################################
+            # BLACKBODY
+            ####################################################################
+            if texType in ('blackbody'):
+                props.Set(pyluxcore.Property(prefix + '.temperature', [float(luxTex.temperature)]))
+            ####################################################################
             # Brick
             ####################################################################
             elif texType == 'brick':
@@ -816,7 +821,7 @@ class BlenderSceneConverter(object):
                     props.Set(pyluxcore.Property(prefix + '.type', ['checkerboard3d']))
                     self.ConvertTransform(prefix, texture)
             ####################################################################
-            # Cloud
+            # CLOUD
             ####################################################################
             # elif texType == 'cloud':
             #     props.Set(pyluxcore.Property(prefix + '.radius', [float(luxTex.radius)]))
@@ -859,7 +864,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.roughness', [float(luxTex.roughness)]))
                 self.ConvertTransform(prefix, texture)
             ####################################################################
-            # Imagemap
+            # IMAGEMAP
             ####################################################################
             elif texType == 'imagemap':
                 full_name, base_name = get_expanded_file_name(texture, luxTex.filename)
