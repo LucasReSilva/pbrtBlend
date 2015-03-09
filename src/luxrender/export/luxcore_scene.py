@@ -875,6 +875,11 @@ class BlenderSceneConverter(object):
                     props.Set(pyluxcore.Property(prefix + '.channel', [(luxTex.channel)]))
                 self.ConvertMapping(prefix, texture)
             ####################################################################
+            # LAMPSPECTRUM
+            ####################################################################
+            elif texType == 'lampspectrum':
+                props.Set(pyluxcore.Property(prefix + '.name', [luxTex.preset]))
+            ####################################################################
             # Normalmap
             ####################################################################
             elif texType == 'normalmap':

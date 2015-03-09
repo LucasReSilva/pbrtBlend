@@ -292,6 +292,22 @@ blender_texture_ui_list = [
     bl_ui.properties_texture.TEXTURE_PT_ocean,
 ]
 
+def lux_texture_chooser(self, context):
+    if context.scene.render.engine == 'LUXRENDER_RENDER':
+        self.layout.separator()
+        row = self.layout.row(align=True)
+        row.label('LuxRender type')
+        row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
+
+        if UseLuxCore():
+            self.layout.separator()
+            self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
+            if context.texture.use_color_ramp:
+                self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
+
+
+_register_elm(bl_ui.properties_texture.TEXTURE_PT_context_texture.append(lux_texture_chooser))
+
 for blender_texture_ui in blender_texture_ui_list:
     _register_elm(blender_texture_ui)
     blender_texture_ui.poll = blender_texture_poll
