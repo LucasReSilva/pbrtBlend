@@ -53,16 +53,16 @@ class ui_texture_main(luxrender_texture_base):
                (context.scene.render.engine in cls.COMPAT_ENGINES) \
                and context.texture.luxrender_texture.type is not 'BLENDER'
 
-    def draw(self, context):
-        #self.layout.separator()
-        row = self.layout.row(align=True)
-        row.label('LuxRender type')
-        row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
-
-        if UseLuxCore():
-            self.layout.separator()
-            self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
-            if context.texture.use_color_ramp:
-                self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
-
-        super().draw(context)
+    # def draw(self, context):
+    #     #self.layout.separator()
+    #     row = self.layout.row(align=True)
+    #     row.label('LuxRender type')
+    #     row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
+    #
+    #     if UseLuxCore():
+    #         self.layout.separator()
+    #         self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
+    #         if context.texture.use_color_ramp:
+    #             self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
+    #
+    #     super().draw(context)
