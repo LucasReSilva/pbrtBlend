@@ -1939,7 +1939,7 @@ class BlenderSceneConverter(object):
         # Motion blur (needs at least 2 matrices in anim_matrices)
         if anim_matrices and len(anim_matrices) > 1:
             shutter_open, shutter_close = self.calc_shutter(self.blScene.camera.data.luxrender_camera)
-            step = shutter_close - shutter_open / self.blScene.camera.data.luxrender_camera.motion_blur_samples
+            step = (shutter_close - shutter_open) / self.blScene.camera.data.luxrender_camera.motion_blur_samples
 
             for i in range(len(anim_matrices)):
                 time = i * step

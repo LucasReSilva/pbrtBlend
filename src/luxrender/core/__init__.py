@@ -1451,7 +1451,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             # Magic formula to compute optimal display interval
             display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
-            LuxLog('Recommmended minimum display interval: %.1fs' % display_interval)
+            LuxLog('Recommended minimum display interval: %.1fs' % display_interval)
 
             while not self.test_break() and not done:
                 time.sleep(0.2)
