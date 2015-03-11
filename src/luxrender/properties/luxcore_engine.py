@@ -91,6 +91,7 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_lights_nearstart',
         # Sampler settings (for all but BIASPATH)
         'sampler_type',
+        'biaspath_sampler_type',
         'largesteprate',
         'maxconsecutivereject',
         'imagemutationrate',
@@ -152,12 +153,15 @@ class luxcore_enginesettings(declarative_property_group):
                     'biaspath_lights_nearstart': 
                     	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
                     # Sampler settings, show for all but BIASPATH
+                    'sampler_type': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
                     'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    # Show "fake" sampler settings for BIASPATH
+                    'biaspath_sampler_type': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     # Filter settings, show for all but BIASPATH
                     'filter_type': A([{'advanced': True}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
@@ -173,7 +177,8 @@ class luxcore_enginesettings(declarative_property_group):
     alert = {}
 
     enabled = {
-        'sampler_type': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
+        # always disabled
+        'biaspath_sampler_type': {'renderengine_type': ''}
     }
 
     properties = [
@@ -525,6 +530,17 @@ class luxcore_enginesettings(declarative_property_group):
             'min': 0,
             'max': 1,
             'slider': True,
+            'save_in_preset': True
+        },
+        {
+            'type': 'enum',
+            'attr': 'biaspath_sampler_type',
+            'name': 'Sampler',
+            'description': 'Pixel sampling algorithm to use',
+            'default': 'SOBOL',
+            'items': [
+                ('SOBOL', 'Stratified Sampler', 'Fixed sampler for Biased Path')
+            ],
             'save_in_preset': True
         },
         # Filter settings
