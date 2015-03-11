@@ -1008,10 +1008,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         }
 
         # Statistics that are the same for all renderengines
-        stats_main = 'Samples/Sec %3.2fM | %s + %s' % (
+        stats_main = 'Samples/Sec %3.2fM | %s' % (
                 (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
-                engine_dict[engine],
-                sampler_dict[sampler])
+                engine_dict[engine])
+
+        if not engine in ['BIASPATHCPU', 'BIASPATHOCL']:
+            stats_main += ' + ' + sampler_dict[sampler]
 
         # show remaining time until next film update (final render only)
         if not realtime_preview and time_until_update > 0.0:

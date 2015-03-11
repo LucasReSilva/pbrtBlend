@@ -152,7 +152,6 @@ class luxcore_enginesettings(declarative_property_group):
                     'biaspath_lights_nearstart': 
                     	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
                     # Sampler settings, show for all but BIASPATH
-                    #'sampler_type': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
                     'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
