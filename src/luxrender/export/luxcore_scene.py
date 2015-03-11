@@ -1938,8 +1938,11 @@ class BlenderSceneConverter(object):
 
         # Motion blur (needs at least 2 matrices in anim_matrices)
         if anim_matrices and len(anim_matrices) > 1:
+            shutter_open, shutter_close = self.calc_shutter(self.blScene.camera.data.luxrender_camera)
+            step = shutter_close - shutter_open / self.blScene.camera.data.luxrender_camera.motion_blur_samples
+
             for i in range(len(anim_matrices)):
-                time = i / (len(anim_matrices) - 1)
+                time = i * step
                 matrix = matrix_to_list(anim_matrices[i], apply_worldscale = True, invert = True)
                 self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.time' % (lcObjName, i), time))
                 self.scnProps.Set(pyluxcore.Property('scene.objects.%s.motion.%d.transformation' % (lcObjName, i), matrix))
@@ -2126,8 +2129,7 @@ class BlenderSceneConverter(object):
         else:
             self.scnProps.Set(pyluxcore.Property('scene.camera.clippingplane.enable', [False]))
 
-    def convert_shutter(self, lux_camera_settings):
-        # Shutter open/close
+    def calc_shutter(self, lux_camera_settings):
         fps = self.blScene.render.fps / self.blScene.render.fps_base
 
         if lux_camera_settings.exposure_mode == 'normalised':
@@ -2139,6 +2141,13 @@ class BlenderSceneConverter(object):
         elif lux_camera_settings.exposure_mode == 'degrees':
             shutter_open = lux_camera_settings.exposure_degrees_start / (fps * 2 * math.pi)
             shutter_close = lux_camera_settings.exposure_degrees_end / (fps * 2 * math.pi)
+        else:
+            raise Exception('exposure mode "%s" not supported' % lux_camera_settings.exposure_mode)
+
+        return shutter_open, shutter_close
+
+    def convert_shutter(self, lux_camera_settings):
+        shutter_open, shutter_close = self.calc_shutter(lux_camera_settings)
 
         self.scnProps.Set(pyluxcore.Property('scene.camera.shutteropen', shutter_open))
         self.scnProps.Set(pyluxcore.Property('scene.camera.shutterclose', shutter_close))
