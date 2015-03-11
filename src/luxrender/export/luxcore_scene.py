@@ -639,13 +639,13 @@ class BlenderSceneConverter(object):
                                 'Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
                         tex_image = efutil.filesystem_path(f_path)
 
+                props.Set(pyluxcore.Property(prefix + '.type', ['imagemap']))
                 props.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
-
                 props.Set(pyluxcore.Property(prefix + '.gamma', [texture.luxrender_texture.luxrender_tex_imagesampling.gamma]))
                 props.Set(pyluxcore.Property(prefix + '.gain', [texture.luxrender_texture.luxrender_tex_imagesampling.gain]))
 
-                if texture.image.use_alpha:
-                    props.Set(pyluxcore.Property(prefix + '.channel', [texture.luxrender_texture.luxrender_tex_imagesampling.channel]))
+                #if texture.image.use_alpha:
+                #    props.Set(pyluxcore.Property(prefix + '.channel', [texture.luxrender_texture.luxrender_tex_imagesampling.channel]))
 
                 self.ConvertMapping(prefix, texture)
             ####################################################################
@@ -784,7 +784,7 @@ class BlenderSceneConverter(object):
             ####################################################################
             # BLACKBODY
             ####################################################################
-            if texType in ('blackbody'):
+            elif texType in ('blackbody'):
                 props.Set(pyluxcore.Property(prefix + '.temperature', [float(luxTex.temperature)]))
             ####################################################################
             # Brick
