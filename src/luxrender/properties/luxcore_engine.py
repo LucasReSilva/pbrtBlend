@@ -98,7 +98,6 @@ class luxcore_enginesettings(declarative_property_group):
         # Filter settings (for all but BIASPATH)
         'filter_type',
         'filter_width',
-        'biaspath_filter_type',
         # Accelerator settings
         'accelerator_type',
         'instancing',
@@ -163,19 +162,14 @@ class luxcore_enginesettings(declarative_property_group):
                     	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
                     # Show "fake" sampler settings for BIASPATH so the user knows the other samplers are not supported
                     'biaspath_sampler_type': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    # Filter settings, show for all but BIASPATH
-                    'filter_type': A([{'advanced': True}, 
-                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
-                    # Show "fake" filter settings for BIASPATH so the user knows the other filters are not supported
-                    'biaspath_filter_type': A([{'advanced': True},
-                        {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
+                    # Filter settings
+                    'filter_type': {'advanced': True},
+                    # don't show filter width if NONE filter is selected
+                    'filter_width': A([{'advanced': True},
+                    	{'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])}]),
                     # Accelerator settings
                     'accelerator_type': {'advanced': True},
                     'instancing': {'advanced': True},
-                    # don't show filter width if NONE filter is selected
-                    'filter_width': A([{'advanced': True}, 
-                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    	{'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])}]),
     }
 
     alert = {}
@@ -183,7 +177,6 @@ class luxcore_enginesettings(declarative_property_group):
     enabled = {
         # Fake settings for BIASPATH are always disabled
         'biaspath_sampler_type': {'renderengine_type': ''},
-        'biaspath_filter_type': {'renderengine_type': ''}
     }
 
     properties = [
@@ -575,17 +568,6 @@ class luxcore_enginesettings(declarative_property_group):
             'soft_min': 0.5,
             'max': 10.0,
             'soft_max': 4.0,
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'biaspath_filter_type',
-            'name': 'Filter',
-            'description': 'Pixel filter to use',
-            'default': 'NONE',
-            'items': [
-                ('NONE', 'None', 'Disable pixel filtering. Only option for Biased Path engine')
-            ],
             'save_in_preset': True
         },
         # Accelerator settings
