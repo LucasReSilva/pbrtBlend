@@ -1370,9 +1370,7 @@ class BlenderSceneConverter(object):
                 set_volumes(prefix)
 
             # coating
-            use_coating = False
             name_coating = matName + '_coated'
-
             if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
                 use_coating = True
                 luxMat_coated = material.luxrender_coating
@@ -1394,6 +1392,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertTextureChannel(luxMat_coated, 'uroughness', 'float')))
                 props.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertTextureChannel(luxMat_coated, 'vroughness', 'float')))
 
+                self.materialsCache.add(name_coating)
                 matName = name_coating
 
             # LuxCore specific material settings
