@@ -1060,15 +1060,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Memory usage
         device_stats = stats.Get("stats.renderengine.devices")
 
-        max_memory = 0
+        max_memory = float('inf')
         used_memory = 0
 
         for i in range(device_stats.GetSize()):
             device_name = device_stats.GetString(i)
 
+            # Max memory available is limited by the device with least amount of memory
             device_max_memory = stats.Get("stats.renderengine.devices." + device_name + ".memory.total").GetFloat()
             device_max_memory = int(device_max_memory / (1024 * 1024))
-            if device_max_memory > max_memory:
+            if device_max_memory < max_memory:
                 max_memory = device_max_memory
 
             device_used_memory = stats.Get("stats.renderengine.devices." + device_name + ".memory.used").GetFloat()
