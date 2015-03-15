@@ -1147,6 +1147,45 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertTextureChannel(luxMat, 'vroughness', 'float')))
 
             ####################################################################
+            # Glossycoating
+            ####################################################################
+            elif matType == 'glossycoating':
+                props.Set(pyluxcore.Property(prefix + '.type', ['glossycoating']))
+                if not material.luxrender_material.luxrender_mat_glossycoating.basematerial_material:
+                    return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
+                else:
+                    try:
+                        material_base_name = material.luxrender_material.luxrender_mat_glossycoating.basematerial_material
+
+                        if materials is not None:
+                            # obj.material_slots passed as argument
+                            base = materials[material_base_name].material
+                        else:
+                            # no material_slots available, get materials from bpy.data.materials
+                            base = bpy.data.materials[material_base_name]
+
+                        baseName = self.ConvertMaterial(base, materials)
+                        props.Set(pyluxcore.Property(prefix + '.base', [baseName]))
+                    except Exception as err:
+                        print('WARNING: unable to convert base material %s\n%s' % (material.name, err))
+
+
+                props.Set(pyluxcore.Property(prefix + '.kd', self.ConvertTextureChannel(luxMat, 'Ks', 'color')))
+
+                if material.luxrender_material.luxrender_mat_glossycoating.useior:
+                    props.Set(
+                        pyluxcore.Property(prefix + '.index', self.ConvertTextureChannel(luxMat, 'index', 'float')))
+                else:
+                    props.Set(pyluxcore.Property(prefix + '.ks', self.ConvertTextureChannel(luxMat, 'Ks', 'color')))
+
+                props.Set(pyluxcore.Property(prefix + '.ka', self.ConvertTextureChannel(luxMat, 'Ka', 'color')))
+                props.Set(pyluxcore.Property(prefix + '.multibounce',
+                                             material.luxrender_material.luxrender_mat_glossycoating.multibounce))
+                props.Set(pyluxcore.Property(prefix + '.d', self.ConvertTextureChannel(luxMat, 'd', 'float')))
+                props.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertTextureChannel(luxMat, 'uroughness', 'float')))
+                props.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertTextureChannel(luxMat, 'vroughness', 'float')))
+
+            ####################################################################
             # Glossytranslucent
             ####################################################################
             elif matType == 'glossytranslucent':
