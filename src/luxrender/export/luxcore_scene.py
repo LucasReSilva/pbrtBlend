@@ -1369,10 +1369,9 @@ class BlenderSceneConverter(object):
 
                 set_volumes(prefix)
 
-            # coating
-            name_coating = matName + '_coated'
+            # coating for all materials
             if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
-                use_coating = True
+                name_coating = matName + '_coated'
                 luxMat_coated = material.luxrender_coating
                 prefix += '_coated'
                 props.Set(pyluxcore.Property(prefix + '.type', ['glossycoating']))
