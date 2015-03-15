@@ -1378,7 +1378,7 @@ class BlenderSceneConverter(object):
                 props.Set(pyluxcore.Property(prefix + '.base', [matName]))
                 props.Set(pyluxcore.Property(prefix + '.kd', self.ConvertTextureChannel(luxMat_coated, 'Ks', 'color')))
 
-                if material.luxrender_material.luxrender_mat_glossycoating.useior:
+                if material.luxrender_coating.useior:
                     props.Set(
                         pyluxcore.Property(prefix + '.index', self.ConvertTextureChannel(luxMat_coated, 'index', 'float')))
                 else:
@@ -1386,7 +1386,7 @@ class BlenderSceneConverter(object):
 
                 props.Set(pyluxcore.Property(prefix + '.ka', self.ConvertTextureChannel(luxMat_coated, 'Ka', 'color')))
                 props.Set(pyluxcore.Property(prefix + '.multibounce',
-                                             material.luxrender_material.luxrender_mat_glossycoating.multibounce))
+                                             material.luxrender_coating.multibounce))
                 props.Set(pyluxcore.Property(prefix + '.d', self.ConvertTextureChannel(luxMat_coated, 'd', 'float')))
                 props.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertTextureChannel(luxMat_coated, 'uroughness', 'float')))
                 props.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertTextureChannel(luxMat_coated, 'vroughness', 'float')))
