@@ -1369,6 +1369,33 @@ class BlenderSceneConverter(object):
 
                 set_volumes(prefix)
 
+            # coating
+            use_coating = False
+            name_coating = matName + '_coated'
+
+            if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
+                use_coating = True
+                luxMat_coated = material.luxrender_coating
+                prefix += '_coated'
+                props.Set(pyluxcore.Property(prefix + '.type', ['glossycoating']))
+                props.Set(pyluxcore.Property(prefix + '.base', [matName]))
+                props.Set(pyluxcore.Property(prefix + '.kd', self.ConvertTextureChannel(luxMat_coated, 'Ks', 'color')))
+
+                if material.luxrender_material.luxrender_mat_glossycoating.useior:
+                    props.Set(
+                        pyluxcore.Property(prefix + '.index', self.ConvertTextureChannel(luxMat_coated, 'index', 'float')))
+                else:
+                    props.Set(pyluxcore.Property(prefix + '.ks', self.ConvertTextureChannel(luxMat_coated, 'Ks', 'color')))
+
+                props.Set(pyluxcore.Property(prefix + '.ka', self.ConvertTextureChannel(luxMat_coated, 'Ka', 'color')))
+                props.Set(pyluxcore.Property(prefix + '.multibounce',
+                                             material.luxrender_material.luxrender_mat_glossycoating.multibounce))
+                props.Set(pyluxcore.Property(prefix + '.d', self.ConvertTextureChannel(luxMat_coated, 'd', 'float')))
+                props.Set(pyluxcore.Property(prefix + '.uroughness', self.ConvertTextureChannel(luxMat_coated, 'uroughness', 'float')))
+                props.Set(pyluxcore.Property(prefix + '.vroughness', self.ConvertTextureChannel(luxMat_coated, 'vroughness', 'float')))
+
+                matName = name_coating
+
             # LuxCore specific material settings
             if material.luxcore_material.id != -1:
                 props.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))

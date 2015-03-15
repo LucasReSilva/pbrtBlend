@@ -267,17 +267,11 @@ class ui_luxrender_material_coating(luxrender_material_base):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('material',), 'luxrender_coating', lambda: not UseLuxCore() )
+        ( ('material',), 'luxrender_coating')
     ]
 
     def draw_header(self, context):
         self.layout.prop(context.material.luxrender_coating, "use_coating", text="")
-
-    def draw(self, context):
-        if UseLuxCore():
-            self.layout.label("Not yet supported by LuxCore")
-
-        super().draw(context)
 
     def draw_coating_ior_menu(self, context):
         """
