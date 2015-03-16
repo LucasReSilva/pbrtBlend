@@ -784,7 +784,7 @@ class BlenderSceneConverter(object):
             ####################################################################
             # BLACKBODY
             ####################################################################
-            elif texType in ('blackbody'):
+            elif texType == 'blackbody':
                 props.Set(pyluxcore.Property(prefix + '.temperature', [float(luxTex.temperature)]))
             ####################################################################
             # Brick
@@ -934,12 +934,37 @@ class BlenderSceneConverter(object):
             elif texType in ['hitpointcolor', 'hitpointgrey', 'hitpointalpha']:
                 pass
             ####################################################################
+            # Fresnel color
+            ####################################################################
+            elif texType == 'fresnelcolor':
+                props.Set(pyluxcore.Property(prefix + '.kr', self.ConvertTextureChannel(luxTex, 'Kr', 'color')))
+            ####################################################################
+            # Fresnel preset (name)
+            ####################################################################
+            elif texType == 'fresnelname':
+                props.Set(pyluxcore.Property(prefix + '.type', 'fresnelpreset'))
+                props.Set(pyluxcore.Property(prefix + '.name', luxTex.name))
+            ####################################################################
+            # Fresnel sopra
+            ####################################################################
+            elif texType == 'sopra':
+                props.Set(pyluxcore.Property(prefix + '.type', 'fresnelsopra'))
+                full_name, base_name = get_expanded_file_name(texture, luxTex.filename)
+                props.Set(pyluxcore.Property(prefix + '.file', full_name))
+            ####################################################################
+            # Fresnel luxpop
+            ####################################################################
+            elif texType == 'luxpop':
+                props.Set(pyluxcore.Property(prefix + '.type', 'fresnelluxpop'))
+                full_name, base_name = get_expanded_file_name(texture, luxTex.filename)
+                props.Set(pyluxcore.Property(prefix + '.file', full_name))
+            ####################################################################
             # Fallback to exception
             ####################################################################
             else:
                 raise Exception('Unknown type ' + texType + ' for texture: ' + texture.name)
 
-            if texType not in ('normalmap', 'checkerboard', 'constant'):
+            if texType not in ('normalmap', 'checkerboard', 'constant', 'fresnelname', 'luxpop', 'sopra'):
                 props.Set(pyluxcore.Property(prefix + '.type', texType))
 
             self.scnProps.Set(props)
