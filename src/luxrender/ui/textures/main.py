@@ -53,4 +53,6 @@ class ui_texture_main(luxrender_texture_base):
                (context.scene.render.engine in cls.COMPAT_ENGINES) \
                and context.texture.luxrender_texture.type is not 'BLENDER'
 
-    # drawing directly attached to plender panel
+    # drawing directly attached to blender panel
+
+
