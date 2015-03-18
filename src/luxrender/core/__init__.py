@@ -1453,7 +1453,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
                 filmWidth = int(filmWidth * x_max - filmWidth * x_min)
                 filmHeight = int(filmHeight * y_max - filmHeight * y_min)
-        
+
             # Convert the Blender scene
             lcConfig = BlenderSceneConverter(scene, renderengine = self).Convert(filmWidth, filmHeight)
 
