@@ -296,8 +296,9 @@ def lux_texture_chooser(self, context):
     if context.scene.render.engine == 'LUXRENDER_RENDER':
         self.layout.separator()
         row = self.layout.row(align=True)
-        row.label('LuxRender type')
-        row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
+        if context.texture:
+            row.label('LuxRender type')
+            row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
 
         if UseLuxCore():
             self.layout.separator()
