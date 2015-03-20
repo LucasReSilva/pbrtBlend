@@ -1106,7 +1106,7 @@ class BlenderSceneConverter(object):
                     props.Set(
                         pyluxcore.Property('scene.textures.' + fcol + '.name', material.luxrender_material.luxrender_mat_metal.name))
 
-                elif m2_type == 'nk':
+                elif m_type == 'nk':
                     full_name, base_name = get_expanded_file_name(material, luxMat.filename)
                     props.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
                     props.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', [full_name]))
