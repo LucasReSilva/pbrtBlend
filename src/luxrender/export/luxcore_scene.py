@@ -2019,8 +2019,20 @@ class BlenderSceneConverter(object):
         print('Hair export not supported yet')
 
     def SetObjectProperties(self, obj, lcObjName, lcMeshName, lcMatName, transform, anim_matrices):
-        self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.material', [lcMatName]))
-        self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.ply', [lcMeshName]))
+        self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.material', lcMatName))
+
+        from ..outputs.luxcore_api import LUXCORE_VERSION
+
+        if LUXCORE_VERSION[:3] < '1.5' or True:
+            # Old syntax (before shape introduction)
+            self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.ply', lcMeshName))
+        else:
+            # New shape syntax (eventually change this so the shape is defined in ExportMesh function
+            # and only the name of the shape is passed through to this function)
+            self.scnProps.Set(pyluxcore.Property('scene.shapes.' + lcMeshName + '.type', 'mesh'))
+            self.scnProps.Set(pyluxcore.Property('scene.shapes.' + lcMeshName + '.ply', lcMeshName))
+
+            self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.shape', lcMeshName))
 
         if transform is not None:
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
