@@ -1096,17 +1096,20 @@ class BlenderSceneConverter(object):
             # Metal (for keeping bw compat., but use metal2 )
             ####################################################################
             elif matType == 'metal':
+                fcol = matName + '_fcol'
                 props.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
-                props.Set(pyluxcore.Property(prefix + '.fresnel', [matName]))
+                props.Set(pyluxcore.Property(prefix + '.fresnel', [fcol]))
                 m_type = material.luxrender_material.luxrender_mat_metal.name
 
                 if m_type != 'nk':
-                    props.Set(pyluxcore.Property(prefix + '.preset', m_type))
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelpreset']))
+                    props.Set(
+                        pyluxcore.Property('scene.textures.' + fcol + '.name', material.luxrender_material.luxrender_mat_metal.name))
 
-                elif m_type == 'nk':
+                elif m2_type == 'nk':
                     full_name, base_name = get_expanded_file_name(material, luxMat.filename)
-                    props.Set(pyluxcore.Property('scene.textures.' + matName + '.type', ['fresnelsopra']))
-                    props.Set(pyluxcore.Property('scene.textures.' + matName + '.file', [full_name]))
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', [full_name]))
 
                 props.Set(pyluxcore.Property(prefix + '.uroughness',
                                              self.ConvertTextureChannel(luxMat, 'uroughness', 'float')))
@@ -1118,28 +1121,23 @@ class BlenderSceneConverter(object):
             # Metal2
             ####################################################################
             elif matType == 'metal2':
+                fcol = matName + '_fcol'
                 props.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
-                props.Set(pyluxcore.Property(prefix + '.fresnel', [matName]))
+                props.Set(pyluxcore.Property(prefix + '.fresnel', [fcol]))
                 m2_type = material.luxrender_material.luxrender_mat_metal2.metaltype
 
                 if m2_type == 'preset':
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelpreset']))
                     props.Set(
-                        pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_metal2.preset))
+                        pyluxcore.Property('scene.textures.' + fcol + '.name', material.luxrender_material.luxrender_mat_metal2.preset))
                 elif m2_type == 'fresnelcolor':
-                    fn_dummy_tex = '%s_fn_dummy_tex' % matName
-                    fk_dummy_tex = '%s_fk_dummy_tex' % matName
-                    props.Set(pyluxcore.Property(prefix + '.n', fn_dummy_tex))
-                    props.Set(pyluxcore.Property(prefix + '.k', fk_dummy_tex))
-                    props.Set(pyluxcore.Property('scene.textures.' + fn_dummy_tex + '.type', 'fresnelapproxn'))
-                    props.Set(pyluxcore.Property('scene.textures.' + fn_dummy_tex + '.texture',
-                                                 self.ConvertTextureChannel(luxMat, 'Kr', 'color')))
-                    props.Set(pyluxcore.Property('scene.textures.' + fk_dummy_tex + '.type', 'fresnelapproxk'))
-                    props.Set(pyluxcore.Property('scene.textures.' + fk_dummy_tex + '.texture',
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelcolor']))
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.kr',
                                                  self.ConvertTextureChannel(luxMat, 'Kr', 'color')))
                 elif m2_type == 'nk':
                     full_name, base_name = get_expanded_file_name(material, luxMat.filename)
-                    props.Set(pyluxcore.Property('scene.textures.' + matName + '.type', ['fresnelsopra']))
-                    props.Set(pyluxcore.Property('scene.textures.' + matName + '.file', [full_name]))
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
+                    props.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', [full_name]))
 
                 else:
                     print('WARNING: Not yet supported metal2 type: %s' % m2_type)

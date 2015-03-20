@@ -375,6 +375,7 @@ def get_expanded_file_name(obj, file_path):
     if hasattr(obj, 'library') and obj.library:
         return bpy.path.abspath(file_path, library=obj.library), file_basename
 
+ #   return os.path.realpath(file_path), file_basename
     return bpy.path.abspath(file_path), file_basename
 
 
