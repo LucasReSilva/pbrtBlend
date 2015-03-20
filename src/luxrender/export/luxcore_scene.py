@@ -2023,16 +2023,18 @@ class BlenderSceneConverter(object):
 
         from ..outputs.luxcore_api import LUXCORE_VERSION
 
-        if LUXCORE_VERSION[:3] < '1.5' or True:
+        if LUXCORE_VERSION[:3] < '1.5':
             # Old syntax (before shape introduction)
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.ply', lcMeshName))
         else:
-            # New shape syntax (eventually change this so the shape is defined in ExportMesh function
-            # and only the name of the shape is passed through to this function)
-            self.scnProps.Set(pyluxcore.Property('scene.shapes.' + lcMeshName + '.type', 'mesh'))
-            self.scnProps.Set(pyluxcore.Property('scene.shapes.' + lcMeshName + '.ply', lcMeshName))
-
+            # New shape syntax
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.shape', lcMeshName))
+
+            # Pointiness test, still WIP
+            #self.scnProps.Set(pyluxcore.Property('scene.shapes.' + lcMeshName + '_pointiness' + '.type', 'pointiness'))
+            #self.scnProps.Set(pyluxcore.Property('scene.shapes.' + lcMeshName + '_pointiness' + '.source', lcMeshName))
+
+            #self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.shape', lcMeshName + '_pointiness'))
 
         if transform is not None:
             self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.transformation', transform))
