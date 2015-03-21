@@ -1858,14 +1858,8 @@ class BlenderSceneConverter(object):
                 mat_name = luxcore_name + '_helper_mat'
                 # TODO: match brightness with API 1.x
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
-                corr_factor = energy * (get_worldscale(as_scalematrix=False) ** 2)
-                raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * corr_factor
-
-                if not light.luxrender_lamp.luxrender_lamp_area.L_usecolortexture:
-                    emission_color = [raw_color[0], raw_color[1], raw_color[2]]
-                else:
-                    emission_color = self.ConvertTextureChannel(light.luxrender_lamp.luxrender_lamp_area, 'L', 'color')
-                    self.scnProps.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.gain', [corr_factor, corr_factor, corr_factor]))
+                raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (get_worldscale(as_scalematrix=False) ** 2)
+                emission_color = [raw_color[0], raw_color[1], raw_color[2]]
 
                 #light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
 
