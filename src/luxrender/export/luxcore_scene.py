@@ -1026,17 +1026,25 @@ class BlenderSceneConverter(object):
         """
 
         def set_volumes(prefix):
-            # Interior volume
-            if (hasattr(material.luxrender_material, 'Interior_volume') and
-                        material.luxrender_material.Interior_volume in BlenderSceneConverter.volumes_cache):
-                validInteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Interior_volume]
-                props.Set(pyluxcore.Property(prefix + '.volume.interior', validInteriorName))
+            # Interior
+            if material.luxrender_material.Interior_volume in BlenderSceneConverter.volumes_cache:
+                # User has set an interior volume and it is valid
+                interior_volume = BlenderSceneConverter.volumes_cache[material.luxrender_material.Interior_volume]
+                props.Set(pyluxcore.Property(prefix + '.volume.interior', interior_volume))
+            elif self.blScene.luxrender_world.default_interior_volume in BlenderSceneConverter.volumes_cache:
+                # No valid interior volume was set, but there's a valid default interior volume in the world settings
+                interior_volume = BlenderSceneConverter.volumes_cache[self.blScene.luxrender_world.default_interior_volume]
+                props.Set(pyluxcore.Property(prefix + '.volume.interior', interior_volume))
 
-            # Exterior volume
-            if (hasattr(material.luxrender_material, 'Exterior_volume') and
-                        material.luxrender_material.Exterior_volume in BlenderSceneConverter.volumes_cache):
-                validExteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Exterior_volume]
-                props.Set(pyluxcore.Property(prefix + '.volume.exterior', validExteriorName))
+            # Exterior
+            if material.luxrender_material.Exterior_volume in BlenderSceneConverter.volumes_cache:
+                # User has set an exterior volume and it is valid
+                exterior_volume = BlenderSceneConverter.volumes_cache[material.luxrender_material.Exterior_volume]
+                props.Set(pyluxcore.Property(prefix + '.volume.exterior', exterior_volume))
+            elif self.blScene.luxrender_world.default_exterior_volume in BlenderSceneConverter.volumes_cache:
+                # No valid exterior volume was set, but there's a valid default exterior volume in the world settings
+                exterior_volume = BlenderSceneConverter.volumes_cache[self.blScene.luxrender_world.default_exterior_volume]
+                props.Set(pyluxcore.Property(prefix + '.volume.exterior', exterior_volume))
 
         try:
             if material is None:
