@@ -152,6 +152,8 @@ class BlenderSceneConverter(object):
     @staticmethod
     def clear():
         BlenderSceneConverter.scalers_count = 0
+        BlenderSceneConverter.volumes_cache = {}
+        BlenderSceneConverter.lightgroups_cache = {}
 
     @staticmethod
     def get_export_cache():
@@ -2739,9 +2741,6 @@ class BlenderSceneConverter(object):
                     abs_col[i] = (-math.log(max([v, 1e-30])) / depth) * scale * (v == 1.0 and -1 or 1)
 
             print('Converting volume: %s' % volume.name)
-
-            if volume.name in BlenderSceneConverter.volumes_cache:
-                return
 
             # IOR Fresnel
             if volume.fresnel_usefresneltexture:
