@@ -1025,12 +1025,14 @@ class BlenderSceneConverter(object):
 
         def set_volumes(prefix):
             # Interior volume
-            if hasattr(material.luxrender_material, 'Interior_volume') and material.luxrender_material.Interior_volume:
+            if (hasattr(material.luxrender_material, 'Interior_volume') and
+                        material.luxrender_material.Interior_volume in BlenderSceneConverter.volumes_cache):
                 validInteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Interior_volume]
                 props.Set(pyluxcore.Property(prefix + '.volume.interior', validInteriorName))
 
             # Exterior volume
-            if hasattr(material.luxrender_material, 'Exterior_volume') and material.luxrender_material.Exterior_volume:
+            if (hasattr(material.luxrender_material, 'Exterior_volume') and
+                        material.luxrender_material.Exterior_volume in BlenderSceneConverter.volumes_cache):
                 validExteriorName = BlenderSceneConverter.volumes_cache[material.luxrender_material.Exterior_volume]
                 props.Set(pyluxcore.Property(prefix + '.volume.exterior', validExteriorName))
 
@@ -2709,21 +2711,25 @@ class BlenderSceneConverter(object):
                 self.ConvertLightgroups()
 
     def ConvertVolumes(self):
-        # default volumes
-        if self.blScene.camera is not None and self.blScene.camera.data.luxrender_camera.Exterior_volume:
-            # Default volume from camera exterior
-            volume = BlenderSceneConverter.generate_volume_name(self.blScene.camera.data.luxrender_camera.Exterior_volume)
-            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
-        elif self.blScene.luxrender_world.default_exterior_volume:
-            # Default volume from world
-            volume = BlenderSceneConverter.generate_volume_name(self.blScene.luxrender_world.default_exterior_volume)
-            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume]))
+        volumes = self.blScene.luxrender_volumes.volumes
+        cam_exterior = self.blScene.camera.data.luxrender_camera.Exterior_volume if self.blScene.camera is not None else ''
+        world_exterior = self.blScene.luxrender_world.default_exterior_volume
 
         # convert all volumes
-        for volume in self.blScene.luxrender_volumes.volumes:
+        for volume in volumes:
             self.convert_volume(volume)
 
+        if self.blScene.camera is not None and cam_exterior in BlenderSceneConverter.volumes_cache:
+            volume_name = BlenderSceneConverter.volumes_cache[cam_exterior]
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume_name]))
+        elif world_exterior in BlenderSceneConverter.volumes_cache:
+            volume_name = BlenderSceneConverter.volumes_cache[world_exterior]
+            self.scnProps.Set(pyluxcore.Property('scene.world.volume.default', [volume_name]))
+
     def convert_volume(self, volume):
+        name = BlenderSceneConverter.generate_volume_name(volume.name)
+        prefix = 'scene.volumes.' + name
+
         try:
             def absorption_at_depth_scaled(abs_col):
                 for i in range(len(abs_col)):
@@ -2734,11 +2740,8 @@ class BlenderSceneConverter(object):
 
             print('Converting volume: %s' % volume.name)
 
-            name = BlenderSceneConverter.generate_volume_name(volume.name)
-            prefix = 'scene.volumes.' + name
-
-            # add to cache
-            BlenderSceneConverter.volumes_cache[volume.name] = name
+            if volume.name in BlenderSceneConverter.volumes_cache:
+                return
 
             # IOR Fresnel
             if volume.fresnel_usefresneltexture:
@@ -2795,6 +2798,11 @@ class BlenderSceneConverter(object):
             LuxLog('Volume export failed, skipping volume: %s\n%s' % (volume.name, err))
             import traceback
             traceback.print_exc()
+
+            # define a clear volume instead of actual volume so LuxCore will still start to render
+            self.scnProps.Set(pyluxcore.Property(prefix + '.type', ['clear']))
+        finally:
+            BlenderSceneConverter.volumes_cache[volume.name] = name
 
     def ConvertChannelSettings(self, realtime_preview=False):
         if self.blScene.camera is None:
