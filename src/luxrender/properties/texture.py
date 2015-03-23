@@ -4611,6 +4611,7 @@ class luxrender_tex_wrinkled(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
+@LuxRenderAddon.addon_register_class
 class luxrender_tex_pointiness(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
