@@ -375,10 +375,7 @@ def get_expanded_file_name(obj, file_path):
     if hasattr(obj, 'library') and obj.library:
         return bpy.path.abspath(file_path, library=obj.library), file_basename
 
-    if sys.platform == 'darwin' and file_basename:
-        return os.path.realpath(file_path), file_basename # attempt to get rid of wrong resolved symbolic links
-    else:
-        return bpy.path.abspath(file_path), file_basename
+    return bpy.path.abspath(file_path), file_basename
 
 
 def process_filepath_data(scene, obj, file_path, paramset, parameter_name):
