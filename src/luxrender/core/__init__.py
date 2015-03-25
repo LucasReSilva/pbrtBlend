@@ -1328,16 +1328,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if saveToDisk:
             blenderImage.save()
 
-    def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight,
-                   show_converged, show_unconverged, show_pending):
+    def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight):
         """
-        draws outlines for specified tile types directly into the imageBuffer
+        draws tile outlines directly into the imageBuffer
         
         scene: Blender scene object
         stats: LuxCore stats (from LuxCore session)
-        imageBuffer: list of tuples of floats, e.g. [(r, g, b, a), ...]
+        imageBuffer: list of tuples of floats, e.g. [(r, g, b, a), ...], must be sliceable!
         """
         tile_size = scene.luxcore_enginesettings.tile_size
+        show_converged = scene.luxcore_tile_highlighting.show_converged
+        show_unconverged = scene.luxcore_tile_highlighting.show_unconverged
+        show_pending = scene.luxcore_tile_highlighting.show_pending
         
         def draw_tile_type(count, coords, color):
             """
@@ -1368,40 +1370,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     try:
                         imageBuffer[sliceEnd - 1] = color
                     except IndexError:
-                        # catch this so render does not crash when we try to 
-                        # draw outside the imageBuffer (should not happen
-                        # anymore, but leave it in in case there's an unknown
-                        # bug)
+                        # catch this so render does not crash when we try to draw outside the imageBuffer
+                        # (should not be possible anymore, but leave it in in case there's an unknown bug)
                         pass
-        
-        def draw_tile_corners(offset_x, offset_y, width, height, color):
-            """
-            draws only the corners of one tile
-            (not finished, looks ugly)
-            """
-            for y in range(offset_y, offset_y + height):
-                cornerLeftStart = y * filmWidth + offset_x
-                cornerRightEnd = cornerLeftStart + width
-                cornerSize = int(width / 8)
-                cornerLeftEnd = cornerLeftStart + cornerSize
-                cornerRightStart = cornerRightEnd - cornerSize
-        	    
-                if y == offset_y or y == offset_y + height - 1:
-                    # bottom and top
-                    replace = [color] * cornerSize
-                    imageBuffer[cornerLeftStart:cornerLeftEnd] = replace
-                    imageBuffer[cornerRightStart:cornerRightEnd] = replace
-                elif y < offset_y + cornerSize or y > offset_y + height - cornerSize:
-                    # sides
-                    try:
-                        imageBuffer[cornerLeftStart] = color
-                        imageBuffer[cornerRightEnd] = color
-                    except IndexError:
-                        print('tile drawing out of range!')
-                        pass
-        
-        # measure time (debug)
-        #tile_draw_starttime = int(round(time.time() * 1000))
         
         # collect stats
         count_converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
@@ -1422,10 +1393,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             coords_pending = stats.Get('stats.biaspath.tiles.pending.coords').GetInts()
             color_yellow = (1.0, 1.0, 0.0, 1.0)
             draw_tile_type(count_pending, coords_pending, color_yellow)
-            
-        # measure time (debug)
-        #print("tile outline drawing took %dms" % (
-        #            int(round(time.time() * 1000)) - tile_draw_starttime))
 
     def luxcore_render(self, scene):
         if scene.name == 'preview':
@@ -1443,20 +1410,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         try:
             self.set_export_path_luxcore(scene)
         
-            filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
-        
-            if scene.render.use_border:
-                x_min, x_max, y_min, y_max = [
-                    scene.render.border_min_x, scene.render.border_max_x,
-                    scene.render.border_min_y, scene.render.border_max_y
-                ]
-            
-                filmWidth = int(filmWidth * x_max - filmWidth * x_min)
-                filmHeight = int(filmHeight * y_max - filmHeight * y_min)
+            filmWidth, filmHeight = self.get_film_size(scene)
 
             # Convert the Blender scene
-            lcConfig = BlenderSceneConverter(scene, renderengine = self).Convert(filmWidth, filmHeight)
-
+            scene_converter = BlenderSceneConverter(scene, renderengine = self)
+            lcConfig = scene_converter.Convert(filmWidth, filmHeight)
             lcSession = pyluxcore.RenderSession(lcConfig)
             
             imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
@@ -1474,7 +1432,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             lastImageDisplay = startTime
             done = False
 
-            # Magic formula to compute optimal display interval
+            # Magic formula to compute optimal display interval (found through testing)
             display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
             LuxLog('Recommended minimum display interval: %.1fs' % display_interval)
 
@@ -1516,10 +1474,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                                                               filmHeight,
                                                                                               imageBufferFloat)
                         # draw tile outlines
-                        self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight, 
-                                        scene.luxcore_tile_highlighting.show_converged,
-                                        scene.luxcore_tile_highlighting.show_unconverged,
-                                        scene.luxcore_tile_highlighting.show_pending)
+                        self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight)
                         layer.rect = tempImage
                     else:
                         layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
@@ -1543,118 +1498,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             lcSession.Stop()
 
             if scene.luxrender_channels.enable_aovs:
-                channelCalcStartTime = time.time()
-                LuxLog('Importing AOV channels into Blender...')
-    
-                channels = scene.luxrender_channels
-    
-                if channels.RGB:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'RGB', channels.saveToDisk)
-                if channels.RGBA:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'RGBA', channels.saveToDisk)
-                if channels.RGB_TONEMAPPED:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'RGB_TONEMAPPED', channels.saveToDisk)
-                if channels.RGBA_TONEMAPPED:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'RGBA_TONEMAPPED', channels.saveToDisk)
-                if channels.ALPHA:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'ALPHA', channels.saveToDisk)
-                if channels.DEPTH:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'DEPTH', channels.saveToDisk,
-                                               normalize = channels.normalize_DEPTH)
-                if channels.POSITION:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'POSITION', channels.saveToDisk)
-                if channels.GEOMETRY_NORMAL:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'GEOMETRY_NORMAL', channels.saveToDisk)
-                if channels.SHADING_NORMAL:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'SHADING_NORMAL', channels.saveToDisk)
-                if channels.MATERIAL_ID:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'MATERIAL_ID', channels.saveToDisk)
-                if channels.DIRECT_DIFFUSE:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'DIRECT_DIFFUSE', channels.saveToDisk,
-                                               normalize = channels.normalize_DIRECT_DIFFUSE)
-                if channels.DIRECT_GLOSSY:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'DIRECT_GLOSSY', channels.saveToDisk,
-                                               normalize = channels.normalize_DIRECT_GLOSSY)
-                if channels.EMISSION:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'EMISSION', channels.saveToDisk)
-                if channels.INDIRECT_DIFFUSE:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'INDIRECT_DIFFUSE', channels.saveToDisk,
-                                               normalize = channels.normalize_INDIRECT_DIFFUSE)
-                if channels.INDIRECT_GLOSSY:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'INDIRECT_GLOSSY', channels.saveToDisk,
-                                               normalize = channels.normalize_INDIRECT_GLOSSY)
-                if channels.INDIRECT_SPECULAR:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'INDIRECT_SPECULAR', channels.saveToDisk,
-                                               normalize = channels.normalize_INDIRECT_SPECULAR)
-                if channels.DIRECT_SHADOW_MASK:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'DIRECT_SHADOW_MASK', channels.saveToDisk)
-                if channels.INDIRECT_SHADOW_MASK:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'INDIRECT_SHADOW_MASK', channels.saveToDisk)
-                if channels.UV:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'UV', channels.saveToDisk)
-                if channels.RAYCOUNT:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'RAYCOUNT', channels.saveToDisk,
-                                               normalize = channels.normalize_RAYCOUNT)
-                if channels.IRRADIANCE:
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'IRRADIANCE', channels.saveToDisk)
-    
-                props = lcSession.GetRenderConfig().GetProperties()
-                # Convert all MATERIAL_ID_MASK channels
-                mask_ids = set()
-                for i in props.GetAllUniqueSubNames('film.outputs'):
-                    if props.Get(i + '.type').GetString() == 'MATERIAL_ID_MASK':
-                        mask_ids.add(props.Get(i + '.id').GetInt())
-    
-                for i in range(len(mask_ids)):
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'MATERIAL_ID_MASK', channels.saveToDisk, buffer_id = i)
-    
-                # Convert all BY_MATERIAL_ID channels
-                ids = set()
-                for i in props.GetAllUniqueSubNames('film.outputs'):
-                    if props.Get(i + '.type').GetString() == 'BY_MATERIAL_ID':
-                        ids.add(props.Get(i + '.id').GetInt())
-    
-                for i in range(len(ids)):
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'BY_MATERIAL_ID', channels.saveToDisk, buffer_id = i)
-
-                from ..outputs.luxcore_api import LUXCORE_VERSION
-                # crashes in 1.4
-                if LUXCORE_VERSION[:3] >= '1.5':
-                    # Convert all RADIANCE_GROUP channels
-                    lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
-
-                    # don't import the standard lightgroup that contains all lights even if no groups are set
-                    if lightgroup_count > 1:
-                        for i in range(lightgroup_count):
-                            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                                       'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
-    
-                channelCalcTime = time.time() - channelCalcStartTime
-                LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)
-                # End of AOV import
+                self.import_aov_channels(scene, lcSession, filmWidth, filmHeight)
 
             LuxLog('Done.\n')
         except Exception as exc:
@@ -1663,6 +1507,133 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             import traceback
 
             traceback.print_exc()
+
+    def get_film_size(self, scene):
+        filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+
+        if scene.render.use_border:
+            x_min, x_max, y_min, y_max = [
+                scene.render.border_min_x, scene.render.border_max_x,
+                scene.render.border_min_y, scene.render.border_max_y
+            ]
+
+            filmWidth = int(filmWidth * x_max - filmWidth * x_min)
+            filmHeight = int(filmHeight * y_max - filmHeight * y_min)
+
+        return filmWidth, filmHeight
+
+    def import_aov_channels(self, scene, lcSession, filmWidth, filmHeight):
+        channelCalcStartTime = time.time()
+        LuxLog('Importing AOV channels into Blender...')
+
+        channels = scene.luxrender_channels
+
+        if channels.RGB:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'RGB', channels.saveToDisk)
+        if channels.RGBA:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'RGBA', channels.saveToDisk)
+        if channels.RGB_TONEMAPPED:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'RGB_TONEMAPPED', channels.saveToDisk)
+        if channels.RGBA_TONEMAPPED:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'RGBA_TONEMAPPED', channels.saveToDisk)
+        if channels.ALPHA:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'ALPHA', channels.saveToDisk)
+        if channels.DEPTH:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'DEPTH', channels.saveToDisk,
+                                       normalize = channels.normalize_DEPTH)
+        if channels.POSITION:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'POSITION', channels.saveToDisk)
+        if channels.GEOMETRY_NORMAL:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'GEOMETRY_NORMAL', channels.saveToDisk)
+        if channels.SHADING_NORMAL:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'SHADING_NORMAL', channels.saveToDisk)
+        if channels.MATERIAL_ID:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'MATERIAL_ID', channels.saveToDisk)
+        if channels.DIRECT_DIFFUSE:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'DIRECT_DIFFUSE', channels.saveToDisk,
+                                       normalize = channels.normalize_DIRECT_DIFFUSE)
+        if channels.DIRECT_GLOSSY:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'DIRECT_GLOSSY', channels.saveToDisk,
+                                       normalize = channels.normalize_DIRECT_GLOSSY)
+        if channels.EMISSION:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'EMISSION', channels.saveToDisk)
+        if channels.INDIRECT_DIFFUSE:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'INDIRECT_DIFFUSE', channels.saveToDisk,
+                                       normalize = channels.normalize_INDIRECT_DIFFUSE)
+        if channels.INDIRECT_GLOSSY:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'INDIRECT_GLOSSY', channels.saveToDisk,
+                                       normalize = channels.normalize_INDIRECT_GLOSSY)
+        if channels.INDIRECT_SPECULAR:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'INDIRECT_SPECULAR', channels.saveToDisk,
+                                       normalize = channels.normalize_INDIRECT_SPECULAR)
+        if channels.DIRECT_SHADOW_MASK:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'DIRECT_SHADOW_MASK', channels.saveToDisk)
+        if channels.INDIRECT_SHADOW_MASK:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'INDIRECT_SHADOW_MASK', channels.saveToDisk)
+        if channels.UV:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'UV', channels.saveToDisk)
+        if channels.RAYCOUNT:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'RAYCOUNT', channels.saveToDisk,
+                                       normalize = channels.normalize_RAYCOUNT)
+        if channels.IRRADIANCE:
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'IRRADIANCE', channels.saveToDisk)
+
+        props = lcSession.GetRenderConfig().GetProperties()
+        # Convert all MATERIAL_ID_MASK channels
+        mask_ids = set()
+        for i in props.GetAllUniqueSubNames('film.outputs'):
+            if props.Get(i + '.type').GetString() == 'MATERIAL_ID_MASK':
+                mask_ids.add(props.Get(i + '.id').GetInt())
+
+        for i in range(len(mask_ids)):
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'MATERIAL_ID_MASK', channels.saveToDisk, buffer_id = i)
+
+        # Convert all BY_MATERIAL_ID channels
+        ids = set()
+        for i in props.GetAllUniqueSubNames('film.outputs'):
+            if props.Get(i + '.type').GetString() == 'BY_MATERIAL_ID':
+                ids.add(props.Get(i + '.id').GetInt())
+
+        for i in range(len(ids)):
+            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                       'BY_MATERIAL_ID', channels.saveToDisk, buffer_id = i)
+
+        from ..outputs.luxcore_api import LUXCORE_VERSION
+        # crashes in 1.4
+        if LUXCORE_VERSION[:3] >= '1.5':
+            # Convert all RADIANCE_GROUP channels
+            lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
+
+            # don't import the standard lightgroup that contains all lights even if no groups are set
+            if lightgroup_count > 1:
+                for i in range(lightgroup_count):
+                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                               'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
+
+        channelCalcTime = time.time() - channelCalcStartTime
+        LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)
 
     def luxcore_render_preview(self, scene):
         # LuxCore libs
