@@ -302,9 +302,15 @@ def lux_texture_chooser(self, context):
 
         if UseLuxCore():
             self.layout.separator()
-            self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
-            if context.texture.use_color_ramp:
-                self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
+            try:
+                self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
+                if context.texture.use_color_ramp:
+                    self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
+            except TypeError:
+                # The code above causes Blender to throw a typeerror if the texture type is set to "None"
+                # Just ignore that and don't spam the log, None is a valid setting for Lux textures
+                # (as they have their own Lux type)
+                pass
 
 
 _register_elm(bl_ui.properties_texture.TEXTURE_PT_context_texture.append(lux_texture_chooser))

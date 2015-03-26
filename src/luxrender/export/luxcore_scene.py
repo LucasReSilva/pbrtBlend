@@ -325,7 +325,8 @@ class BlenderSceneConverter(object):
         mode = 'PREVIEW' if preview else 'RENDER'
 
         mesh = obj.to_mesh(self.blScene, apply_modifiers, mode)
-        mesh.update(calc_tessface = True)
+        if mesh is not None:
+            mesh.update(calc_tessface = True)
 
         return mesh
 
@@ -344,7 +345,7 @@ class BlenderSceneConverter(object):
             # applying modifiers takes time, so don't do it if we won't update the mesh anyway
             mesh = self.CreateExportMesh(obj, update_mesh, preview)
 
-            if mesh is None:
+            if mesh is None or len(mesh.tessfaces) == 0:
                 LuxLog('Cannot create render/export object: %s' % obj.name)
                 return mesh_definitions
 
@@ -1608,6 +1609,8 @@ class BlenderSceneConverter(object):
 
     def ConvertLight(self, obj):
         hide_lamp = not is_obj_visible(self.blScene, obj)
+        if hide_lamp:
+            return
 
         light = obj.data
         luxcore_name = ToValidLuxCoreName(obj.name)
