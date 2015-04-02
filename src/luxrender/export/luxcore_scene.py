@@ -43,6 +43,9 @@ from ..export import ParamSet
 from ..export.materials import get_texture_from_scene
 
 
+# TODO: delete this file once refactoring is finished
+
+
 class ExportedObjectData(object):
     def __init__(self, lcObjName, lcMeshName = '', lcMaterialName = '', matIndex = 0, lightType = ''):
         """
@@ -100,6 +103,7 @@ class ExportCache(object):
             return self.cache[key]
         except KeyError:
             return None
+
 
 
 class BlenderSceneConverter(object):
@@ -163,6 +167,8 @@ class BlenderSceneConverter(object):
     def clear_export_cache():
         BlenderSceneConverter.export_cache = ExportCache()
 
+
+    
     def createChannelOutputString(self, channelName, id=-1):
         """
         Sets configuration properties for LuxCore AOV output
@@ -214,6 +220,8 @@ class BlenderSceneConverter(object):
             outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
             self.cfgProps.Set(pyluxcore.Property(outputStringId, [id]))
 
+
+    
     def DefineBlenderMeshAccelerated(self, name, mesh):
         faces = mesh.tessfaces[0].as_pointer()
         vertices = mesh.vertices[0].as_pointer()
@@ -421,6 +429,8 @@ class BlenderSceneConverter(object):
             traceback.print_exc()
             return []
 
+
+    
     def ConvertMapping(self, prefix, texture):
         # Note 2DMapping is used for: bilerp, checkerboard(dimension == 2), dots, imagemap, normalmap, uv, uvmask
         # Blender - image
@@ -982,6 +992,8 @@ class BlenderSceneConverter(object):
 
         raise Exception('Unknown texture type: ' + texture.name)
 
+
+    
     def ConvertTextureChannel(self, luxMat_or_volume, materialChannel, type):
         if getattr(luxMat_or_volume, '%s_use%stexture' % (materialChannel, type)):
             texName = getattr(luxMat_or_volume, '%s_%stexturename' % (materialChannel, type))
@@ -1592,6 +1604,8 @@ class BlenderSceneConverter(object):
 
             return 'LUXBLEND_LUXCORE_CLAY_MATERIAL'
 
+
+    
     def ConvertParamToLuxcoreProperty(self, param):
         """
         Convert Luxrender parameters of the form
@@ -1607,6 +1621,8 @@ class BlenderSceneConverter(object):
 
         return [parsed[0], param[1]]
 
+
+    
     def ConvertLight(self, obj):
         hide_lamp = not is_obj_visible(self.blScene, obj)
         if hide_lamp:
@@ -1926,6 +1942,8 @@ class BlenderSceneConverter(object):
         # create cache entry
         BlenderSceneConverter.export_cache.add_obj(obj, luxcore_data)
 
+
+    
     def ConvertDuplis(self, obj, duplicator, preview):
         """
         Converts duplis and OBJECT and GROUP particle systems
@@ -2046,6 +2064,8 @@ class BlenderSceneConverter(object):
         """
         print('Hair export not supported yet')
 
+
+    
     def SetObjectProperties(self, obj, lcObjName, lcMeshName, lcMatName, transform, anim_matrices):
         self.scnProps.Set(pyluxcore.Property('scene.objects.' + lcObjName + '.material', lcMatName))
 
@@ -2254,6 +2274,8 @@ class BlenderSceneConverter(object):
             cache.add_obj(obj, self.ExportMesh(obj, preview, update_mesh, update_material, transform, is_dupli,
                                                anim_matrices))
 
+
+    
     def convert_clipping_plane(self, lux_camera_settings):
         if lux_camera_settings.enable_clipping_plane:
             obj_name = lux_camera_settings.clipping_plane_obj
@@ -2490,6 +2512,8 @@ class BlenderSceneConverter(object):
                 # Shutter open/close
                 self.convert_shutter(luxCamera)
 
+
+    
     def ConvertImagepipelineSettings(self, realtime_preview=False):
         if self.blScene.camera is None:
             return
@@ -2745,6 +2769,8 @@ class BlenderSceneConverter(object):
             if not realtime_preview:
                 self.ConvertLightgroups()
 
+
+    
     def ConvertVolumes(self):
         volumes = self.blScene.luxrender_volumes.volumes
         cam_exterior = self.blScene.camera.data.luxrender_camera.Exterior_volume if self.blScene.camera is not None else ''
@@ -2836,6 +2862,8 @@ class BlenderSceneConverter(object):
         finally:
             BlenderSceneConverter.volumes_cache[volume.name] = name
 
+
+    
     def ConvertChannelSettings(self, realtime_preview=False):
         if self.blScene.camera is None:
             return
@@ -2893,6 +2921,8 @@ class BlenderSceneConverter(object):
             for i in range(len(self.lightgroups_cache)):
                 self.createChannelOutputString('RADIANCE_GROUP', i)
 
+
+    
     def Convert(self, imageWidth = None, imageHeight = None, realtime_preview = False, context = None):
         export_start = time.time()
 
@@ -2992,3 +3022,4 @@ class BlenderSceneConverter(object):
             self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
 
         return self.lcConfig
+
