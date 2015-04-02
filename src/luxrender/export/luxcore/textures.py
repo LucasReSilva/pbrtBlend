@@ -36,9 +36,6 @@ from ...export import get_expanded_file_name
 from . import convert_texture_channel
 
 
-# TODO: port texture stuff to new interface
-
-
 class TextureExporter(object):
     def __init__(self, luxcore_exporter, blender_scene, texture):
         self.luxcore_exporter = luxcore_exporter
