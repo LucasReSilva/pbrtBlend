@@ -1810,9 +1810,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         """
         update_changes = UpdateChanges()
 
-        if self.luxcore_exporter is None:
-            self.luxcore_exporter = LuxCoreExporter(context.scene, self, self.viewSession, True, context)
-
         try:
             # check if visibility of objects was changed
             if self.lastVisibilitySettings is None:
@@ -1836,6 +1833,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.viewSession is None or
                     self.luxcore_exporter is None):
                 update_changes.set_cause(startViewportRender = True)
+
+                # LuxCoreExporter instance for viewport rendering is only created here
+                self.luxcore_exporter = LuxCoreExporter(context.scene, self, self.viewSession, True, context)
 
             # check if filmsize has changed
             if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
@@ -1899,10 +1899,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             update_changes.changed_materials.append(mat)
                             update_changes.set_cause(materials = True)
 
-            # check if camera settings have changed
-            #camera_converter = BlenderSceneConverter(context.scene)
-            #camera_converter.ConvertViewportCamera(context)
-            #newCameraSettings = str(camera_converter.scnProps)
             self.luxcore_exporter.convert_camera()
             newCameraSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
 
@@ -1935,9 +1931,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.lastHaltTime = newHaltTime
             self.lastHaltSamples = newHaltSamples
 
-            # check for changes in renderengine configuration
-            #converter.ConvertConfig(realtime_preview = True)
-            #newRenderSettings = str(converter.cfgProps)
             self.luxcore_exporter.convert_config(self.viewFilmWidth, self.viewFilmHeight)
             newRenderSettings = str(self.luxcore_exporter.config_exporter.properties)
 
@@ -2012,9 +2005,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
 
                 LuxLog('Starting viewport render')
-
-                if self.luxcore_exporter is None:
-                    self.luxcore_exporter = LuxCoreExporter(context.scene, self, luxcore_session=None, is_viewport_render=True, context=context)
 
                 # Export the Blender scene
                 self.lcConfig = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)

@@ -74,13 +74,12 @@ class MeshExporter(object):
             return
 
         luxcore_shape_name = self.__generate_shape_name()
-        mesh_definitions = self.__export_mesh_to_shape(luxcore_shape_name, prepared_mesh)
+        self.__export_mesh_to_shape(luxcore_shape_name, prepared_mesh)
 
         bpy.data.meshes.remove(prepared_mesh)
 
         end_time = time.time() - start_time
         print('Export of mesh %s took %.3fs' % (self.blender_object.data.name, end_time))
-        return mesh_definitions
 
 
     def __prepare_export_mesh(self):
