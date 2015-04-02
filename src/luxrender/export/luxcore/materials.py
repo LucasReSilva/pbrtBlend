@@ -587,6 +587,7 @@ class MaterialExporter(object):
                     if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
                         texture_name = material.luxrender_transparency.alpha_floattexturename
                         texture = bpy.data.textures[texture_name]
+                        # TODO: implement with new interface
                         alpha = self.ConvertTexture(texture, ToValidLuxCoreName(texture_name + material.name + '_alpha'))
 
                         self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', ['alpha']))

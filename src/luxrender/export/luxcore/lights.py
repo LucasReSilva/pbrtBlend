@@ -52,11 +52,6 @@ class LightExporter(object):
     def convert(self):
         # Remove old properties
         self.properties = pyluxcore.Properties()
-
-        # Debug test
-        #self.properties.Set(pyluxcore.Property('scene.lights.test_light.type', ['infinite']))
-        #self.properties.Set(pyluxcore.Property('scene.lights.test_light.file', ['F:/Users/Simon_2/Projekte/Blender/00_Resources/HDRIs/empty_room/medium_res.hdr']))
-        #self.luxcore_name = 'test_light'
         
         self.__convert_light()
 

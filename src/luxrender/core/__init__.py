@@ -2092,13 +2092,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.luxcore_exporter.convert_object(ob, update_mesh=True, update_material=False)
 
             if update_changes.cause_light or update_changes.cause_objectTransform:
-                # TODO: implement this with new interface
-
                 for ob in update_changes.changed_objects_transform:
                     LuxLog('Transformation update: ' + ob.name)
 
-                    converter.ConvertObject(ob, preview = True, update_mesh = False, update_transform = True,
-                                            update_material = False)
+                    self.luxcore_exporter.convert_object(ob, update_mesh=False, update_material=False)
 
             if update_changes.cause_objectsRemoved:
                 # TODO: implement this with new interface
