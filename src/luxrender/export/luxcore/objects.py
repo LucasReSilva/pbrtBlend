@@ -199,7 +199,7 @@ class ObjectExporter(object):
         use_pointiness = False
         for mat_slot in self.blender_object.material_slots:
             for tex_slot in mat_slot.material.texture_slots:
-                if tex_slot and tex_slot.texture.luxrender_texture.type == 'pointiness':
+                if tex_slot and tex_slot.texture and tex_slot.texture.luxrender_texture.type == 'pointiness':
                     use_pointiness = True
                     break
 

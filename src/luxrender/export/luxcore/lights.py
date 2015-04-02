@@ -33,6 +33,7 @@ from ...export import is_obj_visible
 from ...export import ParamSet
 from ...export import get_worldscale
 from ...export import matrix_to_list
+from ...export import get_expanded_file_name
 
 from . import convert_param_to_luxcore_property
 
