@@ -33,6 +33,7 @@ from ...export import is_obj_visible
 from ...export import ParamSet
 from ...export import get_worldscale
 from ...export import matrix_to_list
+from ...export import get_expanded_file_name
 
 from . import convert_param_to_luxcore_property
 
@@ -51,11 +52,6 @@ class LightExporter(object):
     def convert(self):
         # Remove old properties
         self.properties = pyluxcore.Properties()
-
-        # Debug test
-        #self.properties.Set(pyluxcore.Property('scene.lights.test_light.type', ['infinite']))
-        #self.properties.Set(pyluxcore.Property('scene.lights.test_light.file', ['F:/Users/Simon_2/Projekte/Blender/00_Resources/HDRIs/empty_room/medium_res.hdr']))
-        #self.luxcore_name = 'test_light'
         
         self.__convert_light()
 

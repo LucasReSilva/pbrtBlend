@@ -39,7 +39,7 @@ from .lights import LightExporter       # ported to new interface, but crucial r
 from .materials import MaterialExporter # some features missing
 from .meshes import MeshExporter        # finished
 from .objects import ObjectExporter     # some features missing
-from .textures import TextureExporter   # not started
+from .textures import TextureExporter   # some features missing
 from .volumes import VolumeExporter     # finished
 
 
