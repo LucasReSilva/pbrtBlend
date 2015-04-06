@@ -115,7 +115,7 @@ class LuxCoreExporter(object):
             print(self.config_properties)
             print(self.scene_properties)
 
-        self.luxcore_scene.Parse(self.scene_properties)
+        self.luxcore_scene.Parse(self.pop_updated_scene_properties())
         luxcore_config = pyluxcore.RenderConfig(self.config_properties, self.luxcore_scene)
 
         end_time = time.time() - start_time
