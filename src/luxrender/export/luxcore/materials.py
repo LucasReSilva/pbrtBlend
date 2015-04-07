@@ -31,6 +31,7 @@ from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 
 from . import convert_texture_channel
+from .textures import TextureExporter
 
 
 DEFAULT_MATTE = 'DEFAULT_MATTE'
@@ -68,8 +69,7 @@ class MaterialExporter(object):
 
 
     def __convert_default_null(self):
-        self.luxcore_name = DEFAULT_NULL
-        self.properties.Set(pyluxcore.Property('scene.materials.' + self.luxcore_name + '.type', 'null'))
+        self.properties.Set(pyluxcore.Property('scene.materials.' + DEFAULT_NULL + '.type', 'null'))
 
 
     def __set_material_volumes(self, prefix):
@@ -557,15 +557,14 @@ class MaterialExporter(object):
                             self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
 
             # alpha transparency
-            # TODO: make sure this works in the new interface after refactoring
             name_mix = self.luxcore_name + '_alpha_mix'
 
             if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
                 use_alpha_transparency = True
 
-                self.__convert_default_null()
+                alpha = 0.0
 
-                alpha = [0.0]
+                self.__convert_default_null()
 
                 sourceMap = {
                     'carpaint': 'Kd',
@@ -588,14 +587,16 @@ class MaterialExporter(object):
                     if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
                         texture_name = material.luxrender_transparency.alpha_floattexturename
                         texture = bpy.data.textures[texture_name]
-                        # TODO: implement with new interface
-                        alpha = self.ConvertTexture(texture, ToValidLuxCoreName(texture_name + material.name + '_alpha'))
 
+                        alpha_tex_exporter = TextureExporter(self.luxcore_exporter, self.blender_scene, texture)
+                        alpha_tex_exporter.convert(texture_name + material.name + '_alpha')
+                        alpha = alpha_tex_exporter.luxcore_name
+
+                        self.properties.Set(alpha_tex_exporter.properties)
                         self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', ['alpha']))
 
                         if material.luxrender_transparency.inverse:
-                            sv = BlenderSceneConverter.next_scale_value()
-                            inverter_name = alpha + '_inverter_' + str(sv)
+                            inverter_name = alpha + '_inverter'
                             inverter_prefix = 'scene.textures.' + inverter_name
 
                             self.properties.Set(pyluxcore.Property(inverter_prefix + '.type', ['mix']))
@@ -617,7 +618,11 @@ class MaterialExporter(object):
                         # Get blender texture
                         texture = bpy.data.textures[texture_name]
                         # Export texture, get luxcore texture name
-                        alpha = self.ConvertTexture(texture, ToValidLuxCoreName(texture_name + material.name + '_alpha'))
+                        alpha_tex_exporter = TextureExporter(self.luxcore_exporter, self.blender_scene, texture)
+                        alpha_tex_exporter.convert(texture_name + material.name + '_alpha')
+                        alpha = alpha_tex_exporter.luxcore_name
+
+                        self.properties.Set(alpha_tex_exporter.properties)
 
                         channelMap = {
                             'diffusealpha': 'alpha',

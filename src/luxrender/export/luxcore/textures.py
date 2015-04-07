@@ -46,11 +46,11 @@ class TextureExporter(object):
         self.luxcore_name = ''
 
 
-    def convert(self):
+    def convert(self, name=''):
         # Remove old properties
         self.properties = pyluxcore.Properties()
 
-        self.__convert_texture()
+        self.__convert_texture(name)
 
         return self.properties
 
@@ -133,11 +133,12 @@ class TextureExporter(object):
             self.luxcore_name = ramp_luxcore_name
 
 
-    def __convert_texture(self):
+    def __convert_texture(self, name=''):
         texture = self.texture
 
         texType = texture.luxrender_texture.type
-        self.luxcore_name = ToValidLuxCoreName(texture.name)
+
+        self.luxcore_name = ToValidLuxCoreName(texture.name) if name == '' else ToValidLuxCoreName(name)
         prefix = 'scene.textures.' + self.luxcore_name
 
         if texType == 'BLENDER':
