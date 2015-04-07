@@ -402,7 +402,7 @@ class TextureExporter(object):
                         self.properties.Set(pyluxcore.Property(prefix + '.offset%d' % i,
                                                      [float(getattr(luxTex, 'offset%s%s' % (luxTex.variant, str(i + 1))))]))
 
-                        spectrum = convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex%s' % str(i + 1), luxTex.variant).split(' ')
+                        spectrum = convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex%s' % str(i + 1), luxTex.variant)
                         if len(spectrum) == 3:
                             value = spectrum
                         else:
