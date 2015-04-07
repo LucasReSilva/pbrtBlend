@@ -101,13 +101,13 @@ class LightExporter(object):
             if lightgroup_enabled:
                 energy *= self.blender_scene.luxrender_lightgroups.lightgroups[lightgroup].gain
     
-                if lightgroup in self.lightgroups_cache:
+                if lightgroup in self.luxcore_exporter.lightgroup_cache:
                     # lightgroup already has a luxcore id, use it
-                    lightgroup_id = self.lightgroups_cache[lightgroup]
+                    lightgroup_id = self.luxcore_exporter.lightgroup_cache[lightgroup]
                 else:
                     # this is the first material to use this lightgroup, add an entry with a new id
-                    lightgroup_id = len(self.lightgroups_cache)
-                    self.lightgroups_cache[lightgroup] = lightgroup_id
+                    lightgroup_id = len(self.luxcore_exporter.lightgroup_cache)
+                    self.luxcore_exporter.lightgroup_cache[lightgroup] = lightgroup_id
             else:
                 energy = 0  # use gain for muting to keep geometry exported
     

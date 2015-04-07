@@ -69,7 +69,7 @@ class LuxCoreExporter(object):
         # All property changes since last pop_updated_scene_properties()
         self.updated_scene_properties = pyluxcore.Properties()
 
-        # Permanent caches
+        # Permanent caches, structure: {element: ElementExporter}
         #self.dupli_cache = {}
         self.light_cache = {}
         self.material_cache = {}
@@ -78,13 +78,16 @@ class LuxCoreExporter(object):
         self.texture_cache = {}
         self.volume_cache = {}
 
+        # Namecache to map an ascending number to each lightgroup name
+        self.lightgroup_cache = {}
+
         # Temporary caches to avoid multiple exporting
         self.temp_material_cache = []
         self.temp_texture_cache = []
         self.temp_volume_cache = []
 
         # Special exporters that are not stored in caches (because there's only one camera and config)
-        self.config_exporter = ConfigExporter(self.blender_scene, self.is_viewport_render)
+        self.config_exporter = ConfigExporter(self, self.blender_scene, self.is_viewport_render)
         self.camera_exporter = CameraExporter(self.blender_scene, self.is_viewport_render, self.context)
 
 
@@ -109,8 +112,6 @@ class LuxCoreExporter(object):
         """
         start_time = time.time()
 
-        self.convert_config(film_width, film_height)
-
         self.convert_camera()
 
         self.__convert_world_volume()
@@ -122,6 +123,9 @@ class LuxCoreExporter(object):
                 break
 
             self.convert_object(blender_object)
+
+        # Convert config at last so all lightgroups are defined
+        self.convert_config(film_width, film_height)
 
         # Debug output
         if self.blender_scene.luxcore_translatorsettings.print_config:

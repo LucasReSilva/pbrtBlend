@@ -28,7 +28,8 @@
 from ...outputs.luxcore_api import pyluxcore
 
 class ConfigExporter(object):
-    def __init__(self, blender_scene, is_viewport_render=False):
+    def __init__(self, luxcore_exporter, blender_scene, is_viewport_render=False):
+        self.luxcore_exporter = luxcore_exporter
         self.blender_scene = blender_scene
         self.is_viewport_render = is_viewport_render
         
@@ -402,5 +403,5 @@ class ConfigExporter(object):
 
     def __convert_lightgroups(self):
         if not self.blender_scene.luxrender_lightgroups.ignore:
-            for i in range(len(self.lightgroups_cache)):
+            for i in range(len(self.luxcore_exporter.lightgroup_cache)):
                 self.__convert_channel('RADIANCE_GROUP', i)
