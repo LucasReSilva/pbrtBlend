@@ -507,29 +507,30 @@ class MaterialExporter(object):
                 self.luxcore_name = name_coating
 
             # LuxCore specific material settings
-            # TODO: make sure this works in the new interface after refactoring
-            if material.luxcore_material.id != -1:
-                self.properties.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
-                if material.luxcore_material.create_MATERIAL_ID_MASK and self.blender_scene.luxrender_channels.enable_aovs:
-                    self.createChannelOutputString('MATERIAL_ID_MASK', material.luxcore_material.id)
-                if material.luxcore_material.create_BY_MATERIAL_ID and self.blender_scene.luxrender_channels.enable_aovs:
-                    self.createChannelOutputString('BY_MATERIAL_ID', material.luxcore_material.id)
+            lc_mat = material.luxcore_material
 
-            self.properties.Set(pyluxcore.Property(prefix + '.samples', [material.luxcore_material.samples]))
-            self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [material.luxcore_material.emission_samples]))
-            self.properties.Set(
-                pyluxcore.Property(prefix + '.bumpsamplingdistance', [material.luxcore_material.bumpsamplingdistance]))
+            if lc_mat.id != -1 and not self.luxcore_exporter.is_viewport_render:
+                self.properties.Set(pyluxcore.Property(prefix + '.id', [lc_mat.id]))
+                if lc_mat.create_MATERIAL_ID_MASK and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('MATERIAL_ID_MASK', lc_mat.id)
+                if lc_mat.create_BY_MATERIAL_ID and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', lc_mat.id)
+
+            self.properties.Set(pyluxcore.Property(prefix + '.samples', [lc_mat.samples]))
+            self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [lc_mat.emission_samples]))
+
+            if lc_mat.advanced:
+                self.properties.Set(pyluxcore.Property(prefix + '.bumpsamplingdistance', [lc_mat.bumpsamplingdistance]))
 
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.diffuse.enable',
-                                         material.luxcore_material.visibility_indirect_diffuse_enable))
+                                         lc_mat.visibility_indirect_diffuse_enable))
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.glossy.enable',
-                                         material.luxcore_material.visibility_indirect_glossy_enable))
+                                         lc_mat.visibility_indirect_glossy_enable))
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.specular.enable',
-                                         material.luxcore_material.visibility_indirect_specular_enable))
+                                         lc_mat.visibility_indirect_specular_enable))
 
             if not (translator_settings.override_materials and translator_settings.override_lights):
                 # LuxRender emission
-                # TODO: make this work after refactoring
                 if material.luxrender_emission.use_emission:
                     emit_enabled = self.blender_scene.luxrender_lightgroups.is_enabled(material.luxrender_emission.lightgroup)
                     emit_enabled &= (material.luxrender_emission.L_color.v * material.luxrender_emission.gain) > 0.0
