@@ -1092,7 +1092,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # Show remaining time until next film update (final render only)
         if not realtime_preview and time_until_update > 0.0:
-            stats_list.append('Next update in %.1fs' % (time_until_update))
+            stats_list.append('Next update in %ds' % math.ceil(time_until_update))
         elif time_until_update != -1:
             stats_list.append('Updating preview...')
                 
