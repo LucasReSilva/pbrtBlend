@@ -599,6 +599,37 @@ class TextureExporter(object):
             ####################################################################
             elif texType == 'pointiness':
                 self.properties.Set(pyluxcore.Property(prefix + '.type', 'hitpointalpha'))
+
+                if luxTex.curvature_mode == 'both':
+                    name_abs = self.luxcore_name + '_abs'
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_abs + '.type', 'abs'))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_abs + '.texture', self.luxcore_name))
+
+                    self.luxcore_name = name_abs
+
+                elif luxTex.curvature_mode == 'concave':
+                    name_clamp = self.luxcore_name + '_clamp'
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.type', 'clamp'))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.texture', self.luxcore_name))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.min', 0.0))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.max', 1.0))
+
+                    self.luxcore_name = name_clamp
+
+                elif luxTex.curvature_mode == 'convex':
+                    name_flip = self.luxcore_name + '_flip'
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_flip + '.type', 'scale'))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_flip + '.texture1', self.luxcore_name))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_flip + '.texture2', -1.0))
+
+                    name_clamp = self.luxcore_name + '_clamp'
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.type', 'clamp'))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.texture', name_flip))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.min', 0.0))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.max', 1.0))
+
+                    self.luxcore_name = name_clamp
+
             ####################################################################
             # Fallback to exception
             ####################################################################
