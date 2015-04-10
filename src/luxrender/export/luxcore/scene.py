@@ -44,7 +44,7 @@ from .volumes import VolumeExporter     # finished
 
 
 class LuxCoreExporter(object):
-    def __init__(self, blender_scene, renderengine, luxcore_session=None, is_viewport_render=False, context=None):
+    def __init__(self, blender_scene, renderengine, is_viewport_render=False, context=None):
         """
         Main exporter class. Only one instance should be used per rendering session.
         To update the rendering on the fly, convert the needed objects/materials etc., then get all updated properties
@@ -54,15 +54,20 @@ class LuxCoreExporter(object):
 
         self.blender_scene = blender_scene
         self.renderengine = renderengine
-        self.luxcore_session = luxcore_session
+        #self.luxcore_session = luxcore_session
         self.is_viewport_render = is_viewport_render
         self.context = context
 
+        '''
         if luxcore_session is not None:
             self.luxcore_scene = luxcore_session.GetRenderConfig().GetScene()
         else:
             imageScale = self.blender_scene.luxcore_scenesettings.imageScale
             self.luxcore_scene = pyluxcore.Scene(imageScale)
+        '''
+
+        self.luxcore_session = None
+        self.luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
 
         self.config_properties = pyluxcore.Properties()
         self.scene_properties = pyluxcore.Properties()
@@ -110,6 +115,7 @@ class LuxCoreExporter(object):
         """
         Convert the whole scene
         """
+
         start_time = time.time()
 
         self.convert_camera()
@@ -124,7 +130,7 @@ class LuxCoreExporter(object):
 
             self.convert_object(blender_object)
 
-        # Convert config at last so all lightgroups are defined
+        # Convert config at last so all lightgroups and passes are defined
         self.convert_config(film_width, film_height)
 
         # Debug output
@@ -132,12 +138,14 @@ class LuxCoreExporter(object):
             print(self.config_properties)
             print(self.scene_properties)
 
+        # Parse scene properties and create LuxCore config and session
         self.luxcore_scene.Parse(self.pop_updated_scene_properties())
         luxcore_config = pyluxcore.RenderConfig(self.config_properties, self.luxcore_scene)
+        self.luxcore_session = pyluxcore.RenderSession(luxcore_config)
 
         end_time = time.time() - start_time
         print('Export took %.1fs' % end_time)
-        return luxcore_config
+        return self.luxcore_session
 
 
     def convert_camera(self):

@@ -1412,9 +1412,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             filmWidth, filmHeight = self.get_film_size(scene)
 
             luxcore_exporter = LuxCoreExporter(scene, self)
-            lcConfig = luxcore_exporter.convert(filmWidth, filmHeight)
+            lcSession = luxcore_exporter.convert(filmWidth, filmHeight)
+            lcConfig = lcSession.GetRenderConfig()
 
-            lcSession = pyluxcore.RenderSession(lcConfig)
+            # maybe export was cancelled by user, don't start the rendering with an incomplete scene then
+            if self.test_break():
+                return
             
             imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
 
@@ -1821,11 +1824,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 if len(objectsToAdd) > 0:
                     update_changes.set_cause(mesh = True)
-                    update_changes.changed_objects_mesh.extend(objectsToAdd)
+                    update_changes.changed_objects_mesh.update(objectsToAdd)
 
                 if len(objectsToRemove) > 0:
                     update_changes.set_cause(objectsRemoved = True)
-                    update_changes.removed_objects.extend(objectsToRemove)
+                    update_changes.removed_objects.update(objectsToRemove)
 
             self.lastVisibilitySettings = set(context.visible_objects)
 
@@ -1836,7 +1839,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 update_changes.set_cause(startViewportRender = True)
 
                 # LuxCoreExporter instance for viewport rendering is only created here
-                self.luxcore_exporter = LuxCoreExporter(context.scene, self, self.viewSession, True, context)
+                self.luxcore_exporter = LuxCoreExporter(context.scene, self, True, context)
 
             # check if filmsize has changed
             if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
@@ -1853,10 +1856,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     if ob.is_updated_data:
                         if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
                             update_changes.set_cause(mesh = True)
-                            update_changes.changed_objects_mesh.append(ob)
+                            update_changes.changed_objects_mesh.add(ob)
                         elif ob.type in ['LAMP']:
                             update_changes.set_cause(light = True)
-                            update_changes.changed_objects_transform.append(ob)
+                            update_changes.changed_objects_transform.add(ob)
                         elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
                             update_changes.set_cause(camera = True, config = True)
 
@@ -1865,39 +1868,28 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             # check if a new material was assigned
                             if ob.data is not None and ob.data.is_updated:
                                 update_changes.set_cause(mesh = True)
-                                update_changes.changed_objects_mesh.append(ob)
+                                update_changes.changed_objects_mesh.add(ob)
                             else:
                                 update_changes.set_cause(objectTransform = True)
-                                update_changes.changed_objects_transform.append(ob)
+                                update_changes.changed_objects_transform.add(ob)
                         elif ob.type in ['LAMP']:
                             update_changes.set_cause(light = True)
-                            update_changes.changed_objects_transform.append(ob)
+                            update_changes.changed_objects_transform.add(ob)
                         elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
                             update_changes.set_cause(camera = True)
 
             if bpy.data.materials.is_updated:
                 for mat in bpy.data.materials:
                     if mat.is_updated:
-                        if mat.luxrender_emission.use_emission:
-                            # re-export users of this material to prevent pyluxcore crash
-                            # TODO: remove if no longer needed
-                            for ob in bpy.data.objects:
-                                for slot in ob.material_slots:
-                                    if slot.material == mat:
-                                        update_changes.changed_objects_mesh.append(ob)
-
-                            if len(update_changes.changed_objects_mesh) > 0:
-                                update_changes.set_cause(mesh = True)
-                        else:
-                            # material is not emitting light, only update this material
-                            update_changes.changed_materials.append(mat)
-                            update_changes.set_cause(materials = True)
+                        # only update this material
+                        update_changes.changed_materials.add(mat)
+                        update_changes.set_cause(materials = True)
 
             if bpy.data.textures.is_updated:
                 for tex in bpy.data.textures:
                     if tex.is_updated:
                         for mat in tex.users_material:
-                            update_changes.changed_materials.append(mat)
+                            update_changes.changed_materials.add(mat)
                             update_changes.set_cause(materials = True)
 
             self.luxcore_exporter.convert_camera()
@@ -2007,18 +1999,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 LuxLog('Starting viewport render')
 
-                # Export the Blender scene
-                self.lcConfig = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)
-
                 if self.viewSessionRunning:
                     self.viewSession.Stop()
                     self.viewSessionRunning = False
-                self.viewSession = None
 
-                self.lcConfig.Parse(pyluxcore.Properties().
-                            Set(pyluxcore.Property('film.width', [self.viewFilmWidth])).
-                            Set(pyluxcore.Property('film.height', [self.viewFilmHeight])))
-                self.viewSession = pyluxcore.RenderSession(self.lcConfig)
+                # Export the Blender scene
+                self.viewSession = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)
+                self.lcConfig = self.viewSession.GetRenderConfig()
+
+                if self.test_break():
+                    return
 
                 self.viewSession.Start()
                 self.viewSessionRunning = True
@@ -2057,6 +2047,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.lcConfig.Parse(self.luxcore_exporter.config_properties)
 
                 self.viewSession = pyluxcore.RenderSession(self.lcConfig)
+                self.luxcore_exporter.luxcore_session = self.viewSession
 
                 self.viewSession.Start()
                 self.viewSessionRunning = True
@@ -2168,10 +2159,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             
 class UpdateChanges(object):
     def __init__(self):
-        self.changed_objects_transform = []
-        self.changed_objects_mesh = []
-        self.changed_materials = []
-        self.removed_objects = []
+        self.changed_objects_transform = set()
+        self.changed_objects_mesh = set()
+        self.changed_materials = set()
+        self.removed_objects = set()
         
         self.cause_unknown = True
         self.cause_startViewportRender = False

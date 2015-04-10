@@ -149,7 +149,7 @@ class ObjectExporter(object):
         if obj.data in self.luxcore_exporter.mesh_cache:
             # Check if object is in cache
             if obj in self.luxcore_exporter.object_cache:
-                print('[%s] object and mesh already in cache' % obj.name)
+                #print('[%s] object and mesh already in cache' % obj.name)
 
                 if update_mesh:
                     self.luxcore_exporter.convert_mesh(obj)
@@ -160,13 +160,13 @@ class ObjectExporter(object):
                     self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
             else:
                 # Mesh is in cache, but not this object
-                print('[%s] mesh in cache, but not object' % obj.name)
+                #print('[%s] mesh in cache, but not object' % obj.name)
                 mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
 
                 self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
         else:
             # Mesh not in cache
-            print('[%s] mesh and object not in cache' % obj.name)
+            #print('[%s] mesh and object not in cache' % obj.name)
             self.luxcore_exporter.convert_mesh(obj)
 
             mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
@@ -186,7 +186,7 @@ class ObjectExporter(object):
                 print('WARNING: material slot %d on object "%s" is unassigned!' % (shape.material_index + 1, self.blender_object.name))
 
             # Convert material
-            if update_material:
+            if update_material or material not in self.luxcore_exporter.material_cache:
                 self.luxcore_exporter.convert_material(material)
             material_exporter = self.luxcore_exporter.material_cache[material]
             luxcore_material_name = material_exporter.luxcore_name
