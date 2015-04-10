@@ -1622,17 +1622,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
                                        'BY_MATERIAL_ID', channels.saveToDisk, buffer_id = i)
 
-        from ..outputs.luxcore_api import LUXCORE_VERSION
-        # crashes in 1.4
-        if LUXCORE_VERSION[:3] >= '1.5':
-            # Convert all RADIANCE_GROUP channels
-            lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
+        # Convert all RADIANCE_GROUP channels
+        lightgroup_count = lcSession.GetFilm().GetRadianceGroupCount()
 
-            # don't import the standard lightgroup that contains all lights even if no groups are set
-            if lightgroup_count > 1:
-                for i in range(lightgroup_count):
-                    self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
-                                               'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
+        # don't import the standard lightgroup that contains all lights even if no groups are set
+        if lightgroup_count > 1:
+            for i in range(lightgroup_count):
+                self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                                           'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
 
         channelCalcTime = time.time() - channelCalcStartTime
         LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)

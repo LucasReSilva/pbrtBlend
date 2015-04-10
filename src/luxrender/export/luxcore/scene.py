@@ -54,17 +54,8 @@ class LuxCoreExporter(object):
 
         self.blender_scene = blender_scene
         self.renderengine = renderengine
-        #self.luxcore_session = luxcore_session
         self.is_viewport_render = is_viewport_render
         self.context = context
-
-        '''
-        if luxcore_session is not None:
-            self.luxcore_scene = luxcore_session.GetRenderConfig().GetScene()
-        else:
-            imageScale = self.blender_scene.luxcore_scenesettings.imageScale
-            self.luxcore_scene = pyluxcore.Scene(imageScale)
-        '''
 
         self.luxcore_session = None
         self.luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
@@ -87,9 +78,9 @@ class LuxCoreExporter(object):
         self.lightgroup_cache = {}
 
         # Temporary caches to avoid multiple exporting
-        self.temp_material_cache = []
-        self.temp_texture_cache = []
-        self.temp_volume_cache = []
+        self.temp_material_cache = set()
+        self.temp_texture_cache = set()
+        self.temp_volume_cache = set()
 
         # Special exporters that are not stored in caches (because there's only one camera and config)
         self.config_exporter = ConfigExporter(self, self.blender_scene, self.is_viewport_render)
@@ -104,9 +95,9 @@ class LuxCoreExporter(object):
         self.updated_scene_properties = pyluxcore.Properties()
 
         # Clear temporary caches
-        self.temp_material_cache = []
-        self.temp_texture_cache = []
-        self.temp_volume_cache = []
+        self.temp_material_cache = set()
+        self.temp_texture_cache = set()
+        self.temp_volume_cache = set()
 
         return updated_properties
 
@@ -119,14 +110,20 @@ class LuxCoreExporter(object):
         start_time = time.time()
 
         self.convert_camera()
-
         self.__convert_world_volume()
 
         # Materials, textures, lights and meshes are all converted by their respective Blender object
+        object_amount = len(self.blender_scene.objects)
+        object_counter = 0
+
         for blender_object in self.blender_scene.objects:
             if self.renderengine.test_break():
                 print('EXPORT CANCELLED BY USER')
                 break
+
+            object_counter += 1
+            self.renderengine.update_stats('Exporting...', 'Object: ' + blender_object.name)
+            self.renderengine.update_progress(object_counter / object_amount)
 
             self.convert_object(blender_object)
 
@@ -143,8 +140,13 @@ class LuxCoreExporter(object):
         luxcore_config = pyluxcore.RenderConfig(self.config_properties, self.luxcore_scene)
         self.luxcore_session = pyluxcore.RenderSession(luxcore_config)
 
-        end_time = time.time() - start_time
-        print('Export took %.1fs' % end_time)
+        # Show message in Blender UI
+        export_time = time.time() - start_time
+        print('Export took %.1fs' % export_time)
+        engine = self.blender_scene.luxcore_enginesettings.renderengine_type
+        message = 'Compiling OpenCL Kernels...' if 'OCL' in engine else 'Starting LuxRender...'
+        self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
+
         return self.luxcore_session
 
 
@@ -191,7 +193,7 @@ class LuxCoreExporter(object):
         if material in self.temp_material_cache:
             return
         else:
-            self.temp_material_cache.append(material)
+            self.temp_material_cache.add(material)
 
         exporter = MaterialExporter(self, self.blender_scene, material)
         self.__convert_element(material, self.material_cache, exporter)
@@ -201,7 +203,7 @@ class LuxCoreExporter(object):
         if texture in self.temp_texture_cache:
             return
         else:
-            self.temp_texture_cache.append(texture)
+            self.temp_texture_cache.add(texture)
 
         exporter = TextureExporter(self, self.blender_scene, texture)
         self.__convert_element(texture, self.texture_cache, exporter)
@@ -216,7 +218,7 @@ class LuxCoreExporter(object):
         if volume in self.temp_volume_cache:
             return
         else:
-            self.temp_volume_cache.append(volume)
+            self.temp_volume_cache.add(volume)
 
         exporter = VolumeExporter(self, self.blender_scene, volume)
         self.__convert_element(volume, self.volume_cache, exporter)

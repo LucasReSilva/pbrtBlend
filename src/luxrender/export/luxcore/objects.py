@@ -97,7 +97,7 @@ class ObjectExporter(object):
             name = ToValidLuxCoreName(obj.name)
 
             # Convert material
-            if update_material:
+            if update_material or obj.active_material not in self.luxcore_exporter.material_cache:
                 self.luxcore_exporter.convert_material(obj.active_material)
             material_exporter = self.luxcore_exporter.material_cache[obj.active_material]
             luxcore_material_name = material_exporter.luxcore_name
