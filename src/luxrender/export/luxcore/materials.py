@@ -85,9 +85,9 @@ class MaterialExporter(object):
             self.__set_volume(prefix + '.volume.interior', scene_volumes[default_interior])
 
         if exterior in scene_volumes:
-            self.__set_volume(prefix + '.volume.interior', scene_volumes[exterior])
+            self.__set_volume(prefix + '.volume.exterior', scene_volumes[exterior])
         elif default_exterior in scene_volumes:
-            self.__set_volume(prefix + '.volume.interior', scene_volumes[default_exterior])
+            self.__set_volume(prefix + '.volume.exterior', scene_volumes[default_exterior])
 
 
     def __set_volume(self, prop_string, volume):
