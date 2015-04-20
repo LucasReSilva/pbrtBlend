@@ -103,6 +103,8 @@ _register_elm(bl_ui.properties_render.RENDER_PT_dimensions, required=True)
 _register_elm(bl_ui.properties_render.RENDER_PT_output, required=True)
 _register_elm(bl_ui.properties_render.RENDER_PT_stamp)
 
+#_register_elm(bl_ui.properties_render_layer.RENDERLAYER_PT_views) # multiview
+
 _register_elm(bl_ui.properties_scene.SCENE_PT_scene, required=True)
 _register_elm(bl_ui.properties_scene.SCENE_PT_audio)
 _register_elm(bl_ui.properties_scene.SCENE_PT_physics)  # This is the gravity panel

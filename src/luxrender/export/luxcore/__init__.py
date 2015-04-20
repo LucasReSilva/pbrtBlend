@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import math
+from  math import pi
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
@@ -116,8 +116,8 @@ def calc_shutter(blender_scene, lux_camera_settings):
         shutter_open = lux_camera_settings.exposure_start_abs
         shutter_close = lux_camera_settings.exposure_end_abs
     elif lux_camera_settings.exposure_mode == 'degrees':
-        shutter_open = lux_camera_settings.exposure_degrees_start / (fps * 2 * math.pi)
-        shutter_close = lux_camera_settings.exposure_degrees_end / (fps * 2 * math.pi)
+        shutter_open = lux_camera_settings.exposure_degrees_start / (fps * 2 * pi)
+        shutter_close = lux_camera_settings.exposure_degrees_end / (fps * 2 * pi)
     else:
         raise Exception('exposure mode "%s" not supported' % lux_camera_settings.exposure_mode)
 
