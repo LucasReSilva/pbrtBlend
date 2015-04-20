@@ -1946,6 +1946,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             return
 
         if self.test_break() or context.scene.luxrender_engine.preview_stop:
+            print("stopping view update")
             return
 
         print('\n###########################################################')
@@ -1970,7 +1971,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if self.viewSession is not None and self.sceneEditActive:
                 self.viewSession.EndSceneEdit()
                 self.sceneEditActive = False
-                print('EndSceneEdit() (render was paused)')
+                print('EndSceneEdit() (resuming paused render)')
 
         update_changes.print_updates()
 
@@ -1990,6 +1991,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.lastVisibilitySettings = None
                 self.update_counter = 0
 
+                LuxManager.SetCurrentScene(context.scene)
+
                 self.viewFilmWidth = context.region.width
                 self.viewFilmHeight = context.region.height
                 self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
@@ -1999,13 +2002,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 if self.viewSessionRunning:
                     self.viewSession.Stop()
                     self.viewSessionRunning = False
+                self.viewSession = None
 
                 # Export the Blender scene
                 self.viewSession = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)
                 self.lcConfig = self.viewSession.GetRenderConfig()
-
-                if self.test_break():
-                    return
 
                 self.viewSession.Start()
                 self.viewSessionRunning = True
@@ -2152,7 +2153,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
         LuxLog('Dynamic updates: update took %dms' % view_update_time)
-
             
 class UpdateChanges(object):
     def __init__(self):
