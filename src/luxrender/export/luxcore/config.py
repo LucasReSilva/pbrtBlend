@@ -25,7 +25,10 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
+import os
+
 from ...outputs.luxcore_api import pyluxcore
+from ...extensions_framework import util as efutil
 
 class ConfigExporter(object):
     def __init__(self, luxcore_exporter, blender_scene, is_viewport_render=False):
