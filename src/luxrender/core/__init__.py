@@ -1440,7 +1440,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
             LuxLog('Recommended minimum display interval: %.1fs' % display_interval)
 
-            while not self.test_break() and not done:
+            while not self.test_break() and not done and bpy.context.space_data.viewport_shade == "RENDERED":
                 time.sleep(0.2)
 
                 now = time.time()
