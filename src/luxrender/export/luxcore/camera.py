@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import math, mathutils
+import bpy, math, mathutils
 
 from ...outputs.luxcore_api import pyluxcore
 from ...export import get_worldscale
