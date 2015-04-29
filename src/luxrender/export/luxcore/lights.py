@@ -35,7 +35,7 @@ from ...export import get_worldscale
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
 
-from . import convert_param_to_luxcore_property
+from .utils import convert_param_to_luxcore_property
 
 
 class LightExporter(object):

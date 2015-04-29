@@ -52,7 +52,7 @@ from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
 from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore, pyluxcore
-from ..export.luxcore.scene import LuxCoreExporter
+from ..export.luxcore import LuxCoreExporter
 
 # Exporter Property Groups need to be imported to ensure initialisation
 from ..properties import (

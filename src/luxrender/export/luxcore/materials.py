@@ -30,7 +30,7 @@ import bpy
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 
-from . import convert_texture_channel
+from .utils import convert_texture_channel
 from .textures import TextureExporter
 
 

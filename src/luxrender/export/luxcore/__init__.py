@@ -25,101 +25,258 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-from  math import pi
+import bpy, time
+
+from ...outputs import LuxManager, LuxLog
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
-from ...export.materials import get_texture_from_scene
+
+# TODO: remove refactoring state comments
+from .camera import CameraExporter      # finished
+from .config import ConfigExporter      # finished
+from .duplis import DupliExporter       # needs testing
+from .lights import LightExporter       # ported to new interface, but crucial refactoring/cleanup still missing
+from .materials import MaterialExporter # some features missing
+from .meshes import MeshExporter        # finished
+from .objects import ObjectExporter     # some features missing
+from .textures import TextureExporter   # finished
+from .volumes import VolumeExporter     # finished
 
 
-class ScaleTextureHandler(object):
-    # TODO: instead of incrementing the scale counter, generate a unique name for each scale texture with
-    # TODO: e.g. material_name + channel_name + texture_name ("rocks_Kd_rocks-diffuse")
-    scale_texture_counter = 0
+class LuxCoreExporter(object):
+    def __init__(self, blender_scene, renderengine, is_viewport_render=False, context=None):
+        """
+        Main exporter class. Only one instance should be used per rendering session.
+        To update the rendering on the fly, convert the needed objects/materials etc., then get all updated properties
+        with pop_updated_scene_properties() and parse them into the luxcore scene
+        """
+        LuxManager.SetCurrentScene(blender_scene)
 
-    @staticmethod
-    def next_scale_texture_name(base_texture_name):
-        name = '%s_scale_%i' % (base_texture_name, ScaleTextureHandler.scale_texture_counter)
-        ScaleTextureHandler.scale_texture_counter += 1
-        return name
+        self.blender_scene = blender_scene
+        self.renderengine = renderengine
+        self.is_viewport_render = is_viewport_render
+        self.context = context
 
+        self.luxcore_session = None
+        self.luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
 
-def convert_texture_channel(luxcore_exporter, properties, textured_element, channel, type):
-    """
-    :param luxcore_exporter: the luxcore_exporter instance of the calling texture/volume/material exporter
-    :param textured_element: material, volume, texture or anything else with attributes that can be textured
-    :param channel: name of the textured attribute, e.g. "Kd", "Ks" etc.
-    :param type: "color" or "float"
-    :return: name of the created texture or raw value if the channel is untextured
-    """
-    if type == 'color':
-        value = list(getattr(textured_element, '%s_color' % channel))
-    else:
-        value = getattr(textured_element, '%s_%svalue' % (channel, type))
+        self.config_properties = pyluxcore.Properties()
+        self.scene_properties = pyluxcore.Properties()
+        # All property changes since last pop_updated_scene_properties()
+        self.updated_scene_properties = pyluxcore.Properties()
 
-    if getattr(textured_element, '%s_use%stexture' % (channel, type)):
-        # The material attribute is textured, export the texture
-        texture_name = getattr(textured_element, '%s_%stexturename' % (channel, type))
-        texture = get_texture_from_scene(luxcore_exporter.blender_scene, texture_name)
+        # Permanent caches, structure: {element: ElementExporter}
+        self.dupli_cache = {}
+        self.light_cache = {}
+        self.material_cache = {}
+        self.mesh_cache = {}
+        self.object_cache = {}
+        self.texture_cache = {}
+        self.volume_cache = {}
 
-        if texture is not None:
-            luxcore_exporter.convert_texture(texture)
-            texture_exporter = luxcore_exporter.texture_cache[texture]
+        # Namecache to map an ascending number to each lightgroup name
+        self.lightgroup_cache = {}
 
-            is_multiplied = getattr(textured_element, '%s_multiply%s' % (channel, type))
+        # Temporary caches to avoid multiple exporting
+        self.temp_material_cache = set()
+        self.temp_texture_cache = set()
+        self.temp_volume_cache = set()
 
-            if is_multiplied:
-                scale_tex_name = create_scale_texture(properties, texture_exporter.luxcore_name, value)
-                return scale_tex_name
-            else:
-                return texture_exporter.luxcore_name
-    else:
-        # The material attribute is not textured, return base color/float value
-        return value
-
-    raise Exception(
-        'Unknown texture in channel' + channel + ' for material/volume/texture ' + textured_element.type)
+        # Special exporters that are not stored in caches (because there's only one camera and config)
+        self.config_exporter = ConfigExporter(self, self.blender_scene, self.is_viewport_render)
+        self.camera_exporter = CameraExporter(self.blender_scene, self.is_viewport_render, self.context)
 
 
-def create_scale_texture(properties, base_texture_name, multiplier):
-    scale_texture_name = ScaleTextureHandler.next_scale_texture_name(base_texture_name)
+    def pop_updated_scene_properties(self):
+        """
+        Get changed scene properties since last call of this function
+        """
+        updated_properties = pyluxcore.Properties(self.updated_scene_properties)
+        self.updated_scene_properties = pyluxcore.Properties()
 
-    properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.type', 'scale'))
-    properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.texture1', base_texture_name))
-    properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.texture2', multiplier))
+        # Clear temporary caches
+        self.temp_material_cache = set()
+        self.temp_texture_cache = set()
+        self.temp_volume_cache = set()
 
-    return scale_texture_name
-
-
-def convert_param_to_luxcore_property(param):
-    """
-    Convert Luxrender parameters of the form
-    ['float gain', 1.0]
-    to LuxCore property format
-
-    Returns list of parsed values without type specifier
-    e.g. ['gain', 1.0]
-    """
-
-    parsed = param[0].split(' ')
-    parsed.pop(0)
-
-    return [parsed[0], param[1]]
+        return updated_properties
 
 
-def calc_shutter(blender_scene, lux_camera_settings):
-    fps = blender_scene.render.fps / blender_scene.render.fps_base
+    def convert(self, film_width, film_height):
+        """
+        Convert the whole scene
+        """
 
-    if lux_camera_settings.exposure_mode == 'normalised':
-        shutter_open = lux_camera_settings.exposure_start_norm / fps
-        shutter_close = lux_camera_settings.exposure_end_norm / fps
-    elif lux_camera_settings.exposure_mode == 'absolute':
-        shutter_open = lux_camera_settings.exposure_start_abs
-        shutter_close = lux_camera_settings.exposure_end_abs
-    elif lux_camera_settings.exposure_mode == 'degrees':
-        shutter_open = lux_camera_settings.exposure_degrees_start / (fps * 2 * pi)
-        shutter_close = lux_camera_settings.exposure_degrees_end / (fps * 2 * pi)
-    else:
-        raise Exception('exposure mode "%s" not supported' % lux_camera_settings.exposure_mode)
+        start_time = time.time()
 
-    return shutter_open, shutter_close
+        self.convert_camera()
+        self.__convert_world_volume()
 
+        # Materials, textures, lights and meshes are all converted by their respective Blender object
+        object_amount = len(self.blender_scene.objects)
+        object_counter = 0
+
+        for blender_object in self.blender_scene.objects:
+            if self.renderengine.test_break():
+                print('EXPORT CANCELLED BY USER')
+                break
+
+            object_counter += 1
+            self.renderengine.update_stats('Exporting...', 'Object: ' + blender_object.name)
+            self.renderengine.update_progress(object_counter / object_amount)
+
+            self.convert_object(blender_object)
+
+        # Convert config at last so all lightgroups and passes are defined
+        self.convert_config(film_width, film_height)
+
+        # Debug output
+        if self.blender_scene.luxcore_translatorsettings.print_config:
+            print(self.config_properties)
+            print(self.scene_properties)
+
+        # Parse scene properties and create LuxCore config and session
+        self.luxcore_scene.Parse(self.pop_updated_scene_properties())
+        luxcore_config = pyluxcore.RenderConfig(self.config_properties, self.luxcore_scene)
+        self.luxcore_session = pyluxcore.RenderSession(luxcore_config)
+
+        # Show message in Blender UI
+        export_time = time.time() - start_time
+        print('Export took %.1fs' % export_time)
+        engine = self.blender_scene.luxcore_enginesettings.renderengine_type
+        message = 'Compiling OpenCL Kernels...' if 'OCL' in engine else 'Starting LuxRender...'
+        self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
+
+        return self.luxcore_session
+
+
+    def convert_camera(self):
+        camera_props_keys = self.camera_exporter.properties.GetAllNames()
+        self.scene_properties.DeleteAll(camera_props_keys)
+
+        self.camera_exporter.convert()
+        self.__set_scene_properties(self.camera_exporter.properties)
+
+
+    def convert_config(self, film_width, film_height):
+        config_props_keys = self.config_exporter.properties.GetAllNames()
+        self.config_properties.DeleteAll(config_props_keys)
+
+        self.config_exporter.convert(film_width, film_height)
+        self.config_properties.Set(self.config_exporter.properties)
+
+
+    def convert_object(self, blender_object, update_mesh=True, update_material=True):
+        cache = self.object_cache
+        exporter = ObjectExporter(self, self.blender_scene, self.luxcore_scene, self.is_viewport_render, blender_object)
+
+        if blender_object in cache:
+            exporter = cache[blender_object]
+            old_properties = exporter.properties.GetAllNames()
+
+            # Delete old scene properties
+            self.scene_properties.DeleteAll(old_properties)
+            self.updated_scene_properties.DeleteAll(old_properties)
+
+        new_properties = exporter.convert(update_mesh, update_material)
+        self.__set_scene_properties(new_properties)
+
+        cache[blender_object] = exporter
+
+
+    def convert_mesh(self, blender_object):
+        exporter = MeshExporter(self.blender_scene, self.luxcore_scene, self.is_viewport_render, blender_object)
+        self.__convert_element(blender_object.data, self.mesh_cache, exporter)
+
+
+    def convert_material(self, material):
+        if material in self.temp_material_cache:
+            return
+        else:
+            self.temp_material_cache.add(material)
+
+        exporter = MaterialExporter(self, self.blender_scene, material)
+        self.__convert_element(material, self.material_cache, exporter)
+
+
+    def convert_texture(self, texture):
+        if texture in self.temp_texture_cache:
+            return
+        else:
+            self.temp_texture_cache.add(texture)
+
+        exporter = TextureExporter(self, self.blender_scene, texture)
+        self.__convert_element(texture, self.texture_cache, exporter)
+
+
+    def convert_light(self, blender_object):
+        exporter = LightExporter(self, self.blender_scene, self.luxcore_scene, blender_object)
+        self.__convert_element(blender_object, self.light_cache, exporter)
+
+
+    def convert_volume(self, volume):
+        if volume in self.temp_volume_cache:
+            return
+        else:
+            self.temp_volume_cache.add(volume)
+
+        exporter = VolumeExporter(self, self.blender_scene, volume)
+        self.__convert_element(volume, self.volume_cache, exporter)
+
+
+    def convert_duplis(self, duplicator, dupli_system=None):
+        exporter = DupliExporter(self, self.blender_scene, duplicator, dupli_system, self.is_viewport_render)
+        self.__convert_element((duplicator, dupli_system), self.dupli_cache, exporter)
+
+
+    def __convert_element(self, element, cache, exporter):
+        if element in cache:
+            exporter = cache[element]
+            old_properties = exporter.properties.GetAllNames()
+
+            # Delete old scene properties
+            self.scene_properties.DeleteAll(old_properties)
+            self.updated_scene_properties.DeleteAll(old_properties)
+
+        new_properties = exporter.convert()
+        self.__set_scene_properties(new_properties)
+
+        cache[element] = exporter
+
+
+    def __set_scene_properties(self, properties):
+        self.updated_scene_properties.Set(properties)
+        self.scene_properties.Set(properties)
+
+
+    def __convert_world_volume(self):
+        # Camera exterior is the preferred volume for world default, fallback is the world exterior
+        properties = pyluxcore.Properties()
+        volumes = self.blender_scene.luxrender_volumes.volumes
+
+        if self.blender_scene.camera is not None:
+            cam_exterior_name = self.blender_scene.camera.data.luxrender_camera.Exterior_volume
+
+            if cam_exterior_name in volumes:
+                cam_exterior = volumes[cam_exterior_name]
+                self.convert_volume(cam_exterior)
+
+                volume_exporter = self.volume_cache[cam_exterior]
+                properties.Set(pyluxcore.Property('scene.world.volume.default', volume_exporter.luxcore_name))
+                self.__set_scene_properties(properties)
+                return
+
+        # No valid camera volume found, try world exterior
+        world_exterior_name = self.blender_scene.luxrender_world.default_exterior_volume
+
+        if world_exterior_name in volumes:
+            world_exterior = volumes[world_exterior_name]
+            self.convert_volume(world_exterior)
+
+            volume_exporter = self.volume_cache[world_exterior]
+            properties.Set(pyluxcore.Property('scene.world.volume.default', volume_exporter.luxcore_name))
+            self.__set_scene_properties(properties)
+            return
+
+        # Fallback: no valid world default volume found, delete old world default
+        self.scene_properties.Delete('scene.world.volume.default')

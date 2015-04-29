@@ -33,7 +33,7 @@ from ...export import get_worldscale
 from ...export import object_anim_matrices
 from ...export import matrix_to_list
 
-from . import calc_shutter
+from .utils import calc_shutter
 
 
 class ExportedObject(object):

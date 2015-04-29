@@ -33,7 +33,7 @@ from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
 
-from . import convert_texture_channel
+from .utils import convert_texture_channel
 
 
 class TextureExporter(object):
