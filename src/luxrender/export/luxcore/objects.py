@@ -44,28 +44,28 @@ class ExportedObject(object):
 
 
 class ObjectExporter(object):
-    def __init__(self, luxcore_exporter, blender_scene, luxcore_scene, is_viewport_render=False, blender_object=None):
+    def __init__(self, luxcore_exporter, blender_scene, luxcore_scene, is_viewport_render=False, blender_object=None,
+                 dupli_name_suffix=''):
         self.luxcore_exporter = luxcore_exporter
         self.blender_scene = blender_scene
         self.luxcore_scene = luxcore_scene
         self.is_viewport_render = is_viewport_render
         self.blender_object = blender_object
+        self.dupli_name_suffix = dupli_name_suffix
 
         self.properties = pyluxcore.Properties()
         self.exported_objects = []
 
 
-    def convert(self, update_mesh, update_material):
+    def convert(self, update_mesh, update_material, anim_matrices=None, matrix=None, is_dupli=False):
         self.properties = pyluxcore.Properties()
 
-        self.__convert_object(update_mesh=update_mesh, update_material=update_material)
+        self.__convert_object(update_mesh, update_material, anim_matrices, matrix, is_dupli)
 
         return self.properties
 
 
-    def __convert_object(self, matrix=None, is_dupli=False, duplicator=None, anim_matrices=None,
-                      update_mesh=True, update_material=True):
-
+    def __convert_object(self, update_mesh, update_material, anim_matrices, matrix, is_dupli):
         obj = self.blender_object
         is_visible = is_obj_visible(self.blender_scene, obj, is_dupli=is_dupli)
 
@@ -109,26 +109,13 @@ class ObjectExporter(object):
 
             self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
 
-        # Check if object is particle/hair emitter
+        # Check if object is duplicator (particle/hair emitter or using dupliverts/frames/...)
         if len(obj.particle_systems) > 0:
-            convert_object = False
-
             for psys in obj.particle_systems:
                 convert_object |= psys.settings.use_render_emitter
-
-                if self.blender_scene.luxcore_translatorsettings.export_particles:
-                    if psys.settings.render_type in ['OBJECT', 'GROUP']:
-                        #ConvertParticles(obj, psys, preview) # TODO: reactivate
-                        pass
-                    elif psys.settings.render_type == 'PATH':
-                        #ConvertHair() # TODO: reactivate
-                        pass
-
-        # Check if object is duplicator
-        if obj.is_duplicator and len(obj.particle_systems) < 1:
-            if obj.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                #ConvertDuplis(obj, obj, preview) # TODO: reactivate
-                pass
+                self.luxcore_exporter.convert_duplis(obj, psys)
+        elif obj.is_duplicator:
+            self.luxcore_exporter.convert_duplis(obj)
 
         # Some dupli types should hide the original
         if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
@@ -154,7 +141,7 @@ class ObjectExporter(object):
         # Check if mesh is in cache
         if obj.data in self.luxcore_exporter.mesh_cache:
             # Check if object is in cache
-            if obj in self.luxcore_exporter.object_cache:
+            if obj in self.luxcore_exporter.object_cache and not is_dupli:
                 #print('[%s] object and mesh already in cache' % obj.name)
 
                 if update_mesh:
@@ -183,7 +170,7 @@ class ObjectExporter(object):
         self.exported_objects = []
 
         for shape in exported_shapes:
-            name = ToValidLuxCoreName(self.blender_object.name + str(shape.material_index))
+            name = ToValidLuxCoreName(self.blender_object.name + str(shape.material_index) + self.dupli_name_suffix)
 
             try:
                 material = self.blender_object.material_slots[shape.material_index].material

@@ -34,7 +34,7 @@ from ...outputs.luxcore_api import ToValidLuxCoreName
 # TODO: remove refactoring state comments
 from .camera import CameraExporter      # finished
 from .config import ConfigExporter      # finished
-# from .duplis import DupliExporter     # not started
+from .duplis import DupliExporter       # needs testing
 from .lights import LightExporter       # ported to new interface, but crucial refactoring/cleanup still missing
 from .materials import MaterialExporter # some features missing
 from .meshes import MeshExporter        # finished
@@ -66,7 +66,7 @@ class LuxCoreExporter(object):
         self.updated_scene_properties = pyluxcore.Properties()
 
         # Permanent caches, structure: {element: ElementExporter}
-        #self.dupli_cache = {}
+        self.dupli_cache = {}
         self.light_cache = {}
         self.material_cache = {}
         self.mesh_cache = {}
@@ -222,6 +222,11 @@ class LuxCoreExporter(object):
 
         exporter = VolumeExporter(self, self.blender_scene, volume)
         self.__convert_element(volume, self.volume_cache, exporter)
+
+
+    def convert_duplis(self, duplicator, dupli_system=None):
+        exporter = DupliExporter(self, self.blender_scene, duplicator, dupli_system, self.is_viewport_render)
+        self.__convert_element((duplicator, dupli_system), self.dupli_cache, exporter)
 
 
     def __convert_element(self, element, cache, exporter):
