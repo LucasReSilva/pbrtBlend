@@ -44,6 +44,8 @@ from .volumes import VolumeExporter     # finished
 
 
 class LuxCoreExporter(object):
+    luxcore_session = None
+
     def __init__(self, blender_scene, renderengine, is_viewport_render=False, context=None):
         """
         Main exporter class. Only one instance should be used per rendering session.
@@ -57,7 +59,6 @@ class LuxCoreExporter(object):
         self.is_viewport_render = is_viewport_render
         self.context = context
 
-        self.luxcore_session = None
         self.luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
 
         self.config_properties = pyluxcore.Properties()
@@ -138,7 +139,7 @@ class LuxCoreExporter(object):
         # Parse scene properties and create LuxCore config and session
         self.luxcore_scene.Parse(self.pop_updated_scene_properties())
         luxcore_config = pyluxcore.RenderConfig(self.config_properties, self.luxcore_scene)
-        self.luxcore_session = pyluxcore.RenderSession(luxcore_config)
+        LuxCoreExporter.luxcore_session = pyluxcore.RenderSession(luxcore_config)
 
         # Show message in Blender UI
         export_time = time.time() - start_time
@@ -147,7 +148,7 @@ class LuxCoreExporter(object):
         message = 'Compiling OpenCL Kernels...' if 'OCL' in engine else 'Starting LuxRender...'
         self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
 
-        return self.luxcore_session
+        return LuxCoreExporter.luxcore_session
 
 
     def convert_camera(self):
