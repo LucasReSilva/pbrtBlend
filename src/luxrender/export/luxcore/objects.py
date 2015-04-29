@@ -82,7 +82,7 @@ class ObjectExporter(object):
         else:
             transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
 
-        # Motion Blur (duplis get their anim_matrices passed as argument
+        # Motion Blur (duplis get their anim_matrices passed as argument)
         if not is_dupli:
             anim_matrices = self.__calc_motion_blur()
 
@@ -92,22 +92,7 @@ class ObjectExporter(object):
         # Check if object is proxy
         if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
             convert_object = not obj.luxrender_object.hide_proxy_mesh
-
-            path = efutil.filesystem_path(obj.luxrender_object.external_mesh)
-            name = ToValidLuxCoreName(obj.name)
-
-            # Convert material
-            if update_material or obj.active_material not in self.luxcore_exporter.material_cache:
-                self.luxcore_exporter.convert_material(obj.active_material)
-            material_exporter = self.luxcore_exporter.material_cache[obj.active_material]
-            luxcore_material_name = material_exporter.luxcore_name
-
-            # Create shape definition
-            name_shape = 'Mesh-' + name
-            self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.type', 'mesh'))
-            self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.ply', path))
-
-            self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
+            self.__convert_proxy(update_material, anim_matrices, convert_object, transform)
 
         # Check if object is duplicator (particle/hair emitter or using dupliverts/frames/...)
         if len(obj.particle_systems) > 0:
@@ -134,7 +119,8 @@ class ObjectExporter(object):
         # Real object export starts here #
         ##################################
 
-        print('Converting object %s' % obj.name)
+        if not is_dupli:
+            print('Converting object %s' % obj.name)
 
         # TODO: dupli handling
 
@@ -164,6 +150,23 @@ class ObjectExporter(object):
 
             mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
             self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
+
+
+    def __convert_proxy(self, update_material, anim_matrices, convert_object, transform):
+        path = efutil.filesystem_path(self.blender_object.luxrender_object.external_mesh)
+        name = ToValidLuxCoreName(self.blender_object.name)
+
+        # Convert material
+        if update_material or self.blender_object.active_material not in self.luxcore_exporter.material_cache:
+            self.luxcore_exporter.convert_material(self.blender_object.active_material)
+        material_exporter = self.luxcore_exporter.material_cache[self.blender_object.active_material]
+        luxcore_material_name = material_exporter.luxcore_name
+
+        # Create shape definition
+        name_shape = 'Mesh-' + name
+        self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.type', 'mesh'))
+        self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.ply', path))
+        self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
 
 
     def __create_luxcore_objects(self, exported_shapes, transform, update_material, anim_matrices):

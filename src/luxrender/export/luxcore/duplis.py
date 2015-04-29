@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import mathutils
+import mathutils, time
 from ...outputs.luxcore_api import pyluxcore
 
 from .objects import ObjectExporter
@@ -63,9 +63,11 @@ class DupliExporter(object):
         """
         Converts duplis and OBJECT and GROUP particle systems
         """
-        print('Exporting duplis of duplicator %s' % self.duplicator.name)
+        print('[%s] Exporting duplis' % self.duplicator.name)
 
         try:
+            time_start = time.time()
+
             mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
             self.duplicator.dupli_list_create(self.blender_scene, settings=mode)
             self.dupli_amount = len(self.duplicator.dupli_list)
@@ -97,7 +99,8 @@ class DupliExporter(object):
 
             self.duplicator.dupli_list_clear()
 
-            print('Dupli export finished')
+            time_elapsed = time.time() - time_start
+            print('[%s] Dupli export finished (%.3fs)' % (self.duplicator.name, time_elapsed))
         except Exception as err:
             print('Error in ConvertDuplis for object %s: %s' % (self.duplicator.name, err))
             import traceback
@@ -108,9 +111,11 @@ class DupliExporter(object):
         obj = self.duplicator
         particle_system = self.dupli_system
 
-        print('Exporting particle system %s...' % particle_system.name)
+        print('[%s: %s] Exporting particle system' % (self.duplicator.name, particle_system.name))
 
         try:
+            time_start = time.time()
+
             if (self.blender_scene.camera is not None and self.blender_scene.camera.data.luxrender_camera.usemblur
                 and self.blender_scene.camera.data.luxrender_camera.objectmblur):
                 steps = self.blender_scene.camera.data.luxrender_camera.motion_blur_samples + 1
@@ -189,7 +194,8 @@ class DupliExporter(object):
                                                      is_dupli=True, anim_matrices=anim_matrices)
                 self.properties.Set(properties)
 
-            print('Particle export finished')
+            time_elapsed = time.time() - time_start
+            print('[%s: %s] Particle export finished (%.3fs)' % (self.duplicator.name, particle_system.name, time_elapsed))
         except Exception as err:
             print('Could not convert particle system %s of object %s: %s' % (particle_system.name, obj.name, err))
             import traceback
