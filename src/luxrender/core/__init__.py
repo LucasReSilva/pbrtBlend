@@ -1726,8 +1726,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     viewport_render_active = False
     viewport_render_paused = False
 
-
+    # TODO: rework all this stuff with lcConfig here and luxcore_session in LuxCoreExporter...
     lcConfig = None
+    
     viewFilmWidth = -1
     viewFilmHeight = -1
     viewImageBufferFloat = None
@@ -2019,6 +2020,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 # Export the Blender scene
                 LuxCoreExporter.luxcore_session = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)
+                # TODO: rework all this stuff with lcConfig here and luxcore_session in LuxCoreExporter...
                 self.lcConfig = LuxCoreExporter.luxcore_session.GetRenderConfig()
 
                 LuxCoreExporter.luxcore_session.Start()
@@ -2053,6 +2055,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.luxcore_exporter.convert_config(self.viewFilmWidth, self.viewFilmHeight)
 
                 # change config
+                # TODO: rework all this stuff with lcConfig here and luxcore_session in LuxCoreExporter...
                 self.lcConfig.Parse(self.luxcore_exporter.config_properties)
 
                 LuxCoreExporter.luxcore_session = pyluxcore.RenderSession(self.lcConfig)
@@ -2061,6 +2064,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 RENDERENGINE_luxrender.viewport_render_active = True
 
             # begin sceneEdit
+            # TODO: rework all this stuff with lcConfig here and luxcore_session in LuxCoreExporter...
             lcScene = self.lcConfig.GetScene()
             RENDERENGINE_luxrender.begin_scene_edit()
 
