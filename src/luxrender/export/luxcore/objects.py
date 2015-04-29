@@ -134,9 +134,11 @@ class ObjectExporter(object):
         if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):
             convert_object = False
 
-        # Check if object is used as camera clipping plane
+        # Check if object is used as camera clipping plane (don't do this for duplis because they can never be
+        # selected as clipping plane)
         if not is_dupli and self.blender_scene.camera is not None:
-            convert_object &= obj.name != self.blender_scene.camera.data.luxrender_camera.clipping_plane_obj
+            if obj.name == self.blender_scene.camera.data.luxrender_camera.clipping_plane_obj:
+                convert_object = False
 
         if not convert_object or obj.data is None:
             return
