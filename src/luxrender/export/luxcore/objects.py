@@ -96,6 +96,8 @@ class ObjectExporter(object):
 
         # Check if object is duplicator (particle/hair emitter or using dupliverts/frames/...)
         if len(obj.particle_systems) > 0:
+            convert_object = False
+
             for psys in obj.particle_systems:
                 convert_object |= psys.settings.use_render_emitter
                 self.luxcore_exporter.convert_duplis(obj, psys)
