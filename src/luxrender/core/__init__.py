@@ -1646,6 +1646,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         #from ..export.luxcore_scene import BlenderSceneConverter
 
         try:
+            # TODO: fix material preview in LuxCore mode
+            raise Exception('Material preview is currently not supported in LuxCore API mode')
+
             xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 
             # Don't render the tiny images
@@ -1728,7 +1731,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     # TODO: rework all this stuff with lcConfig here and luxcore_session in LuxCoreExporter...
     lcConfig = None
-    
+
     viewFilmWidth = -1
     viewFilmHeight = -1
     viewImageBufferFloat = None
