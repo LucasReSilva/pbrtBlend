@@ -47,15 +47,14 @@ class DupliExporter(object):
     def convert(self):
         self.properties = pyluxcore.Properties()
 
-        if self.blender_scene.luxcore_translatorsettings.export_particles:
-            if self.dupli_system is None:
-                # Dupliverts/faces/frames (no particle/hair system)
-                if self.duplicator.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                    self.__convert_duplis()
-            elif self.dupli_system.settings.render_type in ['OBJECT', 'GROUP']:
-                self.__convert_particles()
-            elif self.dupli_system.settings.render_type == 'PATH':
-                self.__convert_hair()
+        if self.dupli_system is None:
+            # Dupliverts/faces/frames (no particle/hair system)
+            if self.duplicator.dupli_type in ['FACES', 'GROUP', 'VERTS']:
+                self.__convert_duplis()
+        elif self.dupli_system.settings.render_type in ['OBJECT', 'GROUP'] and self.blender_scene.luxcore_translatorsettings.export_particles:
+            self.__convert_particles()
+        elif self.dupli_system.settings.render_type == 'PATH' and self.blender_scene.luxcore_translatorsettings.export_hair:
+            self.__convert_hair()
 
         return self.properties
 
