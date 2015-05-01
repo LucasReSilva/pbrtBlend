@@ -60,6 +60,11 @@ def convert_texture_channel(luxcore_exporter, properties, textured_element, chan
     if getattr(textured_element, '%s_use%stexture' % (channel, type)):
         # The material attribute is textured, export the texture
         texture_name = getattr(textured_element, '%s_%stexturename' % (channel, type))
+
+        if not texture_name:
+            # No texture is selected for the channel
+            return value
+
         texture = get_texture_from_scene(luxcore_exporter.blender_scene, texture_name)
 
         if texture is not None:
