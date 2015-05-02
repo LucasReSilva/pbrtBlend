@@ -2158,12 +2158,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewFilmHeight = context.region.height
                 self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
 
+                luxcore_config = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig()
                 RENDERENGINE_luxrender.stop_luxcore_session()
 
                 self.luxcore_exporter.convert_config(self.viewFilmWidth, self.viewFilmHeight)
 
                 # change config
-                luxcore_config = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig()
                 luxcore_config.Parse(self.luxcore_exporter.config_properties)
 
                 RENDERENGINE_luxrender.luxcore_session = pyluxcore.RenderSession(luxcore_config)
