@@ -39,26 +39,25 @@ from .utils import convert_param_to_luxcore_property
 
 
 class LightExporter(object):
-    def __init__(self, luxcore_exporter, blender_scene, luxcore_scene, blender_object):
+    def __init__(self, luxcore_exporter, blender_scene, blender_object):
         self.luxcore_exporter = luxcore_exporter
         self.blender_scene = blender_scene
-        self.luxcore_scene = luxcore_scene
         self.blender_object = blender_object
 
         self.properties = pyluxcore.Properties()
         self.luxcore_name = ''
 
 
-    def convert(self):
+    def convert(self, luxcore_scene):
         # Remove old properties
         self.properties = pyluxcore.Properties()
         
-        self.__convert_light()
+        self.__convert_light(luxcore_scene)
 
         return self.properties
 
 
-    def __convert_light(self):
+    def __convert_light(self, luxcore_scene):
         # TODO: refactor this horrible... thing
         # TODO: find solution for awkward sunsky problem
         
@@ -340,7 +339,7 @@ class LightExporter(object):
     
                 # add mesh
                 mesh_name = 'Mesh-' + luxcore_name
-                if not self.luxcore_scene.IsMeshDefined(mesh_name):
+                if not luxcore_scene.IsMeshDefined(mesh_name):
                     vertices = [
                         (1, 1, 0),
                         (1, -1, 0),
@@ -351,7 +350,7 @@ class LightExporter(object):
                         (0, 1, 2),
                         (2, 3, 0)
                     ]
-                    self.luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
+                    luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
                 # assign mesh to object
                 self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.ply', [mesh_name]))
     

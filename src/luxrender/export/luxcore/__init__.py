@@ -44,8 +44,6 @@ from .volumes import VolumeExporter     # finished
 
 
 class LuxCoreExporter(object):
-    luxcore_session = None
-
     def __init__(self, blender_scene, renderengine, is_viewport_render=False, context=None):
         """
         Main exporter class. Only one instance should be used per rendering session.
@@ -58,8 +56,6 @@ class LuxCoreExporter(object):
         self.renderengine = renderengine
         self.is_viewport_render = is_viewport_render
         self.context = context
-
-        self.luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
 
         self.config_properties = pyluxcore.Properties()
         self.scene_properties = pyluxcore.Properties()
@@ -103,7 +99,7 @@ class LuxCoreExporter(object):
         return updated_properties
 
 
-    def convert(self, film_width, film_height):
+    def convert(self, film_width, film_height, luxcore_scene=None):
         """
         Convert the whole scene
         """
@@ -116,6 +112,7 @@ class LuxCoreExporter(object):
         # Materials, textures, lights and meshes are all converted by their respective Blender object
         object_amount = len(self.blender_scene.objects)
         object_counter = 0
+        luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
 
         for blender_object in self.blender_scene.objects:
             if self.renderengine.test_break():
@@ -126,7 +123,7 @@ class LuxCoreExporter(object):
             self.renderengine.update_stats('Exporting...', 'Object: ' + blender_object.name)
             self.renderengine.update_progress(object_counter / object_amount)
 
-            self.convert_object(blender_object)
+            self.convert_object(blender_object, luxcore_scene)
 
         # Convert config at last so all lightgroups and passes are defined
         self.convert_config(film_width, film_height)
@@ -136,11 +133,6 @@ class LuxCoreExporter(object):
             print(self.config_properties)
             print(self.scene_properties)
 
-        # Parse scene properties and create LuxCore config and session
-        self.luxcore_scene.Parse(self.pop_updated_scene_properties())
-        luxcore_config = pyluxcore.RenderConfig(self.config_properties, self.luxcore_scene)
-        LuxCoreExporter.luxcore_session = pyluxcore.RenderSession(luxcore_config)
-
         # Show message in Blender UI
         export_time = time.time() - start_time
         print('Export took %.1fs' % export_time)
@@ -148,7 +140,11 @@ class LuxCoreExporter(object):
         message = 'Compiling OpenCL Kernels...' if 'OCL' in engine else 'Starting LuxRender...'
         self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
 
-        return LuxCoreExporter.luxcore_session
+        # Create luxcore scene and config
+        luxcore_scene.Parse(self.pop_updated_scene_properties())
+        luxcore_config = pyluxcore.RenderConfig(self.config_properties, luxcore_scene)
+
+        return luxcore_config
 
 
     def convert_camera(self):
@@ -167,9 +163,9 @@ class LuxCoreExporter(object):
         self.config_properties.Set(self.config_exporter.properties)
 
 
-    def convert_object(self, blender_object, update_mesh=True, update_material=True):
+    def convert_object(self, blender_object, luxcore_scene, update_mesh=True, update_material=True):
         cache = self.object_cache
-        exporter = ObjectExporter(self, self.blender_scene, self.luxcore_scene, self.is_viewport_render, blender_object)
+        exporter = ObjectExporter(self, self.blender_scene, self.is_viewport_render, blender_object)
 
         if blender_object in cache:
             exporter = cache[blender_object]
@@ -179,15 +175,15 @@ class LuxCoreExporter(object):
             self.scene_properties.DeleteAll(old_properties)
             self.updated_scene_properties.DeleteAll(old_properties)
 
-        new_properties = exporter.convert(update_mesh, update_material)
+        new_properties = exporter.convert(update_mesh, update_material, luxcore_scene)
         self.__set_scene_properties(new_properties)
 
         cache[blender_object] = exporter
 
 
-    def convert_mesh(self, blender_object):
-        exporter = MeshExporter(self.blender_scene, self.luxcore_scene, self.is_viewport_render, blender_object)
-        self.__convert_element(blender_object.data, self.mesh_cache, exporter)
+    def convert_mesh(self, blender_object, luxcore_scene):
+        exporter = MeshExporter(self.blender_scene, self.is_viewport_render, blender_object)
+        self.__convert_element(blender_object.data, self.mesh_cache, exporter, luxcore_scene)
 
 
     def convert_material(self, material):
@@ -210,9 +206,9 @@ class LuxCoreExporter(object):
         self.__convert_element(texture, self.texture_cache, exporter)
 
 
-    def convert_light(self, blender_object):
-        exporter = LightExporter(self, self.blender_scene, self.luxcore_scene, blender_object)
-        self.__convert_element(blender_object, self.light_cache, exporter)
+    def convert_light(self, blender_object, luxcore_scene):
+        exporter = LightExporter(self, self.blender_scene, blender_object)
+        self.__convert_element(blender_object, self.light_cache, exporter, luxcore_scene)
 
 
     def convert_volume(self, volume):
@@ -225,12 +221,12 @@ class LuxCoreExporter(object):
         self.__convert_element(volume, self.volume_cache, exporter)
 
 
-    def convert_duplis(self, duplicator, dupli_system=None):
+    def convert_duplis(self, luxcore_scene, duplicator, dupli_system=None):
         exporter = DupliExporter(self, self.blender_scene, duplicator, dupli_system, self.is_viewport_render)
-        self.__convert_element((duplicator, dupli_system), self.dupli_cache, exporter)
+        self.__convert_element((duplicator, dupli_system), self.dupli_cache, exporter, luxcore_scene)
 
 
-    def __convert_element(self, element, cache, exporter):
+    def __convert_element(self, element, cache, exporter, luxcore_scene=None):
         if element in cache:
             exporter = cache[element]
             old_properties = exporter.properties.GetAllNames()
@@ -239,7 +235,7 @@ class LuxCoreExporter(object):
             self.scene_properties.DeleteAll(old_properties)
             self.updated_scene_properties.DeleteAll(old_properties)
 
-        new_properties = exporter.convert()
+        new_properties = exporter.convert(luxcore_scene) if luxcore_scene else exporter.convert()
         self.__set_scene_properties(new_properties)
 
         cache[element] = exporter

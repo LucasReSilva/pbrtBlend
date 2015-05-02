@@ -44,21 +44,21 @@ class DupliExporter(object):
         self.dupli_amount = 1
 
 
-    def convert(self):
+    def convert(self, luxcore_scene):
         self.properties = pyluxcore.Properties()
 
         if self.dupli_system is None:
             # Dupliverts/faces/frames (no particle/hair system)
             if self.duplicator.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                self.__convert_duplis()
+                self.__convert_duplis(luxcore_scene)
         elif self.dupli_system.settings.render_type in ['OBJECT', 'GROUP'] and self.blender_scene.luxcore_translatorsettings.export_particles:
-            self.__convert_particles()
+            self.__convert_particles(luxcore_scene)
         elif self.dupli_system.settings.render_type == 'PATH' and self.blender_scene.luxcore_translatorsettings.export_hair:
             self.__convert_hair()
 
         return self.properties
 
-    def __convert_duplis(self):
+    def __convert_duplis(self, luxcore_scene):
         """
         Converts duplis and OBJECT and GROUP particle systems
         """
@@ -83,16 +83,13 @@ class DupliExporter(object):
                 if not group_visible:
                     continue
 
-                # TODO: remove old code
-                #self.ConvertObject(dupli_object, matrix=dupli_ob.matrix.copy(), is_dupli=True,
-                #                   duplicator=duplicator)
-
+                # Convert dupli object
                 dupli_name_suffix = '_%s_%d' % (self.duplicator.name, self.dupli_number)
                 self.dupli_number += 1
-                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene,
-                                                 self.luxcore_exporter.luxcore_scene, self.is_viewport_render,
+
+                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
                                                  dupli_object, dupli_name_suffix)
-                properties = object_exporter.convert(update_mesh=True, update_material=True,
+                properties = object_exporter.convert(update_mesh=True, update_material=True, luxcore_scene=luxcore_scene,
                                                      matrix=dupli_ob.matrix.copy(), is_dupli=True)
                 self.properties.Set(properties)
 
@@ -106,7 +103,7 @@ class DupliExporter(object):
             traceback.print_exc()
 
 
-    def __convert_particles(self):
+    def __convert_particles(self, luxcore_scene):
         obj = self.duplicator
         particle_system = self.dupli_system
 
@@ -186,11 +183,10 @@ class DupliExporter(object):
 
                 dupli_name_suffix = '_%s_%d' % (self.dupli_system.name, self.dupli_number)
                 self.dupli_number += 1
-                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene,
-                                                 self.luxcore_exporter.luxcore_scene, self.is_viewport_render,
+                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
                                                  dupli_object, dupli_name_suffix)
-                properties = object_exporter.convert(update_mesh=True, update_material=True, matrix=anim_matrices[0],
-                                                     is_dupli=True, anim_matrices=anim_matrices)
+                properties = object_exporter.convert(update_mesh=True, update_material=True, luxcore_scene=luxcore_scene,
+                                                     matrix=anim_matrices[0], is_dupli=True, anim_matrices=anim_matrices)
                 self.properties.Set(properties)
 
             time_elapsed = time.time() - time_start
