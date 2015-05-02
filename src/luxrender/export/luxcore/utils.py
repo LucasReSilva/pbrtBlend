@@ -32,18 +32,6 @@ from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 
 
-class ScaleTextureHandler(object):
-    # TODO: instead of incrementing the scale counter, generate a unique name for each scale texture with
-    # TODO: e.g. material_name + channel_name + texture_name ("rocks_Kd_rocks-diffuse")
-    scale_texture_counter = 0
-
-    @staticmethod
-    def next_scale_texture_name(base_texture_name):
-        name = '%s_scale_%i' % (base_texture_name, ScaleTextureHandler.scale_texture_counter)
-        ScaleTextureHandler.scale_texture_counter += 1
-        return name
-
-
 def convert_texture_channel(luxcore_exporter, properties, textured_element, channel, type):
     """
     :param luxcore_exporter: the luxcore_exporter instance of the calling texture/volume/material exporter
@@ -74,7 +62,8 @@ def convert_texture_channel(luxcore_exporter, properties, textured_element, chan
             is_multiplied = getattr(textured_element, '%s_multiply%s' % (channel, type))
 
             if is_multiplied:
-                scale_tex_name = create_scale_texture(properties, texture_exporter.luxcore_name, value)
+                scale_tex_name = textured_element.name + channel + type + texture_exporter.luxcore_name
+                create_scale_texture(properties, texture_exporter.luxcore_name, scale_tex_name, value)
                 return scale_tex_name
             else:
                 return texture_exporter.luxcore_name
@@ -86,14 +75,10 @@ def convert_texture_channel(luxcore_exporter, properties, textured_element, chan
         'Unknown texture in channel' + channel + ' for material/volume/texture ' + textured_element.type)
 
 
-def create_scale_texture(properties, base_texture_name, multiplier):
-    scale_texture_name = ScaleTextureHandler.next_scale_texture_name(base_texture_name)
-
+def create_scale_texture(properties, base_texture_name, scale_texture_name, multiplier):
     properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.type', 'scale'))
     properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.texture1', base_texture_name))
     properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.texture2', multiplier))
-
-    return scale_texture_name
 
 
 def convert_param_to_luxcore_property(param):

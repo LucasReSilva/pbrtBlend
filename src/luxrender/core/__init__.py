@@ -1637,6 +1637,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         channelCalcTime = time.time() - channelCalcStartTime
         LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)
 
+    cached_preview_properties = ''
+
     def luxcore_render_preview(self, scene):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
@@ -1648,59 +1650,181 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 
             # Don't render the tiny images
-            if filmWidth <= 96:
-                return
+            #if filmWidth <= 96:
+            #    return
+            is_thumbnail = filmWidth <= 96
 
             LuxLog('Starting preview render...')
 
             luxcore_exporter = LuxCoreExporter(scene, self)
             luxcore_config = luxcore_exporter.convert(filmWidth, filmHeight)
 
-            # Add a lamp (hack for Blender's preview scene, which does not contain any lights)
-            if bpy.data.materials[0].preview_render_type != 'FLAT':
-                luxcore_config.GetScene().Parse(pyluxcore.Properties().
-                        Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['point'])).
-                        Set(pyluxcore.Property('scene.lights.preview_lamp.position', [12, -12, 8])))
-            else:
-                luxcore_config.GetScene().Parse(pyluxcore.Properties().
-                    Set(pyluxcore.Property('scene.lights.preview_lamp.type', ['constantinfinite'])).
-                    Set(pyluxcore.Property('scene.lights.preview_lamp.position', [10, -20, 8])).
-                    Set(pyluxcore.Property('scene.lights.preview_lamp.gain', [0.004, 0.004, 0.004])))
+            # Check if we even have to render a new preview (only when something changed)
+            # Blender spams many unnecessary updates. The cache has to be static because each preview update
+            # creates its own instance of RENDERENGINE_luxrender.
+            new_preview_properties = str(luxcore_exporter.scene_properties)
 
-            # config for preview
+            if RENDERENGINE_luxrender.cached_preview_properties == new_preview_properties:
+                print('Skipping preview render')
+                return
+            else:
+                print('NOT skipping')
+                RENDERENGINE_luxrender.cached_preview_properties = new_preview_properties
+
+            # Custom config for preview
             cfgProps = pyluxcore.Properties()
-            cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', ['TONEMAP_AUTOLINEAR']))
-            cfgProps.Set(pyluxcore.Property('renderengine.type', ['BIDIRCPU']))
-            cfgProps.Set(pyluxcore.Property('sampler.type', ['SOBOL']))
+            cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.type', 'TONEMAP_LINEAR'))
+            cfgProps.Set(pyluxcore.Property('film.imagepipeline.0.scale', 1.0))
+
+            #cfgProps.Set(pyluxcore.Property('renderengine.type', 'BIDIRCPU'))
+            #cfgProps.Set(pyluxcore.Property('path.maxdepth', 5))
+            #cfgProps.Set(pyluxcore.Property('light.maxdepth', 5))
+            #cfgProps.Set(pyluxcore.Property('sampler.type', 'METROPOLIS'))
+
+            cfgProps.Set(pyluxcore.Property('renderengine.type', 'BIASPATHCPU'))
+            cfgProps.Set(pyluxcore.Property('tile.size', 32))
+            cfgProps.Set(pyluxcore.Property('tile.multipass.enable', 1))
+            cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', 0.06))
+            cfgProps.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', 0))
+            cfgProps.Set(pyluxcore.Property('biaspath.sampling.aa.size', 1))
+            cfgProps.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', 1))
+            cfgProps.Set(pyluxcore.Property('biaspath.sampling.glossy.size', 1))
+            cfgProps.Set(pyluxcore.Property('biaspath.sampling.specular.size', 1))
+            cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.total', 10))
+            cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', 3))
+            cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.glossy ', 1))
+            cfgProps.Set(pyluxcore.Property('biaspath.pathdepth.specular', 5))
+            cfgProps.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', 3))
+            cfgProps.Set(pyluxcore.Property('film.filter.type', 'NONE'))
+
+            if is_thumbnail:
+                cfgProps.Set(pyluxcore.Property('film.outputs.0.type', 'RGBA_TONEMAPPED'))
+                cfgProps.Set(pyluxcore.Property('film.outputs.0.filename', 'rgba.png'))
 
             luxcore_config.Parse(cfgProps)
+
+            # Custom scene for preview
+            luxcore_scene = luxcore_config.GetScene()
+
+            # Delete Blender default objects from the scene
+            luxcore_scene.DeleteObject('checkers_0080')
+            luxcore_scene.DeleteObject('checkers_0081')
+            luxcore_scene.DeleteObject('checkers_0070')
+            luxcore_scene.DeleteObject('checkers_0071')
+            luxcore_scene.DeleteObject('checkers_0040')
+            luxcore_scene.DeleteObject('checkers_0041')
+            luxcore_scene.DeleteObject('checkers_0020')
+            luxcore_scene.DeleteObject('checkers_0021')
+
+            luxcore_scene.DeleteLight('Lamp')
+            luxcore_scene.DeleteLight('Lamp_001')
+            luxcore_scene.DeleteLight('Lamp_002')
+
+            # Add custom elements to the scene (lights, floor)
+            props = pyluxcore.Properties()
+
+            # Axis:
+            # x: + right, - left
+            # y: + back,  - front
+            # z: + up,    - down
+
+            # For debugging
+            #props.Set(pyluxcore.Property('scene.lights.sky.type', 'sky'))
+            #props.Set(pyluxcore.Property('scene.lights.sky.gain', [.00002] * 3))
+
+            # Key lamp
+            gain_key = [500] * 3
+            props.Set(pyluxcore.Property('scene.lights.key_lamp.type', 'point'))
+            props.Set(pyluxcore.Property('scene.lights.key_lamp.position', [-10, -15, 10]))
+            props.Set(pyluxcore.Property('scene.lights.key_lamp.gain', gain_key))
+
+            # Fill lamp
+            gain_fill = [120] * 3
+            props.Set(pyluxcore.Property('scene.lights.fill_lamp.type', 'point'))
+            props.Set(pyluxcore.Property('scene.lights.fill_lamp.position', [20, -30, 8]))
+            props.Set(pyluxcore.Property('scene.lights.fill_lamp.gain', gain_fill))
+
+            if not is_thumbnail:
+                # Ground plane mesh (not used for thumbnails)
+                size = 70
+                zpos = -2.00001
+
+                vertices = [
+                    (size, size, zpos),
+                    (size, -size, zpos),
+                    (-size, -size, zpos),
+                    (-size, size, zpos)
+                ]
+                faces = [
+                    (0, 1, 2),
+                    (2, 3, 0)
+                ]
+                luxcore_scene.DefineMesh('ground_plane_mesh', vertices, faces, None, None, None, None)
+
+                # Ground plane texture and material
+                checker_size = 0.3
+                checker_trans = [checker_size, 0, 0, 0, 0, checker_size, 0, 0, 0, 0, checker_size, 0, 0, 0, 0, 1]
+                props.Set(pyluxcore.Property('scene.textures.ground_plane_checker.type', 'checkerboard3d'))
+                props.Set(pyluxcore.Property('scene.textures.ground_plane_checker.texture1', 0.7))
+                props.Set(pyluxcore.Property('scene.textures.ground_plane_checker.texture2', 0.2))
+                props.Set(pyluxcore.Property('scene.textures.ground_plane_checker.mapping.type', 'globalmapping3d'))
+                props.Set(pyluxcore.Property('scene.textures.ground_plane_checker.mapping.transformation', checker_trans))
+
+                props.Set(pyluxcore.Property('scene.materials.ground_plane_mat.type', 'roughmatte'))
+                props.Set(pyluxcore.Property('scene.materials.ground_plane_mat.kd', 'ground_plane_checker'))
+
+                # Ground plane object
+                props.Set(pyluxcore.Property('scene.objects.ground_plane.shape', 'ground_plane_mesh'))
+                props.Set(pyluxcore.Property('scene.objects.ground_plane.material', 'ground_plane_mat'))
+
+            luxcore_scene.Parse(props)
+
+            # Create preview rendersession
             luxcore_session = pyluxcore.RenderSession(luxcore_config)
 
-            #filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
-            imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
+            # Debug output
+            #print("---------------------")
+            #print("preview scene props:")
+            #print(str(luxcore_scene.GetProperties()))
+            #print("---------------------")
+
+            buffer_depth = 4 if is_thumbnail else 3
+            imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * buffer_depth))
 
             # Start the rendering
             luxcore_session.Start()
 
             startTime = time.time()
-            while not self.test_break() and time.time() - startTime < 4.0:
-                time.sleep(0.2)
+            stopTime = 0.05 if is_thumbnail else 6.0
+            done = False
+
+            while not self.test_break() and time.time() - startTime < stopTime and not done:
+                time.sleep(0.1)
 
                 # Update statistics
                 luxcore_session.UpdateStats()
+                done = self.haltConditionMet(scene, luxcore_session.GetStats())
 
                 # Update the image
-                luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
+                if is_thumbnail:
+                    luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGBA_TONEMAPPED, imageBufferFloat)
+                else:
+                    luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
                 # Here we write the pixel values to the RenderResult
                 result = self.begin_result(0, 0, filmWidth, filmHeight)
                 layer = result.layers[0] if bpy.app.version < (2, 74, 4 ) else result.layers[0].passes[0]
-                layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
+
+                if is_thumbnail:
+                    # Group the flat imagebuffer list into sublists of RGBA values
+                    layer.rect = list(zip(*[iter(imageBufferFloat)] * 4))
+                else:
+                    layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
                                                                                        imageBufferFloat)
                 self.end_result(result)
 
             luxcore_session.Stop()
-            LuxLog('Preview render done.')
+            LuxLog('Preview render done (%.2fs)' % (time.time() - startTime))
         except Exception as exc:
             LuxLog('Rendering aborted: %s' % exc)
             import traceback
