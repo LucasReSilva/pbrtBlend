@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import bpy, mathutils
+import bpy, mathutils, math
 
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
@@ -88,7 +88,6 @@ class LightExporter(object):
         # Common light params
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
         energy = params_keyValue['gain'] if not hide_lamp else 0  # workaround for no lights render recovery
-        position = bpy.data.objects[obj.name].location
         importance = params_keyValue['importance']
     
         # Lightgroup
