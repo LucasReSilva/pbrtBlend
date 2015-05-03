@@ -229,7 +229,7 @@ class MaterialPreviewExporter(object):
         cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.total', 10))
         cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', 3))
         cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.glossy ', 1))
-        cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.specular', 5))
+        cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.specular', 4))
         cfg_props.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', 3))
         cfg_props.Set(pyluxcore.Property('film.filter.type', 'NONE'))
 

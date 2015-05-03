@@ -1398,7 +1398,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             draw_tile_type(count_pending, coords_pending, color_yellow)
 
     def luxcore_render(self, scene):
-        if scene.name == 'preview':
+        if self.is_preview:
             self.luxcore_render_preview(scene)
             return
 

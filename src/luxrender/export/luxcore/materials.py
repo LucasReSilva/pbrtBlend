@@ -458,7 +458,7 @@ class MaterialExporter(object):
             # Fallback
             ####################################################################
             else:
-                self.luxcore_name = DEFAULT_MATTE
+                self.__convert_default_matte()
                 return
 
             ####################################################################
