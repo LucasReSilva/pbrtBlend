@@ -112,7 +112,8 @@ class LuxCoreExporter(object):
         # Materials, textures, lights and meshes are all converted by their respective Blender object
         object_amount = len(self.blender_scene.objects)
         object_counter = 0
-        luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
+        if luxcore_scene is None:
+            luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
 
         for blender_object in self.blender_scene.objects:
             if self.renderengine.test_break():

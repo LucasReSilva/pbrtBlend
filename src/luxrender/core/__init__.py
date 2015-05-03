@@ -1639,6 +1639,48 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     cached_preview_properties = ''
 
+    def determine_preview_settings(self, scene):
+        from ..export import materials as export_materials
+
+        # Iterate through the preview scene, finding objects with materials attached
+        objects_mats = {}
+        for obj in [ob for ob in scene.objects if ob.is_visible(scene) and not ob.hide_render]:
+            for mat in export_materials.get_instance_materials(obj):
+                if mat is not None:
+                    if not obj.name in objects_mats.keys():
+                        objects_mats[obj] = []
+                    objects_mats[obj].append(mat)
+
+        preview_type = None  # 'MATERIAL' or 'TEXTURE'
+
+        # find objects that are likely to be the preview objects
+        preview_objects = [o for o in objects_mats.keys() if o.name.startswith('preview')]
+        if len(preview_objects) > 0:
+            preview_type = 'MATERIAL'
+        else:
+            preview_objects = [o for o in objects_mats.keys() if o.name.startswith('texture')]
+            if len(preview_objects) > 0:
+                preview_type = 'TEXTURE'
+
+        if preview_type is None:
+            return
+
+        # TODO: scene setup based on PREVIEW_TYPE
+
+        # Find the materials attached to the likely preview object
+        likely_materials = objects_mats[preview_objects[0]]
+        if len(likely_materials) < 1:
+            print('no preview materials')
+            return
+
+        preview_material = likely_materials[0]
+        preview_texture = None
+
+        if preview_type == 'TEXTURE':
+            preview_texture = preview_material.active_texture
+
+        return preview_type, preview_material, preview_texture, preview_objects[0]
+
     def luxcore_render_preview(self, scene):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
@@ -1675,10 +1717,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
             is_thumbnail = filmWidth <= 96
+            preview_type, preview_material, preview_texture, preview_object = self.determine_preview_settings(scene)
 
-            LuxLog('Starting preview render...')
+            if preview_type is None:
+                return
 
-            exporter = MaterialPreviewExporter(scene, self, is_thumbnail)
+            exporter = MaterialPreviewExporter(scene, self, is_thumbnail, preview_type, preview_material,
+                                               preview_texture, preview_object)
             luxcore_config = exporter.convert(filmWidth, filmHeight)
 
             if luxcore_config is None:
@@ -1691,6 +1736,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * buffer_depth))
 
             # Start the rendering
+            thumbnail_info = '(thumbnail)' if is_thumbnail else ''
+            LuxLog('Starting', preview_type, 'preview render', thumbnail_info)
             startTime = time.time()
             luxcore_session.Start()
 
@@ -1698,7 +1745,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 time.sleep(0.02)
                 update_result(self, is_thumbnail, luxcore_session, imageBufferFloat, filmWidth, filmHeight)
             else:
-                stopTime = 6.0
+                stopTime = 6.0 if preview_type == 'MATERIAL' else 0.1
                 done = False
 
                 while not self.test_break() and time.time() - startTime < stopTime and not done:
