@@ -317,7 +317,7 @@ class LightExporter(object):
                 # TODO: match brightness with API 1.x
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
                 raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (
-                get_worldscale(as_scalematrix=False) ** 2)
+                    get_worldscale(as_scalematrix=False) ** 2)
                 emission_color = [raw_color[0], raw_color[1], raw_color[2]]
     
                 # light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
