@@ -251,7 +251,7 @@ class MaterialExporter(object):
 
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['glossycoating']))
                 if not material.luxrender_material.luxrender_mat_glossycoating.basematerial_material:
-                    self.luxcore_name = DEFAULT_MATTE
+                    self.__convert_default_matte()
                     return
                 else:
                     try:
@@ -427,7 +427,7 @@ class MaterialExporter(object):
             elif lux_mat_type == 'mix':
                 if (not material.luxrender_material.luxrender_mat_mix.namedmaterial1_material or
                         not material.luxrender_material.luxrender_mat_mix.namedmaterial2_material):
-                    self.luxcore_name = DEFAULT_MATTE
+                    self.__convert_default_matte()
                     return
                 else:
                     try:
@@ -452,7 +452,8 @@ class MaterialExporter(object):
                         import traceback
 
                         traceback.print_exc()
-                        return DEFAULT_MATTE
+                        self.__convert_default_matte()
+                        return
 
             ####################################################################
             # Fallback
