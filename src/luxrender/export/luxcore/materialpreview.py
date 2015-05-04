@@ -77,7 +77,7 @@ class MaterialPreviewExporter(object):
         scn_props = pyluxcore.Properties()
 
         if self.preview_type == 'MATERIAL':
-            if self.preview_object.name == 'preview.004':
+            if self.preview_object.name == 'preview.004' and not self.is_thumbnail:
                 # Scene setup for the "World sphere" preview object, should be lit by sun + sky
                 self.__create_setup_worldsphere(scn_props)
             else:
@@ -129,36 +129,35 @@ class MaterialPreviewExporter(object):
         scale_fill = 12
         self.__create_area_light(luxcore_scene, scn_props, 'fill', color_fill, position_fill, rotation_fill, scale_fill)
 
-        if not self.is_thumbnail:
-            # Ground plane
-            size = 70
-            zpos = -2.00001
-            vertices = [
-                (size, size, zpos),
-                (size, -size, zpos),
-                (-size, -size, zpos),
-                (-size, size, zpos)
-            ]
-            faces = [
-                (0, 1, 2),
-                (2, 3, 0)
-            ]
-            self.__create_checker_plane(luxcore_scene, scn_props, 'ground_plane', vertices, faces)
+        # Ground plane
+        size = 70
+        zpos = -2.00001
+        vertices = [
+            (size, size, zpos),
+            (size, -size, zpos),
+            (-size, -size, zpos),
+            (-size, size, zpos)
+        ]
+        faces = [
+            (0, 1, 2),
+            (2, 3, 0)
+        ]
+        self.__create_checker_plane(luxcore_scene, scn_props, 'ground_plane', vertices, faces)
 
-            # Plane behind preview object
-            size = 70
-            ypos = 20
-            vertices = [
-                (-size, ypos, size),
-                (size, ypos, size),
-                (size, ypos, -size),
-                (-size, ypos, -size)
-            ]
-            faces = [
-                (0, 1, 2),
-                (2, 3, 0)
-            ]
-            self.__create_checker_plane(luxcore_scene, scn_props, 'plane_behind_object', vertices, faces)
+        # Plane behind preview object
+        size = 70
+        ypos = 20
+        vertices = [
+            (-size, ypos, size),
+            (size, ypos, size),
+            (size, ypos, -size),
+            (-size, ypos, -size)
+        ]
+        faces = [
+            (0, 1, 2),
+            (2, 3, 0)
+        ]
+        self.__create_checker_plane(luxcore_scene, scn_props, 'plane_behind_object', vertices, faces)
 
 
     def __create_setup_texture_preview(self, luxcore_exporter, scn_props):
@@ -192,7 +191,7 @@ class MaterialPreviewExporter(object):
         scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.color', [3.1] * 3))
 
 
-    def __create_checker_plane(self, luxcore_scene, scn_props, name, vertices, faces):
+    def __create_checker_plane(self, luxcore_scene, scn_props, name, vertices, faces, light=False):
         mesh_name = name + '_mesh'
         mat_name = name + '_mat'
         tex_name = name + '_tex'
@@ -210,6 +209,8 @@ class MaterialPreviewExporter(object):
         # Material
         scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', 'matte'))
         scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', tex_name))
+        if light:
+            scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', tex_name))
         # Object
         scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.shape', mesh_name))
         scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.material', mat_name))
@@ -260,11 +261,11 @@ class MaterialPreviewExporter(object):
         cfg_props = pyluxcore.Properties()
         cfg_props.Set(pyluxcore.Property('film.imagepipeline.0.type', 'TONEMAP_LINEAR'))
         cfg_props.Set(pyluxcore.Property('film.imagepipeline.0.scale', 1.0))
-        cfg_props.Set(pyluxcore.Property('film.filter.type', 'NONE'))
+        cfg_props.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
 
         if self.preview_type == 'MATERIAL':
+            cfg_props.Set(pyluxcore.Property('film.filter.width', 1.5))
             cfg_props.Set(pyluxcore.Property('renderengine.type', 'BIASPATHCPU'))
-            cfg_props.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', 3))
             cfg_props.Set(pyluxcore.Property('tile.size', 16))
             cfg_props.Set(pyluxcore.Property('tile.multipass.enable', 1))
             cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', 0.045))
@@ -277,15 +278,11 @@ class MaterialPreviewExporter(object):
             cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', 3))
             cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.glossy ', 1))
             cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.specular', 4))
+            cfg_props.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', 3))
         else:
+            cfg_props.Set(pyluxcore.Property('film.filter.width', 2.5))
             cfg_props.Set(pyluxcore.Property('renderengine.type', 'PATHCPU'))
             cfg_props.Set(pyluxcore.Property('path.maxdepth', 1))
-            cfg_props.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
-            cfg_props.Set(pyluxcore.Property('film.filter.width', 2))
-
-        if self.is_thumbnail:
-            cfg_props.Set(pyluxcore.Property('film.outputs.0.type', 'RGBA_TONEMAPPED'))
-            cfg_props.Set(pyluxcore.Property('film.outputs.0.filename', 'rgba.png'))
 
         return cfg_props
 

@@ -1692,21 +1692,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         try:
             def update_result(self, is_thumbnail, luxcore_session, imageBufferFloat, filmWidth, filmHeight):
                 # Update the image
-                if is_thumbnail:
-                    luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGBA_TONEMAPPED, imageBufferFloat)
-                else:
-                    luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
+                luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
                 # Here we write the pixel values to the RenderResult
                 result = self.begin_result(0, 0, filmWidth, filmHeight)
                 layer = result.layers[0] if bpy.app.version < (2, 74, 4 ) else result.layers[0].passes[0]
 
-                if is_thumbnail:
-                    # Group the flat imagebuffer list into sublists of RGBA values
-                    layer.rect = list(zip(*[iter(imageBufferFloat)] * 4))
-                else:
-                    layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
-                                                                                       imageBufferFloat)
+                layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
+                                                                                   imageBufferFloat)
                 self.end_result(result)
 
             filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
