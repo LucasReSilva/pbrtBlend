@@ -210,6 +210,9 @@ class MaterialPreviewExporter(object):
         # Material
         scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', 'matte'))
         scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', tex_name))
+        # Invisible for indirect diffuse rays to eliminate fireflies
+        scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.diffuse.enable', False))
+
         if light:
             scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', tex_name))
         # Object
