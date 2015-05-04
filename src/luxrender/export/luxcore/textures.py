@@ -124,6 +124,15 @@ class TextureExporter(object):
             self.properties.Set(pyluxcore.Property(ramp_prefix + '.amount', self.luxcore_name))
             self.properties.Set(pyluxcore.Property(ramp_prefix + '.offsets', len(ramp.elements)))
 
+            if ramp.interpolation == 'CONSTANT':
+                interpolation = 'none'
+            elif ramp.interpolation == 'LINEAR':
+                interpolation = 'linear'
+            else:
+                interpolation = 'cubic'
+
+            self.properties.Set(pyluxcore.Property(ramp_prefix + '.interpolation', interpolation))
+
             for i in range(len(ramp.elements)):
                 position = ramp.elements[i].position
                 color = list(ramp.elements[i].color[:3])  # Ignore alpha
