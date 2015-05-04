@@ -1690,10 +1690,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         from ..export.luxcore.materialpreview import MaterialPreviewExporter
 
         try:
-            def log_handler(msg):
-                # Don't spam the log
-                pass
-
             def update_result(self, is_thumbnail, luxcore_session, imageBufferFloat, filmWidth, filmHeight):
                 # Update the image
                 if is_thumbnail:
@@ -1712,8 +1708,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
                                                                                        imageBufferFloat)
                 self.end_result(result)
-
-            pyluxcore.Init(log_handler)
 
             filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
             is_thumbnail = filmWidth <= 96
