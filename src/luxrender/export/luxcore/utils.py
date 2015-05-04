@@ -32,10 +32,12 @@ from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 
 
-def convert_texture_channel(luxcore_exporter, properties, textured_element, channel, type):
+def convert_texture_channel(luxcore_exporter, properties, element_name, textured_element, channel, type):
     """
     :param luxcore_exporter: the luxcore_exporter instance of the calling texture/volume/material exporter
-    :param textured_element: material, volume, texture or anything else with attributes that can be textured
+    :param properties: pyluxcore.Properties
+    :param element_name: name of the luxrender material/volume/texture
+    :param textured_element: luxrender material, volume, texture or anything else with attributes that can be textured
     :param channel: name of the textured attribute, e.g. "Kd", "Ks" etc.
     :param type: "color" or "float"
     :return: name of the created texture or raw value if the channel is untextured
@@ -62,7 +64,7 @@ def convert_texture_channel(luxcore_exporter, properties, textured_element, chan
             is_multiplied = getattr(textured_element, '%s_multiply%s' % (channel, type))
 
             if is_multiplied:
-                scale_tex_name = textured_element.name + channel + type + texture_exporter.luxcore_name
+                scale_tex_name = element_name + channel + type + texture_exporter.luxcore_name
                 create_scale_texture(properties, texture_exporter.luxcore_name, scale_tex_name, value)
                 return scale_tex_name
             else:

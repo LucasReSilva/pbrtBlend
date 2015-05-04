@@ -384,14 +384,14 @@ class TextureExporter(object):
             ####################################################################
             if texType in ('add', 'subtract'):
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex1', luxTex.variant)))
+                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex1', luxTex.variant)))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex2', luxTex.variant)))
+                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex2', luxTex.variant)))
             ####################################################################
             # BAND
             ####################################################################
             elif texType == 'band':
-                self.properties.Set(pyluxcore.Property(prefix + '.amount', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'amount', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.amount', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'amount', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.offsets', [(luxTex.noffsets)]))
 
                 if luxTex.variant != 'fresnel':
@@ -399,7 +399,7 @@ class TextureExporter(object):
                         self.properties.Set(pyluxcore.Property(prefix + '.offset%d' % i,
                                                      [float(getattr(luxTex, 'offset%s%s' % (luxTex.variant, str(i + 1))))]))
 
-                        spectrum = convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex%s' % str(i + 1), luxTex.variant)
+                        spectrum = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex%s' % str(i + 1), luxTex.variant)
                         if len(spectrum) == 3:
                             value = spectrum
                         else:
@@ -429,11 +429,11 @@ class TextureExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.brickdepth', [float(luxTex.brickdepth)]))
                 self.properties.Set(pyluxcore.Property(prefix + '.brickheight', [float(luxTex.brickheight)]))
                 self.properties.Set(pyluxcore.Property(prefix + '.bricktex',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'bricktex', luxTex.variant)))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'bricktex', luxTex.variant)))
                 self.properties.Set(pyluxcore.Property(prefix + '.brickmodtex',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'brickmodtex', luxTex.variant)))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'brickmodtex', luxTex.variant)))
                 self.properties.Set(pyluxcore.Property(prefix + '.mortartex',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'mortartex', luxTex.variant)))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'mortartex', luxTex.variant)))
                 self.__convert_transform(prefix, texture)
             ####################################################################
             # CHECKERBOARD
@@ -441,9 +441,9 @@ class TextureExporter(object):
             elif texType == 'checkerboard':
                 # self.properties.Set(pyluxcore.Property(prefix + '.aamode', [float(luxTex.aamode)])) # not yet in luxcore
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex1', 'float')))
+                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex1', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex2', 'float')))
+                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex2', 'float')))
                 if texture.luxrender_texture.luxrender_tex_checkerboard.dimension == 2:
                     self.properties.Set(pyluxcore.Property(prefix + '.type', ['checkerboard2d']))
                     self.__convert_mapping(prefix, texture)
@@ -483,8 +483,8 @@ class TextureExporter(object):
             # DOTS
             ####################################################################
             elif texType == 'dots':
-                self.properties.Set(pyluxcore.Property(prefix + '.inside', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'inside', 'float')))
-                self.properties.Set(pyluxcore.Property(prefix + '.outside', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'outside', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.inside', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'inside', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.outside', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'outside', 'float')))
                 self.__convert_mapping(prefix, texture)
             ####################################################################
             # FBM
@@ -529,20 +529,20 @@ class TextureExporter(object):
             # Mix
             ####################################################################
             elif texType == 'mix':
-                self.properties.Set(pyluxcore.Property(prefix + '.amount', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'amount', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.amount', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'amount', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex1', luxTex.variant)))
+                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex1', luxTex.variant)))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex2', luxTex.variant)))
+                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex2', luxTex.variant)))
             ####################################################################
             # Scale
             ####################################################################
             elif texType == 'scale':
                 self.properties.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex1', luxTex.variant)))
+                    pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex1', luxTex.variant)))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'tex2', luxTex.variant)))
+                    pyluxcore.Property(prefix + '.texture2', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex2', luxTex.variant)))
             ####################################################################
             # UV
             ####################################################################
@@ -569,7 +569,7 @@ class TextureExporter(object):
             # Fresnel color
             ####################################################################
             elif texType == 'fresnelcolor':
-                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, luxTex, 'Kr', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'Kr', 'color')))
             ####################################################################
             # Fresnel preset (name)
             ####################################################################
