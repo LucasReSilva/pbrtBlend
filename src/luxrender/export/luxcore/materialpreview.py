@@ -25,6 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
+import bpy
 from mathutils import Matrix
 
 from ...outputs.luxcore_api import pyluxcore
@@ -56,7 +57,7 @@ class MaterialPreviewExporter(object):
 
         # Check if we even have to render a new preview (only when something changed)
         # Blender spams many unnecessary updates. The cache has to be static because each preview update
-        # creates its own instance of RENDERENGINE_luxrender.
+        # creates its own instance of RENDERENGINE_luxrender (and thus MaterialPreviewExporter).
         new_preview_properties = str(luxcore_exporter.scene_properties)
 
         if MaterialPreviewExporter.cached_preview_properties == new_preview_properties:

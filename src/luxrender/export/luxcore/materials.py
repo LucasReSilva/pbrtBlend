@@ -30,7 +30,7 @@ import bpy
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 
-from .utils import convert_texture_channel
+from .utils import convert_texture_channel, generate_volume_name
 from .textures import TextureExporter
 
 
@@ -73,6 +73,11 @@ class MaterialExporter(object):
 
 
     def __set_material_volumes(self, prefix):
+        '''
+        # This code is better than the one below (the scene still renders with missing volumes/volumes with wrong names)
+        # but we can't use it because when rendering material previews, Blender gives us the "wrong scene" (the
+        # material preview scene) that is lacking the necessary volumes.
+
         scene_volumes = self.blender_scene.luxrender_volumes.volumes
         interior = self.material.luxrender_material.Interior_volume
         default_interior = self.blender_scene.luxrender_world.default_interior_volume
@@ -88,6 +93,23 @@ class MaterialExporter(object):
             self.__set_volume(prefix + '.volume.exterior', scene_volumes[exterior])
         elif default_exterior in scene_volumes:
             self.__set_volume(prefix + '.volume.exterior', scene_volumes[default_exterior])
+        '''
+
+        interior = self.material.luxrender_material.Interior_volume
+        default_interior = self.blender_scene.luxrender_world.default_interior_volume
+
+        if interior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', generate_volume_name(interior)))
+        elif default_interior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior',  generate_volume_name(default_interior)))
+
+        exterior = self.material.luxrender_material.Exterior_volume
+        default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
+
+        if exterior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(exterior)))
+        elif default_exterior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(default_exterior)))
 
 
     def __set_volume(self, prop_string, volume):

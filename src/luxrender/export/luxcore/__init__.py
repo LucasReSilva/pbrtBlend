@@ -107,7 +107,7 @@ class LuxCoreExporter(object):
         start_time = time.time()
 
         self.convert_camera()
-        self.__convert_world_volume()
+        self.__convert_all_volumes()
 
         # Materials, textures, lights and meshes are all converted by their respective Blender object
         object_amount = len(self.blender_scene.objects)
@@ -245,6 +245,15 @@ class LuxCoreExporter(object):
     def __set_scene_properties(self, properties):
         self.updated_scene_properties.Set(properties)
         self.scene_properties.Set(properties)
+
+
+    def __convert_all_volumes(self):
+        self.__convert_world_volume()
+
+        # Convert volumes from all scenes (necessary for material preview rendering)
+        for scn in bpy.data.scenes:
+            for volume in scn.luxrender_volumes.volumes:
+                self.convert_volume(volume)
 
 
     def __convert_world_volume(self):

@@ -114,3 +114,6 @@ def calc_shutter(blender_scene, lux_camera_settings):
 
     return shutter_open, shutter_close
 
+
+def generate_volume_name(name):
+    return ToValidLuxCoreName(name + '_vol')
