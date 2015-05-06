@@ -1418,11 +1418,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             luxcore_config = luxcore_exporter.convert(filmWidth, filmHeight)
             luxcore_session = pyluxcore.RenderSession(luxcore_config)
 
-            # maybe export was cancelled by user, don't start the rendering with an incomplete scene then
+            # Maybe export was cancelled by user, don't start the rendering with an incomplete scene then
             if self.test_break():
                 return
-            
-            imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
 
             # Start the rendering
             luxcore_session.Start()
@@ -1431,6 +1429,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if scene.luxcore_translatorsettings.use_filesaver:
                 luxcore_session.Stop()
                 return
+
+            imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
 
             imagepipeline_settings = scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
             startTime = time.time()
