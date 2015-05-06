@@ -4616,7 +4616,9 @@ class luxrender_tex_pointiness(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
 
-    controls = []
+    controls = [
+        'curvature_mode'
+    ]
 
     visibility = {}
 
@@ -4626,6 +4628,18 @@ class luxrender_tex_pointiness(declarative_property_group):
             'type': 'string',
             'default': 'float'
         },
+        {
+            'attr': 'curvature_mode',
+            'type': 'enum',
+            'name': 'Curvature',
+            'default': 'both',
+            'items': [
+                ('both', 'Both', 'Use both dents and hills'),
+                ('concave', 'Concave', 'Only use dents'),
+                ('convex', 'Convex', 'Only use hills'),
+            ],
+            'expand': True,
+        }
     ]
 
     def get_paramset(self, scene, texture):

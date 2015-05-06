@@ -30,6 +30,8 @@ import math
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 
+from .utils import convert_texture_channel, generate_volume_name
+
 
 class VolumeExporter(object):
     def __init__(self, luxcore_exporter, blender_scene, volume):
@@ -52,7 +54,7 @@ class VolumeExporter(object):
 
     def __generate_volume_name(self, name):
         # materials and volumes must not have the same names
-        self.luxcore_name = ToValidLuxCoreName(name + '_vol')
+        self.luxcore_name = generate_volume_name(name)
 
     
     def __convert_volume(self):
@@ -72,20 +74,20 @@ class VolumeExporter(object):
     
             # IOR Fresnel
             if volume.fresnel_usefresneltexture:
-                ior_val = self.convert_texture_channel(volume, 'fresnel', 'fresnel')
+                ior_val = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, volume, 'fresnel', 'fresnel')
             else:
                 ior_val = volume.fresnel_fresnelvalue
     
             # Absorption
             if volume.type == 'clear':
                 if volume.absorption_usecolortexture:
-                    abs_col = self.convert_texture_channel(volume, 'absorption', 'color')
+                    abs_col = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, volume, 'absorption', 'color')
                 else:
                     abs_col = [volume.absorption_color.r, volume.absorption_color.g, volume.absorption_color.b]
                     absorption_at_depth_scaled(abs_col)
             else:
                 if volume.sigma_a_usecolortexture:
-                    abs_col = self.convert_texture_channel(volume, 'sigma_a', 'color')
+                    abs_col = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, volume, 'sigma_a', 'color')
                 else:
                     abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
                     absorption_at_depth_scaled(abs_col)
@@ -98,10 +100,10 @@ class VolumeExporter(object):
             if volume.type in ['homogeneous', 'heterogeneous']:
                 # Scattering color
                 if volume.sigma_s_usecolortexture:
-                    s_source = self.convert_texture_channel(volume, 'sigma_s', 'color')
+                    s_source = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, volume, 'sigma_s', 'color')
     
                     if volume.scattering_scale != 1.0:
-                        s_source = self.convert_texture_channel(volume, 'sigma_s', 'color')
+                        s_source = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, volume, 'sigma_s', 'color')
     
                         self.properties.Set(pyluxcore.Property('scene.textures.' + self.luxcore_name + '_scatterscaling.type', ['scale']))
                         self.properties.Set(pyluxcore.Property('scene.textures.' + self.luxcore_name + '_scatterscaling.texture1',

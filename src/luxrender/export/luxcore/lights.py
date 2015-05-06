@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import bpy, mathutils
+import bpy, mathutils, math
 
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
@@ -35,30 +35,29 @@ from ...export import get_worldscale
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
 
-from . import convert_param_to_luxcore_property
+from .utils import convert_param_to_luxcore_property
 
 
 class LightExporter(object):
-    def __init__(self, luxcore_exporter, blender_scene, luxcore_scene, blender_object):
+    def __init__(self, luxcore_exporter, blender_scene, blender_object):
         self.luxcore_exporter = luxcore_exporter
         self.blender_scene = blender_scene
-        self.luxcore_scene = luxcore_scene
         self.blender_object = blender_object
 
         self.properties = pyluxcore.Properties()
         self.luxcore_name = ''
 
 
-    def convert(self):
+    def convert(self, luxcore_scene):
         # Remove old properties
         self.properties = pyluxcore.Properties()
         
-        self.__convert_light()
+        self.__convert_light(luxcore_scene)
 
         return self.properties
 
 
-    def __convert_light(self):
+    def __convert_light(self, luxcore_scene):
         # TODO: refactor this horrible... thing
         # TODO: find solution for awkward sunsky problem
         
@@ -89,7 +88,6 @@ class LightExporter(object):
         # Common light params
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
         energy = params_keyValue['gain'] if not hide_lamp else 0  # workaround for no lights render recovery
-        position = bpy.data.objects[obj.name].location
         importance = params_keyValue['importance']
     
         # Lightgroup
@@ -101,13 +99,13 @@ class LightExporter(object):
             if lightgroup_enabled:
                 energy *= self.blender_scene.luxrender_lightgroups.lightgroups[lightgroup].gain
     
-                if lightgroup in self.lightgroups_cache:
+                if lightgroup in self.luxcore_exporter.lightgroup_cache:
                     # lightgroup already has a luxcore id, use it
-                    lightgroup_id = self.lightgroups_cache[lightgroup]
+                    lightgroup_id = self.luxcore_exporter.lightgroup_cache[lightgroup]
                 else:
                     # this is the first material to use this lightgroup, add an entry with a new id
-                    lightgroup_id = len(self.lightgroups_cache)
-                    self.lightgroups_cache[lightgroup] = lightgroup_id
+                    lightgroup_id = len(self.luxcore_exporter.lightgroup_cache)
+                    self.luxcore_exporter.lightgroup_cache[lightgroup] = lightgroup_id
             else:
                 energy = 0  # use gain for muting to keep geometry exported
     
@@ -319,7 +317,7 @@ class LightExporter(object):
                 # TODO: match brightness with API 1.x
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
                 raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (
-                get_worldscale(as_scalematrix=False) ** 2)
+                    get_worldscale(as_scalematrix=False) ** 2)
                 emission_color = [raw_color[0], raw_color[1], raw_color[2]]
     
                 # light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
@@ -340,7 +338,7 @@ class LightExporter(object):
     
                 # add mesh
                 mesh_name = 'Mesh-' + luxcore_name
-                if not self.luxcore_scene.IsMeshDefined(mesh_name):
+                if not luxcore_scene.IsMeshDefined(mesh_name):
                     vertices = [
                         (1, 1, 0),
                         (1, -1, 0),
@@ -351,7 +349,7 @@ class LightExporter(object):
                         (0, 1, 2),
                         (2, 3, 0)
                     ]
-                    self.luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
+                    luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
                 # assign mesh to object
                 self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.ply', [mesh_name]))
     

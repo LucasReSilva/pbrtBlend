@@ -29,8 +29,10 @@ import bpy
 
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...export.materials import get_texture_from_scene
 
-from . import convert_texture_channel
+from .utils import convert_texture_channel, generate_volume_name
+from .textures import TextureExporter
 
 
 DEFAULT_MATTE = 'DEFAULT_MATTE'
@@ -68,11 +70,15 @@ class MaterialExporter(object):
 
 
     def __convert_default_null(self):
-        self.luxcore_name = DEFAULT_NULL
-        self.properties.Set(pyluxcore.Property('scene.materials.' + self.luxcore_name + '.type', 'null'))
+        self.properties.Set(pyluxcore.Property('scene.materials.' + DEFAULT_NULL + '.type', 'null'))
 
 
     def __set_material_volumes(self, prefix):
+        '''
+        # This code is better than the one below (the scene still renders with missing volumes/volumes with wrong names)
+        # but we can't use it because when rendering material previews, Blender gives us the "wrong scene" (the
+        # material preview scene) that is lacking the necessary volumes.
+
         scene_volumes = self.blender_scene.luxrender_volumes.volumes
         interior = self.material.luxrender_material.Interior_volume
         default_interior = self.blender_scene.luxrender_world.default_interior_volume
@@ -85,9 +91,26 @@ class MaterialExporter(object):
             self.__set_volume(prefix + '.volume.interior', scene_volumes[default_interior])
 
         if exterior in scene_volumes:
-            self.__set_volume(prefix + '.volume.interior', scene_volumes[exterior])
+            self.__set_volume(prefix + '.volume.exterior', scene_volumes[exterior])
         elif default_exterior in scene_volumes:
-            self.__set_volume(prefix + '.volume.interior', scene_volumes[default_exterior])
+            self.__set_volume(prefix + '.volume.exterior', scene_volumes[default_exterior])
+        '''
+
+        interior = self.material.luxrender_material.Interior_volume
+        default_interior = self.blender_scene.luxrender_world.default_interior_volume
+
+        if interior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', generate_volume_name(interior)))
+        elif default_interior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior',  generate_volume_name(default_interior)))
+
+        exterior = self.material.luxrender_material.Exterior_volume
+        default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
+
+        if exterior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(exterior)))
+        elif default_exterior != '':
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(default_exterior)))
 
 
     def __set_volume(self, prop_string, volume):
@@ -135,28 +158,27 @@ class MaterialExporter(object):
             # Matte and Roughmatte
             ####################################################################
             if lux_mat_type == 'matte':
-                sigma = convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'sigma', 'float')
+                sigma = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'sigma', 'float')
 
                 if sigma == '0.0':
                     self.properties.Set(pyluxcore.Property(prefix + '.type', ['matte']))
-                    self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kd', 'color')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
                 else:
                     self.properties.Set(pyluxcore.Property(prefix + '.type', ['roughmatte']))
-                    self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kd', 'color')))
-                    self.properties.Set(
-                        pyluxcore.Property(prefix + '.sigma', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'sigma', 'float')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.sigma', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'sigma', 'float')))
 
             ####################################################################
             # Mattetranslucent
             ####################################################################
             elif lux_mat_type == 'mattetranslucent':
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['mattetranslucent']))
-                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kr', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kt', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.sigma', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'sigma', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kr', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kt', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.sigma', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'sigma', 'float')))
 
             ####################################################################
-            # Metal (for keeping bw compat., but use metal2 )
+            # Metal (for keeping backwards compatibility, internally metal2)
             ####################################################################
             elif lux_mat_type == 'metal':
                 fcol = self.luxcore_name + '_fcol'
@@ -176,18 +198,16 @@ class MaterialExporter(object):
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', [full_name]))
 
                 self.properties.Set(pyluxcore.Property(prefix + '.uroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'uroughness', 'float')))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
 
                 self.properties.Set(pyluxcore.Property(prefix + '.vroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'vroughness', 'float')))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
 
             ####################################################################
             # Metal2
             ####################################################################
             elif lux_mat_type == 'metal2':
                 fcol = self.luxcore_name + '_fcol'
-                self.properties.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
-                self.properties.Set(pyluxcore.Property(prefix + '.fresnel', [fcol]))
                 m2_type = material.luxrender_material.luxrender_mat_metal2.metaltype
 
                 if m2_type == 'preset':
@@ -195,10 +215,35 @@ class MaterialExporter(object):
                     self.properties.Set(
                         pyluxcore.Property('scene.textures.' + fcol + '.name',
                                            material.luxrender_material.luxrender_mat_metal2.preset))
+
                 elif m2_type == 'fresnelcolor':
+                    value = list(getattr(lux_mat, 'Kr_color'))
+
+                    if getattr(lux_mat, 'Kr_usecolortexture'):
+                        # The material attribute is textured, export the texture
+                        texture_name = getattr(lux_mat, 'Kr_colortexturename')
+
+                        if texture_name:
+                            texture = get_texture_from_scene(self.luxcore_exporter.blender_scene, texture_name)
+
+                            if texture is not None:
+                                self.luxcore_exporter.convert_texture(texture)
+                                texture_exporter = self.luxcore_exporter.texture_cache[texture]
+
+                                is_multiplied = getattr(lux_mat, 'Kr_multiplycolor')
+
+                                if is_multiplied:
+                                    scale_tex_name = self.luxcore_name + 'Krcolor' + fcol
+                                    self.properties.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.type', 'scale'))
+                                    self.properties.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.texture1', texture_exporter.luxcore_name))
+                                    self.properties.Set(pyluxcore.Property('scene.textures.' + scale_tex_name + '.texture2', value))
+                                    value = scale_tex_name
+                                else:
+                                    value = texture_exporter.luxcore_name
+
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelcolor']))
-                    self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.kr',
-                                                 convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kr', 'color')))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.kr', value))
+
                 elif m2_type == 'nk':
                     full_name, base_name = get_expanded_file_name(material, lux_mat.filename)
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
@@ -207,41 +252,44 @@ class MaterialExporter(object):
                 else:
                     print('WARNING: Not yet supported metal2 type: %s' % m2_type)
 
+                self.properties.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
+                self.properties.Set(pyluxcore.Property(prefix + '.fresnel', [fcol]))
+
                 self.properties.Set(pyluxcore.Property(prefix + '.uroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'uroughness', 'float')))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
 
                 self.properties.Set(pyluxcore.Property(prefix + '.vroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'vroughness', 'float')))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
 
             ####################################################################
             # Mirror
             ####################################################################
             elif lux_mat_type == 'mirror':
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['mirror']))
-                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kr', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kr', 'color')))
 
             ####################################################################
             # Glossy
             ####################################################################
             elif lux_mat_type == 'glossy':
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['glossy2']))
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kd', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
 
                 if material.luxrender_material.luxrender_mat_glossy.useior:
                     self.properties.Set(
-                        pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'index', 'float')))
+                        pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
                 else:
-                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ks', 'color')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks', 'color')))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ka', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ka', 'color')))
                 self.properties.Set(pyluxcore.Property(prefix + '.multibounce',
                                              material.luxrender_material.luxrender_mat_glossy.multibounce))
-                self.properties.Set(pyluxcore.Property(prefix + '.sigma', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'sigma', 'float')))
-                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'd', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.sigma', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'sigma', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'd', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'uroughness', 'float')))
+                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'vroughness', 'float')))
+                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
 
             ####################################################################
             # Glossycoating
@@ -251,7 +299,7 @@ class MaterialExporter(object):
 
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['glossycoating']))
                 if not material.luxrender_material.luxrender_mat_glossycoating.basematerial_material:
-                    self.luxcore_name = DEFAULT_MATTE
+                    self.__convert_default_matte()
                     return
                 else:
                     try:
@@ -266,63 +314,63 @@ class MaterialExporter(object):
                     except Exception as err:
                         print('WARNING: unable to convert base material %s\n%s' % (material.name, err))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ks', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks', 'color')))
 
                 if material.luxrender_material.luxrender_mat_glossycoating.useior:
                     self.properties.Set(
-                        pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'index', 'float')))
+                        pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
                 else:
-                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ks', 'color')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks', 'color')))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ka', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ka', 'color')))
                 self.properties.Set(pyluxcore.Property(prefix + '.multibounce',
                                              material.luxrender_material.luxrender_mat_glossycoating.multibounce))
-                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'd', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'd', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'uroughness', 'float')))
+                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'vroughness', 'float')))
+                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
 
             ####################################################################
             # Glossytranslucent
             ####################################################################
             elif lux_mat_type == 'glossytranslucent':
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['glossytranslucent']))
-                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kt', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kd', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kt', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
 
                 if material.luxrender_material.luxrender_mat_glossy.useior:
-                    self.properties.Set(pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'index', 'float')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
                 else:
-                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ks', 'color')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks', 'color')))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ka', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ka', 'color')))
                 self.properties.Set(pyluxcore.Property(prefix + '.multibounce',
                                              material.luxrender_material.luxrender_mat_glossytranslucent.multibounce))
-                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'd', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'd', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'uroughness', 'float')))
+                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'vroughness', 'float')))
+                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
 
                 # Backface values
                 if material.luxrender_material.luxrender_mat_glossytranslucent.two_sided:
                     if material.luxrender_material.luxrender_mat_glossytranslucent.bf_useior:
                         self.properties.Set(pyluxcore.Property(prefix + '.index_bf',
-                                                     convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'bf_index', 'float')))
+                                                     convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_index', 'float')))
                     else:
                         self.properties.Set(pyluxcore.Property(prefix + '.ks_bf',
-                                                     convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'backface_Ks', 'color')))
+                                                     convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'backface_Ks', 'color')))
 
                     self.properties.Set(
-                        pyluxcore.Property(prefix + '.ka_bf', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'backface_Ka', 'color')))
+                        pyluxcore.Property(prefix + '.ka_bf', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'backface_Ka', 'color')))
                     self.properties.Set(pyluxcore.Property(prefix + '.multibounce_bf',
                                                  material.luxrender_material.luxrender_mat_glossytranslucent.backface_multibounce))
-                    self.properties.Set(pyluxcore.Property(prefix + '.d_bf', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'bf_d', 'float')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.d_bf', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_d', 'float')))
                     self.properties.Set(pyluxcore.Property(prefix + '.uroughness_bf',
-                                                 convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'bf_uroughness', 'float')))
+                                                 convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_uroughness', 'float')))
                     self.properties.Set(pyluxcore.Property(prefix + '.vroughness_bf',
-                                                 convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'bf_vroughness', 'float')))
+                                                 convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_vroughness', 'float')))
 
             ####################################################################
             # Glass
@@ -330,13 +378,13 @@ class MaterialExporter(object):
             elif lux_mat_type == 'glass':
                 glassType = 'archglass' if material.luxrender_material.luxrender_mat_glass.architectural else 'glass'
                 self.properties.Set(pyluxcore.Property(prefix + '.type', [glassType]))
-                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kr', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kt', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.cauchyb', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'cauchyb', 'float')))
-                self.properties.Set(pyluxcore.Property(prefix + '.film', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'film', 'float')))
-                self.properties.Set(pyluxcore.Property(prefix + '.interiorior', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'index', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kr', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kt', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.cauchyb', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'cauchyb', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.film', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'film', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.interiorior', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.filmindex', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'filmindex', 'float')))
+                    pyluxcore.Property(prefix + '.filmindex', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'filmindex', 'float')))
 
             ####################################################################
             # Glass2
@@ -352,14 +400,14 @@ class MaterialExporter(object):
             ####################################################################
             elif lux_mat_type == 'roughglass':
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['roughglass']))
-                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kr', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kt', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.cauchyb', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'cauchyb', 'float')))
-                self.properties.Set(pyluxcore.Property(prefix + '.interiorior', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'index', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kr', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kr', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kt', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.cauchyb', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'cauchyb', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.interiorior', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'uroughness', 'float')))
+                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
                 self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'vroughness', 'float')))
+                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
 
             ####################################################################
             # Cloth
@@ -368,10 +416,10 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['cloth']))
                 self.properties.Set(
                     pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_cloth.presetname))
-                self.properties.Set(pyluxcore.Property(prefix + '.warp_kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'warp_Kd', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.warp_ks', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'warp_Ks', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.weft_kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'weft_Kd', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.weft_ks', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'weft_Ks', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.warp_kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'warp_Kd', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.warp_ks', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'warp_Ks', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.weft_kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'weft_Kd', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.weft_ks', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'weft_Ks', 'color')))
                 self.properties.Set(
                     pyluxcore.Property(prefix + '.repeat_u', material.luxrender_material.luxrender_mat_cloth.repeat_u))
                 self.properties.Set(
@@ -384,12 +432,12 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['carpaint']))
                 self.properties.Set(
                     pyluxcore.Property(prefix + '.preset', material.luxrender_material.luxrender_mat_carpaint.name))
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kd', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ka', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.ks1', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ks1', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.ks2', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ks2', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.ks3', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Ks3', 'color')))
-                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'd', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ka', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ks1', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks1', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ks2', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks2', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ks3', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks3', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'd', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.m1',
                                              material.luxrender_material.luxrender_mat_carpaint.M1_floatvalue))
                 self.properties.Set(pyluxcore.Property(prefix + '.m2',
@@ -408,7 +456,7 @@ class MaterialExporter(object):
             ####################################################################
             elif lux_mat_type == 'velvet':
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['velvet']))
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'Kd', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
                 self.properties.Set(pyluxcore.Property(prefix + '.thickness',
                                              material.luxrender_material.luxrender_mat_velvet.thickness))
                 self.properties.Set(pyluxcore.Property(prefix + '.p1', material.luxrender_material.luxrender_mat_velvet.p1))
@@ -427,7 +475,7 @@ class MaterialExporter(object):
             elif lux_mat_type == 'mix':
                 if (not material.luxrender_material.luxrender_mat_mix.namedmaterial1_material or
                         not material.luxrender_material.luxrender_mat_mix.namedmaterial2_material):
-                    self.luxcore_name = DEFAULT_MATTE
+                    self.__convert_default_matte()
                     return
                 else:
                     try:
@@ -446,19 +494,20 @@ class MaterialExporter(object):
                         self.properties.Set(pyluxcore.Property(prefix + '.type', ['mix']))
                         self.properties.Set(pyluxcore.Property(prefix + '.material1', mat1_luxcore_name))
                         self.properties.Set(pyluxcore.Property(prefix + '.material2', mat2_luxcore_name))
-                        self.properties.Set(pyluxcore.Property(prefix + '.amount', convert_texture_channel(self.luxcore_exporter, self.properties, lux_mat, 'amount', 'float')))
+                        self.properties.Set(pyluxcore.Property(prefix + '.amount', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'amount', 'float')))
                     except Exception as err:
                         print('WARNING: unable to convert mix material %s\n%s' % (material.name, err))
                         import traceback
 
                         traceback.print_exc()
-                        return DEFAULT_MATTE
+                        self.__convert_default_matte()
+                        return
 
             ####################################################################
             # Fallback
             ####################################################################
             else:
-                self.luxcore_name = DEFAULT_MATTE
+                self.__convert_default_matte()
                 return
 
             ####################################################################
@@ -468,13 +517,13 @@ class MaterialExporter(object):
                 # Bump mapping
                 if material.luxrender_material.bumpmap_usefloattexture:
                     self.properties.Set(pyluxcore.Property(prefix + '.bumptex',
-                                                 convert_texture_channel(self.luxcore_exporter, self.properties, material.luxrender_material, 'bumpmap',
+                                                 convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, material.luxrender_material, 'bumpmap',
                                                                             'float')))
 
                 # Normal mapping
                 if material.luxrender_material.normalmap_usefloattexture:
                     self.properties.Set(pyluxcore.Property(prefix + '.normaltex',
-                                                 convert_texture_channel(self.luxcore_exporter, self.properties, material.luxrender_material, 'normalmap',
+                                                 convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, material.luxrender_material, 'normalmap',
                                                                             'float')))
 
                 # Interior/exterior volumes
@@ -487,55 +536,56 @@ class MaterialExporter(object):
                 prefix += '_coated'
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['glossycoating']))
                 self.properties.Set(pyluxcore.Property(prefix + '.base', [self.luxcore_name]))
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, luxMat_coated, 'Ks', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'Ks', 'color')))
 
                 if material.luxrender_coating.useior:
                     self.properties.Set(
-                        pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, luxMat_coated, 'index', 'float')))
+                        pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'index', 'float')))
                 else:
-                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, luxMat_coated, 'Ks', 'color')))
+                    self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'Ks', 'color')))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, luxMat_coated, 'Ka', 'color')))
+                self.properties.Set(pyluxcore.Property(prefix + '.ka', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'Ka', 'color')))
                 self.properties.Set(pyluxcore.Property(prefix + '.multibounce',
                                              material.luxrender_coating.multibounce))
-                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, luxMat_coated, 'd', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'd', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.uroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, luxMat_coated, 'uroughness', 'float')))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'uroughness', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.vroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, luxMat_coated, 'vroughness', 'float')))
+                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'vroughness', 'float')))
 
                 self.luxcore_name = name_coating
 
             # LuxCore specific material settings
-            # TODO: make sure this works in the new interface after refactoring
-            if material.luxcore_material.id != -1:
-                self.properties.Set(pyluxcore.Property(prefix + '.id', [material.luxcore_material.id]))
-                if material.luxcore_material.create_MATERIAL_ID_MASK and self.blender_scene.luxrender_channels.enable_aovs:
-                    self.createChannelOutputString('MATERIAL_ID_MASK', material.luxcore_material.id)
-                if material.luxcore_material.create_BY_MATERIAL_ID and self.blender_scene.luxrender_channels.enable_aovs:
-                    self.createChannelOutputString('BY_MATERIAL_ID', material.luxcore_material.id)
+            lc_mat = material.luxcore_material
 
-            self.properties.Set(pyluxcore.Property(prefix + '.samples', [material.luxcore_material.samples]))
-            self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [material.luxcore_material.emission_samples]))
-            self.properties.Set(
-                pyluxcore.Property(prefix + '.bumpsamplingdistance', [material.luxcore_material.bumpsamplingdistance]))
+            if lc_mat.id != -1 and not self.luxcore_exporter.is_viewport_render:
+                self.properties.Set(pyluxcore.Property(prefix + '.id', [lc_mat.id]))
+                if lc_mat.create_MATERIAL_ID_MASK and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('MATERIAL_ID_MASK', lc_mat.id)
+                if lc_mat.create_BY_MATERIAL_ID and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', lc_mat.id)
+
+            self.properties.Set(pyluxcore.Property(prefix + '.samples', [lc_mat.samples]))
+            self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [lc_mat.emission_samples]))
+
+            if lc_mat.advanced:
+                self.properties.Set(pyluxcore.Property(prefix + '.bumpsamplingdistance', [lc_mat.bumpsamplingdistance]))
 
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.diffuse.enable',
-                                         material.luxcore_material.visibility_indirect_diffuse_enable))
+                                         lc_mat.visibility_indirect_diffuse_enable))
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.glossy.enable',
-                                         material.luxcore_material.visibility_indirect_glossy_enable))
+                                         lc_mat.visibility_indirect_glossy_enable))
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.specular.enable',
-                                         material.luxcore_material.visibility_indirect_specular_enable))
+                                         lc_mat.visibility_indirect_specular_enable))
 
             if not (translator_settings.override_materials and translator_settings.override_lights):
                 # LuxRender emission
-                # TODO: make this work after refactoring
                 if material.luxrender_emission.use_emission:
                     emit_enabled = self.blender_scene.luxrender_lightgroups.is_enabled(material.luxrender_emission.lightgroup)
                     emit_enabled &= (material.luxrender_emission.L_color.v * material.luxrender_emission.gain) > 0.0
                     if emit_enabled:
                         self.properties.Set(pyluxcore.Property(prefix + '.emission',
-                                                     convert_texture_channel(self.luxcore_exporter, self.properties, material.luxrender_emission, 'L', 'color')))
+                                                     convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, material.luxrender_emission, 'L', 'color')))
 
                         gain = [material.luxrender_emission.gain] * 3
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.gain', gain))
@@ -545,26 +595,25 @@ class MaterialExporter(object):
                         if not self.blender_scene.luxrender_lightgroups.ignore:
                             lightgroup = material.luxrender_emission.lightgroup
 
-                            if lightgroup in self.lightgroups_cache:
+                            if lightgroup in self.luxcore_exporter.lightgroup_cache:
                                 # there is already an material with this lightgroup, use the same id
-                                lightgroup_id = self.lightgroups_cache[lightgroup]
+                                lightgroup_id = self.luxcore_exporter.lightgroup_cache[lightgroup]
                             else:
                                 # this is the first material to use this lightgroup, add an entry with a new id
-                                lightgroup_id = len(self.lightgroups_cache)
-                                self.lightgroups_cache[lightgroup] = lightgroup_id
+                                lightgroup_id = len(self.luxcore_exporter.lightgroup_cache)
+                                self.luxcore_exporter.lightgroup_cache[lightgroup] = lightgroup_id
 
                             self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
 
             # alpha transparency
-            # TODO: make sure this works in the new interface after refactoring
             name_mix = self.luxcore_name + '_alpha_mix'
 
             if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
                 use_alpha_transparency = True
 
-                self.__convert_default_null()
+                alpha = 0.0
 
-                alpha = [0.0]
+                self.__convert_default_null()
 
                 sourceMap = {
                     'carpaint': 'Kd',
@@ -587,14 +636,16 @@ class MaterialExporter(object):
                     if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
                         texture_name = material.luxrender_transparency.alpha_floattexturename
                         texture = bpy.data.textures[texture_name]
-                        # TODO: implement with new interface
-                        alpha = self.ConvertTexture(texture, ToValidLuxCoreName(texture_name + material.name + '_alpha'))
 
+                        alpha_tex_exporter = TextureExporter(self.luxcore_exporter, self.blender_scene, texture)
+                        alpha_tex_exporter.convert(texture_name + material.name + '_alpha')
+                        alpha = alpha_tex_exporter.luxcore_name
+
+                        self.properties.Set(alpha_tex_exporter.properties)
                         self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', ['alpha']))
 
                         if material.luxrender_transparency.inverse:
-                            sv = BlenderSceneConverter.next_scale_value()
-                            inverter_name = alpha + '_inverter_' + str(sv)
+                            inverter_name = alpha + '_inverter'
                             inverter_prefix = 'scene.textures.' + inverter_name
 
                             self.properties.Set(pyluxcore.Property(inverter_prefix + '.type', ['mix']))
@@ -616,7 +667,11 @@ class MaterialExporter(object):
                         # Get blender texture
                         texture = bpy.data.textures[texture_name]
                         # Export texture, get luxcore texture name
-                        alpha = self.ConvertTexture(texture, ToValidLuxCoreName(texture_name + material.name + '_alpha'))
+                        alpha_tex_exporter = TextureExporter(self.luxcore_exporter, self.blender_scene, texture)
+                        alpha_tex_exporter.convert(texture_name + material.name + '_alpha')
+                        alpha = alpha_tex_exporter.luxcore_name
+
+                        self.properties.Set(alpha_tex_exporter.properties)
 
                         channelMap = {
                             'diffusealpha': 'alpha',

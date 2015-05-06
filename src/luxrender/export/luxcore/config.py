@@ -25,20 +25,25 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
+import os
+
 from ...outputs.luxcore_api import pyluxcore
+from ...extensions_framework import util as efutil
 
 class ConfigExporter(object):
-    def __init__(self, blender_scene, is_viewport_render=False):
+    def __init__(self, luxcore_exporter, blender_scene, is_viewport_render=False):
+        self.luxcore_exporter = luxcore_exporter
         self.blender_scene = blender_scene
         self.is_viewport_render = is_viewport_render
         
         self.properties = pyluxcore.Properties()
 
+        self.outputCounter = 0
+        self.material_id_mask_counter = 0
+        self.by_material_id_counter = 0
+
 
     def convert(self, film_width, film_height):
-        # Remove old properties
-        self.properties = pyluxcore.Properties()
-
         realtime_settings = self.blender_scene.luxcore_realtimesettings
 
         if self.is_viewport_render and not realtime_settings.use_finalrender_settings:
@@ -56,6 +61,58 @@ class ConfigExporter(object):
         self.__convert_all_channels()
 
         return self.properties
+
+
+    def convert_channel(self, channelName, id=-1):
+        """
+        Sets configuration properties for LuxCore AOV output
+        """
+
+        # the OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
+        engine = self.blender_scene.luxcore_enginesettings.renderengine_type
+        is_ocl_engine = engine in ['BIASPATHOCL', 'PATHOCL']
+        if is_ocl_engine:
+            if channelName == 'MATERIAL_ID_MASK':
+                if self.material_id_mask_counter == 0:
+                    self.material_id_mask_counter += 1
+                else:
+                    # don't create the output channel
+                    return
+
+            elif channelName == 'BY_MATERIAL_ID':
+                if self.by_material_id_counter == 0:
+                    self.by_material_id_counter += 1
+                else:
+                    # don't create the output channel
+                    return
+
+        if channelName == 'RADIANCE_GROUP':
+            if id > 7 and is_ocl_engine:
+                # don't create the output channel
+                LuxLog('WARNING: OpenCL engines support a maximum of 8 lightgroups! Skipping this lightgroup (ID: %d)'
+                       % id)
+                return
+
+        self.outputCounter += 1
+
+        # list of channels that don't use an HDR format
+        LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK',
+                        'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK']
+
+        # channel type (e.g. 'film.outputs.1.type')
+        outputStringType = 'film.outputs.' + str(self.outputCounter) + '.type'
+        self.properties.Set(pyluxcore.Property(outputStringType, [channelName]))
+
+        # output filename (e.g. 'film.outputs.1.filename')
+        suffix = ('.png' if (channelName in LDR_channels) else '.exr')
+        outputStringFilename = 'film.outputs.' + str(self.outputCounter) + '.filename'
+        filename = channelName + suffix if id == -1 else channelName + '_' + str(id) + suffix
+        self.properties.Set(pyluxcore.Property(outputStringFilename, [filename]))
+
+        # output id
+        if id != -1:
+            outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
+            self.properties.Set(pyluxcore.Property(outputStringId, [id]))
 
 
     def __convert_film_size(self, film_width, film_height):
@@ -299,58 +356,6 @@ class ConfigExporter(object):
                 self.properties.Set(pyluxcore.Property(prop[0], prop[1]))
 
 
-    def __convert_channel(self, channelName, id=-1):
-        """
-        Sets configuration properties for LuxCore AOV output
-        """
-
-        # the OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
-        engine = self.blender_scene.luxcore_enginesettings.renderengine_type
-        is_ocl_engine = engine in ['BIASPATHOCL', 'PATHOCL']
-        if is_ocl_engine:
-            if channelName == 'MATERIAL_ID_MASK':
-                if self.material_id_mask_counter == 0:
-                    self.material_id_mask_counter += 1
-                else:
-                    # don't create the output channel
-                    return
-
-            elif channelName == 'BY_MATERIAL_ID':
-                if self.by_material_id_counter == 0:
-                    self.by_material_id_counter += 1
-                else:
-                    # don't create the output channel
-                    return
-
-        if channelName == 'RADIANCE_GROUP':
-            if id > 7 and is_ocl_engine:
-                # don't create the output channel
-                LuxLog('WARNING: OpenCL engines support a maximum of 8 lightgroups! Skipping this lightgroup (ID: %d)'
-                       % id)
-                return
-
-        self.outputCounter += 1
-
-        # list of channels that don't use an HDR format
-        LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK',
-                        'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK']
-
-        # channel type (e.g. 'film.outputs.1.type')
-        outputStringType = 'film.outputs.' + str(self.outputCounter) + '.type'
-        self.properties.Set(pyluxcore.Property(outputStringType, [channelName]))
-
-        # output filename (e.g. 'film.outputs.1.filename')
-        suffix = ('.png' if (channelName in LDR_channels) else '.exr')
-        outputStringFilename = 'film.outputs.' + str(self.outputCounter) + '.filename'
-        filename = channelName + suffix if id == -1 else channelName + '_' + str(id) + suffix
-        self.properties.Set(pyluxcore.Property(outputStringFilename, [filename]))
-
-        # output id
-        if id != -1:
-            outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
-            self.properties.Set(pyluxcore.Property(outputStringId, [id]))
-
-
     def __convert_all_channels(self):
         if self.blender_scene.camera is None:
             return
@@ -361,50 +366,50 @@ class ConfigExporter(object):
 
         if (channels.enable_aovs and not self.is_viewport_render) or output_switcher_channel != 'disabled':
             if channels.RGB:
-                self.__convert_channel('RGB')
+                self.convert_channel('RGB')
             if channels.RGBA:
-                self.__convert_channel('RGBA')
+                self.convert_channel('RGBA')
             if channels.RGB_TONEMAPPED:
-                self.__convert_channel('RGB_TONEMAPPED')
+                self.convert_channel('RGB_TONEMAPPED')
             if channels.RGBA_TONEMAPPED:
-                self.__convert_channel('RGBA_TONEMAPPED')
+                self.convert_channel('RGBA_TONEMAPPED')
             if channels.ALPHA or output_switcher_channel == 'ALPHA':
-                self.__convert_channel('ALPHA')
+                self.convert_channel('ALPHA')
             if channels.DEPTH or output_switcher_channel == 'DEPTH':
-                self.__convert_channel('DEPTH')
+                self.convert_channel('DEPTH')
             if channels.POSITION or output_switcher_channel == 'POSITION':
-                self.__convert_channel('POSITION')
+                self.convert_channel('POSITION')
             if channels.GEOMETRY_NORMAL or output_switcher_channel == 'GEOMETRY_NORMAL':
-                self.__convert_channel('GEOMETRY_NORMAL')
+                self.convert_channel('GEOMETRY_NORMAL')
             if channels.SHADING_NORMAL or output_switcher_channel == 'SHADING_NORMAL':
-                self.__convert_channel('SHADING_NORMAL')
+                self.convert_channel('SHADING_NORMAL')
             if channels.MATERIAL_ID or output_switcher_channel == 'MATERIAL_ID':
-                self.__convert_channel('MATERIAL_ID')
+                self.convert_channel('MATERIAL_ID')
             if channels.DIRECT_DIFFUSE or output_switcher_channel == 'DIRECT_DIFFUSE':
-                self.__convert_channel('DIRECT_DIFFUSE')
+                self.convert_channel('DIRECT_DIFFUSE')
             if channels.DIRECT_GLOSSY or output_switcher_channel == 'DIRECT_GLOSSY':
-                self.__convert_channel('DIRECT_GLOSSY')
+                self.convert_channel('DIRECT_GLOSSY')
             if channels.EMISSION or output_switcher_channel == 'EMISSION':
-                self.__convert_channel('EMISSION')
+                self.convert_channel('EMISSION')
             if channels.INDIRECT_DIFFUSE or output_switcher_channel == 'INDIRECT_DIFFUSE':
-                self.__convert_channel('INDIRECT_DIFFUSE')
+                self.convert_channel('INDIRECT_DIFFUSE')
             if channels.INDIRECT_GLOSSY or output_switcher_channel == 'INDIRECT_GLOSSY':
-                self.__convert_channel('INDIRECT_GLOSSY')
+                self.convert_channel('INDIRECT_GLOSSY')
             if channels.INDIRECT_SPECULAR or output_switcher_channel == 'INDIRECT_SPECULAR':
-                self.__convert_channel('INDIRECT_SPECULAR')
+                self.convert_channel('INDIRECT_SPECULAR')
             if channels.DIRECT_SHADOW_MASK or output_switcher_channel == 'DIRECT_SHADOW_MASK':
-                self.__convert_channel('DIRECT_SHADOW_MASK')
+                self.convert_channel('DIRECT_SHADOW_MASK')
             if channels.INDIRECT_SHADOW_MASK or output_switcher_channel == 'INDIRECT_SHADOW_MASK':
-                self.__convert_channel('INDIRECT_SHADOW_MASK')
+                self.convert_channel('INDIRECT_SHADOW_MASK')
             if channels.UV or output_switcher_channel == 'UV':
-                self.__convert_channel('UV')
+                self.convert_channel('UV')
             if channels.RAYCOUNT or output_switcher_channel == 'RAYCOUNT':
-                self.__convert_channel('RAYCOUNT')
+                self.convert_channel('RAYCOUNT')
             if channels.IRRADIANCE or output_switcher_channel == 'IRRADIANCE':
-                self.__convert_channel('IRRADIANCE')
+                self.convert_channel('IRRADIANCE')
 
 
     def __convert_lightgroups(self):
         if not self.blender_scene.luxrender_lightgroups.ignore:
-            for i in range(len(self.lightgroups_cache)):
-                self.__convert_channel('RADIANCE_GROUP', i)
+            for i in range(len(self.luxcore_exporter.lightgroup_cache)):
+                self.convert_channel('RADIANCE_GROUP', i)

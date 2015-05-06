@@ -25,14 +25,14 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import math, mathutils
+import bpy, math, mathutils
 
 from ...outputs.luxcore_api import pyluxcore
 from ...export import get_worldscale
 from ...export import object_anim_matrices
 from ...export import fix_matrix_order
 
-from . import calc_shutter
+from .utils import calc_shutter
 
 
 class CameraExporter(object):

@@ -131,12 +131,20 @@ class LuxFilmDisplay(TimerThread):
                             result.layers[0].passes) == 1:
                         # use fast buffers
                         pb, zb = ctx.blenderCombinedDepthBuffers()
-                        result.layers.foreach_set("rect", pb)
-                        lay.passes.foreach_set("rect", zb)
+                        if bpy.app.version < (2, 74, 4 ):
+                            result.layers.foreach_set("rect", pb)
+                            lay.passes.foreach_set("rect", zb)
+                        else:
+                            result.layers[0].passes.foreach_set("rect", pb)
+
                     else:
                         cr, zr = ctx.blenderCombinedDepthRects()
-                        lay.rect = cr
-                        lay.passes[0].rect = zr
+                        if bpy.app.version < (2, 74, 4 ):
+                            lay.rect = cr # combined
+                            lay.passes[0].rect = zr # z
+                        else:
+                            lay.passes[0].rect = cr # combined
+                            lay.passes[1].rect = zr # z
 
                 elif os.path.exists(self.LocalStorage['RE'].output_file):
                     lay.load_from_file(self.LocalStorage['RE'].output_file)

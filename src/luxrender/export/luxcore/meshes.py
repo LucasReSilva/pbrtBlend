@@ -41,9 +41,8 @@ class ExportedShape(object):
 
 
 class MeshExporter(object):
-    def __init__(self, blender_scene, luxcore_scene, is_viewport_render=False, blender_object=None):
+    def __init__(self, blender_scene, is_viewport_render=False, blender_object=None):
         self.blender_scene = blender_scene
-        self.luxcore_scene = luxcore_scene
         self.is_viewport_render = is_viewport_render
         self.blender_object = blender_object
 
@@ -51,16 +50,16 @@ class MeshExporter(object):
         self.exported_shapes = []
 
 
-    def convert(self):
+    def convert(self, luxcore_scene):
         # Remove old properties
         self.properties = pyluxcore.Properties()
 
-        self.__convert_object_geometry()
+        self.__convert_object_geometry(luxcore_scene)
 
         return self.properties
 
 
-    def __convert_object_geometry(self):
+    def __convert_object_geometry(self, luxcore_scene):
         start_time = time.time()
 
         obj = self.blender_object
@@ -74,7 +73,7 @@ class MeshExporter(object):
             return
 
         luxcore_shape_name = self.__generate_shape_name()
-        self.__export_mesh_to_shape(luxcore_shape_name, prepared_mesh)
+        self.__export_mesh_to_shape(luxcore_shape_name, prepared_mesh, luxcore_scene)
 
         bpy.data.meshes.remove(prepared_mesh)
 
@@ -93,7 +92,7 @@ class MeshExporter(object):
         return mesh
 
 
-    def __export_mesh_to_shape(self, name, mesh):
+    def __export_mesh_to_shape(self, name, mesh, luxcore_scene):
         faces = mesh.tessfaces[0].as_pointer()
         vertices = mesh.vertices[0].as_pointer()
 
@@ -109,7 +108,7 @@ class MeshExporter(object):
         else:
             vertexColors = 0
 
-        mesh_definitions = self.luxcore_scene.DefineBlenderMesh(name, len(mesh.tessfaces), faces, len(mesh.vertices),
+        mesh_definitions = luxcore_scene.DefineBlenderMesh(name, len(mesh.tessfaces), faces, len(mesh.vertices),
                                                                  vertices, texCoords, vertexColors)
 
         self.exported_shapes = []
