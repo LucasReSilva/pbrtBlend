@@ -1416,12 +1416,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             luxcore_exporter = LuxCoreExporter(scene, self)
             luxcore_config = luxcore_exporter.convert(filmWidth, filmHeight)
-            luxcore_session = pyluxcore.RenderSession(luxcore_config)
 
             # Maybe export was cancelled by user, don't start the rendering with an incomplete scene then
             if self.test_break():
                 return
 
+            luxcore_session = pyluxcore.RenderSession(luxcore_config)
             # Start the rendering
             luxcore_session.Start()
 
@@ -1640,6 +1640,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     cached_preview_properties = ''
 
     def determine_preview_settings(self, scene):
+        # Find out what exactly we have to do for material preview, if it's actually texture preview etc.
         from ..export import materials as export_materials
 
         # Iterate through the preview scene, finding objects with materials attached
@@ -1665,8 +1666,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if preview_type is None:
             return
 
-        # TODO: scene setup based on PREVIEW_TYPE
-
         # Find the materials attached to the likely preview object
         likely_materials = objects_mats[preview_objects[0]]
         if len(likely_materials) < 1:
@@ -1690,7 +1689,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         from ..export.luxcore.materialpreview import MaterialPreviewExporter
 
         try:
-            def update_result(self, is_thumbnail, luxcore_session, imageBufferFloat, filmWidth, filmHeight):
+            def update_result(self, luxcore_session, imageBufferFloat, filmWidth, filmHeight):
                 # Update the image
                 luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
@@ -1728,21 +1727,28 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             startTime = time.time()
             luxcore_session.Start()
 
-            if is_thumbnail:
-                time.sleep(0.02)
-                update_result(self, is_thumbnail, luxcore_session, imageBufferFloat, filmWidth, filmHeight)
+            done = False
+
+            if is_thumbnail or preview_type == 'TEXTURE':
+                while not self.test_break() and not done:
+                    time.sleep(0.02)
+                    luxcore_session.UpdateStats()
+                    stats = luxcore_session.GetStats()
+                    done = (stats.Get('stats.renderengine.convergence').GetFloat() == 1.0 or
+                            stats.Get('stats.renderengine.pass').GetInt() > 5)
             else:
-                stopTime = 6.0 if preview_type == 'MATERIAL' else 0.1
-                done = False
+                stopTime = 6.0
 
                 while not self.test_break() and time.time() - startTime < stopTime and not done:
                     time.sleep(0.1)
+                    update_result(self, luxcore_session, imageBufferFloat, filmWidth, filmHeight)
 
                     # Update statistics
                     luxcore_session.UpdateStats()
-                    done = self.haltConditionMet(scene, luxcore_session.GetStats())
+                    stats = luxcore_session.GetStats()
+                    done = stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
 
-                    update_result(self, is_thumbnail, luxcore_session, imageBufferFloat, filmWidth, filmHeight)
+            update_result(self, luxcore_session, imageBufferFloat, filmWidth, filmHeight)
 
             luxcore_session.Stop()
             LuxLog('Preview render done (%.2fs)' % (time.time() - startTime))

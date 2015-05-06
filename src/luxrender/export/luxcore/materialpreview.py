@@ -178,7 +178,7 @@ class MaterialPreviewExporter(object):
         transform = [1, 0, 0, 0,
                      0, 1, 0, 0,
                      0, 0, 1, 0,
-                     0, 0, 1, 1]
+                     0, 0, 0.86, 1]
         scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.material', mat_name))
         scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.shape', shape_name))
         scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.transformation', transform))
@@ -271,7 +271,7 @@ class MaterialPreviewExporter(object):
             cfg_props.Set(pyluxcore.Property('film.filter.width', 1.5))
             cfg_props.Set(pyluxcore.Property('renderengine.type', 'BIASPATHCPU'))
             cfg_props.Set(pyluxcore.Property('tile.size', 16))
-            cfg_props.Set(pyluxcore.Property('tile.multipass.enable', 1))
+            cfg_props.Set(pyluxcore.Property('tile.multipass.enable', not self.is_thumbnail))
             cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', 0.045))
             cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', 0))
             cfg_props.Set(pyluxcore.Property('biaspath.sampling.aa.size', 1))
@@ -284,7 +284,7 @@ class MaterialPreviewExporter(object):
             cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.specular', 4))
             cfg_props.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', 3))
         else:
-            cfg_props.Set(pyluxcore.Property('film.filter.width', 2.5))
+            cfg_props.Set(pyluxcore.Property('film.filter.width', 2.0))
             cfg_props.Set(pyluxcore.Property('renderengine.type', 'PATHCPU'))
             cfg_props.Set(pyluxcore.Property('path.maxdepth', 1))
 

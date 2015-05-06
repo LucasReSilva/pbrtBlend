@@ -118,7 +118,7 @@ class LuxCoreExporter(object):
         for blender_object in self.blender_scene.objects:
             if self.renderengine.test_break():
                 print('EXPORT CANCELLED BY USER')
-                break
+                return None
 
             object_counter += 1
             self.renderengine.update_stats('Exporting...', 'Object: ' + blender_object.name)
