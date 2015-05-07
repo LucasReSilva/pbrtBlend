@@ -80,7 +80,7 @@ class MaterialPreviewExporter(object):
         if self.preview_type == 'MATERIAL':
             if self.preview_object.name == 'preview.004' and not self.is_thumbnail:
                 # Scene setup for the "World sphere" preview object, should be lit by sun + sky
-                self.__create_setup_worldsphere(scn_props)
+                self.__create_setup_worldsphere(luxcore_exporter, scn_props)
             else:
                 # Scene setup for all other preview objects
                 self.__create_setup_material_preview(luxcore_scene, scn_props)### Texture preview ###
@@ -96,13 +96,26 @@ class MaterialPreviewExporter(object):
         return luxcore_config
 
 
-    def __create_setup_worldsphere(self, scn_props):
+    def __create_setup_worldsphere(self, luxcore_exporter, scn_props):
         scn_props.Set(pyluxcore.Property('scene.lights.sky.type', 'sky'))
         scn_props.Set(pyluxcore.Property('scene.lights.sky.gain', [.00003] * 3))
 
         scn_props.Set(pyluxcore.Property('scene.lights.sun.type', 'sun'))
         scn_props.Set(pyluxcore.Property('scene.lights.sun.dir', [-0.6, -1, 0.9]))
         scn_props.Set(pyluxcore.Property('scene.lights.sun.gain', [.00003] * 3))
+
+        '''
+        # Rotate the preview sphere to hide ugly UV mapping
+        exported_object = luxcore_exporter.object_cache[self.preview_object].exported_objects[0]
+        exported_props = luxcore_exporter.object_cache[self.preview_object].properties
+        obj_name = exported_object.luxcore_object_name
+        transform = [1, 0, 0, 0,
+                     0, 0, 1, 0,
+                     0, -1, 0, 0,
+                     0, 0, 0, 1]
+        exported_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.transformation', transform))
+        scn_props.Set(exported_props)
+        '''
 
 
     def __create_setup_material_preview(self, luxcore_scene, scn_props):
@@ -274,7 +287,8 @@ class MaterialPreviewExporter(object):
             cfg_props.Set(pyluxcore.Property('tile.multipass.enable', not self.is_thumbnail))
             cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', 0.045))
             cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', 0))
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.aa.size', 1))
+            aa_size = 3 if self.is_thumbnail else 1
+            cfg_props.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_size))
             cfg_props.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', 1))
             cfg_props.Set(pyluxcore.Property('biaspath.sampling.glossy.size', 1))
             cfg_props.Set(pyluxcore.Property('biaspath.sampling.specular.size', 1))

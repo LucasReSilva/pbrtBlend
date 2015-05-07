@@ -1463,8 +1463,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 done = self.haltConditionMet(scene, stats)
 
                 if timeSinceDisplay > display_interval:
-                    #display_start = time.time()
-
                     # Update the image
                     luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
@@ -1482,6 +1480,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight)
                         layer.rect = tempImage
                     else:
+                        pass
                         layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
                                                                                                filmHeight,
                                                                                                imageBufferFloat)
@@ -1489,7 +1488,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.end_result(result)
 
                     lastImageDisplay = now
-                    #LuxLog('Imagebuffer update took %.1fs' % (time.time() - display_start))
 
             # Update the image
             luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
