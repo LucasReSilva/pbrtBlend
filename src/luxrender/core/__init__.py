@@ -1411,7 +1411,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         try:
             self.set_export_path_luxcore(scene)
-        
+
             filmWidth, filmHeight = self.get_film_size(scene)
 
             luxcore_exporter = LuxCoreExporter(scene, self)
@@ -1451,7 +1451,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Use user-definde display interval after the first 15 seconds
                 if elapsedTimeSinceStart > 15.0:
                     display_interval = imagepipeline_settings.displayinterval
-                    
+
                 # Update statistics
                 luxcore_session.UpdateStats()
                 stats = luxcore_session.GetStats()
@@ -1472,15 +1472,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                     if (scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] and
                             scene.luxcore_tile_highlighting.use_tile_highlighting):
-                        # use a temp image because layer.rect does not support list slicing
+                        # Use a temp image because layer.rect does not support list slicing
                         tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
                                                                                               filmHeight,
                                                                                               imageBufferFloat)
-                        # draw tile outlines
+                        # Draw tile outlines
                         self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight)
                         layer.rect = tempImage
                     else:
-                        pass
                         layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
                                                                                                filmHeight,
                                                                                                imageBufferFloat)
@@ -1781,7 +1780,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def begin_scene_edit():
         if RENDERENGINE_luxrender.viewport_render_active:
             if not RENDERENGINE_luxrender.viewport_render_paused:
-                print('pausing viewport render')
+                print('Pausing viewport render')
                 RENDERENGINE_luxrender.viewport_render_paused = True
                 RENDERENGINE_luxrender.luxcore_session.BeginSceneEdit()
 
@@ -1789,14 +1788,21 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def end_scene_edit():
         if RENDERENGINE_luxrender.viewport_render_active:
             if RENDERENGINE_luxrender.viewport_render_paused:
-                print('resuming viewport render')
+                print('Resuming viewport render')
                 RENDERENGINE_luxrender.viewport_render_paused = False
                 RENDERENGINE_luxrender.luxcore_session.EndSceneEdit()
 
     @staticmethod
+    def start_luxcore_session():
+        if not RENDERENGINE_luxrender.viewport_render_active:
+            print('Starting viewport render')
+            RENDERENGINE_luxrender.luxcore_session.Start()
+            RENDERENGINE_luxrender.viewport_render_active = True
+
+    @staticmethod
     def stop_luxcore_session():
         if RENDERENGINE_luxrender.viewport_render_active:
-            print('stopping viewport render')
+            print('Stopping viewport render')
             RENDERENGINE_luxrender.end_scene_edit()
             RENDERENGINE_luxrender.viewport_render_active = False
 
@@ -2052,14 +2058,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewFilmHeight = context.region.height
                 self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
 
-                LuxLog('Starting viewport render')
 
                 # Export the Blender scene
                 luxcore_config = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)
-                RENDERENGINE_luxrender.luxcore_session = pyluxcore.RenderSession(luxcore_config)
+                if luxcore_config is None:
+                    LuxLog('ERROR: not a valid luxcore config')
+                    return
 
-                RENDERENGINE_luxrender.luxcore_session.Start()
-                RENDERENGINE_luxrender.viewport_render_active = True
+                RENDERENGINE_luxrender.luxcore_session = pyluxcore.RenderSession(luxcore_config)
+                RENDERENGINE_luxrender.start_luxcore_session()
             except Exception as exc:
                 LuxLog('View update aborted: %s' % exc)
 
@@ -2090,11 +2097,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 # change config
                 luxcore_config.Parse(self.luxcore_exporter.config_properties)
+                if luxcore_config is None:
+                    LuxLog('ERROR: not a valid luxcore config')
+                    return
 
                 RENDERENGINE_luxrender.luxcore_session = pyluxcore.RenderSession(luxcore_config)
-
-                RENDERENGINE_luxrender.luxcore_session.Start()
-                RENDERENGINE_luxrender.viewport_render_active = True
+                RENDERENGINE_luxrender.start_luxcore_session()
 
             # begin sceneEdit
             luxcore_scene = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig().GetScene()

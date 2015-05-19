@@ -53,8 +53,17 @@ class CameraExporter(object):
             self.__convert_final_camera()
 
         return self.properties
-    
-    
+
+
+    def __calc_screenwindow(self, dx, dy, xaspect, yaspect, zoom):
+        scr_left = -xaspect * zoom
+        scr_right = xaspect * zoom
+        scr_bottom = -yaspect * zoom
+        scr_top = yaspect * zoom
+
+        return [scr_left + dx, scr_right + dx, scr_bottom + dy, scr_top + dy]
+
+
     def __convert_viewport_camera(self):
         if self.context.region_data is None:
             return
@@ -67,91 +76,92 @@ class CameraExporter(object):
 
         luxCamera = self.context.scene.camera.data.luxrender_camera if self.context.scene.camera is not None else None
 
-        if view_persp == 'ORTHO':
-            raise Exception('Orthographic camera is not supported')
+        if self.context.region.width > self.context.region.height:
+            xaspect = 1.0
+            yaspect = self.context.region.height / self.context.region.width
         else:
-            lensradius = 0.0
-            focaldistance = 0.0
+            xaspect = self.context.region.width / self.context.region.height
+            yaspect = 1.0
 
-            zoom = 1.0
+        if view_persp == 'ORTHO':
+            # Viewport cam in orthographic mode
+
+            zoom = 2.0
             dx = 0.0
             dy = 0.0
+            screenwindow = self.__calc_screenwindow(dx, dy, xaspect, yaspect, zoom)
 
-            lookat = self.__convert_lookat(view_matrix.inverted())
-            cam_origin = list(lookat[0:3])
-            cam_lookat = list(lookat[3:6])
-            cam_up = list(lookat[6:9])
+            cam_origin, cam_lookat, cam_up = self.__convert_lookat(view_matrix.inverted())
+
+            self.properties.Set(pyluxcore.Property('scene.camera.type', 'orthographic'))
+            self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', cam_lookat))
+            self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin))
+            self.properties.Set(pyluxcore.Property('scene.camera.up', cam_up))
+            self.properties.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
+            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', 0.0))
+            self.properties.Set(pyluxcore.Property('scene.camera.focaldistance', 0.0))
+
+        elif view_persp == 'PERSP':
+            # Viewport cam in perspective mode
+
+            zoom = 2.0
+            dx = 0.0
+            dy = 0.0
+            screenwindow = self.__calc_screenwindow(dx, dy, xaspect, yaspect, zoom)
+
+            cam_origin, cam_lookat, cam_up = self.__convert_lookat(view_matrix.inverted())
 
             cam_fov = 2 * math.atan(0.5 * 32.0 / view_lens)
 
-            if self.context.region.width > self.context.region.height:
-                xaspect = 1.0
-                yaspect = self.context.region.height / self.context.region.width
-            else:
-                xaspect = self.context.region.width / self.context.region.height
-                yaspect = 1.0
 
-            if view_persp == 'CAMERA':
-                blCamera = self.context.scene.camera
-                # magic zoom formula for camera viewport zoom from blender source
-                zoom = view_camera_zoom
-                zoom = (1.41421 + zoom / 50.0)
-                zoom *= zoom
-                zoom = 2.0 / zoom
-
-                #camera plane offset in camera viewport
-                view_camera_shift_x = self.context.scene.camera.data.shift_x
-                view_camera_shift_y = self.context.scene.camera.data.shift_y
-                dx = 2.0 * (view_camera_shift_x + view_camera_offset[0] * xaspect * 2.0)
-                dy = 2.0 * (view_camera_shift_y + view_camera_offset[1] * yaspect * 2.0)
-
-                cam_fov = blCamera.data.angle
-
-                lookat = luxCamera.lookAt(blCamera)
-                cam_origin = list(lookat[0:3])
-                cam_lookat = list(lookat[3:6])
-                cam_up = list(lookat[6:9])
-
-                if luxCamera.use_dof:
-                    # Do not world-scale this, it is already in meters!
-                    lensradius = (blCamera.data.lens / 1000.0) / (2.0 * luxCamera.fstop)
-
-                ws = get_worldscale(as_scalematrix=False)
-
-                if luxCamera.use_dof:
-                    if blCamera.data.dof_object is not None:
-                        focaldistance = ws * ((blCamera.location - blCamera.data.dof_object.location).length)
-                    elif blCamera.data.dof_distance > 0:
-                        focaldistance = ws * blCamera.data.dof_distance
-
-            zoom *= 2.0
-
-            scr_left = -xaspect * zoom
-            scr_right = xaspect * zoom
-            scr_bottom = -yaspect * zoom
-            scr_top = yaspect * zoom
-
-            screenwindow = [scr_left + dx, scr_right + dx, scr_bottom + dy, scr_top + dy]
-
+            self.properties.Set(pyluxcore.Property('scene.camera.type', 'perspective'))
             self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', cam_lookat))
             self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin))
             self.properties.Set(pyluxcore.Property('scene.camera.up', cam_up))
             self.properties.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
             self.properties.Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov)))
-            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', lensradius))
-            self.properties.Set(pyluxcore.Property('scene.camera.focaldistance', focaldistance))
+            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', 0.0))
+            self.properties.Set(pyluxcore.Property('scene.camera.focaldistance', 0.0))
 
-            if luxCamera is not None:
-                # arbitrary clipping plane
-                self.__convert_clipping_plane(luxCamera)
-                # Shutter open/close
-                self.__convert_shutter(luxCamera)
-    
+        elif view_persp == 'CAMERA':
+            # Using final render camera
+
+            #if blCamera.type == 'PERSP' ... 'ORTHO' ...
+
+            self.__convert_final_camera()
+
+            blCamera = self.context.scene.camera
+            # magic zoom formula for camera viewport zoom from blender source
+            zoom = view_camera_zoom
+            zoom = (1.41421 + zoom / 50.0)
+            zoom *= zoom
+            zoom = 2.0 / zoom
+            zoom *= 2
+
+            #camera plane offset in camera viewport
+            view_camera_shift_x = self.context.scene.camera.data.shift_x
+            view_camera_shift_y = self.context.scene.camera.data.shift_y
+            dx = 2.0 * (view_camera_shift_x + view_camera_offset[0] * xaspect * 2.0)
+            dy = 2.0 * (view_camera_shift_y + view_camera_offset[1] * yaspect * 2.0)
+
+            # TODO: in border render mode, the screenwindow should be adapted to the border
+            screenwindow = self.__calc_screenwindow(dx, dy, xaspect, yaspect, zoom)
+            self.properties.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
+
+        if luxCamera is not None:
+            # arbitrary clipping plane
+            self.__convert_clipping_plane(luxCamera)
+            # Shutter open/close
+            self.__convert_shutter(luxCamera)
+
 
     def __convert_final_camera(self):
         blCamera = self.blender_scene.camera
         blCameraData = blCamera.data
         luxCamera = blCameraData.luxrender_camera
+
+        if blCameraData.type == 'ORTHO':
+            self.properties.Set(pyluxcore.Property('scene.camera.type', 'orthographic'))
 
         # Motion blur
         self.__convert_camera_motion_blur(blCamera)
@@ -171,7 +181,8 @@ class CameraExporter(object):
 
         if luxCamera.use_dof:
             # Do not world-scale this, it is already in meters
-            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)))
+            lensradius = (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)
+            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', lensradius))
 
         ws = get_worldscale(as_scalematrix=False)
 
@@ -212,7 +223,13 @@ class CameraExporter(object):
         target = (pos + forwards)
         up = matrix[1]
 
-        return pos[:3] + target[:3] + up[:3]
+        lookat = pos[:3] + target[:3] + up[:3]
+
+        cam_origin = list(lookat[0:3])
+        cam_lookat = list(lookat[3:6])
+        cam_up = list(lookat[6:9])
+
+        return cam_origin, cam_lookat, cam_up
 
 
     def __convert_camera_motion_blur(self, blCamera):
