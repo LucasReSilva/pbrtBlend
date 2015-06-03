@@ -101,7 +101,16 @@ class VolumeExporter(object):
             if volume.use_emission:
                 emission_color = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, volume, 'emission', 'color')
 
-                emission_color[:] = [i * volume.gain for i in emission_color]
+                if volume.emission_usecolortexture:
+                    # Use a scale texture to multiple the textured emission with the gain
+                    scale_name = self.luxcore_name + '_emissionscale'
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + scale_name + '.type', ['scale']))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + scale_name + '.texture1', emission_color))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + scale_name + '.texture2', volume.gain))
+                    emission_color = scale_name
+                else:
+                    # Just multiply r,g,b with the gain
+                    emission_color[:] = [i * volume.gain for i in emission_color]
 
                 self.properties.Set(pyluxcore.Property(prefix + '.emission', emission_color))
 
@@ -116,8 +125,7 @@ class VolumeExporter(object):
                         self.properties.Set(pyluxcore.Property('scene.textures.' + self.luxcore_name + '_scatterscaling.type', ['scale']))
                         self.properties.Set(pyluxcore.Property('scene.textures.' + self.luxcore_name + '_scatterscaling.texture1',
                                                              volume.scattering_scale))
-                        self.properties.Set(
-                            pyluxcore.Property('scene.textures.' + self.luxcore_name + '_scatterscaling.texture2', s_source))
+                        self.properties.Set(pyluxcore.Property('scene.textures.' + self.luxcore_name + '_scatterscaling.texture2', s_source))
                         s_col = self.luxcore_name + '_scatterscaling'
                     else:
                         s_col = s_source
