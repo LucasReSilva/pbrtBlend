@@ -143,6 +143,7 @@ TFR_IOR = VolumeDataFresnelTextureParameter('fresnel', 'IOR', add_float_value=Tr
 TC_absorption = VolumeDataColorTextureParameter('absorption', 'Absorption', default=(1.0, 1.0, 1.0))
 TC_sigma_a = VolumeDataColorTextureParameter('sigma_a', 'Absorption', default=(1.0, 1.0, 1.0))
 TC_sigma_s = VolumeDataColorTextureParameter('sigma_s', 'Scattering', default=(0.0, 0.0, 0.0))
+TC_emission = VolumeDataColorTextureParameter('emission', 'Emission Color', default=(1.0, 1.0, 1.0))
 
 
 def volume_types():
@@ -184,7 +185,12 @@ class luxrender_volume_data(declarative_property_group):
                    'g',
                    'stepsize',
                    'priority',
-                   'multiscattering'
+                   'multiscattering',
+                   'use_emission'
+               ] + \
+               TC_emission.controls + \
+               [
+                   'gain'
                ]
 
     visibility = dict_merge(
@@ -195,17 +201,20 @@ class luxrender_volume_data(declarative_property_group):
             'depth': O([A([{'type': 'clear'}, {'absorption_usecolortexture': False}]),
                         A([{'type': O(['homogeneous', 'heterogeneous'])}, {'sigma_a_usecolortexture': False}])]),
             'priority': lambda: UseLuxCore(),
-            'multiscattering': A([{'type': O(['homogeneous', 'heterogeneous'])}, lambda: UseLuxCore()])
+            'multiscattering': A([{'type': O(['homogeneous', 'heterogeneous'])}, lambda: UseLuxCore()]),
+            'gain': {'use_emission': True}
         },
         TFR_IOR.visibility,
         TC_absorption.visibility,
         TC_sigma_a.visibility,
-        TC_sigma_s.visibility
+        TC_sigma_s.visibility,
+        TC_emission.visibility
     )
 
     visibility = texture_append_visibility(visibility, TC_absorption, {'type': 'clear'})
     visibility = texture_append_visibility(visibility, TC_sigma_a, {'type': O(['homogeneous', 'heterogeneous'])})
     visibility = texture_append_visibility(visibility, TC_sigma_s, {'type': O(['homogeneous', 'heterogeneous'])})
+    visibility = texture_append_visibility(visibility, TC_emission, {'use_emission': True})
 
     properties = [
                      {
@@ -318,7 +327,32 @@ for volumes with high scattering scale)',
                          'default': False,
                          'save_in_preset': True
                      },
+                     {
+                         'type': 'bool',
+                         'attr': 'use_emission',
+                         'name': 'Light Emitter',
+                         'description': '[LuxCore only] Volume light emission (e.g. for fire)',
+                         'default': False,
+                         'save_in_preset': True
+                     },
+                 ]+ \
+                 TC_emission.properties + \
+                 [
+                     {
+                         'type': 'float',
+                         'attr': 'gain',
+                         'name': 'Gain',
+                         'description': 'Multiplier for the emission color',
+                         'default': 1.0,
+                         'min': 0.00001,
+                         'soft_min': 0.00001,
+                         'max': 1000.0,
+                         'soft_max': 1000.0,
+                         'precision': 6,
+                         'save_in_preset': True
+                     },
                  ]
+
 
     def api_output(self, lux_context):
         vp = ParamSet()

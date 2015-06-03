@@ -1418,7 +1418,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             luxcore_config = luxcore_exporter.convert(filmWidth, filmHeight)
 
             # Maybe export was cancelled by user, don't start the rendering with an incomplete scene then
-            if self.test_break():
+            if self.test_break() or luxcore_config is None:
                 return
 
             luxcore_session = pyluxcore.RenderSession(luxcore_config)

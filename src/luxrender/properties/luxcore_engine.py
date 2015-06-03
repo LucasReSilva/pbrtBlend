@@ -327,17 +327,18 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'float',
             'attr': 'tile_multipass_convergencetest_threshold',
-            'name': 'Noise level:',
+            'name': 'Noise level',
             'description': 'Lower values mean less noise',
             'default': 0.04,
             'min': 0.001,
             'max': 0.9,
+            'precision': 3,
             'save_in_preset': True
         },
         {
             'type': 'float',
             'attr': 'tile_multipass_convergencetest_threshold_reduction',
-            'name': 'Noise level reduction:',
+            'name': 'Noise level reduction',
             'description': 'Multiply noise level with this value after all tiles have converged and continue rendering (0.0 = disabled)',
             'default': 0.0,
             'min': 0.0,

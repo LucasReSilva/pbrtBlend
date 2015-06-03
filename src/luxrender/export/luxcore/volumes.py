@@ -91,12 +91,20 @@ class VolumeExporter(object):
                 else:
                     abs_col = [volume.sigma_a_color.r, volume.sigma_a_color.g, volume.sigma_a_color.b]
                     absorption_at_depth_scaled(abs_col)
-    
+
             self.properties.Set(pyluxcore.Property(prefix + '.absorption', abs_col))
             self.properties.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
             self.properties.Set(pyluxcore.Property(prefix + '.ior', ior_val))
             self.properties.Set(pyluxcore.Property(prefix + '.priority', volume.priority))
-    
+
+            # Light emission
+            if volume.use_emission:
+                emission_color = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, volume, 'emission', 'color')
+
+                emission_color[:] = [i * volume.gain for i in emission_color]
+
+                self.properties.Set(pyluxcore.Property(prefix + '.emission', emission_color))
+
             if volume.type in ['homogeneous', 'heterogeneous']:
                 # Scattering color
                 if volume.sigma_s_usecolortexture:

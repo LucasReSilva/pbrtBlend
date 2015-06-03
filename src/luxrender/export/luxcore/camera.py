@@ -113,7 +113,6 @@ class CameraExporter(object):
 
             cam_fov = 2 * math.atan(0.5 * 32.0 / view_lens)
 
-
             self.properties.Set(pyluxcore.Property('scene.camera.type', 'perspective'))
             self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', cam_lookat))
             self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin))
@@ -126,7 +125,7 @@ class CameraExporter(object):
         elif view_persp == 'CAMERA':
             # Using final render camera
 
-            #if blCamera.type == 'PERSP' ... 'ORTHO' ...
+            #TODO: if blCamera.type == 'PERSP' ... 'ORTHO' ...
 
             self.__convert_final_camera()
 
