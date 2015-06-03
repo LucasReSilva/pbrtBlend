@@ -138,7 +138,7 @@ class VolumeExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.asymmetry', list(volume.g)))
                 self.properties.Set(pyluxcore.Property(prefix + '.multiscattering', [volume.multiscattering]))
     
-            if volume.type == 'heterogenous':
+            if volume.type == 'heterogeneous':
                 self.properties.Set(pyluxcore.Property(prefix + '.steps.size', volume.stepsize))
         except Exception as err:
             print('Volume export failed, skipping volume: %s\n%s' % (volume.name, err))
