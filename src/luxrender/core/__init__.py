@@ -1423,6 +1423,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             luxcore_session = pyluxcore.RenderSession(luxcore_config)
             # Start the rendering
+            LuxLog('Starting the rendering process...')
             luxcore_session.Start()
 
             # Immediately end the rendering if 'FILESAVER' engine is used
@@ -2035,7 +2036,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         update_changes.print_updates()
 
         if update_changes.cause_unknown:
-            print('WARNING: Update cause unknown, skipping update')
+            print('Update cause unknown, skipping update', self.update_counter)
 
         elif update_changes.cause_haltconditions:
             pass
@@ -2057,7 +2058,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewFilmWidth = context.region.width
                 self.viewFilmHeight = context.region.height
                 self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
-
 
                 # Export the Blender scene
                 luxcore_config = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)

@@ -289,6 +289,7 @@ class luxcore_enginesettings(declarative_property_group):
             'default': 0.003,
             'min': 0.0001,
             'max': 0.1,
+            'precision': 4,
             'save_in_preset': True
         },
         {
