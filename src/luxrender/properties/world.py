@@ -349,6 +349,7 @@ for volumes with high scattering scale)',
                          'max': 1000.0,
                          'soft_max': 1000.0,
                          'precision': 6,
+                         'step': 100.0,
                          'save_in_preset': True
                      },
                  ]

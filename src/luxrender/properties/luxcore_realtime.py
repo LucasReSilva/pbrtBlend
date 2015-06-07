@@ -83,7 +83,7 @@ class luxcore_realtimesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'halt_time',
-            'name': 'Time',
+            'name': 'Seconds',
             'description': 'Preview will pause after specified amount of seconds (0 = disabled)',
             'default': 10,
             'min': 0,

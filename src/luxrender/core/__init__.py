@@ -1438,9 +1438,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             lastImageDisplay = startTime
             done = False
 
-            # Magic formula to compute optimal display interval (found through testing)
-            display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
-            LuxLog('Recommended minimum display interval: %.1fs' % display_interval)
+            if self.is_animation or not imagepipeline_settings.fast_initial_preview:
+                # Use normal display interval from the beginning in animations to speed up the rendering
+                display_interval = imagepipeline_settings.displayinterval
+            else:
+                # Magic formula to compute optimal display interval (found through testing)
+                display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
+                LuxLog('Recommended minimum display interval: %.1fs' % display_interval)
 
             while not self.test_break() and not done:
                 time.sleep(0.2)

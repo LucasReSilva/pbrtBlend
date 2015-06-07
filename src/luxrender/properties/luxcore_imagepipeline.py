@@ -146,6 +146,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'label_intervals',
         #['writeinterval_png', 'writeinterval_flm'],
         'displayinterval',
+        'fast_initial_preview',
     ]
     
     visibility = {
@@ -279,6 +280,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'min': 0.0,
             'soft_min': 0.001,
             'soft_max': 100.0,
+            'step': 100.0,
             'save_in_preset': True
         },
         # Reinhard tonemapper settings
@@ -375,6 +377,14 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 10,
             'min': 1,
             'soft_min': 3,
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'fast_initial_preview',
+            'name': 'Fast Initial Preview',
+            'description': 'Update the image continuously for the first 15 seconds of the rendering. Not used when rendering animations',
+            'default': True,
             'save_in_preset': True
         },
     ]

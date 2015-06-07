@@ -666,7 +666,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'halt_time',
-            'name': 'Time',
+            'name': 'Seconds',
             'description': 'Rendering process will stop after specified amount of seconds (0 = disabled)',
             'default': 0,
             'min': 0,
