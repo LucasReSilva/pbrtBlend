@@ -83,8 +83,7 @@ class luxcore_enginesettings(declarative_property_group):
         'label_path_depth',
         'biaspath_pathdepth_total',
         ['biaspath_pathdepth_diffuse', 'biaspath_pathdepth_glossy', 'biaspath_pathdepth_specular'],
-        'label_clamping',
-        'biaspath_clamping_radiance_maxvalue',
+        ['use_clamping', 'biaspath_clamping_radiance_maxvalue'],
         'biaspath_clamping_pdf_value',
         'label_lights',
         'biaspath_lights_samplingstrategy_type',
@@ -143,7 +142,7 @@ class luxcore_enginesettings(declarative_property_group):
                     'biaspath_pathdepth_diffuse': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_glossy': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_specular': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'label_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    'use_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
                     'biaspath_clamping_radiance_maxvalue': 
                     	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
                     'biaspath_clamping_pdf_value': 
@@ -184,6 +183,9 @@ class luxcore_enginesettings(declarative_property_group):
     enabled = {
         # Fake settings for BIASPATH are always disabled
         'biaspath_sampler_type': {'renderengine_type': ''},
+        # Clamping value
+        'biaspath_clamping_radiance_maxvalue': {'use_clamping': True},
+        'biaspath_clamping_pdf_value': {'use_clamping': True},
     }
 
     properties = [
@@ -440,14 +442,17 @@ class luxcore_enginesettings(declarative_property_group):
             'save_in_preset': True
         },
         {
-            'type': 'text',
-            'name': 'Clamping:',
-            'attr': 'label_clamping',
+            'type': 'bool',
+            'attr': 'use_clamping',
+            'name': 'Clamp Brightness',
+            'description': '',
+            'default': False,
+            'save_in_preset': True
         },
         {
             'type': 'float',
             'attr': 'biaspath_clamping_radiance_maxvalue',
-            'name': 'Clamping',
+            'name': 'Max. Brightness',
             'description': 'Max acceptable radiance value for a sample (0.0 = disabled). Used to prevent fireflies',
             'default': 0.0,
             'min': 0.0,
