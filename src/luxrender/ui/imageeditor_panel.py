@@ -33,10 +33,10 @@ from .. import LuxRenderAddon
 
 
 @LuxRenderAddon.addon_register_class
-class imageeditor_panel(property_group_renderer):
+class tile_highlighting_panel(property_group_renderer):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'
-    bl_label = "Tile Highlighting"
+    bl_label = 'Tile Highlighting'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
     @classmethod
@@ -46,8 +46,30 @@ class imageeditor_panel(property_group_renderer):
         return engine_is_lux and UseLuxCore()
 
     display_property_groups = [
-        ( ('scene',), 'luxcore_tile_highlighting', lambda: UseLuxCore() 
-            and bpy.context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']),
+        ( ('scene',), 'luxcore_tile_highlighting', lambda: UseLuxCore()
+            and bpy.context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] )
+    ]
+
+    def draw(self, context):
+        # Draw as normal ...
+        property_group_renderer.draw(self, context)
+
+
+@LuxRenderAddon.addon_register_class
+class rendering_controls_panel(property_group_renderer):
+    bl_space_type = 'IMAGE_EDITOR'
+    bl_region_type = 'UI'
+    bl_label = 'LuxRender'
+    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+
+    @classmethod
+    def poll(cls, context):
+        engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
+
+        return engine_is_lux and UseLuxCore()
+
+    display_property_groups = [
+        ( ('scene',), 'luxcore_rendering_controls', lambda: UseLuxCore() )
     ]
 
     def draw(self, context):

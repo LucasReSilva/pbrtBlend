@@ -104,7 +104,7 @@ class luxcore_enginesettings(declarative_property_group):
         # Kernel cache
         'kernelcache',
         # Halt condition settings (halt time and halt spp)
-        'label_halt',
+        'use_halt_condition',
         ['halt_samples', 'halt_time'],
         # BIASPATH specific halt condition
         'tile_multipass_enable',
@@ -174,6 +174,9 @@ class luxcore_enginesettings(declarative_property_group):
                     'instancing': {'advanced': True},
                     # Kernel cache
                     'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATHOCL', 'BIASPATHOCL'])}]),
+                    # Halt conditions
+                    'halt_samples': {'use_halt_condition': True},
+                    'halt_time': {'use_halt_condition': True},
     }
 
     alert = {}
@@ -648,9 +651,12 @@ class luxcore_enginesettings(declarative_property_group):
         
         # Halt condition settings (halt time and halt spp)
         {
-            'type': 'text',
-            'attr': 'label_halt',
-            'name': 'Halt Conditions:',
+            'type': 'bool',
+            'attr': 'use_halt_condition',
+            'name': 'Halt Rendering',
+            'description': 'Set halt conditions for the rendering so it stops at some point (required for animations)',
+            'default': False,
+            'save_in_preset': True
         },
         {
             'type': 'int',

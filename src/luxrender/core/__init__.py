@@ -61,7 +61,7 @@ from ..properties import (
     material, node_material, node_inputs, node_texture, node_fresnel, node_converter,
     mesh, object as prop_object, particles, rendermode, sampler, texture, world,
     luxcore_engine, luxcore_scene, luxcore_material, luxcore_realtime, luxcore_lamp,
-    luxcore_tile_highlighting, luxcore_imagepipeline, luxcore_translator
+    luxcore_tile_highlighting, luxcore_imagepipeline, luxcore_translator, luxcore_rendering_controls
 )
 
 # Exporter Interface Panels need to be imported to ensure initialisation
@@ -1013,12 +1013,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'METROPOLIS' : 'Metropolis'
         }
 
-        if realtime_preview:
-            halt_samples = scene.luxcore_realtimesettings.halt_samples
-            halt_time = scene.luxcore_realtimesettings.halt_time
-        else:
-            halt_samples = scene.luxcore_enginesettings.halt_samples
-            halt_time = scene.luxcore_enginesettings.halt_time
+        settings = scene.luxcore_realtimesettings if realtime_preview else scene.luxcore_enginesettings
+        halt_samples = settings.halt_samples
+        halt_time = settings.halt_time
 
         # Progress
         progress_time = 0.0
@@ -1030,10 +1027,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Time stats
         time_running = stats.Get('stats.renderengine.time').GetFloat()
         # Add time stats for realtime preview because Blender doesn't display it there
-        if realtime_preview and halt_time == 0:
+        if realtime_preview and (halt_time == 0 or not settings.use_halt_condition):
             stats_list.append('Time: %.1fs' % (time_running))
         # For final renderings, only display time if it is set as halt condition
-        elif halt_time != 0:
+        elif halt_time != 0 and settings.use_halt_condition:
             stats_list.append('Time: %.1fs/%ds' % (time_running, halt_time))
             if not realtime_preview:
                 progress_time = time_running / halt_time
@@ -1041,7 +1038,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Samples/Passes stats
         samples_count = stats.Get('stats.renderengine.pass').GetInt()
         samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
-        if halt_samples != 0:
+        if halt_samples != 0 and settings.use_halt_condition:
             stats_list.append('%s: %d/%d' % (samples_term, samples_count, halt_samples))
             if not realtime_preview:
                 progress_samples = samples_count / halt_samples
@@ -1114,19 +1111,21 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         """
         Checks if any halt conditions are met
         """
-        if realtime_preview:
-            halt_samples = scene.luxcore_realtimesettings.halt_samples
-            halt_time = scene.luxcore_realtimesettings.halt_time
-        else:
-            halt_samples = scene.luxcore_enginesettings.halt_samples
-            halt_time = scene.luxcore_enginesettings.halt_time
+        settings = scene.luxcore_realtimesettings if realtime_preview else scene.luxcore_enginesettings
+
+        halt_samples = settings.halt_samples
+        halt_time = settings.halt_time
         
         rendered_samples = stats.Get('stats.renderengine.pass').GetInt()
         rendered_time = stats.Get('stats.renderengine.time').GetFloat()
+
+        halt_samples_met = settings.use_halt_condition and halt_samples != 0 and rendered_samples >= halt_samples
+        halt_time_met = settings.use_halt_condition and halt_time != 0 and rendered_time >= halt_time
+
+        print(halt_samples_met)
+        print(halt_time_met)
             
-        return (halt_samples != 0 and rendered_samples >= halt_samples) or (
-                halt_time != 0 and rendered_time >= halt_time) or (
-                stats.Get('stats.renderengine.convergence').GetFloat() == 1.0)
+        return halt_samples_met or halt_time_met or stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
 
     def normalizeChannel(self, channel_buffer):
         isInf = math.isinf
@@ -1410,6 +1409,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         from ..outputs.luxcore_api import pyluxcore
 
         try:
+            if self.is_animation:
+                # Check if a halt condition is set, cancel the rendering and warn the user otherwise
+                settings = scene.luxcore_enginesettings
+
+                if not (settings.use_halt_condition and (settings.halt_samples != 0 or settings.halt_time != 0)):
+                    raise Exception('You need to set a halt condition for animations! Activate "Halt Rendering" in the \
+render settings.')
+
             self.set_export_path_luxcore(scene)
 
             filmWidth, filmHeight = self.get_film_size(scene)
@@ -1446,8 +1453,24 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
                 LuxLog('Recommended minimum display interval: %.1fs' % display_interval)
 
+            # TODO: activate this once LuxCore supports pause/resume without samples loss
+            #paused = False
+
             while not self.test_break() and not done:
                 time.sleep(0.2)
+
+                # TODO: activate this once LuxCore supports pause/resume without samples loss
+                '''
+                if scene.luxcore_rendering_controls.pause_render:
+                    if not paused:
+                        paused = True
+                        luxcore_session. <pause render>
+                    continue
+                else:
+                    if paused:
+                        paused = False
+                        luxcore_session. <resume render>
+                '''
 
                 now = time.time()
                 timeSinceDisplay = now - lastImageDisplay

@@ -153,7 +153,6 @@ class luxcore_material(declarative_property_group):
             'name': 'Diffuse',
             'description': 'Enable material visibility for indirect rays',
             'default': True,
-            'toggle': True,
             'save_in_preset': True
         },
         {
@@ -162,7 +161,6 @@ class luxcore_material(declarative_property_group):
             'name': 'Glossy',
             'description': 'Enable material visibility for glossy rays',
             'default': True,
-            'toggle': True,
             'save_in_preset': True
         },
         {
@@ -171,7 +169,6 @@ class luxcore_material(declarative_property_group):
             'name': 'Specular',
             'description': 'Enable material visibility for specular rays',
             'default': True,
-            'toggle': True,
             'save_in_preset': True
         },
     ]

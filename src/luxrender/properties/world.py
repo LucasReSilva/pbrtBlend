@@ -297,7 +297,7 @@ class luxrender_volume_data(declarative_property_group):
                          'name': 'Step Size',
                          'description': 'Length of ray marching steps, smaller values resolve more detail, but \
                          are slower',
-                         'default': 1.0,
+                         'default': 0.1,
                          'min': 0.0,
                          'soft_min': 0.0,
                          'max': 100.0,

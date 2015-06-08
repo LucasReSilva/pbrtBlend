@@ -315,13 +315,19 @@ class ConfigExporter(object):
             engine = 'PATHCPU'
     
         self.properties.Set(pyluxcore.Property('renderengine.type', [engine]))
-    
-        # use global clamping settings
+
+        # Use global path/light depth
         if engine in ['PATHCPU', 'PATHOCL']:
-            self.properties.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', [
-                engine_settings.biaspath_clamping_radiance_maxvalue]))
+            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
+
+            # Use global clamping settings
+            self.properties.Set(pyluxcore.Property('path.clamping.radiance.maxvalue',
+                                                 [engine_settings.biaspath_clamping_radiance_maxvalue]))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value',
                                                  [engine_settings.biaspath_clamping_pdf_value]))
+        elif engine in ['BIDIRCPU']:
+            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
+            self.properties.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
     
         # OpenCL settings
         if len(self.blender_scene.luxcore_enginesettings.luxcore_opencl_devices) > 0:

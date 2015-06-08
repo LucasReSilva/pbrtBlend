@@ -39,7 +39,7 @@ class luxcore_realtimesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        'label_halt',
+        'use_halt_condition',
         ['halt_samples', 'halt_time'],
         'use_finalrender_settings',
         'device_type', 
@@ -58,23 +58,29 @@ class luxcore_realtimesettings(declarative_property_group):
                     'ocl_renderengine_type': {'advanced': True, 'device_type': 'OCL', 'use_finalrender_settings': False},
                     'sampler_type': {'advanced': True, 'use_finalrender_settings': False},
                     'filter_type_cpu': {'advanced': True, 'use_finalrender_settings': False, 'device_type': 'CPU'},
-                    'filter_type_ocl': {'advanced': True, 'use_finalrender_settings': False, 'device_type': 'OCL'}
+                    'filter_type_ocl': {'advanced': True, 'use_finalrender_settings': False, 'device_type': 'OCL'},
+                    # Halt conditions
+                    'halt_samples': {'use_halt_condition': True},
+                    'halt_time': {'use_halt_condition': True},
     }
 
     alert = {}
 
     properties = [
         {
-            'type': 'text',
-            'attr': 'label_halt',
-            'name': 'Realtime Preview Halt Conditions:',
+            'type': 'bool',
+            'attr': 'use_halt_condition',
+            'name': 'Halt Realtime Preview',
+            'description': 'Set halt conditions for the realtime rendering so it stops at some point',
+            'default': True,
+            'save_in_preset': True
         },
         {
             'type': 'int',
             'attr': 'halt_samples',
-            'name': 'Samples',
+            'name': 'Preview Samples',
             'description': 'Preview will pause at specified amount of samples (0 = disabled)',
-            'default': 25,
+            'default': 20,
             'min': 0,
             'max': 1000000,
             'soft_max': 1000,
@@ -83,9 +89,9 @@ class luxcore_realtimesettings(declarative_property_group):
         {
             'type': 'int',
             'attr': 'halt_time',
-            'name': 'Seconds',
+            'name': 'Preview Seconds',
             'description': 'Preview will pause after specified amount of seconds (0 = disabled)',
-            'default': 10,
+            'default': 8,
             'min': 0,
             'max': 500000,
             'soft_max': 3600,

@@ -26,7 +26,6 @@
 #
 
 from ..extensions_framework import declarative_property_group
-from ..extensions_framework.validate import Logic_AND as A
 
 from .. import LuxRenderAddon
 
@@ -34,10 +33,7 @@ from .. import LuxRenderAddon
 @LuxRenderAddon.addon_register_class
 class luxcore_tile_highlighting(declarative_property_group):
     """
-    Storage class for LuxCore render interface settings.
-    These are the settings displayed in the properties bar (key: N) of the
-    image editor window. 
-    Examples: tile highlighting settings for BIASPATH render modes.
+    Storage class for tile highlighting settings for BIASPATH render modes.
     """
     
     ef_attach_to = ['Scene']
@@ -72,7 +68,6 @@ class luxcore_tile_highlighting(declarative_property_group):
             'name': 'Converged',
             'description': 'Show finished tiles',
             'default': True,
-            'toggle': True,
             'save_in_preset': True
         },
         {
@@ -81,7 +76,6 @@ class luxcore_tile_highlighting(declarative_property_group):
             'name': 'Unconverged',
             'description': 'Show unfinished tiles',
             'default': False,
-            'toggle': True,
             'save_in_preset': True
         },
         {
@@ -90,7 +84,6 @@ class luxcore_tile_highlighting(declarative_property_group):
             'name': 'Pending',
             'description': 'Show tiles that are actively rendered',
             'default': True,
-            'toggle': True,
             'save_in_preset': True
         },
     ]
