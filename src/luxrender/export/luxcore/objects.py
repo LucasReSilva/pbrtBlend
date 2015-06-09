@@ -56,16 +56,15 @@ class ObjectExporter(object):
         self.exported_objects = []
 
 
-    def convert(self, update_mesh, update_material, luxcore_scene, anim_matrices=None, matrix=None, is_dupli=False,
-                shape=None):
+    def convert(self, update_mesh, update_material, luxcore_scene, anim_matrices=None, matrix=None, is_dupli=False):
         self.properties = pyluxcore.Properties()
 
-        self.__convert_object(luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli, shape)
+        self.__convert_object(luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli)
 
         return self.properties
 
 
-    def __convert_object(self, luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli, shape):
+    def __convert_object(self, luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli):
         obj = self.blender_object
         is_visible = is_obj_visible(self.blender_scene, obj, is_dupli=is_dupli)
 
@@ -96,12 +95,14 @@ class ObjectExporter(object):
 
         # Check if object is duplicator (particle/hair emitter or using dupliverts/frames/...)
         if len(obj.particle_systems) > 0:
+            # Particle/hair
             convert_object = False
 
             for psys in obj.particle_systems:
                 convert_object |= psys.settings.use_render_emitter
                 self.luxcore_exporter.convert_duplis(luxcore_scene, obj, psys)
         elif obj.is_duplicator:
+            # Dupliverts/frames/...
             self.luxcore_exporter.convert_duplis(luxcore_scene, obj)
 
         # Some dupli types should hide the original
@@ -129,26 +130,20 @@ class ObjectExporter(object):
         # Check if mesh is in cache
         if obj.data in self.luxcore_exporter.mesh_cache:
             # Check if object is in cache
-            if obj in self.luxcore_exporter.object_cache and update_mesh and not is_dupli and shape is None:
+            if obj in self.luxcore_exporter.object_cache and update_mesh and not is_dupli:
                 self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
 
-            self.__update_props(anim_matrices, obj, transform, update_material, shape)
+            self.__update_props(anim_matrices, obj, transform, update_material)
         else:
             # Mesh not in cache
             #print('[%s] mesh and object not in cache' % obj.name)
-            if shape is None:
-                self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
-
-            self.__update_props(anim_matrices, obj, transform, update_material, shape)
+            self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
+            self.__update_props(anim_matrices, obj, transform, update_material)
 
 
-    def __update_props(self, anim_matrices, obj, transform, update_material, shape):
-        if shape is None:
-            mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
-            self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
-        else:
-            # TODO handle hair
-            pass
+    def __update_props(self, anim_matrices, obj, transform, update_material):
+        mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
+        self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
 
 
     def __convert_proxy(self, update_material, anim_matrices, convert_object, transform):

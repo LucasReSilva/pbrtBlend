@@ -106,14 +106,19 @@ class LuxCoreExporter(object):
 
         start_time = time.time()
 
+        if luxcore_scene is None:
+            luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
+
+        # Convert camera and add it to the scene. This needs to be done before object conversion because e.g.
+        # hair export needs a valid defined camera object in case it is view-dependent
         self.convert_camera()
+        luxcore_scene.Parse(self.pop_updated_scene_properties())
+
         self.__convert_all_volumes()
 
         # Materials, textures, lights and meshes are all converted by their respective Blender object
         object_amount = len(self.blender_scene.objects)
         object_counter = 0
-        if luxcore_scene is None:
-            luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
 
         for blender_object in self.blender_scene.objects:
             if self.renderengine.test_break():

@@ -28,6 +28,7 @@
 import math, mathutils, time
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...export import matrix_to_list
 
 from .objects import ObjectExporter
 
@@ -202,14 +203,26 @@ class DupliExporter(object):
         obj = self.duplicator
         psys = self.dupli_system
 
+        for mod in obj.modifiers:
+            if mod.type == 'PARTICLE_SYSTEM':
+                if mod.particle_system.name == psys.name:
+                    break
+
+        if not mod.type == 'PARTICLE_SYSTEM':
+            return
+        elif not mod.particle_system.name == psys.name or not mod.show_render:
+            return
+
         print('[%s: %s] Exporting hair' % (self.duplicator.name, psys.name))
 
         # Export code copied from export/geometry (line 947)
 
-        hair_size = psys.settings.luxrender_hair.hair_size
-        root_width = psys.settings.luxrender_hair.root_width
-        tip_width = psys.settings.luxrender_hair.tip_width
-        width_offset = psys.settings.luxrender_hair.width_offset
+        settings = psys.settings.luxrender_hair
+
+        hair_size = settings.hair_size
+        root_width = settings.root_width
+        tip_width = settings.tip_width
+        width_offset = settings.width_offset
 
         if not self.is_viewport_render:
             psys.set_resolution(self.blender_scene, obj, 'RENDER')
@@ -245,14 +258,16 @@ class DupliExporter(object):
         uv_textures = mesh.tessface_uv_textures
         vertex_color = mesh.tessface_vertex_colors
 
-        if psys.settings.luxrender_hair.export_color == 'vertex_color':
-            if vertex_color.active and vertex_color.active.data:
+        has_vertex_colors = vertex_color.active and vertex_color.active.data
+
+        if settings.export_color == 'vertex_color':
+            if has_vertex_colors:
                 vertex_color_layer = vertex_color.active.data
                 colorflag = 1
 
         if uv_textures.active and uv_textures.active.data:
             uv_tex = uv_textures.active.data
-            if psys.settings.luxrender_hair.export_color == 'uv_texture_map':
+            if settings.export_color == 'uv_texture_map':
                 if uv_tex[0].image:
                     image_width = uv_tex[0].image.size[0]
                     image_height = uv_tex[0].image.size[1]
@@ -308,7 +323,7 @@ class DupliExporter(object):
 
                         uv_coords.append(uv_co)
 
-                    if psys.settings.luxrender_hair.export_color == 'uv_texture_map' and not len(image_pixels) == 0:
+                    if settings.export_color == 'uv_texture_map' and not len(image_pixels) == 0:
                         if not col:
                             x_co = round(uv_co[0] * (image_width - 1))
                             y_co = round(uv_co[1] * (image_height - 1))
@@ -321,7 +336,7 @@ class DupliExporter(object):
                             col = (r, g, b)
 
                         colors.append(col)
-                    elif psys.settings.luxrender_hair.export_color == 'vertex_color':
+                    elif settings.export_color == 'vertex_color' and has_vertex_colors:
                         if not col:
                             col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
 
@@ -338,60 +353,49 @@ class DupliExporter(object):
                 total_strand_count += 1
                 total_segments_count = total_segments_count + point_count - 1
 
-        # Define LuxCore hair shape
-
-        '''
-        scene.DefineStrands() has the following arguments:
-
-        - a string for the shape name
-        - an int for the strands count
-        - an int for the vertices count
-        - a list of vertices (es. [(0, 0, 0), (1, 0, 0), etc.])
-        - a list of how long is each strand (in term of segments, es. [1, 1, 12, 5], etc.) OR the default int value for all hairs (es. 1)
-        - a list of thickness for each vertex es. [0.1, 0.05, etc.]) OR the default float value for all hairs (es. 0.025)
-        - a list of transparencies for each vertex (es. [0.0, 1.0, etc.]) OR the default float value for all hairs (es. 0.0)
-        - a list of colors for each vertex ( es. [(1.0, 0.0, 0.0), etc.]) OR the default tuple value for all hairs (es. (1.0, 0.0, 0.0))
-        - a list of UVs for each vertex ( es. [(1.0, 0.0), etc.]) OR None if the UVs values have to be automatically computed
-        - the type of tessellation: ribbon, ribbonadaptive, solid or solidadaptive
-        - the max. number of subdivision for ribbonadaptive/solidadaptive
-        - the threshold error for ribbonadaptive/solidadaptive
-        - the number of side faces for solid/solidadaptive
-        - if to use a cap for strand bottom for solid/solidadaptive
-        - if to use a cap for strand top for solid/solidadaptive
-        - a boolean to set if the ribbons has to be oriented with camera position for ribbon/ribbonadaptive
-        '''
-
-        ''' # crashes
+        # LuxCore needs tuples, not vectors
         points_as_tuples = [(point[0], point[1], point[2]) for point in points]
 
-        luxcore_name = ToValidLuxCoreName(psys.name)
-        luxcore_scene.DefineStrands(luxcore_name, total_strand_count, len(points), points_as_tuples,
-                                                      segments, 0.025, 0.0, (1.0, 1.0, 1.0), None, 'ribbon', 0, 0, 0,
-                                                      False, False, True)
-        '''
+        if not thicknessflag:
+            thickness = hair_size
 
-        material_index = psys.settings.material
+        if not colorflag:
+            colors = (1.0, 1.0, 1.0)
 
+        if not uvflag:
+            uvs_as_tuples = None
+        else:
+            uvs_as_tuples = [(uv[0], uv[1]) for uv in uv_coords]
 
-        ######## TEST ########
-        import random
+        luxcore_shape_name = ToValidLuxCoreName(obj.name + '_' + psys.name)
 
-        # Add strands
-        points = []
-        segments = []
-        strandsCount = 30
-        for i in range(strandsCount):
-            x = random.random() * 2.0 - 1.0
-            y = random.random() * 2.0 - 1.0
-            points.append((x , y, 0.0))
-            points.append((x , y, 1.0))
-            segments.append(1)
+        # Documentation: http://www.luxrender.net/forum/viewtopic.php?f=8&t=12116&sid=03a16c5c345db3ee0f8126f28f1063c8#p112819
+        luxcore_scene.DefineStrands(luxcore_shape_name, total_strand_count, len(points), points_as_tuples, segments,
+                                    thickness, 0.0, colors, uvs_as_tuples,
+                                    settings.tesseltype, settings.adaptive_maxdepth, settings.adaptive_error,
+                                    settings.solid_sidecount, settings.solid_capbottom, settings.solid_captop,
+                                    True)
 
-        luxcore_scene.DefineStrands("strands_shape", strandsCount, 2 * strandsCount, points, segments,
-            0.025, 0.0, (1.0, 1.0, 1.0), None, "ribbon",
-            0, 0, 0, False, False, True)
-        ######### END TEST ########
+        # For some reason this is not starting at 0 but at 1 (Blender is strange)
+        material_index = psys.settings.material - 1
 
+        try:
+            material = obj.material_slots[material_index].material
+        except IndexError:
+            material = None
+            print('WARNING: material slot %d on object "%s" is unassigned!' % (material_index + 1, obj.name))
+
+        # Convert material
+        self.luxcore_exporter.convert_material(material)
+        material_exporter = self.luxcore_exporter.material_cache[material]
+        luxcore_material_name = material_exporter.luxcore_name
+
+        transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
+
+        prefix = 'scene.objects.' + luxcore_shape_name
+        self.properties.Set(pyluxcore.Property(prefix + '.material', luxcore_material_name))
+        self.properties.Set(pyluxcore.Property(prefix + '.shape', luxcore_shape_name))
+        self.properties.Set(pyluxcore.Property(prefix + '.transformation', transform))
 
         if not self.is_viewport_render:
             # Resolution was changed to 'RENDER' for final renders, change it back
