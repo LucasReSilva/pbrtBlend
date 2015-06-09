@@ -1000,8 +1000,10 @@ class GeometryExporter(object):
             uv_textures = mesh.tessface_uv_textures
             vertex_color = mesh.tessface_vertex_colors
 
+            has_vertex_colors = vertex_color.active and vertex_color.active.data
+
             if psys.settings.luxrender_hair.export_color == 'vertex_color':
-                if vertex_color.active and vertex_color.active.data:
+                if has_vertex_colors:
                     vertex_color_layer = vertex_color.active.data
                     colorflag = 1
 
@@ -1082,7 +1084,7 @@ class GeometryExporter(object):
                                 col = (r, g, b)
 
                             colors.append(col)
-                        elif psys.settings.luxrender_hair.export_color == 'vertex_color':
+                        elif psys.settings.luxrender_hair.export_color == 'vertex_color' and has_vertex_colors:
                             if not col:
                                 col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
 
