@@ -56,15 +56,16 @@ class ObjectExporter(object):
         self.exported_objects = []
 
 
-    def convert(self, update_mesh, update_material, luxcore_scene, anim_matrices=None, matrix=None, is_dupli=False):
+    def convert(self, update_mesh, update_material, luxcore_scene, anim_matrices=None, matrix=None, is_dupli=False,
+                shape=None):
         self.properties = pyluxcore.Properties()
 
-        self.__convert_object(luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli)
+        self.__convert_object(luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli, shape)
 
         return self.properties
 
 
-    def __convert_object(self, luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli):
+    def __convert_object(self, luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli, shape):
         obj = self.blender_object
         is_visible = is_obj_visible(self.blender_scene, obj, is_dupli=is_dupli)
 
@@ -128,29 +129,26 @@ class ObjectExporter(object):
         # Check if mesh is in cache
         if obj.data in self.luxcore_exporter.mesh_cache:
             # Check if object is in cache
-            if obj in self.luxcore_exporter.object_cache and not is_dupli:
-                #print('[%s] object and mesh already in cache' % obj.name)
+            if obj in self.luxcore_exporter.object_cache and update_mesh and not is_dupli and shape is None:
+                self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
 
-                if update_mesh:
-                    self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
-                    mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
-                    self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
-                else:
-                    mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
-                    self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
-            else:
-                # Mesh is in cache, but not this object
-                #print('[%s] mesh in cache, but not object' % obj.name)
-                mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
-
-                self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
+            self.__update_props(anim_matrices, obj, transform, update_material, shape)
         else:
             # Mesh not in cache
             #print('[%s] mesh and object not in cache' % obj.name)
-            self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
+            if shape is None:
+                self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
 
+            self.__update_props(anim_matrices, obj, transform, update_material, shape)
+
+
+    def __update_props(self, anim_matrices, obj, transform, update_material, shape):
+        if shape is None:
             mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
             self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
+        else:
+            # TODO handle hair
+            pass
 
 
     def __convert_proxy(self, update_material, anim_matrices, convert_object, transform):
@@ -191,9 +189,9 @@ class ObjectExporter(object):
             self.__create_object_properties(name, shape.luxcore_shape_name, luxcore_material_name, transform, anim_matrices)
 
 
-    def __create_object_properties(self, luxcore_object_name, luxcore_shape_name, luxcore_material_name, transform, anim_matrices):
-        # Insert a pointiness shape if a pointiness texture is used in one of the materials/textures
+    def __handle_pointiness(self, luxcore_shape_name):
         use_pointiness = False
+
         for mat_slot in self.blender_object.material_slots:
             for tex_slot in mat_slot.material.texture_slots:
                 if tex_slot and tex_slot.texture and tex_slot.texture.luxrender_texture.type == 'pointiness':
@@ -205,6 +203,13 @@ class ObjectExporter(object):
             self.properties.Set(pyluxcore.Property('scene.shapes.' + pointiness_shape + '.type', 'pointiness'))
             self.properties.Set(pyluxcore.Property('scene.shapes.' + pointiness_shape + '.source', luxcore_shape_name))
             luxcore_shape_name = pointiness_shape
+
+        return luxcore_shape_name
+
+
+    def __create_object_properties(self, luxcore_object_name, luxcore_shape_name, luxcore_material_name, transform, anim_matrices):
+        # Insert a pointiness shape if a pointiness texture is used in one of the materials/textures
+        luxcore_shape_name = self.__handle_pointiness(luxcore_shape_name)
 
         self.exported_objects.append(ExportedObject(luxcore_object_name, luxcore_shape_name, luxcore_material_name))
 

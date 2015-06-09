@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# David Bucciarelli, Jens Verwiebe, Tom Bech, Simon Wendsche
+# David Bucciarelli, Jens Verwiebe, Tom Bech, Doug Hammond, Daniel Genrich, Michael Klemm, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -25,8 +25,9 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import mathutils, time
+import math, mathutils, time
 from ...outputs.luxcore_api import pyluxcore
+from ...outputs.luxcore_api import ToValidLuxCoreName
 
 from .objects import ObjectExporter
 
@@ -46,15 +47,16 @@ class DupliExporter(object):
 
     def convert(self, luxcore_scene):
         self.properties = pyluxcore.Properties()
+        export_settings = self.blender_scene.luxcore_translatorsettings
 
         if self.dupli_system is None:
             # Dupliverts/faces/frames (no particle/hair system)
             if self.duplicator.dupli_type in ['FACES', 'GROUP', 'VERTS']:
                 self.__convert_duplis(luxcore_scene)
-        elif self.dupli_system.settings.render_type in ['OBJECT', 'GROUP'] and self.blender_scene.luxcore_translatorsettings.export_particles:
+        elif self.dupli_system.settings.render_type in ['OBJECT', 'GROUP'] and export_settings.export_particles:
             self.__convert_particles(luxcore_scene)
-        elif self.dupli_system.settings.render_type == 'PATH' and self.blender_scene.luxcore_translatorsettings.export_hair:
-            self.__convert_hair()
+        elif self.dupli_system.settings.render_type == 'PATH' and export_settings.export_hair:
+            self.__convert_hair(luxcore_scene)
 
         return self.properties
 
@@ -177,10 +179,6 @@ class DupliExporter(object):
                 dupli_object = particle_dupliobj_dict[particle][0]
                 anim_matrices = particle_dupliobj_dict[particle][1]
 
-                # TODO: remove old code
-                #self.ConvertObject(dupli_object, matrix=anim_matrices[0], is_dupli=True,
-                #                   duplicator=particle_system, anim_matrices=anim_matrices)
-
                 dupli_name_suffix = '_%s_%d' % (self.dupli_system.name, self.dupli_number)
                 self.dupli_number += 1
                 object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
@@ -197,8 +195,204 @@ class DupliExporter(object):
             traceback.print_exc()
 
 
-    def __convert_hair(self):
+    def __convert_hair(self, luxcore_scene):
         """
         Converts PATH type particle systems (hair systems)
         """
-        print('Hair export not supported yet')
+        obj = self.duplicator
+        psys = self.dupli_system
+
+        print('[%s: %s] Exporting hair' % (self.duplicator.name, psys.name))
+
+        # Export code copied from export/geometry (line 947)
+
+        hair_size = psys.settings.luxrender_hair.hair_size
+        root_width = psys.settings.luxrender_hair.root_width
+        tip_width = psys.settings.luxrender_hair.tip_width
+        width_offset = psys.settings.luxrender_hair.width_offset
+
+        if not self.is_viewport_render:
+            psys.set_resolution(self.blender_scene, obj, 'RENDER')
+        steps = 2 ** psys.settings.render_step
+        num_parents = len(psys.particles)
+        num_children = len(psys.child_particles)
+
+        if num_children == 0:
+            start = 0
+        else:
+            # Number of virtual parents reduces the number of exported children
+            num_virtual_parents = math.trunc(
+                0.3 * psys.settings.virtual_parents * psys.settings.child_nbr * num_parents)
+            start = num_parents + num_virtual_parents
+
+        segments = []
+        points = []
+        thickness = []
+        colors = []
+        uv_coords = []
+        total_segments_count = 0
+        vertex_color_layer = None
+        uv_tex = None
+        colorflag = 0
+        uvflag = 0
+        thicknessflag = 0
+        image_width = 0
+        image_height = 0
+        image_pixels = []
+
+        modifier_mode = 'PREVIEW' if self.is_viewport_render else 'RENDER'
+        mesh = obj.to_mesh(self.blender_scene, True, modifier_mode)
+        uv_textures = mesh.tessface_uv_textures
+        vertex_color = mesh.tessface_vertex_colors
+
+        if psys.settings.luxrender_hair.export_color == 'vertex_color':
+            if vertex_color.active and vertex_color.active.data:
+                vertex_color_layer = vertex_color.active.data
+                colorflag = 1
+
+        if uv_textures.active and uv_textures.active.data:
+            uv_tex = uv_textures.active.data
+            if psys.settings.luxrender_hair.export_color == 'uv_texture_map':
+                if uv_tex[0].image:
+                    image_width = uv_tex[0].image.size[0]
+                    image_height = uv_tex[0].image.size[1]
+                    image_pixels = uv_tex[0].image.pixels[:]
+                    colorflag = 1
+            uvflag = 1
+
+        transform = obj.matrix_world.inverted()
+        total_strand_count = 0
+
+        if root_width == tip_width:
+            thicknessflag = 0
+            hair_size *= root_width
+        else:
+            thicknessflag = 1
+
+        for pindex in range(start, num_parents + num_children):
+            point_count = 0
+            i = 0
+
+            if num_children == 0:
+                i = pindex
+
+            # A small optimization in order to speedup the export
+            # process: cache the uv_co and color value
+            uv_co = None
+            col = None
+            seg_length = 1.0
+
+            for step in range(0, steps):
+                co = psys.co_hair(obj, pindex, step)
+                if step > 0:
+                    seg_length = (co - obj.matrix_world * points[len(points) - 1]).length_squared
+
+                if not (co.length_squared == 0 or seg_length == 0):
+                    points.append(transform * co)
+
+                    if thicknessflag:
+                        if step > steps * width_offset:
+                            thick = (root_width * (steps - step - 1) + tip_width * (
+                                        step - steps * width_offset)) / (
+                                        steps * (1 - width_offset) - 1)
+                        else:
+                            thick = root_width
+
+                        thickness.append(thick * hair_size)
+
+                    point_count += + 1
+
+                    if uvflag:
+                        if not uv_co:
+                            uv_co = psys.uv_on_emitter(mod, psys.particles[i], pindex, uv_textures.active_index)
+
+                        uv_coords.append(uv_co)
+
+                    if psys.settings.luxrender_hair.export_color == 'uv_texture_map' and not len(image_pixels) == 0:
+                        if not col:
+                            x_co = round(uv_co[0] * (image_width - 1))
+                            y_co = round(uv_co[1] * (image_height - 1))
+
+                            pixelnumber = (image_width * y_co) + x_co
+
+                            r = image_pixels[pixelnumber * 4]
+                            g = image_pixels[pixelnumber * 4 + 1]
+                            b = image_pixels[pixelnumber * 4 + 2]
+                            col = (r, g, b)
+
+                        colors.append(col)
+                    elif psys.settings.luxrender_hair.export_color == 'vertex_color':
+                        if not col:
+                            col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
+
+                        colors.append(col)
+
+            if point_count == 1:
+                points.pop()
+
+                if thicknessflag:
+                    thickness.pop()
+                point_count -= 1
+            elif point_count > 1:
+                segments.append(point_count - 1)
+                total_strand_count += 1
+                total_segments_count = total_segments_count + point_count - 1
+
+        # Define LuxCore hair shape
+
+        '''
+        scene.DefineStrands() has the following arguments:
+
+        - a string for the shape name
+        - an int for the strands count
+        - an int for the vertices count
+        - a list of vertices (es. [(0, 0, 0), (1, 0, 0), etc.])
+        - a list of how long is each strand (in term of segments, es. [1, 1, 12, 5], etc.) OR the default int value for all hairs (es. 1)
+        - a list of thickness for each vertex es. [0.1, 0.05, etc.]) OR the default float value for all hairs (es. 0.025)
+        - a list of transparencies for each vertex (es. [0.0, 1.0, etc.]) OR the default float value for all hairs (es. 0.0)
+        - a list of colors for each vertex ( es. [(1.0, 0.0, 0.0), etc.]) OR the default tuple value for all hairs (es. (1.0, 0.0, 0.0))
+        - a list of UVs for each vertex ( es. [(1.0, 0.0), etc.]) OR None if the UVs values have to be automatically computed
+        - the type of tessellation: ribbon, ribbonadaptive, solid or solidadaptive
+        - the max. number of subdivision for ribbonadaptive/solidadaptive
+        - the threshold error for ribbonadaptive/solidadaptive
+        - the number of side faces for solid/solidadaptive
+        - if to use a cap for strand bottom for solid/solidadaptive
+        - if to use a cap for strand top for solid/solidadaptive
+        - a boolean to set if the ribbons has to be oriented with camera position for ribbon/ribbonadaptive
+        '''
+
+        ''' # crashes
+        points_as_tuples = [(point[0], point[1], point[2]) for point in points]
+
+        luxcore_name = ToValidLuxCoreName(psys.name)
+        luxcore_scene.DefineStrands(luxcore_name, total_strand_count, len(points), points_as_tuples,
+                                                      segments, 0.025, 0.0, (1.0, 1.0, 1.0), None, 'ribbon', 0, 0, 0,
+                                                      False, False, True)
+        '''
+
+        material_index = psys.settings.material
+
+
+        ######## TEST ########
+        import random
+
+        # Add strands
+        points = []
+        segments = []
+        strandsCount = 30
+        for i in range(strandsCount):
+            x = random.random() * 2.0 - 1.0
+            y = random.random() * 2.0 - 1.0
+            points.append((x , y, 0.0))
+            points.append((x , y, 1.0))
+            segments.append(1)
+
+        luxcore_scene.DefineStrands("strands_shape", strandsCount, 2 * strandsCount, points, segments,
+            0.025, 0.0, (1.0, 1.0, 1.0), None, "ribbon",
+            0, 0, 0, False, False, True)
+        ######### END TEST ########
+
+
+        if not self.is_viewport_render:
+            # Resolution was changed to 'RENDER' for final renders, change it back
+            psys.set_resolution(self.blender_scene, obj, 'PREVIEW')
