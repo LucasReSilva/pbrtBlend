@@ -52,6 +52,12 @@ class MaterialPreviewExporter(object):
 
 
     def convert(self, film_width, film_height):
+        # Make the strands in strand preview mode thicker so they are visible
+        strands_settings = self.blender_scene.objects['previewhair'].particle_systems[0].settings.luxrender_hair
+        strands_settings.hair_size = 0.05
+        strands_settings.tesseltype = 'solid'
+
+
         luxcore_exporter = LuxCoreExporter(self.blender_scene, self.renderengine)
         luxcore_config = luxcore_exporter.convert(film_width, film_height)
 
