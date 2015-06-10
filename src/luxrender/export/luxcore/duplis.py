@@ -50,60 +50,84 @@ class DupliExporter(object):
         self.properties = pyluxcore.Properties()
         export_settings = self.blender_scene.luxcore_translatorsettings
 
-        if self.dupli_system is None:
-            # Dupliverts/faces/frames (no particle/hair system)
-            if self.duplicator.dupli_type in ['FACES', 'GROUP', 'VERTS']:
-                self.__convert_duplis(luxcore_scene)
-        elif self.dupli_system.settings.render_type in ['OBJECT', 'GROUP'] and export_settings.export_particles:
-            self.__convert_particles(luxcore_scene)
-        elif self.dupli_system.settings.render_type == 'PATH' and export_settings.export_hair:
-            self.__convert_hair(luxcore_scene)
+        try:
+            if self.dupli_system is None:
+                # Dupliverts/faces/frames (no particle/hair system)
+                if self.duplicator.dupli_type in ['FACES', 'GROUP', 'VERTS']:
+                    self.__convert_duplis(luxcore_scene)
+            elif self.dupli_system.settings.render_type in ['OBJECT', 'GROUP'] and export_settings.export_particles:
+                self.__convert_particles(luxcore_scene)
+            elif self.dupli_system.settings.render_type == 'PATH' and export_settings.export_hair:
+                self.__convert_hair(luxcore_scene)
+        except Exception:
+            print('Could not convert particle system %s of object %s' % (self.dupli_system.name, self.duplicator.name))
+            self.luxcore_exporter.errors = True
+            import traceback
+            traceback.print_exc()
+        finally:
+            return self.properties
 
-        return self.properties
+
+    def __report_progress(self):
+        """
+        Show information about the export progress in the UI
+        """
+        if self.dupli_system is not None:
+            name = 'Hair' if self.dupli_system.settings.type == 'HAIR' else 'Particle'
+            particle_system_string = ' | %s System: %s' % (name, self.dupli_system.name)
+        else:
+            particle_system_string = ''
+
+        percentage = (self.dupli_number / self.dupli_amount) * 100
+        progress_string = ' (%.2f%%)' % percentage
+
+        message = 'Object: %s%s%s' % (self.duplicator.name, particle_system_string, progress_string)
+        self.luxcore_exporter.renderengine.update_stats('Exporting...', message)
+
 
     def __convert_duplis(self, luxcore_scene):
         """
         Converts duplis and OBJECT and GROUP particle systems
         """
         print('[%s] Exporting duplis' % self.duplicator.name)
+        time_start = time.time()
 
-        try:
-            time_start = time.time()
+        mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
+        self.duplicator.dupli_list_create(self.blender_scene, settings=mode)
+        self.dupli_amount = len(self.duplicator.dupli_list)
 
-            mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
-            self.duplicator.dupli_list_create(self.blender_scene, settings=mode)
-            self.dupli_amount = len(self.duplicator.dupli_list)
+        for dupli_ob in self.duplicator.dupli_list:
+            # Make it possible to interrupt the export process
+            if self.luxcore_exporter.renderengine.test_break():
+                return
 
-            for dupli_ob in self.duplicator.dupli_list:
-                dupli_object = dupli_ob.object
+            self.__report_progress()
 
-                # Check for group layer visibility, if the object is in a group
-                group_visible = len(dupli_object.users_group) == 0
+            dupli_object = dupli_ob.object
 
-                for group in dupli_object.users_group:
-                    group_visible |= True in [a & b for a, b in zip(dupli_object.layers, group.layers)]
+            # Check for group layer visibility, if the object is in a group
+            group_visible = len(dupli_object.users_group) == 0
 
-                if not group_visible:
-                    continue
+            for group in dupli_object.users_group:
+                group_visible |= True in [a & b for a, b in zip(dupli_object.layers, group.layers)]
 
-                # Convert dupli object
-                dupli_name_suffix = '_%s_%d' % (self.duplicator.name, self.dupli_number)
-                self.dupli_number += 1
+            if not group_visible:
+                continue
 
-                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
-                                                 dupli_object, dupli_name_suffix)
-                properties = object_exporter.convert(update_mesh=True, update_material=True, luxcore_scene=luxcore_scene,
-                                                     matrix=dupli_ob.matrix.copy(), is_dupli=True)
-                self.properties.Set(properties)
+            # Convert dupli object
+            dupli_name_suffix = '_%s_%d' % (self.duplicator.name, self.dupli_number)
+            self.dupli_number += 1
 
-            self.duplicator.dupli_list_clear()
+            object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
+                                             dupli_object, dupli_name_suffix)
+            properties = object_exporter.convert(update_mesh=True, update_material=True, luxcore_scene=luxcore_scene,
+                                                 matrix=dupli_ob.matrix.copy(), is_dupli=True)
+            self.properties.Set(properties)
 
-            time_elapsed = time.time() - time_start
-            print('[%s] Dupli export finished (%.3fs)' % (self.duplicator.name, time_elapsed))
-        except Exception as err:
-            print('Error in ConvertDuplis for object %s: %s' % (self.duplicator.name, err))
-            import traceback
-            traceback.print_exc()
+        self.duplicator.dupli_list_clear()
+
+        time_elapsed = time.time() - time_start
+        print('[%s] Dupli export finished (%.3fs)' % (self.duplicator.name, time_elapsed))
 
 
     def __convert_particles(self, luxcore_scene):
@@ -111,89 +135,93 @@ class DupliExporter(object):
         particle_system = self.dupli_system
 
         print('[%s: %s] Exporting particle system' % (self.duplicator.name, particle_system.name))
+        time_start = time.time()
 
-        try:
-            time_start = time.time()
+        if (self.blender_scene.camera is not None and self.blender_scene.camera.data.luxrender_camera.usemblur
+            and self.blender_scene.camera.data.luxrender_camera.objectmblur):
+            steps = self.blender_scene.camera.data.luxrender_camera.motion_blur_samples + 1
+        else:
+            steps = 1
 
-            if (self.blender_scene.camera is not None and self.blender_scene.camera.data.luxrender_camera.usemblur
-                and self.blender_scene.camera.data.luxrender_camera.objectmblur):
-                steps = self.blender_scene.camera.data.luxrender_camera.motion_blur_samples + 1
-            else:
-                steps = 1
+        old_subframe = self.blender_scene.frame_subframe
+        current_frame = self.blender_scene.frame_current
 
-            old_subframe = self.blender_scene.frame_subframe
-            current_frame = self.blender_scene.frame_current
+        # Collect particles that should be visible
+        particles = [p for p in particle_system.particles if p.alive_state == 'ALIVE' or (
+            p.alive_state == 'UNBORN' and particle_system.settings.show_unborn) or (
+                         p.alive_state in ['DEAD', 'DYING'] and particle_system.settings.use_dead)]
 
-            # Collect particles that should be visible
-            particles = [p for p in particle_system.particles if p.alive_state == 'ALIVE' or (
-                p.alive_state == 'UNBORN' and particle_system.settings.show_unborn) or (
-                             p.alive_state in ['DEAD', 'DYING'] and particle_system.settings.use_dead)]
+        mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
+        obj.dupli_list_create(self.blender_scene, settings=mode)
+        self.dupli_amount = len(obj.dupli_list)
 
-            mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
-            obj.dupli_list_create(self.blender_scene, settings=mode)
-            self.dupli_amount = len(obj.dupli_list)
+        dupli_objects = [dupli.object for dupli in obj.dupli_list]
+        particle_dupliobj_pairs = list(zip(particles, dupli_objects))
 
-            dupli_objects = [dupli.object for dupli in obj.dupli_list]
-            particle_dupliobj_pairs = list(zip(particles, dupli_objects))
+        # dict of the form {particle: [dupli_object, []]} (the empty list will contain the matrices)
+        particle_dupliobj_dict = {pair[0]: [pair[1], []] for pair in particle_dupliobj_pairs}
 
-            # dict of the form {particle: [dupli_object, []]} (the empty list will contain the matrices)
-            particle_dupliobj_dict = {pair[0]: [pair[1], []] for pair in particle_dupliobj_pairs}
+        for i in range(steps):
+            self.blender_scene.frame_set(current_frame, subframe=i / steps)
 
-            for i in range(steps):
-                self.blender_scene.frame_set(current_frame, subframe=i / steps)
-
-                # Calculate matrix for each particle
-                # I'm not using obj.dupli_list[i].matrix because it contains wrong positions
-                for particle in particle_dupliobj_dict:
-                    dupli_object = particle_dupliobj_dict[particle][0]
-
-                    scale = dupli_object.scale * particle.size
-                    scale_matrix = mathutils.Matrix()
-                    scale_matrix[0][0] = scale.x
-                    scale_matrix[1][1] = scale.y
-                    scale_matrix[2][2] = scale.z
-
-                    rotation_matrix = particle.rotation.to_matrix()
-                    rotation_matrix.resize_4x4()
-
-                    transform_matrix = mathutils.Matrix()
-                    transform_matrix[0][3] = particle.location.x
-                    transform_matrix[1][3] = particle.location.y
-                    transform_matrix[2][3] = particle.location.z
-
-                    transform = transform_matrix * rotation_matrix * scale_matrix
-
-                    # Only use motion blur for living particles
-                    if particle.alive_state == 'ALIVE':
-                        # Don't append matrix if it is identical to the previous one
-                        if particle_dupliobj_dict[particle][1][-1:] != transform:
-                            particle_dupliobj_dict[particle][1].append(transform)
-                    else:
-                        # Overwrite old matrix
-                        particle_dupliobj_dict[particle][1] = [transform]
-
-            obj.dupli_list_clear()
-            self.blender_scene.frame_set(current_frame, subframe=old_subframe)
-
-            # Export particles
+            # Calculate matrix for each particle
+            # I'm not using obj.dupli_list[i].matrix because it contains wrong positions
             for particle in particle_dupliobj_dict:
+                # Make it possible to interrupt the export process
+                if self.luxcore_exporter.renderengine.test_break():
+                    return
+
                 dupli_object = particle_dupliobj_dict[particle][0]
-                anim_matrices = particle_dupliobj_dict[particle][1]
 
-                dupli_name_suffix = '_%s_%d' % (self.dupli_system.name, self.dupli_number)
-                self.dupli_number += 1
-                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
-                                                 dupli_object, dupli_name_suffix)
-                properties = object_exporter.convert(update_mesh=True, update_material=True, luxcore_scene=luxcore_scene,
-                                                     matrix=anim_matrices[0], is_dupli=True, anim_matrices=anim_matrices)
-                self.properties.Set(properties)
+                scale = dupli_object.scale * particle.size
+                scale_matrix = mathutils.Matrix()
+                scale_matrix[0][0] = scale.x
+                scale_matrix[1][1] = scale.y
+                scale_matrix[2][2] = scale.z
 
-            time_elapsed = time.time() - time_start
-            print('[%s: %s] Particle export finished (%.3fs)' % (self.duplicator.name, particle_system.name, time_elapsed))
-        except Exception as err:
-            print('Could not convert particle system %s of object %s: %s' % (particle_system.name, obj.name, err))
-            import traceback
-            traceback.print_exc()
+                rotation_matrix = particle.rotation.to_matrix()
+                rotation_matrix.resize_4x4()
+
+                transform_matrix = mathutils.Matrix()
+                transform_matrix[0][3] = particle.location.x
+                transform_matrix[1][3] = particle.location.y
+                transform_matrix[2][3] = particle.location.z
+
+                transform = transform_matrix * rotation_matrix * scale_matrix
+
+                # Only use motion blur for living particles
+                if particle.alive_state == 'ALIVE':
+                    # Don't append matrix if it is identical to the previous one
+                    if particle_dupliobj_dict[particle][1][-1:] != transform:
+                        particle_dupliobj_dict[particle][1].append(transform)
+                else:
+                    # Overwrite old matrix
+                    particle_dupliobj_dict[particle][1] = [transform]
+
+        obj.dupli_list_clear()
+        self.blender_scene.frame_set(current_frame, subframe=old_subframe)
+
+        # Export particles
+        for particle in particle_dupliobj_dict:
+            # Make it possible to interrupt the export process
+            if self.luxcore_exporter.renderengine.test_break():
+                return
+
+            self.__report_progress()
+
+            dupli_object = particle_dupliobj_dict[particle][0]
+            anim_matrices = particle_dupliobj_dict[particle][1]
+
+            dupli_name_suffix = '_%s_%d' % (self.dupli_system.name, self.dupli_number)
+            self.dupli_number += 1
+            object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
+                                             dupli_object, dupli_name_suffix)
+            properties = object_exporter.convert(update_mesh=True, update_material=True, luxcore_scene=luxcore_scene,
+                                                 matrix=anim_matrices[0], is_dupli=True, anim_matrices=anim_matrices)
+            self.properties.Set(properties)
+
+        time_elapsed = time.time() - time_start
+        print('[%s: %s] Particle export finished (%.3fs)' % (self.duplicator.name, particle_system.name, time_elapsed))
 
 
     def __convert_hair(self, luxcore_scene):
@@ -214,6 +242,7 @@ class DupliExporter(object):
             return
 
         print('[%s: %s] Exporting hair' % (self.duplicator.name, psys.name))
+        time_start = time.time()
 
         # Export code copied from export/geometry (line 947)
 
@@ -284,7 +313,16 @@ class DupliExporter(object):
         else:
             thicknessflag = 1
 
+        self.dupli_amount = num_parents + num_children
+
         for pindex in range(start, num_parents + num_children):
+            # Make it possible to interrupt the export process
+            if self.luxcore_exporter.renderengine.test_break():
+                return
+
+            self.dupli_number += 1
+            self.__report_progress()
+
             point_count = 0
             i = 0
 
@@ -354,7 +392,7 @@ class DupliExporter(object):
                 total_segments_count = total_segments_count + point_count - 1
 
         # LuxCore needs tuples, not vectors
-        points_as_tuples = [(point[0], point[1], point[2]) for point in points]
+        points_as_tuples = [tuple(point) for point in points]
 
         if not thicknessflag:
             thickness = hair_size
@@ -365,10 +403,12 @@ class DupliExporter(object):
         if not uvflag:
             uvs_as_tuples = None
         else:
-            uvs_as_tuples = [(uv[0], uv[1]) for uv in uv_coords]
+            # LuxCore needs tuples, not vectors
+            uvs_as_tuples = [tuple(uv) for uv in uv_coords]
 
         luxcore_shape_name = ToValidLuxCoreName(obj.name + '_' + psys.name)
 
+        self.luxcore_exporter.renderengine.update_stats('Exporting...', 'Refining Hair System %s' % psys.name)
         # Documentation: http://www.luxrender.net/forum/viewtopic.php?f=8&t=12116&sid=03a16c5c345db3ee0f8126f28f1063c8#p112819
         luxcore_scene.DefineStrands(luxcore_shape_name, total_strand_count, len(points), points_as_tuples, segments,
                                     thickness, 0.0, colors, uvs_as_tuples,
@@ -376,7 +416,7 @@ class DupliExporter(object):
                                     settings.solid_sidecount, settings.solid_capbottom, settings.solid_captop,
                                     True)
 
-        # For some reason this is not starting at 0 but at 1 (Blender is strange)
+        # For some reason this index is not starting at 0 but at 1 (Blender is strange)
         material_index = psys.settings.material - 1
 
         try:
@@ -400,3 +440,6 @@ class DupliExporter(object):
         if not self.is_viewport_render:
             # Resolution was changed to 'RENDER' for final renders, change it back
             psys.set_resolution(self.blender_scene, obj, 'PREVIEW')
+
+        time_elapsed = time.time() - time_start
+        print('[%s: %s] Hair export finished (%.3fs)' % (obj.name, psys.name, time_elapsed))

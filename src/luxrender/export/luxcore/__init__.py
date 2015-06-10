@@ -83,6 +83,9 @@ class LuxCoreExporter(object):
         self.config_exporter = ConfigExporter(self, self.blender_scene, self.is_viewport_render)
         self.camera_exporter = CameraExporter(self.blender_scene, self.is_viewport_render, self.context)
 
+        # If errors happen during export, this flag is set to True and a message is displayed after export
+        self.errors = False
+
 
     def pop_updated_scene_properties(self):
         """
