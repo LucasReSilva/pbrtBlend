@@ -1084,6 +1084,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if str.endswith(engine, 'OCL'):
             stats_list.append('Memory: %dM/%dM' % (used_memory, max_memory))
 
+        # Show triangle count (formatted with commas, like so: 5,123,001 Tris)
+        triangle_count = int(stats.Get("stats.dataset.trianglecount").GetFloat())
+        stats_list.append('{:,} Tris'.format(triangle_count))
+
         # Engine and sampler info
         engine_info = engine_dict[engine]
         if not engine in ['BIASPATHCPU', 'BIASPATHOCL']:

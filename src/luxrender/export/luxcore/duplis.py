@@ -79,7 +79,7 @@ class DupliExporter(object):
             particle_system_string = ''
 
         percentage = (self.dupli_number / self.dupli_amount) * 100
-        progress_string = ' (%.2f%%)' % percentage
+        progress_string = ' (%d%%)' % percentage
 
         message = 'Object: %s%s%s' % (self.duplicator.name, particle_system_string, progress_string)
         self.luxcore_exporter.renderengine.update_stats('Exporting...', message)

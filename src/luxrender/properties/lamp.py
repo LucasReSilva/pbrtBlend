@@ -411,8 +411,8 @@ class luxrender_lamp_sun(declarative_property_group):
             'attr': 'relsize',
             'name': 'Relative sun disk size',
             'default': 1.0,
-            'min': 0.0,
-            'soft_min': 0.0,
+            'min': 0.000001,
+            'soft_min': 0.05,
             'max': 100.0,
             'soft_max': 100.0
         },
