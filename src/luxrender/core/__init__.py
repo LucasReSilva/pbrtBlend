@@ -995,6 +995,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         """
         Returns: string of formatted statistics
         """
+        '''
+        'stats_samples',
+        'stats_samples_per_sec',
+        'stats_memory',
+        'stats_tris',
+        'stats_engine_info',
+        stats_tiles
+        '''
+
+        rendering_controls = scene.luxcore_rendering_controls
 
         engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
         engine_dict = {
@@ -1036,17 +1046,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 progress_time = time_running / halt_time
 
         # Samples/Passes stats
-        samples_count = stats.Get('stats.renderengine.pass').GetInt()
-        samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
-        if halt_samples != 0 and settings.use_halt_condition:
-            stats_list.append('%s: %d/%d' % (samples_term, samples_count, halt_samples))
-            if not realtime_preview:
-                progress_samples = samples_count / halt_samples
-        else:
-            stats_list.append('%s: %d' % (samples_term, samples_count))
+        if rendering_controls.stats_samples:
+            samples_count = stats.Get('stats.renderengine.pass').GetInt()
+            samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
+            if halt_samples != 0 and settings.use_halt_condition:
+                stats_list.append('%s: %d/%d' % (samples_term, samples_count, halt_samples))
+                if not realtime_preview:
+                    progress_samples = samples_count / halt_samples
+            else:
+                stats_list.append('%s: %d' % (samples_term, samples_count))
 
         # Tile stats
-        if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
+        if engine in ['BIASPATHCPU', 'BIASPATHOCL'] and rendering_controls.stats_tiles:
             converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
             notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
             pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
@@ -1056,43 +1067,46 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             progress_tiles = converged / tiles_amount
 
         # Samples per second
-        stats_list.append('Samples/Sec %3.2fM' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000))
+        if rendering_controls.stats_samples_per_sec:
+            stats_list.append('Samples/Sec %3.2fM' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000))
 
-        # Memory usage
-        device_stats = stats.Get("stats.renderengine.devices")
+        # Memory usage (only available for OpenCL engines)
+        if str.endswith(engine, 'OCL') and rendering_controls.stats_memory:
+            device_stats = stats.Get("stats.renderengine.devices")
 
-        max_memory = float('inf')
-        used_memory = 0
+            max_memory = float('inf')
+            used_memory = 0
 
-        for i in range(device_stats.GetSize()):
-            device_name = device_stats.GetString(i)
+            for i in range(device_stats.GetSize()):
+                device_name = device_stats.GetString(i)
 
-            # Max memory available is limited by the device with least amount of memory
-            device_max_memory = stats.Get("stats.renderengine.devices." + device_name + ".memory.total").GetFloat()
-            device_max_memory = int(device_max_memory / (1024 * 1024))
-            if device_max_memory < max_memory:
-                max_memory = device_max_memory
+                # Max memory available is limited by the device with least amount of memory
+                device_max_memory = stats.Get("stats.renderengine.devices." + device_name + ".memory.total").GetFloat()
+                device_max_memory = int(device_max_memory / (1024 * 1024))
+                if device_max_memory < max_memory:
+                    max_memory = device_max_memory
 
-            device_used_memory = stats.Get("stats.renderengine.devices." + device_name + ".memory.used").GetFloat()
-            device_used_memory = int(device_used_memory / (1024 * 1024))
-            if device_used_memory > used_memory:
-                used_memory = device_used_memory
+                device_used_memory = stats.Get("stats.renderengine.devices." + device_name + ".memory.used").GetFloat()
+                device_used_memory = int(device_used_memory / (1024 * 1024))
+                if device_used_memory > used_memory:
+                    used_memory = device_used_memory
 
-        if used_memory > self.mem_peak:
-            self.mem_peak = used_memory
+            if used_memory > self.mem_peak:
+                self.mem_peak = used_memory
 
-        if str.endswith(engine, 'OCL'):
             stats_list.append('Memory: %dM/%dM' % (used_memory, max_memory))
 
         # Show triangle count (formatted with commas, like so: 5,123,001 Tris)
-        triangle_count = int(stats.Get("stats.dataset.trianglecount").GetFloat())
-        stats_list.append('{:,} Tris'.format(triangle_count))
+        if rendering_controls.stats_tris:
+            triangle_count = int(stats.Get("stats.dataset.trianglecount").GetFloat())
+            stats_list.append('{:,} Tris'.format(triangle_count))
 
         # Engine and sampler info
-        engine_info = engine_dict[engine]
-        if not engine in ['BIASPATHCPU', 'BIASPATHOCL']:
-            engine_info += ' + ' + sampler_dict[sampler]
-        stats_list.append(engine_info)
+        if rendering_controls.stats_engine_info:
+            engine_info = engine_dict[engine]
+            if not engine in ['BIASPATHCPU', 'BIASPATHOCL']:
+                engine_info += ' + ' + sampler_dict[sampler]
+            stats_list.append(engine_info)
 
         # Show remaining time until next film update (final render only)
         if not realtime_preview and time_until_update > 0.0:
@@ -1109,8 +1123,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             progress = max([progress_time, progress_samples, progress_tiles])
             self.update_progress(progress)
 
-        # Pass memory usage information to Blender
-        if str.endswith(engine, 'OCL'):
+        # Pass memory usage information to Blender (only available when using OpenCL engines)
+        if str.endswith(engine, 'OCL') and rendering_controls.stats_memory:
             self.update_memory_stats(used_memory, self.mem_peak)
 
         return ' | '.join(stats_list)

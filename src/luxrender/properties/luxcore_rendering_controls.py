@@ -41,7 +41,14 @@ class luxcore_rendering_controls(declarative_property_group):
     alert = {}
 
     controls = [
-        'pause_render'
+        #'pause_render',
+        'configure_stats_label',
+        'stats_samples',
+        'stats_samples_per_sec',
+        'stats_memory',
+        'stats_tris',
+        'stats_engine_info',
+        'stats_tiles',
     ]
     
     visibility = {
@@ -53,7 +60,54 @@ class luxcore_rendering_controls(declarative_property_group):
             'type': 'bool',
             'attr': 'pause_render',
             'name': 'Pause Render',
-            'description': '',
+            'description': 'Pause rendering without losing progress',
             'default': False,
+        },
+        {
+            'type': 'text',
+            'attr': 'configure_stats_label',
+            'name': 'Statistics:',
+        },
+        {
+            'type': 'bool',
+            'attr': 'stats_samples',
+            'name': 'Samples',
+            'description': '',
+            'default': True,
+        },
+        {
+            'type': 'bool',
+            'attr': 'stats_samples_per_sec',
+            'name': 'Samples/Sec',
+            'description': '',
+            'default': True,
+        },
+        {
+            'type': 'bool',
+            'attr': 'stats_memory',
+            'name': 'VRAM Usage',
+            'description': 'Amount of GPU RAM used by LuxCore (only available when using an OpenCL engine)',
+            'default': True,
+        },
+        {
+            'type': 'bool',
+            'attr': 'stats_tris',
+            'name': 'Triangles',
+            'description': 'Amount of triangles in the scene',
+            'default': True,
+        },
+        {
+            'type': 'bool',
+            'attr': 'stats_engine_info',
+            'name': 'Engine Info',
+            'description': 'Information about the engine and sampler used to render the image',
+            'default': True,
+        },
+        {
+            'type': 'bool',
+            'attr': 'stats_tiles',
+            'name': 'Tile Info',
+            'description': 'Tile convergence status (only available when using Biased Path engine)',
+            'default': True,
         },
     ]
