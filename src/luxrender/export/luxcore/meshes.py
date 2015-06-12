@@ -64,7 +64,8 @@ class MeshExporter(object):
 
         obj = self.blender_object
 
-        if obj.data is None or obj.type not in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
+        if (obj.data is None) or (obj.type not in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']) or (
+                        obj.data.luxrender_mesh is not None and obj.data.luxrender_mesh.portal):
             return
 
         prepared_mesh = self.__prepare_export_mesh()
