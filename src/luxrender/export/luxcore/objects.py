@@ -25,6 +25,8 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
+from os.path import exists
+
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
@@ -147,8 +149,13 @@ class ObjectExporter(object):
 
 
     def __convert_proxy(self, update_material, anim_matrices, convert_object, transform):
-        path = efutil.filesystem_path(self.blender_object.luxrender_object.external_mesh)
+        raw_path = self.blender_object.luxrender_object.external_mesh
+        path = efutil.filesystem_path(raw_path)
         name = ToValidLuxCoreName(self.blender_object.name)
+
+        if not exists(path) or len(raw_path) == 0:
+            print('ERROR: Invalid path set for proxy "%s"!' % self.blender_object.name)
+            return
 
         # Convert material
         if update_material or self.blender_object.active_material not in self.luxcore_exporter.material_cache:
