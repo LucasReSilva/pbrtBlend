@@ -1741,7 +1741,7 @@ render settings.')
 
                 # Here we write the pixel values to the RenderResult
                 result = self.begin_result(0, 0, filmWidth, filmHeight)
-                layer = result.layers[0] if bpy.app.version < (2, 74, 4 ) else result.layers[0].passes[0]
+                layer = result.layers[0] if bpy.app.version < (2, 74, 4) else result.layers[0].passes[0]
 
                 layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
                                                                                    imageBufferFloat)
@@ -1781,7 +1781,7 @@ render settings.')
                     luxcore_session.UpdateStats()
                     stats = luxcore_session.GetStats()
                     done = (stats.Get('stats.renderengine.convergence').GetFloat() == 1.0 or
-                            stats.Get('stats.renderengine.pass').GetInt() > 5)
+                            stats.Get('stats.renderengine.pass').GetInt() > 10)
             else:
                 stopTime = 6.0
 
