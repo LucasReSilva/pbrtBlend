@@ -593,7 +593,7 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'float',
             'attr': 'filter_width',
             'name': 'Filter Width',
-            'description': 'Width of pixel filter curve. Higher values are smoother and more blurred',
+            'description': 'Filter width in pixels. Lower values result in a sharper image, higher values smooth out noise',
             'default': 2.0,
             'min': 0.5,
             'soft_min': 0.5,
