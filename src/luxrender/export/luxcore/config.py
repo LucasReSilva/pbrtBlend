@@ -241,8 +241,15 @@ class ConfigExporter(object):
                                                  [engine_settings.tile_multipass_enable]))
             self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold',
                                                  [engine_settings.tile_multipass_convergencetest_threshold]))
+
+            if engine_settings.tile_multipass_use_threshold_reduction:
+                noise_threshold_reduction = engine_settings.tile_multipass_convergencetest_threshold_reduction
+            else:
+                noise_threshold_reduction = 0
+
             self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction',
-                                                 [engine_settings.tile_multipass_convergencetest_threshold_reduction]))
+                                                 [noise_threshold_reduction]))
+
             self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size',
                                                  [engine_settings.biaspath_sampling_aa_size]))
             self.properties.Set(pyluxcore.Property('biaspath.sampling.diffuse.size',
