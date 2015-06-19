@@ -57,7 +57,7 @@ class render_settings(render_panel):
         ( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
-        ( ('scene',), 'luxcore_scenesettings', lambda: UseLuxCore() ),
+        #( ('scene',), 'luxcore_scenesettings', lambda: UseLuxCore() ),
     ]
 
     def draw(self, context):
@@ -119,13 +119,6 @@ class device_settings(render_panel):
             tile_highlighting_settings = context.scene.luxcore_tile_highlighting
         
             self.layout.prop(engine_settings, 'tile_size')
-            self.layout.prop(tile_highlighting_settings, 'use_tile_highlighting')
-            
-            if tile_highlighting_settings.use_tile_highlighting:
-                tiletypes_row = self.layout.row(align=True)
-                tiletypes_row.prop(tile_highlighting_settings, 'show_converged', toggle=True)
-                tiletypes_row.prop(tile_highlighting_settings, 'show_unconverged', toggle=True)
-                tiletypes_row.prop(tile_highlighting_settings, 'show_pending', toggle=True)
 
 @LuxRenderAddon.addon_register_class
 class realtime_settings(render_panel):
@@ -152,6 +145,7 @@ class translator(render_panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
+        ( ('scene',), 'luxcore_scenesettings', lambda: UseLuxCore() ),
         ( ('scene',), 'luxrender_engine', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxrender_testing', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxcore_translatorsettings', lambda: UseLuxCore() ),

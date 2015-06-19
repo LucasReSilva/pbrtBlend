@@ -1143,7 +1143,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         halt_samples_met = settings.use_halt_condition and halt_samples != 0 and rendered_samples >= halt_samples
         halt_time_met = settings.use_halt_condition and halt_time != 0 and rendered_time >= halt_time
-            
+
+        # Samples and time make no sense as halt conditions when BIASPATH is used
+        if not realtime_preview and settings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']:
+            return stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
+
         return halt_samples_met or halt_time_met or stats.Get('stats.renderengine.convergence').GetFloat() == 1.0
 
     def normalizeChannel(self, channel_buffer):

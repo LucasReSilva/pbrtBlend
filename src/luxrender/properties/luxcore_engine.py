@@ -108,8 +108,7 @@ class luxcore_enginesettings(declarative_property_group):
         # BIASPATH specific halt condition
         'tile_multipass_enable',
         'tile_multipass_convergencetest_threshold',
-        'tile_multipass_convergencetest_threshold_reduction',
-
+        ['tile_multipass_use_threshold_reduction', 'tile_multipass_convergencetest_threshold_reduction'],
     ]
 
     visibility = {
@@ -126,33 +125,39 @@ class luxcore_enginesettings(declarative_property_group):
                     'bidirvm_lightpath_count': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
                     'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'}, 
                     'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
-                    # BIASPATH
+                    # BIASPATH noise controls
                     'tile_multipass_enable': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'tile_multipass_convergencetest_threshold':
                         {'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'tile_multipass_convergencetest_threshold_reduction':
+                    'tile_multipass_use_threshold_reduction':
                         {'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    'tile_multipass_convergencetest_threshold_reduction':
+                         {'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    # BIASPATH sampling
                     'label_sampling': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_sampling_aa_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_sampling_diffuse_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_sampling_glossy_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_sampling_specular_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+                    # BIASPATH path depth
                     'label_path_depth': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_total': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_diffuse': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_glossy': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
                     'biaspath_pathdepth_specular': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'use_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
-                    'biaspath_clamping_radiance_maxvalue': 
-                    	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
-                    'biaspath_clamping_pdf_value': 
-                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])}]),
+                    # BIASPATH obscure features
                     'label_lights': 
                     	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
                     'biaspath_lights_samplingstrategy_type':
                         A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
                     'biaspath_lights_nearstart': 
                     	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
+                    # Clamping (all unidirectional path engines)
+                    'use_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
+                    'biaspath_clamping_radiance_maxvalue':
+                    	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
+                    'biaspath_clamping_pdf_value':
+                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])}]),
                     # Sampler settings, show for all but BIASPATH
                     'sampler_type': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
                     'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
@@ -166,26 +171,28 @@ class luxcore_enginesettings(declarative_property_group):
                     # Filter settings
                     'filter_type': {'advanced': True},
                     # don't show filter width if NONE filter is selected
-                    'filter_width': A([{'advanced': True},
-                    	{'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])}]),
+                    'filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
                     # Accelerator settings
                     'accelerator_type': {'advanced': True},
                     'instancing': {'advanced': True},
                     # Kernel cache
                     'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATHOCL', 'BIASPATHOCL'])}]),
-                    # Halt conditions
-                    'halt_samples': {'use_halt_condition': True},
-                    'halt_time': {'use_halt_condition': True},
+                    # Halt conditions, show for all but BIASPATH
+                    'use_halt_condition': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
+                    'halt_samples': A([{'use_halt_condition': True},
+                        {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
+                    'halt_time': A([{'use_halt_condition': True},
+                        {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
     }
 
     alert = {}
 
     enabled = {
-        # Fake settings for BIASPATH are always disabled
-        'biaspath_sampler_type': {'renderengine_type': ''},
         # Clamping value
         'biaspath_clamping_radiance_maxvalue': {'use_clamping': True},
         'biaspath_clamping_pdf_value': {'use_clamping': True},
+        # BIASPATH noise multiplier
+        'tile_multipass_convergencetest_threshold_reduction': {'tile_multipass_use_threshold_reduction': True},
     }
 
     properties = [
@@ -325,7 +332,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'tile_multipass_enable',
-            'name': 'Enable Multipass (Adaptive Rendering)',
+            'name': 'Adaptive Rendering',
             'description': 'Continue rendering until the noise threshold is reached',
             'default': True,
             'save_in_preset': True
@@ -335,20 +342,30 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'tile_multipass_convergencetest_threshold',
             'name': 'Noise level',
             'description': 'Lower values mean less noise',
-            'default': 0.04,
+            'default': 0.05,
             'min': 0.001,
             'max': 0.9,
             'precision': 3,
             'save_in_preset': True
         },
         {
+            'type': 'bool',
+            'attr': 'tile_multipass_use_threshold_reduction',
+            'name': 'Reduce Noise Level',
+            'description': 'When the target noise level is reached, reduce it with the multiplier and continue rendering with the reduced noise level',
+            'default': True,
+            'save_in_preset': True
+        },
+        {
             'type': 'float',
             'attr': 'tile_multipass_convergencetest_threshold_reduction',
-            'name': 'Noise level reduction',
-            'description': 'Multiply noise level with this value after all tiles have converged and continue rendering (0.0 = disabled)',
-            'default': 0.0,
-            'min': 0.0,
+            'name': 'Multiplier',
+            'description': 'Multiply noise level with this value after all tiles have converged',
+            'default': 0.5,
+            'min': 0.001,
+            'soft_min': 0.1,
             'max': 0.99,
+            'soft_max': 0.9,
             'save_in_preset': True
         },
         {
