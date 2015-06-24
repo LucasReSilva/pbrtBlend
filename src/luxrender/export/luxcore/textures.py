@@ -453,19 +453,19 @@ class TextureExporter(object):
             ####################################################################
             # CLOUD
             ####################################################################
-            # elif texType == 'cloud':
-            # self.properties.Set(pyluxcore.Property(prefix + '.radius', [float(luxTex.radius)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.noisescale', [float(luxTex.noisescale)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.turbulence', [float(luxTex.turbulence)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.sharpness', [float(luxTex.sharpness)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.noiseoffset', [float(luxTex.noiseoffset)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.spheres', [luxTex.spheres]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.octaves', [luxTex.octaves)])
-            #     self.properties.Set(pyluxcore.Property(prefix + '.omega', [float(luxTex.omega)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.variability', [float(luxTex.variability)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.baseflatness', [float(luxTex.baseflatness)]))
-            #     self.properties.Set(pyluxcore.Property(prefix + '.spheresize', [float(luxTex.spheresize)]))
-            #     self.ConvertTransform(prefix, texture)
+            elif texType == 'cloud':
+                self.properties.Set(pyluxcore.Property(prefix + '.radius', [float(luxTex.radius)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.noisescale', [float(luxTex.noisescale)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.turbulence', [float(luxTex.turbulence)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.sharpness', [float(luxTex.sharpness)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.noiseoffset', [float(luxTex.noiseoffset)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.spheres', [luxTex.spheres]))
+                self.properties.Set(pyluxcore.Property(prefix + '.octaves', [luxTex.octaves]))
+                self.properties.Set(pyluxcore.Property(prefix + '.omega', [float(luxTex.omega)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.variability', [float(luxTex.variability)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.baseflatness', [float(luxTex.baseflatness)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.spheresize', [float(luxTex.spheresize)]))
+                self.__convert_transform(prefix, texture)
             ####################################################################
             # CONSTANT
             ####################################################################
