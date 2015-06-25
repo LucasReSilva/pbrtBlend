@@ -460,7 +460,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'biaspath_pathdepth_specular',
             'name': 'Specular',
             'description': 'Max recursion depth for a specular path',
-            'default': 2,
+            'default': 5,
             'min': 0,
             'max': 2048,
             'save_in_preset': True
