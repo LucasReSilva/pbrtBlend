@@ -212,7 +212,7 @@ class DupliExporter(object):
             dupli_object = particle_dupliobj_dict[particle][0]
             anim_matrices = particle_dupliobj_dict[particle][1]
 
-            dupli_name_suffix = '_%s_%d' % (self.dupli_system.name, self.dupli_number)
+            dupli_name_suffix = '%s_%s_%d' % (self.duplicator.name, self.dupli_system.name, self.dupli_number)
             self.dupli_number += 1
             object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
                                              dupli_object, dupli_name_suffix)
