@@ -59,6 +59,17 @@ class luxcore_opencl_devices(declarative_property_group):
 class luxcore_enginesettings(declarative_property_group):
     """
     Storage class for LuxCore engine settings.
+
+    Labels are used to minimize visual noise of non-equal button widths:
+    Instead of this
+        Engine:         [ Bidir ]
+        [x] Clamp   (    100    )
+
+    We get this
+        Engine:     [   Bidir   ]
+        [x] Clamp   (    100    )
+
+    So far this is only implemented for the default controls, "advanced" users still see a mess.
     """
 
     ef_attach_to = ['Scene']
@@ -90,15 +101,14 @@ class luxcore_enginesettings(declarative_property_group):
         'label_lights',
         'biaspath_lights_samplingstrategy_type',
         'biaspath_lights_nearstart',
-        # Sampler settings (for all but BIASPATH)
-        'sampler_type',
-        'biaspath_sampler_type',
+        ['label_sampler_type', 'sampler_type'],
+        # Advanced sampler settings (for all but BIASPATH)
         'largesteprate',
         'maxconsecutivereject',
         'imagemutationrate',
         # Filter settings (for all but BIASPATH)
-        'filter_type',
-        'filter_width',
+        ['label_filter_type', 'filter_type'],
+        ['label_filter_width', 'filter_width'],
         # Accelerator settings
         'accelerator_type',
         'instancing',
@@ -157,16 +167,14 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_clamping_radiance_maxvalue': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         'biaspath_clamping_pdf_value': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
         # Sampler settings, show for all but BIASPATH
-        'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
-        # Show "fake" sampler settings for BIASPATH so the user knows the other samplers are not supported
-        'biaspath_sampler_type': {'renderengine_type': 'BIASPATH'},
         # Filter settings
+        'label_filter_type': {'advanced': True},
         'filter_type': {'advanced': True},
         # don't show filter width if NONE filter is selected
         'filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
@@ -176,7 +184,6 @@ class luxcore_enginesettings(declarative_property_group):
         # Kernel cache
         'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}]),
         # Halt conditions, show for all but BIASPATH
-        #'label_halt_conditions': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'use_halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'use_halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
@@ -193,6 +200,9 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_clamping_pdf_value': {'use_clamping': True},
         # BIASPATH noise multiplier
         'tile_multipass_convergencetest_threshold_reduction': {'tile_multipass_use_threshold_reduction': True},
+        # Disable sampler dropdown when using BIASPATH
+        'label_sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         # Halt conditions
         'halt_samples': {'use_halt_samples': True},
         'halt_noise': {'use_halt_noise': True},
@@ -292,7 +302,7 @@ class luxcore_enginesettings(declarative_property_group):
         {   # PATH
             'type': 'int',
             'attr': 'path_maxdepth',
-            'name': 'Max. Depth',
+            'name': 'Max Depth',
             'description': 'Max recursion depth for ray casting from eye',
             'default': 8,
             'min': 1,
@@ -506,7 +516,7 @@ rendering with the reduced noise level',
         {
             'type': 'float',
             'attr': 'biaspath_clamping_radiance_maxvalue',
-            'name': 'Max. Brightness',
+            'name': 'Max Brightness',
             'description': 'Max acceptable radiance value for a sample (0.0 = disabled). Used to prevent fireflies',
             'default': 0.0,
             'min': 0.0,
@@ -552,9 +562,14 @@ rendering with the reduced noise level',
         },  
         # Sampler settings
         {
+            'type': 'text',
+            'attr': 'label_sampler_type',
+            'name': 'Sampler:',
+        },
+        {
             'type': 'enum',
             'attr': 'sampler_type',
-            'name': 'Sampler',
+            'name': '',
             'description': 'Pixel sampling algorithm to use',
             'default': 'METROPOLIS',
             'items': [
@@ -578,7 +593,7 @@ increase sampler strength',
         {
             'type': 'int',
             'attr': 'maxconsecutivereject',
-            'name': 'Max. Consecutive Rejections',
+            'name': 'Max Consecutive Rejections',
             'description': 'Maximum amount of samples in a particular area before moving on. Setting this too low \
 may mute lamps and caustics',
             'default': 512,
@@ -610,9 +625,14 @@ may mute lamps and caustics',
         },
         # Filter settings
         {
+            'type': 'text',
+            'attr': 'label_filter_type',
+            'name': 'Filter Type:',
+        },
+        {
             'type': 'enum',
             'attr': 'filter_type',
-            'name': 'Filter',
+            'name': '',
             'description': 'Pixel filter to use',
             'default': 'BLACKMANHARRIS',
             'items': [
@@ -626,9 +646,14 @@ may mute lamps and caustics',
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_filter_width',
+            'name': 'Filter Width:',
+        },
+        {
             'type': 'float',
             'attr': 'filter_width',
-            'name': 'Filter Width',
+            'name': 'Pixels',
             'description': 'Filter width in pixels. Lower values result in a sharper image, higher values smooth out noise',
             'default': 2.0,
             'min': 0.5,
