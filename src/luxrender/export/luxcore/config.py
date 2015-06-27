@@ -339,7 +339,10 @@ class ConfigExporter(object):
             engine = 'PATH'
 
         # Append 'CPU' or 'OCL' from realtime settings
-        engine += realtime_settings.device_type
+        if engine == 'PATH':
+            engine += realtime_settings.device_type
+        else:
+            engine += 'CPU'
 
         self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 

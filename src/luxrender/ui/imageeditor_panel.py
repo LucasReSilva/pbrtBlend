@@ -47,7 +47,7 @@ class tile_highlighting_panel(property_group_renderer):
 
     display_property_groups = [
         ( ('scene',), 'luxcore_tile_highlighting', lambda: UseLuxCore()
-            and bpy.context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] )
+            and bpy.context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH' )
     ]
 
     def draw(self, context):
