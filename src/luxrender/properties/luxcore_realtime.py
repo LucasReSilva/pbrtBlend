@@ -41,10 +41,6 @@ class luxcore_realtimesettings(declarative_property_group):
     controls = [
         'use_finalrender_settings',
         'device_type',
-        'label_halt_conditions',
-        ['use_halt_samples', 'halt_samples'],
-        ['use_halt_noise', 'halt_noise'],
-        ['use_halt_time', 'halt_time'],
     ]
 
     visibility = {
@@ -52,10 +48,6 @@ class luxcore_realtimesettings(declarative_property_group):
     }
 
     enabled = {
-        # Halt conditions
-        'halt_samples': {'use_halt_samples': True},
-        'halt_noise': {'use_halt_noise': True},
-        'halt_time': {'use_halt_time': True},
     }
 
     alert = {}
@@ -80,68 +72,6 @@ class luxcore_realtimesettings(declarative_property_group):
                 ('OCL', 'OpenCL', 'Use the graphics card via OpenCL (fast, slow updates)'),
             ],
             'expand': True,
-            'save_in_preset': True
-        },
-        # Halt condition settings (halt time and halt spp)
-        {
-            'type': 'text',
-            'name': 'Viewport Halt Conditions:',
-            'attr': 'label_halt_conditions',
-        },
-        {
-            'type': 'bool',
-            'attr': 'use_halt_samples',
-            'name': 'Samples',
-            'description': 'Rendering process will stop at specified amount of samples',
-            'default': True,
-            'save_in_preset': True
-        },
-        {
-            'type': 'int',
-            'attr': 'halt_samples',
-            'name': '',
-            'description': 'Rendering process will stop at specified amount of samples',
-            'default': 10,
-            'min': 1,
-            'soft_min': 5,
-            'soft_max': 100,
-            'save_in_preset': True
-        },
-        {
-            'type': 'bool',
-            'attr': 'use_halt_time',
-            'name': 'Time',
-            'description': 'Rendering process will stop after specified amount of seconds',
-            'default': True,
-            'save_in_preset': True
-        },
-        {
-            'type': 'int',
-            'attr': 'halt_time',
-            'name': '',
-            'description': 'Rendering process will stop after specified amount of seconds',
-            'default': 4,
-            'min': 1,
-            'soft_max': 30,
-            'save_in_preset': True
-        },
-        {
-            'type': 'bool',
-            'attr': 'use_halt_noise',
-            'name': 'Noise',
-            'description': 'Rendering process will stop when the specified noise level is reached',
-            'default': True,
-            'save_in_preset': True
-        },
-        {
-            'type': 'float',
-            'attr': 'halt_noise',
-            'name': '',
-            'description': 'Rendering process will stop when the specified noise level is reached (lower = less noise)',
-            'default': 0.10,
-            'min': 0.001,
-            'max': 0.9,
-            'precision': 3,
             'save_in_preset': True
         },
     ]

@@ -114,12 +114,12 @@ class luxcore_enginesettings(declarative_property_group):
         'instancing',
         # Kernel cache
         'kernelcache',
-        # Halt condition settings (halt time and halt spp)
-        'label_halt_conditions',
-        ['use_halt_samples', 'halt_samples'],
-        ['use_halt_noise', 'halt_noise'],
-        ['use_halt_time', 'halt_time'],
+        # Halt condition settings (are now drawn manually in ui/render_panels.py
+        #['use_halt_samples', 'use_halt_noise', 'use_halt_time'],
+        #['halt_samples', 'halt_noise', 'halt_time'],
+        #['halt_samples_preview', 'halt_noise_preview', 'halt_time_preview'],
         # BIASPATH specific halt condition
+        'label_halt_conditions',
         ['tile_multipass_enable', 'tile_multipass_convergencetest_threshold'],
         ['tile_multipass_use_threshold_reduction', 'tile_multipass_convergencetest_threshold_reduction'],
     ]
@@ -141,6 +141,7 @@ class luxcore_enginesettings(declarative_property_group):
         'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
         'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
         # BIASPATH noise controls
+        'label_halt_conditions': {'renderengine_type': 'BIASPATH'},
         'tile_multipass_enable': {'renderengine_type': 'BIASPATH'},
         'tile_multipass_convergencetest_threshold': {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
         'tile_multipass_use_threshold_reduction': {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
@@ -184,12 +185,12 @@ class luxcore_enginesettings(declarative_property_group):
         # Kernel cache
         'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}]),
         # Halt conditions, show for all but BIASPATH
-        'use_halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        'halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        'use_halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        'halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        'use_halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        'halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        #'use_halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        #'halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        #'use_halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        #'halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        #'use_halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        #'halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
     }
 
     alert = {}
@@ -204,9 +205,9 @@ class luxcore_enginesettings(declarative_property_group):
         'label_sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         # Halt conditions
-        'halt_samples': {'use_halt_samples': True},
-        'halt_noise': {'use_halt_noise': True},
-        'halt_time': {'use_halt_time': True},
+        #'halt_samples': {'use_halt_samples': True},
+        #'halt_noise': {'use_halt_noise': True},
+        #'halt_time': {'use_halt_time': True},
         # Never enable fake device enum
         'device_cpu_only': {'renderengine_type': ''},
     }
@@ -765,6 +766,17 @@ Not supported for OpenCL engines')
             'save_in_preset': True
         },
         {
+            'type': 'int',
+            'attr': 'halt_samples_preview',
+            'name': '',
+            'description': 'Viewport rendering process will stop at specified amount of samples',
+            'default': 20,
+            'min': 1,
+            'soft_min': 5,
+            'soft_max': 2000,
+            'save_in_preset': True
+        },
+        {
             'type': 'bool',
             'attr': 'use_halt_time',
             'name': 'Time',
@@ -784,6 +796,16 @@ Not supported for OpenCL engines')
             'save_in_preset': True
         },
         {
+            'type': 'int',
+            'attr': 'halt_time_preview',
+            'name': '',
+            'description': 'Viewport rendering process will stop after specified amount of seconds',
+            'default': 10,
+            'min': 1,
+            'soft_max': 120,
+            'save_in_preset': True
+        },
+        {
             'type': 'bool',
             'attr': 'use_halt_noise',
             'name': 'Noise',
@@ -797,6 +819,17 @@ Not supported for OpenCL engines')
             'name': '',
             'description': 'Rendering process will stop when the specified noise level is reached (lower = less noise)',
             'default': 0.0001,
+            'min': 0.000001,
+            'max': 0.9,
+            'save_in_preset': True
+        },
+        {
+            'type': 'float',
+            'attr': 'halt_noise_preview',
+            'name': '',
+            'description': 'Viewport rendering process will stop when the specified noise level is reached (lower = \
+less noise)',
+            'default': 0.1,
             'min': 0.000001,
             'max': 0.9,
             'save_in_preset': True

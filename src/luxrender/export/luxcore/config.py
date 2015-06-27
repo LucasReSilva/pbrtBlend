@@ -329,8 +329,7 @@ class ConfigExporter(object):
         engine_settings = self.blender_scene.luxcore_enginesettings
 
         # Halt conditions
-        if realtime_settings.use_halt_noise:
-            self.properties.Set(pyluxcore.Property('batch.haltthreshold', realtime_settings.halt_noise))
+        self.properties.Set(pyluxcore.Property('batch.haltthreshold', engine_settings.halt_noise_preview))
 
         # Use same renderengine as final render
         engine = engine_settings.renderengine_type

@@ -61,15 +61,55 @@ class render_settings(render_panel):
     ]
 
     def draw(self, context):
+        layout = self.layout
+
         if not UseLuxCore():
-            row = self.layout.row(align=True)
+            row = layout.row(align=True)
             rd = context.scene.render
-            split = self.layout.split()
+            split = layout.split()
             row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
 
         super().draw(context)
+
+        if UseLuxCore():
+            engine_settings = context.scene.luxcore_enginesettings
+
+            if engine_settings.renderengine_type in ['PATH', 'BIDIR', 'BIDIRVM']:
+                # Draw halt conditions panel
+                split = layout.split()
+                col = split.column()
+
+                sub = col.column(align=True)
+                sub.label("Stop at:")
+                sub.prop(engine_settings, "use_halt_samples")
+                sub.prop(engine_settings, "use_halt_noise")
+                sub.prop(engine_settings, "use_halt_time")
+
+                col = split.column()
+                sub = col.column(align=True)
+                sub.label("Final:")
+
+                sub_samples = sub.column(align=True)
+                sub_samples.enabled = engine_settings.use_halt_samples
+                sub_samples.prop(engine_settings, "halt_samples")
+
+                sub_noise = sub.column(align=True)
+                sub_noise.enabled = engine_settings.use_halt_noise
+                sub_noise.prop(engine_settings, "halt_noise")
+
+                sub_time = sub.column(align=True)
+                sub_time.enabled = engine_settings.use_halt_time
+                sub_time.prop(engine_settings, "halt_time")
+
+                col = split.column()
+                sub = col.column(align=True)
+                sub.label(text="Preview:")
+                sub.prop(engine_settings, "halt_samples_preview")
+                sub.prop(engine_settings, "halt_noise_preview")
+                sub.prop(engine_settings, "halt_time_preview")
+
 
 @LuxRenderAddon.addon_register_class
 class device_settings(render_panel):
