@@ -132,10 +132,8 @@ class luxcore_enginesettings(declarative_property_group):
         'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
         # BIASPATH noise controls
         'tile_multipass_enable': {'renderengine_type': 'BIASPATH'},
-        'tile_multipass_convergencetest_threshold':
-            {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
-        'tile_multipass_use_threshold_reduction':
-            {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
+        'tile_multipass_convergencetest_threshold': {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
+        'tile_multipass_use_threshold_reduction': {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
         'tile_multipass_convergencetest_threshold_reduction':
              {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
         # BIASPATH sampling
@@ -151,18 +149,13 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_pathdepth_glossy': {'renderengine_type': 'BIASPATH'},
         'biaspath_pathdepth_specular': {'renderengine_type': 'BIASPATH'},
         # BIASPATH obscure features
-        'label_lights':
-            A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
-        'biaspath_lights_samplingstrategy_type':
-            A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
-        'biaspath_lights_nearstart':
-            A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        'label_lights':  A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        'biaspath_lights_samplingstrategy_type': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        'biaspath_lights_nearstart': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
         # Clamping (all unidirectional path engines)
         'use_clamping': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'biaspath_clamping_radiance_maxvalue':
-            {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'biaspath_clamping_pdf_value':
-            A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
+        'biaspath_clamping_radiance_maxvalue': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'biaspath_clamping_pdf_value': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
         # Sampler settings, show for all but BIASPATH
         'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
@@ -204,7 +197,7 @@ class luxcore_enginesettings(declarative_property_group):
         'halt_samples': {'use_halt_samples': True},
         'halt_noise': {'use_halt_noise': True},
         'halt_time': {'use_halt_time': True},
-        # Never enable fake device
+        # Never enable fake device enum
         'device_cpu_only': {'renderengine_type': ''},
     }
 
@@ -235,13 +228,13 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'enum',
             'attr': 'device',
             'name': 'Device',
-            'expand': True,
             'description': 'Device',
             'default': 'CPU',
             'items': [
                 ('CPU', 'CPU', 'Use CPU only rendering'),
                 ('OCL', 'OpenCL', 'Use OpenCL to render on GPUs, CPUs or both (see "Compute Settings" panel for details)'),
             ],
+            'expand': True,
             'save_in_preset': True
         },
         {
@@ -249,13 +242,13 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'enum',
             'attr': 'device_cpu_only',
             'name': 'Device',
-            'expand': True,
             'description': 'Device',
             'default': 'CPU',
             'items': [
                 ('CPU', 'CPU', 'Use CPU only rendering'),
                 ('OCL', 'OpenCL', 'Not supported by the selected renderengine'),
             ],
+            'expand': True,
             'save_in_preset': True
         },
         {
@@ -390,7 +383,8 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'bool',
             'attr': 'tile_multipass_use_threshold_reduction',
             'name': 'Reduce Noise Level',
-            'description': 'When the target noise level is reached, reduce it with the multiplier and continue rendering with the reduced noise level',
+            'description': 'When the target noise level is reached, reduce it with the multiplier and continue \
+rendering with the reduced noise level',
             'default': True,
             'save_in_preset': True
         },
@@ -561,7 +555,6 @@ class luxcore_enginesettings(declarative_property_group):
             'items': [
                 ('METROPOLIS', 'Metropolis', 'Recommended for scenes with difficult lighting (caustics, indoors)'),
                 ('SOBOL', 'Sobol', 'Recommended for scenes with simple lighting (outdoors, studio setups)'),
-                ('RANDOM', 'Random', 'Completely random sampler, not recommended')
             ],
             'save_in_preset': True
         },
@@ -652,7 +645,8 @@ may mute lamps and caustics',
                 ('MBVH', 'MBVH', 'Dynamic BVH'),
                 ('QBVH', 'QBVH', 'Static QBVH'),
                 ('MQBVH', 'MQBVH', 'Dynamic QBVH'),
-                ('EMBREE', 'Embree', 'Fastest build times and render speed. Supports only one substep for motion blur. Not supported for OpenCL engines')
+                ('EMBREE', 'Embree', 'Fastest build times and render speed. Supports only one substep for motion blur. \
+Not supported for OpenCL engines')
             ],
             'save_in_preset': True
         },
