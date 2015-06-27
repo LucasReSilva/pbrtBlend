@@ -332,19 +332,21 @@ class ConfigExporter(object):
         if realtime_settings.use_halt_noise:
             self.properties.Set(pyluxcore.Property('batch.haltthreshold', realtime_settings.halt_noise))
 
-        # Renderengine
-        if realtime_settings.device_type == 'CPU':
-            engine = realtime_settings.cpu_renderengine_type
-        elif realtime_settings.device_type == 'OCL':
-            engine = realtime_settings.ocl_renderengine_type
-        else:
-            engine = 'PATHCPU'
-    
-        self.properties.Set(pyluxcore.Property('renderengine.type', [engine]))
+        # Use same renderengine as final render
+        engine = engine_settings.renderengine_type
+
+        # Biased Path engine is sluggish for realtime preview, don't use it
+        if engine == 'BIASPATH':
+            engine = 'PATH'
+
+        # Append 'CPU' or 'OCL' from realtime settings
+        engine += realtime_settings.device_type
+
+        self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 
         # Use global path/light depth
-        if engine in ['PATHCPU', 'PATHOCL']:
-            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
+        if engine_settings.renderengine_type == 'PATH':
+            self.properties.Set(pyluxcore.Property('path.maxdepth', engine_settings.path_maxdepth))
 
             # Use global clamping settings
             if engine_settings.use_clamping:
@@ -356,9 +358,19 @@ class ConfigExporter(object):
 
             self.properties.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
-        elif engine in ['BIDIRCPU']:
-            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
-            self.properties.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
+        else:
+            self.properties.Set(pyluxcore.Property('path.maxdepth', engine_settings.bidir_eyedepth))
+            self.properties.Set(pyluxcore.Property('light.maxdepth', engine_settings.bidir_lightdepth))
+
+        # Sampler settings (same as for final render)
+        self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))
+
+        # Filter settings
+        if realtime_settings.device_type == 'CPU':
+            self.properties.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
+            self.properties.Set(pyluxcore.Property('film.filter.width', 1.3))
+        else:
+            self.properties.Set(pyluxcore.Property('film.filter.type', 'NONE'))
     
         # OpenCL settings
         if len(self.blender_scene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
@@ -367,20 +379,7 @@ class ConfigExporter(object):
                 dev = self.blender_scene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
                 dev_string += '1' if dev.opencl_device_enabled else '0'
     
-            self.properties.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
-    
-        # Sampler settings
-        self.properties.Set(pyluxcore.Property('sampler.type', [realtime_settings.sampler_type]))
-    
-        # Filter settings
-        if realtime_settings.device_type == 'CPU':
-            filter_type = realtime_settings.filter_type_cpu
-        elif realtime_settings.device_type == 'OCL':
-            filter_type = realtime_settings.filter_type_ocl
-    
-        self.properties.Set(pyluxcore.Property('film.filter.type', [filter_type]))
-        if filter_type != 'NONE':
-            self.properties.Set(pyluxcore.Property('film.filter.width', [1.5]))
+            self.properties.Set(pyluxcore.Property('opencl.devices.select', dev_string))
     
     
     def __convert_custom_props(self):

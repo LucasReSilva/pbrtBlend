@@ -40,13 +40,7 @@ class luxcore_realtimesettings(declarative_property_group):
 
     controls = [
         'use_finalrender_settings',
-        'device_type', 
-        'advanced',
-        'cpu_renderengine_type',
-        'ocl_renderengine_type',
-        'sampler_type',
-        'filter_type_cpu',
-        'filter_type_ocl',
+        'device_type',
         'label_halt_conditions',
         ['use_halt_samples', 'halt_samples'],
         ['use_halt_noise', 'halt_noise'],
@@ -54,13 +48,7 @@ class luxcore_realtimesettings(declarative_property_group):
     ]
 
     visibility = {
-                    'device_type': {'use_finalrender_settings': False},
-                    'advanced': {'use_finalrender_settings': False},
-                    'cpu_renderengine_type': {'advanced': True, 'device_type': 'CPU', 'use_finalrender_settings': False},
-                    'ocl_renderengine_type': {'advanced': True, 'device_type': 'OCL', 'use_finalrender_settings': False},
-                    'sampler_type': {'advanced': True, 'use_finalrender_settings': False},
-                    'filter_type_cpu': {'advanced': True, 'use_finalrender_settings': False, 'device_type': 'CPU'},
-                    'filter_type_ocl': {'advanced': True, 'use_finalrender_settings': False, 'device_type': 'OCL'},
+        'device_type': {'use_finalrender_settings': False},
     }
 
     enabled = {
@@ -73,6 +61,27 @@ class luxcore_realtimesettings(declarative_property_group):
     alert = {}
 
     properties = [
+        {
+            'type': 'bool',
+            'attr': 'use_finalrender_settings',
+            'name': 'Use Final Render Settings',
+            'description': 'Use the final render settings for the realtime preview',
+            'default': False,
+            'save_in_preset': True
+        },
+        {
+            'type': 'enum',
+            'attr': 'device_type',
+            'name': 'Device',
+            'description': 'CPU rendering has lower latency, GPU rendering is faster',
+            'default': 'CPU',
+            'items': [
+                ('CPU', 'CPU', 'Use the CPU (slow, fast updates)'),
+                ('OCL', 'OpenCL', 'Use the graphics card via OpenCL (fast, slow updates)'),
+            ],
+            'expand': True,
+            'save_in_preset': True
+        },
         # Halt condition settings (halt time and halt spp)
         {
             'type': 'text',
@@ -133,95 +142,6 @@ class luxcore_realtimesettings(declarative_property_group):
             'min': 0.001,
             'max': 0.9,
             'precision': 3,
-            'save_in_preset': True
-        },
-        {
-            'type': 'bool',
-            'attr': 'use_finalrender_settings',
-            'name': 'Use Final Render Settings',
-            'description': 'Use the final render settings for the realtime preview',
-            'default': False,
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'device_type',
-            'name': 'Device',
-            'description': 'CPU rendering has lower latency, GPU rendering is faster',
-            'default': 'CPU',
-            'items': [
-                ('CPU', 'CPU', 'Use the CPU (lower latency)'),
-                ('OCL', 'OpenCL', 'Use the graphics card via OpenCL (higher latency)'),
-            ],
-            'expand': True,
-            'save_in_preset': True
-        },
-        {
-            'type': 'bool',
-            'attr': 'advanced',
-            'name': 'Advanced Settings',
-            'description': 'Configure advanced viewport render settings',
-            'default': False,
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'cpu_renderengine_type',
-            'name': 'Engine',
-            'description': 'Rendering engine to use',
-            'default': 'PATHCPU',
-            'items': [
-                ('PATHCPU', 'Path', 'Path tracer'),
-                ('BIDIRCPU', 'Bidir', 'Bidirectional path tracer'),
-            ],
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'ocl_renderengine_type',
-            'name': 'Engine',
-            'description': 'Rendering engine to use',
-            'default': 'PATHOCL',
-            'items': [
-                ('PATHOCL', 'Path', 'Pure OpenCL path tracer'),
-            ],
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'sampler_type',
-            'name': 'Sampler',
-            'description': 'Pixel sampling algorithm to use',
-            'default': 'METROPOLIS',
-            'items': [
-                ('METROPOLIS', 'Metropolis', 'Use in complex lighting situations'),
-                ('SOBOL', 'Sobol', 'Use in simple lighting situations'),
-                ('RANDOM', 'Random', 'Completely random sampler')
-            ],
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'filter_type_cpu',
-            'name': 'Filter',
-            'description': 'Pixel filter to use',
-            'default': 'BLACKMANHARRIS',
-            'items': [
-                ('BLACKMANHARRIS', 'Blackman-Harris', 'Blackman-Harris filter with width 1.5'),
-                ('NONE', 'None', 'Disable pixel filtering')
-            ],
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'filter_type_ocl',
-            'name': 'Filter',
-            'description': 'Pixel filter to use',
-            'default': 'NONE',
-            'items': [
-                ('BLACKMANHARRIS', 'Blackman-Harris', 'Blackman-Harris filter with width 1.5'),
-                ('NONE', 'None', 'Disable pixel filtering (fastest)')
-            ],
             'save_in_preset': True
         },
     ]

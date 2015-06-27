@@ -65,7 +65,7 @@ class luxcore_enginesettings(declarative_property_group):
 
     controls = [
         'advanced',
-        'renderengine_type',
+        ['label_renderengine_type', 'renderengine_type'],
         'device',
         'device_cpu_only',
         'label_custom_properties',
@@ -211,9 +211,14 @@ class luxcore_enginesettings(declarative_property_group):
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_renderengine_type',
+            'name': 'Engine:',
+        },
+        {
             'type': 'enum',
             'attr': 'renderengine_type',
-            'name': 'Engine',
+            'name': '',
             'description': 'Rendering engine to use',
             'default': 'BIDIR',
             'items': [
@@ -680,12 +685,19 @@ Not supported for OpenCL engines')
         },  
         # CPU settings
         {
+            'type': 'bool',
+            'attr': 'auto_threads',
+            'name': 'Auto Threads',
+            'description': 'Auto-detect the optimal number of CPU threads',
+            'default': True,
+        },
+        {
             'type': 'int',
             'attr': 'native_threads_count',
             'name': 'Threads count',
-            'description': 'Number of CPU threads used for the rendering (0 = auto)',
-            'default': 0,
-            'min': 0,
+            'description': 'Number of CPU threads used for the rendering',
+            'default': 4,
+            'min': 1,
             'max': 512,
         },  
         # OpenCL settings

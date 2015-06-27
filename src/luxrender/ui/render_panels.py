@@ -100,11 +100,19 @@ class device_settings(render_panel):
         if UseLuxCore() and (engine_settings.renderengine_type in ['BIDIR', 'BIDIRVM']
                 or engine_settings.device == 'CPU'
                 or context.scene.luxcore_realtimesettings.device_type == 'CPU'):
-            # self.layout.label("LuxCore Threads")
-            self.layout.prop(engine_settings, 'native_threads_count')
+            # LuxCore Threads
+            #self.layout.prop(engine_settings, 'native_threads_count')
+
+            if engine_settings.auto_threads:
+                self.layout.prop(engine_settings, 'auto_threads')
+            else:
+                row = self.layout.row()
+                sub = row.row()
+                sub.prop(engine_settings, 'auto_threads')
+                sub.prop(engine_settings, 'native_threads_count')
 
         if not UseLuxCore() and not 'ocl' in render_mode:
-            # self.layout.label("Classic Threads")
+            # Classic Threads
             threads = context.scene.luxrender_engine
             row = self.layout.row()
             row.prop(threads, 'threads_auto')
