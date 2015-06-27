@@ -241,7 +241,7 @@ class ConfigExporter(object):
 
             self.properties.Set(pyluxcore.Property('renderengine.type', engine))
     
-        if engine == 'BIASPATH':
+        if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
             self.properties.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
             self.properties.Set(pyluxcore.Property('tile.multipass.enable',
                                                  [engine_settings.tile_multipass_enable]))
@@ -272,12 +272,18 @@ class ConfigExporter(object):
                                                  [engine_settings.biaspath_pathdepth_glossy]))
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.specular',
                                                  [engine_settings.biaspath_pathdepth_specular]))
-            self.properties.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue',
-                                                 [engine_settings.biaspath_clamping_radiance_maxvalue]))
-            self.properties.Set(pyluxcore.Property('biaspath.clamping.pdf.value',
-                                                 [engine_settings.biaspath_clamping_pdf_value]))
             self.properties.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type',
                                                  [engine_settings.biaspath_lights_samplingstrategy_type]))
+
+            if engine_settings.use_clamping:
+                radiance_clamp = engine_settings.biaspath_clamping_radiance_maxvalue
+                pdf_clamp = engine_settings.biaspath_clamping_pdf_value
+            else:
+                radiance_clamp = 0
+                pdf_clamp = 0
+
+            self.properties.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', radiance_clamp))
+            self.properties.Set(pyluxcore.Property('biaspath.clamping.pdf.value', pdf_clamp))
         elif engine in ['PATHCPU', 'PATHOCL']:
             self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
 
@@ -347,7 +353,7 @@ class ConfigExporter(object):
         self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 
         # Use global path/light depth
-        if engine_settings.renderengine_type == 'PATH':
+        if engine_settings.renderengine_type in ['PATH', 'BIASPATH']:
             self.properties.Set(pyluxcore.Property('path.maxdepth', engine_settings.path_maxdepth))
 
             # Use global clamping settings
