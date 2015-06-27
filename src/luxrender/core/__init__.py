@@ -969,27 +969,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         efutil.export_path = self.output_dir
 
-    def PrintStats(self, lcConfig, stats):
-        lc_engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
-
-        if lc_engine in ['BIASPATHCPU', 'BIASPATHOCL']:
-            converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
-            notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
-            pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
-
-            LuxLog('[Elapsed time: %3d][Pass %4d][Convergence %d/%d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
-                stats.Get('stats.renderengine.time').GetFloat(),
-                stats.Get('stats.renderengine.pass').GetInt(),
-                converged, converged + notconverged + pending,
-                (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
-                (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
-        else:
-            LuxLog('[Elapsed time: %3d][Samples %4d][Avg. samples/sec % 3.2fM on %.1fK tris]' % (
-                stats.Get('stats.renderengine.time').GetFloat(),
-                stats.Get('stats.renderengine.pass').GetInt(),
-                (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000.0),
-                (stats.Get('stats.dataset.trianglecount').GetFloat() / 1000.0)))
-
     mem_peak = 0
 
     def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview=False, time_until_update=-1.0, export_errors=False):
@@ -1155,7 +1134,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             halt_noise_met = rendered_noise == 1.0
 
         # Samples and time make no sense as halt conditions when BIASPATH is used
-        if not realtime_preview and settings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']:
+        if not realtime_preview and settings.renderengine_type == 'BIASPATH':
             return halt_noise_met
 
         return halt_samples_met or halt_time_met or halt_noise_met
@@ -1533,7 +1512,7 @@ first frame will never stop!')
                     result = self.begin_result(0, 0, filmWidth, filmHeight)
                     layer = result.layers[0] if bpy.app.version < (2, 74, 4 ) else result.layers[0].passes[0]
 
-                    if (scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL'] and
+                    if (scene.luxcore_enginesettings.renderengine_type == 'BIASPATH' and
                             scene.luxcore_tile_highlighting.use_tile_highlighting):
                         # Use a temp image because layer.rect does not support list slicing
                         tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
