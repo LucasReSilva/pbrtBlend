@@ -121,7 +121,7 @@ class realtime_settings(render_panel):
     Realtime preview settings
     """
 
-    bl_label = 'LuxRender Realtime Preview Settings'
+    bl_label = 'LuxRender Viewport Render Settings'
 
     display_property_groups = [
         ( ('scene',), 'luxcore_realtimesettings', lambda: UseLuxCore() ),

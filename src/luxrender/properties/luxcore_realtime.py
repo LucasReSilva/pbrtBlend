@@ -39,10 +39,6 @@ class luxcore_realtimesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        'label_halt_conditions',
-        ['use_halt_samples', 'halt_samples'],
-        ['use_halt_noise', 'halt_noise'],
-        ['use_halt_time', 'halt_time'],
         'use_finalrender_settings',
         'device_type', 
         'advanced',
@@ -50,7 +46,11 @@ class luxcore_realtimesettings(declarative_property_group):
         'ocl_renderengine_type',
         'sampler_type',
         'filter_type_cpu',
-        'filter_type_ocl'
+        'filter_type_ocl',
+        'label_halt_conditions',
+        ['use_halt_samples', 'halt_samples'],
+        ['use_halt_noise', 'halt_noise'],
+        ['use_halt_time', 'halt_time'],
     ]
 
     visibility = {
@@ -153,13 +153,14 @@ class luxcore_realtimesettings(declarative_property_group):
                 ('CPU', 'CPU', 'Use the CPU (lower latency)'),
                 ('OCL', 'OpenCL', 'Use the graphics card via OpenCL (higher latency)'),
             ],
+            'expand': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'advanced',
             'name': 'Advanced Settings',
-            'description': 'Configure advanced settings',
+            'description': 'Configure advanced viewport render settings',
             'default': False,
             'save_in_preset': True
         },
@@ -182,7 +183,7 @@ class luxcore_realtimesettings(declarative_property_group):
             'description': 'Rendering engine to use',
             'default': 'PATHOCL',
             'items': [
-                ('PATHOCL', 'Path OpenCL', 'Pure OpenCL path tracer'),
+                ('PATHOCL', 'Path', 'Pure OpenCL path tracer'),
             ],
             'save_in_preset': True
         },
@@ -204,10 +205,9 @@ class luxcore_realtimesettings(declarative_property_group):
             'attr': 'filter_type_cpu',
             'name': 'Filter',
             'description': 'Pixel filter to use',
-            'default': 'GAUSSIAN',
+            'default': 'BLACKMANHARRIS',
             'items': [
                 ('BLACKMANHARRIS', 'Blackman-Harris', 'Blackman-Harris filter with width 1.5'),
-                ('GAUSSIAN', 'Gaussian', 'Gaussian filter with width 1.5'),
                 ('NONE', 'None', 'Disable pixel filtering')
             ],
             'save_in_preset': True
@@ -220,7 +220,6 @@ class luxcore_realtimesettings(declarative_property_group):
             'default': 'NONE',
             'items': [
                 ('BLACKMANHARRIS', 'Blackman-Harris', 'Blackman-Harris filter with width 1.5'),
-                ('GAUSSIAN', 'Gaussian', 'Gaussian filter with width 1.5'),
                 ('NONE', 'None', 'Disable pixel filtering (fastest)')
             ],
             'save_in_preset': True
