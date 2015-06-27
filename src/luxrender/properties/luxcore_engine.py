@@ -84,7 +84,7 @@ class luxcore_enginesettings(declarative_property_group):
         # BIDIR
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH
-        'path_maxdepth',
+        ['label_path_maxdepth', 'path_maxdepth'],
         # BIDIRVMCPU
         ['bidirvm_eyedepth', 'bidirvm_lightdepth'],
         'bidirvm_lightpath_count',
@@ -114,10 +114,6 @@ class luxcore_enginesettings(declarative_property_group):
         'instancing',
         # Kernel cache
         'kernelcache',
-        # Halt condition settings (are now drawn manually in ui/render_panels.py
-        #['use_halt_samples', 'use_halt_noise', 'use_halt_time'],
-        #['halt_samples', 'halt_noise', 'halt_time'],
-        #['halt_samples_preview', 'halt_noise_preview', 'halt_time_preview'],
         # BIASPATH specific halt condition
         'label_halt_conditions',
         ['tile_multipass_enable', 'tile_multipass_convergencetest_threshold'],
@@ -133,6 +129,7 @@ class luxcore_enginesettings(declarative_property_group):
         'bidir_eyedepth': {'renderengine_type': 'BIDIR'},
         'bidir_lightdepth': {'renderengine_type': 'BIDIR'},
         # PATH
+        'label_path_maxdepth': {'renderengine_type': 'PATH'},
         'path_maxdepth': {'renderengine_type': 'PATH'},
         # BIDIRVM
         'bidirvm_eyedepth': {'renderengine_type': 'BIDIRVM'},
@@ -184,13 +181,6 @@ class luxcore_enginesettings(declarative_property_group):
         'instancing': {'advanced': True},
         # Kernel cache
         'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}]),
-        # Halt conditions, show for all but BIASPATH
-        #'use_halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        #'halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        #'use_halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        #'halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        #'use_halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        #'halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
     }
 
     alert = {}
@@ -204,10 +194,6 @@ class luxcore_enginesettings(declarative_property_group):
         # Disable sampler dropdown when using BIASPATH
         'label_sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        # Halt conditions
-        #'halt_samples': {'use_halt_samples': True},
-        #'halt_noise': {'use_halt_noise': True},
-        #'halt_time': {'use_halt_time': True},
         # Never enable fake device enum
         'device_cpu_only': {'renderengine_type': ''},
     }
@@ -299,11 +285,16 @@ class luxcore_enginesettings(declarative_property_group):
             'min': 1,
             'max': 2048,
             'save_in_preset': True
-        },  
+        },
         {   # PATH
+            'type': 'text',
+            'attr': 'label_path_maxdepth',
+            'name': 'Max Depth:',
+        },
+        {
             'type': 'int',
             'attr': 'path_maxdepth',
-            'name': 'Max Depth',
+            'name': '',
             'description': 'Max recursion depth for ray casting from eye',
             'default': 8,
             'min': 1,
