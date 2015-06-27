@@ -382,7 +382,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if UseLuxCore():
             self.luxcore_view_update(context)
         else:
-            self.update_stats('ERROR: Viewport rendering is only available when API 2.x is selected!', '')
+            self.update_stats('ERROR: Viewport rendering is only available when LuxCore API is selected!', '')
 
     def view_draw(self, context):
         if UseLuxCore():

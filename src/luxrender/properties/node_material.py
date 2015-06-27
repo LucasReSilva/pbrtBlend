@@ -46,6 +46,7 @@ from ..export.materials import (
 )
 
 from ..outputs import LuxManager, LuxLog
+from ..outputs.luxcore_api import UseLuxCore
 
 from ..properties.node_sockets import *
 

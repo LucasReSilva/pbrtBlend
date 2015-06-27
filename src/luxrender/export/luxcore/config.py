@@ -221,8 +221,6 @@ class ConfigExporter(object):
     def __convert_engine(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = engine_settings.renderengine_type
-        if len(engine) == 0:
-            engine = 'PATHCPU'
 
         if self.blender_scene.luxcore_translatorsettings.use_filesaver:
             output_path = efutil.filesystem_path(self.blender_scene.render.filepath)
@@ -233,9 +231,17 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('filesaver.directory', [output_path]))
             self.properties.Set(pyluxcore.Property('filesaver.renderengine.type', [engine]))
         else:
-            self.properties.Set(pyluxcore.Property('renderengine.type', [engine]))
+            # Set engine type
+            if engine in ['BIDIR', 'BIDIRVM'] or engine_settings.device == 'CPU':
+                # CPU only engines
+                engine += 'CPU'
+            else:
+                # OpenCL engines
+                engine += 'OCL'
+
+            self.properties.Set(pyluxcore.Property('renderengine.type', engine))
     
-        if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
+        if engine == 'BIASPATH':
             self.properties.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
             self.properties.Set(pyluxcore.Property('tile.multipass.enable',
                                                  [engine_settings.tile_multipass_enable]))

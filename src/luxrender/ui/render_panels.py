@@ -78,18 +78,14 @@ class device_settings(render_panel):
     """
 
     bl_label = 'LuxRender Compute Settings'
-    
-    display_property_groups = [
-        ( ('scene',), 'luxcore_tile_highlighting', lambda: UseLuxCore()
-            and bpy.context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']),
-    ]
 
     def draw(self, context):
         engine_settings = context.scene.luxcore_enginesettings
         render_mode = context.scene.luxrender_rendermode.rendermode
     
-        if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl'] and not UseLuxCore())\
-                or (UseLuxCore() and (engine_settings.renderengine_type in ['PATHOCL', 'BIASPATHOCL']\
+        if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl'] and not UseLuxCore()) \
+                or ((UseLuxCore() and (engine_settings.renderengine_type in ['PATH', 'BIASPATH']
+                                       and engine_settings.device == 'OCL')
                 or context.scene.luxcore_realtimesettings.device_type == 'OCL')):
             self.layout.operator('luxrender.opencl_device_list_update')
             # This is a "special" panel section for the list of OpenCL devices
@@ -101,7 +97,8 @@ class device_settings(render_panel):
                 subrow.enabled = dev.opencl_device_enabled
                 subrow.label(dev.name)
 
-        if UseLuxCore() and (not 'OCL' in engine_settings.renderengine_type\
+        if UseLuxCore() and (engine_settings.renderengine_type in ['BIDIR', 'BIDIRVM']
+                or engine_settings.device == 'CPU'
                 or context.scene.luxcore_realtimesettings.device_type == 'CPU'):
             # self.layout.label("LuxCore Threads")
             self.layout.prop(engine_settings, 'native_threads_count')
@@ -115,9 +112,7 @@ class device_settings(render_panel):
                 row.prop(threads, 'threads')
 
         # Tile settings
-        if context.scene.luxcore_enginesettings.renderengine_type in ['BIASPATHCPU', 'BIASPATHOCL']:
-            tile_highlighting_settings = context.scene.luxcore_tile_highlighting
-        
+        if context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
             self.layout.prop(engine_settings, 'tile_size')
 
 @LuxRenderAddon.addon_register_class

@@ -66,6 +66,8 @@ class luxcore_enginesettings(declarative_property_group):
     controls = [
         'advanced',
         'renderengine_type',
+        'device',
+        'device_cpu_only',
         'label_custom_properties',
         'custom_properties',
         # BIDIR
@@ -113,79 +115,81 @@ class luxcore_enginesettings(declarative_property_group):
     ]
 
     visibility = {
-                    'label_custom_properties': {'advanced': True},
-                    'custom_properties': {'advanced': True},
-                    # BIDIR
-                    'bidir_eyedepth': {'renderengine_type': 'BIDIRCPU'},
-                    'bidir_lightdepth': {'renderengine_type': 'BIDIRCPU'},
-                    # PATH
-                    'path_maxdepth': {'renderengine_type': O(['PATHCPU', 'PATHOCL'])},
-                    # BIDIRVM
-                    'bidirvm_eyedepth': {'renderengine_type': 'BIDIRVMCPU'},
-                    'bidirvm_lightdepth': {'renderengine_type': 'BIDIRVMCPU'},
-                    'bidirvm_lightpath_count': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
-                    'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'}, 
-                    'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVMCPU'},
-                    # BIASPATH noise controls
-                    'tile_multipass_enable': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'tile_multipass_convergencetest_threshold':
-                        {'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'tile_multipass_use_threshold_reduction':
-                        {'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'tile_multipass_convergencetest_threshold_reduction':
-                         {'tile_multipass_enable': True, 'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    # BIASPATH sampling
-                    'label_sampling': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_sampling_aa_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_sampling_diffuse_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_sampling_glossy_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_sampling_specular_size': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    # BIASPATH path depth
-                    'label_path_depth': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_pathdepth_total': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_pathdepth_diffuse': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_pathdepth_glossy': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    'biaspath_pathdepth_specular': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    # BIASPATH obscure features
-                    'label_lights': 
-                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
-                    'biaspath_lights_samplingstrategy_type':
-                        A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
-                    'biaspath_lights_nearstart': 
-                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])}]),
-                    # Clamping (all unidirectional path engines)
-                    'use_clamping': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
-                    'biaspath_clamping_radiance_maxvalue':
-                    	{'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])},
-                    'biaspath_clamping_pdf_value':
-                    	A([{'advanced': True}, {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL', 'PATHCPU', 'PATHOCL'])}]),
-                    # Sampler settings, show for all but BIASPATH
-                    'sampler_type': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
-                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
-                    'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
-                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
-                    'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'}, 
-                    	{'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])}]),
-                    # Show "fake" sampler settings for BIASPATH so the user knows the other samplers are not supported
-                    'biaspath_sampler_type': {'renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
-                    # Filter settings
-                    'filter_type': {'advanced': True},
-                    # don't show filter width if NONE filter is selected
-                    'filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
-                    # Accelerator settings
-                    'accelerator_type': {'advanced': True},
-                    'instancing': {'advanced': True},
-                    # Kernel cache
-                    'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATHOCL', 'BIASPATHOCL'])}]),
-                    # Halt conditions, show for all but BIASPATH
-                    #'label_halt_conditions': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'use_halt_samples': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'halt_samples': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'use_halt_noise': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'halt_noise': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'use_halt_time': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
-                    'halt_time': {'renderengine_type': O(['PATHCPU', 'PATHOCL', 'BIDIRCPU', 'BIDIRVMCPU'])},
+        'device': {'renderengine_type': O(['PATH', 'BIASPATH'])},
+        'device_cpu_only': {'renderengine_type': O(['BIDIR', 'BIDIRVM'])},
+        'label_custom_properties': {'advanced': True},
+        'custom_properties': {'advanced': True},
+        # BIDIR
+        'bidir_eyedepth': {'renderengine_type': 'BIDIR'},
+        'bidir_lightdepth': {'renderengine_type': 'BIDIR'},
+        # PATH
+        'path_maxdepth': {'renderengine_type': 'PATH'},
+        # BIDIRVM
+        'bidirvm_eyedepth': {'renderengine_type': 'BIDIRVM'},
+        'bidirvm_lightdepth': {'renderengine_type': 'BIDIRVM'},
+        'bidirvm_lightpath_count': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
+        'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
+        'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
+        # BIASPATH noise controls
+        'tile_multipass_enable': {'renderengine_type': 'BIASPATH'},
+        'tile_multipass_convergencetest_threshold':
+            {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
+        'tile_multipass_use_threshold_reduction':
+            {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
+        'tile_multipass_convergencetest_threshold_reduction':
+             {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
+        # BIASPATH sampling
+        'label_sampling': {'renderengine_type': 'BIASPATH'},
+        'biaspath_sampling_aa_size': {'renderengine_type': 'BIASPATH'},
+        'biaspath_sampling_diffuse_size': {'renderengine_type': 'BIASPATH'},
+        'biaspath_sampling_glossy_size': {'renderengine_type': 'BIASPATH'},
+        'biaspath_sampling_specular_size': {'renderengine_type': 'BIASPATH'},
+        # BIASPATH path depth
+        'label_path_depth': {'renderengine_type': 'BIASPATH'},
+        'biaspath_pathdepth_total': {'renderengine_type': 'BIASPATH'},
+        'biaspath_pathdepth_diffuse': {'renderengine_type': 'BIASPATH'},
+        'biaspath_pathdepth_glossy': {'renderengine_type': 'BIASPATH'},
+        'biaspath_pathdepth_specular': {'renderengine_type': 'BIASPATH'},
+        # BIASPATH obscure features
+        'label_lights':
+            A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        'biaspath_lights_samplingstrategy_type':
+            A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        'biaspath_lights_nearstart':
+            A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        # Clamping (all unidirectional path engines)
+        'use_clamping': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'biaspath_clamping_radiance_maxvalue':
+            {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'biaspath_clamping_pdf_value':
+            A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
+        # Sampler settings, show for all but BIASPATH
+        'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
+            {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
+        'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
+            {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
+        'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
+            {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
+        # Show "fake" sampler settings for BIASPATH so the user knows the other samplers are not supported
+        'biaspath_sampler_type': {'renderengine_type': 'BIASPATH'},
+        # Filter settings
+        'filter_type': {'advanced': True},
+        # don't show filter width if NONE filter is selected
+        'filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
+        # Accelerator settings
+        'accelerator_type': {'advanced': True},
+        'instancing': {'advanced': True},
+        # Kernel cache
+        'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}]),
+        # Halt conditions, show for all but BIASPATH
+        #'label_halt_conditions': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'use_halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'halt_samples': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'use_halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'halt_noise': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'use_halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'halt_time': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
     }
 
     alert = {}
@@ -200,31 +204,58 @@ class luxcore_enginesettings(declarative_property_group):
         'halt_samples': {'use_halt_samples': True},
         'halt_noise': {'use_halt_noise': True},
         'halt_time': {'use_halt_time': True},
+        # Never enable fake device
+        'device_cpu_only': {'renderengine_type': ''},
     }
 
     properties = [
+        {
+            'type': 'bool',
+            'attr': 'advanced',
+            'name': 'Advanced Settings',
+            'description': 'Super advanced settings you\'ll never need to change',
+            'default': False,
+            'save_in_preset': True
+        },
         {
             'type': 'enum',
             'attr': 'renderengine_type',
             'name': 'Engine',
             'description': 'Rendering engine to use',
-            'default': 'BIDIRCPU',
+            'default': 'BIDIR',
             'items': [
-                ('PATHCPU', 'Path', 'Path tracer'),
-                ('PATHOCL', 'Path OpenCL', 'Pure OpenCL path tracer'),
-                ('BIASPATHCPU', 'Biased Path', 'Biased path tracer'),
-                ('BIASPATHOCL', 'Biased Path OpenCL', 'Pure OpenCL biased path tracer'),
-                ('BIDIRCPU', 'Bidir', 'Bidirectional path tracer'),
-                ('BIDIRVMCPU', 'BidirVCM', 'Bidirectional path tracer with vertex merging'),
+                ('PATH', 'Path', 'Path tracer'),
+                ('BIASPATH', 'Biased Path', 'Biased path tracer'),
+                ('BIDIR', 'Bidir', 'Bidirectional path tracer'),
+                ('BIDIRVM', 'BidirVM', 'Bidirectional path tracer with vertex merging'),
             ],
             'save_in_preset': True
         },
         {
-            'type': 'bool',
-            'attr': 'advanced',
-            'name': 'Advanced Settings',
-            'description': 'Configure advanced engine settings',
-            'default': False,
+            'type': 'enum',
+            'attr': 'device',
+            'name': 'Device',
+            'expand': True,
+            'description': 'Device',
+            'default': 'CPU',
+            'items': [
+                ('CPU', 'CPU', 'Use CPU only rendering'),
+                ('OCL', 'OpenCL', 'Use OpenCL to render on GPUs, CPUs or both (see "Compute Settings" panel for details)'),
+            ],
+            'save_in_preset': True
+        },
+        {
+            # Fake device to show that only a CPU version of the engine exists
+            'type': 'enum',
+            'attr': 'device_cpu_only',
+            'name': 'Device',
+            'expand': True,
+            'description': 'Device',
+            'default': 'CPU',
+            'items': [
+                ('CPU', 'CPU', 'Use CPU only rendering'),
+                ('OCL', 'OpenCL', 'Not supported by the selected renderengine'),
+            ],
             'save_in_preset': True
         },
         {
