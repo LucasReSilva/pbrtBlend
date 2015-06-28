@@ -44,9 +44,7 @@ class ConfigExporter(object):
 
 
     def convert(self, film_width, film_height):
-        realtime_settings = self.blender_scene.luxcore_realtimesettings
-
-        if self.is_viewport_render and not realtime_settings.use_finalrender_settings:
+        if self.is_viewport_render:
             self.__convert_realtime_settings()
         else:
             # Config for final render
@@ -331,7 +329,6 @@ class ConfigExporter(object):
     
     
     def __convert_realtime_settings(self):
-        realtime_settings = self.blender_scene.luxcore_realtimesettings
         engine_settings = self.blender_scene.luxcore_enginesettings
 
         # Halt conditions
@@ -346,7 +343,7 @@ class ConfigExporter(object):
 
         # Append 'CPU' or 'OCL' from realtime settings
         if engine == 'PATH':
-            engine += realtime_settings.device_type
+            engine += engine_settings.device_preview
         else:
             engine += 'CPU'
 
@@ -374,7 +371,7 @@ class ConfigExporter(object):
         self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))
 
         # Filter settings
-        if realtime_settings.device_type == 'CPU':
+        if engine_settings.device_preview == 'CPU':
             self.properties.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
             self.properties.Set(pyluxcore.Property('film.filter.width', 1.3))
         else:

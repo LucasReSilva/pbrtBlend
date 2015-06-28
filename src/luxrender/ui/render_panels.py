@@ -57,11 +57,11 @@ class render_settings(render_panel):
         ( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
-        #( ('scene',), 'luxcore_scenesettings', lambda: UseLuxCore() ),
     ]
 
     def draw(self, context):
         layout = self.layout
+        engine_settings = context.scene.luxcore_enginesettings
 
         if not UseLuxCore():
             row = layout.row(align=True)
@@ -71,44 +71,85 @@ class render_settings(render_panel):
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
 
+        # Draw LuxCore stuff above settings defined via property group (device selection)
+        # This is done here so the device enums are expanded properly (horizontal, not vertical)
+        if UseLuxCore():
+            # Advanced settings checkbox
+            split = layout.split()
+
+            row = split.row()
+            sub = row.row()
+            sub.label(text='')
+
+            row = split.row()
+            sub = row.row()
+            sub.prop(engine_settings, 'advanced', toggle=True)
+
+            # Device enums
+            split = layout.split()
+
+            row = split.row()
+            sub = row.row()
+            sub.label(text='Final Device:')
+
+            row = split.row()
+            sub = row.row()
+
+            if engine_settings.renderengine_type in ['PATH', 'BIASPATH']:
+                # These engines have OpenCL versions
+                sub.prop(engine_settings, 'device', expand=True)
+            else:
+                # Face device enum, always disabled, to show that BIDIR and BIDIRVM only have CPU support
+                sub.enabled = False
+                sub.prop(engine_settings, 'device_cpu_only', expand=True)
+
+            split = layout.split()
+
+            row = split.row()
+            sub = row.row()
+            sub.label(text='Preview Device:')
+
+            row = split.row()
+            sub = row.row()
+            sub.prop(engine_settings, 'device_preview', expand=True)
+
+        # Draw property groups
         super().draw(context)
 
-        if UseLuxCore():
-            engine_settings = context.scene.luxcore_enginesettings
+        # Draw LuxCore stuff below property group stuff (halt conditions)
+        if UseLuxCore() and engine_settings.renderengine_type in ['PATH', 'BIDIR', 'BIDIRVM']:
+            # Draw halt conditions panel
+            split = layout.split()
+            col = split.column()
 
-            if engine_settings.renderengine_type in ['PATH', 'BIDIR', 'BIDIRVM']:
-                # Draw halt conditions panel
-                split = layout.split()
-                col = split.column()
+            sub = col.column(align=True)
+            sub.label("Stop at:")
+            sub.prop(engine_settings, "use_halt_samples")
+            sub.prop(engine_settings, "use_halt_noise")
+            sub.prop(engine_settings, "use_halt_time")
 
-                sub = col.column(align=True)
-                sub.label("Stop at:")
-                sub.prop(engine_settings, "use_halt_samples")
-                sub.prop(engine_settings, "use_halt_noise")
-                sub.prop(engine_settings, "use_halt_time")
+            col = split.column()
+            sub = col.column(align=True)
+            sub.label("Final:")
 
-                col = split.column()
-                sub = col.column(align=True)
-                sub.label("Final:")
+            sub_samples = sub.column(align=True)
+            sub_samples.enabled = engine_settings.use_halt_samples
+            sub_samples.prop(engine_settings, "halt_samples")
 
-                sub_samples = sub.column(align=True)
-                sub_samples.enabled = engine_settings.use_halt_samples
-                sub_samples.prop(engine_settings, "halt_samples")
+            sub_noise = sub.column(align=True)
+            sub_noise.enabled = engine_settings.use_halt_noise
+            sub_noise.prop(engine_settings, "halt_noise")
 
-                sub_noise = sub.column(align=True)
-                sub_noise.enabled = engine_settings.use_halt_noise
-                sub_noise.prop(engine_settings, "halt_noise")
+            sub_time = sub.column(align=True)
+            sub_time.enabled = engine_settings.use_halt_time
+            sub_time.prop(engine_settings, "halt_time")
 
-                sub_time = sub.column(align=True)
-                sub_time.enabled = engine_settings.use_halt_time
-                sub_time.prop(engine_settings, "halt_time")
-
-                col = split.column()
-                sub = col.column(align=True)
-                sub.label(text="Preview:")
-                sub.prop(engine_settings, "halt_samples_preview")
-                sub.prop(engine_settings, "halt_noise_preview")
-                sub.prop(engine_settings, "halt_time_preview")
+            col = split.column()
+            sub = col.column(align=True)
+            sub.label(text="Preview:")
+            sub.prop(engine_settings, "halt_samples_preview")
+            sub.prop(engine_settings, "halt_noise_preview")
+            sub.prop(engine_settings, "halt_time_preview")
 
 
 @LuxRenderAddon.addon_register_class
@@ -126,7 +167,7 @@ class device_settings(render_panel):
         if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl'] and not UseLuxCore()) \
                 or ((UseLuxCore() and (engine_settings.renderengine_type in ['PATH', 'BIASPATH']
                                        and engine_settings.device == 'OCL')
-                or context.scene.luxcore_realtimesettings.device_type == 'OCL')):
+                or engine_settings.device_preview == 'OCL')):
             self.layout.operator('luxrender.opencl_device_list_update')
             # This is a "special" panel section for the list of OpenCL devices
             for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
@@ -139,7 +180,7 @@ class device_settings(render_panel):
 
         if UseLuxCore() and (engine_settings.renderengine_type in ['BIDIR', 'BIDIRVM']
                 or engine_settings.device == 'CPU'
-                or context.scene.luxcore_realtimesettings.device_type == 'CPU'):
+                or engine_settings.device_preview == 'CPU'):
             # LuxCore Threads
             #self.layout.prop(engine_settings, 'native_threads_count')
 
@@ -162,21 +203,6 @@ class device_settings(render_panel):
         # Tile settings
         if context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
             self.layout.prop(engine_settings, 'tile_size')
-
-@LuxRenderAddon.addon_register_class
-class realtime_settings(render_panel):
-    """
-    Realtime preview settings
-    """
-
-    bl_label = 'LuxRender Viewport Render Settings'
-
-    display_property_groups = [
-        ( ('scene',), 'luxcore_realtimesettings', lambda: UseLuxCore() ),
-    ]
-	
-    def draw(self, context):
-        super().draw(context)
 			
 @LuxRenderAddon.addon_register_class
 class translator(render_panel):

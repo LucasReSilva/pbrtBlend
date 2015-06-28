@@ -75,10 +75,7 @@ class luxcore_enginesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        'advanced',
         ['label_renderengine_type', 'renderengine_type'],
-        'device',
-        'device_cpu_only',
         'label_custom_properties',
         'custom_properties',
         # BIDIR
@@ -97,23 +94,23 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_pathdepth_total',
         ['biaspath_pathdepth_diffuse', 'biaspath_pathdepth_glossy', 'biaspath_pathdepth_specular'],
         ['use_clamping', 'biaspath_clamping_radiance_maxvalue'],
-        'biaspath_clamping_pdf_value',
+        ['spacer_pdf_clamping', 'biaspath_clamping_pdf_value'],
         'label_lights',
         'biaspath_lights_samplingstrategy_type',
         'biaspath_lights_nearstart',
         ['label_sampler_type', 'sampler_type'],
         # Advanced sampler settings (for all but BIASPATH)
-        'largesteprate',
-        'maxconsecutivereject',
-        'imagemutationrate',
+        ['label_largesteprate', 'largesteprate'],
+        ['label_maxconsecutivereject', 'maxconsecutivereject'],
+        ['label_imagemutationrate', 'imagemutationrate'],
         # Filter settings (for all but BIASPATH)
         ['label_filter_type', 'filter_type'],
         ['label_filter_width', 'filter_width'],
         # Accelerator settings
-        'accelerator_type',
-        'instancing',
+        ['label_accelerator_type', 'accelerator_type'],
+        ['spacer_instancing', 'instancing'],
         # Kernel cache
-        'kernelcache',
+        ['label_kernelcache', 'kernelcache'],
         # BIASPATH specific halt condition
         'label_halt_conditions',
         ['tile_multipass_enable', 'tile_multipass_convergencetest_threshold'],
@@ -121,8 +118,6 @@ class luxcore_enginesettings(declarative_property_group):
     ]
 
     visibility = {
-        'device': {'renderengine_type': O(['PATH', 'BIASPATH'])},
-        'device_cpu_only': {'renderengine_type': O(['BIDIR', 'BIDIRVM'])},
         'label_custom_properties': {'advanced': True},
         'custom_properties': {'advanced': True},
         # BIDIR
@@ -163,11 +158,18 @@ class luxcore_enginesettings(declarative_property_group):
         # Clamping (all unidirectional path engines)
         'use_clamping': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         'biaspath_clamping_radiance_maxvalue': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'spacer_pdf_clamping': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
         'biaspath_clamping_pdf_value': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
         # Sampler settings, show for all but BIASPATH
+        'label_largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
+            {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
+        'label_maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
+            {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'maxconsecutivereject': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
+            {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
+        'label_imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
@@ -177,10 +179,13 @@ class luxcore_enginesettings(declarative_property_group):
         # don't show filter width if NONE filter is selected
         'filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
         # Accelerator settings
+        'label_accelerator_type': {'advanced': True},
         'accelerator_type': {'advanced': True},
+        'spacer_instancing': {'advanced': True},
         'instancing': {'advanced': True},
         # Kernel cache
-        'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}]),
+        'label_kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}, {'device': 'OCL'}]),
+        'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}, {'device': 'OCL'}]),
     }
 
     alert = {}
@@ -194,8 +199,6 @@ class luxcore_enginesettings(declarative_property_group):
         # Disable sampler dropdown when using BIASPATH
         'label_sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        # Never enable fake device enum
-        'device_cpu_only': {'renderengine_type': ''},
     }
 
     properties = [
@@ -229,7 +232,7 @@ class luxcore_enginesettings(declarative_property_group):
         {
             'type': 'enum',
             'attr': 'device',
-            'name': 'Device',
+            'name': 'Final Device',
             'description': 'Device',
             'default': 'CPU',
             'items': [
@@ -243,12 +246,26 @@ class luxcore_enginesettings(declarative_property_group):
             # Fake device to show that only a CPU version of the engine exists
             'type': 'enum',
             'attr': 'device_cpu_only',
-            'name': 'Device',
+            'name': 'Final Device',
             'description': 'Device',
             'default': 'CPU',
             'items': [
                 ('CPU', 'CPU', 'Use CPU only rendering'),
                 ('OCL', 'OpenCL', 'Not supported by the selected renderengine'),
+            ],
+            'expand': True,
+            'save_in_preset': True
+        },
+        {
+            # Device that is used for viewport rendering
+            'type': 'enum',
+            'attr': 'device_preview',
+            'name': 'Preview Device',
+            'description': 'CPU rendering has lower latency, GPU rendering is faster',
+            'default': 'CPU',
+            'items': [
+                ('CPU', 'CPU', 'Use the CPU (slow, fast updates)'),
+                ('OCL', 'OpenCL', 'Use the graphics card via OpenCL (fast, slow updates)'),
             ],
             'expand': True,
             'save_in_preset': True
@@ -516,6 +533,11 @@ rendering with the reduced noise level',
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'spacer_pdf_clamping',
+            'name': '',
+        },
+        {
             'type': 'float',
             'attr': 'biaspath_clamping_pdf_value',
             'name': 'PDF clamping',
@@ -571,9 +593,14 @@ rendering with the reduced noise level',
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_largesteprate',
+            'name': 'Large Mutation Probability:',
+        },
+        {
             'type': 'float',
             'attr': 'largesteprate',
-            'name': 'Large Mutation Probability',
+            'name': '',
             'description': 'Probability of a completely random mutation rather than a guided one. Lower values \
 increase sampler strength',
             'default': 0.4,
@@ -583,9 +610,14 @@ increase sampler strength',
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_maxconsecutivereject',
+            'name': 'Max Consecutive Rejections:',
+        },
+        {
             'type': 'int',
             'attr': 'maxconsecutivereject',
-            'name': 'Max Consecutive Rejections',
+            'name': '',
             'description': 'Maximum amount of samples in a particular area before moving on. Setting this too low \
 may mute lamps and caustics',
             'default': 512,
@@ -594,25 +626,19 @@ may mute lamps and caustics',
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_imagemutationrate',
+            'name': 'Image Mutation Rate:',
+        },
+        {
             'type': 'float',
             'attr': 'imagemutationrate',
-            'name': 'Image Mutation Rate',
+            'name': '',
             'description': '',
             'default': 0.1,
             'min': 0,
             'max': 1,
             'slider': True,
-            'save_in_preset': True
-        },
-        {
-            'type': 'enum',
-            'attr': 'biaspath_sampler_type',
-            'name': 'Sampler',
-            'description': 'Pixel sampling algorithm to use',
-            'default': 'SOBOL',
-            'items': [
-                ('SOBOL', 'Stratified Sampler', 'Fixed sampler for Biased Path')
-            ],
             'save_in_preset': True
         },
         # Filter settings
@@ -656,9 +682,14 @@ may mute lamps and caustics',
         },
         # Accelerator settings
         {
+            'type': 'text',
+            'attr': 'label_accelerator_type',
+            'name': 'Accelerator:',
+        },
+        {
             'type': 'enum',
             'attr': 'accelerator_type',
-            'name': 'Accelerator',
+            'name': '',
             'description': 'Accelerator to use',
             'default': 'AUTO',
             'items': [
@@ -673,6 +704,11 @@ Not supported for OpenCL engines')
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'spacer_instancing',
+            'name': '',
+        },
+        {
             'type': 'bool',
             'attr': 'instancing',
             'name': 'Use Instancing',
@@ -682,9 +718,14 @@ Not supported for OpenCL engines')
         },
         # Kernel cache
         {
+            'type': 'text',
+            'attr': 'label_kernelcache',
+            'name': 'Kernel Cache:',
+        },
+        {
             'type': 'enum',
             'attr': 'kernelcache',
-            'name': 'Kernel Cache',
+            'name': '',
             'description': 'Kernel cache mode',
             'default': 'PERSISTENT',
             'items': [
