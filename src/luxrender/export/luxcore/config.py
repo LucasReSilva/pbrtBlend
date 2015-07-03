@@ -301,25 +301,6 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('bidirvm.startradius.scale',
                                                  [engine_settings.bidirvm_startradius_scale]))
             self.properties.Set(pyluxcore.Property('bidirvm.alpha', [engine_settings.bidirvm_alpha]))
-<<<<<<< local
-=======
-    
-        # CPU settings
-        if not engine_settings.auto_threads:
-            self.properties.Set(pyluxcore.Property('native.threads.count', engine_settings.native_threads_count))
-    
-        # OpenCL settings
-        if len(engine_settings.luxcore_opencl_devices) > 0:
-            dev_string = ''
-            for dev_index in range(len(engine_settings.luxcore_opencl_devices)):
-                dev = engine_settings.luxcore_opencl_devices[dev_index]
-                dev_string += '1' if dev.opencl_device_enabled else '0'
-    
-            self.properties.Set(pyluxcore.Property('opencl.devices.select', [dev_string]))
-            
-            kernelcache = engine_settings.kernelcache
-            self.properties.Set(pyluxcore.Property('opencl.kernelcache', [kernelcache]))
->>>>>>> other
 
         # Halt conditions
         if engine_settings.use_halt_noise:
@@ -374,13 +355,10 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('film.filter.width', 1.3))
         else:
             self.properties.Set(pyluxcore.Property('film.filter.type', 'NONE'))
-<<<<<<< local
 
 
     def __convert_compute_settings(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
-=======
->>>>>>> other
 
         # CPU settings
         if not engine_settings.auto_threads:
