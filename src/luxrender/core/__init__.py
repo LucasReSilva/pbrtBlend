@@ -1805,6 +1805,7 @@ first frame will never stop!')
     viewport_render_active = False
     viewport_render_paused = False
     luxcore_session = None
+    critical_errors = False
 
     viewFilmWidth = -1
     viewFilmHeight = -1
@@ -1853,6 +1854,9 @@ first frame will never stop!')
 
     
     def luxcore_view_draw(self, context):
+        if self.critical_errors:
+            return
+
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
             LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
@@ -2108,7 +2112,11 @@ first frame will never stop!')
 
                 RENDERENGINE_luxrender.luxcore_session = pyluxcore.RenderSession(luxcore_config)
                 RENDERENGINE_luxrender.start_luxcore_session()
+                self.critical_errors = False
             except Exception as exc:
+                # This flag is used to prevent the luxcore_draw() function from crashing Blender
+                self.critical_errors = True
+
                 LuxLog('View update aborted: %s' % exc)
 
                 message = str(exc)
@@ -2116,9 +2124,8 @@ first frame will never stop!')
                     # more user-friendly error message
                     message = 'The scene does not contain any meshes'
 
+                # Show error message to user in the viewport UI
                 self.update_stats('Error: ', message)
-
-                RENDERENGINE_luxrender.stop_luxcore_session()
 
                 import traceback
                 traceback.print_exc()
