@@ -489,7 +489,7 @@ rendering with the reduced noise level',
             'attr': 'biaspath_pathdepth_diffuse',
             'name': 'Diffuse',
             'description': 'Max recursion depth for a diffuse path',
-            'default': 3,
+            'default': 2,
             'min': 0,
             'max': 2048,
             'save_in_preset': True
