@@ -239,8 +239,18 @@ class ConfigExporter(object):
                 engine += 'OCL'
 
             self.properties.Set(pyluxcore.Property('renderengine.type', engine))
-    
+
+        if engine_settings.use_clamping:
+            radiance_clamp = engine_settings.biaspath_clamping_radiance_maxvalue
+            pdf_clamp = engine_settings.biaspath_clamping_pdf_value
+        else:
+            radiance_clamp = 0
+            pdf_clamp = 0
+
         if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
+            self.properties.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', radiance_clamp))
+            self.properties.Set(pyluxcore.Property('biaspath.clamping.pdf.value', pdf_clamp))
+
             self.properties.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
             self.properties.Set(pyluxcore.Property('tile.multipass.enable',
                                                  [engine_settings.tile_multipass_enable]))
@@ -263,36 +273,21 @@ class ConfigExporter(object):
                                                  [engine_settings.biaspath_sampling_glossy_size]))
             self.properties.Set(pyluxcore.Property('biaspath.sampling.specular.size',
                                                  [engine_settings.biaspath_sampling_specular_size]))
+
+            # Path depths, note that for non-specular paths +1 is added to the path depth.
+            # For details see http://www.luxrender.net/forum/viewtopic.php?f=11&t=11101&start=390#p114959
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.total',
-                                                 [engine_settings.biaspath_pathdepth_total]))
+                                                 [engine_settings.biaspath_pathdepth_total + 1]))
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.diffuse',
-                                                 [engine_settings.biaspath_pathdepth_diffuse]))
+                                                 [engine_settings.biaspath_pathdepth_diffuse + 1]))
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.glossy',
-                                                 [engine_settings.biaspath_pathdepth_glossy]))
+                                                 [engine_settings.biaspath_pathdepth_glossy + 1]))
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.specular',
                                                  [engine_settings.biaspath_pathdepth_specular]))
             self.properties.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type',
                                                  [engine_settings.biaspath_lights_samplingstrategy_type]))
-
-            if engine_settings.use_clamping:
-                radiance_clamp = engine_settings.biaspath_clamping_radiance_maxvalue
-                pdf_clamp = engine_settings.biaspath_clamping_pdf_value
-            else:
-                radiance_clamp = 0
-                pdf_clamp = 0
-
-            self.properties.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', radiance_clamp))
-            self.properties.Set(pyluxcore.Property('biaspath.clamping.pdf.value', pdf_clamp))
         elif engine in ['PATHCPU', 'PATHOCL']:
-            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth]))
-
-            if engine_settings.use_clamping:
-                radiance_clamp = engine_settings.biaspath_clamping_radiance_maxvalue
-                pdf_clamp = engine_settings.biaspath_clamping_pdf_value
-            else:
-                radiance_clamp = 0
-                pdf_clamp = 0
-
+            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth + 1]))
             self.properties.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
         elif engine in ['BIDIRCPU']:
