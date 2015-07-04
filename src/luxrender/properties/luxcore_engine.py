@@ -197,7 +197,6 @@ class luxcore_enginesettings(declarative_property_group):
         # BIASPATH noise multiplier
         'tile_multipass_convergencetest_threshold_reduction': {'tile_multipass_use_threshold_reduction': True},
         # Disable sampler dropdown when using BIASPATH
-        'label_sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
     }
 
