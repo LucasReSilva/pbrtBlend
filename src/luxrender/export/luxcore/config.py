@@ -52,6 +52,7 @@ class ConfigExporter(object):
             self.__convert_filter()
             self.__convert_sampler()
 
+        self.__convert_halt_conditions()
         self.__convert_compute_settings()
         self.__convert_film_size(film_width, film_height)
         self.__convert_accelerator()
@@ -68,8 +69,8 @@ class ConfigExporter(object):
         """
 
         # the OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
-        engine = self.blender_scene.luxcore_enginesettings.renderengine_type
-        is_ocl_engine = engine in ['BIASPATHOCL', 'PATHOCL']
+        engine = self.__get_engine()
+        is_ocl_engine = engine.endswith('OCL')
         if is_ocl_engine:
             if channelName == 'MATERIAL_ID_MASK':
                 if self.material_id_mask_counter == 0:
@@ -88,7 +89,7 @@ class ConfigExporter(object):
         if channelName == 'RADIANCE_GROUP':
             if id > 7 and is_ocl_engine:
                 # don't create the output channel
-                LuxLog('WARNING: OpenCL engines support a maximum of 8 lightgroups! Skipping this lightgroup (ID: %d)'
+                print('WARNING: OpenCL engines support a maximum of 8 lightgroups! Skipping this lightgroup (ID: %d)'
                        % id)
                 return
 
@@ -183,7 +184,15 @@ class ConfigExporter(object):
         # Deprecated but used for backwardscompatibility
         if getattr(self.blender_scene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
             self.properties.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
-    
+
+
+    def __convert_halt_conditions(self):
+        engine_settings = self.blender_scene.luxcore_enginesettings
+
+        haltthreshold = engine_settings.halt_noise_preview if self.is_viewport_render else engine_settings.halt_noise
+        self.properties.Set(pyluxcore.Property('batch.haltthreshold', haltthreshold))
+        # All other halt conditions are controlled in core/__init__.py and not set via properties
+
     
     def __convert_sampler(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
@@ -208,18 +217,43 @@ class ConfigExporter(object):
     def __convert_accelerator(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
         accelerator = engine_settings.accelerator_type
+        device = engine_settings.device if not self.is_viewport_render else engine_settings.device_preview
     
         # Embree does not support OpenCL engines
-        if str.endswith(engine_settings.renderengine_type, 'OCL') and accelerator == 'EMBREE':
+        if device == 'OCL' and accelerator == 'EMBREE':
             accelerator = 'AUTO'
     
         self.properties.Set(pyluxcore.Property('accelerator.type', [accelerator]))
         self.properties.Set(pyluxcore.Property('accelerator.instances.enable', [engine_settings.instancing]))
     
-    
-    def __convert_engine(self):
+
+    def __get_engine(self):
+        """
+        Create the final renderengine string from the general type setting ('PATH', 'BIASPATH' etc.) and the device type
+        :return: LuxCore renderengine string ('PATHOCL', 'PATHCPU' etc.)
+        """
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = engine_settings.renderengine_type
+        device = engine_settings.device_preview if self.is_viewport_render else engine_settings.device
+
+        # Biased Path engine is sluggish for realtime preview, don't use it
+        if self.is_viewport_render and engine == 'BIASPATH':
+            engine = 'PATH'
+
+        # Set engine type
+        if engine in ['BIDIR', 'BIDIRVM'] or device == 'CPU':
+            # CPU only engines
+            engine += 'CPU'
+        else:
+            # OpenCL engines
+            engine += 'OCL'
+
+        return engine
+
+
+    def __convert_engine(self):
+        engine_settings = self.blender_scene.luxcore_enginesettings
+        engine = self.__get_engine()
 
         if self.blender_scene.luxcore_translatorsettings.use_filesaver:
             output_path = efutil.filesystem_path(self.blender_scene.render.filepath)
@@ -230,14 +264,6 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('filesaver.directory', [output_path]))
             self.properties.Set(pyluxcore.Property('filesaver.renderengine.type', [engine]))
         else:
-            # Set engine type
-            if engine in ['BIDIR', 'BIDIRVM'] or engine_settings.device == 'CPU':
-                # CPU only engines
-                engine += 'CPU'
-            else:
-                # OpenCL engines
-                engine += 'OCL'
-
             self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 
         if engine_settings.use_clamping:
@@ -301,10 +327,6 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('bidirvm.startradius.scale',
                                                  [engine_settings.bidirvm_startradius_scale]))
             self.properties.Set(pyluxcore.Property('bidirvm.alpha', [engine_settings.bidirvm_alpha]))
-
-        # Halt conditions
-        if engine_settings.use_halt_noise:
-            self.properties.Set(pyluxcore.Property('batch.haltthreshold', engine_settings.halt_noise))
     
     
     def __convert_realtime_settings(self):
