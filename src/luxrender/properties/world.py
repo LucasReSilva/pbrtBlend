@@ -202,7 +202,7 @@ class luxrender_volume_data(declarative_property_group):
                         A([{'type': O(['homogeneous', 'heterogeneous'])}, {'sigma_a_usecolortexture': False}])]),
             'priority': lambda: UseLuxCore(),
             'multiscattering': A([{'type': O(['homogeneous', 'heterogeneous'])}, lambda: UseLuxCore()]),
-            'gain': {'use_emission': True}
+            'gain': A([{'use_emission': True}, lambda: UseLuxCore()])
         },
         TFR_IOR.visibility,
         TC_absorption.visibility,

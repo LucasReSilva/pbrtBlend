@@ -67,7 +67,6 @@ class imagepipeline(camera_panel):
     """
 
     bl_label = 'LuxCore Imagepipeline'
-    bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
         ( ('camera', 'luxrender_camera'), 'luxcore_imagepipeline_settings' ),

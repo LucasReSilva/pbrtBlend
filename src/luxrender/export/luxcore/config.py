@@ -189,9 +189,10 @@ class ConfigExporter(object):
     def __convert_halt_conditions(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
 
-        haltthreshold = engine_settings.halt_noise_preview if self.is_viewport_render else engine_settings.halt_noise
-        self.properties.Set(pyluxcore.Property('batch.haltthreshold', haltthreshold))
-        # All other halt conditions are controlled in core/__init__.py and not set via properties
+        if engine_settings.use_halt_noise or self.is_viewport_render:
+            haltthreshold = engine_settings.halt_noise_preview if self.is_viewport_render else engine_settings.halt_noise
+            self.properties.Set(pyluxcore.Property('batch.haltthreshold', haltthreshold))
+            # All other halt conditions are controlled in core/__init__.py and not set via properties
 
     
     def __convert_sampler(self):

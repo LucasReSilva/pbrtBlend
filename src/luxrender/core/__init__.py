@@ -1111,7 +1111,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         return ' | '.join(stats_list)
 
-    def haltConditionMet(self, scene, stats, realtime_preview = False):
+    def haltConditionMet(self, scene, stats, realtime_preview=False):
         """
         Checks if any halt conditions are met
         """
