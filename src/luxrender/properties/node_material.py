@@ -46,7 +46,7 @@ from ..export.materials import (
 )
 
 from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 
 from ..properties.node_sockets import *
 
@@ -606,6 +606,14 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
         return make_material(mat_type, self.name, matte_params)
 
+    def export_material_luxcore(self, properties):
+        # Test
+        luxcore_name = ToValidLuxCoreName(self.name + '_mat')
+        prefix = 'scene.materials.' + luxcore_name
+        properties.Set(pyluxcore.Property(prefix + '.type', 'matte'))
+        properties.Set(pyluxcore.Property(prefix + '.kd', self.inputs[0].export_luxcore()))
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
@@ -1153,6 +1161,20 @@ class luxrender_material_output_node(luxrender_node):
         self.inputs.new('NodeSocketShader', 'Interior Volume')
         self.inputs.new('NodeSocketShader', 'Exterior Volume')
         self.inputs.new('NodeSocketShader', 'Emission')
+
+    def export_luxcore(self, material, properties):
+        print('LuxCore Node export')
+
+        surface_socket = self.inputs[0]
+        if not surface_socket.is_linked:
+            return None
+
+        surface_node = surface_socket.links[0].from_node
+        tree_name = material.luxrender_material.nodetree
+
+        # Export the material
+        #if check_node_export_material(surface_node):
+        return surface_node.export_material_luxcore(properties)
 
     def export(self, scene, lux_context, material, mode='indirect'):
 
