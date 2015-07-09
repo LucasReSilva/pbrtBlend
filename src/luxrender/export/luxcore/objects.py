@@ -154,6 +154,7 @@ class ObjectExporter(object):
 
         if not exists(path) or len(raw_path) == 0:
             print('ERROR: Invalid path set for proxy "%s"!' % self.blender_object.name)
+            self.luxcore_exporter.errors = True
             return
 
         # Convert material

@@ -51,18 +51,18 @@ class luxcore_material(declarative_property_group):
     ]
 
     visibility = {
-        'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+        'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'bumpsamplingdistance': {'advanced': True},
         'label_material_visibility': {
-        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'emission_samples': {
-        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_diffuse_enable':
-            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_glossy_enable':
-            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_specular_enable':
-            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIASPATHCPU', 'BIASPATHOCL'])},
+            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
     }
 
     alert = {}
