@@ -106,7 +106,7 @@ class LuxCoreExporter(object):
         """
         Convert the whole scene
         """
-
+        print('Starting export...')
         start_time = time.time()
 
         if luxcore_scene is None:
@@ -144,7 +144,7 @@ class LuxCoreExporter(object):
 
         # Show message in Blender UI
         export_time = time.time() - start_time
-        print('Export took %.1fs' % export_time)
+        print('Export finished (%.1fs)' % export_time)
         engine = self.blender_scene.luxcore_enginesettings.renderengine_type
         message = 'Compiling OpenCL Kernels...' if 'OCL' in engine else 'Starting LuxRender...'
         self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)
