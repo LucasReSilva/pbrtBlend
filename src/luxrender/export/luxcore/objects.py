@@ -36,6 +36,7 @@ from ...export import object_anim_matrices
 from ...export import matrix_to_list
 
 from .utils import calc_shutter
+from .meshes import MeshExporter
 
 
 class ExportedObject(object):
@@ -130,7 +131,7 @@ class ObjectExporter(object):
         # TODO: dupli handling
 
         # Check if mesh is in cache
-        if obj.data in self.luxcore_exporter.mesh_cache:
+        if MeshExporter.get_mesh_key(obj, self.is_viewport_render) in self.luxcore_exporter.mesh_cache:
             # Check if object is in cache
             if obj in self.luxcore_exporter.object_cache and update_mesh and not is_dupli:
                 self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
@@ -144,7 +145,7 @@ class ObjectExporter(object):
 
 
     def __update_props(self, anim_matrices, obj, transform, update_material):
-        mesh_exporter = self.luxcore_exporter.mesh_cache[obj.data]
+        mesh_exporter = self.luxcore_exporter.mesh_cache[MeshExporter.get_mesh_key(obj, self.is_viewport_render)]
         self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
 
 

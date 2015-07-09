@@ -34,6 +34,7 @@ from ..properties.material import texture_append_visibility
 from ..properties.texture import FloatTextureParameter
 from ..util import dict_merge
 from ..outputs import LuxManager
+from ..outputs.luxcore_api import UseLuxCore
 
 
 class MeshFloatTextureParameter(FloatTextureParameter):
@@ -75,6 +76,8 @@ class luxrender_mesh(declarative_property_group):
                ]
 
     visibility = dict_merge({
+                                'mesh_type': lambda: not UseLuxCore(),
+                                'instancing_mode': lambda: not UseLuxCore(),
                                 'nsmooth': {'subdiv': 'loop'},
                                 'sharpbound': {'subdiv': 'loop'},
                                 'splitnormal': {'subdiv': 'loop'},
@@ -121,7 +124,7 @@ class luxrender_mesh(declarative_property_group):
                          'attr': 'generatetangents',
                          'name': 'Generate Tangents',
                          'description': 'Generate tanget space for this mesh. Enable when using a bake-generated \
-                         normal map',
+normal map',
                          'default': False,
                      },
                      {
@@ -155,7 +158,7 @@ class luxrender_mesh(declarative_property_group):
                          'name': 'Keep Split Edges',
                          'default': False,
                          'description': 'Preserves effects of split-edges by splitting at breaks in the normal. \
-                         WARNING: This will cause solid-shaded meshes to rip open!'},
+WARNING: This will cause solid-shaded meshes to rip open!'},
                      {
                          'type': 'int',
                          'attr': 'sublevels',

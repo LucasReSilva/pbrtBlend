@@ -29,12 +29,13 @@ import math
 
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework import util as efutil
-from ..extensions_framework.validate import Logic_Operator as LO, Logic_OR as O
+from ..extensions_framework.validate import Logic_Operator as LO, Logic_OR as O, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..properties.texture import ColorTextureParameter
 from ..util import dict_merge
+from ..outputs.luxcore_api import UseLuxCore
 
 
 def LampVolumeParameter(attr, name):
@@ -173,9 +174,10 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 
     visibility = dict_merge(
         luxrender_lamp_basic.visibility,
-        {'pointsize': {'usesphere': True}},
-        {'nsamples': {'usesphere': True}},
-        {'null_lamp': {'usesphere': True}},
+        {'usesphere': lambda: not UseLuxCore()},
+        {'pointsize': A([{'usesphere': True}, lambda: not UseLuxCore()])},
+        {'nsamples': A([{'usesphere': True}, lambda: not UseLuxCore()])},
+        {'null_lamp': A([{'usesphere': True}, lambda: not UseLuxCore()])},
     )
 
     properties = TC_L.properties[:] + [
@@ -337,7 +339,6 @@ class luxrender_lamp_sun(declarative_property_group):
                    'nsamples',
                    'turbidity',
                    'legacy_sky',
-                   'sunsky_advanced',
                    'relsize',
                    'horizonbrightness',
                    'horizonsize',
@@ -354,18 +355,17 @@ class luxrender_lamp_sun(declarative_property_group):
                     'L_usecolortexture': {'sunsky_type': 'distant'},
                     'L_colortexture': {'sunsky_type': 'distant', 'L_usecolortexture': True},
                     'L_multiplycolor': {'sunsky_type': 'distant', 'L_usecolortexture': True},
-                    'sunsky_advanced': {'sunsky_type': O(['sun', 'sky', 'sunsky'])},
                     'legacy_sky': {'sunsky_type': O(['sunsky', 'sky'])},
                     'turbidity': {'sunsky_type': LO({'!=': 'distant'})},
                     'theta': {'sunsky_type': 'distant'},
-                    'relsize': {'sunsky_advanced': True, 'sunsky_type': O(['sunsky', 'sun'])},
-                    'horizonbrightness': {'sunsky_advanced': True, 'legacy_sky': True,
+                    'relsize': {'sunsky_type': O(['sunsky', 'sun'])},
+                    'horizonbrightness': {'legacy_sky': True,
                                           'sunsky_type': O(['sunsky', 'sky'])},
-                    'horizonsize': {'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
-                    'sunhalobrightness': {'sunsky_advanced': True, 'legacy_sky': True,
+                    'horizonsize': {'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
+                    'sunhalobrightness': {'legacy_sky': True,
                                           'sunsky_type': O(['sunsky', 'sky'])},
-                    'sunhalosize': {'sunsky_advanced': True, 'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
-                    'backscattering': {'sunsky_advanced': True, 'legacy_sky': True,
+                    'sunhalosize': {'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
+                    'backscattering': {'legacy_sky': True,
                                        'sunsky_type': O(['sunsky', 'sky'])},
     }
 
@@ -394,13 +394,6 @@ class luxrender_lamp_sun(declarative_property_group):
         },
         {
             'type': 'bool',
-            'attr': 'sunsky_advanced',
-            'name': 'Advanced',
-            'description': 'Configure advanced sun and sky parameters',
-            'default': False
-        },
-        {
-            'type': 'bool',
             'attr': 'legacy_sky',
             'name': 'Use Legacy Sky Spectrum',
             'description': 'Use legacy Preetham sky model instead of Hosek and Wilkie model',
@@ -410,6 +403,7 @@ class luxrender_lamp_sun(declarative_property_group):
             'type': 'float',
             'attr': 'relsize',
             'name': 'Relative sun disk size',
+            'description': 'Size of the sun. Higher values result in softer shadows',
             'default': 1.0,
             'min': 0.000001,
             'soft_min': 0.05,
@@ -505,10 +499,10 @@ class luxrender_lamp_sun(declarative_property_group):
         if self.sunsky_type != 'distant':
             params.add_float('turbidity', self.turbidity)
 
-        if self.sunsky_advanced and self.sunsky_type in ['sun', 'sunsky']:
+        if self.sunsky_type in ['sun', 'sunsky']:
             params.add_float('relsize', self.relsize)
 
-        if self.sunsky_advanced and self.sunsky_type in ['sky', 'sunsky'] and self.legacy_sky:
+        if self.sunsky_type in ['sky', 'sunsky'] and self.legacy_sky:
             params.add_float('horizonbrightness', self.horizonbrightness)
             params.add_float('horizonsize', self.horizonsize)
             params.add_float('sunhalobrightness', self.sunhalobrightness)
@@ -529,7 +523,12 @@ class luxrender_lamp_area(declarative_property_group):
         'null_lamp',
     ]
 
-    visibility = TC_L.visibility
+    visibility = dict_merge(
+        TC_L.visibility,
+        {'null_lamp': lambda: not UseLuxCore()},
+    )
+
+    #visibility = TC_L.visibility
 
     properties = TC_L.properties[:] + [
         {

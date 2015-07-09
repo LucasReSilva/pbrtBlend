@@ -133,7 +133,7 @@ _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 # Use this example for such overrides
 # Add output format flags to output panel
 def lux_output_hints(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
+    if context.scene.render.engine == 'LUXRENDER_RENDER' and not UseLuxCore():
 
         # In this mode, we don't use use the regular interval write
         pipe_mode = (context.scene.luxrender_engine.export_type == 'INT' and

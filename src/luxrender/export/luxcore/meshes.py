@@ -50,6 +50,30 @@ class MeshExporter(object):
         self.exported_shapes = []
 
 
+    @staticmethod
+    def get_mesh_key(blender_object, is_viewport_render):
+        # We have to account for different modifiers being used on shared geometry
+        # If the object has any active deforming modifiers we have to give the mesh a unique key
+        if MeshExporter.has_active_modifiers(blender_object, is_viewport_render):
+            key = tuple([blender_object, blender_object.data])
+        else:
+            key = blender_object.data
+
+        return key
+
+
+    @staticmethod
+    def has_active_modifiers(blender_object, is_viewport_render):
+        if hasattr(blender_object, 'modifiers') and len(blender_object.modifiers) > 0 and blender_object.data.users > 1:
+            for modifier in blender_object.modifiers:
+                # Allow non-deforming modifiers
+                if modifier.type not in ('COLLISION', 'PARTICLE_INSTANCE', 'PARTICLE_SYSTEM', 'SMOKE'):
+                    # Test if the modifier will be visible
+                    if (is_viewport_render and modifier.show_viewport) or (not is_viewport_render and modifier.show_render):
+                        return True
+        return False
+
+
     def convert(self, luxcore_scene):
         # Remove old properties
         self.properties = pyluxcore.Properties()
@@ -79,7 +103,8 @@ class MeshExporter(object):
         bpy.data.meshes.remove(prepared_mesh)
 
         end_time = time.time() - start_time
-        print('Export of mesh %s took %.3fs' % (self.blender_object.data.name, end_time))
+        if end_time > 0.5:
+            print('Export of mesh %s took %.3fs' % (self.blender_object.data.name, end_time))
 
 
     def __prepare_export_mesh(self):
@@ -118,8 +143,12 @@ class MeshExporter(object):
 
 
     def __generate_shape_name(self, matIndex=-1):
-        indexString = ('%03d' % matIndex) if matIndex != -1 else ''
-        shape_name = '%s-%s%s' % (self.blender_scene.name, self.blender_object.data.name, indexString)
+        index_string = ('%03d' % matIndex) if matIndex != -1 else ''
+        shape_name = '%s_%s_%s' % (self.blender_scene.name, self.blender_object.data.name, index_string)
+
+        # If the object has any active deforming modifiers we have to give the mesh a unique name
+        if MeshExporter.has_active_modifiers(self.blender_object, self.is_viewport_render):
+            shape_name += self.blender_object.name
 
         return ToValidLuxCoreName(shape_name)
 

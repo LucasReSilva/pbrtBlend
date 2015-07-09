@@ -28,6 +28,7 @@ import bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
+from ..outputs.luxcore_api import UseLuxCore
 from .. import LuxRenderAddon
 
 
@@ -41,12 +42,15 @@ class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_rendere
     ]
 
     def draw(self, context):
-        if context.object.luxrender_object.append_proxy and context.object.luxrender_object.hide_proxy_mesh:
-            msg = ['Mesh options not available when',
-                   'object is used as a render proxy',
-                   'and \"Don\'t Render Original\" is set.'
-            ]
-            for t in msg:
-                self.layout.label(t)
+        if UseLuxCore():
+            self.layout.label("Note: displacement is not yet supported by LuxCore")
         else:
-            super().draw(context)
+            if context.object.luxrender_object.append_proxy and context.object.luxrender_object.hide_proxy_mesh:
+                msg = ['Mesh options not available when',
+                       'object is used as a render proxy',
+                       'and \"Don\'t Render Original\" is set.'
+                ]
+                for t in msg:
+                    self.layout.label(t)
+            else:
+                super().draw(context)

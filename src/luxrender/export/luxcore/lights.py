@@ -172,10 +172,9 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
-    
-                if 'relsize' in params_keyValue:
-                    relsize = params_keyValue['relsize']
-                    self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.relsize', [relsize]))
+
+                relsize = params_keyValue['relsize']
+                self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.relsize', [relsize]))
     
                 # Settings for indirect light visibility
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.diffuse.enable',

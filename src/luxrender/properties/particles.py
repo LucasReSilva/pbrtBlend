@@ -36,6 +36,7 @@ from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
 from ..export import fix_matrix_order
 from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.luxcore_api import UseLuxCore
 
 
 @LuxRenderAddon.addon_register_class
@@ -58,12 +59,13 @@ class luxrender_hair(declarative_property_group):
     ]
 
     visibility = {
+        'use_binary_output': lambda: not UseLuxCore(),
+        'acceltype': lambda: not UseLuxCore(),
         'adaptive_maxdepth': {'tesseltype': O(['ribbonadaptive', 'solidadaptive'])},
         'adaptive_error': {'tesseltype': O(['ribbonadaptive', 'solidadaptive'])},
         'solid_sidecount': {'tesseltype': O(['solid', 'solidadaptive'])},
         'solid_capbottom': {'tesseltype': O(['solid', 'solidadaptive'])},
         'solid_captop': {'tesseltype': O(['solid', 'solidadaptive'])},
-
     }
 
     properties = [
