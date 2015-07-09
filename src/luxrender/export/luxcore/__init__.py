@@ -31,16 +31,16 @@ from ...outputs import LuxManager, LuxLog
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 
-# TODO: remove refactoring state comments
-from .camera import CameraExporter      # finished
-from .config import ConfigExporter      # finished
-from .duplis import DupliExporter       # needs testing
+from .camera import CameraExporter
+from .config import ConfigExporter
+from .duplis import DupliExporter
 from .lights import LightExporter       # ported to new interface, but crucial refactoring/cleanup still missing
-from .materials import MaterialExporter # some features missing
-from .meshes import MeshExporter        # finished
-from .objects import ObjectExporter     # some features missing
-from .textures import TextureExporter   # finished
-from .volumes import VolumeExporter     # finished
+from .materials import MaterialExporter
+from .meshes import MeshExporter
+from .objects import ObjectExporter
+from .textures import TextureExporter
+from .volumes import VolumeExporter
+from .utils import get_elem_key
 
 
 class LuxCoreExporter(object):
@@ -176,8 +176,10 @@ class LuxCoreExporter(object):
         cache = self.object_cache
         exporter = ObjectExporter(self, self.blender_scene, self.is_viewport_render, blender_object)
 
-        if blender_object in cache:
-            exporter = cache[blender_object]
+        obj_key = get_elem_key(blender_object)
+
+        if obj_key in cache:
+            exporter = cache[obj_key]
             old_properties = exporter.properties.GetAllNames()
 
             # Delete old scene properties
@@ -187,7 +189,7 @@ class LuxCoreExporter(object):
         new_properties = exporter.convert(update_mesh, update_material, luxcore_scene)
         self.__set_scene_properties(new_properties)
 
-        cache[blender_object] = exporter
+        cache[obj_key] = exporter
 
 
     def convert_mesh(self, blender_object, luxcore_scene):
@@ -197,48 +199,54 @@ class LuxCoreExporter(object):
 
 
     def convert_material(self, material):
-        if material in self.temp_material_cache:
+        mat_key = get_elem_key(material)
+
+        if mat_key in self.temp_material_cache:
             return
         else:
-            self.temp_material_cache.add(material)
+            self.temp_material_cache.add(mat_key)
 
         exporter = MaterialExporter(self, self.blender_scene, material)
-        self.__convert_element(material, self.material_cache, exporter)
+        self.__convert_element(mat_key, self.material_cache, exporter)
 
 
     def convert_texture(self, texture):
-        if texture in self.temp_texture_cache:
+        tex_key = get_elem_key(texture)
+
+        if tex_key in self.temp_texture_cache:
             return
         else:
-            self.temp_texture_cache.add(texture)
+            self.temp_texture_cache.add(tex_key)
 
         exporter = TextureExporter(self, self.blender_scene, texture)
-        self.__convert_element(texture, self.texture_cache, exporter)
+        self.__convert_element(tex_key, self.texture_cache, exporter)
 
 
     def convert_light(self, blender_object, luxcore_scene):
         exporter = LightExporter(self, self.blender_scene, blender_object)
-        self.__convert_element(blender_object, self.light_cache, exporter, luxcore_scene)
+        self.__convert_element(get_elem_key(blender_object), self.light_cache, exporter, luxcore_scene)
 
 
     def convert_volume(self, volume):
-        if volume in self.temp_volume_cache:
+        vol_key = get_elem_key(volume)
+
+        if vol_key in self.temp_volume_cache:
             return
         else:
-            self.temp_volume_cache.add(volume)
+            self.temp_volume_cache.add(vol_key)
 
         exporter = VolumeExporter(self, self.blender_scene, volume)
-        self.__convert_element(volume, self.volume_cache, exporter)
+        self.__convert_element(vol_key, self.volume_cache, exporter)
 
 
     def convert_duplis(self, luxcore_scene, duplicator, dupli_system=None):
         exporter = DupliExporter(self, self.blender_scene, duplicator, dupli_system, self.is_viewport_render)
-        self.__convert_element((duplicator, dupli_system), self.dupli_cache, exporter, luxcore_scene)
+        self.__convert_element((get_elem_key(duplicator), dupli_system), self.dupli_cache, exporter, luxcore_scene)
 
 
-    def __convert_element(self, element, cache, exporter, luxcore_scene=None):
-        if element in cache:
-            exporter = cache[element]
+    def __convert_element(self, cache_key, cache, exporter, luxcore_scene=None):
+        if cache_key in cache:
+            exporter = cache[cache_key]
             old_properties = exporter.properties.GetAllNames()
 
             # Delete old scene properties
@@ -248,7 +256,7 @@ class LuxCoreExporter(object):
         new_properties = exporter.convert(luxcore_scene) if luxcore_scene else exporter.convert()
         self.__set_scene_properties(new_properties)
 
-        cache[element] = exporter
+        cache[cache_key] = exporter
 
 
     def __set_scene_properties(self, properties):

@@ -32,6 +32,14 @@ from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 
 
+def get_elem_key(elem):
+        # Construct unique key for the object (respecting objects from libraries etc.)
+        if hasattr(elem, 'library') and elem.library:
+            return tuple([elem, elem.library])
+        else:
+            return elem
+
+
 def convert_texture_channel(luxcore_exporter, properties, element_name, textured_element, channel, type):
     """
     :param luxcore_exporter: the luxcore_exporter instance of the calling texture/volume/material exporter
@@ -59,7 +67,7 @@ def convert_texture_channel(luxcore_exporter, properties, element_name, textured
 
         if texture is not None:
             luxcore_exporter.convert_texture(texture)
-            texture_exporter = luxcore_exporter.texture_cache[texture]
+            texture_exporter = luxcore_exporter.texture_cache[get_elem_key(texture)]
 
             is_multiplied = getattr(textured_element, '%s_multiply%s' % (channel, type))
 

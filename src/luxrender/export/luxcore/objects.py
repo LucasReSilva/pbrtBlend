@@ -35,7 +35,7 @@ from ...export import get_worldscale
 from ...export import object_anim_matrices
 from ...export import matrix_to_list
 
-from .utils import calc_shutter
+from .utils import calc_shutter, get_elem_key
 from .meshes import MeshExporter
 
 
@@ -128,16 +128,26 @@ class ObjectExporter(object):
         if not is_dupli:
             print('Converting object %s' % obj.name)
 
-        # TODO: dupli handling
-
         # Check if mesh is in cache
         if MeshExporter.get_mesh_key(obj, self.is_viewport_render) in self.luxcore_exporter.mesh_cache:
+            print('  mesh %s of obj %s already in cache' % (obj.data.name, obj.name))
+            if obj.library:
+                print(obj.library.name)
+            else:
+                print('not in lib')
+
             # Check if object is in cache
-            if obj in self.luxcore_exporter.object_cache and update_mesh and not is_dupli:
+            if get_elem_key(obj) in self.luxcore_exporter.object_cache and update_mesh and not is_dupli:
                 self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
 
             self.__update_props(anim_matrices, obj, transform, update_material)
         else:
+            print('  mesh %s of obj %s not in cache' % (obj.data.name, obj.name))
+            if obj.library:
+                print(obj.library.name)
+            else:
+                print('not in lib')
+
             # Mesh not in cache
             #print('[%s] mesh and object not in cache' % obj.name)
             self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
@@ -159,9 +169,9 @@ class ObjectExporter(object):
             return
 
         # Convert material
-        if update_material or self.blender_object.active_material not in self.luxcore_exporter.material_cache:
+        if update_material or get_elem_key(self.blender_object.active_material) not in self.luxcore_exporter.material_cache:
             self.luxcore_exporter.convert_material(self.blender_object.active_material)
-        material_exporter = self.luxcore_exporter.material_cache[self.blender_object.active_material]
+        material_exporter = self.luxcore_exporter.material_cache[get_elem_key(self.blender_object.active_material)]
         luxcore_material_name = material_exporter.luxcore_name
 
         # Create shape definition
@@ -175,7 +185,12 @@ class ObjectExporter(object):
         self.exported_objects = []
 
         for shape in exported_shapes:
-            name = ToValidLuxCoreName(self.blender_object.name + str(shape.material_index) + self.dupli_name_suffix)
+            name = self.blender_object.name + str(shape.material_index) + self.dupli_name_suffix
+
+            if self.blender_object.library:
+                name += self.blender_object.library.name
+
+            name = ToValidLuxCoreName(name)
 
             try:
                 material = self.blender_object.material_slots[shape.material_index].material
@@ -184,9 +199,9 @@ class ObjectExporter(object):
                 print('WARNING: material slot %d on object "%s" is unassigned!' % (shape.material_index + 1, self.blender_object.name))
 
             # Convert material
-            if update_material or material not in self.luxcore_exporter.material_cache:
+            if update_material or get_elem_key(material) not in self.luxcore_exporter.material_cache:
                 self.luxcore_exporter.convert_material(material)
-            material_exporter = self.luxcore_exporter.material_cache[material]
+            material_exporter = self.luxcore_exporter.material_cache[get_elem_key(material)]
             luxcore_material_name = material_exporter.luxcore_name
 
             self.__create_object_properties(name, shape.luxcore_shape_name, luxcore_material_name, transform, anim_matrices)

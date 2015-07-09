@@ -54,10 +54,16 @@ class MeshExporter(object):
     def get_mesh_key(blender_object, is_viewport_render):
         # We have to account for different modifiers being used on shared geometry
         # If the object has any active deforming modifiers we have to give the mesh a unique key
+        key = tuple([blender_object.data])
+
         if MeshExporter.has_active_modifiers(blender_object, is_viewport_render):
-            key = tuple([blender_object, blender_object.data])
-        else:
-            key = blender_object.data
+            key += tuple([blender_object])
+
+        if blender_object.library:
+            key += tuple([blender_object, blender_object.library])
+
+        if blender_object.data.library:
+            key += tuple([blender_object.data, blender_object.data.library])
 
         return key
 
@@ -143,12 +149,23 @@ class MeshExporter(object):
 
 
     def __generate_shape_name(self, matIndex=-1):
-        index_string = ('%03d' % matIndex) if matIndex != -1 else ''
-        shape_name = '%s_%s_%s' % (self.blender_scene.name, self.blender_object.data.name, index_string)
+        #index_string = ('%03d' % matIndex) if matIndex != -1 else ''
+        #shape_name = '%s_%s_%s' % (self.blender_scene.name, self.blender_object.data.name, index_string)
 
         # If the object has any active deforming modifiers we have to give the mesh a unique name
-        if MeshExporter.has_active_modifiers(self.blender_object, self.is_viewport_render):
-            shape_name += self.blender_object.name
+        #if MeshExporter.has_active_modifiers(self.blender_object, self.is_viewport_render):
+        #    shape_name += self.blender_object.name
+
+
+        mesh_key = MeshExporter.get_mesh_key(self.blender_object, self.is_viewport_render)
+        shape_name = self.blender_scene.name
+
+        for elem in mesh_key:
+            if hasattr(elem, 'name'):
+                shape_name += '_' + elem.name
+
+        if matIndex != -1:
+            shape_name += '_%d' % matIndex
 
         return ToValidLuxCoreName(shape_name)
 

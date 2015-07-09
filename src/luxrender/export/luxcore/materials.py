@@ -31,7 +31,7 @@ from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 
-from .utils import convert_texture_channel, generate_volume_name
+from .utils import convert_texture_channel, generate_volume_name, get_elem_key
 from .textures import TextureExporter
 
 
@@ -115,7 +115,7 @@ class MaterialExporter(object):
 
     def __set_volume(self, prop_string, volume):
         self.luxcore_exporter.convert_volume(volume)
-        volume_exporter = self.luxcore_exporter.volume_cache[volume]
+        volume_exporter = self.luxcore_exporter.volume_cache[get_elem_key(volume)]
         self.properties.Set(pyluxcore.Property(prop_string, volume_exporter.luxcore_name))
 
 
@@ -228,7 +228,7 @@ class MaterialExporter(object):
 
                             if texture is not None:
                                 self.luxcore_exporter.convert_texture(texture)
-                                texture_exporter = self.luxcore_exporter.texture_cache[texture]
+                                texture_exporter = self.luxcore_exporter.texture_cache[get_elem_key(texture)]
 
                                 is_multiplied = getattr(lux_mat, 'Kr_multiplycolor')
 
@@ -307,7 +307,7 @@ class MaterialExporter(object):
 
                         base = bpy.data.materials[material_base_name]
                         self.luxcore_exporter.convert_material(base)
-                        base_exporter = self.luxcore_exporter.material_cache[base]
+                        base_exporter = self.luxcore_exporter.material_cache[get_elem_key(base)]
                         luxcore_base_name = base_exporter.luxcore_material_name
 
                         self.properties.Set(pyluxcore.Property(prefix + '.base', [luxcore_base_name]))
@@ -488,8 +488,8 @@ class MaterialExporter(object):
                         self.luxcore_exporter.convert_material(mat1)
                         self.luxcore_exporter.convert_material(mat2)
 
-                        mat1_luxcore_name = self.luxcore_exporter.material_cache[mat1].luxcore_name
-                        mat2_luxcore_name = self.luxcore_exporter.material_cache[mat2].luxcore_name
+                        mat1_luxcore_name = self.luxcore_exporter.material_cache[get_elem_key(mat1)].luxcore_name
+                        mat2_luxcore_name = self.luxcore_exporter.material_cache[get_elem_key(mat2)].luxcore_name
 
                         self.properties.Set(pyluxcore.Property(prefix + '.type', ['mix']))
                         self.properties.Set(pyluxcore.Property(prefix + '.material1', mat1_luxcore_name))
