@@ -57,6 +57,13 @@ class LightExporter(object):
         return self.properties
 
 
+    def __generate_light_name(self, name):
+        if self.blender_object.library:
+            name += '_' + self.blender_object.library.name
+
+        self.luxcore_name = ToValidLuxCoreName(name)
+
+
     def __convert_light(self, luxcore_scene):
         # TODO: refactor this horrible... thing
         # TODO: find solution for awkward sunsky problem
@@ -68,7 +75,9 @@ class LightExporter(object):
             return
     
         light = obj.data
-        luxcore_name = ToValidLuxCoreName(obj.name)
+
+        self.__generate_light_name(obj.name)
+        luxcore_name = self.luxcore_name
     
         light_params = ParamSet() \
             .add_float('gain', light.energy) \

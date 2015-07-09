@@ -142,12 +142,23 @@ class TextureExporter(object):
             self.luxcore_name = ramp_luxcore_name
 
 
+    def __generate_texture_name(self, name):
+        if self.texture.library:
+            name += '_' + self.texture.library.name
+
+        self.luxcore_name = ToValidLuxCoreName(name)
+
+
     def __convert_texture(self, name=''):
         texture = self.texture
 
         texType = texture.luxrender_texture.type
 
-        self.luxcore_name = ToValidLuxCoreName(texture.name) if name == '' else ToValidLuxCoreName(name)
+        if name == '':
+            self.__generate_texture_name(texture.name)
+        else:
+            self.__generate_texture_name(name)
+
         prefix = 'scene.textures.' + self.luxcore_name
 
         if texType == 'BLENDER':

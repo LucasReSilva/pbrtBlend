@@ -130,24 +130,12 @@ class ObjectExporter(object):
 
         # Check if mesh is in cache
         if MeshExporter.get_mesh_key(obj, self.is_viewport_render) in self.luxcore_exporter.mesh_cache:
-            print('  mesh %s of obj %s already in cache' % (obj.data.name, obj.name))
-            if obj.library:
-                print(obj.library.name)
-            else:
-                print('not in lib')
-
             # Check if object is in cache
             if get_elem_key(obj) in self.luxcore_exporter.object_cache and update_mesh and not is_dupli:
                 self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
 
             self.__update_props(anim_matrices, obj, transform, update_material)
         else:
-            print('  mesh %s of obj %s not in cache' % (obj.data.name, obj.name))
-            if obj.library:
-                print(obj.library.name)
-            else:
-                print('not in lib')
-
             # Mesh not in cache
             #print('[%s] mesh and object not in cache' % obj.name)
             self.luxcore_exporter.convert_mesh(obj, luxcore_scene)

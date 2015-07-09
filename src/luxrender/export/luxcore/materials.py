@@ -59,6 +59,9 @@ class MaterialExporter(object):
 
 
     def __generate_material_name(self, name):
+        if self.material.library:
+            name += '_' + self.material.library.name
+
         # materials and volumes must not have the same names
         self.luxcore_name = ToValidLuxCoreName(name + '_mat')
 
