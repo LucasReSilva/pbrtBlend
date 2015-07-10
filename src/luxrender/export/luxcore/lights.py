@@ -156,6 +156,10 @@ class LightExporter(object):
     
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
+
+        samples = light.luxrender_lamp.luxcore_lamp.samples
+        if light.type != 'SUN':
+            self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
     
         ####################################################################
         # Sun (includes sun, sky, distant)
@@ -163,7 +167,6 @@ class LightExporter(object):
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
-            samples = params_keyValue['nsamples']
     
             sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
             legacy_sky = light.luxrender_lamp.luxrender_lamp_sun.legacy_sky
@@ -237,6 +240,7 @@ class LightExporter(object):
                 self.properties.Set(
                     pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
                                        light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
     
         ####################################################################
         # Hemi (infinite)

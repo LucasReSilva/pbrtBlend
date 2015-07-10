@@ -119,6 +119,7 @@ class luxcore_material(declarative_property_group):
             'description': 'Material samples count (-1 = global default, size x size)',
             'default': -1,
             'min': -1,
+            'soft_max': 16,
             'max': 256,
             'save_in_preset': True
         },
@@ -129,6 +130,7 @@ class luxcore_material(declarative_property_group):
             'description': 'Material emission samples count (-1 = global default, size x size)',
             'default': -1,
             'min': -1,
+            'soft_max': 16,
             'max': 256,
             'save_in_preset': True
         },

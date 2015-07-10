@@ -263,8 +263,8 @@ class luxcore_enginesettings(declarative_property_group):
             'description': 'CPU rendering has lower latency, GPU rendering is faster',
             'default': 'CPU',
             'items': [
-                ('CPU', 'CPU', 'Use the CPU (slow, fast updates)'),
-                ('OCL', 'OpenCL', 'Use the graphics card via OpenCL (fast, slow updates)'),
+                ('CPU', 'CPU', 'Use the CPU (slow rendering, fast updates)'),
+                ('OCL', 'OpenCL', 'Use the graphics card via OpenCL (fast rendering, slow updates)'),
             ],
             'expand': True,
             'save_in_preset': True

@@ -350,6 +350,7 @@ class luxrender_lamp_sun(declarative_property_group):
                    :]  # Pin this at the end so the sun type menu isn't jumping around when you select the distant lamp
 
     visibility = {  # Do L visibility manually because we only need it for distant
+                    'nsamples': {lambda: not UseLuxCore()},
                     'L_colorlabel': {'sunsky_type': 'distant'},
                     'L_color': {'sunsky_type': 'distant'},
                     'L_usecolortexture': {'sunsky_type': 'distant'},
@@ -526,6 +527,7 @@ class luxrender_lamp_area(declarative_property_group):
     visibility = dict_merge(
         TC_L.visibility,
         {'null_lamp': lambda: not UseLuxCore()},
+        {'nsamples': lambda: not UseLuxCore()},
     )
 
     #visibility = TC_L.visibility
@@ -600,9 +602,8 @@ class luxrender_lamp_hemi(declarative_property_group):
         'mapping_type': {'infinite_map': LO({'!=': ''})},
         'hdri_multiply': {'infinite_map': LO({'!=': ''})},
         'gamma': {'infinite_map': LO({'!=': ''})},
-        'nsamples': {'infinite_map': LO({'!=': ''})},
+        'nsamples': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
         'hdri_infinitesample': {'infinite_map': LO({'!=': ''})},
-
     }
 
     properties = TC_L.properties[:] + [
