@@ -26,7 +26,7 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import json, math, os, struct, mathutils
+import json, math, os, struct, mathutils, tempfile, shutil, urllib.request, zipfile
 
 # LuxRender Libs
 from .. import LuxRenderAddon
@@ -1385,3 +1385,92 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
 proxy_menu_func = lambda self, context: self.layout.operator("export.export_luxrender_proxy", text="Export LuxRender Proxy")
 bpy.types.INFO_MT_file_export.append(proxy_menu_func)
 
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
+    """Update LuxBlend to the latest version"""
+    bl_idname = "luxrender.update_luxblend"
+    bl_label = "Update LuxBlend"
+
+    def execute(self, context):
+        def recursive_overwrite(src, dest, ignore=None):
+            if os.path.isdir(src):
+                if not os.path.isdir(dest):
+                    os.makedirs(dest)
+                files = os.listdir(src)
+                if ignore is not None:
+                    ignored = ignore(src, files)
+                else:
+                    ignored = set()
+                for f in files:
+                    if f not in ignored:
+                        recursive_overwrite(os.path.join(src, f),
+                                            os.path.join(dest, f),
+                                            ignore)
+            else:
+                shutil.copyfile(src, dest)
+
+        print('-'* 20)
+        print('Updating LuxBlend...')
+
+        temp_dir_path = tempfile.mkdtemp()
+        temp_zip_path = temp_dir_path + "/default.zip"
+
+        # Download LuxBlend zip archive of latest default branch commit
+        print('Downloading https://bitbucket.org/luxrender/luxblend25/get/default.zip')
+        urllib.request.urlretrieve("https://bitbucket.org/luxrender/luxblend25/get/default.zip", temp_zip_path)
+
+        # Extract the zip
+        print('Extracting ZIP archive')
+        with zipfile.ZipFile(temp_zip_path) as zip:
+            for member in zip.namelist():
+                if 'src/luxrender' in member:
+                    # Remove the first two directories and the filename
+                    # e.g. luxrender-luxblend25-bfb488c84111/src/luxrender/ui/textures/wrinkled.py
+                    # becomes luxrender/ui/textures/
+                    target_path = temp_dir_path + '/' + member.split('/', 2)[-1]
+                    target_path = os.path.join(*target_path.split('/')[:-1])
+
+                    filename = os.path.basename(member)
+                    # Skip directories
+                    if len(filename) == 0:
+                        continue
+
+                    # Create the target directory if necessary
+                    if not os.path.exists(target_path):
+                        os.makedirs(target_path)
+
+                    source = zip.open(member)
+                    target = open(os.path.join(target_path, filename), "wb")
+
+                    with source, target:
+                        shutil.copyfileobj(source, target)
+
+        extracted_luxblend_path = os.path.join(temp_dir_path, 'luxrender')
+
+        # Find the old LuxBlend files and the corresponding Blender addon dir (there are three possible addon dirs)
+        luxblend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        print('LuxBlend addon folder:', luxblend_dir)
+
+        # Delete old LuxBlend files (only directories and *.py files, the user might have other stuff in there!)
+        print('Overwriting old LuxBlend files')
+        # remove __init__.py
+        os.remove(os.path.join(luxblend_dir, '__init__.py'))
+        # remove all folders
+        DIRNAMES = 1
+        for dir in next(os.walk(luxblend_dir))[DIRNAMES]:
+            shutil.rmtree(os.path.join(luxblend_dir, dir))
+
+        # copy new LuxBlend files
+        # copy __init__.py
+        shutil.copy2(os.path.join(extracted_luxblend_path, '__init__.py'), luxblend_dir)
+        # copy all folders
+        recursive_overwrite(extracted_luxblend_path, luxblend_dir)
+
+        # Delete temp directory
+        shutil.rmtree(temp_dir_path)
+
+        print('LuxBlend update finished, restart Blender for the changes to take effect.')
+        print('-'* 20)
+        self.report({'INFO'}, 'Restart Blender!')
+        return {'FINISHED'}

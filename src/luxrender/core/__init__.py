@@ -984,7 +984,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'BIASPATHCPU' : 'Biased Path',
             'BIASPATHOCL' : 'Biased Path OpenCL',
             'BIDIRCPU' : 'Bidir',
-            'BIDIRVMCPU' : 'BidirVCM'
+            'BIDIRVMCPU' : 'BidirVCM',
+            'RTPATHOCL': 'RT Path OpenCL',
+            'RTBIASPATHOCL': 'RT Biased Path OpenCL',
         }
         
         sampler = lcConfig.GetProperties().Get('sampler.type').GetString()
@@ -1085,9 +1087,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # Engine and sampler info
         if rendering_controls.stats_engine_info:
-            engine_info = engine_dict[engine]
-            if not engine in ['BIASPATHCPU', 'BIASPATHOCL']:
-                engine_info += ' + ' + sampler_dict[sampler]
+            try:
+                engine_info = engine_dict[engine]
+                if not 'BIASPATH' in engine:
+                    engine_info += ' + ' + sampler_dict[sampler]
+            except KeyError:
+                engine_info = 'Unkown engine or sampler'
+
             stats_list.append(engine_info)
 
         # Show remaining time until next film update (final render only)
