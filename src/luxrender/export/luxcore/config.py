@@ -237,10 +237,6 @@ class ConfigExporter(object):
         engine = engine_settings.renderengine_type
         device = engine_settings.device_preview if self.is_viewport_render else engine_settings.device
 
-        # Biased Path engine is sluggish for realtime preview, don't use it
-        if self.is_viewport_render and engine == 'BIASPATH':
-            engine = 'PATH'
-
         # Set engine type
         if engine in ['BIDIR', 'BIDIRVM'] or device == 'CPU':
             # CPU only engines
@@ -337,17 +333,7 @@ class ConfigExporter(object):
         self.properties.Set(pyluxcore.Property('batch.haltthreshold', engine_settings.halt_noise_preview))
 
         # Use same renderengine as final render
-        engine = engine_settings.renderengine_type
-
-        # Biased Path engine is sluggish for realtime preview, don't use it
-        if engine == 'BIASPATH':
-            engine = 'PATH'
-
-        # Append 'CPU' or 'OCL' from realtime settings
-        if engine == 'PATH':
-            engine += engine_settings.device_preview
-        else:
-            engine += 'CPU'
+        engine = self.__get_engine()
 
         self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 
