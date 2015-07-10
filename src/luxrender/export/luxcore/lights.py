@@ -158,7 +158,7 @@ class LightExporter(object):
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
 
         samples = light.luxrender_lamp.luxcore_lamp.samples
-        if light.type != 'SUN':
+        if light.type not in ['SUN', 'AREA']:
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
     
         ####################################################################
@@ -321,6 +321,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['laser']))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.radius', [light.size]))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
             else:
                 # TODO: visibility for indirect rays
     
@@ -340,6 +341,7 @@ class LightExporter(object):
                                                      [light.luxrender_lamp.luxrender_lamp_area.power]))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.efficiency',
                                                      [light.luxrender_lamp.luxrender_lamp_area.efficacy]))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.samples', [samples]))
     
                 translator_settings = self.blender_scene.luxcore_translatorsettings
                 if not (translator_settings.override_materials and translator_settings.override_lights):
