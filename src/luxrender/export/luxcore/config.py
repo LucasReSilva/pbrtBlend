@@ -48,10 +48,10 @@ class ConfigExporter(object):
             self.__convert_realtime_settings()
         else:
             # Config for final render
-            self.__convert_engine()
             self.__convert_filter()
             self.__convert_sampler()
 
+        self.__convert_engine()
         self.__convert_halt_conditions()
         self.__convert_compute_settings()
         self.__convert_film_size(film_width, film_height)
@@ -252,7 +252,7 @@ class ConfigExporter(object):
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = self.__get_engine()
 
-        if self.blender_scene.luxcore_translatorsettings.use_filesaver:
+        if self.blender_scene.luxcore_translatorsettings.use_filesaver and not self.is_viewport_render:
             output_path = efutil.filesystem_path(self.blender_scene.render.filepath)
             if not os.path.isdir(output_path):
                 os.makedirs(output_path)
@@ -332,36 +332,13 @@ class ConfigExporter(object):
         # Halt conditions
         self.properties.Set(pyluxcore.Property('batch.haltthreshold', engine_settings.halt_noise_preview))
 
-        # Use same renderengine as final render
-        engine = self.__get_engine()
-
-        self.properties.Set(pyluxcore.Property('renderengine.type', engine))
-
-        # Use global path/light depth
-        if engine_settings.renderengine_type in ['PATH', 'BIASPATH']:
-            self.properties.Set(pyluxcore.Property('path.maxdepth', engine_settings.path_maxdepth))
-
-            # Use global clamping settings
-            if engine_settings.use_clamping:
-                radiance_clamp = engine_settings.biaspath_clamping_radiance_maxvalue
-                pdf_clamp = engine_settings.biaspath_clamping_pdf_value
-            else:
-                radiance_clamp = 0
-                pdf_clamp = 0
-
-            self.properties.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', radiance_clamp))
-            self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
-        else:
-            self.properties.Set(pyluxcore.Property('path.maxdepth', engine_settings.bidir_eyedepth))
-            self.properties.Set(pyluxcore.Property('light.maxdepth', engine_settings.bidir_lightdepth))
-
         # Sampler settings (same as for final render)
         self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))
 
-        # Filter settings
+        # Special filter settings optimized for realtime preview
         if engine_settings.device_preview == 'CPU':
             self.properties.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
-            self.properties.Set(pyluxcore.Property('film.filter.width', 1.3))
+            self.properties.Set(pyluxcore.Property('film.filter.width', 1.0))
         else:
             self.properties.Set(pyluxcore.Property('film.filter.type', 'NONE'))
 
