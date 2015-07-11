@@ -1452,15 +1452,20 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
 
                         with source, target:
                             shutil.copyfileobj(source, target)
+                            print('copying', source, 'to', target)
 
             extracted_luxblend_path = os.path.join(temp_dir_path, 'luxrender')
 
-            # Find the old LuxBlend files and the corresponding Blender addon dir (there are three possible addon dirs)
+            if not os.path.exists(extracted_luxblend_path):
+                self.report({'ERROR'}, 'Could not extract ZIP archive! Aborting.')
+                return {'FINISHED'}
+
+            # Find the old LuxBlend files
             luxblend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
             print('LuxBlend addon folder:', luxblend_dir)
 
             # Delete old LuxBlend files (only directories and *.py files, the user might have other stuff in there!)
-            print('Overwriting old LuxBlend files')
+            print('Deleting old LuxBlend files')
             # remove __init__.py
             os.remove(os.path.join(luxblend_dir, '__init__.py'))
             # remove all folders
@@ -1468,6 +1473,7 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
             for dir in next(os.walk(luxblend_dir))[DIRNAMES]:
                 shutil.rmtree(os.path.join(luxblend_dir, dir))
 
+            print('Copying new LuxBlend files')
             # copy new LuxBlend files
             # copy __init__.py
             shutil.copy2(os.path.join(extracted_luxblend_path, '__init__.py'), luxblend_dir)
