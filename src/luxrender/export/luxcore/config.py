@@ -367,7 +367,7 @@ class ConfigExporter(object):
         engine_settings = self.blender_scene.luxcore_enginesettings
         # Custom Properties
         if engine_settings.advanced and engine_settings.custom_properties:
-            custom_params = engine_settings.custom_properties.replace(' ', '').split('|')
+            custom_params = engine_settings.custom_properties.replace(' ', '').replace(';', ' ').split('|')
             for prop in custom_params:
                 prop = prop.split('=')
                 self.properties.Set(pyluxcore.Property(prop[0], prop[1]))
