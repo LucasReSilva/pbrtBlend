@@ -99,6 +99,7 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_lights_samplingstrategy_type',
         'biaspath_lights_nearstart',
         ['label_sampler_type', 'sampler_type'],
+        ['label_biaspath_sampler_type', 'biaspath_sampler_type'],
         # Advanced sampler settings (for all but BIASPATH)
         ['label_largesteprate', 'largesteprate'],
         ['label_maxconsecutivereject', 'maxconsecutivereject'],
@@ -135,10 +136,9 @@ class luxcore_enginesettings(declarative_property_group):
         # BIASPATH noise controls
         'label_halt_conditions': {'renderengine_type': 'BIASPATH'},
         'tile_multipass_enable': {'renderengine_type': 'BIASPATH'},
-        'tile_multipass_convergencetest_threshold': {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
-        'tile_multipass_use_threshold_reduction': {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
-        'tile_multipass_convergencetest_threshold_reduction':
-             {'tile_multipass_enable': True, 'renderengine_type': 'BIASPATH'},
+        'tile_multipass_convergencetest_threshold': {'renderengine_type': 'BIASPATH'},
+        'tile_multipass_use_threshold_reduction': {'renderengine_type': 'BIASPATH'},
+        'tile_multipass_convergencetest_threshold_reduction': {'renderengine_type': 'BIASPATH'},
         # BIASPATH sampling
         'label_sampling': {'renderengine_type': 'BIASPATH'},
         'biaspath_sampling_aa_size': {'renderengine_type': 'BIASPATH'},
@@ -161,6 +161,8 @@ class luxcore_enginesettings(declarative_property_group):
         'spacer_pdf_clamping': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
         'biaspath_clamping_pdf_value': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
         # Sampler settings, show for all but BIASPATH
+        'label_sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'label_largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
@@ -173,6 +175,9 @@ class luxcore_enginesettings(declarative_property_group):
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
+        # Fake sampler settings for BIASPATH
+        'label_biaspath_sampler_type': {'renderengine_type': 'BIASPATH'},
+        'biaspath_sampler_type': {'renderengine_type': 'BIASPATH'},
         # Filter settings
         'label_filter_type': {'advanced': True},
         'filter_type': {'advanced': True},
@@ -195,9 +200,10 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_clamping_radiance_maxvalue': {'use_clamping': True},
         'biaspath_clamping_pdf_value': {'use_clamping': True},
         # BIASPATH noise multiplier
-        'tile_multipass_convergencetest_threshold_reduction': {'tile_multipass_use_threshold_reduction': True},
-        # Disable sampler dropdown when using BIASPATH
-        'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'tile_multipass_convergencetest_threshold': {'tile_multipass_enable': True},
+        'tile_multipass_use_threshold_reduction': {'tile_multipass_enable': True},
+        'tile_multipass_convergencetest_threshold_reduction': {'tile_multipass_enable': True, 
+                                                               'tile_multipass_use_threshold_reduction': True},
     }
 
     properties = [
@@ -638,6 +644,23 @@ may mute lamps and caustics',
             'min': 0,
             'max': 1,
             'slider': True,
+            'save_in_preset': True
+        },
+        # Fake sampler to show to the user that BIASPATH sampler is fixed
+        {
+            'type': 'text',
+            'attr': 'label_biaspath_sampler_type',
+            'name': 'Sampler:',
+        },
+        {
+            'type': 'enum',
+            'attr': 'biaspath_sampler_type',
+            'name': '',
+            'description': 'Pixel sampling algorithm to use',
+            'default': 'SOBOL',
+            'items': [
+                ('SOBOL', 'Stratified Sampler', 'Biased Path uses a fixed stratified sampler'),
+            ],
             'save_in_preset': True
         },
         # Filter settings
