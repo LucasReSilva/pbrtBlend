@@ -190,8 +190,6 @@ class DupliExporter(object):
 
             persistent_id_str = '_'.join([str(elem) for elem in persistent_id])
             dupli_name_suffix = '%s_%s_%s' % (self.duplicator.name, psys_name, persistent_id_str)
-            #dupli_name_suffix = '%s_%s_%d' % (self.duplicator.name, self.dupli_system.name, self.dupli_number)
-            #self.dupli_number += 1
             object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
                                              do, dupli_name_suffix)
             properties = object_exporter.convert(update_mesh=False, update_material=False, luxcore_scene=luxcore_scene,
