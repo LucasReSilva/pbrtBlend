@@ -1439,7 +1439,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Check if a halt condition is set, cancel the rendering and warn the user otherwise
                 settings = scene.luxcore_enginesettings
 
-                if not (settings.use_halt_samples or settings.use_halt_noise or settings.use_halt_time):
+                if settings.renderengine_type == 'BIASPATH':
+                    halt_enabled = not settings.tile_multipass_enable or not settings.tile_multipass_use_threshold_reduction
+                else:
+                    halt_enabled = settings.use_halt_samples or settings.use_halt_noise or settings.use_halt_time
+
+                if not halt_enabled:
                     raise Exception('You need to set a halt condition for animations, otherwise the rendering of the \
 first frame will never stop!')
 
