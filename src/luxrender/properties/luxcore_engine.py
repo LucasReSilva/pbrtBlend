@@ -113,7 +113,7 @@ class luxcore_enginesettings(declarative_property_group):
         # Kernel cache
         ['label_kernelcache', 'kernelcache'],
         # BIASPATH specific halt condition
-        ['label_halt_conditions', 'show_halt_conditions'],
+        ['spacer_halt_conditions', 'show_halt_conditions'],
         #'label_halt_conditions',
         ['tile_multipass_enable', 'tile_multipass_convergencetest_threshold'],
         ['tile_multipass_use_threshold_reduction', 'tile_multipass_convergencetest_threshold_reduction'],
@@ -827,8 +827,8 @@ Not supported for OpenCL engines')
         {
             'type': 'bool',
             'attr': 'show_halt_conditions',
-            'name': 'Show',
-            'description': 'Configure halt conditions (settings will still be used even when hidden)',
+            'name': 'Halt Conditions',
+            'description': 'Show/hide halt conditions (settings will still be used even when hidden)',
             'default': False,
             'toggle': True
         },
