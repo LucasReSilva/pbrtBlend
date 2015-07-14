@@ -1042,6 +1042,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if rendering_controls.stats_samples_per_sec:
             stats_list.append('Samples/Sec %3.2fM' % (stats.Get('stats.renderengine.total.samplesec').GetFloat() / 1000000))
 
+        if rendering_controls.stats_rays_per_sample:
+            rays_per_sample = (
+                stats.Get("stats.renderengine.performance.total").GetFloat()
+                / stats.Get("stats.renderengine.total.samplesec").GetFloat()
+            )
+            stats_list.append('Rays/Sample %.1f' % rays_per_sample)
+
+
         # Convergence stats
         if rendering_controls.stats_convergence:
             convergence = stats.Get('stats.renderengine.convergence').GetFloat()

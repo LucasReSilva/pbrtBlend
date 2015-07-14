@@ -45,6 +45,7 @@ class luxcore_rendering_controls(declarative_property_group):
         'configure_stats_label',
         'stats_samples',
         'stats_samples_per_sec',
+        'stats_rays_per_sample',
         'stats_convergence',
         'stats_memory',
         'stats_tris',
@@ -89,6 +90,13 @@ class luxcore_rendering_controls(declarative_property_group):
             'name': 'Samples/Sec',
             'description': '',
             'default': True,
+        },
+        {
+            'type': 'bool',
+            'attr': 'stats_rays_per_sample',
+            'name': 'Rays/Sample',
+            'description': '',
+            'default': False,
         },
         {
             'type': 'bool',
