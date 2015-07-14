@@ -111,45 +111,17 @@ class render_settings(render_panel):
 
             row = split.row()
             sub = row.row()
-            sub.prop(engine_settings, 'device_preview', expand=True)
+
+            if engine_settings.renderengine_type in ['PATH', 'BIASPATH']:
+                # These engines have OpenCL versions
+                sub.prop(engine_settings, 'device_preview', expand=True)
+            else:
+                # Face device enum, always disabled, to show that BIDIR and BIDIRVM only have CPU support
+                sub.enabled = False
+                sub.prop(engine_settings, 'device_cpu_only', expand=True)
 
         # Draw property groups
         super().draw(context)
-
-        # Draw LuxCore stuff below property group stuff (halt conditions)
-        if UseLuxCore() and engine_settings.renderengine_type in ['PATH', 'BIDIR', 'BIDIRVM']:
-            # Draw halt conditions panel
-            split = layout.split()
-            col = split.column()
-
-            sub = col.column(align=True)
-            sub.label("Stop at:")
-            sub.prop(engine_settings, "use_halt_samples")
-            sub.prop(engine_settings, "use_halt_noise")
-            sub.prop(engine_settings, "use_halt_time")
-
-            col = split.column()
-            sub = col.column(align=True)
-            sub.label("Final:")
-
-            sub_samples = sub.column(align=True)
-            sub_samples.enabled = engine_settings.use_halt_samples
-            sub_samples.prop(engine_settings, "halt_samples")
-
-            sub_noise = sub.column(align=True)
-            sub_noise.enabled = engine_settings.use_halt_noise
-            sub_noise.prop(engine_settings, "halt_noise")
-
-            sub_time = sub.column(align=True)
-            sub_time.enabled = engine_settings.use_halt_time
-            sub_time.prop(engine_settings, "halt_time")
-
-            col = split.column()
-            sub = col.column(align=True)
-            sub.label(text="Preview:")
-            sub.prop(engine_settings, "halt_samples_preview")
-            sub.prop(engine_settings, "halt_noise_preview")
-            sub.prop(engine_settings, "halt_time_preview")
 
 
 @LuxRenderAddon.addon_register_class

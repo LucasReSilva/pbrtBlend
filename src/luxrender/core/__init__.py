@@ -999,7 +999,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         settings = scene.luxcore_enginesettings
         halt_samples = settings.halt_samples_preview if realtime_preview else settings.halt_samples
         halt_time = settings.halt_time_preview if realtime_preview else settings.halt_time
-        halt_noise = settings.halt_noise_preview if realtime_preview else settings.halt_noise
+        halt_noise = settings.halt_noise
 
         # Progress
         progress_time = 0.0
@@ -1012,7 +1012,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         time_running = stats.Get('stats.renderengine.time').GetFloat()
         # Add time stats for realtime preview because Blender doesn't display it there
         # For final renderings, only display time if it is set as halt condition
-        if settings.use_halt_time or realtime_preview:
+        if (not realtime_preview and settings.use_halt_time) or (realtime_preview and settings.use_halt_time_preview):
             stats_list.append('Time: %.1fs/%ds' % (time_running, halt_time))
             if not realtime_preview:
                 progress_time = time_running / halt_time
@@ -1021,7 +1021,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if rendering_controls.stats_samples:
             samples_count = stats.Get('stats.renderengine.pass').GetInt()
             samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
-            if settings.use_halt_samples or realtime_preview:
+            if (not realtime_preview and settings.use_halt_samples) or (realtime_preview and settings.use_halt_samples_preview):
                 stats_list.append('%s: %d/%d' % (samples_term, samples_count, halt_samples))
                 if not realtime_preview:
                     progress_samples = samples_count / halt_samples
@@ -1057,7 +1057,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # in the UI (e.g. target noise level = 0.04)
             convergence = 1.0 - convergence
 
-            if settings.use_halt_noise or realtime_preview:
+            if settings.use_halt_noise:
                 stats_list.append('Noise Level: %f/%f' % (convergence, halt_noise))
             else:
                 stats_list.append('Noise Level: %f' % convergence)
@@ -1131,18 +1131,21 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         """
         settings = scene.luxcore_enginesettings
 
+        use_halt_samples = settings.use_halt_samples_preview if realtime_preview else settings.use_halt_samples
+        use_halt_time = settings.use_halt_time_preview if realtime_preview else settings.use_halt_time
+
         halt_samples = settings.halt_samples_preview if realtime_preview else settings.halt_samples
         halt_time = settings.halt_time_preview if realtime_preview else settings.halt_time
-        halt_noise = settings.halt_noise_preview if realtime_preview else settings.halt_noise
+        halt_noise = settings.halt_noise
         
         rendered_samples = stats.Get('stats.renderengine.pass').GetInt()
         rendered_time = stats.Get('stats.renderengine.time').GetFloat()
         rendered_noise = stats.Get('stats.renderengine.convergence').GetFloat()
 
-        halt_samples_met = (settings.use_halt_samples or realtime_preview) and rendered_samples >= halt_samples
-        halt_time_met = (settings.use_halt_time or realtime_preview) and rendered_time >= halt_time
+        halt_samples_met = use_halt_samples and rendered_samples >= halt_samples
+        halt_time_met = use_halt_time and rendered_time >= halt_time
 
-        if settings.use_halt_noise or realtime_preview:
+        if settings.use_halt_noise:
             halt_noise_met = rendered_noise > (1.0 - halt_noise)
         else:
             halt_noise_met = rendered_noise == 1.0
