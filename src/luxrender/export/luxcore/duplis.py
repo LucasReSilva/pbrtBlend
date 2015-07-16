@@ -113,7 +113,8 @@ class DupliExporter(object):
             if not group_visible:
                 continue
 
-            self.luxcore_exporter.instanced_duplis.add(dupli_object)
+            if dupli_object not in self.luxcore_exporter.instanced_duplis:
+                self.luxcore_exporter.instanced_duplis.add(dupli_object)
 
             # Convert dupli object
             dupli_name_suffix = '_%s_%d' % (self.duplicator.name, self.dupli_number)
@@ -138,7 +139,7 @@ class DupliExporter(object):
         """
         obj = self.duplicator
 
-        print('[%s:] Exporting particle systems' % (obj.name))
+        print('[%s] Exporting particle systems' % (obj.name))
         time_start = time.time()
 
         mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
@@ -159,7 +160,8 @@ class DupliExporter(object):
             if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
                 continue
 
-            self.luxcore_exporter.instanced_duplis.add(dupli_ob.object)
+            if dupli_ob.object not in self.luxcore_exporter.instanced_duplis:
+                self.luxcore_exporter.instanced_duplis.add(dupli_ob.object)
 
             duplis.append(
                 (
@@ -203,7 +205,7 @@ class DupliExporter(object):
         del duplis
 
         time_elapsed = time.time() - time_start
-        print('[%s:] Particle export finished (%.3fs)' % (obj.name, time_elapsed))
+        print('[%s] Particle export finished (%.3fs)' % (obj.name, time_elapsed))
 
 
     def __convert_hair(self, luxcore_scene, particle_system):
