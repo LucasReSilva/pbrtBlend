@@ -168,7 +168,7 @@ class ObjectExporter(object):
             print('Converting object %s %s' % (obj.name, 'as instance' if use_instancing else ''))
 
         # Check if mesh is in cache
-        if MeshExporter.get_mesh_key(obj, self.is_viewport_render) in self.luxcore_exporter.mesh_cache:
+        if MeshExporter.get_mesh_key(obj, self.is_viewport_render, use_instancing) in self.luxcore_exporter.mesh_cache:
             # Check if object is in cache
             if get_elem_key(obj) in self.luxcore_exporter.object_cache and update_mesh and not self.is_dupli:
                 self.luxcore_exporter.convert_mesh(obj, luxcore_scene, use_instancing, transform)
@@ -181,7 +181,8 @@ class ObjectExporter(object):
 
 
     def __update_props(self, anim_matrices, obj, transform, update_material):
-        mesh_exporter = self.luxcore_exporter.mesh_cache[MeshExporter.get_mesh_key(obj, self.is_viewport_render)]
+        mesh_exporter = self.luxcore_exporter.mesh_cache[MeshExporter.get_mesh_key(obj, self.is_viewport_render,
+                                                                                   self.__use_instancing(anim_matrices))]
         self.__create_luxcore_objects(mesh_exporter.exported_shapes, transform, update_material, anim_matrices)
 
 

@@ -198,7 +198,7 @@ class LuxCoreExporter(object):
     def convert_mesh(self, blender_object, luxcore_scene, use_instancing, transformation):
         exporter = MeshExporter(self.blender_scene, self.is_viewport_render, blender_object, use_instancing,
                                 transformation)
-        key = MeshExporter.get_mesh_key(blender_object, self.is_viewport_render)
+        key = MeshExporter.get_mesh_key(blender_object, self.is_viewport_render, use_instancing)
         self.__convert_element(key, self.mesh_cache, exporter, luxcore_scene)
 
 

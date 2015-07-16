@@ -54,10 +54,10 @@ class MeshExporter(object):
 
 
     @staticmethod
-    def get_mesh_key(blender_object, is_viewport_render):
+    def get_mesh_key(blender_object, is_viewport_render, use_instancing):
         # We have to account for different modifiers being used on shared geometry
         # If the object has any active deforming modifiers we have to give the mesh a unique key
-        key = tuple([blender_object.data])
+        key = tuple([blender_object.data, use_instancing])
 
         if MeshExporter.has_active_modifiers(blender_object, is_viewport_render):
             key += tuple([blender_object])
@@ -154,12 +154,14 @@ class MeshExporter(object):
 
 
     def __generate_shape_name(self, matIndex=-1):
-        mesh_key = MeshExporter.get_mesh_key(self.blender_object, self.is_viewport_render)
+        mesh_key = MeshExporter.get_mesh_key(self.blender_object, self.is_viewport_render, self.use_instancing)
         shape_name = self.blender_scene.name
 
         for elem in mesh_key:
             if hasattr(elem, 'name'):
                 shape_name += '_' + elem.name
+            else:
+                shape_name += str(elem)
 
         if matIndex != -1:
             shape_name += '_%d' % matIndex

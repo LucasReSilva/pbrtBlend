@@ -50,14 +50,20 @@ class DupliExporter(object):
         export_settings = self.blender_scene.luxcore_translatorsettings
 
         try:
-            if len(self.duplicator.particle_systems) > 0:
-                for particle_system in self.duplicator.particle_systems:
-                    if particle_system.settings.render_type in ['OBJECT', 'GROUP'] and export_settings.export_particles:
-                        self.__convert_particles(luxcore_scene)
-                    elif particle_system.settings.render_type == 'PATH' and export_settings.export_hair:
-                        self.__convert_hair(luxcore_scene, particle_system)
-            else:
-                self.__convert_duplis(luxcore_scene)
+            is_duplicator_without_psys = len(self.duplicator.particle_systems) == 0 and self.duplicator.is_duplicator
+            has_particle_systems = False
+
+            # The hair convert function converts one hair system at a time
+            for particle_system in self.duplicator.particle_systems:
+                if particle_system.settings.render_type in ['OBJECT', 'GROUP']:
+                    has_particle_systems = True
+                elif particle_system.settings.render_type == 'PATH' and export_settings.export_hair:
+                    self.__convert_hair(luxcore_scene, particle_system)
+
+            # The particle convert function converts all particle systems and duplis at once
+            if (has_particle_systems or is_duplicator_without_psys) and export_settings.export_particles:
+                self.__convert_particles(luxcore_scene)
+
         except Exception:
             print('Could not convert particle systems of object %s' % self.duplicator.name)
             self.luxcore_exporter.errors = True
@@ -84,54 +90,6 @@ class DupliExporter(object):
         self.luxcore_exporter.renderengine.update_stats('Exporting...', message)
 
 
-    def __convert_duplis(self, luxcore_scene):
-        """
-        Converts duplis and OBJECT and GROUP particle systems
-        """
-        print('[%s] Exporting duplis' % self.duplicator.name)
-        time_start = time.time()
-
-        mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
-        self.duplicator.dupli_list_create(self.blender_scene, settings=mode)
-        self.dupli_amount = len(self.duplicator.dupli_list)
-
-        for dupli_ob in self.duplicator.dupli_list:
-            # Make it possible to interrupt the export process
-            if self.luxcore_exporter.renderengine.test_break():
-                return
-
-            self.__report_progress()
-
-            dupli_object = dupli_ob.object
-
-            # Check for group layer visibility, if the object is in a group
-            group_visible = len(dupli_object.users_group) == 0
-
-            for group in dupli_object.users_group:
-                group_visible |= True in [a & b for a, b in zip(dupli_object.layers, group.layers)]
-
-            if not group_visible:
-                continue
-
-            if dupli_object not in self.luxcore_exporter.instanced_duplis:
-                self.luxcore_exporter.instanced_duplis.add(dupli_object)
-
-            # Convert dupli object
-            dupli_name_suffix = '_%s_%d' % (self.duplicator.name, self.dupli_number)
-            self.dupli_number += 1
-
-            object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
-                                             dupli_object, dupli_name_suffix)
-            properties = object_exporter.convert(update_mesh=False, update_material=False, luxcore_scene=luxcore_scene,
-                                                 matrix=dupli_ob.matrix.copy())
-            self.properties.Set(properties)
-
-        self.duplicator.dupli_list_clear()
-
-        time_elapsed = time.time() - time_start
-        print('[%s] Dupli export finished (%.3fs)' % (self.duplicator.name, time_elapsed))
-
-
     def __convert_particles(self, luxcore_scene):
         """
         Ported from export/geometry.py (classic export)
@@ -139,7 +97,7 @@ class DupliExporter(object):
         """
         obj = self.duplicator
 
-        print('[%s] Exporting particle systems' % (obj.name))
+        print('[%s] Exporting particle systems/duplis' % (obj.name))
         time_start = time.time()
 
         mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
@@ -167,7 +125,7 @@ class DupliExporter(object):
                 (
                     dupli_ob.object,
                     dupli_ob.matrix.copy(),
-                    dupli_ob.particle_system.name,
+                    dupli_ob.particle_system.name if dupli_ob.particle_system else obj.name,
                     dupli_ob.persistent_id[:]
                 )
             )
