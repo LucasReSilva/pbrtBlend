@@ -54,22 +54,63 @@ class ObjectExporter(object):
         self.is_viewport_render = is_viewport_render
         self.blender_object = blender_object
         self.dupli_name_suffix = dupli_name_suffix
+        self.is_dupli = len(dupli_name_suffix) > 0
 
         self.properties = pyluxcore.Properties()
         self.exported_objects = []
 
 
-    def convert(self, update_mesh, update_material, luxcore_scene, anim_matrices=None, matrix=None, is_dupli=False):
+    def convert(self, update_mesh, update_material, luxcore_scene, anim_matrices=None, matrix=None):
         self.properties = pyluxcore.Properties()
 
-        self.__convert_object(luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli)
+        self.__convert_object(luxcore_scene, update_mesh, update_material, anim_matrices, matrix)
 
         return self.properties
 
 
-    def __convert_object(self, luxcore_scene, update_mesh, update_material, anim_matrices, matrix, is_dupli):
+    def __use_instancing(self, anim_matrices):
+        """
+        Adapted from ../geometry.py line 611
+        Find out if the object should be instanced (use .transformation property on the object instead of the shape)
+        """
         obj = self.blender_object
-        is_visible = is_obj_visible(self.blender_scene, obj, is_dupli=is_dupli)
+
+        # Use instancing on every object when in viewport render, to be able to transform them without re-exporting
+        # the mesh
+        if self.is_viewport_render:
+            return True
+
+        if self.is_dupli:
+            return True
+
+        # If the object is animated, for motion blur we need instances
+        #if anim_matrices and len(anim_matrices) > 1:
+        #    return True
+
+        # If the mesh is only used once, instancing is a waste of memory
+        # However, duplis don't increase the users count, so we count those separately
+        if (not ((obj.parent and obj.parent.is_duplicator) or
+                         obj in self.luxcore_exporter.instanced_duplis)) and \
+                         obj.data.users == 1:
+            return False
+
+        # Only allow instancing for normal objects if the object has certain modifiers applied against
+        # the same shared base mesh.
+        if hasattr(obj, 'modifiers') and len(obj.modifiers) > 0 and obj.data.users > 1:
+            instance = False
+
+            for mod in obj.modifiers:
+                # Allow non-deforming modifiers
+                instance |= mod.type in ('COLLISION', 'PARTICLE_INSTANCE', 'PARTICLE_SYSTEM', 'SMOKE')
+
+            return instance
+        else:
+            return True
+
+
+    def __convert_object(self, luxcore_scene, update_mesh, update_material, anim_matrices, matrix):
+        obj = self.blender_object
+        is_visible = is_obj_visible(self.blender_scene, obj, self.is_dupli)
 
         if obj is None or obj.type == 'CAMERA' or not is_visible:
             return
@@ -85,7 +126,7 @@ class ObjectExporter(object):
             transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
 
         # Motion Blur (duplis get their anim_matrices passed as argument)
-        if not is_dupli:
+        if not self.is_dupli:
             anim_matrices = self.__calc_motion_blur()
 
         # Check if object should be converted
@@ -110,7 +151,7 @@ class ObjectExporter(object):
 
         # Check if object is used as camera clipping plane (don't do this for duplis because they can never be
         # selected as clipping plane)
-        if not is_dupli and self.blender_scene.camera is not None:
+        if not self.is_dupli and self.blender_scene.camera is not None:
             if obj.name == self.blender_scene.camera.data.luxrender_camera.clipping_plane_obj:
                 convert_object = False
 
@@ -121,20 +162,21 @@ class ObjectExporter(object):
         # Real object export starts here #
         ##################################
 
-        if not is_dupli:
-            print('Converting object %s' % obj.name)
+        use_instancing = self.__use_instancing(anim_matrices)
+
+        if not self.is_dupli:
+            print('Converting object %s %s' % (obj.name, 'as instance' if use_instancing else ''))
 
         # Check if mesh is in cache
         if MeshExporter.get_mesh_key(obj, self.is_viewport_render) in self.luxcore_exporter.mesh_cache:
             # Check if object is in cache
-            if get_elem_key(obj) in self.luxcore_exporter.object_cache and update_mesh and not is_dupli:
-                self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
+            if get_elem_key(obj) in self.luxcore_exporter.object_cache and update_mesh and not self.is_dupli:
+                self.luxcore_exporter.convert_mesh(obj, luxcore_scene, use_instancing, transform)
 
             self.__update_props(anim_matrices, obj, transform, update_material)
         else:
             # Mesh not in cache
-            #print('[%s] mesh and object not in cache' % obj.name)
-            self.luxcore_exporter.convert_mesh(obj, luxcore_scene)
+            self.luxcore_exporter.convert_mesh(obj, luxcore_scene, use_instancing, transform)
             self.__update_props(anim_matrices, obj, transform, update_material)
 
 
@@ -163,6 +205,7 @@ class ObjectExporter(object):
         name_shape = 'Mesh-' + name
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.type', 'mesh'))
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.ply', path))
+        self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.transformation', transform))
         self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
 
 
@@ -181,7 +224,9 @@ class ObjectExporter(object):
                 material = self.blender_object.material_slots[shape.material_index].material
             except IndexError:
                 material = None
-                print('WARNING: material slot %d on object "%s" is unassigned' % (shape.material_index + 1, self.blender_object.name))
+                if not self.is_dupli:
+                    print('WARNING: material slot %d on object "%s" is unassigned' % (shape.material_index + 1,
+                                                                                      self.blender_object.name))
 
             # Convert material
             if update_material or get_elem_key(material) not in self.luxcore_exporter.material_cache:
@@ -221,7 +266,7 @@ class ObjectExporter(object):
         self.properties.Set(pyluxcore.Property(prefix + '.material', luxcore_material_name))
         self.properties.Set(pyluxcore.Property(prefix + '.shape', luxcore_shape_name))
 
-        if transform is not None:
+        if transform is not None and self.__use_instancing(anim_matrices):
             self.properties.Set(pyluxcore.Property(prefix + '.transformation', transform))
 
         # Motion blur (needs at least 2 matrices in anim_matrices)

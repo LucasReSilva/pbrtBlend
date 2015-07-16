@@ -1675,7 +1675,9 @@ class luxrender_mat_glass2(declarative_property_group):
         'dispersion'
     ]
 
-    visibility = {}
+    visibility = {
+        'dispersion': lambda: not UseLuxCore(),
+    }
 
     properties = [
         {
@@ -1747,6 +1749,7 @@ class luxrender_mat_roughglass(declarative_property_group):
         TF_uexponent.visibility,
         TF_vroughness.visibility,
         TF_vexponent.visibility,
+        {'dispersion': lambda: not UseLuxCore()}
     )
 
     enabled = {}

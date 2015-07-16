@@ -41,10 +41,13 @@ class ExportedShape(object):
 
 
 class MeshExporter(object):
-    def __init__(self, blender_scene, is_viewport_render=False, blender_object=None):
+    def __init__(self, blender_scene, is_viewport_render=False, blender_object=None, use_instancing=False,
+                 transformation=None):
         self.blender_scene = blender_scene
         self.is_viewport_render = is_viewport_render
         self.blender_object = blender_object
+        self.use_instancing = use_instancing
+        self.transformation = transformation
 
         self.properties = pyluxcore.Properties()
         self.exported_shapes = []
@@ -140,8 +143,10 @@ class MeshExporter(object):
         else:
             vertexColors = 0
 
+        transformation = None if self.use_instancing else self.transformation
+
         mesh_definitions = luxcore_scene.DefineBlenderMesh(name, len(mesh.tessfaces), faces, len(mesh.vertices),
-                                                                 vertices, texCoords, vertexColors)
+                                                                 vertices, texCoords, vertexColors, transformation)
 
         self.exported_shapes = []
         for entry in mesh_definitions:

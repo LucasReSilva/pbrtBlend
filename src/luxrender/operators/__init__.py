@@ -1410,7 +1410,7 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
             else:
                 shutil.copyfile(src, dest)
 
-        print('-'* 20)
+        print('-' * 20)
         print('Updating LuxBlend...')
 
         with tempfile.TemporaryDirectory() as temp_dir_path:
@@ -1464,6 +1464,9 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
             luxblend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
             print('LuxBlend addon folder:', luxblend_dir)
 
+            # TODO: Create backup
+
+
             # Delete old LuxBlend files (only directories and *.py files, the user might have other stuff in there!)
             print('Deleting old LuxBlend files')
             # remove __init__.py
@@ -1481,6 +1484,6 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
             recursive_overwrite(extracted_luxblend_path, luxblend_dir)
 
         print('LuxBlend update finished, restart Blender for the changes to take effect.')
-        print('-'* 20)
+        print('-' * 20)
         self.report({'WARNING'}, 'Restart Blender!')
         return {'FINISHED'}

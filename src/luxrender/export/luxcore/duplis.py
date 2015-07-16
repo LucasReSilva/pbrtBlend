@@ -113,14 +113,16 @@ class DupliExporter(object):
             if not group_visible:
                 continue
 
+            self.luxcore_exporter.instanced_duplis.add(dupli_object)
+
             # Convert dupli object
             dupli_name_suffix = '_%s_%d' % (self.duplicator.name, self.dupli_number)
             self.dupli_number += 1
 
             object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
                                              dupli_object, dupli_name_suffix)
-            properties = object_exporter.convert(update_mesh=True, update_material=True, luxcore_scene=luxcore_scene,
-                                                 matrix=dupli_ob.matrix.copy(), is_dupli=True)
+            properties = object_exporter.convert(update_mesh=False, update_material=False, luxcore_scene=luxcore_scene,
+                                                 matrix=dupli_ob.matrix.copy())
             self.properties.Set(properties)
 
         self.duplicator.dupli_list_clear()
@@ -156,6 +158,8 @@ class DupliExporter(object):
             # metaballs are omitted from this function intentionally.
             if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
                 continue
+
+            self.luxcore_exporter.instanced_duplis.add(dupli_ob.object)
 
             duplis.append(
                 (
@@ -193,7 +197,7 @@ class DupliExporter(object):
             object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
                                              do, dupli_name_suffix)
             properties = object_exporter.convert(update_mesh=False, update_material=False, luxcore_scene=luxcore_scene,
-                                                 matrix=dm, is_dupli=True, anim_matrices=None)
+                                                 anim_matrices=None, matrix=dm)
             self.properties.Set(properties)
 
         del duplis
@@ -408,6 +412,7 @@ class DupliExporter(object):
         material_exporter = self.luxcore_exporter.material_cache[material]
         luxcore_material_name = material_exporter.luxcore_name
 
+        # Todo: don't use instancing for hair?
         transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
 
         prefix = 'scene.objects.' + luxcore_shape_name

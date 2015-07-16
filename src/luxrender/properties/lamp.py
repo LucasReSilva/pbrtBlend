@@ -214,7 +214,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
             'name': 'Use Sphere',
             'update': sphere_lamp_prop,
             'description': 'Use a spherical area light instead of a true point light. This is more realistic, but \
-            can deform IES profiles',
+can deform IES profiles',
             'default': False,
 
         },
@@ -246,7 +246,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
             'attr': 'null_lamp',
             'name': 'Hide geometry',
             'description': 'Use a null material for lamp geometry (lamp will still be visible when viewed directly, \
-            as it emits its own light',
+as it emits its own light',
             'default': True,
         },
     ]
@@ -569,7 +569,7 @@ class luxrender_lamp_area(declarative_property_group):
             'attr': 'null_lamp',
             'name': 'Hide geometry',
             'description': 'Use a null material for lamp geometry (lamp will still be visible when viewed on \
-            emitting side, as it emits its own light',
+emitting side, as it emits its own light',
             'default': True,
         },
     ]
@@ -649,7 +649,7 @@ class luxrender_lamp_hemi(declarative_property_group):
             'attr': 'hdri_infinitesample',
             'name': 'Intensity Sampling',
             'description': 'Use intensity based sampling for hemi texture, recommended for high contrast HDR \
-            images. Will disable use of portals for this light!',
+images. Will disable use of portals for this light!',
             'default': False
         },
         {

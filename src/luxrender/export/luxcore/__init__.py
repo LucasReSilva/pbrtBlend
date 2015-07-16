@@ -62,6 +62,9 @@ class LuxCoreExporter(object):
         # All property changes since last pop_updated_scene_properties()
         self.updated_scene_properties = pyluxcore.Properties()
 
+        # List of objects that are distributed via particle systems or dupliverts/frames/...
+        self.instanced_duplis = set()
+
         # Permanent caches, structure: {element: ElementExporter}
         self.dupli_cache = {}
         self.light_cache = {}
@@ -192,8 +195,9 @@ class LuxCoreExporter(object):
         cache[obj_key] = exporter
 
 
-    def convert_mesh(self, blender_object, luxcore_scene):
-        exporter = MeshExporter(self.blender_scene, self.is_viewport_render, blender_object)
+    def convert_mesh(self, blender_object, luxcore_scene, use_instancing, transformation):
+        exporter = MeshExporter(self.blender_scene, self.is_viewport_render, blender_object, use_instancing,
+                                transformation)
         key = MeshExporter.get_mesh_key(blender_object, self.is_viewport_render)
         self.__convert_element(key, self.mesh_cache, exporter, luxcore_scene)
 

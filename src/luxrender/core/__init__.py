@@ -1764,6 +1764,11 @@ first frame will never stop!')
 
             filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
             is_thumbnail = filmWidth <= 96
+
+            # don't render thumbnails
+            if is_thumbnail:
+                return
+
             preview_type, preview_material, preview_texture, preview_object = self.determine_preview_settings(scene)
 
             if preview_type is None:
