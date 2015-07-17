@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-from os.path import exists
+import os
 
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
@@ -80,7 +80,8 @@ class ObjectExporter(object):
         if self.is_viewport_render:
             return True
 
-        if self.is_dupli:
+        # Duplis and proxies are always instanced
+        if self.is_dupli or (obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh'):
             return True
 
         # If the object is animated, for motion blur we need instances
@@ -198,7 +199,7 @@ class ObjectExporter(object):
         path = efutil.filesystem_path(raw_path)
         name = ToValidLuxCoreName(self.blender_object.name)
 
-        if not exists(path) or len(raw_path) == 0:
+        if not os.path.exists(path) or len(raw_path) == 0:
             print('ERROR: Invalid path set for proxy "%s"!' % self.blender_object.name)
             self.luxcore_exporter.errors = True
             return
@@ -210,7 +211,7 @@ class ObjectExporter(object):
         luxcore_material_name = material_exporter.luxcore_name
 
         # Create shape definition (always instanciate proxies)
-        name_shape = 'Mesh-' + name
+        name_shape = ToValidLuxCoreName(os.path.basename(path) + '_luxblendproxy')
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.type', 'mesh'))
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.ply', path))
         self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
