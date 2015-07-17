@@ -138,12 +138,19 @@ class ObjectExporter(object):
             self.__convert_proxy(update_material, anim_matrices, convert_object, transform)
 
         # Check if object is duplicator (particle/hair emitter or using dupliverts/frames/...)
-        if len(obj.particle_systems) > 0 or obj.is_duplicator:
-            self.luxcore_exporter.convert_duplis(luxcore_scene, obj)
+        if (len(obj.particle_systems) > 0 or obj.is_duplicator) and not self.is_dupli:
+            if get_elem_key(obj) not in self.luxcore_exporter.dupli_cache:
+                if obj.parent and obj.parent.is_duplicator:
+                    # Go all the way up to the highest duplicator
+                    if get_elem_key(obj.parent) not in self.luxcore_exporter.dupli_cache:
+                        self.luxcore_exporter.convert_object(obj.parent, luxcore_scene, update_mesh, update_material)
+                        return
+                else:
+                    self.luxcore_exporter.convert_duplis(luxcore_scene, obj)
 
-            convert_object = False
-            for psys in obj.particle_systems:
-                convert_object |= psys.settings.use_render_emitter
+                convert_object = False
+                for psys in obj.particle_systems:
+                    convert_object |= psys.settings.use_render_emitter
 
         # Some dupli types should hide the original
         if obj.is_duplicator and obj.dupli_type in ('VERTS', 'FACES', 'GROUP'):

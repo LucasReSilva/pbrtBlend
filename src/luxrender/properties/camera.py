@@ -1027,7 +1027,7 @@ class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.camera and \
+        return hasattr(context, 'camera') and context.camera and \
                context.camera.luxrender_camera.luxrender_film.luxrender_colorspace
 
     def execute(self, context):

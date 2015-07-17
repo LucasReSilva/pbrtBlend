@@ -94,7 +94,7 @@ class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.camera.luxrender_camera and \
+        return hasattr(context, 'camera') and context.camera.luxrender_camera and \
                context.camera.luxrender_camera.luxcore_imagepipeline_settings
 
     def execute(self, context):
