@@ -209,11 +209,10 @@ class ObjectExporter(object):
         material_exporter = self.luxcore_exporter.material_cache[get_elem_key(self.blender_object.active_material)]
         luxcore_material_name = material_exporter.luxcore_name
 
-        # Create shape definition
+        # Create shape definition (always instanciate proxies)
         name_shape = 'Mesh-' + name
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.type', 'mesh'))
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.ply', path))
-        self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.transformation', transform))
         self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
 
 
