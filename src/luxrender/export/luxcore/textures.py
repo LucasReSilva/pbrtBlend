@@ -412,8 +412,14 @@ class TextureExporter(object):
 
                         value = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex%s' % str(i + 1), luxTex.variant)
 
-                        if type(value) is not list:
-                            value = [value] * 3
+                        if isinstance(value, str):
+                            # LuxCore currently does not support textured values, set color to black
+                            print('WARNING: LuxCore does not support textured values in the band texture, '
+                                  'using black color instead (texture: "%s")' % texture.name)
+                            value = [0] * 3
+
+                        if len(value) == 1:
+                            value = [value[0]] * 3
 
                         self.properties.Set(pyluxcore.Property(prefix + '.value%d' % i, value))
                         i += 1

@@ -53,7 +53,7 @@ def convert_texture_channel(luxcore_exporter, properties, element_name, textured
     if type == 'color':
         value = list(getattr(textured_element, '%s_color' % channel))
     else:
-        value = getattr(textured_element, '%s_%svalue' % (channel, type))
+        value = [getattr(textured_element, '%s_%svalue' % (channel, type))]
 
     if getattr(textured_element, '%s_use%stexture' % (channel, type)):
         # The material attribute is textured, export the texture
