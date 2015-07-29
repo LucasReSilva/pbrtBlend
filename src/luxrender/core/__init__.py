@@ -1162,31 +1162,31 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         return halt_samples_met or halt_time_met or halt_noise_met
 
-    def convertChannelToImage(self, lcSession, scene, filmWidth, filmHeight, channelType, saveToDisk,
+    def convertChannelToImage(self, lcSession, scene, passes, filmWidth, filmHeight, channelType, saveToDisk,
                               normalize = False, buffer_id = -1):
         """
         Convert AOVs to Blender images
         """
         from ..outputs.luxcore_api import pyluxcore
 
-        # Structure: {channelType: [pyluxcoreType, is HDR, arrayDepth]}
+        # Structure: {channelType: [pyluxcoreType, is HDR, arrayDepth, optional matching Blender pass]}
         attributes = {
                 'RGB': [pyluxcore.FilmOutputType.RGB, True, 3],
                 'RGBA': [pyluxcore.FilmOutputType.RGBA, True, 4],
                 'RGB_TONEMAPPED': [pyluxcore.FilmOutputType.RGB_TONEMAPPED, False, 3],
                 'RGBA_TONEMAPPED': [pyluxcore.FilmOutputType.RGBA_TONEMAPPED, False, 4],
                 'ALPHA': [pyluxcore.FilmOutputType.ALPHA, False, 1],
-                'DEPTH': [pyluxcore.FilmOutputType.DEPTH, True, 1],
+                'DEPTH': [pyluxcore.FilmOutputType.DEPTH, True, 1, 'Z'],
                 'POSITION': [pyluxcore.FilmOutputType.POSITION, True, 3],
                 'GEOMETRY_NORMAL': [pyluxcore.FilmOutputType.GEOMETRY_NORMAL, True, 3],
-                'SHADING_NORMAL': [pyluxcore.FilmOutputType.SHADING_NORMAL, True, 3],
+                'SHADING_NORMAL': [pyluxcore.FilmOutputType.SHADING_NORMAL, True, 3, 'NORMAL'],
                 'MATERIAL_ID': [pyluxcore.FilmOutputType.MATERIAL_ID, False, 1],
-                'DIRECT_DIFFUSE': [pyluxcore.FilmOutputType.DIRECT_DIFFUSE, True, 3],
-                'DIRECT_GLOSSY': [pyluxcore.FilmOutputType.DIRECT_GLOSSY, True, 3],
-                'EMISSION': [pyluxcore.FilmOutputType.EMISSION, True, 3],
-                'INDIRECT_DIFFUSE': [pyluxcore.FilmOutputType.INDIRECT_DIFFUSE, True, 3],
-                'INDIRECT_GLOSSY': [pyluxcore.FilmOutputType.INDIRECT_GLOSSY, True, 3],
-                'INDIRECT_SPECULAR': [pyluxcore.FilmOutputType.INDIRECT_SPECULAR, True, 3],
+                'DIRECT_DIFFUSE': [pyluxcore.FilmOutputType.DIRECT_DIFFUSE, True, 3, 'DIFFUSE_DIRECT'],
+                'DIRECT_GLOSSY': [pyluxcore.FilmOutputType.DIRECT_GLOSSY, True, 3, 'GLOSSY_DIRECT'],
+                'EMISSION': [pyluxcore.FilmOutputType.EMISSION, True, 3, 'EMIT'],
+                'INDIRECT_DIFFUSE': [pyluxcore.FilmOutputType.INDIRECT_DIFFUSE, True, 3, 'DIFFUSE_INDIRECT'],
+                'INDIRECT_GLOSSY': [pyluxcore.FilmOutputType.INDIRECT_GLOSSY, True, 3, 'GLOSSY_INDIRECT'],
+                'INDIRECT_SPECULAR': [pyluxcore.FilmOutputType.INDIRECT_SPECULAR, True, 3, 'TRANSMISSION_INDIRECT'],
                 'DIRECT_SHADOW_MASK': [pyluxcore.FilmOutputType.DIRECT_SHADOW_MASK, False, 1],
                 'INDIRECT_SHADOW_MASK': [pyluxcore.FilmOutputType.INDIRECT_SHADOW_MASK, False, 1],
                 'UV': [pyluxcore.FilmOutputType.UV, True, 2],
@@ -1196,11 +1196,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 'BY_MATERIAL_ID': [pyluxcore.FilmOutputType.BY_MATERIAL_ID, True, 3],
                 'RADIANCE_GROUP': [pyluxcore.FilmOutputType.RADIANCE_GROUP, True, 3]
         }
+
         outputType = attributes[channelType][0]
         use_hdr = attributes[channelType][1]
         arrayType = 'I' if channelType == 'MATERIAL_ID' else 'f'
         arrayInitValue = 0 if channelType == 'MATERIAL_ID' else 0.0
         arrayDepth = attributes[channelType][2]
+        pass_type = attributes[channelType][3] if len(attributes[channelType]) == 4 else None
 
         # show info about imported passes
         message = 'Pass: ' + channelType
@@ -1211,6 +1213,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # raw channel buffer
         channel_buffer = array.array(arrayType, [arrayInitValue] * (filmWidth * filmHeight * arrayDepth))
+
         # buffer for converted array (to RGBA)
         channel_buffer_converted = []
 
@@ -1242,89 +1245,98 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             else:
                 lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer)
 
-            # spread value to RGBA format
+            # Import into Blender passes
+            if pass_type is not None and scene.luxrender_channels.import_compatible:
+                nested_list = [channel_buffer[i:i+arrayDepth] for i in range(0, len(channel_buffer), arrayDepth)]
 
-            if arrayDepth == 1:
-                channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_1xFloat_To_4xFloatList(filmWidth,
-                                                                                                     filmHeight,
-                                                                                                     channel_buffer,
-                                                                                                     normalize)
-
-            # UV channel, just add 0.0 for B and 1.0 for A components
-            elif arrayDepth == 2:
-                channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_2xFloat_To_4xFloatList(filmWidth,
-                                                                                                     filmHeight,
-                                                                                                     channel_buffer,
-                                                                                                     normalize)
-
-            # RGB channels: just add 1.0 as alpha component
-            elif arrayDepth == 3:
-                channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_4xFloatList(filmWidth,
-                                                                                                     filmHeight,
-                                                                                                     channel_buffer,
-                                                                                                     normalize)
-
-            # RGBA channels: just use the original list
+                for renderpass in passes:
+                    if renderpass.type == pass_type:
+                        renderpass.rect = nested_list
+                        break
             else:
-                channel_buffer_converted = channel_buffer
+                # Pass is not compatible with Blender passes, import as Blender image
+                # spread value to RGBA format
+                if arrayDepth == 1:
+                    channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_1xFloat_To_4xFloatList(filmWidth,
+                                                                                                         filmHeight,
+                                                                                                         channel_buffer,
+                                                                                                         normalize)
+                # UV channel, just add 0.0 for B and 1.0 for A components
+                elif arrayDepth == 2:
+                    channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_2xFloat_To_4xFloatList(filmWidth,
+                                                                                                         filmHeight,
+                                                                                                         channel_buffer,
+                                                                                                         normalize)
+                # RGB channels: just add 1.0 as alpha component
+                elif arrayDepth == 3:
+                    channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_4xFloatList(filmWidth,
+                                                                                                         filmHeight,
+                                                                                                         channel_buffer,
+                                                                                                         normalize)
+                # RGBA channels: just use the original list
+                else:
+                    channel_buffer_converted = channel_buffer
 
-        imageName = 'pass_' + str(channelType)
-        if buffer_id != -1:
-            imageName += '_' + str(buffer_id)
-            
-        if normalize:
-            imageName += '_normalized'
+        if pass_type is None or not scene.luxrender_channels.import_compatible:
+            # Pass is incompatible with Blender passes or import of compatible passes was disabled
 
-        # remove pass image from Blender if it already exists (to prevent duplicates)
-        for bl_image in bpy.data.images:
-            if bl_image.name == imageName:
-                bl_image.user_clear()
-                if not bl_image.users:
-                    bpy.data.images.remove(bl_image)
+            imageName = 'pass_' + str(channelType)
+            if buffer_id != -1:
+                imageName += '_' + str(buffer_id)
 
-        if scene.render.use_border and not scene.render.use_crop_to_border:
-            # border rendering without cropping: fit the rendered area into a blank image
-            imageWidth, imageHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
-            
-            # construct an empty Blender image
-            blenderImage = bpy.data.images.new(imageName, alpha = True, 
-                                                width = imageWidth, height = imageHeight, float_buffer = use_hdr)
-            
-            # copy the buffer content to the right position in the Blender image
-            offsetFromLeft = int(imageWidth * scene.render.border_min_x) * 4
-            offsetFromTop = int(imageHeight * scene.render.border_min_y)
-            
-            # we use an intermediate temp image because blenderImage.pixels doesn't support list slicing
-            tempImage = [0.0] * (imageWidth * imageHeight * 4)
-            
-            for y in range(offsetFromTop, offsetFromTop + filmHeight):
-                imageSliceStart = y * imageWidth * 4 + offsetFromLeft
-                imageSliceEnd = imageSliceStart + filmWidth * 4
-                bufferSliceStart = (y - offsetFromTop) * filmWidth * 4
-                bufferSliceEnd = bufferSliceStart + filmWidth * 4
-                
-                tempImage[imageSliceStart:imageSliceEnd] = channel_buffer_converted[bufferSliceStart:bufferSliceEnd]
-                
-            blenderImage.pixels = tempImage
-        else:
-            # no border rendering or border rendering with cropping: just copy the buffer to a Blender image
-            blenderImage = bpy.data.images.new(imageName, alpha = False, 
-                                                width = filmWidth, height = filmHeight, float_buffer = use_hdr)
-            blenderImage.pixels = channel_buffer_converted
+            if normalize:
+                imageName += '_normalized'
 
-        # write image to file
-        suffix = '.png'
-        image_format = 'PNG'
-        if use_hdr and not normalize:
-            suffix = '.exr'
-            image_format = 'OPEN_EXR'
+            # remove pass image from Blender if it already exists (to prevent duplicates)
+            for bl_image in bpy.data.images:
+                if bl_image.name == imageName:
+                    bl_image.user_clear()
+                    if not bl_image.users:
+                        bpy.data.images.remove(bl_image)
 
-        imageName = get_output_filename(scene) + '_' + imageName + suffix
-        blenderImage.filepath_raw = self.output_dir + imageName
-        blenderImage.file_format = image_format
-        
-        if saveToDisk:
-            blenderImage.save()
+            if scene.render.use_border and not scene.render.use_crop_to_border:
+                # border rendering without cropping: fit the rendered area into a blank image
+                imageWidth, imageHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+
+                # construct an empty Blender image
+                blenderImage = bpy.data.images.new(imageName, alpha = True,
+                                                    width = imageWidth, height = imageHeight, float_buffer = use_hdr)
+
+                # copy the buffer content to the right position in the Blender image
+                offsetFromLeft = int(imageWidth * scene.render.border_min_x) * 4
+                offsetFromTop = int(imageHeight * scene.render.border_min_y)
+
+                # we use an intermediate temp image because blenderImage.pixels doesn't support list slicing
+                tempImage = [0.0] * (imageWidth * imageHeight * 4)
+
+                for y in range(offsetFromTop, offsetFromTop + filmHeight):
+                    imageSliceStart = y * imageWidth * 4 + offsetFromLeft
+                    imageSliceEnd = imageSliceStart + filmWidth * 4
+                    bufferSliceStart = (y - offsetFromTop) * filmWidth * 4
+                    bufferSliceEnd = bufferSliceStart + filmWidth * 4
+
+                    tempImage[imageSliceStart:imageSliceEnd] = channel_buffer_converted[bufferSliceStart:bufferSliceEnd]
+
+                blenderImage.pixels = tempImage
+            else:
+                # no border rendering or border rendering with cropping: just copy the buffer to a Blender image
+                blenderImage = bpy.data.images.new(imageName, alpha = False,
+                                                    width = filmWidth, height = filmHeight, float_buffer = use_hdr)
+                blenderImage.pixels = channel_buffer_converted
+
+            # write image to file
+            suffix = '.png'
+            image_format = 'PNG'
+            if use_hdr and not normalize:
+                suffix = '.exr'
+                image_format = 'OPEN_EXR'
+
+            imageName = get_output_filename(scene) + '_' + imageName + suffix
+            blenderImage.filepath_raw = self.output_dir + imageName
+            blenderImage.file_format = image_format
+
+            if saveToDisk:
+                blenderImage.save()
 
     def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight):
         """
@@ -1514,10 +1526,11 @@ first frame will never stop!')
                         layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
                                                                                                filmHeight,
                                                                                                imageBufferFloat)
-
                     self.end_result(result)
-
                     lastImageDisplay = now
+
+            LuxLog('Ending the rendering process...')
+            luxcore_session.Stop()
 
             # Update the image
             luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
@@ -1526,13 +1539,13 @@ first frame will never stop!')
             layer = result.layers[0] if bpy.app.version < (2, 74, 4) else result.layers[0].passes[0]
             layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
                                                                                    imageBufferFloat)
-            self.end_result(result)
 
-            luxcore_session.Stop()
+            passes = result.layers[0].passes
 
             if scene.luxrender_channels.enable_aovs:
-                self.import_aov_channels(scene, luxcore_session, filmWidth, filmHeight)
+                self.import_aov_channels(scene, luxcore_session, filmWidth, filmHeight, passes)
 
+            self.end_result(result)
             LuxLog('Done.\n')
         except Exception as exc:
             LuxLog('Rendering aborted: %s' % exc)
@@ -1555,81 +1568,81 @@ first frame will never stop!')
 
         return filmWidth, filmHeight
 
-    def import_aov_channels(self, scene, lcSession, filmWidth, filmHeight):
+    def import_aov_channels(self, scene, lcSession, filmWidth, filmHeight, passes):
         channelCalcStartTime = time.time()
         LuxLog('Importing AOV channels into Blender...')
 
         channels = scene.luxrender_channels
 
         if channels.RGB:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGB', channels.saveToDisk)
         if channels.RGBA:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGBA', channels.saveToDisk)
         if channels.RGB_TONEMAPPED:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGB_TONEMAPPED', channels.saveToDisk)
         if channels.RGBA_TONEMAPPED:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGBA_TONEMAPPED', channels.saveToDisk)
         if channels.ALPHA:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'ALPHA', channels.saveToDisk)
         if channels.DEPTH:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'DEPTH', channels.saveToDisk,
                                        normalize = channels.normalize_DEPTH)
         if channels.POSITION:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'POSITION', channels.saveToDisk)
         if channels.GEOMETRY_NORMAL:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'GEOMETRY_NORMAL', channels.saveToDisk)
         if channels.SHADING_NORMAL:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'SHADING_NORMAL', channels.saveToDisk)
         if channels.MATERIAL_ID:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'MATERIAL_ID', channels.saveToDisk)
         if channels.DIRECT_DIFFUSE:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'DIRECT_DIFFUSE', channels.saveToDisk,
                                        normalize = channels.normalize_DIRECT_DIFFUSE)
         if channels.DIRECT_GLOSSY:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'DIRECT_GLOSSY', channels.saveToDisk,
                                        normalize = channels.normalize_DIRECT_GLOSSY)
         if channels.EMISSION:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'EMISSION', channels.saveToDisk)
         if channels.INDIRECT_DIFFUSE:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'INDIRECT_DIFFUSE', channels.saveToDisk,
                                        normalize = channels.normalize_INDIRECT_DIFFUSE)
         if channels.INDIRECT_GLOSSY:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'INDIRECT_GLOSSY', channels.saveToDisk,
                                        normalize = channels.normalize_INDIRECT_GLOSSY)
         if channels.INDIRECT_SPECULAR:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'INDIRECT_SPECULAR', channels.saveToDisk,
                                        normalize = channels.normalize_INDIRECT_SPECULAR)
         if channels.DIRECT_SHADOW_MASK:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'DIRECT_SHADOW_MASK', channels.saveToDisk)
         if channels.INDIRECT_SHADOW_MASK:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'INDIRECT_SHADOW_MASK', channels.saveToDisk)
         if channels.UV:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'UV', channels.saveToDisk)
         if channels.RAYCOUNT:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RAYCOUNT', channels.saveToDisk,
                                        normalize = channels.normalize_RAYCOUNT)
         if channels.IRRADIANCE:
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'IRRADIANCE', channels.saveToDisk)
 
         props = lcSession.GetRenderConfig().GetProperties()
@@ -1640,7 +1653,7 @@ first frame will never stop!')
                 mask_ids.add(props.Get(i + '.id').GetInt())
 
         for i in range(len(mask_ids)):
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'MATERIAL_ID_MASK', channels.saveToDisk, buffer_id = i)
 
         # Convert all BY_MATERIAL_ID channels
@@ -1650,7 +1663,7 @@ first frame will never stop!')
                 ids.add(props.Get(i + '.id').GetInt())
 
         for i in range(len(ids)):
-            self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'BY_MATERIAL_ID', channels.saveToDisk, buffer_id = i)
 
         # Convert all RADIANCE_GROUP channels
@@ -1659,7 +1672,7 @@ first frame will never stop!')
         # don't import the standard lightgroup that contains all lights even if no groups are set
         if lightgroup_count > 1:
             for i in range(lightgroup_count):
-                self.convertChannelToImage(lcSession, scene, filmWidth, filmHeight,
+                self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                            'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
 
         channelCalcTime = time.time() - channelCalcStartTime

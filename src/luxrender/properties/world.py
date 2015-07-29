@@ -799,6 +799,7 @@ class luxrender_channels(declarative_property_group):
     controls = [
         # 'aov_label',
         ['enable_aovs', 'saveToDisk'],
+        'import_compatible',
         'label_unsupported_engines',
         'spacer',
         'label_info_film',
@@ -833,11 +834,18 @@ class luxrender_channels(declarative_property_group):
 
     visibility = {
         'label_unsupported_engines': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIDIR', 'BIDIRVM'])},
+        'normalize_DIRECT_DIFFUSE': {'import_compatible': False},
+        'normalize_DIRECT_GLOSSY': {'import_compatible': False},
+        'normalize_INDIRECT_DIFFUSE': {'import_compatible': False},
+        'normalize_INDIRECT_GLOSSY': {'import_compatible': False},
+        'normalize_INDIRECT_SPECULAR': {'import_compatible': False},
+        'normalize_DEPTH': {'import_compatible': False},
     }
 
     enabled = {
         # Menu buttons
         'saveToDisk': {'enable_aovs': True},
+        'import_compatible': {'enable_aovs': True},
         'spacer': {'enable_aovs': True},
         # Info labels
         'label_unsupported_engines': {'enable_aovs': True, },
@@ -879,6 +887,30 @@ class luxrender_channels(declarative_property_group):
         'IRRADIANCE': {'enable_aovs': True},
     }
 
+    def toggle_shading_normal(self, context):
+        context.scene.render.layers.active.use_pass_normal = self.SHADING_NORMAL
+
+    def toggle_depth(self, context):
+        context.scene.render.layers.active.use_pass_z = self.DEPTH
+
+    def toggle_direct_diffuse(self, context):
+        context.scene.render.layers.active.use_pass_diffuse_direct = self.DIRECT_DIFFUSE
+
+    def toggle_direct_glossy(self, context):
+        context.scene.render.layers.active.use_pass_glossy_direct = self.DIRECT_GLOSSY
+
+    def toggle_emission(self, context):
+        context.scene.render.layers.active.use_pass_emit = self.EMISSION
+
+    def toggle_indirect_diffuse(self, context):
+        context.scene.render.layers.active.use_pass_diffuse_indirect = self.INDIRECT_DIFFUSE
+
+    def toggle_indirect_glossy(self, context):
+        context.scene.render.layers.active.use_pass_glossy_indirect = self.INDIRECT_GLOSSY
+
+    def toggle_indirect_specular(self, context):
+        context.scene.render.layers.active.use_pass_transmission_indirect = self.INDIRECT_SPECULAR
+
     properties = [
         # Menu buttons
         {
@@ -891,6 +923,13 @@ class luxrender_channels(declarative_property_group):
             'attr': 'enable_aovs',
             'name': 'Enable',
             'description': 'Enable LuxRender Passes',
+            'default': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'import_compatible',
+            'name': 'Import Compatible Passes to Compositor',
+            'description': 'Make compatible passes available in Blenders compositor instead of importing as images',
             'default': True
         },
         {
@@ -987,7 +1026,8 @@ class luxrender_channels(declarative_property_group):
             'attr': 'DEPTH',
             'name': 'Depth',
             'description': 'Distance from camera',
-            'default': False
+            'default': False,
+            'update': toggle_depth
         },
         {
             'type': 'bool',
@@ -1015,21 +1055,24 @@ class luxrender_channels(declarative_property_group):
             'attr': 'SHADING_NORMAL',
             'name': 'Shading Normal',
             'description': 'Normal vector X, Y, Z with mesh smoothing',
-            'default': False
+            'default': False,
+            'update': toggle_shading_normal,
         },
         {
             'type': 'bool',
             'attr': 'MATERIAL_ID',
             'name': 'Material ID',
             'description': 'Material ID (1 color per material)',
-            'default': False
+            'default': False,
+            #'update': toggle_material_id
         },
         {
             'type': 'bool',
             'attr': 'DIRECT_DIFFUSE',
             'name': 'Diffuse',
             'description': 'Diffuse R, G, B',
-            'default': False
+            'default': False,
+            'update': toggle_direct_diffuse
         },
         {
             'type': 'bool',
@@ -1043,7 +1086,8 @@ class luxrender_channels(declarative_property_group):
             'attr': 'DIRECT_GLOSSY',
             'name': 'Glossy',
             'description': 'Glossy R, G, B',
-            'default': False
+            'default': False,
+            'update': toggle_direct_glossy
         },
         {
             'type': 'bool',
@@ -1057,14 +1101,16 @@ class luxrender_channels(declarative_property_group):
             'attr': 'EMISSION',
             'name': 'Emission',
             'description': 'Emission R, G, B',
-            'default': False
+            'default': False,
+            'update': toggle_emission
         },
         {
             'type': 'bool',
             'attr': 'INDIRECT_DIFFUSE',
             'name': 'Diffuse',
             'description': 'Indirect diffuse R, G, B',
-            'default': False
+            'default': False,
+            'update': toggle_indirect_diffuse
         },
         {
             'type': 'bool',
@@ -1078,7 +1124,8 @@ class luxrender_channels(declarative_property_group):
             'attr': 'INDIRECT_GLOSSY',
             'name': 'Glossy',
             'description': 'Indirect glossy R, G, B',
-            'default': False
+            'default': False,
+            'update': toggle_indirect_glossy
         },
         {
             'type': 'bool',
@@ -1092,7 +1139,8 @@ class luxrender_channels(declarative_property_group):
             'attr': 'INDIRECT_SPECULAR',
             'name': 'Specular',
             'description': 'Indirect specular (glass) R, G, B',
-            'default': False
+            'default': False,
+            'update': toggle_indirect_specular
         },
         {
             'type': 'bool',
@@ -1106,7 +1154,8 @@ class luxrender_channels(declarative_property_group):
             'attr': 'DIRECT_SHADOW_MASK',
             'name': 'Direct Shadow Mask',
             'description': 'Mask containing shadows by direct light',
-            'default': False
+            'default': False,
+            #'update': toggle_direct_shadow_mask
         },
         {
             'type': 'bool',
@@ -1120,7 +1169,8 @@ class luxrender_channels(declarative_property_group):
             'attr': 'UV',
             'name': 'UV',
             'description': 'Texture coordinates U, V',
-            'default': False
+            'default': False,
+            #'update': toggle_uv
         },
         {
             'type': 'bool',
