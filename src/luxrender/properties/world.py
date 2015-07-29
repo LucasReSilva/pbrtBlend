@@ -36,6 +36,7 @@ from ..export import ParamSet
 from ..export.materials import ExportedTextures
 from ..outputs.pure_api import LUXRENDER_VERSION
 from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import ScenePrefix
 from ..properties.material import texture_append_visibility
 from ..properties.texture import (
     ColorTextureParameter, FloatTextureParameter, FresnelTextureParameter
@@ -798,6 +799,7 @@ class luxrender_channels(declarative_property_group):
     controls = [
         # 'aov_label',
         ['enable_aovs', 'saveToDisk'],
+        'label_unsupported_engines',
         'spacer',
         'label_info_film',
         'RGB',
@@ -829,13 +831,16 @@ class luxrender_channels(declarative_property_group):
         'IRRADIANCE'
     ]
 
-    visibility = {}
+    visibility = {
+        'label_unsupported_engines': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['BIDIR', 'BIDIRVM'])},
+    }
 
     enabled = {
         # Menu buttons
         'saveToDisk': {'enable_aovs': True},
         'spacer': {'enable_aovs': True},
         # Info labels
+        'label_unsupported_engines': {'enable_aovs': True, },
         'label_info_film': {'enable_aovs': True},
         'label_info_material': {'enable_aovs': True},
         'label_info_directlight': {'enable_aovs': True},
@@ -878,8 +883,8 @@ class luxrender_channels(declarative_property_group):
         # Menu buttons
         {
             'type': 'text',
-            'name': 'LuxRender Passes (AOVs)',
             'attr': 'aov_label',
+            'name': 'LuxRender Passes (AOVs)',
         },
         {
             'type': 'bool',
@@ -894,6 +899,11 @@ class luxrender_channels(declarative_property_group):
             'name': 'Save',
             'description': 'Save the passes to the output path after rendering',
             'default': False
+        },
+        {
+            'type': 'text',
+            'attr': 'label_unsupported_engines',
+            'name': 'Note: Bidir engines only support the Alpha and RGB passes',
         },
         {
             'type': 'text',
