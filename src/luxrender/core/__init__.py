@@ -1162,19 +1162,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         return halt_samples_met or halt_time_met or halt_noise_met
 
-    def normalizeChannel(self, channel_buffer):
-        isInf = math.isinf
-
-        # find max value
-        maxValue = 0.0
-        for elem in channel_buffer:
-            if elem > maxValue and not isInf(elem):
-                maxValue = elem
-
-        if maxValue > 0.0:
-            for i in range(0, len(channel_buffer)):
-                channel_buffer[i] = channel_buffer[i] / maxValue
-
     def convertChannelToImage(self, lcSession, scene, filmWidth, filmHeight, channelType, saveToDisk,
                               normalize = False, buffer_id = -1):
         """
@@ -1258,52 +1245,26 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # spread value to RGBA format
 
             if arrayDepth == 1:
-                if getattr(pyluxcore, 'ConvertFilmChannelOutput_1xFloat_To_4xFloatList', None) is not None:
-                    channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_1xFloat_To_4xFloatList(filmWidth,
-                                                                                                         filmHeight,
-                                                                                                         channel_buffer,
-                                                                                                         normalize)
-                else:
-                    # normalize channel_buffer values (map to 0..1 range)
-                    if normalize:
-                        self.normalizeChannel(channel_buffer)
-                    for elem in channel_buffer:
-                        channel_buffer_converted.extend([elem, elem, elem, 1.0])
+                channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_1xFloat_To_4xFloatList(filmWidth,
+                                                                                                     filmHeight,
+                                                                                                     channel_buffer,
+                                                                                                     normalize)
 
             # UV channel, just add 0.0 for B and 1.0 for A components
             elif arrayDepth == 2:
-                if getattr(pyluxcore, 'ConvertFilmChannelOutput_2xFloat_To_4xFloatList', None) is not None:
-                    channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_2xFloat_To_4xFloatList(filmWidth,
-                                                                                                         filmHeight,
-                                                                                                         channel_buffer,
-                                                                                                         normalize)
-                else:
-                    # normalize channel_buffer values (map to 0..1 range)
-                    if normalize:
-                        self.normalizeChannel(channel_buffer)
-                    i = 0
-                    while i < len(channel_buffer):
-                        channel_buffer_converted.extend([channel_buffer[i], channel_buffer[i + 1], 0.0, 1.0])
-                        i += 2
+                channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_2xFloat_To_4xFloatList(filmWidth,
+                                                                                                     filmHeight,
+                                                                                                     channel_buffer,
+                                                                                                     normalize)
 
             # RGB channels: just add 1.0 as alpha component
             elif arrayDepth == 3:
-                if getattr(pyluxcore, 'ConvertFilmChannelOutput_3xFloat_To_4xFloatList', None) is not None:
-                    channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_4xFloatList(filmWidth,
-                                                                                                         filmHeight,
-                                                                                                         channel_buffer,
-                                                                                                         normalize)
-                else:
-                    # normalize channel_buffer values (map to 0..1 range)
-                    if normalize:
-                        self.normalizeChannel(channel_buffer)
-                    i = 0
-                    while i < len(channel_buffer):
-                        channel_buffer_converted.extend(
-                            [channel_buffer[i], channel_buffer[i + 1], channel_buffer[i + 2], 1.0])
-                        i += 3
+                channel_buffer_converted = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_4xFloatList(filmWidth,
+                                                                                                     filmHeight,
+                                                                                                     channel_buffer,
+                                                                                                     normalize)
 
-            # RGBA channels: just copy the list
+            # RGBA channels: just use the original list
             else:
                 channel_buffer_converted = channel_buffer
 

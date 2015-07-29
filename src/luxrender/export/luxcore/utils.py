@@ -44,7 +44,7 @@ def convert_texture_channel(luxcore_exporter, properties, element_name, textured
     """
     :param luxcore_exporter: the luxcore_exporter instance of the calling texture/volume/material exporter
     :param properties: pyluxcore.Properties
-    :param element_name: name of the luxrender material/volume/texture
+    :param element_name: name of the luxrender material/volume/texture (LuxCore name)
     :param textured_element: luxrender material, volume, texture or anything else with attributes that can be textured
     :param channel: name of the textured attribute, e.g. "Kd", "Ks" etc.
     :param type: "color" or "float"

@@ -702,8 +702,6 @@ may mute lamps and caustics',
             'items': [
                 ('BLACKMANHARRIS', 'Blackman-Harris', 'default'),
                 ('MITCHELL', 'Mitchell', 'can produce black ringing artifacts around bright pixels'),
-                ('MITCHELL_SS', 'Mitchell_SS', ''),
-                ('BOX', 'Box', ''),
                 ('GAUSSIAN', 'Gaussian', ''),
                 ('NONE', 'None', 'Disable pixel filtering. Fastest setting when rendering on GPU')
             ],

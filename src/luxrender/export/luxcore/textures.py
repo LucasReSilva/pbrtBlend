@@ -434,7 +434,6 @@ class TextureExporter(object):
             # Brick
             ####################################################################
             elif texType == 'brick':
-                self.properties.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
                 self.properties.Set(pyluxcore.Property(prefix + '.brickbond', [(luxTex.brickbond)]))
 
                 if texture.luxrender_texture.luxrender_tex_brick.brickbond in ('running', 'flemish'):
@@ -554,7 +553,6 @@ class TextureExporter(object):
             # Scale
             ####################################################################
             elif texType == 'scale':
-                self.properties.Set(pyluxcore.Property(prefix + '.variant', [(luxTex.variant)]))
                 self.properties.Set(
                     pyluxcore.Property(prefix + '.texture1', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex1', luxTex.variant)))
                 self.properties.Set(
