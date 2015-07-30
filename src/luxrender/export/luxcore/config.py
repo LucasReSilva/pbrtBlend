@@ -41,6 +41,7 @@ class ConfigExporter(object):
         self.outputCounter = 0
         self.material_id_mask_counter = 0
         self.by_material_id_counter = 0
+        self.active_outputswitcher_channels = []
 
 
     def convert(self, film_width, film_height):
@@ -107,7 +108,14 @@ class ConfigExporter(object):
         suffix = ('.png' if (channelName in LDR_channels) else '.exr')
         outputStringFilename = 'film.outputs.' + str(self.outputCounter) + '.filename'
         filename = channelName + suffix if id == -1 else channelName + '_' + str(id) + suffix
-        self.properties.Set(pyluxcore.Property(outputStringFilename, [filename]))
+
+        output_path = efutil.filesystem_path(self.blender_scene.render.filepath)
+        if not os.path.isdir(output_path):
+            os.makedirs(output_path)
+
+        path = os.path.join(output_path, filename)
+
+        self.properties.Set(pyluxcore.Property(outputStringFilename, path))
 
         # output id
         if id != -1:
@@ -378,7 +386,7 @@ class ConfigExporter(object):
         output_switcher_channel = luxrender_camera.luxcore_imagepipeline_settings.output_switcher_pass
         channels = self.blender_scene.luxrender_channels
 
-        if (channels.enable_aovs and not self.is_viewport_render) or output_switcher_channel != 'disabled':
+        if (channels.enable_aovs and not self.is_viewport_render):
             if channels.RGB:
                 self.convert_channel('RGB')
             if channels.RGBA:
@@ -387,40 +395,45 @@ class ConfigExporter(object):
                 self.convert_channel('RGB_TONEMAPPED')
             if channels.RGBA_TONEMAPPED:
                 self.convert_channel('RGBA_TONEMAPPED')
-            if channels.ALPHA or output_switcher_channel == 'ALPHA':
+            if channels.ALPHA:
                 self.convert_channel('ALPHA')
-            if channels.DEPTH or output_switcher_channel == 'DEPTH':
+            if channels.DEPTH:
                 self.convert_channel('DEPTH')
-            if channels.POSITION or output_switcher_channel == 'POSITION':
+            if channels.POSITION:
                 self.convert_channel('POSITION')
-            if channels.GEOMETRY_NORMAL or output_switcher_channel == 'GEOMETRY_NORMAL':
+            if channels.GEOMETRY_NORMAL:
                 self.convert_channel('GEOMETRY_NORMAL')
-            if channels.SHADING_NORMAL or output_switcher_channel == 'SHADING_NORMAL':
+            if channels.SHADING_NORMAL:
                 self.convert_channel('SHADING_NORMAL')
-            if channels.MATERIAL_ID or output_switcher_channel == 'MATERIAL_ID':
+            if channels.MATERIAL_ID:
                 self.convert_channel('MATERIAL_ID')
-            if channels.DIRECT_DIFFUSE or output_switcher_channel == 'DIRECT_DIFFUSE':
+            if channels.DIRECT_DIFFUSE:
                 self.convert_channel('DIRECT_DIFFUSE')
-            if channels.DIRECT_GLOSSY or output_switcher_channel == 'DIRECT_GLOSSY':
+            if channels.DIRECT_GLOSSY:
                 self.convert_channel('DIRECT_GLOSSY')
-            if channels.EMISSION or output_switcher_channel == 'EMISSION':
+            if channels.EMISSION:
                 self.convert_channel('EMISSION')
-            if channels.INDIRECT_DIFFUSE or output_switcher_channel == 'INDIRECT_DIFFUSE':
+            if channels.INDIRECT_DIFFUSE:
                 self.convert_channel('INDIRECT_DIFFUSE')
-            if channels.INDIRECT_GLOSSY or output_switcher_channel == 'INDIRECT_GLOSSY':
+            if channels.INDIRECT_GLOSSY:
                 self.convert_channel('INDIRECT_GLOSSY')
-            if channels.INDIRECT_SPECULAR or output_switcher_channel == 'INDIRECT_SPECULAR':
+            if channels.INDIRECT_SPECULAR:
                 self.convert_channel('INDIRECT_SPECULAR')
-            if channels.DIRECT_SHADOW_MASK or output_switcher_channel == 'DIRECT_SHADOW_MASK':
+            if channels.DIRECT_SHADOW_MASK:
                 self.convert_channel('DIRECT_SHADOW_MASK')
-            if channels.INDIRECT_SHADOW_MASK or output_switcher_channel == 'INDIRECT_SHADOW_MASK':
+            if channels.INDIRECT_SHADOW_MASK:
                 self.convert_channel('INDIRECT_SHADOW_MASK')
-            if channels.UV or output_switcher_channel == 'UV':
+            if channels.UV:
                 self.convert_channel('UV')
-            if channels.RAYCOUNT or output_switcher_channel == 'RAYCOUNT':
+            if channels.RAYCOUNT:
                 self.convert_channel('RAYCOUNT')
-            if channels.IRRADIANCE or output_switcher_channel == 'IRRADIANCE':
+            if channels.IRRADIANCE:
                 self.convert_channel('IRRADIANCE')
+
+        if output_switcher_channel != 'disabled':
+            if output_switcher_channel not in self.active_outputswitcher_channels:
+                self.active_outputswitcher_channels.append(output_switcher_channel)
+                self.convert_channel(output_switcher_channel)
 
 
     def __convert_lightgroups(self):
