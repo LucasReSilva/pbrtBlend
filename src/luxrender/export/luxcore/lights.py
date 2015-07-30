@@ -43,6 +43,12 @@ class ExportedLight(object):
         self.luxcore_name = name
         self.type = type
 
+    def __eq__(self, other):
+        return self.luxcore_name == other.luxcore_name and self.type == other.type
+
+    def __hash__(self):
+        return hash(self.luxcore_name) ^ hash(self.type)
+
 
 class LightExporter(object):
     def __init__(self, luxcore_exporter, blender_scene, blender_object):
@@ -52,14 +58,26 @@ class LightExporter(object):
 
         self.properties = pyluxcore.Properties()
         self.luxcore_name = ''
-        self.exported_lights = []
+        self.exported_lights = set()
 
 
     def convert(self, luxcore_scene):
         # Remove old properties
         self.properties = pyluxcore.Properties()
-        
+
+        old_exported_lights = self.exported_lights.copy()
+        self.exported_lights = set()
+
         self.__convert_light(luxcore_scene)
+
+        # Remove old lights
+        diff = old_exported_lights - self.exported_lights
+        for exported_light in diff:
+            if exported_light.type == 'AREA':
+                # Area lights are meshlights and treated like objects
+                luxcore_scene.DeleteObject(exported_light.luxcore_name)
+            else:
+                luxcore_scene.DeleteLight(exported_light.luxcore_name)
 
         return self.properties
 
@@ -74,47 +92,47 @@ class LightExporter(object):
     def __convert_light(self, luxcore_scene):
         # TODO: refactor this horrible... thing
         # TODO: find solution for awkward sunsky problem
-        
+
         obj = self.blender_object
-        
+
         hide_lamp = not is_obj_visible(self.blender_scene, obj)
         if hide_lamp:
             return
-    
+
         light = obj.data
 
         self.__generate_light_name(obj.name)
         luxcore_name = self.luxcore_name
-    
+
         light_params = ParamSet() \
             .add_float('gain', light.energy) \
             .add_float('importance', light.luxrender_lamp.importance)
-    
+
         # Params from light sub-types
         light_params.update(getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower()).get_paramset(obj))
-    
+
         params_converted = []
         for rawParam in light_params:
             params_converted.append(convert_param_to_luxcore_property(rawParam))
-    
+
         params_keyValue = {}
         for param in params_converted:
             params_keyValue[param[0]] = param[1]
-    
+
         # Common light params
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
         energy = params_keyValue['gain'] if not hide_lamp else 0  # workaround for no lights render recovery
         importance = params_keyValue['importance']
-    
+
         # Lightgroup
         lightgroup = getattr(light.luxrender_lamp, 'lightgroup')
         lightgroup_id = -1  # for luxcore RADIANCE_GROUP
-    
+
         if lightgroup != '':
             lightgroup_enabled = self.blender_scene.luxrender_lightgroups.lightgroups[lightgroup].lg_enabled
             if lightgroup_enabled:
                 energy *= self.blender_scene.luxrender_lightgroups.lightgroups[lightgroup].gain
-    
+
                 if lightgroup in self.luxcore_exporter.lightgroup_cache:
                     # lightgroup already has a luxcore id, use it
                     lightgroup_id = self.luxcore_exporter.lightgroup_cache[lightgroup]
@@ -124,11 +142,11 @@ class LightExporter(object):
                     self.luxcore_exporter.lightgroup_cache[lightgroup] = lightgroup_id
             else:
                 energy = 0  # use gain for muting to keep geometry exported
-    
+
         # Don't set lightgroup for sun because it might be split into sun + sky
         if lightgroup_id != -1 and light.type != 'SUN' and not self.blender_scene.luxrender_lightgroups.ignore:
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
-    
+
         # Visibility settings for indirect rays (not for sun because it might be split into sun + sky,
         # and not for area light because it needs a different prefix (scene.materials.)
         if light.type != 'SUN' and not (light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
@@ -138,9 +156,9 @@ class LightExporter(object):
                                                  light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
                                                  light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
-    
+
         gain_spectrum = [energy, energy, energy]  # luxcore gain is spectrum!
-    
+
         # not for distant light,
         # not for area lamps (because these are meshlights and gain is controlled by material settings
         if getattr(lux_lamp, 'L_color') and not (
@@ -150,7 +168,7 @@ class LightExporter(object):
             iesfile, basename = get_expanded_file_name(light, iesfile)
             if iesfile != '':
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
-    
+
             # Workaround for lights without color, multiply gain with color here
             if (light.type == 'HEMI' and (not getattr(lux_lamp, 'infinite_map')
                                           or getattr(lux_lamp, 'hdri_multiply'))) or light.type == 'SPOT':
@@ -160,33 +178,33 @@ class LightExporter(object):
                 colorRaw = getattr(lux_lamp, 'L_color')
                 color = [colorRaw[0], colorRaw[1], colorRaw[2]]
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', color))
-    
+
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
 
         samples = light.luxrender_lamp.luxcore_lamp.samples
         if light.type not in ['SUN', 'AREA']:
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
-    
+
         ####################################################################
         # Sun (includes sun, sky, distant)
         ####################################################################
         if light.type == 'SUN':
             invmatrix = obj.matrix_world.inverted()
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
-    
+
             sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
             legacy_sky = light.luxrender_lamp.luxrender_lamp_sun.legacy_sky
-    
+
             if 'sun' in sunsky_type:
                 name = luxcore_name + '_sun'
-                self.exported_lights.append(ExportedLight(name, 'SUN'))
+                self.exported_lights.add(ExportedLight(name, 'SUN'))
 
                 if lightgroup_id != -1 and not self.blender_scene.luxrender_lightgroups.ignore:
                     self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
-    
+
                 turbidity = params_keyValue['turbidity']
-    
+
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.type', ['sun']))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
@@ -196,7 +214,7 @@ class LightExporter(object):
 
                 relsize = params_keyValue['relsize']
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.relsize', [relsize]))
-    
+
                 # Settings for indirect light visibility
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.diffuse.enable',
                                                      light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
@@ -204,24 +222,24 @@ class LightExporter(object):
                                                      light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.specular.enable',
                                                      light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
-    
+
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
-                self.exported_lights.append(ExportedLight(name, 'SKY'))
+                self.exported_lights.add(ExportedLight(name, 'SKY'))
 
                 if lightgroup_id != -1 and not self.blender_scene.luxrender_lightgroups.ignore:
                     self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
-    
+
                 turbidity = params_keyValue['turbidity']
                 skyVersion = 'sky' if legacy_sky else 'sky2'
-    
+
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.type', [skyVersion]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
-    
+
                 # Settings for indirect light visibility
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.diffuse.enable',
                                                      light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
@@ -229,22 +247,22 @@ class LightExporter(object):
                                                      light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.specular.enable',
                                                      light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
-    
+
             if sunsky_type == 'distant':
-                self.exported_lights.append(ExportedLight(luxcore_name, 'DISTANT'))
+                self.exported_lights.add(ExportedLight(luxcore_name, 'DISTANT'))
 
                 if lightgroup_id != -1 and not self.blender_scene.luxrender_lightgroups.ignore:
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
-    
+
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
-    
+
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['distant']))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.direction', distant_dir))
-    
+
                 if 'theta' in params_keyValue:
                     theta = params_keyValue['theta']
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.theta', [theta]))
-    
+
                 # Settings for indirect light visibility
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.diffuse.enable',
                                                      light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
@@ -254,12 +272,12 @@ class LightExporter(object):
                     pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
                                        light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
-    
+
         ####################################################################
         # Hemi (infinite)
         ####################################################################
         elif light.type == 'HEMI':
-            self.exported_lights.append(ExportedLight(luxcore_name, 'HEMI'))
+            self.exported_lights.add(ExportedLight(luxcore_name, 'HEMI'))
 
             infinite_map_path = getattr(lux_lamp, 'infinite_map')
             if infinite_map_path:
@@ -268,34 +286,34 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
             else:
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['constantinfinite']))
-    
+
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
             hemi_fix = mathutils.Matrix.Scale(1.0, 4)  # create new scale matrix 4x4
             hemi_fix[0][0] = -1.0  # mirror the hdri_map
             transform = matrix_to_list(hemi_fix * obj.matrix_world.inverted(), apply_worldscale=True)
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
-    
+
         ####################################################################
         # Point
         ####################################################################
         elif light.type == 'POINT':
-            self.exported_lights.append(ExportedLight(luxcore_name, 'POINT'))
+            self.exported_lights.add(ExportedLight(luxcore_name, 'POINT'))
 
             if iesfile:
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['mappoint']))
             else:
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['point']))
-    
+
             if getattr(lux_lamp, 'flipz'):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.flipz', lux_lamp.flipz))
-    
+
             transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.properties.Set(
                 pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
-    
+
         ####################################################################
         # Spot (includes projector)
         ####################################################################
@@ -304,7 +322,7 @@ class LightExporter(object):
             conedeltaangle = math.degrees(light.spot_size * 0.5 * light.spot_blend)
 
             if getattr(lux_lamp, 'projector'):
-                self.exported_lights.append(ExportedLight(luxcore_name, 'PROJECTION'))
+                self.exported_lights.add(ExportedLight(luxcore_name, 'PROJECTION'))
 
                 projector_map_path = getattr(lux_lamp, 'mapname')
                 projector_map_path_abs, basename = get_expanded_file_name(light, projector_map_path)
@@ -313,27 +331,27 @@ class LightExporter(object):
                     pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', projector_map_path_abs))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.fov', coneangle * 2))
             else:
-                self.exported_lights.append(ExportedLight(luxcore_name, 'SPOT'))
+                self.exported_lights.add(ExportedLight(luxcore_name, 'SPOT'))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
-    
+
             spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')  # match to lux
             transform = matrix_to_list(obj.matrix_world * spot_fix, apply_worldscale=True)
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
-    
+
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.coneangle', coneangle))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.conedeltaangle', conedeltaangle))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
             self.properties.Set(
                 pyluxcore.Property('scene.lights.' + luxcore_name + '.efficency', getattr(lux_lamp, 'efficacy')))
-    
+
         ####################################################################
         # Area (includes laser)
         ####################################################################
         elif light.type == 'AREA':
             if light.luxrender_lamp.luxrender_lamp_laser.is_laser:
-                self.exported_lights.append(ExportedLight(luxcore_name, 'LASER'))
+                self.exported_lights.add(ExportedLight(luxcore_name, 'LASER'))
                 # Laser lamp
                 transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
@@ -343,7 +361,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.radius', [light.size]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
             else:
-                self.exported_lights.append(ExportedLight(luxcore_name, 'AREA'))
+                self.exported_lights.add(ExportedLight(luxcore_name, 'AREA'))
 
                 # TODO: visibility for indirect rays
     

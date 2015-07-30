@@ -2184,7 +2184,6 @@ first frame will never stop!')
                     self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=False, update_material=False)
 
             if update_changes.cause_objectsRemoved:
-
                 from ..export.luxcore.utils import get_elem_key
 
                 for ob in update_changes.removed_objects:
