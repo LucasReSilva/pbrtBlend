@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_fresnelcolor(luxrender_texture_base):
-    bl_label = 'LuxRender Frensel Color Texture'
+    bl_label = 'LuxRender Fresnel Color Texture'
 
     LUX_COMPAT = {'fresnelcolor'}
 
