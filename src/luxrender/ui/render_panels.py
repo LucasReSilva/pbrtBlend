@@ -121,16 +121,73 @@ class render_settings(render_panel):
                 sub.prop(engine_settings, 'device_cpu_only', expand=True)
 
             if engine_settings.renderengine_type == 'BIASPATH':
-                aa = engine_settings.biaspath_sampling_aa_size
-                diffuse = engine_settings.biaspath_sampling_diffuse_size
-                glossy = engine_settings.biaspath_sampling_glossy_size
-                specular = engine_settings.biaspath_sampling_specular_size
+                split = layout.split()
 
-                # All samples are squared, then multiplied times the aa samples
-                effective_samples = aa**2 * (diffuse**2 + glossy**2 + specular**2)
+                row = split.row()
+                sub = row.row()
+                sub.label(text='')
 
-                layout.label(text='Effective samples: %d² × (%d² + %d² + %d²) = %d' %
-                                  (aa, diffuse, glossy, specular, effective_samples))
+                row = split.row()
+                sub = row.row()
+                sub.prop(engine_settings, 'biaspath_show_sample_estimates', toggle=True)
+
+                if engine_settings.biaspath_show_sample_estimates:
+                    # Sample settings
+                    aa = engine_settings.biaspath_sampling_aa_size
+                    diffuse = engine_settings.biaspath_sampling_diffuse_size
+                    glossy = engine_settings.biaspath_sampling_glossy_size
+                    specular = engine_settings.biaspath_sampling_specular_size
+                    # Pathdepth settings
+                    depth_total = engine_settings.biaspath_pathdepth_total
+                    depth_diffuse = engine_settings.biaspath_pathdepth_diffuse
+                    depth_glossy = engine_settings.biaspath_pathdepth_glossy
+                    depth_specular = engine_settings.biaspath_pathdepth_specular
+
+                    # Pixel samples
+                    aaSamplesCount = aa ** 2
+                    layout.label(text='AA: %d' % aaSamplesCount)
+
+                    # Diffuse samples
+                    maxDiffusePathDepth = max(0, min(depth_total, depth_diffuse - 1))
+                    diffuseSamplesCount = aaSamplesCount * (diffuse ** 2)
+                    maxDiffuseSamplesCount = diffuseSamplesCount * maxDiffusePathDepth
+                    layout.label(text='Diffuse: %d (with max. bounces %d: %d)' %
+                                      (diffuseSamplesCount, maxDiffusePathDepth, maxDiffuseSamplesCount))
+
+                    # Glossy samples
+                    maxGlossyPathDepth = max(0, min(depth_total, depth_glossy - 1))
+                    glossySamplesCount = aaSamplesCount * (glossy ** 2)
+                    maxGlossySamplesCount = glossySamplesCount * maxGlossyPathDepth
+                    layout.label(text='Glossy: %d (with max. bounces %d: %d)' %
+                                      (glossySamplesCount, maxGlossyPathDepth, maxGlossySamplesCount))
+
+                    # Specular samples
+                    maxSpecularPathDepth = max(0, min(depth_total, depth_specular - 1))
+                    specularSamplesCount = aaSamplesCount * (specular ** 2)
+                    maxSpecularSamplesCount = specularSamplesCount * maxSpecularPathDepth
+                    layout.label(text='Specular: %d (with max. bounces %d: %d)' %
+                                      (specularSamplesCount, maxSpecularPathDepth, maxSpecularSamplesCount))
+
+                    # Direct light samples # TODO: implement
+                    #directLightSamplesCount = aaSamplesCount * firstVertexLightSampleCount *
+                    #        (directLightSamples * directLightSamples) * renderConfig->scene->lightDefs.GetSize()
+                    #SLG_LOG("[BiasPathCPURenderEngine] Direct light samples on first hit: " << directLightSamplesCount)
+
+                    # Total samples for a pixel with hit on diffuse surfaces
+                    layout.label(text='Total on diffuse surfaces: %d' %
+                                      (maxDiffuseSamplesCount + diffuseSamplesCount * max(0, maxDiffusePathDepth - 1)))
+
+                    '''
+                    // Total samples for a pixel with hit on diffuse surfaces
+                    SLG_LOG("[BiasPathCPURenderEngine] Total samples for a pixel with hit on diffuse surfaces: " <<
+                            // Direct light sampling on first hit
+                            directLightSamplesCount +
+                            // Diffuse samples
+                            maxDiffuseSamplesCount +
+                            // Direct light sampling for diffuse samples
+                            diffuseSamplesCount * Max<int>(0, maxDiffusePathDepth - 1));
+                    '''
+
 
         # Draw property groups
         super().draw(context)

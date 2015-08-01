@@ -76,8 +76,6 @@ class luxcore_enginesettings(declarative_property_group):
 
     controls = [
         ['label_renderengine_type', 'renderengine_type'],
-        'label_custom_properties',
-        'custom_properties',
         # BIDIR
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH
@@ -95,9 +93,8 @@ class luxcore_enginesettings(declarative_property_group):
         ['biaspath_pathdepth_diffuse', 'biaspath_pathdepth_glossy', 'biaspath_pathdepth_specular'],
         ['use_clamping', 'biaspath_clamping_radiance_maxvalue'],
         ['spacer_pdf_clamping', 'biaspath_clamping_pdf_value'],
-        'label_lights',
-        'biaspath_lights_samplingstrategy_type',
-        'biaspath_lights_nearstart',
+        ['label_biaspath_lights_samplingstrategy_type', 'biaspath_lights_samplingstrategy_type'],
+        ['label_biaspath_lights_nearstart', 'biaspath_lights_nearstart'],
         ['label_sampler_type', 'sampler_type'],
         ['label_biaspath_sampler_type', 'biaspath_sampler_type'],
         # Advanced sampler settings (for all but BIASPATH)
@@ -112,6 +109,9 @@ class luxcore_enginesettings(declarative_property_group):
         ['spacer_instancing', 'instancing'],
         # Kernel cache
         ['label_kernelcache', 'kernelcache'],
+        # Custom properties
+        'label_custom_properties',
+        'custom_properties',
         # BIASPATH specific halt condition
         ['spacer_halt_conditions', 'show_halt_conditions'],
         #'label_halt_conditions',
@@ -153,8 +153,9 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_pathdepth_glossy': {'renderengine_type': 'BIASPATH'},
         'biaspath_pathdepth_specular': {'renderengine_type': 'BIASPATH'},
         # BIASPATH obscure features
-        'label_lights':  A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        'label_biaspath_lights_samplingstrategy_type':  A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
         'biaspath_lights_samplingstrategy_type': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        'label_biaspath_lights_nearstart': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
         'biaspath_lights_nearstart': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
         # Clamping (all unidirectional path engines)
         'use_clamping': {'renderengine_type': O(['BIASPATH', 'PATH'])},
@@ -238,6 +239,13 @@ class luxcore_enginesettings(declarative_property_group):
             'description': 'Super advanced settings you\'ll never need to change',
             'default': False,
             'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'biaspath_show_sample_estimates',
+            'name': 'Sample Estimates',
+            'description': 'Show estimated sampling statistics',
+            'default': False,
         },
         {
             'type': 'text',
@@ -578,13 +586,13 @@ rendering with the reduced noise level',
         },
         {
             'type': 'text',
-            'name': 'Lights:',
-            'attr': 'label_lights',
+            'attr': 'label_biaspath_lights_samplingstrategy_type',
+            'name': 'Light Sampling:',
         },
         {
             'type': 'enum',
             'attr': 'biaspath_lights_samplingstrategy_type',
-            'name': 'Sampling strategy',
+            'name': '',
             'description': 'How to sample multiple light sources',
             'default': 'ALL',
             'items': [
@@ -594,13 +602,20 @@ rendering with the reduced noise level',
             'save_in_preset': True
         },
         {
+            'type': 'text',
+            'attr': 'label_biaspath_lights_nearstart',
+            'name': 'Near Start:',
+        },
+        {
             'type': 'float',
             'attr': 'biaspath_lights_nearstart',
-            'name': 'Near start',
+            'name': 'Distance',
             'description': 'How far, from the light source, must be a point to receive light',
             'default': 0.001,
             'min': 0.0,
             'max': 1000.0,
+            'subtype': 'DISTANCE',
+            'unit': 'LENGTH',
             'save_in_preset': True
         },  
         # Sampler settings
