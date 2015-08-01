@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_fresnelname(luxrender_texture_base):
-    bl_label = 'LuxRender Frensel Name Texture'
+    bl_label = 'LuxRender Fresnel Name Texture'
 
     LUX_COMPAT = {'fresnelname'}
 
