@@ -88,7 +88,7 @@ from ..ui.textures import (
 
 # Exporter Operators need to be imported to ensure initialisation
 from .. import operators
-from ..operators import lrmdb
+from ..operators import lrmdb, export, materials, nodes
 
 
 def _register_elm(elm, required=False):
