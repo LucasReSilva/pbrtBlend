@@ -133,6 +133,7 @@ luxrender_node_catagories = [
 
     luxrender_node_category("LUX_TEXTURE", "Texture", items=[
         NodeItem("luxrender_texture_image_map_node"),
+        NodeItem("luxrender_texture_luxcore_image_map_node"),
         NodeItem("luxrender_texture_normal_map_node"),
         NodeItem("luxrender_texture_blender_blend_node"),
         NodeItem("luxrender_texture_brick_node"),
@@ -177,6 +178,7 @@ luxrender_node_catagories = [
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
         NodeItem("luxrender_texture_subtract_node"),
+        NodeItem("luxrender_texture_colorramp_node"),
     ]),
 
     luxrender_node_category("LUX_LAYOUT", "Layout", items=[
