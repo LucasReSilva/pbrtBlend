@@ -26,15 +26,10 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import json, math, os, struct, mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
+import os,  mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
 
 # LuxRender Libs
 from .. import LuxRenderAddon
-from ..outputs import LuxLog, LuxManager
-from ..export.scene import SceneExporter
-from ..export import materials as export_materials
-
-from ..extensions_framework import util as efutil
 
 # Per-IDPropertyGroup preset handling
 
