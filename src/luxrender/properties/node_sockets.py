@@ -250,6 +250,10 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 
         return kd_params
 
+    def export_luxcore(self):
+        # For now, only export the color
+        return list(self.color)
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TC_Kr_socket(bpy.types.NodeSocket):

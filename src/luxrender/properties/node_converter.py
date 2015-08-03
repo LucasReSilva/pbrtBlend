@@ -329,3 +329,46 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
         subtract_params.update(get_socket_paramsets(self.inputs, make_texture))
 
         return make_texture(self.variant, 'subtract', self.name, subtract_params)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colorramp(luxrender_texture_node):
+    """Colorramp texture node"""
+    bl_idname = 'luxrender_texture_colorramp_node'
+    bl_label = 'ColorRamp'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 260
+
+    @classmethod
+    def poll(cls, node_tree):
+        return node_tree is not None
+
+    def get_fake_texture(self):
+        name = self.name
+
+        if name not in bpy.data.textures:
+            fake_texture = bpy.data.textures.new(name=name, type='NONE')
+            # Set fake user so the texture is not deleted on Blender close
+            fake_texture.use_fake_user = True
+            fake_texture.use_color_ramp = True
+            # Set alpha from default 0 to 1
+            fake_texture.color_ramp.elements[0].color[3] = 1.0
+
+        return bpy.data.textures[name]
+
+    def draw_buttons(self, context, layout):
+
+        si = self.inputs.keys()
+        so = self.outputs.keys()
+
+        if not 'Amount' in si:
+            self.inputs.new('luxrender_TF_amount_socket', 'Amount')
+
+        if not 'Color' in so:
+            self.outputs.new('NodeSocketColor', 'Color')
+
+        fake_texture = self.get_fake_texture()
+        layout.template_color_ramp(fake_texture, "color_ramp", expand=True)
+
+    def export_texture(self, make_texture):
+        pass

@@ -454,6 +454,42 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_luxcore_image_map(luxrender_texture_node):
+    """Image map texture node"""
+    bl_idname = 'luxrender_texture_luxcore_image_map_node'
+    bl_label = 'LuxCore Image Map Texture'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 220
+
+    def get_images(self, context):
+        blender_images = [tuple([img.name, img.name, '']) for img in bpy.data.images if img.name != 'Render Result']
+        blender_images.insert(0, tuple(['none', 'Select', 'Select an image']))
+
+        return blender_images
+
+    blender_image = bpy.props.EnumProperty(items=get_images, name='')
+
+    gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0)
+    gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=-10.0, max=10.0)
+
+    def init(self, context):
+        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        split = layout.column(align=True)
+        split.prop(self, 'blender_image')
+        split.operator('image.open')
+
+        layout.prop(self, 'gamma')
+        layout.prop(self, 'gain')
+
+    def export_texture(self, make_texture):
+        pass
+        # Get the absolute filepath with image.filepath_from_user() or better via efutil?
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
     """Marble texture node"""
     bl_idname = 'luxrender_texture_blender_marble_node'
