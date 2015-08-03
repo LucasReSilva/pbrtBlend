@@ -26,15 +26,9 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import json, math, os, struct, mathutils
 
 # LuxRender Libs
 from .. import LuxRenderAddon
-from ..outputs import LuxLog, LuxManager
-from ..export.scene import SceneExporter
-from ..export import materials as export_materials
-
-from ..extensions_framework import util as efutil
 
 
 @LuxRenderAddon.addon_register_class

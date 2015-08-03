@@ -25,6 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ..extensions_framework import declarative_property_group
+from ..outputs.luxcore_api import UseLuxCore
 
 import math
 
@@ -39,6 +40,7 @@ class luxrender_object(declarative_property_group):
     controls = [
         ['append_proxy', 'hide_proxy_mesh'],
         'proxy_type',
+        'label_unsupported_proxy',
         'use_smoothing',
         'external_mesh',
         ['radius', 'phimax'],
@@ -47,6 +49,7 @@ class luxrender_object(declarative_property_group):
     visibility = {
         'proxy_type': {'append_proxy': True},
         'hide_proxy_mesh': {'append_proxy': True},
+        'label_unsupported_proxy': lambda: UseLuxCore(),
         'use_smoothing': {'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
         'external_mesh': {'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
         'radius': {'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid'])},
@@ -85,6 +88,11 @@ class luxrender_object(declarative_property_group):
             # If you add items to this, be sure they are the actual names of the primitives, this string
             # is written directly to the scene file in export/geometry/buildMesh!
             'default': 'plymesh'
+        },
+        {
+            'type': 'text',
+            'attr': 'label_unsupported_proxy',
+            'name': 'Only PLY meshes are supported by LuxCore',
         },
         {
             'type': 'bool',
