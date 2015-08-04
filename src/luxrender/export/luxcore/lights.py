@@ -143,8 +143,8 @@ class LightExporter(object):
             else:
                 energy = 0  # use gain for muting to keep geometry exported
 
-        # Don't set lightgroup for sun because it might be split into sun + sky
-        if lightgroup_id != -1 and light.type != 'SUN' and not self.blender_scene.luxrender_lightgroups.ignore:
+        # Don't set lightgroup for sun because it might be split into sun + sky (and not for AREA because it needs a helper mat
+        if lightgroup_id != -1 and light.type not in ['SUN', 'AREA'] and not self.blender_scene.luxrender_lightgroups.ignore:
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
         # Visibility settings for indirect rays (not for sun because it might be split into sun + sky,
