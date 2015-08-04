@@ -38,6 +38,7 @@ class luxrender_object(declarative_property_group):
     ef_attach_to = ['Object']
 
     controls = [
+        'convert_to_proxy',
         ['append_proxy', 'hide_proxy_mesh'],
         'proxy_type',
         'label_unsupported_proxy',
@@ -47,6 +48,7 @@ class luxrender_object(declarative_property_group):
         ['zmin', 'zmax'],
     ]
     visibility = {
+        'convert_to_proxy': {'append_proxy': False},
         'proxy_type': {'append_proxy': True},
         'hide_proxy_mesh': {'append_proxy': True},
         'label_unsupported_proxy': lambda: UseLuxCore(),
@@ -58,6 +60,12 @@ class luxrender_object(declarative_property_group):
         'zmax': {'append_proxy': True, 'proxy_type': O(['cylinder', 'paraboloid'])},
     }
     properties = [
+        {
+            'type': 'operator',
+            'attr': 'convert_to_proxy',
+            'operator': 'export.export_luxrender_proxy',
+            'text': 'Convert Selection to Proxies',
+        },
         {
             'type': 'bool',
             'attr': 'append_proxy',
