@@ -309,6 +309,7 @@ def lux_texture_chooser(self, context):
                 self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
                 if context.texture.use_color_ramp:
                     self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
+                    context.texture.color_ramp.elements[0].color[3] = 1.0
 
 _register_elm(bl_ui.properties_texture.TEXTURE_PT_context_texture.append(lux_texture_chooser))
 
@@ -1217,7 +1218,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if buffer_id != -1:
             message += ' ID: ' + str(buffer_id)
         self.update_stats('Importing AOV passes into Blender...', message)
-        LuxLog(message)
+        LuxLog('Importing AOV ' + message)
 
         # raw channel buffer
         channel_buffer = array.array(arrayType, [arrayInitValue] * (filmWidth * filmHeight * arrayDepth))
@@ -1583,8 +1584,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     def import_aov_channels(self, scene, lcSession, filmWidth, filmHeight, passes):
         channelCalcStartTime = time.time()
-        LuxLog('Importing AOV channels into Blender...')
-
         channels = scene.luxrender_channels
 
         if channels.RGB:
@@ -1689,7 +1688,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                            'RADIANCE_GROUP', channels.saveToDisk, buffer_id = i)
 
         channelCalcTime = time.time() - channelCalcStartTime
-        LuxLog('AOV conversion took %.1f seconds' % channelCalcTime)
+        if channelCalcTime > 0.1:
+            LuxLog('AOV import took %.1f seconds' % channelCalcTime)
 
     cached_preview_properties = ''
 
