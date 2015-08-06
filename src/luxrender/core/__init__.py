@@ -309,7 +309,11 @@ def lux_texture_chooser(self, context):
                 self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
                 if context.texture.use_color_ramp:
                     self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
-                    context.texture.color_ramp.elements[0].color[3] = 1.0
+
+                    # The first element has a default alpha of 0, which makes no sense for LuxRender - set it to 1
+                    first_color = context.texture.color_ramp.elements[0].color
+                    if first_color[3] < 1:
+                        first_color[3] = 1
 
 _register_elm(bl_ui.properties_texture.TEXTURE_PT_context_texture.append(lux_texture_chooser))
 
