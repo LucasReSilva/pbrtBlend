@@ -51,24 +51,26 @@ class ExportedLight(object):
 
 
 class LightExporter(object):
-    def __init__(self, luxcore_exporter, blender_scene, blender_object):
+    def __init__(self, luxcore_exporter, blender_scene, blender_object, dupli_name_suffix=''):
         self.luxcore_exporter = luxcore_exporter
         self.blender_scene = blender_scene
         self.blender_object = blender_object
+        self.dupli_name_suffix = dupli_name_suffix
+        self.is_dupli = len(dupli_name_suffix) > 0
 
         self.properties = pyluxcore.Properties()
         self.luxcore_name = ''
         self.exported_lights = set()
 
 
-    def convert(self, luxcore_scene):
+    def convert(self, luxcore_scene, matrix=None):
         # Remove old properties
         self.properties = pyluxcore.Properties()
 
         old_exported_lights = self.exported_lights.copy()
         self.exported_lights = set()
 
-        self.__convert_light(luxcore_scene)
+        self.__convert_light(luxcore_scene, matrix)
 
         # Remove old lights
         diff = old_exported_lights - self.exported_lights
@@ -86,18 +88,24 @@ class LightExporter(object):
         if self.blender_object.library:
             name += '_' + self.blender_object.library.name
 
+        if self.is_dupli:
+            name += self.dupli_name_suffix
+
         self.luxcore_name = ToValidLuxCoreName(name)
 
 
-    def __convert_light(self, luxcore_scene):
+    def __convert_light(self, luxcore_scene, matrix):
         # TODO: refactor this horrible... thing
         # TODO: find solution for awkward sunsky problem
 
         obj = self.blender_object
 
-        hide_lamp = not is_obj_visible(self.blender_scene, obj)
+        hide_lamp = not is_obj_visible(self.blender_scene, obj, self.is_dupli)
         if hide_lamp:
             return
+
+        if matrix is None:
+            matrix = obj.matrix_world
 
         light = obj.data
 
@@ -190,7 +198,7 @@ class LightExporter(object):
         # Sun (includes sun, sky, distant)
         ####################################################################
         if light.type == 'SUN':
-            invmatrix = obj.matrix_world.inverted()
+            invmatrix = matrix.inverted()
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
 
             sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
@@ -290,7 +298,7 @@ class LightExporter(object):
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', getattr(lux_lamp, 'gamma')))
             hemi_fix = mathutils.Matrix.Scale(1.0, 4)  # create new scale matrix 4x4
             hemi_fix[0][0] = -1.0  # mirror the hdri_map
-            transform = matrix_to_list(hemi_fix * obj.matrix_world.inverted(), apply_worldscale=True)
+            transform = matrix_to_list(hemi_fix * matrix.inverted(), apply_worldscale=True)
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
 
         ####################################################################
@@ -307,7 +315,7 @@ class LightExporter(object):
             if getattr(lux_lamp, 'flipz'):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.flipz', lux_lamp.flipz))
 
-            transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
+            transform = matrix_to_list(matrix, apply_worldscale=True)
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.power', getattr(lux_lamp, 'power')))
@@ -335,7 +343,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
 
             spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')  # match to lux
-            transform = matrix_to_list(obj.matrix_world * spot_fix, apply_worldscale=True)
+            transform = matrix_to_list(matrix * spot_fix, apply_worldscale=True)
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
@@ -353,7 +361,7 @@ class LightExporter(object):
             if light.luxrender_lamp.luxrender_lamp_laser.is_laser:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'LASER'))
                 # Laser lamp
-                transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
+                transform = matrix_to_list(matrix, apply_worldscale=True)
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['laser']))
