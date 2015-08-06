@@ -94,7 +94,13 @@ class MaterialPreviewExporter(object):
                 (0, 1, 2),
                 (2, 3, 0)
             ]
-            luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
+            uv = [
+                (1, 1),
+                (1, 0),
+                (0, 0),
+                (0, 1)
+            ]
+            luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, uv, None, None)
             # Create object
             obj_name = 'texture_preview_object'
             scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.ply', mesh_name))
