@@ -392,7 +392,21 @@ class LightExporter(object):
     
                 # assign material to object
                 self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.material', [mat_name]))
-    
+
+                # copy transformation of area lamp object
+                scale_matrix = mathutils.Matrix()
+                scale_matrix[0][0] = light.size / 2.0 * obj.scale.x
+                scale_matrix[1][1] = light.size_y / 2.0 if light.shape == 'RECTANGLE' else light.size / 2.0
+                scale_matrix[1][1] *= obj.scale.y
+                rotation_matrix = obj.rotation_euler.to_matrix()
+                rotation_matrix.resize_4x4()
+                transform_matrix = mathutils.Matrix()
+                transform_matrix[0][3] = obj.location.x
+                transform_matrix[1][3] = obj.location.y
+                transform_matrix[2][3] = obj.location.z
+
+                transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix, apply_worldscale=True)
+
                 # add mesh
                 mesh_name = 'Mesh-' + luxcore_name
                 if not luxcore_scene.IsMeshDefined(mesh_name):
@@ -406,24 +420,9 @@ class LightExporter(object):
                         (0, 1, 2),
                         (2, 3, 0)
                     ]
-                    luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
+                    luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None, transform)
                 # assign mesh to object
                 self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.ply', [mesh_name]))
-    
-                # copy transformation of area lamp object
-                scale_matrix = mathutils.Matrix()
-                scale_matrix[0][0] = light.size / 2.0 * obj.scale.x
-                scale_matrix[1][1] = light.size_y / 2.0 if light.shape == 'RECTANGLE' else light.size / 2.0
-                scale_matrix[1][1] *= obj.scale.y
-                rotation_matrix = obj.rotation_euler.to_matrix()
-                rotation_matrix.resize_4x4()
-                transform_matrix = mathutils.Matrix()
-                transform_matrix[0][3] = obj.location.x
-                transform_matrix[1][3] = obj.location.y
-                transform_matrix[2][3] = obj.location.z
-    
-                transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix, apply_worldscale=True)
-                self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.transformation', transform))
     
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + obj.name)
