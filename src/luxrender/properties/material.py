@@ -391,13 +391,14 @@ class luxrender_material(declarative_property_group):
             context.material.use_transparency = False
             context.material.alpha = 1.0
 
+        self.set_master_color(context.material)
+
         # Also refresh the preview when changing mat type
         refresh_preview(self, context)
 
     controls = [  # Type select Menu is drawn manually  #'nodetree', drawn manually
                   'Interior',
                   'Exterior',
-                  # 'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
                ] + \
                TF_normalmap.controls + \
                TF_bumpmap.controls
@@ -446,13 +447,6 @@ class luxrender_material(declarative_property_group):
                         'name': 'Node Tree',
                         'default': ''
                     },
-                    # {
-                    # 'type': 'bool',
-                    # 'attr': 'generatetangents',
-                    # 'name': 'Generate Tangents',
-                    # 'description': 'Generate tanget space for meshes with this material. Enable when using a bake-generated normal map',
-                    # 'default': False,
-                    # },
                  ] + \
                  TF_bumpmap.get_properties() + \
                  TF_normalmap.get_properties() + \
@@ -485,7 +479,7 @@ class luxrender_material(declarative_property_group):
     metal_color_map = {
         'nk': [0.5, 0.5, 0.5],
         'amorphous carbon': [0.1, 0.1, 0.1],
-        'copper': [0.8, 0.4, 0.3], # (218, 138, 103)
+        'copper': [0.8, 0.4, 0.3],
         'gold': [1.0, 0.84, 0.0],
         'silver': [0.6, 0.6, 0.7],
         'aluminium': [0.3, 0.3, 0.3]
