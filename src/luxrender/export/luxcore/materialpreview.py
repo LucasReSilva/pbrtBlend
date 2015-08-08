@@ -321,8 +321,8 @@ class MaterialPreviewExporter(object):
         cfg_props.Set(pyluxcore.Property('tile.multipass.enable', not self.is_thumbnail))
         cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', 0.045))
         cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', 0))
-        aa_size = 3 if self.is_thumbnail else 1
 
+        aa_size = 3 if self.is_thumbnail else 1
         cfg_props.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_size))
         cfg_props.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', 1))
         cfg_props.Set(pyluxcore.Property('biaspath.sampling.glossy.size', 1))
