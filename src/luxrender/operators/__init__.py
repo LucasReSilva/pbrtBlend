@@ -272,8 +272,8 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
                         # Remove the first two directories and the filename
                         # e.g. luxrender-luxblend25-bfb488c84111/src/luxrender/ui/textures/wrinkled.py
                         # becomes luxrender/ui/textures/
-                        target_path = temp_dir_path + '/' + member.split('/', 2)[-1]
-                        target_path = os.path.join(*target_path.split('/')[:-1])
+                        target_path = os.path.join(temp_dir_path,
+                                        os.path.join(*member.split('/')[2:-1]))
 
                         filename = os.path.basename(member)
                         # Skip directories
