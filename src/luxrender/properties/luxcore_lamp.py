@@ -40,6 +40,7 @@ class luxcore_lamp(declarative_property_group):
     ef_attach_to = ['luxrender_lamp']
 
     controls = [
+        ['label_rgb_gain', 'gain_r', 'gain_g', 'gain_b'],
         'samples',
         'label_message',
         'label_light_visibility',
@@ -59,6 +60,38 @@ class luxcore_lamp(declarative_property_group):
 
     properties = [
         {
+            'type': 'text',
+            'attr': 'label_rgb_gain',
+            'name': 'RGB Gain:'
+        },
+        {
+            'type': 'float',
+            'attr': 'gain_r',
+            'name': 'R',
+            'description': 'Red multiplier',
+            'default': 1,
+            'min': 0.0,
+            'soft_max': 1000.0,
+        },
+        {
+            'type': 'float',
+            'attr': 'gain_g',
+            'name': 'G',
+            'description': 'Green multiplier',
+            'default': 1,
+            'min': 0.0,
+            'soft_max': 1000.0,
+        },
+        {
+            'type': 'float',
+            'attr': 'gain_b',
+            'name': 'B',
+            'description': 'Blue multiplier',
+            'default': 1,
+            'min': 0.0,
+            'soft_max': 1000.0,
+        },
+        {
             'type': 'int',
             'attr': 'samples',
             'name': 'Samples',
@@ -67,12 +100,11 @@ class luxcore_lamp(declarative_property_group):
             'min': -1,
             'soft_max': 16,
             'max': 256,
-            'save_in_preset': True
         },
         {
             'type': 'text',
             'attr': 'label_message',
-            'name': 'Only available when Biased Path engine is used'
+            'name': 'Rest of the settings only available when Biased Path engine is used'
         },
         {
             'type': 'text',
@@ -85,7 +117,6 @@ class luxcore_lamp(declarative_property_group):
             'name': 'Diffuse',
             'description': 'Enable material visibility for indirect rays',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -93,7 +124,6 @@ class luxcore_lamp(declarative_property_group):
             'name': 'Glossy',
             'description': 'Enable material visibility for glossy rays',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -101,6 +131,5 @@ class luxcore_lamp(declarative_property_group):
             'name': 'Specular',
             'description': 'Enable material visibility for specular rays',
             'default': True,
-            'save_in_preset': True
         },
     ]

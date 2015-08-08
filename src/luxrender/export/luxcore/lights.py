@@ -94,6 +94,10 @@ class LightExporter(object):
         self.luxcore_name = ToValidLuxCoreName(name)
 
 
+    def __multiply_gain(self, main_gain, gain_r, gain_g, gain_b):
+        return [main_gain * gain_r, main_gain * gain_g, main_gain * gain_b]
+
+
     def __convert_light(self, luxcore_scene, matrix):
         # TODO: refactor this horrible... thing
         # TODO: find solution for awkward sunsky problem
@@ -165,7 +169,10 @@ class LightExporter(object):
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
                                                  light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
-        gain_spectrum = [energy, energy, energy]  # luxcore gain is spectrum!
+        gain_r = light.luxrender_lamp.luxcore_lamp.gain_r
+        gain_g = light.luxrender_lamp.luxcore_lamp.gain_g
+        gain_b = light.luxrender_lamp.luxcore_lamp.gain_b
+        gain_spectrum = self.__multiply_gain(energy, gain_r, gain_g, gain_b)  # luxcore gain is rgb
 
         # not for distant light,
         # not for area lamps (because these are meshlights and gain is controlled by material settings
@@ -181,7 +188,7 @@ class LightExporter(object):
             if (light.type == 'HEMI' and (not getattr(lux_lamp, 'infinite_map')
                                           or getattr(lux_lamp, 'hdri_multiply'))) or light.type == 'SPOT':
                 colorRaw = getattr(lux_lamp, 'L_color') * energy
-                gain_spectrum = [colorRaw[0], colorRaw[1], colorRaw[2]]
+                gain_spectrum = self.__multiply_gain(energy, colorRaw[0], colorRaw[1], colorRaw[2])
             else:
                 colorRaw = getattr(lux_lamp, 'L_color')
                 color = [colorRaw[0], colorRaw[1], colorRaw[2]]
@@ -379,7 +386,11 @@ class LightExporter(object):
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
                 raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (
                     get_worldscale(as_scalematrix=False) ** 2)
-                emission_color = [raw_color[0], raw_color[1], raw_color[2]]
+
+                gain_r = light.luxrender_lamp.luxcore_lamp.gain_r
+                gain_g = light.luxrender_lamp.luxcore_lamp.gain_g
+                gain_b = light.luxrender_lamp.luxcore_lamp.gain_b
+                emission_color = [raw_color[0] * gain_r, raw_color[1] * gain_g, raw_color[2] * gain_b]
     
                 # light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
     
