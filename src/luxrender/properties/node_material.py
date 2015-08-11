@@ -1154,6 +1154,11 @@ class luxrender_material_output_node(luxrender_node):
         self.inputs.new('NodeSocketShader', 'Exterior Volume')
         self.inputs.new('NodeSocketShader', 'Emission')
 
+    def draw_buttons(self, context, layout):
+        if UseLuxCore():
+            layout.label(text='Not supported', icon='ERROR')
+            layout.label(text='in LuxCore mode!')
+
     def export(self, scene, lux_context, material, mode='indirect'):
 
         print('Exporting node tree, mode: %s' % mode)
