@@ -2010,7 +2010,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             if bpy.data.materials.is_updated:
                 for mat in bpy.data.materials:
-                    if mat.is_updated:
+                    nodetree_name = mat.luxrender_material.nodetree
+
+                    if nodetree_name:
+                        # TODO: Blender spams unnecessary updates, it might be better to export the material props
+                        # and look for changes rathen than using Blender's is_updated (applies to other stuff like
+                        # textures as well)
+                        nodetree = bpy.data.node_groups[nodetree_name]
+                        nodetree_updated = nodetree.is_updated or nodetree.is_updated_data
+                    else:
+                        nodetree_updated = False
+
+                    if mat.is_updated or nodetree_updated:
                         # only update this material
                         update_changes.changed_materials.add(mat)
                         update_changes.set_cause(materials = True)

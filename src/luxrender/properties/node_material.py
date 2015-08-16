@@ -990,7 +990,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
                                  soft_min=-100.0, soft_max=100.0, precision=2)
     p2 = bpy.props.FloatProperty(name='p2', description='', default=-10.0, subtype='NONE', min=-100.0, max=100.0,
                                  soft_min=-100.0, soft_max=100.0, precision=2)
-    p3 = bpy.props.FloatProperty(name='p2', description='', default=-2.0, subtype='NONE', min=-100.0, max=100.0,
+    p3 = bpy.props.FloatProperty(name='p3', description='', default=-2.0, subtype='NONE', min=-100.0, max=100.0,
                                  soft_min=-100.0, soft_max=100.0, precision=2)
 
     def init(self, context):
