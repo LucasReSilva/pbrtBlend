@@ -41,15 +41,16 @@ class luxcore_lamp(declarative_property_group):
 
     controls = [
         ['label_rgb_gain', 'gain_r', 'gain_g', 'gain_b'],
-        'samples',
         'label_message',
+        'samples',
         'label_light_visibility',
         ['visibility_indirect_diffuse_enable', 'visibility_indirect_glossy_enable', 'visibility_indirect_specular_enable'],
     ]
 
-    visibility = {
+    visibility = {}
+
+    enabled = {
         'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
-        'label_message': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'label_light_visibility': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_diffuse_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_glossy_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
@@ -104,7 +105,7 @@ class luxcore_lamp(declarative_property_group):
         {
             'type': 'text',
             'attr': 'label_message',
-            'name': 'Rest of the settings only available when Biased Path engine is used'
+            'name': 'Biased Path specific settings:'
         },
         {
             'type': 'text',
