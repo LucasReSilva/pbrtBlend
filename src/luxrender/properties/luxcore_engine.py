@@ -732,11 +732,11 @@ may mute lamps and caustics',
             'attr': 'filter_width',
             'name': 'Pixels',
             'description': 'Filter width in pixels. Lower values result in a sharper image, higher values smooth out noise',
-            'default': 2.0,
+            'default': 1.5,
             'min': 0.5,
             'soft_min': 0.5,
             'max': 10.0,
-            'soft_max': 4.0,
+            'soft_max': 2.5,
             'save_in_preset': True
         },
         # Accelerator settings

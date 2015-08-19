@@ -31,6 +31,7 @@ from ...outputs.luxcore_api import pyluxcore
 from ...export import get_worldscale
 from ...export import object_anim_matrices
 from ...export import fix_matrix_order
+from ...export import matrix_to_list
 
 from .utils import calc_shutter
 

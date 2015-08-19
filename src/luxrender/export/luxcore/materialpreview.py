@@ -58,18 +58,86 @@ class MaterialPreviewExporter(object):
         strands_settings.tesseltype = 'solid'
 
         luxcore_exporter = LuxCoreExporter(self.blender_scene, self.renderengine)
-        luxcore_config = luxcore_exporter.convert(film_width, film_height)
+
+        if self.preview_type == 'MATERIAL':
+            luxcore_config = luxcore_exporter.convert(film_width, film_height)
+        else:
+            luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
+            scn_props = pyluxcore.Properties()
+
+            #luxcore_exporter.convert_camera()
+            # Convert camera
+            scn_props.Set(pyluxcore.Property('scene.camera.type', 'orthographic'))
+            scn_props.Set(pyluxcore.Property('scene.camera.lookat.target', [0, 0, 0]))
+            scn_props.Set(pyluxcore.Property('scene.camera.lookat.orig', [0, 0, 1]))
+            scn_props.Set(pyluxcore.Property('scene.camera.up', [0, 1, 0]))
+            # TODO: screenwindow?
+
+            # Convert the texture
+            luxcore_exporter.convert_texture(self.preview_texture)
+            scn_props.Set(luxcore_exporter.pop_updated_scene_properties())
+
+            # Create matte material to preview the texture
+            tex_name = luxcore_exporter.texture_cache[self.preview_texture].luxcore_name
+            mat_name = 'texture_preview_mat'
+            scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', 'matte'))
+            scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', tex_name))
+            # Create mesh (plane)
+            mesh_name = 'texture_preview_mesh'
+            vertices = [
+                (1, 1, 0),
+                (1, -1, 0),
+                (-1, -1, 0),
+                (-1, 1, 0)
+            ]
+            faces = [
+                (0, 1, 2),
+                (2, 3, 0)
+            ]
+            uv = [
+                (1, 1),
+                (1, 0),
+                (0, 0),
+                (0, 1)
+            ]
+            luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, uv, None, None)
+            # Create object
+            obj_name = 'texture_preview_object'
+            scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.ply', mesh_name))
+            scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.material', mat_name))
+
+            # Create light
+            scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.type', 'sharpdistant'))
+            scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.direction', [0, 0, -1]))
+            scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.color', [3.1] * 3))
+
+            luxcore_scene.Parse(scn_props)
+
+            luxcore_exporter.convert_config(film_width, film_height)
+            cfg_props = luxcore_exporter.config_properties
+            cfg_props.Set(pyluxcore.Property('film.imagepipeline.0.type', 'TONEMAP_LINEAR'))
+            cfg_props.Set(pyluxcore.Property('film.imagepipeline.0.scale', 1.0))
+            cfg_props.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
+            cfg_props.Set(pyluxcore.Property('film.filter.width', 2.0))
+            cfg_props.Set(pyluxcore.Property('renderengine.type', 'PATHCPU'))
+            cfg_props.Set(pyluxcore.Property('path.maxdepth', 1))
+
+            luxcore_config = pyluxcore.RenderConfig(cfg_props, luxcore_scene)
 
         # Check if we even have to render a new preview (only when something changed)
         # Blender spams many unnecessary updates. The cache has to be static because each preview update
         # creates its own instance of RENDERENGINE_luxrender (and thus MaterialPreviewExporter).
-        new_preview_properties = str(luxcore_exporter.scene_properties)
+        new_preview_properties = str(luxcore_exporter.scene_properties) + str(luxcore_exporter.config_properties)
 
         if MaterialPreviewExporter.cached_preview_properties == new_preview_properties:
             print('Skipping preview render, type:', self.preview_type, 'is_thumbnail:', self.is_thumbnail)
             return
         else:
             MaterialPreviewExporter.cached_preview_properties = new_preview_properties
+
+        # For texture preview, the luxcore config is already complete
+        if self.preview_type == 'TEXTURE':
+            return luxcore_config
 
         # Custom config for preview
         luxcore_config.Parse(self.__create_preview_config())
@@ -82,16 +150,12 @@ class MaterialPreviewExporter(object):
 
         scn_props = pyluxcore.Properties()
 
-        if self.preview_type == 'MATERIAL':
-            if self.preview_object.name == 'preview.004' and not self.is_thumbnail:
-                # Scene setup for the "World sphere" preview object, should be lit by sun + sky
-                self.__create_setup_worldsphere(luxcore_exporter, scn_props)
-            else:
-                # Scene setup for all other preview objects
-                self.__create_setup_material_preview(luxcore_scene, scn_props)### Texture preview ###
+        if self.preview_object.name == 'preview.004' and not self.is_thumbnail:
+            # Scene setup for the "World sphere" preview object, should be lit by sun + sky
+            self.__create_setup_worldsphere(luxcore_exporter, scn_props)
         else:
-            # Scene setup for texture preview
-            self.__create_setup_texture_preview(luxcore_exporter, scn_props)
+            # Scene setup for all other preview objects
+            self.__create_setup_material_preview(luxcore_scene, scn_props)
 
         luxcore_scene.Parse(scn_props)
 
@@ -176,37 +240,6 @@ class MaterialPreviewExporter(object):
         self.__create_checker_plane(luxcore_scene, scn_props, 'plane_behind_object', vertices, faces)
 
 
-    def __create_setup_texture_preview(self, luxcore_exporter, scn_props):
-        # Export preview texture and get name
-        luxcore_exporter.convert_texture(self.preview_texture)
-        scn_props.Set(luxcore_exporter.pop_updated_scene_properties())
-        tex_name = luxcore_exporter.texture_cache[self.preview_texture].luxcore_name
-        # Create matte material to preview the texture
-        mat_name = 'texture_preview_mat'
-        scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', 'matte'))
-        scn_props.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', tex_name))
-        # Assign material to the preview object
-        exported_object = luxcore_exporter.object_cache[self.preview_object].exported_objects[0]
-        obj_name = exported_object.luxcore_object_name
-        shape_name = exported_object.luxcore_shape_name
-        # move the preview plane slightly up to avoid numerical precison problems at center (dark speck)
-        transform = [1, 0, 0, 0,
-                     0, 1, 0, 0,
-                     0, 0, 1, 0,
-                     0, 0, 0.86, 1]
-        scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.material', mat_name))
-        scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.shape', shape_name))
-        scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.transformation', transform))
-        # Different camera settings are necessary
-        scn_props.Set(pyluxcore.Property('scene.camera.lookat.target', [0, 0, 0]))
-        scn_props.Set(pyluxcore.Property('scene.camera.lookat.orig', [0, 0, 4]))
-        scn_props.Set(pyluxcore.Property('scene.camera.up', [0, 1, 0]))
-        # Light for the texture preview
-        scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.type', 'sharpdistant'))
-        scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.direction', [0, 0, -1]))
-        scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.color', [3.1] * 3))
-
-
     def __create_checker_plane(self, luxcore_scene, scn_props, name, vertices, faces, light=False):
         mesh_name = name + '_mesh'
         mat_name = name + '_mat'
@@ -247,21 +280,6 @@ class MaterialPreviewExporter(object):
         # assign material to object
         scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.material', [mat_name]))
 
-        # add mesh
-        vertices = [
-            (1, 1, 0),
-            (1, -1, 0),
-            (-1, -1, 0),
-            (-1, 1, 0)
-        ]
-        faces = [
-            (0, 1, 2),
-            (2, 3, 0)
-        ]
-        luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None)
-        # assign mesh to object
-        scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.shape', [mesh_name]))
-
         # copy transformation of area lamp object
         scale_matrix = Matrix()
         scale_matrix[0][0] = scale
@@ -273,7 +291,21 @@ class MaterialPreviewExporter(object):
         transform_matrix[2][3] = position[2]
 
         transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix, apply_worldscale=True)
-        scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.transformation', transform))
+
+        # add mesh
+        vertices = [
+            (1, 1, 0),
+            (1, -1, 0),
+            (-1, -1, 0),
+            (-1, 1, 0)
+        ]
+        faces = [
+            (0, 1, 2),
+            (2, 3, 0)
+        ]
+        luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None, transform)
+        # assign mesh to object
+        scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.shape', [mesh_name]))
 
 
     def __create_preview_config(self):
@@ -281,50 +313,30 @@ class MaterialPreviewExporter(object):
         cfg_props.Set(pyluxcore.Property('film.imagepipeline.0.type', 'TONEMAP_LINEAR'))
         cfg_props.Set(pyluxcore.Property('film.imagepipeline.0.scale', 1.0))
         cfg_props.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
+        cfg_props.Set(pyluxcore.Property('film.filter.width', 1.5))
 
-        if self.preview_type == 'MATERIAL':
-            cfg_props.Set(pyluxcore.Property('film.filter.width', 1.5))
-            cfg_props.Set(pyluxcore.Property('renderengine.type', 'BIASPATHCPU'))
-            cfg_props.Set(pyluxcore.Property('tile.size', 16))
-            cfg_props.Set(pyluxcore.Property('tile.multipass.enable', not self.is_thumbnail))
-            cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', 0.045))
-            cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', 0))
-            aa_size = 3 if self.is_thumbnail else 1
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_size))
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', 1))
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.glossy.size', 1))
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.specular.size', 1))
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.total', 8))
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', 3))
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.glossy ', 1))
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.specular', 4))
-            cfg_props.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', 3))
-        else:
-            # Texture preview
-            cfg_props.Set(pyluxcore.Property('film.filter.width', 2.0))
-            cfg_props.Set(pyluxcore.Property('renderengine.type', 'PATHCPU'))
-            cfg_props.Set(pyluxcore.Property('path.maxdepth', 1))
+        cfg_props.Set(pyluxcore.Property('renderengine.type', 'BIASPATHCPU'))
+
+        cfg_props.Set(pyluxcore.Property('tile.size', 16))
+        cfg_props.Set(pyluxcore.Property('tile.multipass.enable', not self.is_thumbnail))
+        cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold', 0.045))
+        cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', 0))
+
+        aa_size = 3 if self.is_thumbnail else 1
+        cfg_props.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_size))
+        cfg_props.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', 1))
+        cfg_props.Set(pyluxcore.Property('biaspath.sampling.glossy.size', 1))
+        cfg_props.Set(pyluxcore.Property('biaspath.sampling.specular.size', 1))
+        cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.total', 8))
+        cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', 3))
+        cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.glossy ', 1))
+        cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.specular', 4))
+        cfg_props.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', 3))
 
         return cfg_props
 
 
     def __delete_default_objects(self, luxcore_scene):
-        if self.preview_type == 'TEXTURE':
-            luxcore_scene.DeleteObject('checkers_0191')
-            luxcore_scene.DeleteObject('checkers_0190')
-            luxcore_scene.DeleteObject('checkers_0221')
-            luxcore_scene.DeleteObject('checkers_0220')
-            luxcore_scene.DeleteObject('checkers_0171')
-            luxcore_scene.DeleteObject('checkers_0170')
-            luxcore_scene.DeleteObject('checkers_0141')
-            luxcore_scene.DeleteObject('checkers_0140')
-            luxcore_scene.DeleteObject('checkers_0131')
-            luxcore_scene.DeleteObject('checkers_0130')
-            luxcore_scene.DeleteObject('checkers_0101')
-            luxcore_scene.DeleteObject('checkers_0100')
-            luxcore_scene.DeleteObject('checkers_031')
-            luxcore_scene.DeleteObject('checkers_030')
-
         luxcore_scene.DeleteObject('checkers_0080')
         luxcore_scene.DeleteObject('checkers_0081')
         luxcore_scene.DeleteObject('checkers_0070')

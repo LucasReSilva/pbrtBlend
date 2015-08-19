@@ -40,15 +40,17 @@ class luxcore_lamp(declarative_property_group):
     ef_attach_to = ['luxrender_lamp']
 
     controls = [
-        'samples',
+        ['label_rgb_gain', 'gain_r', 'gain_g', 'gain_b'],
         'label_message',
+        'samples',
         'label_light_visibility',
         ['visibility_indirect_diffuse_enable', 'visibility_indirect_glossy_enable', 'visibility_indirect_specular_enable'],
     ]
 
-    visibility = {
+    visibility = {}
+
+    enabled = {
         'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
-        'label_message': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'label_light_visibility': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_diffuse_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_glossy_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
@@ -59,6 +61,38 @@ class luxcore_lamp(declarative_property_group):
 
     properties = [
         {
+            'type': 'text',
+            'attr': 'label_rgb_gain',
+            'name': 'RGB Gain:'
+        },
+        {
+            'type': 'float',
+            'attr': 'gain_r',
+            'name': 'R',
+            'description': 'Red multiplier',
+            'default': 1,
+            'min': 0.0,
+            'soft_max': 1000.0,
+        },
+        {
+            'type': 'float',
+            'attr': 'gain_g',
+            'name': 'G',
+            'description': 'Green multiplier',
+            'default': 1,
+            'min': 0.0,
+            'soft_max': 1000.0,
+        },
+        {
+            'type': 'float',
+            'attr': 'gain_b',
+            'name': 'B',
+            'description': 'Blue multiplier',
+            'default': 1,
+            'min': 0.0,
+            'soft_max': 1000.0,
+        },
+        {
             'type': 'int',
             'attr': 'samples',
             'name': 'Samples',
@@ -67,12 +101,11 @@ class luxcore_lamp(declarative_property_group):
             'min': -1,
             'soft_max': 16,
             'max': 256,
-            'save_in_preset': True
         },
         {
             'type': 'text',
             'attr': 'label_message',
-            'name': 'Only available when Biased Path engine is used'
+            'name': 'Biased Path specific settings:'
         },
         {
             'type': 'text',
@@ -85,7 +118,6 @@ class luxcore_lamp(declarative_property_group):
             'name': 'Diffuse',
             'description': 'Enable material visibility for indirect rays',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -93,7 +125,6 @@ class luxcore_lamp(declarative_property_group):
             'name': 'Glossy',
             'description': 'Enable material visibility for glossy rays',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -101,6 +132,5 @@ class luxcore_lamp(declarative_property_group):
             'name': 'Specular',
             'description': 'Enable material visibility for specular rays',
             'default': True,
-            'save_in_preset': True
         },
     ]

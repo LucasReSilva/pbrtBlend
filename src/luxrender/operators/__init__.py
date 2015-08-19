@@ -26,15 +26,10 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import json, math, os, struct, mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
+import os,  mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
 
 # LuxRender Libs
 from .. import LuxRenderAddon
-from ..outputs import LuxLog, LuxManager
-from ..export.scene import SceneExporter
-from ..export import materials as export_materials
-
-from ..extensions_framework import util as efutil
 
 # Per-IDPropertyGroup preset handling
 
@@ -277,8 +272,8 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
                         # Remove the first two directories and the filename
                         # e.g. luxrender-luxblend25-bfb488c84111/src/luxrender/ui/textures/wrinkled.py
                         # becomes luxrender/ui/textures/
-                        target_path = temp_dir_path + '/' + member.split('/', 2)[-1]
-                        target_path = os.path.join(*target_path.split('/')[:-1])
+                        target_path = os.path.join(temp_dir_path,
+                                        os.path.join(*member.split('/')[2:-1]))
 
                         filename = os.path.basename(member)
                         # Skip directories

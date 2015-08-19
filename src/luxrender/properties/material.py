@@ -391,13 +391,14 @@ class luxrender_material(declarative_property_group):
             context.material.use_transparency = False
             context.material.alpha = 1.0
 
+        self.set_master_color(context.material)
+
         # Also refresh the preview when changing mat type
         refresh_preview(self, context)
 
     controls = [  # Type select Menu is drawn manually  #'nodetree', drawn manually
                   'Interior',
                   'Exterior',
-                  # 'generatetangents' TODO: Make this checkbox actually do something (it has to write a line to the mesh definition)
                ] + \
                TF_normalmap.controls + \
                TF_bumpmap.controls
@@ -446,13 +447,6 @@ class luxrender_material(declarative_property_group):
                         'name': 'Node Tree',
                         'default': ''
                     },
-                    # {
-                    # 'type': 'bool',
-                    # 'attr': 'generatetangents',
-                    # 'name': 'Generate Tangents',
-                    # 'description': 'Generate tanget space for meshes with this material. Enable when using a bake-generated normal map',
-                    # 'default': False,
-                    # },
                  ] + \
                  TF_bumpmap.get_properties() + \
                  TF_normalmap.get_properties() + \
@@ -482,6 +476,14 @@ class luxrender_material(declarative_property_group):
         'velvet': 'Kd',
     }
 
+    metal_color_map = {
+        'nk': [0.5, 0.5, 0.5],
+        'amorphous carbon': [0.1, 0.1, 0.1],
+        'copper': [0.8, 0.4, 0.3],
+        'gold': [1.0, 0.84, 0.0],
+        'silver': [0.6, 0.6, 0.7],
+        'aluminium': [0.3, 0.3, 0.3]
+    }
 
     def reset(self, prnt=None):
         super().reset()
@@ -505,11 +507,23 @@ class luxrender_material(declarative_property_group):
         if blender_material is None:
             return
 
-        if self.type in self.master_color_map.keys():
-            submat = getattr(self, 'luxrender_mat_%s' % self.type)
-            submat_col = getattr(submat, '%s_color' % self.master_color_map[self.type])
-            if blender_material.diffuse_color != submat_col:
-                blender_material.diffuse_color = submat_col
+        submat = getattr(self, 'luxrender_mat_%s' % self.type)
+
+        if self.type == 'metal' or (self.type == 'metal2' and submat.metaltype == 'preset'):
+            preset = submat.name if self.type == 'metal' else submat.preset
+
+            if preset in self.metal_color_map.keys():
+                submat_col = self.metal_color_map[preset]
+
+                if blender_material.diffuse_color != submat_col:
+                    blender_material.diffuse_color = submat_col
+
+        else:
+            if self.type in self.master_color_map.keys():
+                submat_col = getattr(submat, '%s_color' % self.master_color_map[self.type])
+
+                if blender_material.diffuse_color != submat_col:
+                    blender_material.diffuse_color = submat_col
 
     def exportNodetree(self, scene, lux_context, material, mode):
         outputNode = find_node(material, 'luxrender_material_output_node')
@@ -2616,6 +2630,8 @@ class luxrender_mat_metal(declarative_property_group):
                              ('aluminium', 'Aluminium', 'aluminium')
                          ],
                          'default': 'aluminium',
+                         'update': lambda s, c: c.material.luxrender_material.set_master_color(c.material) if hasattr(
+                             c.material, 'luxrender_material') else None,
                          'save_in_preset': True
                      },
                      {
@@ -2762,6 +2778,8 @@ class luxrender_mat_metal2(declarative_property_group):
                              ('aluminium', 'Aluminium', 'aluminium')
                          ],
                          'default': 'aluminium',
+                         'update': lambda s, c: c.material.luxrender_material.set_master_color(c.material) if hasattr(
+                             c.material, 'luxrender_material') else None,
                          'save_in_preset': True
                      },
                      {

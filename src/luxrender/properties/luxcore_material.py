@@ -161,6 +161,6 @@ class luxcore_material(declarative_property_group):
         {
             'type': 'text',
             'attr': 'label_biaspath_only_settings',
-            'name': 'Biased Path only:'
+            'name': 'Biased Path specific settings:'
         },
     ]

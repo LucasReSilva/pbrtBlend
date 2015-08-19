@@ -364,7 +364,7 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kt', 'color')))
                 self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
 
-                if material.luxrender_material.luxrender_mat_glossy.useior:
+                if material.luxrender_material.luxrender_mat_glossytranslucent.useior:
                     self.properties.Set(pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
                 else:
                     self.properties.Set(pyluxcore.Property(prefix + '.ks', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks', 'color')))

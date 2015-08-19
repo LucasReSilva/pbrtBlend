@@ -31,6 +31,7 @@ from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import matrix_to_list, is_obj_visible
 
 from .objects import ObjectExporter
+from .lights import LightExporter
 
 
 class DupliExporter(object):
@@ -115,7 +116,11 @@ class DupliExporter(object):
                 continue
 
             # metaballs are omitted from this function intentionally.
-            if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE']:
+            if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE', 'LAMP']:
+                continue
+
+            if dupli_ob.matrix.determinant() == 0:
+                print('WARNING: Particle with non-invertible matrix! Skipping it.')
                 continue
 
             if dupli_ob.object not in self.luxcore_exporter.instanced_duplis:
@@ -154,10 +159,15 @@ class DupliExporter(object):
 
             persistent_id_str = '_'.join([str(elem) for elem in persistent_id])
             dupli_name_suffix = '%s_%s_%s' % (self.duplicator.name, psys_name, persistent_id_str)
-            object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
-                                             do, dupli_name_suffix)
-            properties = object_exporter.convert(update_mesh=False, update_material=False, luxcore_scene=luxcore_scene,
-                                                 anim_matrices=None, matrix=dm)
+
+            if do.type == 'LAMP':
+                light_exporter = LightExporter(self.luxcore_exporter, self.blender_scene, do, dupli_name_suffix)
+                properties = light_exporter.convert(luxcore_scene, dm)
+            else:
+                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
+                                                 do, dupli_name_suffix)
+                properties = object_exporter.convert(update_mesh=False, update_material=False, luxcore_scene=luxcore_scene,
+                                                     anim_matrices=None, matrix=dm)
             self.properties.Set(properties)
 
         del duplis
