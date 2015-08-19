@@ -119,6 +119,10 @@ class DupliExporter(object):
             if dupli_ob.object.type not in ['MESH', 'SURFACE', 'FONT', 'CURVE', 'LAMP']:
                 continue
 
+            if dupli_ob.matrix.determinant() == 0:
+                print('WARNING: Particle with non-invertible matrix! Skipping it.')
+                continue
+
             if dupli_ob.object not in self.luxcore_exporter.instanced_duplis:
                 self.luxcore_exporter.instanced_duplis.add(dupli_ob.object)
 
