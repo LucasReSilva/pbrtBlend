@@ -26,6 +26,7 @@
 #
 
 import bpy
+from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName
 
 
 class luxrender_node(bpy.types.Node):
@@ -43,7 +44,7 @@ class luxrender_material_node(luxrender_node):
     pass
 
 
-# # For eliminating redundant volume definitions
+# For eliminating redundant volume definitions
 class ExportedVolumes(object):
     vol_names = []
 
@@ -116,3 +117,75 @@ def check_node_get_paramset(node):
         print('No get_paramset() for node: ' + node.bl_idname)
         return False
     return True
+
+# LuxCore node export functions
+
+prefix_materials = 'scene.materials'
+prefix_textures = 'scene.textures'
+prefix_volumes = 'scene.volumes'
+
+def create_luxcore_name(node, suffix=None, name=None):
+    """
+    Construct a unique name for the node to be used in the LuxCore scene definitions.
+    """
+    if name is None:
+        name = node.name
+
+    nodetree = node.id_data
+    name_parts = [name, nodetree.name]
+
+    if nodetree.library:
+        name_parts.append(nodetree.library.name)
+
+    if suffix:
+        name_parts.append(suffix)
+
+    return ToValidLuxCoreName('_'.join(name_parts))
+
+def create_luxcore_name_mat(node, name=None):
+    return create_luxcore_name(node, 'mat', name)
+
+def create_luxcore_name_vol(node, name=None):
+    return create_luxcore_name(node, 'vol', name)
+
+def set_prop(prefix, properties, luxcore_name, property, value):
+    """
+    Set a LuxCore property.
+    Example: set_luxcore_prop(properties, 'type', 'matte') is the equivalent of
+    properties.Set(pyluxcore.Property('scene.materials.<name>.type', 'matte'))
+
+    :param prefix: LuxCore property prefix (e.g. 'scene.materials')
+    :param properties: LuxCore properties that are edited. Type: pyluxcore.Properties
+    :param luxcore_name: LuxCore name of the material
+    :param property: Property string that is set, e.g. 'type' or 'kd'
+    :param value: Value for the property (string, number or list)
+    """
+    key = '.'.join([prefix, luxcore_name, property])
+    properties.Set(pyluxcore.Property(key, value))
+
+def set_prop_mat(properties, luxcore_name, property, value):
+    set_prop(prefix_materials, properties, luxcore_name, property, value)
+
+def set_prop_tex(properties, luxcore_name, property, value):
+    set_prop(prefix_textures, properties, luxcore_name, property, value)
+
+def set_prop_vol(properties, luxcore_name, property, value):
+    set_prop(prefix_volumes, properties, luxcore_name, property, value)
+
+def export_black_matte(properties):
+    luxcore_name = 'BLACK_MATTE'
+    set_prop_mat(properties, luxcore_name, 'type', 'matte')
+    set_prop_mat(properties, luxcore_name, 'kd', [0, 0, 0])
+    return luxcore_name
+
+def export_submat_luxcore(properties, socket, name=None):
+    node = get_linked_node(socket)
+
+    if node is None:
+        # Use a black material if socket is not linked
+        print('WARNING: Unlinked material socket! Using a black material as fallback.')
+        submat_name = export_black_matte(properties)
+    else:
+        submat_name = node.export_luxcore(properties, name)
+
+    return submat_name

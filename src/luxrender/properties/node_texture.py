@@ -41,6 +41,7 @@ from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
+from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 
 from ..properties.texture import (
     luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
@@ -52,6 +53,8 @@ from ..properties.node_sockets import (
     luxrender_TC_brickmodtex_socket, luxrender_TC_bricktex_socket, luxrender_TC_mortartex_socket,
     luxrender_transform_socket, luxrender_coordinate_socket
 )
+
+from . import set_prop_tex, create_luxcore_name
 
 # Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -266,6 +269,24 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
             clouds_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'blender_clouds', self.name, clouds_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_clouds')
+        set_prop_tex(properties, luxcore_name, 'noisetype', self.noisetype)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'noisedepth', self.noisedepth)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class

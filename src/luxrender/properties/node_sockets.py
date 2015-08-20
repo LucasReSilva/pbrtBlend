@@ -50,6 +50,8 @@ from ..outputs import LuxManager, LuxLog
 
 from ..properties.material import *  # for now just the big hammer for starting autogenerate sockets
 
+from . import set_prop_tex
+
 # Get all float properties
 def get_props(TextureParameter, attribute):
     for prop in TextureParameter.get_properties():
@@ -62,6 +64,20 @@ def get_props(TextureParameter, attribute):
 def get_default(TextureParameter):
     TextureParameter = TextureParameter.default
     return TextureParameter
+
+
+def export_socket_luxcore(properties, socket, fallback=None):
+    """
+    Export a socket. If the socket is linked, the linked node is exported and the name of the resulting LuxCore node
+    is returned.
+    If the socket is not linked, the fallback value is returned.
+    """
+    linked_node = get_linked_node(socket)
+
+    if linked_node is not None:
+        return linked_node.export_luxcore(properties)
+    else:
+        return fallback
 
 # Custom socket types, lookup parameters here:
 # http://www.blender.org/documentation/blender_python_api_2_66a
@@ -250,9 +266,8 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
 
         return kd_params
 
-    def export_luxcore(self):
-        # For now, only export the color
-        return list(self.color)
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self, list(self.color))
 
 
 @LuxRenderAddon.addon_register_class
@@ -1119,6 +1134,9 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
 
         return amount_params
 
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self, self.amount)
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_TF_bump_socket(bpy.types.NodeSocket):
@@ -1171,6 +1189,54 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
             bumpmap_params.add_texture('bumpmap', tex_name)
 
         return bumpmap_params
+
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_TF_normal_socket(bpy.types.NodeSocket):
+    """Normal socket (LuxCore only)"""
+    bl_idname = 'luxrender_TF_normal_socket'
+    bl_label = 'Normal socket'
+
+    # meaningful property
+    def normal_update(self, context):
+        pass
+
+    normal = bpy.props.FloatProperty(name=get_props(TF_normalmap, 'name'), description=get_props(TF_normalmap, 'description'),
+                                   default=get_props(TF_normalmap, 'default'), subtype=get_props(TF_normalmap, 'subtype'),
+                                   unit=get_props(TF_normalmap, 'unit'), min=get_props(TF_normalmap, 'min'),
+                                   max=get_props(TF_normalmap, 'max'), soft_min=get_props(TF_normalmap, 'soft_min'),
+                                   soft_max=get_props(TF_normalmap, 'soft_max'),
+                                   precision=get_props(TF_normalmap, 'precision'), update=normal_update)
+
+    # helper property
+    def default_value_get(self):
+        return self.normal
+
+    def default_value_set(self, value):
+        self.normal = value
+
+    default_value = bpy.props.FloatProperty(name=get_props(TF_normalmap, 'name'),
+                                            description=get_props(TF_normalmap, 'description'),
+                                            default=get_props(TF_normalmap, 'default'),
+                                            subtype=get_props(TF_normalmap, 'subtype'),
+                                            unit=get_props(TF_normalmap, 'unit'), min=get_props(TF_normalmap, 'min'),
+                                            max=get_props(TF_normalmap, 'max'),
+                                            soft_min=get_props(TF_normalmap, 'soft_min'),
+                                            soft_max=get_props(TF_normalmap, 'soft_max'),
+                                            precision=get_props(TF_normalmap, 'precision'), get=default_value_get,
+                                            set=default_value_set)
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=self.name)
+
+    def draw_color(self, context, node):
+        return float_socket_color
+
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1619,6 +1685,9 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
             sigma_params = ParamSet().add_float('sigma', self.sigma)
 
         return sigma_params
+
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self, self.sigma)
 
 
 @LuxRenderAddon.addon_register_class
@@ -2661,6 +2730,16 @@ class luxrender_coordinate_socket(bpy.types.NodeSocket):
     # Socket color
     def draw_color(self, context, node):
         return 0.50, 0.25, 0.60, 1.0
+
+    def export_luxcore(self, properties):
+        default_mapping_type = 'globalmapping3d'
+        default_transformation = [
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ]
+        return export_socket_luxcore(properties, self, [default_mapping_type, default_transformation])
 
 
 @LuxRenderAddon.addon_register_class

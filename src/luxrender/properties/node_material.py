@@ -50,6 +50,8 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 
 from ..properties.node_sockets import *
 
+from . import set_prop_mat, create_luxcore_name_mat, export_black_matte, export_submat_luxcore
+
 
 class luxrender_texture_maker:
     def __init__(self, lux_context, root_name):
@@ -606,12 +608,24 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
         return make_material(mat_type, self.name, matte_params)
 
-    def export_material_luxcore(self, properties):
-        # Test
-        luxcore_name = ToValidLuxCoreName(self.name + '_mat')
-        prefix = 'scene.materials.' + luxcore_name
-        properties.Set(pyluxcore.Property(prefix + '.type', 'matte'))
-        properties.Set(pyluxcore.Property(prefix + '.kd', self.inputs[0].export_luxcore()))
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        kd = self.inputs[0].export_luxcore(properties)
+        sigma = self.inputs[1].export_luxcore(properties)
+        bump = self.inputs[2].export_luxcore(properties) # may be None!
+
+        if sigma == 0:
+            set_prop_mat(properties, luxcore_name, 'type', 'matte')
+        else:
+            set_prop_mat(properties, luxcore_name, 'type', 'roughmatte')
+            set_prop_mat(properties, luxcore_name, 'sigma', sigma)
+
+        set_prop_mat(properties, luxcore_name, 'kd', kd)
+
+        if bump is not None:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
         return luxcore_name
 
 
@@ -808,7 +822,20 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         self.inputs.new('NodeSocketShader', 'Material 1')
         self.inputs.new('NodeSocketShader', 'Material 2')
 
+        if UseLuxCore():
+            # LuxCore supports bumpmapping on the mix material
+            self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+
         self.outputs.new('NodeSocketShader', 'Surface')
+
+    def draw_buttons(self, context, layout):
+        # When switching from Classic to LuxCore API, add the bump socket. Don't remove it when switching back so
+        # node connections are not destroyed, the bump slot will simply be ignored by the Classic API export
+        if UseLuxCore():
+            if not 'Bump' in self.inputs.keys():
+                self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+            if not 'Normal' in self.inputs.keys():
+                self.inputs.new('luxrender_TF_normal_socket', 'Normal')
 
     def export_material(self, make_material, make_texture):
         print('export node: mix')
@@ -833,6 +860,26 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         mix_params.add_string("namedmaterial2", mat2_name)
 
         return make_material(mat_type, self.name, mix_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        amount = self.inputs[0].export_luxcore(properties)
+        mat1 = export_submat_luxcore(properties, self.inputs[1])
+        mat2 = export_submat_luxcore(properties, self.inputs[2])
+        bump = self.inputs[3].export_luxcore(properties) # may be None!
+        normal = self.inputs[4].export_luxcore(properties) # may be None!
+
+        set_prop_mat(properties, luxcore_name, 'type', 'mix')
+        set_prop_mat(properties, luxcore_name, 'amount', amount)
+        set_prop_mat(properties, luxcore_name, 'material1', mat1)
+        set_prop_mat(properties, luxcore_name, 'material2', mat2)
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        if normal:
+            set_prop_mat(properties, luxcore_name, 'normaltex', normal)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -1162,24 +1209,12 @@ class luxrender_material_output_node(luxrender_node):
         self.inputs.new('NodeSocketShader', 'Exterior Volume')
         self.inputs.new('NodeSocketShader', 'Emission')
 
-    def draw_buttons(self, context, layout):
-        if UseLuxCore():
-            layout.label(text='Not supported', icon='ERROR')
-            layout.label(text='in LuxCore mode!')
-
     def export_luxcore(self, material, properties):
-        print('LuxCore Node export')
+        tree_name = material.luxrender_material.nodetree
+        print('Exporting nodetree', tree_name, 'of material', material.name)
 
         surface_socket = self.inputs[0]
-        if not surface_socket.is_linked:
-            return None
-
-        surface_node = surface_socket.links[0].from_node
-        tree_name = material.luxrender_material.nodetree
-
-        # Export the material
-        #if check_node_export_material(surface_node):
-        return surface_node.export_material_luxcore(properties)
+        return export_submat_luxcore(properties, surface_socket, material.name)
 
     def export(self, scene, lux_context, material, mode='indirect'):
 

@@ -30,6 +30,7 @@ import bpy
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
+from ...export import get_expanded_file_name
 from ...properties import find_node
 
 from .utils import convert_texture_channel, generate_volume_name, get_elem_key
@@ -67,15 +68,14 @@ class MaterialExporter(object):
     def __convert_node_material(self):
         self.__generate_material_name(self.material.name)
 
-        #def exportNodetree(self, scene, lux_context, material, mode):
         output_node = find_node(self.material, 'luxrender_material_output_node')
-
-        #print('outputNode: ', output_node)
 
         if output_node is None:
             self.__convert_default_matte()
 
         try:
+            # TODO: library name to node names
+
             self.luxcore_name = output_node.export_luxcore(self.material, self.properties)
         except Exception as err:
             print('Node material export failed, skipping material: %s\n%s' % (self.material.name, err))
@@ -185,7 +185,7 @@ class MaterialExporter(object):
             if lux_mat_type == 'matte':
                 sigma = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'sigma', 'float')
 
-                if sigma == '0.0':
+                if sigma[0] == 0:
                     self.properties.Set(pyluxcore.Property(prefix + '.type', ['matte']))
                     self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
                 else:

@@ -39,13 +39,14 @@ from ..properties.texture import (
     luxrender_tex_imagemap
 )
 from ..export import (
-    ParamSet, process_filepath_data, get_worldscale
+    ParamSet, process_filepath_data, get_worldscale, matrix_to_list
 )
 
 from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
+from ..outputs.luxcore_api import UseLuxCore
 
 from ..properties.node_material import get_socket_paramsets
 
@@ -74,17 +75,27 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
                                            max=radians(359.99))
     scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
 
+    # LuxCore uses different names for the mapping types
+    luxcore_mapping_type_map = {
+        'global': 'globalmapping3d',
+        'uv': 'uvmapping3d'
+    }
+
     def init(self, context):
         self.outputs.new('luxrender_coordinate_socket', '3D Coordinate')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
-        if self.coordinates == 'smoke_domain':
-            layout.label(text='Auto Using Smoke Domain Data')
+
+        if UseLuxCore() and self.coordinates not in self.luxcore_mapping_type_map:
+            layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
         else:
-            layout.prop(self, 'translate')
-            layout.prop(self, 'rotate')
-            layout.prop(self, 'scale')
+            if self.coordinates == 'smoke_domain':
+                layout.label(text='Auto Using Smoke Domain Data')
+            else:
+                layout.prop(self, 'translate')
+                layout.prop(self, 'rotate')
+                layout.prop(self, 'scale')
 
     def get_paramset(self):
         coord_params = ParamSet()
@@ -112,6 +123,29 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
             coord_params.add_vector('scale', [i * ws for i in self.scale])
 
         return coord_params
+
+    def export_luxcore(self, properties):
+        mapping_type = self.luxcore_mapping_type_map[self.coordinates]
+
+        # create a location matrix
+        tex_loc = mathutils.Matrix.Translation((self.translate))
+
+        # create an identitiy matrix
+        tex_sca = mathutils.Matrix()
+        tex_sca[0][0] = self.scale[0]  # X
+        tex_sca[1][1] = self.scale[1]  # Y
+        tex_sca[2][2] = self.scale[2]  # Z
+
+        # create a rotation matrix
+        tex_rot0 = mathutils.Matrix.Rotation(radians(self.rotate[0]), 4, 'X')
+        tex_rot1 = mathutils.Matrix.Rotation(radians(self.rotate[1]), 4, 'Y')
+        tex_rot2 = mathutils.Matrix.Rotation(radians(self.rotate[2]), 4, 'Z')
+        tex_rot = tex_rot0 * tex_rot1 * tex_rot2
+
+        # combine transformations
+        transformation = matrix_to_list(tex_loc * tex_rot * tex_sca, apply_worldscale=True, invert=True)
+
+        return [mapping_type, transformation]
 
 
 @LuxRenderAddon.addon_register_class
