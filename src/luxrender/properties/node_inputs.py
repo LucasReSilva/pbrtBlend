@@ -74,6 +74,9 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
     rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(359.99),
                                            max=radians(359.99))
     scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
+    uniform_scale = bpy.props.FloatProperty(name='', default=1.0)
+    use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
+                                               description='Use the same scale value for all axis')
 
     # LuxCore uses different names for the mapping types
     luxcore_mapping_type_map = {
@@ -87,9 +90,26 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
 
-        if UseLuxCore() and self.coordinates not in self.luxcore_mapping_type_map:
-            layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
+        if UseLuxCore():
+            # LuxCore layout
+            if self.coordinates in self.luxcore_mapping_type_map:
+                row = layout.row()
+
+                row.column().prop(self, 'translate')
+                row.column().prop(self, 'rotate')
+
+                scale_column = row.column()
+                if self.use_uniform_scale:
+                    scale_column.label(text='Scale:')
+                    scale_column.prop(self, 'uniform_scale')
+                else:
+                    scale_column.prop(self, 'scale')
+
+                scale_column.prop(self, 'use_uniform_scale')
+            else:
+                layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
         else:
+            # Classic layout
             if self.coordinates == 'smoke_domain':
                 layout.label(text='Auto Using Smoke Domain Data')
             else:
@@ -132,9 +152,9 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 
         # create an identitiy matrix
         tex_sca = mathutils.Matrix()
-        tex_sca[0][0] = self.scale[0]  # X
-        tex_sca[1][1] = self.scale[1]  # Y
-        tex_sca[2][2] = self.scale[2]  # Z
+        tex_sca[0][0] = self.uniform_scale if self.use_uniform_scale else self.scale[0]  # X
+        tex_sca[1][1] = self.uniform_scale if self.use_uniform_scale else self.scale[1]  # Y
+        tex_sca[2][2] = self.uniform_scale if self.use_uniform_scale else self.scale[2]  # Z
 
         # create a rotation matrix
         tex_rot0 = mathutils.Matrix.Rotation(radians(self.rotate[0]), 4, 'X')
