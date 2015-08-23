@@ -200,11 +200,14 @@ class MaterialExporter(object):
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', [full_name]))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.uroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
+                u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')
+                if lux_mat.anisotropic:
+                    v_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')
+                else:
+                    v_roughness = u_roughness
 
-                self.properties.Set(pyluxcore.Property(prefix + '.vroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.uroughness', u_roughness))
+                self.properties.Set(pyluxcore.Property(prefix + '.vroughness', v_roughness))
 
             ####################################################################
             # Metal2
@@ -258,11 +261,14 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['metal2']))
                 self.properties.Set(pyluxcore.Property(prefix + '.fresnel', [fcol]))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.uroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
+                u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')
+                if lux_mat.anisotropic:
+                    v_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')
+                else:
+                    v_roughness = u_roughness
 
-                self.properties.Set(pyluxcore.Property(prefix + '.vroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
+                self.properties.Set(pyluxcore.Property(prefix + '.uroughness', u_roughness))
+                self.properties.Set(pyluxcore.Property(prefix + '.vroughness', v_roughness))
 
             ####################################################################
             # Mirror
@@ -289,10 +295,15 @@ class MaterialExporter(object):
                                              material.luxrender_material.luxrender_mat_glossy.multibounce))
                 self.properties.Set(pyluxcore.Property(prefix + '.sigma', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'sigma', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'd', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
+
+                u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')
+                if lux_mat.anisotropic:
+                    v_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')
+                else:
+                    v_roughness = u_roughness
+
+                self.properties.Set(pyluxcore.Property(prefix + '.uroughness', u_roughness))
+                self.properties.Set(pyluxcore.Property(prefix + '.vroughness', v_roughness))
 
             ####################################################################
             # Glossycoating
@@ -329,10 +340,15 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.multibounce',
                                              material.luxrender_material.luxrender_mat_glossycoating.multibounce))
                 self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'd', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
+
+                u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')
+                if lux_mat.anisotropic:
+                    v_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')
+                else:
+                    v_roughness = u_roughness
+
+                self.properties.Set(pyluxcore.Property(prefix + '.uroughness', u_roughness))
+                self.properties.Set(pyluxcore.Property(prefix + '.vroughness', v_roughness))
 
             ####################################################################
             # Glossytranslucent
@@ -351,10 +367,15 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.multibounce',
                                              material.luxrender_material.luxrender_mat_glossytranslucent.multibounce))
                 self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'd', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
+
+                u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')
+                if lux_mat.anisotropic:
+                    v_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')
+                else:
+                    v_roughness = u_roughness
+
+                self.properties.Set(pyluxcore.Property(prefix + '.uroughness', u_roughness))
+                self.properties.Set(pyluxcore.Property(prefix + '.vroughness', v_roughness))
 
                 # Backface values
                 if material.luxrender_material.luxrender_mat_glossytranslucent.two_sided:
@@ -374,6 +395,15 @@ class MaterialExporter(object):
                                                  convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_uroughness', 'float')))
                     self.properties.Set(pyluxcore.Property(prefix + '.vroughness_bf',
                                                  convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_vroughness', 'float')))
+
+                    u_roughness_bf = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_uroughness', 'float')
+                    if lux_mat.bf_anisotropic:
+                        v_roughness_bf = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'bf_vroughness', 'float')
+                    else:
+                        v_roughness_bf = u_roughness_bf
+
+                    self.properties.Set(pyluxcore.Property(prefix + '.uroughness_bf', u_roughness_bf))
+                    self.properties.Set(pyluxcore.Property(prefix + '.vroughness_bf', v_roughness_bf))
 
             ####################################################################
             # Glass
@@ -407,10 +437,15 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.kt', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kt', 'color')))
                 self.properties.Set(pyluxcore.Property(prefix + '.cauchyb', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'cauchyb', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.interiorior', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.uroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.vroughness', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')))
+
+                u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')
+                if lux_mat.anisotropic:
+                    v_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'vroughness', 'float')
+                else:
+                    v_roughness = u_roughness
+
+                self.properties.Set(pyluxcore.Property(prefix + '.uroughness', u_roughness))
+                self.properties.Set(pyluxcore.Property(prefix + '.vroughness', v_roughness))
 
             ####################################################################
             # Cloth
@@ -551,10 +586,15 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.multibounce',
                                              material.luxrender_coating.multibounce))
                 self.properties.Set(pyluxcore.Property(prefix + '.d', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'd', 'float')))
-                self.properties.Set(pyluxcore.Property(prefix + '.uroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'uroughness', 'float')))
-                self.properties.Set(pyluxcore.Property(prefix + '.vroughness',
-                                             convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'vroughness', 'float')))
+
+                u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'uroughness', 'float')
+                if luxMat_coated.anisotropic:
+                    v_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxMat_coated, 'vroughness', 'float')
+                else:
+                    v_roughness = u_roughness
+
+                self.properties.Set(pyluxcore.Property(prefix + '.uroughness', u_roughness))
+                self.properties.Set(pyluxcore.Property(prefix + '.vroughness', v_roughness))
 
                 self.luxcore_name = name_coating
 
