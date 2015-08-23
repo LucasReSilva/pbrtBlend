@@ -476,7 +476,7 @@ class FloatTextureParameter(TextureParameterBase):
                    {
                        'attr': '%s_presetstring' % self.attr,
                        'type': 'string',
-                       'default': '-- Choose preset --',
+                       'default': '-- Choose IOR preset --',
                        'save_in_preset': True
                    },
 
@@ -635,7 +635,7 @@ class FresnelTextureParameter(TextureParameterBase):
                    {
                        'attr': '%s_presetstring' % self.attr,
                        'type': 'string',
-                       'default': '-- Choose preset --',
+                       'default': '-- Choose IOR preset --',
                        'save_in_preset': True
                    },
                    {
@@ -1929,7 +1929,7 @@ class luxrender_tex_cauchy(declarative_property_group):
         {
             'attr': 'ior_presetstring',
             'type': 'string',
-            'default': '-- Choose preset --',
+            'default': '-- Choose IOR preset --',
             'save_in_preset': True
         },
         {

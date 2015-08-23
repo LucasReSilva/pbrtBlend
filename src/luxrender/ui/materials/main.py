@@ -283,7 +283,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
         if lmc.index_floatvalue == lmc.index_presetvalue:
             menu_text = lmc.index_presetstring
         else:
-            menu_text = '-- Choose preset --'
+            menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
 

@@ -52,6 +52,15 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 
     @classmethod
     def get_from_context(cls, context):
+        # TODO: get right or remove
+        if len(context.scene.luxrender_volumes.volumes) > 0:
+            current_vol_ind = context.scene.luxrender_volumes.volumes_index
+            current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+
+            if current_vol.nodetree:
+                return bpy.data.node_groups[current_vol.nodetree], None, None
+
+
         ob = context.active_object
         if ob and ob.type not in {'LAMP', 'CAMERA'}:
             ma = ob.active_material
@@ -89,7 +98,7 @@ class luxrender_node_category(NodeCategory):
         return context.space_data.tree_type == 'luxrender_material_nodes'
 
 
-luxrender_node_catagories = [
+luxrender_node_categories = [
     luxrender_node_category("LUX_INPUT", "Input", items=[
         NodeItem("luxrender_2d_coordinates_node"),
         NodeItem("luxrender_3d_coordinates_node"),
@@ -105,6 +114,7 @@ luxrender_node_catagories = [
 
     luxrender_node_category("LUX_OUTPUT", "Output", items=[
         NodeItem("luxrender_material_output_node"),
+        NodeItem("luxrender_volume_output_node"),
         # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
     ]),
 

@@ -129,7 +129,7 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
             if self.fresnel == self.fresnel_presetvalue:
                 menu_text = self.fresnel_presetstring
             else:
-                menu_text = '-- Choose preset --'
+                menu_text = '-- Choose IOR preset --'
 
             box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
             box.prop(self, 'fresnel', text=self.name)
@@ -1350,7 +1350,7 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
                 if self.filmindex == self.filmindex_presetvalue:
                     menu_text = self.filmindex_presetstring
                 else:
-                    menu_text = '-- Choose preset --'
+                    menu_text = '-- Choose IOR preset --'
 
                 box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
                 box.prop(self, 'filmindex', text=self.name)
@@ -1473,7 +1473,7 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
             if self.index == self.index_presetvalue:
                 menu_text = self.index_presetstring
             else:
-                menu_text = '-- Choose preset --'
+                menu_text = '-- Choose IOR preset --'
 
             box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
             box.prop(self, 'index', text=self.name)

@@ -49,7 +49,6 @@ class world(world_panel):
         ( ('scene',), 'luxrender_world' )
     ]
 
-
 class volumes_base(object):
     """
     Interior/Exterior Volumes Settings
@@ -71,7 +70,7 @@ class volumes_base(object):
         if lv.fresnel_fresnelvalue == lv.fresnel_presetvalue:
             menu_text = lv.fresnel_presetstring
         else:
-            menu_text = '-- Choose preset --'
+            menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
         cl.menu('LUXRENDER_MT_ior_presets_volumes', text=menu_text)
@@ -91,9 +90,7 @@ class volumes_base(object):
 
             # 'name' is not a member of current_vol.properties,
             # so we draw it explicitly
-            self.layout.prop(
-                current_vol, 'name'
-            )
+            self.layout.prop(current_vol, 'name')
 
             # Here we draw the currently selected luxrender_volumes_data property group
             for control in current_vol.controls:

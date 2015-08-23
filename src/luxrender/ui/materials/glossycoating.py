@@ -49,7 +49,7 @@ class ui_material_glossycoating(luxrender_material_sub):
         if lmg.index_floatvalue == lmg.index_presetvalue:
             menu_text = lmg.index_presetstring
         else:
-            menu_text = '-- Choose preset --'
+            menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
         cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)

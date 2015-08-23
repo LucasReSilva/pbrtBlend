@@ -74,8 +74,6 @@ class MaterialExporter(object):
             self.__convert_default_matte()
 
         try:
-            # TODO: library name to node names
-
             self.luxcore_name = output_node.export_luxcore(self.material, self.properties)
         except Exception as err:
             print('Node material export failed, skipping material: %s\n%s' % (self.material.name, err))

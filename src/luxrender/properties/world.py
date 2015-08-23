@@ -219,6 +219,13 @@ class luxrender_volume_data(declarative_property_group):
 
     properties = [
                      {
+                         'attr': 'nodetree',
+                         'type': 'string',
+                         'description': 'Node tree',
+                         'name': 'Node Tree',
+                         'default': ''
+                     },
+                     {
                          'type': 'ef_callback',
                          'attr': 'draw_ior_menu',
                          'method': 'draw_ior_menu',

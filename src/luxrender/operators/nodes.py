@@ -35,7 +35,7 @@ from .. import LuxRenderAddon
 class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_material_nodetree"
-    bl_label = "Add LuxRender Material Nodetree"
+    bl_label = "Use Material Nodes"
     bl_description = "Add a LuxRender node tree linked to this material"
 
     # idtype = StringProperty(name="ID Type", default="material")

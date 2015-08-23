@@ -50,7 +50,8 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 
 from ..properties.node_sockets import *
 
-from . import set_prop_mat, create_luxcore_name_mat, export_black_matte, export_submat_luxcore
+from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, export_submat_luxcore,
+               export_volume_luxcore)
 
 
 class luxrender_texture_maker:
@@ -900,6 +901,13 @@ class luxrender_material_type_node_null(luxrender_material_node):
 
         return make_material(mat_type, self.name, null_params)
 
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'null')
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_roughglass(luxrender_material_node):
@@ -1090,6 +1098,24 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
         return make_volume(self.name, vol_type, clear_params)
 
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_vol(self, name)
+
+        set_prop_vol(properties, luxcore_name, 'type', 'clear')
+        set_prop_vol(properties, luxcore_name, 'ior', 1.5)
+        set_prop_vol(properties, luxcore_name, 'absorption', [.2, .2, .2])
+        #set_prop_vol(properties, luxcore_name, '', )
+
+
+        '''
+        self.properties.Set(pyluxcore.Property(prefix + '.absorption', abs_col))
+        self.properties.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
+        self.properties.Set(pyluxcore.Property(prefix + '.ior', ior_val))
+        self.properties.Set(pyluxcore.Property(prefix + '.priority', volume.priority))
+        '''
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_homogeneous(luxrender_material_node):
@@ -1209,12 +1235,30 @@ class luxrender_material_output_node(luxrender_node):
         self.inputs.new('NodeSocketShader', 'Exterior Volume')
         self.inputs.new('NodeSocketShader', 'Emission')
 
+    #def draw_buttons(self, context, layout):
+    #    lux_material = context.active_object.active_material.luxrender_material
+    #    layout.label(text='Volumes:')
+    #    layout.prop_search(lux_material, 'Interior_volume', context.scene.luxrender_volumes, 'volumes', 'Interior')
+    #    layout.prop_search(lux_material, 'Exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior')
+
     def export_luxcore(self, material, properties):
         tree_name = material.luxrender_material.nodetree
         print('Exporting nodetree', tree_name, 'of material', material.name)
 
-        surface_socket = self.inputs[0]
-        return export_submat_luxcore(properties, surface_socket, material.name)
+        luxcore_name = export_submat_luxcore(properties, self.inputs[0], material.name)
+
+        '''
+        # Export Volumes
+        interior_volume = export_volume_luxcore(properties, self.inputs[1])
+        if interior_volume is not None:
+            set_prop_mat(properties, luxcore_name, 'volume.interior', interior_volume)
+
+        exterior_volume = export_volume_luxcore(properties, self.inputs[2])
+        if exterior_volume is not None:
+            set_prop_mat(properties, luxcore_name, 'volume.exterior', exterior_volume)
+        '''
+
+        return luxcore_name
 
     def export(self, scene, lux_context, material, mode='indirect'):
 
@@ -1323,3 +1367,15 @@ class luxrender_material_output_node(luxrender_node):
             ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
 
         return set()
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_volume_output_node(luxrender_node):
+    """Volume output node"""
+    bl_idname = 'luxrender_volume_output_node'
+    bl_label = 'Volume Output'
+    bl_icon = 'WORLD'
+    bl_width_min = 120
+
+    def init(self, context):
+        self.inputs.new('NodeSocketShader', 'Volume')

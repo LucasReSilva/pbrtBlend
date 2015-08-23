@@ -179,6 +179,9 @@ def export_black_matte(properties):
     return luxcore_name
 
 def export_submat_luxcore(properties, socket, name=None):
+    """
+    NodeSocketShader sockets cannot export themselves, so this function does it
+    """
     node = get_linked_node(socket)
 
     if node is None:
@@ -189,3 +192,14 @@ def export_submat_luxcore(properties, socket, name=None):
         submat_name = node.export_luxcore(properties, name)
 
     return submat_name
+
+def export_volume_luxcore(properties, socket, name=None):
+    """
+    NodeSocketShader sockets cannot export themselves, so this function does it
+    """
+    node = get_linked_node(socket)
+
+    if node is not None:
+        return node.export_luxcore(properties, name)
+    else:
+        return None

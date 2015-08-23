@@ -99,7 +99,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
             if self.cauchy_n == self.cauchy_n_presetvalue:
                 menu_text = self.cauchy_n_presetstring
             else:
-                menu_text = '-- Choose preset --'
+                menu_text = '-- Choose IOR preset --'
 
             layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
             layout.prop(self, 'cauchy_n')
