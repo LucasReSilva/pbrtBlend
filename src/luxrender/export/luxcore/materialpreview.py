@@ -57,7 +57,7 @@ class MaterialPreviewExporter(object):
         strands_settings.hair_size = 0.05
         strands_settings.tesseltype = 'solid'
 
-        luxcore_exporter = LuxCoreExporter(self.blender_scene, self.renderengine)
+        luxcore_exporter = LuxCoreExporter(self.blender_scene, self.renderengine, is_material_preview=True)
 
         if self.preview_type == 'MATERIAL':
             luxcore_config = luxcore_exporter.convert(film_width, film_height)
