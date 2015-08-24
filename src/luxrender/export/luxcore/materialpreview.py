@@ -62,7 +62,7 @@ class MaterialPreviewExporter(object):
         if self.preview_type == 'MATERIAL':
             luxcore_config = luxcore_exporter.convert(film_width, film_height)
         else:
-            luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
+            luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale / 100.0)
             scn_props = pyluxcore.Properties()
 
             #luxcore_exporter.convert_camera()
