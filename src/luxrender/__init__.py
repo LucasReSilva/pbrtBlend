@@ -133,8 +133,11 @@ else:
                          "please restart Blender for changes to take "
                          "effect.")
 
-            layout.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
-            layout.label(text="After updating LuxBlend please restart Blender for the changes to take effect.")
+            row = layout.row()
+            sub = row.row()
+            sub.scale_x = 0.3
+            sub.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
+            row.label(text="After updating LuxBlend please restart Blender for the changes to take effect.")
 
     LuxRenderAddon = Addon(bl_info)
     addon_register, addon_unregister = LuxRenderAddon.init_functions()
