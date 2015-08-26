@@ -59,9 +59,9 @@ class ConfigExporter(object):
         self.__convert_compute_settings()
         self.__convert_film_size(film_width, film_height)
         self.__convert_accelerator()
-        self.__convert_custom_props()
         self.__convert_imagepipeline()
         self.__convert_all_channels()
+        self.__convert_custom_props()
 
         return self.properties
 
@@ -230,16 +230,10 @@ class ConfigExporter(object):
     
     
     def __convert_accelerator(self):
+        # The optimal accelerator settings are chosen by LuxCore automatically, so we let the user decide only
+        # if instancing should be allowed or not
         engine_settings = self.blender_scene.luxcore_enginesettings
-        accelerator = engine_settings.accelerator_type
-        device = engine_settings.device if not self.is_viewport_render else engine_settings.device_preview
-    
-        # Embree does not support OpenCL engines
-        if device == 'OCL' and accelerator == 'EMBREE':
-            accelerator = 'AUTO'
-    
-        self.properties.Set(pyluxcore.Property('accelerator.type', [accelerator]))
-        self.properties.Set(pyluxcore.Property('accelerator.instances.enable', [engine_settings.instancing]))
+        self.properties.Set(pyluxcore.Property('accelerator.instances.enable', engine_settings.instancing))
     
 
     def __get_engine(self):
@@ -382,7 +376,7 @@ class ConfigExporter(object):
     def __convert_custom_props(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
         # Custom Properties
-        if engine_settings.advanced and engine_settings.custom_properties:
+        if engine_settings.custom_properties:
             custom_params = engine_settings.custom_properties.replace(' ', '').replace(';', ' ').split('|')
             for prop in custom_params:
                 prop = prop.split('=')

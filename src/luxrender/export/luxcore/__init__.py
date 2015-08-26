@@ -110,7 +110,7 @@ class LuxCoreExporter(object):
         """
         Convert the whole scene
         """
-        print('Starting export...')
+        print('\nStarting export...')
         start_time = time.time()
 
         if luxcore_scene is None:

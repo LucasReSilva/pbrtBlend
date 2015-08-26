@@ -105,13 +105,9 @@ class luxcore_enginesettings(declarative_property_group):
         ['label_filter_type', 'filter_type'],
         ['label_filter_width', 'filter_width'],
         # Accelerator settings
-        ['label_accelerator_type', 'accelerator_type'],
-        ['spacer_instancing', 'instancing'],
+        ['label_accelerator_type', 'instancing'],
         # Kernel cache
         ['label_kernelcache', 'kernelcache'],
-        # Custom properties
-        'label_custom_properties',
-        'custom_properties',
         # BIASPATH specific halt condition
         ['spacer_halt_conditions', 'show_halt_conditions'],
         #'label_halt_conditions',
@@ -126,8 +122,6 @@ class luxcore_enginesettings(declarative_property_group):
     ]
 
     visibility = {
-        'label_custom_properties': {'advanced': True},
-        'custom_properties': {'advanced': True},
         # BIDIR
         'bidir_eyedepth': {'renderengine_type': 'BIDIR'},
         'bidir_lightdepth': {'renderengine_type': 'BIDIR'},
@@ -187,8 +181,6 @@ class luxcore_enginesettings(declarative_property_group):
         'filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
         # Accelerator settings
         'label_accelerator_type': {'advanced': True},
-        'accelerator_type': {'advanced': True},
-        'spacer_instancing': {'advanced': True},
         'instancing': {'advanced': True},
         # Kernel cache
         'label_kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}, {'device': 'OCL'}]),
@@ -306,11 +298,6 @@ class luxcore_enginesettings(declarative_property_group):
             ],
             'expand': True,
             'save_in_preset': True
-        },
-        {
-            'type': 'text',
-            'attr': 'label_custom_properties',
-            'name': 'Custom properties:',
         },
         {
             'type': 'string',
@@ -744,28 +731,6 @@ may mute lamps and caustics',
             'type': 'text',
             'attr': 'label_accelerator_type',
             'name': 'Accelerator:',
-        },
-        {
-            'type': 'enum',
-            'attr': 'accelerator_type',
-            'name': '',
-            'description': 'Accelerator to use',
-            'default': 'AUTO',
-            'items': [
-                ('AUTO', 'Auto', 'Automatically choose the best accelerator for each device (strongly recommended!)'),
-                ('BVH', 'BVH', 'Static BVH'),
-                ('MBVH', 'MBVH', 'Dynamic BVH'),
-                ('QBVH', 'QBVH', 'Static QBVH'),
-                ('MQBVH', 'MQBVH', 'Dynamic QBVH'),
-                ('EMBREE', 'Embree', 'Fastest build times and render speed. Supports only one substep for motion blur. \
-Not supported for OpenCL engines')
-            ],
-            'save_in_preset': True
-        },
-        {
-            'type': 'text',
-            'attr': 'spacer_instancing',
-            'name': '',
         },
         {
             'type': 'bool',
