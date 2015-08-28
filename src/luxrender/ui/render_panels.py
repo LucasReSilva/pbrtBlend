@@ -267,8 +267,9 @@ class translator(render_panel):
             row = self.layout.row(align=True)
             rd = context.scene.render
         else:
-            #self.layout.label("Note: not yet supported by LuxCore")
             super().draw(context)
+            self.layout.label('Custom LuxCore config properties:')
+            self.layout.prop(context.scene.luxcore_enginesettings, 'custom_properties')
 
 @LuxRenderAddon.addon_register_class
 class networking(render_panel):

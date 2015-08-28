@@ -34,7 +34,7 @@ bl_info = {
     "name": "LuxRender",
     "author": "LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), \
     Jens Verwiebe, Jason Clarke (JtheNinja), Michael Klemm (neo2068), Simon Wendsche (B.Y.O.B.)",
-    "version": (1, 5, 'RC2'),
+    "version": (1, 5),
     "blender": (2, 67, 1),
     "api": 57908,
     "category": "Render",
@@ -133,8 +133,11 @@ else:
                          "please restart Blender for changes to take "
                          "effect.")
 
-            layout.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
-            layout.label(text="After updating LuxBlend please restart Blender for the changes to take effect.")
+            row = layout.row()
+            sub = row.row()
+            sub.scale_x = 0.3
+            sub.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
+            row.label(text="After updating LuxBlend please restart Blender for the changes to take effect.")
 
     LuxRenderAddon = Addon(bl_info)
     addon_register, addon_unregister = LuxRenderAddon.init_functions()

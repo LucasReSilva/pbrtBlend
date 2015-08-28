@@ -341,6 +341,7 @@ class property_group_renderer(bpy.types.Panel):
                                                             context),
                                     current_property['src_attr'],
                                     text=current_property['name'],
+                                    icon=current_property['icon'] if 'icon' in current_property_keys else 'NONE'
                                 )
 
                             elif current_property['type'] in ['ef_callback']:

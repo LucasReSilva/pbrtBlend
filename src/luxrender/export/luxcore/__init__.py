@@ -44,7 +44,7 @@ from .utils import get_elem_key
 
 
 class LuxCoreExporter(object):
-    def __init__(self, blender_scene, renderengine, is_viewport_render=False, context=None):
+    def __init__(self, blender_scene, renderengine, is_viewport_render=False, context=None, is_material_preview=False):
         """
         Main exporter class. Only one instance should be used per rendering session.
         To update the rendering on the fly, convert the needed objects/materials etc., then get all updated properties
@@ -56,6 +56,7 @@ class LuxCoreExporter(object):
         self.renderengine = renderengine
         self.is_viewport_render = is_viewport_render
         self.context = context
+        self.is_material_preview = is_material_preview
 
         self.config_properties = pyluxcore.Properties()
         self.scene_properties = pyluxcore.Properties()
@@ -65,7 +66,7 @@ class LuxCoreExporter(object):
         # List of objects that are distributed via particle systems or dupliverts/frames/...
         self.instanced_duplis = set()
 
-        # Permanent caches, structure: {element: ElementExporter}
+        # Permanent (for one viewport session or one final render) caches, structure: {element: ElementExporter}
         self.dupli_cache = {}
         self.light_cache = {}
         self.material_cache = {}
@@ -77,7 +78,7 @@ class LuxCoreExporter(object):
         # Namecache to map an ascending number to each lightgroup name
         self.lightgroup_cache = {}
 
-        # Temporary caches to avoid multiple exporting
+        # Temporary (only used during export) caches to avoid multiple exporting
         self.temp_material_cache = set()
         self.temp_texture_cache = set()
         self.temp_volume_cache = set()
@@ -109,11 +110,15 @@ class LuxCoreExporter(object):
         """
         Convert the whole scene
         """
-        print('Starting export...')
+        print('\nStarting export...')
         start_time = time.time()
 
         if luxcore_scene is None:
-            luxcore_scene = pyluxcore.Scene(self.blender_scene.luxcore_scenesettings.imageScale)
+            image_scale = self.blender_scene.luxcore_scenesettings.imageScale / 100.0
+            if image_scale < 1:
+                print('All textures will be scaled down by factor %.2f' % image_scale)
+
+            luxcore_scene = pyluxcore.Scene(image_scale)
 
         # Convert camera and add it to the scene. This needs to be done before object conversion because e.g.
         # hair export needs a valid defined camera object in case it is view-dependent

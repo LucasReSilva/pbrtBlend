@@ -59,9 +59,9 @@ class ConfigExporter(object):
         self.__convert_compute_settings()
         self.__convert_film_size(film_width, film_height)
         self.__convert_accelerator()
-        self.__convert_custom_props()
         self.__convert_imagepipeline()
         self.__convert_all_channels()
+        self.__convert_custom_props()
 
         return self.properties
 
@@ -230,16 +230,10 @@ class ConfigExporter(object):
     
     
     def __convert_accelerator(self):
+        # The optimal accelerator settings are chosen by LuxCore automatically, so we let the user decide only
+        # if instancing should be allowed or not
         engine_settings = self.blender_scene.luxcore_enginesettings
-        accelerator = engine_settings.accelerator_type
-        device = engine_settings.device if not self.is_viewport_render else engine_settings.device_preview
-    
-        # Embree does not support OpenCL engines
-        if device == 'OCL' and accelerator == 'EMBREE':
-            accelerator = 'AUTO'
-    
-        self.properties.Set(pyluxcore.Property('accelerator.type', [accelerator]))
-        self.properties.Set(pyluxcore.Property('accelerator.instances.enable', [engine_settings.instancing]))
+        self.properties.Set(pyluxcore.Property('accelerator.instances.enable', engine_settings.instancing))
     
 
     def __get_engine(self):
@@ -302,14 +296,19 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction',
                                                  [noise_threshold_reduction]))
 
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size',
-                                                 [engine_settings.biaspath_sampling_aa_size]))
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.diffuse.size',
-                                                 [engine_settings.biaspath_sampling_diffuse_size]))
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.glossy.size',
-                                                 [engine_settings.biaspath_sampling_glossy_size]))
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.specular.size',
-                                                 [engine_settings.biaspath_sampling_specular_size]))
+            # Always use only 1 sample in viewport render to make it usable
+            if self.is_viewport_render:
+                aa_samples = diffuse_samples = glossy_samples = specular_samples = 1
+            else:
+                aa_samples = engine_settings.biaspath_sampling_aa_size
+                diffuse_samples = engine_settings.biaspath_sampling_diffuse_size
+                glossy_samples = engine_settings.biaspath_sampling_glossy_size
+                specular_samples = engine_settings.biaspath_sampling_specular_size
+
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_samples))
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', diffuse_samples))
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.glossy.size', glossy_samples))
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.specular.size', specular_samples))
 
             # Path depths, note that for non-specular paths +1 is added to the path depth.
             # For details see http://www.luxrender.net/forum/viewtopic.php?f=11&t=11101&start=390#p114959
@@ -377,7 +376,7 @@ class ConfigExporter(object):
     def __convert_custom_props(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
         # Custom Properties
-        if engine_settings.advanced and engine_settings.custom_properties:
+        if engine_settings.custom_properties:
             custom_params = engine_settings.custom_properties.replace(' ', '').replace(';', ' ').split('|')
             for prop in custom_params:
                 prop = prop.split('=')

@@ -53,10 +53,11 @@ class luxcore_scenesettings(declarative_property_group):
             'type': 'float',
             'attr': 'imageScale',
             'name': 'Texture Scale',
-            'description': 'Scale down all image textures, e.g. 1.0 = don\'t scale, 0.5 = half size',
-            'default': 1.0,
-            'min': 0.01,
-            'max': 1.0,
+            'description': 'If less than 100%, image textures are scaled down',
+            'default': 100.0,
+            'min': 1.0,
+            'max': 100.0,
+            'subtype': 'PERCENTAGE',
             'slider': True,
             'save_in_preset': True
         }
