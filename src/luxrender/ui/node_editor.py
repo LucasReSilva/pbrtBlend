@@ -52,15 +52,6 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 
     @classmethod
     def get_from_context(cls, context):
-        # TODO: get right or remove
-        if len(context.scene.luxrender_volumes.volumes) > 0:
-            current_vol_ind = context.scene.luxrender_volumes.volumes_index
-            current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
-
-            if current_vol.nodetree:
-                return bpy.data.node_groups[current_vol.nodetree], None, None
-
-
         ob = context.active_object
         if ob and ob.type not in {'LAMP', 'CAMERA'}:
             ma = ob.active_material
@@ -76,6 +67,44 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
         #     nt_name = la.luxrender_lamp.nodetree
         #     if nt_name:
         #         return bpy.data.node_groups[la.luxrender_lamp.nodetree], la, la
+
+        return None, None, None
+
+    # This block updates the preview, when socket links change
+    def update(self):
+        self.refresh = True
+
+    def acknowledge_connection(self, context):
+        while self.refresh:
+            self.refresh = False
+            break
+
+    refresh = bpy.props.BoolProperty(name='Links Changed', default=False, update=acknowledge_connection)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_vol_node_editor(bpy.types.NodeTree):
+    '''LuxRender Volume Nodes'''
+
+    bl_idname = 'luxrender_volume_nodes'
+    bl_label = 'LuxRender Volume Nodes'
+    bl_icon = 'TEXTURE_SHADED'
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.render.engine == 'LUXRENDER_RENDER'
+        # This function will set the current node tree to the one belonging
+        # to the active material (code orignally from Matt Ebb's 3Delight exporter)
+
+    @classmethod
+    def get_from_context(cls, context):
+        # TODO: get right or remove
+        if len(context.scene.luxrender_volumes.volumes) > 0:
+            current_vol_ind = context.scene.luxrender_volumes.volumes_index
+            current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+
+            if current_vol.nodetree:
+                return bpy.data.node_groups[current_vol.nodetree], None, None # context.scene? context.scene.world?
 
         return None, None, None
 
@@ -114,7 +143,6 @@ luxrender_node_categories = [
 
     luxrender_node_category("LUX_OUTPUT", "Output", items=[
         NodeItem("luxrender_material_output_node"),
-        NodeItem("luxrender_volume_output_node"),
         # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
     ]),
 
@@ -156,7 +184,7 @@ luxrender_node_categories = [
         NodeItem("luxrender_texture_blender_marble_node"),
         NodeItem("luxrender_texture_blender_musgrave_node"),
         NodeItem("luxrender_texture_blender_stucci_node"),
-        NodeItem("luxrender_texture_vol_smoke_data_node"),
+        #NodeItem("luxrender_texture_vol_smoke_data_node"),
         NodeItem("luxrender_texture_uv_node"),
         NodeItem("luxrender_texture_windy_node"),
         NodeItem("luxrender_texture_blender_wood_node"),
@@ -164,11 +192,11 @@ luxrender_node_categories = [
         NodeItem("luxrender_texture_blender_voronoi_node"),
     ]),
 
-    luxrender_node_category("LUX_VOLUME", "Volume", items=[
-        NodeItem("luxrender_volume_clear_node"),
-        NodeItem("luxrender_volume_homogeneous_node"),
-        NodeItem("luxrender_volume_heterogeneous_node"),
-    ]),
+    #luxrender_node_category("LUX_VOLUME", "Volume", items=[
+    #    NodeItem("luxrender_volume_clear_node"),
+    #    NodeItem("luxrender_volume_homogeneous_node"),
+    #    NodeItem("luxrender_volume_heterogeneous_node"),
+    #]),
 
     luxrender_node_category("LUX_LIGHT", "Light", items=[
         NodeItem("luxrender_light_area_node"),
@@ -184,7 +212,7 @@ luxrender_node_categories = [
     luxrender_node_category("LUX_CONVERTER", "Converter", items=[
         NodeItem("luxrender_texture_add_node"),
         NodeItem("luxrender_texture_bump_map_node"),
-        NodeItem("luxrender_texture_colordepth_node"),
+        #NodeItem("luxrender_texture_colordepth_node"),
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
         NodeItem("luxrender_texture_subtract_node"),
@@ -192,6 +220,89 @@ luxrender_node_categories = [
     ]),
 
     luxrender_node_category("LUX_LAYOUT", "Layout", items=[
+        NodeItem("NodeFrame"),
+        # NodeItem("NodeReroute") #not working yet
+    ]),
+]
+
+# Registered specially in init.py
+class luxrender_node_category_volume(NodeCategory):
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == 'luxrender_volume_nodes'
+
+luxrender_node_categories_volume = [
+    # elements that make no sense for volumes are disabled or removed
+
+    luxrender_node_category_volume("LUX_INPUT_VOLUME", "Input", items=[
+        NodeItem("luxrender_2d_coordinates_node"),
+        NodeItem("luxrender_3d_coordinates_node"),
+        NodeItem("luxrender_texture_blackbody_node"),
+        NodeItem("luxrender_texture_gaussian_node"),
+        NodeItem("luxrender_texture_glossyexponent_node"),
+        NodeItem("luxrender_texture_tabulateddata_node"),
+        NodeItem("luxrender_texture_constant_node"),  # value node
+        #NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
+        #NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
+        # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
+    ]),
+
+    luxrender_node_category_volume("LUX_OUTPUT_VOLUME", "Output", items=[
+        NodeItem("luxrender_volume_output_node"),
+        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
+    ]),
+
+    luxrender_node_category_volume("LUX_TEXTURE_VOLUME", "Texture", items=[
+        NodeItem("luxrender_texture_image_map_node"),
+        NodeItem("luxrender_texture_luxcore_image_map_node"),
+        #NodeItem("luxrender_texture_normal_map_node"),
+        NodeItem("luxrender_texture_blender_blend_node"),
+        NodeItem("luxrender_texture_brick_node"),
+        NodeItem("luxrender_texture_blender_clouds_node"),
+        NodeItem("luxrender_texture_vol_cloud_node"),
+        NodeItem("luxrender_texture_blender_distortednoise_node"),
+        NodeItem("luxrender_texture_vol_exponential_node"),
+        NodeItem("luxrender_texture_fbm_node"),
+        NodeItem("luxrender_texture_harlequin_node"),
+        NodeItem("luxrender_texture_blender_marble_node"),
+        NodeItem("luxrender_texture_blender_musgrave_node"),
+        NodeItem("luxrender_texture_blender_stucci_node"),
+        NodeItem("luxrender_texture_vol_smoke_data_node"),
+        #NodeItem("luxrender_texture_uv_node"),
+        NodeItem("luxrender_texture_windy_node"),
+        NodeItem("luxrender_texture_blender_wood_node"),
+        NodeItem("luxrender_texture_wrinkled_node"),
+        NodeItem("luxrender_texture_blender_voronoi_node"),
+    ]),
+
+    luxrender_node_category_volume("LUX_VOLUME", "Volume", items=[
+        NodeItem("luxrender_volume_clear_node"),
+        NodeItem("luxrender_volume_homogeneous_node"),
+        NodeItem("luxrender_volume_heterogeneous_node"),
+    ]),
+
+    luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
+        NodeItem("luxrender_light_area_node"),
+    ]),
+
+    luxrender_node_category_volume("LUX_FRESNEL_VOLUME", "Fresnel Data", items=[
+        NodeItem("luxrender_texture_cauchy_node"),
+        NodeItem("luxrender_texture_fresnelcolor_node"),
+        NodeItem("luxrender_texture_fresnelname_node"),
+        NodeItem("luxrender_texture_sellmeier_node"),
+    ]),
+
+    luxrender_node_category_volume("LUX_CONVERTER_VOLUME", "Converter", items=[
+        NodeItem("luxrender_texture_add_node"),
+        #NodeItem("luxrender_texture_bump_map_node"),
+        NodeItem("luxrender_texture_colordepth_node"),
+        NodeItem("luxrender_texture_mix_node"),
+        NodeItem("luxrender_texture_scale_node"),
+        NodeItem("luxrender_texture_subtract_node"),
+        NodeItem("luxrender_texture_colorramp_node"),
+    ]),
+
+    luxrender_node_category_volume("LUX_LAYOUT_VOLUME", "Layout", items=[
         NodeItem("NodeFrame"),
         # NodeItem("NodeReroute") #not working yet
     ]),

@@ -33,7 +33,7 @@ class luxrender_node(bpy.types.Node):
     # This node is only for the Lux node-tree
     @classmethod
     def poll(cls, tree):
-        return tree.bl_idname == 'luxrender_material_nodes'
+        return tree.bl_idname in ['luxrender_material_nodes', 'luxrender_volume_nodes']
 
 
 class luxrender_texture_node(luxrender_node):

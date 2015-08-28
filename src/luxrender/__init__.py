@@ -145,11 +145,13 @@ else:
     def register():
         bpy.utils.register_class(LuxRenderAddonPreferences)
         nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_categories)
+        nodeitems_utils.register_node_categories("LUX_VOLUME", ui.node_editor.luxrender_node_categories_volume)
         addon_register()
 
     def unregister():
         bpy.utils.unregister_class(LuxRenderAddonPreferences)
         nodeitems_utils.unregister_node_categories("LUX_SHADER")
+        nodeitems_utils.unregister_node_categories("LUX_VOLUME")
         addon_unregister()
 
 

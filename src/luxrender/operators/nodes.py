@@ -223,3 +223,24 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         #   nt.nodes.new('OutputLightShaderNode')
 
         return {'FINISHED'}
+
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
+    """"""
+    bl_idname = "luxrender.add_volume_nodetree"
+    bl_label = "Use Volume Nodes"
+    bl_description = "Add a LuxRender node tree linked to this volume"
+
+    def execute(self, context):
+        current_vol_ind = context.scene.luxrender_volumes.volumes_index
+        current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+
+        nt = bpy.data.node_groups.new(current_vol.name, type='luxrender_volume_nodes')
+        nt.use_fake_user = True
+        current_vol.nodetree = nt.name
+
+        sh_out = nt.nodes.new('luxrender_volume_output_node')
+        sh_out.location = 500, 400
+
+        return {'FINISHED'}

@@ -835,8 +835,6 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         if UseLuxCore():
             if not 'Bump' in self.inputs.keys():
                 self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-            if not 'Normal' in self.inputs.keys():
-                self.inputs.new('luxrender_TF_normal_socket', 'Normal')
 
     def export_material(self, make_material, make_texture):
         print('export node: mix')
@@ -869,7 +867,6 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         mat1 = export_submat_luxcore(properties, self.inputs[1])
         mat2 = export_submat_luxcore(properties, self.inputs[2])
         bump = self.inputs[3].export_luxcore(properties) # may be None!
-        normal = self.inputs[4].export_luxcore(properties) # may be None!
 
         set_prop_mat(properties, luxcore_name, 'type', 'mix')
         set_prop_mat(properties, luxcore_name, 'amount', amount)
@@ -877,8 +874,6 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         set_prop_mat(properties, luxcore_name, 'material2', mat2)
         if bump:
             set_prop_mat(properties, luxcore_name, 'bumptex', bump)
-        if normal:
-            set_prop_mat(properties, luxcore_name, 'normaltex', normal)
 
         return luxcore_name
 
@@ -1227,19 +1222,20 @@ class luxrender_material_output_node(luxrender_node):
     bl_idname = 'luxrender_material_output_node'
     bl_label = 'Material Output'
     bl_icon = 'MATERIAL'
-    bl_width_min = 120
+    bl_width_min = 180
+
+    interior_volume = bpy.props.StringProperty(description='Volume inside of the object with this material')
+    exterior_volume = bpy.props.StringProperty(description='Volume outside of the object with this material')
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Surface')
-        self.inputs.new('NodeSocketShader', 'Interior Volume')
-        self.inputs.new('NodeSocketShader', 'Exterior Volume')
         self.inputs.new('NodeSocketShader', 'Emission')
 
-    #def draw_buttons(self, context, layout):
-    #    lux_material = context.active_object.active_material.luxrender_material
-    #    layout.label(text='Volumes:')
-    #    layout.prop_search(lux_material, 'Interior_volume', context.scene.luxrender_volumes, 'volumes', 'Interior')
-    #    layout.prop_search(lux_material, 'Exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior')
+    def draw_buttons(self, context, layout):
+        layout.label(text='Volumes:')
+
+        layout.prop_search(self, 'interior_volume', context.scene.luxrender_volumes, 'volumes', 'Interior')
+        layout.prop_search(self, 'exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior')
 
     def export_luxcore(self, material, properties):
         tree_name = material.luxrender_material.nodetree

@@ -1195,51 +1195,6 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
 
 
 @LuxRenderAddon.addon_register_class
-class luxrender_TF_normal_socket(bpy.types.NodeSocket):
-    """Normal socket (LuxCore only)"""
-    bl_idname = 'luxrender_TF_normal_socket'
-    bl_label = 'Normal socket'
-
-    # meaningful property
-    def normal_update(self, context):
-        pass
-
-    normal = bpy.props.FloatProperty(name=get_props(TF_normalmap, 'name'), description=get_props(TF_normalmap, 'description'),
-                                   default=get_props(TF_normalmap, 'default'), subtype=get_props(TF_normalmap, 'subtype'),
-                                   unit=get_props(TF_normalmap, 'unit'), min=get_props(TF_normalmap, 'min'),
-                                   max=get_props(TF_normalmap, 'max'), soft_min=get_props(TF_normalmap, 'soft_min'),
-                                   soft_max=get_props(TF_normalmap, 'soft_max'),
-                                   precision=get_props(TF_normalmap, 'precision'), update=normal_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.normal
-
-    def default_value_set(self, value):
-        self.normal = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_normalmap, 'name'),
-                                            description=get_props(TF_normalmap, 'description'),
-                                            default=get_props(TF_normalmap, 'default'),
-                                            subtype=get_props(TF_normalmap, 'subtype'),
-                                            unit=get_props(TF_normalmap, 'unit'), min=get_props(TF_normalmap, 'min'),
-                                            max=get_props(TF_normalmap, 'max'),
-                                            soft_min=get_props(TF_normalmap, 'soft_min'),
-                                            soft_max=get_props(TF_normalmap, 'soft_max'),
-                                            precision=get_props(TF_normalmap, 'precision'), get=default_value_get,
-                                            set=default_value_set)
-
-    def draw(self, context, layout, node, text):
-        layout.label(text=self.name)
-
-    def draw_color(self, context, node):
-        return float_socket_color
-
-    def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self)
-
-
-@LuxRenderAddon.addon_register_class
 class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
     """Cauchy B socket"""
     bl_idname = 'luxrender_TF_cauchyb_socket'
