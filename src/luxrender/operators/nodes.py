@@ -198,6 +198,8 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if hasattr(shader, 'metal_nkfile'):
                 shader.metal_nkfile = editor_type.filename
 
+            # TODO: remove, this is now down below
+            '''
             # Get the volumes
             def get_vol_type(name):
                 for vol in ctx_vol.volumes:
@@ -218,6 +220,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
                 volume_ext.location = 200, -50
                 nt.links.new(volume_ext.outputs[0], sh_out.inputs[2])
                 volume_ext.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Exterior_volume].fresnel_fresnelvalue
+            '''
 
         #else:
         #   nt.nodes.new('OutputLightShaderNode')
@@ -240,7 +243,51 @@ class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
         nt.use_fake_user = True
         current_vol.nodetree = nt.name
 
+        # Volume output
         sh_out = nt.nodes.new('luxrender_volume_output_node')
         sh_out.location = 500, 400
+
+        # Volume node (use volume type, i.e. clear/homogeneous/heterogeneous)
+        vol_node_type = 'luxrender_volume_%s_node' % current_vol.type
+        volume_node = nt.nodes.new(vol_node_type)
+        volume_node.location = 250, 480
+        nt.links.new(volume_node.outputs[0], sh_out.inputs[0])
+
+        # Copy settings
+        volume_node.inputs['IOR'].fresnel = current_vol.fresnel_fresnelvalue
+
+        # Color at depth node
+        colordepth_node = nt.nodes.new('luxrender_texture_colordepth_node')
+        colordepth_node.location = 50, 480
+        colordepth_node.depth = current_vol.depth
+        nt.links.new(colordepth_node.outputs[0], volume_node.inputs[1])
+
+        absorption_color = current_vol.sigma_a_color if current_vol.type in ['homogeneous', 'heterogeneous'] else (
+            current_vol.absorption_color)
+
+        if current_vol.absorption_scale == 1:
+            colordepth_node.inputs[0].color = absorption_color
+        else:
+            # Value node (to be able to copy scaled colors)
+            absorption_color_value_node = nt.nodes.new('luxrender_texture_constant_node')
+            absorption_color_value_node.location = -150, 480
+            absorption_color_value_node.color = absorption_color
+            absorption_color_value_node.col_mult = current_vol.absorption_scale
+            nt.links.new(absorption_color_value_node.outputs[0], colordepth_node.inputs[0])
+
+        if current_vol.type in ['homogeneous', 'heterogeneous']:
+            # Scattering color
+            if current_vol.scattering_scale == 1:
+                volume_node.inputs[2].color = current_vol.sigma_s_color
+            else:
+                # Value node (to be able to copy scaled colors)
+                scattering_color_value_node = nt.nodes.new('luxrender_texture_constant_node')
+                scattering_color_value_node.location = -150, 280
+                scattering_color_value_node.color = current_vol.sigma_s_color
+                scattering_color_value_node.col_mult = current_vol.scattering_scale
+                nt.links.new(scattering_color_value_node.outputs[0], volume_node.inputs[2])
+
+            if current_vol.type == 'heterogeneous':
+                volume_node.stepsize = current_vol.stepsize
 
         return {'FINISHED'}

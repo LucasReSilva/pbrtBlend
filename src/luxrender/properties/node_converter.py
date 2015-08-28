@@ -332,6 +332,30 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colordepth(luxrender_texture_node):
+    """Color at Depth node"""
+    bl_idname = 'luxrender_texture_colordepth_node'
+    bl_label = 'Color at Depth'
+    bl_icon = 'TEXTURE'
+
+    depth = bpy.props.FloatProperty(name='Depth', default=1.0, subtype='DISTANCE', unit='LENGTH')
+
+    def init(self, context):
+        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'depth')
+
+    def export_texture(self, make_texture):
+        colordepth_params = ParamSet()
+        colordepth_params.update(get_socket_paramsets(self.inputs, make_texture))
+        colordepth_params.add_float('depth', self.depth)
+
+        return make_texture('color', 'colordepth', self.name, colordepth_params)
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_colorramp(luxrender_texture_node):
     """Colorramp texture node"""
     bl_idname = 'luxrender_texture_colorramp_node'

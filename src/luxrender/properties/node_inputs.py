@@ -268,30 +268,6 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_colordepth(luxrender_texture_node):
-    """Color at Depth node"""
-    bl_idname = 'luxrender_texture_colordepth_node'
-    bl_label = 'Color at Depth'
-    bl_icon = 'TEXTURE'
-
-    depth = bpy.props.FloatProperty(name='Depth', default=1.0, subtype='DISTANCE', unit='LENGTH')
-
-    def init(self, context):
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-        self.outputs.new('NodeSocketColor', 'Color')
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, 'depth')
-
-    def export_texture(self, make_texture):
-        colordepth_params = ParamSet()
-        colordepth_params.update(get_socket_paramsets(self.inputs, make_texture))
-        colordepth_params.add_float('depth', self.depth)
-
-        return make_texture('color', 'colordepth', self.name, colordepth_params)
-
-
-@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_gaussian(luxrender_texture_node):
     """Gaussian spectrum node"""
     bl_idname = 'luxrender_texture_gaussian_node'
@@ -380,6 +356,10 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
     fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0, precision=5)
     col_mult = bpy.props.FloatProperty(name='Multiply Color', default=1.0, precision=5, description='Multiply color')
 
+    def init(self, context):
+        # Default is color
+        self.outputs.new('NodeSocketColor', 'Color')
+
     def draw_buttons(self, context, layout):
         layout.prop(self, 'variant')
 
@@ -394,7 +374,6 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
         if self.variant == 'fresnel':
             layout.prop(self, 'fresnel')
 
-        si = self.inputs.keys()
         so = self.outputs.keys()
 
         if self.variant == 'color':

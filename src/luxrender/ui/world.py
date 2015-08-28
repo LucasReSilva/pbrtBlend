@@ -109,7 +109,7 @@ class volumes_base(object):
                 # 'name' is not a member of current_vol.properties,
                 # so we draw it explicitly
                 self.layout.prop(current_vol, 'name')
-                self.layout.operator('luxrender.add_volume_nodetree', icon='TEXTURE_SHADED')
+                self.layout.operator('luxrender.add_volume_nodetree', icon='NODETREE')
 
                 for control in current_vol.controls:
                     self.draw_column(
