@@ -60,7 +60,8 @@ def WorldVolumeParameter(attr, name):
             'src_attr': 'volumes',
             'trg': lambda s, c: c.luxrender_world,
             'trg_attr': '%s_volume' % attr,
-            'name': name
+            'name': name,
+            'icon': 'MOD_FLUIDSIM'
         },
     ]
 

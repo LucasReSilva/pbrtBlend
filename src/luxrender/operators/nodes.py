@@ -50,7 +50,6 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         nt.use_fake_user = True
         idblock.luxrender_material.nodetree = nt.name
 
-        ctx_vol = context.scene.luxrender_volumes
         ctx_mat = context.material.luxrender_material
 
         # Get the mat type set in editor, todo: find a more iterative way to get context
@@ -100,6 +99,8 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             shader = nt.nodes.new(node_type)  # create also matnode from editor type
             shader.location = 200, 570
             sh_out = nt.nodes.new('luxrender_material_output_node')
+            sh_out.interior_volume = ctx_mat.Interior_volume
+            sh_out.exterior_volume = ctx_mat.Exterior_volume
             sh_out.location = 500, 400
             nt.links.new(shader.outputs[0], sh_out.inputs[0])
 
@@ -198,30 +199,6 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if hasattr(shader, 'metal_nkfile'):
                 shader.metal_nkfile = editor_type.filename
 
-            # TODO: remove, this is now down below
-            '''
-            # Get the volumes
-            def get_vol_type(name):
-                for vol in ctx_vol.volumes:
-                    if vol.name == name:
-                        volume_type = 'luxrender_volume_%s_node' % (vol.type)
-                return volume_type
-
-            if ctx_mat.Interior_volume:
-                vol_node = get_vol_type(ctx_mat.Interior_volume)
-                volume_int = nt.nodes.new(vol_node)
-                volume_int.location = 200, 200
-                nt.links.new(volume_int.outputs[0], sh_out.inputs[1])
-                volume_int.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Interior_volume].fresnel_fresnelvalue
-
-            if ctx_mat.Exterior_volume:
-                vol_node = get_vol_type(ctx_mat.Exterior_volume)
-                volume_ext = nt.nodes.new(vol_node)
-                volume_ext.location = 200, -50
-                nt.links.new(volume_ext.outputs[0], sh_out.inputs[2])
-                volume_ext.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Exterior_volume].fresnel_fresnelvalue
-            '''
-
         #else:
         #   nt.nodes.new('OutputLightShaderNode')
 
@@ -239,7 +216,7 @@ class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
         current_vol_ind = context.scene.luxrender_volumes.volumes_index
         current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
 
-        nt = bpy.data.node_groups.new(current_vol.name, type='luxrender_volume_nodes')
+        nt = bpy.data.node_groups.new(current_vol.name, type='luxrender_volume_nodes_a')
         nt.use_fake_user = True
         current_vol.nodetree = nt.name
 

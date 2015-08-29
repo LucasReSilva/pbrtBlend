@@ -86,9 +86,10 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
 class luxrender_vol_node_editor(bpy.types.NodeTree):
     '''LuxRender Volume Nodes'''
 
-    bl_idname = 'luxrender_volume_nodes'
+    # The bl_idname is named this way so the volume editor entry comes after the material editor entry in the enum
+    bl_idname = 'luxrender_volume_nodes_a'
     bl_label = 'LuxRender Volume Nodes'
-    bl_icon = 'TEXTURE_SHADED'
+    bl_icon = 'MOD_FLUIDSIM'
 
     @classmethod
     def poll(cls, context):
@@ -104,7 +105,7 @@ class luxrender_vol_node_editor(bpy.types.NodeTree):
             current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
 
             if current_vol.nodetree:
-                return bpy.data.node_groups[current_vol.nodetree], None, None # context.scene? context.scene.world?
+                return bpy.data.node_groups[current_vol.nodetree], None, None # TODO context.scene? context.scene.world?
 
         return None, None, None
 
@@ -121,14 +122,16 @@ class luxrender_vol_node_editor(bpy.types.NodeTree):
 
 
 # Registered specially in init.py
-class luxrender_node_category(NodeCategory):
+class luxrender_node_category_material(NodeCategory):
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == 'luxrender_material_nodes'
 
 
-luxrender_node_categories = [
-    luxrender_node_category("LUX_INPUT", "Input", items=[
+luxrender_node_categories_material = [
+    # elements that make no sense for materials are disabled or removed
+
+    luxrender_node_category_material("LUX_INPUT", "Input", items=[
         NodeItem("luxrender_2d_coordinates_node"),
         NodeItem("luxrender_3d_coordinates_node"),
         NodeItem("luxrender_texture_blackbody_node"),
@@ -141,12 +144,12 @@ luxrender_node_categories = [
         # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
     ]),
 
-    luxrender_node_category("LUX_OUTPUT", "Output", items=[
+    luxrender_node_category_material("LUX_OUTPUT", "Output", items=[
         NodeItem("luxrender_material_output_node"),
         # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
     ]),
 
-    luxrender_node_category("LUX_MATERIAL", "Material", items=[
+    luxrender_node_category_material("LUX_MATERIAL", "Material", items=[
         NodeItem("luxrender_material_carpaint_node"),
         NodeItem("luxrender_material_cloth_node"),
         NodeItem("luxrender_material_glass_node"),
@@ -169,7 +172,7 @@ luxrender_node_categories = [
         NodeItem("luxrender_material_layered_node"),
     ]),
 
-    luxrender_node_category("LUX_TEXTURE", "Texture", items=[
+    luxrender_node_category_material("LUX_TEXTURE", "Texture", items=[
         NodeItem("luxrender_texture_image_map_node"),
         NodeItem("luxrender_texture_luxcore_image_map_node"),
         NodeItem("luxrender_texture_normal_map_node"),
@@ -198,18 +201,18 @@ luxrender_node_categories = [
     #    NodeItem("luxrender_volume_heterogeneous_node"),
     #]),
 
-    luxrender_node_category("LUX_LIGHT", "Light", items=[
+    luxrender_node_category_material("LUX_LIGHT", "Light", items=[
         NodeItem("luxrender_light_area_node"),
     ]),
 
-    luxrender_node_category("LUX_FRESNEL", "Fresnel Data", items=[
+    luxrender_node_category_material("LUX_FRESNEL", "Fresnel Data", items=[
         NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_fresnelcolor_node"),
         NodeItem("luxrender_texture_fresnelname_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
-    luxrender_node_category("LUX_CONVERTER", "Converter", items=[
+    luxrender_node_category_material("LUX_CONVERTER", "Converter", items=[
         NodeItem("luxrender_texture_add_node"),
         NodeItem("luxrender_texture_bump_map_node"),
         #NodeItem("luxrender_texture_colordepth_node"),
@@ -219,7 +222,7 @@ luxrender_node_categories = [
         NodeItem("luxrender_texture_colorramp_node"),
     ]),
 
-    luxrender_node_category("LUX_LAYOUT", "Layout", items=[
+    luxrender_node_category_material("LUX_LAYOUT", "Layout", items=[
         NodeItem("NodeFrame"),
         # NodeItem("NodeReroute") #not working yet
     ]),
@@ -229,7 +232,7 @@ luxrender_node_categories = [
 class luxrender_node_category_volume(NodeCategory):
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == 'luxrender_volume_nodes'
+        return context.space_data.tree_type == 'luxrender_volume_nodes_a'
 
 luxrender_node_categories_volume = [
     # elements that make no sense for volumes are disabled or removed

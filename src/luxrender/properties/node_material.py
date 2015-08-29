@@ -1234,8 +1234,10 @@ class luxrender_material_output_node(luxrender_node):
     def draw_buttons(self, context, layout):
         layout.label(text='Volumes:')
 
-        layout.prop_search(self, 'interior_volume', context.scene.luxrender_volumes, 'volumes', 'Interior')
-        layout.prop_search(self, 'exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior')
+        layout.prop_search(self, 'interior_volume', context.scene.luxrender_volumes, 'volumes', 'Interior',
+                           icon='MOD_FLUIDSIM')
+        layout.prop_search(self, 'exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior',
+                           icon='MOD_FLUIDSIM')
 
     def export_luxcore(self, material, properties):
         tree_name = material.luxrender_material.nodetree
