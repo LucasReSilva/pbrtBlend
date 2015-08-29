@@ -175,14 +175,20 @@ class luxrender_volume_data(declarative_property_group):
                    'draw_ior_menu',
                ] + \
                TFR_IOR.controls + \
+               [
+                   'separator'
+               ] + \
                TC_absorption.controls + \
                TC_sigma_a.controls + \
                [
-                   'depth', 'absorption_scale'
+                   'depth',
+                   'absorption_scale',
+                   'separator'
                ] + \
                TC_sigma_s.controls + \
                [
                    'scattering_scale',
+                   'separator',
                    'g',
                    'stepsize',
                    'priority',
@@ -218,6 +224,10 @@ class luxrender_volume_data(declarative_property_group):
     visibility = texture_append_visibility(visibility, TC_emission, {'use_emission': True})
 
     properties = [
+                     {
+                         'type': 'separator',
+                         'attr': 'separator'
+                     },
                      {
                          'type': 'ef_callback',
                          'attr': 'draw_ior_menu',

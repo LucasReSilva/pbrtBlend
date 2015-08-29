@@ -346,6 +346,9 @@ class property_group_renderer(bpy.types.Panel):
 
                             elif current_property['type'] in ['ef_callback']:
                                 getattr(self, current_property['method'])(supercontext)
+
+                            elif current_property['type'] in ['separator']:
+                                layout.separator()
                         else:
                             layout.prop(property_group, control_list_item)
 
