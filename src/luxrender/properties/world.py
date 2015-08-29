@@ -968,9 +968,8 @@ class luxrender_channels(declarative_property_group):
             'name': 'Note: Bidir engines only support the Alpha and RGB passes',
         },
         {
-            'type': 'text',
+            'type': 'separator',
             'attr': 'spacer',
-            'name': '',
         },
         # Info labels
         {
