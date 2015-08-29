@@ -175,14 +175,20 @@ class luxrender_volume_data(declarative_property_group):
                    'draw_ior_menu',
                ] + \
                TFR_IOR.controls + \
+               [
+                   'separator'
+               ] + \
                TC_absorption.controls + \
                TC_sigma_a.controls + \
                [
-                   'depth', 'absorption_scale'
+                   'depth',
+                   'absorption_scale',
+                   'separator'
                ] + \
                TC_sigma_s.controls + \
                [
                    'scattering_scale',
+                   'separator_asymmetry',
                    'g',
                    'stepsize',
                    'priority',
@@ -196,7 +202,8 @@ class luxrender_volume_data(declarative_property_group):
 
     visibility = dict_merge(
         {
-            'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous'])},
+            'scattering_scale': {'type': O(['homogeneous', 'heterogeneous'])},
+            'separator_asymmetry': {'type': O(['homogeneous', 'heterogeneous'])},
             'g': {'type': O(['homogeneous', 'heterogeneous'])},
             'stepsize': {'type': 'heterogeneous'},
             'depth': O([A([{'type': 'clear'}, {'absorption_usecolortexture': False}]),
@@ -224,6 +231,14 @@ class luxrender_volume_data(declarative_property_group):
                          'description': 'Node tree',
                          'name': 'Node Tree',
                          'default': ''
+                     },
+                     {
+                         'type': 'separator',
+                         'attr': 'separator'
+                     },
+                     {
+                         'type': 'separator',
+                         'attr': 'separator_asymmetry'
                      },
                      {
                          'type': 'ef_callback',
@@ -960,9 +975,8 @@ class luxrender_channels(declarative_property_group):
             'name': 'Note: Bidir engines only support the Alpha and RGB passes',
         },
         {
-            'type': 'text',
+            'type': 'separator',
             'attr': 'spacer',
-            'name': '',
         },
         # Info labels
         {
