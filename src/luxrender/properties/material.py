@@ -3433,7 +3433,8 @@ def EmissionLightGroupParameter():
             'src_attr': 'lightgroups',
             'trg': lambda s, c: c.luxrender_emission,
             'trg_attr': 'lightgroup',
-            'name': 'Light Group'
+            'name': 'Light Group',
+            'icon': 'OUTLINER_OB_LAMP'
         },
     ]
 
