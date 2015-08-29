@@ -110,6 +110,7 @@ class volumes_base(object):
                 # so we draw it explicitly
                 self.layout.prop(current_vol, 'name')
                 self.layout.operator('luxrender.add_volume_nodetree', icon='NODETREE')
+                self.layout.separator()
 
                 # Here we draw the currently selected luxrender_volumes_data property group
                 for control in current_vol.controls:

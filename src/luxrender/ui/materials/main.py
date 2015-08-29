@@ -53,7 +53,8 @@ def cycles_panel_node_draw(layout, id_data, output_type, input_name):
 def node_tree_selector_draw(layout, id_data, output_type):
     # layout.prop_search(mat.luxrender_material, "nodetree", bpy.data, "node_groups")
     try:
-        layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups")
+        if id_data.luxrender_material.nodetree:
+            layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups")
     except:
         return False
 
