@@ -188,7 +188,7 @@ class luxrender_volume_data(declarative_property_group):
                TC_sigma_s.controls + \
                [
                    'scattering_scale',
-                   'separator',
+                   'separator_asymmetry',
                    'g',
                    'stepsize',
                    'priority',
@@ -202,7 +202,8 @@ class luxrender_volume_data(declarative_property_group):
 
     visibility = dict_merge(
         {
-            'scattering_scale': { 'type': O(['homogeneous', 'heterogeneous'])},
+            'scattering_scale': {'type': O(['homogeneous', 'heterogeneous'])},
+            'separator_asymmetry': {'type': O(['homogeneous', 'heterogeneous'])},
             'g': {'type': O(['homogeneous', 'heterogeneous'])},
             'stepsize': {'type': 'heterogeneous'},
             'depth': O([A([{'type': 'clear'}, {'absorption_usecolortexture': False}]),
@@ -227,6 +228,10 @@ class luxrender_volume_data(declarative_property_group):
                      {
                          'type': 'separator',
                          'attr': 'separator'
+                     },
+                     {
+                         'type': 'separator',
+                         'attr': 'separator_asymmetry'
                      },
                      {
                          'type': 'ef_callback',

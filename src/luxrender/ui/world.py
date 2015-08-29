@@ -27,6 +27,7 @@
 import bpy, bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
+from ..outputs.luxcore_api import UseLuxCore
 
 from .. import LuxRenderAddon
 from .lamps import lamps_panel
@@ -97,13 +98,15 @@ class volumes_base(object):
 
             # Here we draw the currently selected luxrender_volumes_data property group
             for control in current_vol.controls:
-                self.draw_column(
-                    control,
-                    self.layout,
-                    current_vol,
-                    context,
-                    property_group=current_vol
-                )
+                # Don't show the "Light Emitter" checkbox in Classic API mode, can't do this in properties/world.py
+                if not (not UseLuxCore() and control == 'use_emission'):
+                    self.draw_column(
+                        control,
+                        self.layout,
+                        current_vol,
+                        context,
+                        property_group=current_vol
+                    )
 
 
 @LuxRenderAddon.addon_register_class
