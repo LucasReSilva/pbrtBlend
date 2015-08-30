@@ -74,7 +74,10 @@ class MaterialExporter(object):
             self.__convert_default_matte()
 
         try:
-            self.luxcore_name = output_node.export_luxcore(self.material, self.properties)
+            self.luxcore_name = output_node.export_luxcore(self.material, self.properties, self.blender_scene)
+
+            prefix = 'scene.materials.' + self.luxcore_name
+            self.__set_material_volumes(prefix, output_node.interior_volume, output_node.exterior_volume)
         except Exception as err:
             print('Node material export failed, skipping material: %s\n%s' % (self.material.name, err))
             import traceback
@@ -100,10 +103,10 @@ class MaterialExporter(object):
         self.properties.Set(pyluxcore.Property('scene.materials.' + DEFAULT_NULL + '.type', 'null'))
 
 
-    def __set_material_volumes(self, prefix):
+    def __set_material_volumes(self, prefix, interior, exterior):
         if self.luxcore_exporter.is_material_preview:
             # The material/texture preview scene does not contain any volumes, so we have to use this code.
-            interior = self.material.luxrender_material.Interior_volume
+            #interior = self.material.luxrender_material.Interior_volume
             default_interior = self.blender_scene.luxrender_world.default_interior_volume
 
             if interior != '':
@@ -111,7 +114,7 @@ class MaterialExporter(object):
             elif default_interior != '':
                 self.properties.Set(pyluxcore.Property(prefix + '.volume.interior',  generate_volume_name(default_interior)))
 
-            exterior = self.material.luxrender_material.Exterior_volume
+            #exterior = self.material.luxrender_material.Exterior_volume
             default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
 
             if exterior != '':
@@ -121,10 +124,11 @@ class MaterialExporter(object):
         else:
             # This code checks if the volumes are set correctly so rendering does not fail when volumes are missing
             # from the scene
+            #interior = self.material.luxrender_material.Interior_volume
+            #exterior = self.material.luxrender_material.Exterior_volume
+
             scene_volumes = self.blender_scene.luxrender_volumes.volumes
-            interior = self.material.luxrender_material.Interior_volume
             default_interior = self.blender_scene.luxrender_world.default_interior_volume
-            exterior = self.material.luxrender_material.Exterior_volume
             default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
 
             if interior in scene_volumes:
@@ -581,7 +585,9 @@ class MaterialExporter(object):
                                                                             'float')))
 
                 # Interior/exterior volumes
-                self.__set_material_volumes(prefix)
+                interior = self.material.luxrender_material.Interior_volume
+                exterior = self.material.luxrender_material.Exterior_volume
+                self.__set_material_volumes(prefix, interior, exterior)
 
             # coating for all materials
             if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
@@ -759,7 +765,10 @@ class MaterialExporter(object):
                     self.properties.Set(pyluxcore.Property(mix_prefix + '.amount', alpha))
 
                     self.luxcore_name = name_mix
-                    self.__set_material_volumes(mix_prefix)
+
+                    interior = self.material.luxrender_material.Interior_volume
+                    exterior = self.material.luxrender_material.Exterior_volume
+                    self.__set_material_volumes(prefix, interior, exterior)
         except Exception as err:
             print('Material export failed, skipping material: %s\n%s' % (self.material.name, err))
             import traceback

@@ -1239,22 +1239,13 @@ class luxrender_material_output_node(luxrender_node):
         layout.prop_search(self, 'exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior',
                            icon='MOD_FLUIDSIM')
 
-    def export_luxcore(self, material, properties):
+    def export_luxcore(self, material, properties, blender_scene):
+        # Note: volumes are exported in export/luxcore/materials.py (in "parent" function that calls this function)
+
         tree_name = material.luxrender_material.nodetree
         print('Exporting nodetree', tree_name, 'of material', material.name)
 
         luxcore_name = export_submat_luxcore(properties, self.inputs[0], material.name)
-
-        '''
-        # Export Volumes
-        interior_volume = export_volume_luxcore(properties, self.inputs[1])
-        if interior_volume is not None:
-            set_prop_mat(properties, luxcore_name, 'volume.interior', interior_volume)
-
-        exterior_volume = export_volume_luxcore(properties, self.inputs[2])
-        if exterior_volume is not None:
-            set_prop_mat(properties, luxcore_name, 'volume.exterior', exterior_volume)
-        '''
 
         return luxcore_name
 
