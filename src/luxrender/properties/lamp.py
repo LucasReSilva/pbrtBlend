@@ -114,6 +114,10 @@ class luxrender_lamp(declarative_property_group):
         'Exterior'
     ]
 
+    visibility = {
+        'importance': lambda: not UseLuxCore(),
+    }
+
     properties = [
                      {
                          'type': 'float',

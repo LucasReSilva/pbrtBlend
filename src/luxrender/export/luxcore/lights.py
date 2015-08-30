@@ -117,8 +117,7 @@ class LightExporter(object):
         luxcore_name = self.luxcore_name
 
         light_params = ParamSet() \
-            .add_float('gain', light.energy) \
-            .add_float('importance', light.luxrender_lamp.importance)
+            .add_float('gain', light.energy)
 
         # Params from light sub-types
         light_params.update(getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower()).get_paramset(obj))
@@ -134,7 +133,6 @@ class LightExporter(object):
         # Common light params
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
         energy = params_keyValue['gain'] if not hide_lamp else 0  # workaround for no lights render recovery
-        importance = params_keyValue['importance']
 
         # Lightgroup
         lightgroup = getattr(light.luxrender_lamp, 'lightgroup')
@@ -195,7 +193,6 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', color))
 
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
-            self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.importance', importance))
 
         samples = light.luxrender_lamp.luxcore_lamp.samples
         if light.type not in ['SUN', 'AREA']:
@@ -224,7 +221,6 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
-                self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
 
                 relsize = params_keyValue['relsize']
@@ -252,7 +248,6 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
-                self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.importance', importance))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
 
                 # Settings for indirect light visibility
