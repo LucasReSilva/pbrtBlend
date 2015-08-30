@@ -99,7 +99,6 @@ class luxrender_vol_node_editor(bpy.types.NodeTree):
 
     @classmethod
     def get_from_context(cls, context):
-        # TODO: get right or remove
         if len(context.scene.luxrender_volumes.volumes) > 0:
             current_vol_ind = context.scene.luxrender_volumes.volumes_index
             current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]

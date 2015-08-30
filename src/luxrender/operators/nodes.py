@@ -31,6 +31,22 @@ import bpy, bl_operators
 from .. import LuxRenderAddon
 
 
+def find_node_editor(nodetree_type):
+    node_editor = None
+
+    if bpy.context.screen:
+        for area in bpy.context.screen.areas:
+            if area.type == 'NODE_EDITOR':
+                for space in area.spaces:
+                    if space.type == 'NODE_EDITOR':
+                        if space.tree_type == nodetree_type:
+                            return None
+                        else:
+                            node_editor = space
+
+    return node_editor
+
+
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
     """"""
@@ -202,6 +218,13 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         #else:
         #   nt.nodes.new('OutputLightShaderNode')
 
+        # Try to find a node editor already set to material nodes
+        node_editor = find_node_editor('luxrender_material_nodes')
+
+        if node_editor:
+            # No node editor set to volume nodes, set the last one
+            node_editor.tree_type = 'luxrender_material_nodes'
+
         return {'FINISHED'}
 
 
@@ -266,5 +289,12 @@ class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
 
             if current_vol.type == 'heterogeneous':
                 volume_node.stepsize = current_vol.stepsize
+
+        # Try to find a node editor already set to volume nodes
+        node_editor = find_node_editor('luxrender_volume_nodes_a')
+
+        if node_editor:
+            # No node editor set to volume nodes, set the last one
+            node_editor.tree_type = 'luxrender_volume_nodes_a'
 
         return {'FINISHED'}
