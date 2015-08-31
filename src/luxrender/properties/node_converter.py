@@ -55,6 +55,8 @@ from ..properties.node_sockets import (
     luxrender_TC_tex2_socket
 )
 
+from . import warning_luxcore_node
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_add(luxrender_texture_node):
@@ -381,6 +383,7 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
         return bpy.data.textures[name]
 
     def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
 
         si = self.inputs.keys()
         so = self.outputs.keys()
@@ -393,6 +396,3 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
 
         fake_texture = self.get_fake_texture()
         layout.template_color_ramp(fake_texture, "color_ramp", expand=True)
-
-    def export_texture(self, make_texture):
-        pass

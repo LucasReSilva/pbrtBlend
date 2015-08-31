@@ -174,7 +174,7 @@ luxrender_node_categories_material = [
 
     luxrender_node_category_material("LUX_TEXTURE", "Texture", items=[
         NodeItem("luxrender_texture_image_map_node", label="Image Map"),
-        NodeItem("luxrender_texture_luxcore_image_map_node", label="[exp.] Blender Image Map"),
+        NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
         NodeItem("luxrender_texture_normal_map_node", label="Normal Map"),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),
@@ -257,7 +257,7 @@ luxrender_node_categories_volume = [
 
     luxrender_node_category_volume("LUX_TEXTURE_VOLUME", "Texture", items=[
         NodeItem("luxrender_texture_image_map_node", label="Image Map"),
-        NodeItem("luxrender_texture_luxcore_image_map_node", label="[exp.] Blender Image Map"),
+        NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
         #NodeItem("luxrender_texture_normal_map_node", label="Normal Map"),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),

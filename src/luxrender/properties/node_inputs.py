@@ -202,18 +202,21 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
 
-        if self.coordinates == 'planar':
-            layout.prop(self, 'v1')
-            layout.prop(self, 'v2')
-            layout.prop(self, 'udelta')
+        if UseLuxCore() and not self.coordinates in self.luxcore_mapping_type_map:
+            layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
         else:
-            layout.prop(self, 'uscale')
-            layout.prop(self, 'vscale')
-            layout.prop(self, 'udelta')
-            layout.prop(self, 'vdelta')
+            if self.coordinates == 'planar':
+                layout.prop(self, 'v1')
+                layout.prop(self, 'v2')
+                layout.prop(self, 'udelta')
+            else:
+                layout.prop(self, 'uscale')
+                layout.prop(self, 'vscale')
+                layout.prop(self, 'udelta')
+                layout.prop(self, 'vdelta')
 
-        if self.coordinates == 'uv':
-            layout.prop(self, 'center_map')
+            if self.coordinates == 'uv':
+                layout.prop(self, 'center_map')
 
     def get_paramset(self):
         coord_params = ParamSet()

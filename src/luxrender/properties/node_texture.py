@@ -54,7 +54,9 @@ from ..properties.node_sockets import (
     luxrender_transform_socket, luxrender_coordinate_socket
 )
 
-from . import set_prop_tex, create_luxcore_name
+from ..extensions_framework import util as efutil
+
+from . import set_prop_tex, create_luxcore_name, warning_luxcore_node
 
 # Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -475,10 +477,10 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_luxcore_image_map(luxrender_texture_node):
+class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     """Image map texture node"""
-    bl_idname = 'luxrender_texture_luxcore_image_map_node'
-    bl_label = 'LuxCore Image Map Texture'
+    bl_idname = 'luxrender_texture_blender_image_map_node'
+    bl_label = 'Blender Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
@@ -491,13 +493,15 @@ class luxrender_texture_type_node_luxcore_image_map(luxrender_texture_node):
     blender_image = bpy.props.EnumProperty(items=get_images, name='')
 
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0)
-    gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=-10.0, max=10.0)
+    gain = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0.0, max=10.0)
 
     def init(self, context):
         self.inputs.new('luxrender_transform_socket', '2D Coordinate')
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
         split = layout.column(align=True)
         split.prop(self, 'blender_image')
         split.operator('image.open')
@@ -505,9 +509,34 @@ class luxrender_texture_type_node_luxcore_image_map(luxrender_texture_node):
         layout.prop(self, 'gamma')
         layout.prop(self, 'gain')
 
-    def export_texture(self, make_texture):
-        pass
-        # Get the absolute filepath with image.filepath_from_user() or better via efutil?
+    #def export_texture(self, make_texture):
+    #    pass
+    # Get the absolute filepath with image.filepath_from_user() or better via efutil?
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        if self.blender_image == 'none':
+            return [0, 0, 0] # Black color
+
+        image = bpy.data.images[self.blender_image]
+
+        # TODO: library handling
+        # TODO: SEQUENCE/GENERATED handling? Create own sequence node?
+        filepath = efutil.filesystem_path(image.filepath)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
+        set_prop_tex(properties, luxcore_name, 'file', filepath)
+        set_prop_tex(properties, luxcore_name, 'gamma', self.gamma)
+        set_prop_tex(properties, luxcore_name, 'gain', self.gain)
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class

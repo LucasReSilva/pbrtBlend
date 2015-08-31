@@ -2855,7 +2855,8 @@ class luxrender_transform_socket(bpy.types.NodeSocket):
 
     def export_luxcore(self, properties):
         default_mapping_type = 'uvmapping2d'
-        default_uvscale = [1, 1]
-        default_uvdelta = [0, 0]
+        # These are not the LuxCore API default values because we have to compensate Blender stuff
+        default_uvscale = [1, -1]
+        default_uvdelta = [0, 1]
         return export_socket_luxcore(properties, self, [default_mapping_type, default_uvscale, default_uvdelta])
 
