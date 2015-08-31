@@ -1247,6 +1247,8 @@ class luxrender_material_output_node(luxrender_node):
 
         luxcore_name = export_submat_luxcore(properties, self.inputs[0], material.name)
 
+        # Todo: light emission
+
         return luxcore_name
 
     def export(self, scene, lux_context, material, mode='indirect'):
@@ -1368,3 +1370,6 @@ class luxrender_volume_output_node(luxrender_node):
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Volume')
+        self.inputs.new('NodeSocketShader', 'Emission')
+
+    # Todo: export

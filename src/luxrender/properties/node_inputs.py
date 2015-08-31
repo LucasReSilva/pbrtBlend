@@ -189,6 +189,11 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
     v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
     v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
 
+    # LuxCore uses different names for the mapping types
+    luxcore_mapping_type_map = {
+        'uv': 'uvmapping2d'
+    }
+
     def init(self, context):
         self.outputs.new('luxrender_transform_socket', '2D Coordinate')
 
@@ -242,6 +247,21 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
                                        self.vdelta * -1 + 1 - (0.5 * (1.0 - self.vscale)))  # auto-center the mapping
 
         return coord_params
+
+    def export_luxcore(self, properties):
+        mapping_type = self.luxcore_mapping_type_map[self.coordinates]
+
+        uvscale = [self.uscale,
+                   self.vscale * -1]
+
+        if not self.center_map:
+            uvdelta = [self.udelta,
+                       self.vdelta + 1]
+        else:
+            uvdelta = [self.udelta + 0.5 * (1 - self.uscale),
+                       self.vdelta * -1 + 1 - (0.5 * (1 - self.vscale))]
+
+        return [mapping_type, uvscale, uvdelta]
 
 
 @LuxRenderAddon.addon_register_class
