@@ -124,6 +124,10 @@ def warning_luxcore_node(layout):
     if not UseLuxCore():
         layout.label('LuxCore only node!', icon='ERROR')
 
+def warning_classic_node(layout):
+    if UseLuxCore():
+        layout.label('No LuxCore support!', icon='ERROR')
+
 # LuxCore node export functions
 
 prefix_materials = 'scene.materials'

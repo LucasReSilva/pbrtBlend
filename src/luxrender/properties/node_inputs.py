@@ -56,7 +56,7 @@ from ..properties.node_sockets import (
     luxrender_TC_Kt_socket, luxrender_transform_socket, luxrender_coordinate_socket
 )
 
-from . import set_prop_tex, create_luxcore_name, warning_luxcore_node
+from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
 
 
 @LuxRenderAddon.addon_register_class
@@ -332,17 +332,23 @@ class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
 
     exponent = bpy.props.FloatProperty(name='Exponent', default=350.0)
 
+    def calc_roughness(self):
+        return (2.0 / (self.exponent + 2.0)) ** 0.5
+
     def init(self, context):
-        self.outputs.new('NodeSocketFloat', 'Float')
+        self.outputs.new('NodeSocketFloat', 'Roughness')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'exponent')
 
     def export_texture(self, make_texture):
         glossyexponent_params = ParamSet()
-        glossyexponent_params.add_float('value', (2.0 / (self.exponent + 2.0)) ** 0.5)
+        glossyexponent_params.add_float('value', self.calc_roughness())
 
         return make_texture('float', 'constant', self.name, glossyexponent_params)
+
+    def export_luxcore(self, properties):
+        return self.calc_roughness()
 
 
 @LuxRenderAddon.addon_register_class
@@ -382,7 +388,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
     col_mult = bpy.props.FloatProperty(name='Multiply Color', default=1.0, precision=5, description='Multiply color')
 
     def init(self, context):
-        # Default is color
+        # Default is color (need to set it for instances generated from scripts, e.g. the auto-conversion operators)
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
@@ -397,6 +403,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
             layout.prop(self, 'float')
 
         if self.variant == 'fresnel':
+            warning_classic_node(layout)
             layout.prop(self, 'fresnel')
 
         so = self.outputs.keys()
@@ -445,6 +452,16 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
         return make_texture(self.variant, 'constant', self.name, constant_params)
 
+    def export_luxcore(self, properties):
+        if self.variant == 'color':
+            value = [c * self.col_mult for c in self.color]
+        elif self.variant == 'float':
+            value = self.float
+        elif self.variant == 'fresnel':
+            value = self.fresnel
+
+        return value
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
@@ -461,6 +478,13 @@ class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
 
         return make_texture('color', 'hitpointcolor', self.name, hitpointcolor_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hitpointcolor')
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
@@ -475,16 +499,35 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 
     channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='mean')
 
+    channel_luxcore_items = [
+        ('-1', 'RGB', 'RGB luminance'),
+        ('0', 'R', 'Red luminance'),
+        ('1', 'G', 'Green luminance'),
+        ('2', 'B', 'Blue luminance'),
+    ]
+    channel_luxcore = bpy.props.EnumProperty(name='Channel', items=channel_luxcore_items, default='-1')
+
     def init(self, context):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'channel')
+        if UseLuxCore():
+            layout.prop(self, 'channel_luxcore', expand=True)
+        else:
+            layout.prop(self, 'channel')
 
     def export_texture(self, make_texture):
         hitpointgrey_params = ParamSet()
 
         return make_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hitpointgrey')
+        set_prop_tex(properties, luxcore_name, 'channel', self.channel_luxcore)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -518,6 +561,7 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
         set_prop_tex(properties, luxcore_name, 'type', 'hitpointalpha')
 
         if self.curvature_mode == 'both':
+            # Pointiness values are in [-1..1] range originally
             name_abs = luxcore_name + '_abs'
             set_prop_tex(properties, name_abs, 'type', 'abs')
             set_prop_tex(properties, name_abs, 'texture', luxcore_name)
@@ -525,6 +569,7 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
             luxcore_name = name_abs
 
         elif self.curvature_mode == 'concave':
+            # Only use the positive values of the pointiness information
             name_clamp = luxcore_name + '_clamp'
             set_prop_tex(properties, name_clamp, 'type', 'clamp')
             set_prop_tex(properties, name_clamp, 'texture', luxcore_name)
@@ -534,6 +579,7 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
             luxcore_name = name_clamp
 
         elif self.curvature_mode == 'convex':
+            # Only use the negative values of the pointiness information by first flipping the values
             name_flip = luxcore_name + '_flip'
             set_prop_tex(properties, name_flip, 'type', 'scale')
             set_prop_tex(properties, name_flip, 'texture1', luxcore_name)

@@ -135,8 +135,8 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_3d_coordinates_node"),
         NodeItem("luxrender_texture_blackbody_node"),
         NodeItem("luxrender_texture_gaussian_node"),
-        NodeItem("luxrender_texture_glossyexponent_node"),
         NodeItem("luxrender_texture_tabulateddata_node"),
+        NodeItem("luxrender_texture_glossyexponent_node"),
         NodeItem("luxrender_texture_constant_node"),  # value node
         NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
         NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
@@ -242,7 +242,7 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_3d_coordinates_node"),
         NodeItem("luxrender_texture_blackbody_node"),
         NodeItem("luxrender_texture_gaussian_node"),
-        NodeItem("luxrender_texture_glossyexponent_node"),
+        #NodeItem("luxrender_texture_glossyexponent_node"),
         NodeItem("luxrender_texture_tabulateddata_node"),
         NodeItem("luxrender_texture_constant_node"),  # value node
         #NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
