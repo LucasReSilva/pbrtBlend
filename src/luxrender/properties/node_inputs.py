@@ -56,6 +56,8 @@ from ..properties.node_sockets import (
     luxrender_TC_Kt_socket, luxrender_transform_socket, luxrender_coordinate_socket
 )
 
+from . import set_prop_tex, create_luxcore_name, warning_luxcore_node
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_3d_coordinates_node(luxrender_texture_node):
@@ -480,6 +482,69 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
         hitpointgrey_params = ParamSet()
 
         return make_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_pointiness(luxrender_texture_node):
+    """Pointiness texture node"""
+    bl_idname = 'luxrender_texture_pointiness_node'
+    bl_label = 'Pointiness'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 190
+
+    curvature_items = [
+        ('concave', 'Concave', 'Only use dents'),
+        ('convex', 'Convex', 'Only use hills'),
+        ('both', 'Both', 'Use both hills and dents'),
+    ]
+    curvature_mode = bpy.props.EnumProperty(items=curvature_items, default='both')
+
+    def init(self, context):
+        self.outputs.new('NodeSocketFloat', 'Float')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+        layout.prop(self, 'curvature_mode', expand=True)
+
+    def export_luxcore(self, properties):
+        # Pointiness is a hitpointalpha texture behind the scenes, just that it implicitly enables pointiness
+        # calculation on the mesh (handled in luxcore object export) and has some nice wrapping to get only part of
+        # the pointiness information (see code below)
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hitpointalpha')
+
+        if self.curvature_mode == 'both':
+            name_abs = luxcore_name + '_abs'
+            set_prop_tex(properties, name_abs, 'type', 'abs')
+            set_prop_tex(properties, name_abs, 'texture', luxcore_name)
+
+            luxcore_name = name_abs
+
+        elif self.curvature_mode == 'concave':
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', luxcore_name)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
+
+        elif self.curvature_mode == 'convex':
+            name_flip = luxcore_name + '_flip'
+            set_prop_tex(properties, name_flip, 'type', 'scale')
+            set_prop_tex(properties, name_flip, 'texture1', luxcore_name)
+            set_prop_tex(properties, name_flip, 'texture2', -1)
+
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', name_flip)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
+
+        return luxcore_name
 
 # Hitpointalpha is kind of useless with Blender's vertex color system, so we don't use it
 # @LuxRenderAddon.addon_register_class

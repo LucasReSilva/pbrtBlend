@@ -26,7 +26,7 @@
 #
 
 import bpy
-from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName
+from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName, UseLuxCore
 
 
 class luxrender_node(bpy.types.Node):
@@ -117,6 +117,12 @@ def check_node_get_paramset(node):
         print('No get_paramset() for node: ' + node.bl_idname)
         return False
     return True
+
+# LuxCore node UI functions (e.g. warning labels)
+
+def warning_luxcore_node(layout):
+    if not UseLuxCore():
+        layout.label('LuxCore only node!', icon='ERROR')
 
 # LuxCore node export functions
 

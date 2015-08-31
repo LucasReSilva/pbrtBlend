@@ -140,6 +140,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_constant_node"),  # value node
         NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
         NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
+        NodeItem("luxrender_texture_pointiness_node"),
         # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
     ]),
 
