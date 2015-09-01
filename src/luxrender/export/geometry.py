@@ -1101,7 +1101,6 @@ class GeometryExporter(object):
                     total_strand_count += 1
                     total_segments_count = total_segments_count + point_count - 1
 
-            hair_file_path = efutil.path_relative_to_export(hair_file_path)
             with open(hair_file_path, 'wb') as hair_file:
                 # Binary hair file format from
                 # http://www.cemyuksel.com/research/hairmodels/
