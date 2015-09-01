@@ -926,8 +926,8 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
 
     default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
                                                   default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                                    get=default_value_get,
-                                                    set=default_value_set)
+                                                  get=default_value_get,
+                                                  set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -977,9 +977,9 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
-                                                     default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                                     get=default_value_get,
-                                                     set=default_value_set)
+                                                  default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
+                                                  get=default_value_get,
+                                                  set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -1029,8 +1029,8 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 
     default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color',
                                                   default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                                   get=default_value_get,
-                                                   set=default_value_set)
+                                                  get=default_value_get,
+                                                  set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
