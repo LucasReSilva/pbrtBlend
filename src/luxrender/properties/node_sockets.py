@@ -1018,7 +1018,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
         pass
 
     color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color',
-                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0)
+                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0, update=color_update)
 
     # helper property
     def default_value_get(self):
@@ -1028,7 +1028,9 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color',
-                                                  default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0)
+                                                  default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
+                                                   get=default_value_get,
+                                                   set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
