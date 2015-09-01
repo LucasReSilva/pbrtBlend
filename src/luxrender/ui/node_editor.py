@@ -133,9 +133,6 @@ luxrender_node_categories_material = [
     luxrender_node_category_material("LUX_INPUT", "Input", items=[
         NodeItem("luxrender_2d_coordinates_node"),
         NodeItem("luxrender_3d_coordinates_node"),
-        NodeItem("luxrender_texture_blackbody_node"),
-        NodeItem("luxrender_texture_gaussian_node"),
-        NodeItem("luxrender_texture_tabulateddata_node"),
         NodeItem("luxrender_texture_glossyexponent_node"),
         NodeItem("luxrender_texture_constant_node"),  # value node
         NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
@@ -207,6 +204,12 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
+    luxrender_node_category_material("LUX_SPECTRUM", "Spectrum", items=[
+        NodeItem("luxrender_texture_blackbody_node"),
+        NodeItem("luxrender_texture_gaussian_node"),
+        NodeItem("luxrender_texture_tabulateddata_node"),
+    ]),
+
     luxrender_node_category_material("LUX_LIGHT", "Light", items=[
         NodeItem("luxrender_light_area_node"),
     ]),
@@ -234,10 +237,7 @@ luxrender_node_categories_volume = [
     luxrender_node_category_volume("LUX_INPUT_VOLUME", "Input", items=[
         NodeItem("luxrender_2d_coordinates_node"),
         NodeItem("luxrender_3d_coordinates_node"),
-        NodeItem("luxrender_texture_blackbody_node"),
-        NodeItem("luxrender_texture_gaussian_node"),
         #NodeItem("luxrender_texture_glossyexponent_node"),
-        NodeItem("luxrender_texture_tabulateddata_node"),
         NodeItem("luxrender_texture_constant_node"),  # value node
         #NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
         #NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
@@ -288,6 +288,12 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_fresnelcolor_node"),
         NodeItem("luxrender_texture_fresnelname_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
+    ]),
+
+    luxrender_node_category_volume("LUX_SPECTRUM_VOLUME", "Spectrum", items=[
+        NodeItem("luxrender_texture_blackbody_node"),
+        NodeItem("luxrender_texture_gaussian_node"),
+        NodeItem("luxrender_texture_tabulateddata_node"),
     ]),
 
     luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
