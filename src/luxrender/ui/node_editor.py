@@ -133,33 +133,33 @@ luxrender_node_categories_material = [
     luxrender_node_category_material("LUX_INPUT", "Input", items=[
         NodeItem("luxrender_2d_coordinates_node"),
         NodeItem("luxrender_3d_coordinates_node"),
-        NodeItem("luxrender_texture_glossyexponent_node"),
         NodeItem("luxrender_texture_constant_node"),  # value node
         NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
         NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
         NodeItem("luxrender_texture_pointiness_node"),
+        NodeItem("luxrender_texture_glossyexponent_node"),
         # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
     ]),
 
     luxrender_node_category_material("LUX_MATERIAL", "Material", items=[
-        NodeItem("luxrender_material_carpaint_node", label="Car Paint"),
-        NodeItem("luxrender_material_cloth_node", label="Cloth"),
+        NodeItem("luxrender_material_matte_node", label="Matte"),
+        NodeItem("luxrender_material_glossy_node", label="Glossy"),
+        NodeItem("luxrender_material_mix_node", label="Mix"),
+        NodeItem("luxrender_material_null_node", label="Null"),
         NodeItem("luxrender_material_glass_node", label="Glass"),
         NodeItem("luxrender_material_glass2_node", label="Glass2"),
-        NodeItem("luxrender_material_glossy_node", label="Glossy"),
-        NodeItem("luxrender_material_glossycoating_node", label="Glossy Coating"),
-        NodeItem("luxrender_material_glossytranslucent_node", label="Glossy Translucent"),
-        NodeItem("luxrender_material_matte_node", label="Matte"),
+        NodeItem("luxrender_material_roughglass_node", label="Rough Glass"),
         NodeItem("luxrender_material_mattetranslucent_node", label="Matte Translucent"),
+        NodeItem("luxrender_material_glossytranslucent_node", label="Glossy Translucent"),
         NodeItem("luxrender_material_metal_node", label="Metal"),
         NodeItem("luxrender_material_metal2_node", label="Metal2"),
         NodeItem("luxrender_material_mirror_node", label="Mirror"),
-        NodeItem("luxrender_material_roughglass_node", label="Rough Glass"),
-        NodeItem("luxrender_material_scatter_node", label="Scatter"),
         NodeItem("luxrender_material_shinymetal_node", label="Shiny Metal"),
         NodeItem("luxrender_material_velvet_node", label="Velvet"),
-        NodeItem("luxrender_material_null_node", label="Null"),
-        NodeItem("luxrender_material_mix_node", label="Mix"),
+        NodeItem("luxrender_material_carpaint_node", label="Car Paint"),
+        NodeItem("luxrender_material_cloth_node", label="Cloth"),
+        NodeItem("luxrender_material_scatter_node", label="Scatter"),
+        NodeItem("luxrender_material_glossycoating_node", label="Glossy Coating"),
         NodeItem("luxrender_material_doubleside_node", label="Double-Sided"),
         NodeItem("luxrender_material_layered_node", label="Layered"),
     ]),
@@ -188,13 +188,13 @@ luxrender_node_categories_material = [
     ]),
 
     luxrender_node_category_material("LUX_CONVERTER", "Converter", items=[
-        NodeItem("luxrender_texture_add_node"),
         NodeItem("luxrender_texture_bump_map_node"),
-        #NodeItem("luxrender_texture_colordepth_node"),
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
+        NodeItem("luxrender_texture_add_node"),
         NodeItem("luxrender_texture_subtract_node"),
         NodeItem("luxrender_texture_colorramp_node"),
+        #NodeItem("luxrender_texture_colordepth_node"),
     ]),
 
     luxrender_node_category_material("LUX_FRESNEL", "Fresnel Data", items=[
@@ -237,8 +237,8 @@ luxrender_node_categories_volume = [
     luxrender_node_category_volume("LUX_INPUT_VOLUME", "Input", items=[
         NodeItem("luxrender_2d_coordinates_node"),
         NodeItem("luxrender_3d_coordinates_node"),
-        #NodeItem("luxrender_texture_glossyexponent_node"),
         NodeItem("luxrender_texture_constant_node"),  # value node
+        #NodeItem("luxrender_texture_glossyexponent_node"),
         #NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
         #NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
         # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
@@ -274,13 +274,13 @@ luxrender_node_categories_volume = [
     ]),
 
     luxrender_node_category_volume("LUX_CONVERTER_VOLUME", "Converter", items=[
-        NodeItem("luxrender_texture_add_node"),
-        #NodeItem("luxrender_texture_bump_map_node"),
         NodeItem("luxrender_texture_colordepth_node"),
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
+        NodeItem("luxrender_texture_add_node"),
         NodeItem("luxrender_texture_subtract_node"),
         NodeItem("luxrender_texture_colorramp_node"),
+        #NodeItem("luxrender_texture_bump_map_node"),
     ]),
 
     luxrender_node_category_volume("LUX_FRESNEL_VOLUME", "Fresnel Data", items=[
