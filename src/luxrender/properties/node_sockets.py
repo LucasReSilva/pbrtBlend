@@ -2264,8 +2264,22 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_brickmodtex_socket'
     bl_label = 'Brick modulation texture socket'
 
+    # meaningful property
+    def brickmodtex_update(self, context):
+        pass
+
     brickmodtex = bpy.props.FloatVectorProperty(name='Brick Modulation Texture', subtype='COLOR', min=0.0, max=1.0,
-                                                default=(0.9, 0.9, 0.9))
+                                                default=(0.9, 0.9, 0.9), update=brickmodtex_update)
+
+    # helper property
+    def default_value_get(self):
+        return self.brickmodtex
+
+    def default_value_set(self, value):
+        self.brickmodtex = value
+
+    default_value = bpy.props.FloatVectorProperty(name='Brick Modulation Texture', subtype='COLOR', min=0.0, max=1.0,
+                                                default=(0.9, 0.9, 0.9), get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -2299,8 +2313,22 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_bricktex_socket'
     bl_label = 'Brick texture socket'
 
+    # meaningful property
+    def bricktex_update(self, context):
+        pass
+
     bricktex = bpy.props.FloatVectorProperty(name='Brick Texture', subtype='COLOR', min=0.0, max=1.0,
-                                             default=(0.8, 0.8, 0.8))
+                                             default=(0.8, 0.8, 0.8), update=bricktex_update)
+
+    # helper property
+    def default_value_get(self):
+        return self.bricktex
+
+    def default_value_set(self, value):
+        self.bricktex = value
+
+    default_value = bpy.props.FloatVectorProperty(name='Brick Texture', subtype='COLOR', min=0.0, max=1.0,
+                                             default=(0.8, 0.8, 0.8), get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -2334,8 +2362,22 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_mortartex_socket'
     bl_label = 'Mortar texture socket'
 
+    # meaningful property
+    def mortartex_update(self, context):
+        pass
+
     mortartex = bpy.props.FloatVectorProperty(name='Mortar Texture', subtype='COLOR', min=0.0, max=1.0,
-                                              default=(0.1, 0.1, 0.1))
+                                              default=(0.1, 0.1, 0.1), update=mortartex_update)
+
+    # helper property
+    def default_value_get(self):
+        return self.mortartex
+
+    def default_value_set(self, value):
+        self.mortartex = value
+
+    default_value = bpy.props.FloatVectorProperty(name='Mortar Texture', subtype='COLOR', min=0.0, max=1.0,
+                                              default=(0.1, 0.1, 0.1), get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
