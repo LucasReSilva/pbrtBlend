@@ -144,11 +144,6 @@ luxrender_node_categories_material = [
         # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
     ]),
 
-    luxrender_node_category_material("LUX_OUTPUT", "Output", items=[
-        NodeItem("luxrender_material_output_node"),
-        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
-    ]),
-
     luxrender_node_category_material("LUX_MATERIAL", "Material", items=[
         NodeItem("luxrender_material_carpaint_node", label="Car Paint"),
         NodeItem("luxrender_material_cloth_node", label="Cloth"),
@@ -195,14 +190,14 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_blender_voronoi_node", label="Voronoi"),
     ]),
 
-    #luxrender_node_category("LUX_VOLUME", "Volume", items=[
-    #    NodeItem("luxrender_volume_clear_node"),
-    #    NodeItem("luxrender_volume_homogeneous_node"),
-    #    NodeItem("luxrender_volume_heterogeneous_node"),
-    #]),
-
-    luxrender_node_category_material("LUX_LIGHT", "Light", items=[
-        NodeItem("luxrender_light_area_node"),
+    luxrender_node_category_material("LUX_CONVERTER", "Converter", items=[
+        NodeItem("luxrender_texture_add_node"),
+        NodeItem("luxrender_texture_bump_map_node"),
+        #NodeItem("luxrender_texture_colordepth_node"),
+        NodeItem("luxrender_texture_mix_node"),
+        NodeItem("luxrender_texture_scale_node"),
+        NodeItem("luxrender_texture_subtract_node"),
+        NodeItem("luxrender_texture_colorramp_node"),
     ]),
 
     luxrender_node_category_material("LUX_FRESNEL", "Fresnel Data", items=[
@@ -212,14 +207,13 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
-    luxrender_node_category_material("LUX_CONVERTER", "Converter", items=[
-        NodeItem("luxrender_texture_add_node"),
-        NodeItem("luxrender_texture_bump_map_node"),
-        #NodeItem("luxrender_texture_colordepth_node"),
-        NodeItem("luxrender_texture_mix_node"),
-        NodeItem("luxrender_texture_scale_node"),
-        NodeItem("luxrender_texture_subtract_node"),
-        NodeItem("luxrender_texture_colorramp_node"),
+    luxrender_node_category_material("LUX_LIGHT", "Light", items=[
+        NodeItem("luxrender_light_area_node"),
+    ]),
+
+    luxrender_node_category_material("LUX_OUTPUT", "Output", items=[
+        NodeItem("luxrender_material_output_node"),
+        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
     ]),
 
     luxrender_node_category_material("LUX_LAYOUT", "Layout", items=[
@@ -250,14 +244,15 @@ luxrender_node_categories_volume = [
         # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
     ]),
 
-    luxrender_node_category_volume("LUX_OUTPUT_VOLUME", "Output", items=[
-        NodeItem("luxrender_volume_output_node"),
-        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
+    luxrender_node_category_volume("LUX_VOLUME", "Volume", items=[
+        NodeItem("luxrender_volume_clear_node"),
+        NodeItem("luxrender_volume_homogeneous_node"),
+        NodeItem("luxrender_volume_heterogeneous_node"),
     ]),
 
     luxrender_node_category_volume("LUX_TEXTURE_VOLUME", "Texture", items=[
-        NodeItem("luxrender_texture_image_map_node", label="Image Map"),
-        NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
+        #NodeItem("luxrender_texture_image_map_node", label="Image Map"),
+        #NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
         #NodeItem("luxrender_texture_normal_map_node", label="Normal Map"),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),
@@ -278,14 +273,14 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_blender_voronoi_node", label="Voronoi"),
     ]),
 
-    luxrender_node_category_volume("LUX_VOLUME", "Volume", items=[
-        NodeItem("luxrender_volume_clear_node"),
-        NodeItem("luxrender_volume_homogeneous_node"),
-        NodeItem("luxrender_volume_heterogeneous_node"),
-    ]),
-
-    luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
-        NodeItem("luxrender_light_area_node"),
+    luxrender_node_category_volume("LUX_CONVERTER_VOLUME", "Converter", items=[
+        NodeItem("luxrender_texture_add_node"),
+        #NodeItem("luxrender_texture_bump_map_node"),
+        NodeItem("luxrender_texture_colordepth_node"),
+        NodeItem("luxrender_texture_mix_node"),
+        NodeItem("luxrender_texture_scale_node"),
+        NodeItem("luxrender_texture_subtract_node"),
+        NodeItem("luxrender_texture_colorramp_node"),
     ]),
 
     luxrender_node_category_volume("LUX_FRESNEL_VOLUME", "Fresnel Data", items=[
@@ -295,14 +290,13 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
-    luxrender_node_category_volume("LUX_CONVERTER_VOLUME", "Converter", items=[
-        NodeItem("luxrender_texture_add_node"),
-        #NodeItem("luxrender_texture_bump_map_node"),
-        NodeItem("luxrender_texture_colordepth_node"),
-        NodeItem("luxrender_texture_mix_node"),
-        NodeItem("luxrender_texture_scale_node"),
-        NodeItem("luxrender_texture_subtract_node"),
-        NodeItem("luxrender_texture_colorramp_node"),
+    luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
+        NodeItem("luxrender_light_area_node"),
+    ]),
+
+    luxrender_node_category_volume("LUX_OUTPUT_VOLUME", "Output", items=[
+        NodeItem("luxrender_volume_output_node"),
+        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
     ]),
 
     luxrender_node_category_volume("LUX_LAYOUT_VOLUME", "Layout", items=[
