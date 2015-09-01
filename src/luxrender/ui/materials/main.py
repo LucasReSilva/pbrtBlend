@@ -143,6 +143,14 @@ class ui_luxrender_material_header(luxrender_material_base):
                 row.label("Material type")
                 row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
                 super().draw(context)
+        else:
+            # Draw volume dropdowns for material output node
+            output_node = find_node(mat, 'luxrender_material_output_node')
+            if output_node:
+                layout.prop_search(output_node, 'interior_volume', context.scene.luxrender_volumes, 'volumes',
+                                   'Interior', icon='MOD_FLUIDSIM')
+                layout.prop_search(output_node, 'exterior_volume', context.scene.luxrender_volumes, 'volumes',
+                                   'Exterior', icon='MOD_FLUIDSIM')
 
 
 @LuxRenderAddon.addon_register_class
@@ -301,7 +309,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
         except:
             return super().poll(context)
 
-
+'''
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_node_volume(luxrender_material_base):
     bl_label = 'Volumes'
@@ -320,6 +328,7 @@ class ui_luxrender_material_node_volume(luxrender_material_base):
             return context.material.luxrender_material.nodetree
         except:
             return False
+'''
 
 
 @LuxRenderAddon.addon_register_class

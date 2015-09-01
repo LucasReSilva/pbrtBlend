@@ -1217,6 +1217,31 @@ class luxrender_light_area_node(luxrender_material_node):
 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_standard(luxrender_material_node):
+    """Standard material node"""
+
+    # TODO: this thing is just a test for now!
+
+    bl_idname = 'luxrender_material_type_node_standard'
+    bl_label = 'Standard Material'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 160
+
+    def init(self, context):
+        self.inputs.new('NodeSocketColor', 'Diffuse Color')
+        self.inputs.new('NodeSocketFloat', 'Diffuse Roughness')
+        self.inputs.new('NodeSocketColor', 'Specular Color')
+        self.inputs.new('NodeSocketFloat', 'Specular Roughness')
+        self.inputs.new('NodeSocketFloat', 'Bump')
+
+        self.outputs.new('NodeSocketShader', 'Surface')
+
+    def draw_buttons(self, context, layout):
+        #layout.prop(self, 'gain')
+        pass
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(luxrender_node):
     """Material output node"""
     bl_idname = 'luxrender_material_output_node'
