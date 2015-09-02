@@ -1227,18 +1227,30 @@ class luxrender_material_type_node_standard(luxrender_material_node):
     bl_icon = 'MATERIAL'
     bl_width_min = 160
 
+    def update_glossy(self, context):
+        self.inputs['Specular Color'].enabled = self.glossy
+        self.inputs['Specular Roughness'].enabled = self.glossy
+
+    glossy = bpy.props.BoolProperty(name='Glossy', description='', default=False, update=update_glossy)
+    multibounce = bpy.props.BoolProperty(name='Dusty (Multibounce)', description='', default=False)
+    anisotropic = bpy.props.BoolProperty(name='Anisotropic', description='', default=False)
+
     def init(self, context):
+        self.outputs.new('NodeSocketShader', 'Surface')
+
         self.inputs.new('NodeSocketColor', 'Diffuse Color')
         self.inputs.new('NodeSocketFloat', 'Diffuse Roughness')
         self.inputs.new('NodeSocketColor', 'Specular Color')
+        self.inputs['Specular Color'].enabled = False
         self.inputs.new('NodeSocketFloat', 'Specular Roughness')
-        self.inputs.new('NodeSocketFloat', 'Bump')
-
-        self.outputs.new('NodeSocketShader', 'Surface')
+        self.inputs['Specular Roughness'].enabled = False
+        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
     def draw_buttons(self, context, layout):
-        #layout.prop(self, 'gain')
-        pass
+        layout.prop(self, 'glossy')
+        if self.glossy:
+            layout.prop(self, 'multibounce')
+            layout.prop(self, 'anisotropic')
 
 
 @LuxRenderAddon.addon_register_class

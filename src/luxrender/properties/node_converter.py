@@ -112,7 +112,7 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 class luxrender_texture_type_node_bump_map(luxrender_texture_node):
     """Bump map texture node"""
     bl_idname = 'luxrender_texture_bump_map_node'
-    bl_label = 'Bump'
+    bl_label = 'Bump Height'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
@@ -120,8 +120,8 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
                                           precision=6, subtype='DISTANCE', unit='LENGTH', step=.001)
 
     def init(self, context):
-        self.inputs.new('NodeSocketFloat', 'Bump Value')
-        self.outputs.new('NodeSocketFloat', 'Float')
+        self.inputs.new('luxrender_TF_bump_socket', 'Float')
+        self.outputs.new('NodeSocketFloat', 'Bump')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'bump_height')
