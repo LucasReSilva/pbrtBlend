@@ -61,7 +61,7 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 
     def init(self, context):
         self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-        self.outputs.new('luxrender_fresnel_output_socket', 'Fresnel')
+        self.outputs.new('luxrender_fresnel_output_socket', 'IOR')
 
     def export_texture(self, make_texture):
         fresnelcolor_params = ParamSet()
@@ -90,7 +90,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
     cauchy_b = bpy.props.FloatProperty(name='B', default=0.0035, min=0.0, max=10.0, precision=6)
 
     def init(self, context):
-        self.outputs.new('luxrender_fresnel_output_socket', 'Fresnel')
+        self.outputs.new('luxrender_fresnel_output_socket', 'IOR')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'use_ior')
@@ -137,7 +137,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
     frname_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 
     def init(self, context):
-        self.outputs.new('luxrender_fresnel_output_socket', 'Fresnel')
+        self.outputs.new('luxrender_fresnel_output_socket', 'IOR')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'frname_preset')
@@ -175,7 +175,7 @@ class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
     c = bpy.props.FloatVectorProperty(name='C', default=(0.0047, 0.0135, 97.93), min=0.0, max=100.0, precision=6)
 
     def init(self, context):
-        self.outputs.new('luxrender_fresnel_output_socket', 'Fresnel')
+        self.outputs.new('luxrender_fresnel_output_socket', 'IOR')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'advanced')

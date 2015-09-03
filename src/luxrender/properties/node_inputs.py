@@ -415,8 +415,8 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
             if 'Float' in so:
                 self.outputs.remove(self.outputs['Float'])
 
-            if 'Fresnel' in so:
-                self.outputs.remove(self.outputs['Fresnel'])
+            if 'IOR' in so:
+                self.outputs.remove(self.outputs['IOR'])
 
         if self.variant == 'float':
             if not 'Float' in so:
@@ -425,12 +425,12 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
 
-            if 'Fresnel' in so:
-                self.outputs.remove(self.outputs['Fresnel'])
+            if 'IOR' in so:
+                self.outputs.remove(self.outputs['IOR'])
 
         if self.variant == 'fresnel':
-            if not 'Fresnel' in so:
-                self.outputs.new('luxrender_fresnel_output_socket', 'Fresnel')
+            if not 'IOR' in so:
+                self.outputs.new('luxrender_fresnel_output_socket', 'IOR')
 
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
