@@ -757,6 +757,10 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
     use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness',
                                             default=False, update=change_use_anisotropy)
 
+    # TEST
+    n = bpy.props.FloatVectorProperty(name='n', description='', subtype='COLOR')
+    k = bpy.props.FloatVectorProperty(name='k', description='', subtype='COLOR')
+
     def init(self, context):
         self.inputs.new('luxrender_fresnel_socket', 'IOR')
         self.inputs['IOR'].needs_link = True  # suppress inappropiate chooser
@@ -775,6 +779,8 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         # if self.metal2_type == 'nk':
         # layout.prop(self, 'metal2_nkfile')
         layout.prop(self, 'use_anisotropy')
+        layout.prop(self, 'n')
+        layout.prop(self, 'k')
 
     def export_material(self, make_material, make_texture):
         mat_type = 'metal2'
@@ -783,6 +789,21 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         metal2_params.update(get_socket_paramsets(self.inputs, make_texture))
 
         return make_material(mat_type, self.name, metal2_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        u_roughness = self.inputs[1].export_luxcore(properties)
+        v_roughness = self.inputs[2].export_luxcore(properties) if self.use_anisotropy else u_roughness
+
+        set_prop_mat(properties, luxcore_name, 'type', 'metal2')
+        #set_prop_mat(properties, luxcore_name, 'fresnel', )
+        set_prop_mat(properties, luxcore_name, 'n', list(self.n))
+        set_prop_mat(properties, luxcore_name, 'k', list(self.k))
+        set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
+        set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
