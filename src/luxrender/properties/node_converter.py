@@ -216,7 +216,7 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
                 self.inputs.remove(self.inputs['Float 2'])
 
             if not 'Fresnel' in so:
-                self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+                self.outputs.new('luxrender_fresnel_output_socket', 'Fresnel')
 
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])

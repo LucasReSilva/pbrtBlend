@@ -430,7 +430,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
         if self.variant == 'fresnel':
             if not 'Fresnel' in so:
-                self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+                self.outputs.new('luxrender_fresnel_output_socket', 'Fresnel')
 
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])

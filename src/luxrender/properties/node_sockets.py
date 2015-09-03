@@ -85,13 +85,15 @@ def export_socket_luxcore(properties, socket, fallback=None):
 
 # Store our custom socket colors here as vars, so we don't have to remember what they are on every custom socket
 float_socket_color = (0.63, 0.63, 0.63, 1.0)  # Same as native NodeSocketFloat
-color_socket_color = (0.9, 0.9, 0.0, 1.0)  # Same as native NodeSocketColor
+color_socket_color = (0.78, 0.78, 0.16, 1.0)  # Same as native NodeSocketColor
 fresnel_socket_color = (0.33, 0.6, 0.85, 1.0)
+coord_2d_color = (0.50, 0.25, 0.60, 1.0)
+coord_3d_color = (0.65, 0.55, 0.75, 1.0)
 
 
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
-    """Fresnel texture I/O socket"""
+    """Fresnel texture input socket"""
     bl_idname = 'luxrender_fresnel_socket'
     bl_label = 'IOR socket'
 
@@ -160,6 +162,21 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 
     def export_luxcore(self, properties):
         return export_socket_luxcore(properties, self, self.fresnel)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_fresnel_output_socket(bpy.types.NodeSocket):
+    """Fresnel texture output socket"""
+    bl_idname = 'luxrender_fresnel_output_socket'
+    bl_label = 'IOR socket'
+
+    # Optional function for drawing the socket input value
+    def draw(self, context, layout, node, text):
+        layout.label(self.name)
+
+    # Socket color
+    def draw_color(self, context, node):
+        return fresnel_socket_color
 
 
 # #### custom color sockets #####
@@ -2864,7 +2881,7 @@ class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
 # 3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names
 @LuxRenderAddon.addon_register_class
 class luxrender_coordinate_socket(bpy.types.NodeSocket):
-    """coordinate socket"""
+    """3D coordinate socket"""
     bl_idname = 'luxrender_coordinate_socket'
     bl_label = 'Coordinate socket'
 
@@ -2874,7 +2891,7 @@ class luxrender_coordinate_socket(bpy.types.NodeSocket):
 
     # Socket color
     def draw_color(self, context, node):
-        return 0.50, 0.25, 0.60, 1.0
+        return coord_2d_color
 
     def export_luxcore(self, properties):
         default_mapping_type = 'globalmapping3d'
@@ -2897,7 +2914,7 @@ class luxrender_transform_socket(bpy.types.NodeSocket):
         layout.label(text=self.name)
 
     def draw_color(self, context, node):
-        return 0.65, 0.55, 0.75, 1.0
+        return coord_3d_color
 
     def export_luxcore(self, properties):
         default_mapping_type = 'uvmapping2d'
@@ -2905,4 +2922,3 @@ class luxrender_transform_socket(bpy.types.NodeSocket):
         default_uvscale = [1, -1]
         default_uvdelta = [0, 1]
         return export_socket_luxcore(properties, self, [default_mapping_type, default_uvscale, default_uvdelta])
-
