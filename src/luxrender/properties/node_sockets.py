@@ -90,13 +90,6 @@ fresnel_socket_color = (0.33, 0.6, 0.85, 1.0)
 coord_2d_color = (0.50, 0.25, 0.60, 1.0)
 coord_3d_color = (0.65, 0.55, 0.75, 1.0)
 
-def get_fresnel_socket_color():
-    # Fresnel/IOR is just a float in LuxCore API, so don't confuse the user with different colors
-    if UseLuxCore():
-        return float_socket_color
-    else:
-        return fresnel_socket_color
-
 
 @LuxRenderAddon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
@@ -145,7 +138,7 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 
     # Socket color
     def draw_color(self, context, node):
-        return get_fresnel_socket_color()
+        return fresnel_socket_color
 
     # Export routine for this socket
     def get_paramset(self, make_texture):
@@ -183,7 +176,7 @@ class luxrender_fresnel_output_socket(bpy.types.NodeSocket):
 
     # Socket color
     def draw_color(self, context, node):
-        return get_fresnel_socket_color()
+        return fresnel_socket_color
 
 
 # #### custom color sockets #####
@@ -2832,7 +2825,7 @@ class luxrender_TFR_tex1_socket(bpy.types.NodeSocket):
             layout.prop(self, 'tex1', text=self.name)
 
     def draw_color(self, context, node):
-        return get_fresnel_socket_color()
+        return fresnel_socket_color
 
     def get_paramset(self, make_texture):
         tex_node = get_linked_node(self)
@@ -2866,7 +2859,7 @@ class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
             layout.prop(self, 'tex2', text=self.name)
 
     def draw_color(self, context, node):
-        return get_fresnel_socket_color()
+        return fresnel_socket_color
 
     def get_paramset(self, make_texture):
         tex_node = get_linked_node(self)
