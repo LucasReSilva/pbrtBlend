@@ -858,7 +858,7 @@ class luxrender_material_type_node_mix(luxrender_material_node):
     bl_idname = 'luxrender_material_mix_node'
     bl_label = 'Mix Material'
     bl_icon = 'MATERIAL'
-    bl_width_min = 180
+    bl_width_min = 160
 
     def init(self, context):
         self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')

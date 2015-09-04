@@ -373,8 +373,8 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
         },
         'clamp': {
             0: ['Value', True],
-            1: ['Min', True],
-            2: ['Max', True]
+            1: ['', False],
+            2: ['', False]
         },
         'mix': {
             0: ['Amount', True],
@@ -405,6 +405,9 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
     ]
     mode = bpy.props.EnumProperty(name='Mode', items=mode_items, default='scale', update=change_mode)
 
+    mode_clamp_min = bpy.props.FloatProperty(name='Min', description='', default=0)
+    mode_clamp_max = bpy.props.FloatProperty(name='Max', description='', default=1)
+
     clamp_output = bpy.props.BoolProperty(name='Clamp', default=False, description='Limit the output value to 0..1 range')
 
     def init(self, context):
@@ -419,6 +422,10 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
         layout.prop(self, 'mode', text='')
         layout.prop(self, 'clamp_output')
 
+        if self.mode == 'clamp':
+            layout.prop(self, 'mode_clamp_min')
+            layout.prop(self, 'mode_clamp_max')
+
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
@@ -432,8 +439,8 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
             set_prop_tex(properties, luxcore_name, 'texture', slot_1)
         elif self.mode == 'clamp':
             set_prop_tex(properties, luxcore_name, 'texture', slot_1)
-            set_prop_tex(properties, luxcore_name, 'min', slot_2)
-            set_prop_tex(properties, luxcore_name, 'max', slot_3)
+            set_prop_tex(properties, luxcore_name, 'min', self.mode_clamp_min)
+            set_prop_tex(properties, luxcore_name, 'max', self.mode_clamp_max)
         elif self.mode == 'mix':
             set_prop_tex(properties, luxcore_name, 'amount', slot_1)
             set_prop_tex(properties, luxcore_name, 'texture1', slot_2)
