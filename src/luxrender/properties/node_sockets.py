@@ -164,21 +164,6 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.fresnel)
 
 
-@LuxRenderAddon.addon_register_class
-class luxrender_fresnel_output_socket(bpy.types.NodeSocket):
-    """Fresnel texture output socket"""
-    bl_idname = 'luxrender_fresnel_output_socket'
-    bl_label = 'IOR socket'
-
-    # Optional function for drawing the socket input value
-    def draw(self, context, layout, node, text):
-        layout.label(self.name)
-
-    # Socket color
-    def draw_color(self, context, node):
-        return fresnel_socket_color
-
-
 # #### custom color sockets #####
 
 @LuxRenderAddon.addon_register_class

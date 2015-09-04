@@ -198,10 +198,10 @@ luxrender_node_categories_material = [
         #NodeItem("luxrender_texture_colordepth_node"),
     ]),
 
-    luxrender_node_category_material("LUX_FRESNEL", "Fresnel Data", items=[
-        NodeItem("luxrender_texture_cauchy_node"),
+    luxrender_node_category_material("LUX_FRESNEL", "Fresnel", items=[
         NodeItem("luxrender_texture_fresnelcolor_node"),
         NodeItem("luxrender_texture_fresnelname_node"),
+        NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
@@ -284,10 +284,10 @@ luxrender_node_categories_volume = [
         #NodeItem("luxrender_texture_bump_map_node"),
     ]),
 
-    luxrender_node_category_volume("LUX_FRESNEL_VOLUME", "Fresnel Data", items=[
-        NodeItem("luxrender_texture_cauchy_node"),
+    luxrender_node_category_volume("LUX_FRESNEL_VOLUME", "Fresnel", items=[
         NodeItem("luxrender_texture_fresnelcolor_node"),
         NodeItem("luxrender_texture_fresnelname_node"),
+        NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
