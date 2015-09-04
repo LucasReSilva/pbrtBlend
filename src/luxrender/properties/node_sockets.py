@@ -2863,6 +2863,30 @@ class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.tex2)
 
 
+@LuxRenderAddon.addon_register_class
+class luxrender_float_socket(bpy.types.NodeSocket):
+    """Float socket"""
+    bl_idname = 'luxrender_float_socket'
+    bl_label = 'Value'
+
+    default_value = bpy.props.FloatProperty(name='Value', default=0.5)
+
+    def draw(self, context, layout, node, text):
+        if self.is_linked:
+            layout.label(text=self.name)
+        else:
+            layout.prop(self, 'default_value', text=self.name)
+
+    def draw_color(self, context, node):
+        return float_socket_color
+
+    # TODO: implement classic export
+    #def get_paramset(self, make_texture):
+
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self, self.default_value)
+
+
 # 3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names
 @LuxRenderAddon.addon_register_class
 class luxrender_coordinate_socket(bpy.types.NodeSocket):

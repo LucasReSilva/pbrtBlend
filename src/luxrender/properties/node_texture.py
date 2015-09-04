@@ -523,6 +523,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
         # TODO: library handling
         # TODO: SEQUENCE/GENERATED handling? Create own sequence node?
+        # Note: we can get the nodetree via node.id_data
+
         filepath = efutil.filesystem_path(image.filepath)
 
         set_prop_tex(properties, luxcore_name, 'type', 'imagemap')

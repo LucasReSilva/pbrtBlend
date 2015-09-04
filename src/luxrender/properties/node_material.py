@@ -731,13 +731,9 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
-    for prop in luxrender_mat_metal2.properties:
-        if prop['attr'].startswith('metaltype'):
-            metal2_types = prop['items']
-
-    for prop in luxrender_mat_metal2.properties:
-        if prop['attr'].startswith('preset'):
-            metal2_presets = prop['items']
+    #for prop in luxrender_mat_metal2.properties:
+    #    if prop['attr'].startswith('metaltype'):
+    #        metal2_types = prop['items']
 
     def change_use_anisotropy(self, context):
         try:
@@ -749,10 +745,22 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 
         self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
-        # metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
+    # metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
 
-    # metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets, default='aluminium')
+    for prop in luxrender_mat_metal2.properties:
+        if prop['attr'].startswith('preset'):
+            metal2_presets = prop['items']
+    metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets,
+                                           default='aluminium')
+
     # metal2_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
+
+    input_type_items = [
+        ('preset', 'Preset', 'Use pre-configured presets'),
+        ('color', 'Color', 'Use custom color as input'),
+        ('fresnel', 'Fresnel', 'Use a fresnel texture as input')
+    ]
+    input_type = bpy.props.EnumProperty(name='Type', description='Input Type', items=input_type_items, default='preset')
 
     use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness',
                                             default=False, update=change_use_anisotropy)
@@ -775,6 +783,27 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         # if self.metal2_type == 'nk':
         # layout.prop(self, 'metal2_nkfile')
         layout.prop(self, 'use_anisotropy')
+        layout.prop(self, 'input_type', expand=True)
+
+        if self.input_type == 'preset':
+            layout.prop(self, 'metal2_preset')
+            if 'Fresnel' in self.inputs:
+                self.inputs.remove(self.inputs['Fresnel'])
+            if 'Color' in self.inputs:
+                self.inputs.remove(self.inputs['Color'])
+
+        elif self.input_type == 'color':
+            if 'Fresnel' in self.inputs:
+                self.inputs.remove(self.inputs['Fresnel'])
+            if not 'Color' in self.inputs:
+                self.inputs.new('NodeSocketColor', 'Color')
+
+        elif self.input_type == 'fresnel':
+            if 'Color' in self.inputs:
+                self.inputs.remove(self.inputs['Color'])
+            if not 'Fresnel' in self.inputs:
+                self.inputs.new('luxrender_fresnel_socket', 'Fresnel')
+                self.inputs['Fresnel'].needs_link = True
 
     def export_material(self, make_material, make_texture):
         mat_type = 'metal2'

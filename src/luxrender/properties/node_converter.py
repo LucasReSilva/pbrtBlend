@@ -55,7 +55,7 @@ from ..properties.node_sockets import (
     luxrender_TC_tex2_socket
 )
 
-from . import warning_luxcore_node
+from . import warning_luxcore_node, create_luxcore_name, set_prop_tex
 
 
 @LuxRenderAddon.addon_register_class
@@ -359,12 +359,109 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_math(luxrender_texture_node):
+    """Color at Depth node"""
+    bl_idname = 'luxrender_texture_math_node'
+    bl_label = 'Math'
+    bl_icon = 'TEXTURE'
+
+    input_settings = {
+        'abs': {
+            0: ['Value', True], # slot index: [name, enabled]
+            1: ['', False],
+            2: ['', False]
+        },
+        'clamp': {
+            0: ['Value', True],
+            1: ['Min', True],
+            2: ['Max', True]
+        },
+        'mix': {
+            0: ['Amount', True],
+            1: ['Value 1', True],
+            2: ['Value 2', True]
+        },
+        'default': {
+            0: ['Value 1', True],
+            1: ['Value 2', True],
+            2: ['', False]
+        }
+    }
+
+    def change_mode(self, context):
+        mode = self.mode if self.mode in self.input_settings else 'default'
+
+        for i in self.input_settings[mode].keys():
+            self.inputs[i].name = self.input_settings[mode][i][0]
+            self.inputs[i].enabled = self.input_settings[mode][i][1]
+
+    mode_items = [
+        ('scale', 'Multiply', ''),
+        ('add', 'Add', ''),
+        ('subtract', 'Subtract', ''),
+        ('mix', 'Mix', 'Mix between two values/textures according to the amount (0 = use first value, 1 = use second value'),
+        ('clamp', 'Clamp', 'Clamp the input so it is between min and max values'),
+        ('abs', 'Absolute', 'Take the absolute value (remove minus sign)'),
+    ]
+    mode = bpy.props.EnumProperty(name='Mode', items=mode_items, default='scale', update=change_mode)
+
+    clamp_output = bpy.props.BoolProperty(name='Clamp', default=False, description='Limit the output value to 0..1 range')
+
+    def init(self, context):
+        self.inputs.new('luxrender_float_socket', 'Value 1')
+        self.inputs.new('luxrender_float_socket', 'Value 2')
+        self.inputs.new('luxrender_float_socket', 'Max') # for clamp mode, disabled by default
+        self.inputs['Max'].enabled = False
+
+        self.outputs.new('NodeSocketFloat', 'Value')
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'mode', text='')
+        layout.prop(self, 'clamp_output')
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        slot_1 = self.inputs[0].export_luxcore(properties)
+        slot_2 = self.inputs[1].export_luxcore(properties)
+        slot_3 = self.inputs[2].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', self.mode)
+
+        if self.mode == 'abs':
+            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
+        elif self.mode == 'clamp':
+            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
+            set_prop_tex(properties, luxcore_name, 'min', slot_2)
+            set_prop_tex(properties, luxcore_name, 'max', slot_3)
+        elif self.mode == 'mix':
+            set_prop_tex(properties, luxcore_name, 'amount', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_2)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_3)
+        else:
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_2)
+
+        if self.clamp_output:
+            clamp_name = create_luxcore_name(self, suffix='clamp')
+            set_prop_tex(properties, clamp_name, 'type', 'clamp')
+            set_prop_tex(properties, clamp_name, 'texture', luxcore_name)
+            set_prop_tex(properties, clamp_name, 'min', 0)
+            set_prop_tex(properties, clamp_name, 'max', 1)
+            luxcore_name = clamp_name
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_colorramp(luxrender_texture_node):
     """Colorramp texture node"""
     bl_idname = 'luxrender_texture_colorramp_node'
     bl_label = 'ColorRamp'
     bl_icon = 'TEXTURE'
     bl_width_min = 260
+
+    #TODO: wait for the colorramp property to be exposed by Blender API before releasing this into the wild!
 
     @classmethod
     def poll(cls, node_tree):

@@ -63,7 +63,7 @@ from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_c
 class luxrender_3d_coordinates_node(luxrender_texture_node):
     """3D texture coordinates node"""
     bl_idname = 'luxrender_3d_coordinates_node'
-    bl_label = '3D Texture Coordinate'
+    bl_label = '3D Texture Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 260
 
@@ -174,7 +174,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 class luxrender_2d_coordinates_node(luxrender_texture_node):
     """2D texture coordinates node"""
     bl_idname = 'luxrender_2d_coordinates_node'
-    bl_label = '2D Texture Coordinate'
+    bl_label = '2D Texture Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
