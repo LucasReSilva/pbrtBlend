@@ -360,7 +360,7 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_math(luxrender_texture_node):
-    """Color at Depth node"""
+    """Math node with several math operations"""
     bl_idname = 'luxrender_texture_math_node'
     bl_label = 'Math'
     bl_icon = 'TEXTURE'
@@ -465,7 +465,7 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_colormix(luxrender_texture_node):
-    """Color at Depth node"""
+    """ColorMix node with several mixing methods"""
     bl_idname = 'luxrender_texture_colormix_node'
     bl_label = 'ColorMix'
     bl_icon = 'TEXTURE'
@@ -566,6 +566,45 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
             set_prop_tex(properties, mix_name, 'type', 'mix')
             set_prop_tex(properties, mix_name, 'amount', slot_0)
             set_prop_tex(properties, mix_name, 'texture1', slot_1)
+            set_prop_tex(properties, mix_name, 'texture2', luxcore_name)
+            luxcore_name = mix_name
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
+    """ColorInvert node"""
+    bl_idname = 'luxrender_texture_colorinvert_node'
+    bl_label = 'Invert'
+    bl_icon = 'TEXTURE'
+
+    def init(self, context):
+        self.inputs.new('luxrender_TF_amount_socket', 'Fac')
+        self.inputs[0].default_value = 1
+        self.inputs.new('luxrender_color_socket', 'Color')
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        pass
+
+    # TODO: classic export
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        fac = self.inputs[0].export_luxcore(properties)
+        tex = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'subtract')
+        set_prop_tex(properties, luxcore_name, 'texture1', [1, 1, 1])
+        set_prop_tex(properties, luxcore_name, 'texture2', tex)
+
+        if fac != 1:
+            mix_name = create_luxcore_name(self, suffix='mix')
+            set_prop_tex(properties, mix_name, 'type', 'mix')
+            set_prop_tex(properties, mix_name, 'amount', fac)
+            set_prop_tex(properties, mix_name, 'texture1', tex)
             set_prop_tex(properties, mix_name, 'texture2', luxcore_name)
             luxcore_name = mix_name
 

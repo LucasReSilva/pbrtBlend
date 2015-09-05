@@ -189,8 +189,9 @@ luxrender_node_categories_material = [
     ]),
 
     luxrender_node_category_material("LUX_CONVERTER", "Converter", items=[
-        NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colormix_node"),
+        NodeItem("luxrender_texture_math_node"),
+        NodeItem("luxrender_texture_colorinvert_node"),
         NodeItem("luxrender_texture_bump_map_node"),
         #NodeItem("luxrender_texture_mix_node"),
         #NodeItem("luxrender_texture_scale_node"),
@@ -277,6 +278,7 @@ luxrender_node_categories_volume = [
     ]),
 
     luxrender_node_category_volume("LUX_CONVERTER_VOLUME", "Converter", items=[
+        # TODO: replace these with the new math/colormix nodes
         NodeItem("luxrender_texture_colordepth_node"),
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
