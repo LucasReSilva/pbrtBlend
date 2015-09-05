@@ -1172,7 +1172,7 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'amount', text=self.name)
+            layout.prop(self, 'amount', text=self.name, slider=True)
 
     # Socket color
     def draw_color(self, context, node):
@@ -2885,6 +2885,31 @@ class luxrender_float_socket(bpy.types.NodeSocket):
 
     def export_luxcore(self, properties):
         return export_socket_luxcore(properties, self, self.default_value)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_color_socket(bpy.types.NodeSocket):
+    """Color socket"""
+    bl_idname = 'luxrender_color_socket'
+    bl_label = 'Color'
+
+    default_value = bpy.props.FloatVectorProperty(name='Color', default=(0.5, 0.5, 0.5), subtype='COLOR',
+                                                  soft_min=0, soft_max=1)
+
+    def draw(self, context, layout, node, text):
+        if self.is_linked:
+            layout.label(text=self.name)
+        else:
+            layout.prop(self, 'default_value', text=self.name)
+
+    def draw_color(self, context, node):
+        return color_socket_color
+
+    # TODO: implement classic export
+    #def get_paramset(self, make_texture):
+
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 # 3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names

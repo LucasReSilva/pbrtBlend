@@ -111,7 +111,8 @@ TF_bumpmap = SubGroupFloatTextureParameter('bumpmap', 'Bump Map', add_float_valu
                                            unit='LENGTH')
 TF_normalmap = SubGroupFloatTextureParameter('normalmap', 'Normal Map', add_float_value=True, min=-5.0, max=5.0,
                                              default=1.0, precision=6, multiply_float=False, ignore_unassigned=True)
-TF_amount = FloatTextureParameter('amount', 'Mix amount', add_float_value=True, min=0.0, default=0.5, max=1.0)
+TF_amount = FloatTextureParameter('amount', 'Mix amount', add_float_value=True, min=0.0, default=0.5, max=1.0,
+                                  precision=3)
 TF_cauchyb = FloatTextureParameter('cauchyb', 'Cauchy B', add_float_value=True, default=0.0, min=0.0,
                                    max=1.0)  # default 0.0 for OFF
 TF_d = FloatTextureParameter('d', 'Absorption depth (nm)', add_float_value=True, default=0.0, min=0.0,
