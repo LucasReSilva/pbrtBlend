@@ -412,8 +412,6 @@ class MaterialExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.cauchyb', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'cauchyb', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.film', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'film', 'float')))
                 self.properties.Set(pyluxcore.Property(prefix + '.interiorior', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.filmindex', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'filmindex', 'float')))
 
             ####################################################################
             # Glass2
@@ -556,9 +554,12 @@ class MaterialExporter(object):
 
                 # Normal mapping
                 if material.luxrender_material.normalmap_usefloattexture:
-                    self.properties.Set(pyluxcore.Property(prefix + '.normaltex',
-                                                 convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, material.luxrender_material, 'normalmap',
-                                                                            'float')))
+                    normalmap = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name,
+                                                        material.luxrender_material, 'normalmap', 'float')
+                    # We have to set normalmap gamma to 1
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap + '.gamma', 1))
+
+                    self.properties.Set(pyluxcore.Property(prefix + '.normaltex', normalmap))
 
                 # Interior/exterior volumes
                 self.__set_material_volumes(prefix)
