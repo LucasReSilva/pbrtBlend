@@ -2900,7 +2900,10 @@ class luxrender_color_socket(bpy.types.NodeSocket):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'default_value', text=self.name)
+            row = layout.row()
+            row.alignment = 'LEFT'
+            row.prop(self, 'default_value', text='')
+            row.label(text=self.name)
 
     def draw_color(self, context, node):
         return color_socket_color
