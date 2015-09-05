@@ -366,6 +366,11 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
     bl_icon = 'TEXTURE'
 
     input_settings = {
+        'default': {
+            0: ['Value 1', True],
+            1: ['Value 2', True],
+            2: ['', False]
+        },
         'abs': {
             0: ['Value', True], # slot index: [name, enabled]
             1: ['', False],
@@ -380,20 +385,16 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
             0: ['Amount', True],
             1: ['Value 1', True],
             2: ['Value 2', True]
-        },
-        'default': {
-            0: ['Value 1', True],
-            1: ['Value 2', True],
-            2: ['', False]
         }
     }
 
     def change_mode(self, context):
         mode = self.mode if self.mode in self.input_settings else 'default'
+        current_settings = self.input_settings[mode]
 
-        for i in self.input_settings[mode].keys():
-            self.inputs[i].name = self.input_settings[mode][i][0]
-            self.inputs[i].enabled = self.input_settings[mode][i][1]
+        for i in current_settings.keys():
+            self.inputs[i].name = current_settings[i][0]
+            self.inputs[i].enabled = current_settings[i][1]
 
     mode_items = [
         ('scale', 'Multiply', ''),
@@ -414,7 +415,7 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
         self.inputs.new('luxrender_float_socket', 'Value 1')
         self.inputs.new('luxrender_float_socket', 'Value 2')
         self.inputs.new('luxrender_float_socket', 'Value 3') # for mix mode
-        self.inputs['Value 3'].enabled = False
+        self.inputs[2].enabled = False
 
         self.outputs.new('NodeSocketFloat', 'Value')
 
@@ -426,28 +427,30 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
             layout.prop(self, 'mode_clamp_min')
             layout.prop(self, 'mode_clamp_max')
 
+    # TODO: classic export
+
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
-        slot_1 = self.inputs[0].export_luxcore(properties)
-        slot_2 = self.inputs[1].export_luxcore(properties)
-        slot_3 = self.inputs[2].export_luxcore(properties)
+        slot_0 = self.inputs[0].export_luxcore(properties)
+        slot_1 = self.inputs[1].export_luxcore(properties)
+        slot_2 = self.inputs[2].export_luxcore(properties)
 
         set_prop_tex(properties, luxcore_name, 'type', self.mode)
 
         if self.mode == 'abs':
-            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture', slot_0)
         elif self.mode == 'clamp':
-            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture', slot_0)
             set_prop_tex(properties, luxcore_name, 'min', self.mode_clamp_min)
             set_prop_tex(properties, luxcore_name, 'max', self.mode_clamp_max)
         elif self.mode == 'mix':
-            set_prop_tex(properties, luxcore_name, 'amount', slot_1)
-            set_prop_tex(properties, luxcore_name, 'texture1', slot_2)
-            set_prop_tex(properties, luxcore_name, 'texture2', slot_3)
-        else:
+            set_prop_tex(properties, luxcore_name, 'amount', slot_0)
             set_prop_tex(properties, luxcore_name, 'texture1', slot_1)
             set_prop_tex(properties, luxcore_name, 'texture2', slot_2)
+        else:
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_0)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_1)
 
         if self.clamp_output:
             clamp_name = create_luxcore_name(self, suffix='clamp')
@@ -468,6 +471,10 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
     bl_icon = 'TEXTURE'
 
     input_settings = {
+        'default': {
+            1: ['Color 1', True],
+            2: ['Color 2', True]
+        },
         'abs': {
             1: ['Color', True], # slot index: [name, enabled]
             2: ['', False]
@@ -479,19 +486,16 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
         'mix': {
             1: ['Color 1', True],
             2: ['Color 2', True]
-        },
-        'default': {
-            1: ['Color 1', True],
-            2: ['Color 2', True]
         }
     }
 
     def change_mode(self, context):
         mode = self.mode if self.mode in self.input_settings else 'default'
+        current_settings = self.input_settings[mode]
 
-        for i in self.input_settings[mode].keys():
-            self.inputs[i].name = self.input_settings[mode][i][0]
-            self.inputs[i].enabled = self.input_settings[mode][i][1]
+        for i in current_settings.keys():
+            self.inputs[i].name = current_settings[i][0]
+            self.inputs[i].enabled = current_settings[i][1]
 
     mode_items = [
         ('scale', 'Multiply', ''),
@@ -510,7 +514,7 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
 
     def init(self, context):
         self.inputs.new('luxrender_TF_amount_socket', 'Fac')
-        self.inputs[0].amount = 1
+        self.inputs[0].default_value = 1
         self.inputs.new('luxrender_color_socket', 'Color 1')
         self.inputs.new('luxrender_color_socket', 'Color 2')
 
@@ -524,28 +528,30 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
             layout.prop(self, 'mode_clamp_min')
             layout.prop(self, 'mode_clamp_max')
 
+    # TODO: classic export
+
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
-        slot_1 = self.inputs[0].export_luxcore(properties)
-        slot_2 = self.inputs[1].export_luxcore(properties)
-        slot_3 = self.inputs[2].export_luxcore(properties)
+        slot_0 = self.inputs[0].export_luxcore(properties)
+        slot_1 = self.inputs[1].export_luxcore(properties)
+        slot_2 = self.inputs[2].export_luxcore(properties)
 
         set_prop_tex(properties, luxcore_name, 'type', self.mode)
 
         if self.mode == 'abs':
-            set_prop_tex(properties, luxcore_name, 'texture', slot_2)
+            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
         elif self.mode == 'clamp':
-            set_prop_tex(properties, luxcore_name, 'texture', slot_2)
+            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
             set_prop_tex(properties, luxcore_name, 'min', self.mode_clamp_min)
             set_prop_tex(properties, luxcore_name, 'max', self.mode_clamp_max)
         elif self.mode == 'mix':
-            set_prop_tex(properties, luxcore_name, 'amount', slot_1)
-            set_prop_tex(properties, luxcore_name, 'texture1', slot_2)
-            set_prop_tex(properties, luxcore_name, 'texture2', slot_3)
+            set_prop_tex(properties, luxcore_name, 'amount', slot_0)
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_2)
         else:
-            set_prop_tex(properties, luxcore_name, 'texture1', slot_2)
-            set_prop_tex(properties, luxcore_name, 'texture2', slot_3)
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_2)
 
         if self.clamp_output:
             clamp_name = create_luxcore_name(self, suffix='clamp')
@@ -555,11 +561,11 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
             set_prop_tex(properties, clamp_name, 'max', 1)
             luxcore_name = clamp_name
 
-        if slot_1 != 1 and self.mode != 'mix':
+        if slot_0 != 1 and self.mode != 'mix':
             mix_name = create_luxcore_name(self, suffix='mix')
             set_prop_tex(properties, mix_name, 'type', 'mix')
-            set_prop_tex(properties, mix_name, 'amount', slot_1)
-            set_prop_tex(properties, mix_name, 'texture1', slot_2)
+            set_prop_tex(properties, mix_name, 'amount', slot_0)
+            set_prop_tex(properties, mix_name, 'texture1', slot_1)
             set_prop_tex(properties, mix_name, 'texture2', luxcore_name)
             luxcore_name = mix_name
 

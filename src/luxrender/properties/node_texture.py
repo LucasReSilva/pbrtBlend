@@ -509,6 +509,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         layout.prop(self, 'gamma')
         layout.prop(self, 'gain')
 
+    # TODO: Classic export
     #def export_texture(self, make_texture):
     #    pass
     # Get the absolute filepath with image.filepath_from_user() or better via efutil?
