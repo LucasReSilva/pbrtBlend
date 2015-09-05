@@ -538,6 +538,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
         set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
 
+        #set_prop_tex(properties, luxcore_name, 'channel', 'alpha')
+
         return luxcore_name
 
 

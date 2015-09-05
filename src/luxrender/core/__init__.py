@@ -1841,6 +1841,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lastHaltSamples = -1
     lastCameraSettings = ''
     lastVisibilitySettings = None
+    lastNodeMatSettings = ''
     update_counter = 0
 
     @staticmethod
@@ -1897,7 +1898,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # check if camera settings have changed
         self.luxcore_exporter.convert_camera()
-        newCameraSettings = str(self.luxcore_exporter.camera_exporter.properties)
+        newCameraSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
 
         if self.lastCameraSettings == '':
             self.lastCameraSettings = newCameraSettings
@@ -2016,16 +2017,25 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 for mat in bpy.data.materials:
                     nodetree_name = mat.luxrender_material.nodetree
 
-                    if nodetree_name:
-                        # TODO: Blender spams unnecessary updates, it might be better to export the material props
-                        # and look for changes rathen than using Blender's is_updated (applies to other stuff like
-                        # textures as well)
-                        nodetree = bpy.data.node_groups[nodetree_name]
-                        nodetree_updated = nodetree.is_updated or nodetree.is_updated_data
-                    else:
-                        nodetree_updated = False
+                    mat_updated = False
 
-                    if mat.is_updated or nodetree_updated:
+                    if nodetree_name:
+                        # Check for nodetree updates
+                        nodetree = bpy.data.node_groups[nodetree_name]
+
+                        if nodetree.is_updated or nodetree.is_updated_data:
+                            self.luxcore_exporter.convert_material(mat)
+                            newNodeMatSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
+
+                            if self.lastNodeMatSettings == '':
+                                self.lastNodeMatSettings = newNodeMatSettings
+                            elif self.lastNodeMatSettings != newNodeMatSettings:
+                                self.lastNodeMatSettings = newNodeMatSettings
+                                mat_updated = True
+                    else:
+                        mat_updated = mat.is_updated
+
+                    if mat_updated:
                         # only update this material
                         update_changes.changed_materials.add(mat)
                         update_changes.set_cause(materials = True)
@@ -2040,7 +2050,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.luxcore_exporter.convert_camera()
             newCameraSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
 
-            if self.lastCameraSettings == '':
+            if self.lastCameraSettings == '' or newCameraSettings == '':
                 self.lastCameraSettings = newCameraSettings
             elif self.lastCameraSettings != newCameraSettings:
                 update_changes.set_cause(camera = True)
