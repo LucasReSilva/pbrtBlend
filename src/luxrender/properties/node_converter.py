@@ -55,7 +55,7 @@ from ..properties.node_sockets import (
     luxrender_TC_tex2_socket
 )
 
-from . import warning_luxcore_node, create_luxcore_name, set_prop_tex
+from . import warning_luxcore_node, warning_classic_node, create_luxcore_name, set_prop_tex
 
 
 @LuxRenderAddon.addon_register_class
@@ -68,6 +68,8 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -165,6 +167,8 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
         self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -254,6 +258,8 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -305,6 +311,8 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -360,6 +368,8 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'depth')
 
     def export_texture(self, make_texture):
@@ -368,6 +378,8 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
         colordepth_params.add_float('depth', self.depth)
 
         return make_texture('color', 'colordepth', self.name, colordepth_params)
+
+    # TODO: LuxCore export
 
 
 @LuxRenderAddon.addon_register_class
@@ -379,12 +391,12 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
 
     input_settings = {
         'default': {
-            0: ['Value 1', True],
+            0: ['Value 1', True], # slot index: [name, enabled]
             1: ['Value 2', True],
             2: ['', False]
         },
         'abs': {
-            0: ['Value', True], # slot index: [name, enabled]
+            0: ['Value', True],
             1: ['', False],
             2: ['', False]
         },
@@ -432,6 +444,8 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Value')
 
     def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
         layout.prop(self, 'mode', text='')
         layout.prop(self, 'clamp_output')
 
@@ -484,11 +498,11 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
 
     input_settings = {
         'default': {
-            1: ['Color 1', True],
+            1: ['Color 1', True], # slot index: [name, enabled]
             2: ['Color 2', True]
         },
         'abs': {
-            1: ['Color', True], # slot index: [name, enabled]
+            1: ['Color', True],
             2: ['', False]
         },
         'clamp': {
@@ -533,6 +547,8 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
         layout.prop(self, 'mode', text='')
         layout.prop(self, 'clamp_output')
 
@@ -598,7 +614,7 @@ class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
-        pass
+        warning_luxcore_node(layout)
 
     # TODO: classic export
 

@@ -158,6 +158,8 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 
         return make_material(mat_type, self.name, carpaint_params)
 
+    # TODO: LuxCore export
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_cloth(luxrender_material_node):
@@ -201,6 +203,8 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
         cloth_params.add_float('repeat_v', self.repeat_v)
 
         return make_material(mat_type, self.name, cloth_params)
+
+    # TODO: LuxCore export
 
 
 @LuxRenderAddon.addon_register_class
@@ -256,6 +260,8 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
         doubleside_params.add_bool('usefrontforback', self.usefrontforback)
 
         return make_material(mat_type, self.name, doubleside_params)
+
+    # TODO: LuxCore export
 
 
 @LuxRenderAddon.addon_register_class
@@ -463,6 +469,35 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         glossycoating_params.add_string("basematerial", basemat_name)
 
         return make_material(mat_type, self.name, glossycoating_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        base = export_submat_luxcore(properties, self.inputs['Base Material'])
+        ks = self.inputs['Specular Color'].export_luxcore(properties)
+        u_roughness = self.inputs['Roughness'].export_luxcore(properties)
+        v_roughness = self.inputs['V-Roughness'].export_luxcore(properties) if self.use_anisotropy else u_roughness
+        ka = self.inputs['Absorption Color'].export_luxcore(properties)
+        d = self.inputs['Absorption Depth (nm)'].export_luxcore(properties)
+        index = self.inputs['IOR'].export_luxcore(properties)
+        bump = self.inputs['Bump'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'glossycoating')
+        set_prop_mat(properties, luxcore_name, 'base', base)
+        set_prop_mat(properties, luxcore_name, 'ks', ks)
+        set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
+        set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
+        set_prop_mat(properties, luxcore_name, 'ka', ka)
+        set_prop_mat(properties, luxcore_name, 'd', d)
+        set_prop_mat(properties, luxcore_name, 'multibounce', self.multibounce)
+
+        if self.use_ior:
+            set_prop_mat(properties, luxcore_name, 'index', index)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class

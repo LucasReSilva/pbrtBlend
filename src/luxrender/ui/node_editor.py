@@ -166,9 +166,7 @@ luxrender_node_categories_material = [
     ]),
 
     luxrender_node_category_material("LUX_TEXTURE", "Texture", items=[
-        NodeItem("luxrender_texture_image_map_node", label="Image Map"),
         NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
-        NodeItem("luxrender_texture_normal_map_node", label="Normal Map"),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),
         NodeItem("luxrender_texture_blender_clouds_node", label="Clouds"),
@@ -225,7 +223,9 @@ luxrender_node_categories_material = [
     ]),
 
     # TODO: remove when Math and ColorMix nodes support classic API
-    luxrender_node_category_material("LUX_DEPRECATED", "Deprecated", items=[
+    luxrender_node_category_material("LUX_DEPRECATED", "Classic API", items=[
+        NodeItem("luxrender_texture_image_map_node", label="Image Map"),
+        NodeItem("luxrender_texture_normal_map_node", label="Normal Map"),
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
         NodeItem("luxrender_texture_add_node"),
@@ -318,7 +318,7 @@ luxrender_node_categories_volume = [
     ]),
 
     # TODO: remove when Math and ColorMix nodes support classic API
-    luxrender_node_category_volume("LUX_DEPRECATED_VOLUME", "Deprecated", items=[
+    luxrender_node_category_volume("LUX_DEPRECATED_VOLUME", "Classic API", items=[
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
         NodeItem("luxrender_texture_add_node"),

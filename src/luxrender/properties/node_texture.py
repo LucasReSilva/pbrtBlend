@@ -492,8 +492,22 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
     blender_image = bpy.props.EnumProperty(items=get_images, name='')
 
-    gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0)
-    gain = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0.0, max=10.0)
+    channel_items = [
+        ('default', 'Default', ''),
+        ('red', 'Red', ''),
+        ('green', 'Green', ''),
+        ('blue', 'Blue', ''),
+        ('alpha', 'Alpha', ''),
+        ('mean', 'Mean', ''),
+        ('colored_mean', 'Colored Mean', ''),
+        ('rgb', 'RGB', '')
+    ]
+    channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='default')
+
+    gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, max=10.0, description='Brightness multiplier')
+    gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0, description='Gamma correction to apply')
+    is_normal_map = bpy.props.BoolProperty(name='Normalmap', default=False, description='Enable if this is a normalmap')
+    normalmap_fake_gamma = bpy.props.FloatProperty(name='Gamma', default=1)
 
     def init(self, context):
         self.inputs.new('luxrender_transform_socket', '2D Coordinate')
@@ -506,8 +520,18 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         split.prop(self, 'blender_image')
         split.operator('image.open')
 
-        layout.prop(self, 'gamma')
+        layout.prop(self, 'channel')
         layout.prop(self, 'gain')
+
+        # Gamma needs to be 1 for normalmaps
+        if self.is_normal_map:
+            row = layout.row()
+            row.enabled = False
+            row.prop(self, 'normalmap_fake_gamma')
+        else:
+            layout.prop(self, 'gamma')
+
+        layout.prop(self, 'is_normal_map')
 
     # TODO: Classic export
     #def export_texture(self, make_texture):
@@ -523,14 +547,15 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         image = bpy.data.images[self.blender_image]
 
         # TODO: library handling
-        # TODO: SEQUENCE/GENERATED handling? Create own sequence node?
+        # TODO: SEQUENCE/GENERATED handling? Create separate sequence node?
         # Note: we can get the nodetree via node.id_data
 
         filepath = efutil.filesystem_path(image.filepath)
+        gamma = 1 if self.is_normal_map else self.gamma
 
         set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
         set_prop_tex(properties, luxcore_name, 'file', filepath)
-        set_prop_tex(properties, luxcore_name, 'gamma', self.gamma)
+        set_prop_tex(properties, luxcore_name, 'gamma', gamma)
         set_prop_tex(properties, luxcore_name, 'gain', self.gain)
 
         mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
@@ -539,7 +564,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
         set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
 
-        #set_prop_tex(properties, luxcore_name, 'channel', 'alpha')
+        set_prop_tex(properties, luxcore_name, 'channel', self.channel)
 
         return luxcore_name
 

@@ -348,8 +348,6 @@ class MaterialExporter(object):
                     except Exception as err:
                         print('WARNING: unable to convert base material %s\n%s' % (material.name, err))
 
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks', 'color')))
-
                 if material.luxrender_material.luxrender_mat_glossycoating.useior:
                     self.properties.Set(
                         pyluxcore.Property(prefix + '.index', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'index', 'float')))
