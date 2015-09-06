@@ -51,7 +51,7 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 from ..properties.node_sockets import *
 
 from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, export_submat_luxcore,
-               export_volume_luxcore)
+               export_volume_luxcore, warning_classic_node, warning_luxcore_node)
 
 
 class luxrender_texture_maker:
@@ -229,6 +229,8 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'usefrontforfront')
         layout.prop(self, 'usefrontforback')
 
@@ -421,7 +423,14 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
         self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
-    multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce',
+    def change_show_advanced(self, context):
+        self.inputs['IOR'].enabled &= self.show_advanced
+        self.inputs['Absorption Color'].enabled = self.show_advanced
+        self.inputs['Absorption Depth (nm)'].enabled = self.show_advanced
+
+    show_advanced = bpy.props.BoolProperty(name='Advanced Options', description='Configure advanced options',
+                                         default=False, update=change_show_advanced)
+    multibounce = bpy.props.BoolProperty(name='Multibounce', description='Creates a fuzzy, dusty appearance',
                                          default=False)
     use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False,
                                      update=change_use_ior)
@@ -444,8 +453,12 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'multibounce')
-        layout.prop(self, 'use_ior')
+        layout.prop(self, 'show_advanced')
+
+        if self.show_advanced:
+            layout.separator()
+            layout.prop(self, 'multibounce')
+            layout.prop(self, 'use_ior')
         layout.prop(self, 'use_anisotropy')
 
     def export_material(self, make_material, make_texture):
@@ -582,6 +595,8 @@ class luxrender_material_type_node_layered(luxrender_material_node):
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
+    def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
 
     def export_material(self, make_material, make_texture):
         print('export node: layered')
@@ -1047,6 +1062,9 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
+    def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
     def export_material(self, make_material, make_texture):
         mat_type = 'scatter'
 
@@ -1091,6 +1109,8 @@ class luxrender_material_type_node_shinymetal(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'use_anisotropy')
 
     def export_material(self, make_material, make_texture):
@@ -1110,29 +1130,32 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
     bl_icon = 'MATERIAL'
     bl_width_min = 160
 
-    advanced = bpy.props.BoolProperty(name='Advanced', description='Advanced Velvet Parameters', default=False)
-    thickness = bpy.props.FloatProperty(name='Thickness', description='', default=0.1, subtype='NONE', min=-0.0,
-                                        max=1.0, soft_min=-0.0, soft_max=1.0, precision=2)
-    p1 = bpy.props.FloatProperty(name='p1', description='', default=-2.0, subtype='NONE', min=-100.0, max=100.0,
-                                 soft_min=-100.0, soft_max=100.0, precision=2)
-    p2 = bpy.props.FloatProperty(name='p2', description='', default=-10.0, subtype='NONE', min=-100.0, max=100.0,
-                                 soft_min=-100.0, soft_max=100.0, precision=2)
-    p3 = bpy.props.FloatProperty(name='p3', description='', default=-2.0, subtype='NONE', min=-100.0, max=100.0,
-                                 soft_min=-100.0, soft_max=100.0, precision=2)
+    def update_advanced(self, context):
+        self.inputs['p1'].enabled = self.advanced
+        self.inputs['p2'].enabled = self.advanced
+        self.inputs['p3'].enabled = self.advanced
+
+    advanced = bpy.props.BoolProperty(name='Advanced', description='Advanced Velvet Parameters', default=False,
+                                      update=update_advanced)
 
     def init(self, context):
         self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
+        self.inputs.new('luxrender_float_socket', 'Thickness')
+        self.inputs['Thickness'].default_value = 0.1
+        self.inputs.new('luxrender_float_socket', 'p1')
+        self.inputs['p1'].enabled = False
+        self.inputs['p1'].default_value = 2
+        self.inputs.new('luxrender_float_socket', 'p2')
+        self.inputs['p2'].enabled = False
+        self.inputs['p2'].default_value = 10
+        self.inputs.new('luxrender_float_socket', 'p3')
+        self.inputs['p3'].enabled = False
+        self.inputs['p3'].default_value = 2
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'advanced')
-        layout.prop(self, 'thickness')
-
-        if self.advanced:
-            layout.prop(self, 'p1')
-            layout.prop(self, 'p2')
-            layout.prop(self, 'p3')
 
     def export_material(self, make_material, make_texture):
         mat_type = 'velvet'
@@ -1140,12 +1163,36 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
         velvet_params = ParamSet()
         velvet_params.update(get_socket_paramsets(self.inputs, make_texture))
 
-        velvet_params.add_float('thickness', self.thickness)
-        velvet_params.add_float('p1', self.p1)
-        velvet_params.add_float('p2', self.p2)
-        velvet_params.add_float('p3', self.p3)
+        # Classic Lux does not support textured parameters here, so we just use the socket value
+        velvet_params.add_float('thickness', self.inputs['Thickness'].default_value)
+        velvet_params.add_float('p1', self.inputs['p1'].default_value)
+        velvet_params.add_float('p2', self.inputs['p2'].default_value)
+        velvet_params.add_float('p3', self.inputs['p3'].default_value)
 
         return make_material(mat_type, self.name, velvet_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        kd = self.inputs['Diffuse Color'].export_luxcore(properties)
+        thickness = self.inputs['Thickness'].export_luxcore(properties)
+        p1 = self.inputs['p1'].export_luxcore(properties)
+        p2 = self.inputs['p2'].export_luxcore(properties)
+        p3 = self.inputs['p3'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'velvet')
+        set_prop_mat(properties, luxcore_name, 'kd', kd)
+        set_prop_mat(properties, luxcore_name, 'thickness', thickness)
+
+        if self.advanced:
+            set_prop_mat(properties, luxcore_name, 'p1', p1)
+            set_prop_mat(properties, luxcore_name, 'p2', p2)
+            set_prop_mat(properties, luxcore_name, 'p3', p3)
+
+        # TODO: is bump mapping on velvet suported?
+        #set_prop_mat(properties, luxcore_name, 'bump', bump)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -1298,6 +1345,7 @@ class luxrender_material_type_node_standard(luxrender_material_node):
     """Standard material node"""
 
     # TODO: this thing is just a test for now!
+    # This node is an experiment to test if it is possible to merge matte, glossy and maybe the translucent versions
 
     bl_idname = 'luxrender_material_type_node_standard'
     bl_label = 'Standard Material'
