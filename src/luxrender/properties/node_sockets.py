@@ -87,6 +87,7 @@ def export_socket_luxcore(properties, socket, fallback=None):
 float_socket_color = (0.63, 0.63, 0.63, 1.0)  # Same as native NodeSocketFloat
 color_socket_color = (0.78, 0.78, 0.16, 1.0)  # Same as native NodeSocketColor
 fresnel_socket_color = (0.33, 0.6, 0.85, 1.0)
+#shader_socket_color = (0.39, 0.78, 0.39, 1.0) # Same as native NodeSocketShader
 coord_2d_color = (0.50, 0.25, 0.60, 1.0)
 coord_3d_color = (0.65, 0.55, 0.75, 1.0)
 

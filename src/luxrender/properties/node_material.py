@@ -51,7 +51,7 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 from ..properties.node_sockets import *
 
 from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, export_submat_luxcore,
-               export_volume_luxcore, warning_classic_node, warning_luxcore_node)
+               export_emission_luxcore, warning_classic_node, warning_luxcore_node)
 
 
 class luxrender_texture_maker:
@@ -423,13 +423,13 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
         self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
-    def change_show_advanced(self, context):
-        self.inputs['IOR'].enabled &= self.show_advanced
-        self.inputs['Absorption Color'].enabled = self.show_advanced
-        self.inputs['Absorption Depth (nm)'].enabled = self.show_advanced
+    def change_advanced(self, context):
+        self.inputs['IOR'].enabled &= self.advanced
+        self.inputs['Absorption Color'].enabled = self.advanced
+        self.inputs['Absorption Depth (nm)'].enabled = self.advanced
 
-    show_advanced = bpy.props.BoolProperty(name='Advanced Options', description='Configure advanced options',
-                                         default=False, update=change_show_advanced)
+    advanced = bpy.props.BoolProperty(name='Advanced Options', description='Configure advanced options',
+                                         default=False, update=change_advanced)
     multibounce = bpy.props.BoolProperty(name='Multibounce', description='Creates a fuzzy, dusty appearance',
                                          default=False)
     use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False,
@@ -453,10 +453,9 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'show_advanced')
+        layout.prop(self, 'advanced', toggle=True)
 
-        if self.show_advanced:
-            layout.separator()
+        if self.advanced:
             layout.prop(self, 'multibounce')
             layout.prop(self, 'use_ior')
         layout.prop(self, 'use_anisotropy')
@@ -648,6 +647,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
         self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
         self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
         self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        self.inputs.new('NodeSocketShader', 'Emission')
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
@@ -676,6 +676,9 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
         if bump is not None:
             set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+        # Light emission
+        export_emission_luxcore(properties, self.inputs[3], luxcore_name)
 
         return luxcore_name
 
@@ -1135,7 +1138,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
         self.inputs['p2'].enabled = self.advanced
         self.inputs['p3'].enabled = self.advanced
 
-    advanced = bpy.props.BoolProperty(name='Advanced', description='Advanced Velvet Parameters', default=False,
+    advanced = bpy.props.BoolProperty(name='Advanced Options', description='Advanced Velvet Parameters', default=False,
                                       update=update_advanced)
 
     def init(self, context):
@@ -1155,7 +1158,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'advanced')
+        layout.prop(self, 'advanced', toggle=True)
 
     def export_material(self, make_material, make_texture):
         mat_type = 'velvet'
@@ -1298,9 +1301,11 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
 class luxrender_light_area_node(luxrender_material_node):
     """Area Light node"""
     bl_idname = 'luxrender_light_area_node'
-    bl_label = 'Area Light'
+    bl_label = 'Light Emission'
     bl_icon = 'LAMP'
     bl_width_min = 160
+
+    advanced = bpy.props.BoolProperty(name='Advanced Options', default=False)
 
     gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, description='Scaling factor for light intensity')
     power = bpy.props.FloatProperty(name='Power (W)', default=100.0, min=0.0)
@@ -1310,6 +1315,8 @@ class luxrender_light_area_node(luxrender_material_node):
                                          description='Shadow ray and light path sampling weight')
     nsamples = bpy.props.IntProperty(name='Shadow Ray Count', default=1, min=1, max=64,
                                      description='Number of shadow samples per intersection')
+    luxcore_samples = bpy.props.IntProperty(name='Samples', default=-1, min=-1, max=256,
+                                     description='Number of shadow samples per intersection')
 
     def init(self, context):
         self.inputs.new('luxrender_TC_L_socket', 'Light Color')
@@ -1317,12 +1324,19 @@ class luxrender_light_area_node(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Emission')
 
     def draw_buttons(self, context, layout):
+        layout.prop(self, 'advanced', toggle=True)
         layout.prop(self, 'gain')
-        layout.prop(self, 'power')
-        layout.prop(self, 'efficacy')
-        layout.prop(self, 'iesname')
-        layout.prop(self, 'importance')
-        layout.prop(self, 'nsamples')
+
+        if self.advanced:
+            layout.prop(self, 'power')
+            layout.prop(self, 'efficacy')
+            layout.prop(self, 'iesname')
+
+            if UseLuxCore():
+                layout.prop(self, 'luxcore_samples')
+            else:
+                layout.prop(self, 'importance')
+                layout.prop(self, 'nsamples')
 
     def export(self, make_texture):
         arealight_params = ParamSet()
@@ -1338,6 +1352,16 @@ class luxrender_light_area_node(luxrender_material_node):
         arealight_params.add_integer('nsamples', self.nsamples)
 
         return 'area', arealight_params
+
+    def export_luxcore(self, properties, parent_luxcore_name):
+        emission = self.inputs[0].export_luxcore(properties)
+
+        set_prop_mat(properties, parent_luxcore_name, 'emission', emission)
+        set_prop_mat(properties, parent_luxcore_name, 'emission.gain', [self.gain] * 3)
+        set_prop_mat(properties, parent_luxcore_name, 'emission.power', self.power)
+        set_prop_mat(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
+        set_prop_mat(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
+        #set_prop_mat(properties, parent_luxcore_name, 'emission.id', )
 
 
 @LuxRenderAddon.addon_register_class
@@ -1410,6 +1434,7 @@ class luxrender_material_output_node(luxrender_node):
         luxcore_name = export_submat_luxcore(properties, self.inputs[0], material.name)
 
         # Todo: light emission
+        # TODO: LuxCore options (Material ID, samples etc.)
 
         return luxcore_name
 
@@ -1488,6 +1513,7 @@ class luxrender_material_output_node(luxrender_node):
                 if check_node_export_material(surface_node):
                     surface_node.export_material(make_material=make_material, make_texture=make_texture)
 
+        # TODO: remove, volumes (with nodes) are now exported from their own output node below
         '''
         # Volumes exporting:
         int_vol_socket = self.inputs[1]

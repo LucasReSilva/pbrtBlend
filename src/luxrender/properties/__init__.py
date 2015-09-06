@@ -203,13 +203,11 @@ def export_submat_luxcore(properties, socket, name=None):
 
     return submat_name
 
-def export_volume_luxcore(properties, socket, name=None):
+def export_emission_luxcore(properties, socket, parent_luxcore_name):
     """
     NodeSocketShader sockets cannot export themselves, so this function does it
     """
     node = get_linked_node(socket)
 
     if node is not None:
-        return node.export_luxcore(properties, name)
-    else:
-        return None
+        node.export_luxcore(properties, parent_luxcore_name)
