@@ -1488,6 +1488,7 @@ class luxrender_material_output_node(luxrender_node):
                 if check_node_export_material(surface_node):
                     surface_node.export_material(make_material=make_material, make_texture=make_texture)
 
+        '''
         # Volumes exporting:
         int_vol_socket = self.inputs[1]
         if int_vol_socket.is_linked:
@@ -1518,6 +1519,7 @@ class luxrender_material_output_node(luxrender_node):
 
         if ext_vol_socket.is_linked:
             ext_vol_node.export_volume(make_volume=make_volume, make_texture=make_texture)
+        '''
 
         return set()
 

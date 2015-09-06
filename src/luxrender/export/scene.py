@@ -116,7 +116,7 @@ class SceneExporter(object):
                     output_node = find_node(mat, 'luxrender_material_output_node')
 
                     if output_node is not None:
-                        light_socket = output_node.inputs[3]
+                        light_socket = output_node.inputs['Emission']
 
                         if light_socket.is_linked:
                             have_emitter = light_socket.is_linked
