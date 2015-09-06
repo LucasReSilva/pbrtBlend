@@ -193,11 +193,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
         NodeItem("luxrender_texture_bump_map_node"),
-        #NodeItem("luxrender_texture_mix_node"),
-        #NodeItem("luxrender_texture_scale_node"),
-        #NodeItem("luxrender_texture_add_node"),
-        #NodeItem("luxrender_texture_subtract_node"),
-        NodeItem("luxrender_texture_colorramp_node"), # TODO: unfinished
+        #NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
         #NodeItem("luxrender_texture_colordepth_node"),
     ]),
 
@@ -226,6 +222,14 @@ luxrender_node_categories_material = [
     luxrender_node_category_material("LUX_LAYOUT", "Layout", items=[
         NodeItem("NodeFrame"),
         # NodeItem("NodeReroute") #not working yet
+    ]),
+
+    # TODO: remove when Math and ColorMix nodes support classic API
+    luxrender_node_category_material("LUX_DEPRECATED", "Deprecated", items=[
+        NodeItem("luxrender_texture_mix_node"),
+        NodeItem("luxrender_texture_scale_node"),
+        NodeItem("luxrender_texture_add_node"),
+        NodeItem("luxrender_texture_subtract_node"),
     ]),
 ]
 
@@ -278,13 +282,11 @@ luxrender_node_categories_volume = [
     ]),
 
     luxrender_node_category_volume("LUX_CONVERTER_VOLUME", "Converter", items=[
-        # TODO: replace these with the new math/colormix nodes
+        NodeItem("luxrender_texture_colormix_node"),
+        NodeItem("luxrender_texture_math_node"),
+        NodeItem("luxrender_texture_colorinvert_node"),
         NodeItem("luxrender_texture_colordepth_node"),
-        NodeItem("luxrender_texture_mix_node"),
-        NodeItem("luxrender_texture_scale_node"),
-        NodeItem("luxrender_texture_add_node"),
-        NodeItem("luxrender_texture_subtract_node"),
-        NodeItem("luxrender_texture_colorramp_node"),
+        #NodeItem("luxrender_texture_colorramp_node"), TODO: activate when ready
         #NodeItem("luxrender_texture_bump_map_node"),
     ]),
 
@@ -313,5 +315,13 @@ luxrender_node_categories_volume = [
     luxrender_node_category_volume("LUX_LAYOUT_VOLUME", "Layout", items=[
         NodeItem("NodeFrame"),
         # NodeItem("NodeReroute") #not working yet
+    ]),
+
+    # TODO: remove when Math and ColorMix nodes support classic API
+    luxrender_node_category_volume("LUX_DEPRECATED_VOLUME", "Deprecated", items=[
+        NodeItem("luxrender_texture_mix_node"),
+        NodeItem("luxrender_texture_scale_node"),
+        NodeItem("luxrender_texture_add_node"),
+        NodeItem("luxrender_texture_subtract_node"),
     ]),
 ]

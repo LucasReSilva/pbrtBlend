@@ -116,6 +116,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
+    # TODO: change this to be a socket? Possible with classic API?
     bump_height = bpy.props.FloatProperty(name='Bump Height', description='Height of the bump map', default=.001,
                                           precision=6, subtype='DISTANCE', unit='LENGTH', step=.001)
 
@@ -137,6 +138,17 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
             bumpmap_params.add_texture("tex2", bumpmap_name)
 
         return make_texture('float', 'scale', self.name, bumpmap_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        input = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'scale')
+        set_prop_tex(properties, luxcore_name, 'texture1', input)
+        set_prop_tex(properties, luxcore_name, 'texture2', self.bump_height)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
