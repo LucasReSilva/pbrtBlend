@@ -299,6 +299,9 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         else:
             self.inputs['Roughness'].enabled = self.rough
 
+    def change_use_volume_ior(self, context):
+        self.inputs['IOR'].enabled = not self.use_volume_ior
+
     advanced = bpy.props.BoolProperty(name='Advanced Options', description='Configure advanced options',
                                       default=False, update=change_advanced)
     architectural = bpy.props.BoolProperty(name='Architectural',
@@ -307,11 +310,16 @@ class luxrender_material_type_node_glass(luxrender_material_node):
     rough = bpy.props.BoolProperty(name='Rough',
                                   description='Rough glass surface instead of a smooth one',
                                   default=False, update=change_rough)
-    use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness',
+    use_anisotropy = bpy.props.BoolProperty(name='Anisotropic', description='Anisotropic Roughness, distorts the reflec'
+                                                                            'tions (object has to be UV-unwrapped)',
                                             default=False, update=change_use_anisotropy)
     dispersion = bpy.props.BoolProperty(name='Dispersion',
                                         description='Enables chromatic dispersion, Cauchy B value should be none-zero',
                                         default=False, update=change_dispersion)
+    use_volume_ior = bpy.props.BoolProperty(name='Use Volume IOR',
+                                        description='Use the IOR setting of the interior volume (attached to the '
+                                            'material output node)',
+                                        default=False, update=change_use_volume_ior)
 
     def init(self, context):
         self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
@@ -338,9 +346,6 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        # TODO: do something with this (hide IOR?)
-        # has_interior_volume(self)
-
         # None of the advanced options work in LuxCore
         if not UseLuxCore():
             layout.prop(self, 'advanced', toggle=True)
@@ -357,6 +362,10 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         row.enabled = not self.rough
         row.prop(self, 'architectural')
 
+        row = layout.row()
+        row.enabled = has_interior_volume(self)
+        row.prop(self, 'use_volume_ior')
+
         if self.advanced:
             layout.prop(self, 'dispersion')
 
@@ -371,7 +380,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
             roughglass_params.add_bool('dispersion', self.dispersion)
 
             return make_material(mat_type, self.name, roughglass_params)
-        elif has_interior_volume(self):
+        elif has_interior_volume(self) and self.use_volume_ior:
             # Export as glass2
             mat_type = 'glass2'
 
@@ -417,7 +426,9 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         set_prop_mat(properties, luxcore_name, 'type', type)
         set_prop_mat(properties, luxcore_name, 'kr', kr)
         set_prop_mat(properties, luxcore_name, 'kt', kt)
-        set_prop_mat(properties, luxcore_name, 'interiorior', ior)
+
+        if not (has_interior_volume(self) and self.use_volume_ior):
+            set_prop_mat(properties, luxcore_name, 'interiorior', ior)
 
         if self.rough:
             set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
@@ -559,8 +570,8 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
                                          default=False, update=change_advanced)
     multibounce = bpy.props.BoolProperty(name='Multibounce', description='Creates a fuzzy, dusty appearance',
                                          default=False)
-    use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False,
-                                     update=change_use_ior)
+    use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR instead of specular color',
+                                     default=False, update=change_use_ior)
     use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness',
                                             default=False, update=change_use_anisotropy)
 
@@ -580,12 +591,12 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
+        layout.prop(self, 'use_anisotropy')
         layout.prop(self, 'advanced', toggle=True)
 
         if self.advanced:
             layout.prop(self, 'multibounce')
             layout.prop(self, 'use_ior')
-        layout.prop(self, 'use_anisotropy')
 
     def export_material(self, make_material, make_texture):
         mat_type = 'glossycoating'
@@ -1443,8 +1454,8 @@ class luxrender_light_area_node(luxrender_material_node):
                                          description='Shadow ray and light path sampling weight')
     nsamples = bpy.props.IntProperty(name='Shadow Ray Count', default=1, min=1, max=64,
                                      description='Number of shadow samples per intersection')
-    luxcore_samples = bpy.props.IntProperty(name='Samples', default=-1, min=-1, max=256,
-                                     description='Number of shadow samples per intersection')
+    luxcore_samples = bpy.props.IntProperty(name='Samples', default=-1, min=-1, max=64,
+                                     description='Number of shadow samples per intersection (-1 = use global settings)')
 
     def init(self, context):
         self.inputs.new('luxrender_TC_L_socket', 'Light Color')
@@ -1452,8 +1463,8 @@ class luxrender_light_area_node(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Emission')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'advanced', toggle=True)
         layout.prop(self, 'gain')
+        layout.prop(self, 'advanced', toggle=True)
 
         if self.advanced:
             layout.prop(self, 'power')
@@ -1489,7 +1500,7 @@ class luxrender_light_area_node(luxrender_material_node):
         set_prop_mat(properties, parent_luxcore_name, 'emission.power', self.power)
         set_prop_mat(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
         set_prop_mat(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
-        #set_prop_mat(properties, parent_luxcore_name, 'emission.id', )
+        #set_prop_mat(properties, parent_luxcore_name, 'emission.id', ) # TODO: lightgroup
 
 
 @LuxRenderAddon.addon_register_class

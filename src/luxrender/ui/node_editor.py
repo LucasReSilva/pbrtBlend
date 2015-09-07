@@ -142,7 +142,7 @@ luxrender_node_categories_material = [
     ]),
 
     luxrender_node_category_material("LUX_MATERIAL", "Material", items=[
-        NodeItem("luxrender_material_type_node_standard", label="Standard"),
+        #NodeItem("luxrender_material_type_node_standard", label="Standard"), # TODO: Work in progress
         NodeItem("luxrender_material_matte_node", label="Matte"),
         NodeItem("luxrender_material_glossy_node", label="Glossy"),
         NodeItem("luxrender_material_mix_node", label="Mix"),

@@ -96,7 +96,10 @@ def get_linked_node(socket):
 
 def has_interior_volume(node):
     mat_output_node = find_node_in_nodetree(node.id_data, 'luxrender_material_output_node')
-    return mat_output_node and mat_output_node.interior_volume
+    if mat_output_node and mat_output_node.interior_volume:
+        return True
+    else:
+        return False
 
 
 def check_node_export_material(node):
