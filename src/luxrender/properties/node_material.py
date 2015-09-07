@@ -346,10 +346,6 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        # None of the advanced options work in LuxCore
-        if not UseLuxCore():
-            layout.prop(self, 'advanced', toggle=True)
-
         column = layout.row()
         column.enabled = not self.architectural
         column.prop(self, 'rough')
@@ -366,8 +362,12 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         row.enabled = has_interior_volume(self)
         row.prop(self, 'use_volume_ior')
 
-        if self.advanced:
-            layout.prop(self, 'dispersion')
+        # None of the advanced options work in LuxCore
+        if not UseLuxCore():
+            layout.prop(self, 'advanced', toggle=True)
+
+            if self.advanced:
+                layout.prop(self, 'dispersion')
 
     def export_material(self, make_material, make_texture):
         if self.rough:
