@@ -51,7 +51,7 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 from ..properties.node_sockets import *
 
 from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, export_submat_luxcore,
-               export_emission_luxcore, warning_classic_node, warning_luxcore_node)
+               export_emission_luxcore, warning_classic_node, warning_luxcore_node, find_node_in_nodetree)
 
 
 class luxrender_texture_maker:
@@ -274,33 +274,135 @@ class luxrender_material_type_node_glass(luxrender_material_node):
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
-    arch = bpy.props.BoolProperty(name='Architectural',
+    def change_advanced(self, context):
+        self.inputs['Cauchy B'].enabled = self.advanced and self.dispersion # is also disabled/enabled by dispersion
+        self.inputs['Film IOR'].enabled = self.advanced
+        self.inputs['Film Thickness (nm)'].enabled = self.advanced
+
+    def change_use_anisotropy(self, context):
+        try:
+            self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
+            self.inputs['Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+        except:
+            self.inputs['U-Roughness'].sync_vroughness = not self.use_anisotropy
+            self.inputs['U-Roughness'].name = 'Roughness' if not self.use_anisotropy else 'U-Roughness'
+
+        self.inputs['V-Roughness'].enabled = self.use_anisotropy
+
+    def change_dispersion(self, context):
+        self.inputs['Cauchy B'].enabled = self.advanced and self.dispersion
+
+    def change_rough(self, context):
+        if self.use_anisotropy:
+            self.inputs['U-Roughness'].enabled = self.rough
+            self.inputs['V-Roughness'].enabled = self.rough
+        else:
+            self.inputs['Roughness'].enabled = self.rough
+
+    advanced = bpy.props.BoolProperty(name='Advanced Options', description='Configure advanced options',
+                                      default=False, update=change_advanced)
+    architectural = bpy.props.BoolProperty(name='Architectural',
                                   description='Skips refraction during transmission, propagates alpha and shadow rays',
                                   default=False)
+    rough = bpy.props.BoolProperty(name='Rough',
+                                  description='Rough glass surface instead of a smooth one',
+                                  default=False, update=change_rough)
+    use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness',
+                                            default=False, update=change_use_anisotropy)
+    dispersion = bpy.props.BoolProperty(name='Dispersion',
+                                        description='Enables chromatic dispersion, Cauchy B value should be none-zero',
+                                        default=False, update=change_dispersion)
 
     def init(self, context):
         self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
         self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
         self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+
+        # advanced options
         self.inputs.new('luxrender_TF_cauchyb_socket', 'Cauchy B')
+        self.inputs['Cauchy B'].enabled = False
         self.inputs.new('luxrender_TF_film_ior_socket', 'Film IOR')
+        self.inputs['Film IOR'].enabled = False
         self.inputs.new('luxrender_TF_film_thick_socket', 'Film Thickness (nm)')
+        self.inputs['Film Thickness (nm)'].enabled = False
+
+        # Rough options
+        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+        self.inputs['U-Roughness'].name = 'Roughness'
+        self.inputs['Roughness'].enabled = False
+        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs['V-Roughness'].enabled = False
+
         self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'arch')
+        # TODO: do something with this (hide IOR?)
+        mat_output_node = find_node_in_nodetree(self.id_data, 'luxrender_material_output_node')
+        has_interior_volume = mat_output_node and mat_output_node.interior_volume
+
+        # None of the advanced options work in LuxCore
+        if not UseLuxCore():
+            layout.prop(self, 'advanced', toggle=True)
+
+        column = layout.row()
+        column.enabled = not self.architectural
+        column.prop(self, 'rough')
+
+        if self.rough:
+            column.prop(self, 'use_anisotropy')
+
+        # Rough glass cannot be archglass
+        row = layout.row()
+        row.enabled = not self.rough
+        row.prop(self, 'architectural')
+
+        if self.advanced:
+            layout.prop(self, 'dispersion')
 
     def export_material(self, make_material, make_texture):
+        # TODO: adapt classic export to unified glass node
+
         mat_type = 'glass'
 
         glass_params = ParamSet()
         glass_params.update(get_socket_paramsets(self.inputs, make_texture))
 
-        glass_params.add_bool('architectural', self.arch)
+        glass_params.add_bool('architectural', self.architectural)
 
         return make_material(mat_type, self.name, glass_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        if self.rough:
+            type = 'roughglass'
+        elif self.architectural:
+            type = 'archglass'
+        else:
+            type = 'glass'
+
+        kt = self.inputs['Transmission Color'].export_luxcore(properties)
+        kr = self.inputs['Reflection Color'].export_luxcore(properties)
+        ior = self.inputs['IOR'].export_luxcore(properties)
+
+        if self.use_anisotropy:
+            u_roughness = self.inputs['U-Roughness'].export_luxcore(properties)
+            v_roughness = self.inputs['V-Roughness'].export_luxcore(properties)
+        else:
+            u_roughness = v_roughness = self.inputs['Roughness'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', type)
+        set_prop_mat(properties, luxcore_name, 'kr', kr)
+        set_prop_mat(properties, luxcore_name, 'kt', kt)
+        set_prop_mat(properties, luxcore_name, 'interiorior', ior)
+
+        if self.rough:
+            set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
+            set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -678,7 +780,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
             set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 
         # Light emission
-        export_emission_luxcore(properties, self.inputs[3], luxcore_name)
+        export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
 
         return luxcore_name
 
@@ -1435,6 +1537,8 @@ class luxrender_material_output_node(luxrender_node):
 
         # Todo: light emission
         # TODO: LuxCore options (Material ID, samples etc.)
+
+        export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
 
         return luxcore_name
 

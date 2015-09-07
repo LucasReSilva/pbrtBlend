@@ -59,29 +59,25 @@ class ExportedVolumes(object):
 
 
 def find_node(material, nodetype):
-    #print('find_node: ', material, nodetype)
     if not (material and material.luxrender_material and material.luxrender_material.nodetree):
         return None
 
-    nodetree = material.luxrender_material.nodetree
-    #print('nodetree: ', nodetree)
+    nodetree_name = material.luxrender_material.nodetree
 
-    if not nodetree:
+    if not nodetree_name:
         return None
 
-    ntree = bpy.data.node_groups[nodetree]
-    #print('ntree: ', ntree)
+    ntree = bpy.data.node_groups[nodetree_name]
 
-    for node in ntree.nodes:
-        #nt = getattr(node, "type", None)
+    return find_node_in_nodetree(ntree, nodetype)
+
+
+def find_node_in_nodetree(nodetree, nodetype):
+    for node in nodetree.nodes:
         nt = getattr(node, "bl_idname", None)
-        #print('node: ', node, nt, node.__class__.__name__)
-        #print(dir(node))
 
         if nt == nodetype:
             return node
-
-    return None
 
 
 def find_node_input(node, name):
