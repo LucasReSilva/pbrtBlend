@@ -120,6 +120,7 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'flipxy')
         layout.prop(self, 'type')
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -249,10 +250,11 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'noisetype')
+        layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisebasis')
         layout.prop(self, 'noisesize')
         layout.prop(self, 'noisedepth')
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -301,7 +303,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 
     noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items,
                                         default='blender_original')
-    type = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items,
+    type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=noise_basis_items,
                                   default='blender_original')
     distamount = bpy.props.FloatProperty(name='Distortion', default=1.00)
     noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
@@ -316,9 +318,10 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
     def draw_buttons(self, context, layout):
         layout.prop(self, 'noisebasis')
         layout.prop(self, 'type')
-        layout.prop(self, 'distamount')
         layout.prop(self, 'noisesize')
+        layout.prop(self, 'distamount')
         layout.prop(self, 'nabla')
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -608,13 +611,14 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'type')
-        layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisebasis2')
-        layout.prop(self, 'noisetype')
+        layout.prop(self, 'type', expand=True)
+        layout.prop(self, 'noisebasis2', expand=True)
+        layout.prop(self, 'noisetype', expand=True)
+        layout.prop(self, 'noisebasis',)
         layout.prop(self, 'noisesize')
         layout.prop(self, 'noisedepth')
         layout.prop(self, 'turbulence')
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -689,6 +693,7 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
         if self.musgravetype != 'fbm':
             layout.prop(self, 'iscale')
 
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -807,11 +812,12 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'type')
+        layout.prop(self, 'type', expand=True)
         layout.prop(self, 'noisebasis')
         layout.prop(self, 'noisetype')
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -901,6 +907,7 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
         layout.prop(self, 'w2')
         layout.prop(self, 'w3')
         layout.prop(self, 'w4')
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 
@@ -970,7 +977,7 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
     ]
 
     type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=wood_type_items, default='bands')
-    noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items,
+    noisebasis = bpy.props.EnumProperty(name='Basis', description='Basis of noise used', items=noise_basis_items,
                                         default='blender_original')
     noisebasis2 = bpy.props.EnumProperty(name='Noise Basis 2', description='Second basis of noise used',
                                          items=wood_noise_items, default='sin')
@@ -986,12 +993,13 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        layout.prop(self, 'noisebasis2', expand=True)
         layout.prop(self, 'type')
+        layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisebasis2')
-        layout.prop(self, 'noisetype')
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
+        layout.separator()
         layout.prop(self, 'bright')
         layout.prop(self, 'contrast')
 

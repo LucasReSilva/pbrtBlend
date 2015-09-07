@@ -375,7 +375,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
             mat_type = 'roughglass'
 
             roughglass_params = ParamSet()
-            roughglass_params.update(get_socket_paramsets(self.inputs, make_texture)) # TODO
+            roughglass_params.update(get_socket_paramsets(self.inputs, make_texture))
 
             roughglass_params.add_bool('dispersion', self.dispersion)
 
@@ -395,7 +395,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
             mat_type = 'glass'
 
             glass_params = ParamSet()
-            glass_params.update(get_socket_paramsets(self.inputs, make_texture)) # TODO
+            glass_params.update(get_socket_paramsets(self.inputs, make_texture))
 
             glass_params.add_bool('architectural', self.architectural)
 
