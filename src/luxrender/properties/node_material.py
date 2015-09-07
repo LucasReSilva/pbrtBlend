@@ -51,7 +51,7 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 from ..properties.node_sockets import *
 
 from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, export_submat_luxcore,
-               export_emission_luxcore, warning_classic_node, warning_luxcore_node, find_node_in_nodetree)
+               export_emission_luxcore, warning_classic_node, warning_luxcore_node, has_interior_volume)
 
 
 class luxrender_texture_maker:
@@ -339,8 +339,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 
     def draw_buttons(self, context, layout):
         # TODO: do something with this (hide IOR?)
-        mat_output_node = find_node_in_nodetree(self.id_data, 'luxrender_material_output_node')
-        has_interior_volume = mat_output_node and mat_output_node.interior_volume
+        # has_interior_volume(self)
 
         # None of the advanced options work in LuxCore
         if not UseLuxCore():
@@ -362,16 +361,36 @@ class luxrender_material_type_node_glass(luxrender_material_node):
             layout.prop(self, 'dispersion')
 
     def export_material(self, make_material, make_texture):
-        # TODO: adapt classic export to unified glass node
+        if self.rough:
+            # Export as roughglass
+            mat_type = 'roughglass'
 
-        mat_type = 'glass'
+            roughglass_params = ParamSet()
+            roughglass_params.update(get_socket_paramsets(self.inputs, make_texture)) # TODO
 
-        glass_params = ParamSet()
-        glass_params.update(get_socket_paramsets(self.inputs, make_texture))
+            roughglass_params.add_bool('dispersion', self.dispersion)
 
-        glass_params.add_bool('architectural', self.architectural)
+            return make_material(mat_type, self.name, roughglass_params)
+        elif has_interior_volume(self):
+            # Export as glass2
+            mat_type = 'glass2'
 
-        return make_material(mat_type, self.name, glass_params)
+            glass2_params = ParamSet()
+
+            glass2_params.add_bool('architectural', self.architectural)
+            glass2_params.add_bool('dispersion', self.dispersion)
+
+            return make_material(mat_type, self.name, glass2_params)
+        else:
+            # Export as glass
+            mat_type = 'glass'
+
+            glass_params = ParamSet()
+            glass_params.update(get_socket_paramsets(self.inputs, make_texture)) # TODO
+
+            glass_params.add_bool('architectural', self.architectural)
+
+            return make_material(mat_type, self.name, glass_params)
 
     def export_luxcore(self, properties, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
@@ -405,6 +424,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         return luxcore_name
 
 
+# Deprecated, replaced by unified glass node
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glass2(luxrender_material_node):
     """Glass2 material node"""
@@ -1101,6 +1121,7 @@ class luxrender_material_type_node_null(luxrender_material_node):
         return luxcore_name
 
 
+# Deprecated, replaced by unified glass node
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_roughglass(luxrender_material_node):
     """Rough Glass material node"""

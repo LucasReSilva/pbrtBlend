@@ -94,6 +94,11 @@ def get_linked_node(socket):
     return socket.links[0].from_node
 
 
+def has_interior_volume(node):
+    mat_output_node = find_node_in_nodetree(node.id_data, 'luxrender_material_output_node')
+    return mat_output_node and mat_output_node.interior_volume
+
+
 def check_node_export_material(node):
     if not hasattr(node, 'export_material'):
         print('No export_material() for node: ' + node.bl_idname)
