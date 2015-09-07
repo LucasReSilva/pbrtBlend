@@ -412,6 +412,8 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         else:
             u_roughness = v_roughness = self.inputs['Roughness'].export_luxcore(properties)
 
+        bump = self.inputs['Bump'].export_luxcore(properties)
+
         set_prop_mat(properties, luxcore_name, 'type', type)
         set_prop_mat(properties, luxcore_name, 'kr', kr)
         set_prop_mat(properties, luxcore_name, 'kt', kt)
@@ -420,6 +422,9 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         if self.rough:
             set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
             set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 
         return luxcore_name
 
