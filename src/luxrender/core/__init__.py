@@ -254,6 +254,9 @@ def render_start_options(self, context):
         col = self.layout.column()
         row = self.layout.row()
 
+        if UseLuxCore() and context.scene.render.display_mode == 'WINDOW':
+            col.label("Window mode can cause crashes!", icon="ERROR")
+
         col.prop(context.scene.luxrender_engine, "selected_luxrender_api", text="LuxRender API")
 
         if not UseLuxCore():

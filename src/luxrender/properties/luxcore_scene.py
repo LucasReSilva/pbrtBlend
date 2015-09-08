@@ -40,15 +40,15 @@ class luxcore_scenesettings(declarative_property_group):
     alert = {}
 
     controls = [
-                  ['label', 'imageScale']
+                  'imageScale'
     ]
 
     properties = [
-        {
-            'type': 'text',
-            'attr': 'label',
-            'name': 'Scene Settings:'
-        },
+        #{
+        #    'type': 'text',
+        #    'attr': 'label',
+        #    'name': 'Scene Settings:'
+        #},
         {
             'type': 'float',
             'attr': 'imageScale',
