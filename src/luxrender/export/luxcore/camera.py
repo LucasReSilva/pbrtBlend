@@ -235,7 +235,8 @@ class CameraExporter(object):
     def __convert_camera_motion_blur(self, blCamera):
         luxCamera = blCamera.data.luxrender_camera
 
-        if luxCamera.usemblur and luxCamera.cammblur:
+        # Note: enabling this in viewport leads to constant refresing of the render, even when cam is not animated
+        if luxCamera.usemblur and luxCamera.cammblur and not self.is_viewport_render:
             # Complete transformation is handled by motion.x.transformation below
             self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', [0, 0, 0]))
             self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', [0, 0, -1]))
