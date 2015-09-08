@@ -581,7 +581,9 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         self.inputs.new('luxrender_TF_ior_socket', 'IOR')
         self.inputs['IOR'].enabled = False  # initial state is disabled
         self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
+        self.inputs['Absorption Color'].enabled = False  # initial state is disabled
         self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
+        self.inputs['Absorption Depth (nm)'].enabled = False  # initial state is disabled
         self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
         self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
