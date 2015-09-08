@@ -629,7 +629,9 @@ class MaterialExporter(object):
                     self.luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', lc_mat.id)
 
             self.properties.Set(pyluxcore.Property(prefix + '.samples', [lc_mat.samples]))
-            self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [lc_mat.emission_samples]))
+
+            if material.luxrender_emission.use_emission:
+                self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [lc_mat.emission_samples]))
 
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.diffuse.enable',
                                          lc_mat.visibility_indirect_diffuse_enable))
