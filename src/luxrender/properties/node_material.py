@@ -50,8 +50,9 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 
 from ..properties.node_sockets import *
 
-from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, export_submat_luxcore,
-               export_emission_luxcore, warning_classic_node, warning_luxcore_node, has_interior_volume)
+from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, create_luxcore_name,
+               export_submat_luxcore, export_emission_luxcore, warning_classic_node, warning_luxcore_node,
+               has_interior_volume)
 
 
 class luxrender_texture_maker:
@@ -849,6 +850,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
         return make_material(mat_type, self.name, mattetranslucent_params)
 
 
+# Deprecated, replaced with metal2 node
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_metal(luxrender_material_node):
     """Metal material node"""
@@ -922,10 +924,6 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
-    #for prop in luxrender_mat_metal2.properties:
-    #    if prop['attr'].startswith('metaltype'):
-    #        metal2_types = prop['items']
-
     def change_use_anisotropy(self, context):
         try:
             self.inputs['Roughness'].sync_vroughness = not self.use_anisotropy
@@ -936,29 +934,25 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 
         self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
-    # metal2_type = bpy.props.EnumProperty(name='Type', description='Luxrender Metal2 Type', items=metal2_types, default='preset')
-
-    for prop in luxrender_mat_metal2.properties:
-        if prop['attr'].startswith('preset'):
-            metal2_presets = prop['items']
-    metal2_preset = bpy.props.EnumProperty(name='Preset', description='Luxrender Metal2 Preset', items=metal2_presets,
-                                           default='aluminium')
-
-    # metal2_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
+    def change_input_type(self, context):
+        self.inputs['Fresnel'].enabled = self.input_type == 'fresnel'
+        self.inputs['Color'].enabled = self.input_type == 'color'
 
     input_type_items = [
-        ('preset', 'Preset', 'Use pre-configured presets'),
         ('color', 'Color', 'Use custom color as input'),
-        ('fresnel', 'Fresnel', 'Use a fresnel texture as input')
+        ('fresnel', 'Fresnel Texture', 'Use a fresnel texture as input')
     ]
-    input_type = bpy.props.EnumProperty(name='Type', description='Input Type', items=input_type_items, default='preset')
+    input_type = bpy.props.EnumProperty(name='Type', description='Input Type', items=input_type_items, default='color',
+                                        update=change_input_type)
 
     use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness',
                                             default=False, update=change_use_anisotropy)
 
     def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'Color')
         self.inputs.new('luxrender_fresnel_socket', 'Fresnel')
         self.inputs['Fresnel'].needs_link = True  # suppress inappropiate chooser
+        self.inputs['Fresnel'].enabled = False
         self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
         self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
@@ -968,35 +962,11 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        # layout.prop(self, 'metal2_type')
-        # if self.metal2_type == 'preset':
-        # layout.prop(self, 'metal2_preset')
-        # if self.metal2_type == 'nk':
-        # layout.prop(self, 'metal2_nkfile')
         layout.prop(self, 'use_anisotropy')
         layout.prop(self, 'input_type', expand=True)
 
-        if self.input_type == 'preset':
-            layout.prop(self, 'metal2_preset')
-            if 'Fresnel' in self.inputs:
-                self.inputs.remove(self.inputs['Fresnel'])
-            if 'Color' in self.inputs:
-                self.inputs.remove(self.inputs['Color'])
-
-        elif self.input_type == 'color':
-            if 'Fresnel' in self.inputs:
-                self.inputs.remove(self.inputs['Fresnel'])
-            if not 'Color' in self.inputs:
-                self.inputs.new('NodeSocketColor', 'Color')
-
-        elif self.input_type == 'fresnel':
-            if 'Color' in self.inputs:
-                self.inputs.remove(self.inputs['Color'])
-            if not 'Fresnel' in self.inputs:
-                self.inputs.new('luxrender_fresnel_socket', 'Fresnel')
-                self.inputs['Fresnel'].needs_link = True
-
     def export_material(self, make_material, make_texture):
+        # TODO: port new behavior
         mat_type = 'metal2'
 
         metal2_params = ParamSet()
@@ -1007,13 +977,30 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
     def export_luxcore(self, properties, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
-        u_roughness = self.inputs[1].export_luxcore(properties)
-        v_roughness = self.inputs[2].export_luxcore(properties) if self.use_anisotropy else u_roughness
+        if self.input_type == 'color':
+            kr = self.inputs['Color'].export_luxcore(properties)
+
+            # Implicitly create a fresnelcolor texture
+            fresnel_texture = create_luxcore_name(self, suffix='fresnelcolor')
+            set_prop_tex(properties, fresnel_texture, 'type', 'fresnelcolor')
+            set_prop_tex(properties, fresnel_texture, 'kr', kr)
+        else:
+            if self.inputs['Fresnel'].is_linked:
+                fresnel_texture = self.inputs['Fresnel'].export_luxcore(properties)
+            else:
+                print('Warning: Metal2 node "%s" is in fresnel mode, but no fresnel texture is connected' % self.name)
+                # Use a black color to signal that nothing is connected, but LuxCore is still able to render
+                fresnel_texture = create_luxcore_name(self, suffix='fresnelcolor')
+                set_prop_tex(properties, fresnel_texture, 'type', 'fresnelcolor')
+                set_prop_tex(properties, fresnel_texture, 'kr', [0, 0, 0])
+
+        u_roughness = self.inputs[2].export_luxcore(properties)
+        v_roughness = self.inputs[3].export_luxcore(properties) if self.use_anisotropy else u_roughness
 
         set_prop_mat(properties, luxcore_name, 'type', 'metal2')
-        #set_prop_mat(properties, luxcore_name, 'fresnel', )
         set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
         set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
+        set_prop_mat(properties, luxcore_name, 'fresnel', fresnel_texture)
 
         return luxcore_name
 
@@ -1589,6 +1576,7 @@ class luxrender_material_output_node(luxrender_node):
                 layout.label('Biased Path Settings:')
                 column = layout.column()
                 column.enabled = context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH'
+
                 column.prop(luxcore_material, 'samples')
                 column.label('Visibility for indirect rays:')
                 row = column.row()

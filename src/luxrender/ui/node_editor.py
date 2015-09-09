@@ -152,7 +152,7 @@ luxrender_node_categories_material = [
         #NodeItem("luxrender_material_roughglass_node", label="Rough Glass"), # replaced by unified glass node
         NodeItem("luxrender_material_mattetranslucent_node", label="Matte Translucent"),
         NodeItem("luxrender_material_glossytranslucent_node", label="Glossy Translucent"),
-        NodeItem("luxrender_material_metal_node", label="Metal"),
+        #NodeItem("luxrender_material_metal_node", label="Metal"), # replaced by unified metal2 node
         NodeItem("luxrender_material_metal2_node", label="Metal2"),
         NodeItem("luxrender_material_mirror_node", label="Mirror"),
         #NodeItem("luxrender_material_shinymetal_node", label="Shiny Metal"),
@@ -198,6 +198,7 @@ luxrender_node_categories_material = [
     luxrender_node_category_material("LUX_FRESNEL", "Fresnel", items=[
         NodeItem("luxrender_texture_fresnelcolor_node"),
         NodeItem("luxrender_texture_fresnelname_node"),
+        NodeItem("luxrender_texture_fresnelfile_node"),
         NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
@@ -291,8 +292,8 @@ luxrender_node_categories_volume = [
     ]),
 
     luxrender_node_category_volume("LUX_FRESNEL_VOLUME", "Fresnel", items=[
-        NodeItem("luxrender_texture_fresnelcolor_node"),
-        NodeItem("luxrender_texture_fresnelname_node"),
+        #NodeItem("luxrender_texture_fresnelcolor_node"),
+        #NodeItem("luxrender_texture_fresnelname_node"),
         NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
