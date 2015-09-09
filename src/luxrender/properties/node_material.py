@@ -1029,6 +1029,16 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 
         return make_material(mat_type, self.name, mirror_params)
 
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        kr = self.inputs['Reflection Color'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'mirror')
+        set_prop_mat(properties, luxcore_name, 'kr', kr)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_mix(luxrender_material_node):
