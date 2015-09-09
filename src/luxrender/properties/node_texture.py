@@ -35,7 +35,7 @@ from ..properties import (luxrender_texture_node, get_linked_node, check_node_ex
 from ..properties.texture import (
     import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
-from ..export import ParamSet, get_worldscale, process_filepath_data
+from ..export import ParamSet, get_worldscale, process_filepath_data, matrix_to_list
 from ..export.volumes import export_smoke
 from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
@@ -113,12 +113,32 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
     bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
+    luxcore_direction_items = [
+        ('horizontal', 'Horizontal', 'Direction: -x to x'),
+        ('vertical', 'Vertical', 'Direction: -y to y')
+    ]
+    luxcore_direction = bpy.props.EnumProperty(name='Direction', items=luxcore_direction_items)
+
+    luxcore_progression_type_map = {
+        'lin': 'linear',
+        'quad': 'quadratic',
+        'ease': 'easing',
+        'diag': 'diagonal',
+        'sphere': 'spherical',
+        'halo': 'halo',
+        'radial': 'radial',
+    }
+
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'flipxy')
+        if UseLuxCore():
+            layout.prop(self, 'luxcore_direction')
+        else:
+            layout.prop(self, 'flipxy')
+
         layout.prop(self, 'type')
         layout.separator()
         layout.prop(self, 'bright')
@@ -137,6 +157,23 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
             blend_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'blender_blend', self.name, blend_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_blend')
+        set_prop_tex(properties, luxcore_name, 'progressiontype', self.luxcore_progression_type_map[self.type])
+        set_prop_tex(properties, luxcore_name, 'direction', self.luxcore_direction)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -286,6 +323,7 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
         set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
 
         mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
 
         set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
         set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)

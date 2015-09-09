@@ -26,7 +26,7 @@
 
 import re
 
-import bpy
+import bpy, mathutils
 
 from ..extensions_framework import declarative_property_group
 
@@ -2933,12 +2933,7 @@ class luxrender_coordinate_socket(bpy.types.NodeSocket):
 
     def export_luxcore(self, properties):
         default_mapping_type = 'globalmapping3d'
-        default_transformation = [
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        ]
+        default_transformation = mathutils.Matrix()
         return export_socket_luxcore(properties, self, [default_mapping_type, default_transformation])
 
 

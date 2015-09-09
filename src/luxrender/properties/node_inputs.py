@@ -165,7 +165,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
         tex_rot = tex_rot0 * tex_rot1 * tex_rot2
 
         # combine transformations
-        transformation = matrix_to_list(tex_loc * tex_rot * tex_sca, apply_worldscale=True, invert=True)
+        transformation = tex_loc * tex_rot * tex_sca
 
         return [mapping_type, transformation]
 

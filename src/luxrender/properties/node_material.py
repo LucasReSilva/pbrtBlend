@@ -1213,6 +1213,7 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
         return make_material(mat_type, self.name, scatter_params)
 
 
+# Deprecated
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_shinymetal(luxrender_material_node):
     """Shiny metal material node"""
@@ -1357,6 +1358,8 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
         return make_volume(self.name, vol_type, clear_params)
 
     def export_luxcore(self, properties, name=None):
+        # TODO
+
         luxcore_name = create_luxcore_name_vol(self, name)
 
         set_prop_vol(properties, luxcore_name, 'type', 'clear')
@@ -1399,6 +1402,8 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 
         return make_volume(self.name, vol_type, homogeneous_params)
 
+    # TODO: port to new volume system, LuxCore support
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
@@ -1431,6 +1436,8 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
         heterogeneous_params.add_float('stepsize', self.stepsize)
 
         return make_volume(self.name, vol_type, heterogeneous_params)
+
+    # TODO: port to new volume system, LuxCore support
 
 
 @LuxRenderAddon.addon_register_class
