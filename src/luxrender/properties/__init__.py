@@ -125,10 +125,16 @@ def check_node_get_paramset(node):
 # LuxCore node UI functions (e.g. warning labels)
 
 def warning_luxcore_node(layout):
+    """
+    Show a warning label if API mode is Classic (this node only works in LuxCore mode)
+    """
     if not UseLuxCore():
         layout.label('LuxCore only node!', icon='ERROR')
 
 def warning_classic_node(layout):
+    """
+    Show a warning label if API mode is LuxCore (this node only works in Classic mode)
+    """
     if UseLuxCore():
         layout.label('No LuxCore support!', icon='ERROR')
 

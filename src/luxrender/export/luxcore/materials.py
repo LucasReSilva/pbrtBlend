@@ -78,6 +78,16 @@ class MaterialExporter(object):
 
             prefix = 'scene.materials.' + self.luxcore_name
             self.__set_material_volumes(prefix, output_node.interior_volume, output_node.exterior_volume)
+
+            # LuxCore specific material settings
+            lc_mat = self.material.luxcore_material
+
+            if lc_mat.id != -1 and not self.luxcore_exporter.is_viewport_render:
+                self.properties.Set(pyluxcore.Property(prefix + '.id', [lc_mat.id]))
+                if lc_mat.create_MATERIAL_ID_MASK and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('MATERIAL_ID_MASK', lc_mat.id)
+                if lc_mat.create_BY_MATERIAL_ID and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', lc_mat.id)
         except Exception as err:
             print('Node material export failed, skipping material: %s\n%s' % (self.material.name, err))
             import traceback

@@ -263,8 +263,6 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 
         return make_material(mat_type, self.name, doubleside_params)
 
-    # TODO: LuxCore export
-
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glass(luxrender_material_node):
@@ -1502,7 +1500,8 @@ class luxrender_light_area_node(luxrender_material_node):
         set_prop_mat(properties, parent_luxcore_name, 'emission.power', self.power)
         set_prop_mat(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
         set_prop_mat(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
-        #set_prop_mat(properties, parent_luxcore_name, 'emission.id', ) # TODO: lightgroup
+        # TODO: lightgroup
+        #set_prop_mat(properties, parent_luxcore_name, 'emission.id', )
 
 
 @LuxRenderAddon.addon_register_class
@@ -1553,18 +1552,49 @@ class luxrender_material_output_node(luxrender_node):
 
     interior_volume = bpy.props.StringProperty(description='Volume inside of the object with this material')
     exterior_volume = bpy.props.StringProperty(description='Volume outside of the object with this material')
+    advanced = bpy.props.BoolProperty(name='Advanced Options', description='Show advanced material settings',
+                                      default=False)
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Surface')
         self.inputs.new('NodeSocketShader', 'Emission')
 
     def draw_buttons(self, context, layout):
-        layout.label(text='Volumes:')
+        layout.label('Volumes:')
 
         layout.prop_search(self, 'interior_volume', context.scene.luxrender_volumes, 'volumes', 'Interior',
                            icon='MOD_FLUIDSIM')
+
+        default_interior = context.scene.luxrender_world.default_interior_volume
+        if not self.interior_volume and default_interior:
+            layout.label('Using default: "%s"' % default_interior, icon='INFO')
+
         layout.prop_search(self, 'exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior',
                            icon='MOD_FLUIDSIM')
+
+        default_exterior = context.scene.luxrender_world.default_exterior_volume
+        if not self.exterior_volume and default_exterior:
+            layout.label('Using default: "%s"' % default_exterior, icon='INFO')
+
+        if UseLuxCore():
+            layout.prop(self, 'advanced', toggle=True)
+
+            if self.advanced:
+                layout.label('Passes:')
+                luxcore_material = context.active_object.active_material.luxcore_material
+                layout.prop(luxcore_material, 'id')
+                layout.prop(luxcore_material, 'create_MATERIAL_ID_MASK')
+                layout.prop(luxcore_material, 'create_BY_MATERIAL_ID')
+
+                layout.label('Biased Path Settings:')
+                column = layout.column()
+                column.enabled = context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH'
+                column.prop(luxcore_material, 'samples')
+                column.label('Visibility for indirect rays:')
+                row = column.row()
+                row.prop(luxcore_material, 'visibility_indirect_diffuse_enable')
+                row.prop(luxcore_material, 'visibility_indirect_glossy_enable')
+                row.prop(luxcore_material, 'visibility_indirect_specular_enable')
 
     def export_luxcore(self, material, properties, blender_scene):
         # Note: volumes are exported in export/luxcore/materials.py (in "parent" function that calls this function)
@@ -1572,12 +1602,20 @@ class luxrender_material_output_node(luxrender_node):
         tree_name = material.luxrender_material.nodetree
         print('Exporting nodetree', tree_name, 'of material', material.name)
 
+        # Export the material tree
         luxcore_name = export_submat_luxcore(properties, self.inputs[0], material.name)
-
-        # Todo: light emission
-        # TODO: LuxCore options (Material ID, samples etc.)
-
+        # Export emission node if attached to this node
         export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
+        # Export advanced LuxCore material settings
+        luxcore_material = material.luxcore_material
+        set_prop_mat(properties, luxcore_name, 'id', luxcore_material.id)
+        set_prop_mat(properties, luxcore_name, 'samples', luxcore_material.samples)
+        set_prop_mat(properties, luxcore_name, 'visibility.indirect.diffuse.enable',
+                     luxcore_material.visibility_indirect_diffuse_enable)
+        set_prop_mat(properties, luxcore_name, 'visibility.indirect.glossy.enable',
+                     luxcore_material.visibility_indirect_glossy_enable)
+        set_prop_mat(properties, luxcore_name, 'visibility.indirect.specular.enable',
+                     luxcore_material.visibility_indirect_specular_enable)
 
         return luxcore_name
 

@@ -32,6 +32,9 @@ from .. import LuxRenderAddon
 
 
 def find_node_editor(nodetree_type):
+    """
+    Find out which space(s) of Blender's UI are a node editor that is not set to display the nodetree_type
+    """
     node_editor = None
 
     if bpy.context.screen:
