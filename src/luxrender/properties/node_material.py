@@ -561,6 +561,13 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 
         self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
+    def change_advanced(self, context):
+        self.inputs['IOR'].enabled = self.advanced and self.use_ior
+        self.inputs['Absorption Color'].enabled = self.advanced
+        self.inputs['Absorption Depth (nm)'].enabled = self.advanced
+
+    advanced = bpy.props.BoolProperty(name='Advanced Options', description='Configure advanced options',
+                                         default=False, update=change_advanced)
     multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce',
                                          default=False)
     use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False,
@@ -571,6 +578,8 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
     def init(self, context):
         self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
         self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
+        if UseLuxCore():
+            self.inputs['Sigma'].enabled = False # not supported by LuxCore
         self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
         self.inputs.new('luxrender_TF_ior_socket', 'IOR')
         self.inputs['IOR'].enabled = False  # initial state is disabled
@@ -585,9 +594,12 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'multibounce')
-        layout.prop(self, 'use_ior')
         layout.prop(self, 'use_anisotropy')
+        layout.prop(self, 'advanced', toggle=True)
+
+        if self.advanced:
+            layout.prop(self, 'multibounce')
+            layout.prop(self, 'use_ior')
 
     def export_material(self, make_material, make_texture):
         mat_type = 'glossy'
@@ -598,6 +610,35 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
         glossy_params.add_bool('multibounce', self.multibounce)
 
         return make_material(mat_type, self.name, glossy_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        kd = self.inputs['Diffuse Color'].export_luxcore(properties)
+        ks = self.inputs['Specular Color'].export_luxcore(properties)
+        u_roughness = self.inputs[6].export_luxcore(properties)
+        v_roughness = self.inputs[7].export_luxcore(properties) if self.use_anisotropy else u_roughness
+        ka = self.inputs['Absorption Color'].export_luxcore(properties)
+        d = self.inputs['Absorption Depth (nm)'].export_luxcore(properties)
+        index = self.inputs['IOR'].export_luxcore(properties)
+        bump = self.inputs['Bump'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'glossy2')
+        set_prop_mat(properties, luxcore_name, 'kd', kd)
+        set_prop_mat(properties, luxcore_name, 'ks', ks)
+        set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
+        set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
+        set_prop_mat(properties, luxcore_name, 'ka', ka)
+        set_prop_mat(properties, luxcore_name, 'd', d)
+        set_prop_mat(properties, luxcore_name, 'multibounce', self.multibounce)
+
+        if self.use_ior:
+            set_prop_mat(properties, luxcore_name, 'index', index)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -624,7 +665,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
     def change_advanced(self, context):
-        self.inputs['IOR'].enabled &= self.advanced
+        self.inputs['IOR'].enabled = self.advanced and self.use_ior
         self.inputs['Absorption Color'].enabled = self.advanced
         self.inputs['Absorption Depth (nm)'].enabled = self.advanced
 
@@ -689,8 +730,8 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
         base = export_submat_luxcore(properties, self.inputs['Base Material'])
         ks = self.inputs['Specular Color'].export_luxcore(properties)
-        u_roughness = self.inputs['Roughness'].export_luxcore(properties)
-        v_roughness = self.inputs['V-Roughness'].export_luxcore(properties) if self.use_anisotropy else u_roughness
+        u_roughness = self.inputs[5].export_luxcore(properties)
+        v_roughness = self.inputs[6].export_luxcore(properties) if self.use_anisotropy else u_roughness
         ka = self.inputs['Absorption Color'].export_luxcore(properties)
         d = self.inputs['Absorption Depth (nm)'].export_luxcore(properties)
         index = self.inputs['IOR'].export_luxcore(properties)
