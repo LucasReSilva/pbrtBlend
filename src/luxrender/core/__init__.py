@@ -1912,7 +1912,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.luxcore_view_update(context, update_changes)
 
         # Update statistics
-        if RENDERENGINE_luxrender.viewport_render_active:
+        if RENDERENGINE_luxrender.viewport_render_active and not RENDERENGINE_luxrender.viewport_render_paused:
             RENDERENGINE_luxrender.luxcore_session.UpdateStats()
             stats = RENDERENGINE_luxrender.luxcore_session.GetStats()
 
