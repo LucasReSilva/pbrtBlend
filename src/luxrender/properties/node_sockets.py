@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Jens Verwiebe, Jason Clarke, Asbjørn Heid
+# Jens Verwiebe, Jason Clarke, Asbjørn Heid, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -1735,7 +1735,8 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
         pass
 
     sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry',
-                                            description='Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is forwards scattering',
+                                            description='Scattering asymmetry RGB. -1 means backscatter, '
+                                            '0 is isotropic, 1 is forwards scattering',
                                             default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4,
                                             update=sc_asym_update)
 
@@ -1774,7 +1775,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
         return sc_asym_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.sc_asym)
+        return export_socket_luxcore(properties, self, list(self.sc_asym))
 
 
 @LuxRenderAddon.addon_register_class
@@ -2069,7 +2070,7 @@ class luxrender_TF_M1_socket(bpy.types.NodeSocket):
     def M1_update(self, context):
         pass
 
-    M1 = bpy.props.FloatProperty(name=get_props(TF_M1, 'name'), description=get_props(TF_M1, 'description'),
+    M1 = bpy.props.FloatProperty(name=get_props(TF_M1, 'name'), description='1st glossy layer roughness',
                                  default=get_props(TF_M1, 'default'), subtype=get_props(TF_M1, 'subtype'),
                                  min=get_props(TF_M1, 'min'), max=get_props(TF_M1, 'max'),
                                  soft_min=get_props(TF_M1, 'soft_min'), soft_max=get_props(TF_M1, 'soft_max'),
@@ -2125,7 +2126,7 @@ class luxrender_TF_M2_socket(bpy.types.NodeSocket):
     def M2_update(self, context):
         pass
 
-    M2 = bpy.props.FloatProperty(name=get_props(TF_M2, 'name'), description=get_props(TF_M2, 'description'),
+    M2 = bpy.props.FloatProperty(name=get_props(TF_M2, 'name'), description='2nd glossy layer roughness',
                                  default=get_props(TF_M2, 'default'), subtype=get_props(TF_M2, 'subtype'),
                                  min=get_props(TF_M2, 'min'), max=get_props(TF_M2, 'max'),
                                  soft_min=get_props(TF_M2, 'soft_min'), soft_max=get_props(TF_M2, 'soft_max'),
@@ -2181,7 +2182,7 @@ class luxrender_TF_M3_socket(bpy.types.NodeSocket):
     def M3_update(self, context):
         pass
 
-    M3 = bpy.props.FloatProperty(name=get_props(TF_M3, 'name'), description=get_props(TF_M3, 'description'),
+    M3 = bpy.props.FloatProperty(name=get_props(TF_M3, 'name'), description='3rd glossy layer roughness',
                                  default=get_props(TF_M3, 'default'), subtype=get_props(TF_M3, 'subtype'),
                                  min=get_props(TF_M3, 'min'), max=get_props(TF_M3, 'max'),
                                  soft_min=get_props(TF_M3, 'soft_min'), soft_max=get_props(TF_M3, 'soft_max'),
@@ -2237,7 +2238,7 @@ class luxrender_TF_R1_socket(bpy.types.NodeSocket):
     def R1_update(self, context):
         pass
 
-    R1 = bpy.props.FloatProperty(name=get_props(TF_R1, 'name'), description=get_props(TF_R1, 'description'),
+    R1 = bpy.props.FloatProperty(name=get_props(TF_R1, 'name'), description='1st glossy layer normal reflectance',
                                  default=get_props(TF_R1, 'default'), subtype=get_props(TF_R1, 'subtype'),
                                  min=get_props(TF_R1, 'min'), max=get_props(TF_R1, 'max'),
                                  soft_min=get_props(TF_R1, 'soft_min'), soft_max=get_props(TF_R1, 'soft_max'),
@@ -2293,7 +2294,7 @@ class luxrender_TF_R2_socket(bpy.types.NodeSocket):
     def R2_update(self, context):
         pass
 
-    R2 = bpy.props.FloatProperty(name=get_props(TF_R2, 'name'), description=get_props(TF_R2, 'description'),
+    R2 = bpy.props.FloatProperty(name=get_props(TF_R2, 'name'), description='2nd glossy layer normal reflectance',
                                  default=get_props(TF_R2, 'default'), subtype=get_props(TF_R2, 'subtype'),
                                  min=get_props(TF_R2, 'min'), max=get_props(TF_R2, 'max'),
                                  soft_min=get_props(TF_R2, 'soft_min'), soft_max=get_props(TF_R2, 'soft_max'),
@@ -2349,7 +2350,7 @@ class luxrender_TF_R3_socket(bpy.types.NodeSocket):
     def R3_update(self, context):
         pass
 
-    R3 = bpy.props.FloatProperty(name=get_props(TF_R3, 'name'), description=get_props(TF_R3, 'description'),
+    R3 = bpy.props.FloatProperty(name=get_props(TF_R3, 'name'), description='3rd glossy layer normal reflectance',
                                  default=get_props(TF_R3, 'default'), subtype=get_props(TF_R3, 'subtype'),
                                  min=get_props(TF_R3, 'min'), max=get_props(TF_R3, 'max'),
                                  soft_min=get_props(TF_R3, 'soft_min'), soft_max=get_props(TF_R3, 'soft_max'),

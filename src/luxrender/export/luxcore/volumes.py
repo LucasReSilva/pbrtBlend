@@ -28,7 +28,7 @@
 import math
 
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...properties import find_node_in_volume
 
 from .utils import convert_texture_channel, generate_volume_name
 
@@ -47,9 +47,30 @@ class VolumeExporter(object):
         # Remove old properties
         self.properties = pyluxcore.Properties()
 
-        self.__convert_volume()
+        if self.volume.nodetree:
+            self.__convert_node_volume()
+        else:
+            self.__convert_volume()
 
         return self.properties
+
+
+    def __convert_node_volume(self):
+        self.__generate_volume_name(self.volume.name)
+
+        output_node = find_node_in_volume(self.volume, 'luxrender_volume_output_node')
+
+        if output_node is None:
+            # TODO: maybe create black volume here?
+            return
+
+        try:
+            self.luxcore_name = output_node.export_luxcore(self.volume, self.properties, self.blender_scene)
+        except Exception as err:
+            print('Node volume export failed, skipping volume: %s\n%s' % (self.volume.name, err))
+            import traceback
+            traceback.print_exc()
+            #self.__convert_default_matte() # TODO: same as above (black volume)?
 
 
     def __generate_volume_name(self, name):

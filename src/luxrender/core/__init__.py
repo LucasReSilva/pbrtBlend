@@ -58,7 +58,7 @@ from ..export.luxcore import LuxCoreExporter
 # Exporter Property Groups need to be imported to ensure initialisation
 from ..properties import (
     accelerator, camera, engine, filter, integrator, ior_data, lamp, lampspectrum_data,
-    material, node_material, node_inputs, node_texture, node_fresnel, node_converter,
+    material, node_material, node_inputs, node_texture, node_fresnel, node_converter, node_volume,
     mesh, object as prop_object, particles, rendermode, sampler, texture, world,
     luxcore_engine, luxcore_scene, luxcore_material, luxcore_lamp,
     luxcore_tile_highlighting, luxcore_imagepipeline, luxcore_translator, luxcore_rendering_controls

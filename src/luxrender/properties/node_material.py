@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Jens Verwiebe, Jason Clarke, Asbjørn Heid
+# Jens Verwiebe, Jason Clarke, Asbjørn Heid, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -1380,111 +1380,6 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
 
 
 @LuxRenderAddon.addon_register_class
-class luxrender_volume_type_node_clear(luxrender_material_node):
-    """Clear volume node"""
-    bl_idname = 'luxrender_volume_clear_node'
-    bl_label = 'Clear Volume'
-    bl_icon = 'MATERIAL'
-    bl_width_min = 160
-
-    def init(self, context):
-        self.inputs.new('luxrender_fresnel_socket', 'IOR')
-        self.inputs.new('luxrender_AC_absorption_socket', 'Absorption Color')
-
-        self.outputs.new('NodeSocketShader', 'Volume')
-
-    def export_volume(self, make_volume, make_texture):
-        vol_type = 'clear'
-
-        clear_params = ParamSet()
-        clear_params.update(get_socket_paramsets(self.inputs, make_texture))
-
-        return make_volume(self.name, vol_type, clear_params)
-
-    def export_luxcore(self, properties, name=None):
-        # TODO
-
-        luxcore_name = create_luxcore_name_vol(self, name)
-
-        set_prop_vol(properties, luxcore_name, 'type', 'clear')
-        set_prop_vol(properties, luxcore_name, 'ior', 1.5)
-        set_prop_vol(properties, luxcore_name, 'absorption', [.2, .2, .2])
-        #set_prop_vol(properties, luxcore_name, '', )
-
-
-        '''
-        self.properties.Set(pyluxcore.Property(prefix + '.absorption', abs_col))
-        self.properties.Set(pyluxcore.Property(prefix + '.type', [volume.type]))
-        self.properties.Set(pyluxcore.Property(prefix + '.ior', ior_val))
-        self.properties.Set(pyluxcore.Property(prefix + '.priority', volume.priority))
-        '''
-
-        return luxcore_name
-
-
-@LuxRenderAddon.addon_register_class
-class luxrender_volume_type_node_homogeneous(luxrender_material_node):
-    '''Homogeneous volume node'''
-    bl_idname = 'luxrender_volume_homogeneous_node'
-    bl_label = 'Homogeneous Volume'
-    bl_icon = 'MATERIAL'
-    bl_width_min = 160
-
-    def init(self, context):
-        self.inputs.new('luxrender_fresnel_socket', 'IOR')
-        self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
-        self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
-        self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
-
-        self.outputs.new('NodeSocketShader', 'Volume')
-
-    def export_volume(self, make_volume, make_texture):
-        vol_type = 'homogeneous'
-
-        homogeneous_params = ParamSet()
-        homogeneous_params.update(get_socket_paramsets(self.inputs, make_texture))
-
-        return make_volume(self.name, vol_type, homogeneous_params)
-
-    # TODO: port to new volume system, LuxCore support
-
-
-@LuxRenderAddon.addon_register_class
-class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
-    """Heterogeneous volume node"""
-    bl_idname = 'luxrender_volume_heterogeneous_node'
-    bl_label = 'Heterogeneous Volume'
-    bl_icon = 'MATERIAL'
-    bl_width_min = 160
-
-    stepsize = bpy.props.FloatProperty(name='Step Size', default=1.0, min=0.0, max=100.0, subtype='DISTANCE',
-                                       unit='LENGTH', description='Length of ray marching steps, smaller values \
-                                       resolve more detail, but are slower')
-
-    def init(self, context):
-        self.inputs.new('luxrender_fresnel_socket', 'IOR')
-        self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
-        self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
-        self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
-
-        self.outputs.new('NodeSocketShader', 'Volume')
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, 'stepsize')
-
-    def export_volume(self, make_volume, make_texture):
-        vol_type = 'heterogeneous'
-
-        heterogeneous_params = ParamSet()
-        heterogeneous_params.update(get_socket_paramsets(self.inputs, make_texture))
-        heterogeneous_params.add_float('stepsize', self.stepsize)
-
-        return make_volume(self.name, vol_type, heterogeneous_params)
-
-    # TODO: port to new volume system, LuxCore support
-
-
-@LuxRenderAddon.addon_register_class
 class luxrender_light_area_node(luxrender_material_node):
     """Area Light node"""
     bl_idname = 'luxrender_light_area_node'
@@ -1540,14 +1435,16 @@ class luxrender_light_area_node(luxrender_material_node):
 
         return 'area', arealight_params
 
-    def export_luxcore(self, properties, parent_luxcore_name):
+    def export_luxcore(self, properties, parent_luxcore_name, is_volume_emission=False):
         emission = self.inputs[0].export_luxcore(properties)
 
-        set_prop_mat(properties, parent_luxcore_name, 'emission', emission)
-        set_prop_mat(properties, parent_luxcore_name, 'emission.gain', [self.gain] * 3)
-        set_prop_mat(properties, parent_luxcore_name, 'emission.power', self.power)
-        set_prop_mat(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
-        set_prop_mat(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
+        set_prop = set_prop_vol if is_volume_emission else set_prop_mat
+
+        set_prop(properties, parent_luxcore_name, 'emission', emission)
+        set_prop(properties, parent_luxcore_name, 'emission.gain', [self.gain] * 3)
+        set_prop(properties, parent_luxcore_name, 'emission.power', self.power)
+        set_prop(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
+        set_prop(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
         # TODO: lightgroup
         #set_prop_mat(properties, parent_luxcore_name, 'emission.id', )
 
@@ -1779,17 +1676,3 @@ class luxrender_material_output_node(luxrender_node):
 
         return set()
 
-
-@LuxRenderAddon.addon_register_class
-class luxrender_volume_output_node(luxrender_node):
-    """Volume output node"""
-    bl_idname = 'luxrender_volume_output_node'
-    bl_label = 'Volume Output'
-    bl_icon = 'WORLD'
-    bl_width_min = 120
-
-    def init(self, context):
-        self.inputs.new('NodeSocketShader', 'Volume')
-        self.inputs.new('NodeSocketShader', 'Emission')
-
-    # Todo: export

@@ -72,6 +72,23 @@ def find_node(material, nodetype):
     return find_node_in_nodetree(ntree, nodetype)
 
 
+def find_node_in_volume(volume, nodetype):
+    """
+    Volume version of find_node()
+    """
+    if not (volume and volume.nodetree):
+        return None
+
+    nodetree_name = volume.nodetree
+
+    if not nodetree_name:
+        return None
+
+    ntree = bpy.data.node_groups[nodetree_name]
+
+    return find_node_in_nodetree(ntree, nodetype)
+
+
 def find_node_in_nodetree(nodetree, nodetype):
     for node in nodetree.nodes:
         nt = getattr(node, "bl_idname", None)
@@ -198,6 +215,12 @@ def export_black_matte(properties):
     set_prop_mat(properties, luxcore_name, 'kd', [0, 0, 0])
     return luxcore_name
 
+def export_black_volume(properties):
+    luxcore_name = 'BLACK_VOLUME'
+    set_prop_vol(properties, luxcore_name, 'type', 'clear')
+    set_prop_vol(properties, luxcore_name, 'absorption', [100, 100, 100])
+    return luxcore_name
+
 def export_submat_luxcore(properties, socket, name=None):
     """
     NodeSocketShader sockets cannot export themselves, so this function does it
@@ -213,11 +236,26 @@ def export_submat_luxcore(properties, socket, name=None):
 
     return submat_name
 
-def export_emission_luxcore(properties, socket, parent_luxcore_name):
+def export_volume_luxcore(properties, socket, name=None):
+    """
+    NodeSocketShader sockets cannot export themselves, so this function does it
+    """
+    node = get_linked_node(socket)
+
+    if node is None:
+        # Use a black volume if socket is not linked
+        print('WARNING: Unlinked volume socket! Using a black volume as fallback.')
+        volume_name = export_black_volume(properties)
+    else:
+        volume_name = node.export_luxcore(properties, name)
+
+    return volume_name
+
+def export_emission_luxcore(properties, socket, parent_luxcore_name, is_volume_emission=False):
     """
     NodeSocketShader sockets cannot export themselves, so this function does it
     """
     node = get_linked_node(socket)
 
     if node is not None:
-        node.export_luxcore(properties, parent_luxcore_name)
+        node.export_luxcore(properties, parent_luxcore_name, is_volume_emission)
