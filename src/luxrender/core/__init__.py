@@ -2032,6 +2032,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                             if self.lastNodeMatSettings == '':
                                 self.lastNodeMatSettings = newNodeMatSettings
+                                mat_updated = True
                             elif self.lastNodeMatSettings != newNodeMatSettings:
                                 self.lastNodeMatSettings = newNodeMatSettings
                                 mat_updated = True
