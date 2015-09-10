@@ -159,7 +159,49 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 
         return make_material(mat_type, self.name, carpaint_params)
 
-    # TODO: LuxCore export
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        kd = self.inputs['Diffuse Color'].export_luxcore(properties)
+        ks1 = self.inputs['Specular Color 1'].export_luxcore(properties)
+        r1 = self.inputs['R1'].export_luxcore(properties)
+        m1 = self.inputs['M1'].export_luxcore(properties)
+        ks2 = self.inputs['Specular Color 2'].export_luxcore(properties)
+        r2 = self.inputs['R2'].export_luxcore(properties)
+        m2 = self.inputs['M2'].export_luxcore(properties)
+        ks3 = self.inputs['Specular Color 3'].export_luxcore(properties)
+        r3 = self.inputs['R3'].export_luxcore(properties)
+        m3 = self.inputs['M3'].export_luxcore(properties)
+
+        ka = self.inputs['Absorption Color'].export_luxcore(properties)
+        d = self.inputs['Absorption Depth'].export_luxcore(properties)
+
+        bump = self.inputs['Bump'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'carpaint')
+
+        if self.carpaint_presets == '-':
+            # Manual settings
+            set_prop_mat(properties, luxcore_name, 'kd', kd)
+            set_prop_mat(properties, luxcore_name, 'ks1', ks1)
+            set_prop_mat(properties, luxcore_name, 'ks2', ks2)
+            set_prop_mat(properties, luxcore_name, 'ks3', ks3)
+            set_prop_mat(properties, luxcore_name, 'm1', m1)
+            set_prop_mat(properties, luxcore_name, 'm2', m2)
+            set_prop_mat(properties, luxcore_name, 'm3', m3)
+            set_prop_mat(properties, luxcore_name, 'r1', r1)
+            set_prop_mat(properties, luxcore_name, 'r2', r2)
+            set_prop_mat(properties, luxcore_name, 'r3', r3)
+            set_prop_mat(properties, luxcore_name, 'ka', ka)
+            set_prop_mat(properties, luxcore_name, 'd', d)
+        else:
+            # Preset
+            set_prop_mat(properties, luxcore_name, 'preset', self.carpaint_presets)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -965,8 +1007,10 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         layout.prop(self, 'use_anisotropy')
         layout.prop(self, 'input_type', expand=True)
 
+        if not UseLuxCore() and self.input_type == 'color':
+            layout.label('Classic only supports fresnel!', icon='ERROR')
+
     def export_material(self, make_material, make_texture):
-        # TODO: port new behavior
         mat_type = 'metal2'
 
         metal2_params = ParamSet()
