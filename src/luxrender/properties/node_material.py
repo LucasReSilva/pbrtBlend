@@ -920,7 +920,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 class luxrender_material_type_node_metal2(luxrender_material_node):
     """Metal2 material node"""
     bl_idname = 'luxrender_material_metal2_node'
-    bl_label = 'Metal2 Material'
+    bl_label = 'Metal Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
