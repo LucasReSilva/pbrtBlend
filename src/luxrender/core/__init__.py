@@ -2051,15 +2051,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             update_changes.changed_materials.add(mat)
                             update_changes.set_cause(materials = True)
 
-            self.luxcore_exporter.convert_camera()
-            newCameraSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
-
-            if self.lastCameraSettings == '' or newCameraSettings == '':
-                self.lastCameraSettings = newCameraSettings
-            elif self.lastCameraSettings != newCameraSettings:
-                update_changes.set_cause(camera = True)
-                self.lastCameraSettings = newCameraSettings
-
             # check for changes in volume configuration
             for volume in context.scene.luxrender_volumes.volumes:
                 self.luxcore_exporter.convert_volume(volume)
