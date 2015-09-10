@@ -686,7 +686,7 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
-    """3D texture coordinates node"""
+    """Manipulate 3D texture coordinates node"""
     bl_idname = 'luxrender_manipulate_3d_mapping_node'
     bl_label = 'Manipulate 3D Mapping'
     bl_icon = 'TEXTURE'
@@ -747,3 +747,49 @@ class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
         output_mapping = input_mapping * transformation
 
         return [mapping_type, output_mapping]
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_manipulate_2d_mapping_node(luxrender_texture_node):
+    """Manipulate 2D texture coordinates node"""
+    bl_idname = 'luxrender_manipulate_2d_mapping_node'
+    bl_label = 'Manipulate 2D Mapping'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 180
+
+    uscale = bpy.props.FloatProperty(name='U', default=1.0, min=-10000.0, max=10000.0)
+    vscale = bpy.props.FloatProperty(name='V', default=1.0, min=-10000.0, max=10000.0)
+    udelta = bpy.props.FloatProperty(name='U', default=0.0, min=-10000.0, max=10000.0)
+    vdelta = bpy.props.FloatProperty(name='V', default=0.0, min=-10000.0, max=10000.0)
+
+    def init(self, context):
+        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.outputs.new('luxrender_transform_socket', '2D Coordinate')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        if UseLuxCore():
+            layout.label('Scale:')
+            row = layout.row(align=True)
+            row.prop(self, 'uscale')
+            row.prop(self, 'vscale')
+            layout.label('Offset:')
+            row = layout.row(align=True)
+            row.prop(self, 'udelta')
+            row.prop(self, 'vdelta')
+
+    def export_luxcore(self, properties):
+        mapping_type, input_uvscale, input_uvdelta = self.inputs[0].export_luxcore(properties)
+
+        uvscale = [self.uscale,
+                   self.vscale]
+
+        output_uvscale = [a * b for a, b in zip(input_uvscale, uvscale)]
+
+        uvdelta = [self.udelta,
+                   self.vdelta]
+
+        output_uvdelta = [a + b for a, b in zip(input_uvdelta, uvdelta)]
+
+        return [mapping_type, output_uvscale, output_uvdelta]

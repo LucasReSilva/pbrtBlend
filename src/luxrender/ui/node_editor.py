@@ -191,7 +191,8 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
         NodeItem("luxrender_texture_bump_map_node"),
-        NodeItem("luxrender_manipulate_3d_mapping_node")
+        NodeItem("luxrender_manipulate_3d_mapping_node"),
+        NodeItem("luxrender_manipulate_2d_mapping_node"),
         #NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
         #NodeItem("luxrender_texture_colordepth_node"),
     ]),
@@ -288,6 +289,7 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
         NodeItem("luxrender_manipulate_3d_mapping_node"),
+        NodeItem("luxrender_manipulate_2d_mapping_node"),
         NodeItem("luxrender_texture_colordepth_node"),
         #NodeItem("luxrender_texture_colorramp_node"), TODO: activate when ready
         #NodeItem("luxrender_texture_bump_map_node"),
