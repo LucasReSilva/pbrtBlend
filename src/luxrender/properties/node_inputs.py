@@ -184,10 +184,10 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 
     coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
     center_map = bpy.props.BoolProperty(name='Center Map', default=False)
-    uscale = bpy.props.FloatProperty(name='U Scale', default=1.0, min=-10000.0, max=10000.0)
-    vscale = bpy.props.FloatProperty(name='V Scale', default=1.0, min=-10000.0, max=10000.0)
-    udelta = bpy.props.FloatProperty(name='U Offset', default=0.0, min=-10000.0, max=10000.0)
-    vdelta = bpy.props.FloatProperty(name='V Offset', default=0.0, min=-10000.0, max=10000.0)
+    uscale = bpy.props.FloatProperty(name='U', default=1.0, min=-10000.0, max=10000.0)
+    vscale = bpy.props.FloatProperty(name='V', default=1.0, min=-10000.0, max=10000.0)
+    udelta = bpy.props.FloatProperty(name='U', default=0.0, min=-10000.0, max=10000.0)
+    vdelta = bpy.props.FloatProperty(name='V', default=0.0, min=-10000.0, max=10000.0)
     v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
     v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
 
@@ -210,10 +210,14 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
                 layout.prop(self, 'v2')
                 layout.prop(self, 'udelta')
             else:
-                layout.prop(self, 'uscale')
-                layout.prop(self, 'vscale')
-                layout.prop(self, 'udelta')
-                layout.prop(self, 'vdelta')
+                layout.label('Scale:')
+                row = layout.row(align=True)
+                row.prop(self, 'uscale')
+                row.prop(self, 'vscale')
+                layout.label('Offset:')
+                row = layout.row(align=True)
+                row.prop(self, 'udelta')
+                row.prop(self, 'vdelta')
 
             if self.coordinates == 'uv':
                 layout.prop(self, 'center_map')
@@ -291,6 +295,14 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 
         return make_texture('color', 'blackbody', self.name, blackbody_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blackbody')
+        set_prop_tex(properties, luxcore_name, 'temperature', self.temperature)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_gaussian(luxrender_texture_node):
@@ -320,6 +332,8 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
         gaussian_params.add_float('width', self.width)
 
         return make_texture('color', 'gaussian', self.name, gaussian_params)
+
+    # TODO: LuxCore export once supported by LuxCore
 
 
 @LuxRenderAddon.addon_register_class  # Drawn in "input" menu, since it does not have any input sockets
@@ -372,6 +386,8 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
         process_filepath_data(LuxManager.CurrentScene, self, self.data_file, tabulateddata_params, 'filename')
 
         return make_texture('color', 'tabulateddata', self.name, tabulateddata_params)
+
+    # TODO: LuxCore export once supported by LuxCore
 
 
 @LuxRenderAddon.addon_register_class

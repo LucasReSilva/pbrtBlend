@@ -135,7 +135,7 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
 
     def draw_buttons(self, context, layout):
         if UseLuxCore():
-            layout.prop(self, 'luxcore_direction')
+            layout.prop(self, 'luxcore_direction', expand=True)
         else:
             layout.prop(self, 'flipxy')
 
