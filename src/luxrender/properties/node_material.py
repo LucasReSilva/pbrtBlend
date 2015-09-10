@@ -247,7 +247,28 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 
         return make_material(mat_type, self.name, cloth_params)
 
-    # TODO: LuxCore export
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        warp_kd = self.inputs['Warp Diffuse Color'].export_luxcore(properties)
+        warp_ks = self.inputs['Warp Specular Color'].export_luxcore(properties)
+        weft_kd = self.inputs['Weft Diffuse Color'].export_luxcore(properties)
+        weft_ks = self.inputs['Weft Specular Color'].export_luxcore(properties)
+        bump = self.inputs['Bump'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'cloth')
+        set_prop_mat(properties, luxcore_name, 'preset', self.fabric_type)
+        set_prop_mat(properties, luxcore_name, 'warp_kd', warp_kd)
+        set_prop_mat(properties, luxcore_name, 'warp_ks', warp_ks)
+        set_prop_mat(properties, luxcore_name, 'weft_kd', weft_kd)
+        set_prop_mat(properties, luxcore_name, 'weft_ks', weft_ks)
+        set_prop_mat(properties, luxcore_name, 'repeat_u', self.repeat_u)
+        set_prop_mat(properties, luxcore_name, 'repeat_v', self.repeat_v)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -828,7 +849,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
         self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
         self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
         self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-        self.inputs.new('NodeSocketShader', 'Emission')
+        #self.inputs.new('NodeSocketShader', 'Emission') # TODO: what do?
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
@@ -859,7 +880,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
             set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 
         # Light emission
-        export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
+        #export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
 
         return luxcore_name
 
@@ -1041,10 +1062,15 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         u_roughness = self.inputs[2].export_luxcore(properties)
         v_roughness = self.inputs[3].export_luxcore(properties) if self.use_anisotropy else u_roughness
 
+        bump = self.inputs['Bump'].export_luxcore(properties)
+
         set_prop_mat(properties, luxcore_name, 'type', 'metal2')
         set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
         set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
         set_prop_mat(properties, luxcore_name, 'fresnel', fresnel_texture)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 
         return luxcore_name
 
