@@ -525,9 +525,13 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
+    def update_is_normal_map(self, context):
+        self.outputs['Color'].enabled = not self.is_normal_map
+        self.outputs['Bump'].enabled = self.is_normal_map
+
     def get_images(self, context):
         blender_images = [tuple([img.name, img.name, '']) for img in bpy.data.images if img.name != 'Render Result']
-        blender_images.insert(0, tuple(['none', 'Select', 'Select an image']))
+        blender_images.insert(0, tuple(['none', 'Select Image', 'Select an image']))
 
         return blender_images
 
@@ -547,12 +551,15 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
     gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, max=10.0, description='Brightness multiplier')
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0, description='Gamma correction to apply')
-    is_normal_map = bpy.props.BoolProperty(name='Normalmap', default=False, description='Enable if this is a normalmap')
+    is_normal_map = bpy.props.BoolProperty(name='Normalmap', default=False, description='Enable if this is a normalmap,'
+                                           ' then plug the output directly in a Bump socket', update=update_is_normal_map)
     normalmap_fake_gamma = bpy.props.FloatProperty(name='Gamma', default=1)
 
     def init(self, context):
         self.inputs.new('luxrender_transform_socket', '2D Coordinate')
         self.outputs.new('NodeSocketColor', 'Color')
+        self.outputs.new('NodeSocketFloat', 'Bump')
+        self.outputs['Bump'].enabled = False
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
@@ -561,8 +568,10 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         split.prop(self, 'blender_image')
         split.operator('image.open')
 
-        layout.prop(self, 'channel')
-        layout.prop(self, 'gain')
+        column = layout.column()
+        column.enabled = not self.is_normal_map
+        column.prop(self, 'channel')
+        column.prop(self, 'gain')
 
         # Gamma needs to be 1 for normalmaps
         if self.is_normal_map:
@@ -606,6 +615,13 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
 
         set_prop_tex(properties, luxcore_name, 'channel', self.channel)
+
+        if self.is_normal_map:
+            # Implicitly create a normalmap
+            normalmap_name = create_luxcore_name(self, suffix='normal')
+            set_prop_tex(properties, normalmap_name, 'type', 'normalmap')
+            set_prop_tex(properties, normalmap_name, 'texture', luxcore_name)
+            luxcore_name = normalmap_name
 
         return luxcore_name
 
