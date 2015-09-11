@@ -183,7 +183,8 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
             coordinate_items = prop['items']
 
     coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
-    center_map = bpy.props.BoolProperty(name='Center Map', default=False)
+    center_map = bpy.props.BoolProperty(name='Center Map', default=False, description='Keep the map centerered even '
+                                        'when scaled (e.g. scale to +U and -U equally instead of only in +U direction)')
     uscale = bpy.props.FloatProperty(name='U', default=1.0, min=-10000.0, max=10000.0)
     vscale = bpy.props.FloatProperty(name='V', default=1.0, min=-10000.0, max=10000.0)
     udelta = bpy.props.FloatProperty(name='U', default=0.0, min=-10000.0, max=10000.0)

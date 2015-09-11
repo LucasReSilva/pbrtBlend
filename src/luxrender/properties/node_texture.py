@@ -869,6 +869,30 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 
         return make_texture('float', 'blender_musgrave', self.name, musgrave_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_marble')
+        set_prop_tex(properties, luxcore_name, 'musgravetype', self.musgravetype)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'dimension', self.h)
+        set_prop_tex(properties, luxcore_name, 'intensity', self.iscale)
+        set_prop_tex(properties, luxcore_name, 'lacunarity', self.lacu)
+        set_prop_tex(properties, luxcore_name, 'offset', self.offset)
+        set_prop_tex(properties, luxcore_name, 'gain', self.gain)
+        set_prop_tex(properties, luxcore_name, 'octaves', self.octs)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_normal_map(luxrender_texture_node):
@@ -958,7 +982,7 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'type', expand=True)
         layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisetype')
+        layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
         layout.separator()
@@ -981,6 +1005,26 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
             stucci_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'blender_stucci', self.name, stucci_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_stucci')
+        set_prop_tex(properties, luxcore_name, 'stuccitype', self.type)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'noisetype', self.noisetype)
+        set_prop_tex(properties, luxcore_name, 'turbulence', self.turbulence)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -1005,6 +1049,19 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
             uvtest_params.add_float('vscale', -1.0)
 
         return make_texture('color', 'uv', self.name, uvtest_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'uv')
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -1075,6 +1132,29 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
 
         return make_texture('float', 'blender_voronoi', self.name, voronoi_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_voronoi')
+        set_prop_tex(properties, luxcore_name, 'distancemetric', self.distmetric)
+        set_prop_tex(properties, luxcore_name, 'intensity', self.nabla) # TODO: is this right?
+        set_prop_tex(properties, luxcore_name, 'exponent', self.minkowsky_exp)
+        set_prop_tex(properties, luxcore_name, 'w1', self.w1)
+        set_prop_tex(properties, luxcore_name, 'w2', self.w2)
+        set_prop_tex(properties, luxcore_name, 'w3', self.w3)
+        set_prop_tex(properties, luxcore_name, 'w4', self.w4)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
@@ -1097,6 +1177,8 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
             wrinkled_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'windy', self.name, windy_params)
+
+    # TODO: LuxCore export
 
 
 @LuxRenderAddon.addon_register_class
@@ -1165,6 +1247,8 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
 
         return make_texture('float', 'blender_wood', self.name, wood_params)
 
+    # TODO: LuxCore export
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
@@ -1197,6 +1281,8 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
             wrinkled_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'wrinkled', self.name, wrinkled_params)
+
+    # TODO: LuxCore export
 
 
 @LuxRenderAddon.addon_register_class
@@ -1268,6 +1354,8 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
 
         return make_texture('float', 'cloud', self.name, cloud_vol_params)
 
+    # TODO: LuxCore export
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
@@ -1299,6 +1387,8 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
             .add_float('decay', self.decay)
 
         return make_texture('float', 'exponential', self.name, exponential_params)
+
+    # TODO: LuxCore export
 
 
 @LuxRenderAddon.addon_register_class
