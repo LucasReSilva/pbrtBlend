@@ -1103,7 +1103,8 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
         layout.prop(self, 'distmetric')
         layout.prop(self, 'minkowsky_exp')
         layout.prop(self, 'noisesize')
-        layout.prop(self, 'nabla')
+        if not UseLuxCore():
+            layout.prop(self, 'nabla')
         layout.prop(self, 'w1')
         layout.prop(self, 'w2')
         layout.prop(self, 'w3')
@@ -1136,8 +1137,8 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
         luxcore_name = create_luxcore_name(self)
 
         set_prop_tex(properties, luxcore_name, 'type', 'blender_voronoi')
-        set_prop_tex(properties, luxcore_name, 'distancemetric', self.distmetric)
-        set_prop_tex(properties, luxcore_name, 'intensity', self.nabla) # TODO: is this right?
+        set_prop_tex(properties, luxcore_name, 'distmetric', self.distmetric)
+        #set_prop_tex(properties, luxcore_name, 'intensity', )
         set_prop_tex(properties, luxcore_name, 'exponent', self.minkowsky_exp)
         set_prop_tex(properties, luxcore_name, 'w1', self.w1)
         set_prop_tex(properties, luxcore_name, 'w2', self.w2)
