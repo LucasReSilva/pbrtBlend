@@ -2447,7 +2447,7 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
         return brickmodtex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.brickmodtex)
+        return export_socket_luxcore(properties, self, list(self.brickmodtex))
 
 
 @LuxRenderAddon.addon_register_class
@@ -2499,7 +2499,7 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
         return bricktex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.bricktex)
+        return export_socket_luxcore(properties, self, list(self.bricktex))
 
 
 @LuxRenderAddon.addon_register_class
@@ -2551,7 +2551,7 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
         return mortartex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.mortartex)
+        return export_socket_luxcore(properties, self, list(self.mortartex))
 
 
 @LuxRenderAddon.addon_register_class
