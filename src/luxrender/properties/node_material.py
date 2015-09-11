@@ -327,6 +327,8 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 
         return make_material(mat_type, self.name, doubleside_params)
 
+    # TODO: add LuxCore support once supported by LuxCore
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_glass(luxrender_material_node):
@@ -765,10 +767,39 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
+    def change_advanced(self, context):
+        # Hide frontface inputs
+        self.inputs['IOR'].enabled = self.advanced and self.use_ior
+        self.inputs['Absorption Color'].enabled = self.advanced
+        self.inputs['Absorption Depth (nm)'].enabled = self.advanced
+
+        # Hide backface inputs
+        self.inputs['BF IOR'].enabled = self.two_sided and self.use_ior_bf and self.advanced
+        self.inputs['BF Absorption Color'].enabled = self.two_sided and self.advanced
+        self.inputs['BF Absorption Depth (nm)'].enabled = self.two_sided and self.advanced
+
+    def change_two_sided(self, context):
+        self.inputs['BF Specular Color'].enabled = self.two_sided
+        self.inputs['BF IOR'].enabled = self.two_sided and self.use_ior_bf and self.advanced
+        self.inputs['BF Absorption Color'].enabled = self.two_sided and self.advanced
+        self.inputs['BF Absorption Depth (nm)'].enabled = self.two_sided and self.advanced
+
+        if self.use_anisotropy_bf:
+            self.inputs['BF U-Roughness'].enabled = self.two_sided
+        else:
+            self.inputs['BF Roughness'].enabled = self.two_sided
+
+        self.inputs['BF V-Roughness'].enabled = self.two_sided and self.use_anisotropy_bf
+
     def change_use_ior(self, context):
         # # Specular/IOR representation switches
         self.inputs['Specular Color'].enabled = not self.use_ior
         self.inputs['IOR'].enabled = self.use_ior
+
+    def change_use_ior_bf(self, context):
+        # # Specular/IOR representation switches
+        self.inputs['BF Specular Color'].enabled = not self.use_ior_bf
+        self.inputs['BF IOR'].enabled = self.use_ior_bf
 
     def change_use_anisotropy(self, context):
         try:
@@ -780,6 +811,21 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 
         self.inputs['V-Roughness'].enabled = self.use_anisotropy
 
+    def change_use_anisotropy_bf(self, context):
+        try:
+            self.inputs['BF Roughness'].sync_vroughness = not self.use_anisotropy_bf
+            self.inputs['BF Roughness'].name = 'BF Roughness' if not self.use_anisotropy_bf else 'BF U-Roughness'
+        except:
+            self.inputs['BF U-Roughness'].sync_vroughness = not self.use_anisotropy_bf
+            self.inputs['BF U-Roughness'].name = 'BF Roughness' if not self.use_anisotropy_bf else 'BF U-Roughness'
+
+        self.inputs['BF V-Roughness'].enabled = self.use_anisotropy_bf
+
+    advanced = bpy.props.BoolProperty(name='Advanced Options', description='Configure advanced options',
+                                       default=False, update=change_advanced)
+    two_sided = bpy.props.BoolProperty(name='Two Sided', description='Use different specular properties for the back',
+                                       default=False, update=change_two_sided)
+
     multibounce = bpy.props.BoolProperty(name='Multibounce', description='Enable surface layer multibounce',
                                          default=False)
     use_ior = bpy.props.BoolProperty(name='Use IOR', description='Set specularity by IOR', default=False,
@@ -787,26 +833,68 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
     use_anisotropy = bpy.props.BoolProperty(name='Anisotropic Roughness', description='Anisotropic Roughness',
                                             default=False, update=change_use_anisotropy)
 
+    multibounce_bf = bpy.props.BoolProperty(name='BF Multibounce', description='Enable surface layer multibounce on backface',
+                                         default=False)
+    use_ior_bf = bpy.props.BoolProperty(name='BF Use IOR', description='Set specularity by IOR on backface', default=False,
+                                     update=change_use_ior_bf)
+    use_anisotropy_bf = bpy.props.BoolProperty(name='BF Anisotropic Roughness', description='Anisotropic Roughness on backface',
+                                            default=False, update=change_use_anisotropy_bf)
+
+
     def init(self, context):
         self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
         self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+
+        # Front
         self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
         self.inputs.new('luxrender_TF_ior_socket', 'IOR')
-        self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
-        self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['IOR'].enabled = False  # initial state is disabled
+        self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
+        self.inputs['Absorption Color'].enabled = False  # initial state is disabled
+        self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
+        self.inputs['Absorption Depth (nm)'].enabled = False  # initial state is disabled
+        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+        self.inputs['U-Roughness'].name = 'Roughness'
+        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
+
+        # Back (not Classic API compatible due to wrong sockets), initially disabled
+        self.inputs.new('luxrender_TC_Ks_socket', 'BF Specular Color')
+        self.inputs['BF Specular Color'].enabled = False
+        self.inputs.new('luxrender_TF_ior_socket', 'BF IOR')
+        self.inputs['BF IOR'].enabled = False
+        self.inputs.new('luxrender_TC_Ka_socket', 'BF Absorption Color')
+        self.inputs['BF Absorption Color'].enabled = False
+        self.inputs.new('luxrender_TF_d_socket', 'BF Absorption Depth (nm)')
+        self.inputs['BF Absorption Depth (nm)'].enabled = False
+        self.inputs.new('luxrender_TF_uroughness_socket', 'BF U-Roughness')
+        self.inputs['BF U-Roughness'].enabled = False
+        self.inputs['BF U-Roughness'].name = 'BF Roughness'
+        self.inputs.new('luxrender_TF_vroughness_socket', 'BF V-Roughness')
+        self.inputs['BF V-Roughness'].enabled = False
+
+        #  Bump
         self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
-        self.inputs['U-Roughness'].name = 'Roughness'
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'multibounce')
-        layout.prop(self, 'use_ior')
         layout.prop(self, 'use_anisotropy')
+        layout.prop(self, 'advanced', toggle=True)
+
+        if self.advanced:
+            layout.prop(self, 'multibounce')
+            layout.prop(self, 'use_ior')
+
+        layout.separator()
+        layout.prop(self, 'two_sided')
+
+        if self.two_sided:
+            layout.prop(self, 'use_anisotropy_bf')
+
+            if self.advanced:
+                layout.prop(self, 'multibounce_bf')
+                layout.prop(self, 'use_ior_bf')
 
     def export_material(self, make_material, make_texture):
         mat_type = 'glossytranslucent'
@@ -817,6 +905,63 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
         glossytranslucent_params.add_bool('multibounce', self.multibounce)
 
         return make_material(mat_type, self.name, glossytranslucent_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        kd = self.inputs['Diffuse Color'].export_luxcore(properties)
+        bump = self.inputs['Bump'].export_luxcore(properties)
+        kt = self.inputs['Transmission Color'].export_luxcore(properties)
+
+        # Front
+        ks = self.inputs['Specular Color'].export_luxcore(properties)
+        u_roughness = self.inputs[6].export_luxcore(properties)
+        v_roughness = self.inputs[7].export_luxcore(properties) if self.use_anisotropy else u_roughness
+        ka = self.inputs['Absorption Color'].export_luxcore(properties)
+        d = self.inputs['Absorption Depth (nm)'].export_luxcore(properties)
+        index = self.inputs['IOR'].export_luxcore(properties)
+        # Back
+        ks_bf = self.inputs['BF Specular Color'].export_luxcore(properties) if self.two_sided else ks
+        u_roughness_bf = self.inputs[12].export_luxcore(properties) if self.two_sided else u_roughness
+        if self.two_sided:
+            v_roughness_bf = self.inputs[13].export_luxcore(properties) if self.use_anisotropy_bf else u_roughness_bf
+        else:
+            v_roughness_bf = v_roughness
+        ka_bf = self.inputs['BF Absorption Color'].export_luxcore(properties) if self.two_sided else ka
+        d_bf = self.inputs['BF Absorption Depth (nm)'].export_luxcore(properties) if self.two_sided else d
+        index_bf = self.inputs['BF IOR'].export_luxcore(properties) if self.two_sided else index
+
+        set_prop_mat(properties, luxcore_name, 'type', 'glossytranslucent')
+        set_prop_mat(properties, luxcore_name, 'kd', kd)
+        set_prop_mat(properties, luxcore_name, 'kt', kt)
+
+        # Front
+        set_prop_mat(properties, luxcore_name, 'ks', ks)
+        set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
+        set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
+        set_prop_mat(properties, luxcore_name, 'ka', ka)
+        set_prop_mat(properties, luxcore_name, 'd', d)
+        set_prop_mat(properties, luxcore_name, 'multibounce', self.multibounce)
+
+        if self.use_ior:
+            set_prop_mat(properties, luxcore_name, 'index', index)
+
+        # Back
+        set_prop_mat(properties, luxcore_name, 'ks_bf', ks_bf)
+        set_prop_mat(properties, luxcore_name, 'uroughness_bf', u_roughness_bf)
+        set_prop_mat(properties, luxcore_name, 'vroughness_bf', v_roughness_bf)
+        set_prop_mat(properties, luxcore_name, 'ka_bf', ka_bf)
+        set_prop_mat(properties, luxcore_name, 'd_bf', d_bf)
+        set_prop_mat(properties, luxcore_name, 'multibounce_bf', self.multibounce_bf)
+
+        if self.use_ior_bf:
+            set_prop_mat(properties, luxcore_name, 'index_bf', index_bf)
+
+        # Bump
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
