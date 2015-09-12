@@ -130,17 +130,6 @@ class luxrender_node_category_material(NodeCategory):
 luxrender_node_categories_material = [
     # elements that make no sense for materials are disabled or removed
 
-    luxrender_node_category_material("LUX_INPUT", "Input", items=[
-        NodeItem("luxrender_2d_coordinates_node"),
-        NodeItem("luxrender_3d_coordinates_node"),
-        NodeItem("luxrender_texture_constant_node"),  # value node
-        NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
-        NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
-        NodeItem("luxrender_texture_pointiness_node"),
-        NodeItem("luxrender_texture_glossyexponent_node"),
-        # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
-    ]),
-
     luxrender_node_category_material("LUX_MATERIAL", "Material", items=[
         #NodeItem("luxrender_material_type_node_standard", label="Standard"), # TODO: Work in progress
         NodeItem("luxrender_material_matte_node", label="Matte"),
@@ -186,15 +175,28 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_harlequin_node", label="Harlequin"),
     ]),
 
-    luxrender_node_category_material("LUX_CONVERTER", "Converter", items=[
+    luxrender_node_category_material("LUX_MAPPING", "Mapping", items=[
+        NodeItem("luxrender_2d_coordinates_node"),
+        NodeItem("luxrender_3d_coordinates_node"),
+        NodeItem("luxrender_manipulate_2d_mapping_node"),
+        NodeItem("luxrender_manipulate_3d_mapping_node"),
+    ]),
+
+    luxrender_node_category_material("LUX_COLOR_MATH", "Color & Math", items=[
+        NodeItem("luxrender_texture_constant_node"),  # value node
         NodeItem("luxrender_texture_colormix_node"),
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
         NodeItem("luxrender_texture_bump_map_node"),
-        NodeItem("luxrender_manipulate_3d_mapping_node"),
-        NodeItem("luxrender_manipulate_2d_mapping_node"),
+        NodeItem("luxrender_texture_glossyexponent_node"),
         #NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
         #NodeItem("luxrender_texture_colordepth_node"),
+    ]),
+
+    luxrender_node_category_material("LUX_MESHINFO", "Mesh Info", items=[
+        NodeItem("luxrender_texture_pointiness_node"),
+        NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
+        NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
     ]),
 
     luxrender_node_category_material("LUX_FRESNEL", "Fresnel", items=[
@@ -205,20 +207,21 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
-    luxrender_node_category_material("LUX_SPECTRUM", "Spectrum", items=[
+    luxrender_node_category_material("LUX_LIGHT", "Light", items=[
+        NodeItem("luxrender_light_area_node"),
         NodeItem("luxrender_texture_blackbody_node"),
         NodeItem("luxrender_texture_gaussian_node"),
         NodeItem("luxrender_texture_tabulateddata_node"),
     ]),
 
-    luxrender_node_category_material("LUX_LIGHT", "Light", items=[
-        NodeItem("luxrender_light_area_node"),
-    ]),
-
     luxrender_node_category_material("LUX_OUTPUT", "Output", items=[
         NodeItem("luxrender_material_output_node"),
-        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
     ]),
+
+    #luxrender_node_category_material("LUX_GROUP", "Group", items=[ # ...maybe...
+        # NodeItem("NodeGroupInput", poll=group_input_output_item_poll),
+        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
+    #]),
 
     luxrender_node_category_material("LUX_LAYOUT", "Layout", items=[
         NodeItem("NodeFrame"),
@@ -244,16 +247,6 @@ class luxrender_node_category_volume(NodeCategory):
 
 luxrender_node_categories_volume = [
     # elements that make no sense for volumes are disabled or removed
-
-    luxrender_node_category_volume("LUX_INPUT_VOLUME", "Input", items=[
-        NodeItem("luxrender_2d_coordinates_node"),
-        NodeItem("luxrender_3d_coordinates_node"),
-        NodeItem("luxrender_texture_constant_node"),  # value node
-        #NodeItem("luxrender_texture_glossyexponent_node"),
-        #NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
-        #NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
-        # NodeItem("NodeGroupInput", poll=group_input_output_item_poll), ...maybe...
-    ]),
 
     luxrender_node_category_volume("LUX_VOLUME", "Volume", items=[
         NodeItem("luxrender_volume_clear_node"),
@@ -284,12 +277,21 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_blender_voronoi_node", label="Voronoi"),
     ]),
 
-    luxrender_node_category_volume("LUX_CONVERTER_VOLUME", "Converter", items=[
+    luxrender_node_category_volume("LUX_MAPPING_VOLUME", "Mapping", items=[
+        #NodeItem("luxrender_2d_coordinates_node"), # not used for volumetric textures
+        NodeItem("luxrender_3d_coordinates_node"),
+        #NodeItem("luxrender_manipulate_2d_mapping_node"), # not used for volumetric textures
+        NodeItem("luxrender_manipulate_3d_mapping_node"),
+        #NodeItem("luxrender_texture_glossyexponent_node"),
+        #NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
+        #NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
+    ]),
+
+    luxrender_node_category_volume("LUX_COLOR_MATH_VOLUME", "Color & Math", items=[
+        NodeItem("luxrender_texture_constant_node"),  # value node
         NodeItem("luxrender_texture_colormix_node"),
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
-        NodeItem("luxrender_manipulate_3d_mapping_node"),
-        NodeItem("luxrender_manipulate_2d_mapping_node"),
         NodeItem("luxrender_texture_colordepth_node"),
         #NodeItem("luxrender_texture_colorramp_node"), TODO: activate when ready
         #NodeItem("luxrender_texture_bump_map_node"),
@@ -302,19 +304,15 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
 
-    luxrender_node_category_volume("LUX_SPECTRUM_VOLUME", "Spectrum", items=[
+    luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
+        NodeItem("luxrender_light_area_node"),
         NodeItem("luxrender_texture_blackbody_node"),
         NodeItem("luxrender_texture_gaussian_node"),
         NodeItem("luxrender_texture_tabulateddata_node"),
     ]),
 
-    luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
-        NodeItem("luxrender_light_area_node"),
-    ]),
-
     luxrender_node_category_volume("LUX_OUTPUT_VOLUME", "Output", items=[
         NodeItem("luxrender_volume_output_node"),
-        # NodeItem("NodeGroupOutput", poll=group_input_output_item_poll),
     ]),
 
     luxrender_node_category_volume("LUX_LAYOUT_VOLUME", "Layout", items=[
