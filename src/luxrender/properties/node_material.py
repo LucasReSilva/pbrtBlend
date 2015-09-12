@@ -1064,7 +1064,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
         set_prop_mat(properties, luxcore_name, 'kd', kd)
 
-        if bump is not None:
+        if bump:
             set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 
         # Light emission
@@ -1099,6 +1099,28 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
         mattetranslucent_params.add_bool('energyconserving', self.energyconsrv)
 
         return make_material(mat_type, self.name, mattetranslucent_params)
+
+    def export_luxcore(self, properties, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        kr = self.inputs[0].export_luxcore(properties)
+        kt = self.inputs[1].export_luxcore(properties)
+        sigma = self.inputs[2].export_luxcore(properties)
+        bump = self.inputs[3].export_luxcore(properties) # may be None!
+
+        if sigma == 0:
+            set_prop_mat(properties, luxcore_name, 'type', 'mattetranslucent')
+        else:
+            set_prop_mat(properties, luxcore_name, 'type', 'roughmattetranslucent')
+            set_prop_mat(properties, luxcore_name, 'sigma', sigma)
+
+        set_prop_mat(properties, luxcore_name, 'kr', kr)
+        set_prop_mat(properties, luxcore_name, 'kt', kt)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+        return luxcore_name
 
 
 # Deprecated, replaced with metal2 node
