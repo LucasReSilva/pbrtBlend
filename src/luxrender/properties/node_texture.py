@@ -51,12 +51,13 @@ from ..properties.node_material import get_socket_paramsets
 from ..properties.node_sockets import (
     luxrender_TF_brickmodtex_socket, luxrender_TF_bricktex_socket, luxrender_TF_mortartex_socket,
     luxrender_TC_brickmodtex_socket, luxrender_TC_bricktex_socket, luxrender_TC_mortartex_socket,
-    luxrender_transform_socket, luxrender_coordinate_socket
+    luxrender_transform_socket, luxrender_coordinate_socket, mapping_2d_socketname, mapping_3d_socketname
 )
 
 from ..extensions_framework import util as efutil
 
 from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
+
 
 # Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -130,7 +131,7 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
     }
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -198,7 +199,7 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
     height = bpy.props.FloatProperty(name='Height', default=0.10, subtype='DISTANCE', unit='LENGTH')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
         if not UseLuxCore():
@@ -312,7 +313,7 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -379,7 +380,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -443,7 +444,7 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
     roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -523,7 +524,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
         warning_classic_node(layout)
@@ -623,7 +624,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     normalmap_fake_gamma = bpy.props.FloatProperty(name='Gamma', default=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
         self.outputs.new('NodeSocketColor', 'Color')
         self.outputs.new('NodeSocketFloat', 'Bump')
         self.outputs['Bump'].enabled = False
@@ -728,7 +729,7 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -817,7 +818,7 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -917,7 +918,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
     discardmipmaps = bpy.props.IntProperty(name='Discard Mipmaps', default=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -976,7 +977,7 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1035,7 +1036,7 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
     bl_icon = 'TEXTURE'
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Transform')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
         self.outputs.new('NodeSocketColor', 'Color')
 
@@ -1096,7 +1097,7 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1166,7 +1167,7 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
     bl_width_min = 160
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def export_texture(self, make_texture):
@@ -1227,7 +1228,7 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1294,7 +1295,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
     roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1361,7 +1362,7 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
                                          description='Maxiumum size of cumulus spheres')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1457,7 +1458,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
     wrap = bpy.props.EnumProperty(name='Wrapping', items=wrap_items, default='black')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):

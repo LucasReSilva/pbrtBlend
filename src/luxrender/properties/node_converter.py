@@ -54,7 +54,7 @@ from ..properties.node_material import get_socket_paramsets
 from ..properties.node_sockets import (
     luxrender_fresnel_socket, luxrender_TF_amount_socket, luxrender_transform_socket, luxrender_TF_tex1_socket,
     luxrender_TF_tex2_socket, luxrender_TFR_tex1_socket, luxrender_TFR_tex2_socket, luxrender_TC_tex1_socket,
-    luxrender_TC_tex2_socket
+    luxrender_TC_tex2_socket, mapping_2d_socketname, mapping_3d_socketname
 )
 
 from . import warning_luxcore_node, warning_classic_node, create_luxcore_name, set_prop_tex
@@ -703,8 +703,8 @@ class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
                                                description='Use the same scale value for all axis')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
-        self.outputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.outputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
@@ -765,8 +765,8 @@ class luxrender_manipulate_2d_mapping_node(luxrender_texture_node):
     vdelta = bpy.props.FloatProperty(name='V', default=0.0, min=-10000.0, max=10000.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
-        self.outputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.outputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)

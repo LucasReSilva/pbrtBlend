@@ -53,7 +53,7 @@ from ..properties.node_material import get_socket_paramsets
 from ..properties.node_texture import triple_variant_items
 
 from ..properties.node_sockets import (
-    luxrender_TC_Kt_socket, luxrender_transform_socket, luxrender_coordinate_socket
+    luxrender_TC_Kt_socket, luxrender_transform_socket, luxrender_coordinate_socket, mapping_2d_socketname
 )
 
 from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
@@ -198,7 +198,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
     }
 
     def init(self, context):
-        self.outputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.outputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')

@@ -381,8 +381,8 @@ class luxrender_material_type_node_glass(luxrender_material_node):
                                         description='Enables chromatic dispersion, Cauchy B value should be none-zero',
                                         default=False, update=change_dispersion)
     use_volume_ior = bpy.props.BoolProperty(name='Use Volume IOR',
-                                        description='Use the IOR setting of the interior volume (attached to the '
-                                            'material output node)',
+                                        description='Use the IOR setting of the interior volume (only works if an '
+                                            'interior volume is set on the material output node)',
                                         default=False, update=change_use_volume_ior)
 
     def init(self, context):
