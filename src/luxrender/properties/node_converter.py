@@ -544,7 +544,9 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
         self.inputs.new('luxrender_TF_amount_socket', 'Fac')
         self.inputs[0].default_value = 1
         self.inputs.new('luxrender_color_socket', 'Color 1')
+        self.inputs[1].default_value = (0.04, 0.04, 0.04)
         self.inputs.new('luxrender_color_socket', 'Color 2')
+        self.inputs[2].default_value = (0.7, 0.7, 0.7)
 
         self.outputs.new('NodeSocketColor', 'Color')
 

@@ -1179,7 +1179,18 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
 
         return make_texture('float', 'windy', self.name, windy_params)
 
-    # TODO: LuxCore export
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'windy')
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -1222,7 +1233,8 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'noisebasis2', expand=True)
         layout.prop(self, 'type')
-        layout.prop(self, 'noisetype', expand=True)
+        if self.type.endswith('noise'):
+            layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisebasis')
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
@@ -1248,7 +1260,26 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
 
         return make_texture('float', 'blender_wood', self.name, wood_params)
 
-    # TODO: LuxCore export
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_wood')
+        set_prop_tex(properties, luxcore_name, 'woodtype', self.type)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisebasis2', self.noisebasis2)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'noisetype', self.noisetype)
+        set_prop_tex(properties, luxcore_name, 'turbulence', self.turbulence)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
