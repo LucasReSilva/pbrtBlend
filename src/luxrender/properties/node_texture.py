@@ -1290,9 +1290,8 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 160
 
-    octaves = bpy.props.IntProperty(name='Octaves', default=8)
-    roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)
-
+    octaves = bpy.props.IntProperty(name='Octaves', default=8, min=0, max=29)
+    roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
@@ -1300,7 +1299,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'octaves')
-        layout.prop(self, 'roughness')
+        layout.prop(self, 'roughness', slider=True)
 
     def export_texture(self, make_texture):
         wrinkled_params = ParamSet() \
@@ -1314,7 +1313,20 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 
         return make_texture('float', 'wrinkled', self.name, wrinkled_params)
 
-    # TODO: LuxCore export
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'wrinkled')
+        set_prop_tex(properties, luxcore_name, 'octaves', self.octaves)
+        set_prop_tex(properties, luxcore_name, 'roughness', self.roughness)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -1335,9 +1347,9 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
                                         description='Noise sharpness - increase for more spikey appearance')
     noiseoffset = bpy.props.FloatProperty(name='Noise Offset', default=0.00, min=0.0, max=1.0)
     spheres = bpy.props.IntProperty(name='Spheres', default=0,
-                                    description='If greater than 0, the cloud will consist of a bunch of random \
-                                    spheres to mimic a cumulus, this is the number of random spheres. If set to 0, the \
-                                    cloud will consist of single displaced sphere')
+                                    description='If greater than 0, the cloud will consist of a bunch of random '
+                                    'spheres to mimic a cumulus, this is the number of random spheres. If set to 0, the '
+                                    'cloud will consist of single displaced sphere')
     octaves = bpy.props.IntProperty(name='Octaves', default=1, description='Number of octaves for the noise function')
     omega = bpy.props.FloatProperty(name='Omega', default=0.75, min=0.0, max=1.0,
                                     description='Amount of noise per octave')
@@ -1420,7 +1432,7 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 
         return make_texture('float', 'exponential', self.name, exponential_params)
 
-    # TODO: LuxCore export
+    # TODO: LuxCore export once supported by LuxCore
 
 
 @LuxRenderAddon.addon_register_class
