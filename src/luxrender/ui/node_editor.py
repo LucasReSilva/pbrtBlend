@@ -183,7 +183,10 @@ luxrender_node_categories_material = [
     ]),
 
     luxrender_node_category_material("LUX_COLOR_MATH", "Color & Math", items=[
-        NodeItem("luxrender_texture_constant_node"),  # value node
+        NodeItem("luxrender_texture_constant_node", label="Color"),
+        NodeItem("luxrender_texture_constant_node", label="Float Value", settings={
+            "variant": repr("float"),
+            }),
         NodeItem("luxrender_texture_colormix_node"),
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
@@ -203,6 +206,9 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_fresnelcolor_node"),
         NodeItem("luxrender_texture_fresnelname_node"),
         NodeItem("luxrender_texture_fresnelfile_node"),
+        NodeItem("luxrender_texture_constant_node", label="Fresnel Value", settings={
+            "variant": repr("fresnel"),
+            }),
         NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
@@ -288,7 +294,10 @@ luxrender_node_categories_volume = [
     ]),
 
     luxrender_node_category_volume("LUX_COLOR_MATH_VOLUME", "Color & Math", items=[
-        NodeItem("luxrender_texture_constant_node"),  # value node
+        NodeItem("luxrender_texture_constant_node", label="Color"),
+        NodeItem("luxrender_texture_constant_node", label="Float Value", settings={
+            "variant": repr("float"),
+            }),
         NodeItem("luxrender_texture_colormix_node"),
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
@@ -300,6 +309,9 @@ luxrender_node_categories_volume = [
     luxrender_node_category_volume("LUX_FRESNEL_VOLUME", "Fresnel", items=[
         #NodeItem("luxrender_texture_fresnelcolor_node"),
         #NodeItem("luxrender_texture_fresnelname_node"),
+        NodeItem("luxrender_texture_constant_node", label="Fresnel Value", settings={
+            "variant": repr("fresnel"),
+            }),
         NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),
