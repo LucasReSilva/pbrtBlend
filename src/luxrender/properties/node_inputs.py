@@ -413,7 +413,9 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
         if self.variant == 'color':
             col = layout.column()
-            col.prop(self, 'color')
+            col.template_color_picker(self, 'color', value_slider=True)
+            col.prop(self, 'color', text='')
+
             col.prop(self, 'col_mult')
 
         if self.variant == 'float':
