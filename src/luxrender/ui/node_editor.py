@@ -158,6 +158,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),
+        NodeItem("luxrender_texture_checker_node", label="Checkerboard"),
         NodeItem("luxrender_texture_blender_clouds_node", label="Clouds"),
         NodeItem("luxrender_texture_blender_distortednoise_node", label="Distorted Noise"),
         NodeItem("luxrender_texture_vol_exponential_node", label="Exponential"),
@@ -266,6 +267,9 @@ luxrender_node_categories_volume = [
         #NodeItem("luxrender_texture_normal_map_node", label="Normal Map"),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),
+        NodeItem("luxrender_texture_checker_node", label="Checkerboard", settings={
+            "dimension": repr("checkerboard3d"),
+            }),
         NodeItem("luxrender_texture_blender_clouds_node", label="Clouds"),
         NodeItem("luxrender_texture_vol_cloud_node", label="Cloud"),
         NodeItem("luxrender_texture_blender_distortednoise_node", label="Distorted Noise"),

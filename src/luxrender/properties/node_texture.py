@@ -295,6 +295,67 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 
         return luxcore_name
 
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_checker(luxrender_texture_node):
+    """Checker texture node"""
+    bl_idname = 'luxrender_texture_checker_node'
+    bl_label = 'Checkerboard Texture'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 180
+
+    def change_dimension(self, context):
+        self.inputs[mapping_2d_socketname].enabled = self.dimension.endswith('2d')
+        self.inputs[mapping_3d_socketname].enabled = self.dimension.endswith('3d')
+
+    dimension_items = [
+        ('checkerboard2d', '2D', 'Two-dimensional texture (for e.g. UV mapping)'),
+        ('checkerboard3d', '3D', 'Three-dimensional texture (for e.g. global mapping)')
+    ]
+    dimension = bpy.props.EnumProperty(name='Dimension', items=dimension_items, default='checkerboard2d',
+                                       update=change_dimension)
+
+    def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'Color 1')
+        self.inputs['Color 1'].default_value = [0.05] * 3
+        self.inputs.new('luxrender_color_socket', 'Color 2')
+        self.inputs['Color 2'].default_value = [0.5] * 3
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs[mapping_3d_socketname].enabled = False # Disabled by default because 2D is default dimension
+
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+        layout.prop(self, 'dimension', expand=True)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        texture1 = self.inputs['Color 1'].export_luxcore(properties)
+        texture2 = self.inputs['Color 2'].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', self.dimension)
+        set_prop_tex(properties, luxcore_name, 'texture1', texture1)
+        set_prop_tex(properties, luxcore_name, 'texture2', texture2)
+
+        if self.dimension.endswith('2d'):
+            mapping_type, uvscale, uvdelta = self.inputs[mapping_2d_socketname].export_luxcore(properties)
+
+            set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+            set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+            set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+        else:
+            mapping_type, mapping_transformation = self.inputs[mapping_3d_socketname].export_luxcore(properties)
+            mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+            set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+            set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
     """Clouds texture node"""
@@ -587,7 +648,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
-    """Image map texture node"""
+    """Blender image map texture node"""
     bl_idname = 'luxrender_texture_blender_image_map_node'
     bl_label = 'Blender Image Map Texture'
     bl_icon = 'TEXTURE'
@@ -1462,6 +1523,8 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop_search(self, "domain", bpy.data, "objects")
         layout.prop(self, 'source')
         layout.prop(self, 'wrap')

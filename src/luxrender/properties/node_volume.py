@@ -30,8 +30,8 @@ from ..outputs.luxcore_api import UseLuxCore
 from ..properties.node_sockets import *
 from ..properties.node_material import get_socket_paramsets
 
-from . import (set_prop_vol, create_luxcore_name_vol, export_emission_luxcore, warning_luxcore_node,
-               export_volume_luxcore)
+from . import (set_prop_vol, create_luxcore_name_vol, create_luxcore_name, export_emission_luxcore,
+               warning_luxcore_node, export_volume_luxcore)
 
 
 @LuxRenderAddon.addon_register_class
@@ -76,7 +76,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
     bl_idname = 'luxrender_volume_clear_node'
     bl_label = 'Clear Volume'
     bl_icon = 'MATERIAL'
-    bl_width_min = 160
+    bl_width_min = 180
 
     def init(self, context):
         self.inputs.new('luxrender_fresnel_socket', 'IOR')
@@ -111,7 +111,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
     bl_idname = 'luxrender_volume_homogeneous_node'
     bl_label = 'Homogeneous Volume'
     bl_icon = 'MATERIAL'
-    bl_width_min = 160
+    bl_width_min = 180
 
     use_multiscattering = bpy.props.BoolProperty(name='Multiscattering', description='Compute multiple scattering '
                                                  'events in this volume (recommended for volumes with high scattering '
@@ -121,6 +121,8 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
         self.inputs.new('luxrender_fresnel_socket', 'IOR')
         self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
         self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
+        self.inputs.new('luxrender_float_socket', 'Scattering Scale')
+        self.inputs['Scattering Scale'].default_value = 1
         self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 
         self.outputs.new('NodeSocketShader', 'Volume')
@@ -145,6 +147,15 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
         scattering = self.inputs['Scattering Color'].export_luxcore(properties)
         asymmetry = self.inputs['Asymmetry'].export_luxcore(properties)
 
+        if self.inputs['Scattering Scale'] != 1:
+            scale = self.inputs['Scattering Scale'].export_luxcore(properties)
+
+            scale_name = create_luxcore_name(self, suffix='scattering_scale')
+            set_prop_tex(properties, scale_name, 'type', 'scale')
+            set_prop_tex(properties, scale_name, 'texture1', scattering)
+            set_prop_tex(properties, scale_name, 'texture2', scale)
+            scattering = scale_name
+
         set_prop_vol(properties, luxcore_name, 'type', 'homogeneous')
         set_prop_vol(properties, luxcore_name, 'ior', ior)
         set_prop_vol(properties, luxcore_name, 'absorption', absorption)
@@ -161,7 +172,7 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
     bl_idname = 'luxrender_volume_heterogeneous_node'
     bl_label = 'Heterogeneous Volume'
     bl_icon = 'MATERIAL'
-    bl_width_min = 160
+    bl_width_min = 180
 
     stepsize = bpy.props.FloatProperty(name='Step Size', default=0.1, min=0.0, soft_min=0.001, max=1000, soft_max=10,
                                        subtype='DISTANCE', unit='LENGTH', precision=3,
@@ -176,6 +187,8 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
         self.inputs.new('luxrender_fresnel_socket', 'IOR')
         self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
         self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
+        self.inputs.new('luxrender_float_socket', 'Scattering Scale')
+        self.inputs['Scattering Scale'].default_value = 1
         self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
 
         self.outputs.new('NodeSocketShader', 'Volume')
@@ -206,6 +219,15 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
         absorption = self.inputs['Absorption Color'].export_luxcore(properties)
         scattering = self.inputs['Scattering Color'].export_luxcore(properties)
         asymmetry = self.inputs['Asymmetry'].export_luxcore(properties)
+
+        if self.inputs['Scattering Scale'] != 1:
+            scale = self.inputs['Scattering Scale'].export_luxcore(properties)
+
+            scale_name = create_luxcore_name(self, suffix='scattering_scale')
+            set_prop_tex(properties, scale_name, 'type', 'scale')
+            set_prop_tex(properties, scale_name, 'texture1', scattering)
+            set_prop_tex(properties, scale_name, 'texture2', scale)
+            scattering = scale_name
 
         set_prop_vol(properties, luxcore_name, 'type', 'heterogeneous')
         set_prop_vol(properties, luxcore_name, 'ior', ior)
