@@ -254,7 +254,8 @@ class luxcore_enginesettings(declarative_property_group):
                 ('PATH', 'Path', 'Path tracer'),
                 ('BIASPATH', 'Biased Path', 'Biased path tracer'),
                 ('BIDIR', 'Bidir', 'Bidirectional path tracer'),
-                ('BIDIRVM', 'BidirVM', 'Bidirectional path tracer with vertex merging'),
+                ('BIDIRVM', 'BidirVM (Experimental)', 'Bidirectional path tracer with vertex merging. '
+                                                      'Warning: Experimental! Might use large amounts of RAM or crash!'),
             ],
             'save_in_preset': True
         },
