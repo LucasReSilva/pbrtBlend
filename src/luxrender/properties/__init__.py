@@ -146,7 +146,7 @@ def warning_luxcore_node(layout):
     Show a warning label if API mode is Classic (this node only works in LuxCore mode)
     """
     if not UseLuxCore():
-        layout.label('LuxCore only node!', icon='ERROR')
+        layout.label('No Classic support!', icon='ERROR')
 
 def warning_classic_node(layout):
     """
