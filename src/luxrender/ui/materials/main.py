@@ -122,15 +122,19 @@ class ui_luxrender_material_header(luxrender_material_base):
                 row.operator("object.material_slot_select", text="Select")
                 row.operator("object.material_slot_deselect", text="Deselect")
 
-        split = layout.split(percentage=0.65)
+        split = layout.split(percentage=0.68)
 
         if ob:
             split.template_ID(ob, "active_material", new="material.new")
-            row = split.row()
-
+            
             if slot:
+                # Special copy operator that not only duplicates the material but also the Lux nodetree if it exists
+                split.operator("luxrender.material_copy")
+
+                row = split.row()
                 row.prop(slot, "link", text="")
             else:
+                row = split.row()
                 row.label()
         elif mat:
             split.template_ID(space, "pin_id")

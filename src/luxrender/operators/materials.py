@@ -504,3 +504,29 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 
         material_converter(self.report, context.scene, blender_mat)
         return {'FINISHED'}
+
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_material_copy(bpy.types.Operator):
+    bl_idname = 'luxrender.material_copy'
+    bl_label = 'Copy'
+    bl_description = 'Create a copy of the material (also copying the nodetree)'
+
+    def execute(self, context):
+        current_mat = context.active_object.active_material
+
+        # Create a copy of the material
+        new_mat = current_mat.copy()
+
+        current_nodetree_name = current_mat.luxrender_material.nodetree
+
+        if current_nodetree_name in bpy.data.node_groups:
+            current_nodetree = bpy.data.node_groups[current_nodetree_name]
+            # Create a copy of the nodetree as well
+            new_nodetree = current_nodetree.copy()
+            # Assign new nodetree to the new material
+            new_mat.luxrender_material.nodetree = new_nodetree.name
+
+        context.active_object.active_material = new_mat
+
+        return {'FINISHED'}
