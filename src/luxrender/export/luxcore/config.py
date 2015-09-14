@@ -190,7 +190,7 @@ class ConfigExporter(object):
             index += 1
     
         # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
-        if self.is_viewport_render:
+        if self.is_viewport_render or self.blender_scene.luxcore_translatorsettings.use_filesaver:
             self.properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
             self.properties.Set(pyluxcore.Property(prefix + str(index) + '.value', [2.2]))
             index += 1
