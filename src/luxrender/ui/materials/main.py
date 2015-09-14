@@ -126,7 +126,7 @@ class ui_luxrender_material_header(luxrender_material_base):
 
         if ob:
             split.template_ID(ob, "active_material", new="material.new")
-            
+
             if slot:
                 # Special copy operator that not only duplicates the material but also the Lux nodetree if it exists
                 split.operator("luxrender.material_copy")

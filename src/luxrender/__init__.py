@@ -135,6 +135,7 @@ else:
             sub = row.row()
             sub.scale_x = 0.3
             sub.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
+            sub.template_reports_banner() # This shows an "update Blender" warning text after updating
             row.label(text="After updating LuxBlend please restart Blender for the changes to take effect.")
 
     LuxRenderAddon = Addon(bl_info)
