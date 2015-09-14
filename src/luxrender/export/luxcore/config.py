@@ -245,6 +245,9 @@ class ConfigExporter(object):
         engine = engine_settings.renderengine_type
         device = engine_settings.device_preview if self.is_viewport_render else engine_settings.device
 
+        if engine == 'BIASPATH' and self.is_viewport_render:
+            engine = 'PATH'
+
         # Set engine type
         if engine in ['BIDIR', 'BIDIRVM'] or device == 'CPU':
             # CPU only engines

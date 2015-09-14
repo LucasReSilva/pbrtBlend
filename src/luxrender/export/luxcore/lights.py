@@ -425,6 +425,9 @@ class LightExporter(object):
                 transform_matrix[2][3] = obj.location.z
 
                 transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix, apply_worldscale=True)
+                # Only use mesh transform for final renders (disables instancing which is needed for viewport render
+                # so we can move the light object)
+                mesh_transform = None if self.luxcore_exporter.is_viewport_render else transform
 
                 # add mesh
                 mesh_name = 'Mesh-' + luxcore_name
@@ -439,9 +442,12 @@ class LightExporter(object):
                         (0, 1, 2),
                         (2, 3, 0)
                     ]
-                    luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None, transform)
+                    luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None, mesh_transform)
                 # assign mesh to object
-                self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.ply', [mesh_name]))
+                self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.ply', mesh_name))
+                # Use instancing in viewport so we can move the light
+                if self.luxcore_exporter.is_viewport_render:
+                    self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.transformation', transform))
     
         else:
             raise Exception('Unknown lighttype ' + light.type + ' for light: ' + obj.name)
