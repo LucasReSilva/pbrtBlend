@@ -554,7 +554,6 @@ rendering with the reduced noise level',
             'description': 'Max acceptable radiance value for a sample (0.0 = disabled). Used to prevent fireflies',
             'default': 0.0,
             'min': 0.0,
-            'max': 999999.0,
             'save_in_preset': True
         },
         {
