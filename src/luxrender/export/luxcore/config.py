@@ -275,7 +275,6 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 
         if engine_settings.use_clamping:
-            # radiance_clamp = 1.13 ** engine_settings.biaspath_clamping_radiance_maxvalue - 1 # TODO: activate?
             radiance_clamp = engine_settings.biaspath_clamping_radiance_maxvalue
             pdf_clamp = engine_settings.biaspath_clamping_pdf_value
         else:
