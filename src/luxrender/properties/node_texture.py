@@ -501,7 +501,7 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 160
 
-    octaves = bpy.props.IntProperty(name='Octaves', default=8, min=1, max=29))
+    octaves = bpy.props.IntProperty(name='Octaves', default=8, min=1, max=29)
     roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
