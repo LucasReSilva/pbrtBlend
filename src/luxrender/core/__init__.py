@@ -54,6 +54,7 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore, pyluxcore
 from ..export.luxcore import LuxCoreExporter
+from ..export.luxcore.utils import get_elem_key
 
 # Exporter Property Groups need to be imported to ensure initialisation
 from ..properties import (
@@ -2051,17 +2052,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             update_changes.changed_materials.add(mat)
                             update_changes.set_cause(materials = True)
 
-            # check for changes in volume configuration
-            for volume in context.scene.luxrender_volumes.volumes:
-                self.luxcore_exporter.convert_volume(volume)
+            if bpy.data.worlds.is_updated:
+                # check for changes in volume configuration
+                for volume in context.scene.luxrender_volumes.volumes:
+                    self.luxcore_exporter.convert_volume(volume)
 
-            newVolumeSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
+                newVolumeSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
 
-            if self.lastVolumeSettings == '':
-                self.lastVolumeSettings = newVolumeSettings
-            elif self.lastVolumeSettings != newVolumeSettings:
-                update_changes.set_cause(volumes = True)
-                self.lastVolumeSettings = newVolumeSettings
+                if self.lastVolumeSettings == '':
+                    self.lastVolumeSettings = newVolumeSettings
+                elif self.lastVolumeSettings != newVolumeSettings:
+                    update_changes.set_cause(volumes = True)
+                    self.lastVolumeSettings = newVolumeSettings
 
             # check for changes in halt conditions
             newHaltTime = context.scene.luxcore_enginesettings.halt_time_preview
@@ -2217,8 +2219,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=False, update_material=False)
 
             if update_changes.cause_objectsRemoved:
-                from ..export.luxcore.utils import get_elem_key
-
                 for ob in update_changes.removed_objects:
                     key = get_elem_key(ob)
 
