@@ -164,6 +164,7 @@ prefix_volumes = 'scene.volumes'
 def create_luxcore_name(node, suffix=None, name=None):
     """
     Construct a unique name for the node to be used in the LuxCore scene definitions.
+    Note: node can also be a socket or anything else with an "id_data" attribute that points to the parent nodetree
     """
     if name is None:
         name = node.name
@@ -209,14 +210,16 @@ def set_prop_tex(properties, luxcore_name, property, value):
 def set_prop_vol(properties, luxcore_name, property, value):
     set_prop(prefix_volumes, properties, luxcore_name, property, value)
 
-def export_black_matte(properties):
-    luxcore_name = 'BLACK_MATTE'
+def export_fallback_material(properties, socket, name):
+    # Black matte material
+    luxcore_name = create_luxcore_name_mat(socket, name)
     set_prop_mat(properties, luxcore_name, 'type', 'matte')
     set_prop_mat(properties, luxcore_name, 'kd', [0, 0, 0])
     return luxcore_name
 
-def export_black_volume(properties):
-    luxcore_name = 'BLACK_VOLUME'
+def export_fallback_volume(properties, socket, name):
+    # Black clear volume
+    luxcore_name = create_luxcore_name_vol(socket, name)
     set_prop_vol(properties, luxcore_name, 'type', 'clear')
     set_prop_vol(properties, luxcore_name, 'absorption', [100, 100, 100])
     return luxcore_name
@@ -230,7 +233,7 @@ def export_submat_luxcore(properties, socket, name=None):
     if node is None:
         # Use a black material if socket is not linked
         print('WARNING: Unlinked material socket! Using a black material as fallback.')
-        submat_name = export_black_matte(properties)
+        submat_name = export_fallback_material(properties, socket, name)
     else:
         submat_name = node.export_luxcore(properties, name)
 
@@ -245,7 +248,7 @@ def export_volume_luxcore(properties, socket, name=None):
     if node is None:
         # Use a black volume if socket is not linked
         print('WARNING: Unlinked volume socket! Using a black volume as fallback.')
-        volume_name = export_black_volume(properties)
+        volume_name = export_fallback_volume(properties, socket, name)
     else:
         volume_name = node.export_luxcore(properties, name)
 
