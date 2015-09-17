@@ -526,6 +526,8 @@ class luxrender_material_type_node_glass2(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'arch')
         layout.prop(self, 'dispersion')
 
@@ -1163,6 +1165,8 @@ class luxrender_material_type_node_metal(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'metal_preset')
 
         if self.metal_preset == 'nk':
@@ -1453,6 +1457,8 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'use_anisotropy')
         layout.prop(self, 'dispersion')
 
