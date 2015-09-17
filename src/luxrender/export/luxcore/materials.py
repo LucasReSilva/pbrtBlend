@@ -66,6 +66,11 @@ class MaterialExporter(object):
 
 
     def __convert_node_material(self):
+        # Clay render handling
+        if self.blender_scene.luxcore_translatorsettings.override_materials:
+            self.__convert_default_matte()
+            return
+
         self.__generate_material_name(self.material.name)
 
         output_node = find_node(self.material, 'luxrender_material_output_node')
