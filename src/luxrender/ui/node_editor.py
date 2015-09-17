@@ -167,7 +167,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_blender_musgrave_node", label="Musgrave"),
         NodeItem("luxrender_texture_blender_stucci_node", label="Stucci"),
         #NodeItem("luxrender_texture_vol_smoke_data_node"),
-        NodeItem("luxrender_texture_windy_node", label="Windy"),
+        #NodeItem("luxrender_texture_windy_node", label="Windy"), # Same as FBM -> unnecessary
         NodeItem("luxrender_texture_blender_wood_node", label="Wood"),
         NodeItem("luxrender_texture_wrinkled_node", label="Wrinkled"),
         NodeItem("luxrender_texture_blender_voronoi_node", label="Voronoi"),
@@ -281,7 +281,7 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_blender_stucci_node", label="Stucci"),
         NodeItem("luxrender_texture_vol_smoke_data_node", label="Smoke Data"),
         #NodeItem("luxrender_texture_uv_node", label="UV Test"),
-        NodeItem("luxrender_texture_windy_node", label="Windy"),
+        #NodeItem("luxrender_texture_windy_node", label="Windy"), # Same as FBM -> unnecessary
         NodeItem("luxrender_texture_blender_wood_node", label="Wood"),
         NodeItem("luxrender_texture_wrinkled_node", label="Wrinkled"),
         NodeItem("luxrender_texture_blender_voronoi_node", label="Voronoi"),

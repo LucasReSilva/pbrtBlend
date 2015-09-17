@@ -142,8 +142,9 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
 
         layout.prop(self, 'type')
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         blend_params = ParamSet() \
@@ -209,9 +210,11 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
         layout.prop(self, 'brickbond')
         layout.prop(self, 'brickrun')
         layout.prop(self, 'mortarsize')
-        layout.prop(self, 'width')
-        layout.prop(self, 'depth')
-        layout.prop(self, 'height')
+
+        column = layout.column(align=True)
+        column.prop(self, 'width')
+        column.prop(self, 'depth')
+        column.prop(self, 'height')
 
         si = self.inputs.keys()
         so = self.outputs.keys()
@@ -380,11 +383,13 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisesize')
-        layout.prop(self, 'noisedepth')
+        column = layout.column(align=True)
+        column.prop(self, 'noisesize')
+        column.prop(self, 'noisedepth')
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         clouds_params = ParamSet() \
@@ -452,8 +457,9 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
         if not UseLuxCore():
             layout.prop(self, 'nabla') # Has no visible influence
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         distortednoise_params = ParamSet() \
@@ -592,6 +598,9 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 
     def init(self, context):
         self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
 
     def export_texture(self, make_texture):
         harlequin_params = ParamSet()
@@ -841,12 +850,14 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
         layout.prop(self, 'noisebasis2', expand=True)
         layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisebasis',)
-        layout.prop(self, 'noisesize')
-        layout.prop(self, 'noisedepth')
+        column = layout.column(align=True)
+        column.prop(self, 'noisesize')
+        column.prop(self, 'noisedepth')
         layout.prop(self, 'turbulence')
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         marble_params = ParamSet() \
@@ -943,8 +954,9 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
             layout.prop(self, 'iscale')
 
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         musgrave_params = ParamSet()
@@ -1091,8 +1103,9 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         stucci_params = ParamSet() \
@@ -1210,13 +1223,15 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
         layout.prop(self, 'noisesize')
         if not UseLuxCore():
             layout.prop(self, 'nabla')
-        layout.prop(self, 'w1')
-        layout.prop(self, 'w2')
-        layout.prop(self, 'w3')
-        layout.prop(self, 'w4')
+        column = layout.column(align=True)
+        column.prop(self, 'w1')
+        column.prop(self, 'w2')
+        column.prop(self, 'w3')
+        column.prop(self, 'w4')
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         voronoi_params = ParamSet() \
@@ -1344,8 +1359,9 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
         layout.separator()
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         wood_params = ParamSet() \
@@ -1470,6 +1486,8 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout) # TODO: remove when LuxCore support is implemented
+
         layout.prop(self, 'radius')
         layout.prop(self, 'noisescale')
         layout.prop(self, 'turbulence')
