@@ -566,6 +566,8 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
     curvature_mode = bpy.props.EnumProperty(items=curvature_items, default='both')
 
     def init(self, context):
+        self.inputs.new('luxrender_float_socket', 'Multiplier')
+        self.inputs[0].default_value = 10
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -612,6 +614,16 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
             set_prop_tex(properties, name_clamp, 'max', 1)
 
             luxcore_name = name_clamp
+
+        multiplier = self.inputs[0].export_luxcore(properties)
+
+        if multiplier != 1:
+            multiplier_name = luxcore_name + '_multiplier'
+            set_prop_tex(properties, multiplier_name, 'type', 'scale')
+            set_prop_tex(properties, multiplier_name, 'texture1', luxcore_name)
+            set_prop_tex(properties, multiplier_name, 'texture2', multiplier)
+
+            luxcore_name = multiplier_name
 
         return luxcore_name
 

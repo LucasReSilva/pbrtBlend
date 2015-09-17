@@ -499,7 +499,14 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
     bl_idname = 'luxrender_texture_fbm_node'
     bl_label = 'FBM Texture'
     bl_icon = 'TEXTURE'
-    bl_width_min = 160
+    bl_width_min = 180
+
+    sign_items = [
+        ('positive', 'Positive', 'Only use the positive values of the texture'),
+        ('negative', 'Negative', 'Only use the negative values of the texture'),
+        ('both', 'Both', 'Use the absolute of the functions to use both positive and negative values'),
+    ]
+    sign_mode = bpy.props.EnumProperty(items=sign_items, default='both')
 
     octaves = bpy.props.IntProperty(name='Octaves', default=8, min=1, max=29)
     roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
@@ -509,6 +516,9 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        if UseLuxCore():
+            layout.prop(self, 'sign_mode', expand=True)
+
         layout.prop(self, 'octaves')
         layout.prop(self, 'roughness', slider=True)
 
@@ -536,6 +546,39 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 
         set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
         set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        if self.sign_mode == 'both':
+            # FBM values are in [-1..1] range originally
+            name_abs = luxcore_name + '_abs'
+            set_prop_tex(properties, name_abs, 'type', 'abs')
+            set_prop_tex(properties, name_abs, 'texture', luxcore_name)
+
+            luxcore_name = name_abs
+
+        elif self.sign_mode == 'positive':
+            # Only use the positive values of the FBM texture
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', luxcore_name)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
+
+        elif self.sign_mode == 'negative':
+            # Only use the negative values of the FBM texture by first flipping the values
+            name_flip = luxcore_name + '_flip'
+            set_prop_tex(properties, name_flip, 'type', 'scale')
+            set_prop_tex(properties, name_flip, 'texture1', luxcore_name)
+            set_prop_tex(properties, name_flip, 'texture2', -1)
+
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', name_flip)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
 
         return luxcore_name
 
