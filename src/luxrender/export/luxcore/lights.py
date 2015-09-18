@@ -397,17 +397,15 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', ['matte']))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', [0.0, 0.0, 0.0]))
 
-                translator_settings = self.blender_scene.luxcore_translatorsettings
-                if not (translator_settings.override_materials and translator_settings.override_lights):
-                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
-                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.power',
-                                                     light.luxrender_lamp.luxrender_lamp_area.power))
-                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.efficiency',
-                                                         light.luxrender_lamp.luxrender_lamp_area.efficacy))
-                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.samples', samples))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.power',
+                                                 light.luxrender_lamp.luxrender_lamp_area.power))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.efficiency',
+                                                     light.luxrender_lamp.luxrender_lamp_area.efficacy))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.samples', samples))
 
-                    if lightgroup_id != -1 and not self.blender_scene.luxrender_lightgroups.ignore:
-                        self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.id', [lightgroup_id]))
+                if lightgroup_id != -1 and not self.blender_scene.luxrender_lightgroups.ignore:
+                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.id', [lightgroup_id]))
     
                 # assign material to object
                 self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.material', [mat_name]))
