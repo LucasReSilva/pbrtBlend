@@ -339,7 +339,7 @@ def compatible(mod):
 
 
 compatible("properties_data_mesh")
-#compatible("properties_data_camera") # spliited to avoid dof panel
+#compatible("properties_data_camera") # we register only needed  panels now
 compatible("properties_particle")
 compatible("properties_data_speaker")
 
