@@ -42,8 +42,31 @@ class camera(camera_panel):
     bl_label = 'LuxRender Camera'
 
     display_property_groups = [
-        ( ('camera',), 'luxrender_camera' )
+        ( ('camera',), 'luxrender_camera' ),
     ]
+
+    def draw(self, context):
+        layout = self.layout
+        super().draw(context)
+        cam = context.camera
+
+        row = self.layout.row()
+        row.prop(context.camera.luxrender_camera, "use_dof", text="Use Depth of Field")
+
+        if context.camera.luxrender_camera.use_dof:
+            layout.label(text="Focus:")
+            layout.prop(cam, "dof_object", text="")
+            sub = layout.column()
+            sub.active = (cam.dof_object is None)
+            sub.prop(cam, "dof_distance", text="Distance")
+            row.prop(context.camera.luxrender_camera, "autofocus", text="Auto Focus")
+
+            row = self.layout.row()
+            row.prop(context.camera.luxrender_camera, "blades", text="Blades")
+
+            row = self.layout.row(align=True)
+            row.prop(context.camera.luxrender_camera, "distribution", text="Distribution")
+            row.prop(context.camera.luxrender_camera, "power", text="Power")
 
 
 @LuxRenderAddon.addon_register_class
