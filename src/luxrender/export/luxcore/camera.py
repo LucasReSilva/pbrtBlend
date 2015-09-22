@@ -183,6 +183,7 @@ class CameraExporter(object):
             # Do not world-scale this, it is already in meters
             lensradius = (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)
             self.properties.Set(pyluxcore.Property('scene.camera.lensradius', lensradius))
+            self.properties.Set(pyluxcore.Property('scene.camera.autofocus', luxCamera.autofocus))
 
         ws = get_worldscale(as_scalematrix=False)
 
