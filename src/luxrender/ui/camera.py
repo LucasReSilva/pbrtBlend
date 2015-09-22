@@ -51,7 +51,7 @@ class camera(camera_panel):
         cam = context.camera
 
         row = self.layout.row()
-        row.prop(context.camera.luxrender_camera, "use_dof", text="Use Depth of Field")
+        # row.prop(context.camera.luxrender_camera, "use_dof", text="Use Depth of Field")
 
         if context.camera.luxrender_camera.use_dof:
             layout.label(text="Focus:")

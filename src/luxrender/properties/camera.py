@@ -106,7 +106,8 @@ class luxrender_camera(declarative_property_group):
         'shutterdistribution',
         ['cammblur', 'objectmblur'],
         'enable_clipping_plane',
-        'clipping_plane_selector'
+        'clipping_plane_selector',
+        'use_dof'
         # [0.3, 'use_dof','autofocus', 'use_clipping'], # moved to blender panels visually
         # 'blades',
         #       ['distribution', 'power'],
