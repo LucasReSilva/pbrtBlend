@@ -100,15 +100,18 @@ class luxrender_camera(declarative_property_group):
         'sensitivity',
         'exposure_mode',
         ['exposure_start_norm', 'exposure_end_norm'],
-        'exposure_start_abs', 'exposure_end_abs',
+        ['exposure_start_abs', 'exposure_end_abs'],
         ['exposure_degrees_start', 'exposure_degrees_end'],
+        'separator_mblur',
         'usemblur',
+        ['cammblur', 'objectmblur'],
         'motion_blur_samples',
         'shutterdistribution',
-        ['cammblur', 'objectmblur'],
-        'enable_clipping_plane',
-        'clipping_plane_selector'
-        # [0.3, 'use_dof','autofocus', 'use_clipping'], # moved to blender panels visually
+        'separator_after_mblur',
+        #'enable_clipping_plane', # now drawn manually in ui/camera.py
+        #'clipping_plane_selector',
+        #'use_dof'
+        # [0.3, 'use_dof','autofocus', 'use_clipping'],
         # 'blades',
         #       ['distribution', 'power'],
     ]
@@ -128,6 +131,7 @@ class luxrender_camera(declarative_property_group):
         'motion_blur_samples': {'usemblur': True},
         'cammblur': {'usemblur': True},
         'objectmblur': {'usemblur': True},
+        'separator_after_mblur': {'usemblur': True},
         'enable_clipping_plane': lambda: UseLuxCore(),
         'clipping_plane_selector': A([{'enable_clipping_plane': True}, lambda: UseLuxCore()])
     }
@@ -148,11 +152,24 @@ class luxrender_camera(declarative_property_group):
             'default': False,
         },
         {
+            'type': 'enum',
+            'attr': 'dof_focus_type',
+            'name': 'Focus',
+            'description': 'Type of focus point',
+            'default': 'manual',
+            'items': [
+                ('manual', 'Manual', 'Set the focal distance by hand'),
+                ('object', 'Object', 'Use an object\'s origin as focal point'),
+                ('autofocus', 'Autofocus', 'Automatically set the focal distance to the surface distance in the '
+                                           'image center'),
+            ]
+        },
+        { # TODO: remove
             'type': 'bool',
             'attr': 'autofocus',
-            'name': 'Auto focus',
+            'name': 'Auto Focus',
             'description': 'Auto-focus for depth of field, DOF target object will be ignored',
-            'default': True,
+            'default': False,
         },
         {
             'type': 'int',
@@ -166,8 +183,8 @@ class luxrender_camera(declarative_property_group):
             'type': 'enum',
             'attr': 'distribution',
             'name': 'Distribution',
-            'description': 'This value controls the lens sampling distribution. \
-            Non-uniform distributions allow for ring effects',
+            'description': 'This value controls the lens sampling distribution. '
+                           'Non-uniform distributions allow for ring effects',
             'default': 'uniform',
             'items': [
                 ('uniform', 'Uniform', 'Uniform'),
@@ -181,7 +198,7 @@ class luxrender_camera(declarative_property_group):
             'type': 'int',
             'attr': 'power',
             'name': 'Power',
-            'description': 'Exponent for lens samping distribution. Higher values give more pronounced ring-effects',
+            'description': 'Exponent for lens sampling distribution. Higher values give more pronounced ring-effects',
             'min': 0,
             'default': 0,
         },
@@ -201,48 +218,44 @@ class luxrender_camera(declarative_property_group):
             'type': 'float',
             'attr': 'fstop',
             'name': 'f/Stop',
-            'description': 'f/Stop',
+            'description': 'Aperture, lower values result in stronger depth of field effect (if enabled) and '
+                           'brighten the image (if the manual/camera settings tonemapper is selected)',
             'default': 2.8,
             'min': 0.01,  # for experimental values
-            'soft_min': 0.4,
             'max': 128.0,
-            'soft_max': 128.0,
             'step': 100
         },
         {
             'type': 'float',
             'attr': 'sensitivity',
             'name': 'ISO',
-            'description': 'Sensitivity (ISO)',
+            'description': 'Sensitivity (ISO), only affects image brightness (if the manual/camera settings tonemapper '
+                           'is selected)',
             'default': 320.0,
             'min': 10.0,
-            'soft_min': 10.0,
             'max': 6400.0,
-            'soft_max': 6400.0,
             'step': 1000
         },
         {
             'type': 'enum',
             'attr': 'exposure_mode',
-            'name': 'Exposure timing',
+            'name': 'Exposure',
             'items': [
                 ('normalised', 'Normalised', 'normalised'),
                 ('absolute', 'Absolute', 'absolute'),
                 ('degrees', 'Degrees', 'degrees'),
             ],
-            'default': 'normalised'
+            'default': 'normalised',
         },
         {
             'type': 'int',
             'attr': 'motion_blur_samples',
             'name': 'Motion Subdivision',
-            'description': 'Number of motion steps per frame. Increase for non-linear\
-             motion blur or high velocity rotations',
+            'description': 'Number of motion steps per frame. Increase for non-linear motion blur or high velocity '
+                           'rotations',
             'default': 1,
             'min': 1,
-            'soft_min': 1,
             'max': 100,
-            'soft_max': 100
         },
         {
             'type': 'float',
@@ -252,9 +265,7 @@ class luxrender_camera(declarative_property_group):
             'precision': 3,
             'default': 0.0,
             'min': 0.0,
-            'soft_min': 0.0,
             'max': 1.0,
-            'soft_max': 1.0
         },
         {
             'type': 'float',
@@ -264,9 +275,7 @@ class luxrender_camera(declarative_property_group):
             'precision': 3,
             'default': 1.0,
             'min': 0.0,
-            'soft_min': 0.0,
             'max': 1.0,
-            'soft_max': 1.0
         },
         {
             'type': 'float',
@@ -276,7 +285,6 @@ class luxrender_camera(declarative_property_group):
             'precision': 6,
             'default': 0.0,
             'min': 0.0,
-            'soft_min': 0.0,
         },
         {
             'type': 'float',
@@ -286,7 +294,6 @@ class luxrender_camera(declarative_property_group):
             'precision': 6,
             'default': 1.0,
             'min': 0.0,
-            'soft_min': 0.0,
         },
         {
             'type': 'float',
@@ -296,9 +303,7 @@ class luxrender_camera(declarative_property_group):
             'precision': 1,
             'default': 0.0,
             'min': 0.0,
-            'soft_min': 0.0,
             'max': 2 * math.pi,
-            'soft_max': 2 * math.pi,
             'subtype': 'ANGLE',
             'unit': 'ROTATION'
         },
@@ -310,17 +315,20 @@ class luxrender_camera(declarative_property_group):
             'precision': 1,
             'default': 2 * math.pi,
             'min': 0.0,
-            'soft_min': 0.0,
             'max': 2 * math.pi,
-            'soft_max': 2 * math.pi,
             'subtype': 'ANGLE',
             'unit': 'ROTATION'
+        },
+        {
+            'type': 'separator',
+            'attr': 'separator_mblur'
         },
         {
             'type': 'bool',
             'attr': 'usemblur',
             'name': 'Motion Blur',
-            'default': False
+            'default': False,
+            'toggle': True
         },
         {
             'type': 'enum',
@@ -330,7 +338,8 @@ class luxrender_camera(declarative_property_group):
             'items': [
                 ('uniform', 'Uniform', 'uniform'),
                 ('gaussian', 'Gaussian', 'gaussian'),
-            ]
+            ],
+            'expand': True,
         },
         {
             'type': 'bool',
@@ -345,9 +354,13 @@ class luxrender_camera(declarative_property_group):
             'default': True
         },
         {
+            'type': 'separator',
+            'attr': 'separator_after_mblur'
+        },
+        {
             'type': 'bool',
             'attr': 'enable_clipping_plane',
-            'name': 'Use Arbitrary Clipping Plane',
+            'name': 'Arbitrary Clipping Plane',
             'description': 'LuxCore only',
             'default': False
         },

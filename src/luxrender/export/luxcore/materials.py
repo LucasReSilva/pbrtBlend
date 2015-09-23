@@ -180,19 +180,24 @@ class MaterialExporter(object):
 
             # Material override (clay render)
             translator_settings = self.blender_scene.luxcore_translatorsettings
-            if translator_settings.override_materials and lux_mat_type != 'mix':
-                if 'glass' in lux_mat_type:
-                    if translator_settings.override_glass:
+            if translator_settings.override_materials:
+                if material.luxrender_emission.use_emission:
+                    if translator_settings.override_lights:
                         self.__convert_default_matte()
                         return
-                elif lux_mat_type == 'null':
-                    if translator_settings.override_null:
+                elif lux_mat_type != 'mix':
+                    if 'glass' in lux_mat_type:
+                        if translator_settings.override_glass:
+                            self.__convert_default_matte()
+                            return
+                    elif lux_mat_type == 'null':
+                        if translator_settings.override_null:
+                            self.__convert_default_matte()
+                            return
+                    else:
+                        # all materials that are not glass, lights or null
                         self.__convert_default_matte()
                         return
-                else:
-                    # all materials that are not glass, lights or null
-                    self.__convert_default_matte()
-                    return
 
             # ###################################################################
             # Matte and Roughmatte

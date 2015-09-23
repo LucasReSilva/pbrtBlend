@@ -104,6 +104,11 @@ _register_elm(bl_ui.properties_render.RENDER_PT_render, required=True)
 _register_elm(bl_ui.properties_render.RENDER_PT_dimensions, required=True)
 _register_elm(bl_ui.properties_render.RENDER_PT_output, required=True)
 _register_elm(bl_ui.properties_render.RENDER_PT_stamp)
+_register_elm(bl_ui.properties_data_camera.DATA_PT_lens, required=True)
+_register_elm(bl_ui.properties_data_camera.DATA_PT_camera, required=True)
+_register_elm(bl_ui.properties_data_camera.DATA_PT_camera_display, required=True)
+_register_elm(bl_ui.properties_data_camera.DATA_PT_camera_safe_areas, required=True)
+#_register_elm(bl_ui.properties_data_camera.DATA_PT_custom_props_camera) # do we need these ?
 
 #_register_elm(bl_ui.properties_render_layer.RENDERLAYER_PT_views) # multiview
 
@@ -222,31 +227,12 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview.append(lux_use_alterna
 # Add use_clipping button to lens panel
 def lux_use_clipping(self, context):
     if context.scene.render.engine == 'LUXRENDER_RENDER':
-
-        self.layout.split().column().prop(context.camera.luxrender_camera, "use_clipping", text="Export Clipping")
+        split = self.layout.split()
+        split.label("")
+        split.column().prop(context.camera.luxrender_camera, "use_clipping", text="Export Clipping")
 
 
 _register_elm(bl_ui.properties_data_camera.DATA_PT_lens.append(lux_use_clipping))
-
-
-# Add lux dof elements to blender dof panel
-def lux_use_dof(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
-        row = self.layout.row()
-
-        row.prop(context.camera.luxrender_camera, "use_dof", text="Use Depth of Field")
-        if context.camera.luxrender_camera.use_dof:
-            row.prop(context.camera.luxrender_camera, "autofocus", text="Auto Focus")
-
-            row = self.layout.row()
-            row.prop(context.camera.luxrender_camera, "blades", text="Blades")
-
-            row = self.layout.row(align=True)
-            row.prop(context.camera.luxrender_camera, "distribution", text="Distribution")
-            row.prop(context.camera.luxrender_camera, "power", text="Power")
-
-
-_register_elm(bl_ui.properties_data_camera.DATA_PT_camera_dof.append(lux_use_dof))
 
 
 # Add options by render image/anim buttons
@@ -335,7 +321,7 @@ def compatible(mod):
 
 
 compatible("properties_data_mesh")
-compatible("properties_data_camera")
+#compatible("properties_data_camera") # we register only needed  panels now
 compatible("properties_particle")
 compatible("properties_data_speaker")
 
