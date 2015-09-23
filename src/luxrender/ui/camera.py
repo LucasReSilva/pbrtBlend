@@ -31,6 +31,7 @@ from ..extensions_framework.ui import property_group_renderer
 
 from ..outputs.luxcore_api import UseLuxCore
 from .. import LuxRenderAddon
+from ..export import get_worldscale
 
 
 class camera_panel(bl_ui.properties_data_camera.CameraButtonsPanel, property_group_renderer):
@@ -47,26 +48,49 @@ class camera(camera_panel):
 
     def draw(self, context):
         layout = self.layout
+        blender_cam = context.camera
+        lux_cam = context.camera.luxrender_camera
+
+        # Draw property groups
         super().draw(context)
-        cam = context.camera
 
-        row = self.layout.row()
-        # row.prop(context.camera.luxrender_camera, "use_dof", text="Use Depth of Field")
+        if lux_cam.use_dof and not lux_cam.usemblur:
+            # mblur already has a trailing separator if enabled
+            layout.separator()
 
-        if context.camera.luxrender_camera.use_dof:
-            layout.label(text="Focus:")
-            layout.prop(cam, "dof_object", text="")
-            sub = layout.column()
-            sub.active = (cam.dof_object is None)
-            sub.prop(cam, "dof_distance", text="Distance")
-            row.prop(context.camera.luxrender_camera, "autofocus", text="Auto Focus")
+        layout.prop(lux_cam, "use_dof", toggle=True)
 
-            row = self.layout.row()
-            row.prop(context.camera.luxrender_camera, "blades", text="Blades")
+        if lux_cam.use_dof:
+            split = layout.split()
 
-            row = self.layout.row(align=True)
-            row.prop(context.camera.luxrender_camera, "distribution", text="Distribution")
-            row.prop(context.camera.luxrender_camera, "power", text="Power")
+            column = split.column()
+            column.label("Focus:")
+            column.prop(lux_cam, "autofocus")
+
+            # Disable "Distance" and "Object" settings if autofocus is used
+            sub_autofocus = column.column()
+            sub_autofocus.enabled = not lux_cam.autofocus
+            sub_autofocus.prop(blender_cam, "dof_object", text="")
+
+            # Disable "Distance" setting if a focus object is used
+            sub_distance = sub_autofocus.row()
+            sub_distance.enabled = blender_cam.dof_object is None
+            sub_distance.prop(blender_cam, "dof_distance", text="Distance")
+
+            column = split.column(align=True)
+            column.label("Bokeh Shape:")
+            sub_bokeh = column.column()
+            sub_bokeh.prop(lux_cam, "blades", text="Blades")
+            sub_bokeh.prop(lux_cam, "distribution", text="")
+            sub_bokeh.prop(lux_cam, "power", text="Power")
+
+        if lux_cam.enable_clipping_plane or lux_cam.use_dof:
+            layout.separator()
+
+        layout.prop(lux_cam, "enable_clipping_plane", toggle=True)
+
+        if lux_cam.enable_clipping_plane:
+            layout.prop_search(lux_cam, "clipping_plane_obj", context.scene, "objects", text="Plane")
 
 
 @LuxRenderAddon.addon_register_class
