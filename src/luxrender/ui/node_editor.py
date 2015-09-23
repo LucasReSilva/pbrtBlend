@@ -156,6 +156,7 @@ luxrender_node_categories_material = [
 
     luxrender_node_category_material("LUX_TEXTURE", "Texture", items=[
         NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
+        NodeItem("luxrender_texture_bump_map_node", label="Bump Map"),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),
         NodeItem("luxrender_texture_checker_node", label="Checkerboard"),
@@ -184,20 +185,18 @@ luxrender_node_categories_material = [
     ]),
 
     luxrender_node_category_material("LUX_COLOR_MATH", "Color & Math", items=[
-        NodeItem("luxrender_texture_constant_node", label="Color"),
-        NodeItem("luxrender_texture_constant_node", label="Float Value", settings={
-            "variant": repr("float"),
-            }),
         NodeItem("luxrender_texture_colormix_node"),
         NodeItem("luxrender_texture_math_node"),
         NodeItem("luxrender_texture_colorinvert_node"),
-        NodeItem("luxrender_texture_bump_map_node"),
-        NodeItem("luxrender_texture_glossyexponent_node"),
+        NodeItem("luxrender_texture_constant_node", label="Color Input"),
+        NodeItem("luxrender_texture_constant_node", label="Value Input", settings={
+            "variant": repr("float"),
+            }),
         #NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
         #NodeItem("luxrender_texture_colordepth_node"),
     ]),
 
-    luxrender_node_category_material("LUX_MESHINFO", "Mesh Info", items=[
+    luxrender_node_category_material("LUX_VERTEXDATA", "Vertex Data", items=[
         NodeItem("luxrender_texture_pointiness_node"),
         NodeItem("luxrender_texture_hitpointcolor_node"),  # vertex color node
         NodeItem("luxrender_texture_hitpointgrey_node"),  # vertex mask node
@@ -243,6 +242,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_scale_node"),
         NodeItem("luxrender_texture_add_node"),
         NodeItem("luxrender_texture_subtract_node"),
+        NodeItem("luxrender_texture_glossyexponent_node"), # Works in LuxCore, but kind of deprecated
     ]),
 ]
 
