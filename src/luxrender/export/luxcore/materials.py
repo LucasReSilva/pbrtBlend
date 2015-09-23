@@ -119,48 +119,23 @@ class MaterialExporter(object):
 
 
     def __set_material_volumes(self, prefix, interior, exterior):
-        if self.luxcore_exporter.is_material_preview:
-            # The material/texture preview scene does not contain any volumes, so we have to use this code.
-            #interior = self.material.luxrender_material.Interior_volume
-            default_interior = self.blender_scene.luxrender_world.default_interior_volume
+        # This code checks if the volumes are set correctly so rendering does not fail when volumes are missing
+        # from the scene. It is assumed that all volumes are already exported prior to material export.
+        vol_cache = self.luxcore_exporter.volume_cache
+        scene_volumes = {vol_exporter.volume.name: vol_exporter.luxcore_name for vol_exporter in vol_cache.values()}
 
-            if interior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', generate_volume_name(interior)))
-            elif default_interior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.interior',  generate_volume_name(default_interior)))
+        default_interior = self.blender_scene.luxrender_world.default_interior_volume
+        default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
 
-            #exterior = self.material.luxrender_material.Exterior_volume
-            default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
+        if interior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', scene_volumes[interior]))
+        elif default_interior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', scene_volumes[default_interior]))
 
-            if exterior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(exterior)))
-            elif default_exterior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(default_exterior)))
-        else:
-            # This code checks if the volumes are set correctly so rendering does not fail when volumes are missing
-            # from the scene
-            #interior = self.material.luxrender_material.Interior_volume
-            #exterior = self.material.luxrender_material.Exterior_volume
-
-            scene_volumes = self.blender_scene.luxrender_volumes.volumes
-            default_interior = self.blender_scene.luxrender_world.default_interior_volume
-            default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
-
-            if interior in scene_volumes:
-                self.__set_volume(prefix + '.volume.interior', scene_volumes[interior])
-            elif default_interior in scene_volumes:
-                self.__set_volume(prefix + '.volume.interior', scene_volumes[default_interior])
-
-            if exterior in scene_volumes:
-                self.__set_volume(prefix + '.volume.exterior', scene_volumes[exterior])
-            elif default_exterior in scene_volumes:
-                self.__set_volume(prefix + '.volume.exterior', scene_volumes[default_exterior])
-
-
-    def __set_volume(self, prop_string, volume):
-        self.luxcore_exporter.convert_volume(volume)
-        volume_exporter = self.luxcore_exporter.volume_cache[get_elem_key(volume)]
-        self.properties.Set(pyluxcore.Property(prop_string, volume_exporter.luxcore_name))
+        if exterior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior', scene_volumes[exterior]))
+        elif default_exterior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior', scene_volumes[default_exterior]))
 
 
     def __convert_material(self):

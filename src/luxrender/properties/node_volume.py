@@ -58,7 +58,7 @@ class luxrender_volume_output_node(luxrender_node):
 
     def export_luxcore(self, volume, properties, blender_scene):
         tree_name = volume.nodetree
-        print('Exporting nodetree', tree_name, 'of volume', volume.name)
+        print('Converting volume: %s (Nodetree: %s)' % (volume.name, tree_name))
 
         # Export the volume tree
         luxcore_name = export_volume_luxcore(properties, self.inputs[0], volume.name)

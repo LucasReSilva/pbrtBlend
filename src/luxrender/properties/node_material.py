@@ -1788,7 +1788,7 @@ class luxrender_material_output_node(luxrender_node):
         # Note: volumes are exported in export/luxcore/materials.py (in "parent" function that calls this function)
 
         tree_name = material.luxrender_material.nodetree
-        print('Exporting nodetree', tree_name, 'of material', material.name)
+        print('Converting material: %s (Nodetree: %s)' % (material.name, tree_name))
 
         # Export the material tree
         luxcore_name = export_submat_luxcore(properties, self.inputs[0], material.name)
@@ -1882,7 +1882,7 @@ class luxrender_material_output_node(luxrender_node):
                 if check_node_export_material(surface_node):
                     surface_node.export_material(make_material=make_material, make_texture=make_texture)
 
-        # TODO: remove, volumes (with nodes) are now exported from their own output node below
+        # TODO: remove, volumes (with nodes) are now exported from their own output node
         '''
         # Volumes exporting:
         int_vol_socket = self.inputs[1]
