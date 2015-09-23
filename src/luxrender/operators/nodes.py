@@ -74,6 +74,12 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         # Get the mat type set in editor, todo: find a more iterative way to get context
         node_type = 'luxrender_material_%s_node' % ctx_mat.type
 
+        # Some nodes were merged during the introduction of LuxCore node support
+        if ctx_mat.type in ['glass2', 'roughglass']:
+            node_type = 'luxrender_material_glass_node'
+        elif ctx_mat.type == 'metal':
+            node_type = 'luxrender_material_metal2_node'
+
         if ctx_mat.type == 'matte':
             editor_type = ctx_mat.luxrender_mat_matte
         if ctx_mat.type == 'mattetranslucent':
@@ -117,10 +123,12 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         if idtype == 'material':
             shader = nt.nodes.new(node_type)  # create also matnode from editor type
             shader.location = 200, 570
+
             sh_out = nt.nodes.new('luxrender_material_output_node')
             sh_out.interior_volume = ctx_mat.Interior_volume
             sh_out.exterior_volume = ctx_mat.Exterior_volume
             sh_out.location = 500, 400
+
             nt.links.new(shader.outputs[0], sh_out.inputs[0])
 
             # Get material settings ( color )
@@ -160,10 +168,10 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if 'Cauchy B' in shader.inputs:
                 shader.inputs['Cauchy B'].cauchyb = editor_type.cauchyb_floatvalue
 
-            if 'Film IOR' in shader.inputs:
+            if 'Film IOR' in shader.inputs and hasattr(editor_type, 'filmindex_floatvalue'):
                 shader.inputs['Film IOR'].filmindex = editor_type.filmindex_floatvalue
 
-            if 'Film Thickness (nm)' in shader.inputs:
+            if 'Film Thickness (nm)' in shader.inputs and hasattr(editor_type, 'film_floatvalue'):
                 shader.inputs['Film Thickness (nm)'].film = editor_type.film_floatvalue
 
             if 'IOR' in shader.inputs and hasattr(shader.inputs['IOR'], 'index'):
@@ -193,9 +201,6 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 
             if hasattr(shader, 'arch'):
                 shader.arch = editor_type.architectural
-
-            if hasattr(shader, 'advanced'):
-                shader.advanced = editor_type.advanced
 
             # non-socket parameters ( other )
             # velvet
