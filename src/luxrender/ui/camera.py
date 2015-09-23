@@ -78,11 +78,16 @@ class camera(camera_panel):
             sub_distance.prop(blender_cam, "dof_distance", text="Distance")
 
             column = split.column(align=True)
+            column.enabled = not UseLuxCore()
             column.label("Bokeh Shape:")
-            sub_bokeh = column.column()
-            sub_bokeh.prop(lux_cam, "blades", text="Blades")
-            sub_bokeh.prop(lux_cam, "distribution", text="")
-            sub_bokeh.prop(lux_cam, "power", text="Power")
+
+            if UseLuxCore():
+                column.label("No LuxCore support", icon="INFO")
+            else:
+                sub_bokeh = column.column()
+                sub_bokeh.prop(lux_cam, "blades", text="Blades")
+                sub_bokeh.prop(lux_cam, "distribution", text="")
+                sub_bokeh.prop(lux_cam, "power", text="Power")
 
         if lux_cam.enable_clipping_plane or lux_cam.use_dof:
             layout.separator()
