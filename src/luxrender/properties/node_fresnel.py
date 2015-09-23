@@ -73,6 +73,16 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 
         return make_texture('fresnel', 'fresnelcolor', self.name, fresnelcolor_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        kr = self.inputs['Reflection Color'].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'fresnelcolor')
+        set_prop_tex(properties, luxcore_name, 'kr', kr)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
