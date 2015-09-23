@@ -226,7 +226,7 @@ class MaterialPreviewExporter(object):
 
         # Plane behind preview object
         size = 70
-        ypos = 20
+        ypos = 20.00001
         vertices = [
             (-size, ypos, size),
             (size, ypos, size),
