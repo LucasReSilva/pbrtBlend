@@ -110,5 +110,9 @@ class film(camera_panel):
     ]
 
     def draw_crf_preset_menu(self, context):
-        self.layout.menu('CAMERA_MT_luxrender_crf',
+        if UseLuxCore():
+            self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',
+                         text=context.camera.luxrender_camera.luxcore_imagepipeline_settings.crf_preset)
+        else:
+            self.layout.menu('CAMERA_MT_luxrender_crf',
                          text=context.camera.luxrender_camera.luxrender_film.luxrender_colorspace.crf_preset)

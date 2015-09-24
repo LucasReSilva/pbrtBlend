@@ -104,7 +104,8 @@ class tonemapping_panel(property_group_renderer):
             sub.prop(imagepipeline_settings, 'reinhard_postscale')
             sub.prop(imagepipeline_settings, 'reinhard_burn')
 
-        #self.layout.label('Analog Film Simulation:') # TODO
+        self.layout.label('Analog Film Simulation:')
+        self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf', text=imagepipeline_settings.crf_preset)
 
         # TODO: can we only show the available passes here?
         self.layout.label('Pass:')
