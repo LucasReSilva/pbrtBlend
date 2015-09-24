@@ -1468,13 +1468,29 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             else:
                 # Magic formula to compute optimal display interval (found through testing)
                 display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
-                LuxLog('Recommended minimum display interval: %.1fs' % display_interval)
+                LuxLog('Set initial display interval to %.1fs' % display_interval)
 
             # TODO: activate this once LuxCore supports pause/resume without samples loss
             #paused = False
 
+            # Cache imagepipeline settings to detect changes
+            cached_imagepipeline_properties = str(luxcore_exporter.config_exporter.convert_imagepipeline())
+
             while not self.test_break() and not done:
                 time.sleep(0.2)
+
+                # Check if imagepipeline settings have changed
+                imagepipeline_has_changed = False
+                new_imagepipeline_properties = luxcore_exporter.config_exporter.convert_imagepipeline()
+
+                if str(new_imagepipeline_properties) != cached_imagepipeline_properties:
+                    cached_imagepipeline_properties = str(new_imagepipeline_properties)
+
+                    # Safety check for old pyluxcore versions compatibility
+                    if hasattr(luxcore_session, 'Parse'): # TODO: removed once no longer needed
+                        luxcore_session.Parse(new_imagepipeline_properties)
+                        print('Set imagepipeline settings:\n%s' % cached_imagepipeline_properties)
+                        imagepipeline_has_changed = True
 
                 # TODO: activate this once LuxCore supports pause/resume without samples loss
                 '''
@@ -1494,8 +1510,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 elapsedTimeSinceStart = now - startTime
 
                 # Use user-definde display interval after the first 15 seconds
-                if elapsedTimeSinceStart > 15.0:
+                if elapsedTimeSinceStart > 15.0 and display_interval != imagepipeline_settings.displayinterval:
                     display_interval = imagepipeline_settings.displayinterval
+                    LuxLog('Set display interval to %.1fs' % display_interval)
 
                 # Update statistics
                 luxcore_session.UpdateStats()
@@ -1507,7 +1524,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # check if any halt conditions are met
                 done = self.haltConditionMet(scene, stats)
 
-                if timeSinceDisplay > display_interval:
+                if timeSinceDisplay > display_interval or imagepipeline_has_changed:
                     # Update the image
                     luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 

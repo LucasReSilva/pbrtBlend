@@ -28,51 +28,93 @@ import bpy
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UseLuxCore, pyluxcore
 from .. import LuxRenderAddon
-
-
-@LuxRenderAddon.addon_register_class
-class tile_highlighting_panel(property_group_renderer):
-    bl_space_type = 'IMAGE_EDITOR'
-    bl_region_type = 'UI'
-    bl_label = 'Tile Highlighting'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
-
-    @classmethod
-    def poll(cls, context):
-        engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
-
-        return engine_is_lux and UseLuxCore()
-
-    display_property_groups = [
-        ( ('scene',), 'luxcore_tile_highlighting', lambda: UseLuxCore()
-            and bpy.context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH' )
-    ]
-
-    def draw(self, context):
-        # Draw as normal ...
-        property_group_renderer.draw(self, context)
 
 
 @LuxRenderAddon.addon_register_class
 class rendering_controls_panel(property_group_renderer):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'
-    bl_label = 'LuxRender'
+    bl_label = 'LuxRender Statistics'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
     @classmethod
     def poll(cls, context):
         engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
-
         return engine_is_lux and UseLuxCore()
 
-    display_property_groups = [
-        ( ('scene',), 'luxcore_rendering_controls', lambda: UseLuxCore() )
-    ]
+    def draw(self, context):
+        if not UseLuxCore():
+            self.layout.label('Only available in LuxCore API mode')
+            return
+
+        box = self.layout.box()
+        for elem in context.scene.luxcore_rendering_controls.controls:
+            box.prop(context.scene.luxcore_rendering_controls, elem)
+
+        if bpy.context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
+            box = self.layout.box()
+            box.prop(context.scene.luxcore_tile_highlighting, 'use_tile_highlighting')
+
+            if context.scene.luxcore_tile_highlighting.use_tile_highlighting:
+                subbox = box.box()
+                box.prop(context.scene.luxcore_tile_highlighting, 'show_converged')
+                box.prop(context.scene.luxcore_tile_highlighting, 'show_unconverged')
+                box.prop(context.scene.luxcore_tile_highlighting, 'show_pending')
+
+
+@LuxRenderAddon.addon_register_class
+class tonemapping_panel(property_group_renderer):
+    bl_space_type = 'IMAGE_EDITOR'
+    bl_region_type = 'UI'
+    bl_label = 'LuxRender Imagepipeline'
+    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+
+    @classmethod
+    def poll(cls, context):
+        engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
+        return engine_is_lux and UseLuxCore()
 
     def draw(self, context):
-        # Draw as normal ...
-        property_group_renderer.draw(self, context)
+        if not UseLuxCore():
+            self.layout.label('Only available in LuxCore API mode')
+            return
 
+        if not hasattr(pyluxcore.RenderSession, 'Parse'):
+            self.layout.label('Outdated LuxCore version!', icon='INFO')
+            return
+
+        lux_cam = context.scene.camera.data.luxrender_camera
+        imagepipeline_settings = lux_cam.luxcore_imagepipeline_settings
+
+        self.layout.prop(imagepipeline_settings, 'displayinterval')
+
+        self.layout.label('Tonemapper:')
+        self.layout.prop(imagepipeline_settings, 'tonemapper_type')
+
+        if imagepipeline_settings.tonemapper_type == 'TONEMAP_LINEAR':
+            self.layout.prop(imagepipeline_settings, 'linear_scale')
+        elif imagepipeline_settings.tonemapper_type == 'TONEMAP_LUXLINEAR':
+            # Since fstop and exposure time should also change DOF/motion blur we don't show them here - ISO is enough
+            self.layout.prop(lux_cam, 'sensitivity')
+        elif imagepipeline_settings.tonemapper_type == 'TONEMAP_REINHARD02':
+            sub = self.layout.column(align=True)
+            sub.prop(imagepipeline_settings, 'reinhard_prescale')
+            sub.prop(imagepipeline_settings, 'reinhard_postscale')
+            sub.prop(imagepipeline_settings, 'reinhard_burn')
+
+        #self.layout.label('Analog Film Simulation:') # TODO
+
+        # TODO: can we only show the available passes here?
+        self.layout.label('Pass:')
+        self.layout.prop(imagepipeline_settings, 'output_switcher_pass')
+
+        if imagepipeline_settings.output_switcher_pass == 'IRRADIANCE':
+            sub = self.layout.column(align=True)
+            row = sub.row(align=True)
+            row.prop(imagepipeline_settings, 'contour_scale')
+            row.prop(imagepipeline_settings, 'contour_range')
+            row = sub.row(align=True)
+            row.prop(imagepipeline_settings, 'contour_steps')
+            row.prop(imagepipeline_settings, 'contour_zeroGridSize')
