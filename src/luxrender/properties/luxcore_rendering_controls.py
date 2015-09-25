@@ -42,7 +42,6 @@ class luxcore_rendering_controls(declarative_property_group):
 
     controls = [
         #'pause_render',
-        'configure_stats_label',
         'stats_samples',
         'stats_samples_per_sec',
         'stats_rays_per_sample',
@@ -64,11 +63,6 @@ class luxcore_rendering_controls(declarative_property_group):
             'name': 'Pause Render',
             'description': 'Pause rendering without losing progress',
             'default': False,
-        },
-        {
-            'type': 'text',
-            'attr': 'configure_stats_label',
-            'name': 'Statistics:',
         },
         {
             'type': 'bool',

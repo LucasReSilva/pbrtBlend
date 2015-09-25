@@ -54,6 +54,16 @@ class luxcore_opencl_devices(declarative_property_group):
         },
     ]
 
+def detect_cpu_corecount():
+    corecount = 4 # Fallback
+
+    try:
+        import multiprocessing
+        corecount = multiprocessing.cpu_count()
+    except NotImplementedError:
+        pass
+    finally:
+        return corecount
 
 @LuxRenderAddon.addon_register_class
 class luxcore_enginesettings(declarative_property_group):
@@ -68,8 +78,6 @@ class luxcore_enginesettings(declarative_property_group):
     We get this
         Engine:     [   Bidir   ]
         [x] Clamp   (    100    )
-
-    So far this is only implemented for the default controls, "advanced" users still see a mess.
     """
 
     ef_attach_to = ['Scene']
@@ -778,7 +786,7 @@ may mute lamps and caustics',
             'attr': 'native_threads_count',
             'name': 'Threads count',
             'description': 'Number of CPU threads used for the rendering',
-            'default': 4,
+            'default': detect_cpu_corecount(),
             'min': 1,
             'max': 512,
         },  

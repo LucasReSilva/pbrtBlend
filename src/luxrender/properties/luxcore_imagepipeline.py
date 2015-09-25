@@ -94,11 +94,15 @@ class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return hasattr(context, 'camera') and context.camera.luxrender_camera and \
-               context.camera.luxrender_camera.luxcore_imagepipeline_settings
+        return (hasattr(context, 'camera') or hasattr(context.scene, 'camera')) and \
+               context.camera.luxrender_camera and context.camera.luxrender_camera.luxcore_imagepipeline_settings
 
     def execute(self, context):
-        context.camera.luxrender_camera.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
+        if hasattr(context, 'camera'):
+            context.camera.luxrender_camera.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
+        elif hasattr(context.scene, 'camera'):
+            context.scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
+
         return {'FINISHED'}
 
 @LuxRenderAddon.addon_register_class
@@ -129,20 +133,18 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     alert = {}
 
     controls = [
-        'advanced',
-        # Output switcher
-        ['label_output_switcher', 'output_switcher_pass'],
-        ['contour_scale', 'contour_range'], 
-        ['contour_steps', 'contour_zeroGridSize'],
         # Tonemapper
         ['label_tonemapper', 'tonemapper_type'],
         'linear_scale',
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
+        # Output switcher
+        ['label_output_switcher', 'output_switcher_pass'],
+        ['contour_scale', 'contour_range'], 
+        ['contour_steps', 'contour_zeroGridSize'],
         # Film response
         'crf_label',
         'crf_preset_menu',
         # Intervals
-        #'spacer_intervals',
         'label_intervals',
         #['writeinterval_png', 'writeinterval_flm'],
         'displayinterval',
@@ -150,12 +152,10 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     ]
     
     visibility = {
-        'label_output_switcher': {'advanced': True},
-        'output_switcher_pass': {'advanced': True},
-        'contour_scale': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
-        'contour_range': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
-        'contour_steps': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
-        'contour_zeroGridSize': A([{'output_switcher_pass': 'IRRADIANCE'}, {'advanced': True}]),
+        'contour_scale': {'output_switcher_pass': 'IRRADIANCE'},
+        'contour_range': {'output_switcher_pass': 'IRRADIANCE'},
+        'contour_steps': {'output_switcher_pass': 'IRRADIANCE'},
+        'contour_zeroGridSize': {'output_switcher_pass': 'IRRADIANCE'},
         'linear_scale': {'tonemapper_type': 'TONEMAP_LINEAR'},
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
@@ -163,14 +163,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     }
 
     properties = [
-        {
-            'type': 'bool',
-            'attr': 'advanced',
-            'name': 'Advanced',
-            'description': 'Configure advanced settings',
-            'default': False,
-            'save_in_preset': True
-        },
         # Output switcher
         {
             'type': 'text',
@@ -339,11 +331,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'save_in_preset': True
         },
         # Update and save intervals
-        {
-            'attr': 'spacer_intervals',
-            'type': 'text',
-            'name': '',
-        },
         {
             'attr': 'label_intervals',
             'type': 'text',

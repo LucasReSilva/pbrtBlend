@@ -59,7 +59,6 @@ class ConfigExporter(object):
         self.__convert_compute_settings()
         self.__convert_film_size(film_width, film_height)
         self.__convert_accelerator()
-        self.__convert_imagepipeline()
         self.__convert_all_channels()
         self.__convert_custom_props()
 
@@ -132,72 +131,6 @@ class ConfigExporter(object):
     def __convert_film_size(self, film_width, film_height):
         self.properties.Set(pyluxcore.Property('film.width', [film_width]))
         self.properties.Set(pyluxcore.Property('film.height', [film_height]))
-
-    def __convert_imagepipeline(self):
-        if self.blender_scene.camera is None:
-            return
-    
-        imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
-        index = 0
-        prefix = 'film.imagepipeline.'
-    
-        # Output switcher
-        if imagepipeline_settings.output_switcher_pass != 'disabled':
-            channel = imagepipeline_settings.output_switcher_pass
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['OUTPUT_SWITCHER']))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.channel', [channel]))
-            index += 1
-    
-        # Tonemapper
-        tonemapper = imagepipeline_settings.tonemapper_type
-        self.properties.Set(pyluxcore.Property(prefix + str(index) + '.type', [tonemapper]))
-        # Note: TONEMAP_AUTOLINEAR has no parameters and is thus not in the if/elif block
-        if tonemapper == 'TONEMAP_LINEAR':
-            scale = imagepipeline_settings.linear_scale
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', [scale]))
-        elif tonemapper == 'TONEMAP_REINHARD02':
-            prescale = imagepipeline_settings.reinhard_prescale
-            postscale = imagepipeline_settings.reinhard_postscale
-            burn = imagepipeline_settings.reinhard_burn
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.prescale', [prescale]))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.postscale', [postscale]))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.burn', [burn]))
-        elif tonemapper == 'TONEMAP_LUXLINEAR':
-            lux_camera = self.blender_scene.camera.data.luxrender_camera
-            sensitivity = lux_camera.sensitivity
-            exposure = lux_camera.exposure_time() if not self.is_viewport_render else lux_camera.exposure_time() * 2.25
-            fstop = lux_camera.fstop
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.sensitivity', [sensitivity]))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.exposure', [exposure]))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.fstop', [fstop]))
-        index += 1
-    
-        # Camera response function
-        if imagepipeline_settings.crf_preset != 'None':
-            preset = imagepipeline_settings.crf_preset
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['CAMERA_RESPONSE_FUNC']))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.name', [preset]))
-            index += 1
-    
-        # Contour lines for IRRADIANCE pass
-        if imagepipeline_settings.output_switcher_pass == 'IRRADIANCE':
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['CONTOUR_LINES']))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.range', [imagepipeline_settings.contour_range]))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', [imagepipeline_settings.contour_scale]))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.steps', [imagepipeline_settings.contour_steps]))
-            self.properties.Set(
-                pyluxcore.Property(prefix + str(index) + '.zerogridsize', [imagepipeline_settings.contour_zeroGridSize]))
-            index += 1
-    
-        # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
-        if self.is_viewport_render or self.blender_scene.luxcore_translatorsettings.use_filesaver:
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
-            self.properties.Set(pyluxcore.Property(prefix + str(index) + '.value', [2.2]))
-            index += 1
-    
-        # Deprecated but used for backwardscompatibility
-        if getattr(self.blender_scene.camera.data.luxrender_camera.luxrender_film, 'output_alpha'):
-            self.properties.Set(pyluxcore.Property('film.alphachannel.enable', ['1']))
 
 
     def __convert_halt_conditions(self):

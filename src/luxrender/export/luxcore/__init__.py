@@ -40,7 +40,7 @@ from .meshes import MeshExporter
 from .objects import ObjectExporter
 from .textures import TextureExporter
 from .volumes import VolumeExporter
-from .utils import get_elem_key
+from .utils import get_elem_key, LightgroupCache
 
 
 class LuxCoreExporter(object):
@@ -76,7 +76,7 @@ class LuxCoreExporter(object):
         self.volume_cache = {}
 
         # Namecache to map an ascending number to each lightgroup name
-        self.lightgroup_cache = {}
+        self.lightgroup_cache = LightgroupCache(self.blender_scene.luxrender_lightgroups)
 
         # Temporary (only used during export) caches to avoid multiple exporting
         self.temp_material_cache = set()
@@ -115,8 +115,10 @@ class LuxCoreExporter(object):
 
         if luxcore_scene is None:
             image_scale = self.blender_scene.luxcore_scenesettings.imageScale / 100.0
-            if image_scale < 1:
+            if image_scale < 0.99:
                 print('All textures will be scaled down by factor %.2f' % image_scale)
+            else:
+                image_scale = 1
 
             luxcore_scene = pyluxcore.Scene(image_scale)
 
@@ -142,8 +144,10 @@ class LuxCoreExporter(object):
 
             self.convert_object(blender_object, luxcore_scene)
 
-        # Convert config at last so all lightgroups and passes are defined
+        # Convert config at last because all lightgroups and passes have to be already defined
         self.convert_config(film_width, film_height)
+        self.convert_imagepipeline()
+        self.convert_lightgroup_scales()
 
         # Debug output
         if self.blender_scene.luxcore_translatorsettings.print_config:
@@ -181,6 +185,109 @@ class LuxCoreExporter(object):
 
         self.config_exporter.convert(film_width, film_height)
         self.config_properties.Set(self.config_exporter.properties)
+
+
+    def convert_imagepipeline(self):
+        """
+        This method is not part of the config exporter because it works on the session rather than the scene,
+        so it can be updated without restarting the rendering
+        """
+        if self.blender_scene.camera is None:
+            return
+
+        temp_properties = pyluxcore.Properties()
+
+        imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
+        index = 1
+        prefix = 'film.imagepipeline.'
+
+        # Output switcher
+        if imagepipeline_settings.output_switcher_pass != 'disabled':
+            channel = imagepipeline_settings.output_switcher_pass
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['OUTPUT_SWITCHER']))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.channel', [channel]))
+            index += 1
+
+        # Tonemapper
+        tonemapper = imagepipeline_settings.tonemapper_type
+        temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', [tonemapper]))
+        # Note: TONEMAP_AUTOLINEAR has no parameters and is thus not in the if/elif block
+        if tonemapper == 'TONEMAP_LINEAR':
+            scale = imagepipeline_settings.linear_scale
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', [scale]))
+        elif tonemapper == 'TONEMAP_REINHARD02':
+            prescale = imagepipeline_settings.reinhard_prescale
+            postscale = imagepipeline_settings.reinhard_postscale
+            burn = imagepipeline_settings.reinhard_burn
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.prescale', [prescale]))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.postscale', [postscale]))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.burn', [burn]))
+        elif tonemapper == 'TONEMAP_LUXLINEAR':
+            lux_camera = self.blender_scene.camera.data.luxrender_camera
+            sensitivity = lux_camera.sensitivity
+            exposure = lux_camera.exposure_time() if not self.is_viewport_render else lux_camera.exposure_time() * 2.25
+            fstop = lux_camera.fstop
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.sensitivity', [sensitivity]))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.exposure', [exposure]))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.fstop', [fstop]))
+        index += 1
+
+        # Camera response function
+        if imagepipeline_settings.crf_preset != 'None':
+            preset = imagepipeline_settings.crf_preset
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['CAMERA_RESPONSE_FUNC']))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.name', [preset]))
+            index += 1
+
+        # Contour lines for IRRADIANCE pass
+        if imagepipeline_settings.output_switcher_pass == 'IRRADIANCE':
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['CONTOUR_LINES']))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.range', [imagepipeline_settings.contour_range]))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', [imagepipeline_settings.contour_scale]))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.steps', [imagepipeline_settings.contour_steps]))
+            temp_properties.Set(
+                pyluxcore.Property(prefix + str(index) + '.zerogridsize', [imagepipeline_settings.contour_zeroGridSize]))
+            index += 1
+
+        # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
+        if self.is_viewport_render or self.blender_scene.luxcore_translatorsettings.use_filesaver:
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.value', [2.2]))
+            index += 1
+
+        # Deprecated but used for backwardscompatibility
+        if self.blender_scene.camera.data.luxrender_camera.luxrender_film.output_alpha:
+            temp_properties.Set(pyluxcore.Property('film.alphachannel.enable', True))
+
+        self.config_properties.Set(temp_properties)
+        # For tonemapping update during rendering
+        return temp_properties
+
+
+    def convert_lightgroup_scales(self):
+        """
+        This method is not part of the config exporter because it works on the session rather than the scene,
+        so it can be updated without restarting the rendering
+
+        This method has to be called after all lights and materials have been exported since it assumes that the
+        lightgroup_cache already contains all lightgroups used in the scene
+        """
+        temp_properties = pyluxcore.Properties()
+        prefix = 'film.radiancescales.'
+
+        for lg, id in self.lightgroup_cache.get_lightgroup_id_pairs():
+            temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.enabled', lg.lg_enabled))
+            temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.globalscale', lg.gain))
+
+            if lg.use_rgb_gain:
+                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.rgbscale', list(lg.rgb_gain)))
+
+            if lg.use_temperature:
+                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.temperature', lg.temperature))
+
+        self.config_properties.Set(temp_properties)
+        # For lightgroup update during rendering
+        return temp_properties
 
 
     def convert_object(self, blender_object, luxcore_scene, update_mesh=True, update_material=True):

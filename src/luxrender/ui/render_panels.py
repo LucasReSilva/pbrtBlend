@@ -31,6 +31,9 @@ from ..extensions_framework.ui import property_group_renderer
 from ..outputs.luxcore_api import UseLuxCore
 from .. import LuxRenderAddon
 
+from .lamps import lamps_panel
+from .imageeditor_panel import imageeditor_panel
+
 
 class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_renderer):
     """
@@ -382,47 +385,112 @@ class layers(render_panel):
         col = split.column()
         col.prop(rl, "layers", text="Layer")
 
-@LuxRenderAddon.addon_register_class
-class passes_lg(render_panel):
+
+class lightgroups_base(object):
     """
-    Render passes UI panel
+    Light Groups Settings
     """
 
-    bl_label = 'LuxRender Lightgroups'
-    bl_options = {'DEFAULT_CLOSED'}
-    bl_context = "render_layer"
+    bl_label = 'LuxRender Light Groups'
 
     display_property_groups = [
         ( ('scene',), 'luxrender_lightgroups' )
     ]
 
+    is_imageeditor_panel = False
+
+    # overridden in order to draw a 'non-standard' panel
     def draw(self, context):
-        layout = self.layout
-        scene = context.scene
+        def lightgroup_icon(enabled):
+            return 'OUTLINER_OB_LAMP' if enabled else 'LAMP'
 
-        super().draw(context)
+        def settings_toggle_icon(enabled):
+            return 'TRIA_DOWN' if enabled else 'TRIA_RIGHT'
 
-        # Light groups, this is a "special" panel section
+        def draw_lightgroup(lg, lg_index=None):
+            is_default_group = lg_index is None
+
+            split = self.layout.split()
+
+            col = split.column()
+            sub = col.column(align=True)
+
+            # Upper row (enable/disable, name, remove)
+            box = sub.box()
+            row = box.row()
+            row.prop(lg, 'show_settings', icon=settings_toggle_icon(lg.show_settings), icon_only=True, emboss=False)
+            row.prop(lg, 'lg_enabled', icon=lightgroup_icon(lg.lg_enabled), icon_only=True, toggle=True)
+
+            sub_row = row.row()
+            if is_default_group:
+                sub_row.label('Default Lightgroup')
+            else:
+                sub_row.enabled = lg.lg_enabled
+                sub_row.prop(lg, 'name', text='')
+
+            if not self.is_imageeditor_panel and not is_default_group:
+                # Can't delete the default lightgroup 0, can't delete lightgroups during final render
+                row.operator('luxrender.lightgroup_remove', text="", icon="X", emboss=False).lg_index = lg_index
+
+            if lg.show_settings:
+                # Lower row (gain settings, RGB gain, temperature)
+                box = sub.box()
+                box.enabled = lg.lg_enabled
+
+                row = box.row()
+                row.prop(lg, 'gain')
+
+                if UseLuxCore():
+                    # RGB gain and temperature are not supported by Classic API
+                    row = box.row()
+                    row.prop(lg, 'use_rgb_gain')
+                    sub = row.split()
+                    sub.active = lg.use_rgb_gain
+                    sub.prop(lg, 'rgb_gain')
+
+                    row = box.row()
+                    row.prop(lg, 'use_temperature')
+                    sub = row.split()
+                    sub.active = lg.use_temperature
+                    sub.prop(lg, 'temperature', slider=True)
+
+        # Merge button
+        if not self.is_imageeditor_panel and not UseLuxCore():
+            row = self.layout.row()
+            # Lightgroup merging is not supported currently
+            row.prop(context.scene.luxrender_lightgroups, 'ignore')
+
+        # Default lightgroup (LuxCore only)
+        if UseLuxCore():
+            draw_lightgroup(context.scene.luxrender_lightgroups)
+
+        # Normal light groups, this is a "special" panel section
         for lg_index in range(len(context.scene.luxrender_lightgroups.lightgroups)):
             lg = context.scene.luxrender_lightgroups.lightgroups[lg_index]
-            row = self.layout.row()
-            row.prop(lg, 'lg_enabled', text="")
-            subrow = row.row()
-            subrow.enabled = lg.lg_enabled
-            subrow.prop(lg, 'name', text="")
+            draw_lightgroup(lg, lg_index)
 
-            for control in lg.controls:
-                self.draw_column(
-                    control,
-                    subrow.column(),
-                    lg,
-                    context,
-                    property_group=lg
-                )
+        if not self.is_imageeditor_panel:
+            self.layout.separator()
+            self.layout.operator('luxrender.lightgroup_add', text='Add Lightgroup', icon='ZOOMIN')
 
-            row.operator('luxrender.lightgroup_remove', text="", icon="ZOOMOUT").lg_index = lg_index
+        self.layout.separator()
 
-        layout.separator()  # give a little gap to seperate next panel
+
+@LuxRenderAddon.addon_register_class
+class lightgroups_renderlayer(lightgroups_base, render_panel):
+    bl_context = 'render_layer'
+
+
+@LuxRenderAddon.addon_register_class
+class lightgroups_imageeditor(lightgroups_base, imageeditor_panel):
+    is_imageeditor_panel = True
+
+
+@LuxRenderAddon.addon_register_class
+class lightgroups_lamps(lightgroups_base, lamps_panel):
+    @classmethod
+    def poll(cls, context):
+        return super().poll(context) and context.lamp.luxrender_lamp.lightgroup
 
 @LuxRenderAddon.addon_register_class
 class passes_aov(render_panel):

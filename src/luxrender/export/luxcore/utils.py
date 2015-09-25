@@ -127,3 +127,46 @@ def calc_shutter(blender_scene, lux_camera_settings):
 
 def generate_volume_name(name):
     return ToValidLuxCoreName(name + '_vol')
+
+class ExportedLightgroup(object):
+    def __init__(self, lightgroup, id, user):
+        """
+        :param id: unique lightgroup index
+        :param user: LuxCore material or light EXPORTER that uses this lightgroup
+        """
+        self.lightgroup = lightgroup
+        self.id = id
+        self.users = [user]
+
+    def add_user(self, user):
+        """
+        Add an additional user to the lightgroup
+        :param user: LuxCore material or light EXPORTER that uses this lightgroup
+        """
+        self.users.append(user)
+
+
+class LightgroupCache(object):
+    def __init__(self, default_lightgroup):
+        self.cache = {'default': ExportedLightgroup(default_lightgroup, 0, None)}
+        self.id_counter = 1
+
+    def get_id(self, lightgroup_name, blender_scene=None, user=None):
+        # If lightgroup does not exist, use the default group
+        id = 0
+
+        if lightgroup_name in self.cache:
+            exported_lightgroup = self.cache[lightgroup_name]
+            id = exported_lightgroup.id
+        elif lightgroup_name in blender_scene.luxrender_lightgroups.lightgroups:
+            assert user is not None # We need to create a new ExportedLightgroup, so the user must not be None
+
+            lightgroup = blender_scene.luxrender_lightgroups.lightgroups[lightgroup_name]
+            self.cache[lightgroup_name] = ExportedLightgroup(lightgroup, self.id_counter, user)
+            id = self.id_counter
+            self.id_counter += 1
+
+        return id
+
+    def get_lightgroup_id_pairs(self):
+        return [(exported_lightgroup.lightgroup, exported_lightgroup.id) for exported_lightgroup in self.cache.values()]
