@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-import bpy
+import bpy, bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
@@ -32,10 +32,14 @@ from ..outputs.luxcore_api import UseLuxCore, pyluxcore
 from .. import LuxRenderAddon
 
 
-@LuxRenderAddon.addon_register_class
-class rendering_controls_panel(property_group_renderer):
+class imageeditor_panel(property_group_renderer):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'
+    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+
+
+@LuxRenderAddon.addon_register_class
+class rendering_controls_panel(imageeditor_panel):
     bl_label = 'LuxRender Statistics'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
@@ -65,9 +69,7 @@ class rendering_controls_panel(property_group_renderer):
 
 
 @LuxRenderAddon.addon_register_class
-class tonemapping_panel(property_group_renderer):
-    bl_space_type = 'IMAGE_EDITOR'
-    bl_region_type = 'UI'
+class tonemapping_panel(imageeditor_panel):
     bl_label = 'LuxRender Imagepipeline'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 

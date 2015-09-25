@@ -714,17 +714,17 @@ class luxrender_volumes(declarative_property_group):
 @LuxRenderAddon.addon_register_class
 class luxrender_lightgroup_data(declarative_property_group):
     """
-    Storage class for LuxRender light groups. The
+    Storage class for LuxRender light group settings. The
     luxrender_lightgroups object will store 1 or more of
     these in its CollectionProperty 'lightgroups'.
     """
 
     ef_attach_to = []  # not attached
-    alert = {}
 
-    controls = [  # lg_enabled is drawn manually in the UI class
-                  'gain'
+    controls = [
+        # Drawn manually in the UI class
     ]
+
     properties = [
         {
             'type': 'bool',
@@ -734,15 +734,59 @@ class luxrender_lightgroup_data(declarative_property_group):
             'default': True
         },
         {
+            'type': 'bool',
+            'attr': 'show_settings',
+            'name': '',
+            'description': 'Show multiplier settings',
+            'default': True
+        },
+        {
             'type': 'float',
             'attr': 'gain',
             'name': 'Gain',
             'description': 'Overall gain for this light group',
-            'min': 0.0,
-            'soft_min': 0.0,
             'default': 1.0,
-            'precision': 4
-        }
+            'min': 0.0,
+            'soft_min': 0.01,
+            'soft_max': 10 ** 6,
+            'step': 1000,
+        },
+        # Additional LuxCore properties of lightgroups
+        {
+            'type': 'bool',
+            'attr': 'use_temperature',
+            'name': 'Temperature:',
+            'description': 'Use temperature multiplier',
+            'default': False
+        },
+        {
+            'type': 'float', # could be an int but whatever
+            'attr': 'temperature',
+            'name': 'Kelvin',
+            'description': 'Blackbody emission color in Kelvin',
+            'min': 1000,
+            'max': 10000,
+            'default': 4000,
+            'precision': 0,
+            'step': 10000,
+        },
+        {
+            'type': 'bool',
+            'attr': 'use_rgb_gain',
+            'name': 'Color:',
+            'description': 'Use RGB color multiplier',
+            'default': False
+        },
+        {
+            'type': 'float_vector',
+            'attr': 'rgb_gain',
+            'name': '',
+            'description': 'RGB gain',
+            'default': (1, 1, 1),
+            'min': 0,
+            'soft_max': 1,
+            'subtype': 'COLOR',
+        },
     ]
 
 
@@ -755,19 +799,10 @@ class luxrender_lightgroups(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        # 'lightgroups_label',
-        ['ignore',
-         'op_lg_add'],
+        # Drawn manually in ui/render_panels.py
     ]
 
-    visibility = {}
-
     properties = [
-        {
-            'type': 'text',
-            'name': 'Light groups',
-            'attr': 'lightgroups_label',
-        },
         {
             'type': 'collection',
             'ptype': luxrender_lightgroup_data,
@@ -784,8 +819,6 @@ class luxrender_lightgroups(declarative_property_group):
             'type': 'operator',
             'attr': 'op_lg_add',
             'operator': 'luxrender.lightgroup_add',
-            'text': 'Add',
-            'icon': 'ZOOMIN',
         },
         {
             'type': 'bool',
@@ -793,6 +826,67 @@ class luxrender_lightgroups(declarative_property_group):
             'name': 'Merge light groups',
             'description': 'Combine all light groups into one. Enable this for final renders, or to decrease RAM usage',
             'default': False
+        },
+        # Properties of the default lightgroup (LuxCore only)
+        {
+            'type': 'bool',
+            'attr': 'lg_enabled',
+            'name': 'Enabled',
+            'description': 'Enable this light group',
+            'default': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'show_settings',
+            'name': '',
+            'description': 'Show multiplier settings',
+            'default': True
+        },
+        {
+            'type': 'float',
+            'attr': 'gain',
+            'name': 'Gain',
+            'description': 'Overall gain for this light group',
+            'default': 1.0,
+            'min': 0.0,
+            'soft_min': 0.01,
+            'soft_max': 10 ** 6,
+            'step': 1000,
+        },
+        {
+            'type': 'bool',
+            'attr': 'use_temperature',
+            'name': 'Temperature:',
+            'description': 'Use temperature multiplier',
+            'default': False
+        },
+        {
+            'type': 'float', # could be an int but whatever
+            'attr': 'temperature',
+            'name': 'Kelvin',
+            'description': 'Blackbody emission color in Kelvin',
+            'min': 1000,
+            'max': 10000,
+            'default': 4000,
+            'precision': 0,
+            'step': 10000,
+        },
+        {
+            'type': 'bool',
+            'attr': 'use_rgb_gain',
+            'name': 'Color:',
+            'description': 'Use RGB color multiplier',
+            'default': False
+        },
+        {
+            'type': 'float_vector',
+            'attr': 'rgb_gain',
+            'name': '',
+            'description': 'RGB gain',
+            'default': (1, 1, 1),
+            'min': 0,
+            'soft_max': 1,
+            'subtype': 'COLOR',
         },
     ]
 

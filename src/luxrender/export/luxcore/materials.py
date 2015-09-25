@@ -632,26 +632,11 @@ class MaterialExporter(object):
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.power', material.luxrender_emission.power))
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.efficency', material.luxrender_emission.efficacy))
 
+                        lightgroup = material.luxrender_emission.lightgroup
+                        lightgroup_id = self.luxcore_exporter.lightgroup_cache.get_id(lightgroup, self.blender_scene, self)
+                        self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
+
                         gain = material.luxrender_emission.gain
-
-                        if not self.blender_scene.luxrender_lightgroups.ignore:
-                            lightgroup = material.luxrender_emission.lightgroup
-
-                            if lightgroup in self.luxcore_exporter.lightgroup_cache:
-                                # there is already an material with this lightgroup, use the same id
-                                lightgroup_id = self.luxcore_exporter.lightgroup_cache[lightgroup]
-                            else:
-                                # this is the first material to use this lightgroup, add an entry with a new id
-                                lightgroup_id = len(self.luxcore_exporter.lightgroup_cache)
-                                self.luxcore_exporter.lightgroup_cache[lightgroup] = lightgroup_id
-
-                            self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
-
-                            if lightgroup:
-                                # Material is assigned to a lightgroup, use lightgroup gain etc. settings
-                                lightgroup_settings = self.blender_scene.luxrender_lightgroups.lightgroups[lightgroup]
-                                gain *= lightgroup_settings.gain
-
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.gain', [gain] * 3))
 
             # alpha transparency

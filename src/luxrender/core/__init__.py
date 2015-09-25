@@ -1474,23 +1474,27 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             #paused = False
 
             # Cache imagepipeline settings to detect changes
-            cached_imagepipeline_properties = str(luxcore_exporter.config_exporter.convert_imagepipeline())
+            session_props = luxcore_exporter.convert_imagepipeline()
+            session_props.Set(luxcore_exporter.convert_lightgroup_scales())
+
+            cached_session_props = str(session_props)
 
             while not self.test_break() and not done:
                 time.sleep(0.2)
 
                 # Check if imagepipeline settings have changed
-                imagepipeline_has_changed = False
-                new_imagepipeline_properties = luxcore_exporter.config_exporter.convert_imagepipeline()
+                session_was_updated = False
+                new_session_props = luxcore_exporter.convert_imagepipeline()
+                new_session_props.Set(luxcore_exporter.convert_lightgroup_scales())
 
-                if str(new_imagepipeline_properties) != cached_imagepipeline_properties:
-                    cached_imagepipeline_properties = str(new_imagepipeline_properties)
+                if str(new_session_props) != cached_session_props:
+                    cached_session_props = str(new_session_props)
 
                     # Safety check for old pyluxcore versions compatibility
                     if hasattr(luxcore_session, 'Parse'): # TODO: removed once no longer needed
-                        luxcore_session.Parse(new_imagepipeline_properties)
-                        print('Set imagepipeline settings:\n%s' % cached_imagepipeline_properties)
-                        imagepipeline_has_changed = True
+                        luxcore_session.Parse(new_session_props)
+                        print('Set session settings:\n%s' % cached_session_props)
+                        session_was_updated = True
 
                 # TODO: activate this once LuxCore supports pause/resume without samples loss
                 '''
@@ -1524,7 +1528,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # check if any halt conditions are met
                 done = self.haltConditionMet(scene, stats)
 
-                if timeSinceDisplay > display_interval or imagepipeline_has_changed:
+                if timeSinceDisplay > display_interval or session_was_updated:
                     # Update the image
                     luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
 
@@ -1843,6 +1847,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     # store renderengine configuration of last update
     lastRenderSettings = ''
     lastVolumeSettings = ''
+    lastSessionSettings = ''
     lastHaltTime = -1
     lastHaltSamples = -1
     lastCameraSettings = ''
@@ -1907,7 +1912,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if self.lastCameraSettings == '':
             self.lastCameraSettings = newCameraSettings
-        elif self.lastCameraSettings != newCameraSettings:
+        elif self.lastCameraSettings != newCameraSettings and newCameraSettings.strip() != '':
             update_changes = UpdateChanges()
             update_changes.set_cause(camera = True)
             self.lastCameraSettings = newCameraSettings
@@ -2041,7 +2046,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 update_changes.set_cause(camera = True)
                 self.lastCameraSettings = newCameraSettings
 
-            # check for changes in volume configuration
+            # Check for changes in volume configuration
             for volume in context.scene.luxrender_volumes.volumes:
                 self.luxcore_exporter.convert_volume(volume)
 
@@ -2053,7 +2058,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 update_changes.set_cause(volumes = True)
                 self.lastVolumeSettings = newVolumeSettings
 
-            # check for changes in halt conditions
+            # Check for changes in halt conditions
             newHaltTime = context.scene.luxcore_enginesettings.halt_time_preview
             newHaltSamples = context.scene.luxcore_enginesettings.halt_samples_preview
 
@@ -2064,16 +2069,27 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.lastHaltTime = newHaltTime
             self.lastHaltSamples = newHaltSamples
 
+            # Check for config changes that need a restart of the rendering
             self.luxcore_exporter.convert_config(self.viewFilmWidth, self.viewFilmHeight)
             newRenderSettings = str(self.luxcore_exporter.config_exporter.properties)
 
             if self.lastRenderSettings == '':
                 self.lastRenderSettings = newRenderSettings
             elif self.lastRenderSettings != newRenderSettings:
-                # renderengine config has changed
                 update_changes.set_cause(config = True)
-                # save settings to compare with next update
                 self.lastRenderSettings = newRenderSettings
+
+            # Check for config changes that do not require the rendering to be restarted (tonemapping, lightgroups)
+            session_props = self.luxcore_exporter.convert_imagepipeline()
+            session_props.Set(self.luxcore_exporter.convert_lightgroup_scales())
+            newSessionSettings = str(session_props)
+
+            if self.lastSessionSettings == '':
+                self.lastSessionSettings = newSessionSettings
+            elif self.lastSessionSettings != newSessionSettings:
+                update_changes.set_cause(session = True)
+                self.lastSessionSettings = newSessionSettings
+
         except Exception as exc:
             LuxLog('Update check failed: %s' % exc)
             self.report({'ERROR'}, str(exc))
@@ -2122,6 +2138,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 self.lastRenderSettings = ''
                 self.lastVolumeSettings = ''
+                self.lastSessionSettings = ''
                 self.lastHaltTime = -1
                 self.lastHaltSamples = -1
                 self.lastCameraSettings = ''
@@ -2159,6 +2176,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 import traceback
                 traceback.print_exc()
+
+        elif update_changes.cause_session:
+            # Only update the session without restarting the rendering
+            props = self.luxcore_exporter.convert_imagepipeline()
+            props.Set(self.luxcore_exporter.convert_lightgroup_scales())
+
+            RENDERENGINE_luxrender.luxcore_session.Parse(props)
+            RENDERENGINE_luxrender.viewport_render_paused = False
+            self.luxcore_view_draw(context)
+
         else:
             # config update
             if update_changes.cause_config:
@@ -2319,6 +2346,7 @@ class UpdateChanges(object):
         self.cause_layers = False
         self.cause_materials = False
         self.cause_config = False
+        self.cause_session = False
         self.cause_objectsRemoved = False
         self.cause_volumes = False
         self.cause_haltconditions = False
@@ -2332,6 +2360,7 @@ class UpdateChanges(object):
                   layers = None,
                   materials = None, 
                   config = None,
+                  session = None,
                   objectsRemoved = None,
                   volumes = None,
                   haltconditions = None):
@@ -2353,7 +2382,9 @@ class UpdateChanges(object):
         if materials is not None:
             self.cause_materials = materials 
         if config is not None:
-            self.cause_config = config 
+            self.cause_config = config
+        if session is not None:
+            self.cause_session = session
         if objectsRemoved is not None:
             self.cause_objectsRemoved = objectsRemoved
         if volumes is not None:
@@ -2388,6 +2419,8 @@ class UpdateChanges(object):
                 print('    ' + mat.name)
         if self.cause_config:
             print('configuration was changed')
+        if self.cause_session:
+            print('session was changed')
         if self.cause_objectsRemoved:
             print('objects where removed:')
             for obj in self.removed_objects:
