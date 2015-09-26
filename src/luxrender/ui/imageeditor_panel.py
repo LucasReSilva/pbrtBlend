@@ -87,6 +87,10 @@ class tonemapping_panel(imageeditor_panel):
             self.layout.label('Outdated LuxCore version!', icon='INFO')
             return
 
+        if context.scene.camera is None:
+            self.layout.label('No camera in scene.')
+            return
+
         lux_cam = context.scene.camera.data.luxrender_camera
         imagepipeline_settings = lux_cam.luxcore_imagepipeline_settings
 
