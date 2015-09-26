@@ -98,13 +98,8 @@ class LightExporter(object):
         return [main_gain * gain_r, main_gain * gain_g, main_gain * gain_b]
 
 
-    def __convert_lightgroup(self, light):
-        lightgroup = light.luxrender_lamp.lightgroup
-        return self.luxcore_exporter.lightgroup_cache.get_id(lightgroup, self.blender_scene, self)
-
-
     def __convert_light(self, luxcore_scene, matrix):
-        # TODO: refactor this horrible... thing
+        # TODO: refactor this horrible... thing (although it's a bit better now)
 
         obj = self.blender_object
         self.__generate_light_name(obj.name)
@@ -120,7 +115,8 @@ class LightExporter(object):
             matrix = obj.matrix_world
 
         # Get lightgroup ID
-        lightgroup_id = self.__convert_lightgroup(light)
+        lightgroup = light.luxrender_lamp.lightgroup
+        lightgroup_id =  self.luxcore_exporter.lightgroup_cache.get_id(lightgroup, self.blender_scene, self)
 
         # Don't set lightgroup for sun because it might be split into sun + sky (and not for AREA because it needs a helper mat)
         if lightgroup_id != -1 and light.type != 'SUN' and not (

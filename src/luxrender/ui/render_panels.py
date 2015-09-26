@@ -28,7 +28,7 @@ import bpy, bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UseLuxCore, pyluxcore
 from .. import LuxRenderAddon
 
 from .lamps import lamps_panel
@@ -393,14 +393,14 @@ class lightgroups_base(object):
 
     bl_label = 'LuxRender Light Groups'
 
-    display_property_groups = [
-        ( ('scene',), 'luxrender_lightgroups' )
-    ]
-
     is_imageeditor_panel = False
 
     # overridden in order to draw a 'non-standard' panel
     def draw(self, context):
+        if not hasattr(pyluxcore.RenderSession, 'Parse'):
+            self.layout.label('Outdated LuxCore version!', icon='INFO')
+            return
+
         def lightgroup_icon(enabled):
             return 'OUTLINER_OB_LAMP' if enabled else 'LAMP'
 
