@@ -1937,9 +1937,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             else:
                 self.update_stats('Rendering', blender_stats)
 
-            # Update the image buffer
-            RENDERENGINE_luxrender.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
-                                                      self.viewImageBufferFloat)
+        # Update the image buffer
+        RENDERENGINE_luxrender.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
+                                                  self.viewImageBufferFloat)
 
         # Update the screen
         bufferSize = self.viewFilmWidth * self.viewFilmHeight * 3
@@ -2183,7 +2183,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             props.Set(self.luxcore_exporter.convert_lightgroup_scales())
 
             RENDERENGINE_luxrender.luxcore_session.Parse(props)
-            RENDERENGINE_luxrender.viewport_render_paused = False
             self.luxcore_view_draw(context)
 
         else:
