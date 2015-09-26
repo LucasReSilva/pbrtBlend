@@ -194,6 +194,9 @@ class LuxCoreExporter(object):
         """
         temp_properties = pyluxcore.Properties()
 
+        if self.blender_scene.camera is None:
+            return temp_properties
+
         imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
         index = 1
         prefix = 'film.imagepipeline.'
