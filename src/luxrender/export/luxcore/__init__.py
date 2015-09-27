@@ -192,10 +192,10 @@ class LuxCoreExporter(object):
         This method is not part of the config exporter because it works on the session rather than the scene,
         so it can be updated without restarting the rendering
         """
-        if self.blender_scene.camera is None:
-            return
-
         temp_properties = pyluxcore.Properties()
+
+        if self.blender_scene.camera is None:
+            return temp_properties
 
         imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
         index = 1

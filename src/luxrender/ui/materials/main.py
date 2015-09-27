@@ -375,7 +375,7 @@ class ui_luxcore_material(luxrender_material_base):
 
     @classmethod
     def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
+        if context.scene.render.engine != 'LUXRENDER_RENDER' or not UseLuxCore():
             return False
         try:
             return not context.material.luxrender_material.nodetree

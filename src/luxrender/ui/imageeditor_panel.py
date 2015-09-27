@@ -37,16 +37,16 @@ class imageeditor_panel(property_group_renderer):
     bl_region_type = 'UI'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
+    @classmethod
+    def poll(cls, context):
+        engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
+        return engine_is_lux and UseLuxCore()
+
 
 @LuxRenderAddon.addon_register_class
 class rendering_controls_panel(imageeditor_panel):
     bl_label = 'LuxRender Statistics'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
-
-    @classmethod
-    def poll(cls, context):
-        engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
-        return engine_is_lux and UseLuxCore()
 
     def draw(self, context):
         if not UseLuxCore():
@@ -73,11 +73,6 @@ class tonemapping_panel(imageeditor_panel):
     bl_label = 'LuxRender Imagepipeline'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
-    @classmethod
-    def poll(cls, context):
-        engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
-        return engine_is_lux and UseLuxCore()
-
     def draw(self, context):
         if not UseLuxCore():
             self.layout.label('Only available in LuxCore API mode')
@@ -85,6 +80,10 @@ class tonemapping_panel(imageeditor_panel):
 
         if not hasattr(pyluxcore.RenderSession, 'Parse'):
             self.layout.label('Outdated LuxCore version!', icon='INFO')
+            return
+
+        if context.scene.camera is None:
+            self.layout.label('No camera in scene.')
             return
 
         lux_cam = context.scene.camera.data.luxrender_camera

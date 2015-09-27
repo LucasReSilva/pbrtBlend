@@ -194,4 +194,7 @@ class ui_luxcore_lamp(lamps_panel):
 
     @classmethod
     def poll(cls, context):
+        if not UseLuxCore():
+            return False
+
         return super().poll(context)
