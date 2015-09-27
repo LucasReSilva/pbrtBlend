@@ -2060,18 +2060,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             update_changes.changed_materials.add(mat)
                             update_changes.set_cause(materials = True)
 
-            if bpy.data.worlds.is_updated:
-                # check for changes in volume configuration
-                for volume in context.scene.luxrender_volumes.volumes:
-                    self.luxcore_exporter.convert_volume(volume)
+            # check for changes in volume configuration
+            for volume in context.scene.luxrender_volumes.volumes:
+                self.luxcore_exporter.convert_volume(volume)
 
-                newVolumeSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
+            newVolumeSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
 
-                if self.lastVolumeSettings == '':
-                    self.lastVolumeSettings = newVolumeSettings
-                elif self.lastVolumeSettings != newVolumeSettings:
-                    update_changes.set_cause(volumes = True)
-                    self.lastVolumeSettings = newVolumeSettings
+            if self.lastVolumeSettings == '':
+                self.lastVolumeSettings = newVolumeSettings
+            elif self.lastVolumeSettings != newVolumeSettings:
+                update_changes.set_cause(volumes = True)
+                self.lastVolumeSettings = newVolumeSettings
 
             # Check for changes in halt conditions
             newHaltTime = context.scene.luxcore_enginesettings.halt_time_preview
