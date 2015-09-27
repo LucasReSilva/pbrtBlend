@@ -967,7 +967,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     mem_peak = 0
 
-    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview=False, time_until_update=-1.0, export_errors=False):
+    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview=False, time_until_update=-1.0,
+                           export_errors=False):
         """
         Returns: string of formatted statistics
         """
@@ -1928,14 +1929,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             # update statistic display in Blender
             luxcore_config = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig()
-            blender_stats = self.CreateBlenderStats(luxcore_config,
-                                                    stats,
-                                                    context.scene,
-                                                    realtime_preview = True)
-            if stop_redraw:
-                self.update_stats('Paused', blender_stats)
-            else:
-                self.update_stats('Rendering', blender_stats)
+            blender_stats = self.CreateBlenderStats(luxcore_config, stats, context.scene, realtime_preview=True)
+            status = 'Paused' if stop_redraw else 'Rendering'
+
+            if context.space_data.local_view:
+                status = '[Local] ' + status
+
+            self.update_stats(status, blender_stats)
 
         # Update the image buffer
         RENDERENGINE_luxrender.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
@@ -2315,6 +2315,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.luxcore_exporter.convert_volume(volume)
 
             updated_properties = self.luxcore_exporter.pop_updated_scene_properties()
+
+            if context.space_data.local_view:
+                # Add a uniform white background light in local view so we have a lightsource
+                updated_properties.Set(pyluxcore.Property('scene.lights.LOCALVIEW_BACKGROUND.type', 'constantinfinite'))
+            else:
+                luxcore_scene.DeleteLight('LOCALVIEW_BACKGROUND')
 
             # Debug output
             print('Updated scene properties:')
