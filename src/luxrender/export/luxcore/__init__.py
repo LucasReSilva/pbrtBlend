@@ -130,8 +130,9 @@ class LuxCoreExporter(object):
         self.__convert_all_volumes()
 
         if self.is_viewport_render and self.context.space_data.local_view:
-            # In local view, only export the active object and add a white background light
-            self.convert_object(self.context.object, luxcore_scene)
+            # In local view, add a white background light
+            for blender_object in self.context.visible_objects:
+                self.convert_object(blender_object, luxcore_scene)
 
             background_props = pyluxcore.Properties()
             background_props.Set(pyluxcore.Property('scene.lights.LOCALVIEW_BACKGROUND.type', 'constantinfinite'))
