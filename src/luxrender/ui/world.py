@@ -91,20 +91,24 @@ class volumes_base(object):
 
             # Here we draw the currently selected luxrender_volumes_data property group
             if current_vol.nodetree:
-                nodetree = bpy.data.node_groups[current_vol.nodetree]
+                self.layout.prop_search(current_vol, "nodetree", bpy.data, "node_groups")
 
-                self.layout.prop_search(current_vol, "nodetree", bpy.data, "node_groups") # TODO: remove?
+                if current_vol.nodetree in bpy.data.node_groups:
+                    nodetree = bpy.data.node_groups[current_vol.nodetree]
 
-                output_node = None
-                for node in nodetree.nodes:
-                    if node.bl_idname == 'luxrender_volume_output_node':
-                        output_node = node
-                        break
+                    output_node = None
+                    for node in nodetree.nodes:
+                        if node.bl_idname == 'luxrender_volume_output_node':
+                            output_node = node
+                            break
 
-                if output_node:
-                    self.layout.template_node_view(nodetree, output_node, output_node.inputs[0])
+                    if output_node:
+                        self.layout.template_node_view(nodetree, output_node, output_node.inputs[0])
+                    else:
+                        self.layout.label("No output node")
                 else:
-                    self.layout.label("No output node")
+                    # Nodetree name is invalid (because nodetree is missing or was renamed)
+                    self.layout.label('Invalid nodetree name, select a nodetree.', icon='ERROR')
             else:
                 # 'name' is not a member of current_vol.properties,
                 # so we draw it explicitly

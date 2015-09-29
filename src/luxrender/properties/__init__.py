@@ -64,7 +64,7 @@ def find_node(material, nodetype):
 
     nodetree_name = material.luxrender_material.nodetree
 
-    if not nodetree_name:
+    if not nodetree_name or nodetree_name not in bpy.data.node_groups:
         return None
 
     ntree = bpy.data.node_groups[nodetree_name]

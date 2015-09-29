@@ -55,6 +55,9 @@ def node_tree_selector_draw(layout, id_data, output_type):
     try:
         if id_data.luxrender_material.nodetree:
             layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups")
+
+            if id_data.luxrender_material.nodetree not in bpy.data.node_groups:
+                layout.label('Invalid nodetree name, select a nodetree.', icon='ERROR')
     except:
         return False
 
@@ -342,7 +345,9 @@ class ui_luxrender_material_node_emit(luxrender_material_base):
     def draw(self, context):
         layout = self.layout
         mat = context.material
-        panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
+
+        if mat.luxrender_material.nodetree in bpy.data.node_groups:
+            panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
 
     @classmethod
     def poll(cls, context):

@@ -59,7 +59,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
             if ma is not None:
                 nt_name = ma.luxrender_material.nodetree
 
-                if nt_name:
+                if nt_name and nt_name in bpy.data.node_groups:
                     return bpy.data.node_groups[ma.luxrender_material.nodetree], ma, ma
         # Uncomment if/when we make lamp nodes
         # elif ob and ob.type == 'LAMP':
@@ -103,7 +103,7 @@ class luxrender_vol_node_editor(bpy.types.NodeTree):
             current_vol_ind = context.scene.luxrender_volumes.volumes_index
             current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
 
-            if current_vol.nodetree:
+            if current_vol.nodetree and current_vol.nodetree in bpy.data.node_groups:
                 return bpy.data.node_groups[current_vol.nodetree], None, None # TODO context.scene? context.scene.world?
 
         return None, None, None

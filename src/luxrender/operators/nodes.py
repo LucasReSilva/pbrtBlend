@@ -124,6 +124,9 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             shader = nt.nodes.new(node_type)  # create also matnode from editor type
             shader.location = 200, 570
 
+            if ctx_mat.type == 'roughglass':
+                shader.rough = True
+
             sh_out = nt.nodes.new('luxrender_material_output_node')
             sh_out.interior_volume = ctx_mat.Interior_volume
             sh_out.exterior_volume = ctx_mat.Exterior_volume
@@ -178,10 +181,12 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
                 shader.inputs['IOR'].index = editor_type.index_floatvalue  # not fresnel IOR
 
             if 'U-Roughness' in shader.inputs:
-                shader.inputs['U-Roughness'].uroughness = editor_type.uroughness_floatvalue
+                if hasattr(editor_type, 'uroughness_floatvalue'):
+                    shader.inputs['U-Roughness'].uroughness = editor_type.uroughness_floatvalue
 
             if 'V-Roughness' in shader.inputs:
-                shader.inputs['V-Roughness'].vroughness = editor_type.vroughness_floatvalue
+                if hasattr(editor_type, 'vroughness_floatvalue'):
+                    shader.inputs['V-Roughness'].vroughness = editor_type.vroughness_floatvalue
 
             if 'Sigma' in shader.inputs:
                 shader.inputs['Sigma'].sigma = editor_type.sigma_floatvalue
@@ -194,10 +199,12 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
                 shader.multibounce = editor_type.multibounce
 
             if hasattr(shader, 'use_anisotropy'):
-                shader.use_anisotropy = editor_type.anisotropic
+                if hasattr(editor_type, 'anisotropic'):
+                    shader.use_anisotropy = editor_type.anisotropic
 
             if hasattr(shader, 'dispersion'):
-                shader.dispersion = editor_type.dispersion
+                if hasattr(editor_type, 'dispersion'):
+                    shader.dispersion = editor_type.dispersion
 
             if hasattr(shader, 'arch'):
                 shader.arch = editor_type.architectural
