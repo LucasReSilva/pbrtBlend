@@ -127,22 +127,32 @@ class LuxCoreExporter(object):
         self.convert_camera()
         luxcore_scene.Parse(self.pop_updated_scene_properties())
 
-        self.__convert_all_volumes()
+        self.convert_all_volumes()
 
-        # Materials, textures, lights and meshes are all converted by their respective Blender object
-        object_amount = len(self.blender_scene.objects)
-        object_counter = 0
+        if self.is_viewport_render and self.context.space_data.local_view:
+            # In local view, only export "local" objects and add a white background light
+            for blender_object in self.context.visible_objects:
+                self.convert_object(blender_object, luxcore_scene)
 
-        for blender_object in self.blender_scene.objects:
-            if self.renderengine.test_break():
-                print('EXPORT CANCELLED BY USER')
-                return None
+            background_props = pyluxcore.Properties()
+            background_props.Set(pyluxcore.Property('scene.lights.LOCALVIEW_BACKGROUND.type', 'constantinfinite'))
 
-            object_counter += 1
-            self.renderengine.update_stats('Exporting...', 'Object: ' + blender_object.name)
-            self.renderengine.update_progress(object_counter / object_amount)
+            self.__set_scene_properties(background_props)
+        else:
+            # Materials, textures, lights and meshes are all converted by their respective Blender object
+            object_amount = len(self.blender_scene.objects)
+            object_counter = 0
 
-            self.convert_object(blender_object, luxcore_scene)
+            for blender_object in self.blender_scene.objects:
+                if self.renderengine.test_break():
+                    print('EXPORT CANCELLED BY USER')
+                    return None
+
+                object_counter += 1
+                self.renderengine.update_stats('Exporting...', 'Object: ' + blender_object.name)
+                self.renderengine.update_progress(object_counter / object_amount)
+
+                self.convert_object(blender_object, luxcore_scene)
 
         # Convert config at last because all lightgroups and passes have to be already defined
         self.convert_config(film_width, film_height)
@@ -363,6 +373,15 @@ class LuxCoreExporter(object):
         self.__convert_element(get_elem_key(duplicator), self.dupli_cache, exporter, luxcore_scene)
 
 
+    def convert_all_volumes(self):
+        self.__convert_world_volume()
+
+        # Convert volumes from all scenes (necessary for material preview rendering)
+        for scn in bpy.data.scenes:
+            for volume in scn.luxrender_volumes.volumes:
+                self.convert_volume(volume)
+
+
     def __convert_element(self, cache_key, cache, exporter, luxcore_scene=None):
         if cache_key in cache:
             exporter = cache[cache_key]
@@ -381,15 +400,6 @@ class LuxCoreExporter(object):
     def __set_scene_properties(self, properties):
         self.updated_scene_properties.Set(properties)
         self.scene_properties.Set(properties)
-
-
-    def __convert_all_volumes(self):
-        self.__convert_world_volume()
-
-        # Convert volumes from all scenes (necessary for material preview rendering)
-        for scn in bpy.data.scenes:
-            for volume in scn.luxrender_volumes.volumes:
-                self.convert_volume(volume)
 
 
     def __convert_world_volume(self):
