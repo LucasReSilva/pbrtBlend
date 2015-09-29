@@ -208,7 +208,7 @@ class LuxCoreExporter(object):
             return temp_properties
 
         imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
-        index = 1
+        index = 0
         prefix = 'film.imagepipeline.'
 
         # Output switcher
@@ -264,10 +264,6 @@ class LuxCoreExporter(object):
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', ['GAMMA_CORRECTION']))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.value', [2.2]))
             index += 1
-
-        # Deprecated but used for backwardscompatibility
-        if self.blender_scene.camera.data.luxrender_camera.luxrender_film.output_alpha:
-            temp_properties.Set(pyluxcore.Property('film.alphachannel.enable', True))
 
         self.config_properties.Set(temp_properties)
         # For tonemapping update during rendering
