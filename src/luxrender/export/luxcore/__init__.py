@@ -208,7 +208,7 @@ class LuxCoreExporter(object):
             return temp_properties
 
         imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
-        index = 1
+        index = 0
         prefix = 'film.imagepipeline.'
 
         # Output switcher
