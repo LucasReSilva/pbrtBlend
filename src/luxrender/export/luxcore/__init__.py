@@ -265,10 +265,6 @@ class LuxCoreExporter(object):
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.value', [2.2]))
             index += 1
 
-        # Deprecated but used for backwardscompatibility
-        if self.blender_scene.camera.data.luxrender_camera.luxrender_film.output_alpha:
-            temp_properties.Set(pyluxcore.Property('film.alphachannel.enable', True))
-
         self.config_properties.Set(temp_properties)
         # For tonemapping update during rendering
         return temp_properties
