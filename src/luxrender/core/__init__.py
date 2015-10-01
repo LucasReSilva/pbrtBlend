@@ -1920,22 +1920,23 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.luxcore_view_update(context, update_changes)
 
         # Update statistics
-        if RENDERENGINE_luxrender.viewport_render_active and not RENDERENGINE_luxrender.viewport_render_paused:
+        if RENDERENGINE_luxrender.viewport_render_active:
             RENDERENGINE_luxrender.luxcore_session.UpdateStats()
             stats = RENDERENGINE_luxrender.luxcore_session.GetStats()
 
             stop_redraw = (context.scene.luxrender_engine.preview_stop or
                     self.haltConditionMet(context.scene, stats, realtime_preview = True))
 
-            # update statistic display in Blender
-            luxcore_config = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig()
-            blender_stats = self.CreateBlenderStats(luxcore_config, stats, context.scene, realtime_preview=True)
-            status = 'Paused' if stop_redraw else 'Rendering'
+            if not RENDERENGINE_luxrender.viewport_render_paused:
+                # update statistic display in Blender
+                luxcore_config = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig()
+                blender_stats = self.CreateBlenderStats(luxcore_config, stats, context.scene, realtime_preview=True)
+                status = 'Paused' if stop_redraw else 'Rendering'
 
-            if context.space_data.local_view:
-                status = '[Local] ' + status
+                if context.space_data.local_view:
+                    status = '[Local] ' + status
 
-            self.update_stats(status, blender_stats)
+                self.update_stats(status, blender_stats)
 
         # Update the image buffer
         RENDERENGINE_luxrender.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
