@@ -114,6 +114,7 @@ class luxcore_enginesettings(declarative_property_group):
         ['label_filter_width', 'filter_width'],
         # Accelerator settings
         ['label_accelerator_type', 'instancing'],
+        ['label_lightstrategy_type', 'lightstrategy_type'],
         # Kernel cache
         ['label_kernelcache', 'kernelcache'],
         # BIASPATH specific halt condition
@@ -186,10 +187,14 @@ class luxcore_enginesettings(declarative_property_group):
         'label_filter_type': {'advanced': True},
         'filter_type': {'advanced': True},
         # don't show filter width if NONE filter is selected
+        'label_filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
         'filter_width': {'filter_type': O(['BLACKMANHARRIS', 'MITCHELL', 'MITCHELL_SS', 'BOX', 'GAUSSIAN'])},
         # Accelerator settings
         'label_accelerator_type': {'advanced': True},
         'instancing': {'advanced': True},
+        # Light strategy
+        'label_lightstrategy_type': {'advanced': True},
+        'lightstrategy_type': {'advanced': True},
         # Kernel cache
         'label_kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}, {'device': 'OCL'}]),
         'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}, {'device': 'OCL'}]),
@@ -754,6 +759,28 @@ may mute lamps and caustics',
             'name': 'Use Instancing',
             'description': 'Lower memory usage for instances (like particles), but also lower rendering speed',
             'default': True,
+            'save_in_preset': True
+        },
+        # Light strategy
+        {
+            'type': 'text',
+            'attr': 'label_lightstrategy_type',
+            'name': 'Light Strategy:',
+        },
+        {
+            'type': 'enum',
+            'attr': 'lightstrategy_type',
+            'name': '',
+            'description': 'Light sampling strategy type',
+            'default': 'LOG_POWER',
+            'items': [
+                ('LOG_POWER', 'Log Power', 'Sample lights according to their brightness, but weighting very bright '
+                                           'lights not much more than dim lights (recommended when using environment '
+                                           'lights (hemi/sky) plus few small light sources)'),
+                ('POWER', 'Power', 'Sample lights according to their brightness (recommended when using very bright '
+                                   'lights (e.g. sun) together with highpoly meshlights with more than about 10 tris)'),
+                ('UNIFORM', 'Uniform', 'Sample all lights equally, not according to their brightness')
+            ],
             'save_in_preset': True
         },
         # Kernel cache

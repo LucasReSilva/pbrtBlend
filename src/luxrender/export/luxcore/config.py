@@ -273,6 +273,9 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('bidirvm.startradius.scale',
                                                  [engine_settings.bidirvm_startradius_scale]))
             self.properties.Set(pyluxcore.Property('bidirvm.alpha', [engine_settings.bidirvm_alpha]))
+
+        # Light strategy
+        self.properties.Set(pyluxcore.Property('lightstrategy.type', engine_settings.lightstrategy_type))
     
     
     def __convert_realtime_settings(self):
