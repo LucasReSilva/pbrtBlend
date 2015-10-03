@@ -178,7 +178,7 @@ class ConfigExporter(object):
         engine = engine_settings.renderengine_type
         device = engine_settings.device_preview if self.is_viewport_render else engine_settings.device
 
-        if engine == 'BIASPATH' and self.is_viewport_render:
+        if engine == 'BIASPATH' and self.is_viewport_render and engine_settings.biaspath_use_path_in_viewport:
             engine = 'PATH'
 
         # Set engine type

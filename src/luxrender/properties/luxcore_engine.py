@@ -248,6 +248,14 @@ class luxcore_enginesettings(declarative_property_group):
             'default': False,
         },
         {
+            'type': 'bool',
+            'attr': 'biaspath_use_path_in_viewport',
+            'name': 'Use Path in Viewport',
+            'description': 'Use the Path renderengine instead of Biased Path for viewport rendering (Biased Path is '
+                           'not well suited for interactive rendering due to the tiled rendering)',
+            'default': True,
+        },
+        {
             'type': 'text',
             'attr': 'label_renderengine_type',
             'name': 'Engine:',
