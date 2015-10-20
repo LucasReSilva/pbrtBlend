@@ -28,7 +28,7 @@
 import bpy
 
 from ..extensions_framework import declarative_property_group
-from ..extensions_framework.validate import Logic_AND as A
+from ..extensions_framework.validate import Logic_AND as A, Logic_OR as O
 
 from .. import LuxRenderAddon
 
@@ -135,7 +135,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     controls = [
         # Tonemapper
         ['label_tonemapper', 'tonemapper_type'],
-        'linear_scale',
+        ['spacer', 'use_auto_linear'],
+        ['spacer', 'linear_scale'],
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
         # Output switcher
         ['label_output_switcher', 'output_switcher_pass'],
@@ -156,6 +157,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'contour_range': {'output_switcher_pass': 'IRRADIANCE'},
         'contour_steps': {'output_switcher_pass': 'IRRADIANCE'},
         'contour_zeroGridSize': {'output_switcher_pass': 'IRRADIANCE'},
+        'use_auto_linear': {'tonemapper_type': O(['TONEMAP_LINEAR', 'TONEMAP_LUXLINEAR'])},
         'linear_scale': {'tonemapper_type': 'TONEMAP_LINEAR'},
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
@@ -163,6 +165,11 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     }
 
     properties = [
+        {
+            'type': 'text',
+            'attr': 'spacer',
+            'name': '',
+        },
         # Output switcher
         {
             'type': 'text',
@@ -235,7 +242,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'type': 'int',
             'attr': 'contour_zeroGridSize',
             'name': 'Grid Size',
-            'description': 'size of the black grid to draw on image where irradiance values are not avilable (-1 => no grid, 0 => all black, >0 => size of the black grid)',
+            'description': 'size of the black grid to draw on image where irradiance values are not avilable '
+                           '(-1 => no grid, 0 => all black, >0 => size of the black grid)',
             'default': 8,
             'min': -1,
             'soft_min': -1,
@@ -253,10 +261,10 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'attr': 'tonemapper_type',
             'name': '',
             'description': 'The tonemapper converts the image from HDR to LDR',
-            'default': 'TONEMAP_AUTOLINEAR',
+            'default': 'TONEMAP_LINEAR',
             'items': [
-                ('TONEMAP_AUTOLINEAR', 'Linear (Auto)', 'Simple auto-exposure'),
-                ('TONEMAP_LINEAR', 'Linear', 'Brightness is controlled by the scale value'),
+                ('TONEMAP_LINEAR', 'Linear', 'Brightness is controlled by the scale value, can be set to auto-detect '
+                                             'optimal brightness'),
                 ('TONEMAP_LUXLINEAR', 'Linear (Camera Settings)', 'Uses camera settings (ISO, f-stop and shuttertime)'),
                 ('TONEMAP_REINHARD02', 'Reinhard', 'Non-linear tonemapper that adapts to the image brightness'),
             ],
@@ -264,15 +272,23 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         },
         # Linear tonemapper settings
         {
+            'type': 'bool',
+            'attr': 'use_auto_linear',
+            'name': 'Auto',
+            'description': 'Auto-detect the optimal image brightness',
+            'default': True,
+            'save_in_preset': True
+        },
+        {
             'type': 'float',
             'attr': 'linear_scale',
-            'name': 'Brightness',
-            'description': 'Brightness factor of the image',
+            'name': 'Gain',
+            'description': 'Brightness multiplier',
             'default': 1.0,
             'min': 0.0,
-            'soft_min': 0.001,
+            'soft_min': 0.00001,
             'soft_max': 100.0,
-            'step': 100.0,
+            'step': 1.0,
             'save_in_preset': True
         },
         # Reinhard tonemapper settings
@@ -370,7 +386,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'type': 'bool',
             'attr': 'fast_initial_preview',
             'name': 'Fast Initial Preview',
-            'description': 'Update the image continuously for the first 15 seconds of the rendering. Not used when rendering animations',
+            'description': 'Update the image continuously for the first 15 seconds of the rendering. Not used when '
+                           'rendering animations',
             'default': True,
             'save_in_preset': True
         },
