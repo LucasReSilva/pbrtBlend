@@ -220,6 +220,11 @@ class LuxCoreExporter(object):
 
         # Tonemapper
         tonemapper = imagepipeline_settings.tonemapper_type
+
+        if tonemapper in ['TONEMAP_LINEAR', 'TONEMAP_LUXLINEAR'] and imagepipeline_settings.use_auto_linear:
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'TONEMAP_AUTOLINEAR'))
+            index += 1
+
         temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', [tonemapper]))
         # Note: TONEMAP_AUTOLINEAR has no parameters and is thus not in the if/elif block
         if tonemapper == 'TONEMAP_LINEAR':
