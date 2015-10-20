@@ -135,8 +135,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     controls = [
         # Tonemapper
         ['label_tonemapper', 'tonemapper_type'],
-        ['spacer', 'use_auto_linear'],
-        ['spacer', 'linear_scale'],
+        ['linear_scale', 'use_auto_linear'],
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
         # Output switcher
         ['label_output_switcher', 'output_switcher_pass'],
@@ -165,11 +164,6 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     }
 
     properties = [
-        {
-            'type': 'text',
-            'attr': 'spacer',
-            'name': '',
-        },
         # Output switcher
         {
             'type': 'text',
