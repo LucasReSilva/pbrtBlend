@@ -127,6 +127,17 @@ class luxrender_node_category_material(NodeCategory):
         return context.space_data.tree_type == 'luxrender_material_nodes'
 
 
+class Separator(NodeItemCustom):
+    # NodeItemCustom is not documented anywhere so this code is a bit of guesswork
+    def draw_separator(self, self2, layout, context):
+        layout.separator()
+
+    def __init__(self, poll=None, draw=None):
+        if draw is None:
+            draw = self.draw_separator
+        super().__init__(poll, draw)
+
+
 luxrender_node_categories_material = [
     # elements that make no sense for materials are disabled or removed
 
@@ -155,8 +166,9 @@ luxrender_node_categories_material = [
     ]),
 
     luxrender_node_category_material("LUX_TEXTURE", "Texture", items=[
-        NodeItem("luxrender_texture_blender_image_map_node", label="Blender Image Map"),
+        NodeItem("luxrender_texture_blender_image_map_node", label="Image Map"),
         NodeItem("luxrender_texture_bump_map_node", label="Bump Map"),
+        Separator(),
         NodeItem("luxrender_texture_blender_blend_node", label="Blend"),
         NodeItem("luxrender_texture_brick_node", label="Brick"),
         NodeItem("luxrender_texture_checker_node", label="Checkerboard"),
@@ -209,6 +221,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_constant_node", label="Fresnel Value", settings={
             "variant": repr("fresnel"),
             }),
+        Separator(),
         NodeItem("luxrender_texture_cauchy_node"),
         NodeItem("luxrender_texture_sellmeier_node"),
     ]),

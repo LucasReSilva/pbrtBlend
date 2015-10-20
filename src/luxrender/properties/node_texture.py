@@ -704,7 +704,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     """Blender image map texture node"""
     bl_idname = 'luxrender_texture_blender_image_map_node'
-    bl_label = 'Blender Image Map Texture'
+    bl_label = 'Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
@@ -718,16 +718,15 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     image = bpy.props.StringProperty(default='', update=update_image)
 
     channel_items = [
-        ('default', 'Default', ''),
-        ('red', 'Red', ''),
-        ('green', 'Green', ''),
-        ('blue', 'Blue', ''),
-        ('alpha', 'Alpha', ''),
-        ('mean', 'Mean', ''),
-        ('colored_mean', 'Colored Mean', ''),
-        ('rgb', 'RGB', '')
+        ('rgb', 'RGB', 'Default, use all color channels'),
+        ('red', 'Red', 'Use only the red color channel'),
+        ('green', 'Green', 'Use only the green color channel'),
+        ('blue', 'Blue', 'Use only the blue color channel'),
+        ('alpha', 'Alpha', 'Use only the alpha channel'),
+        ('mean', 'Mean', 'Greyscale'),
+        ('colored_mean', 'Colored Mean', 'Greyscale'),
     ]
-    channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='default')
+    channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='rgb')
 
     gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, max=10.0, description='Brightness multiplier')
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0, description='Gamma correction to apply')
