@@ -33,6 +33,10 @@ from .. import LuxRenderAddon
 class hair_panel(bl_ui.properties_particle.ParticleButtonsPanel, property_group_renderer):
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
+    @classmethod
+    def poll(cls, context):
+        return super().poll(context) and context.particle_settings.type == 'HAIR'
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_ui_controls(hair_panel):

@@ -712,10 +712,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Color'].enabled = not self.is_normal_map
         self.outputs['Bump'].enabled = self.is_normal_map
 
-    def update_image(self, context):
-        self.bl_label = self.image
-
-    image = bpy.props.StringProperty(default='', update=update_image)
+    image = bpy.props.StringProperty(default='')
 
     channel_items = [
         ('rgb', 'RGB', 'Default, use all color channels'),
