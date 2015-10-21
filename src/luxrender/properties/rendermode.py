@@ -304,6 +304,11 @@ class luxrender_rendermode(declarative_property_group):
             if self.rendermode in ['luxcorebiaspath', 'luxcorebiaspathocl']:
                 luxcore_params = '" "'.join((luxcore_params, 'tile.multipass.enable = 1'))
 
+            # Set native  threadcount when manually set
+            if not bpy.context.scene.luxrender_engine.threads_auto:
+                luxcore_native_threads = "native.threads.count = " +  str(bpy.context.scene.luxrender_engine.threads)
+                luxcore_params = '" "'.join((luxcore_params, luxcore_native_threads))
+
             # Finally add custom properties
             luxcore_params = '" "'.join([luxcore_params] + self.luxcore_custom_properties.split("|"))
             renderer_params.add_string('config', luxcore_params)
