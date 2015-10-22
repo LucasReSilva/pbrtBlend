@@ -326,15 +326,13 @@ compatible("properties_data_speaker")
 
 # To draw the preview pause button
 def DrawButtonPause(self, context):
-    layout = self.layout
     scene = context.scene
 
-    if scene.render.engine == "LUXRENDER_RENDER":
+    if scene.render.engine == "LUXRENDER_RENDER" and UseLuxCore():
         view = context.space_data
 
         if view.viewport_shade == "RENDERED":
-            layout.prop(scene.luxrender_engine, "preview_stop", icon="PAUSE", text="")
-
+            self.layout.prop(scene.luxrender_engine, "preview_stop", icon="PAUSE", text="")
 
 _register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
 
@@ -1607,9 +1605,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if channels.RGBA:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGBA', channels.saveToDisk)
-        if channels.RGB_TONEMAPPED:
-            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
-                                       'RGB_TONEMAPPED', channels.saveToDisk)
+        #if channels.RGB_TONEMAPPED:
+        #    self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
+        #                               'RGB_TONEMAPPED', channels.saveToDisk)
         if channels.RGBA_TONEMAPPED:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGBA_TONEMAPPED', channels.saveToDisk)

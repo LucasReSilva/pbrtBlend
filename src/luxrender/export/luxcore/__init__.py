@@ -77,6 +77,8 @@ class LuxCoreExporter(object):
 
         # Namecache to map an ascending number to each lightgroup name
         self.lightgroup_cache = LightgroupCache(self.blender_scene.luxrender_lightgroups)
+        # Cache defined passes to avoid multiple definitions
+        self.passes_cache = set()
 
         # Temporary (only used during export) caches to avoid multiple exporting
         self.temp_material_cache = set()

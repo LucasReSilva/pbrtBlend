@@ -912,10 +912,10 @@ class luxrender_channels(declarative_property_group):
         'label_unsupported_engines',
         'spacer',
         'label_info_film',
-        'RGB',
-        'RGBA',
         'RGB_TONEMAPPED',
         'RGBA_TONEMAPPED',
+        'RGB',
+        'RGBA',
         'ALPHA',
         'label_info_material',
         'MATERIAL_ID',
@@ -969,7 +969,7 @@ class luxrender_channels(declarative_property_group):
         # AOVs
         'RGB': {'enable_aovs': True},
         'RGBA': {'enable_aovs': True},
-        'RGB_TONEMAPPED': {'enable_aovs': True},
+        'RGB_TONEMAPPED': False,
         'RGBA_TONEMAPPED': {'enable_aovs': True},
         'ALPHA': {'enable_aovs': True},
         'DEPTH': {'enable_aovs': True},
@@ -1121,7 +1121,7 @@ class luxrender_channels(declarative_property_group):
             'attr': 'RGB_TONEMAPPED',
             'name': 'RGB Tonemapped',
             'description': 'Tonemapped RGB values (LDR)',
-            'default': False
+            'default': True
         },
         {
             'type': 'bool',
