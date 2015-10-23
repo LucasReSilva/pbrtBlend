@@ -69,6 +69,10 @@ class ConfigExporter(object):
         """
         Sets configuration properties for LuxCore AOV output
         """
+        if channelName in self.luxcore_exporter.passes_cache:
+            return
+        else:
+            self.luxcore_exporter.passes_cache.add(channelName)
 
         # the OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
         engine = self.__get_engine()
@@ -323,6 +327,9 @@ class ConfigExporter(object):
 
 
     def __convert_all_channels(self):
+        # Convert it so it can be saved to the correct filepath
+        self.convert_channel('RGB_TONEMAPPED')
+
         if self.blender_scene.camera is None:
             return
 
@@ -330,14 +337,13 @@ class ConfigExporter(object):
         output_switcher_channel = luxrender_camera.luxcore_imagepipeline_settings.output_switcher_pass
         channels = self.blender_scene.luxrender_channels
 
-        if channels.enable_aovs and not self.is_viewport_render and (
-                    channels.import_into_blender or channels.saveToDisk):
+        if channels.enable_aovs and (channels.import_into_blender or channels.saveToDisk):
             if channels.RGB:
                 self.convert_channel('RGB')
             if channels.RGBA:
                 self.convert_channel('RGBA')
-            if channels.RGB_TONEMAPPED:
-                self.convert_channel('RGB_TONEMAPPED')
+            #if channels.RGB_TONEMAPPED:
+            #    self.convert_channel('RGB_TONEMAPPED')
             if channels.RGBA_TONEMAPPED:
                 self.convert_channel('RGBA_TONEMAPPED')
             if channels.ALPHA:
