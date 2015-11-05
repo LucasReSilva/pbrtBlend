@@ -170,7 +170,7 @@ class LuxCoreExporter(object):
         export_time = time.time() - start_time
         print('Export finished (%.1fs)' % export_time)
 
-        if self.blender_scene.luxcore_enginesettings.device == 'CPU':
+        if self.config_exporter.get_engine().endswith('CPU'):
             message = 'Starting LuxRender...'
         else:
             message = 'Compiling OpenCL Kernels...'
