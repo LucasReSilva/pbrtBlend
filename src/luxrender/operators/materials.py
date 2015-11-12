@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond
+# Doug Hammond, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -32,6 +32,8 @@ import json, math, os, mathutils
 from .. import LuxRenderAddon
 from ..outputs import LuxLog, LuxManager
 from ..export import materials as export_materials
+
+from .cycles_converter import cycles_converter
 
 
 @LuxRenderAddon.addon_register_class
@@ -459,179 +461,6 @@ def material_converter(report, scene, blender_mat):
     except Exception as err:
         report({'ERROR'}, 'Cannot convert material: %s' % err)
         # print('Material conversion failed on line %d' % err.__traceback__.tb_lineno)
-        return {'CANCELLED'}
-
-def cycles_converter(report, blender_mat):
-    def convert_rgba_to_rgb(color):
-        return color[:3] if color is not None else None
-
-    def get_linked_node(socket):
-        if socket.is_linked:
-            return socket.links[0].from_node
-        else:
-            return None
-
-    def copy_socket_properties(lux_node, socket_index, linked_node=None, default_value=None):
-        if linked_node is not None:
-            # Create the link
-            lux_nodetree.links.new(linked_node.outputs[0], lux_node.inputs[socket_index])
-        elif default_value is not None:
-            # Set default value of the socket
-            lux_node.inputs[socket_index].default_value = default_value
-
-    def convert_socket(socket, lux_nodetree):
-        if socket.is_linked:
-            node = socket.links[0].from_node
-            # Get from_socket information, for nodes with multiple outputs (e.g. image map with color and alpha)
-            from_socket = socket.links[0].from_socket
-        elif hasattr(socket, 'default_value'):
-            return None, socket.default_value
-        else:
-            # Sockets like NodeSocketShader do not have a default value
-            return None, None
-
-        lux_node = None
-
-        if node.type == 'OUTPUT_MATERIAL':
-            pass # Output is exported before iterative export
-
-        ### Materials ###
-        elif node.type == 'BSDF_DIFFUSE':
-            lux_node = lux_nodetree.nodes.new('luxrender_material_matte_node')
-
-            # Color
-            linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
-            # The default value of a Cycles color is always RGBA, but we only need RGB
-            default_value = convert_rgba_to_rgb(default_value)
-            copy_socket_properties(lux_node, 0, linked_node, default_value)
-
-        elif node.type == 'BSDF_GLOSSY':
-            lux_node = lux_nodetree.nodes.new('luxrender_material_metal2_node')
-
-            # Color
-            linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
-            # The default value of a Cycles color is always RGBA, but we only need RGB
-            default_value = convert_rgba_to_rgb(default_value)
-            copy_socket_properties(lux_node, 0, linked_node, default_value)
-
-            # Roughness
-            linked_node, default_value = convert_socket(node.inputs['Roughness'], lux_nodetree)
-            copy_socket_properties(lux_node, 2, linked_node, default_value)
-
-        elif node.type == 'MIX_SHADER':
-            amount_node = get_linked_node(node.inputs['Fac'])
-            mat1_node = get_linked_node((node.inputs[1]))
-            mat2_node = get_linked_node((node.inputs[2]))
-
-            if (amount_node and mat1_node and mat2_node) and (
-                    amount_node.type in ('FRESNEL', 'LAYER_WEIGHT') and
-                    mat1_node.type == 'BSDF_DIFFUSE' and mat2_node.type == 'BSDF_GLOSSY'):
-                # Create a LuxRender glossy material
-                lux_node = lux_nodetree.nodes.new('luxrender_material_glossy_node')
-
-                # Diffuse Color (from BSDF_DIFFUSE)
-                linked_node, default_value = convert_socket(mat1_node.inputs['Color'], lux_nodetree)
-                # The default value of a Cycles color is always RGBA, but we only need RGB
-                default_value = convert_rgba_to_rgb(default_value)
-                copy_socket_properties(lux_node, 0, linked_node, default_value)
-
-                # Roughness (from BSDF_GLOSSY)
-                linked_node, default_value = convert_socket(mat2_node.inputs['Roughness'], lux_nodetree)
-                copy_socket_properties(lux_node, 6, linked_node, default_value)
-            else:
-                # "Normal" mix material, no special treatment
-                lux_node = lux_nodetree.nodes.new('luxrender_material_mix_node')
-                # Amount
-                linked_node_amount, default_value_amount = convert_socket(node.inputs['Fac'], lux_nodetree)
-                copy_socket_properties(lux_node, 0, linked_node_amount, default_value_amount)
-                # Material 1
-                linked_node_1, default_value_1 = convert_socket(node.inputs[1], lux_nodetree)
-                copy_socket_properties(lux_node, 1, linked_node_1, default_value_1)
-                # Material 2
-                linked_node_2, default_value_2 = convert_socket(node.inputs[2], lux_nodetree)
-                copy_socket_properties(lux_node, 2, linked_node_2, default_value_2)
-
-        elif node.type == 'BSDF_TRANSPARENT':
-            if node.inputs['Color'].default_value[:3] == (1, 1, 1):
-                # In Lux, we ohly have the Null materials as an equivalent to a fully transparent material
-                lux_node = lux_nodetree.nodes.new('luxrender_material_null_node')
-            # TODO: find an approximation to Cycles' transparent material with non-white colors
-
-        elif node.type == 'BSDF_GLASS':
-            lux_node = lux_nodetree.nodes.new('luxrender_material_glass_node')
-
-            # Color (Transmission)
-            linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
-            # The default value of a Cycles color is always RGBA, but we only need RGB
-            default_value = convert_rgba_to_rgb(default_value)
-            copy_socket_properties(lux_node, 0, linked_node, default_value)
-
-            # Roughness
-            linked_node, default_value = convert_socket(node.inputs['Roughness'], lux_nodetree)
-
-            if default_value != 0:
-                # Use roughness
-                lux_node.rough = True
-                copy_socket_properties(lux_node, 6, linked_node, default_value)
-
-            # IOR
-            linked_node, default_value = convert_socket(node.inputs['IOR'], lux_nodetree)
-            copy_socket_properties(lux_node, 2, linked_node, default_value)
-
-        ### Textures ###
-        elif node.type == 'TEX_IMAGE':
-            lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_image_map_node')
-
-            # Selected Blender image
-            lux_node.image = node.image.name
-
-            # Gamma (from color space)
-            lux_node.gamma = 2.2 if node.color_space == 'COLOR' else 1
-
-            # Alpha handling (if alpha output of TEX_IMAGE is used)
-            if from_socket.name == 'Alpha':
-                lux_node.channel = 'alpha'
-
-        else:
-            # In case of an unkown node, do nothing
-            print('WARNING: Unsupported node type %s' % node.type)
-            return None, None
-
-        if lux_node:
-            # Copy properties shared by all nodes
-            lux_node.location = node.location
-
-        return lux_node, None
-
-    try:
-        # Create Lux nodetree
-        lux_nodetree = bpy.data.node_groups.new(blender_mat.name, type='luxrender_material_nodes')
-        lux_nodetree.use_fake_user = True
-        blender_mat.luxrender_material.nodetree = lux_nodetree.name
-
-        # Find active Cycles output node
-        output = None
-
-        for node in blender_mat.node_tree.nodes:
-            if node.type == 'OUTPUT_MATERIAL' and node.is_active_output:
-                output = node
-                break
-
-        # Convert surface socket
-        first_surface_node, default_value = convert_socket(output.inputs['Surface'], lux_nodetree)
-
-        # Create Lux output node
-        lux_output = lux_nodetree.nodes.new('luxrender_material_output_node')
-        lux_output.location = output.location
-        # Connect Lux output to first converted node
-        lux_nodetree.links.new(first_surface_node.outputs[0], lux_output.inputs[0])
-
-        report({'INFO'}, 'Converted Cycles nodetree "%s"' % blender_mat.node_tree.name)
-        return {'FINISHED'}
-    except Exception as err:
-        report({'ERROR'}, 'Cannot convert nodetree "%s": %s' % (blender_mat.node_tree.name, err))
-        import traceback
-        traceback.print_exc()
         return {'CANCELLED'}
 
 
