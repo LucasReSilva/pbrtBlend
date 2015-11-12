@@ -473,6 +473,8 @@ def cycles_converter(report, blender_mat):
     def convert_socket(socket, lux_nodetree):
         if socket.is_linked:
             node = socket.links[0].from_node
+            # Get from_socket information, for nodes with multiple outputs (e.g. image map with color and alpha)
+            from_socket = socket.links[0].from_socket
         elif hasattr(socket, 'default_value'):
             return None, socket.default_value
         else:
@@ -538,7 +540,9 @@ def cycles_converter(report, blender_mat):
             # Gamma (from color space)
             lux_node.gamma = 2.2 if node.color_space == 'COLOR' else 1
 
-            # TODO: Alpha handling (if alpha output of TEX_IMAGE is used)
+            # Alpha handling (if alpha output of TEX_IMAGE is used)
+            if from_socket.name == 'Alpha':
+                lux_node.channel = 'alpha'
 
         else:
             # In case of an unkown node, do nothing
