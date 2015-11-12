@@ -462,6 +462,9 @@ def material_converter(report, scene, blender_mat):
         return {'CANCELLED'}
 
 def cycles_converter(report, blender_mat):
+    def convert_rgba_to_rgb(color):
+        return color[:3] if color is not None else None
+
     def get_linked_node(socket):
         if socket.is_linked:
             return socket.links[0].from_node
@@ -499,7 +502,7 @@ def cycles_converter(report, blender_mat):
             # Color
             linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
             # The default value of a Cycles color is always RGBA, but we only need RGB
-            default_value = default_value[:3] if default_value is not None else None
+            default_value = convert_rgba_to_rgb(default_value)
             copy_socket_properties(lux_node, 0, linked_node, default_value)
 
         elif node.type == 'BSDF_GLOSSY':
@@ -508,7 +511,7 @@ def cycles_converter(report, blender_mat):
             # Color
             linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
             # The default value of a Cycles color is always RGBA, but we only need RGB
-            default_value = default_value[:3] if default_value is not None else None
+            default_value = convert_rgba_to_rgb(default_value)
             copy_socket_properties(lux_node, 0, linked_node, default_value)
 
             # Roughness
@@ -529,7 +532,7 @@ def cycles_converter(report, blender_mat):
                 # Diffuse Color (from BSDF_DIFFUSE)
                 linked_node, default_value = convert_socket(mat1_node.inputs['Color'], lux_nodetree)
                 # The default value of a Cycles color is always RGBA, but we only need RGB
-                default_value = default_value[:3] if default_value is not None else None
+                default_value = convert_rgba_to_rgb(default_value)
                 copy_socket_properties(lux_node, 0, linked_node, default_value)
 
                 # Roughness (from BSDF_GLOSSY)
