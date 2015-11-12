@@ -327,15 +327,13 @@ compatible("properties_data_speaker")
 
 # To draw the preview pause button
 def DrawButtonPause(self, context):
-    layout = self.layout
     scene = context.scene
 
-    if scene.render.engine == "LUXRENDER_RENDER":
+    if scene.render.engine == "LUXRENDER_RENDER" and UseLuxCore():
         view = context.space_data
 
         if view.viewport_shade == "RENDERED":
-            layout.prop(scene.luxrender_engine, "preview_stop", icon="PAUSE", text="")
-
+            self.layout.prop(scene.luxrender_engine, "preview_stop", icon="PAUSE", text="")
 
 _register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
 
@@ -1608,9 +1606,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if channels.RGBA:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGBA', channels.saveToDisk)
-        if channels.RGB_TONEMAPPED:
-            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
-                                       'RGB_TONEMAPPED', channels.saveToDisk)
+        #if channels.RGB_TONEMAPPED:
+        #    self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
+        #                               'RGB_TONEMAPPED', channels.saveToDisk)
         if channels.RGBA_TONEMAPPED:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGBA_TONEMAPPED', channels.saveToDisk)
@@ -1838,9 +1836,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     ############################################################################
 
     luxcore_exporter = None
-    viewport_render_active = False
-    viewport_render_paused = False
-    luxcore_session = None
+    space = None # The VIEW_3D space this viewport render is running in
     critical_errors = False
 
     viewFilmWidth = -1
@@ -1856,40 +1852,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lastVisibilitySettings = None
     lastNodeMatSettings = ''
     update_counter = 0
-
-    @staticmethod
-    def begin_scene_edit():
-        if RENDERENGINE_luxrender.viewport_render_active:
-            if not RENDERENGINE_luxrender.viewport_render_paused:
-                print('Pausing viewport render')
-                RENDERENGINE_luxrender.viewport_render_paused = True
-                RENDERENGINE_luxrender.luxcore_session.BeginSceneEdit()
-
-    @staticmethod
-    def end_scene_edit():
-        if RENDERENGINE_luxrender.viewport_render_active:
-            if RENDERENGINE_luxrender.viewport_render_paused:
-                print('Resuming viewport render')
-                RENDERENGINE_luxrender.viewport_render_paused = False
-                RENDERENGINE_luxrender.luxcore_session.EndSceneEdit()
-
-    @staticmethod
-    def start_luxcore_session():
-        if not RENDERENGINE_luxrender.viewport_render_active:
-            print('Starting viewport render')
-            RENDERENGINE_luxrender.luxcore_session.Start()
-            RENDERENGINE_luxrender.viewport_render_active = True
-
-    @staticmethod
-    def stop_luxcore_session():
-        if RENDERENGINE_luxrender.viewport_render_active:
-            print('Stopping viewport render')
-            RENDERENGINE_luxrender.end_scene_edit()
-            RENDERENGINE_luxrender.viewport_render_active = False
-
-            RENDERENGINE_luxrender.luxcore_session.Stop()
-            RENDERENGINE_luxrender.luxcore_session = None
-
     
     def luxcore_view_draw(self, context):
         if self.critical_errors:
@@ -1921,26 +1883,29 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.lastCameraSettings = newCameraSettings
             self.luxcore_view_update(context, update_changes)
 
+        session = LuxCoreSessionManager.get_session(self.space)
+
         # Update statistics
-        if RENDERENGINE_luxrender.viewport_render_active and not RENDERENGINE_luxrender.viewport_render_paused:
-            RENDERENGINE_luxrender.luxcore_session.UpdateStats()
-            stats = RENDERENGINE_luxrender.luxcore_session.GetStats()
+        if LuxCoreSessionManager.is_session_active(self.space):
+            session.luxcore_session.UpdateStats()
+            stats = session.luxcore_session.GetStats()
 
             stop_redraw = (context.scene.luxrender_engine.preview_stop or
                     self.haltConditionMet(context.scene, stats, realtime_preview = True))
 
-            # update statistic display in Blender
-            luxcore_config = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig()
-            blender_stats = self.CreateBlenderStats(luxcore_config, stats, context.scene, realtime_preview=True)
-            status = 'Paused' if stop_redraw else 'Rendering'
+            if not session.is_paused:
+                # update statistic display in Blender
+                luxcore_config = session.luxcore_session.GetRenderConfig()
+                blender_stats = self.CreateBlenderStats(luxcore_config, stats, context.scene, realtime_preview=True)
+                status = 'Paused' if stop_redraw else 'Rendering'
 
-            if context.space_data.local_view:
-                status = '[Local] ' + status
+                if context.space_data.local_view:
+                    status = '[Local] ' + status
 
-            self.update_stats(status, blender_stats)
+                self.update_stats(status, blender_stats)
 
         # Update the image buffer
-        RENDERENGINE_luxrender.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
+        session.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
                                                   self.viewImageBufferFloat)
 
         # Update the screen
@@ -1951,7 +1916,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if stop_redraw:
             # Pause rendering
-            RENDERENGINE_luxrender.begin_scene_edit()
+            LuxCoreSessionManager.begin_scene_edit(self.space)
         else:
             # Trigger another update
             self.tag_redraw()
@@ -1980,8 +1945,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             self.lastVisibilitySettings = set(context.visible_objects)
 
-            if (not RENDERENGINE_luxrender.viewport_render_active or
-                    RENDERENGINE_luxrender.luxcore_session is None or
+            if (not LuxCoreSessionManager.is_session_active(self.space) or
                     self.luxcore_exporter is None):
                 update_changes.set_cause(startViewportRender = True)
 
@@ -2148,7 +2112,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         elif update_changes.cause_startViewportRender:
             try:
-                RENDERENGINE_luxrender.stop_luxcore_session()
+                for area in context.screen.areas:
+                    if area.type == 'VIEW_3D':
+                        for space in area.spaces:
+                            if space.type == 'VIEW_3D' and space.viewport_shade == 'RENDERED':
+                                self.space = space
+                                break
+
+                LuxCoreSessionManager.stop_luxcore_session(self.space)
 
                 self.lastRenderSettings = ''
                 self.lastVolumeSettings = ''
@@ -2171,8 +2142,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     LuxLog('ERROR: not a valid luxcore config')
                     return
 
-                RENDERENGINE_luxrender.luxcore_session = pyluxcore.RenderSession(luxcore_config)
-                RENDERENGINE_luxrender.start_luxcore_session()
+                LuxCoreSessionManager.create_luxcore_session(luxcore_config, self.space)
+                LuxCoreSessionManager.start_luxcore_session(self.space)
+
                 self.critical_errors = False
             except Exception as exc:
                 # This flag is used to prevent the luxcore_draw() function from crashing Blender
@@ -2196,7 +2168,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             props = self.luxcore_exporter.convert_imagepipeline()
             props.Set(self.luxcore_exporter.convert_lightgroup_scales())
 
-            RENDERENGINE_luxrender.luxcore_session.Parse(props)
+            LuxCoreSessionManager.get_session(self.space).luxcore_session.Parse(props)
             self.luxcore_view_draw(context)
 
         else:
@@ -2208,8 +2180,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.viewFilmHeight = context.region.height
                 self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
 
-                luxcore_config = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig()
-                RENDERENGINE_luxrender.stop_luxcore_session()
+                luxcore_config = LuxCoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig()
+                LuxCoreSessionManager.stop_luxcore_session(self.space)
 
                 self.luxcore_exporter.convert_config(self.viewFilmWidth, self.viewFilmHeight)
 
@@ -2219,12 +2191,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     LuxLog('ERROR: not a valid luxcore config')
                     return
 
-                RENDERENGINE_luxrender.luxcore_session = pyluxcore.RenderSession(luxcore_config)
-                RENDERENGINE_luxrender.start_luxcore_session()
+                LuxCoreSessionManager.create_luxcore_session(luxcore_config, self.space)
+                LuxCoreSessionManager.start_luxcore_session(self.space)
 
             # begin sceneEdit
-            luxcore_scene = RENDERENGINE_luxrender.luxcore_session.GetRenderConfig().GetScene()
-            RENDERENGINE_luxrender.begin_scene_edit()
+            luxcore_scene = LuxCoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig().GetScene()
+            LuxCoreSessionManager.begin_scene_edit(self.space)
 
             if update_changes.cause_camera:
                 LuxLog('Camera update')
@@ -2268,60 +2240,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                 luxcore_name = exported_object.luxcore_object_name
                                 luxcore_scene.DeleteObject(luxcore_name)
 
-                '''
-                def remove_object(ob, exported_object):
-                    # loop through object components (split by materials)
-                    for exported_object_data in exported_object.luxcore_data:
-                        luxcore_name = exported_object_data.lcObjName
-                        light_type = exported_object_data.lightType
-
-                        if ob.type == 'LAMP' and light_type != 'AREA':
-                            print('removing light %s (luxcore name: %s)' % (ob.name, luxcore_name))
-                            luxcore_scene.DeleteLight(luxcore_name)
-                        else:
-                            print('removing object %s (luxcore name: %s)' % (ob.name, luxcore_name))
-                            luxcore_scene.DeleteObject(luxcore_name)
-
-                cache = converter.get_export_cache()
-
-                for ob in update_changes.removed_objects:
-                    if cache.has(ob):
-                        exported_object = cache.get_exported_object(ob)
-                        remove_object(ob, exported_object)
-
-                # Remove particles/duplis
-                for ob in update_changes.removed_objects:
-                    # Dupliverts/frames/groups etc.
-                    if ob.is_duplicator and len(ob.particle_systems) == 0:
-                        ob.dupli_list_create(context.scene, settings = 'VIEWPORT')
-
-                        for dupli_ob in ob.dupli_list:
-                            dupli_key = (dupli_ob.object, ob)
-
-                            if cache.has(dupli_key):
-                                exported_object = cache.get_exported_object(dupli_key)
-                                remove_object(ob, exported_object)
-
-                        ob.dupli_list_clear()
-
-                    # Particle systems
-                    elif len(ob.particle_systems) > 0:
-                        for psys in ob.particle_systems:
-                            ob.dupli_list_create(context.scene, settings = 'VIEWPORT')
-
-                            if len(ob.dupli_list) > 0:
-                                dupli_ob = ob.dupli_list[0]
-                                dupli_key = (dupli_ob.object, psys)
-
-                                if cache.has(dupli_key):
-                                    exported_object_list = cache.get_exported_object(dupli_key)
-
-                                    for exported_object in exported_object_list:
-                                        remove_object(ob, exported_object)
-
-                            ob.dupli_list_clear()
-                '''
-
             if update_changes.cause_volumes:
                 for volume in context.scene.luxrender_volumes.volumes:
                     self.luxcore_exporter.convert_volume(volume)
@@ -2341,12 +2259,96 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # parse scene changes and end sceneEdit
             luxcore_scene.Parse(updated_properties)
 
-            RENDERENGINE_luxrender.end_scene_edit()
+            LuxCoreSessionManager.end_scene_edit(self.space)
 
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
         LuxLog('Dynamic updates: update took %dms' % view_update_time)
-            
+
+
+class Session(object):
+    def __init__(self, luxcore_session):
+        self.luxcore_session = luxcore_session
+        self.is_active = False
+        self.is_paused = False
+
+
+class LuxCoreSessionManager(object):
+    sessions = {}
+
+    @classmethod
+    def create_luxcore_session(cls, luxcore_config, space):
+        # space: bpy.context.screen.areas[x].spaces[y] (areas[x].type == "VIEW_3D", spaces[y].type == "VIEW_3D")
+        cls.sessions[space] = Session(pyluxcore.RenderSession(luxcore_config))
+
+    @classmethod
+    def get_session(cls, space):
+        return cls.sessions[space]
+
+    @classmethod
+    def is_session_active(cls, space):
+        return space in cls.sessions and cls.sessions[space].is_active
+
+    @classmethod
+    def start_luxcore_session(cls, space):
+        if space in cls.sessions:
+            session = cls.sessions[space]
+
+            if not session.is_active:
+                print('Starting viewport render')
+                session.luxcore_session.Start()
+                session.is_active = True
+
+    @classmethod
+    def stop_luxcore_session(cls, space):
+        if space in cls.sessions:
+            session = cls.sessions[space]
+
+            if session.is_active:
+                print('Stopping viewport render')
+                cls.end_scene_edit(space)
+                session.is_active = False
+
+                session.luxcore_session.Stop()
+                session.luxcore_session = None
+
+                del cls.sessions[space]
+
+    @classmethod
+    def begin_scene_edit(cls, space):
+        if space in cls.sessions:
+            session = cls.sessions[space]
+
+            if session.is_active and not session.is_paused:
+                print('Pausing viewport render')
+                session.is_paused = True
+                session.luxcore_session.BeginSceneEdit()
+
+    @classmethod
+    def end_scene_edit(cls, space):
+        if space in cls.sessions:
+            session = cls.sessions[space]
+
+            if session.is_active and session.is_paused:
+                print('Resuming viewport render')
+                session.is_paused = False
+                session.luxcore_session.EndSceneEdit()
+
+
+@persistent
+def stop_viewport_render(context):
+    # Check spaces that are not in rendered mode if they have a corresponding session that is still running
+    for screen in bpy.data.screens:
+        for area in screen.areas:
+            if area.type == 'VIEW_3D':
+                for space in area.spaces:
+                    if (space.type == 'VIEW_3D' and space.viewport_shade != 'RENDERED'
+                                                and space in LuxCoreSessionManager.sessions):
+                            LuxCoreSessionManager.stop_luxcore_session(space)
+
+bpy.app.handlers.scene_update_post.append(stop_viewport_render)
+
+
 class UpdateChanges(object):
     def __init__(self):
         self.changed_objects_transform = set()
@@ -2449,19 +2451,3 @@ class UpdateChanges(object):
 
         print('========================================')
 
-
-@persistent
-def stop_viewport_render(context):
-    # Check if there should be an active viewport rendering session
-    if bpy.context.screen:
-        for area in bpy.context.screen.areas:
-            if area.type == 'VIEW_3D':
-                for space in area.spaces:
-                    if space.type == 'VIEW_3D' and space.viewport_shade == 'RENDERED':
-                        return
-
-    # No viewport in "RENDERED" mode found, stop running rendersessions
-    RENDERENGINE_luxrender.stop_luxcore_session()
-
-
-bpy.app.handlers.scene_update_post.append(stop_viewport_render)

@@ -77,6 +77,8 @@ class LuxCoreExporter(object):
 
         # Namecache to map an ascending number to each lightgroup name
         self.lightgroup_cache = LightgroupCache(self.blender_scene.luxrender_lightgroups)
+        # Cache defined passes to avoid multiple definitions
+        self.passes_cache = set()
 
         # Temporary (only used during export) caches to avoid multiple exporting
         self.temp_material_cache = set()
@@ -168,7 +170,7 @@ class LuxCoreExporter(object):
         export_time = time.time() - start_time
         print('Export finished (%.1fs)' % export_time)
 
-        if self.blender_scene.luxcore_enginesettings.device == 'CPU':
+        if self.config_exporter.get_engine().endswith('CPU'):
             message = 'Starting LuxRender...'
         else:
             message = 'Compiling OpenCL Kernels...'
@@ -220,6 +222,11 @@ class LuxCoreExporter(object):
 
         # Tonemapper
         tonemapper = imagepipeline_settings.tonemapper_type
+
+        if tonemapper in ['TONEMAP_LINEAR', 'TONEMAP_LUXLINEAR'] and imagepipeline_settings.use_auto_linear:
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'TONEMAP_AUTOLINEAR'))
+            index += 1
+
         temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', [tonemapper]))
         # Note: TONEMAP_AUTOLINEAR has no parameters and is thus not in the if/elif block
         if tonemapper == 'TONEMAP_LINEAR':

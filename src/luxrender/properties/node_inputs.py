@@ -74,8 +74,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 
     coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
     translate = bpy.props.FloatVectorProperty(name='Translate')
-    rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(359.99),
-                                           max=radians(359.99))
+    rotate = bpy.props.FloatVectorProperty(name='Rotate', unit='ROTATION', default=(0, 0, 0))
     scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
     uniform_scale = bpy.props.FloatProperty(name='', default=1.0)
     use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
@@ -160,9 +159,9 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
         tex_sca[2][2] = self.uniform_scale if self.use_uniform_scale else self.scale[2]  # Z
 
         # create a rotation matrix
-        tex_rot0 = mathutils.Matrix.Rotation(radians(self.rotate[0]), 4, 'X')
-        tex_rot1 = mathutils.Matrix.Rotation(radians(self.rotate[1]), 4, 'Y')
-        tex_rot2 = mathutils.Matrix.Rotation(radians(self.rotate[2]), 4, 'Z')
+        tex_rot0 = mathutils.Matrix.Rotation(self.rotate[0], 4, 'X')
+        tex_rot1 = mathutils.Matrix.Rotation(self.rotate[1], 4, 'Y')
+        tex_rot2 = mathutils.Matrix.Rotation(self.rotate[2], 4, 'Z')
         tex_rot = tex_rot0 * tex_rot1 * tex_rot2
 
         # combine transformations

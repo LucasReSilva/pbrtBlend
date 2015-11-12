@@ -89,18 +89,6 @@ triple_variant_items = [
     ('fresnel', 'Fresnel', 'This node outputs an optical dataset')
 ]
 
-# LuxCore only
-image_map_channels = [
-    ('default', 'Default', ''),
-    ('red', 'Red', ''),
-    ('green', 'Green', ''),
-    ('blue', 'Blue', ''),
-    ('alpha', 'Alpha', ''),
-    ('mean', 'Mean', ''),
-    ('colored_mean', 'Colored Mean', ''),
-    ('rgb', 'RGB', '')
-]
-
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
@@ -623,7 +611,7 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 class luxrender_texture_type_node_image_map(luxrender_texture_node):
     """Image map texture node"""
     bl_idname = 'luxrender_texture_image_map_node'
-    bl_label = 'Image Map Texture'
+    bl_label = 'Classic Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
@@ -714,7 +702,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     """Blender image map texture node"""
     bl_idname = 'luxrender_texture_blender_image_map_node'
-    bl_label = 'Blender Image Map Texture'
+    bl_label = 'Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
@@ -722,16 +710,19 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Color'].enabled = not self.is_normal_map
         self.outputs['Bump'].enabled = self.is_normal_map
 
-    def get_images(self, context):
-        blender_images = [tuple([img.name, img.name, '']) for img in bpy.data.images if img.name != 'Render Result']
-        blender_images.insert(0, tuple(['none', 'Select Image', 'Select an image']))
+    image = bpy.props.StringProperty(default='')
 
-        return blender_images
+    channel_items = [
+        ('rgb', 'RGB', 'Default, use all color channels'),
+        ('red', 'Red', 'Use only the red color channel'),
+        ('green', 'Green', 'Use only the green color channel'),
+        ('blue', 'Blue', 'Use only the blue color channel'),
+        ('alpha', 'Alpha', 'Use only the alpha channel'),
+        ('mean', 'Mean', 'Greyscale'),
+        ('colored_mean', 'Colored Mean', 'Greyscale'),
+    ]
+    channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='rgb')
 
-    # TODO: handle case where nodemat was appended/linked and the selected enum index is "wrong"
-    # TODO: maybe create extra property to save the selected name and display warning if the image does not exist in the blender scene?
-    blender_image = bpy.props.EnumProperty(items=get_images, name='')
-    channel = bpy.props.EnumProperty(name='Channel', items=image_map_channels, default='default')
     gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, max=10.0, description='Brightness multiplier')
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0, description='Gamma correction to apply')
     is_normal_map = bpy.props.BoolProperty(name='Normalmap', default=False, description='Enable if this is a normalmap,'
@@ -747,9 +738,9 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
 
-        split = layout.column(align=True)
-        split.prop(self, 'blender_image')
-        split.operator('image.open')
+        split = layout.split(align=True, percentage=0.7)
+        split.prop_search(self, 'image', bpy.data, 'images', text='')
+        split.operator('image.open', text='Open', icon='FILESEL')
 
         column = layout.column()
         column.enabled = not self.is_normal_map
@@ -774,10 +765,14 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
-        if self.blender_image == 'none':
+        if self.image == '':
             return [0, 0, 0] # Black color
 
-        image = bpy.data.images[self.blender_image]
+        if self.image not in bpy.data.images:
+            print('ERROR: %s not found in Blender images!')
+            return [0.8, 0, 0.8] # Purple color
+
+        image = bpy.data.images[self.image]
 
         # TODO: library handling
         # TODO: SEQUENCE/GENERATED handling? Create separate sequence node?
