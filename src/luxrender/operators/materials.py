@@ -462,6 +462,12 @@ def material_converter(report, scene, blender_mat):
         return {'CANCELLED'}
 
 def cycles_converter(report, blender_mat):
+    def get_linked_node(socket):
+        if socket.is_linked:
+            return socket.links[0].from_node
+        else:
+            return None
+
     def copy_socket_properties(lux_node, socket_index, linked_node=None, default_value=None):
         if linked_node is not None:
             # Create the link
@@ -510,19 +516,37 @@ def cycles_converter(report, blender_mat):
             copy_socket_properties(lux_node, 2, linked_node, default_value)
 
         elif node.type == 'MIX_SHADER':
-            lux_node = lux_nodetree.nodes.new('luxrender_material_mix_node')
+            amount_node = get_linked_node(node.inputs['Fac'])
+            mat1_node = get_linked_node((node.inputs[1]))
+            mat2_node = get_linked_node((node.inputs[2]))
 
-            # Mix amount
-            linked_node, default_value = convert_socket(node.inputs['Fac'], lux_nodetree)
-            copy_socket_properties(lux_node, 0, linked_node, default_value)
+            if (amount_node and mat1_node and mat2_node) and (
+                    amount_node.type in ('FRESNEL', 'LAYER_WEIGHT') and
+                    mat1_node.type == 'BSDF_DIFFUSE' and mat2_node.type == 'BSDF_GLOSSY'):
+                # Create a LuxRender glossy material
+                lux_node = lux_nodetree.nodes.new('luxrender_material_glossy_node')
 
-            # Material 1
-            linked_node, default_value = convert_socket(node.inputs[1], lux_nodetree)
-            copy_socket_properties(lux_node, 1, linked_node, default_value)
+                # Diffuse Color (from BSDF_DIFFUSE)
+                linked_node, default_value = convert_socket(mat1_node.inputs['Color'], lux_nodetree)
+                # The default value of a Cycles color is always RGBA, but we only need RGB
+                default_value = default_value[:3] if default_value is not None else None
+                copy_socket_properties(lux_node, 0, linked_node, default_value)
 
-            # Material 2
-            linked_node, default_value = convert_socket(node.inputs[2], lux_nodetree)
-            copy_socket_properties(lux_node, 2, linked_node, default_value)
+                # Roughness (from BSDF_GLOSSY)
+                linked_node, default_value = convert_socket(mat2_node.inputs['Roughness'], lux_nodetree)
+                copy_socket_properties(lux_node, 6, linked_node, default_value)
+            else:
+                # "Normal" mix material, no special treatment
+                lux_node = lux_nodetree.nodes.new('luxrender_material_mix_node')
+                # Amount
+                linked_node_amount, default_value_amount = convert_socket(node.inputs['Fac'], lux_nodetree)
+                copy_socket_properties(lux_node, 0, linked_node_amount, default_value_amount)
+                # Material 1
+                linked_node_1, default_value_1 = convert_socket(node.inputs[1], lux_nodetree)
+                copy_socket_properties(lux_node, 1, linked_node_1, default_value_1)
+                # Material 2
+                linked_node_2, default_value_2 = convert_socket(node.inputs[2], lux_nodetree)
+                copy_socket_properties(lux_node, 2, linked_node_2, default_value_2)
 
         elif node.type == 'BSDF_TRANSPARENT':
             if node.inputs['Color'].default_value[:3] == (1, 1, 1):
@@ -546,7 +570,7 @@ def cycles_converter(report, blender_mat):
 
         else:
             # In case of an unkown node, do nothing
-            print('WARNING: Unknown node type %s' % node.type)
+            print('WARNING: Unsupported node type %s' % node.type)
             return None, None
 
         if lux_node:
