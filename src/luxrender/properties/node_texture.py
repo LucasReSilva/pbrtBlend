@@ -611,7 +611,7 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 class luxrender_texture_type_node_image_map(luxrender_texture_node):
     """Image map texture node"""
     bl_idname = 'luxrender_texture_image_map_node'
-    bl_label = 'Image Map Texture'
+    bl_label = 'Classic Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
@@ -696,8 +696,6 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
             imagemap_params.add_float('vscale', -1.0)
 
         return make_texture(self.variant, 'imagemap', self.name, imagemap_params)
-
-
 
 
 @LuxRenderAddon.addon_register_class
