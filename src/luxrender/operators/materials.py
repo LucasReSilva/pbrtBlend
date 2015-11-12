@@ -557,6 +557,27 @@ def cycles_converter(report, blender_mat):
                 lux_node = lux_nodetree.nodes.new('luxrender_material_null_node')
             # TODO: find an approximation to Cycles' transparent material with non-white colors
 
+        elif node.type == 'BSDF_GLASS':
+            lux_node = lux_nodetree.nodes.new('luxrender_material_glass_node')
+
+            # Color (Transmission)
+            linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
+            # The default value of a Cycles color is always RGBA, but we only need RGB
+            default_value = convert_rgba_to_rgb(default_value)
+            copy_socket_properties(lux_node, 0, linked_node, default_value)
+
+            # Roughness
+            linked_node, default_value = convert_socket(node.inputs['Roughness'], lux_nodetree)
+
+            if default_value != 0:
+                # Use roughness
+                lux_node.rough = True
+                copy_socket_properties(lux_node, 6, linked_node, default_value)
+
+            # IOR
+            linked_node, default_value = convert_socket(node.inputs['IOR'], lux_nodetree)
+            copy_socket_properties(lux_node, 2, linked_node, default_value)
+
         ### Textures ###
         elif node.type == 'TEX_IMAGE':
             lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_image_map_node')
