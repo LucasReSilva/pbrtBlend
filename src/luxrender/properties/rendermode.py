@@ -24,6 +24,9 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+
+import bpy
+
 from ..extensions_framework import declarative_property_group
 
 from .. import LuxRenderAddon
@@ -250,7 +253,6 @@ class luxrender_rendermode(declarative_property_group):
         renderer_params = ParamSet()
 
         if self.opencl_prefs:
-            import bpy
             engine_settings = bpy.context.scene.luxcore_enginesettings
             dev_string = ''
             if len(engine_settings.luxcore_opencl_devices) > 0:
