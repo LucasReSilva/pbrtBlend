@@ -24,9 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import re
-
-import bpy
+import bpy, re, tempfile, os
 
 from ..extensions_framework import declarative_property_group
 
@@ -765,24 +763,48 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
+        warning_color_no_image = [0, 0, 0] # Black color
+        warning_color_wrong_path = [0.8, 0, 0.8] # Purple color
+
         if self.image == '':
-            return [0, 0, 0] # Black color
+            return warning_color_no_image
 
         if self.image not in bpy.data.images:
             print('ERROR: %s not found in Blender images!')
-            return [0.8, 0, 0.8] # Purple color
+            return warning_color_wrong_path
 
         image = bpy.data.images[self.image]
 
         # TODO: library handling
-        # TODO: SEQUENCE/GENERATED handling? Create separate sequence node?
         # Note: we can get the nodetree via node.id_data
+        # TODO: SEQUENCE/GENERATED handling? Create separate sequence node?
 
-        filepath = efutil.filesystem_path(image.filepath)
+        if image.source in ['GENERATED', 'FILE']:
+            scene = bpy.context.scene
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            tex_image = temp_file.name
+
+            if image.source == 'GENERATED':
+                image.save_render(tex_image, scene)
+
+            if image.source == 'FILE':
+                if image.packed_file:
+                    image.save_render(tex_image, scene)
+                else:
+                    if self.id_data.library is not None:
+                        f_path = efutil.filesystem_path(bpy.path.abspath(image.filepath, self.id_data.library.filepath))
+                    else:
+                        f_path = efutil.filesystem_path(image.filepath)
+
+                    tex_image = efutil.filesystem_path(f_path)
+
+        if not (os.path.exists(tex_image) and os.path.isfile(tex_image)):
+            return warning_color_wrong_path
+
         gamma = 1 if self.is_normal_map else self.gamma
 
         set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
-        set_prop_tex(properties, luxcore_name, 'file', filepath)
+        set_prop_tex(properties, luxcore_name, 'file', tex_image)
         set_prop_tex(properties, luxcore_name, 'gamma', gamma)
         set_prop_tex(properties, luxcore_name, 'gain', self.gain)
 
