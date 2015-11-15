@@ -80,10 +80,10 @@ def cycles_converter(report, blender_mat):
 
         # TODO: displacement socket
 
-        report({'INFO'}, 'Converted Cycles nodetree "%s"' % blender_mat.node_tree.name)
+        report({'INFO'}, 'Converted Cycles material "%s"' % blender_mat.name)
         return {'FINISHED'}
     except Exception as err:
-        report({'ERROR'}, 'Cannot convert nodetree "%s": %s' % (blender_mat.node_tree.name, err))
+        report({'ERROR'}, 'Cannot convert material "%s": %s' % (blender_mat.name, err))
         import traceback
         traceback.print_exc()
         return {'CANCELLED'}
@@ -122,7 +122,6 @@ def convert_socket(socket, lux_nodetree):
         pass # Output is exported before iterative export
 
     ### Materials ###
-    # TODO: Bump textures
 
     elif node.type == 'BSDF_DIFFUSE':
         # "Matte" in Lux
@@ -259,8 +258,8 @@ def convert_socket(socket, lux_nodetree):
         default_value = convert_rgba_to_rgb(default_value)
         copy_socket_properties(lux_node, 0, lux_nodetree, linked_node, default_value)
 
-
     ### Textures ###
+
     elif node.type == 'TEX_IMAGE':
         lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_image_map_node')
 
@@ -296,14 +295,14 @@ def convert_socket(socket, lux_nodetree):
         return None, None
 
     if lux_node:
-        # Copy properties shared by all nodes
+        # Copy common properties shared by all nodes
         lux_node.location = node.location
 
         if 'BSDF' in node.type:
-            # Is a material shader, copy common material properties
             # Bump
             if 'Normal' in node.inputs and 'Bump' in lux_node.inputs:
                 linked_node, default_value = convert_socket(node.inputs['Normal'], lux_nodetree)
-                copy_socket_properties(lux_node, 'Bump', lux_nodetree, linked_node, default_value)
+                # There is no valid default value for the bump slot, that's why we pass None
+                copy_socket_properties(lux_node, 'Bump', lux_nodetree, linked_node, None)
 
     return lux_node, None
