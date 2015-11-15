@@ -146,10 +146,10 @@ def convert_socket(socket, lux_nodetree):
         linked_node, default_value = convert_socket(node.inputs['Roughness'], lux_nodetree)
         copy_socket_properties(lux_node, 2, lux_nodetree, linked_node, default_value)
 
-    elif node.type in ('MIX_SHADER', 'ADD_SHADER'):
+    elif node.type == 'MIX_SHADER':
         amount_node = get_linked_node(node.inputs['Fac'])
-        mat1_node = get_linked_node((node.inputs[1]))
-        mat2_node = get_linked_node((node.inputs[2]))
+        mat1_node = get_linked_node(node.inputs[1])
+        mat2_node = get_linked_node(node.inputs[2])
 
         if (amount_node and mat1_node and mat2_node) and (
                 amount_node.type in ('FRESNEL', 'LAYER_WEIGHT') and
@@ -184,6 +184,18 @@ def convert_socket(socket, lux_nodetree):
                 # Material 2
                 copy_socket_properties(lux_node, 2, lux_nodetree, linked_node_2, default_value_2)
 
+    elif node.type == 'ADD_SHADER':
+        # Since there is no better euqivalent for the add shader in Lux we will use a mix material
+        linked_node_1, default_value_1 = convert_socket(node.inputs[0], lux_nodetree)
+        linked_node_2, default_value_2 = convert_socket(node.inputs[1], lux_nodetree)
+
+        if linked_node_1 or linked_node_2:
+            lux_node = lux_nodetree.nodes.new('luxrender_material_mix_node')
+            # Material 1
+            copy_socket_properties(lux_node, 1, lux_nodetree, linked_node_1, default_value_1)
+            # Material 2
+            copy_socket_properties(lux_node, 2, lux_nodetree, linked_node_2, default_value_2)
+
     elif node.type == 'BSDF_TRANSPARENT':
         if node.inputs['Color'].default_value[:3] == (1, 1, 1):
             # In Lux, we ohly have the Null materials as an equivalent to a fully transparent material
@@ -202,7 +214,7 @@ def convert_socket(socket, lux_nodetree):
         # Roughness
         linked_node, default_value = convert_socket(node.inputs['Roughness'], lux_nodetree)
 
-        if default_value != 0:
+        if (default_value and default_value > 0.000001) or linked_node:
             # Use roughness
             lux_node.rough = True
             copy_socket_properties(lux_node, 6, lux_nodetree, linked_node, default_value)
@@ -235,8 +247,9 @@ def convert_socket(socket, lux_nodetree):
     elif node.type == 'TEX_IMAGE':
         lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_image_map_node')
 
-        # Selected Blender image
-        lux_node.image = node.image.name
+        if node.image:
+            # Selected Blender image
+            lux_node.image = node.image.name
 
         # Gamma (from color space)
         lux_node.gamma = 2.2 if node.color_space == 'COLOR' else 1
