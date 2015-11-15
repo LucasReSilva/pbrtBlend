@@ -537,6 +537,7 @@ class LUXRENDER_OT_material_copy(bpy.types.Operator):
             current_nodetree = bpy.data.node_groups[current_nodetree_name]
             # Create a copy of the nodetree as well
             new_nodetree = current_nodetree.copy()
+            new_nodetree.use_fake_user = True
             # Assign new nodetree to the new material
             new_mat.luxrender_material.nodetree = new_nodetree.name
 
