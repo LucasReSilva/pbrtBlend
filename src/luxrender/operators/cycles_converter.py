@@ -146,7 +146,7 @@ def convert_socket(socket, lux_nodetree):
         linked_node, default_value = convert_socket(node.inputs['Roughness'], lux_nodetree)
         copy_socket_properties(lux_node, 2, lux_nodetree, linked_node, default_value)
 
-    elif node.type == 'MIX_SHADER':
+    elif node.type in ('MIX_SHADER', 'ADD_SHADER'):
         amount_node = get_linked_node(node.inputs['Fac'])
         mat1_node = get_linked_node((node.inputs[1]))
         mat2_node = get_linked_node((node.inputs[2]))
@@ -210,6 +210,26 @@ def convert_socket(socket, lux_nodetree):
         # IOR
         linked_node, default_value = convert_socket(node.inputs['IOR'], lux_nodetree)
         copy_socket_properties(lux_node, 2, lux_nodetree, linked_node, default_value)
+
+    elif node.type == 'BSDF_TRANSLUCENT':
+        lux_node = lux_nodetree.nodes.new('luxrender_material_mattetranslucent_node')
+
+        # Color (the cycles node only has one value that is used for both reflection and transmission in the Lux mat)
+        linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
+        # The default value of a Cycles color is always RGBA, but we only need RGB
+        default_value = convert_rgba_to_rgb(default_value)
+        copy_socket_properties(lux_node, 0, lux_nodetree, linked_node, default_value)
+        copy_socket_properties(lux_node, 1, lux_nodetree, linked_node, default_value)
+
+    elif node.type == 'BSDF_VELVET':
+        lux_node = lux_nodetree.nodes.new('luxrender_material_velvet_node')
+
+        # Color (the cycles node only has one value that is used for both reflection and transmission in the Lux mat)
+        linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
+        # The default value of a Cycles color is always RGBA, but we only need RGB
+        default_value = convert_rgba_to_rgb(default_value)
+        copy_socket_properties(lux_node, 0, lux_nodetree, linked_node, default_value)
+
 
     ### Textures ###
     elif node.type == 'TEX_IMAGE':
