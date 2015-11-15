@@ -109,8 +109,8 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
     flipxy = bpy.props.BoolProperty(name='Flip XY', description='Switch between horizontal and linear gradient',
                                     default=False)
     type = bpy.props.EnumProperty(name='Progression', description='progression', items=progression_items, default='lin')
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     luxcore_direction_items = [
         ('horizontal', 'Horizontal', 'Direction: -x to x'),
@@ -192,7 +192,7 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
     brickbond = bpy.props.EnumProperty(name='Bond Type', items=brickbond_items, default='running')
     brickrun = bpy.props.FloatProperty(name='Brick Run', default=0.5, subtype='PERCENTAGE')
     mortarsize = bpy.props.FloatProperty(name='Mortar Size', description='Width of mortar segments', default=0.01,
-                                         subtype='DISTANCE', unit='LENGTH')
+                                         subtype='DISTANCE', unit='LENGTH', min=0)
     width = bpy.props.FloatProperty(name='Width', default=0.3, subtype='DISTANCE', unit='LENGTH')
     depth = bpy.props.FloatProperty(name='Depth', default=0.15, subtype='DISTANCE', unit='LENGTH')
     height = bpy.props.FloatProperty(name='Height', default=0.10, subtype='DISTANCE', unit='LENGTH')
@@ -369,10 +369,10 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
                                        default='soft_noise')
     noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items,
                                         default='blender_original')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
-    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
+    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2, min=0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
@@ -438,10 +438,10 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
     type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=noise_basis_items,
                                   default='blender_original')
     distamount = bpy.props.FloatProperty(name='Distortion', default=1.00)
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     nabla = bpy.props.FloatProperty(name='Nabla', default=0.025)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
@@ -638,23 +638,28 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
         self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout)
+        if UseLuxCore():
+            layout.label('Not all parameters supported in LuxCore mode', icon='ERROR')
 
         layout.prop(self, 'filename')
-        layout.prop(self, 'variant')
 
-        if self.variant == 'float':
-            layout.prop(self, 'channel')
+        if not UseLuxCore():
+            layout.prop(self, 'variant')
+
+            if self.variant == 'float':
+                layout.prop(self, 'channel')
 
         layout.prop(self, 'gamma')
         layout.prop(self, 'gain')
-        layout.prop(self, 'filtertype')
 
-        if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
-            layout.prop(self, 'maxanisotropy')
-            layout.prop(self, 'discardmipmaps')
+        if not UseLuxCore():
+            layout.prop(self, 'filtertype')
 
-        layout.prop(self, 'wrap')
+            if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
+                layout.prop(self, 'maxanisotropy')
+                layout.prop(self, 'discardmipmaps')
+
+            layout.prop(self, 'wrap')
 
         s = self.outputs.keys()
 
@@ -694,6 +699,25 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
             imagemap_params.add_float('vscale', -1.0)
 
         return make_texture(self.variant, 'imagemap', self.name, imagemap_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        if not (os.path.exists(self.filename) and os.path.isfile(self.filename)):
+            return [0, 0, 0] # Black color
+
+        set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
+        set_prop_tex(properties, luxcore_name, 'file', self.filename)
+        set_prop_tex(properties, luxcore_name, 'gamma', self.gamma)
+        set_prop_tex(properties, luxcore_name, 'gain', self.gain)
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -854,11 +878,11 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
                                          items=marble_noise_items, default='sin')
     noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items,
                                        default='soft_noise')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
-    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
+    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2, min=0)
     turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
@@ -941,15 +965,15 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
                                           items=musgrave_type_items, default='multifractal')
     noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items,
                                         default='blender_original')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     h = bpy.props.FloatProperty(name='Dimension', default=1.0)
     lacu = bpy.props.FloatProperty(name='Lacunarity', default=2.0)
     octs = bpy.props.FloatProperty(name='Octaves', default=2.0)
     offset = bpy.props.FloatProperty(name='Offset', default=1.0)
     gain = bpy.props.FloatProperty(name='Gain', default=1.0)
     iscale = bpy.props.FloatProperty(name='Intensity', default=1.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
@@ -1106,10 +1130,10 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
                                         default='blender_original')
     noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items,
                                        default='soft_noise')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
@@ -1223,14 +1247,14 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
                                         description='Algorithm used to calculate distance of sample points to feature points',
                                         items=distance_items, default='actual_distance')
     minkowsky_exp = bpy.props.FloatProperty(name='Exponent', default=1.0)
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     nabla = bpy.props.FloatProperty(name='Nabla', default=0.025)
     w1 = bpy.props.FloatProperty(name='Weight 1', default=1.0, min=0.0, max=1.0, subtype='FACTOR')
     w2 = bpy.props.FloatProperty(name='Weight 2', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
     w3 = bpy.props.FloatProperty(name='Weight 3', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
     w4 = bpy.props.FloatProperty(name='Weight 4', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
@@ -1360,10 +1384,10 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
                                          items=wood_noise_items, default='sin')
     noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items,
                                        default='soft_noise')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
         self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
