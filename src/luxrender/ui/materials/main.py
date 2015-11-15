@@ -198,11 +198,17 @@ class ui_luxrender_material_utils(luxrender_material_base):
         row.operator("luxrender.save_material", icon="DISK_DRIVE").filename = \
             '%s.lbm2' % bpy.path.clean_name(context.material.name)
 
-        row = self.layout.row(align=True)
-        row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
+        self.layout.label("Material Converter:")
 
-        row = self.layout.row(align=True)
-        row.operator("luxrender.convert_material", icon='MATERIAL_DATA')
+        column = self.layout.column(align=True)
+        sub = column.column(align=True)
+        sub.enabled = context.material.node_tree is not None
+        sub.operator("luxrender.convert_cycles_material", icon='MATERIAL_DATA')
+        column.operator("luxrender.convert_all_cycles_materials", icon='WORLD_DATA')
+
+        column = self.layout.column(align=True)
+        column.operator("luxrender.convert_material", icon='MATERIAL_DATA')
+        column.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
 
         # row = self.layout.row(align=True)
 

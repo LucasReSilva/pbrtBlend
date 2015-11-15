@@ -26,7 +26,62 @@
 #
 import bpy
 
-def cycles_converter(report, blender_mat):
+from .. import LuxRenderAddon
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_convert_all_cycles_materials(bpy.types.Operator):
+    bl_idname = 'luxrender.convert_all_cycles_materials'
+    bl_label = 'Convert all Cycles materials'
+
+    def execute(self, context):
+        success = 0
+        failed = 0
+        total = 0
+
+        for blender_mat in bpy.data.materials:
+            # Don't convert materials from linked-in files
+            if blender_mat.library is None and blender_mat.node_tree:
+                # Cycles nodetree available
+                if not (hasattr(blender_mat, 'luxrender_material') and blender_mat.luxrender_material.nodetree):
+                    # No Lux nodetree yet, convert the Cycles material
+                    total += 1
+
+                    result = cycles_material_converter(blender_mat)
+
+                    if 'FINISHED' in result:
+                        success += 1
+                    elif 'CANCELLED' in result:
+                        failed += 1
+
+        self.report({'INFO'}, 'Converted %d of %d materials (%d failed)' % (success, total, failed))
+        return {'FINISHED'}
+
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_convert_cycles_material(bpy.types.Operator):
+    bl_idname = 'luxrender.convert_cycles_material'
+    bl_label = 'Convert this Cycles material'
+
+    material_name = bpy.props.StringProperty(default='')
+
+    def execute(self, context):
+        if not self.properties.material_name:
+            blender_mat = context.material
+        else:
+            blender_mat = bpy.data.materials[self.properties.material_name]
+
+        if blender_mat.node_tree:
+            # Cycles nodetree present
+            result = cycles_material_converter(blender_mat)
+
+            if 'FINISHED' in result:
+                self.report({'INFO'}, 'Successfully converted material "%s"' % blender_mat.name)
+            elif 'CANCELLED' in result:
+                self.report({'ERROR'}, 'Failed to convert material "%s"' % blender_mat.name)
+
+        return {'FINISHED'}
+
+def cycles_material_converter(blender_mat):
     try:
         # Create Lux nodetree
         lux_nodetree = bpy.data.node_groups.new(blender_mat.name, type='luxrender_material_nodes')
@@ -80,10 +135,9 @@ def cycles_converter(report, blender_mat):
 
         # TODO: displacement socket
 
-        report({'INFO'}, 'Converted Cycles material "%s"' % blender_mat.name)
         return {'FINISHED'}
     except Exception as err:
-        report({'ERROR'}, 'Cannot convert material "%s": %s' % (blender_mat.name, err))
+        print('ERROR: Cannot convert material "%s": %s' % (blender_mat.name, err))
         import traceback
         traceback.print_exc()
         return {'CANCELLED'}

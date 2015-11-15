@@ -33,7 +33,7 @@ from .. import LuxRenderAddon
 from ..outputs import LuxLog, LuxManager
 from ..export import materials as export_materials
 
-from .cycles_converter import cycles_converter
+from .cycles_converter import cycles_material_converter
 
 
 @LuxRenderAddon.addon_register_class
@@ -478,7 +478,7 @@ class LUXRENDER_OT_material_reset(bpy.types.Operator):
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
     bl_idname = 'luxrender.convert_all_materials'
-    bl_label = 'Convert all Blender materials'
+    bl_label = 'Convert all Blender Internal materials'
 
     def report_log(self, level, msg):
         LuxLog('Material conversion %s: %s' % (level, msg))
@@ -487,12 +487,7 @@ class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
         for blender_mat in bpy.data.materials:
             # Don't convert materials from linked-in files
             if blender_mat.library is None:
-                if blender_mat.node_tree:
-                    if not (hasattr(blender_mat, 'luxrender_material') and blender_mat.luxrender_material.nodetree):
-                        # Cycles nodetree available and no Lux nodetree yet
-                        cycles_converter(self.report_log, blender_mat)
-                else:
-                    material_converter(self.report_log, context.scene, blender_mat)
+                material_converter(self.report_log, context.scene, blender_mat)
 
         return {'FINISHED'}
 
@@ -500,7 +495,7 @@ class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_material(bpy.types.Operator):
     bl_idname = 'luxrender.convert_material'
-    bl_label = 'Convert selected Blender material'
+    bl_label = 'Convert this Blender Internal material'
 
     material_name = bpy.props.StringProperty(default='')
 
@@ -510,11 +505,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
         else:
             blender_mat = bpy.data.materials[self.properties.material_name]
 
-        if blender_mat.node_tree:
-            # Cycles nodetree present
-            cycles_converter(self.report, blender_mat)
-        else:
-            material_converter(self.report, context.scene, blender_mat)
+        material_converter(self.report, context.scene, blender_mat)
 
         return {'FINISHED'}
 
