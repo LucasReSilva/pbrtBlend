@@ -78,6 +78,8 @@ def cycles_converter(report, blender_mat):
             # Connect
             lux_nodetree.links.new(lux_emission.outputs[0], lux_output.inputs[1])
 
+        # TODO: displacement socket
+
         report({'INFO'}, 'Converted Cycles nodetree "%s"' % blender_mat.node_tree.name)
         return {'FINISHED'}
     except Exception as err:
@@ -154,10 +156,10 @@ def convert_socket(socket, lux_nodetree):
         if (amount_node and mat1_node and mat2_node) and (
                 amount_node.type in ('FRESNEL', 'LAYER_WEIGHT') and
                 mat1_node.type == 'BSDF_DIFFUSE' and mat2_node.type == 'BSDF_GLOSSY'):
-            # Create a LuxRender glossy material
+            # This is the most common way to fake a glossy material in Cycles
             lux_node = lux_nodetree.nodes.new('luxrender_material_glossy_node')
 
-            # Diffuse Color (from BSDF_DIFFUSE)
+            # Diffuse color (from BSDF_DIFFUSE)
             linked_node, default_value = convert_socket(mat1_node.inputs['Color'], lux_nodetree)
             # The default value of a Cycles color is always RGBA, but we only need RGB
             default_value = convert_rgba_to_rgb(default_value)
@@ -168,6 +170,21 @@ def convert_socket(socket, lux_nodetree):
             copy_socket_properties(lux_node, 6, lux_nodetree, linked_node, default_value)
 
             # TODO: specular color (get brightness from fresnel/layerweight node and color from glossy node?)
+
+        elif (mat1_node and mat2_node) and ((mat1_node.type == 'BSDF_GLASS' and mat2_node.type == 'BSDF_TRANSPARENT')
+                                            or (mat1_node.type == 'BSDF_TRANSPARENT' and mat2_node.type == 'BSDF_GLASS')):
+            # This is the most common way to fake an archglass material in Cycles
+            glass_node = mat1_node if mat1_node.type == 'BSDF_GLASS' else mat2_node
+
+            lux_node = lux_nodetree.nodes.new('luxrender_material_glass_node')
+            # Set it to architectural mode
+            lux_node.architectural = True
+
+            # Glass transmission color (from BSDF_GLASS)
+            linked_node, default_value = convert_socket(glass_node.inputs['Color'], lux_nodetree)
+            # The default value of a Cycles color is always RGBA, but we only need RGB
+            default_value = convert_rgba_to_rgb(default_value)
+            copy_socket_properties(lux_node, 0, lux_nodetree, linked_node, default_value)
         else:
             # "Normal" mix material, no special treatment
             linked_node_amount, default_value_amount = convert_socket(node.inputs['Fac'], lux_nodetree)
@@ -258,6 +275,21 @@ def convert_socket(socket, lux_nodetree):
         if from_socket.name == 'Alpha':
             lux_node.channel = 'alpha'
 
+    elif node.type == 'BUMP':
+        lux_node = lux_nodetree.nodes.new('luxrender_texture_math_node')
+        lux_node.mode = 'scale'
+
+        # Strength
+        linked_node, default_value = convert_socket(node.inputs['Strength'], lux_nodetree)
+        if default_value and node.invert:
+            # TODO: extend this so it is able to invert linked nodes, too
+            default_value = -default_value
+        copy_socket_properties(lux_node, 0, lux_nodetree, linked_node, default_value)
+
+        # Height
+        linked_node, default_value = convert_socket(node.inputs['Height'], lux_nodetree)
+        copy_socket_properties(lux_node, 1, lux_nodetree, linked_node, default_value)
+
     else:
         # In case of an unkown node, do nothing
         print('WARNING: Unsupported node type %s' % node.type)
@@ -266,5 +298,12 @@ def convert_socket(socket, lux_nodetree):
     if lux_node:
         # Copy properties shared by all nodes
         lux_node.location = node.location
+
+        if 'BSDF' in node.type:
+            # Is a material shader, copy common material properties
+            # Bump
+            if 'Normal' in node.inputs and 'Bump' in lux_node.inputs:
+                linked_node, default_value = convert_socket(node.inputs['Normal'], lux_nodetree)
+                copy_socket_properties(lux_node, 'Bump', lux_nodetree, linked_node, default_value)
 
     return lux_node, None
