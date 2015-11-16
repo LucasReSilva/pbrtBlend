@@ -29,6 +29,90 @@ import bpy
 from .. import LuxRenderAddon
 
 @LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
+    bl_idname = 'luxrender.convert_cycles_scene'
+    bl_label = 'Convert Cycles Scene'
+    bl_description = 'Convert Cycles materials, lamps and world background to LuxRender materials and lamps'
+
+    def execute(self, context):
+        # Convert all materials
+        bpy.ops.luxrender.convert_all_cycles_materials()
+
+        # Convert light settings
+        lights = [obj for obj in context.scene.objects if obj.type == 'LAMP']
+
+        for light in lights:
+            if light.data.type == 'SUN':
+                print('Converted sun %s' % light.name)
+                lux_sun = light.data.luxrender_lamp.luxrender_lamp_sun
+                # Cycles sun lamps are always in "sun only" mode
+                lux_sun.sunsky_type = 'sun'
+                # Sun size
+                lux_sun.relsize = max(light.data.shadow_soft_size * 200, 0.05)
+
+        # Convert world background settings
+        create_sky = False
+        create_background_hemi = False
+        hemi_color = None
+        hemi_hdri_path = None
+
+        if context.scene.world.node_tree:
+            world_output = None
+
+            for node in context.scene.world.node_tree.nodes:
+                if node.type == 'OUTPUT_WORLD' and node.is_active_output:
+                    world_output = node
+                    break
+
+            if world_output:
+                background_node = get_linked_node(world_output.inputs['Surface'])
+
+                if background_node and background_node.type == 'BACKGROUND':
+                    socket_color = background_node.inputs['Color']
+                    socket_strength = background_node.inputs['Strength']
+
+                    if socket_color.is_linked:
+                        pass # TODO: detect sky/HDRI
+                    else:
+                        if (socket_strength.default_value > 0 or socket_strength.is_linked):
+                            converted_color = convert_rgba_to_rgb(socket_color.default_value)
+
+                            if converted_color != (0, 0, 0):
+                                create_background_hemi = True
+                                hemi_color = converted_color
+        else:
+            # Don't create hemi if background is black (check Value component of HSV model)
+            if context.scene.world.horizon_color.v > 0:
+                create_background_hemi = True
+                hemi_color = context.scene.world.horizon_color
+
+        if create_background_hemi:
+            hemi_name = 'Background_Lux_autoconverted'
+            hemi_data = bpy.data.lamps.new(name=hemi_name, type='HEMI')
+            hemi_object = bpy.data.objects.new(name=hemi_name, object_data=hemi_data)
+            context.scene.objects.link(hemi_object)
+
+            lux_hemi = hemi_data.luxrender_lamp.luxrender_lamp_hemi
+
+            if hemi_color:
+                lux_hemi.L_color = hemi_color
+
+            if hemi_hdri_path:
+                lux_hemi.infinite_map = hemi_hdri_path
+
+        if create_sky:
+            sky_name = 'Sky_Lux_autoconverted'
+            sky_data = bpy.data.lamps.new(name=sky_name, type='SUN')
+            sky_object = bpy.data.objects.new(name=sky_name, object_data=sky_data)
+            context.scene.objects.link(sky_object)
+
+            # Set it to be sky only
+            sky_data.luxrender_lamp.luxrender_lamp_sun.sunsky_type = 'sky'
+
+        return {'FINISHED'}
+
+
+@LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_all_cycles_materials(bpy.types.Operator):
     bl_idname = 'luxrender.convert_all_cycles_materials'
     bl_label = 'Convert all Cycles materials'
@@ -80,6 +164,7 @@ class LUXRENDER_OT_convert_cycles_material(bpy.types.Operator):
                 self.report({'ERROR'}, 'Failed to convert material "%s"' % blender_mat.name)
 
         return {'FINISHED'}
+
 
 def cycles_material_converter(blender_mat):
     try:
@@ -172,8 +257,8 @@ def convert_socket(socket, lux_nodetree):
 
     lux_node = None
 
-    if node.type == 'OUTPUT_MATERIAL':
-        pass # Output is exported before iterative export
+    if node.type in ('OUTPUT_MATERIAL', 'EMISSION'):
+        pass # These node types are exported before recursive export
 
     ### Materials ###
 

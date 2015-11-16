@@ -246,6 +246,9 @@ def render_start_options(self, context):
 
         col.prop(context.scene.luxrender_engine, "selected_luxrender_api", text="LuxRender API")
 
+        col.separator()
+        col.operator("luxrender.convert_cycles_scene", icon='EXPORT')
+
         if not UseLuxCore():
             col.prop(context.scene.luxrender_engine, "export_type", text="Export Type")
             if context.scene.luxrender_engine.export_type == 'EXT':
