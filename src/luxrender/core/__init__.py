@@ -246,9 +246,6 @@ def render_start_options(self, context):
 
         col.prop(context.scene.luxrender_engine, "selected_luxrender_api", text="LuxRender API")
 
-        col.separator()
-        col.operator("luxrender.convert_cycles_scene", icon='EXPORT')
-
         if not UseLuxCore():
             col.prop(context.scene.luxrender_engine, "export_type", text="Export Type")
             if context.scene.luxrender_engine.export_type == 'EXT':
@@ -256,6 +253,9 @@ def render_start_options(self, context):
             if context.scene.luxrender_engine.export_type == 'INT':
                 row.prop(context.scene.luxrender_engine, "write_files", text="Write to Disk")
                 row.prop(context.scene.luxrender_engine, "integratedimaging", text="Integrated Imaging")
+
+        col.separator()
+        col.operator("luxrender.convert_cycles_scene", icon='EXPORT')
 
 
 _register_elm(bl_ui.properties_render.RENDER_PT_render.append(render_start_options))
