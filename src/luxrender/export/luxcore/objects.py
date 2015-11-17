@@ -250,15 +250,16 @@ class ObjectExporter(object):
         use_pointiness = False
 
         for mat_slot in self.blender_object.material_slots:
-            if mat_slot.material.luxrender_material.nodetree:
-                # Material with nodetree, check the nodes for pointiness node
-                use_pointiness = find_node(mat_slot.material, 'luxrender_texture_pointiness_node')
-            else:
-                # Material without nodetree, check its textures for pointiness texture
-                for tex_slot in mat_slot.material.texture_slots:
-                    if tex_slot and tex_slot.texture and tex_slot.texture.luxrender_texture.type == 'pointiness':
-                        use_pointiness = True
-                        break
+            if mat_slot.material:
+                if mat_slot.material.luxrender_material.nodetree:
+                    # Material with nodetree, check the nodes for pointiness node
+                    use_pointiness = find_node(mat_slot.material, 'luxrender_texture_pointiness_node')
+                else:
+                    # Material without nodetree, check its textures for pointiness texture
+                    for tex_slot in mat_slot.material.texture_slots:
+                        if tex_slot and tex_slot.texture and tex_slot.texture.luxrender_texture.type == 'pointiness':
+                            use_pointiness = True
+                            break
 
         if use_pointiness:
             pointiness_shape = luxcore_shape_name + '_pointiness'
