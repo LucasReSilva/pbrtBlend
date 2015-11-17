@@ -38,6 +38,11 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
         # Convert all materials
         bpy.ops.luxrender.convert_all_cycles_materials()
 
+        # Convert object settings
+        for obj in context.scene.objects:
+            if not obj.cycles_visibility.camera:
+                obj.hide_render = True
+
         # Convert light settings
         lights = [obj for obj in context.scene.objects if obj.type == 'LAMP']
 
