@@ -1032,7 +1032,7 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
-        set_prop_tex(properties, luxcore_name, 'type', 'blender_marble')
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_musgrave')
         set_prop_tex(properties, luxcore_name, 'musgravetype', self.musgravetype)
         set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
         set_prop_tex(properties, luxcore_name, 'dimension', self.h)
