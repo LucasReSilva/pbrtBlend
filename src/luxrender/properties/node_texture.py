@@ -1654,3 +1654,40 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
             smokedata_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'densitygrid', self.name, smokedata_params)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_dots(luxrender_texture_node):
+    """Smoke Data node"""
+    bl_idname = 'luxrender_texture_dots_node'
+    bl_label = 'Dots Texture'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 190
+
+    def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'Inside')
+        self.inputs.new('luxrender_color_socket', 'Outside')
+        self.inputs['Outside'].default_value = (0.05, 0.05, 0.05)
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        inside = self.inputs[0].export_luxcore(properties)
+        outside = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'dots')
+        set_prop_tex(properties, luxcore_name, 'inside', inside)
+        set_prop_tex(properties, luxcore_name, 'outside', outside)
+
+        mapping_type, uvscale, uvdelta = self.inputs[2].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
