@@ -1631,16 +1631,18 @@ class luxrender_light_area_node(luxrender_material_node):
 
     advanced = bpy.props.BoolProperty(name='Advanced Options', default=False)
 
-    gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, description='Scaling factor for light intensity')
+    gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, description='Multiplier for light intensity')
     power = bpy.props.FloatProperty(name='Power (W)', default=100.0, min=0.0)
     efficacy = bpy.props.FloatProperty(name='Efficacy (lm/W)', default=17.0, min=0.0)
     iesname = bpy.props.StringProperty(name='IES Data', description='IES file path', subtype='FILE_PATH')
     importance = bpy.props.FloatProperty(name='Importance', default=1.0, min=0.0,
-                                         description='Shadow ray and light path sampling weight')
+                                         description='How often the light is sampled compared to other light sources. '
+                                                     'Does not change the look but may have an impact on how quickly '
+                                                     'the render cleans up.')
     nsamples = bpy.props.IntProperty(name='Shadow Ray Count', default=1, min=1, max=64,
-                                     description='Number of shadow samples per intersection')
+                                     description='Number of shadow samples per bounce')
     luxcore_samples = bpy.props.IntProperty(name='Samples', default=-1, min=-1, max=64,
-                                     description='Number of shadow samples per intersection (-1 = use global settings)')
+                                     description='Number of shadow samples per bounce (-1 = use global settings)')
 
     def init(self, context):
         self.inputs.new('luxrender_TC_L_socket', 'Light Color')
