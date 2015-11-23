@@ -432,6 +432,30 @@ def convert_socket(socket, lux_nodetree):
         if from_socket.name == 'Alpha':
             lux_node.channel = 'alpha'
 
+    elif node.type == 'TEX_NOISE':
+        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_clouds_node')
+
+    elif node.type == 'TEX_VORONOI':
+        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_voronoi_node')
+
+    elif node.type == 'TEX_GRADIENT':
+        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_blend_node')
+
+    # No node support for magic texture yet (in LuxBlend)
+    #elif node.type == 'TEX_MAGIC':
+    #    lux_node = lux_nodetree.nodes.new('luxrender_texture_blender__node')
+
+    elif node.type == 'TEX_MUSGRAVE':
+        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_musgrave_node')
+
+    elif node.type == 'TEX_CHECKER':
+        lux_node = lux_nodetree.nodes.new('luxrender_texture_checker_node')
+
+    # Brick is making problems (does not have outputs after creation, probably because of color/float switch which is
+    # done in the draw() function... annoying concept
+    #elif node.type == 'TEX_BRICK':
+    #    lux_node = lux_nodetree.nodes.new('luxrender_texture_brick_node')
+
     elif node.type == 'BUMP':
         lux_node = lux_nodetree.nodes.new('luxrender_texture_math_node')
         lux_node.mode = 'scale'
