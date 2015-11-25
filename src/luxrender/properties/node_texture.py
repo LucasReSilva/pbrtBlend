@@ -1082,13 +1082,15 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'filename')
-        layout.prop(self, 'filtertype')
 
-        if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
-            layout.prop(self, 'maxanisotropy')
-            layout.prop(self, 'discardmipmaps')
+        if not UseLuxCore():
+            layout.prop(self, 'filtertype')
 
-        layout.prop(self, 'wrap')
+            if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
+                layout.prop(self, 'maxanisotropy')
+                layout.prop(self, 'discardmipmaps')
+
+            layout.prop(self, 'wrap')
 
     def export_texture(self, make_texture):
         normalmap_params = ParamSet()
@@ -1108,6 +1110,30 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
             normalmap_params.add_float('vscale', -1.0)
 
         return make_texture('float', 'normalmap', self.name, normalmap_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        if not (os.path.exists(self.filename) and os.path.isfile(self.filename)):
+            return [0, 0, 0] # Black color
+
+        set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
+        set_prop_tex(properties, luxcore_name, 'file', self.filename)
+        set_prop_tex(properties, luxcore_name, 'gamma', 1)
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        # Implicitly create a normalmap
+        normalmap_name = create_luxcore_name(self, suffix='normal')
+        set_prop_tex(properties, normalmap_name, 'type', 'normalmap')
+        set_prop_tex(properties, normalmap_name, 'texture', luxcore_name)
+        luxcore_name = normalmap_name
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
