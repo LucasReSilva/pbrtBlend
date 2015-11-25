@@ -2762,7 +2762,7 @@ class luxrender_TC_tex1_socket(bpy.types.NodeSocket):
         return tex1_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.tex1)
+        return export_socket_luxcore(properties, self, list(self.tex1))
 
 
 @LuxRenderAddon.addon_register_class
@@ -2796,7 +2796,7 @@ class luxrender_TC_tex2_socket(bpy.types.NodeSocket):
         return tex2_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.tex2)
+        return export_socket_luxcore(properties, self, list(self.tex2))
 
 
 # And fresnel!

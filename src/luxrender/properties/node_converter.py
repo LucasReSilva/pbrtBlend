@@ -70,8 +70,6 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout)
-
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -110,6 +108,18 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
         addtex_params.update(get_socket_paramsets(self.inputs, make_texture))
 
         return make_texture(self.variant, 'add', self.name, addtex_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex1 = self.inputs[0].export_luxcore(properties)
+        tex2 = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'add')
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -169,8 +179,6 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
         self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout)
-
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -249,6 +257,20 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 
         return make_texture(self.variant, 'mix', self.name, mix_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        amount = self.inputs[0].export_luxcore(properties)
+        tex1 = self.inputs[1].export_luxcore(properties)
+        tex2 = self.inputs[2].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'mix')
+        set_prop_tex(properties, luxcore_name, 'amount', amount)
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_scale(luxrender_texture_node):
@@ -260,8 +282,6 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout)
-
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -302,6 +322,18 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 
         return make_texture(self.variant, 'scale', self.name, scale_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex1 = self.inputs[0].export_luxcore(properties)
+        tex2 = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'scale')
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_subtract(luxrender_texture_node):
@@ -313,8 +345,6 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout)
-
         layout.prop(self, 'variant')
 
         si = self.inputs.keys()
@@ -354,6 +384,18 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
         subtract_params.update(get_socket_paramsets(self.inputs, make_texture))
 
         return make_texture(self.variant, 'subtract', self.name, subtract_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex1 = self.inputs[0].export_luxcore(properties)
+        tex2 = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'subtract')
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -652,6 +694,8 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
     bl_width_min = 260
 
     #TODO: wait for the colorramp property to be exposed by Blender API before releasing this into the wild!
+
+    # TODO 2: refactor it...
 
     @classmethod
     def poll(cls, node_tree):
