@@ -423,7 +423,16 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 
         return make_texture('color', 'colordepth', self.name, colordepth_params)
 
-    # TODO: LuxCore export
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        kt = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'colordepth')
+        set_prop_tex(properties, luxcore_name, 'depth', self.depth)
+        set_prop_tex(properties, luxcore_name, 'kt', kt)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
