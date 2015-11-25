@@ -732,7 +732,14 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Color'].enabled = not self.is_normal_map
         self.outputs['Bump'].enabled = self.is_normal_map
 
-    image = bpy.props.StringProperty(default='')
+    def update_image(self, context):
+        # Set a fake user so Blender does not delete the image (workaround needed because we can't do real datablock
+        # links, so the user count is not incremented if a user selects an image in this node)
+        if self.image_name in bpy.data.images:
+            image = bpy.data.images[self.image_name]
+            image.use_fake_user = True
+
+    image_name = bpy.props.StringProperty(default='', update=update_image)
 
     channel_items = [
         ('rgb', 'RGB', 'Default, use all color channels'),
@@ -748,7 +755,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, max=10.0, description='Brightness multiplier')
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0, description='Gamma correction to apply')
     is_normal_map = bpy.props.BoolProperty(name='Normalmap', default=False, description='Enable if this is a normalmap,'
-                                           ' then plug the output directly in a Bump socket', update=update_is_normal_map)
+                                           ' then plug the output directly into a Bump socket', update=update_is_normal_map)
     normalmap_fake_gamma = bpy.props.FloatProperty(name='Gamma', default=1)
 
     def init(self, context):
@@ -761,7 +768,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         warning_luxcore_node(layout)
 
         split = layout.split(align=True, percentage=0.7)
-        split.prop_search(self, 'image', bpy.data, 'images', text='')
+        split.prop_search(self, 'image_name', bpy.data, 'images', text='')
         split.operator('image.open', text='Open', icon='FILESEL')
 
         column = layout.column()
@@ -790,14 +797,14 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         warning_color_no_image = [0, 0, 0] # Black color
         warning_color_wrong_path = [0.8, 0, 0.8] # Purple color
 
-        if self.image == '':
+        if self.image_name == '':
             return warning_color_no_image
 
-        if self.image not in bpy.data.images:
+        if self.image_name not in bpy.data.images:
             print('ERROR: %s not found in Blender images!')
             return warning_color_wrong_path
 
-        image = bpy.data.images[self.image]
+        image = bpy.data.images[self.image_name]
 
         # TODO: library handling
         # Note: we can get the nodetree via node.id_data
