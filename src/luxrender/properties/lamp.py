@@ -222,8 +222,8 @@ class luxrender_lamp_point(luxrender_lamp_basic):
             'attr': 'usesphere',
             'name': 'Use Sphere',
             'update': sphere_lamp_prop,
-            'description': 'Use a spherical area light instead of a true point light. This is more realistic, but \
-can deform IES profiles',
+            'description': 'Use a spherical area light instead of a true point light. This is more realistic, but '
+                           'can deform IES profiles',
             'default': False,
 
         },
@@ -254,8 +254,8 @@ can deform IES profiles',
             'type': 'bool',
             'attr': 'null_lamp',
             'name': 'Hide geometry',
-            'description': 'Use a null material for lamp geometry (lamp will still be visible when viewed directly, \
-as it emits its own light',
+            'description': 'Use a null material for lamp geometry (lamp will still be visible when viewed directly, '
+            'as it emits its own light',
             'default': True,
         },
     ]
