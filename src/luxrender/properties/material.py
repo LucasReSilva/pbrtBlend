@@ -219,8 +219,7 @@ class MATERIAL_OT_set_luxrender_type(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.material and \
-               context.material.luxrender_material
+        return hasattr(context, 'material') and context.material and context.material.luxrender_material
 
     def execute(self, context):
         context.material.luxrender_material.set_type(self.properties.mat_name)

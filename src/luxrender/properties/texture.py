@@ -750,7 +750,7 @@ class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.texture and context.texture.luxrender_texture
+        return hasattr(context, 'texture') and context.texture and context.texture.luxrender_texture
 
     def execute(self, context):
         context.texture.luxrender_texture.type = self.properties.tex_name
