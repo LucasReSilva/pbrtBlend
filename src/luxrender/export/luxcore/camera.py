@@ -171,7 +171,7 @@ class CameraExporter(object):
 
         # Field of view
         if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
-            self.properties.Set(pyluxcore.Property('scene.camera.fieldofview', [math.degrees(blCameraData.angle)]))
+            self.properties.Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(blCameraData.angle)))
 
         # screenwindow (for border rendering and camera shift)
         width, height = luxCamera.luxrender_film.resolution(self.blender_scene)

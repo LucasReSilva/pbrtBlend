@@ -412,8 +412,6 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout)
-
         layout.prop(self, 'depth')
 
     def export_texture(self, make_texture):

@@ -435,11 +435,8 @@ class luxrender_material(declarative_property_group):
                         'description': 'Zoom Factor of preview camera',
                         'name': 'Zoom Factor',
                         'min': 1.0,
-                        'soft_min': 0.5,
                         'max': 2.0,
-                        'soft_max': 2.0,
-                        'step': 25,
-                        'default': 1.0
+                        'default': 1.0,
                     },
                     {
                         'attr': 'nodetree',
