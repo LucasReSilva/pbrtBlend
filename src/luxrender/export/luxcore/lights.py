@@ -208,10 +208,12 @@ class LightExporter(object):
                     self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = lux_lamp.turbidity
+                groundalbedo = list(lux_lamp.groundalbedo)
                 skyVersion = 'sky' if legacy_sky else 'sky2'
 
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.type', [skyVersion]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.turbidity', [turbidity]))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.groundalbedo', groundalbedo))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.dir', sundir))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
