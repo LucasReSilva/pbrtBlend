@@ -347,6 +347,7 @@ class luxrender_lamp_sun(declarative_property_group):
                    'sunsky_type',
                    'nsamples',
                    'turbidity',
+                   'groundalbedo', # LuxCore only parameter
                    'legacy_sky',
                    'relsize',
                    'horizonbrightness',
@@ -367,6 +368,7 @@ class luxrender_lamp_sun(declarative_property_group):
                     'L_multiplycolor': {'sunsky_type': 'distant', 'L_usecolortexture': True},
                     'legacy_sky': {'sunsky_type': O(['sunsky', 'sky'])},
                     'turbidity': {'sunsky_type': LO({'!=': 'distant'})},
+                    'groundalbedo': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
                     'theta': {'sunsky_type': 'distant'},
                     'relsize': {'sunsky_type': O(['sunsky', 'sun'])},
                     'horizonbrightness': {'legacy_sky': True,
@@ -401,6 +403,16 @@ class luxrender_lamp_sun(declarative_property_group):
                 ('sky', 'Sky Only', 'Physical sky without sun'),
                 ('distant', 'Distant', 'Generic directional light'),
             ]
+        },
+        {
+            'type': 'float_vector',
+            'subtype': 'COLOR',
+            'attr': 'groundalbedo',
+            'name': 'Ground Albedo',
+            'description': '',
+            'default': (0, 0, 0),
+            'min': 0,
+            'max': 1,
         },
         {
             'type': 'bool',

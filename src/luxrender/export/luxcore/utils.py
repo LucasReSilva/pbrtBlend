@@ -65,7 +65,7 @@ def convert_texture_channel(luxcore_exporter, properties, element_name, textured
 
         texture = get_texture_from_scene(luxcore_exporter.blender_scene, texture_name)
 
-        if texture is not None:
+        if texture:
             luxcore_exporter.convert_texture(texture)
             texture_exporter = luxcore_exporter.texture_cache[get_elem_key(texture)]
 
