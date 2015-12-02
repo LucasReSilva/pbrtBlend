@@ -65,7 +65,7 @@ class ConfigExporter(object):
         return self.properties
 
 
-    def convert_channel(self, channelName, id=-1):
+    def convert_channel(self, channelName, id=-1, lightgroup_name=''):
         """
         Sets configuration properties for LuxCore AOV output
         """
@@ -74,9 +74,10 @@ class ConfigExporter(object):
         else:
             self.luxcore_exporter.passes_cache.add(channelName)
 
-        # the OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
+        # The OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
         engine = self.__get_engine()
         is_ocl_engine = engine.endswith('OCL')
+
         if is_ocl_engine:
             if channelName == 'MATERIAL_ID_MASK':
                 if self.material_id_mask_counter == 0:
@@ -113,7 +114,7 @@ class ConfigExporter(object):
         suffix = ('.png' if (channelName in LDR_channels) else '.exr')
         outputStringFilename = 'film.outputs.' + str(self.outputCounter) + '.filename'
 
-        filename = channelName
+        filename = channelName + '_' + lightgroup_name
         if id != -1:
             filename += '_' + str(id)
         filename = get_output_filename(self.blender_scene) + '_' + filename + suffix
@@ -391,3 +392,6 @@ class ConfigExporter(object):
         if not self.blender_scene.luxrender_lightgroups.ignore:
             for i in range(len(self.luxcore_exporter.lightgroup_cache)):
                 self.convert_channel('RADIANCE_GROUP', i)
+
+            for lg, id in self.luxcore_exporter.lightgroup_cache.get_lightgroup_id_pairs():
+                self.convert_channel('RADIANCE_GROUP', id, lg)
