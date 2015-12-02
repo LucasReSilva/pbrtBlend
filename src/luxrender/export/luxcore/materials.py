@@ -235,7 +235,7 @@ class MaterialExporter(object):
                         if texture_name:
                             texture = get_texture_from_scene(self.luxcore_exporter.blender_scene, texture_name)
 
-                            if texture is not None:
+                            if texture:
                                 self.luxcore_exporter.convert_texture(texture)
                                 texture_exporter = self.luxcore_exporter.texture_cache[get_elem_key(texture)]
 
