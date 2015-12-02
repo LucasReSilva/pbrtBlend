@@ -196,6 +196,8 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
         self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'use_ior')
 
         if self.use_ior:
@@ -241,6 +243,8 @@ class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
         self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'advanced')
 
         if self.advanced:
