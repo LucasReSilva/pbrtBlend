@@ -223,10 +223,11 @@ def lux_use_alternate_texview(self, context):
         if not UseLuxCore():
             row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
 
-        row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
+        if context.material:
+            row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
 
-        if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
-            row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
+            if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
+                row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
 
 
 _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview.append(lux_use_alternate_texview))
