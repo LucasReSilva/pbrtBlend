@@ -33,7 +33,7 @@ from ...export.materials import get_texture_from_scene
 from ...export import get_expanded_file_name
 from ...properties import find_node
 
-from .utils import convert_texture_channel, generate_volume_name, get_elem_key
+from .utils import convert_texture_channel, generate_volume_name, get_elem_key, is_lightgroup_opencl_compatible
 from .textures import TextureExporter
 
 
@@ -650,7 +650,9 @@ class MaterialExporter(object):
 
                         lightgroup = material.luxrender_emission.lightgroup
                         lightgroup_id = self.luxcore_exporter.lightgroup_cache.get_id(lightgroup, self.blender_scene, self)
-                        self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
+
+                        if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
+                            self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
 
                         gain = material.luxrender_emission.gain
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.gain', [gain] * 3))
