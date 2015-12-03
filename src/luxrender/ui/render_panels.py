@@ -217,21 +217,29 @@ class device_settings(render_panel):
                 or ((UseLuxCore() and (engine_settings.renderengine_type in ['PATH', 'BIASPATH']
                                        and engine_settings.device == 'OCL')
                 or engine_settings.device_preview == 'OCL')):
-            self.layout.operator('luxrender.opencl_device_list_update')
-            # This is a "special" panel section for the list of OpenCL devices
-            for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
-                dev = context.scene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
+            self.layout.label('OpenCL Settings:')
+            self.layout.prop(engine_settings, 'opencl_settings_type', expand=True)
+
+            if UseLuxCore() and engine_settings.opencl_settings_type == 'SIMPLE':
                 row = self.layout.row()
-                row.prop(dev, 'opencl_device_enabled', text="")
-                subrow = row.row()
-                subrow.enabled = dev.opencl_device_enabled
-                subrow.label(dev.name)
+                row.prop(engine_settings, 'opencl_use_all_cpus')
+                row.prop(engine_settings, 'opencl_use_all_gpus')
+
+            elif not UseLuxCore() or engine_settings.opencl_settings_type == 'ADVANCED':
+                self.layout.operator('luxrender.opencl_device_list_update')
+                # This is a "special" panel section for the list of OpenCL devices
+                for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
+                    dev = context.scene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
+                    row = self.layout.row()
+                    row.prop(dev, 'opencl_device_enabled', text='')
+                    subrow = row.row()
+                    subrow.enabled = dev.opencl_device_enabled
+                    subrow.label(dev.name)
 
         if UseLuxCore() and (engine_settings.renderengine_type in ['BIDIR', 'BIDIRVM']
                 or engine_settings.device == 'CPU'
                 or engine_settings.device_preview == 'CPU'):
-            # LuxCore Threads
-            #self.layout.prop(engine_settings, 'native_threads_count')
+            self.layout.label('CPU Settings:')
 
             if engine_settings.auto_threads:
                 self.layout.prop(engine_settings, 'auto_threads')
@@ -250,7 +258,7 @@ class device_settings(render_panel):
                 row.prop(threads, 'threads')
 
         # Tile settings
-        if context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
+        if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
             self.layout.prop(engine_settings, 'tile_size')
 			
 @LuxRenderAddon.addon_register_class

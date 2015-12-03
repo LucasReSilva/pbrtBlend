@@ -305,16 +305,25 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('native.threads.count', engine_settings.native_threads_count))
 
         # OpenCL settings
-        if len(engine_settings.luxcore_opencl_devices) > 0:
-            dev_string = ''
-            for dev_index in range(len(engine_settings.luxcore_opencl_devices)):
-                dev = engine_settings.luxcore_opencl_devices[dev_index]
-                dev_string += '1' if dev.opencl_device_enabled else '0'
+        if engine_settings.opencl_settings_type == 'SIMPLE':
+            self.properties.Set(pyluxcore.Property('opencl.cpu.use', engine_settings.opencl_use_all_cpus))
+            self.properties.Set(pyluxcore.Property('opencl.gpu.use', engine_settings.opencl_use_all_gpus))
+            self.properties.Set(pyluxcore.Property('opencl.devices.select', ''))
 
-            self.properties.Set(pyluxcore.Property('opencl.devices.select', dev_string))
+        elif engine_settings.opencl_settings_type == 'ADVANCED':
+            self.properties.Set(pyluxcore.Property('opencl.cpu.use', True))
+            self.properties.Set(pyluxcore.Property('opencl.gpu.use', True))
 
-            kernelcache = engine_settings.kernelcache
-            self.properties.Set(pyluxcore.Property('opencl.kernelcache', kernelcache))
+            if len(engine_settings.luxcore_opencl_devices) > 0:
+                dev_string = ''
+                for dev_index in range(len(engine_settings.luxcore_opencl_devices)):
+                    dev = engine_settings.luxcore_opencl_devices[dev_index]
+                    dev_string += '1' if dev.opencl_device_enabled else '0'
+
+                self.properties.Set(pyluxcore.Property('opencl.devices.select', dev_string))
+
+                kernelcache = engine_settings.kernelcache
+                self.properties.Set(pyluxcore.Property('opencl.kernelcache', kernelcache))
 
     
     def __convert_custom_props(self):
