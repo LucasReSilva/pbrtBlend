@@ -956,4 +956,33 @@ may mute lamps and caustics',
             'max': 0.9,
             'save_in_preset': True
         },
+        # OpenCL settings (drawn manually in "Compute Settings" panel)
+        {
+            'type': 'enum',
+            'attr': 'opencl_settings_type',
+            'name': 'OpenCL Settings',
+            'description': 'How to configure the OpenCL settings',
+            'default': 'SIMPLE',
+            'items': [
+                ('SIMPLE', 'Simple', 'Simple settings that allow to use all CPUs/no CPUs and all GPUs/no GPUs'),
+                ('ADVANCED', 'Advanced', 'Enable the OpenCL devices you want to use individually for each device'),
+            ],
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'opencl_use_all_cpus',
+            'name': 'Use all CPUs',
+            'description': 'Use all available CPUs',
+            'default': False,
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'opencl_use_all_gpus',
+            'name': 'Use all GPUs',
+            'description': 'Use all available graphics cards',
+            'default': True,
+            'save_in_preset': True
+        },
     ]
