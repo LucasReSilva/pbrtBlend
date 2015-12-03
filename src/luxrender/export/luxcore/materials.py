@@ -634,7 +634,9 @@ class MaterialExporter(object):
 
                         lightgroup = material.luxrender_emission.lightgroup
                         lightgroup_id = self.luxcore_exporter.lightgroup_cache.get_id(lightgroup, self.blender_scene, self)
-                        self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
+
+                        if not self.blender_scene.luxrender_lightgroups.ignore:
+                            self.properties.Set(pyluxcore.Property(prefix + '.emission.id', [lightgroup_id]))
 
                         gain = material.luxrender_emission.gain
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.gain', [gain] * 3))

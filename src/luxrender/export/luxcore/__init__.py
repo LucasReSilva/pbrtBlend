@@ -288,17 +288,19 @@ class LuxCoreExporter(object):
         temp_properties = pyluxcore.Properties()
         prefix = 'film.radiancescales.'
 
-        for lg, id in self.lightgroup_cache.get_lightgroup_id_pairs():
-            temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.enabled', lg.lg_enabled))
-            temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.globalscale', lg.gain))
+        if not self.blender_scene.luxrender_lightgroups.ignore:
+            for lg, id in self.lightgroup_cache.get_lightgroup_id_pairs():
+                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.enabled', lg.lg_enabled))
+                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.globalscale', lg.gain))
 
-            if lg.use_rgb_gain:
-                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.rgbscale', list(lg.rgb_gain)))
+                if lg.use_rgb_gain:
+                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.rgbscale', list(lg.rgb_gain)))
 
-            if lg.use_temperature:
-                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.temperature', lg.temperature))
+                if lg.use_temperature:
+                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.temperature', lg.temperature))
 
-        self.config_properties.Set(temp_properties)
+            self.config_properties.Set(temp_properties)
+
         # For lightgroup update during rendering
         return temp_properties
 

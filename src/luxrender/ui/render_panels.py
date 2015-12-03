@@ -478,9 +478,8 @@ class lightgroups_base(object):
                     sub.prop(lg, 'temperature', slider=True)
 
         # Merge button
-        if not self.is_imageeditor_panel and not UseLuxCore():
+        if not self.is_imageeditor_panel:
             row = self.layout.row()
-            # Lightgroup merging is not supported currently in LuxCore mode # TODO make it work
             row.prop(context.scene.luxrender_lightgroups, 'ignore')
 
         # Default lightgroup (LuxCore only)

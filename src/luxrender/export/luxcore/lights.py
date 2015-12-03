@@ -178,7 +178,7 @@ class LightExporter(object):
                 name = luxcore_name + '_sun'
                 self.exported_lights.add(ExportedLight(name, 'SUN'))
 
-                if lightgroup_id != -1:
+                if not self.blender_scene.luxrender_lightgroups.ignore:
                     self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = lux_lamp.turbidity
@@ -204,7 +204,7 @@ class LightExporter(object):
                 name = luxcore_name + '_sky'
                 self.exported_lights.add(ExportedLight(name, 'SKY'))
 
-                if lightgroup_id != -1:
+                if not self.blender_scene.luxrender_lightgroups.ignore:
                     self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = lux_lamp.turbidity
@@ -229,7 +229,7 @@ class LightExporter(object):
             if sunsky_type == 'distant':
                 self.exported_lights.add(ExportedLight(luxcore_name, 'DISTANT'))
 
-                if lightgroup_id != -1:
+                if not self.blender_scene.luxrender_lightgroups.ignore:
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
@@ -362,7 +362,7 @@ class LightExporter(object):
                                                      light.luxrender_lamp.luxrender_lamp_area.efficacy))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.samples', samples))
 
-                if lightgroup_id != -1:
+                if not self.blender_scene.luxrender_lightgroups.ignore:
                     self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.id', [lightgroup_id]))
     
                 # assign material to object
