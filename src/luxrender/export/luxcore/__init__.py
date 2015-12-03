@@ -40,7 +40,7 @@ from .meshes import MeshExporter
 from .objects import ObjectExporter
 from .textures import TextureExporter
 from .volumes import VolumeExporter
-from .utils import get_elem_key, LightgroupCache
+from .utils import get_elem_key, LightgroupCache, is_lightgroup_opencl_compatible
 
 
 class LuxCoreExporter(object):
@@ -159,11 +159,13 @@ class LuxCoreExporter(object):
         # Convert config at last because all lightgroups and passes have to be already defined
         self.convert_config(film_width, film_height)
         self.convert_imagepipeline()
-        self.convert_lightgroup_scales()
+        self.convert_lightgroup_scales(verbose=True)
 
         # Debug output
         if self.blender_scene.luxcore_translatorsettings.print_config:
+            print('\nConfig Properties:')
             print(self.config_properties)
+            print('\nScene Properties:')
             print(self.scene_properties)
 
         # Show message in Blender UI
@@ -277,7 +279,7 @@ class LuxCoreExporter(object):
         return temp_properties
 
 
-    def convert_lightgroup_scales(self):
+    def convert_lightgroup_scales(self, verbose=False):
         """
         This method is not part of the config exporter because it works on the session rather than the scene,
         so it can be updated without restarting the rendering
@@ -290,14 +292,20 @@ class LuxCoreExporter(object):
 
         if not self.blender_scene.luxrender_lightgroups.ignore:
             for lg, id in self.lightgroup_cache.get_lightgroup_id_pairs():
-                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.enabled', lg.lg_enabled))
-                temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.globalscale', lg.gain))
+                if is_lightgroup_opencl_compatible(self, id):
+                    if verbose:
+                        print('Converting lightgroup "%s" (ID: %d)' % (lg.name, id))
 
-                if lg.use_rgb_gain:
-                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.rgbscale', list(lg.rgb_gain)))
+                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.enabled', lg.lg_enabled))
+                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.globalscale', lg.gain))
 
-                if lg.use_temperature:
-                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.temperature', lg.temperature))
+                    if lg.use_rgb_gain:
+                        temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.rgbscale', list(lg.rgb_gain)))
+
+                    if lg.use_temperature:
+                        temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.temperature', lg.temperature))
+                elif verbose:
+                    print('NOT converting lightgroup "%s" (ID: %d) (max. 8 lightgroups in OpenCL engines)' % (lg.name, id))
 
             self.config_properties.Set(temp_properties)
 

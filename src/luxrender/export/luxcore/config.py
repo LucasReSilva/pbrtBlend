@@ -30,6 +30,7 @@ import os
 from ...outputs.luxcore_api import pyluxcore
 from ...extensions_framework import util as efutil
 from ...export import get_output_filename
+from .utils import is_lightgroup_opencl_compatible
 
 
 class ConfigExporter(object):
@@ -94,7 +95,7 @@ class ConfigExporter(object):
                     return
 
         if channelName == 'RADIANCE_GROUP':
-            if id > 7 and is_ocl_engine:
+            if not is_lightgroup_opencl_compatible(self.luxcore_exporter, id):
                 # don't create the output channel
                 print('WARNING: OpenCL engines support a maximum of 8 lightgroups! Skipping this lightgroup (ID: %d)'
                        % id)

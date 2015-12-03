@@ -128,6 +128,17 @@ def calc_shutter(blender_scene, lux_camera_settings):
 def generate_volume_name(name):
     return ToValidLuxCoreName(name + '_vol')
 
+def is_lightgroup_opencl_compatible(luxcore_exporter, lightgroup_id):
+    """
+    Checks if a lightgroup is allowed by the renderengine (don't export more than 8 lightgroups when using an OpenCL
+    engine). Note that one lightgroup is the default one, without an index to check, thus leaving IDs 0 to 6 for
+    user defined lightgroups.
+    """
+    engine_settings = luxcore_exporter.blender_scene.luxcore_enginesettings
+    is_opencl_engine = (engine_settings.device == 'OCL' and not luxcore_exporter.is_viewport_render) or (
+                        engine_settings.device_preview == 'OCL' and luxcore_exporter.is_viewport_render)
+    return not (is_opencl_engine and lightgroup_id > 6)
+
 class ExportedLightgroup(object):
     def __init__(self, lightgroup, id, user):
         """
