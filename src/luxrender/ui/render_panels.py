@@ -425,11 +425,21 @@ class lightgroups_base(object):
 
             split = self.layout.split()
 
+            # OpenCL engines only support up to 8 lightgroups. Display a warning for each additional lightgroup.
+            # Note that we use "lg_index > 6" because of the additional default lightgroup that has no index in this function
+            enginesettings = context.scene.luxcore_enginesettings
+            is_opencl_engine = enginesettings.device == 'OCL' or enginesettings.device_preview == 'OCL'
+            split.active = not (is_opencl_engine and (lg_index is not None and lg_index > 6))
+
             col = split.column()
             sub = col.column(align=True)
 
             # Upper row (enable/disable, name, remove)
             box = sub.box()
+
+            if not split.active:
+                box.label('OpenCL engines only support 8 lightgroups!', icon='ERROR')
+
             row = box.row()
             row.prop(lg, 'show_settings', icon=settings_toggle_icon(lg.show_settings), icon_only=True, emboss=False)
             row.prop(lg, 'lg_enabled', icon=lightgroup_icon(lg.lg_enabled), icon_only=True, toggle=True)
@@ -470,7 +480,7 @@ class lightgroups_base(object):
         # Merge button
         if not self.is_imageeditor_panel and not UseLuxCore():
             row = self.layout.row()
-            # Lightgroup merging is not supported currently
+            # Lightgroup merging is not supported currently in LuxCore mode # TODO make it work
             row.prop(context.scene.luxrender_lightgroups, 'ignore')
 
         # Default lightgroup (LuxCore only)
