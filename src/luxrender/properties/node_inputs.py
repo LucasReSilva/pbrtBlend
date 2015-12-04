@@ -322,6 +322,8 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'energy')
         layout.prop(self, 'wavelength')
         layout.prop(self, 'width')
@@ -379,6 +381,8 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'data_file')
 
     def export_texture(self, make_texture):

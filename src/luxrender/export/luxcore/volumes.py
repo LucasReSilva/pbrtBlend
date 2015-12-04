@@ -61,7 +61,7 @@ class VolumeExporter(object):
         output_node = find_node_in_volume(self.volume, 'luxrender_volume_output_node')
 
         if output_node is None:
-            # TODO: maybe create black volume here?
+            self.__export_fallback_volume()
             return
 
         try:
@@ -70,7 +70,13 @@ class VolumeExporter(object):
             print('Node volume export failed, skipping volume: %s\n%s' % (self.volume.name, err))
             import traceback
             traceback.print_exc()
-            #self.__convert_default_matte() # TODO: same as above (black volume)?
+            self.__export_fallback_volume()
+
+
+    def __export_fallback_volume(self):
+        # Black clear volume
+        self.properties.Set(pyluxcore.Property('scene.volumes.' + self.luxcore_name + '.type', 'clear'))
+        self.properties.Set(pyluxcore.Property('scene.volumes.' + self.luxcore_name + '.absorption', [100, 100, 100]))
 
 
     def __generate_volume_name(self, name):
