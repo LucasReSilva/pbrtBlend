@@ -109,7 +109,9 @@ class MaterialExporter(object):
 
 
     def __convert_default_matte(self):
-        self.luxcore_name = DEFAULT_MATTE
+        if self.luxcore_name == '':
+            self.luxcore_name = DEFAULT_MATTE
+
         self.properties.Set(pyluxcore.Property('scene.materials.' + self.luxcore_name + '.type', 'matte'))
         self.properties.Set(pyluxcore.Property('scene.materials.' + self.luxcore_name + '.kd', [0.6, 0.6, 0.6]))
 

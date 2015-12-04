@@ -282,7 +282,7 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
-    temperature = bpy.props.FloatProperty(name='Temperature', default=6500.0)
+    temperature = bpy.props.FloatProperty(name='Temperature', default=6500.0, step=100, min=1000, max=10000)
 
     def init(self, context):
         self.outputs.new('NodeSocketColor', 'Color')
