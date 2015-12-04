@@ -123,7 +123,7 @@ class render_settings(render_panel):
                 sub.enabled = False
                 sub.prop(engine_settings, 'device_cpu_only', expand=True)
 
-            if engine_settings.renderengine_type == 'BIASPATH' and engine_settings.advanced:
+            if engine_settings.renderengine_type == 'BIASPATH':
                 row = layout.row()
                 row.label('')
                 row.prop(engine_settings, 'biaspath_use_path_in_viewport')
