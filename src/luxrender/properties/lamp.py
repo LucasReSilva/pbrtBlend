@@ -345,11 +345,13 @@ class luxrender_lamp_sun(declarative_property_group):
 
     controls = [
                    'sunsky_type',
+                   'relsize',
                    'nsamples',
                    'turbidity',
                    'groundalbedo', # LuxCore only parameter
+                   'use_groundcolor', # LuxCore only parameter
+                   'groundcolor', # LuxCore only parameter
                    'legacy_sky',
-                   'relsize',
                    'horizonbrightness',
                    'horizonsize',
                    'sunhalobrightness',
@@ -368,17 +370,18 @@ class luxrender_lamp_sun(declarative_property_group):
                     'L_multiplycolor': {'sunsky_type': 'distant', 'L_usecolortexture': True},
                     'legacy_sky': {'sunsky_type': O(['sunsky', 'sky'])},
                     'turbidity': {'sunsky_type': LO({'!=': 'distant'})},
-                    'groundalbedo': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
                     'theta': {'sunsky_type': 'distant'},
                     'relsize': {'sunsky_type': O(['sunsky', 'sun'])},
-                    'horizonbrightness': {'legacy_sky': True,
-                                          'sunsky_type': O(['sunsky', 'sky'])},
-                    'horizonsize': {'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
-                    'sunhalobrightness': {'legacy_sky': True,
-                                          'sunsky_type': O(['sunsky', 'sky'])},
-                    'sunhalosize': {'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
-                    'backscattering': {'legacy_sky': True,
-                                       'sunsky_type': O(['sunsky', 'sky'])},
+                    # These legacy sky options are not supported by LuxCore
+                    'horizonbrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'horizonsize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'sunhalobrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'sunhalosize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'backscattering':     A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    # LuxCore only parameters
+                    'groundalbedo': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
+                    'use_groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
+                    'groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore(), {'use_groundcolor': True}]),
     }
 
     properties = TC_L.properties[:] + [
@@ -405,11 +408,28 @@ class luxrender_lamp_sun(declarative_property_group):
             ]
         },
         {
+            'type': 'bool',
+            'attr': 'use_groundcolor',
+            'name': 'Use Custom Ground Color',
+            'description': 'Use a custom color for the lower half of the sky',
+            'default': False
+        },
+        {
+            'type': 'float_vector',
+            'subtype': 'COLOR',
+            'attr': 'groundcolor',
+            'name': 'Custom Ground Color',
+            'description': 'Custom color for the lower half of the sky',
+            'default': (0.5, 0.5, 0.5),
+            'min': 0,
+            'soft_max': 1,
+        },
+        {
             'type': 'float_vector',
             'subtype': 'COLOR',
             'attr': 'groundalbedo',
             'name': 'Ground Albedo',
-            'description': '',
+            'description': 'Brightness of the ground',
             'default': (0, 0, 0),
             'min': 0,
             'max': 1,
