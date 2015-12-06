@@ -350,8 +350,8 @@ class luxrender_lamp_sun(declarative_property_group):
                    'turbidity',
                    'groundalbedo', # LuxCore only parameter
                    'use_groundcolor', # LuxCore only parameter
+                   'groundcolor_autoscale',# LuxCore only parameter
                    'groundcolor', # LuxCore only parameter
-                   'groundcolor_autoscale', # LuxCore only parameter
                    'legacy_sky',
                    'horizonbrightness',
                    'horizonsize',
@@ -419,7 +419,7 @@ class luxrender_lamp_sun(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'groundcolor_autoscale',
-            'name': 'Scale the ground color by the intensity of sky zenith',
+            'name': 'Scale With Sky Zenith',
             'description': 'Scale the ground color by the intensity of sky zenith ',
             'default': True
         },
