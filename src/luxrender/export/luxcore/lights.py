@@ -210,7 +210,7 @@ class LightExporter(object):
 
                 turbidity = lux_lamp.turbidity
                 groundalbedo = list(lux_lamp.groundalbedo)
-                groundcolor = list(lux_lamp.groundcolor * 100000)
+                groundcolor = list(lux_lamp.groundcolor * 100000 *  energy)
                 skyVersion = 'sky' if legacy_sky else 'sky2'
 
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.type', [skyVersion]))
