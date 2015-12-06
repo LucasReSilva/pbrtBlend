@@ -351,6 +351,7 @@ class luxrender_lamp_sun(declarative_property_group):
                    'groundalbedo', # LuxCore only parameter
                    'use_groundcolor', # LuxCore only parameter
                    'groundcolor', # LuxCore only parameter
+                   'groundcolor_autoscale', # LuxCore only parameter
                    'legacy_sky',
                    'horizonbrightness',
                    'horizonsize',
@@ -382,6 +383,7 @@ class luxrender_lamp_sun(declarative_property_group):
                     'groundalbedo': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
                     'use_groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
                     'groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore(), {'use_groundcolor': True}]),
+                    'groundcolor_autoscale': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore(), {'use_groundcolor': True}]),
     }
 
     properties = TC_L.properties[:] + [
@@ -413,6 +415,13 @@ class luxrender_lamp_sun(declarative_property_group):
             'name': 'Use Custom Ground Color',
             'description': 'Use a custom color for the lower half of the sky',
             'default': False
+        },
+        {
+            'type': 'bool',
+            'attr': 'groundcolor_autoscale',
+            'name': 'Scale the ground color by the intensity of sky zenith',
+            'description': 'Scale the ground color by the intensity of sky zenith ',
+            'default': True
         },
         {
             'type': 'float_vector',
