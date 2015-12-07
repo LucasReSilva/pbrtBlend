@@ -349,9 +349,8 @@ class luxrender_lamp_sun(declarative_property_group):
                    'nsamples',
                    'turbidity',
                    'groundalbedo', # LuxCore only parameter
-                   'use_groundcolor', # LuxCore only parameter
-                   'groundcolor_autoscale',# LuxCore only parameter
-                   'groundcolor', # LuxCore only parameter
+                   ['use_groundcolor', # LuxCore only parameter
+                   'groundcolor'], # LuxCore only parameter
                    'legacy_sky',
                    'horizonbrightness',
                    'horizonsize',
@@ -382,8 +381,7 @@ class luxrender_lamp_sun(declarative_property_group):
                     # LuxCore only parameters
                     'groundalbedo': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
                     'use_groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
-                    'groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore(), {'use_groundcolor': True}]),
-                    'groundcolor_autoscale': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore(), {'use_groundcolor': True}]),
+                    'groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
     }
 
     properties = TC_L.properties[:] + [
@@ -391,11 +389,10 @@ class luxrender_lamp_sun(declarative_property_group):
             'type': 'float',
             'attr': 'turbidity',
             'name': 'turbidity',
+            'description': 'Haziness of the atmosphere',
             'default': 2.2,
             'min': 1.2,
-            'soft_min': 1.2,
             'max': 30.0,
-            'soft_max': 30.0,
         },
         {
             'type': 'enum',
@@ -412,24 +409,17 @@ class luxrender_lamp_sun(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'use_groundcolor',
-            'name': 'Use Custom Ground Color',
+            'name': 'Use Ground Color:',
             'description': 'Use a custom color for the lower half of the sky',
             'default': False
-        },
-        {
-            'type': 'bool',
-            'attr': 'groundcolor_autoscale',
-            'name': 'Scale With Sky Zenith',
-            'description': 'Scale the ground color by the intensity of sky zenith ',
-            'default': True
         },
         {
             'type': 'float_vector',
             'subtype': 'COLOR',
             'attr': 'groundcolor',
-            'name': 'Custom Ground Color',
+            'name': '',
             'description': 'Custom color for the lower half of the sky',
-            'default': (0.5, 0.5, 0.5),
+            'default': (0.05, 0.05, 0.05),
             'min': 0,
             'soft_max': 1,
         },
@@ -438,7 +428,7 @@ class luxrender_lamp_sun(declarative_property_group):
             'subtype': 'COLOR',
             'attr': 'groundalbedo',
             'name': 'Ground Albedo',
-            'description': 'Brightness of the ground',
+            'description': 'Brightness of the ground (gets reflected into the sky)',
             'default': (0, 0, 0),
             'min': 0,
             'max': 1,

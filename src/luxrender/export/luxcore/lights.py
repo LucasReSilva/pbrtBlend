@@ -211,7 +211,6 @@ class LightExporter(object):
                 turbidity = lux_lamp.turbidity
                 groundalbedo = list(lux_lamp.groundalbedo)
                 groundcolor = list(lux_lamp.groundcolor)
-                groundcolor_autoscale = lux_lamp.groundcolor_autoscale
                 skyVersion = 'sky' if legacy_sky else 'sky2'
 
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.type', [skyVersion]))
@@ -221,7 +220,6 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.gain', gain_spectrum))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.samples', [samples]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.ground.enable', lux_lamp.use_groundcolor))
-                self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.ground.autoscale', groundcolor_autoscale))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.ground.color', groundcolor))
 
                 # Settings for indirect light visibility
