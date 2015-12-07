@@ -348,9 +348,6 @@ class luxrender_lamp_sun(declarative_property_group):
                    'relsize',
                    'nsamples',
                    'turbidity',
-                   'groundalbedo', # LuxCore only parameter
-                   ['use_groundcolor', # LuxCore only parameter
-                   'groundcolor'], # LuxCore only parameter
                    'legacy_sky',
                    'horizonbrightness',
                    'horizonsize',
@@ -378,10 +375,6 @@ class luxrender_lamp_sun(declarative_property_group):
                     'sunhalobrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
                     'sunhalosize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
                     'backscattering':     A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
-                    # LuxCore only parameters
-                    'groundalbedo': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
-                    'use_groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
-                    'groundcolor': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
     }
 
     properties = TC_L.properties[:] + [
@@ -406,14 +399,14 @@ class luxrender_lamp_sun(declarative_property_group):
                 ('distant', 'Distant', 'Generic directional light'),
             ]
         },
-        {
+        {   # Drawn manually in ui/lamps.py
             'type': 'bool',
             'attr': 'use_groundcolor',
             'name': 'Use Ground Color:',
             'description': 'Use a custom color for the lower half of the sky',
             'default': False
         },
-        {
+        {   # Drawn manually in ui/lamps.py
             'type': 'float_vector',
             'subtype': 'COLOR',
             'attr': 'groundcolor',
@@ -423,15 +416,22 @@ class luxrender_lamp_sun(declarative_property_group):
             'min': 0,
             'soft_max': 1,
         },
-        {
+        {   # Drawn manually in ui/lamps.py
             'type': 'float_vector',
             'subtype': 'COLOR',
             'attr': 'groundalbedo',
-            'name': 'Ground Albedo',
+            'name': '',
             'description': 'Brightness of the ground (gets reflected into the sky)',
             'default': (0, 0, 0),
             'min': 0,
             'max': 1,
+        },
+        {   # Drawn manually in ui/lamps.py
+            'type': 'bool',
+            'attr': 'link_albedo_groundcolor',
+            'name': '',
+            'description': 'Link albedo to ground color',
+            'default': False
         },
         {
             'type': 'bool',

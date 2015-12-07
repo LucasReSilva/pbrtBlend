@@ -124,6 +124,34 @@ class ui_luxrender_lamp_sun(lamps_panel):
     def poll(cls, context):
         return super().poll(context) and context.lamp.type == 'SUN'
 
+    def draw(self, context):
+        if context.lamp is not None:
+            super().draw(context)
+
+            if context.lamp.type == 'SUN':
+                layout = self.layout
+
+                sun_props = context.lamp.luxrender_lamp.luxrender_lamp_sun
+
+                if UseLuxCore():
+                    row = layout.row(align=True)
+                    row.label('Ground Albedo:')
+
+                    if sun_props.link_albedo_groundcolor:
+                        row.prop(sun_props, 'groundcolor')
+                    else:
+                        row.prop(sun_props, 'groundalbedo')
+
+                    if sun_props.use_groundcolor:
+                        row.prop(sun_props, 'link_albedo_groundcolor', icon='CONSTRAINT', toggle=True)
+
+                    row = layout.row(align=True)
+                    row.prop(sun_props, 'use_groundcolor')
+                    row.prop(sun_props, 'groundcolor')
+
+                    if sun_props.use_groundcolor:
+                        row.prop(sun_props, 'link_albedo_groundcolor', icon='CONSTRAINT', toggle=True)
+
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_hemi(lamps_panel):
