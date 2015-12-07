@@ -1052,7 +1052,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             if samples_per_sec > 10**6 - 1:
                 # Use megasamples as unit
-                stats_list.append('Samples/Sec %.3f M' % (samples_per_sec / 10**6))
+                stats_list.append('Samples/Sec %.1f M' % (samples_per_sec / 10**6))
             else:
                 # Use kilosamples as unit
                 stats_list.append('Samples/Sec %d k' % (samples_per_sec / 10**3))
