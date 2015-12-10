@@ -133,7 +133,7 @@ class ui_luxrender_lamp_sun(lamps_panel):
 
                 sun_props = context.lamp.luxrender_lamp.luxrender_lamp_sun
 
-                if UseLuxCore():
+                if UseLuxCore() and 'sky' in sun_props.sunsky_type:
                     row = layout.row(align=True)
                     row.label('Ground Albedo:')
 
