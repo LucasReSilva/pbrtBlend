@@ -72,7 +72,8 @@ class MaterialPreviewExporter(object):
         if self.preview_type == 'MATERIAL':
             # Convert camera
             luxcore_exporter.convert_camera()
-            luxcore_scene.Parse(luxcore_exporter.pop_updated_scene_properties())
+            cam_props = luxcore_exporter.pop_updated_scene_properties()
+            luxcore_scene.Parse(cam_props)
 
             # Convert volumes
             luxcore_exporter.convert_all_volumes()
@@ -82,6 +83,11 @@ class MaterialPreviewExporter(object):
 
             # Add light and ground plane definitions
             scn_props.Set(luxcore_exporter.scene_properties)
+
+            # Camera zoom
+            field_of_view = scn_props.Get('scene.camera.fieldofview').GetFloat()
+            zoom = self.preview_material.luxrender_material.preview_zoom
+            scn_props.Set(pyluxcore.Property('scene.camera.fieldofview', field_of_view / zoom))
 
             if self.is_world_sphere_type and not self.is_thumbnail:
                 # Scene setup for the "World sphere" preview object, should be lit by sun + sky
@@ -135,6 +141,7 @@ class MaterialPreviewExporter(object):
             scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.direction', [0, 0, -1]))
             scn_props.Set(pyluxcore.Property('scene.lights.' + 'distant' + '.color', [3.1] * 3))
 
+        print(scn_props)
         luxcore_scene.Parse(scn_props)
 
         # Create config

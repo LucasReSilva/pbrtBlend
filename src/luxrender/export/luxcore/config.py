@@ -76,8 +76,8 @@ class ConfigExporter(object):
         else:
             self.luxcore_exporter.passes_cache.add(channelName)
 
-        # The OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
-        engine = self.__get_engine()
+        # the OpenCL engines only support 1 MATERIAL_ID_MASK, 1 BY_MATERIAL_ID channel and 8 RADIANCE_GROUP channels
+        engine = self.get_engine()
         is_ocl_engine = engine.endswith('OCL')
 
         if is_ocl_engine:
@@ -135,6 +135,29 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property(outputStringId, [id]))
 
 
+    def get_engine(self):
+        """
+        Create the final renderengine string from the general type setting ('PATH', 'BIASPATH' etc.) and the device type
+        :return: LuxCore renderengine string ('PATHOCL', 'PATHCPU' etc.)
+        """
+        engine_settings = self.blender_scene.luxcore_enginesettings
+        engine = engine_settings.renderengine_type
+        device = engine_settings.device_preview if self.is_viewport_render else engine_settings.device
+
+        if engine == 'BIASPATH' and self.is_viewport_render and engine_settings.biaspath_use_path_in_viewport:
+            engine = 'PATH'
+
+        # Set engine type
+        if engine in ['BIDIR', 'BIDIRVM'] or device == 'CPU':
+            # CPU only engines
+            engine += 'CPU'
+        else:
+            # OpenCL engines
+            engine += 'OCL'
+
+        return engine
+
+
     def __convert_film_size(self, film_width, film_height):
         self.properties.Set(pyluxcore.Property('film.width', [film_width]))
         self.properties.Set(pyluxcore.Property('film.height', [film_height]))
@@ -174,34 +197,11 @@ class ConfigExporter(object):
         # if instancing should be allowed or not
         engine_settings = self.blender_scene.luxcore_enginesettings
         self.properties.Set(pyluxcore.Property('accelerator.instances.enable', engine_settings.instancing))
-    
-
-    def __get_engine(self):
-        """
-        Create the final renderengine string from the general type setting ('PATH', 'BIASPATH' etc.) and the device type
-        :return: LuxCore renderengine string ('PATHOCL', 'PATHCPU' etc.)
-        """
-        engine_settings = self.blender_scene.luxcore_enginesettings
-        engine = engine_settings.renderengine_type
-        device = engine_settings.device_preview if self.is_viewport_render else engine_settings.device
-
-        if engine == 'BIASPATH' and self.is_viewport_render and engine_settings.biaspath_use_path_in_viewport:
-            engine = 'PATH'
-
-        # Set engine type
-        if engine in ['BIDIR', 'BIDIRVM'] or device == 'CPU':
-            # CPU only engines
-            engine += 'CPU'
-        else:
-            # OpenCL engines
-            engine += 'OCL'
-
-        return engine
 
 
     def __convert_engine(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
-        engine = self.__get_engine()
+        engine = self.get_engine()
 
         if self.blender_scene.luxcore_translatorsettings.use_filesaver and not self.is_viewport_render:
             output_path = efutil.filesystem_path(self.blender_scene.render.filepath)

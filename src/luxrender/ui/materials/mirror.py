@@ -49,7 +49,7 @@ class ui_material_mirror(luxrender_material_sub):
         if lmg.filmindex_floatvalue == lmg.filmindex_presetvalue:
             menu_text = lmg.filmindex_presetstring
         else:
-            menu_text = '-- Choose preset --'
+            menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
         cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)

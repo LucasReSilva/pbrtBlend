@@ -180,18 +180,8 @@ def get_material_volume_defs(m):
             print('Node tree is assigned, but does not contain an output node')
             return ""
 
-        int_vol_socket = outputNode.inputs[1]
-
-        if int_vol_socket.is_linked:
-            int_vol_node = int_vol_socket.links[0].from_node
-
-        ext_vol_socket = outputNode.inputs[2]
-
-        if ext_vol_socket.is_linked:
-            ext_vol_node = ext_vol_socket.links[0].from_node
-
-        int_vol_name = '%s::%s' % (tree_name, int_vol_node.name) if int_vol_socket.is_linked else ""
-        ext_vol_name = '%s::%s' % (tree_name, ext_vol_node.name) if ext_vol_socket.is_linked else ""
+        int_vol_name = outputNode.interior_volume
+        ext_vol_name = outputNode.exterior_volume
 
         return int_vol_name, ext_vol_name
     else:

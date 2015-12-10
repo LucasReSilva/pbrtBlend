@@ -476,7 +476,7 @@ class FloatTextureParameter(TextureParameterBase):
                    {
                        'attr': '%s_presetstring' % self.attr,
                        'type': 'string',
-                       'default': '-- Choose preset --',
+                       'default': '-- Choose IOR preset --',
                        'save_in_preset': True
                    },
 
@@ -635,7 +635,7 @@ class FresnelTextureParameter(TextureParameterBase):
                    {
                        'attr': '%s_presetstring' % self.attr,
                        'type': 'string',
-                       'default': '-- Choose preset --',
+                       'default': '-- Choose IOR preset --',
                        'save_in_preset': True
                    },
                    {
@@ -750,7 +750,7 @@ class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.texture and context.texture.luxrender_texture
+        return hasattr(context, 'texture') and context.texture and context.texture.luxrender_texture
 
     def execute(self, context):
         context.texture.luxrender_texture.type = self.properties.tex_name
@@ -1929,7 +1929,7 @@ class luxrender_tex_cauchy(declarative_property_group):
         {
             'attr': 'ior_presetstring',
             'type': 'string',
-            'default': '-- Choose preset --',
+            'default': '-- Choose IOR preset --',
             'save_in_preset': True
         },
         {

@@ -463,7 +463,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
                         object_is_emitter = False
 
                         if output_node is not None:
-                            light_socket = output_node.inputs[3]
+                            light_socket = output_node.inputs['Emission']
 
                             if light_socket.is_linked:
                                 light_node = light_socket.links[0].from_node

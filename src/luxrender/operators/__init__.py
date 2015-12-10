@@ -26,7 +26,7 @@
 #
 # Blender Libs
 import bpy, bl_operators
-import os,  mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
+import os, re, mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
 
 # LuxRender Libs
 from .. import LuxRenderAddon
@@ -135,13 +135,41 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
     bl_idname = "luxrender.volume_add"
     bl_label = "Add LuxRender Volume"
 
-    new_volume_name = bpy.props.StringProperty(default='New Volume')
+    new_volume_name = bpy.props.StringProperty(default='New Volume 1')
+
+    def create_unique_name(self, context):
+        volumes = context.scene.luxrender_volumes.volumes
+        volume_names = [v.name for v in volumes]
+        name = self.new_volume_name
+
+        while name in volume_names:
+            m = re.search(r'\d+$', name)
+
+            if m is None: # Can not happen with 'New Volume 1', but leave it in case the default is changed
+                # Append a new number
+                name += ' 1'
+            else:
+                # Found a trailing number
+                number = m.group()
+                # Increment the old number and replace it
+                name = name[:len(name) - len(number)] + str(int(name[-len(number):]) + 1)
+
+        self.new_volume_name = name
 
     def invoke(self, context, event):
-        v = context.scene.luxrender_volumes.volumes
-        v.add()
-        new_vol = v[len(v) - 1]
+        self.new_volume_name = 'New Volume 1'
+        volumes = context.scene.luxrender_volumes.volumes
+
+        # Create unique volume name
+        self.create_unique_name(context)
+
+        volumes.add()
+        new_vol = volumes[len(volumes) - 1]
         new_vol.name = self.properties.new_volume_name
+
+        # Switch to the added volume
+        context.scene.luxrender_volumes.volumes_index = len(volumes) - 1
+
         return {'FINISHED'}
 
 
@@ -154,8 +182,10 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 
     def invoke(self, context, event):
         w = context.scene.luxrender_volumes
+        old_index = w.volumes_index
         w.volumes.remove(w.volumes_index)
-        w.volumes_index = len(w.volumes) - 1
+        # Switch to the volume above the deleted volume
+        w.volumes_index = max(old_index - 1, 0)
         return {'FINISHED'}
 
 

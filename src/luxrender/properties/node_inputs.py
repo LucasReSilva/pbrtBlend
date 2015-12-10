@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Jens Verwiebe, Jason Clarke, Asbjørn Heid
+# Jens Verwiebe, Jason Clarke, Asbjørn Heid, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -39,28 +39,32 @@ from ..properties.texture import (
     luxrender_tex_imagemap
 )
 from ..export import (
-    ParamSet, process_filepath_data, get_worldscale
+    ParamSet, process_filepath_data, get_worldscale, matrix_to_list
 )
 
 from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
+from ..outputs.luxcore_api import UseLuxCore
 
 from ..properties.node_material import get_socket_paramsets
 
 from ..properties.node_texture import triple_variant_items
 
 from ..properties.node_sockets import (
-    luxrender_TC_Kt_socket, luxrender_transform_socket, luxrender_coordinate_socket
+    luxrender_TC_Kt_socket, luxrender_transform_socket, luxrender_coordinate_socket, mapping_2d_socketname,
+    mapping_3d_socketname
 )
+
+from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
 
 
 @LuxRenderAddon.addon_register_class
 class luxrender_3d_coordinates_node(luxrender_texture_node):
     """3D texture coordinates node"""
     bl_idname = 'luxrender_3d_coordinates_node'
-    bl_label = '3D Texture Coordinate'
+    bl_label = '3D Texture Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 260
 
@@ -70,21 +74,50 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 
     coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
     translate = bpy.props.FloatVectorProperty(name='Translate')
-    rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(359.99),
-                                           max=radians(359.99))
+    rotate = bpy.props.FloatVectorProperty(name='Rotate', unit='ROTATION', default=(0, 0, 0))
     scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
+    uniform_scale = bpy.props.FloatProperty(name='', default=1.0)
+    use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
+                                               description='Use the same scale value for all axis')
+
+    # LuxCore uses different names for the mapping types
+    luxcore_mapping_type_map = {
+        'global': 'globalmapping3d',
+        'uv': 'uvmapping3d'
+    }
 
     def init(self, context):
-        self.outputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.outputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
-        if self.coordinates == 'smoke_domain':
-            layout.label(text='Auto Using Smoke Domain Data')
+
+        if UseLuxCore():
+            # LuxCore layout
+            if self.coordinates in self.luxcore_mapping_type_map:
+                row = layout.row()
+
+                row.column().prop(self, 'translate')
+                row.column().prop(self, 'rotate')
+
+                scale_column = row.column()
+                if self.use_uniform_scale:
+                    scale_column.label(text='Scale:')
+                    scale_column.prop(self, 'uniform_scale')
+                else:
+                    scale_column.prop(self, 'scale')
+
+                scale_column.prop(self, 'use_uniform_scale')
+            else:
+                layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
         else:
-            layout.prop(self, 'translate')
-            layout.prop(self, 'rotate')
-            layout.prop(self, 'scale')
+            # Classic layout
+            if self.coordinates == 'smoke_domain':
+                layout.label(text='Auto Using Smoke Domain Data')
+            else:
+                layout.prop(self, 'translate')
+                layout.prop(self, 'rotate')
+                layout.prop(self, 'scale')
 
     def get_paramset(self):
         coord_params = ParamSet()
@@ -113,12 +146,35 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 
         return coord_params
 
+    def export_luxcore(self, properties):
+        mapping_type = self.luxcore_mapping_type_map[self.coordinates]
+
+        # create a location matrix
+        tex_loc = mathutils.Matrix.Translation((self.translate))
+
+        # create an identitiy matrix
+        tex_sca = mathutils.Matrix()
+        tex_sca[0][0] = self.uniform_scale if self.use_uniform_scale else self.scale[0]  # X
+        tex_sca[1][1] = self.uniform_scale if self.use_uniform_scale else self.scale[1]  # Y
+        tex_sca[2][2] = self.uniform_scale if self.use_uniform_scale else self.scale[2]  # Z
+
+        # create a rotation matrix
+        tex_rot0 = mathutils.Matrix.Rotation(self.rotate[0], 4, 'X')
+        tex_rot1 = mathutils.Matrix.Rotation(self.rotate[1], 4, 'Y')
+        tex_rot2 = mathutils.Matrix.Rotation(self.rotate[2], 4, 'Z')
+        tex_rot = tex_rot0 * tex_rot1 * tex_rot2
+
+        # combine transformations
+        transformation = tex_loc * tex_rot * tex_sca
+
+        return [mapping_type, transformation]
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_2d_coordinates_node(luxrender_texture_node):
     """2D texture coordinates node"""
     bl_idname = 'luxrender_2d_coordinates_node'
-    bl_label = '2D Texture Coordinate'
+    bl_label = '2D Texture Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
@@ -127,32 +183,45 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
             coordinate_items = prop['items']
 
     coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
-    center_map = bpy.props.BoolProperty(name='Center Map', default=False)
-    uscale = bpy.props.FloatProperty(name='U Scale', default=1.0, min=-10000.0, max=10000.0)
-    vscale = bpy.props.FloatProperty(name='V Scale', default=1.0, min=-10000.0, max=10000.0)
-    udelta = bpy.props.FloatProperty(name='U Offset', default=0.0, min=-10000.0, max=10000.0)
-    vdelta = bpy.props.FloatProperty(name='V Offset', default=0.0, min=-10000.0, max=10000.0)
+    center_map = bpy.props.BoolProperty(name='Center Map', default=False, description='Keep the map centerered even '
+                                        'when scaled (e.g. scale to +U and -U equally instead of only in +U direction)')
+    uscale = bpy.props.FloatProperty(name='U', default=1.0, min=-10000.0, max=10000.0)
+    vscale = bpy.props.FloatProperty(name='V', default=1.0, min=-10000.0, max=10000.0)
+    udelta = bpy.props.FloatProperty(name='U', default=0.0, min=-10000.0, max=10000.0)
+    vdelta = bpy.props.FloatProperty(name='V', default=0.0, min=-10000.0, max=10000.0)
     v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
     v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
 
+    # LuxCore uses different names for the mapping types
+    luxcore_mapping_type_map = {
+        'uv': 'uvmapping2d'
+    }
+
     def init(self, context):
-        self.outputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.outputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
 
-        if self.coordinates == 'planar':
-            layout.prop(self, 'v1')
-            layout.prop(self, 'v2')
-            layout.prop(self, 'udelta')
+        if UseLuxCore() and not self.coordinates in self.luxcore_mapping_type_map:
+            layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
         else:
-            layout.prop(self, 'uscale')
-            layout.prop(self, 'vscale')
-            layout.prop(self, 'udelta')
-            layout.prop(self, 'vdelta')
+            if self.coordinates == 'planar':
+                layout.prop(self, 'v1')
+                layout.prop(self, 'v2')
+                layout.prop(self, 'udelta')
+            else:
+                layout.label('Scale:')
+                row = layout.row(align=True)
+                row.prop(self, 'uscale')
+                row.prop(self, 'vscale')
+                layout.label('Offset:')
+                row = layout.row(align=True)
+                row.prop(self, 'udelta')
+                row.prop(self, 'vdelta')
 
-        if self.coordinates == 'uv':
-            layout.prop(self, 'center_map')
+            if self.coordinates == 'uv':
+                layout.prop(self, 'center_map')
 
     def get_paramset(self):
         coord_params = ParamSet()
@@ -189,6 +258,21 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 
         return coord_params
 
+    def export_luxcore(self, properties):
+        mapping_type = self.luxcore_mapping_type_map[self.coordinates]
+
+        uvscale = [self.uscale,
+                   self.vscale * -1]
+
+        if not self.center_map:
+            uvdelta = [self.udelta,
+                       self.vdelta + 1]
+        else:
+            uvdelta = [self.udelta + 0.5 * (1 - self.uscale),
+                       self.vdelta * -1 + 1 - (0.5 * (1 - self.vscale))]
+
+        return [mapping_type, uvscale, uvdelta]
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blackbody(luxrender_texture_node):
@@ -198,7 +282,7 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
-    temperature = bpy.props.FloatProperty(name='Temperature', default=6500.0)
+    temperature = bpy.props.FloatProperty(name='Temperature', default=6500.0, step=100, min=1000, max=10000)
 
     def init(self, context):
         self.outputs.new('NodeSocketColor', 'Color')
@@ -212,29 +296,13 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 
         return make_texture('color', 'blackbody', self.name, blackbody_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
 
-@LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_colordepth(luxrender_texture_node):
-    """Color at Depth node"""
-    bl_idname = 'luxrender_texture_colordepth_node'
-    bl_label = 'Color at Depth'
-    bl_icon = 'TEXTURE'
+        set_prop_tex(properties, luxcore_name, 'type', 'blackbody')
+        set_prop_tex(properties, luxcore_name, 'temperature', self.temperature)
 
-    depth = bpy.props.FloatProperty(name='Depth', default=1.0, subtype='DISTANCE', unit='LENGTH')
-
-    def init(self, context):
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-        self.outputs.new('NodeSocketColor', 'Color')
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, 'depth')
-
-    def export_texture(self, make_texture):
-        colordepth_params = ParamSet()
-        colordepth_params.update(get_socket_paramsets(self.inputs, make_texture))
-        colordepth_params.add_float('depth', self.depth)
-
-        return make_texture('color', 'colordepth', self.name, colordepth_params)
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -254,6 +322,8 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'energy')
         layout.prop(self, 'wavelength')
         layout.prop(self, 'width')
@@ -266,6 +336,8 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
 
         return make_texture('color', 'gaussian', self.name, gaussian_params)
 
+    # TODO: LuxCore export once supported by LuxCore
+
 
 @LuxRenderAddon.addon_register_class  # Drawn in "input" menu, since it does not have any input sockets
 class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
@@ -277,17 +349,23 @@ class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
 
     exponent = bpy.props.FloatProperty(name='Exponent', default=350.0)
 
+    def calc_roughness(self):
+        return (2.0 / (self.exponent + 2.0)) ** 0.5
+
     def init(self, context):
-        self.outputs.new('NodeSocketFloat', 'Float')
+        self.outputs.new('NodeSocketFloat', 'Roughness')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'exponent')
 
     def export_texture(self, make_texture):
         glossyexponent_params = ParamSet()
-        glossyexponent_params.add_float('value', (2.0 / (self.exponent + 2.0)) ** 0.5)
+        glossyexponent_params.add_float('value', self.calc_roughness())
 
         return make_texture('float', 'constant', self.name, glossyexponent_params)
+
+    def export_luxcore(self, properties):
+        return self.calc_roughness()
 
 
 @LuxRenderAddon.addon_register_class
@@ -303,6 +381,8 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'data_file')
 
     def export_texture(self, make_texture):
@@ -311,6 +391,8 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
         process_filepath_data(LuxManager.CurrentScene, self, self.data_file, tabulateddata_params, 'filename')
 
         return make_texture('color', 'tabulateddata', self.name, tabulateddata_params)
+
+    # TODO: LuxCore export once supported by LuxCore
 
 
 @LuxRenderAddon.addon_register_class
@@ -326,21 +408,27 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
     fresnel = bpy.props.FloatProperty(name='IOR', default=1.52, min=1.0, max=25.0, precision=5)
     col_mult = bpy.props.FloatProperty(name='Multiply Color', default=1.0, precision=5, description='Multiply color')
 
+    def init(self, context):
+        # Default is color (need to set it for instances generated from scripts, e.g. the auto-conversion operators)
+        self.outputs.new('NodeSocketColor', 'Color')
+
     def draw_buttons(self, context, layout):
         layout.prop(self, 'variant')
 
         if self.variant == 'color':
             col = layout.column()
-            col.prop(self, 'color')
+            col.template_color_picker(self, 'color', value_slider=True)
+            col.prop(self, 'color', text='')
+
             col.prop(self, 'col_mult')
 
         if self.variant == 'float':
             layout.prop(self, 'float')
 
         if self.variant == 'fresnel':
+            warning_classic_node(layout)
             layout.prop(self, 'fresnel')
 
-        si = self.inputs.keys()
         so = self.outputs.keys()
 
         if self.variant == 'color':
@@ -366,6 +454,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
         if self.variant == 'fresnel':
             if not 'Fresnel' in so:
                 self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+                self.outputs['Fresnel'].needs_link = True
 
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
@@ -387,6 +476,16 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
         return make_texture(self.variant, 'constant', self.name, constant_params)
 
+    def export_luxcore(self, properties):
+        if self.variant == 'color':
+            value = [c * self.col_mult for c in self.color]
+        elif self.variant == 'float':
+            value = self.float
+        elif self.variant == 'fresnel':
+            value = self.fresnel
+
+        return value
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
@@ -403,6 +502,13 @@ class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
 
         return make_texture('color', 'hitpointcolor', self.name, hitpointcolor_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hitpointcolor')
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
@@ -417,16 +523,113 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 
     channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='mean')
 
+    channel_luxcore_items = [
+        ('-1', 'RGB', 'RGB luminance'),
+        ('0', 'R', 'Red luminance'),
+        ('1', 'G', 'Green luminance'),
+        ('2', 'B', 'Blue luminance'),
+    ]
+    channel_luxcore = bpy.props.EnumProperty(name='Channel', items=channel_luxcore_items, default='-1')
+
     def init(self, context):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'channel')
+        if UseLuxCore():
+            layout.prop(self, 'channel_luxcore', expand=True)
+        else:
+            layout.prop(self, 'channel')
 
     def export_texture(self, make_texture):
         hitpointgrey_params = ParamSet()
 
         return make_texture('float', 'hitpointgrey', self.name, hitpointgrey_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hitpointgrey')
+        set_prop_tex(properties, luxcore_name, 'channel', self.channel_luxcore)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_pointiness(luxrender_texture_node):
+    """Pointiness texture node"""
+    bl_idname = 'luxrender_texture_pointiness_node'
+    bl_label = 'Pointiness'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 190
+
+    curvature_items = [
+        ('concave', 'Concave', 'Only use dents'),
+        ('convex', 'Convex', 'Only use hills'),
+        ('both', 'Both', 'Use both hills and dents'),
+    ]
+    curvature_mode = bpy.props.EnumProperty(items=curvature_items, default='both')
+
+    def init(self, context):
+        self.inputs.new('luxrender_float_socket', 'Multiplier')
+        self.inputs[0].default_value = 10
+        self.outputs.new('NodeSocketFloat', 'Float')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+        layout.prop(self, 'curvature_mode', expand=True)
+
+    def export_luxcore(self, properties):
+        # Pointiness is a hitpointalpha texture behind the scenes, just that it implicitly enables pointiness
+        # calculation on the mesh (handled in luxcore object export) and has some nice wrapping to get only part of
+        # the pointiness information (see code below)
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hitpointalpha')
+
+        if self.curvature_mode == 'both':
+            # Pointiness values are in [-1..1] range originally
+            name_abs = luxcore_name + '_abs'
+            set_prop_tex(properties, name_abs, 'type', 'abs')
+            set_prop_tex(properties, name_abs, 'texture', luxcore_name)
+
+            luxcore_name = name_abs
+
+        elif self.curvature_mode == 'concave':
+            # Only use the positive values of the pointiness information
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', luxcore_name)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
+
+        elif self.curvature_mode == 'convex':
+            # Only use the negative values of the pointiness information by first flipping the values
+            name_flip = luxcore_name + '_flip'
+            set_prop_tex(properties, name_flip, 'type', 'scale')
+            set_prop_tex(properties, name_flip, 'texture1', luxcore_name)
+            set_prop_tex(properties, name_flip, 'texture2', -1)
+
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', name_flip)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
+
+        multiplier = self.inputs[0].export_luxcore(properties)
+
+        if multiplier != 1:
+            multiplier_name = luxcore_name + '_multiplier'
+            set_prop_tex(properties, multiplier_name, 'type', 'scale')
+            set_prop_tex(properties, multiplier_name, 'texture1', luxcore_name)
+            set_prop_tex(properties, multiplier_name, 'texture2', multiplier)
+
+            luxcore_name = multiplier_name
+
+        return luxcore_name
 
 # Hitpointalpha is kind of useless with Blender's vertex color system, so we don't use it
 # @LuxRenderAddon.addon_register_class
