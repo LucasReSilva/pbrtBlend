@@ -693,6 +693,44 @@ class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_hsv(luxrender_texture_node):
+    """Color at Depth node"""
+    bl_idname = 'luxrender_texture_hsv_node'
+    bl_label = 'Hue Saturation Value'
+    bl_icon = 'TEXTURE'
+
+    def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'Color')
+        self.inputs.new('luxrender_float_socket', 'Hue')
+        self.inputs['Hue'].default_value = 0.5
+        self.inputs.new('luxrender_float_socket', 'Saturation')
+        self.inputs['Saturation'].default_value = 1
+        self.inputs.new('luxrender_float_socket', 'Value')
+        self.inputs['Value'].default_value = 1
+
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex = self.inputs[0].export_luxcore(properties)
+        hue = self.inputs[1].export_luxcore(properties)
+        sat = self.inputs[2].export_luxcore(properties)
+        val = self.inputs[3].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hsv')
+        set_prop_tex(properties, luxcore_name, 'texture', tex)
+        set_prop_tex(properties, luxcore_name, 'hue', hue)
+        set_prop_tex(properties, luxcore_name, 'saturation', sat)
+        set_prop_tex(properties, luxcore_name, 'value', val)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_colorramp(luxrender_texture_node):
     """Colorramp texture node"""
     bl_idname = 'luxrender_texture_colorramp_node'
