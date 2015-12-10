@@ -701,11 +701,12 @@ class luxrender_texture_type_node_hsv(luxrender_texture_node):
 
     def init(self, context):
         self.inputs.new('luxrender_color_socket', 'Color')
-        self.inputs.new('luxrender_float_socket', 'Hue')
+        self.inputs.new('luxrender_float_limited_0_1_socket', 'Hue')
+        self.inputs.new('luxrender_float_limited_0_2_socket', 'Saturation')
+        self.inputs.new('luxrender_float_limited_0_2_socket', 'Value')
+
         self.inputs['Hue'].default_value = 0.5
-        self.inputs.new('luxrender_float_socket', 'Saturation')
         self.inputs['Saturation'].default_value = 1
-        self.inputs.new('luxrender_float_socket', 'Value')
         self.inputs['Value'].default_value = 1
 
         self.outputs.new('NodeSocketColor', 'Color')

@@ -2893,6 +2893,48 @@ class luxrender_float_socket(bpy.types.NodeSocket):
 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_float_limited_0_1_socket(bpy.types.NodeSocket):
+    """Float socket with soft limits between 0 and 1"""
+    bl_idname = 'luxrender_float_limited_0_1_socket'
+    bl_label = 'Value'
+
+    default_value = bpy.props.FloatProperty(name='Value', default=0.5, soft_min=0, soft_max=1)
+
+    def draw(self, context, layout, node, text):
+        if self.is_linked:
+            layout.label(text=self.name)
+        else:
+            layout.prop(self, 'default_value', text=self.name)
+
+    def draw_color(self, context, node):
+        return float_socket_color
+
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self, self.default_value)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_float_limited_0_2_socket(bpy.types.NodeSocket):
+    """Float socket with soft limits between 0 and 2"""
+    bl_idname = 'luxrender_float_limited_0_2_socket'
+    bl_label = 'Value'
+
+    default_value = bpy.props.FloatProperty(name='Value', default=1, soft_min=0, soft_max=2)
+
+    def draw(self, context, layout, node, text):
+        if self.is_linked:
+            layout.label(text=self.name)
+        else:
+            layout.prop(self, 'default_value', text=self.name)
+
+    def draw_color(self, context, node):
+        return float_socket_color
+
+    def export_luxcore(self, properties):
+        return export_socket_luxcore(properties, self, self.default_value)
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_color_socket(bpy.types.NodeSocket):
     """Color socket"""
     bl_idname = 'luxrender_color_socket'
