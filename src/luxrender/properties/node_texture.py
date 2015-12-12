@@ -621,7 +621,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
         if prop['attr'].startswith('channel'):
             channel_items = prop['items']
 
-    filename = bpy.props.StringProperty(name='File Name', description='Path to the normal map', subtype='FILE_PATH')
+    filename = bpy.props.StringProperty(name='File Name', description='Path to the image map', subtype='FILE_PATH')
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
     channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='mean')
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0)

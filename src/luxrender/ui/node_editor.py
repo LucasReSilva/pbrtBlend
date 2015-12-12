@@ -249,7 +249,6 @@ luxrender_node_categories_material = [
         # NodeItem("NodeReroute") #not working yet
     ]),
 
-    # TODO: remove when Math and ColorMix nodes support classic API
     luxrender_node_category_material("LUX_DEPRECATED", "Classic API", items=[
         NodeItem("luxrender_texture_image_map_node", label="Image Map"),
         NodeItem("luxrender_texture_normal_map_node", label="Normal Map"),
@@ -353,7 +352,6 @@ luxrender_node_categories_volume = [
         # NodeItem("NodeReroute") #not working yet
     ]),
 
-    # TODO: remove when Math and ColorMix nodes support classic API
     luxrender_node_category_volume("LUX_DEPRECATED_VOLUME", "Classic API", items=[
         NodeItem("luxrender_texture_mix_node"),
         NodeItem("luxrender_texture_scale_node"),
