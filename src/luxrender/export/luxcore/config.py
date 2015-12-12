@@ -222,7 +222,7 @@ class ConfigExporter(object):
             pdf_clamp = 0
 
         if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
-            self.properties.Set(pyluxcore.Property('biaspath.clamping.radiance.maxvalue', radiance_clamp))
+            self.properties.Set(pyluxcore.Property('biaspath.clamping.variance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('biaspath.clamping.pdf.value', pdf_clamp))
 
             self.properties.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
@@ -267,7 +267,7 @@ class ConfigExporter(object):
                                                  [engine_settings.biaspath_lights_samplingstrategy_type]))
         elif engine in ['PATHCPU', 'PATHOCL']:
             self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth + 1]))
-            self.properties.Set(pyluxcore.Property('path.clamping.radiance.maxvalue', radiance_clamp))
+            self.properties.Set(pyluxcore.Property('path.clamping.variance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
         elif engine in ['BIDIRCPU']:
             self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
