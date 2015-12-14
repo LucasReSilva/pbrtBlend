@@ -291,6 +291,9 @@ class property_group_renderer(bpy.types.Panel):
                                     emboss=current_property['emboss']
                                         if 'emboss' in current_property_keys
                                         else True,
+                                    icon=current_property['icon']
+                                        if 'icon' in current_property_keys
+                                        else 'NONE',
                                 )
                             elif current_property['type'] in ['operator']:
                                 args = {}

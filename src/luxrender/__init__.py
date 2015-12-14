@@ -95,10 +95,9 @@ if 'core' in locals():
 else:
     import bpy
     from bpy.types import AddonPreferences
-    from bpy.props import StringProperty, IntProperty, BoolProperty
+    from bpy.props import StringProperty
     from .extensions_framework import Addon
     import nodeitems_utils
-    from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
 
     def set_luxrender_path(self, path):
         """Save Lux install path to persistent disk storage."""
@@ -129,14 +128,14 @@ else:
             layout = self.layout
 
             layout.prop(self, "install_path")
-            layout.label(text="After updating LuxRender installation path "
-                         "please restart Blender for changes to take "
+            layout.label(text="After updating LuxRender installation path please restart Blender for changes to take "
                          "effect.")
 
             row = layout.row()
             sub = row.row()
             sub.scale_x = 0.3
             sub.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
+            sub.template_reports_banner() # This shows an "update Blender" warning text after updating
             row.label(text="After updating LuxBlend please restart Blender for the changes to take effect.")
 
     LuxRenderAddon = Addon(bl_info)
@@ -144,12 +143,14 @@ else:
 
     def register():
         bpy.utils.register_class(LuxRenderAddonPreferences)
-        nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_catagories)
+        nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_categories_material)
+        nodeitems_utils.register_node_categories("LUX_VOLUME", ui.node_editor.luxrender_node_categories_volume)
         addon_register()
 
     def unregister():
         bpy.utils.unregister_class(LuxRenderAddonPreferences)
         nodeitems_utils.unregister_node_categories("LUX_SHADER")
+        nodeitems_utils.unregister_node_categories("LUX_VOLUME")
         addon_unregister()
 
 

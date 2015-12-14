@@ -60,7 +60,8 @@ def WorldVolumeParameter(attr, name):
             'src_attr': 'volumes',
             'trg': lambda s, c: c.luxrender_world,
             'trg_attr': '%s_volume' % attr,
-            'name': name
+            'name': name,
+            'icon': 'MOD_FLUIDSIM'
         },
     ]
 
@@ -226,6 +227,13 @@ class luxrender_volume_data(declarative_property_group):
 
     properties = [
                      {
+                         'attr': 'nodetree',
+                         'type': 'string',
+                         'description': 'Node tree',
+                         'name': 'Node Tree',
+                         'default': ''
+                     },
+                     {
                          'type': 'separator',
                          'attr': 'separator'
                      },
@@ -297,8 +305,8 @@ class luxrender_volume_data(declarative_property_group):
                          'type': 'float_vector',
                          'attr': 'g',
                          'name': 'Asymmetry',
-                         'description': 'Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is \
-forwards scattering',
+                         'description': 'Scattering asymmetry RGB. -1 means backscatter, 0 is isotropic, 1 is '
+                                        'forwards scattering',
                          'default': (0.0, 0.0, 0.0),
                          'min': -1.0,
                          'soft_min': -1.0,
@@ -311,8 +319,7 @@ forwards scattering',
                          'type': 'float',
                          'attr': 'stepsize',
                          'name': 'Step Size',
-                         'description': 'Length of ray marching steps, smaller values resolve more detail, but \
-are slower',
+                         'description': 'Length of ray marching steps, smaller values resolve more detail, but are slower',
                          'default': 0.1,
                          'min': 0.0,
                          'soft_min': 0.0,
@@ -327,8 +334,8 @@ are slower',
                          'type': 'int',
                          'attr': 'priority',
                          'name': 'Volume priority',
-                         'description': '[LuxCore only] Volume priority, volumes with higher values gets priority if \
-there is overlap',
+                         'description': '[LuxCore only] Volume priority, volumes with higher values get priority if '
+                                        'there is overlap',
                          'default': 0,
                          'min': 0,
                          'max': 65535,
@@ -338,8 +345,8 @@ there is overlap',
                          'type': 'bool',
                          'attr': 'multiscattering',
                          'name': 'Multiscattering',
-                         'description': '[LuxCore only] Compute multiple scattering events in this volume (recommended \
-for volumes with high scattering scale)',
+                         'description': '[LuxCore only] Compute multiple scattering events in this volume (recommended '
+                                        'for volumes with high scattering scale)',
                          'default': False,
                          'save_in_preset': True
                      },

@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Jens Verwiebe, Jason Clarke, Asbjørn Heid
+# Jens Verwiebe, Jason Clarke, Asbjørn Heid, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -26,7 +26,8 @@
 
 import re
 
-import bpy
+import bpy, mathutils
+from math import degrees, radians
 
 from ..extensions_framework import declarative_property_group
 
@@ -37,11 +38,12 @@ from ..properties import (
 from ..properties.texture import (
     import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
-from ..export import ParamSet, process_filepath_data
+from ..export import ParamSet, process_filepath_data, get_worldscale, matrix_to_list
 from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
+from ..outputs.luxcore_api import UseLuxCore
 
 from ..properties.node_texture import (
     variant_items, triple_variant_items
@@ -52,8 +54,10 @@ from ..properties.node_material import get_socket_paramsets
 from ..properties.node_sockets import (
     luxrender_fresnel_socket, luxrender_TF_amount_socket, luxrender_transform_socket, luxrender_TF_tex1_socket,
     luxrender_TF_tex2_socket, luxrender_TFR_tex1_socket, luxrender_TFR_tex2_socket, luxrender_TC_tex1_socket,
-    luxrender_TC_tex2_socket
+    luxrender_TC_tex2_socket, mapping_2d_socketname, mapping_3d_socketname
 )
+
+from . import warning_luxcore_node, warning_classic_node, create_luxcore_name, set_prop_tex
 
 
 @LuxRenderAddon.addon_register_class
@@ -105,21 +109,34 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 
         return make_texture(self.variant, 'add', self.name, addtex_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex1 = self.inputs[0].export_luxcore(properties)
+        tex2 = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'add')
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_bump_map(luxrender_texture_node):
     """Bump map texture node"""
     bl_idname = 'luxrender_texture_bump_map_node'
-    bl_label = 'Bump'
+    bl_label = 'Bump Height'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
+    # TODO: change this to be a socket? Possible with classic API?
     bump_height = bpy.props.FloatProperty(name='Bump Height', description='Height of the bump map', default=.001,
                                           precision=6, subtype='DISTANCE', unit='LENGTH', step=.001)
 
     def init(self, context):
-        self.inputs.new('NodeSocketFloat', 'Bump Value')
-        self.outputs.new('NodeSocketFloat', 'Float')
+        self.inputs.new('luxrender_TF_bump_socket', 'Float')
+        self.outputs.new('NodeSocketFloat', 'Bump')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'bump_height')
@@ -135,6 +152,17 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
             bumpmap_params.add_texture("tex2", bumpmap_name)
 
         return make_texture('float', 'scale', self.name, bumpmap_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        input = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'scale')
+        set_prop_tex(properties, luxcore_name, 'texture1', input)
+        set_prop_tex(properties, luxcore_name, 'texture2', self.bump_height)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -215,6 +243,7 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 
             if not 'Fresnel' in so:
                 self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+                self.outputs['Fresnel'].needs_link = True
 
             if 'Color' in so:
                 self.outputs.remove(self.outputs['Color'])
@@ -227,6 +256,20 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
         mix_params.update(get_socket_paramsets(self.inputs, make_texture))
 
         return make_texture(self.variant, 'mix', self.name, mix_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        amount = self.inputs[0].export_luxcore(properties)
+        tex1 = self.inputs[1].export_luxcore(properties)
+        tex2 = self.inputs[2].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'mix')
+        set_prop_tex(properties, luxcore_name, 'amount', amount)
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -279,6 +322,18 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 
         return make_texture(self.variant, 'scale', self.name, scale_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex1 = self.inputs[0].export_luxcore(properties)
+        tex2 = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'scale')
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_subtract(luxrender_texture_node):
@@ -329,3 +384,504 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
         subtract_params.update(get_socket_paramsets(self.inputs, make_texture))
 
         return make_texture(self.variant, 'subtract', self.name, subtract_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex1 = self.inputs[0].export_luxcore(properties)
+        tex2 = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'subtract')
+        set_prop_tex(properties, luxcore_name, 'texture1', tex1)
+        set_prop_tex(properties, luxcore_name, 'texture2', tex2)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colordepth(luxrender_texture_node):
+    """Color at Depth node"""
+    bl_idname = 'luxrender_texture_colordepth_node'
+    bl_label = 'Color at Depth'
+    bl_icon = 'TEXTURE'
+
+    depth = bpy.props.FloatProperty(name='Depth', default=1.0, subtype='DISTANCE', unit='LENGTH')
+
+    def init(self, context):
+        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'depth')
+
+    def export_texture(self, make_texture):
+        colordepth_params = ParamSet()
+        colordepth_params.update(get_socket_paramsets(self.inputs, make_texture))
+        colordepth_params.add_float('depth', self.depth)
+
+        return make_texture('color', 'colordepth', self.name, colordepth_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        kt = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'colordepth')
+        set_prop_tex(properties, luxcore_name, 'depth', self.depth)
+        set_prop_tex(properties, luxcore_name, 'kt', kt)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_math(luxrender_texture_node):
+    """Math node with several math operations"""
+    bl_idname = 'luxrender_texture_math_node'
+    bl_label = 'Math'
+    bl_icon = 'TEXTURE'
+
+    input_settings = {
+        'default': {
+            0: ['Value 1', True], # slot index: [name, enabled]
+            1: ['Value 2', True],
+            2: ['', False]
+        },
+        'abs': {
+            0: ['Value', True],
+            1: ['', False],
+            2: ['', False]
+        },
+        'clamp': {
+            0: ['Value', True],
+            1: ['', False],
+            2: ['', False]
+        },
+        'mix': {
+            0: ['Amount', True],
+            1: ['Value 1', True],
+            2: ['Value 2', True]
+        }
+    }
+
+    def change_mode(self, context):
+        mode = self.mode if self.mode in self.input_settings else 'default'
+        current_settings = self.input_settings[mode]
+
+        for i in current_settings.keys():
+            self.inputs[i].name = current_settings[i][0]
+            self.inputs[i].enabled = current_settings[i][1]
+
+    mode_items = [
+        ('scale', 'Multiply', ''),
+        ('add', 'Add', ''),
+        ('subtract', 'Subtract', ''),
+        ('mix', 'Mix', 'Mix between two values/textures according to the amount (0 = use first value, 1 = use second value'),
+        ('clamp', 'Clamp', 'Clamp the input so it is between min and max values'),
+        ('abs', 'Absolute', 'Take the absolute value (remove minus sign)'),
+    ]
+    mode = bpy.props.EnumProperty(name='Mode', items=mode_items, default='scale', update=change_mode)
+
+    mode_clamp_min = bpy.props.FloatProperty(name='Min', description='', default=0)
+    mode_clamp_max = bpy.props.FloatProperty(name='Max', description='', default=1)
+
+    clamp_output = bpy.props.BoolProperty(name='Clamp', default=False, description='Limit the output value to 0..1 range')
+
+    def init(self, context):
+        self.inputs.new('luxrender_float_socket', 'Value 1')
+        self.inputs.new('luxrender_float_socket', 'Value 2')
+        self.inputs.new('luxrender_float_socket', 'Value 3') # for mix mode
+        self.inputs[2].enabled = False
+
+        self.outputs.new('NodeSocketFloat', 'Value')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        layout.prop(self, 'mode', text='')
+        layout.prop(self, 'clamp_output')
+
+        if self.mode == 'clamp':
+            layout.prop(self, 'mode_clamp_min')
+            layout.prop(self, 'mode_clamp_max')
+
+    # TODO: classic export
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        slot_0 = self.inputs[0].export_luxcore(properties)
+        slot_1 = self.inputs[1].export_luxcore(properties)
+        slot_2 = self.inputs[2].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', self.mode)
+
+        if self.mode == 'abs':
+            set_prop_tex(properties, luxcore_name, 'texture', slot_0)
+        elif self.mode == 'clamp':
+            set_prop_tex(properties, luxcore_name, 'texture', slot_0)
+            set_prop_tex(properties, luxcore_name, 'min', self.mode_clamp_min)
+            set_prop_tex(properties, luxcore_name, 'max', self.mode_clamp_max)
+        elif self.mode == 'mix':
+            set_prop_tex(properties, luxcore_name, 'amount', slot_0)
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_2)
+        else:
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_0)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_1)
+
+        if self.clamp_output:
+            clamp_name = create_luxcore_name(self, suffix='clamp')
+            set_prop_tex(properties, clamp_name, 'type', 'clamp')
+            set_prop_tex(properties, clamp_name, 'texture', luxcore_name)
+            set_prop_tex(properties, clamp_name, 'min', 0)
+            set_prop_tex(properties, clamp_name, 'max', 1)
+            luxcore_name = clamp_name
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colormix(luxrender_texture_node):
+    """ColorMix node with several mixing methods"""
+    bl_idname = 'luxrender_texture_colormix_node'
+    bl_label = 'ColorMix'
+    bl_icon = 'TEXTURE'
+
+    input_settings = {
+        'default': {
+            1: ['Color 1', True], # slot index: [name, enabled]
+            2: ['Color 2', True]
+        },
+        'abs': {
+            1: ['Color', True],
+            2: ['', False]
+        },
+        'clamp': {
+            1: ['Color', True],
+            2: ['', False]
+        },
+        'mix': {
+            1: ['Color 1', True],
+            2: ['Color 2', True]
+        }
+    }
+
+    def change_mode(self, context):
+        mode = self.mode if self.mode in self.input_settings else 'default'
+        current_settings = self.input_settings[mode]
+
+        for i in current_settings.keys():
+            self.inputs[i].name = current_settings[i][0]
+            self.inputs[i].enabled = current_settings[i][1]
+
+    mode_items = [
+        ('scale', 'Multiply', ''),
+        ('add', 'Add', ''),
+        ('subtract', 'Subtract', ''),
+        ('mix', 'Mix', 'Mix between two values/textures according to the amount (0 = use first value, 1 = use second value'),
+        ('clamp', 'Clamp', 'Clamp the input so it is between min and max values'),
+        ('abs', 'Absolute', 'Take the absolute value (remove minus sign)'),
+    ]
+    mode = bpy.props.EnumProperty(name='Mode', items=mode_items, default='mix', update=change_mode)
+
+    mode_clamp_min = bpy.props.FloatProperty(name='Min', description='', default=0)
+    mode_clamp_max = bpy.props.FloatProperty(name='Max', description='', default=1)
+
+    clamp_output = bpy.props.BoolProperty(name='Clamp', default=False, description='Limit the output value to 0..1 range')
+
+    def init(self, context):
+        self.inputs.new('luxrender_TF_amount_socket', 'Fac')
+        self.inputs[0].default_value = 1
+        self.inputs.new('luxrender_color_socket', 'Color 1')
+        self.inputs[1].default_value = (0.04, 0.04, 0.04)
+        self.inputs.new('luxrender_color_socket', 'Color 2')
+        self.inputs[2].default_value = (0.7, 0.7, 0.7)
+
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        layout.prop(self, 'mode', text='')
+        layout.prop(self, 'clamp_output')
+
+        if self.mode == 'clamp':
+            layout.prop(self, 'mode_clamp_min')
+            layout.prop(self, 'mode_clamp_max')
+
+    # TODO: classic export
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        slot_0 = self.inputs[0].export_luxcore(properties)
+        slot_1 = self.inputs[1].export_luxcore(properties)
+        slot_2 = self.inputs[2].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', self.mode)
+
+        if self.mode == 'abs':
+            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
+        elif self.mode == 'clamp':
+            set_prop_tex(properties, luxcore_name, 'texture', slot_1)
+            set_prop_tex(properties, luxcore_name, 'min', self.mode_clamp_min)
+            set_prop_tex(properties, luxcore_name, 'max', self.mode_clamp_max)
+        elif self.mode == 'mix':
+            set_prop_tex(properties, luxcore_name, 'amount', slot_0)
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_2)
+        else:
+            set_prop_tex(properties, luxcore_name, 'texture1', slot_1)
+            set_prop_tex(properties, luxcore_name, 'texture2', slot_2)
+
+        if self.clamp_output:
+            clamp_name = create_luxcore_name(self, suffix='clamp')
+            set_prop_tex(properties, clamp_name, 'type', 'clamp')
+            set_prop_tex(properties, clamp_name, 'texture', luxcore_name)
+            set_prop_tex(properties, clamp_name, 'min', 0)
+            set_prop_tex(properties, clamp_name, 'max', 1)
+            luxcore_name = clamp_name
+
+        if slot_0 != 1 and self.mode != 'mix':
+            mix_name = create_luxcore_name(self, suffix='mix')
+            set_prop_tex(properties, mix_name, 'type', 'mix')
+            set_prop_tex(properties, mix_name, 'amount', slot_0)
+            set_prop_tex(properties, mix_name, 'texture1', slot_1)
+            set_prop_tex(properties, mix_name, 'texture2', luxcore_name)
+            luxcore_name = mix_name
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
+    """ColorInvert node"""
+    bl_idname = 'luxrender_texture_colorinvert_node'
+    bl_label = 'Invert'
+    bl_icon = 'TEXTURE'
+
+    def init(self, context):
+        self.inputs.new('luxrender_TF_amount_socket', 'Fac')
+        self.inputs[0].default_value = 1
+        self.inputs.new('luxrender_color_socket', 'Color')
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+    # TODO: classic export
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        fac = self.inputs[0].export_luxcore(properties)
+        tex = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'subtract')
+        set_prop_tex(properties, luxcore_name, 'texture1', [1, 1, 1])
+        set_prop_tex(properties, luxcore_name, 'texture2', tex)
+
+        if fac != 1:
+            mix_name = create_luxcore_name(self, suffix='mix')
+            set_prop_tex(properties, mix_name, 'type', 'mix')
+            set_prop_tex(properties, mix_name, 'amount', fac)
+            set_prop_tex(properties, mix_name, 'texture1', tex)
+            set_prop_tex(properties, mix_name, 'texture2', luxcore_name)
+            luxcore_name = mix_name
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_hsv(luxrender_texture_node):
+    """Color at Depth node"""
+    bl_idname = 'luxrender_texture_hsv_node'
+    bl_label = 'Hue Saturation Value'
+    bl_icon = 'TEXTURE'
+
+    def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'Color')
+        self.inputs.new('luxrender_float_limited_0_1_socket', 'Hue')
+        self.inputs.new('luxrender_float_limited_0_2_socket', 'Saturation')
+        self.inputs.new('luxrender_float_limited_0_2_socket', 'Value')
+
+        self.inputs['Hue'].default_value = 0.5
+        self.inputs['Saturation'].default_value = 1
+        self.inputs['Value'].default_value = 1
+
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        tex = self.inputs[0].export_luxcore(properties)
+        hue = self.inputs[1].export_luxcore(properties)
+        sat = self.inputs[2].export_luxcore(properties)
+        val = self.inputs[3].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'hsv')
+        set_prop_tex(properties, luxcore_name, 'texture', tex)
+        set_prop_tex(properties, luxcore_name, 'hue', hue)
+        set_prop_tex(properties, luxcore_name, 'saturation', sat)
+        set_prop_tex(properties, luxcore_name, 'value', val)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colorramp(luxrender_texture_node):
+    """Colorramp texture node"""
+    bl_idname = 'luxrender_texture_colorramp_node'
+    bl_label = 'ColorRamp'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 260
+
+    #TODO: wait for the colorramp property to be exposed by Blender API before releasing this into the wild!
+
+    # TODO 2: refactor it...
+
+    @classmethod
+    def poll(cls, node_tree):
+        return node_tree is not None
+
+    def get_fake_texture(self):
+        name = self.name
+
+        if name not in bpy.data.textures:
+            fake_texture = bpy.data.textures.new(name=name, type='NONE')
+            # Set fake user so the texture is not deleted on Blender close
+            fake_texture.use_fake_user = True
+            fake_texture.use_color_ramp = True
+            # Set alpha from default 0 to 1
+            fake_texture.color_ramp.elements[0].color[3] = 1.0
+
+        return bpy.data.textures[name]
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        si = self.inputs.keys()
+        so = self.outputs.keys()
+
+        if not 'Amount' in si:
+            self.inputs.new('luxrender_TF_amount_socket', 'Amount')
+
+        if not 'Color' in so:
+            self.outputs.new('NodeSocketColor', 'Color')
+
+        fake_texture = self.get_fake_texture()
+        layout.template_color_ramp(fake_texture, "color_ramp", expand=True)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
+    """Manipulate 3D texture coordinates node"""
+    bl_idname = 'luxrender_manipulate_3d_mapping_node'
+    bl_label = 'Manipulate 3D Mapping'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 260
+
+    translate = bpy.props.FloatVectorProperty(name='Translate')
+    rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(359.99),
+                                           max=radians(359.99))
+    scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
+    uniform_scale = bpy.props.FloatProperty(name='', default=1.0)
+    use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
+                                               description='Use the same scale value for all axis')
+
+    def init(self, context):
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.outputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        if UseLuxCore():
+            row = layout.row()
+
+            row.column().prop(self, 'translate')
+            row.column().prop(self, 'rotate')
+
+            scale_column = row.column()
+            if self.use_uniform_scale:
+                scale_column.label(text='Scale:')
+                scale_column.prop(self, 'uniform_scale')
+            else:
+                scale_column.prop(self, 'scale')
+
+            scale_column.prop(self, 'use_uniform_scale')
+
+    def export_luxcore(self, properties):
+        mapping_type, input_mapping = self.inputs[0].export_luxcore(properties)
+
+        # create a location matrix
+        tex_loc = mathutils.Matrix.Translation((self.translate))
+
+        # create an identitiy matrix
+        tex_sca = mathutils.Matrix()
+        tex_sca[0][0] = self.uniform_scale if self.use_uniform_scale else self.scale[0]  # X
+        tex_sca[1][1] = self.uniform_scale if self.use_uniform_scale else self.scale[1]  # Y
+        tex_sca[2][2] = self.uniform_scale if self.use_uniform_scale else self.scale[2]  # Z
+
+        # create a rotation matrix
+        tex_rot0 = mathutils.Matrix.Rotation(radians(self.rotate[0]), 4, 'X')
+        tex_rot1 = mathutils.Matrix.Rotation(radians(self.rotate[1]), 4, 'Y')
+        tex_rot2 = mathutils.Matrix.Rotation(radians(self.rotate[2]), 4, 'Z')
+        tex_rot = tex_rot0 * tex_rot1 * tex_rot2
+
+        # combine transformations
+        transformation = tex_loc * tex_rot * tex_sca
+
+        # Transform input matrix
+        output_mapping = input_mapping * transformation
+
+        return [mapping_type, output_mapping]
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_manipulate_2d_mapping_node(luxrender_texture_node):
+    """Manipulate 2D texture coordinates node"""
+    bl_idname = 'luxrender_manipulate_2d_mapping_node'
+    bl_label = 'Manipulate 2D Mapping'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 180
+
+    uscale = bpy.props.FloatProperty(name='U', default=1.0, min=-10000.0, max=10000.0)
+    vscale = bpy.props.FloatProperty(name='V', default=1.0, min=-10000.0, max=10000.0)
+    udelta = bpy.props.FloatProperty(name='U', default=0.0, min=-10000.0, max=10000.0)
+    vdelta = bpy.props.FloatProperty(name='V', default=0.0, min=-10000.0, max=10000.0)
+
+    def init(self, context):
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.outputs.new('luxrender_transform_socket', mapping_2d_socketname)
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        if UseLuxCore():
+            layout.label('Scale:')
+            row = layout.row(align=True)
+            row.prop(self, 'uscale')
+            row.prop(self, 'vscale')
+            layout.label('Offset:')
+            row = layout.row(align=True)
+            row.prop(self, 'udelta')
+            row.prop(self, 'vdelta')
+
+    def export_luxcore(self, properties):
+        mapping_type, input_uvscale, input_uvdelta = self.inputs[0].export_luxcore(properties)
+
+        uvscale = [self.uscale,
+                   self.vscale]
+
+        output_uvscale = [a * b for a, b in zip(input_uvscale, uvscale)]
+
+        uvdelta = [self.udelta,
+                   self.vdelta]
+
+        output_uvdelta = [a + b for a, b in zip(input_uvdelta, uvdelta)]
+
+        return [mapping_type, output_uvscale, output_uvdelta]

@@ -31,11 +31,30 @@ import bpy, bl_operators
 from .. import LuxRenderAddon
 
 
+def find_node_editor(nodetree_type):
+    """
+    Find out which space(s) of Blender's UI are a node editor that is not set to display the nodetree_type
+    """
+    node_editor = None
+
+    if bpy.context.screen:
+        for area in bpy.context.screen.areas:
+            if area.type == 'NODE_EDITOR':
+                for space in area.spaces:
+                    if space.type == 'NODE_EDITOR':
+                        if space.tree_type == nodetree_type:
+                            return None
+                        else:
+                            node_editor = space
+
+    return node_editor
+
+
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_material_nodetree"
-    bl_label = "Add LuxRender Material Nodetree"
+    bl_label = "Use Material Nodes"
     bl_description = "Add a LuxRender node tree linked to this material"
 
     # idtype = StringProperty(name="ID Type", default="material")
@@ -50,11 +69,16 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         nt.use_fake_user = True
         idblock.luxrender_material.nodetree = nt.name
 
-        ctx_vol = context.scene.luxrender_volumes
         ctx_mat = context.material.luxrender_material
 
         # Get the mat type set in editor, todo: find a more iterative way to get context
         node_type = 'luxrender_material_%s_node' % ctx_mat.type
+
+        # Some nodes were merged during the introduction of LuxCore node support
+        if ctx_mat.type in ['glass2', 'roughglass']:
+            node_type = 'luxrender_material_glass_node'
+        elif ctx_mat.type == 'metal':
+            node_type = 'luxrender_material_metal2_node'
 
         if ctx_mat.type == 'matte':
             editor_type = ctx_mat.luxrender_mat_matte
@@ -99,8 +123,15 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         if idtype == 'material':
             shader = nt.nodes.new(node_type)  # create also matnode from editor type
             shader.location = 200, 570
+
+            if ctx_mat.type == 'roughglass':
+                shader.rough = True
+
             sh_out = nt.nodes.new('luxrender_material_output_node')
+            sh_out.interior_volume = ctx_mat.Interior_volume
+            sh_out.exterior_volume = ctx_mat.Exterior_volume
             sh_out.location = 500, 400
+
             nt.links.new(shader.outputs[0], sh_out.inputs[0])
 
             # Get material settings ( color )
@@ -140,20 +171,22 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if 'Cauchy B' in shader.inputs:
                 shader.inputs['Cauchy B'].cauchyb = editor_type.cauchyb_floatvalue
 
-            if 'Film IOR' in shader.inputs:
+            if 'Film IOR' in shader.inputs and hasattr(editor_type, 'filmindex_floatvalue'):
                 shader.inputs['Film IOR'].filmindex = editor_type.filmindex_floatvalue
 
-            if 'Film Thickness (nm)' in shader.inputs:
+            if 'Film Thickness (nm)' in shader.inputs and hasattr(editor_type, 'film_floatvalue'):
                 shader.inputs['Film Thickness (nm)'].film = editor_type.film_floatvalue
 
             if 'IOR' in shader.inputs and hasattr(shader.inputs['IOR'], 'index'):
                 shader.inputs['IOR'].index = editor_type.index_floatvalue  # not fresnel IOR
 
             if 'U-Roughness' in shader.inputs:
-                shader.inputs['U-Roughness'].uroughness = editor_type.uroughness_floatvalue
+                if hasattr(editor_type, 'uroughness_floatvalue'):
+                    shader.inputs['U-Roughness'].uroughness = editor_type.uroughness_floatvalue
 
             if 'V-Roughness' in shader.inputs:
-                shader.inputs['V-Roughness'].vroughness = editor_type.vroughness_floatvalue
+                if hasattr(editor_type, 'vroughness_floatvalue'):
+                    shader.inputs['V-Roughness'].vroughness = editor_type.vroughness_floatvalue
 
             if 'Sigma' in shader.inputs:
                 shader.inputs['Sigma'].sigma = editor_type.sigma_floatvalue
@@ -166,16 +199,15 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
                 shader.multibounce = editor_type.multibounce
 
             if hasattr(shader, 'use_anisotropy'):
-                shader.use_anisotropy = editor_type.anisotropic
+                if hasattr(editor_type, 'anisotropic'):
+                    shader.use_anisotropy = editor_type.anisotropic
 
             if hasattr(shader, 'dispersion'):
-                shader.dispersion = editor_type.dispersion
+                if hasattr(editor_type, 'dispersion'):
+                    shader.dispersion = editor_type.dispersion
 
             if hasattr(shader, 'arch'):
                 shader.arch = editor_type.architectural
-
-            if hasattr(shader, 'advanced'):
-                shader.advanced = editor_type.advanced
 
             # non-socket parameters ( other )
             # velvet
@@ -198,28 +230,86 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if hasattr(shader, 'metal_nkfile'):
                 shader.metal_nkfile = editor_type.filename
 
-            # Get the volumes
-            def get_vol_type(name):
-                for vol in ctx_vol.volumes:
-                    if vol.name == name:
-                        volume_type = 'luxrender_volume_%s_node' % (vol.type)
-                return volume_type
-
-            if ctx_mat.Interior_volume:
-                vol_node = get_vol_type(ctx_mat.Interior_volume)
-                volume_int = nt.nodes.new(vol_node)
-                volume_int.location = 200, 200
-                nt.links.new(volume_int.outputs[0], sh_out.inputs[1])
-                volume_int.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Interior_volume].fresnel_fresnelvalue
-
-            if ctx_mat.Exterior_volume:
-                vol_node = get_vol_type(ctx_mat.Exterior_volume)
-                volume_ext = nt.nodes.new(vol_node)
-                volume_ext.location = 200, -50
-                nt.links.new(volume_ext.outputs[0], sh_out.inputs[2])
-                volume_ext.inputs['IOR'].fresnel = ctx_vol.volumes[ctx_mat.Exterior_volume].fresnel_fresnelvalue
-
         #else:
         #   nt.nodes.new('OutputLightShaderNode')
+
+        # Try to find a node editor already set to material nodes
+        node_editor = find_node_editor('luxrender_material_nodes')
+
+        if node_editor:
+            # No node editor set to volume nodes, set the last one
+            node_editor.tree_type = 'luxrender_material_nodes'
+
+        return {'FINISHED'}
+
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
+    """"""
+    bl_idname = "luxrender.add_volume_nodetree"
+    bl_label = "Use Volume Nodes"
+    bl_description = "Add a LuxRender node tree linked to this volume"
+
+    def execute(self, context):
+        current_vol_ind = context.scene.luxrender_volumes.volumes_index
+        current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+
+        nt = bpy.data.node_groups.new(current_vol.name, type='luxrender_volume_nodes_a')
+        nt.use_fake_user = True
+        current_vol.nodetree = nt.name
+
+        # Volume output
+        sh_out = nt.nodes.new('luxrender_volume_output_node')
+        sh_out.location = 500, 400
+
+        # Volume node (use volume type, i.e. clear/homogeneous/heterogeneous)
+        vol_node_type = 'luxrender_volume_%s_node' % current_vol.type
+        volume_node = nt.nodes.new(vol_node_type)
+        volume_node.location = 250, 480
+        nt.links.new(volume_node.outputs[0], sh_out.inputs[0])
+
+        # Copy settings
+        volume_node.inputs['IOR'].fresnel = current_vol.fresnel_fresnelvalue
+
+        # Color at depth node
+        colordepth_node = nt.nodes.new('luxrender_texture_colordepth_node')
+        colordepth_node.location = 50, 480
+        colordepth_node.depth = current_vol.depth
+        nt.links.new(colordepth_node.outputs[0], volume_node.inputs[1])
+
+        absorption_color = current_vol.sigma_a_color if current_vol.type in ['homogeneous', 'heterogeneous'] else (
+            current_vol.absorption_color)
+
+        if current_vol.absorption_scale == 1:
+            colordepth_node.inputs[0].color = absorption_color
+        else:
+            # Value node (to be able to copy scaled colors)
+            absorption_color_value_node = nt.nodes.new('luxrender_texture_constant_node')
+            absorption_color_value_node.location = -150, 480
+            absorption_color_value_node.color = absorption_color
+            absorption_color_value_node.col_mult = current_vol.absorption_scale
+            nt.links.new(absorption_color_value_node.outputs[0], colordepth_node.inputs[0])
+
+        if current_vol.type in ['homogeneous', 'heterogeneous']:
+            # Scattering color
+            if current_vol.scattering_scale == 1:
+                volume_node.inputs[2].color = current_vol.sigma_s_color
+            else:
+                # Value node (to be able to copy scaled colors)
+                scattering_color_value_node = nt.nodes.new('luxrender_texture_constant_node')
+                scattering_color_value_node.location = -150, 280
+                scattering_color_value_node.color = current_vol.sigma_s_color
+                scattering_color_value_node.col_mult = current_vol.scattering_scale
+                nt.links.new(scattering_color_value_node.outputs[0], volume_node.inputs[2])
+
+            if current_vol.type == 'heterogeneous':
+                volume_node.stepsize = current_vol.stepsize
+
+        # Try to find a node editor already set to volume nodes
+        node_editor = find_node_editor('luxrender_volume_nodes_a')
+
+        if node_editor:
+            # No node editor set to volume nodes, set the last one
+            node_editor.tree_type = 'luxrender_volume_nodes_a'
 
         return {'FINISHED'}

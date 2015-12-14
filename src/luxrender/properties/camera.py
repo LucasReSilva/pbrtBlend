@@ -57,7 +57,8 @@ def CameraVolumeParameter(attr, name):
             'src_attr': 'volumes',
             'trg': lambda s, c: c.luxrender_camera,
             'trg_attr': '%s_volume' % attr,
-            'name': name
+            'name': name,
+            'icon': 'MOD_FLUIDSIM'
         },
     ]
 

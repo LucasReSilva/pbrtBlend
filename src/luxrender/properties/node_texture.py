@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Jens Verwiebe, Jason Clarke, Asbjørn Heid
+# Jens Verwiebe, Jason Clarke, Asbjørn Heid, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -24,9 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import re
-
-import bpy
+import bpy, re, tempfile, os
 
 from ..extensions_framework import declarative_property_group
 
@@ -35,12 +33,13 @@ from ..properties import (luxrender_texture_node, get_linked_node, check_node_ex
 from ..properties.texture import (
     import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
-from ..export import ParamSet, get_worldscale, process_filepath_data
+from ..export import ParamSet, get_worldscale, process_filepath_data, matrix_to_list
 from ..export.volumes import export_smoke
 from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
+from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
 
 from ..properties.texture import (
     luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
@@ -50,8 +49,13 @@ from ..properties.node_material import get_socket_paramsets
 from ..properties.node_sockets import (
     luxrender_TF_brickmodtex_socket, luxrender_TF_bricktex_socket, luxrender_TF_mortartex_socket,
     luxrender_TC_brickmodtex_socket, luxrender_TC_bricktex_socket, luxrender_TC_mortartex_socket,
-    luxrender_transform_socket, luxrender_coordinate_socket
+    luxrender_transform_socket, luxrender_coordinate_socket, mapping_2d_socketname, mapping_3d_socketname
 )
+
+from ..extensions_framework import util as efutil
+
+from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
+
 
 # Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -105,18 +109,40 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
     flipxy = bpy.props.BoolProperty(name='Flip XY', description='Switch between horizontal and linear gradient',
                                     default=False)
     type = bpy.props.EnumProperty(name='Progression', description='progression', items=progression_items, default='lin')
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
+
+    luxcore_direction_items = [
+        ('horizontal', 'Horizontal', 'Direction: -x to x'),
+        ('vertical', 'Vertical', 'Direction: -y to y')
+    ]
+    luxcore_direction = bpy.props.EnumProperty(name='Direction', items=luxcore_direction_items)
+
+    luxcore_progression_type_map = {
+        'lin': 'linear',
+        'quad': 'quadratic',
+        'ease': 'easing',
+        'diag': 'diagonal',
+        'sphere': 'spherical',
+        'halo': 'halo',
+        'radial': 'radial',
+    }
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'flipxy')
+        if UseLuxCore():
+            layout.prop(self, 'luxcore_direction', expand=True)
+        else:
+            layout.prop(self, 'flipxy')
+
         layout.prop(self, 'type')
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         blend_params = ParamSet() \
@@ -131,6 +157,23 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
             blend_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'blender_blend', self.name, blend_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_blend')
+        set_prop_tex(properties, luxcore_name, 'progressiontype', self.luxcore_progression_type_map[self.type])
+        set_prop_tex(properties, luxcore_name, 'direction', self.luxcore_direction)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -149,27 +192,32 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
     brickbond = bpy.props.EnumProperty(name='Bond Type', items=brickbond_items, default='running')
     brickrun = bpy.props.FloatProperty(name='Brick Run', default=0.5, subtype='PERCENTAGE')
     mortarsize = bpy.props.FloatProperty(name='Mortar Size', description='Width of mortar segments', default=0.01,
-                                         subtype='DISTANCE', unit='LENGTH')
+                                         subtype='DISTANCE', unit='LENGTH', min=0)
     width = bpy.props.FloatProperty(name='Width', default=0.3, subtype='DISTANCE', unit='LENGTH')
     depth = bpy.props.FloatProperty(name='Depth', default=0.15, subtype='DISTANCE', unit='LENGTH')
     height = bpy.props.FloatProperty(name='Height', default=0.10, subtype='DISTANCE', unit='LENGTH')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'variant')
+        if not UseLuxCore():
+            # Variant is irrelevant for LuxCore
+            layout.prop(self, 'variant', expand=True)
+
         layout.prop(self, 'brickbond')
         layout.prop(self, 'brickrun')
         layout.prop(self, 'mortarsize')
-        layout.prop(self, 'width')
-        layout.prop(self, 'depth')
-        layout.prop(self, 'height')
+
+        column = layout.column(align=True)
+        column.prop(self, 'width')
+        column.prop(self, 'depth')
+        column.prop(self, 'height')
 
         si = self.inputs.keys()
         so = self.outputs.keys()
 
-        if self.variant == 'color':
+        if self.variant == 'color' or UseLuxCore():
             if not 'Brick Color' in si:  # If there aren't color inputs, create them
                 self.inputs.new('luxrender_TC_brickmodtex_socket', 'Brick Modulation Color')
                 self.inputs.new('luxrender_TC_bricktex_socket', 'Brick Color')
@@ -186,7 +234,7 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
             if 'Float' in so:  # If there is a float output, destroy it
                 self.outputs.remove(self.outputs['Float'])
 
-        if self.variant == 'float':
+        elif self.variant == 'float':
             if not 'Brick Value' in si:
                 self.inputs.new('luxrender_TF_brickmodtex_socket', 'Brick Modulation Value')
                 self.inputs.new('luxrender_TF_bricktex_socket', 'Brick Value')
@@ -221,6 +269,93 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 
         return make_texture(self.variant, 'brick', self.name, brick_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        brickmodtex = self.inputs[1].export_luxcore(properties)
+        bricktex = self.inputs[2].export_luxcore(properties)
+        mortartex = self.inputs[3].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'brick')
+        set_prop_tex(properties, luxcore_name, 'brickmodtex', brickmodtex)
+        set_prop_tex(properties, luxcore_name, 'bricktex', bricktex)
+        set_prop_tex(properties, luxcore_name, 'mortartex', mortartex)
+        set_prop_tex(properties, luxcore_name, 'brickwidth', self.width)
+        set_prop_tex(properties, luxcore_name, 'brickheight', self.height)
+        set_prop_tex(properties, luxcore_name, 'brickdepth', self.depth)
+        set_prop_tex(properties, luxcore_name, 'mortarsize', self.mortarsize)
+        set_prop_tex(properties, luxcore_name, 'brickrun', self.brickrun)
+        #set_prop_tex(properties, luxcore_name, 'brickbevel', self.brickbevel) # no idea what this does
+        set_prop_tex(properties, luxcore_name, 'brickbond', self.brickbond)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_checker(luxrender_texture_node):
+    """Checker texture node"""
+    bl_idname = 'luxrender_texture_checker_node'
+    bl_label = 'Checkerboard Texture'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 180
+
+    def change_dimension(self, context):
+        self.inputs[mapping_2d_socketname].enabled = self.dimension.endswith('2d')
+        self.inputs[mapping_3d_socketname].enabled = self.dimension.endswith('3d')
+
+    dimension_items = [
+        ('checkerboard2d', '2D', 'Two-dimensional texture (for e.g. UV mapping)'),
+        ('checkerboard3d', '3D', 'Three-dimensional texture (for e.g. global mapping)')
+    ]
+    dimension = bpy.props.EnumProperty(name='Dimension', items=dimension_items, default='checkerboard2d',
+                                       update=change_dimension)
+
+    def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'Color 1')
+        self.inputs['Color 1'].default_value = [0.05] * 3
+        self.inputs.new('luxrender_color_socket', 'Color 2')
+        self.inputs['Color 2'].default_value = [0.5] * 3
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs[mapping_3d_socketname].enabled = False # Disabled by default because 2D is default dimension
+
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+        layout.prop(self, 'dimension', expand=True)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        texture1 = self.inputs['Color 1'].export_luxcore(properties)
+        texture2 = self.inputs['Color 2'].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', self.dimension)
+        set_prop_tex(properties, luxcore_name, 'texture1', texture1)
+        set_prop_tex(properties, luxcore_name, 'texture2', texture2)
+
+        if self.dimension.endswith('2d'):
+            mapping_type, uvscale, uvdelta = self.inputs[mapping_2d_socketname].export_luxcore(properties)
+
+            set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+            set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+            set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+        else:
+            mapping_type, mapping_transformation = self.inputs[mapping_3d_socketname].export_luxcore(properties)
+            mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+            set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+            set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
@@ -234,22 +369,25 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
                                        default='soft_noise')
     noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items,
                                         default='blender_original')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
-    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
+    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2, min=0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'noisetype')
+        layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisesize')
-        layout.prop(self, 'noisedepth')
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        column = layout.column(align=True)
+        column.prop(self, 'noisesize')
+        column.prop(self, 'noisedepth')
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         clouds_params = ParamSet() \
@@ -267,6 +405,25 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 
         return make_texture('float', 'blender_clouds', self.name, clouds_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_clouds')
+        set_prop_tex(properties, luxcore_name, 'noisetype', self.noisetype)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'noisedepth', self.noisedepth)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node):
@@ -278,26 +435,29 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 
     noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items,
                                         default='blender_original')
-    type = bpy.props.EnumProperty(name='Noise Basis', description='Type of noise used', items=noise_basis_items,
+    type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=noise_basis_items,
                                   default='blender_original')
     distamount = bpy.props.FloatProperty(name='Distortion', default=1.00)
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     nabla = bpy.props.FloatProperty(name='Nabla', default=0.025)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'noisebasis')
         layout.prop(self, 'type')
-        layout.prop(self, 'distamount')
         layout.prop(self, 'noisesize')
-        layout.prop(self, 'nabla')
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        layout.prop(self, 'distamount')
+        if not UseLuxCore():
+            layout.prop(self, 'nabla') # Has no visible influence
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         distortednoise_params = ParamSet() \
@@ -316,6 +476,26 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 
         return make_texture('float', 'blender_distortednoise', self.name, distortednoise_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_distortednoise')
+        set_prop_tex(properties, luxcore_name, 'noise_distortion', self.type)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'distortion', self.distamount)
+
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_fbm(luxrender_texture_node):
@@ -323,18 +503,28 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
     bl_idname = 'luxrender_texture_fbm_node'
     bl_label = 'FBM Texture'
     bl_icon = 'TEXTURE'
-    bl_width_min = 160
+    bl_width_min = 180
 
-    octaves = bpy.props.IntProperty(name='Octaves', default=8)
-    roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)
+    sign_items = [
+        ('positive', 'Positive', 'Only use the positive values of the texture'),
+        ('negative', 'Negative', 'Only use the negative values of the texture'),
+        ('both', 'Both', 'Use the absolute of the functions to use both positive and negative values'),
+    ]
+    sign_mode = bpy.props.EnumProperty(items=sign_items, default='both')
+
+    octaves = bpy.props.IntProperty(name='Octaves', default=8, min=1, max=29)
+    roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        if UseLuxCore():
+            layout.prop(self, 'sign_mode', expand=True)
+
         layout.prop(self, 'octaves')
-        layout.prop(self, 'roughness')
+        layout.prop(self, 'roughness', slider=True)
 
     def export_texture(self, make_texture):
         fbm_params = ParamSet() \
@@ -348,6 +538,54 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 
         return make_texture('float', 'fbm', self.name, fbm_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'fbm')
+        set_prop_tex(properties, luxcore_name, 'octaves', self.octaves)
+        set_prop_tex(properties, luxcore_name, 'roughness', self.roughness)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        if self.sign_mode == 'both':
+            # FBM values are in [-1..1] range originally
+            name_abs = luxcore_name + '_abs'
+            set_prop_tex(properties, name_abs, 'type', 'abs')
+            set_prop_tex(properties, name_abs, 'texture', luxcore_name)
+
+            luxcore_name = name_abs
+
+        elif self.sign_mode == 'positive':
+            # Only use the positive values of the FBM texture
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', luxcore_name)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
+
+        elif self.sign_mode == 'negative':
+            # Only use the negative values of the FBM texture by first flipping the values
+            name_flip = luxcore_name + '_flip'
+            set_prop_tex(properties, name_flip, 'type', 'scale')
+            set_prop_tex(properties, name_flip, 'texture1', luxcore_name)
+            set_prop_tex(properties, name_flip, 'texture2', -1)
+
+            name_clamp = luxcore_name + '_clamp'
+            set_prop_tex(properties, name_clamp, 'type', 'clamp')
+            set_prop_tex(properties, name_clamp, 'texture', name_flip)
+            set_prop_tex(properties, name_clamp, 'min', 0)
+            set_prop_tex(properties, name_clamp, 'max', 1)
+
+            luxcore_name = name_clamp
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_harlequin(luxrender_texture_node):
@@ -359,6 +597,9 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
     def init(self, context):
         self.outputs.new('NodeSocketColor', 'Color')
 
+    def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
     def export_texture(self, make_texture):
         harlequin_params = ParamSet()
         return make_texture('color', 'harlequin', self.name, harlequin_params)
@@ -368,7 +609,7 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 class luxrender_texture_type_node_image_map(luxrender_texture_node):
     """Image map texture node"""
     bl_idname = 'luxrender_texture_image_map_node'
-    bl_label = 'Image Map Texture'
+    bl_label = 'Classic Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
@@ -380,7 +621,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
         if prop['attr'].startswith('channel'):
             channel_items = prop['items']
 
-    filename = bpy.props.StringProperty(name='File Name', description='Path to the normal map', subtype='FILE_PATH')
+    filename = bpy.props.StringProperty(name='File Name', description='Path to the image map', subtype='FILE_PATH')
     variant = bpy.props.EnumProperty(name='Variant', items=variant_items, default='color')
     channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='mean')
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0)
@@ -394,24 +635,31 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'filename')
-        layout.prop(self, 'variant')
+        if UseLuxCore():
+            layout.label('Not all parameters supported in LuxCore mode', icon='ERROR')
 
-        if self.variant == 'float':
-            layout.prop(self, 'channel')
+        layout.prop(self, 'filename')
+
+        if not UseLuxCore():
+            layout.prop(self, 'variant')
+
+            if self.variant == 'float':
+                layout.prop(self, 'channel')
 
         layout.prop(self, 'gamma')
         layout.prop(self, 'gain')
-        layout.prop(self, 'filtertype')
 
-        if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
-            layout.prop(self, 'maxanisotropy')
-            layout.prop(self, 'discardmipmaps')
+        if not UseLuxCore():
+            layout.prop(self, 'filtertype')
 
-        layout.prop(self, 'wrap')
+            if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
+                layout.prop(self, 'maxanisotropy')
+                layout.prop(self, 'discardmipmaps')
+
+            layout.prop(self, 'wrap')
 
         s = self.outputs.keys()
 
@@ -452,6 +700,162 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
         return make_texture(self.variant, 'imagemap', self.name, imagemap_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        if not (os.path.exists(self.filename) and os.path.isfile(self.filename)):
+            return [0, 0, 0] # Black color
+
+        set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
+        set_prop_tex(properties, luxcore_name, 'file', self.filename)
+        set_prop_tex(properties, luxcore_name, 'gamma', self.gamma)
+        set_prop_tex(properties, luxcore_name, 'gain', self.gain)
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
+    """Blender image map texture node"""
+    bl_idname = 'luxrender_texture_blender_image_map_node'
+    bl_label = 'Image Map Texture'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 220
+
+    def update_is_normal_map(self, context):
+        self.outputs['Color'].enabled = not self.is_normal_map
+        self.outputs['Bump'].enabled = self.is_normal_map
+
+    def update_image(self, context):
+        # Set a fake user so Blender does not delete the image (workaround needed because we can't do real datablock
+        # links, so the user count is not incremented if a user selects an image in this node)
+        if self.image_name in bpy.data.images:
+            image = bpy.data.images[self.image_name]
+            image.use_fake_user = True
+
+    image_name = bpy.props.StringProperty(default='', update=update_image)
+
+    channel_items = [
+        ('rgb', 'RGB', 'Default, use all color channels'),
+        ('red', 'Red', 'Use only the red color channel'),
+        ('green', 'Green', 'Use only the green color channel'),
+        ('blue', 'Blue', 'Use only the blue color channel'),
+        ('alpha', 'Alpha', 'Use only the alpha channel'),
+        ('mean', 'Mean', 'Greyscale'),
+        ('colored_mean', 'Colored Mean', 'Greyscale'),
+    ]
+    channel = bpy.props.EnumProperty(name='Channel', items=channel_items, default='rgb')
+
+    gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, max=10.0, description='Brightness multiplier')
+    gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0, description='Gamma correction to apply')
+    is_normal_map = bpy.props.BoolProperty(name='Normalmap', default=False, description='Enable if this is a normalmap,'
+                                           ' then plug the output directly into a Bump socket', update=update_is_normal_map)
+    normalmap_fake_gamma = bpy.props.FloatProperty(name='Gamma', default=1)
+
+    def init(self, context):
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.outputs.new('NodeSocketColor', 'Color')
+        self.outputs.new('NodeSocketFloat', 'Bump')
+        self.outputs['Bump'].enabled = False
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        split = layout.split(align=True, percentage=0.7)
+        split.prop_search(self, 'image_name', bpy.data, 'images', text='')
+        split.operator('image.open', text='Open', icon='FILESEL')
+
+        column = layout.column()
+        column.enabled = not self.is_normal_map
+        column.prop(self, 'channel')
+        column.prop(self, 'gain')
+
+        # Gamma needs to be 1 for normalmaps
+        if self.is_normal_map:
+            row = layout.row()
+            row.enabled = False
+            row.prop(self, 'normalmap_fake_gamma')
+        else:
+            layout.prop(self, 'gamma')
+
+        layout.prop(self, 'is_normal_map')
+
+    # TODO: Classic export
+    #def export_texture(self, make_texture):
+    #    pass
+    # Get the absolute filepath with image.filepath_from_user() or better via efutil?
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        warning_color_no_image = [0, 0, 0] # Black color
+        warning_color_wrong_path = [0.8, 0, 0.8] # Purple color
+
+        if self.image_name == '':
+            return warning_color_no_image
+
+        if self.image_name not in bpy.data.images:
+            print('ERROR: %s not found in Blender images!')
+            return warning_color_wrong_path
+
+        image = bpy.data.images[self.image_name]
+
+        # TODO: library handling
+        # Note: we can get the nodetree via node.id_data
+        # TODO: SEQUENCE/GENERATED handling? Create separate sequence node?
+
+        if image.source in ['GENERATED', 'FILE']:
+            scene = bpy.context.scene
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            tex_image = temp_file.name
+
+            if image.source == 'GENERATED':
+                image.save_render(tex_image, scene)
+
+            if image.source == 'FILE':
+                if image.packed_file:
+                    image.save_render(tex_image, scene)
+                else:
+                    if self.id_data.library is not None:
+                        f_path = efutil.filesystem_path(bpy.path.abspath(image.filepath, self.id_data.library.filepath))
+                    else:
+                        f_path = efutil.filesystem_path(image.filepath)
+
+                    tex_image = efutil.filesystem_path(f_path)
+
+        if not (os.path.exists(tex_image) and os.path.isfile(tex_image)):
+            return warning_color_wrong_path
+
+        gamma = 1 if self.is_normal_map else self.gamma
+
+        set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
+        set_prop_tex(properties, luxcore_name, 'file', tex_image)
+        set_prop_tex(properties, luxcore_name, 'gamma', gamma)
+        set_prop_tex(properties, luxcore_name, 'gain', self.gain)
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        set_prop_tex(properties, luxcore_name, 'channel', self.channel)
+
+        if self.is_normal_map:
+            # Implicitly create a normalmap
+            normalmap_name = create_luxcore_name(self, suffix='normal')
+            set_prop_tex(properties, normalmap_name, 'type', 'normalmap')
+            set_prop_tex(properties, normalmap_name, 'texture', luxcore_name)
+            luxcore_name = normalmap_name
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
@@ -481,26 +885,29 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
                                          items=marble_noise_items, default='sin')
     noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items,
                                        default='soft_noise')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
-    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
+    noisedepth = bpy.props.IntProperty(name='Noise Depth', default=2, min=0)
     turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'type')
-        layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisebasis2')
-        layout.prop(self, 'noisetype')
-        layout.prop(self, 'noisesize')
-        layout.prop(self, 'noisedepth')
+        layout.prop(self, 'type', expand=True)
+        layout.prop(self, 'noisebasis2', expand=True)
+        layout.prop(self, 'noisetype', expand=True)
+        layout.prop(self, 'noisebasis',)
+        column = layout.column(align=True)
+        column.prop(self, 'noisesize')
+        column.prop(self, 'noisedepth')
         layout.prop(self, 'turbulence')
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         marble_params = ParamSet() \
@@ -520,6 +927,29 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
             marble_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'blender_marble', self.name, marble_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_marble')
+        set_prop_tex(properties, luxcore_name, 'marbletype', self.type)
+        set_prop_tex(properties, luxcore_name, 'turbulence', self.turbulence)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisebasis2', self.noisebasis2)
+        set_prop_tex(properties, luxcore_name, 'noisedepth', self.noisedepth)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'noisetype', self.noisetype)
+        set_prop_tex(properties, luxcore_name, 'turbulence', self.turbulence)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -542,18 +972,18 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
                                           items=musgrave_type_items, default='multifractal')
     noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items,
                                         default='blender_original')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     h = bpy.props.FloatProperty(name='Dimension', default=1.0)
     lacu = bpy.props.FloatProperty(name='Lacunarity', default=2.0)
     octs = bpy.props.FloatProperty(name='Octaves', default=2.0)
     offset = bpy.props.FloatProperty(name='Offset', default=1.0)
     gain = bpy.props.FloatProperty(name='Gain', default=1.0)
     iscale = bpy.props.FloatProperty(name='Intensity', default=1.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -573,8 +1003,10 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
         if self.musgravetype != 'fbm':
             layout.prop(self, 'iscale')
 
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         musgrave_params = ParamSet()
@@ -604,6 +1036,30 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 
         return make_texture('float', 'blender_musgrave', self.name, musgrave_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_musgrave')
+        set_prop_tex(properties, luxcore_name, 'musgravetype', self.musgravetype)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'dimension', self.h)
+        set_prop_tex(properties, luxcore_name, 'intensity', self.iscale)
+        set_prop_tex(properties, luxcore_name, 'lacunarity', self.lacu)
+        set_prop_tex(properties, luxcore_name, 'offset', self.offset)
+        set_prop_tex(properties, luxcore_name, 'gain', self.gain)
+        set_prop_tex(properties, luxcore_name, 'octaves', self.octs)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_normal_map(luxrender_texture_node):
@@ -628,18 +1084,20 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
     discardmipmaps = bpy.props.IntProperty(name='Discard Mipmaps', default=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Coordinate')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'filename')
-        layout.prop(self, 'filtertype')
 
-        if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
-            layout.prop(self, 'maxanisotropy')
-            layout.prop(self, 'discardmipmaps')
+        if not UseLuxCore():
+            layout.prop(self, 'filtertype')
 
-        layout.prop(self, 'wrap')
+            if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
+                layout.prop(self, 'maxanisotropy')
+                layout.prop(self, 'discardmipmaps')
+
+            layout.prop(self, 'wrap')
 
     def export_texture(self, make_texture):
         normalmap_params = ParamSet()
@@ -659,6 +1117,30 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
             normalmap_params.add_float('vscale', -1.0)
 
         return make_texture('float', 'normalmap', self.name, normalmap_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        if not (os.path.exists(self.filename) and os.path.isfile(self.filename)):
+            return [0, 0, 0] # Black color
+
+        set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
+        set_prop_tex(properties, luxcore_name, 'file', self.filename)
+        set_prop_tex(properties, luxcore_name, 'gamma', 1)
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        # Implicitly create a normalmap
+        normalmap_name = create_luxcore_name(self, suffix='normal')
+        set_prop_tex(properties, normalmap_name, 'type', 'normalmap')
+        set_prop_tex(properties, normalmap_name, 'texture', luxcore_name)
+        luxcore_name = normalmap_name
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -681,23 +1163,25 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
                                         default='blender_original')
     noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items,
                                        default='soft_noise')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'type')
+        layout.prop(self, 'type', expand=True)
         layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisetype')
+        layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         stucci_params = ParamSet() \
@@ -716,6 +1200,26 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
 
         return make_texture('float', 'blender_stucci', self.name, stucci_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_stucci')
+        set_prop_tex(properties, luxcore_name, 'stuccitype', self.type)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'noisetype', self.noisetype)
+        set_prop_tex(properties, luxcore_name, 'turbulence', self.turbulence)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_uv(luxrender_texture_node):
@@ -725,7 +1229,7 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
     bl_icon = 'TEXTURE'
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', '2D Transform')
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
 
         self.outputs.new('NodeSocketColor', 'Color')
 
@@ -739,6 +1243,19 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
             uvtest_params.add_float('vscale', -1.0)
 
         return make_texture('color', 'uv', self.name, uvtest_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'uv')
+
+        mapping_type, uvscale, uvdelta = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -763,30 +1280,34 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
                                         description='Algorithm used to calculate distance of sample points to feature points',
                                         items=distance_items, default='actual_distance')
     minkowsky_exp = bpy.props.FloatProperty(name='Exponent', default=1.0)
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     nabla = bpy.props.FloatProperty(name='Nabla', default=0.025)
     w1 = bpy.props.FloatProperty(name='Weight 1', default=1.0, min=0.0, max=1.0, subtype='FACTOR')
     w2 = bpy.props.FloatProperty(name='Weight 2', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
     w3 = bpy.props.FloatProperty(name='Weight 3', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
     w4 = bpy.props.FloatProperty(name='Weight 4', default=0.0, min=0.0, max=1.0, subtype='FACTOR')
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'distmetric')
         layout.prop(self, 'minkowsky_exp')
         layout.prop(self, 'noisesize')
-        layout.prop(self, 'nabla')
-        layout.prop(self, 'w1')
-        layout.prop(self, 'w2')
-        layout.prop(self, 'w3')
-        layout.prop(self, 'w4')
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        if not UseLuxCore():
+            layout.prop(self, 'nabla')
+        column = layout.column(align=True)
+        column.prop(self, 'w1')
+        column.prop(self, 'w2')
+        column.prop(self, 'w3')
+        column.prop(self, 'w4')
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         voronoi_params = ParamSet() \
@@ -808,6 +1329,29 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
 
         return make_texture('float', 'blender_voronoi', self.name, voronoi_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_voronoi')
+        set_prop_tex(properties, luxcore_name, 'distmetric', self.distmetric)
+        #set_prop_tex(properties, luxcore_name, 'intensity', )
+        set_prop_tex(properties, luxcore_name, 'exponent', self.minkowsky_exp)
+        set_prop_tex(properties, luxcore_name, 'w1', self.w1)
+        set_prop_tex(properties, luxcore_name, 'w2', self.w2)
+        set_prop_tex(properties, luxcore_name, 'w3', self.w3)
+        set_prop_tex(properties, luxcore_name, 'w4', self.w4)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
@@ -818,7 +1362,7 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
     bl_width_min = 160
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def export_texture(self, make_texture):
@@ -830,6 +1374,19 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
             wrinkled_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'windy', self.name, windy_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'windy')
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -854,30 +1411,33 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
     ]
 
     type = bpy.props.EnumProperty(name='Type', description='Type of noise used', items=wood_type_items, default='bands')
-    noisebasis = bpy.props.EnumProperty(name='Noise Basis', description='Basis of noise used', items=noise_basis_items,
+    noisebasis = bpy.props.EnumProperty(name='Basis', description='Basis of noise used', items=noise_basis_items,
                                         default='blender_original')
     noisebasis2 = bpy.props.EnumProperty(name='Noise Basis 2', description='Second basis of noise used',
                                          items=wood_noise_items, default='sin')
     noisetype = bpy.props.EnumProperty(name='Noise Type', description='Soft or hard noise', items=noise_type_items,
                                        default='soft_noise')
-    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25)
+    noisesize = bpy.props.FloatProperty(name='Noise Size', default=0.25, min=0)
     turbulence = bpy.props.FloatProperty(name='Turbulence', default=5.0)
-    bright = bpy.props.FloatProperty(name='Brightness', default=1.0)
-    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0)
+    bright = bpy.props.FloatProperty(name='Brightness', default=1.0, min=0)
+    contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        layout.prop(self, 'noisebasis2', expand=True)
         layout.prop(self, 'type')
+        if self.type.endswith('noise'):
+            layout.prop(self, 'noisetype', expand=True)
         layout.prop(self, 'noisebasis')
-        layout.prop(self, 'noisebasis2')
-        layout.prop(self, 'noisetype')
         layout.prop(self, 'noisesize')
         layout.prop(self, 'turbulence')
-        layout.prop(self, 'bright')
-        layout.prop(self, 'contrast')
+        layout.separator()
+        column = layout.column(align=True)
+        column.prop(self, 'bright')
+        column.prop(self, 'contrast')
 
     def export_texture(self, make_texture):
         wood_params = ParamSet() \
@@ -897,6 +1457,27 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
 
         return make_texture('float', 'blender_wood', self.name, wood_params)
 
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'blender_wood')
+        set_prop_tex(properties, luxcore_name, 'woodtype', self.type)
+        set_prop_tex(properties, luxcore_name, 'noisebasis', self.noisebasis)
+        set_prop_tex(properties, luxcore_name, 'noisebasis2', self.noisebasis2)
+        set_prop_tex(properties, luxcore_name, 'noisesize', self.noisesize)
+        set_prop_tex(properties, luxcore_name, 'noisetype', self.noisetype)
+        set_prop_tex(properties, luxcore_name, 'turbulence', self.turbulence)
+        set_prop_tex(properties, luxcore_name, 'bright', self.bright)
+        set_prop_tex(properties, luxcore_name, 'contrast', self.contrast)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
@@ -906,17 +1487,16 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 160
 
-    octaves = bpy.props.IntProperty(name='Octaves', default=8)
-    roughness = bpy.props.FloatProperty(name='Roughness', default=0.5)
-
+    octaves = bpy.props.IntProperty(name='Octaves', default=8, min=1, max=29)
+    roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'octaves')
-        layout.prop(self, 'roughness')
+        layout.prop(self, 'roughness', slider=True)
 
     def export_texture(self, make_texture):
         wrinkled_params = ParamSet() \
@@ -929,6 +1509,21 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
             wrinkled_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'wrinkled', self.name, wrinkled_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'wrinkled')
+        set_prop_tex(properties, luxcore_name, 'octaves', self.octaves)
+        set_prop_tex(properties, luxcore_name, 'roughness', self.roughness)
+
+        mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+        mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -949,9 +1544,9 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
                                         description='Noise sharpness - increase for more spikey appearance')
     noiseoffset = bpy.props.FloatProperty(name='Noise Offset', default=0.00, min=0.0, max=1.0)
     spheres = bpy.props.IntProperty(name='Spheres', default=0,
-                                    description='If greater than 0, the cloud will consist of a bunch of random \
-                                    spheres to mimic a cumulus, this is the number of random spheres. If set to 0, the \
-                                    cloud will consist of single displaced sphere')
+                                    description='If greater than 0, the cloud will consist of a bunch of random '
+                                    'spheres to mimic a cumulus, this is the number of random spheres. If set to 0, the '
+                                    'cloud will consist of single displaced sphere')
     octaves = bpy.props.IntProperty(name='Octaves', default=1, description='Number of octaves for the noise function')
     omega = bpy.props.FloatProperty(name='Omega', default=0.75, min=0.0, max=1.0,
                                     description='Amount of noise per octave')
@@ -963,10 +1558,12 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
                                          description='Maxiumum size of cumulus spheres')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout) # TODO: remove when LuxCore support is implemented
+
         layout.prop(self, 'radius')
         layout.prop(self, 'noisescale')
         layout.prop(self, 'turbulence')
@@ -1000,6 +1597,8 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
 
         return make_texture('float', 'cloud', self.name, cloud_vol_params)
 
+    # TODO: LuxCore export
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
@@ -1032,6 +1631,8 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 
         return make_texture('float', 'exponential', self.name, exponential_params)
 
+    # TODO: LuxCore export once supported by LuxCore
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
@@ -1055,10 +1656,12 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
     wrap = bpy.props.EnumProperty(name='Wrapping', items=wrap_items, default='black')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', '3D Coordinate')
+        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop_search(self, "domain", bpy.data, "objects")
         layout.prop(self, 'source')
         layout.prop(self, 'wrap')
@@ -1084,3 +1687,40 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
             smokedata_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'densitygrid', self.name, smokedata_params)
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_dots(luxrender_texture_node):
+    """Smoke Data node"""
+    bl_idname = 'luxrender_texture_dots_node'
+    bl_label = 'Dots Texture'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 190
+
+    def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'Inside')
+        self.inputs.new('luxrender_color_socket', 'Outside')
+        self.inputs['Outside'].default_value = (0.05, 0.05, 0.05)
+        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        inside = self.inputs[0].export_luxcore(properties)
+        outside = self.inputs[1].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'dots')
+        set_prop_tex(properties, luxcore_name, 'inside', inside)
+        set_prop_tex(properties, luxcore_name, 'outside', outside)
+
+        mapping_type, uvscale, uvdelta = self.inputs[2].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
+        set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
