@@ -160,7 +160,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 
         set_prop_tex(properties, luxcore_name, 'type', 'scale')
         set_prop_tex(properties, luxcore_name, 'texture1', input)
-        set_prop_tex(properties, luxcore_name, 'texture2', self.bump_height)
+        set_prop_tex(properties, luxcore_name, 'texture2', self.bump_height * get_worldscale(as_scalematrix=False))
 
         return luxcore_name
 
