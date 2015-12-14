@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Jens Verwiebe, Jason Clarke, Asbjørn Heid
+# Jens Verwiebe, Jason Clarke, Asbjørn Heid, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -42,6 +42,7 @@ from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
+from ..outputs.luxcore_api import UseLuxCore
 
 from ..properties.node_sockets import (
     luxrender_fresnel_socket, luxrender_TC_Kr_socket
@@ -49,6 +50,8 @@ from ..properties.node_sockets import (
 
 from ..properties.node_material import get_socket_paramsets
 from ..properties.texture import luxrender_tex_fresnelname
+
+from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
 
 
 @LuxRenderAddon.addon_register_class
@@ -62,12 +65,111 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
     def init(self, context):
         self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
         self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs['Fresnel'].needs_link = True
 
     def export_texture(self, make_texture):
         fresnelcolor_params = ParamSet()
         fresnelcolor_params.update(get_socket_paramsets(self.inputs, make_texture))
 
         return make_texture('fresnel', 'fresnelcolor', self.name, fresnelcolor_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        kr = self.inputs['Reflection Color'].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'fresnelcolor')
+        set_prop_tex(properties, luxcore_name, 'kr', kr)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
+    """Fresnel Name Node"""
+    bl_idname = 'luxrender_texture_fresnelname_node'
+    bl_label = 'Fresnel Preset'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 160
+
+    for prop in luxrender_tex_fresnelname.properties:
+        if prop['attr'].startswith('name'):
+            frname_presets = prop['items']
+
+    frname_preset = bpy.props.EnumProperty(name='Preset', description='NK data presets', items=frname_presets,
+                                           default='aluminium')
+    frname_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
+
+    def init(self, context):
+        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs['Fresnel'].needs_link = True
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'frname_preset')
+
+        if self.frname_preset == 'nk':
+            if UseLuxCore():
+                warning_classic_node(layout)
+            else:
+                layout.prop(self, 'frname_nkfile')
+
+    def export_texture(self, make_texture):
+        fresnelname_params = ParamSet()
+
+        if self.frname_preset == 'nk':  # use an NK data file
+            # This function resolves relative paths (even in linked library blends)
+            # and optionally encodes/embeds the data if the setting is enabled
+            process_filepath_data(LuxManager.CurrentScene, self, self.frname_nkfile, fresnelname_params, 'filename')
+
+            return make_texture('fresnel', 'fresnelname', self.name, fresnelname_params)
+        else:
+            # use a preset name
+            fresnelname_params.add_string('name', self.frname_preset)
+
+            return make_texture('fresnel', 'preset', self.name, fresnelname_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'fresnelpreset')
+        set_prop_tex(properties, luxcore_name, 'name', self.frname_preset)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_fresnelfile(luxrender_texture_node):
+    """Fresnel Sopra/Luxpop Node"""
+    bl_idname = 'luxrender_texture_fresnelfile_node'
+    bl_label = 'Fresnel NK File'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 180
+
+    filepath = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
+
+    type_items = [
+        ('fresnelsopra', 'Sopra', 'NK file with sopra format'),
+        ('fresnelluxpop', 'Luxpop', 'NK file with Luxpop format')
+    ]
+    type = bpy.props.EnumProperty(name='Type', items=type_items)
+
+    def init(self, context):
+        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs['Fresnel'].needs_link = True
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+        layout.prop(self, 'filepath')
+        layout.prop(self, 'type', expand=True)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        set_prop_tex(properties, luxcore_name, 'type', self.type)
+        set_prop_tex(properties, luxcore_name, 'file', self.filepath)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
@@ -91,15 +193,18 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 
     def init(self, context):
         self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'use_ior')
 
         if self.use_ior:
             if self.cauchy_n == self.cauchy_n_presetvalue:
                 menu_text = self.cauchy_n_presetstring
             else:
-                menu_text = '-- Choose preset --'
+                menu_text = '-- Choose IOR preset --'
 
             layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
             layout.prop(self, 'cauchy_n')
@@ -121,47 +226,6 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
-    """Fresnel Name Node"""
-    bl_idname = 'luxrender_texture_fresnelname_node'
-    bl_label = 'Fresnel Name'
-    bl_icon = 'TEXTURE'
-    bl_width_min = 160
-
-    for prop in luxrender_tex_fresnelname.properties:
-        if prop['attr'].startswith('name'):
-            frname_presets = prop['items']
-
-    frname_preset = bpy.props.EnumProperty(name='Preset', description='NK data presets', items=frname_presets,
-                                           default='aluminium')
-    frname_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
-
-    def init(self, context):
-        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, 'frname_preset')
-
-        if self.frname_preset == 'nk':
-            layout.prop(self, 'frname_nkfile')
-
-    def export_texture(self, make_texture):
-        fresnelname_params = ParamSet()
-
-        if self.frname_preset == 'nk':  # use an NK data file
-            # This function resolves relative paths (even in linked library blends)
-            # and optionally encodes/embeds the data if the setting is enabled
-            process_filepath_data(LuxManager.CurrentScene, self, self.frname_nkfile, fresnelname_params, 'filename')
-
-            return make_texture('fresnel', 'fresnelname', self.name, fresnelname_params)
-        else:
-            # use a preset name
-            fresnelname_params.add_string('name', self.frname_preset)
-
-            return make_texture('fresnel', 'preset', self.name, fresnelname_params)
-
-
-@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
     """Sellmeier Node"""
     bl_idname = 'luxrender_texture_sellmeier_node'
@@ -176,8 +240,11 @@ class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
 
     def init(self, context):
         self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
+
         layout.prop(self, 'advanced')
 
         if self.advanced:

@@ -30,6 +30,8 @@ import bpy
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
+from ...export import get_expanded_file_name
+from ...properties import find_node
 
 from .utils import convert_texture_channel, generate_volume_name, get_elem_key, is_lightgroup_opencl_compatible
 from .textures import TextureExporter
@@ -53,9 +55,49 @@ class MaterialExporter(object):
         # Remove old properties
         self.properties = pyluxcore.Properties()
 
-        self.__convert_material()
+        if self.material is None:
+            self.__convert_default_matte()
+        elif self.material.luxrender_material.nodetree:
+            self.__convert_node_material()
+        else:
+            self.__convert_material()
 
         return self.properties
+
+
+    def __convert_node_material(self):
+        # Clay render handling
+        if self.blender_scene.luxcore_translatorsettings.override_materials:
+            self.__convert_default_matte()
+            return
+
+        self.__generate_material_name(self.material.name)
+
+        output_node = find_node(self.material, 'luxrender_material_output_node')
+
+        if output_node is None:
+            self.__convert_default_matte()
+
+        try:
+            self.luxcore_name = output_node.export_luxcore(self.material, self.properties, self.blender_scene)
+
+            prefix = 'scene.materials.' + self.luxcore_name
+            self.__set_material_volumes(prefix, output_node.interior_volume, output_node.exterior_volume)
+
+            # LuxCore specific material settings
+            lc_mat = self.material.luxcore_material
+
+            if lc_mat.id != -1 and not self.luxcore_exporter.is_viewport_render:
+                self.properties.Set(pyluxcore.Property(prefix + '.id', [lc_mat.id]))
+                if lc_mat.create_MATERIAL_ID_MASK and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('MATERIAL_ID_MASK', lc_mat.id)
+                if lc_mat.create_BY_MATERIAL_ID and self.blender_scene.luxrender_channels.enable_aovs:
+                    self.luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', lc_mat.id)
+        except Exception as err:
+            print('Node material export failed, skipping material: %s\n%s' % (self.material.name, err))
+            import traceback
+            traceback.print_exc()
+            self.__convert_default_matte()
 
 
     def __generate_material_name(self, name):
@@ -67,7 +109,9 @@ class MaterialExporter(object):
 
 
     def __convert_default_matte(self):
-        self.luxcore_name = DEFAULT_MATTE
+        if self.luxcore_name == '':
+            self.luxcore_name = DEFAULT_MATTE
+
         self.properties.Set(pyluxcore.Property('scene.materials.' + self.luxcore_name + '.type', 'matte'))
         self.properties.Set(pyluxcore.Property('scene.materials.' + self.luxcore_name + '.kd', [0.6, 0.6, 0.6]))
 
@@ -76,48 +120,24 @@ class MaterialExporter(object):
         self.properties.Set(pyluxcore.Property('scene.materials.' + DEFAULT_NULL + '.type', 'null'))
 
 
-    def __set_material_volumes(self, prefix):
-        if self.luxcore_exporter.is_material_preview:
-            # The material/texture preview scene does not contain any volumes, so we have to use this code.
-            interior = self.material.luxrender_material.Interior_volume
-            default_interior = self.blender_scene.luxrender_world.default_interior_volume
+    def __set_material_volumes(self, prefix, interior, exterior):
+        # This code checks if the volumes are set correctly so rendering does not fail when volumes are missing
+        # from the scene. It is assumed that all volumes are already exported prior to material export.
+        vol_cache = self.luxcore_exporter.volume_cache
+        scene_volumes = {vol_exporter.volume.name: vol_exporter.luxcore_name for vol_exporter in vol_cache.values()}
 
-            if interior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', generate_volume_name(interior)))
-            elif default_interior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.interior',  generate_volume_name(default_interior)))
+        default_interior = self.blender_scene.luxrender_world.default_interior_volume
+        default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
 
-            exterior = self.material.luxrender_material.Exterior_volume
-            default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
+        if interior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', scene_volumes[interior]))
+        elif default_interior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.interior', scene_volumes[default_interior]))
 
-            if exterior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(exterior)))
-            elif default_exterior != '':
-                self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior',  generate_volume_name(default_exterior)))
-        else:
-            # This code checks if the volumes are set correctly so rendering does not fail when volumes are missing
-            # from the scene
-            scene_volumes = self.blender_scene.luxrender_volumes.volumes
-            interior = self.material.luxrender_material.Interior_volume
-            default_interior = self.blender_scene.luxrender_world.default_interior_volume
-            exterior = self.material.luxrender_material.Exterior_volume
-            default_exterior = self.blender_scene.luxrender_world.default_exterior_volume
-
-            if interior in scene_volumes:
-                self.__set_volume(prefix + '.volume.interior', scene_volumes[interior])
-            elif default_interior in scene_volumes:
-                self.__set_volume(prefix + '.volume.interior', scene_volumes[default_interior])
-
-            if exterior in scene_volumes:
-                self.__set_volume(prefix + '.volume.exterior', scene_volumes[exterior])
-            elif default_exterior in scene_volumes:
-                self.__set_volume(prefix + '.volume.exterior', scene_volumes[default_exterior])
-
-
-    def __set_volume(self, prop_string, volume):
-        self.luxcore_exporter.convert_volume(volume)
-        volume_exporter = self.luxcore_exporter.volume_cache[get_elem_key(volume)]
-        self.properties.Set(pyluxcore.Property(prop_string, volume_exporter.luxcore_name))
+        if exterior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior', scene_volumes[exterior]))
+        elif default_exterior in scene_volumes:
+            self.properties.Set(pyluxcore.Property(prefix + '.volume.exterior', scene_volumes[default_exterior]))
 
 
     def __convert_material(self):
@@ -126,10 +146,6 @@ class MaterialExporter(object):
         """
         try:
             material = self.material
-
-            if material is None:
-                self.__convert_default_matte()
-                return
 
             print('Converting material: %s' % material.name)
 
@@ -166,7 +182,7 @@ class MaterialExporter(object):
             if lux_mat_type == 'matte':
                 sigma = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'sigma', 'float')
 
-                if sigma == '0.0':
+                if sigma[0] == 0:
                     self.properties.Set(pyluxcore.Property(prefix + '.type', ['matte']))
                     self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Kd', 'color')))
                 else:
@@ -328,8 +344,6 @@ class MaterialExporter(object):
                         self.properties.Set(pyluxcore.Property(prefix + '.base', [luxcore_base_name]))
                     except Exception as err:
                         print('WARNING: unable to convert base material %s\n%s' % (material.name, err))
-
-                self.properties.Set(pyluxcore.Property(prefix + '.kd', convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'Ks', 'color')))
 
                 if material.luxrender_material.luxrender_mat_glossycoating.useior:
                     self.properties.Set(
@@ -567,7 +581,9 @@ class MaterialExporter(object):
                     self.properties.Set(pyluxcore.Property(prefix + '.normaltex', normalmap))
 
                 # Interior/exterior volumes
-                self.__set_material_volumes(prefix)
+                interior = self.material.luxrender_material.Interior_volume
+                exterior = self.material.luxrender_material.Exterior_volume
+                self.__set_material_volumes(prefix, interior, exterior)
 
             # coating for all materials
             if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
@@ -611,7 +627,9 @@ class MaterialExporter(object):
                     self.luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', lc_mat.id)
 
             self.properties.Set(pyluxcore.Property(prefix + '.samples', [lc_mat.samples]))
-            self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [lc_mat.emission_samples]))
+
+            if material.luxrender_emission.use_emission:
+                self.properties.Set(pyluxcore.Property(prefix + '.emission.samples', [lc_mat.emission_samples]))
 
             self.properties.Set(pyluxcore.Property(prefix + '.visibility.indirect.diffuse.enable',
                                          lc_mat.visibility_indirect_diffuse_enable))
@@ -732,7 +750,10 @@ class MaterialExporter(object):
                     self.properties.Set(pyluxcore.Property(mix_prefix + '.amount', alpha))
 
                     self.luxcore_name = name_mix
-                    self.__set_material_volumes(mix_prefix)
+
+                    interior = self.material.luxrender_material.Interior_volume
+                    exterior = self.material.luxrender_material.Exterior_volume
+                    self.__set_material_volumes(prefix, interior, exterior)
         except Exception as err:
             print('Material export failed, skipping material: %s\n%s' % (self.material.name, err))
             import traceback

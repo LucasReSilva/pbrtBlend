@@ -54,11 +54,12 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore, pyluxcore
 from ..export.luxcore import LuxCoreExporter
+from ..export.luxcore.utils import get_elem_key
 
 # Exporter Property Groups need to be imported to ensure initialisation
 from ..properties import (
     accelerator, camera, engine, filter, integrator, ior_data, lamp, lampspectrum_data,
-    material, node_material, node_inputs, node_texture, node_fresnel, node_converter,
+    material, node_material, node_inputs, node_texture, node_fresnel, node_converter, node_volume,
     mesh, object as prop_object, particles, rendermode, sampler, texture, world,
     luxcore_engine, luxcore_scene, luxcore_material, luxcore_lamp,
     luxcore_tile_highlighting, luxcore_imagepipeline, luxcore_translator, luxcore_rendering_controls
@@ -88,7 +89,7 @@ from ..ui.textures import (
 
 # Exporter Operators need to be imported to ensure initialisation
 from .. import operators
-from ..operators import lrmdb, export, materials, nodes
+from ..operators import lrmdb, export, materials, nodes, cycles_converter
 
 
 def _register_elm(elm, required=False):
@@ -202,9 +203,13 @@ _register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))
 def lux_use_alternate_matview(self, context):
     if context.scene.render.engine == 'LUXRENDER_RENDER':
         row = self.layout.row()
-        row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
+
+        if not UseLuxCore():
+            row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
+
         row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
-        if context.material.preview_render_type == 'FLAT':
+
+        if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
             row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
 
 
@@ -214,10 +219,15 @@ _register_elm(bl_ui.properties_material.MATERIAL_PT_preview.append(lux_use_alter
 def lux_use_alternate_texview(self, context):
     if context.scene.render.engine == 'LUXRENDER_RENDER':
         row = self.layout.row()
-        row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
-        row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
-        if context.material.preview_render_type == 'FLAT':
-            row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
+
+        if not UseLuxCore():
+            row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
+
+        if context.material:
+            row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
+
+            if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
+                row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
 
 
 _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview.append(lux_use_alternate_texview))
@@ -252,6 +262,9 @@ def render_start_options(self, context):
             if context.scene.luxrender_engine.export_type == 'INT':
                 row.prop(context.scene.luxrender_engine, "write_files", text="Write to Disk")
                 row.prop(context.scene.luxrender_engine, "integratedimaging", text="Integrated Imaging")
+
+        col.separator()
+        col.operator("luxrender.convert_cycles_scene", icon='EXPORT')
 
 
 _register_elm(bl_ui.properties_render.RENDER_PT_render.append(render_start_options))
@@ -1039,7 +1052,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             if samples_per_sec > 10**6 - 1:
                 # Use megasamples as unit
-                stats_list.append('Samples/Sec %.3f M' % (samples_per_sec / 10**6))
+                stats_list.append('Samples/Sec %.1f M' % (samples_per_sec / 10**6))
             else:
                 # Use kilosamples as unit
                 stats_list.append('Samples/Sec %d k' % (samples_per_sec / 10**3))
@@ -1849,6 +1862,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lastHaltSamples = -1
     lastCameraSettings = ''
     lastVisibilitySettings = None
+    lastNodeMatSettings = ''
     update_counter = 0
     
     def luxcore_view_draw(self, context):
@@ -1871,7 +1885,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # check if camera settings have changed
         self.luxcore_exporter.convert_camera()
-        newCameraSettings = str(self.luxcore_exporter.camera_exporter.properties)
+        newCameraSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
 
         if self.lastCameraSettings == '':
             self.lastCameraSettings = newCameraSettings
@@ -1989,7 +2003,28 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             if bpy.data.materials.is_updated:
                 for mat in bpy.data.materials:
-                    if mat.is_updated:
+                    nodetree_name = mat.luxrender_material.nodetree
+
+                    mat_updated = False
+
+                    if nodetree_name:
+                        # Check for nodetree updates
+                        nodetree = bpy.data.node_groups[nodetree_name]
+
+                        if nodetree.is_updated or nodetree.is_updated_data:
+                            self.luxcore_exporter.convert_material(mat)
+                            newNodeMatSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
+
+                            if self.lastNodeMatSettings == '':
+                                self.lastNodeMatSettings = newNodeMatSettings
+                                mat_updated = True
+                            elif self.lastNodeMatSettings != newNodeMatSettings:
+                                self.lastNodeMatSettings = newNodeMatSettings
+                                mat_updated = True
+                    else:
+                        mat_updated = mat.is_updated
+
+                    if mat_updated:
                         # only update this material
                         update_changes.changed_materials.add(mat)
                         update_changes.set_cause(materials = True)
@@ -2001,16 +2036,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             update_changes.changed_materials.add(mat)
                             update_changes.set_cause(materials = True)
 
-            self.luxcore_exporter.convert_camera()
-            newCameraSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
-
-            if self.lastCameraSettings == '':
-                self.lastCameraSettings = newCameraSettings
-            elif self.lastCameraSettings != newCameraSettings:
-                update_changes.set_cause(camera = True)
-                self.lastCameraSettings = newCameraSettings
-
-            # Check for changes in volume configuration
+            # check for changes in volume configuration
             for volume in context.scene.luxrender_volumes.volumes:
                 self.luxcore_exporter.convert_volume(volume)
 
@@ -2205,8 +2231,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=False, update_material=False)
 
             if update_changes.cause_objectsRemoved:
-                from ..export.luxcore.utils import get_elem_key
-
                 for ob in update_changes.removed_objects:
                     key = get_elem_key(ob)
 

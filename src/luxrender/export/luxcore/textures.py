@@ -430,7 +430,7 @@ class TextureExporter(object):
                         self.properties.Set(pyluxcore.Property(prefix + '.value%d' % i, value))
                         i += 1
                 else:
-                    LuxLog('WARNING: Unsupported variant %s for texture: %s' % (luxTex.variant, texture.name))
+                    print('WARNING: Unsupported variant %s for texture: %s' % (luxTex.variant, texture.name))
             ####################################################################
             # BLACKBODY
             ####################################################################
@@ -500,7 +500,7 @@ class TextureExporter(object):
                     self.properties.Set(pyluxcore.Property(prefix + '.type', ['constfloat1']))
                     self.properties.Set(pyluxcore.Property(prefix + '.value', [float(luxTex.floatvalue)]))
                 else:
-                    LuxLog('WARNING: Unsupported variant %s for texture: %s' % (luxTex.variant, texture.name))
+                    print('WARNING: Unsupported variant %s for texture: %s' % (luxTex.variant, texture.name))
             ####################################################################
             # DOTS
             ####################################################################

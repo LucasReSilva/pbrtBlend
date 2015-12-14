@@ -53,7 +53,11 @@ def cycles_panel_node_draw(layout, id_data, output_type, input_name):
 def node_tree_selector_draw(layout, id_data, output_type):
     # layout.prop_search(mat.luxrender_material, "nodetree", bpy.data, "node_groups")
     try:
-        layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups")
+        if id_data.luxrender_material.nodetree:
+            layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups")
+
+            if id_data.luxrender_material.nodetree not in bpy.data.node_groups:
+                layout.label('Invalid nodetree name, select a nodetree.', icon='ERROR')
     except:
         return False
 
@@ -121,15 +125,19 @@ class ui_luxrender_material_header(luxrender_material_base):
                 row.operator("object.material_slot_select", text="Select")
                 row.operator("object.material_slot_deselect", text="Deselect")
 
-        split = layout.split(percentage=0.65)
+        split = layout.split(percentage=0.68)
 
         if ob:
             split.template_ID(ob, "active_material", new="material.new")
-            row = split.row()
 
             if slot:
+                # Special copy operator that not only duplicates the material but also the Lux nodetree if it exists
+                split.operator("luxrender.material_copy")
+
+                row = split.row()
                 row.prop(slot, "link", text="")
             else:
+                row = split.row()
                 row.label()
         elif mat:
             split.template_ID(space, "pin_id")
@@ -142,6 +150,14 @@ class ui_luxrender_material_header(luxrender_material_base):
                 row.label("Material type")
                 row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
                 super().draw(context)
+        else:
+            # Draw volume dropdowns for material output node
+            output_node = find_node(mat, 'luxrender_material_output_node')
+            if output_node:
+                layout.prop_search(output_node, 'interior_volume', context.scene.luxrender_volumes, 'volumes',
+                                   'Interior', icon='MOD_FLUIDSIM')
+                layout.prop_search(output_node, 'exterior_volume', context.scene.luxrender_volumes, 'volumes',
+                                   'Exterior', icon='MOD_FLUIDSIM')
 
 
 @LuxRenderAddon.addon_register_class
@@ -182,11 +198,17 @@ class ui_luxrender_material_utils(luxrender_material_base):
         row.operator("luxrender.save_material", icon="DISK_DRIVE").filename = \
             '%s.lbm2' % bpy.path.clean_name(context.material.name)
 
-        row = self.layout.row(align=True)
-        row.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
+        self.layout.label("Material Converter:")
 
-        row = self.layout.row(align=True)
-        row.operator("luxrender.convert_material", icon='MATERIAL_DATA')
+        column = self.layout.column(align=True)
+        sub = column.column(align=True)
+        sub.enabled = context.material.node_tree is not None
+        sub.operator("luxrender.convert_cycles_material", icon='MATERIAL_DATA')
+        column.operator("luxrender.convert_all_cycles_materials", icon='WORLD_DATA')
+
+        column = self.layout.column(align=True)
+        column.operator("luxrender.convert_material", icon='MATERIAL_DATA')
+        column.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
 
         # row = self.layout.row(align=True)
 
@@ -283,7 +305,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
         if lmc.index_floatvalue == lmc.index_presetvalue:
             menu_text = lmc.index_presetstring
         else:
-            menu_text = '-- Choose preset --'
+            menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
 
@@ -300,7 +322,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
         except:
             return super().poll(context)
 
-
+'''
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_material_node_volume(luxrender_material_base):
     bl_label = 'Volumes'
@@ -319,6 +341,7 @@ class ui_luxrender_material_node_volume(luxrender_material_base):
             return context.material.luxrender_material.nodetree
         except:
             return False
+'''
 
 
 @LuxRenderAddon.addon_register_class
@@ -328,7 +351,9 @@ class ui_luxrender_material_node_emit(luxrender_material_base):
     def draw(self, context):
         layout = self.layout
         mat = context.material
-        panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
+
+        if mat.luxrender_material.nodetree in bpy.data.node_groups:
+            panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
 
     @classmethod
     def poll(cls, context):

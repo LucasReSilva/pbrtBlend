@@ -50,7 +50,6 @@ class world(world_panel):
         ( ('scene',), 'luxrender_world' )
     ]
 
-
 class volumes_base(object):
     """
     Interior/Exterior Volumes Settings
@@ -72,7 +71,7 @@ class volumes_base(object):
         if lv.fresnel_fresnelvalue == lv.fresnel_presetvalue:
             menu_text = lv.fresnel_presetstring
         else:
-            menu_text = '-- Choose preset --'
+            menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
         cl.menu('LUXRENDER_MT_ior_presets_volumes', text=menu_text)
@@ -90,23 +89,44 @@ class volumes_base(object):
             current_vol_ind = context.scene.luxrender_volumes.volumes_index
             current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
 
-            # 'name' is not a member of current_vol.properties,
-            # so we draw it explicitly
-            self.layout.prop(
-                current_vol, 'name'
-            )
-
             # Here we draw the currently selected luxrender_volumes_data property group
-            for control in current_vol.controls:
-                # Don't show the "Light Emitter" checkbox in Classic API mode, can't do this in properties/world.py
-                if not (not UseLuxCore() and control == 'use_emission'):
-                    self.draw_column(
-                        control,
-                        self.layout,
-                        current_vol,
-                        context,
-                        property_group=current_vol
-                    )
+            if current_vol.nodetree:
+                self.layout.prop_search(current_vol, "nodetree", bpy.data, "node_groups")
+
+                if current_vol.nodetree in bpy.data.node_groups:
+                    nodetree = bpy.data.node_groups[current_vol.nodetree]
+
+                    output_node = None
+                    for node in nodetree.nodes:
+                        if node.bl_idname == 'luxrender_volume_output_node':
+                            output_node = node
+                            break
+
+                    if output_node:
+                        self.layout.template_node_view(nodetree, output_node, output_node.inputs[0])
+                    else:
+                        self.layout.label("No output node")
+                else:
+                    # Nodetree name is invalid (because nodetree is missing or was renamed)
+                    self.layout.label('Invalid nodetree name, select a nodetree.', icon='ERROR')
+            else:
+                # 'name' is not a member of current_vol.properties,
+                # so we draw it explicitly
+                self.layout.prop(current_vol, 'name')
+                self.layout.operator('luxrender.add_volume_nodetree', icon='NODETREE')
+                self.layout.separator()
+
+                # Here we draw the currently selected luxrender_volumes_data property group
+                for control in current_vol.controls:
+                    # Don't show the "Light Emitter" checkbox in Classic API mode, can't do this in properties/world.py
+                    if not (not UseLuxCore() and control == 'use_emission'):
+                        self.draw_column(
+                            control,
+                            self.layout,
+                            current_vol,
+                            context,
+                            property_group=current_vol
+                        )
 
 
 @LuxRenderAddon.addon_register_class

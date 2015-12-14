@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Doug Hammond
+# Doug Hammond, Simon Wendsche
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -32,6 +32,8 @@ import json, math, os, mathutils
 from .. import LuxRenderAddon
 from ..outputs import LuxLog, LuxManager
 from ..export import materials as export_materials
+
+from .cycles_converter import cycles_material_converter
 
 
 @LuxRenderAddon.addon_register_class
@@ -476,7 +478,7 @@ class LUXRENDER_OT_material_reset(bpy.types.Operator):
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
     bl_idname = 'luxrender.convert_all_materials'
-    bl_label = 'Convert all Blender materials'
+    bl_label = 'Convert all Blender Internal materials'
 
     def report_log(self, level, msg):
         LuxLog('Material conversion %s: %s' % (level, msg))
@@ -486,13 +488,14 @@ class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
             # Don't convert materials from linked-in files
             if blender_mat.library is None:
                 material_converter(self.report_log, context.scene, blender_mat)
+
         return {'FINISHED'}
 
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_convert_material(bpy.types.Operator):
     bl_idname = 'luxrender.convert_material'
-    bl_label = 'Convert selected Blender material'
+    bl_label = 'Convert this Blender Internal material'
 
     material_name = bpy.props.StringProperty(default='')
 
@@ -503,4 +506,32 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
             blender_mat = bpy.data.materials[self.properties.material_name]
 
         material_converter(self.report, context.scene, blender_mat)
+
+        return {'FINISHED'}
+
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_material_copy(bpy.types.Operator):
+    bl_idname = 'luxrender.material_copy'
+    bl_label = 'Copy'
+    bl_description = 'Create a copy of the material (also copying the nodetree)'
+
+    def execute(self, context):
+        current_mat = context.active_object.active_material
+
+        # Create a copy of the material
+        new_mat = current_mat.copy()
+
+        current_nodetree_name = current_mat.luxrender_material.nodetree
+
+        if current_nodetree_name in bpy.data.node_groups:
+            current_nodetree = bpy.data.node_groups[current_nodetree_name]
+            # Create a copy of the nodetree as well
+            new_nodetree = current_nodetree.copy()
+            new_nodetree.use_fake_user = True
+            # Assign new nodetree to the new material
+            new_mat.luxrender_material.nodetree = new_nodetree.name
+
+        context.active_object.active_material = new_mat
+
         return {'FINISHED'}

@@ -49,7 +49,7 @@ class ui_texture_cauchy(luxrender_texture_base):
         if lmg.ior == lmg.ior_presetvalue:
             menu_text = lmg.ior_presetstring
         else:
-            menu_text = '-- Choose preset --'
+            menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
         cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)

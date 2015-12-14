@@ -54,7 +54,8 @@ def LampVolumeParameter(attr, name):
             'src_attr': 'volumes',
             'trg': lambda s, c: c.luxrender_lamp,
             'trg_attr': '%s_volume' % attr,
-            'name': name
+            'name': name,
+            'icon': 'MOD_FLUIDSIM'
         },
     ]
 
@@ -75,7 +76,8 @@ def LampLightGroupParameter():
             'src_attr': 'lightgroups',
             'trg': lambda s, c: c.luxrender_lamp,
             'trg_attr': 'lightgroup',
-            'name': 'Light Group'
+            'name': 'Light Group',
+            'icon': 'OUTLINER_OB_LAMP'
         },
     ]
 
@@ -111,6 +113,10 @@ class luxrender_lamp(declarative_property_group):
         'lightgroup_chooser',
         'Exterior'
     ]
+
+    visibility = {
+        'importance': lambda: not UseLuxCore(),
+    }
 
     properties = [
                      {
@@ -339,11 +345,10 @@ class luxrender_lamp_sun(declarative_property_group):
 
     controls = [
                    'sunsky_type',
+                   'relsize',
                    'nsamples',
                    'turbidity',
-                   'groundalbedo', # LuxCore only parameter
                    'legacy_sky',
-                   'relsize',
                    'horizonbrightness',
                    'horizonsize',
                    'sunhalobrightness',
@@ -362,17 +367,14 @@ class luxrender_lamp_sun(declarative_property_group):
                     'L_multiplycolor': {'sunsky_type': 'distant', 'L_usecolortexture': True},
                     'legacy_sky': {'sunsky_type': O(['sunsky', 'sky'])},
                     'turbidity': {'sunsky_type': LO({'!=': 'distant'})},
-                    'groundalbedo': A([{'sunsky_type': O(['sunsky', 'sky'])}, lambda: UseLuxCore()]),
                     'theta': {'sunsky_type': 'distant'},
                     'relsize': {'sunsky_type': O(['sunsky', 'sun'])},
-                    'horizonbrightness': {'legacy_sky': True,
-                                          'sunsky_type': O(['sunsky', 'sky'])},
-                    'horizonsize': {'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
-                    'sunhalobrightness': {'legacy_sky': True,
-                                          'sunsky_type': O(['sunsky', 'sky'])},
-                    'sunhalosize': {'legacy_sky': True, 'sunsky_type': O(['sunsky', 'sky'])},
-                    'backscattering': {'legacy_sky': True,
-                                       'sunsky_type': O(['sunsky', 'sky'])},
+                    # These legacy sky options are not supported by LuxCore
+                    'horizonbrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'horizonsize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'sunhalobrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'sunhalosize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    'backscattering':     A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
     }
 
     properties = TC_L.properties[:] + [
@@ -380,11 +382,10 @@ class luxrender_lamp_sun(declarative_property_group):
             'type': 'float',
             'attr': 'turbidity',
             'name': 'turbidity',
+            'description': 'Haziness of the atmosphere',
             'default': 2.2,
             'min': 1.2,
-            'soft_min': 1.2,
             'max': 30.0,
-            'soft_max': 30.0,
         },
         {
             'type': 'enum',
@@ -398,15 +399,39 @@ class luxrender_lamp_sun(declarative_property_group):
                 ('distant', 'Distant', 'Generic directional light'),
             ]
         },
-        {
+        {   # Drawn manually in ui/lamps.py
+            'type': 'bool',
+            'attr': 'use_groundcolor',
+            'name': 'Use Ground Color:',
+            'description': 'Use a custom color for the lower half of the sky',
+            'default': False
+        },
+        {   # Drawn manually in ui/lamps.py
+            'type': 'float_vector',
+            'subtype': 'COLOR',
+            'attr': 'groundcolor',
+            'name': '',
+            'description': 'Custom color for the lower half of the sky',
+            'default': (0.05, 0.05, 0.05),
+            'min': 0,
+            'soft_max': 1,
+        },
+        {   # Drawn manually in ui/lamps.py
             'type': 'float_vector',
             'subtype': 'COLOR',
             'attr': 'groundalbedo',
-            'name': 'Ground Albedo',
-            'description': '',
+            'name': '',
+            'description': 'Brightness of the ground (gets reflected into the sky)',
             'default': (0, 0, 0),
             'min': 0,
             'max': 1,
+        },
+        {   # Drawn manually in ui/lamps.py
+            'type': 'bool',
+            'attr': 'link_albedo_groundcolor',
+            'name': '',
+            'description': 'Link albedo to ground color',
+            'default': False
         },
         {
             'type': 'bool',

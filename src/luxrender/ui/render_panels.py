@@ -218,7 +218,9 @@ class device_settings(render_panel):
                                        and engine_settings.device == 'OCL')
                 or engine_settings.device_preview == 'OCL')):
             self.layout.label('OpenCL Settings:')
-            self.layout.prop(engine_settings, 'opencl_settings_type', expand=True)
+            
+            if UseLuxCore():
+                self.layout.prop(engine_settings, 'opencl_settings_type', expand=True)
 
             if UseLuxCore() and engine_settings.opencl_settings_type == 'SIMPLE':
                 row = self.layout.row()
