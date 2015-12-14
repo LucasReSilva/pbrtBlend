@@ -146,7 +146,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 
     def export_texture(self, make_texture):
         bumpmap_params = ParamSet() \
-            .add_float('tex1', self.calculate_bump_height())
+            .add_float('tex1', self.bump_height)
 
         tex_node = get_linked_node(self.inputs[0])
 
