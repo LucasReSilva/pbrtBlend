@@ -1317,9 +1317,13 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kr = self.inputs['Reflection Color'].export_luxcore(properties)
+        bump = self.inputs['Bump'].export_luxcore(properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'mirror')
         set_prop_mat(properties, luxcore_name, 'kr', kr)
+
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 
         return luxcore_name
 
@@ -1386,6 +1390,7 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         set_prop_mat(properties, luxcore_name, 'amount', amount)
         set_prop_mat(properties, luxcore_name, 'material1', mat1)
         set_prop_mat(properties, luxcore_name, 'material2', mat2)
+
         if bump:
             set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 

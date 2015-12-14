@@ -607,7 +607,7 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_image_map(luxrender_texture_node):
-    """Image map texture node"""
+    """Image map texture node (deprecated, replaced by luxrender_texture_type_node_blender_image_map)"""
     bl_idname = 'luxrender_texture_image_map_node'
     bl_label = 'Classic Image Map Texture'
     bl_icon = 'TEXTURE'
@@ -632,7 +632,6 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
                                   default='repeat')
     maxanisotropy = bpy.props.FloatProperty(name='Max Anisotropy', default=8.0)
     discardmipmaps = bpy.props.IntProperty(name='Discard Mipmaps', default=1)
-
 
     def init(self, context):
         self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
@@ -765,7 +764,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Bump'].enabled = False
 
     def draw_buttons(self, context, layout):
-        warning_luxcore_node(layout)
+        if not UseLuxCore():
+            layout.label('Not all parameters supported in Classic API mode', icon='ERROR')
 
         split = layout.split(align=True, percentage=0.7)
         split.prop_search(self, 'image_name', bpy.data, 'images', text='')
@@ -784,12 +784,32 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         else:
             layout.prop(self, 'gamma')
 
-        layout.prop(self, 'is_normal_map')
+        if UseLuxCore():
+            layout.prop(self, 'is_normal_map')
 
-    # TODO: Classic export
-    #def export_texture(self, make_texture):
-    #    pass
-    # Get the absolute filepath with image.filepath_from_user() or better via efutil?
+    def export_texture(self, make_texture):
+        image = bpy.data.images[self.image_name]
+
+        imagemap_params = ParamSet()
+        process_filepath_data(LuxManager.CurrentScene, self, image.filepath, imagemap_params, 'filename')
+
+        if self.channel == 'rgb':
+            variant = 'color'
+        else:
+            variant = 'float'
+            imagemap_params.add_string('channel', self.channel)
+
+        imagemap_params.add_float('gain', self.gain)
+        imagemap_params.add_float('gamma', self.gamma)
+
+        coord_node = get_linked_node(self.inputs[0])
+
+        if coord_node and check_node_get_paramset(coord_node):
+            imagemap_params.update(coord_node.get_paramset())
+        else:
+            imagemap_params.add_float('vscale', -1.0)
+
+        return make_texture(variant, 'imagemap', self.name, imagemap_params)
 
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)

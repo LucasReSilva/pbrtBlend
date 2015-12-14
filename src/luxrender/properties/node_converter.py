@@ -134,6 +134,9 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
     bump_height = bpy.props.FloatProperty(name='Bump Height', description='Height of the bump map', default=.001,
                                           precision=6, subtype='DISTANCE', unit='LENGTH', step=.001)
 
+    def calculate_bump_height(self):
+        return self.bump_height * get_worldscale(as_scalematrix=False)
+
     def init(self, context):
         self.inputs.new('luxrender_TF_bump_socket', 'Float')
         self.outputs.new('NodeSocketFloat', 'Bump')
@@ -143,7 +146,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 
     def export_texture(self, make_texture):
         bumpmap_params = ParamSet() \
-            .add_float('tex1', self.bump_height)
+            .add_float('tex1', self.calculate_bump_height())
 
         tex_node = get_linked_node(self.inputs[0])
 
@@ -160,7 +163,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 
         set_prop_tex(properties, luxcore_name, 'type', 'scale')
         set_prop_tex(properties, luxcore_name, 'texture1', input)
-        set_prop_tex(properties, luxcore_name, 'texture2', self.bump_height * get_worldscale(as_scalematrix=False))
+        set_prop_tex(properties, luxcore_name, 'texture2', self.calculate_bump_height())
 
         return luxcore_name
 
