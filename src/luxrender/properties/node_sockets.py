@@ -176,23 +176,8 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Ka_socket'
     bl_label = 'Absorption Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
-                                          default=get_default(TC_Ka), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Absorption Color', default=get_default(TC_Ka), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
+                                          default=get_default(TC_Ka), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -200,7 +185,7 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -219,12 +204,12 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             ka_params = ParamSet().add_texture('Ka', tex_name)
         else:
-            ka_params = ParamSet().add_color('Ka', self.color)
+            ka_params = ParamSet().add_color('Ka', self.default_value)
 
         return ka_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -233,22 +218,8 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Kd_socket'
     bl_label = 'Diffuse Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Diffuse Color', description='Diffuse Color', default=get_default(TC_Kd),
-                                          subtype='COLOR', min=0.0, max=1.0, update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Diffuse Color', default=get_default(TC_Kd), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Diffuse Color', description='Diffuse Color', default=get_default(TC_Kd),
+                                          subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -256,7 +227,7 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -274,12 +245,12 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             kd_params = ParamSet().add_texture('Kd', tex_name)
         else:
-            kd_params = ParamSet().add_color('Kd', self.color)
+            kd_params = ParamSet().add_color('Kd', self.default_value)
 
         return kd_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -288,23 +259,8 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Kr_socket'
     bl_label = 'Reflection Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Reflection Color', description='Reflection Color',
-                                          default=get_default(TC_Kr), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Reflection Color', default=get_default(TC_Kr), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Reflection Color', description='Reflection Color',
+                                          default=get_default(TC_Kr), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -312,7 +268,7 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -327,12 +283,12 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             kr_params = ParamSet().add_texture('Kr', tex_name)
         else:
-            kr_params = ParamSet().add_color('Kr', self.color)
+            kr_params = ParamSet().add_color('Kr', self.default_value)
 
         return kr_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -341,23 +297,8 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Ks_socket'
     bl_label = 'Specular Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Specular Color', description='Specular Color',
-                                          default=get_default(TC_Ks), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Specular Color', default=get_default(TC_Ks), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Specular Color', description='Specular Color',
+                                          default=get_default(TC_Ks), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -365,7 +306,7 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -380,12 +321,12 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             ks_params = ParamSet() .add_texture('Ks', tex_name)
         else:
-            ks_params = ParamSet().add_color('Ks', self.color)
+            ks_params = ParamSet().add_color('Ks', self.default_value)
 
         return ks_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -394,23 +335,8 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Ks1_socket'
     bl_label = 'Specular Color 1 socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Specular Color 1', description='Specular Color 1',
-                                          default=get_default(TC_Ks1), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Specular Color 1', default=get_default(TC_Ks1), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Specular Color 1', description='Specular Color 1',
+                                          default=get_default(TC_Ks1), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -418,7 +344,7 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -433,12 +359,12 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             ks1_params = ParamSet().add_texture('Ks1', tex_name)
         else:
-            ks1_params = ParamSet().add_color('Ks1', self.color)
+            ks1_params = ParamSet().add_color('Ks1', self.default_value)
 
         return ks1_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -447,23 +373,8 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Ks2_socket'
     bl_label = 'Specular Color 2 socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Specular Color 2', description='Specular Color 2',
-                                          default=get_default(TC_Ks2), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Specular Color 2', default=get_default(TC_Ks2), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Specular Color 2', description='Specular Color 2',
+                                          default=get_default(TC_Ks2), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -471,7 +382,7 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -486,12 +397,12 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             ks2_params = ParamSet().add_texture('Ks2', tex_name)
         else:
-            ks2_params = ParamSet().add_color('Ks2', self.color)
+            ks2_params = ParamSet().add_color('Ks2', self.default_value)
 
         return ks2_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -500,23 +411,8 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Ks3_socket'
     bl_label = 'Specular Color 3 socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Specular Color 3', description='Specular Color 3',
-                                          default=get_default(TC_Ks3), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Specular Color 3', default=get_default(TC_Ks3), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Specular Color 3', description='Specular Color 3',
+                                          default=get_default(TC_Ks3), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -524,7 +420,7 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -539,12 +435,12 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             ks3_params = ParamSet().add_texture('Ks3', tex_name)
         else:
-            ks3_params = ParamSet().add_color('Ks3', self.color)
+            ks3_params = ParamSet().add_color('Ks3', self.default_value)
 
         return ks3_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -553,23 +449,8 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_Kt_socket'
     bl_label = 'Transmission Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Transmission Color', description='Transmission Color',
-                                          default=get_default(TC_Kt), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Transmission Color', default=get_default(TC_Kt),
-                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Transmission Color', description='Transmission Color',
+                                          default=get_default(TC_Kt), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -577,7 +458,7 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -592,12 +473,12 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             kt_params = ParamSet().add_texture('Kt', tex_name)
         else:
-            kt_params = ParamSet().add_color('Kt', self.color)
+            kt_params = ParamSet().add_color('Kt', self.default_value)
 
         return kt_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -606,23 +487,8 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_warp_Kd_socket'
     bl_label = 'Warp Diffuse socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Warp Diffuse Color', description='Warp Diffuse Color',
-                                          default=get_default(TC_warp_Kd), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Warp Diffuse Color', default=get_default(TC_warp_Kd),
-                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Warp Diffuse Color', description='Warp Diffuse Color',
+                                          default=get_default(TC_warp_Kd), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -630,7 +496,7 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -646,12 +512,12 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
 
             warp_kd_params = ParamSet().add_texture('warp_Kd', tex_name)
         else:
-            warp_kd_params = ParamSet().add_color('warp_Kd', self.color)
+            warp_kd_params = ParamSet().add_color('warp_Kd', self.default_value)
 
         return warp_kd_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -660,23 +526,8 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_warp_Ks_socket'
     bl_label = 'Warp Specular socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Warp Specular Color', description='Warp Specular Color',
-                                          default=get_default(TC_warp_Ks), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Warp Specular Color', default=get_default(TC_warp_Ks),
-                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Warp Specular Color', description='Warp Specular Color',
+                                          default=get_default(TC_warp_Ks), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -684,7 +535,7 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -699,12 +550,12 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             warp_ks_params = ParamSet().add_texture('warp_Ks', tex_name)
         else:
-            warp_ks_params = ParamSet().add_color('warp_Ks', self.color)
+            warp_ks_params = ParamSet().add_color('warp_Ks', self.default_value)
 
         return warp_ks_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -713,23 +564,8 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_weft_Kd_socket'
     bl_label = 'Weft Diffuse socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Weft Diffuse Color', description='Weft Diffuse Color',
-                                          default=get_default(TC_weft_Kd), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Weft Diffuse Color', default=get_default(TC_weft_Kd),
-                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Weft Diffuse Color', description='Weft Diffuse Color',
+                                          default=get_default(TC_weft_Kd), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -737,7 +573,7 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -753,12 +589,12 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
 
             weft_kd_params = ParamSet().add_texture('weft_Kd', tex_name)
         else:
-            weft_kd_params = ParamSet().add_color('weft_Kd', self.color)
+            weft_kd_params = ParamSet().add_color('weft_Kd', self.default_value)
 
         return weft_kd_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -767,23 +603,8 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_weft_Ks_socket'
     bl_label = 'Weft Specular socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Weft Specular Color', description='Weft Specular Color',
-                                          default=get_default(TC_weft_Ks), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Weft Specular Color', default=get_default(TC_weft_Ks),
-                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Weft Specular Color', description='Weft Specular Color',
+                                          default=get_default(TC_weft_Ks), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -791,7 +612,7 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -806,12 +627,12 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             weft_ks_params = ParamSet().add_texture('weft_Ks', tex_name)
         else:
-            weft_ks_params = ParamSet().add_color('weft_Ks', self.color)
+            weft_ks_params = ParamSet().add_color('weft_Ks', self.default_value)
 
         return weft_ks_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -820,23 +641,8 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_backface_Ka_socket'
     bl_label = 'Backface Absorption socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Backface Absorption Color', description='Backface Absorption Color',
-                                          default=get_default(TC_backface_Ka), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Backface Absorption Color', default=get_default(TC_backface_Ka),
-                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Backface Absorption Color', description='Backface Absorption Color',
+                                          default=get_default(TC_backface_Ka), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -844,7 +650,7 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -859,12 +665,12 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             backface_ka_params = ParamSet().add_texture('backface_Ka', tex_name)
         else:
-            backface_ka_params = ParamSet().add_color('backface_Ka', self.color)
+            backface_ka_params = ParamSet().add_color('backface_Ka', self.default_value)
 
         return backface_ka_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -873,23 +679,8 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_backface_Ks_socket'
     bl_label = 'Backface Specular socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Backface Specular Color', description='Backface Specular Color',
-                                          default=get_default(TC_backface_Ks), subtype='COLOR', min=0.0, max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Backface Specular Color', default=get_default(TC_backface_Ks),
-                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Backface Specular Color', description='Backface Specular Color',
+                                          default=get_default(TC_backface_Ks), subtype='COLOR', min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -897,7 +688,7 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -912,12 +703,12 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             backface_ks_params = ParamSet().add_texture('backface_Ks', tex_name)
         else:
-            backface_ks_params = ParamSet().add_color('backface_Ks', self.color)
+            backface_ks_params = ParamSet().add_color('backface_Ks', self.default_value)
 
         return backface_ks_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -926,22 +717,8 @@ class luxrender_TC_L_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_L_socket'
     bl_label = 'Light Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Color', description='Color', default=get_default(TC_L), subtype='COLOR',
-                                          min=0.0, max=1.0, update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Color', default=get_default(TC_L), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+    default_value = bpy.props.FloatVectorProperty(name='Color', description='Color', default=get_default(TC_L), subtype='COLOR',
+                                          min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -949,7 +726,7 @@ class luxrender_TC_L_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -965,12 +742,12 @@ class luxrender_TC_L_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             L_params = ParamSet().add_texture('L', tex_name)
         else:
-            L_params = ParamSet().add_color('L', self.color)
+            L_params = ParamSet().add_color('L', self.default_value)
 
         return L_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -979,25 +756,8 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_AC_absorption_socket'
     bl_label = 'Absorption Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
-                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
     default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
-                                                  default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                                  get=default_value_get,
-                                                  set=default_value_set)
+                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -1005,7 +765,7 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -1020,12 +780,12 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             ac_params = ParamSet().add_texture('absorption', tex_name)
         else:
-            ac_params = ParamSet().add_color('absorption', self.color)
+            ac_params = ParamSet().add_color('absorption', self.default_value)
 
         return ac_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -1034,25 +794,8 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_SC_absorption_socket'
     bl_label = 'Scattering Absorption socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
-                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                          update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
     default_value = bpy.props.FloatVectorProperty(name='Absorption Color', description='Absorption Color',
-                                                  default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                                  get=default_value_get,
-                                                  set=default_value_set)
+                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -1060,7 +803,7 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -1075,12 +818,12 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             ac_params = ParamSet().add_texture('sigma_a', tex_name)
         else:
-            ac_params = ParamSet().add_color('sigma_a', self.color)
+            ac_params = ParamSet().add_color('sigma_a', self.default_value)
 
         return ac_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -1089,24 +832,8 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_SC_color_socket'
     bl_label = 'Scattering Color socket'
 
-    # meaningful property
-    def color_update(self, context):
-        pass
-
-    color = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color',
-                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0, update=color_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.color
-
-    def default_value_set(self, value):
-        self.color = value
-
     default_value = bpy.props.FloatVectorProperty(name='Scattering Color', description='Scattering Color',
-                                                  default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0,
-                                                  get=default_value_get,
-                                                  set=default_value_set)
+                                          default=(0.0, 0.0, 0.0), subtype='COLOR', min=0.0, soft_max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -1114,7 +841,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'color', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -1129,12 +856,12 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             sc_params = ParamSet().add_texture('sigma_s', tex_name)
         else:
-            sc_params = ParamSet().add_color('sigma_s', self.color)
+            sc_params = ParamSet().add_color('sigma_s', self.default_value)
 
         return sc_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.color))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 # #### custom float sockets #####
