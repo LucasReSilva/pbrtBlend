@@ -105,25 +105,10 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
         # # connect preset -> property
         self.default_value = self.fresnel_presetvalue
 
-    # meaningful property
-    def fresnel_update(self, context):
-        pass
-
     fresnel_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
     fresnel_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
-    fresnel = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52, precision=6,
-                                      update=fresnel_update)
+    default_value = bpy.props.FloatProperty(name='IOR', description='Optical dataset', default=1.52, precision=6)
     needs_link = bpy.props.BoolProperty(name='Metal Fresnel', default=False) # for hiding inappropiate ui elements
-
-    # helper property
-    def default_value_get(self):
-        return self.fresnel
-
-    def default_value_set(self, value):
-        self.fresnel = value
-
-    default_value = bpy.props.FloatProperty(name='IOR', default=1.52, precision=6, get=default_value_get,
-                                            set=default_value_set)
 
     # Optional function for drawing the socket input value
     def draw(self, context, layout, node, text):
@@ -132,13 +117,13 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
         else:
             box = layout.box()
 
-            if self.fresnel == self.fresnel_presetvalue:
+            if self.default_value == self.fresnel_presetvalue:
                 menu_text = self.fresnel_presetstring
             else:
                 menu_text = '-- Choose IOR preset --'
 
             box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-            box.prop(self, 'fresnel', text=self.name)
+            box.prop(self, 'default_value', text=self.name)
 
     # Socket color
     def draw_color(self, context, node):
@@ -160,12 +145,12 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
                 .add_texture('fresnel', tex_name)
         else:
             fresnel_params = ParamSet() \
-                .add_float('fresnel', self.fresnel)
+                .add_float('fresnel', self.default_value)
 
         return fresnel_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.fresnel)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 # #### custom color sockets #####
@@ -995,53 +980,33 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
         # # connect preset -> property
         self.default_value = self.filmindex_presetvalue
 
-    # meaningful property
-    def filmindex_update(self, context):
-        pass
-
     filmindex_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
     filmindex_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
-    filmindex = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'),
                                         description=get_props(TF_filmindex, 'description'),
                                         default=get_props(TF_filmindex, 'default'),
                                         subtype=get_props(TF_filmindex, 'subtype'), min=get_props(TF_filmindex, 'min'),
                                         max=get_props(TF_filmindex, 'max'),
                                         soft_min=get_props(TF_filmindex, 'soft_min'),
                                         soft_max=get_props(TF_filmindex, 'soft_max'),
-                                        precision=get_props(TF_filmindex, 'precision'), update=filmindex_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.filmindex
-
-    def default_value_set(self, value):
-        self.filmindex = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_filmindex, 'name'),
-                                            default=get_props(TF_filmindex, 'default'),
-                                            subtype=get_props(TF_filmindex, 'subtype'),
-                                            min=get_props(TF_filmindex, 'min'), max=get_props(TF_filmindex, 'max'),
-                                            soft_min=get_props(TF_filmindex, 'soft_min'),
-                                            soft_max=get_props(TF_filmindex, 'soft_max'),
-                                            precision=get_props(TF_filmindex, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                        precision=get_props(TF_filmindex, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
             if 'IOR' in self.node.inputs.keys():  # index/filmindex presets interfere, show simple property only then
-                layout.prop(self, 'filmindex', text=self.name)
+                layout.prop(self, 'default_value', text=self.name)
             else:  # show presetchooser for all other mat
                 box = layout.box()
 
-                if self.filmindex == self.filmindex_presetvalue:
+                if self.default_value == self.filmindex_presetvalue:
                     menu_text = self.filmindex_presetstring
                 else:
                     menu_text = '-- Choose IOR preset --'
 
                 box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-                box.prop(self, 'filmindex', text=self.name)
+                box.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1056,12 +1021,12 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             filmindex_params = ParamSet().add_texture('filmindex', tex_name)
         else:
-            filmindex_params = ParamSet().add_float('filmindex', self.filmindex)
+            filmindex_params = ParamSet().add_float('filmindex', self.default_value)
 
         return filmindex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.filmindex)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1113,31 +1078,13 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
         # # connect preset -> property
         self.default_value = self.index_presetvalue
 
-    # meaningful property
-    def index_update(self, context):
-        pass
-
     index_presetvalue = bpy.props.FloatProperty(name='IOR-Preset', description='IOR', update=changed_preset)
     index_presetstring = bpy.props.StringProperty(name='IOR_Preset Name', description='IOR')
-    index = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), description=get_props(TF_index, 'description'),
                                     default=get_props(TF_index, 'default'), subtype=get_props(TF_index, 'subtype'),
                                     min=get_props(TF_index, 'min'), max=get_props(TF_index, 'max'),
                                     soft_min=get_props(TF_index, 'soft_min'), soft_max=get_props(TF_index, 'soft_max'),
-                                    precision=get_props(TF_index, 'precision'), update=index_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.index
-
-    def default_value_set(self, value):
-        self.index = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_index, 'name'), default=get_props(TF_index, 'default'),
-                                            subtype=get_props(TF_index, 'subtype'), min=get_props(TF_index, 'min'),
-                                            max=get_props(TF_index, 'max'), soft_min=get_props(TF_index, 'soft_min'),
-                                            soft_max=get_props(TF_index, 'soft_max'),
-                                            precision=get_props(TF_index, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                    precision=get_props(TF_index, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -1145,13 +1092,13 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
         else:
             box = layout.box()
 
-            if self.index == self.index_presetvalue:
+            if self.default_value == self.index_presetvalue:
                 menu_text = self.index_presetstring
             else:
                 menu_text = '-- Choose IOR preset --'
 
             box.menu('LUXRENDER_MT_ior_presets', text=menu_text)
-            box.prop(self, 'index', text=self.name)
+            box.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1167,12 +1114,12 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
 
             index_params = ParamSet().add_texture('index', tex_name)
         else:
-            index_params = ParamSet().add_float('index', self.index)
+            index_params = ParamSet().add_float('index', self.default_value)
 
         return index_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.index)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
