@@ -192,7 +192,7 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Absorption Color', default=get_default(TC_Ka), subtype='COLOR',
-                                                  get=default_value_get, set=default_value_set)
+                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -304,7 +304,7 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Reflection Color', default=get_default(TC_Kr), subtype='COLOR',
-                                                  get=default_value_get, set=default_value_set)
+                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -357,7 +357,7 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Specular Color', default=get_default(TC_Ks), subtype='COLOR',
-                                                  get=default_value_get, set=default_value_set)
+                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -410,7 +410,7 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Specular Color 1', default=get_default(TC_Ks1), subtype='COLOR',
-                                                  get=default_value_get, set=default_value_set)
+                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -463,7 +463,7 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Specular Color 2', default=get_default(TC_Ks2), subtype='COLOR',
-                                                  get=default_value_get, set=default_value_set)
+                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -516,7 +516,7 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Specular Color 3', default=get_default(TC_Ks3), subtype='COLOR',
-                                                  get=default_value_get, set=default_value_set)
+                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -569,7 +569,7 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Transmission Color', default=get_default(TC_Kt),
-                                                  subtype='COLOR', get=default_value_get, set=default_value_set)
+                                                  subtype='COLOR', min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
