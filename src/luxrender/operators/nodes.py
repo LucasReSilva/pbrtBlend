@@ -122,7 +122,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
 
         if idtype == 'material':
             shader = nt.nodes.new(node_type)  # create also matnode from editor type
-            shader.location = 200, 570
+            shader.location = 250, 400
 
             if ctx_mat.type == 'roughglass':
                 shader.rough = True
