@@ -248,7 +248,7 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Diffuse Color', default=get_default(TC_Kd), subtype='COLOR',
-                                                  get=default_value_get, set=default_value_set)
+                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
