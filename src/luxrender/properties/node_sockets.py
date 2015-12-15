@@ -872,38 +872,19 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_amount_socket'
     bl_label = 'Amount socket'
 
-    # meaningful property
-    def amount_update(self, context):
-        pass
-
-    amount = bpy.props.FloatProperty(name=get_props(TF_amount, 'name'), description=get_props(TF_amount, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_amount, 'name'), description=get_props(TF_amount, 'description'),
                                      default=get_props(TF_amount, 'default'), subtype=get_props(TF_amount, 'subtype'),
                                      unit=get_props(TF_amount, 'unit'), min=get_props(TF_amount, 'min'),
                                      max=get_props(TF_amount, 'max'), soft_min=get_props(TF_amount, 'soft_min'),
                                      soft_max=get_props(TF_amount, 'soft_max'),
-                                     precision=get_props(TF_amount, 'precision'), update=amount_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.amount
-
-    def default_value_set(self, value):
-        self.amount = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_amount, 'name'), default=get_props(TF_amount, 'default'),
-                                            subtype=get_props(TF_amount, 'subtype'), unit=get_props(TF_amount, 'unit'),
-                                            min=get_props(TF_amount, 'min'), max=get_props(TF_amount, 'max'),
-                                            soft_min=get_props(TF_amount, 'soft_min'),
-                                            soft_max=get_props(TF_amount, 'soft_max'),
-                                            precision=get_props(TF_amount, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                     precision=get_props(TF_amount, 'precision'))
 
     # Optional function for drawing the socket input value
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'amount', text=self.name, slider=True)
+            layout.prop(self, 'default_value', text=self.name, slider=True)
 
     # Socket color
     def draw_color(self, context, node):
@@ -920,13 +901,13 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             amount_params = ParamSet().add_texture('amount', tex_name)
         else:
-            print('value %f' % self.amount)
-            amount_params = ParamSet().add_float('amount', self.amount)
+            print('value %f' % self.default_value)
+            amount_params = ParamSet().add_float('amount', self.default_value)
 
         return amount_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.amount)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -935,34 +916,12 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_bump_socket'
     bl_label = 'Bump socket'
 
-    # meaningful property
-    def bump_update(self, context):
-        pass
-
-    bump = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'), description=get_props(TF_bumpmap, 'description'),
                                    default=get_props(TF_bumpmap, 'default'), subtype=get_props(TF_bumpmap, 'subtype'),
                                    unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'),
                                    max=get_props(TF_bumpmap, 'max'), soft_min=get_props(TF_bumpmap, 'soft_min'),
                                    soft_max=get_props(TF_bumpmap, 'soft_max'),
-                                   precision=get_props(TF_bumpmap, 'precision'), update=bump_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.bump
-
-    def default_value_set(self, value):
-        self.bump = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_bumpmap, 'name'),
-                                            description=get_props(TF_bumpmap, 'description'),
-                                            default=get_props(TF_bumpmap, 'default'),
-                                            subtype=get_props(TF_bumpmap, 'subtype'),
-                                            unit=get_props(TF_bumpmap, 'unit'), min=get_props(TF_bumpmap, 'min'),
-                                            max=get_props(TF_bumpmap, 'max'),
-                                            soft_min=get_props(TF_bumpmap, 'soft_min'),
-                                            soft_max=get_props(TF_bumpmap, 'soft_max'),
-                                            precision=get_props(TF_bumpmap, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                   precision=get_props(TF_bumpmap, 'precision'))
 
     def draw(self, context, layout, node, text):
         layout.label(text=self.name)
@@ -991,39 +950,19 @@ class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_cauchyb_socket'
     bl_label = 'Cauchy B socket'
 
-    # meaningful property
-    def cauchyb_update(self, context):
-        pass
-
-    cauchyb = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'),
                                       description=get_props(TF_cauchyb, 'description'),
                                       default=get_props(TF_cauchyb, 'default'),
                                       subtype=get_props(TF_cauchyb, 'subtype'), min=get_props(TF_cauchyb, 'min'),
                                       max=get_props(TF_cauchyb, 'max'), soft_min=get_props(TF_cauchyb, 'soft_min'),
                                       soft_max=get_props(TF_cauchyb, 'soft_max'),
-                                      precision=get_props(TF_cauchyb, 'precision'), update=cauchyb_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.cauchyb
-
-    def default_value_set(self, value):
-        self.cauchyb = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_cauchyb, 'name'),
-                                            default=get_props(TF_cauchyb, 'default'),
-                                            subtype=get_props(TF_cauchyb, 'subtype'), min=get_props(TF_cauchyb, 'min'),
-                                            max=get_props(TF_cauchyb, 'max'),
-                                            soft_min=get_props(TF_cauchyb, 'soft_min'),
-                                            soft_max=get_props(TF_cauchyb, 'soft_max'),
-                                            precision=get_props(TF_cauchyb, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                      precision=get_props(TF_cauchyb, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'cauchyb', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1038,12 +977,12 @@ class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             cauchyb_params = ParamSet().add_texture('cauchyb', tex_name)
         else:
-            cauchyb_params = ParamSet().add_float('cauchyb', self.cauchyb)
+            cauchyb_params = ParamSet().add_float('cauchyb', self.default_value)
 
         return cauchyb_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.cauchyb)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1131,36 +1070,17 @@ class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_film_thick_socket'
     bl_label = 'Thin Film thickness socket'
 
-    # meaningful property
-    def film_update(self, context):
-        pass
-
-    film = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), description=get_props(TF_film, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), description=get_props(TF_film, 'description'),
                                    default=get_props(TF_film, 'default'), subtype=get_props(TF_film, 'subtype'),
                                    min=get_props(TF_film, 'min'), max=get_props(TF_film, 'max'),
                                    soft_min=get_props(TF_film, 'soft_min'), soft_max=get_props(TF_film, 'soft_max'),
-                                   precision=get_props(TF_film, 'precision'), update=film_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.film
-
-    def default_value_set(self, value):
-        self.film = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_film, 'name'), default=get_props(TF_film, 'default'),
-                                            subtype=get_props(TF_film, 'subtype'), min=get_props(TF_film, 'min'),
-                                            max=get_props(TF_film, 'max'), soft_min=get_props(TF_film, 'soft_min'),
-                                            soft_max=get_props(TF_film, 'soft_max'),
-                                            precision=get_props(TF_film, 'precision'), get=default_value_get,
-                                            set=default_value_set)
-
+                                   precision=get_props(TF_film, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'film', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1175,12 +1095,12 @@ class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             film_params = ParamSet().add_texture('film', tex_name)
         else:
-            film_params = ParamSet().add_float('film', self.film)
+            film_params = ParamSet().add_float('film', self.default_value)
 
         return film_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.film)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1261,41 +1181,21 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_uroughness_socket'
     bl_label = 'U-Roughness socket'
 
-    # meaningful property
-    def uroughness_update(self, context):
-        pass
-
     sync_vroughness = bpy.props.BoolProperty(name='Sync V to U', default=True)
-    uroughness = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'),
                                          description=get_props(TF_uroughness, 'description'),
                                          default=get_props(TF_uroughness, 'default'),
                                          subtype=get_props(TF_uroughness, 'subtype'),
                                          min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'),
                                          soft_min=get_props(TF_uroughness, 'soft_min'),
                                          soft_max=get_props(TF_uroughness, 'soft_max'),
-                                         precision=get_props(TF_uroughness, 'precision'), update=uroughness_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.uroughness
-
-    def default_value_set(self, value):
-        self.uroughness = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_uroughness, 'name'),
-                                            default=get_props(TF_uroughness, 'default'),
-                                            subtype=get_props(TF_uroughness, 'subtype'),
-                                            min=get_props(TF_uroughness, 'min'), max=get_props(TF_uroughness, 'max'),
-                                            soft_min=get_props(TF_uroughness, 'soft_min'),
-                                            soft_max=get_props(TF_uroughness, 'soft_max'),
-                                            precision=get_props(TF_uroughness, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                         precision=get_props(TF_uroughness, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'uroughness', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1323,16 +1223,16 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
             if self.sync_vroughness:
                 print("Syncing V-Roughness: ")
                 roughness_params = ParamSet() \
-                    .add_float('uroughness', self.uroughness) \
-                    .add_float('vroughness', self.uroughness)
+                    .add_float('uroughness', self.default_value) \
+                    .add_float('vroughness', self.default_value)
             else:
                 roughness_params = ParamSet() \
-                    .add_float('uroughness', self.uroughness)
+                    .add_float('uroughness', self.default_value)
 
         return roughness_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.uroughness)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1341,40 +1241,20 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_vroughness_socket'
     bl_label = 'V-Roughness socket'
 
-    # meaningful property
-    def vroughness_update(self, context):
-        pass
-
-    vroughness = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'),
                                          description=get_props(TF_vroughness, 'description'),
                                          default=get_props(TF_vroughness, 'default'),
                                          subtype=get_props(TF_vroughness, 'subtype'),
                                          min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'),
                                          soft_min=get_props(TF_vroughness, 'soft_min'),
                                          soft_max=get_props(TF_vroughness, 'soft_max'),
-                                         precision=get_props(TF_uroughness, 'precision'), update=vroughness_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.vroughness
-
-    def default_value_set(self, value):
-        self.vroughness = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_vroughness, 'name'),
-                                            default=get_props(TF_vroughness, 'default'),
-                                            subtype=get_props(TF_vroughness, 'subtype'),
-                                            min=get_props(TF_vroughness, 'min'), max=get_props(TF_vroughness, 'max'),
-                                            soft_min=get_props(TF_vroughness, 'soft_min'),
-                                            soft_max=get_props(TF_vroughness, 'soft_max'),
-                                            precision=get_props(TF_uroughness, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                         precision=get_props(TF_uroughness, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'vroughness', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1390,12 +1270,12 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             roughness_params = ParamSet().add_texture('vroughness', tex_name)
         else:
-            roughness_params = ParamSet().add_float('vroughness', self.vroughness)
+            roughness_params = ParamSet().add_float('vroughness', self.default_value)
 
         return roughness_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.vroughness)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1404,35 +1284,17 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_sigma_socket'
     bl_label = 'Sigma socket'
 
-    # meaningful property
-    def sigma_update(self, context):
-        pass
-
-    sigma = bpy.props.FloatProperty(name=get_props(TF_sigma, 'name'), description=get_props(TF_sigma, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_sigma, 'name'), description=get_props(TF_sigma, 'description'),
                                     default=get_props(TF_sigma, 'default'), subtype=get_props(TF_sigma, 'subtype'),
                                     min=get_props(TF_sigma, 'min'), max=get_props(TF_sigma, 'max'),
                                     soft_min=get_props(TF_sigma, 'soft_min'), soft_max=get_props(TF_sigma, 'soft_max'),
-                                    precision=get_props(TF_sigma, 'precision'), update=sigma_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.sigma
-
-    def default_value_set(self, value):
-        self.sigma = value
-
-    default_value = bpy.props.FloatProperty(name="Sigma", default=get_props(TF_sigma, 'default'),
-                                            subtype=get_props(TF_sigma, 'subtype'), min=get_props(TF_sigma, 'min'),
-                                            max=get_props(TF_sigma, 'max'), soft_min=get_props(TF_sigma, 'soft_min'),
-                                            soft_max=get_props(TF_sigma, 'soft_max'),
-                                            precision=get_props(TF_sigma, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                    precision=get_props(TF_sigma, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'sigma', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1446,12 +1308,12 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             sigma_params = ParamSet().add_texture('sigma', tex_name)
         else:
-            sigma_params = ParamSet().add_float('sigma', self.sigma)
+            sigma_params = ParamSet().add_float('sigma', self.default_value)
 
         return sigma_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.sigma)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1460,25 +1322,10 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_SC_asymmetry_socket'
     bl_label = 'Scattering Asymmetry socket'
 
-    # meaningful property
-    def sc_asym_update(self, context):
-        pass
-
-    sc_asym = bpy.props.FloatVectorProperty(name='Asymmetry',
+    default_value = bpy.props.FloatVectorProperty(name='Asymmetry',
                                             description='Scattering asymmetry RGB. -1 means backscatter, '
                                             '0 is isotropic, 1 is forwards scattering',
-                                            default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4,
-                                            update=sc_asym_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.sc_asym
-
-    def default_value_set(self, value):
-        self.sc_asym = value
-
-    default_value = bpy.props.FloatVectorProperty(name='Asymmetry', default=(0.0, 0.0, 0.0), min=-1.0, max=1.0,
-                                                  precision=4, get=default_value_get, set=default_value_set)
+                                            default=(0.0, 0.0, 0.0), min=-1.0, max=1.0, precision=4)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -1486,7 +1333,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
         else:
             col = layout.column()
             col.label(text=self.name)
-            col.prop(self, 'sc_asym', text='')
+            col.prop(self, 'default_value', text='')
 
     def draw_color(self, context, node):
         return color_socket_color
@@ -1500,12 +1347,12 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             sc_asym_params = ParamSet().add_texture('g', tex_name)
         else:
-            sc_asym_params = ParamSet().add_color('g', self.sc_asym)
+            sc_asym_params = ParamSet().add_color('g', self.default_value)
 
         return sc_asym_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.sc_asym))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -1514,35 +1361,17 @@ class luxrender_TF_d_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_d_socket'
     bl_label = 'Absorption Depth socket'
 
-    # meaningful property
-    def d_update(self, context):
-        pass
-
-    d = bpy.props.FloatProperty(name=get_props(TF_d, 'name'), description=get_props(TF_d, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_d, 'name'), description=get_props(TF_d, 'description'),
                                 default=get_props(TF_d, 'default'), subtype=get_props(TF_d, 'subtype'),
                                 min=get_props(TF_d, 'min'), max=get_props(TF_d, 'max'),
                                 soft_min=get_props(TF_d, 'soft_min'), soft_max=get_props(TF_d, 'soft_max'),
-                                precision=get_props(TF_d, 'precision'), update=d_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.d
-
-    def default_value_set(self, value):
-        self.d = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_d, 'name'), default=get_props(TF_d, 'default'),
-                                            subtype=get_props(TF_d, 'subtype'), min=get_props(TF_d, 'min'),
-                                            max=get_props(TF_d, 'max'), soft_min=get_props(TF_d, 'soft_min'),
-                                            soft_max=get_props(TF_d, 'soft_max'),
-                                            precision=get_props(TF_d, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                precision=get_props(TF_d, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'd', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1556,12 +1385,12 @@ class luxrender_TF_d_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             d_params = ParamSet().add_texture('d', tex_name)
         else:
-            d_params = ParamSet().add_float('d', self.d)
+            d_params = ParamSet().add_float('d', self.default_value)
 
         return d_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.d)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1570,35 +1399,17 @@ class luxrender_TF_OP1_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_OP1_socket'
     bl_label = 'Opacity1 socket'
 
-    # meaningful property
-    def opacity1_update(self, context):
-        pass
-
-    opacity1 = bpy.props.FloatProperty(name=get_props(TF_OP1, 'name'), description=get_props(TF_OP1, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_OP1, 'name'), description=get_props(TF_OP1, 'description'),
                                        default=get_props(TF_OP1, 'default'), subtype=get_props(TF_OP1, 'subtype'),
                                        min=get_props(TF_OP1, 'min'), max=get_props(TF_OP1, 'max'),
                                        soft_min=get_props(TF_OP1, 'soft_min'), soft_max=get_props(TF_OP1, 'soft_max'),
-                                       precision=get_props(TF_OP1, 'precision'), update=opacity1_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.opacity1
-
-    def default_value_set(self, value):
-        self.opacity1 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_OP1, 'name'), default=get_props(TF_OP1, 'default'),
-                                            subtype=get_props(TF_OP1, 'subtype'), min=get_props(TF_OP1, 'min'),
-                                            max=get_props(TF_OP1, 'max'), soft_min=get_props(TF_OP1, 'soft_min'),
-                                            soft_max=get_props(TF_OP1, 'soft_max'),
-                                            precision=get_props(TF_OP1, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                       precision=get_props(TF_OP1, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'opacity1', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1612,12 +1423,12 @@ class luxrender_TF_OP1_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             opacity1_params = ParamSet().add_texture('opacity1', tex_name)
         else:
-            opacity1_params = ParamSet().add_float('opacity1', self.opacity1)
+            opacity1_params = ParamSet().add_float('opacity1', self.default_value)
 
         return opacity1_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.opacity1)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1626,35 +1437,17 @@ class luxrender_TF_OP2_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_OP2_socket'
     bl_label = 'Opacity2 socket'
 
-    # meaningful property
-    def opacity2_update(self, context):
-        pass
-
-    opacity2 = bpy.props.FloatProperty(name=get_props(TF_OP2, 'name'), description=get_props(TF_OP2, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_OP2, 'name'), description=get_props(TF_OP2, 'description'),
                                        default=get_props(TF_OP2, 'default'), subtype=get_props(TF_OP2, 'subtype'),
                                        min=get_props(TF_OP2, 'min'), max=get_props(TF_OP2, 'max'),
                                        soft_min=get_props(TF_OP2, 'soft_min'), soft_max=get_props(TF_OP2, 'soft_max'),
-                                       precision=get_props(TF_OP2, 'precision'), update=opacity2_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.opacity2
-
-    def default_value_set(self, value):
-        self.opacity2 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_OP2, 'name'), default=get_props(TF_OP2, 'default'),
-                                            subtype=get_props(TF_OP2, 'subtype'), min=get_props(TF_OP2, 'min'),
-                                            max=get_props(TF_OP2, 'max'), soft_min=get_props(TF_OP2, 'soft_min'),
-                                            soft_max=get_props(TF_OP2, 'soft_max'),
-                                            precision=get_props(TF_OP2, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                       precision=get_props(TF_OP2, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'opacity2', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1668,12 +1461,12 @@ class luxrender_TF_OP2_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             opacity2_params = ParamSet().add_texture('opacity2', tex_name)
         else:
-            opacity2_params = ParamSet().add_float('opacity2', self.opacity2)
+            opacity2_params = ParamSet().add_float('opacity2', self.default_value)
 
         return opacity2_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.opacity2)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1682,35 +1475,17 @@ class luxrender_TF_OP3_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_OP3_socket'
     bl_label = 'Opacity3 socket'
 
-    # meaningful property
-    def opacity3_update(self, context):
-        pass
-
-    opacity3 = bpy.props.FloatProperty(name=get_props(TF_OP3, 'name'), description=get_props(TF_OP3, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_OP3, 'name'), description=get_props(TF_OP3, 'description'),
                                        default=get_props(TF_OP3, 'default'), subtype=get_props(TF_OP3, 'subtype'),
                                        min=get_props(TF_OP3, 'min'), max=get_props(TF_OP3, 'max'),
                                        soft_min=get_props(TF_OP3, 'soft_min'), soft_max=get_props(TF_OP3, 'soft_max'),
-                                       precision=get_props(TF_OP3, 'precision'), update=opacity3_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.opacity3
-
-    def default_value_set(self, value):
-        self.opacity3 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_OP3, 'name'), default=get_props(TF_OP3, 'default'),
-                                            subtype=get_props(TF_OP3, 'subtype'), min=get_props(TF_OP3, 'min'),
-                                            max=get_props(TF_OP3, 'max'), soft_min=get_props(TF_OP3, 'soft_min'),
-                                            soft_max=get_props(TF_OP3, 'soft_max'),
-                                            precision=get_props(TF_OP3, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                       precision=get_props(TF_OP3, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'opacity3', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1724,12 +1499,12 @@ class luxrender_TF_OP3_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             opacity3_params = ParamSet().add_texture('opacity3', tex_name)
         else:
-            opacity3_params = ParamSet().add_float('opacity3', self.opacity3)
+            opacity3_params = ParamSet().add_float('opacity3', self.default_value)
 
         return opacity3_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.opacity3)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1738,35 +1513,17 @@ class luxrender_TF_OP4_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_OP4_socket'
     bl_label = 'Opacity4 socket'
 
-    # meaningful property
-    def opacity4_update(self, context):
-        pass
-
-    opacity4 = bpy.props.FloatProperty(name=get_props(TF_OP4, 'name'), description=get_props(TF_OP4, 'description'),
+    default_value = bpy.props.FloatProperty(name=get_props(TF_OP4, 'name'), description=get_props(TF_OP4, 'description'),
                                        default=get_props(TF_OP4, 'default'), subtype=get_props(TF_OP4, 'subtype'),
                                        min=get_props(TF_OP4, 'min'), max=get_props(TF_OP4, 'max'),
                                        soft_min=get_props(TF_OP4, 'soft_min'), soft_max=get_props(TF_OP4, 'soft_max'),
-                                       precision=get_props(TF_OP4, 'precision'), update=opacity4_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.opacity4
-
-    def default_value_set(self, value):
-        self.opacity4 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_OP4, 'name'), default=get_props(TF_OP4, 'default'),
-                                            subtype=get_props(TF_OP4, 'subtype'), min=get_props(TF_OP4, 'min'),
-                                            max=get_props(TF_OP4, 'max'), soft_min=get_props(TF_OP4, 'soft_min'),
-                                            soft_max=get_props(TF_OP4, 'soft_max'),
-                                            precision=get_props(TF_OP4, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                       precision=get_props(TF_OP4, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'opacity4', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1780,12 +1537,12 @@ class luxrender_TF_OP4_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             opacity4_params = ParamSet().add_texture('opacity4', tex_name)
         else:
-            opacity4_params = ParamSet().add_float('opacity4', self.opacity4)
+            opacity4_params = ParamSet().add_float('opacity4', self.default_value)
 
         return opacity4_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.opacity4)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 # Sockets for carpaint nodes
@@ -1796,35 +1553,17 @@ class luxrender_TF_M1_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_M1_socket'
     bl_label = 'M1 socket'
 
-    # meaningful property
-    def M1_update(self, context):
-        pass
-
-    M1 = bpy.props.FloatProperty(name=get_props(TF_M1, 'name'), description='1st glossy layer roughness',
+    default_value = bpy.props.FloatProperty(name=get_props(TF_M1, 'name'), description='1st glossy layer roughness',
                                  default=get_props(TF_M1, 'default'), subtype=get_props(TF_M1, 'subtype'),
                                  min=get_props(TF_M1, 'min'), max=get_props(TF_M1, 'max'),
                                  soft_min=get_props(TF_M1, 'soft_min'), soft_max=get_props(TF_M1, 'soft_max'),
-                                 precision=get_props(TF_M1, 'precision'), update=M1_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.M1
-
-    def default_value_set(self, value):
-        self.M1 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_M1, 'name'), default=get_props(TF_M1, 'default'),
-                                            subtype=get_props(TF_M1, 'subtype'), min=get_props(TF_M1, 'min'),
-                                            max=get_props(TF_M1, 'max'), soft_min=get_props(TF_M1, 'soft_min'),
-                                            soft_max=get_props(TF_M1, 'soft_max'),
-                                            precision=get_props(TF_M1, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                 precision=get_props(TF_M1, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'M1', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1838,12 +1577,12 @@ class luxrender_TF_M1_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             M1_params = ParamSet().add_texture('M1', tex_name)
         else:
-            M1_params = ParamSet().add_float('M1', self.M1)
+            M1_params = ParamSet().add_float('M1', self.default_value)
 
         return M1_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.M1)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1852,35 +1591,17 @@ class luxrender_TF_M2_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_M2_socket'
     bl_label = 'M2 socket'
 
-    # meaningful property
-    def M2_update(self, context):
-        pass
-
-    M2 = bpy.props.FloatProperty(name=get_props(TF_M2, 'name'), description='2nd glossy layer roughness',
+    default_value = bpy.props.FloatProperty(name=get_props(TF_M2, 'name'), description='2nd glossy layer roughness',
                                  default=get_props(TF_M2, 'default'), subtype=get_props(TF_M2, 'subtype'),
                                  min=get_props(TF_M2, 'min'), max=get_props(TF_M2, 'max'),
                                  soft_min=get_props(TF_M2, 'soft_min'), soft_max=get_props(TF_M2, 'soft_max'),
-                                 precision=get_props(TF_M2, 'precision'), update=M2_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.M2
-
-    def default_value_set(self, value):
-        self.M2 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_M2, 'name'), default=get_props(TF_M2, 'default'),
-                                            subtype=get_props(TF_M2, 'subtype'), min=get_props(TF_M2, 'min'),
-                                            max=get_props(TF_M2, 'max'), soft_min=get_props(TF_M2, 'soft_min'),
-                                            soft_max=get_props(TF_M2, 'soft_max'),
-                                            precision=get_props(TF_M2, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                 precision=get_props(TF_M2, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'M2', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1894,12 +1615,12 @@ class luxrender_TF_M2_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             M2_params = ParamSet().add_texture('M2', tex_name)
         else:
-            M2_params = ParamSet().add_float('M2', self.M2)
+            M2_params = ParamSet().add_float('M2', self.default_value)
 
         return M2_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.M2)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1908,35 +1629,17 @@ class luxrender_TF_M3_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_M3_socket'
     bl_label = 'M3 socket'
 
-    # meaningful property
-    def M3_update(self, context):
-        pass
-
-    M3 = bpy.props.FloatProperty(name=get_props(TF_M3, 'name'), description='3rd glossy layer roughness',
+    default_value = bpy.props.FloatProperty(name=get_props(TF_M3, 'name'), description='3rd glossy layer roughness',
                                  default=get_props(TF_M3, 'default'), subtype=get_props(TF_M3, 'subtype'),
                                  min=get_props(TF_M3, 'min'), max=get_props(TF_M3, 'max'),
                                  soft_min=get_props(TF_M3, 'soft_min'), soft_max=get_props(TF_M3, 'soft_max'),
-                                 precision=get_props(TF_M3, 'precision'), update=M3_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.M3
-
-    def default_value_set(self, value):
-        self.M3 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_M3, 'name'), default=get_props(TF_M3, 'default'),
-                                            subtype=get_props(TF_M3, 'subtype'), min=get_props(TF_M3, 'min'),
-                                            max=get_props(TF_M3, 'max'), soft_min=get_props(TF_M3, 'soft_min'),
-                                            soft_max=get_props(TF_M3, 'soft_max'),
-                                            precision=get_props(TF_M3, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                 precision=get_props(TF_M3, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'M3', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -1950,12 +1653,12 @@ class luxrender_TF_M3_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             M3_params = ParamSet().add_texture('M3', tex_name)
         else:
-            M3_params = ParamSet().add_float('M3', self.M3)
+            M3_params = ParamSet().add_float('M3', self.default_value)
 
         return M3_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.M3)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1964,35 +1667,17 @@ class luxrender_TF_R1_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_R1_socket'
     bl_label = 'R1 socket'
 
-    # meaningful property
-    def R1_update(self, context):
-        pass
-
-    R1 = bpy.props.FloatProperty(name=get_props(TF_R1, 'name'), description='1st glossy layer normal reflectance',
+    default_value = bpy.props.FloatProperty(name=get_props(TF_R1, 'name'), description='1st glossy layer normal reflectance',
                                  default=get_props(TF_R1, 'default'), subtype=get_props(TF_R1, 'subtype'),
                                  min=get_props(TF_R1, 'min'), max=get_props(TF_R1, 'max'),
                                  soft_min=get_props(TF_R1, 'soft_min'), soft_max=get_props(TF_R1, 'soft_max'),
-                                 precision=get_props(TF_R1, 'precision'), update=R1_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.R1
-
-    def default_value_set(self, value):
-        self.R1 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_R1, 'name'), default=get_props(TF_R1, 'default'),
-                                            subtype=get_props(TF_R1, 'subtype'), min=get_props(TF_R1, 'min'),
-                                            max=get_props(TF_R1, 'max'), soft_min=get_props(TF_R1, 'soft_min'),
-                                            soft_max=get_props(TF_R1, 'soft_max'),
-                                            precision=get_props(TF_R1, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                 precision=get_props(TF_R1, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'R1', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -2006,12 +1691,12 @@ class luxrender_TF_R1_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             R1_params = ParamSet().add_texture('R1', tex_name)
         else:
-            R1_params = ParamSet().add_float('R1', self.R1)
+            R1_params = ParamSet().add_float('R1', self.default_value)
 
         return R1_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.R1)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -2020,35 +1705,17 @@ class luxrender_TF_R2_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_R2_socket'
     bl_label = 'R2 socket'
 
-    # meaningful property
-    def R2_update(self, context):
-        pass
-
-    R2 = bpy.props.FloatProperty(name=get_props(TF_R2, 'name'), description='2nd glossy layer normal reflectance',
+    default_value = bpy.props.FloatProperty(name=get_props(TF_R2, 'name'), description='2nd glossy layer normal reflectance',
                                  default=get_props(TF_R2, 'default'), subtype=get_props(TF_R2, 'subtype'),
                                  min=get_props(TF_R2, 'min'), max=get_props(TF_R2, 'max'),
                                  soft_min=get_props(TF_R2, 'soft_min'), soft_max=get_props(TF_R2, 'soft_max'),
-                                 precision=get_props(TF_R2, 'precision'), update=R2_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.R2
-
-    def default_value_set(self, value):
-        self.R2 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_R2, 'name'), default=get_props(TF_R2, 'default'),
-                                            subtype=get_props(TF_R2, 'subtype'), min=get_props(TF_R2, 'min'),
-                                            max=get_props(TF_R2, 'max'), soft_min=get_props(TF_R2, 'soft_min'),
-                                            soft_max=get_props(TF_R2, 'soft_max'),
-                                            precision=get_props(TF_R2, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                 precision=get_props(TF_R2, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'R2', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -2062,12 +1729,12 @@ class luxrender_TF_R2_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             R2_params = ParamSet().add_texture('R2', tex_name)
         else:
-            R2_params = ParamSet().add_float('R2', self.R2)
+            R2_params = ParamSet().add_float('R2', self.default_value)
 
         return R2_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.R2)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -2076,35 +1743,17 @@ class luxrender_TF_R3_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_R3_socket'
     bl_label = 'R3 socket'
 
-    # meaningful property
-    def R3_update(self, context):
-        pass
-
-    R3 = bpy.props.FloatProperty(name=get_props(TF_R3, 'name'), description='3rd glossy layer normal reflectance',
+    default_value = bpy.props.FloatProperty(name=get_props(TF_R3, 'name'), description='3rd glossy layer normal reflectance',
                                  default=get_props(TF_R3, 'default'), subtype=get_props(TF_R3, 'subtype'),
                                  min=get_props(TF_R3, 'min'), max=get_props(TF_R3, 'max'),
                                  soft_min=get_props(TF_R3, 'soft_min'), soft_max=get_props(TF_R3, 'soft_max'),
-                                 precision=get_props(TF_R3, 'precision'), update=R3_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.R3
-
-    def default_value_set(self, value):
-        self.R3 = value
-
-    default_value = bpy.props.FloatProperty(name=get_props(TF_R3, 'name'), default=get_props(TF_R3, 'default'),
-                                            subtype=get_props(TF_R3, 'subtype'), min=get_props(TF_R3, 'min'),
-                                            max=get_props(TF_R3, 'max'), soft_min=get_props(TF_R3, 'soft_min'),
-                                            soft_max=get_props(TF_R3, 'soft_max'),
-                                            precision=get_props(TF_R3, 'precision'), get=default_value_get,
-                                            set=default_value_set)
+                                 precision=get_props(TF_R3, 'precision'))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'R3', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -2118,12 +1767,12 @@ class luxrender_TF_R3_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             R3_params = ParamSet().add_texture('R3', tex_name)
         else:
-            R3_params = ParamSet().add_float('R3', self.R3)
+            R3_params = ParamSet().add_float('R3', self.default_value)
 
         return R3_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.R3)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 # Sockets for texture/utitlity nodes
@@ -2134,22 +1783,8 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_brickmodtex_socket'
     bl_label = 'Brick modulation texture socket'
 
-    # meaningful property
-    def brickmodtex_update(self, context):
-        pass
-
-    brickmodtex = bpy.props.FloatVectorProperty(name='Brick Modulation Texture', subtype='COLOR', min=0.0, max=1.0,
-                                                default=(0.9, 0.9, 0.9), update=brickmodtex_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.brickmodtex
-
-    def default_value_set(self, value):
-        self.brickmodtex = value
-
     default_value = bpy.props.FloatVectorProperty(name='Brick Modulation Texture', subtype='COLOR', min=0.0, max=1.0,
-                                                default=(0.9, 0.9, 0.9), get=default_value_get, set=default_value_set)
+                                                default=(0.9, 0.9, 0.9))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -2157,7 +1792,7 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'brickmodtex', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -2172,12 +1807,12 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             brickmodtex_params = ParamSet().add_texture('brickmodtex', tex_name)
         else:
-            brickmodtex_params = ParamSet().add_color('brickmodtex', self.brickmodtex)
+            brickmodtex_params = ParamSet().add_color('brickmodtex', self.default_value)
 
         return brickmodtex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.brickmodtex))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -2186,22 +1821,8 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_bricktex_socket'
     bl_label = 'Brick texture socket'
 
-    # meaningful property
-    def bricktex_update(self, context):
-        pass
-
-    bricktex = bpy.props.FloatVectorProperty(name='Brick Texture', subtype='COLOR', min=0.0, max=1.0,
-                                             default=(0.8, 0.8, 0.8), update=bricktex_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.bricktex
-
-    def default_value_set(self, value):
-        self.bricktex = value
-
     default_value = bpy.props.FloatVectorProperty(name='Brick Texture', subtype='COLOR', min=0.0, max=1.0,
-                                             default=(0.8, 0.8, 0.8), get=default_value_get, set=default_value_set)
+                                             default=(0.8, 0.8, 0.8))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -2209,7 +1830,7 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'bricktex', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -2224,12 +1845,12 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             bricktex_params = ParamSet().add_texture('bricktex', tex_name)
         else:
-            bricktex_params = ParamSet().add_color('bricktex', self.bricktex)
+            bricktex_params = ParamSet().add_color('bricktex', self.default_value)
 
         return bricktex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.bricktex))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -2238,22 +1859,8 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TC_mortartex_socket'
     bl_label = 'Mortar texture socket'
 
-    # meaningful property
-    def mortartex_update(self, context):
-        pass
-
-    mortartex = bpy.props.FloatVectorProperty(name='Mortar Texture', subtype='COLOR', min=0.0, max=1.0,
-                                              default=(0.1, 0.1, 0.1), update=mortartex_update)
-
-    # helper property
-    def default_value_get(self):
-        return self.mortartex
-
-    def default_value_set(self, value):
-        self.mortartex = value
-
     default_value = bpy.props.FloatVectorProperty(name='Mortar Texture', subtype='COLOR', min=0.0, max=1.0,
-                                              default=(0.1, 0.1, 0.1), get=default_value_get, set=default_value_set)
+                                              default=(0.1, 0.1, 0.1))
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
@@ -2261,7 +1868,7 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
         else:
             row = layout.row()
             row.alignment = 'LEFT'
-            row.prop(self, 'mortartex', text='')
+            row.prop(self, 'default_value', text='')
             row.label(text=self.name)
 
     def draw_color(self, context, node):
@@ -2276,12 +1883,12 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             mortartex_params = ParamSet().add_texture('mortartex', tex_name)
         else:
-            mortartex_params = ParamSet().add_color('mortartex', self.mortartex)
+            mortartex_params = ParamSet().add_color('mortartex', self.default_value)
 
         return mortartex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, list(self.mortartex))
+        return export_socket_luxcore(properties, self, list(self.default_value))
 
 
 @LuxRenderAddon.addon_register_class
@@ -2290,13 +1897,13 @@ class luxrender_TF_brickmodtex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_brickmodtex_socket'
     bl_label = 'Brick modulation texture socket'
 
-    brickmodtex = bpy.props.FloatProperty(name='Brick Modulation Texture', min=0.0, max=1.0, default=0.9)
+    default_value = bpy.props.FloatProperty(name='Brick Modulation Texture', min=0.0, max=1.0, default=0.9)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'brickmodtex', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -2310,12 +1917,12 @@ class luxrender_TF_brickmodtex_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             brickmodtex_params = ParamSet().add_texture('brickmodtex', tex_name)
         else:
-            brickmodtex_params = ParamSet().add_float('brickmodtex', self.brickmodtex)
+            brickmodtex_params = ParamSet().add_float('brickmodtex', self.default_value)
 
         return brickmodtex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.brickmodtex)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -2324,13 +1931,13 @@ class luxrender_TF_bricktex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_bricktex_socket'
     bl_label = 'Brick texture socket'
 
-    bricktex = bpy.props.FloatProperty(name='Brick Texture', min=0.0, max=1.0, default=1.0)
+    default_value = bpy.props.FloatProperty(name='Brick Texture', min=0.0, max=1.0, default=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'bricktex', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -2344,12 +1951,12 @@ class luxrender_TF_bricktex_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             bricktex_params = ParamSet().add_texture('bricktex', tex_name)
         else:
-            bricktex_params = ParamSet().add_float('bricktex', self.bricktex)
+            bricktex_params = ParamSet().add_float('bricktex', self.default_value)
 
         return bricktex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.bricktex)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 @LuxRenderAddon.addon_register_class
@@ -2358,13 +1965,13 @@ class luxrender_TF_mortartex_socket(bpy.types.NodeSocket):
     bl_idname = 'luxrender_TF_mortartex_socket'
     bl_label = 'Mortar texture socket'
 
-    mortartex = bpy.props.FloatProperty(name='Mortar Texture', min=0.0, max=1.0, default=0.0)
+    default_value = bpy.props.FloatProperty(name='Mortar Texture', min=0.0, max=1.0, default=0.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
             layout.label(text=self.name)
         else:
-            layout.prop(self, 'mortartex', text=self.name)
+            layout.prop(self, 'default_value', text=self.name)
 
     def draw_color(self, context, node):
         return float_socket_color
@@ -2378,12 +1985,12 @@ class luxrender_TF_mortartex_socket(bpy.types.NodeSocket):
             tex_name = tex_node.export_texture(make_texture)
             mortartex_params = ParamSet().add_texture('mortartex', tex_name)
         else:
-            mortartex_params = ParamSet().add_float('mortartex', self.mortartex)
+            mortartex_params = ParamSet().add_float('mortartex', self.default_value)
 
         return mortartex_params
 
     def export_luxcore(self, properties):
-        return export_socket_luxcore(properties, self, self.mortartex)
+        return export_socket_luxcore(properties, self, self.default_value)
 
 
 # Custom sockets for the mix/add/scale/subtract nodes, in all 3 variants. *sigh*
