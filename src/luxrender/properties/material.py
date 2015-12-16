@@ -1113,6 +1113,7 @@ class luxrender_transparency(declarative_property_group):
                              ('diffusealpha', 'diffuse/reflection alpha', 'diffusealpha'),
                              ('constant', 'constant', 'constant')
                          ],
+                         'update': lambda s, c: refresh_preview(s, c),
                          'save_in_preset': True
                      },
                      {
