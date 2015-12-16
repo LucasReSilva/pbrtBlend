@@ -1532,6 +1532,7 @@ class luxrender_mat_carpaint(declarative_property_group):
                              ('polaris silber', 'Polaris Silber', 'polaris silber'),
                              ('white', 'White', 'white'),
                          ],
+                         'update': lambda s, c: refresh_preview(s, c),
                          'save_in_preset': True
                      },
                  ] + \
@@ -3353,6 +3354,7 @@ class luxrender_mat_cloth(declarative_property_group):
                              ('silk_shantung', 'Silk Shantung', 'Silk shantung'),
                          ],
                          'default': 'denim',
+                         'update': lambda s, c: refresh_preview(s, c),
                          'save_in_preset': True
                      },
                      {
