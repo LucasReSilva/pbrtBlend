@@ -437,6 +437,7 @@ class luxrender_material(declarative_property_group):
                         'min': 1.0,
                         'max': 2.0,
                         'default': 1.0,
+                        'update': lambda s, c: refresh_preview(s, c),
                     },
                     {
                         'attr': 'nodetree',

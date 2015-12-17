@@ -3652,7 +3652,8 @@ class luxrender_tex_marble(declarative_property_group):
         {
             'type': 'string',
             'attr': 'variant',
-            'default': 'color'
+            'default': 'color',
+            'update': refresh_preview,
         },
         {
             'type': 'int',
@@ -3663,7 +3664,8 @@ class luxrender_tex_marble(declarative_property_group):
             'soft_min': 1,
             'max': 100,
             'soft_max': 100,
-            'save_in_preset': True
+            'save_in_preset': True,
+            'update': refresh_preview,
         },
         {
             'type': 'float',
@@ -3674,7 +3676,8 @@ class luxrender_tex_marble(declarative_property_group):
             'soft_min': 0.0,
             'max': 1.0,
             'soft_max': 1.0,
-            'save_in_preset': True
+            'save_in_preset': True,
+            'update': refresh_preview,
         },
         {
             'type': 'float',
@@ -3685,7 +3688,8 @@ class luxrender_tex_marble(declarative_property_group):
             'soft_min': 0.0,
             'max': 100.0,
             'soft_max': 100.0,
-            'save_in_preset': True
+            'save_in_preset': True,
+            'update': refresh_preview,
         },
         {
             'type': 'float',
@@ -3696,7 +3700,8 @@ class luxrender_tex_marble(declarative_property_group):
             'soft_min': 0.0,
             'max': 100.0,
             'soft_max': 100.0,
-            'save_in_preset': True
+            'save_in_preset': True,
+            'update': refresh_preview,
         },
     ]
 
@@ -4578,7 +4583,8 @@ class luxrender_tex_wrinkled(declarative_property_group):
             'soft_min': 1,
             'max': 100,
             'soft_max': 100,
-            'save_in_preset': True
+            'save_in_preset': True,
+            'update': refresh_preview,
         },
         {
             'type': 'float',
@@ -4590,7 +4596,8 @@ class luxrender_tex_wrinkled(declarative_property_group):
             'max': 1.0,
             'soft_max': 1.0,
             'slider': True,
-            'save_in_preset': True
+            'save_in_preset': True,
+            'update': refresh_preview,
         },
     ]
 
@@ -4623,11 +4630,6 @@ class luxrender_tex_pointiness(declarative_property_group):
     visibility = {}
 
     properties = [
-        {
-            'attr': 'variant',
-            'type': 'string',
-            'default': 'float'
-        },
         {
             'attr': 'curvature_mode',
             'type': 'enum',
