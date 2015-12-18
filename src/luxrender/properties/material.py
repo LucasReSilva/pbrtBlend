@@ -2640,6 +2640,7 @@ class luxrender_mat_metal(declarative_property_group):
                          'subtype': 'FILE_PATH',
                          'attr': 'filename',
                          'name': 'NK file',
+                         'update': lambda s, c: refresh_preview(s, c),
                          'save_in_preset': True
                      },
                      {
@@ -2764,6 +2765,7 @@ class luxrender_mat_metal2(declarative_property_group):
                              ('fresneltex', 'Fresnel texture', 'Use generic fresnel input'),
                          ],
                          'default': 'preset',
+                         'update': lambda s, c: refresh_preview(s, c),
                          'save_in_preset': True
                      },
                      {
@@ -2788,6 +2790,7 @@ class luxrender_mat_metal2(declarative_property_group):
                          'subtype': 'FILE_PATH',
                          'attr': 'filename',
                          'name': 'NK file',
+                         'update': lambda s, c: refresh_preview(s, c),
                          'save_in_preset': True
                      },
                      {
