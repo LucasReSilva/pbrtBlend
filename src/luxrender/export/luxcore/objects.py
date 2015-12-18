@@ -135,7 +135,9 @@ class ObjectExporter(object):
         convert_object = True
 
         # Check if object is proxy
-        if obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
+        export_proxies = self.blender_scene.luxcore_translatorsettings.export_proxies
+
+        if export_proxies and obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
             convert_object = not obj.luxrender_object.hide_proxy_mesh
             self.__convert_proxy(update_material, anim_matrices, convert_object, transform)
 

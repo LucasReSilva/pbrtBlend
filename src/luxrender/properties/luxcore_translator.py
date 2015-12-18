@@ -40,7 +40,7 @@ class luxcore_translatorsettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        ['export_particles', 'export_hair'],
+        ['export_particles', 'export_hair', 'export_proxies'],
         'override_materials',
         ['override_glass', 'override_lights', 'override_null'],
         'use_filesaver',
@@ -60,14 +60,24 @@ class luxcore_translatorsettings(declarative_property_group):
         {
             'type': 'bool',
             'attr': 'export_particles',
-            'name': 'Export Particles',
+            'name': 'Particles',
+            'description': 'Export particle systems',
             'default': True,
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'export_hair',
-            'name': 'Export Hair',
+            'name': 'Hair',
+            'description': 'Export hair systems',
+            'default': True,
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'export_proxies',
+            'name': 'Proxies',
+            'description': 'Load linked PLY files for proxy objects',
             'default': True,
             'save_in_preset': True
         },
