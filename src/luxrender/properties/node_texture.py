@@ -766,7 +766,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     def draw_buttons(self, context, layout):
         if not UseLuxCore():
             layout.label('Not all parameters supported in Classic API mode', icon='ERROR')
-
+        layout.operator("image.new")
         split = layout.split(align=True, percentage=0.7)
         split.prop_search(self, 'image_name', bpy.data, 'images', text='')
         split.operator('image.open', text='Open', icon='FILESEL')
