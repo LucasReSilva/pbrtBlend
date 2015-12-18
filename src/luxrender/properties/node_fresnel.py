@@ -129,7 +129,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
         luxcore_name = create_luxcore_name(self)
 
         if self.frname_preset == 'nk':  # use an NK data file
-             full_name, base_name = get_expanded_file_name(self.frname_presets, self.frname_nkfile)
+             full_name, base_name = get_expanded_file_name(self.frname_preset, self.frname_nkfile)
              set_prop_tex(properties, luxcore_name, 'type', 'fresnelsopra')
              set_prop_tex(properties, luxcore_name, 'file', [full_name])
         else:
