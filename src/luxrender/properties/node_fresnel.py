@@ -108,10 +108,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
         layout.prop(self, 'frname_preset')
 
         if self.frname_preset == 'nk':
-            if UseLuxCore():
-                warning_classic_node(layout)
-            else:
-                layout.prop(self, 'frname_nkfile')
+            layout.prop(self, 'frname_nkfile')
 
     def export_texture(self, make_texture):
         fresnelname_params = ParamSet()
@@ -131,8 +128,13 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
-        set_prop_tex(properties, luxcore_name, 'type', 'fresnelpreset')
-        set_prop_tex(properties, luxcore_name, 'name', self.frname_preset)
+        if self.frname_preset == 'nk':  # use an NK data file
+             full_name, base_name = get_expanded_file_name(self.frname_presets, self.frname_nkfile)
+             set_prop_tex(properties, luxcore_name, 'type', 'fresnelsopra')
+             set_prop_tex(properties, luxcore_name, 'file', [full_name])
+        else:
+             set_prop_tex(properties, luxcore_name, 'type', 'fresnelpreset')
+             set_prop_tex(properties, luxcore_name, 'name', self.frname_preset)
 
         return luxcore_name
 
