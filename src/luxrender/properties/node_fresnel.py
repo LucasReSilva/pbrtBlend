@@ -37,7 +37,7 @@ from ..properties import (
 from ..properties.texture import (
     import_paramset_to_blender_texture, shorten_name, refresh_preview
 )
-from ..export import ParamSet, process_filepath_data
+from ..export import ParamSet, process_filepath_data,  get_expanded_file_name
 from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
@@ -166,8 +166,9 @@ class luxrender_texture_type_node_fresnelfile(luxrender_texture_node):
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
+        full_name, base_name = get_expanded_file_name(self.type, self.filepath)
         set_prop_tex(properties, luxcore_name, 'type', self.type)
-        set_prop_tex(properties, luxcore_name, 'file', self.filepath)
+        set_prop_tex(properties, luxcore_name, 'file', [full_name])
 
         return luxcore_name
 
