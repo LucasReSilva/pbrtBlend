@@ -740,6 +740,16 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
     image_name = bpy.props.StringProperty(default='', update=update_image)
 
+    def default_value_get(self):
+        return  bpy.data.images[self.image_name].filepath
+
+    def default_value_set(self, value):
+        self.image_name = os.path.basename(value)
+        # Add image to bpy.data.images
+        bpy.ops.image.open(filepath= value)
+
+    filename = bpy.props.StringProperty(name='File Name', description='Path to the image map', subtype='FILE_PATH', get=default_value_get, set=default_value_set)
+
     channel_items = [
         ('rgb', 'RGB', 'Default, use all color channels'),
         ('red', 'Red', 'Use only the red color channel'),
@@ -767,9 +777,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         if not UseLuxCore():
             layout.label('Not all parameters supported in Classic API mode', icon='ERROR')
 
-        split = layout.split(align=True, percentage=0.7)
-        split.prop_search(self, 'image_name', bpy.data, 'images', text='')
-        split.operator('image.open', text='Open', icon='FILESEL')
+        layout.prop_search(self, 'image_name', bpy.data, 'images', text='')
+        layout.prop(self, 'filename', text='')
 
         column = layout.column()
         column.enabled = not self.is_normal_map
