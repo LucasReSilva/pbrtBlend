@@ -522,7 +522,7 @@ class TextureExporter(object):
             ####################################################################
             elif texType == 'imagemap':
                 full_name, base_name = get_expanded_file_name(texture, luxTex.filename)
-                self.properties.Set(pyluxcore.Property(prefix + '.file', [full_name]))
+                self.properties.Set(pyluxcore.Property(prefix + '.file', full_name))
                 self.properties.Set(pyluxcore.Property(prefix + '.gamma', [float(luxTex.gamma)]))
                 self.properties.Set(pyluxcore.Property(prefix + '.gain', [float(luxTex.gain)]))
                 if luxTex.variant == 'float':
@@ -538,7 +538,7 @@ class TextureExporter(object):
             ####################################################################
             elif texType == 'normalmap':
                 full_name, base_name = get_expanded_file_name(texture, luxTex.filename)
-                self.properties.Set(pyluxcore.Property(prefix + '.file', [full_name]))
+                self.properties.Set(pyluxcore.Property(prefix + '.file', full_name))
                 self.__convert_mapping(prefix, texture)
             ####################################################################
             # Marble

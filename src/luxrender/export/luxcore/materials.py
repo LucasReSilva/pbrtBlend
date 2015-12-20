@@ -217,7 +217,7 @@ class MaterialExporter(object):
                 elif m_type == 'nk':
                     full_name, base_name = get_expanded_file_name(material, lux_mat.filename)
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
-                    self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', [full_name]))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', full_name))
 
                 u_roughness = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, lux_mat, 'uroughness', 'float')
                 if lux_mat.anisotropic:
@@ -272,7 +272,7 @@ class MaterialExporter(object):
                 elif m2_type == 'nk':
                     full_name, base_name = get_expanded_file_name(material, lux_mat.filename)
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
-                    self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', [full_name]))
+                    self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', full_name))
 
                 else:
                     print('WARNING: Not yet supported metal2 type: %s' % m2_type)
