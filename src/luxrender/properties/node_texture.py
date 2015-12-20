@@ -744,9 +744,11 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         return  bpy.data.images[self.image_name].filepath
 
     def default_value_set(self, value):
-        self.image_name = os.path.basename(value)
         # Add image to bpy.data.images
         bpy.ops.image.open(filepath= value)
+        for item in bpy.data.images.keys():
+            if bpy.data.images[item].filepath == value:
+                self.image_name = item
 
     filename = bpy.props.StringProperty(name='File Name', description='Path to the image map', subtype='FILE_PATH', get=default_value_get, set=default_value_set)
 
