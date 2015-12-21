@@ -769,10 +769,20 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
     remove_item = bpy.props.BoolProperty(name='Remove', description='Remove last offset', default=False, update=update_remove)
     items = bpy.props.CollectionProperty(type=ColorRampItem)
 
+    interpolation_items = [
+        ('linear', 'Linear', ''),
+        ('cubic', 'Cubic', ''),
+        ('none', 'None', ''),
+    ]
+    interpolation = bpy.props.EnumProperty(name='Interpolation Type', items=interpolation_items, default='linear',
+                                           description='How to interpolate between the offset points')
+
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
         layout.label('IN DEVELOPMENT!', icon='ERROR')
         layout.label('Do not use in production!', icon='ERROR')
+
+        layout.prop(self, 'interpolation', expand=True)
 
         for item in self.items:
             split = layout.split(align=True, percentage=0.7)
@@ -789,6 +799,7 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
         amount = self.inputs[0].export_luxcore(properties)
 
         set_prop_tex(properties, luxcore_name, 'type', 'band')
+        set_prop_tex(properties, luxcore_name, 'interpolation', self.interpolation)
         set_prop_tex(properties, luxcore_name, 'amount', amount)
 
         for index, item in enumerate(self.items):
