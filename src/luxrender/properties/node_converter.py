@@ -737,7 +737,67 @@ class luxrender_texture_type_node_hsv(luxrender_texture_node):
 
         return luxcore_name
 
+@LuxRenderAddon.addon_register_class
+class ColorRampItem(bpy.types.PropertyGroup):
+    offset = bpy.props.FloatProperty(name='Offset', default=0.0, min=0, max=1)
+    value = bpy.props.FloatVectorProperty(name='', min=0, soft_max=1, subtype='COLOR')
 
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_colorramp(luxrender_texture_node):
+    """Colorramp texture node"""
+    bl_idname = 'luxrender_texture_colorramp_node'
+    bl_label = 'ColorRamp'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 180
+
+    def init(self, context):
+        self.inputs.new('luxrender_TF_amount_socket', 'Amount')
+
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def update_add(self, context):
+        self.items.add()
+        self['add_item'] = False
+
+    def update_remove(self, context):
+        if len(self.items) > 0:
+            self.items.remove(len(self.items) - 1)
+
+        self['remove_item'] = False
+
+    add_item = bpy.props.BoolProperty(name='Add', description='Add an offset', default=False, update=update_add)
+    remove_item = bpy.props.BoolProperty(name='Remove', description='Remove last offset', default=False, update=update_remove)
+    items = bpy.props.CollectionProperty(type=ColorRampItem)
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+        layout.label('IN DEVELOPMENT!', icon='ERROR')
+        layout.label('Do not use in production!', icon='ERROR')
+
+        for item in self.items:
+            split = layout.split(align=True, percentage=0.7)
+            split.prop(item, 'offset', slider=True)
+            split.prop(item, 'value')
+
+        row = layout.row(align=True)
+        row.prop(self, 'add_item', icon='ZOOMIN')
+        row.prop(self, 'remove_item', icon='ZOOMOUT')
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        amount = self.inputs[0].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'band')
+        set_prop_tex(properties, luxcore_name, 'amount', amount)
+
+        for index, item in enumerate(self.items):
+            set_prop_tex(properties, luxcore_name, 'offset%i' % index, item.offset)
+            set_prop_tex(properties, luxcore_name, 'value%i' % index, list(item.value))
+
+        return luxcore_name
+
+'''
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_colorramp(luxrender_texture_node):
     """Colorramp texture node"""
@@ -781,6 +841,7 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
 
         fake_texture = self.get_fake_texture()
         layout.template_color_ramp(fake_texture, "color_ramp", expand=True)
+'''
 
 
 @LuxRenderAddon.addon_register_class

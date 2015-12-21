@@ -36,8 +36,7 @@ from .. import LuxRenderAddon
 # Valid CRF preset names (case sensitive):
 # See lux/core/cameraresponse.cpp to keep this up to date
 crf_preset_names = [s.strip() for s in
-                    """None
-                    Advantix_100CD
+                    """Advantix_100CD
                     Advantix_200CD
                     Advantix_400CD
                     Agfachrome_ctpecisa_200CD
@@ -143,7 +142,9 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         ['contour_steps', 'contour_zeroGridSize'],
         # Film response
         'crf_label',
+        'crf_type',
         'crf_preset_menu',
+        'crf_file',
         # Intervals
         'label_intervals',
         #['writeinterval_png', 'writeinterval_flm'],
@@ -161,6 +162,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
+        'crf_preset_menu': {'crf_type': 'PRESET'},
+        'crf_file': {'crf_type': 'FILE'},
     }
 
     properties = [
@@ -329,6 +332,20 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'name': 'Analog Film Simulation:',
         },
         {
+            'type': 'enum',
+            'attr': 'crf_type',
+            'name': 'test',
+            'description': 'CRF data to use',
+            'default': 'NONE',
+            'items': [
+                ('NONE', 'None', ''),
+                ('PRESET', 'Preset', 'Choose a CRF profile from a list of built-in presets'),
+                ('FILE', 'File', 'Choose a CRF file'),
+            ],
+            'expand': True,
+            'save_in_preset': True
+        },
+        {
             'type': 'ef_callback',
             'attr': 'crf_preset_menu',
             'method': 'draw_crf_preset_menu'
@@ -339,6 +356,14 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'name': 'Film Reponse Preset',
             'default': 'None',
             'save_in_preset': True
+        },
+        {
+            'attr': 'crf_file',
+            'type': 'string',
+            'name': '',
+            'description': 'Path to the external .crf file',
+            'default': '',
+            'subtype': 'FILE_PATH',
         },
         # Update and save intervals
         {

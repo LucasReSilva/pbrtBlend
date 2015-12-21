@@ -125,6 +125,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                                             subtype = 'UNSIGNED',
                                             set = set_proxy_facecount,
                                             get = get_proxy_facecount)
+
     proxy_quality = bpy.props.FloatProperty(name = 'Preview Mesh Quality',
                                             default = 0.02,
                                             soft_min = 0.001,
