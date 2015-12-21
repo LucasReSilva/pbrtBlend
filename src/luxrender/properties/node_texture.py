@@ -731,26 +731,34 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Color'].enabled = not self.is_normal_map
         self.outputs['Bump'].enabled = self.is_normal_map
 
-    def update_image(self, context):
+    def set_fake_user(self, image_name):
         # Set a fake user so Blender does not delete the image (workaround needed because we can't do real datablock
         # links, so the user count is not incremented if a user selects an image in this node)
-        if self.image_name in bpy.data.images:
-            image = bpy.data.images[self.image_name]
+        if image_name in bpy.data.images:
+            image = bpy.data.images[image_name]
             image.use_fake_user = True
 
-    image_name = bpy.props.StringProperty(default='', update=update_image)
+    def update_image(self, context):
+        self.set_fake_user(self.image_name)
 
     def default_value_get(self):
-        return  bpy.data.images[self.image_name].filepath
+        if self.image_name in bpy.data.images:
+            return bpy.data.images[self.image_name].filepath
+        else:
+            return ''
 
     def default_value_set(self, value):
         # Add image to bpy.data.images
         bpy.ops.image.open(filepath= value)
+
         for item in bpy.data.images.keys():
             if bpy.data.images[item].filepath == value:
                 self.image_name = item
 
+        self.set_fake_user(self.image_name)
+
     filename = bpy.props.StringProperty(name='File Name', description='Path to the image map', subtype='FILE_PATH', get=default_value_get, set=default_value_set)
+    image_name = bpy.props.StringProperty(default='', update=update_image)
 
     channel_items = [
         ('rgb', 'RGB', 'Default, use all color channels'),
