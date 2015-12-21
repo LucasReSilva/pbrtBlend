@@ -741,15 +741,15 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     def update_image(self, context):
         self.set_fake_user(self.image_name)
 
-    def default_value_get(self):
+    def filename_get(self):
         if self.image_name in bpy.data.images:
             return bpy.data.images[self.image_name].filepath
         else:
             return ''
 
-    def default_value_set(self, value):
+    def filename_set(self, value):
         # Add image to bpy.data.images
-        bpy.ops.image.open(filepath= value)
+        bpy.ops.image.open(filepath=value)
 
         for item in bpy.data.images.keys():
             if bpy.data.images[item].filepath == value:
@@ -757,7 +757,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
         self.set_fake_user(self.image_name)
 
-    filename = bpy.props.StringProperty(name='File Name', description='Path to the image map', subtype='FILE_PATH', get=default_value_get, set=default_value_set)
+    filename = bpy.props.StringProperty(name='', description='Path to the image map', subtype='FILE_PATH',
+                                        get=filename_get, set=filename_set)
     image_name = bpy.props.StringProperty(default='', update=update_image)
 
     channel_items = [
@@ -784,27 +785,29 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Bump'].enabled = False
 
     def draw_buttons(self, context, layout):
-        if not UseLuxCore():
-            layout.label('Not all parameters supported in Classic API mode', icon='ERROR')
-
-        layout.prop_search(self, 'image_name', bpy.data, 'images', text='')
-        layout.prop(self, 'filename', text='')
+        column = layout.column(align=True)
+        column.prop_search(self, 'image_name', bpy.data, 'images', text='')
+        column.prop(self, 'filename')
 
         column = layout.column()
-        column.enabled = not self.is_normal_map
+        column.enabled = not self.is_normal_map or not UseLuxCore()
         column.prop(self, 'channel')
         column.prop(self, 'gain')
 
         # Gamma needs to be 1 for normalmaps
-        if self.is_normal_map:
+        if self.is_normal_map and UseLuxCore():
             row = layout.row()
             row.enabled = False
             row.prop(self, 'normalmap_fake_gamma')
         else:
             layout.prop(self, 'gamma')
 
-        if UseLuxCore():
-            layout.prop(self, 'is_normal_map')
+        if not UseLuxCore():
+            layout.label('Normalmap option not supported in Classic API mode', icon='ERROR')
+
+        row = layout.row()
+        row.enabled = UseLuxCore()
+        row.prop(self, 'is_normal_map')
 
     def export_texture(self, make_texture):
         image = bpy.data.images[self.image_name]
