@@ -268,10 +268,11 @@ class LightExporter(object):
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', lux_lamp.gamma))
                 else:
+                    print('ERROR: Imagemap "%s" of hemilight "%s" not found at path "%s"' % (basename, light.name, infinite_map_path_abs))
+                    self.luxcore_exporter.errors = True
                     # Warning color
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'constantinfinite'))
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', [1, 0, 1]))
-                    self.luxcore_exporter.errors = True
             else:
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'constantinfinite'))
 
