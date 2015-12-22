@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import bpy, mathutils, math
+import bpy, mathutils, math, os
 
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
@@ -262,11 +262,19 @@ class LightExporter(object):
 
             if lux_lamp.infinite_map:
                 infinite_map_path_abs, basename = get_expanded_file_name(light, lux_lamp.infinite_map)
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['infinite']))
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', lux_lamp.gamma))
+
+                if os.path.exists(infinite_map_path_abs):
+                    self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'infinite'))
+                    self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
+                    self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', lux_lamp.gamma))
+                else:
+                    print('ERROR: Imagemap "%s" of hemilight "%s" not found at path "%s"' % (basename, light.name, infinite_map_path_abs))
+                    self.luxcore_exporter.errors = True
+                    # Warning color
+                    self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'constantinfinite'))
+                    self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.color', [1, 0, 1]))
             else:
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['constantinfinite']))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'constantinfinite'))
 
             hemi_fix = mathutils.Matrix.Scale(1.0, 4)  # create new scale matrix 4x4
             hemi_fix[0][0] = -1.0  # mirror the hdri_map
