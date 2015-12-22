@@ -57,7 +57,7 @@ class MeshExporter(object):
     def get_mesh_key(blender_object, is_viewport_render, use_instancing):
         # We have to account for different modifiers being used on shared geometry
         # If the object has any active deforming modifiers we have to give the mesh a unique key
-        key = tuple([blender_object.data, use_instancing])
+        key = tuple([blender_object.data, blender_object.type, use_instancing])
 
         if MeshExporter.has_active_modifiers(blender_object, is_viewport_render):
             key += tuple([blender_object])
