@@ -324,8 +324,8 @@ class ConfigExporter(object):
 
                 self.properties.Set(pyluxcore.Property('opencl.devices.select', dev_string))
 
-                kernelcache = engine_settings.kernelcache
-                self.properties.Set(pyluxcore.Property('opencl.kernelcache', kernelcache))
+        kernelcache = engine_settings.kernelcache
+        self.properties.Set(pyluxcore.Property('opencl.kernelcache', kernelcache))
 
 
     def __convert_epsilon(self):
