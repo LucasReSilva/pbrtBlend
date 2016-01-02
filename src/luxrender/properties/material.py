@@ -1404,6 +1404,7 @@ class luxrender_coating(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -1795,6 +1796,7 @@ class luxrender_mat_roughglass(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -1949,6 +1951,7 @@ class luxrender_mat_glossy(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -2251,6 +2254,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -2299,6 +2303,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
                          'name': 'Backface anisotropic roughness',
                          'description': 'Enable anisotropic roughness for backface',
                          'default': False,
+                         'update': lambda s, c: link_backface_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -2500,6 +2505,7 @@ class luxrender_mat_glossycoating(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -2649,6 +2655,7 @@ class luxrender_mat_metal(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -2799,6 +2806,7 @@ class luxrender_mat_metal2(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
@@ -2998,6 +3006,7 @@ class luxrender_mat_shinymetal(declarative_property_group):
                          'name': 'Anisotropic roughness',
                          'description': 'Enable anisotropic roughness',
                          'default': False,
+                         'update': lambda s, c: link_anisotropy(s, c, chan='u'),
                          'save_in_preset': True
                      },
                      {
