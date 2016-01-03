@@ -412,9 +412,9 @@ class lightgroups_base(object):
 
     # overridden in order to draw a 'non-standard' panel
     def draw(self, context):
-        if not hasattr(pyluxcore.RenderSession, 'Parse'):
+        if UseLuxCore() and not hasattr(pyluxcore.RenderSession, 'Parse'):
             self.layout.label('Outdated LuxCore version!', icon='INFO')
-            return
+            self.layout.separator()
 
         def lightgroup_icon(enabled):
             return 'OUTLINER_OB_LAMP' if enabled else 'LAMP'
