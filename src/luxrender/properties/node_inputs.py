@@ -188,6 +188,9 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
                                         'when scaled (e.g. scale to +U and -U equally instead of only in +U direction)')
     uscale = bpy.props.FloatProperty(name='U', default=1.0, min=-10000.0, max=10000.0)
     vscale = bpy.props.FloatProperty(name='V', default=1.0, min=-10000.0, max=10000.0)
+    uniform_scale = bpy.props.FloatProperty(name='', default=1.0)
+    use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
+                                               description='Use the same scale value for U and V')
     udelta = bpy.props.FloatProperty(name='U', default=0.0, min=-10000.0, max=10000.0)
     vdelta = bpy.props.FloatProperty(name='V', default=0.0, min=-10000.0, max=10000.0)
     v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
@@ -213,9 +216,17 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
                 layout.prop(self, 'udelta')
             else:
                 layout.label('Scale:')
-                row = layout.row(align=True)
-                row.prop(self, 'uscale')
-                row.prop(self, 'vscale')
+
+                if self.use_uniform_scale and UseLuxCore():
+                    layout.prop(self, 'uniform_scale')
+                else:
+                    sub = layout.row(align=True)
+                    sub.prop(self, 'uscale')
+                    sub.prop(self, 'vscale')
+
+                if UseLuxCore():
+                    layout.prop(self, 'use_uniform_scale')
+
                 layout.label('Offset:')
                 row = layout.row(align=True)
                 row.prop(self, 'udelta')
@@ -262,15 +273,22 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
     def export_luxcore(self, properties):
         mapping_type = self.luxcore_mapping_type_map[self.coordinates]
 
-        uvscale = [self.uscale,
-                   self.vscale * -1]
+        if self.use_uniform_scale:
+            uscale = self.uniform_scale
+            vscale = self.uniform_scale
+        else:
+            uscale = self.uscale
+            vscale = self.vscale
+
+        uvscale = [uscale,
+                   vscale * -1]
 
         if not self.center_map:
             uvdelta = [self.udelta,
                        self.vdelta + 1]
         else:
-            uvdelta = [self.udelta + 0.5 * (1 - self.uscale),
-                       self.vdelta * -1 + 1 - (0.5 * (1 - self.vscale))]
+            uvdelta = [self.udelta + 0.5 * (1 - uscale),
+                       self.vdelta * -1 + 1 - (0.5 * (1 - vscale))]
 
         return [mapping_type, uvscale, uvdelta]
 
