@@ -61,7 +61,7 @@ class TextureExporter(object):
         luxMapping = getattr(texture.luxrender_texture, 'luxrender_tex_mapping')
 
         if luxMapping.type == 'uv':
-            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', ['uvmapping2d']))
+            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'uvmapping2d'))
             self.properties.Set(
                 pyluxcore.Property(prefix + '.mapping.uvscale', [luxMapping.uscale, luxMapping.vscale * - 1.0]))
 
@@ -83,11 +83,13 @@ class TextureExporter(object):
         luxTransform = getattr(texture.luxrender_texture, 'luxrender_tex_transform')
 
         if luxTransform.coordinates == 'uv':
-            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', ['uvmapping3d']))
+            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'uvmapping3d'))
         elif luxTransform.coordinates == 'global':
-            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', ['globalmapping3d']))
+            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'globalmapping3d'))
+        elif luxTransform.coordinates == 'local':
+            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'localmapping3d'))
         else:
-            raise Exception('Unsupported mapping for texture: ' + texture.name)
+            raise Exception('Unsupported mapping "%s" for texture "%s"' % (luxTransform.coordinates, texture.name))
 
         luxTranslate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'translate')
         luxScale = getattr(texture.luxrender_texture.luxrender_tex_transform, 'scale')
