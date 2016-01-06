@@ -83,6 +83,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
     # LuxCore uses different names for the mapping types
     luxcore_mapping_type_map = {
         'global': 'globalmapping3d',
+        'local': 'localmapping3d',
         'uv': 'uvmapping3d'
     }
 
