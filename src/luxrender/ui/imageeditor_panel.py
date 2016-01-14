@@ -51,10 +51,13 @@ class rendering_controls_panel(imageeditor_panel):
     def draw(self, context):
         if context.scene.luxcore_rendering_controls.pause_render:
             button_text = 'Resume Render'
+            button_icon = 'PLAY'
         else:
             button_text = 'Pause Render'
+            button_icon = 'PAUSE'
 
-        self.layout.prop(context.scene.luxcore_rendering_controls, 'pause_render', toggle=True, text=button_text)
+        self.layout.prop(context.scene.luxcore_rendering_controls, 'pause_render', toggle=True, text=button_text,
+                         icon=button_icon)
 
 
 @LuxRenderAddon.addon_register_class
