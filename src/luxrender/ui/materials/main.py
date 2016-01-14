@@ -52,21 +52,23 @@ def cycles_panel_node_draw(layout, id_data, output_type, input_name):
 
 def node_tree_selector_draw(layout, id_data, output_type):
     # layout.prop_search(mat.luxrender_material, "nodetree", bpy.data, "node_groups")
-    try:
-        if id_data.luxrender_material.nodetree:
-            layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups")
 
-            if id_data.luxrender_material.nodetree not in bpy.data.node_groups:
-                layout.label('Invalid nodetree name, select a nodetree.', icon='ERROR')
-    except:
-        return False
+    sub_layout = layout
+    prop_search_text = 'Node Tree'
 
     node = find_node(id_data, output_type)
     if not node:
         if not id_data.luxrender_material.nodetree:
-            layout.operator('luxrender.add_material_nodetree', icon='NODETREE')
-            return False
-    return True
+            sub_layout = layout.split(percentage=0.665)
+            sub_layout.operator('luxrender.add_material_nodetree', icon='NODETREE')
+            prop_search_text = ''
+
+    sub_layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups", text=prop_search_text)
+
+    if id_data.luxrender_material.nodetree and id_data.luxrender_material.nodetree not in bpy.data.node_groups:
+        layout.label('Invalid nodetree name, select a nodetree.', icon='ERROR')
+
+    layout.separator()
 
 
 def panel_node_draw(layout, id_data, output_type, input_name):
