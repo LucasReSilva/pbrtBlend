@@ -702,11 +702,13 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
-        if not (os.path.exists(self.filename) and os.path.isfile(self.filename)):
+        file_path = efutil.filesystem_path(self.filename)
+
+        if not (os.path.exists(file_path) and os.path.isfile(file_path)):
             return [0, 0, 0] # Black color
 
         set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
-        set_prop_tex(properties, luxcore_name, 'file', self.filename)
+        set_prop_tex(properties, luxcore_name, 'file', file_path)
         set_prop_tex(properties, luxcore_name, 'gamma', self.gamma)
         set_prop_tex(properties, luxcore_name, 'gain', self.gain)
 
