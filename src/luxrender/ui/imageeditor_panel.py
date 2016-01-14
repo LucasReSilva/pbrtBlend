@@ -45,27 +45,16 @@ class imageeditor_panel(property_group_renderer):
 
 @LuxRenderAddon.addon_register_class
 class rendering_controls_panel(imageeditor_panel):
-    bl_label = 'LuxRender Statistics'
+    bl_label = 'LuxRender Controls'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
     def draw(self, context):
-        if not UseLuxCore():
-            self.layout.label('Only available in LuxCore API mode')
-            return
+        if context.scene.luxcore_rendering_controls.pause_render:
+            button_text = 'Resume Render'
+        else:
+            button_text = 'Pause Render'
 
-        box = self.layout.box()
-        for elem in context.scene.luxcore_rendering_controls.controls:
-            box.prop(context.scene.luxcore_rendering_controls, elem)
-
-        if bpy.context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
-            box = self.layout.box()
-            box.prop(context.scene.luxcore_tile_highlighting, 'use_tile_highlighting')
-
-            if context.scene.luxcore_tile_highlighting.use_tile_highlighting:
-                subbox = box.box()
-                box.prop(context.scene.luxcore_tile_highlighting, 'show_converged')
-                box.prop(context.scene.luxcore_tile_highlighting, 'show_unconverged')
-                box.prop(context.scene.luxcore_tile_highlighting, 'show_pending')
+        self.layout.prop(context.scene.luxcore_rendering_controls, 'pause_render', toggle=True, text=button_text)
 
 
 @LuxRenderAddon.addon_register_class
@@ -74,10 +63,6 @@ class tonemapping_panel(imageeditor_panel):
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
     def draw(self, context):
-        if not UseLuxCore():
-            self.layout.label('Only available in LuxCore API mode')
-            return
-
         if not hasattr(pyluxcore.RenderSession, 'Parse'):
             self.layout.label('Outdated LuxCore version!', icon='INFO')
             return
@@ -109,7 +94,11 @@ class tonemapping_panel(imageeditor_panel):
             sub.prop(imagepipeline_settings, 'reinhard_burn')
 
         self.layout.label('Analog Film Simulation:')
-        self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf', text=imagepipeline_settings.crf_preset)
+        self.layout.prop(imagepipeline_settings, 'crf_type', expand=True)
+        if imagepipeline_settings.crf_type == 'PRESET':
+            self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf', text=imagepipeline_settings.crf_preset)
+        elif imagepipeline_settings.crf_type == 'FILE':
+            self.layout.prop(imagepipeline_settings, 'crf_file')
 
         # TODO: can we only show the available passes here?
         self.layout.label('Pass:')
@@ -123,3 +112,24 @@ class tonemapping_panel(imageeditor_panel):
             row = sub.row(align=True)
             row.prop(imagepipeline_settings, 'contour_steps')
             row.prop(imagepipeline_settings, 'contour_zeroGridSize')
+
+
+@LuxRenderAddon.addon_register_class
+class rendering_statistics_panel(imageeditor_panel):
+    bl_label = 'LuxRender Statistics'
+    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+
+    def draw(self, context):
+        box = self.layout.box()
+        for elem in context.scene.luxcore_rendering_controls.controls:
+            box.prop(context.scene.luxcore_rendering_controls, elem)
+
+        if bpy.context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
+            box = self.layout.box()
+            box.prop(context.scene.luxcore_tile_highlighting, 'use_tile_highlighting')
+
+            if context.scene.luxcore_tile_highlighting.use_tile_highlighting:
+                box.separator()
+                box.prop(context.scene.luxcore_tile_highlighting, 'show_converged')
+                box.prop(context.scene.luxcore_tile_highlighting, 'show_unconverged')
+                box.prop(context.scene.luxcore_tile_highlighting, 'show_pending')

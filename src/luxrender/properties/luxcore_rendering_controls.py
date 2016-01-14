@@ -41,7 +41,6 @@ class luxcore_rendering_controls(declarative_property_group):
     alert = {}
 
     controls = [
-        #'pause_render',
         'stats_samples',
         'stats_samples_per_sec',
         'stats_rays_per_sample',
@@ -61,8 +60,15 @@ class luxcore_rendering_controls(declarative_property_group):
             'type': 'bool',
             'attr': 'pause_render',
             'name': 'Pause Render',
-            'description': 'Pause rendering without losing progress',
-            'default': False,
+            'description': 'Pause/resume rendering without losing sampling progress',
+            'default': False
+        },
+        {
+            'type': 'bool',
+            'attr': 'pause_viewport_render',
+            'name': 'Pause Preview',
+            'description': 'Pause all viewport render sessions',
+            'default': False
         },
         {
             'type': 'bool',

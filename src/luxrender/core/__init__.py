@@ -345,7 +345,7 @@ def DrawButtonPause(self, context):
         view = context.space_data
 
         if view.viewport_shade == "RENDERED":
-            self.layout.prop(scene.luxrender_engine, "preview_stop", icon="PAUSE", text="")
+            self.layout.prop(scene.luxcore_rendering_controls, "pause_viewport_render", icon="PAUSE", text="")
 
 _register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
 
@@ -978,7 +978,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     mem_peak = 0
 
-    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview=False, time_until_update=-1.0,
+    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview=False, time_until_update=-1,
                            export_errors=False):
         """
         Returns: string of formatted statistics
@@ -1125,10 +1125,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             stats_list.append(engine_info)
 
         # Show remaining time until next film update (final render only)
-        if not realtime_preview and time_until_update > 0.0:
-            stats_list.append('Next update in %ds' % math.ceil(time_until_update))
-        elif time_until_update != -1:
-            stats_list.append('Updating preview...')
+        if scene.luxcore_rendering_controls.pause_render:
+            stats_list.append('Rendering Paused')
+        else:
+            if not realtime_preview and time_until_update > 0.0:
+                stats_list.append('Next update in %ds' % math.ceil(time_until_update))
+            elif time_until_update != -1:
+                stats_list.append('Updating preview...')
 
         # Inform the user when errors happened during export (e.g. failed to export a particle system)
         if export_errors:
@@ -1174,7 +1177,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if not realtime_preview and settings.renderengine_type == 'BIASPATH':
             return halt_noise_met
 
-        return halt_samples_met or halt_time_met or halt_noise_met
+        return halt_samples_met or halt_time_met or halt_noise_met or scene.luxcore_rendering_controls.pause_viewport_render
 
     def convertChannelToImage(self, lcSession, scene, passes, filmWidth, filmHeight, channelType, saveToDisk,
                               normalize = False, buffer_id = -1):
@@ -1431,6 +1434,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         from ..outputs.luxcore_api import pyluxcore
 
         try:
+            scene.luxcore_rendering_controls.pause_render = False
+
             if self.is_animation:
                 # Check if a halt condition is set, cancel the rendering and warn the user otherwise
                 settings = scene.luxcore_enginesettings
@@ -1470,8 +1475,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
 
             imagepipeline_settings = scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
-            startTime = time.time()
-            lastImageDisplay = startTime
+            start_time = time.time()
+            last_image_display = start_time
             done = False
 
             if self.is_animation or not imagepipeline_settings.fast_initial_preview:
@@ -1481,9 +1486,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Magic formula to compute optimal display interval (found through testing)
                 display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
                 LuxLog('Set initial display interval to %.1fs' % display_interval)
-
-            # TODO: activate this once LuxCore supports pause/resume without samples loss
-            #paused = False
 
             # Cache imagepipeline settings to detect changes
             session_props = luxcore_exporter.convert_imagepipeline()
@@ -1508,61 +1510,47 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         print('Set session settings:\n%s' % cached_session_props)
                         session_was_updated = True
 
-                # TODO: activate this once LuxCore supports pause/resume without samples loss
-                '''
+                # Pause/Resume of rendering prcess
                 if scene.luxcore_rendering_controls.pause_render:
-                    if not paused:
-                        paused = True
-                        luxcore_session. <pause render>
-                    continue
+                    if not luxcore_session.IsInPause():
+                        luxcore_session.UpdateStats()
+
+                        luxcore_session.Pause()
+                        print('Rendering paused.')
+
+                        stats = luxcore_session.GetStats()
+                        self.update_framebuffer(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight)
+                        last_image_display = now
                 else:
-                    if paused:
-                        paused = False
-                        luxcore_session. <resume render>
-                '''
+                    if luxcore_session.IsInPause():
+                        luxcore_session.Resume()
+                        print('Resuming rendering')
 
-                now = time.time()
-                timeSinceDisplay = now - lastImageDisplay
-                elapsedTimeSinceStart = now - startTime
+                if not luxcore_session.IsInPause():
+                    now = time.time()
+                    time_since_display = now - last_image_display
+                    time_since_start = now - start_time
 
-                # Use user-definde display interval after the first 15 seconds
-                if elapsedTimeSinceStart > 15.0 and display_interval != imagepipeline_settings.displayinterval:
+                # Use user-defined display interval after the first 15 seconds
+                if time_since_start > 15.0 and display_interval != imagepipeline_settings.displayinterval:
                     display_interval = imagepipeline_settings.displayinterval
                     LuxLog('Set display interval to %.1fs' % display_interval)
 
                 # Update statistics
-                luxcore_session.UpdateStats()
+                if not luxcore_session.IsInPause():
+                    luxcore_session.UpdateStats()
+
                 stats = luxcore_session.GetStats()
-                time_until_update = display_interval - timeSinceDisplay
+                time_until_update = display_interval - time_since_display
                 blender_stats = self.CreateBlenderStats(luxcore_config, stats, scene, False, time_until_update, export_errors)
                 self.update_stats('Rendering...', blender_stats)
 
                 # check if any halt conditions are met
                 done = self.haltConditionMet(scene, stats)
 
-                if timeSinceDisplay > display_interval or session_was_updated:
-                    # Update the image
-                    luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
-
-                    # Here we write the pixel values to the RenderResult
-                    result = self.begin_result(0, 0, filmWidth, filmHeight)
-                    layer = result.layers[0] if bpy.app.version < (2, 74, 4) else result.layers[0].passes[0]
-
-                    if (scene.luxcore_enginesettings.renderengine_type == 'BIASPATH' and
-                            scene.luxcore_tile_highlighting.use_tile_highlighting):
-                        # Use a temp image because layer.rect does not support list slicing
-                        tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
-                                                                                              filmHeight,
-                                                                                              imageBufferFloat)
-                        # Draw tile outlines
-                        self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight)
-                        layer.rect = tempImage
-                    else:
-                        layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
-                                                                                               filmHeight,
-                                                                                               imageBufferFloat)
-                    self.end_result(result)
-                    lastImageDisplay = now
+                if time_since_display > display_interval or session_was_updated:
+                    self.update_framebuffer(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight)
+                    last_image_display = now
 
             LuxLog('Ending the rendering process...')
             luxcore_session.Stop()
@@ -1593,6 +1581,29 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             import traceback
 
             traceback.print_exc()
+
+    def update_framebuffer(self, luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight):
+        # Update the image
+        luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
+
+        # Here we write the pixel values to the RenderResult
+        result = self.begin_result(0, 0, filmWidth, filmHeight)
+        layer = result.layers[0] if bpy.app.version < (2, 74, 4) else result.layers[0].passes[0]
+
+        if (scene.luxcore_enginesettings.renderengine_type == 'BIASPATH' and
+                scene.luxcore_tile_highlighting.use_tile_highlighting):
+            # Use a temp image because layer.rect does not support list slicing
+            tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
+                                                                                  filmHeight,
+                                                                                  imageBufferFloat)
+            # Draw tile outlines
+            self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight)
+            layer.rect = tempImage
+        else:
+            layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
+                                                                                   filmHeight,
+                                                                                   imageBufferFloat)
+        self.end_result(result)
 
     def get_film_size(self, scene):
         filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
@@ -1902,10 +1913,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             session.luxcore_session.UpdateStats()
             stats = session.luxcore_session.GetStats()
 
-            stop_redraw = (context.scene.luxrender_engine.preview_stop or
-                    self.haltConditionMet(context.scene, stats, realtime_preview = True))
+            stop_redraw = self.haltConditionMet(context.scene, stats, realtime_preview = True)
 
-            if not session.is_paused:
+            if not session.is_in_scene_edit():
                 # update statistic display in Blender
                 luxcore_config = session.luxcore_session.GetRenderConfig()
                 blender_stats = self.CreateBlenderStats(luxcore_config, stats, context.scene, realtime_preview=True)
@@ -1928,7 +1938,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if stop_redraw:
             # Pause rendering
-            LuxCoreSessionManager.begin_scene_edit(self.space)
+            LuxCoreSessionManager.pause(self.space)
         else:
             # Trigger another update
             self.tag_redraw()
@@ -2088,14 +2098,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         return update_changes
     
-    def luxcore_view_update(self, context, update_changes = None):
+    def luxcore_view_update(self, context, update_changes=None):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
             LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
             return
 
-        if self.test_break() or context.scene.luxrender_engine.preview_stop:
-            print("stopping view update")
+        if self.test_break() or context.scene.luxcore_rendering_controls.pause_viewport_render:
             return
 
         print('\n###########################################################')
@@ -2120,7 +2129,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             print('Update cause unknown, skipping update', self.update_counter)
 
         elif update_changes.cause_haltconditions:
-            pass
+            LuxCoreSessionManager.resume(self.space)
 
         elif update_changes.cause_startViewportRender:
             try:
@@ -2272,6 +2281,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             luxcore_scene.Parse(updated_properties)
 
             LuxCoreSessionManager.end_scene_edit(self.space)
+            # Resume in case the session was paused
+            LuxCoreSessionManager.resume(self.space)
 
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
@@ -2279,13 +2290,26 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
 
 class Session(object):
+    """
+    Wrapper for LuxCore's rendersession class.
+    """
     def __init__(self, luxcore_session):
         self.luxcore_session = luxcore_session
         self.is_active = False
-        self.is_paused = False
+
+    def is_in_scene_edit(self):
+        return self.luxcore_session.IsInSceneEdit()
+
+    def is_paused(self):
+        return self.luxcore_session.IsInPause()
 
 
 class LuxCoreSessionManager(object):
+    """
+    Session manager for viewport render sessions only.
+    Provides a mapping from Blender screen spaces to their respective LuxCore session.
+    """
+
     sessions = {}
 
     @classmethod
@@ -2331,9 +2355,8 @@ class LuxCoreSessionManager(object):
         if space in cls.sessions:
             session = cls.sessions[space]
 
-            if session.is_active and not session.is_paused:
-                print('Pausing viewport render')
-                session.is_paused = True
+            if session.is_active and not session.is_in_scene_edit():
+                print('Beginning scene edit')
                 session.luxcore_session.BeginSceneEdit()
 
     @classmethod
@@ -2341,10 +2364,27 @@ class LuxCoreSessionManager(object):
         if space in cls.sessions:
             session = cls.sessions[space]
 
-            if session.is_active and session.is_paused:
-                print('Resuming viewport render')
-                session.is_paused = False
+            if session.is_active and session.is_in_scene_edit():
+                print('Ending scene edit')
                 session.luxcore_session.EndSceneEdit()
+
+    @classmethod
+    def pause(cls, space):
+        if space in cls.sessions:
+            session = cls.sessions[space]
+
+            if session.is_active and not session.is_paused():
+                print('Pausing viewport render')
+                session.luxcore_session.Pause()
+
+    @classmethod
+    def resume(cls, space):
+        if space in cls.sessions:
+            session = cls.sessions[space]
+
+            if session.is_active and session.is_paused():
+                print('Resuming viewport render')
+                session.luxcore_session.Resume()
 
 
 @persistent

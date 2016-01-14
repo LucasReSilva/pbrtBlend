@@ -253,14 +253,17 @@ class LuxCoreExporter(object):
 
         # Camera response function
         if imagepipeline_settings.crf_type != 'NONE':
-            if imagepipeline_settings.crf_type == 'PRESET':
+            if imagepipeline_settings.crf_type == 'PRESET' and imagepipeline_settings.crf_preset != 'None':
                 crf_name = imagepipeline_settings.crf_preset
-            else:
+            elif imagepipeline_settings.crf_file != '':
                 crf_name = imagepipeline_settings.crf_file
+            else:
+                crf_name = False
 
-            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'CAMERA_RESPONSE_FUNC'))
-            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.name', crf_name))
-            index += 1
+            if crf_name:
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'CAMERA_RESPONSE_FUNC'))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.name', crf_name))
+                index += 1
 
         # Contour lines for IRRADIANCE pass
         if imagepipeline_settings.output_switcher_pass == 'IRRADIANCE':
