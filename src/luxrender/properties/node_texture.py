@@ -759,9 +759,15 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
         self.set_fake_user(self.image_name)
 
+    file_type_items = [
+        ('blender_image', 'Blender Image', 'Select a Blender image or load a new one'),
+        ('manual_filepath', 'Filepath', 'Select a filepath to an image file on disk without loading it into Blender'),
+    ]
+    file_type = bpy.props.EnumProperty(name='File Type', items=file_type_items, default='blender_image')
     filename = bpy.props.StringProperty(name='', description='Path to the image map', subtype='FILE_PATH',
                                         get=filename_get, set=filename_set)
     image_name = bpy.props.StringProperty(default='', update=update_image)
+    manual_filepath = bpy.props.StringProperty(name='', description='Path to the image map', subtype='FILE_PATH')
 
     channel_items = [
         ('rgb', 'RGB', 'Default, use all color channels'),
@@ -787,9 +793,14 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Bump'].enabled = False
 
     def draw_buttons(self, context, layout):
-        column = layout.column(align=True)
-        column.prop_search(self, 'image_name', bpy.data, 'images', text='')
-        column.prop(self, 'filename')
+        layout.prop(self, 'file_type', expand=True)
+
+        if self.file_type == 'blender_image':
+            column = layout.column(align=True)
+            column.prop_search(self, 'image_name', bpy.data, 'images', text='')
+            column.prop(self, 'filename')
+        elif self.file_type == 'manual_filepath':
+            layout.prop(self, 'manual_filepath')
 
         column = layout.column()
         column.enabled = not self.is_normal_map or not UseLuxCore()
@@ -841,45 +852,49 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         warning_color_no_image = [0, 0, 0] # Black color
         warning_color_wrong_path = [0.8, 0, 0.8] # Purple color
 
-        if self.image_name == '':
-            return warning_color_no_image
+        if self.file_type == 'blender_image':
+            if self.image_name == '':
+                return warning_color_no_image
 
-        if self.image_name not in bpy.data.images:
-            print('ERROR: %s not found in Blender images!')
-            return warning_color_wrong_path
+            if self.image_name not in bpy.data.images:
+                print('ERROR: %s not found in Blender images!')
+                return warning_color_wrong_path
 
-        image = bpy.data.images[self.image_name]
+            image = bpy.data.images[self.image_name]
 
-        # TODO: library handling
-        # Note: we can get the nodetree via node.id_data
-        # TODO: SEQUENCE/GENERATED handling? Create separate sequence node?
+            # TODO: library handling
+            # Note: we can get the nodetree via node.id_data
+            # TODO: SEQUENCE/GENERATED handling? Create separate sequence node?
 
-        if image.source in ['GENERATED', 'FILE']:
-            scene = bpy.context.scene
-            temp_file = tempfile.NamedTemporaryFile(delete=False)
-            tex_image = temp_file.name
+            if image.source in ['GENERATED', 'FILE']:
+                scene = bpy.context.scene
 
-            if image.source == 'GENERATED':
-                image.save_render(tex_image, scene)
+                if image.source == 'GENERATED':
+                    temp_file = tempfile.NamedTemporaryFile(delete=False)
+                    file_path = temp_file.name
+                    image.save_render(file_path, scene)
 
-            if image.source == 'FILE':
-                if image.packed_file:
-                    image.save_render(tex_image, scene)
-                else:
-                    if self.id_data.library is not None:
-                        f_path = efutil.filesystem_path(bpy.path.abspath(image.filepath, self.id_data.library.filepath))
+                if image.source == 'FILE':
+                    if image.packed_file:
+                        temp_file = tempfile.NamedTemporaryFile(delete=False)
+                        file_path = temp_file.name
+                        image.save_render(file_path, scene)
                     else:
-                        f_path = efutil.filesystem_path(image.filepath)
+                        if self.id_data.library is not None:
+                            file_path = efutil.filesystem_path(bpy.path.abspath(image.filepath, self.id_data.library.filepath))
+                        else:
+                            file_path = efutil.filesystem_path(image.filepath)
+        else:
+            # Manual path
+            file_path = efutil.filesystem_path(self.manual_filepath)
 
-                    tex_image = efutil.filesystem_path(f_path)
-
-        if not (os.path.exists(tex_image) and os.path.isfile(tex_image)):
+        if not (os.path.exists(file_path) and os.path.isfile(file_path)):
             return warning_color_wrong_path
 
         gamma = 1 if self.is_normal_map else self.gamma
 
         set_prop_tex(properties, luxcore_name, 'type', 'imagemap')
-        set_prop_tex(properties, luxcore_name, 'file', tex_image)
+        set_prop_tex(properties, luxcore_name, 'file', file_path)
         set_prop_tex(properties, luxcore_name, 'gamma', gamma)
         set_prop_tex(properties, luxcore_name, 'gain', self.gain)
 
