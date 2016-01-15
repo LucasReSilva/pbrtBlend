@@ -255,7 +255,13 @@ def render_start_options(self, context):
 
         col.prop(context.scene.luxrender_engine, "selected_luxrender_api", text="LuxRender API")
 
-        if not UseLuxCore():
+        if UseLuxCore():
+            col.prop(context.scene.luxcore_translatorsettings, "export_type")
+            if context.scene.luxcore_translatorsettings.export_type == "luxcoreui":
+                sub = col.row()
+                sub.alignment = 'RIGHT'
+                sub.prop(context.scene.luxcore_translatorsettings, "run_luxcoreui")
+        else:
             col.prop(context.scene.luxrender_engine, "export_type", text="Export Type")
             if context.scene.luxrender_engine.export_type == 'EXT':
                 col.prop(context.scene.luxrender_engine, "binary_name", text="Render Using")
@@ -1477,10 +1483,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             luxcore_session.Start()
 
             # Immediately end the rendering if 'FILESAVER' engine is used
-            if scene.luxcore_translatorsettings.use_filesaver:
+            if scene.luxcore_translatorsettings.export_type == 'luxcoreui':
                 luxcore_session.Stop()
 
-                if scene.luxcore_translatorsettings.open_luxcoreui:
+                if scene.luxcore_translatorsettings.run_luxcoreui:
                     luxrender_path = self.get_lux_binary_path(scene, 'luxcoreui')
                     cmd_args = [luxrender_path, '-o', 'render.cfg']
                     scene_dir = efutil.filesystem_path(scene.render.filepath)

@@ -43,7 +43,6 @@ class luxcore_translatorsettings(declarative_property_group):
         ['export_particles', 'export_hair', 'export_proxies'],
         'override_materials',
         ['override_glass', 'override_lights', 'override_null'],
-        ['use_filesaver', 'open_luxcoreui'],
         'label_debug',
         'print_config'
     ]
@@ -52,10 +51,6 @@ class luxcore_translatorsettings(declarative_property_group):
         'override_glass': {'override_materials': True},
         'override_lights': {'override_materials': True},
         'override_null': {'override_materials': True},
-    }
-
-    enabled = {
-        'open_luxcoreui': {'use_filesaver': True}
     }
 
     alert = {}
@@ -121,22 +116,6 @@ class luxcore_translatorsettings(declarative_property_group):
             'save_in_preset': True
         },
         {
-            'type': 'bool',
-            'attr': 'use_filesaver',
-            'name': 'Only Export Files',
-            'description': 'Instead of rendering, only export CFG/SCN files, meshes and textures to output path',
-            'default': False,
-            'save_in_preset': True
-        },
-        {
-            'type': 'bool',
-            'attr': 'open_luxcoreui',
-            'name': 'Open LuxCoreUI',
-            'description': 'After exporting, start LuxCoreUI with the exported scene files',
-            'default': False,
-            'save_in_preset': True
-        },
-        {
             'type': 'text',
             'attr': 'label_debug',
             'name': 'Debug:',
@@ -147,6 +126,26 @@ class luxcore_translatorsettings(declarative_property_group):
             'name': 'Print Config in Terminal',
             'description': 'Print generated renderconfig and sceneconfig in system console',
             'default': False,
+            'save_in_preset': True
+        },
+        {
+            'type': 'enum',
+            'attr': 'export_type',
+            'name': 'Export Type',
+            'description': 'How to export and render the scene',
+            'default': 'internal',
+            'items': [
+                ('internal', 'Internal', 'Do not export any files, render inside of Blender'),
+                ('luxcoreui', 'LuxCoreUI', 'Export scene files to output path and render using LuxCoreUI'),
+            ],
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'run_luxcoreui',
+            'name': 'Run LuxCoreUI',
+            'description': 'After exporting, start LuxCoreUI with the exported scene files',
+            'default': True,
             'save_in_preset': True
         },
     ]

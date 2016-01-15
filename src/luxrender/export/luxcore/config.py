@@ -203,7 +203,7 @@ class ConfigExporter(object):
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = self.get_engine()
 
-        if self.blender_scene.luxcore_translatorsettings.use_filesaver and not self.is_viewport_render:
+        if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui' and not self.is_viewport_render:
             output_path = efutil.filesystem_path(self.blender_scene.render.filepath)
             if not os.path.isdir(output_path):
                 os.makedirs(output_path)
