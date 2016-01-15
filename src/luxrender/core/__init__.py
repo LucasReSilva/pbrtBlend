@@ -749,8 +749,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 
     def append_lux_binary_name(self, scene, luxrender_path, binary_name):
-        print('1', luxrender_path)
-
         if sys.platform == 'darwin':
             # Get binary from OSX bundle
             luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % binary_name
