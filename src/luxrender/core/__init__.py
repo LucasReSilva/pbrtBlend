@@ -748,11 +748,24 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # LuxLog(' in %s' % self.outout_dir)
             luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 
-    def get_process_args(self, scene, start_rendering):
-        config_updates = {
-            'auto_start': start_rendering
-        }
+    def append_lux_binary_name(self, scene, luxrender_path, binary_name):
+        print('1', luxrender_path)
 
+        if sys.platform == 'darwin':
+            # Get binary from OSX bundle
+            luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % binary_name
+            if not os.path.exists(luxrender_path):
+                LuxLog('LuxRender not found at path: %s' % luxrender_path, ', trying default LuxRender location')
+                luxrender_path = '/Applications/LuxRender/LuxRender.app/Contents/MacOS/%s' % \
+                                 binary_name  # try fallback to default installation path
+        elif sys.platform == 'win32':
+            luxrender_path += '%s.exe' % binary_name
+        else:
+            luxrender_path += binary_name
+
+        return luxrender_path
+
+    def get_lux_binary_path(self, scene, binary_name):
         luxrender_path = efutil.filesystem_path(efutil.find_config_value(
                               'luxrender', 'defaults', 'install_path', ''))
 
@@ -764,21 +777,19 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if luxrender_path[-1] != '/':
             luxrender_path += '/'
 
-        if sys.platform == 'darwin':
-            # Get binary from OSX bundle
-            luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % scene.luxrender_engine.binary_name
-            if not os.path.exists(luxrender_path):
-                LuxLog('LuxRender not found at path: %s' % luxrender_path, ', trying default LuxRender location')
-                luxrender_path = '/Applications/LuxRender/LuxRender.app/Contents/MacOS/%s' % \
-                                 scene.luxrender_engine.binary_name  # try fallback to default installation path
-
-        elif sys.platform == 'win32':
-            luxrender_path += '%s.exe' % scene.luxrender_engine.binary_name
-        else:
-            luxrender_path += scene.luxrender_engine.binary_name
+        luxrender_path = self.append_lux_binary_name(scene, luxrender_path, binary_name)
 
         if not os.path.exists(luxrender_path):
             raise Exception('LuxRender not found at path: %s' % luxrender_path)
+
+        return luxrender_path
+
+    def get_process_args(self, scene, start_rendering):
+        config_updates = {
+            'auto_start': start_rendering
+        }
+
+        luxrender_path = self.get_lux_binary_path(scene, scene.luxrender_engine.binary_name)
 
         cmd_args = [luxrender_path]
 
@@ -1470,6 +1481,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # Immediately end the rendering if 'FILESAVER' engine is used
             if scene.luxcore_translatorsettings.use_filesaver:
                 luxcore_session.Stop()
+
+                if scene.luxcore_translatorsettings.open_luxcoreui:
+                    luxrender_path = self.get_lux_binary_path(scene, 'luxcoreui')
+                    cmd_args = [luxrender_path, '-o', 'render.cfg']
+                    scene_dir = efutil.filesystem_path(scene.render.filepath)
+
+                    luxrender_process = subprocess.Popen(cmd_args, cwd=scene_dir)
+
                 return
 
             imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
