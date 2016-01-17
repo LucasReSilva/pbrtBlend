@@ -128,7 +128,8 @@ class halt_conditions_panel(imageeditor_panel):
 
         def draw_condition_pair(halt_conditon):
             """
-            Example: draw_condition_pair('use_halt_samples', 'halt_samples')
+            designed for halt conditons of the form 'use_<name>' and '<name>', where the first is the checkbox and
+            the second is the value (e.g. 'use_halt_samples' is a boolean and 'halt_samples' is an int)
             """
             bool_name = 'use_%s' % halt_conditon
 
