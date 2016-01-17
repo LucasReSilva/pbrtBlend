@@ -118,6 +118,45 @@ class tonemapping_panel(imageeditor_panel):
 
 
 @LuxRenderAddon.addon_register_class
+class halt_conditions_panel(imageeditor_panel):
+    bl_label = 'LuxRender Halt Conditions'
+    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+
+    def draw(self, context):
+        layout = self.layout
+        settings = context.scene.luxcore_enginesettings
+
+        def draw_condition_pair(halt_conditon):
+            """
+            Example: draw_condition_pair('use_halt_samples', 'halt_samples')
+            """
+            bool_name = 'use_%s' % halt_conditon
+
+            row = layout.row()
+            row.prop(settings, bool_name)
+            sub = row.split()
+            sub.enabled = getattr(settings, bool_name)
+            sub.prop(settings, halt_conditon)
+
+        if settings.renderengine_type == 'BIASPATH':
+            layout.prop(settings, 'tile_multipass_enable')
+
+            column = layout.column()
+            column.enabled = settings.tile_multipass_enable
+
+            column.prop(settings, 'tile_multipass_convergencetest_threshold')
+            column.prop(settings, 'tile_multipass_use_threshold_reduction')
+
+            sub_column = column.split()
+            sub_column.enabled = settings.tile_multipass_use_threshold_reduction
+            sub_column.prop(settings, 'tile_multipass_convergencetest_threshold_reduction')
+        else:
+            draw_condition_pair('halt_samples')
+            draw_condition_pair('halt_time')
+            draw_condition_pair('halt_noise')
+
+
+@LuxRenderAddon.addon_register_class
 class rendering_statistics_panel(imageeditor_panel):
     bl_label = 'LuxRender Statistics'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
