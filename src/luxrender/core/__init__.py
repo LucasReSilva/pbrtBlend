@@ -1011,7 +1011,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'RTPATHOCL': 'RT Path OpenCL',
             'RTBIASPATHOCL': 'RT Biased Path OpenCL',
         }
-        
+
         sampler = lcConfig.GetProperties().Get('sampler.type').GetString()
         sampler_dict = {
             'RANDOM' : 'Random',
@@ -1151,7 +1151,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Inform the user when errors happened during export (e.g. failed to export a particle system)
         if export_errors:
             stats_list.append('Errors happened during export, open system console for details')
-                
+
         # Update progressbar (final render only)
         if not realtime_preview:
             progress = max([progress_time, progress_samples, progress_tiles])
@@ -1175,7 +1175,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         halt_samples = settings.halt_samples_preview if realtime_preview else settings.halt_samples
         halt_time = settings.halt_time_preview if realtime_preview else settings.halt_time
         halt_noise = settings.halt_noise
-        
+
         rendered_samples = stats.Get('stats.renderengine.pass').GetInt()
         rendered_time = stats.Get('stats.renderengine.time').GetFloat()
         rendered_noise = stats.Get('stats.renderengine.convergence').GetFloat()
@@ -1257,18 +1257,18 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             mask_red = 0xff0000
             mask_green = 0xff00
             mask_blue = 0xff
-            
+
             k = 0
             for i in range(0, len(channel_buffer)):
                 rgba_raw = channel_buffer[i]
-                
+
                 rgba_converted = [
                     float((rgba_raw & mask_red) >> 16) / 255.0,
                     float((rgba_raw & mask_green) >> 8) / 255.0,
                     float(rgba_raw & mask_blue) / 255.0,
                     1.0
                 ]
-                
+
                 channel_buffer_converted[k:k + 4] = rgba_converted
                 k += 4
         else:
@@ -1373,7 +1373,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight):
         """
         draws tile outlines directly into the imageBuffer
-        
+
         scene: Blender scene object
         stats: LuxCore stats (from LuxCore session)
         imageBuffer: list of tuples of floats, e.g. [(r, g, b, a), ...], must be sliceable!
@@ -1382,27 +1382,27 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         show_converged = scene.luxcore_tile_highlighting.show_converged
         show_unconverged = scene.luxcore_tile_highlighting.show_unconverged
         show_pending = scene.luxcore_tile_highlighting.show_pending
-        
+
         def draw_tile_type(count, coords, color):
             """
-        	draws all tiles at the given coordinates with given color
-        	"""
+            draws all tiles at the given coordinates with given color
+            """
             for i in range(count):
                 offset_x = coords[i * 2]
                 offset_y = coords[i * 2 + 1]
                 width = min(tile_size + 1, filmWidth - offset_x)
                 height = min(tile_size + 1, filmHeight - offset_y)
-                
+
                 draw_tile_outline(offset_x, offset_y, width, height, color)
-        
+
         def draw_tile_outline(offset_x, offset_y, width, height, color):
             """
-        	draws the outline of one tile
-        	"""
+            draws the outline of one tile
+            """
             for y in range(offset_y, offset_y + height):
                 sliceStart = y * filmWidth + offset_x
                 sliceEnd = sliceStart + width
-                
+
                 if y == offset_y or y == offset_y + height - 1:
                     # bottom and top lines
                     imageBuffer[sliceStart:sliceEnd] = [color] * width
@@ -1415,22 +1415,22 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         # catch this so render does not crash when we try to draw outside the imageBuffer
                         # (should not be possible anymore, but leave it in in case there's an unknown bug)
                         pass
-        
+
         # collect stats
         count_converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
         count_notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
         count_pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
-        
+
         if count_converged > 0 and show_converged:
             coords_converged = stats.Get('stats.biaspath.tiles.converged.coords').GetInts()
             color_green = (0.0, 1.0, 0.0, 1.0)
             draw_tile_type(count_converged, coords_converged, color_green)
-            
+
         if count_notconverged > 0 and show_unconverged:
             coords_notconverged = stats.Get('stats.biaspath.tiles.notconverged.coords').GetInts()
             color_red = (1.0, 0.0, 0.0, 1.0)
             draw_tile_type(count_notconverged, coords_notconverged, color_red)
-            
+
         if count_pending > 0 and show_pending:
             coords_pending = stats.Get('stats.biaspath.tiles.pending.coords').GetInts()
             color_yellow = (1.0, 1.0, 0.0, 1.0)
@@ -1491,7 +1491,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     cmd_args = [luxrender_path, '-o', 'render.cfg']
                     scene_dir = efutil.filesystem_path(scene.render.filepath)
 
-                    luxrender_process = subprocess.Popen(cmd_args, cwd=scene_dir)
+                    env = os.environ.copy()
+                    if 'linux' in sys.platform:
+                        print('XXX')
+                        env['LD_LIBRARY_PATH'] = os.path.dirname(luxrender_path)
+
+                    luxrender_process = subprocess.Popen(cmd_args, cwd=scene_dir, env=env)
 
                 return
 
@@ -1898,7 +1903,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lastVisibilitySettings = None
     lastNodeMatSettings = ''
     update_counter = 0
-    
+
     def luxcore_view_draw(self, context):
         if self.critical_errors:
             return
@@ -2120,7 +2125,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             traceback.print_exc()
 
         return update_changes
-    
+
     def luxcore_view_update(self, context, update_changes=None):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
@@ -2430,7 +2435,7 @@ class UpdateChanges(object):
         self.changed_objects_mesh = set()
         self.changed_materials = set()
         self.removed_objects = set()
-        
+
         self.cause_unknown = True
         self.cause_startViewportRender = False
         self.cause_mesh = False
@@ -2444,15 +2449,15 @@ class UpdateChanges(object):
         self.cause_objectsRemoved = False
         self.cause_volumes = False
         self.cause_haltconditions = False
-        
+
     def set_cause(self,
-                  startViewportRender = None, 
-                  mesh = None, 
-                  light = None, 
-                  camera = None, 
-                  objectTransform = None, 
+                  startViewportRender = None,
+                  mesh = None,
+                  light = None,
+                  camera = None,
+                  objectTransform = None,
                   layers = None,
-                  materials = None, 
+                  materials = None,
                   config = None,
                   session = None,
                   objectsRemoved = None,
@@ -2460,21 +2465,21 @@ class UpdateChanges(object):
                   haltconditions = None):
         # automatically switch off unkown
         self.cause_unknown = False
-        
+
         if startViewportRender is not None:
-            self.cause_startViewportRender = startViewportRender 
+            self.cause_startViewportRender = startViewportRender
         if mesh is not None:
-            self.cause_mesh = mesh 
+            self.cause_mesh = mesh
         if light is not None:
-            self.cause_light = light 
+            self.cause_light = light
         if camera is not None:
-            self.cause_camera = camera 
+            self.cause_camera = camera
         if objectTransform is not None:
-            self.cause_objectTransform = objectTransform 
+            self.cause_objectTransform = objectTransform
         if layers is not None:
             self.cause_layers = layers
         if materials is not None:
-            self.cause_materials = materials 
+            self.cause_materials = materials
         if config is not None:
             self.cause_config = config
         if session is not None:
@@ -2485,7 +2490,7 @@ class UpdateChanges(object):
             self.cause_volumes = volumes
         if haltconditions is not None:
             self.cause_haltconditions = haltconditions
-            
+
     def print_updates(self):
         print('===== Realtime update information: =====')
 
