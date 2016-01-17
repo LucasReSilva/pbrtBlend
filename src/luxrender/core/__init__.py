@@ -1492,8 +1492,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     scene_dir = efutil.filesystem_path(scene.render.filepath)
 
                     env = os.environ.copy()
+
                     if 'linux' in sys.platform:
-                        print('XXX')
                         env['LD_LIBRARY_PATH'] = os.path.dirname(luxrender_path)
 
                     luxrender_process = subprocess.Popen(cmd_args, cwd=scene_dir, env=env)
