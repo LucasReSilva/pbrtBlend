@@ -34,6 +34,10 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
     bl_label = 'Convert Cycles Scene'
     bl_description = 'Convert Cycles materials, lamps and world background to LuxRender materials and lamps'
 
+    def invoke(self, context, event):
+        # Show a popup asking for confirmation so the user does not accidentally overwrite materials etc.
+        return context.window_manager.invoke_confirm(self, event)
+
     def execute(self, context):
         # Convert all materials
         bpy.ops.luxrender.convert_all_cycles_materials()
