@@ -691,35 +691,40 @@ class MaterialExporter(object):
                 if alpha_source == 'texture':
                     if hasattr(material.luxrender_transparency, 'alpha_floattexturename'):
                         texture_name = material.luxrender_transparency.alpha_floattexturename
-                        texture = bpy.data.textures[texture_name]
 
-                        alpha_tex_exporter = TextureExporter(self.luxcore_exporter, self.blender_scene, texture)
-                        alpha_tex_exporter.convert(texture_name + material.name + '_alpha')
-                        alpha = alpha_tex_exporter.luxcore_name
+                        if texture_name in bpy.data.textures:
+                            texture = bpy.data.textures[texture_name]
 
-                        self.properties.Set(alpha_tex_exporter.properties)
-                        self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', ['alpha']))
+                            alpha_tex_exporter = TextureExporter(self.luxcore_exporter, self.blender_scene, texture)
+                            alpha_tex_exporter.convert(texture_name + material.name + '_alpha')
+                            alpha = alpha_tex_exporter.luxcore_name
 
-                        if material.luxrender_transparency.inverse:
-                            inverter_name = alpha + '_inverter'
-                            inverter_prefix = 'scene.textures.' + inverter_name
+                            self.properties.Set(alpha_tex_exporter.properties)
+                            self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', 'alpha'))
 
-                            self.properties.Set(pyluxcore.Property(inverter_prefix + '.type', ['mix']))
-                            self.properties.Set(pyluxcore.Property(inverter_prefix + '.amount', alpha))
-                            self.properties.Set(pyluxcore.Property(inverter_prefix + '.texture1', [1.0]))
-                            self.properties.Set(pyluxcore.Property(inverter_prefix + '.texture2', [0.0]))
+                            if material.luxrender_transparency.inverse:
+                                inverter_name = alpha + '_inverter'
+                                inverter_prefix = 'scene.textures.' + inverter_name
 
-                            alpha = inverter_name
+                                self.properties.Set(pyluxcore.Property(inverter_prefix + '.type', 'mix'))
+                                self.properties.Set(pyluxcore.Property(inverter_prefix + '.amount', alpha))
+                                self.properties.Set(pyluxcore.Property(inverter_prefix + '.texture1', 1.0))
+                                self.properties.Set(pyluxcore.Property(inverter_prefix + '.texture2', 0.0))
+
+                                alpha = inverter_name
+                        else:
+                            use_alpha_transparency = False
 
                 elif alpha_source == 'constant':
                     alpha = material.luxrender_transparency.alpha_value
 
                 # diffusealpha, diffusemean, diffuseintensity
-                elif material.luxrender_material.type in sourceMap:
+                elif (material.luxrender_material.type in sourceMap
+                      and getattr(lux_mat, '%s_usecolortexture' % sourceMap[material.luxrender_material.type])):
                     # Get base texture name
                     texture_name = getattr(lux_mat, '%s_colortexturename' % sourceMap[material.luxrender_material.type])
 
-                    try:
+                    if texture_name in bpy.data.textures:
                         # Get blender texture
                         texture = bpy.data.textures[texture_name]
                         # Export texture, get luxcore texture name
@@ -735,9 +740,7 @@ class MaterialExporter(object):
                             'diffuseintensity': 'colored_mean',
                         }
                         self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', [channelMap[alpha_source]]))
-
-                    except KeyError:
-                        print('Texturename %s is not in bpy.data.textures' % texture_name)
+                    else:
                         use_alpha_transparency = False
                 else:
                     print(
@@ -745,17 +748,7 @@ class MaterialExporter(object):
                     use_alpha_transparency = False
 
                 if use_alpha_transparency:
-                    mix_prefix = 'scene.materials.' + name_mix
-                    self.properties.Set(pyluxcore.Property(mix_prefix + '.type', ['mix']))
-                    self.properties.Set(pyluxcore.Property(mix_prefix + '.material1', DEFAULT_NULL))
-                    self.properties.Set(pyluxcore.Property(mix_prefix + '.material2', self.luxcore_name))
-                    self.properties.Set(pyluxcore.Property(mix_prefix + '.amount', alpha))
-
-                    self.luxcore_name = name_mix
-
-                    interior = self.material.luxrender_material.Interior_volume
-                    exterior = self.material.luxrender_material.Exterior_volume
-                    self.__set_material_volumes(prefix, interior, exterior)
+                    self.properties.Set(pyluxcore.Property(prefix + '.transparency', alpha))
         except Exception as err:
             print('Material export failed, skipping material: %s\n%s' % (self.material.name, err))
             self.luxcore_exporter.errors = True
