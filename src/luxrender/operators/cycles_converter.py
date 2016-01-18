@@ -52,14 +52,35 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
 
         for light in lights:
             if light.data.type == 'SUN':
-                print('Converted sun %s' % light.name)
+                print('Converting light %s (%s)' % (light.name, light.data.type))
                 lux_sun = light.data.luxrender_lamp.luxrender_lamp_sun
                 # Cycles sun lamps are always in "sun only" mode
                 lux_sun.sunsky_type = 'sun'
                 # Sun size
                 lux_sun.relsize = max(light.data.shadow_soft_size * 200, 0.05)
 
+            elif light.data.type == 'AREA':
+                print('Converting light %s (%s)' % (light.name, light.data.type))
+                lux_area = light.data.luxrender_lamp.luxrender_lamp_area
+                output = None
+
+                for node in light.data.node_tree.nodes:
+                    if node.type == 'OUTPUT_LAMP' and node.is_active_output:
+                        output = node
+                        break
+
+                if output:
+                    emission_node = get_linked_node(output.inputs['Surface'])
+
+                    if emission_node and emission_node.type == 'EMISSION':
+                        socket_color = emission_node.inputs['Color']
+                        socket_strength = emission_node.inputs['Strength']
+
+                        lux_area.L_color = convert_rgba_to_rgb(socket_color.default_value)
+                        lux_area.power = socket_strength.default_value
+
         # Convert world background settings
+        print('Converting world background')
         create_sky = False
         sky_turbidity = 2.2
 
@@ -191,6 +212,8 @@ class LUXRENDER_OT_convert_cycles_material(bpy.types.Operator):
 
 def cycles_material_converter(blender_mat):
     try:
+        print('Converting material %s' % blender_mat.name)
+
         # Create Lux nodetree
         lux_nodetree = bpy.data.node_groups.new(blender_mat.name, type='luxrender_material_nodes')
         lux_nodetree.use_fake_user = True
