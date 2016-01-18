@@ -57,6 +57,7 @@ class luxcore_scenesettings(declarative_property_group):
             'default': 100.0,
             'min': 1.0,
             'max': 100.0,
+            'precision': 0,
             'subtype': 'PERCENTAGE',
             'slider': True,
             'save_in_preset': True
