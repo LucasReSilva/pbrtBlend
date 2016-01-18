@@ -722,6 +722,41 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
 
 @LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
+    """
+    Wrapper for Blender's bpy.ops.image.open() operator so we know which image was opened
+    """
+    bl_idname = "luxrender.open_image_wrapper"
+    bl_label = "Open Image"
+    bl_description = "Open Image"
+
+    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+    def execute(self, context):
+        from bpy_extras.image_utils import load_image # TODO: move?
+
+        img = load_image(self.filepath)
+        image_name = ''
+
+        # Find the name Blender assigned to the opened image as key
+        for key in bpy.data.images.keys():
+            if bpy.data.images[key].filepath == img.filepath:
+                image_name = key
+
+        # Find the node that requested the opened image and assign the image name, then reset its "requested" flag
+        for node in context.space_data.node_tree.nodes:
+            if node.bl_idname == 'luxrender_texture_blender_image_map_node' and node.requested_image_load:
+                node.image_name = image_name
+                node.requested_image_load = False
+                break
+
+        return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     """Blender image map texture node"""
     bl_idname = 'luxrender_texture_blender_image_map_node'
@@ -743,29 +778,22 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     def update_image(self, context):
         self.set_fake_user(self.image_name)
 
-    def filename_get(self):
-        if self.image_name in bpy.data.images:
-            return bpy.data.images[self.image_name].filepath
-        else:
-            return ''
+    def load_image(self, context):
+        # Because the operator does not know which on which node the "open image" button was clicked,  the requesting
+        # node is flagged below. The operator then assigns the name of the loaded image and resets the flag.
+        self.requested_image_load = True
+        bpy.ops.luxrender.open_image_wrapper('INVOKE_DEFAULT')
+        # Reset the button state so it does not look pressed
+        self['load_image_button'] = False
 
-    def filename_set(self, value):
-        # Add image to bpy.data.images
-        bpy.ops.image.open(filepath=value)
+    load_image_button = bpy.props.BoolProperty(name='Open', description='Open a new image', update=load_image)
+    requested_image_load = bpy.props.BoolProperty() # Internal flag
 
-        for item in bpy.data.images.keys():
-            if bpy.data.images[item].filepath == value:
-                self.image_name = item
-
-        self.set_fake_user(self.image_name)
-
-    file_type_items = [
+    source_items = [
         ('blender_image', 'Blender Image', 'Select a Blender image or load a new one'),
         ('manual_filepath', 'Filepath', 'Select a filepath to an image file on disk without loading it into Blender'),
     ]
-    file_type = bpy.props.EnumProperty(name='File Type', items=file_type_items, default='blender_image')
-    filename = bpy.props.StringProperty(name='', description='Path to the image map', subtype='FILE_PATH',
-                                        get=filename_get, set=filename_set)
+    source = bpy.props.EnumProperty(name='Source', items=source_items, default='blender_image')
     image_name = bpy.props.StringProperty(default='', update=update_image)
     manual_filepath = bpy.props.StringProperty(name='', description='Path to the image map', subtype='FILE_PATH')
 
@@ -793,13 +821,13 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Bump'].enabled = False
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'file_type', expand=True)
+        layout.prop(self, 'source', expand=True)
 
-        if self.file_type == 'blender_image':
-            column = layout.column(align=True)
-            column.prop_search(self, 'image_name', bpy.data, 'images', text='')
-            column.prop(self, 'filename')
-        elif self.file_type == 'manual_filepath':
+        if self.source == 'blender_image':
+            split = layout.split(align=True, percentage=0.75)
+            split.prop_search(self, 'image_name', bpy.data, 'images', text='')
+            split.prop(self, 'load_image_button', toggle=True)
+        elif self.source == 'manual_filepath':
             layout.prop(self, 'manual_filepath')
 
         column = layout.column()
@@ -852,7 +880,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         warning_color_no_image = [0, 0, 0] # Black color
         warning_color_wrong_path = [0.8, 0, 0.8] # Purple color
 
-        if self.file_type == 'blender_image':
+        if self.source == 'blender_image':
             if self.image_name == '':
                 return warning_color_no_image
 
