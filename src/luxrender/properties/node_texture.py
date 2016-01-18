@@ -724,7 +724,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
     """
-    Wrapper for Blender's bpy.ops.image.open() operator so we know which image was opened
+    Wrapper for Blender's load_image() function so we know which image was opened
     """
     bl_idname = "luxrender.open_image_wrapper"
     bl_label = "Open Image"
@@ -739,18 +739,12 @@ class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
     def execute(self, context):
         from bpy_extras.image_utils import load_image # TODO: move?
 
-        img = load_image(self.filepath)
-        image_name = ''
-
-        # Find the name Blender assigned to the opened image as key
-        for key in bpy.data.images.keys():
-            if bpy.data.images[key].filepath == img.filepath:
-                image_name = key
+        image = load_image(self.filepath)
 
         # Find the node that requested the opened image and assign the image name, then reset its "requested" flag
         for node in context.space_data.node_tree.nodes:
             if node.bl_idname == 'luxrender_texture_blender_image_map_node' and node.requested_image_load:
-                node.image_name = image_name
+                node.image_name = image.name
                 node.requested_image_load = False
                 break
 
