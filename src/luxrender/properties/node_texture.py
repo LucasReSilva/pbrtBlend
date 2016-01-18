@@ -56,6 +56,8 @@ from ..extensions_framework import util as efutil
 
 from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
 
+from bpy_extras.image_utils import load_image
+
 
 # Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -737,8 +739,6 @@ class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
-        from bpy_extras.image_utils import load_image # TODO: move?
-
         image = load_image(self.filepath)
 
         # Find the node that requested the opened image and assign the image name, then reset its "requested" flag
