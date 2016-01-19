@@ -251,6 +251,18 @@ class LuxCoreExporter(object):
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.fstop', fstop))
         index += 1
 
+        # Bloom
+        '''
+        if imagepipeline_settings.<bloom>:
+            radius =
+            weight =
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BLOOM'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.radius', 0.07))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.weight', 0.25))
+            ...
+            index += 1
+        '''
+
         # Camera response function
         if imagepipeline_settings.crf_type != 'NONE':
             if imagepipeline_settings.crf_type == 'PRESET' and imagepipeline_settings.crf_preset != 'None':

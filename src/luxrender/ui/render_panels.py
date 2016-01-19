@@ -224,11 +224,13 @@ class device_settings(render_panel):
 
             if UseLuxCore() and engine_settings.opencl_settings_type == 'SIMPLE':
                 row = self.layout.row()
-                row.prop(engine_settings, 'opencl_use_all_cpus')
                 row.prop(engine_settings, 'opencl_use_all_gpus')
+                row.prop(engine_settings, 'opencl_use_all_cpus')
 
             elif not UseLuxCore() or engine_settings.opencl_settings_type == 'ADVANCED':
+                self.layout.prop(context.scene.luxcore_enginesettings, 'use_opencl_always_enabled')
                 self.layout.operator('luxrender.opencl_device_list_update')
+
                 # This is a "special" panel section for the list of OpenCL devices
                 for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
                     dev = context.scene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]

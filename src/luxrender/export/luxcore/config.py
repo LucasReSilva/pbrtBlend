@@ -298,6 +298,19 @@ class ConfigExporter(object):
         else:
             self.properties.Set(pyluxcore.Property('film.filter.type', 'NONE'))
 
+        if engine_settings.use_opencl_always_enabled:
+            # remember to have a whitespace character at the end of each line
+            enabled_features = (
+                'MATTE ROUGHMATTE MATTETRANSLUCENT ROUGHMATTETRANSLUCENT '
+                'GLOSSY2 GLOSSYTRANSLUCENT '
+                'GLASS ARCHGLASS ROUGHGLASS '
+                'MIRROR METAL2 '
+                'HOMOGENEOUS_VOL CLEAR_VOL '
+                'IMAGEMAPS_BYTE_FORMAT IMAGEMAPS_HALF_FORMAT IMAGEMAPS_1xCHANNELS IMAGEMAPS_3xCHANNELS '
+                'HAS_BUMPMAPS '
+            )
+            self.properties.Set(pyluxcore.Property('opencl.code.alwaysenabled', enabled_features))
+
 
     def __convert_compute_settings(self):
         engine_settings = self.blender_scene.luxcore_enginesettings

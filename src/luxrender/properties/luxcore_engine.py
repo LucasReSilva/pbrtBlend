@@ -985,4 +985,12 @@ may mute lamps and caustics',
             'default': True,
             'save_in_preset': True
         },
+        {
+            'type': 'bool',
+            'attr': 'use_opencl_always_enabled',
+            'name': 'Low Latency Viewport Kernel',
+            'description': 'Always enable the most common materials and textures for viewport rendering (rendering is '
+                           'slower, but less kernel recompilations are necessary)',
+            'default': True,
+        },
     ]
