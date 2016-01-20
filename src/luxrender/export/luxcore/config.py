@@ -339,7 +339,7 @@ class ConfigExporter(object):
 
         # Workaround for we cannot use more than one filmkernel atm.,
         # the preview auto_linear -> linear -> scale would cause an RuntimeError: clEnqueueNDRangeKernel
-        if self.is_viewport_render:
+        if not self.is_viewport_render:
             self.properties.Set(pyluxcore.Property('film.opencl.enable', engine_settings.film_use_opencl))
         else:
             self.properties.Set(pyluxcore.Property('film.opencl.enable', False))
