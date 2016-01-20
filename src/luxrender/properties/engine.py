@@ -236,9 +236,10 @@ class luxrender_engine(declarative_property_group):
             'description': 'Choose between LuxRender v1.x and v2.x API',
             'default': 'classic',
             'items': [
-                         ('classic', 'Classic API', 'Use LuxRender v1.x API'),
+                         ('classic', 'Classic API', 'Use LuxRender v1.x API', 'NONE', 0),
                      ] + ([
-                         ('luxcore', 'LuxCore API (Experimental)', 'Use LuxRender v2.x API (experimental and unstable!)')
+                         ('luxcore', 'LuxCore API (Experimental)', 'Use LuxRender v2.x API (experimental and unstable!)',
+                          'ERROR', 1)
                      ] if PYLUXCORE_AVAILABLE else []),
             'save_in_preset': True
         },

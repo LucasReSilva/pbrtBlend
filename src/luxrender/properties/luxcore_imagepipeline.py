@@ -133,11 +133,11 @@ class luxcore_imagepipeline_settings(declarative_property_group):
 
     controls = [
         # Tonemapper
-        ['label_tonemapper', 'tonemapper_type'],
-        ['linear_scale', 'use_auto_linear'],
+        ['tonemapper_type'],
+        ['use_auto_linear', 'linear_scale'],
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
         # Output switcher
-        ['label_output_switcher', 'output_switcher_pass'],
+        ['output_switcher_pass'],
         ['contour_scale', 'contour_range'], 
         ['contour_steps', 'contour_zeroGridSize'],
         # Film response
@@ -169,14 +169,9 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     properties = [
         # Output switcher
         {
-            'type': 'text',
-            'attr': 'label_output_switcher',
-            'name': 'Input Pass:',
-        },
-        {
             'type': 'enum',
             'attr': 'output_switcher_pass',
-            'name': '',
+            'name': 'Input Pass',
             'description': 'Pass to use as imagepipeline input',
             'default': 'disabled',
             'items': [
@@ -249,14 +244,9 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         },
         # Tonemapper
         {
-            'type': 'text',
-            'attr': 'label_tonemapper',
-            'name': 'Tonemapper:',
-        },
-        {
             'type': 'enum',
             'attr': 'tonemapper_type',
-            'name': '',
+            'name': 'Tonemapper',
             'description': 'The tonemapper converts the image from HDR to LDR',
             'default': 'TONEMAP_LINEAR',
             'items': [
@@ -369,7 +359,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         {
             'attr': 'label_intervals',
             'type': 'text',
-            'name': 'Write Intervals:',
+            'name': 'Update Intervals:',
         },
         {
             'type': 'int',

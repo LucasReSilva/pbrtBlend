@@ -272,11 +272,11 @@ class luxcore_enginesettings(declarative_property_group):
             'description': 'Rendering engine to use',
             'default': 'BIDIR',
             'items': [
-                ('PATH', 'Path', 'Path tracer'),
-                ('BIASPATH', 'Biased Path', 'Biased path tracer'),
-                ('BIDIR', 'Bidir', 'Bidirectional path tracer'),
+                ('PATH', 'Path', 'Path tracer', '', 0),
+                ('BIASPATH', 'Biased Path', 'Biased path tracer', '', 1),
+                ('BIDIR', 'Bidir', 'Bidirectional path tracer', '', 2),
                 ('BIDIRVM', 'BidirVM (Experimental)', 'Bidirectional path tracer with vertex merging. '
-                                                      'Warning: Experimental! Might use large amounts of RAM or crash!'),
+                 'Warning: Experimental! May use large amounts of RAM or crash!', 'ERROR', 3),
             ],
             'save_in_preset': True
         },
