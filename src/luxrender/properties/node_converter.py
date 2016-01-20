@@ -501,6 +501,12 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
 
         self.outputs.new('NodeSocketFloat', 'Value')
 
+    def draw_label(self):
+        # Use the name of the selected operation as displayed node name
+        for elem in self.mode_items:
+            if self.mode in elem:
+                return elem[1]
+
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
 
@@ -605,6 +611,12 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
         self.inputs[2].default_value = (0.7, 0.7, 0.7)
 
         self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_label(self):
+        # Use the name of the selected operation as displayed node name
+        for elem in self.mode_items:
+            if self.mode in elem:
+                return elem[1]
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)

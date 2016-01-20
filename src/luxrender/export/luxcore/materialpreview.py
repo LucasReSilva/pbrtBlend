@@ -311,6 +311,9 @@ class MaterialPreviewExporter(object):
     def __create_preview_config(self, film_width, film_height):
         cfg_props = pyluxcore.Properties()
 
+        # The overhead of the kernel compilation is not worth the higher speed on our tiny material/texture preview
+        cfg_props.Set(pyluxcore.Property('film.opencl.enable', False))
+
         cfg_props.Set(pyluxcore.Property('film.width', film_width))
         cfg_props.Set(pyluxcore.Property('film.height', film_height))
 

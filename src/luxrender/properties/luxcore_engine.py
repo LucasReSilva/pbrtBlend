@@ -967,7 +967,6 @@ may mute lamps and caustics',
                 ('SIMPLE', 'Simple', 'Simple settings that allow to use all CPUs/no CPUs and all GPUs/no GPUs'),
                 ('ADVANCED', 'Advanced', 'Enable the OpenCL devices you want to use individually for each device'),
             ],
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -975,7 +974,6 @@ may mute lamps and caustics',
             'name': 'Use all CPUs',
             'description': 'Use all available CPUs',
             'default': False,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -983,7 +981,6 @@ may mute lamps and caustics',
             'name': 'Use all GPUs',
             'description': 'Use all available graphics cards',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -991,6 +988,14 @@ may mute lamps and caustics',
             'name': 'Low Latency Viewport Kernel',
             'description': 'Always enable the most common materials and textures for viewport rendering (rendering is '
                            'slower, but less kernel recompilations are necessary)',
+            'default': True,
+        },
+        {
+            'type': 'bool',
+            'attr': 'film_use_opencl',
+            'name': 'OpenCL Imagepipeline',
+            'description': 'Use OpenCL to accelerate tonemapping and other imagepipeline operations (both viewport '
+                           'and final render)',
             'default': True,
         },
     ]

@@ -337,6 +337,8 @@ class ConfigExporter(object):
 
                 self.properties.Set(pyluxcore.Property('opencl.devices.select', dev_string))
 
+        self.properties.Set(pyluxcore.Property('film.opencl.enable', engine_settings.film_use_opencl))
+
         kernelcache = engine_settings.kernelcache
         self.properties.Set(pyluxcore.Property('opencl.kernelcache', kernelcache))
 

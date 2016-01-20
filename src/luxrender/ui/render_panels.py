@@ -229,6 +229,8 @@ class device_settings(render_panel):
 
             elif not UseLuxCore() or engine_settings.opencl_settings_type == 'ADVANCED':
                 self.layout.prop(context.scene.luxcore_enginesettings, 'use_opencl_always_enabled')
+                self.layout.prop(context.scene.luxcore_enginesettings, 'film_use_opencl')
+
                 self.layout.operator('luxrender.opencl_device_list_update')
 
                 # This is a "special" panel section for the list of OpenCL devices
