@@ -127,16 +127,13 @@ else:
         def draw(self, context):
             layout = self.layout
 
-            layout.prop(self, "install_path")
-            layout.label(text="After updating LuxRender installation path please restart Blender for changes to take "
-                         "effect.")
+            split = layout.split(percentage=0.78)
+            split.template_reports_banner()
+            split.label(text="After editing these settings please restart Blender for the changes to take effect.",
+                        icon='INFO')
+            split.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
 
-            row = layout.row()
-            sub = row.row()
-            sub.scale_x = 0.3
-            sub.operator("luxrender.update_luxblend", icon='RECOVER_AUTO')
-            sub.template_reports_banner() # This shows an "update Blender" warning text after updating
-            row.label(text="After updating LuxBlend please restart Blender for the changes to take effect.")
+            layout.prop(self, "install_path")
 
     LuxRenderAddon = Addon(bl_info)
     addon_register, addon_unregister = LuxRenderAddon.init_functions()
