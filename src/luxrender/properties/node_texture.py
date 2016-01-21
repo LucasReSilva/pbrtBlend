@@ -818,9 +818,9 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         layout.prop(self, 'source', expand=True)
 
         if self.source == 'blender_image':
-            split = layout.split(align=True, percentage=0.75)
+            split = layout.split(align=True, percentage=0.7)
             split.prop_search(self, 'image_name', bpy.data, 'images', text='')
-            split.prop(self, 'load_image_button', toggle=True)
+            split.prop(self, 'load_image_button', toggle=True, icon='FILESEL')
         elif self.source == 'manual_filepath':
             layout.prop(self, 'manual_filepath')
 
