@@ -168,7 +168,7 @@ class luxrender_camera(declarative_property_group):
             'type': 'bool',
             'attr': 'autofocus',
             'name': 'Auto Focus',
-            'description': 'Auto-focus for depth of field, DOF target object will be ignored',
+            'description': 'Auto-focus for depth of field (to the image center), DOF target object will be ignored',
             'default': False,
         },
         {
