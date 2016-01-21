@@ -926,6 +926,7 @@ class luxrender_channels(declarative_property_group):
         'ALPHA',
         'label_info_material',
         'MATERIAL_ID',
+        'OBJECT_ID',
         'EMISSION',
         'label_info_directlight',
         ['DIRECT_DIFFUSE', 'normalize_DIRECT_DIFFUSE'],
@@ -985,6 +986,7 @@ class luxrender_channels(declarative_property_group):
         'GEOMETRY_NORMAL': {'enable_aovs': True},
         'SHADING_NORMAL': {'enable_aovs': True},
         'MATERIAL_ID': {'enable_aovs': True},
+        'OBJECT_ID': {'enable_aovs': True},
         'DIRECT_DIFFUSE': {'enable_aovs': True},
         'normalize_DIRECT_DIFFUSE': A([{'enable_aovs': True}, {'DIRECT_DIFFUSE': True}]),
         'DIRECT_GLOSSY': {'enable_aovs': True},
@@ -1081,7 +1083,7 @@ class luxrender_channels(declarative_property_group):
         {
             'type': 'text',
             'attr': 'label_info_material',
-            'name': 'Material Information:',
+            'name': 'Material/Object Information:',
         },
         {
             'type': 'text',
@@ -1188,6 +1190,13 @@ class luxrender_channels(declarative_property_group):
             'description': 'Material ID (1 color per material)',
             'default': False,
             #'update': toggle_material_id
+        },
+        {
+            'type': 'bool',
+            'attr': 'OBJECT_ID',
+            'name': 'Object ID',
+            'description': 'Object ID (1 color per object)',
+            'default': False,
         },
         {
             'type': 'bool',
@@ -1316,4 +1325,5 @@ class luxrender_channels(declarative_property_group):
             'description': 'Surface irradiance',
             'default': False
         },
+
     ]

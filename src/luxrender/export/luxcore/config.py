@@ -105,7 +105,7 @@ class ConfigExporter(object):
         self.outputCounter += 1
 
         # list of channels that don't use an HDR format
-        LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'DIRECT_SHADOW_MASK',
+        LDR_channels = ['RGB_TONEMAPPED', 'RGBA_TONEMAPPED', 'ALPHA', 'MATERIAL_ID', 'OBJECT_ID', 'DIRECT_SHADOW_MASK',
                         'INDIRECT_SHADOW_MASK', 'MATERIAL_ID_MASK']
 
         # channel type (e.g. 'film.outputs.1.type')
@@ -390,6 +390,8 @@ class ConfigExporter(object):
                 self.convert_channel('SHADING_NORMAL')
             if channels.MATERIAL_ID:
                 self.convert_channel('MATERIAL_ID')
+            if channels.OBJECT_ID:
+                self.convert_channel('OBJECT_ID')
             if channels.DIRECT_DIFFUSE:
                 self.convert_channel('DIRECT_DIFFUSE')
             if channels.DIRECT_GLOSSY:

@@ -30,7 +30,7 @@ from ..outputs.luxcore_api import UseLuxCore
 import math
 
 from .. import LuxRenderAddon
-from ..extensions_framework.validate import Logic_OR as O
+from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 
 @LuxRenderAddon.addon_register_class
@@ -38,7 +38,6 @@ class luxrender_object(declarative_property_group):
     ef_attach_to = ['Object']
 
     controls = [
-        'convert_to_proxy',
         ['append_proxy', 'hide_proxy_mesh'],
         'proxy_type',
         'label_unsupported_proxy',
@@ -46,12 +45,15 @@ class luxrender_object(declarative_property_group):
         'external_mesh',
         ['radius', 'phimax'],
         ['zmin', 'zmax'],
+        'convert_to_proxy',
     ]
+
     visibility = {
         'convert_to_proxy': {'append_proxy': False},
         'proxy_type': {'append_proxy': True},
         'hide_proxy_mesh': {'append_proxy': True},
-        'label_unsupported_proxy': lambda: UseLuxCore(),
+        'label_unsupported_proxy': A([{'proxy_type': O(['stlmesh', 'sphere', 'cylinder', 'cone', 'disk', 'paraboloid'])},
+                                      lambda: UseLuxCore()]),
         'use_smoothing': {'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
         'external_mesh': {'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
         'radius': {'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid'])},
@@ -59,6 +61,7 @@ class luxrender_object(declarative_property_group):
         'zmin': {'append_proxy': True, 'proxy_type': 'cylinder'},
         'zmax': {'append_proxy': True, 'proxy_type': O(['cylinder', 'paraboloid'])},
     }
+
     properties = [
         {
             'type': 'operator',
@@ -101,6 +104,7 @@ class luxrender_object(declarative_property_group):
             'type': 'text',
             'attr': 'label_unsupported_proxy',
             'name': 'Only PLY meshes are supported by LuxCore',
+            'icon': 'ERROR'
         },
         {
             'type': 'bool',

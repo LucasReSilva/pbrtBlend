@@ -315,7 +315,10 @@ class property_group_renderer(bpy.types.Panel):
 
                             elif current_property['type'] in ['text']:
                                 layout.label(
-                                    text=current_property['name']
+                                    text=current_property['name'],
+                                    icon=current_property['icon']
+                                        if 'icon' in current_property_keys
+                                        else 'NONE'
                                 )
 
                             elif current_property['type'] in ['template_list']:

@@ -1213,6 +1213,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 'GEOMETRY_NORMAL': [pyluxcore.FilmOutputType.GEOMETRY_NORMAL, True, 3],
                 'SHADING_NORMAL': [pyluxcore.FilmOutputType.SHADING_NORMAL, True, 3, 'NORMAL'],
                 'MATERIAL_ID': [pyluxcore.FilmOutputType.MATERIAL_ID, False, 1],
+                'OBJECT_ID': [pyluxcore.FilmOutputType.OBJECT_ID, False, 1],
                 'DIRECT_DIFFUSE': [pyluxcore.FilmOutputType.DIRECT_DIFFUSE, True, 3, 'DIFFUSE_DIRECT'],
                 'DIRECT_GLOSSY': [pyluxcore.FilmOutputType.DIRECT_GLOSSY, True, 3, 'GLOSSY_DIRECT'],
                 'EMISSION': [pyluxcore.FilmOutputType.EMISSION, True, 3, 'EMIT'],
@@ -1231,8 +1232,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         outputType = attributes[channelType][0]
         use_hdr = attributes[channelType][1]
-        arrayType = 'I' if channelType == 'MATERIAL_ID' else 'f'
-        arrayInitValue = 0 if channelType == 'MATERIAL_ID' else 0.0
+        arrayType = 'I' if channelType in ('MATERIAL_ID', 'OBJECT_ID') else 'f'
+        arrayInitValue = 0 if channelType in ('MATERIAL_ID', 'OBJECT_ID') else 0.0
         arrayDepth = attributes[channelType][2]
         pass_type = attributes[channelType][3] if len(attributes[channelType]) == 4 else None
 
@@ -1249,7 +1250,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # buffer for converted array (to RGBA)
         channel_buffer_converted = []
 
-        if channelType == 'MATERIAL_ID':
+        if channelType in ('MATERIAL_ID', 'OBJECT_ID'):
             # MATERIAL_ID needs special treatment
             channel_buffer_converted = [None] * (filmWidth * filmHeight * 4)
             lcSession.GetFilm().GetOutputUInt(outputType, channel_buffer)
@@ -1682,6 +1683,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if channels.MATERIAL_ID:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'MATERIAL_ID', channels.saveToDisk)
+        if channels.OBJECT_ID:
+            self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
+                                       'OBJECT_ID', channels.saveToDisk)
         if channels.DIRECT_DIFFUSE:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'DIRECT_DIFFUSE', channels.saveToDisk,
@@ -1886,6 +1890,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     # Viewport render
     ############################################################################
 
+    # TODO: maybe put this in constructor for windows?
     luxcore_exporter = None
     space = None # The VIEW_3D space this viewport render is running in
     critical_errors = False
@@ -1893,6 +1898,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     viewFilmWidth = -1
     viewFilmHeight = -1
     viewImageBufferFloat = None
+    last_update_time = 0
     # store renderengine configuration of last update
     lastRenderSettings = ''
     lastVolumeSettings = ''
@@ -1905,6 +1911,31 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     update_counter = 0
 
     def luxcore_view_draw(self, context):
+        def draw_framebuffer():
+            # Update the screen
+            bufferSize = self.viewFilmWidth * self.viewFilmHeight * 3
+            glBuffer = bgl.Buffer(bgl.GL_FLOAT, [bufferSize], self.viewImageBufferFloat)
+            bgl.glRasterPos2i(0, 0)
+            bgl.glDrawPixels(self.viewFilmWidth, self.viewFilmHeight, bgl.GL_RGB, bgl.GL_FLOAT, glBuffer)
+
+        # TODO: if RTBIASPATHOCL: implement waitNextFrame
+        #https://bitbucket.org/luxrender/luxrays/src/5e46ffbf8cca06fdfb960f4a9584c971f829967e/samples/luxcoreui/uiloop.cpp?at=default&fileviewer=file-view-default#uiloop.cpp-532
+
+        view_draw_startTime = time.time()
+        elapsed = view_draw_startTime - self.last_update_time
+
+        if context.scene.camera:
+            interval = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings.viewport_interval / 1000
+        else:
+            interval = 0.05
+
+        # Run at fixed fps
+        if elapsed < interval:
+            draw_framebuffer()
+            self.tag_redraw()
+            return
+
+        # Check for errors
         if self.critical_errors:
             return
 
@@ -1957,12 +1988,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Update the image buffer
         session.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
                                                   self.viewImageBufferFloat)
+        draw_framebuffer()
 
-        # Update the screen
-        bufferSize = self.viewFilmWidth * self.viewFilmHeight * 3
-        glBuffer = bgl.Buffer(bgl.GL_FLOAT, [bufferSize], self.viewImageBufferFloat)
-        bgl.glRasterPos2i(0, 0)
-        bgl.glDrawPixels(self.viewFilmWidth, self.viewFilmHeight, bgl.GL_RGB, bgl.GL_FLOAT, glBuffer)
+        self.last_update_time = view_draw_startTime
 
         if stop_redraw:
             # Pause rendering
@@ -2315,6 +2343,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
         LuxLog('Dynamic updates: update took %dms' % view_update_time)
+
+        self.last_update_time = time.time()
 
 
 class Session(object):

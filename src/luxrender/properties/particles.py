@@ -137,7 +137,7 @@ class luxrender_hair(declarative_property_group):
                 ('ribbonadaptive', 'Adaptive Triangle Ribbon',
                  'Render hair as ribbons of triangles facing the camera, with adaptive tessellation'),
                 ('solid', 'Solid', 'Render hairs as solid mesh cylinders (memory intensive!)'),
-                ('solidadaptive', 'Adaptive Solid', 'Render hairs as solid mesh cylinders with adaptive tesselation'),
+                ('solidadaptive', 'Adaptive Solid', 'Render hairs as solid mesh cylinders with adaptive tessellation'),
             ],
         },
         {

@@ -132,14 +132,15 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     alert = {}
 
     controls = [
+        # Output switcher
+        'output_switcher_pass',
+        ['contour_scale', 'contour_range'],
+        ['contour_steps', 'contour_zeroGridSize'],
         # Tonemapper
-        ['tonemapper_type'],
+        'label_tonemapper_type',
+        'tonemapper_type',
         ['use_auto_linear', 'linear_scale'],
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
-        # Output switcher
-        ['output_switcher_pass'],
-        ['contour_scale', 'contour_range'], 
-        ['contour_steps', 'contour_zeroGridSize'],
         # Film response
         'crf_label',
         'crf_type',
@@ -150,6 +151,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         #['writeinterval_png', 'writeinterval_flm'],
         'displayinterval',
         'fast_initial_preview',
+        'viewport_interval',
     ]
     
     visibility = {
@@ -193,8 +195,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
                 ('INDIRECT_SHADOW_MASK', 'Indirect Shadow Mask', ''),
                 ('RAYCOUNT', 'Raycount', ''),
                 ('IRRADIANCE', 'Irradiance', '')
-            ],
-            'save_in_preset': True
+            ]
         },
         # Contour lines settings (only for IRRADIANCE pass)
         {
@@ -205,8 +206,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 179.0,
             'min': 0.0,
             'soft_min': 0.0,
-            'soft_max': 1000.0,
-            'save_in_preset': True
+            'soft_max': 1000.0
         },
         {
             'type': 'float',
@@ -216,8 +216,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 100.0,
             'min': 0.0,
             'soft_min': 0.0,
-            'soft_max': 1000.0,
-            'save_in_preset': True
+            'soft_max': 1000.0
         },
         {
             'type': 'int',
@@ -227,8 +226,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 8,
             'min': 0,
             'soft_min': 2,
-            'soft_max': 50,
-            'save_in_preset': True
+            'soft_max': 50
         },
         {
             'type': 'int',
@@ -239,10 +237,14 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'default': 8,
             'min': -1,
             'soft_min': -1,
-            'soft_max': 20,
-            'save_in_preset': True
+            'soft_max': 20
         },
         # Tonemapper
+        {
+            'type': 'text',
+            'attr': 'label_tonemapper_type',
+            'name': 'Tonemapper:',
+        },
         {
             'type': 'enum',
             'attr': 'tonemapper_type',
@@ -252,10 +254,10 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'items': [
                 ('TONEMAP_LINEAR', 'Linear', 'Brightness is controlled by the scale value, can be set to auto-detect '
                                              'optimal brightness'),
-                ('TONEMAP_LUXLINEAR', 'Linear (Camera Settings)', 'Uses camera settings (ISO, f-stop and shuttertime)'),
+                ('TONEMAP_LUXLINEAR', 'Camera Settings', 'Use camera settings (ISO, f-stop and shuttertime)'),
                 ('TONEMAP_REINHARD02', 'Reinhard', 'Non-linear tonemapper that adapts to the image brightness'),
             ],
-            'save_in_preset': True
+            'expand': True
         },
         # Linear tonemapper settings
         {
@@ -263,8 +265,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'attr': 'use_auto_linear',
             'name': 'Auto',
             'description': 'Auto-detect the optimal image brightness',
-            'default': True,
-            'save_in_preset': True
+            'default': True
         },
         {
             'type': 'float',
@@ -275,8 +276,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'min': 0.0,
             'soft_min': 0.00001,
             'soft_max': 100.0,
-            'step': 1.0,
-            'save_in_preset': True
+            'step': 1.0
         },
         # Reinhard tonemapper settings
         {
@@ -288,8 +288,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'min': 0.0,
             'soft_min': 0.0,
             'max': 25.0,
-            'soft_max': 25.0,
-            'save_in_preset': True
+            'soft_max': 25.0
         },
         {
             'type': 'float',
@@ -300,8 +299,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'min': 0.0,
             'soft_min': 0.0,
             'max': 25.0,
-            'soft_max': 25.0,
-            'save_in_preset': True
+            'soft_max': 25.0
         },
         {
             'type': 'float',
@@ -312,8 +310,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'min': 0.01,
             'soft_min': 0.01,
             'max': 25.0,
-            'soft_max': 25.0,
-            'save_in_preset': True
+            'soft_max': 25.0
         },
         # Camera/Film response function (crf)
         {
@@ -332,8 +329,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
                 ('PRESET', 'Preset', 'Choose a CRF profile from a list of built-in presets'),
                 ('FILE', 'File', 'Choose a CRF file'),
             ],
-            'expand': True,
-            'save_in_preset': True
+            'expand': True
         },
         {
             'type': 'ef_callback',
@@ -344,8 +340,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'attr': 'crf_preset',
             'type': 'string',
             'name': 'Film Reponse Preset',
-            'default': 'None',
-            'save_in_preset': True
+            'default': 'None'
         },
         {
             'attr': 'crf_file',
@@ -363,33 +358,12 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         },
         {
             'type': 'int',
-            'attr': 'writeinterval_png',
-            'name': 'PNG',
-            'description': 'Period for writing images to disk (seconds)',
-            'default': 180,
-            'min': 2,
-            'soft_min': 2,
-            'save_in_preset': True
-        },
-        {
-            'type': 'int',
-            'attr': 'writeinterval_flm',
-            'name': 'FLM',
-            'description': 'Period for writing flm files to disk (seconds)',
-            'default': 900,
-            'min': 2,
-            'soft_min': 2,
-            'save_in_preset': True
-        },
-        {
-            'type': 'int',
             'attr': 'displayinterval',
-            'name': 'Preview Interval',
+            'name': 'Preview Interval (s)',
             'description': 'Period for updating rendering on screen (seconds)',
             'default': 10,
             'min': 1,
-            'soft_min': 3,
-            'save_in_preset': True
+            'soft_min': 3
         },
         {
             'type': 'bool',
@@ -397,7 +371,15 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'name': 'Fast Initial Preview',
             'description': 'Update the image continuously for the first 15 seconds of the rendering. Not used when '
                            'rendering animations',
-            'default': True,
-            'save_in_preset': True
+            'default': True
+        },
+        {
+            'type': 'int',
+            'attr': 'viewport_interval',
+            'name': 'Viewport Display Interval (ms)',
+            'description': 'Period for updating the viewport render (milliseconds)',
+            'default': 100,
+            'min': 5,
+            'soft_min': 50
         },
     ]

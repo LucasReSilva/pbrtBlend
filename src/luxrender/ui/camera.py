@@ -116,3 +116,10 @@ class film(camera_panel):
         else:
             self.layout.menu('CAMERA_MT_luxrender_crf',
                          text=context.camera.luxrender_camera.luxrender_film.luxrender_colorspace.crf_preset)
+
+    def draw(self, context):
+        super().draw(context)
+
+        if UseLuxCore():
+            imagepipeline_settings = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
+            self.layout.label('Framerate: %d fps' % (1 / (imagepipeline_settings.viewport_interval / 1000)))
