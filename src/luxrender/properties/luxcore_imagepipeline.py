@@ -141,6 +141,9 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'tonemapper_type',
         ['use_auto_linear', 'linear_scale'],
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
+        # Bloom
+        'use_bloom',
+        ['bloom_radius', 'bloom_weight'],
         # Film response
         'crf_label',
         'crf_type',
@@ -311,6 +314,30 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'soft_min': 0.01,
             'max': 25.0,
             'soft_max': 25.0
+        },
+        # Bloom TODO: Descriptions
+        {
+            'type': 'bool',
+            'attr': 'use_bloom',
+            'name': 'Bloom',
+            'description': '',
+            'default': False
+        },
+        {
+            'type': 'float',
+            'attr': 'bloom_radius',
+            'name': 'Radius',
+            'description': '',
+            'default': 0.07,
+            'min': 0.0001,
+        },
+        {
+            'type': 'float',
+            'attr': 'bloom_weight',
+            'name': 'Weight',
+            'description': '',
+            'default': 0.25,
+            'min': 0.0001,
         },
         # Camera/Film response function (crf)
         {
