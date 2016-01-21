@@ -755,10 +755,10 @@ class ColorRampItem(bpy.types.PropertyGroup):
     value = bpy.props.FloatVectorProperty(name='', min=0, soft_max=1, subtype='COLOR')
 
 @LuxRenderAddon.addon_register_class
-class luxrender_texture_type_node_colorramp(luxrender_texture_node):
-    """Colorramp texture node"""
-    bl_idname = 'luxrender_texture_colorramp_node'
-    bl_label = 'ColorRamp'
+class luxrender_texture_type_node_band(luxrender_texture_node):
+    """Band texture node"""
+    bl_idname = 'luxrender_texture_band_node'
+    bl_label = 'Band'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 

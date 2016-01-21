@@ -143,9 +143,9 @@ luxrender_node_categories_material = [
 
     luxrender_node_category_material("LUX_MATERIAL", "Material", items=[
         #NodeItem("luxrender_material_type_node_standard", label="Standard"), # TODO: Work in progress
+        NodeItem("luxrender_material_mix_node", label="Mix"),
         NodeItem("luxrender_material_matte_node", label="Matte"),
         NodeItem("luxrender_material_glossy_node", label="Glossy"),
-        NodeItem("luxrender_material_mix_node", label="Mix"),
         NodeItem("luxrender_material_null_node", label="Null"),
         NodeItem("luxrender_material_glass_node", label="Glass"),
         #NodeItem("luxrender_material_glass2_node", label="Glass2"), # replaced by unified glass node
@@ -206,7 +206,8 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_constant_node", label="Value Input", settings={
             "variant": repr("float"),
             }),
-        NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
+        NodeItem("luxrender_texture_band_node"),
+        #NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
         #NodeItem("luxrender_texture_colordepth_node"),
     ]),
 
@@ -230,6 +231,7 @@ luxrender_node_categories_material = [
 
     luxrender_node_category_material("LUX_LIGHT", "Light", items=[
         NodeItem("luxrender_light_area_node"),
+        Separator(),
         NodeItem("luxrender_texture_blackbody_node"),
         NodeItem("luxrender_texture_gaussian_node"),
         NodeItem("luxrender_texture_tabulateddata_node"),
@@ -322,6 +324,7 @@ luxrender_node_categories_volume = [
         NodeItem("luxrender_texture_constant_node", label="Float Value", settings={
             "variant": repr("float"),
             }),
+        NodeItem("luxrender_texture_band_node"),
         #NodeItem("luxrender_texture_colorramp_node"), TODO: activate when ready
         #NodeItem("luxrender_texture_bump_map_node"),
     ]),
@@ -338,6 +341,7 @@ luxrender_node_categories_volume = [
 
     luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
         NodeItem("luxrender_light_area_node"),
+        Separator(),
         NodeItem("luxrender_texture_blackbody_node"),
         NodeItem("luxrender_texture_gaussian_node"),
         NodeItem("luxrender_texture_tabulateddata_node"),

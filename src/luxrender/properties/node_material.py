@@ -709,6 +709,10 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
             layout.prop(self, 'multibounce')
             layout.prop(self, 'use_ior')
 
+        if not self.inputs['Base Material'].is_linked:
+            icon = 'INFO' if UseLuxCore() else 'ERROR' # In classic API, glossycoating will not export without base
+            layout.label('Select a base material!', icon=icon)
+
     def export_material(self, make_material, make_texture):
         mat_type = 'glossycoating'
 
