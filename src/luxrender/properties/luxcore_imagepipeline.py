@@ -167,6 +167,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
+        'bloom_radius': {'use_bloom': True},
+        'bloom_weight': {'use_bloom': True},
         'crf_preset_menu': {'crf_type': 'PRESET'},
         'crf_file': {'crf_type': 'FILE'},
     }
@@ -315,30 +317,37 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'max': 25.0,
             'soft_max': 25.0
         },
-        # Bloom TODO: Descriptions
+        # Bloom
         {
             'type': 'bool',
             'attr': 'use_bloom',
             'name': 'Bloom',
-            'description': '',
+            'description': 'Apply bloom filter to the image',
             'default': False
         },
         {
             'type': 'float',
             'attr': 'bloom_radius',
             'name': 'Radius',
-            'description': '',
-            'default': 0.07,
-            'min': 0.0001,
+            'description': 'Size of the bloom effect in percent of the image size',
+            'default': 7.0,
+            'min': 0.1,
+            'max': 100.0,
+            'precision': 1,
+            'subtype': 'PERCENTAGE',
+            'slider': True,
         },
         {
             'type': 'float',
             'attr': 'bloom_weight',
-            'name': 'Weight',
-            'description': '',
-            'default': 0.25,
-            'min': 0.0001,
-            'max': 1.0,
+            'name': 'Strength',
+            'description': 'Strength of the bloom effect (a linear mix factor)',
+            'default': 25.0,
+            'min': 0.0,
+            'max': 100.0,
+            'precision': 1,
+            'subtype': 'PERCENTAGE',
+            'slider': True,
         },
         # Camera/Film response function (crf)
         {
