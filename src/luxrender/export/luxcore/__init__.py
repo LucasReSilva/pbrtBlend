@@ -253,8 +253,9 @@ class LuxCoreExporter(object):
 
         # Bloom
         if imagepipeline_settings.use_bloom:
-            radius = imagepipeline_settings.bloom_radius
-            weight = imagepipeline_settings.bloom_weight
+            # radius and weight are in percent (0-100) in Blender, LuxCore needs range 0..1
+            radius = imagepipeline_settings.bloom_radius / 100
+            weight = imagepipeline_settings.bloom_weight / 100
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BLOOM'))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.radius', radius))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.weight', weight))
