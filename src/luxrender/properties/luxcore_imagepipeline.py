@@ -317,12 +317,12 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'max': 25.0,
             'soft_max': 25.0
         },
-        # Bloom TODO: Descriptions
+        # Bloom
         {
             'type': 'bool',
             'attr': 'use_bloom',
             'name': 'Bloom',
-            'description': '',
+            'description': 'Apply bloom filter to the image',
             'default': False
         },
         {

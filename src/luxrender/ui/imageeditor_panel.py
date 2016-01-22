@@ -96,6 +96,12 @@ class tonemapping_panel(imageeditor_panel):
             sub.prop(imagepipeline_settings, 'reinhard_postscale')
             sub.prop(imagepipeline_settings, 'reinhard_burn')
 
+        self.layout.prop(imagepipeline_settings, 'use_bloom')
+        if imagepipeline_settings.use_bloom:
+            col = self.layout.column(align=True)
+            col.prop(imagepipeline_settings, 'bloom_radius')
+            col.prop(imagepipeline_settings, 'bloom_weight')
+
         self.layout.label('Analog Film Simulation:')
         self.layout.prop(imagepipeline_settings, 'crf_type', expand=True)
         if imagepipeline_settings.crf_type == 'PRESET':
