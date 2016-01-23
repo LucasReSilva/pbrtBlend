@@ -120,8 +120,8 @@ def set_common_properties(properties, luxcore_name, bump, transparency):
     if bump:
         set_prop_mat(properties, luxcore_name, 'bumptex', bump)
         
-    # Always export the tranparency value, cause in core it would default to 1
-    set_prop_mat(properties, luxcore_name, 'transparency', transparency)
+    if transparency != 1.0:
+        set_prop_mat(properties, luxcore_name, 'transparency', transparency)
 
 
 # Material nodes alphabetical
