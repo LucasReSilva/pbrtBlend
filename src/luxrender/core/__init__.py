@@ -975,7 +975,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         fp = scene.render.filepath
         output_path_split = list(os.path.split(fp))
 
-        if sys.platform in ('win32', 'darwin') and output_path_split[0] == '/tmp':
+        if fp == '' or (sys.platform in ('win32', 'darwin') and output_path_split[0] == '/tmp'):
             output_path_split[0] = efutil.temp_directory()
             fp = '/'.join(output_path_split)
 
@@ -1490,14 +1490,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 if scene.luxcore_translatorsettings.run_luxcoreui:
                     luxrender_path = self.get_lux_binary_path(scene, 'luxcoreui')
                     cmd_args = [luxrender_path, '-o', 'render.cfg']
-                    scene_dir = efutil.filesystem_path(scene.render.filepath)
 
                     env = os.environ.copy()
 
                     if 'linux' in sys.platform:
                         env['LD_LIBRARY_PATH'] = os.path.dirname(luxrender_path)
 
-                    luxrender_process = subprocess.Popen(cmd_args, cwd=scene_dir, env=env)
+                    luxrender_process = subprocess.Popen(cmd_args, cwd=efutil.export_path, env=env)
 
                 return
 
