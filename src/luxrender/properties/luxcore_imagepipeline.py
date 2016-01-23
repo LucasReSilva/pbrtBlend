@@ -141,6 +141,9 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'tonemapper_type',
         ['use_auto_linear', 'linear_scale'],
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
+        # Bloom
+        'use_bloom',
+        ['bloom_radius', 'bloom_weight'],
         # Film response
         'crf_label',
         'crf_type',
@@ -164,6 +167,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
+        'bloom_radius': {'use_bloom': True},
+        'bloom_weight': {'use_bloom': True},
         'crf_preset_menu': {'crf_type': 'PRESET'},
         'crf_file': {'crf_type': 'FILE'},
     }
@@ -311,6 +316,38 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'soft_min': 0.01,
             'max': 25.0,
             'soft_max': 25.0
+        },
+        # Bloom
+        {
+            'type': 'bool',
+            'attr': 'use_bloom',
+            'name': 'Bloom',
+            'description': 'Apply bloom filter to the image',
+            'default': False
+        },
+        {
+            'type': 'float',
+            'attr': 'bloom_radius',
+            'name': 'Radius',
+            'description': 'Size of the bloom effect in percent of the image size',
+            'default': 7.0,
+            'min': 0.1,
+            'max': 100.0,
+            'precision': 1,
+            'subtype': 'PERCENTAGE',
+            'slider': True,
+        },
+        {
+            'type': 'float',
+            'attr': 'bloom_weight',
+            'name': 'Strength',
+            'description': 'Strength of the bloom effect (a linear mix factor)',
+            'default': 25.0,
+            'min': 0.0,
+            'max': 100.0,
+            'precision': 1,
+            'subtype': 'PERCENTAGE',
+            'slider': True,
         },
         # Camera/Film response function (crf)
         {

@@ -369,27 +369,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     render_lock = threading.Lock()
 
-    def __init__(self):
-        # Properties for LuxCore viewport rendering
-        self.luxcore_exporter = None
-        self.space = None # The VIEW_3D space this viewport render is running in
-        self.critical_errors = False
-
-        self.viewFilmWidth = -1
-        self.viewFilmHeight = -1
-        self.viewImageBufferFloat = None
-        self.last_update_time = 0
-        # store renderengine configuration of last update
-        self.lastRenderSettings = ''
-        self.lastVolumeSettings = ''
-        self.lastSessionSettings = ''
-        self.lastHaltTime = -1
-        self.lastHaltSamples = -1
-        self.lastCameraSettings = ''
-        self.lastVisibilitySettings = None
-        self.lastNodeMatSettings = ''
-        self.update_counter = 0
-
     def render(self, scene):
         """
         scene:  bpy.types.Scene
@@ -996,7 +975,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         fp = scene.render.filepath
         output_path_split = list(os.path.split(fp))
 
-        if sys.platform in ('win32', 'darwin') and output_path_split[0] == '/tmp':
+        if fp == '' or (sys.platform in ('win32', 'darwin') and output_path_split[0] == '/tmp'):
             output_path_split[0] = efutil.temp_directory()
             fp = '/'.join(output_path_split)
 
@@ -1511,14 +1490,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 if scene.luxcore_translatorsettings.run_luxcoreui:
                     luxrender_path = self.get_lux_binary_path(scene, 'luxcoreui')
                     cmd_args = [luxrender_path, '-o', 'render.cfg']
-                    scene_dir = efutil.filesystem_path(scene.render.filepath)
 
                     env = os.environ.copy()
 
                     if 'linux' in sys.platform:
                         env['LD_LIBRARY_PATH'] = os.path.dirname(luxrender_path)
 
-                    luxrender_process = subprocess.Popen(cmd_args, cwd=scene_dir, env=env)
+                    luxrender_process = subprocess.Popen(cmd_args, cwd=efutil.export_path, env=env)
 
                 return
 
@@ -1910,8 +1888,25 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     ############################################################################
     # Viewport render
     ############################################################################
-    # Note: all viewport-render related properties were moved to the __init__() function because otherwise
-    # you can't open multiple rendersessions on Windows OS
+
+    luxcore_exporter = None
+    space = None # The VIEW_3D space this viewport render is running in
+    critical_errors = False
+
+    viewFilmWidth = -1
+    viewFilmHeight = -1
+    viewImageBufferFloat = None
+    last_update_time = 0
+    # store renderengine configuration of last update
+    lastRenderSettings = ''
+    lastVolumeSettings = ''
+    lastSessionSettings = ''
+    lastHaltTime = -1
+    lastHaltSamples = -1
+    lastCameraSettings = ''
+    lastVisibilitySettings = None
+    lastNodeMatSettings = ''
+    update_counter = 0
 
     def luxcore_view_draw(self, context):
         def draw_framebuffer():

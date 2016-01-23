@@ -44,11 +44,6 @@ class luxcore_scenesettings(declarative_property_group):
     ]
 
     properties = [
-        #{
-        #    'type': 'text',
-        #    'attr': 'label',
-        #    'name': 'Scene Settings:'
-        #},
         {
             'type': 'float',
             'attr': 'imageScale',
@@ -60,6 +55,5 @@ class luxcore_scenesettings(declarative_property_group):
             'precision': 0,
             'subtype': 'PERCENTAGE',
             'slider': True,
-            'save_in_preset': True
         }
     ]

@@ -204,13 +204,10 @@ class ConfigExporter(object):
         engine = self.get_engine()
 
         if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui' and not self.is_viewport_render:
-            output_path = efutil.filesystem_path(self.blender_scene.render.filepath)
-            if not os.path.isdir(output_path):
-                os.makedirs(output_path)
-    
-            self.properties.Set(pyluxcore.Property('renderengine.type', ['FILESAVER']))
-            self.properties.Set(pyluxcore.Property('filesaver.directory', [output_path]))
-            self.properties.Set(pyluxcore.Property('filesaver.renderengine.type', [engine]))
+            # efutil.export_path is set at the beginning of the render() function in core/__init__.py
+            self.properties.Set(pyluxcore.Property('renderengine.type', 'FILESAVER'))
+            self.properties.Set(pyluxcore.Property('filesaver.directory', efutil.export_path))
+            self.properties.Set(pyluxcore.Property('filesaver.renderengine.type', engine))
         else:
             self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 
@@ -337,12 +334,7 @@ class ConfigExporter(object):
 
                 self.properties.Set(pyluxcore.Property('opencl.devices.select', dev_string))
 
-        # Workaround for we cannot use more than one filmkernel atm.,
-        # the preview auto_linear -> linear -> scale would cause an RuntimeError: clEnqueueNDRangeKernel
-        if not self.is_viewport_render:
-            self.properties.Set(pyluxcore.Property('film.opencl.enable', engine_settings.film_use_opencl))
-        else:
-            self.properties.Set(pyluxcore.Property('film.opencl.enable', False))
+        self.properties.Set(pyluxcore.Property('film.opencl.enable', engine_settings.film_use_opencl))
 
         kernelcache = engine_settings.kernelcache
         self.properties.Set(pyluxcore.Property('opencl.kernelcache', kernelcache))
