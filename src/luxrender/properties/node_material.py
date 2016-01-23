@@ -109,7 +109,7 @@ def export_common_sockets(node, properties):
     if 'Transparency' in node.inputs: # Compatibility with old node setups
         transparency = node.inputs['Transparency'].export_luxcore(properties)
     else:
-        transparency = None
+        transparency = 1.0
 
     return bump, transparency
 
