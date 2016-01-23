@@ -89,6 +89,41 @@ def get_socket_paramsets(sockets, make_texture):
     return params
 
 
+def add_common_sockets(node):
+    """
+    Add sockets shared by all material nodes
+    """
+    node.inputs.new('luxrender_TF_bump_socket', 'Bump')
+    # LuxCore only transparency property
+    node.inputs.new('luxrender_float_limited_0_1_socket', 'Transparency')
+    node.inputs['Transparency'].default_value = 1
+
+    node.outputs.new('NodeSocketShader', 'Surface')
+
+def export_common_sockets(node, properties):
+    """
+    Call this function in export_luxcore() before setting any properties
+    """
+    bump = node.inputs['Bump'].export_luxcore(properties) # may be None!
+
+    if 'Transparency' in node.inputs: # Compatibility with old node setups
+        transparency = node.inputs['Transparency'].export_luxcore(properties)
+    else:
+        transparency = None
+
+    return bump, transparency
+
+def set_common_properties(properties, luxcore_name, bump, transparency):
+    """
+    Call this function in export_luxcore() after setting the properties
+    """
+    if bump:
+        set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+
+    if transparency:
+        set_prop_mat(properties, luxcore_name, 'transparency', transparency)
+
+
 # Material nodes alphabetical
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_carpaint(luxrender_material_node):
@@ -138,9 +173,8 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
         self.inputs.new('luxrender_TF_M3_socket', 'M3')
         self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
         self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth')
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
-        self.outputs.new('NodeSocketShader', 'Surface')
+        add_common_sockets(self)
 
     # Draw the non-socket properties
     def draw_buttons(self, context, layout):
@@ -176,7 +210,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
         ka = self.inputs['Absorption Color'].export_luxcore(properties)
         d = self.inputs['Absorption Depth'].export_luxcore(properties)
 
-        bump = self.inputs['Bump'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'carpaint')
 
@@ -198,8 +232,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
             # Preset
             set_prop_mat(properties, luxcore_name, 'preset', self.carpaint_presets)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -227,8 +260,8 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
         self.inputs.new('luxrender_TC_warp_Ks_socket', 'Warp Specular Color')
         self.inputs.new('luxrender_TC_weft_Kd_socket', 'Weft Diffuse Color')
         self.inputs.new('luxrender_TC_weft_Ks_socket', 'Weft Specular Color')
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-        self.outputs.new('NodeSocketShader', 'Surface')
+
+        add_common_sockets(self)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'fabric_type')
@@ -254,7 +287,7 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
         warp_ks = self.inputs['Warp Specular Color'].export_luxcore(properties)
         weft_kd = self.inputs['Weft Diffuse Color'].export_luxcore(properties)
         weft_ks = self.inputs['Weft Specular Color'].export_luxcore(properties)
-        bump = self.inputs['Bump'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'cloth')
         set_prop_mat(properties, luxcore_name, 'preset', self.fabric_type)
@@ -265,8 +298,7 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
         set_prop_mat(properties, luxcore_name, 'repeat_u', self.repeat_u)
         set_prop_mat(properties, luxcore_name, 'repeat_v', self.repeat_v)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -405,9 +437,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False
 
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-
-        self.outputs.new('NodeSocketShader', 'Surface')
+        add_common_sockets(self)
 
     def draw_buttons(self, context, layout):
         column = layout.row()
@@ -485,7 +515,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
         else:
             u_roughness = v_roughness = self.inputs['Roughness'].export_luxcore(properties)
 
-        bump = self.inputs['Bump'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', type)
         set_prop_mat(properties, luxcore_name, 'kr', kr)
@@ -498,8 +528,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
             set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
             set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -594,10 +623,9 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
         self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
         self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-
         self.inputs['U-Roughness'].name = 'Roughness'
-        self.outputs.new('NodeSocketShader', 'Surface')
+
+        add_common_sockets(self)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'use_anisotropy')
@@ -627,7 +655,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
         ka = self.inputs['Absorption Color'].export_luxcore(properties)
         d = self.inputs['Absorption Depth (nm)'].export_luxcore(properties)
         index = self.inputs['IOR'].export_luxcore(properties)
-        bump = self.inputs['Bump'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'glossy2')
         set_prop_mat(properties, luxcore_name, 'kd', kd)
@@ -641,8 +669,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
         if self.use_ior:
             set_prop_mat(properties, luxcore_name, 'index', index)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -696,10 +723,9 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
         self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-
         self.inputs['U-Roughness'].name = 'Roughness'
-        self.outputs.new('NodeSocketShader', 'Surface')
+
+        add_common_sockets(self)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'use_anisotropy')
@@ -745,7 +771,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         ka = self.inputs['Absorption Color'].export_luxcore(properties)
         d = self.inputs['Absorption Depth (nm)'].export_luxcore(properties)
         index = self.inputs['IOR'].export_luxcore(properties)
-        bump = self.inputs['Bump'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'glossycoating')
         set_prop_mat(properties, luxcore_name, 'base', base)
@@ -759,8 +785,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         if self.use_ior:
             set_prop_mat(properties, luxcore_name, 'index', index)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -879,10 +904,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
         self.inputs.new('luxrender_TF_vroughness_socket', 'BF V-Roughness')
         self.inputs['BF V-Roughness'].enabled = False
 
-        #  Bump
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-
-        self.outputs.new('NodeSocketShader', 'Surface')
+        add_common_sockets(self)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'use_anisotropy')
@@ -916,7 +938,6 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kd = self.inputs['Diffuse Color'].export_luxcore(properties)
-        bump = self.inputs['Bump'].export_luxcore(properties)
         kt = self.inputs['Transmission Color'].export_luxcore(properties)
 
         # Front
@@ -936,6 +957,8 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
         ka_bf = self.inputs['BF Absorption Color'].export_luxcore(properties) if self.two_sided else ka
         d_bf = self.inputs['BF Absorption Depth (nm)'].export_luxcore(properties) if self.two_sided else d
         index_bf = self.inputs['BF IOR'].export_luxcore(properties) if self.two_sided else index
+
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'glossytranslucent')
         set_prop_mat(properties, luxcore_name, 'kd', kd)
@@ -963,9 +986,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
         if self.use_ior_bf:
             set_prop_mat(properties, luxcore_name, 'index_bf', index_bf)
 
-        # Bump
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -1042,10 +1063,8 @@ class luxrender_material_type_node_matte(luxrender_material_node):
     def init(self, context):
         self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
         self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-        #self.inputs.new('NodeSocketShader', 'Emission') # TODO: what do?
 
-        self.outputs.new('NodeSocketShader', 'Surface')
+        add_common_sockets(self)
 
     def export_material(self, make_material, make_texture):
         mat_type = 'matte'
@@ -1060,7 +1079,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
         kd = self.inputs[0].export_luxcore(properties)
         sigma = self.inputs[1].export_luxcore(properties)
-        bump = self.inputs[2].export_luxcore(properties) # may be None!
+        bump, transparency = export_common_sockets(self, properties)
 
         if sigma == 0:
             set_prop_mat(properties, luxcore_name, 'type', 'matte')
@@ -1070,11 +1089,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
         set_prop_mat(properties, luxcore_name, 'kd', kd)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
-
-        # Light emission
-        #export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -1093,9 +1108,8 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
         self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
         self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
         self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
-        self.outputs.new('NodeSocketShader', 'Surface')
+        add_common_sockets(self)
 
     def export_material(self, make_material, make_texture):
         mat_type = 'mattetranslucent'
@@ -1112,7 +1126,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
         kr = self.inputs[0].export_luxcore(properties)
         kt = self.inputs[1].export_luxcore(properties)
         sigma = self.inputs[2].export_luxcore(properties)
-        bump = self.inputs[3].export_luxcore(properties) # may be None!
+        bump, transparency = export_common_sockets(self, properties)
 
         if sigma == 0:
             set_prop_mat(properties, luxcore_name, 'type', 'mattetranslucent')
@@ -1123,8 +1137,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
         set_prop_mat(properties, luxcore_name, 'kr', kr)
         set_prop_mat(properties, luxcore_name, 'kt', kt)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -1237,10 +1250,9 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
         self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-
         self.inputs['U-Roughness'].name = 'Roughness'
-        self.outputs.new('NodeSocketShader', 'Surface')
+
+        add_common_sockets(self)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'use_anisotropy')
@@ -1280,15 +1292,14 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         u_roughness = self.inputs[2].export_luxcore(properties)
         v_roughness = self.inputs[3].export_luxcore(properties) if self.use_anisotropy else u_roughness
 
-        bump = self.inputs['Bump'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'metal2')
         set_prop_mat(properties, luxcore_name, 'uroughness', u_roughness)
         set_prop_mat(properties, luxcore_name, 'vroughness', v_roughness)
         set_prop_mat(properties, luxcore_name, 'fresnel', fresnel_texture)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -1305,9 +1316,8 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
         self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
         self.inputs.new('luxrender_TF_film_ior_socket', 'Film IOR')
         self.inputs.new('luxrender_TF_film_thick_socket', 'Film Thickness (nm)')
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
 
-        self.outputs.new('NodeSocketShader', 'Surface')
+        add_common_sockets(self)
 
     def export_material(self, make_material, make_texture):
         mat_type = 'mirror'
@@ -1321,13 +1331,12 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kr = self.inputs['Reflection Color'].export_luxcore(properties)
-        bump = self.inputs['Bump'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'mirror')
         set_prop_mat(properties, luxcore_name, 'kr', kr)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -1345,18 +1354,7 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         self.inputs.new('NodeSocketShader', 'Material 1')
         self.inputs.new('NodeSocketShader', 'Material 2')
 
-        if UseLuxCore():
-            # LuxCore supports bumpmapping on the mix material
-            self.inputs.new('luxrender_TF_bump_socket', 'Bump')
-
-        self.outputs.new('NodeSocketShader', 'Surface')
-
-    def draw_buttons(self, context, layout):
-        # When switching from Classic to LuxCore API, add the bump socket. Don't remove it when switching back so
-        # node connections are not destroyed, the bump slot will simply be ignored by the Classic API export
-        if UseLuxCore():
-            if not 'Bump' in self.inputs.keys():
-                self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        add_common_sockets(self)
 
     def export_material(self, make_material, make_texture):
         print('export node: mix')
@@ -1388,15 +1386,14 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         amount = self.inputs[0].export_luxcore(properties)
         mat1 = export_submat_luxcore(properties, self.inputs[1])
         mat2 = export_submat_luxcore(properties, self.inputs[2])
-        bump = self.inputs[3].export_luxcore(properties) # may be None!
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'mix')
         set_prop_mat(properties, luxcore_name, 'amount', amount)
         set_prop_mat(properties, luxcore_name, 'material1', mat1)
         set_prop_mat(properties, luxcore_name, 'material2', mat2)
 
-        if bump:
-            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 
@@ -1588,6 +1585,9 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
         self.inputs['p3'].default_value = 2
 
         self.outputs.new('NodeSocketShader', 'Surface')
+
+        # TODO: add_common_sockets(self)
+        # TODO: is bump mapping on velvet supported?
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'advanced', toggle=True)
