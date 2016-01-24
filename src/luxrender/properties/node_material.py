@@ -95,8 +95,7 @@ def add_common_sockets(node):
     """
     node.inputs.new('luxrender_TF_bump_socket', 'Bump')
     # LuxCore only transparency property
-    node.inputs.new('luxrender_float_limited_0_1_socket', 'Transparency')
-    node.inputs['Transparency'].default_value = 1
+    node.inputs.new('luxrender_transparency_socket', 'Transparency')
 
     node.outputs.new('NodeSocketShader', 'Surface')
 

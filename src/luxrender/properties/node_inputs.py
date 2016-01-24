@@ -307,7 +307,7 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'temperature')
+        layout.prop(self, 'temperature', slider=True)
 
     def export_texture(self, make_texture):
         blackbody_params = ParamSet()
