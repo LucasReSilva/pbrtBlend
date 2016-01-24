@@ -2966,9 +2966,9 @@ class luxrender_color_socket(bpy.types.NodeSocket):
 class luxrender_float_socket(bpy.types.NodeSocket):
     """LuxCore transparency socket"""
     bl_idname = 'luxrender_transparency_socket'
-    bl_label = 'Transparency'
+    bl_label = 'Opacity'
 
-    default_value = bpy.props.FloatProperty(name='Transparency', default=1.0, min=0.0, max=1.0)
+    default_value = bpy.props.FloatProperty(name='Opacity', default=1.0, min=0.0, max=1.0)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
