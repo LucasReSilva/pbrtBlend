@@ -450,7 +450,7 @@ def convert_socket(socket, lux_nodetree):
 
         if node.image:
             # Selected Blender image
-            lux_node.image = node.image.name
+            lux_node.image_name = node.image.name
 
         # Gamma (from color space)
         lux_node.gamma = 2.2 if node.color_space == 'COLOR' else 1
