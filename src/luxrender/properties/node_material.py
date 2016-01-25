@@ -54,6 +54,8 @@ from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxco
                export_submat_luxcore, export_emission_luxcore, warning_classic_node, warning_luxcore_node,
                has_interior_volume)
 
+from ..export.luxcore.utils import get_elem_key
+
 
 class luxrender_texture_maker:
     def __init__(self, lux_context, root_name):
@@ -192,7 +194,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 
         return make_material(mat_type, self.name, carpaint_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kd = self.inputs['Diffuse Color'].export_luxcore(properties)
@@ -279,7 +281,7 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 
         return make_material(mat_type, self.name, cloth_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         warp_kd = self.inputs['Warp Diffuse Color'].export_luxcore(properties)
@@ -494,7 +496,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 
             return make_material(mat_type, self.name, glass_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         if self.rough:
@@ -644,7 +646,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 
         return make_material(mat_type, self.name, glossy_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kd = self.inputs['Diffuse Color'].export_luxcore(properties)
@@ -760,10 +762,10 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
         return make_material(mat_type, self.name, glossycoating_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
-        base = export_submat_luxcore(properties, self.inputs['Base Material'])
+        base = export_submat_luxcore(properties, self.inputs['Base Material'], luxcore_exporter)
         ks = self.inputs['Specular Color'].export_luxcore(properties)
         u_roughness = self.inputs[5].export_luxcore(properties)
         v_roughness = self.inputs[6].export_luxcore(properties) if self.use_anisotropy else u_roughness
@@ -933,7 +935,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 
         return make_material(mat_type, self.name, glossytranslucent_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kd = self.inputs['Diffuse Color'].export_luxcore(properties)
@@ -1073,7 +1075,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
         return make_material(mat_type, self.name, matte_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kd = self.inputs[0].export_luxcore(properties)
@@ -1119,7 +1121,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 
         return make_material(mat_type, self.name, mattetranslucent_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kr = self.inputs[0].export_luxcore(properties)
@@ -1268,7 +1270,7 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 
         return make_material(mat_type, self.name, metal2_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         if self.input_type == 'color':
@@ -1326,7 +1328,7 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 
         return make_material(mat_type, self.name, mirror_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kr = self.inputs['Reflection Color'].export_luxcore(properties)
@@ -1379,12 +1381,12 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 
         return make_material(mat_type, self.name, mix_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         amount = self.inputs[0].export_luxcore(properties)
-        mat1 = export_submat_luxcore(properties, self.inputs[1])
-        mat2 = export_submat_luxcore(properties, self.inputs[2])
+        mat1 = export_submat_luxcore(properties, self.inputs[1], luxcore_exporter)
+        mat2 = export_submat_luxcore(properties, self.inputs[2], luxcore_exporter)
         bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'mix')
@@ -1415,7 +1417,7 @@ class luxrender_material_type_node_null(luxrender_material_node):
 
         return make_material(mat_type, self.name, null_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         set_prop_mat(properties, luxcore_name, 'type', 'null')
@@ -1605,7 +1607,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
 
         return make_material(mat_type, self.name, velvet_params)
 
-    def export_luxcore(self, properties, name=None):
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
         kd = self.inputs['Diffuse Color'].export_luxcore(properties)
@@ -1738,6 +1740,37 @@ class luxrender_material_type_node_standard(luxrender_material_node):
             layout.prop(self, 'multibounce')
             layout.prop(self, 'anisotropic')
 
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_datablock(luxrender_material_node):
+    """Datablock material node"""
+    bl_idname = 'luxrender_material_type_node_datablock'
+    bl_label = 'Material Datablock'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 160
+
+    datablock_name = bpy.props.StringProperty(name='Datablock', description='')
+
+    def init(self, context):
+        self.outputs.new('NodeSocketShader', 'Surface')
+        # add tex output
+
+    def draw_buttons(self, context, layout):
+        layout.prop_search(self, 'datablock_name', bpy.data, 'materials', text='')
+
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
+        if self.datablock_name in bpy.data.materials:
+            mat = bpy.data.materials[self.datablock_name]
+
+            luxcore_exporter.convert_material(mat)
+            exporter = luxcore_exporter.material_cache[get_elem_key(mat)]
+            luxcore_name = exporter.luxcore_name
+        else:
+            luxcore_name = create_luxcore_name_mat(self, name)
+            set_prop_mat(properties, luxcore_name, 'type', 'matte')
+            set_prop_mat(properties, luxcore_name, 'kd', [0, 0, 0])
+
+        return luxcore_name
+
 
 @LuxRenderAddon.addon_register_class
 class luxrender_material_output_node(luxrender_node):
@@ -1794,14 +1827,14 @@ class luxrender_material_output_node(luxrender_node):
                 row.prop(luxcore_material, 'visibility_indirect_glossy_enable')
                 row.prop(luxcore_material, 'visibility_indirect_specular_enable')
 
-    def export_luxcore(self, material, properties, blender_scene):
+    def export_luxcore(self, material, properties, blender_scene, luxcore_exporter):
         # Note: volumes are exported in export/luxcore/materials.py (in "parent" function that calls this function)
 
         tree_name = material.luxrender_material.nodetree
         print('Converting material: %s (Nodetree: %s)' % (material.name, tree_name))
 
         # Export the material tree
-        luxcore_name = export_submat_luxcore(properties, self.inputs[0], material.name)
+        luxcore_name = export_submat_luxcore(properties, self.inputs[0], luxcore_exporter, material.name)
         # Export emission node if attached to this node
         export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
         # Export advanced LuxCore material settings

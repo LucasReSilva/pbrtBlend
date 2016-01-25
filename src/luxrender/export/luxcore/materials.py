@@ -79,7 +79,7 @@ class MaterialExporter(object):
             self.__convert_default_matte()
 
         try:
-            self.luxcore_name = output_node.export_luxcore(self.material, self.properties, self.blender_scene)
+            self.luxcore_name = output_node.export_luxcore(self.material, self.properties, self.blender_scene, self.luxcore_exporter)
 
             prefix = 'scene.materials.' + self.luxcore_name
             self.__set_material_volumes(prefix, output_node.interior_volume, output_node.exterior_volume)
@@ -340,7 +340,7 @@ class MaterialExporter(object):
                         base = bpy.data.materials[material_base_name]
                         self.luxcore_exporter.convert_material(base)
                         base_exporter = self.luxcore_exporter.material_cache[get_elem_key(base)]
-                        luxcore_base_name = base_exporter.luxcore_material_name
+                        luxcore_base_name = base_exporter.luxcore_name
 
                         self.properties.Set(pyluxcore.Property(prefix + '.base', [luxcore_base_name]))
                     except Exception as err:
