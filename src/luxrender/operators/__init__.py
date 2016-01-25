@@ -354,3 +354,24 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
         print('-' * 20)
         self.report({'WARNING'}, 'Restart Blender!')
         return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_fix_color_management(bpy.types.Operator):
+    """Reset "view", "exposure" and "gamma" values. Rendered images might look wrong when these settings are not not the defaults."""
+
+    bl_idname = "luxrender.fix_color_management"
+    bl_label = "Fix Color Management"
+
+    def execute(self, context):
+        vs = context.scene.view_settings
+
+        if vs.view_transform != 'Default':
+            vs.view_transform = 'Default'
+
+        if vs.exposure != 0:
+            vs.exposure = 0
+
+        if vs.gamma != 1:
+            vs.gamma = 1
+
+        return {'FINISHED'}
