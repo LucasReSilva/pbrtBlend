@@ -224,7 +224,7 @@ def export_fallback_volume(properties, socket, name):
     set_prop_vol(properties, luxcore_name, 'absorption', [100, 100, 100])
     return luxcore_name
 
-def export_submat_luxcore(properties, socket, name=None):
+def export_submat_luxcore(properties, socket, luxcore_exporter, name=None):
     """
     NodeSocketShader sockets cannot export themselves, so this function does it
     """
@@ -235,7 +235,7 @@ def export_submat_luxcore(properties, socket, name=None):
         print('WARNING: Unlinked material socket! Using a black material as fallback.')
         submat_name = export_fallback_material(properties, socket, name)
     else:
-        submat_name = node.export_luxcore(properties, name)
+        submat_name = node.export_luxcore(properties, luxcore_exporter, name)
 
     return submat_name
 

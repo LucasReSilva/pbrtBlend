@@ -163,6 +163,8 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_material_scatter_node", label="Scatter"),
         NodeItem("luxrender_material_doubleside_node", label="Double-Sided"),
         NodeItem("luxrender_material_layered_node", label="Layered"),
+        Separator(),
+        NodeItem("luxrender_material_type_node_datablock"),
     ]),
 
     luxrender_node_category_material("LUX_TEXTURE", "Texture", items=[
