@@ -2980,7 +2980,7 @@ class luxrender_float_socket(bpy.types.NodeSocket):
         else:
             column.prop(self, 'default_value', text=self.name, slider=True)
         if override:
-            column.label('No SubMat Opacity!', icon='INFO')
+            column.label('SubMat Opacity OFF', icon='INFO')
 
     def draw_color(self, context, node):
         return float_socket_color

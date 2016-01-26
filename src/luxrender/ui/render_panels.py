@@ -77,6 +77,11 @@ class render_settings(render_panel):
         # Draw LuxCore stuff above settings defined via property group (device selection)
         # This is done here so the device enums are expanded properly (horizontal, not vertical)
         if UseLuxCore():
+            vs = context.scene.view_settings
+            if vs.view_transform != 'Default' or vs.exposure != 0 or vs.gamma != 1:
+                layout.label('Color Management not using default values!', icon='ERROR')
+                layout.operator('luxrender.fix_color_management')
+
             # Advanced settings checkbox
             split = layout.split()
 

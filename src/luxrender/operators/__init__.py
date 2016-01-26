@@ -354,16 +354,43 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
         print('-' * 20)
         self.report({'WARNING'}, 'Restart Blender!')
         return {'FINISHED'}
+<<<<<<< local
 
+=======
+>>>>>>> other
 
 @LuxRenderAddon.addon_register_class
+<<<<<<< local
 class LUXRENDER_OT_open_daily_builds_webpage(bpy.types.Operator):
     """Open the "daily builds" webpage"""
     bl_idname = 'luxrender.open_daily_builds_webpage'
     bl_label = 'Update LuxRender'
+=======
+class LUXRENDER_OT_fix_color_management(bpy.types.Operator):
+    """Reset "view", "exposure" and "gamma" values. Rendered images might look wrong when these settings are not not the defaults."""
+
+    bl_idname = "luxrender.fix_color_management"
+    bl_label = "Fix Color Management"
+>>>>>>> other
 
     def execute(self, context):
+<<<<<<< local
         import webbrowser
         webbrowser.open('http://www.luxrender.net/forum/viewtopic.php?f=30&t=12147')
+=======
+        vs = context.scene.view_settings
+>>>>>>> other
+
+<<<<<<< local
+        return {'FINISHED'}=======
+        if vs.view_transform != 'Default':
+            vs.view_transform = 'Default'
+
+        if vs.exposure != 0:
+            vs.exposure = 0
+
+        if vs.gamma != 1:
+            vs.gamma = 1
 
         return {'FINISHED'}
+>>>>>>> other
