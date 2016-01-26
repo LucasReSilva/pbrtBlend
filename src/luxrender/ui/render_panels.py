@@ -115,7 +115,7 @@ class render_settings(render_panel):
 
             row = split.row()
             sub = row.row()
-            sub.label(text='Preview Device:')
+            sub.label(text='Viewport Device:')
 
             row = split.row()
             sub = row.row()
