@@ -261,6 +261,20 @@ class LuxCoreExporter(object):
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.weight', weight))
             index += 1
 
+        # Color aberration
+        if imagepipeline_settings.use_color_aberration:
+            amount = imagepipeline_settings.color_aberration_amount
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'COLOR_ABERRATION'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.amount', amount))
+            index += 1
+
+        # Vignetting
+        if imagepipeline_settings.use_vignetting:
+            scale = imagepipeline_settings.vignetting_scale
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'VIGNETTING'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', scale))
+            index += 1
+
         # Camera response function
         if imagepipeline_settings.crf_type != 'NONE':
             if imagepipeline_settings.crf_type == 'PRESET' and imagepipeline_settings.crf_preset != 'None':

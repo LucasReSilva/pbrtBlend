@@ -141,9 +141,15 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'tonemapper_type',
         ['use_auto_linear', 'linear_scale'],
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
+        # Postpro plugin label
+        'label_postpro',
         # Bloom
         'use_bloom',
         ['bloom_radius', 'bloom_weight'],
+        # Color aberration
+        ['use_color_aberration', 'color_aberration_amount'],
+        # Vignetting
+        ['use_vignetting', 'vignetting_scale'],
         # Film response
         'crf_label',
         'crf_type',
@@ -169,6 +175,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'reinhard_burn': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'bloom_radius': {'use_bloom': True},
         'bloom_weight': {'use_bloom': True},
+        'color_aberration_amount': {'use_color_aberration': True},
+        'vignetting_scale': {'use_vignetting': True},
         'crf_preset_menu': {'crf_type': 'PRESET'},
         'crf_file': {'crf_type': 'FILE'},
     }
@@ -185,6 +193,7 @@ class luxcore_imagepipeline_settings(declarative_property_group):
                 ('disabled', 'RGB (Default)', 'RGB colors (beauty/combined pass)'),
                 ('ALPHA', 'Alpha', ''),
                 ('MATERIAL_ID', 'Material ID', ''),
+                ('OBJECT_ID', 'Object ID', ''),
                 ('EMISSION', 'Emission', ''),
                 ('DIRECT_DIFFUSE', 'Direct Diffuse', ''),
                 ('DIRECT_GLOSSY', 'Direct Glossy', ''),
@@ -317,6 +326,12 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'max': 25.0,
             'soft_max': 25.0
         },
+        # Postpro label
+        {
+            'attr': 'label_postpro',
+            'type': 'text',
+            'name': 'Lens Effects:',
+        },
         # Bloom
         {
             'type': 'bool',
@@ -347,6 +362,44 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'max': 100.0,
             'precision': 1,
             'subtype': 'PERCENTAGE',
+            'slider': True,
+        },
+        # Color aberration
+        {
+            'type': 'bool',
+            'attr': 'use_color_aberration',
+            'name': 'Color Aberration',
+            'description': '', # TODO
+            'default': False
+        },
+        {
+            'type': 'float',
+            'attr': 'color_aberration_amount',
+            'name': 'Amount',
+            'description': 'Strength of the effect',
+            'default': 0.005,
+            'min': 0.0,
+            'soft_max': 0.1,
+            'max': 1.0,
+            'slider': True,
+        },
+        # Vignetting
+        {
+            'type': 'bool',
+            'attr': 'use_vignetting',
+            'name': 'Vignetting',
+            'description': 'Darken the corners of the image',
+            'default': False
+        },
+        {
+            'type': 'float',
+            'attr': 'vignetting_scale',
+            'name': 'Amount',
+            'description': 'Strength of the effect',
+            'default': 0.4,
+            'min': 0.0,
+            'soft_max': 0.6,
+            'max': 1.0,
             'slider': True,
         },
         # Camera/Film response function (crf)

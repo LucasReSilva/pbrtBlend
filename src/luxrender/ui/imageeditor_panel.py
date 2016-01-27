@@ -99,8 +99,16 @@ class tonemapping_panel(imageeditor_panel):
         self.layout.prop(imagepipeline_settings, 'use_bloom')
         if imagepipeline_settings.use_bloom:
             col = self.layout.column(align=True)
-            col.prop(imagepipeline_settings, 'bloom_radius')
-            col.prop(imagepipeline_settings, 'bloom_weight')
+            col.prop(imagepipeline_settings, 'bloom_radius', slider=True)
+            col.prop(imagepipeline_settings, 'bloom_weight', slider=True)
+
+        self.layout.prop(imagepipeline_settings, 'use_color_aberration')
+        if imagepipeline_settings.use_color_aberration:
+            self.layout.prop(imagepipeline_settings, 'color_aberration_amount', slider=True)
+
+        self.layout.prop(imagepipeline_settings, 'use_vignetting')
+        if imagepipeline_settings.use_vignetting:
+            self.layout.prop(imagepipeline_settings, 'vignetting_scale', slider=True)
 
         self.layout.label('Analog Film Simulation:')
         self.layout.prop(imagepipeline_settings, 'crf_type', expand=True)
