@@ -1425,6 +1425,34 @@ class luxrender_material_type_node_null(luxrender_material_node):
         return luxcore_name
 
 
+@LuxRenderAddon.addon_register_class
+class luxrender_material_type_node_transparent(luxrender_material_node):
+    """Null material node"""
+    bl_idname = 'luxrender_material_transparent_node'
+    bl_label = 'Transparent Material'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 160
+
+    def init(self, context):
+        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+        self.outputs.new('NodeSocketShader', 'Surface')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+    def export_luxcore(self, properties, luxcore_exporter, name=None):
+        luxcore_name = create_luxcore_name_mat(self, name)
+
+        transparency = self.inputs['Transmission Color'].export_luxcore(properties)
+
+        set_prop_mat(properties, luxcore_name, 'type', 'null')
+
+        if transparency != 1.0 and transparency != [1.0, 1.0, 1.0]:
+            set_prop_mat(properties, luxcore_name, 'transparency', transparency)
+
+        return luxcore_name
+
+
 # Deprecated, replaced by unified glass node
 @LuxRenderAddon.addon_register_class
 class luxrender_material_type_node_roughglass(luxrender_material_node):

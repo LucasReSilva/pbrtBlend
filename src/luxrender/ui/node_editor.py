@@ -147,6 +147,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_material_matte_node", label="Matte"),
         NodeItem("luxrender_material_glossy_node", label="Glossy"),
         NodeItem("luxrender_material_null_node", label="Null"),
+        NodeItem("luxrender_material_transparent_node", label="Transparent"),
         NodeItem("luxrender_material_glass_node", label="Glass"),
         #NodeItem("luxrender_material_glass2_node", label="Glass2"), # replaced by unified glass node
         #NodeItem("luxrender_material_roughglass_node", label="Rough Glass"), # replaced by unified glass node
