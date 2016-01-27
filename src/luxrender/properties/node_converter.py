@@ -511,7 +511,9 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
         warning_luxcore_node(layout)
 
         layout.prop(self, 'mode', text='')
-        layout.prop(self, 'clamp_output')
+
+        if self.mode != 'clamp':
+            layout.prop(self, 'clamp_output')
 
         if self.mode == 'clamp':
             layout.prop(self, 'mode_clamp_min')
@@ -542,7 +544,7 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
             set_prop_tex(properties, luxcore_name, 'texture1', slot_0)
             set_prop_tex(properties, luxcore_name, 'texture2', slot_1)
 
-        if self.clamp_output:
+        if self.clamp_output and self.mode != 'clamp':
             clamp_name = create_luxcore_name(self, suffix='clamp')
             set_prop_tex(properties, clamp_name, 'type', 'clamp')
             set_prop_tex(properties, clamp_name, 'texture', luxcore_name)
