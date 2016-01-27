@@ -862,21 +862,28 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
         if self.source == 'blender_image':
             if self.image_name in bpy.data.images:
+                valid_image = True
                 image = bpy.data.images[self.image_name]
                 is_packed = bool(image.packed_file) and not os.path.exists(bpy.path.abspath(image.filepath))
             else:
+                valid_image = False
                 is_packed = False
 
+            show_previews = context.scene.luxcore_enginesettings.nodeeditor_show_imagemap_previews
+
+            # "Show Preview" button
             split = layout.split(percentage=0.1)
             sub = split.row()
-            sub.active = context.scene.luxcore_enginesettings.nodeeditor_show_imagemap_previews and not is_packed
+            sub.active = show_previews and not is_packed
             sub.prop(self, 'show_preview', toggle=True, icon_only=True, icon='IMAGE_COL')
 
+            # Image dropdown and "Open" button
             split2 = split.split(align=True, percentage=0.67)
             split2.prop_search(self, 'image_name', bpy.data, 'images', text='')
             split2.prop(self, 'load_image_button', toggle=True, icon='FILESEL')
 
-            if context.scene.luxcore_enginesettings.nodeeditor_show_imagemap_previews and self.show_preview:
+            # Preview thumbnail
+            if show_previews and self.show_preview and valid_image:
                 if is_packed:
                     layout.label("Can't preview packed image")
                 else:
