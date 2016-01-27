@@ -91,9 +91,6 @@ from ..ui.textures import (
 from .. import operators
 from ..operators import lrmdb, export, materials, nodes, cycles_converter
 
-# To be able to add the draw_button_show_imagemap_previews function
-from ..ui.node_editor import luxrender_mat_node_editor
-
 def _register_elm(elm, required=False):
     try:
         elm.COMPAT_ENGINES.add('LUXRENDER_RENDER')
