@@ -998,4 +998,11 @@ may mute lamps and caustics',
                            'and final render)',
             'default': True,
         },
+        {
+            'type': 'bool',
+            'attr': 'nodeeditor_show_imagemap_previews',
+            'name': 'Thumbnails',
+            'description': 'Show preview images in imagemap nodes',
+            'default': True,
+        },
     ]

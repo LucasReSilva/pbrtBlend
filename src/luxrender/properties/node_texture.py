@@ -58,6 +58,8 @@ from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_c
 
 from bpy_extras.image_utils import load_image
 
+import bpy.utils.previews
+
 
 # Define the list of noise types globally, this gets used by a few different nodes
 noise_basis_items = [
@@ -750,6 +752,10 @@ class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
+preview_collections = {}
+
+
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     """Blender image map texture node"""
@@ -757,6 +763,43 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     bl_label = 'Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
+
+    def generate_preview(self, context):
+        luxcore_name = create_luxcore_name(self)
+
+        if luxcore_name not in preview_collections:
+            collection = bpy.utils.previews.new()
+            collection.previews = ()
+            collection.image_name = ''
+            preview_collections[luxcore_name] = collection
+
+        enum_items = []
+
+        wm = context.window_manager
+        #directory = wm.my_previews_dir
+
+        # Get the preview collection
+        collection = preview_collections[luxcore_name]
+
+        new_image_name = self.image_name
+        if collection.image_name == new_image_name:
+            return collection.previews
+        else:
+            collection.image_name = new_image_name
+
+        # We have to reconstruct the previews
+        collection.clear()
+
+        if self.image_name in bpy.data.images:
+            image = bpy.data.images[self.image_name]
+            thumb = collection.load(image.name, bpy.path.abspath(image.filepath), 'IMAGE')
+            enum_items = [(image.filepath, image.name, '', thumb.icon_id, 0)]
+
+        collection.previews = enum_items
+        return collection.previews
+
+    preview = bpy.props.EnumProperty(items=generate_preview)
+    show_preview = bpy.props.BoolProperty(name='Show Preview', default=True, description='Show imagemap thumbnail')
 
     def update_is_normal_map(self, context):
         self.outputs['Color'].enabled = not self.is_normal_map
@@ -818,9 +861,27 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         layout.prop(self, 'source', expand=True)
 
         if self.source == 'blender_image':
-            split = layout.split(align=True, percentage=0.7)
-            split.prop_search(self, 'image_name', bpy.data, 'images', text='')
-            split.prop(self, 'load_image_button', toggle=True, icon='FILESEL')
+            if self.image_name in bpy.data.images:
+                image = bpy.data.images[self.image_name]
+                is_packed = bool(image.packed_file) and not os.path.exists(bpy.path.abspath(image.filepath))
+            else:
+                is_packed = False
+
+            split = layout.split(percentage=0.1)
+            sub = split.row()
+            sub.active = context.scene.luxcore_enginesettings.nodeeditor_show_imagemap_previews and not is_packed
+            sub.prop(self, 'show_preview', toggle=True, icon_only=True, icon='IMAGE_COL')
+
+            split2 = split.split(align=True, percentage=0.67)
+            split2.prop_search(self, 'image_name', bpy.data, 'images', text='')
+            split2.prop(self, 'load_image_button', toggle=True, icon='FILESEL')
+
+            if context.scene.luxcore_enginesettings.nodeeditor_show_imagemap_previews and self.show_preview:
+                if is_packed:
+                    layout.label("Can't preview packed image")
+                else:
+                    layout.template_icon_view(self, 'preview', show_labels=True)
+
         elif self.source == 'manual_filepath':
             layout.prop(self, 'manual_filepath')
 
@@ -843,6 +904,9 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         row = layout.row()
         row.enabled = UseLuxCore()
         row.prop(self, 'is_normal_map')
+
+    def draw_label(self):
+        return self.image_name
 
     def export_texture(self, make_texture):
         image = bpy.data.images[self.image_name]
