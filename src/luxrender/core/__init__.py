@@ -91,6 +91,8 @@ from ..ui.textures import (
 from .. import operators
 from ..operators import lrmdb, export, materials, nodes, cycles_converter
 
+# To be able to add the draw_button_show_imagemap_previews function
+from ..ui.node_editor import luxrender_mat_node_editor
 
 def _register_elm(elm, required=False):
     try:
@@ -354,6 +356,15 @@ def DrawButtonPause(self, context):
             self.layout.prop(scene.luxcore_rendering_controls, "pause_viewport_render", icon="PAUSE", text="")
 
 _register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
+
+
+def draw_button_show_imagemap_previews(self, context):
+    if context.scene.render.engine == "LUXRENDER_RENDER" and UseLuxCore():
+        self.layout.prop(context.scene.luxcore_enginesettings, 'nodeeditor_show_imagemap_previews',
+                         toggle=True,
+                         icon='IMAGE_COL')
+
+_register_elm(bpy.types.NODE_HT_header.append(draw_button_show_imagemap_previews))
 
 
 @LuxRenderAddon.addon_register_class
