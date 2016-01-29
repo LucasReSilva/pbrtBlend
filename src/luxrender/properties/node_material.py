@@ -725,8 +725,10 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
         self.inputs['U-Roughness'].name = 'Roughness'
+        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        # Note: glossycoating does not support the .transparency attribute, thus no add_common_properties() call
 
-        add_common_sockets(self)
+        self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'use_anisotropy')
@@ -772,7 +774,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         ka = self.inputs['Absorption Color'].export_luxcore(properties)
         d = self.inputs['Absorption Depth (nm)'].export_luxcore(properties)
         index = self.inputs['IOR'].export_luxcore(properties)
-        bump, transparency = export_common_sockets(self, properties)
+        bump = self.inputs['Bump'].export_luxcore(properties) # May be None
 
         set_prop_mat(properties, luxcore_name, 'type', 'glossycoating')
         set_prop_mat(properties, luxcore_name, 'base', base)
@@ -786,7 +788,8 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         if self.use_ior:
             set_prop_mat(properties, luxcore_name, 'index', index)
 
-        set_common_properties(properties, luxcore_name, bump, transparency)
+        if bump:
+            set_prop_mat(properties, luxcore_name, 'bumptex', bump)
 
         return luxcore_name
 
@@ -1403,12 +1406,17 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 class luxrender_material_type_node_null(luxrender_material_node):
     """Null material node"""
     bl_idname = 'luxrender_material_null_node'
-    bl_label = 'Null Material'
+    bl_label = 'Transparent Material'
     bl_icon = 'MATERIAL'
-    bl_width_min = 160
+    bl_width_min = 180
 
     def init(self, context):
+        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
         self.outputs.new('NodeSocketShader', 'Surface')
+
+    def draw_buttons(self, context, layout):
+        if not UseLuxCore():
+            layout.label('Color not supported in Classic API', icon='ERROR')
 
     def export_material(self, make_material, make_texture):
         mat_type = 'null'
@@ -1416,29 +1424,6 @@ class luxrender_material_type_node_null(luxrender_material_node):
         null_params = ParamSet()
 
         return make_material(mat_type, self.name, null_params)
-
-    def export_luxcore(self, properties, luxcore_exporter, name=None):
-        luxcore_name = create_luxcore_name_mat(self, name)
-
-        set_prop_mat(properties, luxcore_name, 'type', 'null')
-
-        return luxcore_name
-
-
-@LuxRenderAddon.addon_register_class
-class luxrender_material_type_node_transparent(luxrender_material_node):
-    """Null material node"""
-    bl_idname = 'luxrender_material_transparent_node'
-    bl_label = 'Transparent Material'
-    bl_icon = 'MATERIAL'
-    bl_width_min = 160
-
-    def init(self, context):
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-        self.outputs.new('NodeSocketShader', 'Surface')
-
-    def draw_buttons(self, context, layout):
-        warning_luxcore_node(layout)
 
     def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
@@ -1613,10 +1598,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
         self.inputs['p3'].enabled = False
         self.inputs['p3'].default_value = 2
 
-        self.outputs.new('NodeSocketShader', 'Surface')
-
-        # TODO: add_common_sockets(self)
-        # TODO: is bump mapping on velvet supported?
+        add_common_sockets(self)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'advanced', toggle=True)
@@ -1643,6 +1625,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
         p1 = self.inputs['p1'].export_luxcore(properties)
         p2 = self.inputs['p2'].export_luxcore(properties)
         p3 = self.inputs['p3'].export_luxcore(properties)
+        bump, transparency = export_common_sockets(self, properties)
 
         set_prop_mat(properties, luxcore_name, 'type', 'velvet')
         set_prop_mat(properties, luxcore_name, 'kd', kd)
@@ -1653,8 +1636,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
             set_prop_mat(properties, luxcore_name, 'p2', p2)
             set_prop_mat(properties, luxcore_name, 'p3', p3)
 
-        # TODO: is bump mapping on velvet suported?
-        #set_prop_mat(properties, luxcore_name, 'bump', bump)
+        set_common_properties(properties, luxcore_name, bump, transparency)
 
         return luxcore_name
 

@@ -266,6 +266,12 @@ def cycles_material_converter(blender_mat):
 
         # TODO: displacement socket
 
+        # Fallback in case no node could be converted
+        # TODO: try to find a texture and attach it to a new diffuse mat node
+
+        # Second fallback
+        # TODO: create white matte/warning color/delete the node tree?
+
         return {'FINISHED'}
     except Exception as err:
         print('ERROR: Cannot convert material "%s": %s' % (blender_mat.name, err))
