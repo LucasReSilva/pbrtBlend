@@ -1899,7 +1899,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     luxcore_exporter = None
     space = None # The VIEW_3D space this viewport render is running in
-    critical_errors = False
+    critical_errors = False # Flag that tells wether critical errors prevent the viewport render from running
 
     viewFilmWidth = -1
     viewFilmHeight = -1

@@ -139,7 +139,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
                 shader.inputs['Absorption Color'].color = editor_type.Ka_color
             if 'Diffuse Color' in shader.inputs:
                 shader.inputs['Diffuse Color'].color = editor_type.Kd_color
-            if 'Reflection Color' in shader.inputs:
+            if 'Reflection Color' in shader.inputs and hasattr(editor_type, 'Kr_color'):
                 shader.inputs['Reflection Color'].color = editor_type.Kr_color
             if 'Specular Color' in shader.inputs:
                 shader.inputs['Specular Color'].color = editor_type.Ks_color
@@ -149,7 +149,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
                 shader.inputs['Specular Color 2'].color = editor_type.Ks2_color
             if 'Specular Color 3' in shader.inputs:
                 shader.inputs['Specular Color 3'].color = editor_type.Ks3_color
-            if 'Transmission Color' in shader.inputs:
+            if 'Transmission Color' in shader.inputs and hasattr(editor_type, 'Kt_color'):
                 shader.inputs['Transmission Color'].color = editor_type.Kt_color
             if 'Warp Diffuse Color' in shader.inputs:
                 shader.inputs['Warp Diffuse Color'].color = editor_type.warp_Kd_color
@@ -168,7 +168,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if 'Mix Amount' in shader.inputs:
                 shader.inputs['Mix Amount'].amount = editor_type.amount_floatvalue
 
-            if 'Cauchy B' in shader.inputs:
+            if 'Cauchy B' in shader.inputs and hasattr(editor_type, 'cauchyb_floatvalue'):
                 shader.inputs['Cauchy B'].cauchyb = editor_type.cauchyb_floatvalue
 
             if 'Film IOR' in shader.inputs and hasattr(editor_type, 'filmindex_floatvalue'):
@@ -177,7 +177,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if 'Film Thickness (nm)' in shader.inputs and hasattr(editor_type, 'film_floatvalue'):
                 shader.inputs['Film Thickness (nm)'].film = editor_type.film_floatvalue
 
-            if 'IOR' in shader.inputs and hasattr(shader.inputs['IOR'], 'index'):
+            if 'IOR' in shader.inputs and hasattr(shader.inputs['IOR'], 'index') and hasattr(editor_type, 'index_floatvalue'):
                 shader.inputs['IOR'].index = editor_type.index_floatvalue  # not fresnel IOR
 
             if 'U-Roughness' in shader.inputs:
