@@ -170,6 +170,8 @@ class luxrender_lamp_point(luxrender_lamp_basic):
         context.lamp.distance = self.pointsize
 
     controls = TC_L.controls[:] + [
+        'projector',
+        'mapname', # Only supported by LuxCore
         'flipz',
         'power',
         'efficacy',
@@ -181,6 +183,8 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 
     visibility = dict_merge(
         luxrender_lamp_basic.visibility,
+        {'projector': lambda: UseLuxCore()},
+        {'mapname': A([{'projector': True}, lambda: UseLuxCore()])}, # Only supported by LuxCore
         {'usesphere': lambda: not UseLuxCore()},
         {'pointsize': A([{'usesphere': True}, lambda: not UseLuxCore()])},
         {'nsamples': A([{'usesphere': True}, lambda: not UseLuxCore()])},
@@ -188,6 +192,20 @@ class luxrender_lamp_point(luxrender_lamp_basic):
     )
 
     properties = TC_L.properties[:] + [
+        {
+            'type': 'bool',
+            'attr': 'projector',
+            'name': 'Projector',
+            'default': False
+        },
+        {
+            'type': 'string',
+            'subtype': 'FILE_PATH',
+            'attr': 'mapname',
+            'name': 'Projector Image',
+            'description': 'Image to project from this lamp',
+            'default': ''
+        },
         {
             'type': 'bool',
             'attr': 'flipz',
@@ -301,7 +319,7 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
             'type': 'string',
             'subtype': 'FILE_PATH',
             'attr': 'mapname',
-            'name': 'Projector image',
+            'name': 'Projector Image',
             'description': 'Image to project from this lamp',
             'default': ''
         },

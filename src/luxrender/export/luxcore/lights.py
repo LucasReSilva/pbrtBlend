@@ -147,7 +147,7 @@ class LightExporter(object):
                         light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
             iesfile = light.luxrender_lamp.iesname
             iesfile, basename = get_expanded_file_name(light, iesfile)
-            if iesfile != '':
+            if os.path.exists(iesfile):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
 
             # Workaround for lights without color, multiply gain with color here
@@ -287,10 +287,16 @@ class LightExporter(object):
         elif light.type == 'POINT':
             self.exported_lights.add(ExportedLight(luxcore_name, 'POINT'))
 
-            if iesfile:
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['mappoint']))
+            valid_mapfile = lux_lamp.projector and os.path.exists(lux_lamp.mapname)
+
+            if valid_mapfile or os.path.exists(iesfile):
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'mappoint'))
+
+                if valid_mapfile:
+                    mapfile, basename = get_expanded_file_name(light, lux_lamp.mapname)
+                    self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', mapfile))
             else:
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['point']))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'point'))
 
             if lux_lamp.flipz:
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.flipz', lux_lamp.flipz))
@@ -313,13 +319,13 @@ class LightExporter(object):
                 self.exported_lights.add(ExportedLight(luxcore_name, 'PROJECTION'))
 
                 projector_map_path_abs, basename = get_expanded_file_name(light, lux_lamp.mapname)
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['projection']))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'projection'))
                 self.properties.Set(
                     pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', projector_map_path_abs))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.fov', coneangle * 2))
             else:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'SPOT'))
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['spot']))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'spot'))
 
             spot_fix = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')  # match to lux
             transform = matrix_to_list(matrix * spot_fix, apply_worldscale=True)
@@ -343,7 +349,7 @@ class LightExporter(object):
                 transform = matrix_to_list(matrix, apply_worldscale=True)
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.transformation', transform))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.position', [0.0, 0.0, 0.0]))
-                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', ['laser']))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'laser'))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.target', [0.0, 0.0, -1.0]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.radius', [light.size]))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
