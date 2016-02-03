@@ -136,6 +136,13 @@ class halt_conditions_panel(imageeditor_panel):
     bl_label = 'LuxRender Halt Conditions'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
+
+    @classmethod
+    def poll(cls, context):
+        engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
+        # Custom poll because the halt conditions of BIASPATH cannot be adjusted during the rendering
+        return engine_is_lux and UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type != 'BIASPATH'
+
     def draw(self, context):
         layout = self.layout
         settings = context.scene.luxcore_enginesettings
@@ -153,22 +160,9 @@ class halt_conditions_panel(imageeditor_panel):
             sub.active = getattr(settings, bool_name)
             sub.prop(settings, halt_conditon)
 
-        if settings.renderengine_type == 'BIASPATH':
-            layout.prop(settings, 'tile_multipass_enable')
-
-            column = layout.column()
-            column.enabled = settings.tile_multipass_enable
-
-            column.prop(settings, 'tile_multipass_convergencetest_threshold')
-            column.prop(settings, 'tile_multipass_use_threshold_reduction')
-
-            sub_column = column.split()
-            sub_column.enabled = settings.tile_multipass_use_threshold_reduction
-            sub_column.prop(settings, 'tile_multipass_convergencetest_threshold_reduction')
-        else:
-            draw_condition_pair('halt_samples')
-            draw_condition_pair('halt_time')
-            draw_condition_pair('halt_noise')
+        draw_condition_pair('halt_samples')
+        draw_condition_pair('halt_time')
+        draw_condition_pair('halt_noise')
 
 
 @LuxRenderAddon.addon_register_class
