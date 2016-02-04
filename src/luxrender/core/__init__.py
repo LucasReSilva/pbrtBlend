@@ -2198,11 +2198,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 for area in context.screen.areas:
                     if area.type == 'VIEW_3D':
                         for space in area.spaces:
-                            if space.type == 'VIEW_3D' and space.viewport_shade == 'RENDERED':
+                            if (space.type == 'VIEW_3D' and space.viewport_shade == 'RENDERED' and
+                                        space not in LuxCoreSessionManager.sessions.keys()):
                                 self.space = space
                                 break
 
                 LuxCoreSessionManager.stop_luxcore_session(self.space)
+
+                # For the mesh cache
+                self.set_export_path_luxcore(context.scene)
 
                 self.lastRenderSettings = ''
                 self.lastVolumeSettings = ''
