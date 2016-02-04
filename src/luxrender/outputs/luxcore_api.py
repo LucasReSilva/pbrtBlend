@@ -31,9 +31,42 @@ from collections import Iterable
 from ..outputs import LuxLog
 from .. import import_bindings_module
 
+PREFIX_MATERIALS = 'scene.materials'
+PREFIX_TEXTURES = 'scene.textures'
+PREFIX_VOLUMES = 'scene.volumes'
+PREFIX_CAMERA = 'scene.camera'
+
 
 def ToValidLuxCoreName(name):
     return re.sub('[^_0-9a-zA-Z]+', '_', name)
+
+
+def set_prop(prefix, properties, luxcore_name, property, value):
+    """
+    Set a LuxCore property.
+    Example: set_luxcore_prop(properties, 'type', 'matte') is the equivalent of
+    properties.Set(pyluxcore.Property('scene.materials.<name>.type', 'matte'))
+
+    :param prefix: LuxCore property prefix (e.g. 'scene.materials')
+    :param properties: LuxCore properties that are edited. Type: pyluxcore.Properties
+    :param luxcore_name: LuxCore name of the material
+    :param property: Property string that is set, e.g. 'type' or 'kd'
+    :param value: Value for the property (string, number or list)
+    """
+    key = '.'.join([prefix, luxcore_name, property])
+    properties.Set(pyluxcore.Property(key, value))
+
+def set_prop_mat(properties, luxcore_name, property, value):
+    set_prop(PREFIX_MATERIALS, properties, luxcore_name, property, value)
+
+def set_prop_tex(properties, luxcore_name, property, value):
+    set_prop(PREFIX_TEXTURES, properties, luxcore_name, property, value)
+
+def set_prop_vol(properties, luxcore_name, property, value):
+    set_prop(PREFIX_VOLUMES, properties, luxcore_name, property, value)
+
+def set_prop_cam(properties, luxcore_name, property, value):
+    set_prop(PREFIX_CAMERA, properties, luxcore_name, property, value)
 
 
 def FlattenStrCollection(coll):

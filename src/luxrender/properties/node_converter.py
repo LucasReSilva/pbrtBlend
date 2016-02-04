@@ -43,7 +43,7 @@ from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
 
 from ..properties.node_texture import (
     variant_items, triple_variant_items
@@ -57,7 +57,7 @@ from ..properties.node_sockets import (
     luxrender_TC_tex2_socket, mapping_2d_socketname, mapping_3d_socketname
 )
 
-from . import warning_luxcore_node, warning_classic_node, create_luxcore_name, set_prop_tex
+from . import warning_luxcore_node, warning_classic_node, create_luxcore_name
 
 
 @LuxRenderAddon.addon_register_class

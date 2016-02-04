@@ -50,8 +50,6 @@ from ..outputs import LuxManager, LuxLog
 
 from ..properties.material import *  # for now just the big hammer for starting autogenerate sockets
 
-from . import set_prop_tex
-
 # Get all float properties
 def get_props(TextureParameter, attribute):
     for prop in TextureParameter.get_properties():

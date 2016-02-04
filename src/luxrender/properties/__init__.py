@@ -26,7 +26,7 @@
 #
 
 import bpy
-from ..outputs.luxcore_api import pyluxcore, ToValidLuxCoreName, UseLuxCore
+from ..outputs.luxcore_api import ToValidLuxCoreName, UseLuxCore, set_prop_mat, set_prop_vol
 
 
 class luxrender_node(bpy.types.Node):
@@ -157,10 +157,6 @@ def warning_classic_node(layout):
 
 # LuxCore node export functions
 
-prefix_materials = 'scene.materials'
-prefix_textures = 'scene.textures'
-prefix_volumes = 'scene.volumes'
-
 def create_luxcore_name(node, suffix=None, name=None):
     """
     Construct a unique name for the node to be used in the LuxCore scene definitions.
@@ -185,30 +181,6 @@ def create_luxcore_name_mat(node, name=None):
 
 def create_luxcore_name_vol(node, name=None):
     return create_luxcore_name(node, 'vol', name)
-
-def set_prop(prefix, properties, luxcore_name, property, value):
-    """
-    Set a LuxCore property.
-    Example: set_luxcore_prop(properties, 'type', 'matte') is the equivalent of
-    properties.Set(pyluxcore.Property('scene.materials.<name>.type', 'matte'))
-
-    :param prefix: LuxCore property prefix (e.g. 'scene.materials')
-    :param properties: LuxCore properties that are edited. Type: pyluxcore.Properties
-    :param luxcore_name: LuxCore name of the material
-    :param property: Property string that is set, e.g. 'type' or 'kd'
-    :param value: Value for the property (string, number or list)
-    """
-    key = '.'.join([prefix, luxcore_name, property])
-    properties.Set(pyluxcore.Property(key, value))
-
-def set_prop_mat(properties, luxcore_name, property, value):
-    set_prop(prefix_materials, properties, luxcore_name, property, value)
-
-def set_prop_tex(properties, luxcore_name, property, value):
-    set_prop(prefix_textures, properties, luxcore_name, property, value)
-
-def set_prop_vol(properties, luxcore_name, property, value):
-    set_prop(prefix_volumes, properties, luxcore_name, property, value)
 
 def export_fallback_material(properties, socket, name):
     # Black matte material

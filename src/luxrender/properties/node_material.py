@@ -46,11 +46,11 @@ from ..export.materials import (
 )
 
 from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
+from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName, set_prop_mat, set_prop_vol
 
 from ..properties.node_sockets import *
 
-from . import (set_prop_mat, set_prop_vol, create_luxcore_name_mat, create_luxcore_name_vol, create_luxcore_name,
+from . import (create_luxcore_name_mat, create_luxcore_name_vol, create_luxcore_name,
                export_submat_luxcore, export_emission_luxcore, warning_classic_node, warning_luxcore_node,
                has_interior_volume)
 

@@ -39,7 +39,7 @@ from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName
+from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName, set_prop_tex
 
 from ..properties.texture import (
     luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
@@ -54,7 +54,7 @@ from ..properties.node_sockets import (
 
 from ..extensions_framework import util as efutil
 
-from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
+from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
 
 from bpy_extras.image_utils import load_image
 

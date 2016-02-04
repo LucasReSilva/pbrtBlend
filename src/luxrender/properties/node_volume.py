@@ -25,12 +25,12 @@
 # ***** END GPL LICENCE BLOCK *****
 
 import bpy
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import set_prop_vol
 
 from ..properties.node_sockets import *
 from ..properties.node_material import get_socket_paramsets
 
-from . import (set_prop_vol, create_luxcore_name_vol, create_luxcore_name, export_emission_luxcore,
+from . import (create_luxcore_name_vol, create_luxcore_name, export_emission_luxcore,
                warning_luxcore_node, export_volume_luxcore)
 
 

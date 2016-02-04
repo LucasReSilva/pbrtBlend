@@ -42,7 +42,7 @@ from ..export.materials import (
     ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import set_prop_tex
 
 from ..properties.node_sockets import (
     luxrender_fresnel_socket, luxrender_TC_Kr_socket
@@ -51,7 +51,7 @@ from ..properties.node_sockets import (
 from ..properties.node_material import get_socket_paramsets
 from ..properties.texture import luxrender_tex_fresnelname
 
-from . import set_prop_tex, create_luxcore_name, warning_luxcore_node, warning_classic_node
+from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
 
 
 @LuxRenderAddon.addon_register_class
