@@ -723,9 +723,9 @@ may mute lamps and caustics',
             'description': 'Pixel filter to use',
             'default': 'BLACKMANHARRIS',
             'items': [
-                ('BLACKMANHARRIS', 'Blackman-Harris', 'default'),
-                ('MITCHELL', 'Mitchell', 'can produce black ringing artifacts around bright pixels'),
-                ('GAUSSIAN', 'Gaussian', ''),
+                ('BLACKMANHARRIS', 'Blackman-Harris', 'Default, usually the best option'),
+                ('MITCHELL_SS', 'Mitchell', 'Sharp, but can produce black ringing artifacts around bright pixels'),
+                ('GAUSSIAN', 'Gaussian', 'Blurry'),
                 ('NONE', 'None', 'Disable pixel filtering. Fastest setting when rendering on GPU')
             ],
             'save_in_preset': True
