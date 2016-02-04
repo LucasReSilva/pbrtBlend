@@ -30,12 +30,11 @@ import bpy, mathutils, math, os
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import is_obj_visible
-from ...export import ParamSet
 from ...export import get_worldscale
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
 
-from .utils import convert_param_to_luxcore_property, is_lightgroup_opencl_compatible
+from .utils import is_lightgroup_opencl_compatible
 
 
 class ExportedLight(object):
@@ -77,7 +76,7 @@ class LightExporter(object):
         for exported_light in diff:
             if exported_light.type == 'AREA':
                 # Area lights are meshlights and treated like objects
-                luxcore_scene.DeleteObject(exported_light.luxcore_name) # TODO: something does not work here (LuxCore bug?)
+                luxcore_scene.DeleteObject(exported_light.luxcore_name)
             else:
                 luxcore_scene.DeleteLight(exported_light.luxcore_name)
 

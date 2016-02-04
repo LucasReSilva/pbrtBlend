@@ -74,6 +74,8 @@ class CameraExporter(object):
         view_lens = self.context.space_data.lens
         view_camera_zoom = self.context.region_data.view_camera_zoom
         view_camera_offset = list(self.context.region_data.view_camera_offset)
+        # Attributes of orthographic user perspective
+        view_ortho_zoom = self.context.space_data.region_3d.view_distance
 
         luxCamera = self.context.scene.camera.data.luxrender_camera if self.context.scene.camera is not None else None
 
@@ -86,8 +88,7 @@ class CameraExporter(object):
 
         if view_persp == 'ORTHO':
             # Viewport cam in orthographic mode
-
-            zoom = 2.0
+            zoom = view_ortho_zoom
             dx = 0.0
             dy = 0.0
             screenwindow = self.__calc_screenwindow(dx, dy, xaspect, yaspect, zoom)
@@ -104,7 +105,6 @@ class CameraExporter(object):
 
         elif view_persp == 'PERSP':
             # Viewport cam in perspective mode
-
             zoom = 2.0
             dx = 0.0
             dy = 0.0
@@ -125,18 +125,18 @@ class CameraExporter(object):
 
         elif view_persp == 'CAMERA':
             # Using final render camera
-
-            #TODO: if blCamera.type == 'PERSP' ... 'ORTHO' ...
-
             self.__convert_final_camera()
 
-            blCamera = self.context.scene.camera
             # magic zoom formula for camera viewport zoom from blender source
             zoom = view_camera_zoom
             zoom = (1.41421 + zoom / 50.0)
             zoom *= zoom
             zoom = 2.0 / zoom
             zoom *= 2
+
+            blCamera = self.context.scene.camera
+            if blCamera.data.type == 'ORTHO':
+                zoom *= blCamera.data.ortho_scale / 2
 
             #camera plane offset in camera viewport
             view_camera_shift_x = self.context.scene.camera.data.shift_x
