@@ -1408,7 +1408,10 @@ class luxrender_material_type_node_null(luxrender_material_node):
     def export_luxcore(self, properties, luxcore_exporter, name=None):
         luxcore_name = create_luxcore_name_mat(self, name)
 
-        transparency = self.inputs['Transmission Color'].export_luxcore(properties)
+        if 'Transmission Color' in self.inputs:
+            transparency = self.inputs['Transmission Color'].export_luxcore(properties)
+        else:
+            transparency = 1.0
 
         set_prop_mat(properties, luxcore_name, 'type', 'null')
 
