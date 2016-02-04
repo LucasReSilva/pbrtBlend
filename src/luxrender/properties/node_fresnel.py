@@ -24,34 +24,19 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import re
-
 import bpy
 
-from ..extensions_framework import declarative_property_group
-
+from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
 from .. import LuxRenderAddon
-from ..properties import (
-    luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset
-)
-from ..properties.texture import (
-    import_paramset_to_blender_texture, shorten_name, refresh_preview
-)
+
 from ..export import ParamSet, process_filepath_data,  get_expanded_file_name
-from ..export.materials import (
-    ExportedTextures, add_texture_parameter, get_texture_from_scene
-)
-from ..outputs import LuxManager, LuxLog
+
+from ..outputs import LuxManager
 from ..outputs.luxcore_api import set_prop_tex
 
-from ..properties.node_sockets import (
-    luxrender_fresnel_socket, luxrender_TC_Kr_socket
-)
-
+from ..properties import luxrender_texture_node
 from ..properties.node_material import get_socket_paramsets
 from ..properties.texture import luxrender_tex_fresnelname
-
-from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
 
 
 @LuxRenderAddon.addon_register_class

@@ -24,41 +24,28 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import bpy, re, tempfile, os
-
-from ..extensions_framework import declarative_property_group
-
-from .. import LuxRenderAddon
-from ..properties import (luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset)
-from ..properties.texture import (
-    import_paramset_to_blender_texture, shorten_name, refresh_preview
-)
-from ..export import ParamSet, get_worldscale, process_filepath_data, matrix_to_list
-from ..export.volumes import export_smoke
-from ..export.materials import (
-    ExportedTextures, add_texture_parameter, get_texture_from_scene
-)
-from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName, set_prop_tex
-
-from ..properties.texture import (
-    luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap, luxrender_tex_transform, luxrender_tex_mapping
-)
-from ..properties.node_material import get_socket_paramsets
-
-from ..properties.node_sockets import (
-    luxrender_TF_brickmodtex_socket, luxrender_TF_bricktex_socket, luxrender_TF_mortartex_socket,
-    luxrender_TC_brickmodtex_socket, luxrender_TC_bricktex_socket, luxrender_TC_mortartex_socket,
-    luxrender_transform_socket, luxrender_coordinate_socket, mapping_2d_socketname, mapping_3d_socketname
-)
-
-from ..extensions_framework import util as efutil
-
-from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
+import bpy
+import bpy.utils.previews
+import os
+import tempfile
 
 from bpy_extras.image_utils import load_image
 
-import bpy.utils.previews
+from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
+from .. import LuxRenderAddon
+
+from ..export import ParamSet, process_filepath_data, matrix_to_list
+from ..export.volumes import export_smoke
+
+from ..extensions_framework import util as efutil
+
+from ..outputs import LuxManager
+from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
+
+from ..properties import (luxrender_texture_node, get_linked_node, check_node_get_paramset)
+from ..properties.node_material import get_socket_paramsets
+from ..properties.node_sockets import mapping_2d_socketname, mapping_3d_socketname
+from ..properties.texture import luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap
 
 
 # Define the list of noise types globally, this gets used by a few different nodes

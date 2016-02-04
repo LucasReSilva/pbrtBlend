@@ -24,37 +24,17 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import re
-
 import bpy
 
-from ..extensions_framework import declarative_property_group
-
-import nodeitems_utils
-from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
-
-from .. import LuxRenderAddon
-from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export_material,
-                          check_node_export_texture, check_node_get_paramset, ExportedVolumes)
-
-from ..properties.texture import (
-    import_paramset_to_blender_texture, shorten_name, refresh_preview
-)
-from ..export import ParamSet, process_filepath_data
-from ..export.materials import (
-    MaterialCounter, TextureCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
-)
-
-from ..outputs import LuxManager, LuxLog
-from ..outputs.luxcore_api import UseLuxCore, pyluxcore, ToValidLuxCoreName, set_prop_mat, set_prop_vol
-
-from ..properties.node_sockets import *
-
-from . import (create_luxcore_name_mat, create_luxcore_name_vol, create_luxcore_name,
-               export_submat_luxcore, export_emission_luxcore, warning_classic_node, warning_luxcore_node,
-               has_interior_volume)
-
+from . import (create_luxcore_name_mat, create_luxcore_name, warning_classic_node, has_interior_volume,
+               export_submat_luxcore, export_emission_luxcore)
 from ..export.luxcore.utils import get_elem_key
+from ..export.materials import TextureCounter
+
+from ..outputs.luxcore_api import set_prop_mat, set_prop_vol, set_prop_tex
+
+from ..properties import (luxrender_node, luxrender_material_node, check_node_export_material)
+from ..properties.node_sockets import *
 
 
 class luxrender_texture_maker:

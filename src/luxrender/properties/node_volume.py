@@ -31,7 +31,7 @@ from ..properties.node_sockets import *
 from ..properties.node_material import get_socket_paramsets
 
 from . import (create_luxcore_name_vol, create_luxcore_name, export_emission_luxcore,
-               warning_luxcore_node, export_volume_luxcore)
+               warning_luxcore_node, export_volume_luxcore, luxrender_node, luxrender_material_node)
 
 
 @LuxRenderAddon.addon_register_class

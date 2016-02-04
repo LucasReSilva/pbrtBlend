@@ -24,30 +24,10 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import re
+import bpy
+import mathutils
 
-import bpy, mathutils
-
-from ..extensions_framework import declarative_property_group
-
-import nodeitems_utils
-from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
-
-from .. import LuxRenderAddon
-from ..properties import (luxrender_node, luxrender_material_node, get_linked_node, check_node_export_material,
-                          check_node_export_texture, check_node_get_paramset, ExportedVolumes)
-
-from ..properties.texture import (
-    import_paramset_to_blender_texture, shorten_name, refresh_preview
-)
-
-from ..export import ParamSet, process_filepath_data
-from ..export.materials import (
-    MaterialCounter, TextureCounter, ExportedMaterials, ExportedTextures, get_texture_from_scene
-)
-
-from ..outputs import LuxManager, LuxLog
-
+from ..properties import get_linked_node, check_node_export_texture
 from ..properties.material import *  # for now just the big hammer for starting autogenerate sockets
 
 # Get all float properties

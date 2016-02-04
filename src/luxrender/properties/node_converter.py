@@ -24,40 +24,22 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import re
+from math import radians
 
-import bpy, mathutils
-from math import degrees, radians
+import bpy
+import mathutils
 
-from ..extensions_framework import declarative_property_group
-
+from . import warning_luxcore_node, create_luxcore_name
 from .. import LuxRenderAddon
-from ..properties import (
-    luxrender_texture_node, get_linked_node, check_node_export_texture, check_node_get_paramset
-)
-from ..properties.texture import (
-    import_paramset_to_blender_texture, shorten_name, refresh_preview
-)
-from ..export import ParamSet, process_filepath_data, get_worldscale, matrix_to_list
-from ..export.materials import (
-    ExportedTextures, add_texture_parameter, get_texture_from_scene
-)
-from ..outputs import LuxManager, LuxLog
+
+from ..export import ParamSet, get_worldscale
+
 from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
 
-from ..properties.node_texture import (
-    variant_items, triple_variant_items
-)
-
+from ..properties import luxrender_texture_node, get_linked_node, check_node_export_texture
 from ..properties.node_material import get_socket_paramsets
-
-from ..properties.node_sockets import (
-    luxrender_fresnel_socket, luxrender_TF_amount_socket, luxrender_transform_socket, luxrender_TF_tex1_socket,
-    luxrender_TF_tex2_socket, luxrender_TFR_tex1_socket, luxrender_TFR_tex2_socket, luxrender_TC_tex1_socket,
-    luxrender_TC_tex2_socket, mapping_2d_socketname, mapping_3d_socketname
-)
-
-from . import warning_luxcore_node, warning_classic_node, create_luxcore_name
+from ..properties.node_sockets import mapping_2d_socketname, mapping_3d_socketname
+from ..properties.node_texture import variant_items, triple_variant_items
 
 
 @LuxRenderAddon.addon_register_class
