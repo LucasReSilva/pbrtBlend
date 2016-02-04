@@ -65,8 +65,9 @@ def set_prop_tex(properties, luxcore_name, property, value):
 def set_prop_vol(properties, luxcore_name, property, value):
     set_prop(PREFIX_VOLUMES, properties, luxcore_name, property, value)
 
-def set_prop_cam(properties, luxcore_name, property, value):
-    set_prop(PREFIX_CAMERA, properties, luxcore_name, property, value)
+def set_prop_cam(properties, property, value):
+    key = '.'.join([PREFIX_CAMERA, property])
+    properties.Set(pyluxcore.Property(key, value))
 
 
 def FlattenStrCollection(coll):

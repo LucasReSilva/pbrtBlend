@@ -27,7 +27,7 @@
 
 import bpy, math, mathutils
 
-from ...outputs.luxcore_api import pyluxcore
+from ...outputs.luxcore_api import pyluxcore, set_prop_cam
 from ...export import get_worldscale
 from ...export import object_anim_matrices
 from ...export import fix_matrix_order
@@ -95,13 +95,14 @@ class CameraExporter(object):
 
             cam_origin, cam_lookat, cam_up = self.__convert_lookat(view_matrix.inverted())
 
-            self.properties.Set(pyluxcore.Property('scene.camera.type', 'orthographic'))
-            self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', cam_lookat))
-            self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin))
-            self.properties.Set(pyluxcore.Property('scene.camera.up', cam_up))
-            self.properties.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
-            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', 0.0))
-            self.properties.Set(pyluxcore.Property('scene.camera.focaldistance', 0.0))
+            set_prop_cam(self.properties, 'type', 'orthographic')
+            #set_prop_cam(self.properties, '
+            set_prop_cam(self.properties, 'lookat.target', cam_lookat)
+            set_prop_cam(self.properties, 'lookat.orig', cam_origin)
+            set_prop_cam(self.properties, 'up', cam_up)
+            set_prop_cam(self.properties, 'screenwindow', screenwindow)
+            set_prop_cam(self.properties, 'lensradius', 0.0)
+            set_prop_cam(self.properties, 'focaldistance', 0.0)
 
         elif view_persp == 'PERSP':
             # Viewport cam in perspective mode
@@ -114,14 +115,14 @@ class CameraExporter(object):
 
             cam_fov = 2 * math.atan(0.5 * 32.0 / view_lens)
 
-            self.properties.Set(pyluxcore.Property('scene.camera.type', 'perspective'))
-            self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', cam_lookat))
-            self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', cam_origin))
-            self.properties.Set(pyluxcore.Property('scene.camera.up', cam_up))
-            self.properties.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
-            self.properties.Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(cam_fov)))
-            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', 0.0))
-            self.properties.Set(pyluxcore.Property('scene.camera.focaldistance', 0.0))
+            set_prop_cam(self.properties, 'type', 'perspective')
+            set_prop_cam(self.properties, 'lookat.target', cam_lookat)
+            set_prop_cam(self.properties, 'lookat.orig', cam_origin)
+            set_prop_cam(self.properties, 'up', cam_up)
+            set_prop_cam(self.properties, 'screenwindow', screenwindow)
+            set_prop_cam(self.properties, 'fieldofview', math.degrees(cam_fov))
+            set_prop_cam(self.properties, 'lensradius', 0.0)
+            set_prop_cam(self.properties, 'focaldistance', 0.0)
 
         elif view_persp == 'CAMERA':
             # Using final render camera
@@ -146,7 +147,7 @@ class CameraExporter(object):
 
             # TODO: in border render mode, the screenwindow should be adapted to the border
             screenwindow = self.__calc_screenwindow(dx, dy, xaspect, yaspect, zoom)
-            self.properties.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
+            set_prop_cam(self.properties, 'screenwindow', screenwindow)
 
         if luxCamera is not None:
             # arbitrary clipping plane
@@ -161,7 +162,7 @@ class CameraExporter(object):
         luxCamera = blCameraData.luxrender_camera
 
         if blCameraData.type == 'ORTHO':
-            self.properties.Set(pyluxcore.Property('scene.camera.type', 'orthographic'))
+            set_prop_cam(self.properties, 'type', 'orthographic')
 
         # Motion blur
         self.__convert_camera_motion_blur(blCamera)
@@ -171,32 +172,32 @@ class CameraExporter(object):
 
         # Field of view
         if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
-            self.properties.Set(pyluxcore.Property('scene.camera.fieldofview', math.degrees(blCameraData.angle)))
+            set_prop_cam(self.properties, 'fieldofview', math.degrees(blCameraData.angle))
 
         # screenwindow (for border rendering and camera shift)
         width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
         screenwindow = luxCamera.screenwindow(width, height, self.blender_scene, blCameraData,
                                               luxcore_export=self.blender_scene.render.use_border)
-        self.properties.Set(pyluxcore.Property('scene.camera.screenwindow', screenwindow))
+        set_prop_cam(self.properties, 'screenwindow', screenwindow)
 
         if luxCamera.use_dof:
             # Do not world-scale this, it is already in meters
             lensradius = (blCameraData.lens / 1000.0) / (2.0 * luxCamera.fstop)
-            self.properties.Set(pyluxcore.Property('scene.camera.lensradius', lensradius))
-            self.properties.Set(pyluxcore.Property('scene.camera.autofocus.enable', luxCamera.autofocus))
+            set_prop_cam(self.properties, 'lensradius', lensradius)
+            set_prop_cam(self.properties, 'autofocus.enable', luxCamera.autofocus)
 
         ws = get_worldscale(as_scalematrix=False)
 
         if luxCamera.use_dof:
             if blCameraData.dof_object is not None:
-                self.properties.Set(pyluxcore.Property('scene.camera.focaldistance', ws * (
-                    (blCamera.location - blCameraData.dof_object.location).length)))
+                distance = ws * (blCamera.location - blCameraData.dof_object.location).length
+                set_prop_cam(self.properties, 'focaldistance', distance)
             elif blCameraData.dof_distance > 0:
-                self.properties.Set(pyluxcore.Property('scene.camera.focaldistance', ws * blCameraData.dof_distance))
+                set_prop_cam(self.properties, 'focaldistance', ws * blCameraData.dof_distance)
 
         if luxCamera.use_clipping:
-            self.properties.Set(pyluxcore.Property('scene.camera.cliphither', ws * blCameraData.clip_start))
-            self.properties.Set(pyluxcore.Property('scene.camera.clipyon', ws * blCameraData.clip_end))
+            set_prop_cam(self.properties, 'cliphither', ws * blCameraData.clip_start)
+            set_prop_cam(self.properties, 'clipyon', ws * blCameraData.clip_end)
 
         # arbitrary clipping plane
         self.__convert_clipping_plane(luxCamera)
@@ -239,9 +240,9 @@ class CameraExporter(object):
         # Note: enabling this in viewport leads to constant refresing of the render, even when cam is not animated
         if luxCamera.usemblur and luxCamera.cammblur and not self.is_viewport_render:
             # Complete transformation is handled by motion.x.transformation below
-            self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', [0, 0, 0]))
-            self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', [0, 0, -1]))
-            self.properties.Set(pyluxcore.Property('scene.camera.up', [0, 1, 0]))
+            set_prop_cam(self.properties, 'lookat.orig', [0, 0, 0])
+            set_prop_cam(self.properties, 'lookat.target', [0, 0, -1])
+            set_prop_cam(self.properties, 'up', [0, 1, 0])
 
             anim_matrices = object_anim_matrices(self.blender_scene, blCamera, steps=luxCamera.motion_blur_samples)
 
@@ -249,8 +250,8 @@ class CameraExporter(object):
                 for i in range(len(anim_matrices)):
                     time = float(i) / (len(anim_matrices) - 1)
                     matrix = matrix_to_list(anim_matrices[i], apply_worldscale=True)
-                    self.properties.Set(pyluxcore.Property('scene.camera.motion.%d.time' % i, time))
-                    self.properties.Set(pyluxcore.Property('scene.camera.motion.%d.transformation' % i, matrix))
+                    set_prop_cam(self.properties, 'motion.%d.time' % i, time)
+                    set_prop_cam(self.properties, 'motion.%d.transformation' % i, matrix)
                 return
 
         # No camera motion blur
@@ -259,9 +260,9 @@ class CameraExporter(object):
         target = list(lookat[3:6])
         up = list(lookat[6:9])
 
-        self.properties.Set(pyluxcore.Property('scene.camera.lookat.orig', orig))
-        self.properties.Set(pyluxcore.Property('scene.camera.lookat.target', target))
-        self.properties.Set(pyluxcore.Property('scene.camera.up', up))
+        set_prop_cam(self.properties, 'lookat.orig', orig)
+        set_prop_cam(self.properties, 'lookat.target', target)
+        set_prop_cam(self.properties, 'up', up)
 
 
     def __convert_clipping_plane(self, lux_camera_settings):
@@ -275,18 +276,18 @@ class CameraExporter(object):
                 normal_vector = obj.rotation_euler.to_matrix() * mathutils.Vector((0.0, 0.0, 1.0))
                 normal = [normal_vector.x, normal_vector.y, normal_vector.z]
 
-                self.properties.Set(pyluxcore.Property('scene.camera.clippingplane.enable', True))
-                self.properties.Set(pyluxcore.Property('scene.camera.clippingplane.center', position))
-                self.properties.Set(pyluxcore.Property('scene.camera.clippingplane.normal', normal))
+                set_prop_cam(self.properties, 'clippingplane.enable', True)
+                set_prop_cam(self.properties, 'clippingplane.center', position)
+                set_prop_cam(self.properties, 'clippingplane.normal', normal)
             except KeyError:
                 # No valid clipping plane object selected
-                self.properties.Set(pyluxcore.Property('scene.camera.clippingplane.enable', False))
+                set_prop_cam(self.properties, 'clippingplane.enable', False)
         else:
-            self.properties.Set(pyluxcore.Property('scene.camera.clippingplane.enable', False))
+            set_prop_cam(self.properties, 'clippingplane.enable', False)
 
 
     def __convert_shutter(self, lux_camera_settings):
         shutter_open, shutter_close = calc_shutter(self.blender_scene, lux_camera_settings)
 
-        self.properties.Set(pyluxcore.Property('scene.camera.shutteropen', shutter_open))
-        self.properties.Set(pyluxcore.Property('scene.camera.shutterclose', shutter_close))
+        set_prop_cam(self.properties, 'shutteropen', shutter_open)
+        set_prop_cam(self.properties, 'shutterclose', shutter_close)
