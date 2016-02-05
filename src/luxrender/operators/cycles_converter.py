@@ -404,10 +404,12 @@ def convert_socket(socket, lux_nodetree):
             copy_socket_properties(lux_node, 2, lux_nodetree, linked_node_2, default_value_2)
 
     elif node.type == 'BSDF_TRANSPARENT':
-        if node.inputs['Color'].default_value[:3] == (1, 1, 1):
-            # In Lux, we ohly have the Null materials as an equivalent to a fully transparent material
-            lux_node = lux_nodetree.nodes.new('luxrender_material_null_node')
-        # TODO: find an approximation to Cycles' transparent material with non-white colors
+        lux_node = lux_nodetree.nodes.new('luxrender_material_null_node')
+
+        linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
+        default_value = convert_rgba_to_rgb(default_value)
+
+        copy_socket_properties(lux_node, 0, lux_nodetree, linked_node, default_value)
 
     elif node.type == 'BSDF_GLASS':
         lux_node = lux_nodetree.nodes.new('luxrender_material_glass_node')
