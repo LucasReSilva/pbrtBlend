@@ -33,7 +33,7 @@ from ...export.materials import get_texture_from_scene
 from ...export import get_expanded_file_name
 from ...properties import find_node
 
-from .utils import convert_texture_channel, generate_volume_name, get_elem_key, is_lightgroup_opencl_compatible
+from .utils import convert_texture_channel, get_elem_key, is_lightgroup_opencl_compatible
 from .textures import TextureExporter
 
 

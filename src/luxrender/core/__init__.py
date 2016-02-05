@@ -513,8 +513,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if preview_type is None:
             return
 
-        # TODO: scene setup based on PREVIEW_TYPE
-
         # Find the materials attached to the likely preview object
         likely_materials = objects_mats[preview_objects[0]]
         if len(likely_materials) < 1:
@@ -1376,9 +1374,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             blenderImage.filepath_raw = self.output_dir + imageName
             blenderImage.file_format = image_format
 
-            #if saveToDisk: # TODO: remove, this is done via LuxCore now
-            #    blenderImage.save()
-
     def draw_tiles(self, scene, stats, imageBuffer, filmWidth, filmHeight):
         """
         draws tile outlines directly into the imageBuffer
@@ -1541,10 +1536,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     cached_session_props = str(new_session_props)
 
                     # Safety check for old pyluxcore versions compatibility
-                    if hasattr(luxcore_session, 'Parse'): # TODO: removed once no longer needed
-                        luxcore_session.Parse(new_session_props)
-                        print('Set session settings:\n%s' % cached_session_props)
-                        session_was_updated = True
+                    luxcore_session.Parse(new_session_props)
+                    print('Set session settings:\n%s' % cached_session_props)
+                    session_was_updated = True
 
                 # Pause/Resume of rendering prcess
                 if scene.luxcore_rendering_controls.pause_render:
@@ -1924,9 +1918,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             bgl.glRasterPos2i(0, 0)
             bgl.glDrawPixels(self.viewFilmWidth, self.viewFilmHeight, bgl.GL_RGB, bgl.GL_FLOAT, glBuffer)
 
-        # TODO: if RTBIASPATHOCL: implement waitNextFrame
-        #https://bitbucket.org/luxrender/luxrays/src/5e46ffbf8cca06fdfb960f4a9584c971f829967e/samples/luxcoreui/uiloop.cpp?at=default&fileviewer=file-view-default#uiloop.cpp-532
-
         view_draw_startTime = time.time()
         elapsed = view_draw_startTime - self.last_update_time
 
@@ -2195,6 +2186,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         elif update_changes.cause_startViewportRender:
             try:
+                # Find out in which space this rendersession is running.
+                # This code assumes that only one VIEW_3D is set to RENDERED mode at a time - scripts that set
+                # many views to rendered at once might break this detection, but I fear we can't implement a better
+                # detection algorithm
                 for area in context.screen.areas:
                     if area.type == 'VIEW_3D':
                         for space in area.spaces:

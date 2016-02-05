@@ -98,7 +98,7 @@ class DupliExporter(object):
         """
         obj = self.duplicator
 
-        print('[%s] Exporting particle systems/duplis' % (obj.name))
+        print('[%s] Exporting particle systems/duplis' % obj.name)
         time_start = time.time()
 
         mode = 'VIEWPORT' if self.is_viewport_render else 'RENDER'
@@ -166,8 +166,8 @@ class DupliExporter(object):
             else:
                 object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
                                                  do, dupli_name_suffix)
-                properties = object_exporter.convert(update_mesh=False, update_material=False, luxcore_scene=luxcore_scene,
-                                                     anim_matrices=None, matrix=dm)
+                properties = object_exporter.convert(update_mesh=False, update_material=False,
+                                                     luxcore_scene=luxcore_scene, anim_matrices=None, matrix=dm)
             self.properties.Set(properties)
 
         del duplis
@@ -225,7 +225,6 @@ class DupliExporter(object):
         colors = []
         uv_coords = []
         total_segments_count = 0
-        vertex_color_layer = None
         uv_tex = None
         colorflag = 0
         uvflag = 0
@@ -243,7 +242,6 @@ class DupliExporter(object):
 
         if settings.export_color == 'vertex_color':
             if has_vertex_colors:
-                vertex_color_layer = vertex_color.active.data
                 colorflag = 1
 
         if uv_textures.active and uv_textures.active.data:

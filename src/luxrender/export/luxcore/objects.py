@@ -31,7 +31,6 @@ from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import is_obj_visible
-from ...export import get_worldscale
 from ...export import object_anim_matrices
 from ...export import matrix_to_list
 from ...properties import find_node
