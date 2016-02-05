@@ -26,6 +26,7 @@
 #
 
 import bpy, math, mathutils
+from mathutils import Vector
 
 from ...outputs.luxcore_api import pyluxcore, set_prop_cam
 from ...export import get_worldscale
@@ -74,7 +75,6 @@ class CameraExporter(object):
         view_lens = self.context.space_data.lens
         view_camera_zoom = self.context.region_data.view_camera_zoom
         view_camera_offset = list(self.context.region_data.view_camera_offset)
-        # Attributes of orthographic user perspective
         view_ortho_zoom = self.context.space_data.region_3d.view_distance
 
         luxCamera = self.context.scene.camera.data.luxrender_camera if self.context.scene.camera is not None else None
@@ -93,11 +93,10 @@ class CameraExporter(object):
             dy = 0.0
             screenwindow = self.__calc_screenwindow(dx, dy, xaspect, yaspect, zoom)
 
-            cam_origin, cam_lookat, cam_up = self.__convert_lookat(view_matrix.inverted())
+            cam_origin, cam_target, cam_up = self.__convert_lookat(view_matrix.inverted())
 
             set_prop_cam(self.properties, 'type', 'orthographic')
-            #set_prop_cam(self.properties, '
-            set_prop_cam(self.properties, 'lookat.target', cam_lookat)
+            set_prop_cam(self.properties, 'lookat.target', cam_target)
             set_prop_cam(self.properties, 'lookat.orig', cam_origin)
             set_prop_cam(self.properties, 'up', cam_up)
             set_prop_cam(self.properties, 'screenwindow', screenwindow)
@@ -111,12 +110,12 @@ class CameraExporter(object):
             dy = 0.0
             screenwindow = self.__calc_screenwindow(dx, dy, xaspect, yaspect, zoom)
 
-            cam_origin, cam_lookat, cam_up = self.__convert_lookat(view_matrix.inverted())
+            cam_origin, cam_target, cam_up = self.__convert_lookat(view_matrix.inverted())
 
             cam_fov = 2 * math.atan(0.5 * 32.0 / view_lens)
 
             set_prop_cam(self.properties, 'type', 'perspective')
-            set_prop_cam(self.properties, 'lookat.target', cam_lookat)
+            set_prop_cam(self.properties, 'lookat.target', cam_target)
             set_prop_cam(self.properties, 'lookat.orig', cam_origin)
             set_prop_cam(self.properties, 'up', cam_up)
             set_prop_cam(self.properties, 'screenwindow', screenwindow)
@@ -125,7 +124,7 @@ class CameraExporter(object):
             set_prop_cam(self.properties, 'focaldistance', 0.0)
 
         elif view_persp == 'CAMERA':
-            # Using final render camera
+            # Using final render camera in viewport
             self.__convert_final_camera()
 
             # magic zoom formula for camera viewport zoom from blender source
@@ -228,10 +227,10 @@ class CameraExporter(object):
         lookat = pos[:3] + target[:3] + up[:3]
 
         cam_origin = list(lookat[0:3])
-        cam_lookat = list(lookat[3:6])
+        cam_target = list(lookat[3:6])
         cam_up = list(lookat[6:9])
 
-        return cam_origin, cam_lookat, cam_up
+        return cam_origin, cam_target, cam_up
 
 
     def __convert_camera_motion_blur(self, blCamera):
