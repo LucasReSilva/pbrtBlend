@@ -132,8 +132,8 @@ class luxrender_camera(declarative_property_group):
         'cammblur': {'usemblur': True},
         'objectmblur': {'usemblur': True},
         'separator_after_mblur': {'usemblur': True},
-        'enable_clipping_plane': lambda: UseLuxCore(),
-        'clipping_plane_selector': A([{'enable_clipping_plane': True}, lambda: UseLuxCore()])
+        #'enable_clipping_plane': lambda: UseLuxCore(),
+        #'clipping_plane_selector': A([{'enable_clipping_plane': True}, lambda: UseLuxCore()])
     }
 
     properties = CameraVolumeParameter('Exterior', 'Exterior') + ArbitraryClippingPlane() + [

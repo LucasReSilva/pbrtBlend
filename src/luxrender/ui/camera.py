@@ -89,13 +89,14 @@ class camera(camera_panel):
                 sub_bokeh.prop(lux_cam, "distribution", text="")
                 sub_bokeh.prop(lux_cam, "power", text="Power")
 
-        if lux_cam.enable_clipping_plane or lux_cam.use_dof:
-            layout.separator()
+        if UseLuxCore():
+            if lux_cam.enable_clipping_plane or lux_cam.use_dof:
+                layout.separator()
 
-        layout.prop(lux_cam, "enable_clipping_plane", toggle=True)
+            layout.prop(lux_cam, "enable_clipping_plane", toggle=True)
 
-        if lux_cam.enable_clipping_plane:
-            layout.prop_search(lux_cam, "clipping_plane_obj", context.scene, "objects", text="Plane")
+            if lux_cam.enable_clipping_plane:
+                layout.prop_search(lux_cam, "clipping_plane_obj", context.scene, "objects", text="Plane")
 
 
 @LuxRenderAddon.addon_register_class
