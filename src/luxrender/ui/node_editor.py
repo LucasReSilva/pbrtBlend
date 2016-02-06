@@ -342,11 +342,11 @@ luxrender_node_categories_volume = [
     ]),
 
     luxrender_node_category_volume("LUX_LIGHT_VOLUME", "Light", items=[
-        NodeItem("luxrender_light_area_node"),
-        Separator(),
+        #NodeItem("luxrender_light_area_node"), # Only emission color is supported, so this node can not be used
+        #Separator(),
         NodeItem("luxrender_texture_blackbody_node"),
-        NodeItem("luxrender_texture_gaussian_node"),
-        NodeItem("luxrender_texture_tabulateddata_node"),
+        #NodeItem("luxrender_texture_gaussian_node"), # Not yet supported by LuxCore
+        #NodeItem("luxrender_texture_tabulateddata_node"), # Not yet supported by LuxCore
     ]),
 
     luxrender_node_category_volume("LUX_OUTPUT_VOLUME", "Output", items=[

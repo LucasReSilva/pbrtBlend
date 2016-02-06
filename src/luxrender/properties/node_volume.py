@@ -44,7 +44,8 @@ class luxrender_volume_output_node(luxrender_node):
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Volume')
-        self.inputs.new('NodeSocketShader', 'Emission')
+        self.inputs.new('luxrender_color_socket', 'Emission Color')
+        self.inputs['Emission Color'].default_value = [0, 0, 0]
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
@@ -60,10 +61,21 @@ class luxrender_volume_output_node(luxrender_node):
         tree_name = volume.nodetree
         print('Converting volume: %s (Nodetree: %s)' % (volume.name, tree_name))
 
+        # Export emission color (backwards compatible)
+        if 'Emission Color' in self.inputs:
+            emission = self.inputs['Emission Color'].export_luxcore(properties)
+
+            if emission == [0, 0, 0]:
+                emission = None
+        else:
+            emission = None
+
         # Export the volume tree
         luxcore_name = export_volume_luxcore(properties, self.inputs[0], volume.name)
-        # Export emission node if attached to this node
-        export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name, is_volume_emission=True)
+
+        # Set emission color (backwards compatible)
+        if emission:
+            set_prop_vol(properties, luxcore_name, 'emission', emission)
 
         set_prop_vol(properties, luxcore_name, 'priority', volume.priority)
 
