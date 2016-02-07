@@ -95,6 +95,12 @@ class CameraExporter(object):
 
             cam_origin, cam_target, cam_up = self.__convert_lookat(view_matrix.inverted())
 
+            # Move the camera origin away from the viewport center to avoid clipping
+            origin = Vector(cam_origin)
+            target = Vector(cam_target)
+            origin += (origin - target) * 50
+            cam_origin = list(origin)
+
             set_prop_cam(self.properties, 'type', 'orthographic')
             set_prop_cam(self.properties, 'lookat.target', cam_target)
             set_prop_cam(self.properties, 'lookat.orig', cam_origin)
