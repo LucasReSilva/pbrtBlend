@@ -31,6 +31,8 @@ from ...outputs import LuxManager, LuxLog
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 
+from ...extensions_framework import util as efutil
+
 from .camera import CameraExporter
 from .config import ConfigExporter
 from .duplis import DupliExporter
@@ -253,7 +255,7 @@ class LuxCoreExporter(object):
 
         # Background image
         if imagepipeline_settings.use_background_image:
-            path = imagepipeline_settings.background_image
+            path = efutil.filesystem_path(imagepipeline_settings.background_image)
             gamma = imagepipeline_settings.background_image_gamma
 
             if os.path.exists(path):

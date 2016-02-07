@@ -24,6 +24,8 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
+import bpy
+
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
@@ -40,6 +42,7 @@ class luxcore_material(declarative_property_group):
     ef_attach_to = ['Material']
 
     controls = [
+        'is_shadow_catcher',
         'id',
         'create_MATERIAL_ID_MASK',
         'create_BY_MATERIAL_ID',
@@ -72,6 +75,13 @@ class luxcore_material(declarative_property_group):
 
     properties = [
         {
+            'type': 'bool',
+            'attr': 'is_shadow_catcher',
+            'name': 'Shadow Catcher',
+            'description': 'Make material transparent where hit by light and opaque where shadowed (alpha transparency)',
+            'default': False,
+        },
+        {
             'type': 'int',
             'attr': 'id',
             'name': 'Material ID',
@@ -79,7 +89,6 @@ class luxcore_material(declarative_property_group):
             'default': -1,
             'min': -1,
             'max': 65536,
-            'save_in_preset': True
         },
         {
             'type': 'int',
@@ -89,7 +98,6 @@ class luxcore_material(declarative_property_group):
             'default': -1,
             'min': -1,
             'max': 65536,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -97,7 +105,6 @@ class luxcore_material(declarative_property_group):
             'name': 'MATERIAL_ID_MASK pass',
             'description': 'Create a mask for this material (AOV channel)',
             'default': False,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -105,7 +112,6 @@ class luxcore_material(declarative_property_group):
             'name': 'BY_MATERIAL_ID pass',
             'description': 'Create a pass containing only objects with this material ID (AOV channel)',
             'default': False,
-            'save_in_preset': True
         },
         {
             'type': 'int',
@@ -116,7 +122,6 @@ class luxcore_material(declarative_property_group):
             'min': -1,
             'soft_max': 16,
             'max': 256,
-            'save_in_preset': True
         },
         {
             'type': 'int',
@@ -127,7 +132,6 @@ class luxcore_material(declarative_property_group):
             'min': -1,
             'soft_max': 16,
             'max': 256,
-            'save_in_preset': True
         },
         {
             'type': 'text',
@@ -140,7 +144,6 @@ class luxcore_material(declarative_property_group):
             'name': 'Diffuse',
             'description': 'Enable material visibility for indirect rays',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -148,7 +151,6 @@ class luxcore_material(declarative_property_group):
             'name': 'Glossy',
             'description': 'Enable material visibility for glossy rays',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'bool',
@@ -156,7 +158,6 @@ class luxcore_material(declarative_property_group):
             'name': 'Specular',
             'description': 'Enable material visibility for specular rays',
             'default': True,
-            'save_in_preset': True
         },
         {
             'type': 'text',

@@ -1341,7 +1341,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 blenderImage = bpy.data.images.new(imageName, alpha = True,
                                                     width = imageWidth, height = imageHeight, float_buffer = use_hdr)
 
-                # copy the buffer content to the right position in the Blender image
+                # copy the buffer content to the correct position in the Blender image
                 offsetFromLeft = int(imageWidth * scene.render.border_min_x) * 4
                 offsetFromTop = int(imageHeight * scene.render.border_min_y)
 

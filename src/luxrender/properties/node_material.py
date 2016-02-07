@@ -1738,8 +1738,24 @@ class luxrender_material_output_node(luxrender_node):
 
     interior_volume = bpy.props.StringProperty(description='Volume inside of the object with this material')
     exterior_volume = bpy.props.StringProperty(description='Volume outside of the object with this material')
-    advanced = bpy.props.BoolProperty(name='Advanced Options', description='Show advanced material settings',
-                                      default=False)
+    is_shadow_catcher = bpy.props.BoolProperty(name='Shadow Catcher', default=False, description=
+        'Make material transparent where hit by light and opaque where shadowed (alpha transparency)')
+    advanced = bpy.props.BoolProperty(name='Advanced Options', default=False, description=
+        'Show advanced material settings')
+    id = bpy.props.IntProperty(name='Material ID', default=-1, min=-1, max=65536, description=
+        'Material ID (-1 = auto), used for AOVs')
+    create_MATERIAL_ID_MASK = bpy.props.BoolProperty(name='MATERIAL_ID_MASK pass', default=False, description=
+        'Create a mask for this material (AOV channel)')
+    create_BY_MATERIAL_ID = bpy.props.BoolProperty(name='BY_MATERIAL_ID pass', default=False, description=
+        'Create a pass containing only objects with this material ID (AOV channel)')
+    samples = bpy.props.IntProperty(name='Samples', default=-1, min=-1, soft_max=16, max=256, description=
+        'Material samples count (-1 = global default, size x size)')
+    visibility_indirect_diffuse_enable = bpy.props.BoolProperty(name='Diffuse', default=True, description=
+        'Enable material visibility for indirect rays')
+    visibility_indirect_glossy_enable = bpy.props.BoolProperty(name='Glossy', default=True, description=
+        'Enable material visibility for glossy rays')
+    visibility_indirect_specular_enable = bpy.props.BoolProperty(name='Specular', default=True, description=
+        'Enable material visibility for specular rays')
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Surface')
@@ -1763,25 +1779,25 @@ class luxrender_material_output_node(luxrender_node):
             layout.label('Using default: "%s"' % default_exterior, icon='INFO')
 
         if UseLuxCore():
+            layout.prop(self, 'is_shadow_catcher')
+
             layout.prop(self, 'advanced', toggle=True)
 
             if self.advanced:
-                layout.label('Passes:')
-                luxcore_material = context.active_object.active_material.luxcore_material
-                layout.prop(luxcore_material, 'id')
-                layout.prop(luxcore_material, 'create_MATERIAL_ID_MASK')
-                layout.prop(luxcore_material, 'create_BY_MATERIAL_ID')
+                layout.prop(self, 'id')
+                layout.prop(self, 'create_MATERIAL_ID_MASK')
+                layout.prop(self, 'create_BY_MATERIAL_ID')
 
                 layout.label('Biased Path Settings:')
                 column = layout.column()
                 column.enabled = context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH'
 
-                column.prop(luxcore_material, 'samples')
+                column.prop(self, 'samples')
                 column.label('Visibility for indirect rays:')
                 row = column.row()
-                row.prop(luxcore_material, 'visibility_indirect_diffuse_enable')
-                row.prop(luxcore_material, 'visibility_indirect_glossy_enable')
-                row.prop(luxcore_material, 'visibility_indirect_specular_enable')
+                row.prop(self, 'visibility_indirect_diffuse_enable')
+                row.prop(self, 'visibility_indirect_glossy_enable')
+                row.prop(self, 'visibility_indirect_specular_enable')
 
     def export_luxcore(self, material, properties, blender_scene, luxcore_exporter):
         # Note: volumes are exported in export/luxcore/materials.py (in "parent" function that calls this function)
@@ -1791,18 +1807,22 @@ class luxrender_material_output_node(luxrender_node):
 
         # Export the material tree
         luxcore_name = export_submat_luxcore(properties, self.inputs[0], luxcore_exporter, material.name)
+
         # Export emission node if attached to this node
         export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
+
         # Export advanced LuxCore material settings
-        luxcore_material = material.luxcore_material
-        set_prop_mat(properties, luxcore_name, 'id', luxcore_material.id)
-        set_prop_mat(properties, luxcore_name, 'samples', luxcore_material.samples)
+        set_prop_mat(properties, luxcore_name, 'id', self.id)
+        set_prop_mat(properties, luxcore_name, 'samples', self.samples)
         set_prop_mat(properties, luxcore_name, 'visibility.indirect.diffuse.enable',
-                     luxcore_material.visibility_indirect_diffuse_enable)
+                     self.visibility_indirect_diffuse_enable)
         set_prop_mat(properties, luxcore_name, 'visibility.indirect.glossy.enable',
-                     luxcore_material.visibility_indirect_glossy_enable)
+                     self.visibility_indirect_glossy_enable)
         set_prop_mat(properties, luxcore_name, 'visibility.indirect.specular.enable',
-                     luxcore_material.visibility_indirect_specular_enable)
+                     self.visibility_indirect_specular_enable)
+
+        # Shadow catcher
+        set_prop_mat(properties, luxcore_name, 'shadowcatcher.enable', self.is_shadow_catcher)
 
         return luxcore_name
 

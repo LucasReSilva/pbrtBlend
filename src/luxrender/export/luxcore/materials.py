@@ -621,6 +621,8 @@ class MaterialExporter(object):
             # LuxCore specific material settings
             lc_mat = material.luxcore_material
 
+            self.properties.Set(pyluxcore.Property(prefix + '.shadowcatcher.enable', lc_mat.is_shadow_catcher))
+
             if lc_mat.id != -1 and not self.luxcore_exporter.is_viewport_render:
                 self.properties.Set(pyluxcore.Property(prefix + '.id', [lc_mat.id]))
                 if lc_mat.create_MATERIAL_ID_MASK and self.blender_scene.luxrender_channels.enable_aovs:
