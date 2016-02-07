@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import bpy, time
+import bpy, time, os
 
 from ...outputs import LuxManager, LuxLog
 from ...outputs.luxcore_api import pyluxcore
@@ -250,6 +250,17 @@ class LuxCoreExporter(object):
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.exposure', exposure))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.fstop', fstop))
         index += 1
+
+        # Background image
+        if imagepipeline_settings.use_background_image:
+            path = imagepipeline_settings.background_image
+            gamma = imagepipeline_settings.background_image_gamma
+
+            if os.path.exists(path):
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BACKGROUND_IMG'))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.file', path))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.gamma', gamma))
+                index += 1
 
         # Bloom
         if imagepipeline_settings.use_bloom:

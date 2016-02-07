@@ -155,6 +155,11 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'crf_type',
         'crf_preset_menu',
         'crf_file',
+        # Background image
+        'label_compositing',
+        'use_background_image',
+        'background_image',
+        'background_image_gamma',
         # Intervals
         'label_intervals',
         #['writeinterval_png', 'writeinterval_flm'],
@@ -179,7 +184,14 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'vignetting_scale': {'use_vignetting': True},
         'crf_preset_menu': {'crf_type': 'PRESET'},
         'crf_file': {'crf_type': 'FILE'},
+        'background_image': {'use_background_image': True},
+        'background_image_gamma': {'use_background_image': True},
     }
+
+    def update_background_image(self, context):
+        # Enable alpha AOV so the background image plugin works
+        if not context.scene.luxrender_channels.ALPHA and self.use_background_image:
+            context.scene.luxrender_channels.ALPHA = True
 
     properties = [
         # Output switcher
@@ -439,6 +451,38 @@ class luxcore_imagepipeline_settings(declarative_property_group):
             'description': 'Path to the external .crf file',
             'default': '',
             'subtype': 'FILE_PATH',
+        },
+        # Background image
+        {
+            'attr': 'label_compositing',
+            'type': 'text',
+            'name': 'Compositing:',
+        },
+        {
+            'type': 'bool',
+            'attr': 'use_background_image',
+            'name': 'Background Image',
+            'description': 'Use a background image (requires alpha pass). The image will be stretched to fit the film size.',
+            'default': False,
+            'update': update_background_image
+        },
+        {
+            'attr': 'background_image',
+            'type': 'string',
+            'subtype': 'FILE_PATH',
+            'name': 'Path',
+            'description': 'Path to the image file on disk',
+            'default': ''
+        },
+        {
+            'type': 'float',
+            'attr': 'background_image_gamma',
+            'name': 'Gamma',
+            'description': 'Gamma value of the image',
+            'default': 2.2,
+            'min': 0.0,
+            'soft_min': 1.0,
+            'max': 5.0,
         },
         # Update and save intervals
         {
