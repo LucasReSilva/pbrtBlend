@@ -66,69 +66,76 @@ class tonemapping_panel(imageeditor_panel):
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
     def draw(self, context):
+        layout = self.layout
+
         if not hasattr(pyluxcore.RenderSession, 'Parse'):
-            self.layout.label('Outdated LuxCore version!', icon='INFO')
+            layout.label('Outdated LuxCore version!', icon='INFO')
             return
 
         if context.scene.camera is None:
-            self.layout.label('No camera in scene.')
+            layout.label('No camera in scene.')
             return
 
         lux_cam = context.scene.camera.data.luxrender_camera
         imagepipeline_settings = lux_cam.luxcore_imagepipeline_settings
 
-        self.layout.prop(imagepipeline_settings, 'displayinterval')
+        layout.prop(imagepipeline_settings, 'displayinterval')
 
-        self.layout.label('Tonemapper:')
-        self.layout.prop(imagepipeline_settings, 'tonemapper_type')
+        layout.label('Tonemapper:')
+        layout.prop(imagepipeline_settings, 'tonemapper_type')
 
         if imagepipeline_settings.tonemapper_type in ['TONEMAP_LINEAR', 'TONEMAP_LUXLINEAR']:
-            self.layout.prop(imagepipeline_settings, 'use_auto_linear')
+            layout.prop(imagepipeline_settings, 'use_auto_linear')
 
         if imagepipeline_settings.tonemapper_type == 'TONEMAP_LINEAR':
-            self.layout.prop(imagepipeline_settings, 'linear_scale')
+            layout.prop(imagepipeline_settings, 'linear_scale')
         elif imagepipeline_settings.tonemapper_type == 'TONEMAP_LUXLINEAR':
             # Since fstop and exposure time should also change DOF/motion blur we don't show them here - ISO is enough
-            self.layout.prop(lux_cam, 'sensitivity')
+            layout.prop(lux_cam, 'sensitivity')
         elif imagepipeline_settings.tonemapper_type == 'TONEMAP_REINHARD02':
-            sub = self.layout.column(align=True)
+            sub = layout.column(align=True)
             sub.prop(imagepipeline_settings, 'reinhard_prescale')
             sub.prop(imagepipeline_settings, 'reinhard_postscale')
             sub.prop(imagepipeline_settings, 'reinhard_burn')
 
-        self.layout.prop(imagepipeline_settings, 'use_bloom')
+        layout.prop(imagepipeline_settings, 'use_bloom')
         if imagepipeline_settings.use_bloom:
-            col = self.layout.column(align=True)
+            col = layout.column(align=True)
             col.prop(imagepipeline_settings, 'bloom_radius', slider=True)
             col.prop(imagepipeline_settings, 'bloom_weight', slider=True)
 
-        self.layout.prop(imagepipeline_settings, 'use_color_aberration')
+        layout.prop(imagepipeline_settings, 'use_color_aberration')
         if imagepipeline_settings.use_color_aberration:
-            self.layout.prop(imagepipeline_settings, 'color_aberration_amount', slider=True)
+            layout.prop(imagepipeline_settings, 'color_aberration_amount', slider=True)
 
-        self.layout.prop(imagepipeline_settings, 'use_vignetting')
+        layout.prop(imagepipeline_settings, 'use_vignetting')
         if imagepipeline_settings.use_vignetting:
-            self.layout.prop(imagepipeline_settings, 'vignetting_scale', slider=True)
+            layout.prop(imagepipeline_settings, 'vignetting_scale', slider=True)
 
-        self.layout.label('Analog Film Simulation:')
-        self.layout.prop(imagepipeline_settings, 'crf_type', expand=True)
+        layout.label('Analog Film Simulation:')
+        layout.prop(imagepipeline_settings, 'crf_type', expand=True)
         if imagepipeline_settings.crf_type == 'PRESET':
-            self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf', text=imagepipeline_settings.crf_preset)
+            layout.menu('IMAGEPIPELINE_MT_luxrender_crf', text=imagepipeline_settings.crf_preset)
         elif imagepipeline_settings.crf_type == 'FILE':
-            self.layout.prop(imagepipeline_settings, 'crf_file')
+            layout.prop(imagepipeline_settings, 'crf_file')
 
         # TODO: can we only show the available passes here?
-        self.layout.label('Pass:')
-        self.layout.prop(imagepipeline_settings, 'output_switcher_pass')
+        layout.label('Pass:')
+        layout.prop(imagepipeline_settings, 'output_switcher_pass')
 
         if imagepipeline_settings.output_switcher_pass == 'IRRADIANCE':
-            sub = self.layout.column(align=True)
+            sub = layout.column(align=True)
             row = sub.row(align=True)
             row.prop(imagepipeline_settings, 'contour_scale')
             row.prop(imagepipeline_settings, 'contour_range')
             row = sub.row(align=True)
             row.prop(imagepipeline_settings, 'contour_steps')
             row.prop(imagepipeline_settings, 'contour_zeroGridSize')
+
+        layout.prop(imagepipeline_settings, 'use_background_image')
+        if imagepipeline_settings.use_background_image:
+            layout.prop(imagepipeline_settings, 'background_image', text='')
+            layout.prop(imagepipeline_settings, 'background_image_gamma')
 
 
 @LuxRenderAddon.addon_register_class
