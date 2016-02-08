@@ -1041,7 +1041,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         time_running = stats.Get('stats.renderengine.time').GetFloat()
         # Add time stats for realtime preview because Blender doesn't display it there
         # For final renderings, only display time if it is set as halt condition
-        if (not realtime_preview and settings.use_halt_time) or (realtime_preview and settings.use_halt_time_preview):
+        # Don't show when engine is BIASPATH because it uses different halt conditions
+        if ((not realtime_preview and settings.use_halt_time) or (realtime_preview and settings.use_halt_time_preview)) \
+                and engine not in ['BIASPATHCPU', 'BIASPATHOCL']:
             stats_list.append('Time: %.1fs/%ds' % (time_running, halt_time))
             if not realtime_preview:
                 progress_time = time_running / halt_time
@@ -1050,7 +1052,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if rendering_controls.stats_samples:
             samples_count = stats.Get('stats.renderengine.pass').GetInt()
             samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
-            if (not realtime_preview and settings.use_halt_samples) or (realtime_preview and settings.use_halt_samples_preview):
+
+            # Do not show when engine is BIASPATH because it uses different halt conditions
+            if ((not realtime_preview and settings.use_halt_samples) or (realtime_preview and settings.use_halt_samples_preview)) \
+                    and engine not in ['BIASPATHCPU', 'BIASPATHOCL']:
                 stats_list.append('%s: %d/%d' % (samples_term, samples_count, halt_samples))
                 if not realtime_preview:
                     progress_samples = samples_count / halt_samples
