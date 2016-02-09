@@ -94,11 +94,11 @@ class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         camera_data = context.camera if hasattr(context, 'camera') else context.scene.camera.data
-        return camera_data.luxrender_camera and camera_data.luxrender_camera.luxcore_imagepipeline_settings
+        return camera_data.luxrender_camera and camera_data.luxrender_camera.luxcore_imagepipeline
 
     def execute(self, context):
         camera_data = context.camera if hasattr(context, 'camera') else context.scene.camera.data
-        camera_data.luxrender_camera.luxcore_imagepipeline_settings.crf_preset = self.properties.preset_name
+        camera_data.luxrender_camera.luxcore_imagepipeline.crf_preset = self.properties.preset_name
 
         camera_data.update_tag()
 
@@ -122,7 +122,7 @@ class IMAGEPIPELINE_MT_luxrender_crf(bpy.types.Menu):
             op.preset_name = crf_name
 
 @LuxRenderAddon.addon_register_class
-class luxcore_imagepipeline_settings(declarative_property_group):
+class luxcore_imagepipeline(declarative_property_group):
     """
     Storage class for LuxCore imagepipeline settings.
     """
@@ -134,12 +134,14 @@ class luxcore_imagepipeline_settings(declarative_property_group):
     controls = [
         # Output switcher
         'output_switcher_pass',
+        'transparent_film',
         ['contour_scale', 'contour_range'],
         ['contour_steps', 'contour_zeroGridSize'],
         # Tonemapper
         'label_tonemapper_type',
         'tonemapper_type',
         ['use_auto_linear', 'linear_scale'],
+        'label_camera_settings_help',
         ['reinhard_prescale', 'reinhard_postscale', 'reinhard_burn'],
         # Postpro plugin label
         'label_postpro',
@@ -173,7 +175,8 @@ class luxcore_imagepipeline_settings(declarative_property_group):
         'contour_range': {'output_switcher_pass': 'IRRADIANCE'},
         'contour_steps': {'output_switcher_pass': 'IRRADIANCE'},
         'contour_zeroGridSize': {'output_switcher_pass': 'IRRADIANCE'},
-        'use_auto_linear': {'tonemapper_type': O(['TONEMAP_LINEAR', 'TONEMAP_LUXLINEAR'])},
+        'label_camera_settings_help': {'tonemapper_type': 'TONEMAP_LUXLINEAR'},
+        'use_auto_linear': {'tonemapper_type': 'TONEMAP_LINEAR'},
         'linear_scale': {'tonemapper_type': 'TONEMAP_LINEAR'},
         'reinhard_prescale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
         'reinhard_postscale': {'tonemapper_type': 'TONEMAP_REINHARD02'},
@@ -222,6 +225,13 @@ class luxcore_imagepipeline_settings(declarative_property_group):
                 ('RAYCOUNT', 'Raycount', ''),
                 ('IRRADIANCE', 'Irradiance', '')
             ]
+        },
+        {
+            'type': 'bool',
+            'attr': 'transparent_film',
+            'name': 'Transparent Film',
+            'description': 'Make the world background transparent',
+            'default': False,
         },
         # Contour lines settings (only for IRRADIANCE pass)
         {
@@ -284,6 +294,12 @@ class luxcore_imagepipeline_settings(declarative_property_group):
                 ('TONEMAP_REINHARD02', 'Reinhard', 'Non-linear tonemapper that adapts to the image brightness'),
             ],
             'expand': True
+        },
+        {
+            'type': 'text',
+            'attr': 'label_camera_settings_help',
+            'name': 'Brightness controlled by f/stop, ISO and exposure',
+            'icon': 'INFO',
         },
         # Linear tonemapper settings
         {

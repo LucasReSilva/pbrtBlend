@@ -363,17 +363,20 @@ class ConfigExporter(object):
             return
 
         luxrender_camera = self.blender_scene.camera.data.luxrender_camera
-        output_switcher_channel = luxrender_camera.luxcore_imagepipeline_settings.output_switcher_pass
+        output_switcher_channel = luxrender_camera.luxcore_imagepipeline.output_switcher_pass
         channels = self.blender_scene.luxrender_channels
 
-        if channels.enable_aovs and (channels.import_into_blender or channels.saveToDisk):
+        convert_channels = channels.enable_aovs and (channels.import_into_blender or channels.saveToDisk)
+        transparent_film = luxrender_camera.luxcore_imagepipeline.transparent_film
+
+        if convert_channels:
             if channels.RGB:
                 self.convert_channel('RGB')
             if channels.RGBA:
                 self.convert_channel('RGBA')
             #if channels.RGB_TONEMAPPED:
             #    self.convert_channel('RGB_TONEMAPPED')
-            if channels.RGBA_TONEMAPPED:
+            if channels.RGBA_TONEMAPPED or transparent_film:
                 self.convert_channel('RGBA_TONEMAPPED')
             if channels.ALPHA:
                 self.convert_channel('ALPHA')
@@ -411,6 +414,10 @@ class ConfigExporter(object):
                 self.convert_channel('RAYCOUNT')
             if channels.IRRADIANCE:
                 self.convert_channel('IRRADIANCE')
+        elif transparent_film:
+            # Make absolutely sure that this AOV is enabled when using transparent film, otherwise Blender crashes
+            # during the render!
+            self.convert_channel('RGBA_TONEMAPPED')
 
         if output_switcher_channel != 'disabled':
             if output_switcher_channel not in self.active_outputswitcher_channels:

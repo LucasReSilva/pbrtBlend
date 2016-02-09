@@ -77,7 +77,7 @@ class tonemapping_panel(imageeditor_panel):
             return
 
         lux_cam = context.scene.camera.data.luxrender_camera
-        imagepipeline_settings = lux_cam.luxcore_imagepipeline_settings
+        imagepipeline_settings = lux_cam.luxcore_imagepipeline
 
         layout.prop(imagepipeline_settings, 'displayinterval')
 

@@ -213,7 +213,7 @@ class LuxCoreExporter(object):
         if self.blender_scene.camera is None:
             return temp_properties
 
-        imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
+        imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline
         index = 0
         prefix = 'film.imagepipeline.'
 
@@ -227,7 +227,7 @@ class LuxCoreExporter(object):
         # Tonemapper
         tonemapper = imagepipeline_settings.tonemapper_type
 
-        if tonemapper in ['TONEMAP_LINEAR', 'TONEMAP_LUXLINEAR'] and imagepipeline_settings.use_auto_linear:
+        if tonemapper == 'TONEMAP_LINEAR' and imagepipeline_settings.use_auto_linear:
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'TONEMAP_AUTOLINEAR'))
             index += 1
 

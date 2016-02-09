@@ -1445,6 +1445,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             color_yellow = (1.0, 1.0, 0.0, 1.0)
             draw_tile_type(count_pending, coords_pending, color_yellow)
 
+    transparent_film = False
+
     def luxcore_render(self, scene):
         if self.is_preview:
             self.luxcore_render_preview(scene)
@@ -1474,6 +1476,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                     'first frame will never stop!')
 
             self.set_export_path_luxcore(scene)
+            self.transparent_film = scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
 
             filmWidth, filmHeight = self.get_film_size(scene)
 
@@ -1508,9 +1511,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 return
 
-            imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * 3))
+            bufferdepth = 4 if self.transparent_film else 3
+            imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * bufferdepth))
 
-            imagepipeline_settings = scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings
+            imagepipeline_settings = scene.camera.data.luxrender_camera.luxcore_imagepipeline
             start_time = time.time()
             last_image_display = start_time
             done = False
@@ -1554,7 +1558,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         print('Rendering paused.')
 
                         stats = luxcore_session.GetStats()
-                        self.update_framebuffer(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight)
+                        result = self.create_result(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight, False)
+                        self.end_result(result)
                         last_image_display = now
                 else:
                     if luxcore_session.IsInPause():
@@ -1584,19 +1589,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 done = self.haltConditionMet(scene, stats)
 
                 if time_since_display > display_interval or session_was_updated:
-                    self.update_framebuffer(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight)
+                    result = self.create_result(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight, False)
+                    self.end_result(result)
                     last_image_display = now
 
             LuxLog('Ending the rendering process...')
             luxcore_session.Stop()
 
-            # Update the image
-            luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
-            # write final render result
-            result = self.begin_result(0, 0, filmWidth, filmHeight)
-            layer = result.layers[0] if bpy.app.version < (2, 74, 4) else result.layers[0].passes[0]
-            layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight,
-                                                                                   imageBufferFloat)
+            # Get the final result
+            result = self.create_result(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight, True)
 
             if scene.luxrender_channels.enable_aovs:
                 if scene.luxrender_channels.saveToDisk:
@@ -1617,28 +1618,39 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             traceback.print_exc()
 
-    def update_framebuffer(self, luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight):
-        # Update the image
-        luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED, imageBufferFloat)
+    def create_result(self, luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight, is_final_result):
+        """
+        Updates the film and creates a RenderResult.
+        Remember to call self.end_result(result) on the returned result after calling this function!
+        """
 
-        # Here we write the pixel values to the RenderResult
+        if self.transparent_film:
+            output_type = pyluxcore.FilmOutputType.RGBA_TONEMAPPED
+            def convert(filmWidth, filmHeight, imageBufferFloat):
+                # Need the extra "False" because this function has an additional "normalize" argument
+                return pyluxcore.ConvertFilmChannelOutput_4xFloat_To_4xFloatList(filmWidth, filmHeight, imageBufferFloat, False)
+        else:
+            output_type = pyluxcore.FilmOutputType.RGB_TONEMAPPED
+            def convert(filmWidth, filmHeight, imageBufferFloat):
+                return pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth, filmHeight, imageBufferFloat)
+
+        # Update the image
+        luxcore_session.GetFilm().GetOutputFloat(output_type, imageBufferFloat)
+
         result = self.begin_result(0, 0, filmWidth, filmHeight)
         layer = result.layers[0] if bpy.app.version < (2, 74, 4) else result.layers[0].passes[0]
 
         if (scene.luxcore_enginesettings.renderengine_type == 'BIASPATH' and
-                scene.luxcore_tile_highlighting.use_tile_highlighting):
+                scene.luxcore_tile_highlighting.use_tile_highlighting and not is_final_result):
             # Use a temp image because layer.rect does not support list slicing
-            tempImage = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
-                                                                                  filmHeight,
-                                                                                  imageBufferFloat)
+            tempImage = convert(filmWidth, filmHeight, imageBufferFloat)
             # Draw tile outlines
             self.draw_tiles(scene, stats, tempImage, filmWidth, filmHeight)
             layer.rect = tempImage
         else:
-            layer.rect = pyluxcore.ConvertFilmChannelOutput_3xFloat_To_3xFloatList(filmWidth,
-                                                                                   filmHeight,
-                                                                                   imageBufferFloat)
-        self.end_result(result)
+            layer.rect = convert(filmWidth, filmHeight, imageBufferFloat)
+
+        return result
 
     def get_film_size(self, scene):
         filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
@@ -1667,7 +1679,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         #if channels.RGB_TONEMAPPED:
         #    self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
         #                               'RGB_TONEMAPPED', channels.saveToDisk)
-        if channels.RGBA_TONEMAPPED:
+        # When the film is transparent the RGBA_TONEMAPPED channel is already imported as the main render result
+        if channels.RGBA_TONEMAPPED and not self.transparent_film:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
                                        'RGBA_TONEMAPPED', channels.saveToDisk)
         if channels.ALPHA:
@@ -1915,19 +1928,38 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     lastNodeMatSettings = ''
     update_counter = 0
 
+    def create_view_buffer(self, width, height):
+        bufferdepth = 4 if self.transparent_film else 3
+        self.viewImageBufferFloat = array.array('f', [0.0] * (width * height * bufferdepth))
+
     def luxcore_view_draw(self, context):
         def draw_framebuffer():
             # Update the screen
-            bufferSize = self.viewFilmWidth * self.viewFilmHeight * 3
-            glBuffer = bgl.Buffer(bgl.GL_FLOAT, [bufferSize], self.viewImageBufferFloat)
+            print('transp:', self.transparent_film)
+
+            if self.transparent_film:
+                bufferdepth = 4
+                buffertype = bgl.GL_RGBA
+                # Enable GL_BLEND so the alpha channel is visible
+                bgl.glEnable(bgl.GL_BLEND)
+            else:
+                bufferdepth = 3
+                buffertype = bgl.GL_RGB
+
+            buffersize = self.viewFilmWidth * self.viewFilmHeight * bufferdepth
+            print('buf size:', buffersize)
+            glBuffer = bgl.Buffer(bgl.GL_FLOAT, [buffersize], self.viewImageBufferFloat)
+
             bgl.glRasterPos2i(0, 0)
-            bgl.glDrawPixels(self.viewFilmWidth, self.viewFilmHeight, bgl.GL_RGB, bgl.GL_FLOAT, glBuffer)
+            bgl.glDrawPixels(self.viewFilmWidth, self.viewFilmHeight, buffertype, bgl.GL_FLOAT, glBuffer)
+            # restore the default
+            bgl.glDisable(bgl.GL_BLEND)
 
         view_draw_startTime = time.time()
         elapsed = view_draw_startTime - self.last_update_time
 
         if context.scene.camera:
-            interval = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline_settings.viewport_interval / 1000
+            interval = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline.viewport_interval / 1000
         else:
             interval = 0.05
 
@@ -1988,9 +2020,19 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.update_stats(status, blender_stats)
 
         # Update the image buffer
-        session.luxcore_session.GetFilm().GetOutputFloat(pyluxcore.FilmOutputType.RGB_TONEMAPPED,
-                                                  self.viewImageBufferFloat)
+        if self.transparent_film:
+            output_type = pyluxcore.FilmOutputType.RGBA_TONEMAPPED
+        else:
+            output_type = pyluxcore.FilmOutputType.RGB_TONEMAPPED
+
+        session.luxcore_session.GetFilm().GetOutputFloat(output_type, self.viewImageBufferFloat)
         draw_framebuffer()
+
+        for i in range(15):
+            print(self.viewImageBufferFloat[i])
+        print('---')
+        print(self.transparent_film)
+        print(output_type)
 
         self.last_update_time = view_draw_startTime
 
@@ -2205,8 +2247,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 LuxCoreSessionManager.stop_luxcore_session(self.space)
 
-                # For the mesh cache
-                self.set_export_path_luxcore(context.scene)
+                if context.scene.camera:
+                    self.transparent_film = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+                else:
+                    self.transparent_film = False
 
                 self.lastRenderSettings = ''
                 self.lastVolumeSettings = ''
@@ -2221,7 +2265,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 self.viewFilmWidth = context.region.width
                 self.viewFilmHeight = context.region.height
-                self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
+
+                self.create_view_buffer(self.viewFilmWidth, self.viewFilmHeight)
 
                 # Export the Blender scene
                 luxcore_config = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)
@@ -2263,9 +2308,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if update_changes.cause_config:
                 LuxLog('Configuration update')
 
+                if context.scene.camera:
+                    self.transparent_film = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+                else:
+                    self.transparent_film = False
+
                 self.viewFilmWidth = context.region.width
                 self.viewFilmHeight = context.region.height
-                self.viewImageBufferFloat = array.array('f', [0.0] * (self.viewFilmWidth * self.viewFilmHeight * 3))
+
+                self.create_view_buffer(self.viewFilmWidth, self.viewFilmHeight)
 
                 luxcore_config = LuxCoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig()
                 LuxCoreSessionManager.stop_luxcore_session(self.space)
