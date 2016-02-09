@@ -2028,12 +2028,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         session.luxcore_session.GetFilm().GetOutputFloat(output_type, self.viewImageBufferFloat)
         draw_framebuffer()
 
-        for i in range(15):
-            print(self.viewImageBufferFloat[i])
-        print('---')
-        print(self.transparent_film)
-        print(output_type)
-
         self.last_update_time = view_draw_startTime
 
         if stop_redraw:
@@ -2612,9 +2606,7 @@ class UpdateChanges(object):
         if self.cause_session:
             print('session was changed')
         if self.cause_objectsRemoved:
-            print('objects where removed:')
-            for obj in self.removed_objects:
-                print('    ' + obj.name)
+            print('objects where removed')
         if self.cause_volumes:
             print('volumes changed')
         if self.cause_haltconditions:
