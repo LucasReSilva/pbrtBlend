@@ -219,13 +219,18 @@ def cycles_material_converter(blender_mat):
         lux_nodetree.use_fake_user = True
         blender_mat.luxrender_material.nodetree = lux_nodetree.name
 
-        # Find active Cycles output node
+        # Find several Cycles nodetypes needed to start the export (or just useful later)
         output = None
+        first_image_node = None
+        emission = None
 
         for node in blender_mat.node_tree.nodes:
             if node.type == 'OUTPUT_MATERIAL' and node.is_active_output:
                 output = node
-                break
+            elif node.type == 'TEX_IMAGE' and node.outputs[0].is_linked:
+                first_image_node = node
+            elif node.type == 'EMISSION' and node.outputs[0].is_linked:
+                emission = node
 
         # Convert surface socket
         first_surface_node, default_value = convert_socket(output.inputs['Surface'], lux_nodetree)
@@ -236,15 +241,21 @@ def cycles_material_converter(blender_mat):
         # Connect Lux output to first converted node (if it could be converted)
         if first_surface_node:
             lux_nodetree.links.new(first_surface_node.outputs[0], lux_output.inputs[0])
+        else:
+            # Backup material in case nothing could be converted
+            backup_matte_node = lux_nodetree.nodes.new('luxrender_material_matte_node')
+            backup_matte_node.location = lux_output.location.x - 300, lux_output.location.y # move to left
+            lux_nodetree.links.new(backup_matte_node.outputs[0], lux_output.inputs[0])
+
+            # If nothing at all could be converted, try at least to find an image texture
+            if first_image_node:
+                backup_image_node = lux_nodetree.nodes.new('luxrender_texture_blender_image_map_node')
+                backup_image_node.location = backup_matte_node.location.x - 300, backup_matte_node.location.y # move to left
+                lux_nodetree.links.new(backup_image_node.outputs[0], backup_matte_node.inputs[0])
+
+                backup_image_node.image_name = first_image_node.image.name
 
         # Use the first emission node if there are any
-        emission = None
-
-        for node in blender_mat.node_tree.nodes:
-            if node.type == 'EMISSION' and node.outputs[0].is_linked:
-                emission = node
-                break
-
         if emission:
             lux_emission = lux_nodetree.nodes.new('luxrender_light_area_node')
             lux_emission.location = lux_output.location.x - 230, lux_output.location.y - 180
@@ -265,12 +276,6 @@ def cycles_material_converter(blender_mat):
             lux_nodetree.links.new(lux_emission.outputs[0], lux_output.inputs[1])
 
         # TODO: displacement socket
-
-        # Fallback in case no node could be converted
-        # TODO: try to find a texture and attach it to a new diffuse mat node
-
-        # Second fallback
-        # TODO: create white matte/warning color/delete the node tree?
 
         return {'FINISHED'}
     except Exception as err:
