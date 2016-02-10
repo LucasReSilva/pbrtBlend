@@ -653,15 +653,17 @@ class luxrender_lamp_hemi(declarative_property_group):
         'gamma',
         [0.323, 'L_colorlabel', 'L_color'],
         'hdri_multiply',
-        'hdri_infinitesample'
+        'hdri_infinitesample',
+        'blacklowerhemisphere',
     ]
 
     visibility = {
-        'mapping_type': {'infinite_map': LO({'!=': ''})},
+        'mapping_type': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
         'hdri_multiply': {'infinite_map': LO({'!=': ''})},
         'gamma': {'infinite_map': LO({'!=': ''})},
         'nsamples': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
         'hdri_infinitesample': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
+        'blacklowerhemisphere': lambda: UseLuxCore(),
     }
 
     properties = TC_L.properties[:] + [
@@ -720,6 +722,14 @@ images. Will disable use of portals for this light!',
             'soft_min': 1,
             'max': 100,
             'soft_max': 100,
+        },
+        {
+            'type': 'bool',
+            'attr': 'blacklowerhemisphere',
+            'name': 'Black lower hemisphere',
+            'description': 'Enable when using a shadowcatcher (prevents the lower half of the HDRI to cast shadows '
+                           'onto the shadowcatcher from below)',
+            'default': False
         },
     ]
 
