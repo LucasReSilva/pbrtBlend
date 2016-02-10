@@ -1004,7 +1004,6 @@ may mute lamps and caustics',
                            'noise pattern',
             'default': 1,
             'min': 1,
-            'max': 60000, # TODO
         },
         {
             'type': 'bool',
