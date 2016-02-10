@@ -1937,7 +1937,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def luxcore_view_draw(self, context):
         def draw_framebuffer():
             # Update the screen
-            print('transp:', self.transparent_film)
 
             if self.transparent_film:
                 bufferdepth = 4
@@ -1949,7 +1948,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 buffertype = bgl.GL_RGB
 
             buffersize = self.viewFilmWidth * self.viewFilmHeight * bufferdepth
-            print('buf size:', buffersize)
             glBuffer = bgl.Buffer(bgl.GL_FLOAT, [buffersize], self.viewImageBufferFloat)
 
             bgl.glRasterPos2i(0, 0)

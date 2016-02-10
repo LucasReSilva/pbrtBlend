@@ -107,6 +107,7 @@ class luxcore_enginesettings(declarative_property_group):
 
         # Advanced settings
         'advanced',
+        [0.498, 'label_seed', ['seed', 'use_animated_seed']],
         ['label_accelerator_type', 'instancing'],
         ['label_filter_type', 'filter_type'],
         ['label_biaspath_lights_samplingstrategy_type', 'biaspath_lights_samplingstrategy_type'],
@@ -211,6 +212,10 @@ class luxcore_enginesettings(declarative_property_group):
         'tile_multipass_convergencetest_threshold': {'show_halt_conditions': True, 'renderengine_type': 'BIASPATH'},
         'tile_multipass_use_threshold_reduction': {'show_halt_conditions': True, 'renderengine_type': 'BIASPATH'},
         'tile_multipass_convergencetest_threshold_reduction': {'show_halt_conditions': True, 'renderengine_type': 'BIASPATH'},
+        # Seed (advanced option)
+        'label_seed': {'advanced': True},
+        'seed': {'advanced': True},
+        'use_animated_seed': {'advanced': True},
     }
 
     alert = {}
@@ -985,6 +990,32 @@ may mute lamps and caustics',
                            'and final render)',
             'default': True,
         },
+        # Seed
+        {
+            'type': 'text',
+            'attr': 'label_seed',
+            'name': 'Seed:',
+        },
+        {
+            'type': 'int',
+            'attr': 'seed',
+            'name': '',
+            'description': 'Seed for random number generation. Images rendered with the same seed will have the same '
+                           'noise pattern',
+            'default': 1,
+            'min': 1,
+            'max': 60000, # TODO
+        },
+        {
+            'type': 'bool',
+            'attr': 'use_animated_seed',
+            'name': '',
+            'description': 'Use different seed values for different frames',
+            'default': False,
+            'icon': 'TIME',
+            'toggle': True,
+        },
+        # Global node editor properties (they are here because I didn't find a better place)
         {
             'type': 'bool',
             'attr': 'nodeeditor_show_imagemap_previews',

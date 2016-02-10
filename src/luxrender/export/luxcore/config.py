@@ -56,6 +56,7 @@ class ConfigExporter(object):
             self.__convert_sampler()
 
         self.__convert_engine()
+        self.__convert_seed()
         self.__convert_halt_conditions()
         self.__convert_compute_settings()
         self.__convert_film_size(film_width, film_height)
@@ -159,8 +160,20 @@ class ConfigExporter(object):
 
 
     def __convert_film_size(self, film_width, film_height):
-        self.properties.Set(pyluxcore.Property('film.width', [film_width]))
-        self.properties.Set(pyluxcore.Property('film.height', [film_height]))
+        self.properties.Set(pyluxcore.Property('film.width', film_width))
+        self.properties.Set(pyluxcore.Property('film.height', film_height))
+
+
+    def __convert_seed(self):
+        engine_settings = self.blender_scene.luxcore_enginesettings
+
+        if engine_settings.use_animated_seed:
+            # frame_current can be 0, but not negative, while LuxCore seed can only be > 1
+            seed = self.blender_scene.frame_current + 1
+        else:
+            seed = engine_settings.seed
+
+        self.properties.Set(pyluxcore.Property('renderengine.seed', seed))
 
 
     def __convert_halt_conditions(self):
