@@ -1502,6 +1502,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 if scene.luxcore_translatorsettings.run_luxcoreui:
                     luxrender_path = self.get_lux_binary_path(scene, 'luxcoreui')
+
+                    if not os.path.exists(luxrender_path):
+                        self.report({'ERROR'}, 'LuxCoreUI executable not found at path "%s"' % luxrender_path)
+                        return
+
                     cmd_args = [luxrender_path, '-o', 'render.cfg']
 
                     env = os.environ.copy()
