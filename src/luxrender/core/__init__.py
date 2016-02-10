@@ -1476,7 +1476,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                     'first frame will never stop!')
 
             self.set_export_path_luxcore(scene)
-            self.transparent_film = scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+            # Stay compatible to old pyluxcore versions
+            self.transparent_film = (scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film and
+                                     hasattr(pyluxcore, 'ConvertFilmChannelOutput_4xFloat_To_4xFloatList'))
 
             filmWidth, filmHeight = self.get_film_size(scene)
 

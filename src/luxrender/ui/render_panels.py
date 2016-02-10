@@ -82,17 +82,6 @@ class render_settings(render_panel):
                 layout.label('Color Management not using default values!', icon='ERROR')
                 layout.operator('luxrender.fix_color_management')
 
-            # Advanced settings checkbox
-            split = layout.split()
-
-            row = split.row()
-            sub = row.row()
-            sub.label(text='')
-
-            row = split.row()
-            sub = row.row()
-            sub.prop(engine_settings, 'advanced', toggle=True)
-
             # Device enums
             split = layout.split()
 
@@ -107,7 +96,7 @@ class render_settings(render_panel):
                 # These engines have OpenCL versions
                 sub.prop(engine_settings, 'device', expand=True)
             else:
-                # Face device enum, always disabled, to show that BIDIR and BIDIRVM only have CPU support
+                # Fake device enum, always disabled, to show that BIDIR and BIDIRVM only have CPU support
                 sub.enabled = False
                 sub.prop(engine_settings, 'device_cpu_only', expand=True)
 
@@ -124,7 +113,7 @@ class render_settings(render_panel):
                 # These engines have OpenCL versions
                 sub.prop(engine_settings, 'device_preview', expand=True)
             else:
-                # Face device enum, always disabled, to show that BIDIR and BIDIRVM only have CPU support
+                # Fake device enum, always disabled, to show that BIDIR and BIDIRVM only have CPU support
                 sub.enabled = False
                 sub.prop(engine_settings, 'device_cpu_only', expand=True)
 
@@ -233,8 +222,10 @@ class device_settings(render_panel):
                 row.prop(engine_settings, 'opencl_use_all_cpus')
 
             elif not UseLuxCore() or engine_settings.opencl_settings_type == 'ADVANCED':
-                self.layout.prop(context.scene.luxcore_enginesettings, 'use_opencl_always_enabled')
-                self.layout.prop(context.scene.luxcore_enginesettings, 'film_use_opencl')
+                if UseLuxCore():
+                    self.layout.prop(context.scene.luxcore_enginesettings, 'use_opencl_always_enabled')
+                    self.layout.prop(context.scene.luxcore_enginesettings, 'film_use_opencl')
+                    self.layout.prop(context.scene.luxcore_enginesettings, 'kernelcache')
 
                 self.layout.operator('luxrender.opencl_device_list_update')
 

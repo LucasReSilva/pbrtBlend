@@ -100,25 +100,24 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_pathdepth_total',
         ['biaspath_pathdepth_diffuse', 'biaspath_pathdepth_glossy', 'biaspath_pathdepth_specular'],
         ['use_clamping', 'biaspath_clamping_radiance_maxvalue'],
-        ['spacer_pdf_clamping', 'biaspath_clamping_pdf_value'],
-        ['label_biaspath_lights_samplingstrategy_type', 'biaspath_lights_samplingstrategy_type'],
-        ['label_biaspath_lights_nearstart', 'biaspath_lights_nearstart'],
         ['label_sampler_type', 'sampler_type'],
         ['label_biaspath_sampler_type', 'biaspath_sampler_type'],
-        # Advanced sampler settings (for all but BIASPATH)
+        # Filter width
+        ['label_filter_width', 'filter_width'],
+
+        # Advanced settings
+        'advanced',
+        ['label_accelerator_type', 'instancing'],
+        ['label_filter_type', 'filter_type'],
+        ['label_biaspath_lights_samplingstrategy_type', 'biaspath_lights_samplingstrategy_type'],
+        ['label_biaspath_lights_nearstart', 'biaspath_lights_nearstart'],
+        ['label_lightstrategy_type', 'lightstrategy_type'],
         ['label_largesteprate', 'largesteprate'],
         ['label_maxconsecutivereject', 'maxconsecutivereject'],
         ['label_imagemutationrate', 'imagemutationrate'],
-        # Filter settings (for all but BIASPATH)
-        ['label_filter_type', 'filter_type'],
-        ['label_filter_width', 'filter_width'],
-        # Accelerator settings
-        ['label_accelerator_type', 'instancing'],
-        ['label_lightstrategy_type', 'lightstrategy_type'],
-        # Kernel cache
-        ['label_kernelcache', 'kernelcache'],
-        # BIASPATH specific halt condition
-        ['spacer_halt_conditions', 'show_halt_conditions'],
+
+        # Halt conditions
+        'show_halt_conditions',
         #'label_halt_conditions',
         ['tile_multipass_enable', 'tile_multipass_convergencetest_threshold'],
         ['tile_multipass_use_threshold_reduction', 'tile_multipass_convergencetest_threshold_reduction'],
@@ -195,9 +194,6 @@ class luxcore_enginesettings(declarative_property_group):
         # Light strategy
         'label_lightstrategy_type': {'advanced': True},
         'lightstrategy_type': {'advanced': True},
-        # Kernel cache
-        'label_kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}, {'device': 'OCL'}]),
-        'kernelcache': A([{'advanced': True}, {'renderengine_type': O(['PATH', 'BIASPATH'])}, {'device': 'OCL'}]),
         # Halt conditions
         'use_halt_samples': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'halt_samples': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
@@ -243,6 +239,7 @@ class luxcore_enginesettings(declarative_property_group):
             'name': 'Advanced Settings',
             'description': 'Super advanced settings you\'ll never need to change',
             'default': False,
+            'toggle': True,
             'save_in_preset': True
         },
         {
@@ -785,14 +782,9 @@ may mute lamps and caustics',
         },
         # Kernel cache
         {
-            'type': 'text',
-            'attr': 'label_kernelcache',
-            'name': 'Kernel Cache:',
-        },
-        {
             'type': 'enum',
             'attr': 'kernelcache',
-            'name': '',
+            'name': 'Kernel Cache',
             'description': 'Kernel cache mode',
             'default': 'PERSISTENT',
             'items': [
@@ -840,11 +832,6 @@ may mute lamps and caustics',
             'text': 'Update OpenCL device list',
         },
         # Halt condition settings (halt time and halt spp)
-        {
-            'type': 'text',
-            'name': '',
-            'attr': 'spacer_halt_conditions',
-        },
         {
             'type': 'bool',
             'attr': 'show_halt_conditions',

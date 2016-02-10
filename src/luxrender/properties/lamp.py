@@ -661,7 +661,7 @@ class luxrender_lamp_hemi(declarative_property_group):
         'hdri_multiply': {'infinite_map': LO({'!=': ''})},
         'gamma': {'infinite_map': LO({'!=': ''})},
         'nsamples': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
-        'hdri_infinitesample': {'infinite_map': LO({'!=': ''})},
+        'hdri_infinitesample': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
     }
 
     properties = TC_L.properties[:] + [
