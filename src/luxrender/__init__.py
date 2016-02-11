@@ -44,10 +44,12 @@ bl_info = {
 }
 
 def find_luxrender_path():
-    return getenv(  # Use the env var path, if set ...
-                    'LUXRENDER_ROOT',  # .. or load the last path from CFG file
-                    efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
-    )
+    path = efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
+
+    if not path:
+        path = getenv('LUXRENDER_ROOT', '')
+
+    return path
 
 def import_bindings_module(name):
     """Import Lux Python bindings module (e.g. pylux)."""
