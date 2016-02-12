@@ -663,7 +663,7 @@ class luxrender_lamp_hemi(declarative_property_group):
         'gamma': {'infinite_map': LO({'!=': ''})},
         'nsamples': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
         'hdri_infinitesample': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
-        'sampleupperhemisphereonly': lambda: UseLuxCore(),
+        'sampleupperhemisphereonly': A([{'infinite_map': LO({'!=': ''})}, lambda: UseLuxCore()]),
     }
 
     properties = TC_L.properties[:] + [
@@ -726,7 +726,7 @@ images. Will disable use of portals for this light!',
         {
             'type': 'bool',
             'attr': 'sampleupperhemisphereonly',
-            'name': 'Only sample  upper Hemisphere',
+            'name': 'Only sample upper hemisphere',
             'description': 'Enable when using a shadowcatcher (prevents the lower half of the HDRI to cast shadows '
                            'onto the shadowcatcher from below)',
             'default': False
