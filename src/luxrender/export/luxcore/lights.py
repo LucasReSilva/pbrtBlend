@@ -261,13 +261,13 @@ class LightExporter(object):
 
             if lux_lamp.infinite_map:
                 infinite_map_path_abs, basename = get_expanded_file_name(light, lux_lamp.infinite_map)
-                black_lower = lux_lamp.blacklowerhemisphere
+                upper_hemi = lux_lamp.sampleUpperHemisphereOnly
 
                 if os.path.exists(infinite_map_path_abs):
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'infinite'))
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.file', infinite_map_path_abs))
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', lux_lamp.gamma))
-                    self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.blacklowerhemisphere', black_lower))
+                    self.properties.Set(pyluxcore.Property('scene.lights.ls.sampleUpperHemisphereOnly', upper_hemi))
 
                 else:
                     print('ERROR: Imagemap "%s" of hemilight "%s" not found at path "%s"' % (basename, light.name, infinite_map_path_abs))
