@@ -242,9 +242,9 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'bool',
             'attr': 'advanced',
             'name': 'Advanced Settings',
-            'description': 'Super advanced settings you\'ll never need to change',
+            'description': 'Show extra settings that rarely need to be changed',
             'default': False,
-            'toggle': True,
+            'icon': 'TRIA_DOWN',
             'save_in_preset': True
         },
         {
@@ -843,7 +843,7 @@ may mute lamps and caustics',
             'name': 'Halt Conditions',
             'description': 'Show/hide halt conditions (settings will still be used even when hidden)',
             'default': False,
-            'toggle': True
+            'icon': 'TRIA_DOWN',
         },
         {
             'type': 'text',
