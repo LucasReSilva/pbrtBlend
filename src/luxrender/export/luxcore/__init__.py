@@ -220,6 +220,7 @@ class LuxCoreExporter(object):
         # Premultiply Alpha
         if imagepipeline_settings.premul_alpha_film:
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'PREMULTIPLY_ALPHA'))
+            index += 1
 
         # Output switcher
         if imagepipeline_settings.output_switcher_pass != 'disabled':
