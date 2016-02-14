@@ -215,7 +215,11 @@ class ConfigExporter(object):
     def __convert_engine(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = self.get_engine()
-        transparent_film = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+
+        if self.blender_scene.camera:
+            transparent_film = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+        else:
+            transparent_film = False
 
         if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui' and not self.is_viewport_render:
             # efutil.export_path is set at the beginning of the render() function in core/__init__.py

@@ -254,7 +254,7 @@ class LuxCoreExporter(object):
         index += 1
 
         # Premultiply Alpha
-        if imagepipeline_settings.transparent_film and imagepipeline_settings.premul_alpha_film:
+        if imagepipeline_settings.transparent_film:
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'PREMULTIPLY_ALPHA'))
             index += 1
 

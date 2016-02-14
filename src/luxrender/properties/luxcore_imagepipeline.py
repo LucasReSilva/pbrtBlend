@@ -189,7 +189,6 @@ class luxcore_imagepipeline(declarative_property_group):
         'crf_file': {'crf_type': 'FILE'},
         'background_image': {'use_background_image': True},
         'background_image_gamma': {'use_background_image': True},
-        'premul_alpha_film': {'transparent_film': True},
     }
 
     def update_background_image(self, context):
