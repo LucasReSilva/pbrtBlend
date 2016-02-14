@@ -266,6 +266,7 @@ class LuxCoreExporter(object):
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BACKGROUND_IMG'))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.file', path))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.gamma', gamma))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.storage', 'byte'))
                 index += 1
 
         # Bloom
