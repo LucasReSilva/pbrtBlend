@@ -134,7 +134,7 @@ class luxcore_imagepipeline(declarative_property_group):
     controls = [
         # Output switcher
         'output_switcher_pass',
-        'transparent_film',
+        ['transparent_film', 'premul_alpha_film'],
         ['contour_scale', 'contour_range'],
         ['contour_steps', 'contour_zeroGridSize'],
         # Tonemapper
@@ -232,6 +232,13 @@ class luxcore_imagepipeline(declarative_property_group):
             'name': 'Transparent Film',
             'description': 'Make the world background transparent',
             'default': False,
+        },
+        {
+            'type': 'bool',
+            'attr': 'premul_alpha_film',
+            'name': 'Premultiply Film Alpha',
+            'description': 'Premultiply colors with alpha, expected by some imaging apps',
+            'default': True,
         },
         # Contour lines settings (only for IRRADIANCE pass)
         {
