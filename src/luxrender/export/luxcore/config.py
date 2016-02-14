@@ -215,6 +215,7 @@ class ConfigExporter(object):
     def __convert_engine(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = self.get_engine()
+        transparent_film = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
 
         if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui' and not self.is_viewport_render:
             # efutil.export_path is set at the beginning of the render() function in core/__init__.py
@@ -245,6 +246,9 @@ class ConfigExporter(object):
                 noise_threshold_reduction = engine_settings.tile_multipass_convergencetest_threshold_reduction
             else:
                 noise_threshold_reduction = 0
+
+            # Transparent film enables using black bg
+            self.properties.Set(pyluxcore.Property('biaspath.forceblackbackground.enable', transparent_film))
 
             self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction',
                                                  [noise_threshold_reduction]))
@@ -279,6 +283,8 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth + 1]))
             self.properties.Set(pyluxcore.Property('path.clamping.variance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
+            # Transparent film enables using black bg
+            self.properties.Set(pyluxcore.Property('path.forceblackbackground.enable', transparent_film))
         elif engine in ['BIDIRCPU']:
             self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
             self.properties.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
