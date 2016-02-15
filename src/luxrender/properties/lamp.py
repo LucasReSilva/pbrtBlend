@@ -415,7 +415,8 @@ class luxrender_lamp_sun(declarative_property_group):
                 ('sun', 'Sun Only', 'Physical sun without sky'),
                 ('sky', 'Sky Only', 'Physical sky without sun'),
                 ('distant', 'Distant', 'Generic directional light'),
-            ]
+            ],
+            'expand': True,
         },
         {   # Drawn manually in ui/lamps.py
             'type': 'bool',

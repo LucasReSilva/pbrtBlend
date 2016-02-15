@@ -191,14 +191,20 @@ class ui_luxrender_lamp_area(lamps_panel):
                 else:
                     col = self.layout.column()
 
-                col.row().prop(context.lamp, "shape", expand=True)
+                is_laser = context.lamp.luxrender_lamp.luxrender_lamp_laser.is_laser
+
+                row = col.row()
+                row.active = not is_laser
+                row.prop(context.lamp, "shape", expand=True)
                 sub = col.column(align=True)
 
                 if context.lamp.shape == 'SQUARE':
                     sub.prop(context.lamp, "size")
                 elif context.lamp.shape == 'RECTANGLE':
                     sub.prop(context.lamp, "size", text="Size X")
-                    sub.prop(context.lamp, "size_y", text="Size Y")
+                    sub2 = sub.column(align=True)
+                    sub2.active = not is_laser
+                    sub2.prop(context.lamp, "size_y", text="Size Y")
 
 
 @LuxRenderAddon.addon_register_class
