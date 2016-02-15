@@ -73,9 +73,9 @@ from ..ui import (
 
 # Legacy material editor panels, node editor UI is initialized above
 from ..ui.materials import (
-    main as mat_main, compositing, carpaint, cloth, glass, glass2, roughglass, glossytranslucent,
+    compositing, carpaint, cloth, glass, glass2, roughglass, glossytranslucent,
     glossycoating, glossy, layered, matte, mattetranslucent, metal, metal2, mirror, mix as mat_mix, null,
-    scatter, shinymetal, velvet
+    scatter, shinymetal, velvet, main as mat_main
 )
 
 #Legacy texture editor panels

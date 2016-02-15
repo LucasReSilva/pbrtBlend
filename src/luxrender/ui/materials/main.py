@@ -163,96 +163,6 @@ class ui_luxrender_material_header(luxrender_material_base):
 
 
 @LuxRenderAddon.addon_register_class
-class ui_luxrender_material_db(luxrender_material_base):
-    bl_label = 'LuxRender Materials Database'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-        if not lrmdb_state._active:
-            self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
-        else:
-            self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
-
-            for action in lrmdb_state.actions:
-                if action.callback is None:
-                    self.layout.label(text=action.label)
-                else:
-                    self.layout.operator('luxrender.lrmdb', text=action.label).invoke_action_id = action.aid
-
-    @classmethod
-    def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
-            return False
-        try:
-            return not context.material.luxrender_material.nodetree
-        except:
-            return False
-
-
-@LuxRenderAddon.addon_register_class
-class ui_luxrender_material_utils(luxrender_material_base):
-    bl_label = 'LuxRender Materials Utils'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-        row = self.layout.row(align=True)
-        row.operator("luxrender.load_material", icon="DISK_DRIVE")
-        row.operator("luxrender.save_material", icon="DISK_DRIVE").filename = \
-            '%s.lbm2' % bpy.path.clean_name(context.material.name)
-
-        self.layout.label("Material Converter:")
-
-        column = self.layout.column(align=True)
-        sub = column.column(align=True)
-        sub.enabled = context.material.node_tree is not None
-        sub.operator("luxrender.convert_cycles_material", icon='MATERIAL_DATA')
-        column.operator("luxrender.convert_all_cycles_materials", icon='WORLD_DATA')
-
-        column = self.layout.column(align=True)
-        column.operator("luxrender.convert_material", icon='MATERIAL_DATA')
-        column.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
-
-        # row = self.layout.row(align=True)
-
-    # row.operator("luxrender.material_reset", icon='SOLID')
-
-    @classmethod
-    def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
-            return False
-        try:
-            return not context.material.luxrender_material.nodetree
-        except:
-            return False
-
-
-@LuxRenderAddon.addon_register_class
-class ui_luxrender_material_emission(luxrender_material_base):
-    """
-    Material Emission Settings
-    """
-
-    bl_label = 'LuxRender Light Emission'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    display_property_groups = [
-        ( ('material',), 'luxrender_emission' )
-    ]
-
-    def draw_header(self, context):
-        self.layout.prop(context.material.luxrender_emission, "use_emission", text="")
-
-    @classmethod
-    def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
-            return False
-        try:
-            return not context.material.luxrender_material.nodetree
-        except:
-            return False
-
-
-@LuxRenderAddon.addon_register_class
 class ui_luxrender_material_transparency(luxrender_material_base):
     """
     Material Transparency Settings
@@ -279,6 +189,32 @@ class ui_luxrender_material_transparency(luxrender_material_base):
                 context) and context.material.luxrender_material.type != 'null' and not context.material.luxrender_material.nodetree
         except:
             return super().poll(context)
+
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_emission(luxrender_material_base):
+    """
+    Material Emission Settings
+    """
+
+    bl_label = 'LuxRender Light Emission'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    display_property_groups = [
+        ( ('material',), 'luxrender_emission' )
+    ]
+
+    def draw_header(self, context):
+        self.layout.prop(context.material.luxrender_emission, "use_emission", text="")
+
+    @classmethod
+    def poll(cls, context):
+        if context.scene.render.engine != 'LUXRENDER_RENDER':
+            return False
+        try:
+            return not context.material.luxrender_material.nodetree
+        except:
+            return False
 
 
 @LuxRenderAddon.addon_register_class
@@ -370,25 +306,81 @@ class ui_luxrender_material_node_emit(luxrender_material_base):
 @LuxRenderAddon.addon_register_class
 class ui_luxcore_material(luxrender_material_base):
     """
-    Material Emission Settings
+    LuxCore only settings
     """
 
-    bl_label = 'LuxCore specific settings'
+    bl_label = 'LuxCore Specific Settings'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
         ( ('material',), 'luxcore_material', lambda: UseLuxCore() ),
     ]
 
-    def draw(self, context):
-        if not UseLuxCore():
-            self.layout.label("Not available with API v1.x")
-
-        super().draw(context)
-
     @classmethod
     def poll(cls, context):
         if context.scene.render.engine != 'LUXRENDER_RENDER' or not UseLuxCore():
+            return False
+        try:
+            return not context.material.luxrender_material.nodetree
+        except:
+            return False
+
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_utils(luxrender_material_base):
+    bl_label = 'LuxRender Materials Utils'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        row = self.layout.row(align=True)
+        row.operator("luxrender.load_material", icon="DISK_DRIVE")
+        row.operator("luxrender.save_material", icon="DISK_DRIVE").filename = \
+            '%s.lbm2' % bpy.path.clean_name(context.material.name)
+
+        self.layout.label("Material Converter:")
+
+        column = self.layout.column(align=True)
+        sub = column.column(align=True)
+        sub.enabled = context.material.node_tree is not None
+        sub.operator("luxrender.convert_cycles_material", icon='MATERIAL_DATA')
+        column.operator("luxrender.convert_all_cycles_materials", icon='WORLD_DATA')
+
+        column = self.layout.column(align=True)
+        column.operator("luxrender.convert_material", icon='MATERIAL_DATA')
+        column.operator("luxrender.convert_all_materials", icon='WORLD_DATA')
+
+    # row.operator("luxrender.material_reset", icon='SOLID')
+
+    @classmethod
+    def poll(cls, context):
+        if context.scene.render.engine != 'LUXRENDER_RENDER':
+            return False
+        try:
+            return not context.material.luxrender_material.nodetree
+        except:
+            return False
+
+
+@LuxRenderAddon.addon_register_class
+class ui_luxrender_material_db(luxrender_material_base):
+    bl_label = 'LuxRender Materials Database'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        if not lrmdb_state._active:
+            self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
+        else:
+            self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
+
+            for action in lrmdb_state.actions:
+                if action.callback is None:
+                    self.layout.label(text=action.label)
+                else:
+                    self.layout.operator('luxrender.lrmdb', text=action.label).invoke_action_id = action.aid
+
+    @classmethod
+    def poll(cls, context):
+        if context.scene.render.engine != 'LUXRENDER_RENDER':
             return False
         try:
             return not context.material.luxrender_material.nodetree
