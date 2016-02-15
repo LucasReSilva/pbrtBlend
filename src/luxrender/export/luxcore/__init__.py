@@ -214,6 +214,7 @@ class LuxCoreExporter(object):
             return temp_properties
 
         imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline
+        export_to_luxcoreui = self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui'
         index = 0
         prefix = 'film.imagepipeline.'
 
@@ -253,6 +254,11 @@ class LuxCoreExporter(object):
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.fstop', fstop))
         index += 1
 
+        # Premultiply Alpha
+        if imagepipeline_settings.transparent_film and not export_to_luxcoreui:
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'PREMULTIPLY_ALPHA'))
+            index += 1
+
         # Background image
         if imagepipeline_settings.use_background_image:
             path = efutil.filesystem_path(imagepipeline_settings.background_image)
@@ -262,6 +268,7 @@ class LuxCoreExporter(object):
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BACKGROUND_IMG'))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.file', path))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.gamma', gamma))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.storage', 'byte'))
                 index += 1
 
         # Bloom
@@ -313,7 +320,7 @@ class LuxCoreExporter(object):
             index += 1
 
         # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
-        if self.is_viewport_render or self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui':
+        if self.is_viewport_render or export_to_luxcoreui:
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'GAMMA_CORRECTION'))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.value', 2.2))
             index += 1

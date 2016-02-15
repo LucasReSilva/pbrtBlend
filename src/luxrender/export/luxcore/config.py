@@ -216,6 +216,13 @@ class ConfigExporter(object):
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = self.get_engine()
 
+        if self.blender_scene.camera:
+            export_to_luxcoreui = self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui'
+            transparent_film = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+            force_black_background = transparent_film and not export_to_luxcoreui
+        else:
+            force_black_background = False
+
         if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui' and not self.is_viewport_render:
             # efutil.export_path is set at the beginning of the render() function in core/__init__.py
             self.properties.Set(pyluxcore.Property('renderengine.type', 'FILESAVER'))
@@ -245,6 +252,9 @@ class ConfigExporter(object):
                 noise_threshold_reduction = engine_settings.tile_multipass_convergencetest_threshold_reduction
             else:
                 noise_threshold_reduction = 0
+
+            # Transparent film enables using black bg
+            self.properties.Set(pyluxcore.Property('biaspath.forceblackbackground.enable', force_black_background))
 
             self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction',
                                                  [noise_threshold_reduction]))
@@ -279,6 +289,8 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth + 1]))
             self.properties.Set(pyluxcore.Property('path.clamping.variance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
+            # Transparent film enables using black bg
+            self.properties.Set(pyluxcore.Property('path.forceblackbackground.enable', force_black_background))
         elif engine in ['BIDIRCPU']:
             self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
             self.properties.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
