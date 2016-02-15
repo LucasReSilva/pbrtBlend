@@ -131,7 +131,7 @@ class render_settings(render_panel):
 
                 row = split.row()
                 sub = row.row()
-                sub.prop(engine_settings, 'biaspath_show_sample_estimates', toggle=True)
+                sub.prop(engine_settings, 'biaspath_show_sample_estimates', toggle=True, icon='TRIA_DOWN')
 
                 if engine_settings.biaspath_show_sample_estimates:
                     # Sample settings
@@ -145,29 +145,32 @@ class render_settings(render_panel):
                     depth_glossy = engine_settings.biaspath_pathdepth_glossy
                     depth_specular = engine_settings.biaspath_pathdepth_specular
 
+                    col = layout.column(align=True)
+                    col.scale_y = 0.6
+                    
                     # Pixel samples
                     aaSamplesCount = aa ** 2
-                    layout.label(text='AA: %d' % aaSamplesCount)
+                    col.label(text='AA: %d' % aaSamplesCount)
 
                     # Diffuse samples
                     maxDiffusePathDepth = max(0, min(depth_total, depth_diffuse - 1))
                     diffuseSamplesCount = aaSamplesCount * (diffuse ** 2)
                     maxDiffuseSamplesCount = diffuseSamplesCount * maxDiffusePathDepth
-                    layout.label(text='Diffuse: %d (with max. bounces %d: %d)' %
+                    col.label(text='Diffuse: %d (with max. bounces %d: %d)' %
                                       (diffuseSamplesCount, maxDiffusePathDepth, maxDiffuseSamplesCount))
 
                     # Glossy samples
                     maxGlossyPathDepth = max(0, min(depth_total, depth_glossy - 1))
                     glossySamplesCount = aaSamplesCount * (glossy ** 2)
                     maxGlossySamplesCount = glossySamplesCount * maxGlossyPathDepth
-                    layout.label(text='Glossy: %d (with max. bounces %d: %d)' %
+                    col.label(text='Glossy: %d (with max. bounces %d: %d)' %
                                       (glossySamplesCount, maxGlossyPathDepth, maxGlossySamplesCount))
 
                     # Specular samples
                     maxSpecularPathDepth = max(0, min(depth_total, depth_specular - 1))
                     specularSamplesCount = aaSamplesCount * (specular ** 2)
                     maxSpecularSamplesCount = specularSamplesCount * maxSpecularPathDepth
-                    layout.label(text='Specular: %d (with max. bounces %d: %d)' %
+                    col.label(text='Specular: %d (with max. bounces %d: %d)' %
                                       (specularSamplesCount, maxSpecularPathDepth, maxSpecularSamplesCount))
 
                     # Direct light samples # TODO: implement
@@ -176,7 +179,7 @@ class render_settings(render_panel):
                     #SLG_LOG("[BiasPathCPURenderEngine] Direct light samples on first hit: " << directLightSamplesCount)
 
                     # Total samples for a pixel with hit on diffuse surfaces
-                    layout.label(text='Total on diffuse surfaces: %d' %
+                    col.label(text='Total on diffuse surfaces: %d' %
                                       (maxDiffuseSamplesCount + diffuseSamplesCount * max(0, maxDiffusePathDepth - 1)))
 
                     '''
