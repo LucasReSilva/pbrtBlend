@@ -393,9 +393,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         Returns None
         """
 
-        for elem in dir(self):
-            print(elem)
-
         with RENDERENGINE_luxrender.render_lock:  # just render one thing at a time
             if scene is None:
                 LuxLog('ERROR: Scene to render is not valid')
