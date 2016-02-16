@@ -403,7 +403,7 @@ class ConfigExporter(object):
             #    self.convert_channel('RGB_TONEMAPPED')
             if channels.RGBA_TONEMAPPED or transparent_film:
                 self.convert_channel('RGBA_TONEMAPPED')
-            if channels.ALPHA:
+            if channels.ALPHA or transparent_film:
                 self.convert_channel('ALPHA')
             if channels.DEPTH:
                 self.convert_channel('DEPTH')
@@ -440,9 +440,10 @@ class ConfigExporter(object):
             if channels.IRRADIANCE:
                 self.convert_channel('IRRADIANCE')
         elif transparent_film:
-            # Make absolutely sure that this AOV is enabled when using transparent film, otherwise Blender crashes
+            # Make absolutely sure that these AOVs are enabled when using transparent film, otherwise Blender crashes
             # during the render!
             self.convert_channel('RGBA_TONEMAPPED')
+            self.convert_channel('ALPHA')
 
         if output_switcher_channel != 'disabled':
             if output_switcher_channel not in self.active_outputswitcher_channels:
