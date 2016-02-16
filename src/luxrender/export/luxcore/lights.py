@@ -357,12 +357,19 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
             else:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'AREA'))
-
-                # TODO: visibility for indirect rays
     
                 # Area lamp workaround: create plane and add emitting material
                 mat_name = luxcore_name + '_helper_mat'
                 # TODO: match brightness with API 1.x
+
+                # Visibility for indirect rays
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.diffuse.enable',
+                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.glossy.enable',
+                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.specular.enable',
+                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
                 raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (
                     get_worldscale(as_scalematrix=False) ** 2)
