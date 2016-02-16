@@ -1607,6 +1607,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             luxcore_session.Stop()
 
             # Get the final result
+            stats = luxcore_session.GetStats()
             result = self.create_result(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight, True)
 
             if scene.luxrender_channels.enable_aovs:

@@ -164,9 +164,10 @@ class LuxCoreExporter(object):
         self.convert_lightgroup_scales(verbose=True)
 
         # Debug output
-        if self.blender_scene.luxcore_translatorsettings.print_config:
+        if self.blender_scene.luxcore_translatorsettings.print_cfg:
             print('\nConfig Properties:')
             print(self.config_properties)
+        if self.blender_scene.luxcore_translatorsettings.print_scn:
             print('\nScene Properties:')
             print(self.scene_properties)
 
