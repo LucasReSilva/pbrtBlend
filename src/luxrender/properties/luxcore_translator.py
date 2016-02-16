@@ -44,7 +44,7 @@ class luxcore_translatorsettings(declarative_property_group):
         'override_materials',
         ['override_glass', 'override_lights', 'override_null'],
         'label_debug',
-        'print_config'
+        ['print_cfg', 'print_scn'],
     ]
 
     visibility = {
@@ -122,9 +122,17 @@ class luxcore_translatorsettings(declarative_property_group):
         },
         {
             'type': 'bool',
-            'attr': 'print_config',
-            'name': 'Print Config in Terminal',
-            'description': 'Print generated renderconfig and sceneconfig in system console',
+            'attr': 'print_cfg',
+            'name': 'Print CFG',
+            'description': 'Print generated renderconfig in system console',
+            'default': False,
+            'save_in_preset': True
+        },
+        {
+            'type': 'bool',
+            'attr': 'print_scn',
+            'name': 'Print SCN',
+            'description': 'Print generated sceneconfig in system console',
             'default': False,
             'save_in_preset': True
         },
