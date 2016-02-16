@@ -67,7 +67,7 @@ from ..properties import (
 
 # Exporter Interface Panels need to be imported to ensure initialisation
 from ..ui import (
-    render_panels, camera, image, lamps, mesh, node_editor, object as ui_object, particles, world,
+    render_panels, render_layers, camera, image, lamps, mesh, node_editor, object as ui_object, particles, world,
     imageeditor_panel
 )
 
