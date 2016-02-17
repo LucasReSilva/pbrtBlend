@@ -256,7 +256,7 @@ class LuxCoreExporter(object):
         index += 1
 
         # Premultiply Alpha
-        if imagepipeline_settings.transparent_film and not export_to_luxcoreui:
+        if imagepipeline_settings.transparent_film and not export_to_luxcoreui and 'ALPHA' in self.passes_cache:
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'PREMULTIPLY_ALPHA'))
             index += 1
 

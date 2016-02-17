@@ -2298,14 +2298,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 import traceback
                 traceback.print_exc()
 
-        elif update_changes.cause_session:
-            # Only update the session without restarting the rendering
-            props = self.luxcore_exporter.convert_imagepipeline()
-            props.Set(self.luxcore_exporter.convert_lightgroup_scales())
-
-            LuxCoreSessionManager.get_session(self.space).luxcore_session.Parse(props)
-            self.luxcore_view_draw(context)
-
         else:
             # config update
             if update_changes.cause_config:
@@ -2335,72 +2327,82 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 LuxCoreSessionManager.create_luxcore_session(luxcore_config, self.space)
                 LuxCoreSessionManager.start_luxcore_session(self.space)
 
-            # begin sceneEdit
-            luxcore_scene = LuxCoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig().GetScene()
-            LuxCoreSessionManager.begin_scene_edit(self.space)
+            if update_changes.scene_edit_necessary:
+                # begin sceneEdit
+                luxcore_scene = LuxCoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig().GetScene()
+                LuxCoreSessionManager.begin_scene_edit(self.space)
 
-            if update_changes.cause_camera:
-                LuxLog('Camera update')
-                self.luxcore_exporter.convert_camera()
+                if update_changes.cause_camera:
+                    LuxLog('Camera update')
+                    self.luxcore_exporter.convert_camera()
 
-            if update_changes.cause_materials:
-                LuxLog('Materials update')
-                for material in update_changes.changed_materials:
-                    self.luxcore_exporter.convert_material(material)
+                if update_changes.cause_materials:
+                    LuxLog('Materials update')
+                    for material in update_changes.changed_materials:
+                        self.luxcore_exporter.convert_material(material)
 
-            if update_changes.cause_mesh:
-                for ob in update_changes.changed_objects_mesh:
-                    LuxLog('Mesh update: ' + ob.name)
-                    self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=True, update_material=False)
+                if update_changes.cause_mesh:
+                    for ob in update_changes.changed_objects_mesh:
+                        LuxLog('Mesh update: ' + ob.name)
+                        self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=True, update_material=False)
 
-            if update_changes.cause_light or update_changes.cause_objectTransform:
-                for ob in update_changes.changed_objects_transform:
-                    LuxLog('Transformation update: ' + ob.name)
+                if update_changes.cause_light or update_changes.cause_objectTransform:
+                    for ob in update_changes.changed_objects_transform:
+                        LuxLog('Transformation update: ' + ob.name)
 
-                    self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=False, update_material=False)
+                        self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=False, update_material=False)
 
-            if update_changes.cause_objectsRemoved:
-                for ob in update_changes.removed_objects:
-                    key = get_elem_key(ob)
+                if update_changes.cause_objectsRemoved:
+                    for ob in update_changes.removed_objects:
+                        key = get_elem_key(ob)
 
-                    if ob.type == 'LAMP':
-                        if key in self.luxcore_exporter.light_cache:
-                            # In case of sunsky there might be multiple light sources, loop through them
-                            for exported_light in self.luxcore_exporter.light_cache[key].exported_lights:
-                                luxcore_name = exported_light.luxcore_name
+                        if ob.type == 'LAMP':
+                            if key in self.luxcore_exporter.light_cache:
+                                # In case of sunsky there might be multiple light sources, loop through them
+                                for exported_light in self.luxcore_exporter.light_cache[key].exported_lights:
+                                    luxcore_name = exported_light.luxcore_name
 
-                                if exported_light.type == 'AREA':
-                                    # Area lights are meshlights and treated like objects with glowing materials
+                                    if exported_light.type == 'AREA':
+                                        # Area lights are meshlights and treated like objects with glowing materials
+                                        luxcore_scene.DeleteObject(luxcore_name)
+                                    else:
+                                        luxcore_scene.DeleteLight(luxcore_name)
+                        else:
+                            if key in self.luxcore_exporter.object_cache:
+                                # loop through object components (split by materials)
+                                for exported_object in self.luxcore_exporter.object_cache[key].exported_objects:
+                                    luxcore_name = exported_object.luxcore_object_name
                                     luxcore_scene.DeleteObject(luxcore_name)
-                                else:
-                                    luxcore_scene.DeleteLight(luxcore_name)
-                    else:
-                        if key in self.luxcore_exporter.object_cache:
-                            # loop through object components (split by materials)
-                            for exported_object in self.luxcore_exporter.object_cache[key].exported_objects:
-                                luxcore_name = exported_object.luxcore_object_name
-                                luxcore_scene.DeleteObject(luxcore_name)
 
-            if update_changes.cause_volumes:
-                for volume in context.scene.luxrender_volumes.volumes:
-                    self.luxcore_exporter.convert_volume(volume)
+                if update_changes.cause_volumes:
+                    for volume in context.scene.luxrender_volumes.volumes:
+                        self.luxcore_exporter.convert_volume(volume)
 
-            updated_properties = self.luxcore_exporter.pop_updated_scene_properties()
+                updated_properties = self.luxcore_exporter.pop_updated_scene_properties()
 
-            if context.space_data.local_view:
-                # Add a uniform white background light in local view so we have a lightsource
-                updated_properties.Set(pyluxcore.Property('scene.lights.LOCALVIEW_BACKGROUND.type', 'constantinfinite'))
-            else:
-                luxcore_scene.DeleteLight('LOCALVIEW_BACKGROUND')
+                if context.space_data.local_view:
+                    # Add a uniform white background light in local view so we have a lightsource
+                    updated_properties.Set(pyluxcore.Property('scene.lights.LOCALVIEW_BACKGROUND.type', 'constantinfinite'))
+                else:
+                    luxcore_scene.DeleteLight('LOCALVIEW_BACKGROUND')
 
-            # Debug output
-            print('Updated scene properties:')
-            print(updated_properties, '\n')
+                # Debug output
+                print('Updated scene properties:')
+                print(updated_properties, '\n')
 
-            # parse scene changes and end sceneEdit
-            luxcore_scene.Parse(updated_properties)
+                # parse scene changes and end sceneEdit
+                luxcore_scene.Parse(updated_properties)
 
-            LuxCoreSessionManager.end_scene_edit(self.space)
+                LuxCoreSessionManager.end_scene_edit(self.space)
+
+            if update_changes.cause_session:
+                # Only update the session without restarting the rendering
+                props = self.luxcore_exporter.convert_imagepipeline()
+                props.Set(self.luxcore_exporter.convert_lightgroup_scales())
+
+                LuxCoreSessionManager.get_session(self.space).luxcore_session.Parse(props)
+                self.luxcore_view_draw(context)
+
             # Resume in case the session was paused
             LuxCoreSessionManager.resume(self.space)
 
@@ -2544,6 +2546,8 @@ class UpdateChanges(object):
         self.cause_volumes = False
         self.cause_haltconditions = False
 
+        self.scene_edit_necessary = False
+
     def set_cause(self,
                   startViewportRender = None,
                   mesh = None,
@@ -2564,24 +2568,31 @@ class UpdateChanges(object):
             self.cause_startViewportRender = startViewportRender
         if mesh is not None:
             self.cause_mesh = mesh
+            self.scene_edit_necessary = mesh
         if light is not None:
             self.cause_light = light
+            self.scene_edit_necessary = light
         if camera is not None:
             self.cause_camera = camera
+            self.scene_edit_necessary = camera
         if objectTransform is not None:
             self.cause_objectTransform = objectTransform
+            self.scene_edit_necessary = objectTransform
         if layers is not None:
             self.cause_layers = layers
         if materials is not None:
             self.cause_materials = materials
+            self.scene_edit_necessary = materials
         if config is not None:
             self.cause_config = config
         if session is not None:
             self.cause_session = session
         if objectsRemoved is not None:
             self.cause_objectsRemoved = objectsRemoved
+            self.scene_edit_necessary = objectsRemoved
         if volumes is not None:
             self.cause_volumes = volumes
+            self.scene_edit_necessary = volumes
         if haltconditions is not None:
             self.cause_haltconditions = haltconditions
 
