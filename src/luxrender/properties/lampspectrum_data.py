@@ -164,7 +164,8 @@ class TEXTURE_OT_set_lampspectrum_preset(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.texture and \
+        return hasattr(context, 'texture') and \
+               context.texture and \
                context.texture.luxrender_texture and \
                context.texture.luxrender_texture.luxrender_tex_lampspectrum
 
