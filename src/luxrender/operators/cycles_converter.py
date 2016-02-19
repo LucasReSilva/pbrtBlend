@@ -36,7 +36,7 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
 
     def invoke(self, context, event):
         # Show a popup asking for confirmation so the user does not accidentally overwrite materials etc.
-        return context.window_manager.invoke_confirm(self, event)
+        return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
         # Convert all materials
