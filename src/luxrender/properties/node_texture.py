@@ -1792,14 +1792,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         ('fire', 'Fire', 'Fire grid'),
     ]
 
-    def update_domain(self, context):
-        # Disable the mapping socket when a domain object is specified (only in LuxCore mode because backwards compatibility)
-        if UseLuxCore():
-            self.inputs[0].enabled = self.domain not in bpy.data.objects
-        else:
-            self.inputs[0].enabled = True
-
-    domain = bpy.props.StringProperty(name='Domain Object', update=update_domain)
+    domain = bpy.props.StringProperty(name='Domain')
     source = bpy.props.EnumProperty(name='Source', items=smoke_channels, default='density')
     wrap = bpy.props.EnumProperty(name='Wrapping', items=wrap_items, default='black')
 
@@ -1808,6 +1801,9 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        if self.domain not in bpy.data.objects:
+            layout.label('Specify a smoke domain object!', icon='ERROR')
+
         layout.prop_search(self, "domain", bpy.data, "objects")
         layout.prop(self, 'source')
         layout.prop(self, 'wrap')
@@ -1844,12 +1840,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         set_prop_tex(properties, luxcore_name, 'ny', int(grid[1]))
         set_prop_tex(properties, luxcore_name, 'nz', int(grid[2]))
         set_prop_tex(properties, luxcore_name, 'wrap', self.wrap)
-
-        if grid[0] * grid[1] * grid[2] == 1:
-            #special case for preview rendering
-            set_prop_tex(properties, luxcore_name, 'data', float(grid[3]))
-        else:
-            set_prop_tex(properties, luxcore_name, 'data', grid[3])
+        set_prop_tex(properties, luxcore_name, 'data', grid[3])
 
         if self.domain in bpy.data.objects:
             obj = bpy.data.objects[self.domain]

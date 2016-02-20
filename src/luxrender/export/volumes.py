@@ -658,43 +658,41 @@ def export_smoke(smoke_obj_name, channel):
 
                 if mod.smoke_type == 'DOMAIN':
                     domain = smoke_obj
-                    smoke_modifier = mod
 
         eps = 0.000001
         if domain is not None:
             if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 71:
                 # Blender version 2.71 supports direct access to smoke data structure
-                set = mod.domain_settings
+                settings = mod.domain_settings
 
                 channeldata = []
                 if channel == 'density':
-                    for v in set.density_grid:
+                    for v in settings.density_grid:
                         channeldata.append(v.real)
 
                 if channel == 'fire':
-                    for v in set.flame_grid:
+                    for v in settings.flame_grid:
                         channeldata.append(v.real)
 
-                resolution = set.resolution_max
                 big_res = []
-                big_res.append(set.domain_resolution[0])
-                big_res.append(set.domain_resolution[1])
-                big_res.append(set.domain_resolution[2])
+                big_res.append(settings.domain_resolution[0])
+                big_res.append(settings.domain_resolution[1])
+                big_res.append(settings.domain_resolution[2])
 
-                if set.use_high_resolution:
-                    big_res[0] = big_res[0] * (set.amplify + 1)
-                    big_res[1] = big_res[1] * (set.amplify + 1)
-                    big_res[2] = big_res[2] * (set.amplify + 1)
+                if settings.use_high_resolution:
+                    big_res[0] *= (settings.amplify + 1)
+                    big_res[1] *= (settings.amplify + 1)
+                    big_res[2] *= (settings.amplify + 1)
             else:
                 p = []
                 # gather smoke domain settings
                 BBox = domain.bound_box
                 p.append([BBox[0][0], BBox[0][1], BBox[0][2]])
                 p.append([BBox[6][0], BBox[6][1], BBox[6][2]])
-                set = mod.domain_settings
-                resolution = set.resolution_max
-                smokecache = set.point_cache
-                ret = read_cache(smokecache, set.use_high_resolution, set.amplify + 1, flowtype)
+                settings = mod.domain_settings
+                resolution = settings.resolution_max
+                smokecache = settings.point_cache
+                ret = read_cache(smokecache, settings.use_high_resolution, settings.amplify + 1, flowtype)
                 res_x = ret[0]
                 res_y = ret[1]
                 res_z = ret[2]
@@ -719,9 +717,9 @@ def export_smoke(smoke_obj_name, channel):
                                int(round(resolution * domain.dimensions[1] / max, 0)),
                                int(round(resolution * domain.dimensions[2] / max, 0))]
 
-                if set.use_high_resolution:
-                    big_res = [big_res[0] * (set.amplify + 1), big_res[1] * (set.amplify + 1),
-                               big_res[2] * (set.amplify + 1)]
+                if settings.use_high_resolution:
+                    big_res = [big_res[0] * (settings.amplify + 1), big_res[1] * (settings.amplify + 1),
+                               big_res[2] * (settings.amplify + 1)]
 
                 if channel == 'density':
                     channeldata = density
