@@ -99,7 +99,7 @@ class TextureExporter(object):
             tex = texture.luxrender_texture.luxrender_tex_densitygrid
             obj = bpy.context.scene.objects[tex.domain_object]
             
-            luxScale = obj.dimensions                        
+            luxScale = obj.dimensions
             luxTranslate = obj.matrix_world * mathutils.Vector([v for v in obj.bound_box[0]])
             luxRotate = obj.rotation_euler
         else:
@@ -670,17 +670,19 @@ class TextureExporter(object):
             ####################################################################
             elif texType == 'densitygrid':
                 grid = export_smoke(luxTex.domain_object, luxTex.source)
-                                
-                self.properties.Set(pyluxcore.Property(prefix + '.nx', [int(grid[0])]))
-                self.properties.Set(pyluxcore.Property(prefix + '.ny', [int(grid[1])]))
-                self.properties.Set(pyluxcore.Property(prefix + '.nz', [int(grid[2])]))
+
+                if grid[0] * grid[1] * grid[2] == 1:
+                    #special case for material/texture preview rendering
+                    data = float(grid[3])
+                else:
+                    data = grid[3]
+
+                self.properties.Set(pyluxcore.Property(prefix + '.data', data))
+                self.properties.Set(pyluxcore.Property(prefix + '.nx', int(grid[0])))
+                self.properties.Set(pyluxcore.Property(prefix + '.ny', int(grid[1])))
+                self.properties.Set(pyluxcore.Property(prefix + '.nz', int(grid[2])))
                 self.properties.Set(pyluxcore.Property(prefix + '.wrap', luxTex.wrapping))
-                                
-                if grid[0]*grid[1]*grid[2] == 1:
-                    #special case for preview rendering
-                    self.properties.Set(pyluxcore.Property(prefix + '.data').Add([float(grid[3])]))
-                else:                    
-                    self.properties.Set(pyluxcore.Property(prefix + '.data').Add(grid[3]))
+
                 self.__convert_transform(prefix, texture)
             ####################################################################
             # Fallback to exception

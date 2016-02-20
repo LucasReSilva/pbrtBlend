@@ -27,7 +27,7 @@
 # System Libs
 from __future__ import division
 from ctypes import cdll, c_uint, c_float, cast, POINTER, byref, sizeof
-import os, struct, sys
+import os, struct, sys, time
 
 # Blender Libs
 import bpy
@@ -636,6 +636,9 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 
 
 def export_smoke(smoke_obj_name, channel):
+    print('Beginning smoke export...')
+    start_time = time.time()
+
     if LuxManager.CurrentScene.name == 'preview':
         return 1, 1, 1, 1.0
     else:
@@ -747,10 +750,6 @@ def export_smoke(smoke_obj_name, channel):
                     #
                     #	        	LuxLog('Binary SMOKE file written: %s' % (smoke_path))
 
+    print('Smoke export took %.3fs' % (time.time() - start_time))
+
     return big_res[0], big_res[1], big_res[2], channeldata
-
-# return (smoke_path)
-
-
-
-
