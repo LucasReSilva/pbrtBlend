@@ -32,6 +32,7 @@ from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
+from ...export.volumes import export_smoke
 
 from .utils import convert_texture_channel
 
@@ -88,12 +89,23 @@ class TextureExporter(object):
             self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'globalmapping3d'))
         elif luxTransform.coordinates == 'local':
             self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'localmapping3d'))
+        elif luxTransform.coordinates == 'smoke_domain':
+            self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'globalmapping3d'))            
         else:
             raise Exception('Unsupported mapping "%s" for texture "%s"' % (luxTransform.coordinates, texture.name))
 
-        luxTranslate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'translate')
-        luxScale = getattr(texture.luxrender_texture.luxrender_tex_transform, 'scale')
-        luxRotate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'rotate')
+        if luxTransform.coordinates == 'smoke_domain':
+            #For correct densitygrid texture transformation use smoke domain bounding box
+            tex = texture.luxrender_texture.luxrender_tex_densitygrid
+            obj = bpy.context.scene.objects[tex.domain_object]
+            
+            luxScale = obj.dimensions                        
+            luxTranslate = obj.matrix_world * mathutils.Vector([v for v in obj.bound_box[0]])
+            luxRotate = obj.rotation_euler
+        else:
+            luxTranslate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'translate')
+            luxScale = getattr(texture.luxrender_texture.luxrender_tex_transform, 'scale')
+            luxRotate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'rotate')
 
         # create a location matrix
         tex_loc = mathutils.Matrix.Translation((luxTranslate))
@@ -653,7 +665,23 @@ class TextureExporter(object):
                     self.properties.Set(pyluxcore.Property('scene.textures.' + name_clamp + '.max', 1.0))
 
                     self.luxcore_name = name_clamp
-
+            ####################################################################
+            # Densitygrid
+            ####################################################################
+            elif texType == 'densitygrid':
+                grid = export_smoke(luxTex.domain_object, luxTex.source)
+                                
+                self.properties.Set(pyluxcore.Property(prefix + '.nx', [int(grid[0])]))
+                self.properties.Set(pyluxcore.Property(prefix + '.ny', [int(grid[1])]))
+                self.properties.Set(pyluxcore.Property(prefix + '.nz', [int(grid[2])]))
+                self.properties.Set(pyluxcore.Property(prefix + '.wrap', luxTex.wrapping))
+                                
+                if grid[0]*grid[1]*grid[2] == 1:
+                    #special case for preview rendering
+                    self.properties.Set(pyluxcore.Property(prefix + '.data').Add([float(grid[3])]))
+                else:                    
+                    self.properties.Set(pyluxcore.Property(prefix + '.data').Add(grid[3]))
+                self.__convert_transform(prefix, texture)
             ####################################################################
             # Fallback to exception
             ####################################################################
