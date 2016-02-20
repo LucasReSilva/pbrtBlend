@@ -397,9 +397,8 @@ class LuxCoreExporter(object):
 
         if mat_key in self.temp_material_cache:
             return
-        else:
-            self.temp_material_cache.add(mat_key)
 
+        self.temp_material_cache.add(mat_key)
         exporter = MaterialExporter(self, self.blender_scene, material)
         self.__convert_element(mat_key, self.material_cache, exporter)
 
@@ -409,9 +408,8 @@ class LuxCoreExporter(object):
 
         if tex_key in self.temp_texture_cache:
             return
-        else:
-            self.temp_texture_cache.add(tex_key)
 
+        self.temp_texture_cache.add(tex_key)
         exporter = TextureExporter(self, self.blender_scene, texture)
         self.__convert_element(tex_key, self.texture_cache, exporter)
 
@@ -426,9 +424,8 @@ class LuxCoreExporter(object):
 
         if vol_key in self.temp_volume_cache:
             return
-        else:
-            self.temp_volume_cache.add(vol_key)
 
+        self.temp_volume_cache.add(vol_key)
         exporter = VolumeExporter(self, self.blender_scene, volume)
         self.__convert_element(vol_key, self.volume_cache, exporter)
 
