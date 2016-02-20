@@ -753,8 +753,14 @@ class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
         return hasattr(context, 'texture') and context.texture and context.texture.luxrender_texture
 
     def execute(self, context):
-        context.texture.luxrender_texture.type = self.properties.tex_name
-        context.texture.luxrender_texture.type_label = self.properties.tex_label
+        lux_tex = context.texture.luxrender_texture
+
+        lux_tex.type = self.properties.tex_name
+        lux_tex.type_label = self.properties.tex_label
+
+        # This is what the user needs in almost all cases
+        if lux_tex.type == 'densitygrid':
+            lux_tex.luxrender_tex_transform.coordinates = 'smoke_domain'
 
         return {'FINISHED'}
 

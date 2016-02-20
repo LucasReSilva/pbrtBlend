@@ -28,6 +28,8 @@ import bpy
 import bpy.utils.previews
 import os
 import tempfile
+import mathutils
+import math
 
 from bpy_extras.image_utils import load_image
 
@@ -1790,7 +1792,14 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         ('fire', 'Fire', 'Fire grid'),
     ]
 
-    domain = bpy.props.StringProperty(name='Domain Object')
+    def update_domain(self, context):
+        # Disable the mapping socket when a domain object is specified (only in LuxCore mode because backwards compatibility)
+        if UseLuxCore():
+            self.inputs[0].enabled = self.domain not in bpy.data.objects
+        else:
+            self.inputs[0].enabled = True
+
+    domain = bpy.props.StringProperty(name='Domain Object', update=update_domain)
     source = bpy.props.EnumProperty(name='Source', items=smoke_channels, default='density')
     wrap = bpy.props.EnumProperty(name='Wrapping', items=wrap_items, default='black')
 
@@ -1799,8 +1808,6 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout)
-
         layout.prop_search(self, "domain", bpy.data, "objects")
         layout.prop(self, 'source')
         layout.prop(self, 'wrap')
@@ -1826,6 +1833,57 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
             smokedata_params.update(coord_node.get_paramset())
 
         return make_texture('float', 'densitygrid', self.name, smokedata_params)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        grid = export_smoke(self.domain, self.source)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'densitygrid')
+        set_prop_tex(properties, luxcore_name, 'nx', int(grid[0]))
+        set_prop_tex(properties, luxcore_name, 'ny', int(grid[1]))
+        set_prop_tex(properties, luxcore_name, 'nz', int(grid[2]))
+        set_prop_tex(properties, luxcore_name, 'wrap', self.wrap)
+
+        if grid[0] * grid[1] * grid[2] == 1:
+            #special case for preview rendering
+            set_prop_tex(properties, luxcore_name, 'data', float(grid[3]))
+        else:
+            set_prop_tex(properties, luxcore_name, 'data', grid[3])
+
+        if self.domain in bpy.data.objects:
+            obj = bpy.data.objects[self.domain]
+
+            scale = obj.dimensions
+            translate = obj.matrix_world * mathutils.Vector([v for v in obj.bound_box[0]])
+            rotate = obj.rotation_euler
+
+            # create a location matrix
+            tex_loc = mathutils.Matrix.Translation((translate))
+
+            # create an identitiy matrix
+            tex_sca = mathutils.Matrix()
+            tex_sca[0][0] = scale[0]  # X
+            tex_sca[1][1] = scale[1]  # Y
+            tex_sca[2][2] = scale[2]  # Z
+
+            # create a rotation matrix
+            tex_rot0 = mathutils.Matrix.Rotation(math.radians(rotate[0]), 4, 'X')
+            tex_rot1 = mathutils.Matrix.Rotation(math.radians(rotate[1]), 4, 'Y')
+            tex_rot2 = mathutils.Matrix.Rotation(math.radians(rotate[2]), 4, 'Z')
+            tex_rot = tex_rot0 * tex_rot1 * tex_rot2
+
+            # combine transformations
+            mapping_type = 'globalmapping3d'
+            mapping_transformation = matrix_to_list(tex_loc * tex_rot * tex_sca, apply_worldscale=True, invert=True)
+        else:
+            mapping_type, mapping_transformation = self.inputs[0].export_luxcore(properties)
+            mapping_transformation = matrix_to_list(mapping_transformation, apply_worldscale=True, invert=True)
+
+        set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
+        set_prop_tex(properties, luxcore_name, 'mapping.transformation', mapping_transformation)
+
+        return luxcore_name
 
 
 @LuxRenderAddon.addon_register_class
