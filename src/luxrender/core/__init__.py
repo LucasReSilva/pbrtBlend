@@ -2568,31 +2568,31 @@ class UpdateChanges(object):
             self.cause_startViewportRender = startViewportRender
         if mesh is not None:
             self.cause_mesh = mesh
-            self.scene_edit_necessary = mesh
+            self.scene_edit_necessary |= mesh
         if light is not None:
             self.cause_light = light
-            self.scene_edit_necessary = light
+            self.scene_edit_necessary |= light
         if camera is not None:
             self.cause_camera = camera
             self.scene_edit_necessary = camera
         if objectTransform is not None:
             self.cause_objectTransform = objectTransform
-            self.scene_edit_necessary = objectTransform
+            self.scene_edit_necessary |= objectTransform
         if layers is not None:
             self.cause_layers = layers
         if materials is not None:
             self.cause_materials = materials
-            self.scene_edit_necessary = materials
+            self.scene_edit_necessary |= materials
         if config is not None:
             self.cause_config = config
         if session is not None:
             self.cause_session = session
         if objectsRemoved is not None:
             self.cause_objectsRemoved = objectsRemoved
-            self.scene_edit_necessary = objectsRemoved
+            self.scene_edit_necessary |= objectsRemoved
         if volumes is not None:
             self.cause_volumes = volumes
-            self.scene_edit_necessary = volumes
+            self.scene_edit_necessary |= volumes
         if haltconditions is not None:
             self.cause_haltconditions = haltconditions
 
