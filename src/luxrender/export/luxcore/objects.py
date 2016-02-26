@@ -111,7 +111,7 @@ class ObjectExporter(object):
 
     def __convert_object(self, luxcore_scene, update_mesh, update_material, anim_matrices, matrix):
         obj = self.blender_object
-        is_visible = is_obj_visible(self.blender_scene, obj, self.is_dupli)
+        is_visible = is_obj_visible(self.blender_scene, obj, self.is_dupli, self.is_viewport_render)
 
         if obj is None or obj.type == 'CAMERA' or not is_visible:
             return

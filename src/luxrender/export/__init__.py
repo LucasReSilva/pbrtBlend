@@ -251,11 +251,13 @@ class ParamSet(list):
         return self
 
 
-def is_obj_visible(scene, obj, is_dupli=False):
+def is_obj_visible(scene, obj, is_dupli=False, is_viewport_render=False):
+    hidden = obj.hide if is_viewport_render else obj.hide_render
+
     ov = False
     for lv in [ol and sl and rl for ol, sl, rl in zip(obj.layers, scene.layers, scene.render.layers.active.layers)]:
         ov |= lv
-    return (ov or is_dupli) and not obj.hide_render
+    return (ov or is_dupli) and not hidden
 
 
 def get_worldscale(as_scalematrix=True):
