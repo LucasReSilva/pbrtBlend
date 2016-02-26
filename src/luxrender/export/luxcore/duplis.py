@@ -112,7 +112,7 @@ class DupliExporter(object):
         # attribute when inside create_dupli_list()..free_dupli_list()
         duplis = []
         for dupli_ob in obj.dupli_list:
-            if not is_obj_visible(self.blender_scene, dupli_ob.object, is_dupli=True):
+            if not is_obj_visible(self.blender_scene, dupli_ob.object, True, self.is_viewport_render):
                 continue
 
             # metaballs are omitted from this function intentionally.
