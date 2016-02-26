@@ -107,7 +107,7 @@ class LightExporter(object):
         energy = light.energy
         lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
 
-        if not is_obj_visible(self.blender_scene, obj, self.is_dupli):
+        if not is_obj_visible(self.blender_scene, obj, self.is_dupli, self.luxcore_exporter.is_viewport_render):
             return
 
         if matrix is None:
