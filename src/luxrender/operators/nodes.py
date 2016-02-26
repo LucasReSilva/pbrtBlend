@@ -114,6 +114,8 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             editor_type = ctx_mat.luxrender_mat_mix
         if ctx_mat.type == 'layered':
             editor_type = ctx_mat.luxrender_mat_layered
+        if ctx_mat.type == 'null':
+            editor_type = ctx_mat.luxrender_mat_null
 
         # handling for not existent shinymetal node, just hack atm.
         if ctx_mat.type == 'shinymetal':

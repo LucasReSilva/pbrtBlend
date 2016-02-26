@@ -633,6 +633,63 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
 
         return luxcore_name
 
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_python(luxrender_texture_node):
+    """Python expression node"""
+    bl_idname = 'luxrender_texture_python_node'
+    bl_label = 'Python Expression'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 200
+
+    single_line = bpy.props.StringProperty()
+    text_block_name = bpy.props.StringProperty()
+    input_type_items = [
+        ('single_line', 'Single Line', ''),
+        ('text_block', 'Text Block', ''),
+    ]
+    input_type = bpy.props.EnumProperty(items=input_type_items, default='single_line')
+
+    def init(self, context):
+        self.outputs.new('NodeSocketFloat', 'result')
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'input_type', expand=True)
+
+        col = layout.column(align=True)
+        col.scale_y = 0.6
+        col.label('Assign result of the expression')
+        col.label('to a variable named "result".')
+        col.label('Example: result = [1, 0, 0]')
+
+        if self.input_type == 'single_line':
+            layout.prop(self, 'single_line', text='')
+        elif self.input_type == 'text_block':
+            layout.prop_search(self, 'text_block_name', bpy.data, 'texts', 'Script', icon='TEXT')
+
+    def export_luxcore(self, properties):
+        if self.input_type == 'single_line':
+            # Convenience imports like in the Blender python console
+            code = (
+                'import bpy\n'
+                'from mathutils import *\n'
+                'from math import *\n'
+                'C = bpy.context\n'
+                'D = bpy.data\n'
+            )
+
+            code += self.single_line
+        else:
+            text_block = bpy.data.texts[self.text_block_name]
+            code = '\n'.join([line.body for line in text_block.lines])
+
+        global_scope = {}
+        local_scope = {}
+
+        exec(code, global_scope, local_scope)
+        return local_scope['result']
+
+
 # Hitpointalpha is kind of useless with Blender's vertex color system, so we don't use it
 # @LuxRenderAddon.addon_register_class
 # class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):

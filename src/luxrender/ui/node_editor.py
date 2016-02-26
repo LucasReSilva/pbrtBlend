@@ -209,6 +209,7 @@ luxrender_node_categories_material = [
             "variant": repr("float"),
             }),
         NodeItem("luxrender_texture_band_node"),
+        NodeItem("luxrender_texture_python_node"),
         #NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
         #NodeItem("luxrender_texture_colordepth_node"),
     ]),
