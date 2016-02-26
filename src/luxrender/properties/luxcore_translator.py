@@ -43,8 +43,7 @@ class luxcore_translatorsettings(declarative_property_group):
         ['export_particles', 'export_hair', 'export_proxies'],
         'override_materials',
         ['override_glass', 'override_lights', 'override_null'],
-        'label_debug',
-        ['print_cfg', 'print_scn'],
+        ['label_debug', 'print_cfg', 'print_scn'],
     ]
 
     visibility = {
@@ -119,6 +118,7 @@ class luxcore_translatorsettings(declarative_property_group):
             'type': 'text',
             'attr': 'label_debug',
             'name': 'Debug:',
+            'icon': 'CONSOLE',
         },
         {
             'type': 'bool',

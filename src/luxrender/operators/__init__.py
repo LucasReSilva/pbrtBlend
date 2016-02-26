@@ -426,3 +426,31 @@ class LUXRENDER_OT_fix_color_management(bpy.types.Operator):
             vs.gamma = 1
 
         return {'FINISHED'}
+
+@LuxRenderAddon.addon_register_class
+class ExportSomeData(bpy.types.Operator):
+    """LuxRender append"""
+    bl_idname = "luxrender.append"
+    bl_label = "LuxRender Append"
+
+    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+    filename = bpy.props.StringProperty(subtype="FILE_PATH")
+    directory = bpy.props.StringProperty(subtype="FILE_PATH")
+    #files
+
+    @classmethod
+    def poll(cls, context):
+        return True # TODO (check object mode?)
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+    def execute(self, context):
+        #file = open(self.filepath, 'w')
+        #file.write("Hello World " + context.object.name)
+        print(self.filepath)
+        print(self.filename)
+        print(self.directory)
+
+        return {'FINISHED'}
