@@ -78,8 +78,11 @@ class render_settings(render_panel):
         # This is done here so the device enums are expanded properly (horizontal, not vertical)
         if UseLuxCore():
             vs = context.scene.view_settings
-            if vs.view_transform != 'Default' or vs.exposure != 0 or vs.gamma != 1:
-                layout.label('Color Management not using default values!', icon='ERROR')
+            if vs.view_transform != 'Default' or vs.exposure != 0 or vs.gamma != 1 or vs.look != 'None' or vs.use_curve_mapping:
+                col = layout.column(align=True)
+                col.scale_y = 0.8
+                col.label('Color Management not using default values!', icon='ERROR')
+                col.label('Viewport render might not match final render.')
                 layout.operator('luxrender.fix_color_management')
 
             # Device enums

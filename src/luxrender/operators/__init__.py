@@ -408,10 +408,10 @@ class LUXRENDER_OT_open_daily_builds_webpage(bpy.types.Operator):
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_fix_color_management(bpy.types.Operator):
-    """Reset "view", "exposure" and "gamma" values. Rendered images might look wrong when these settings are not not the defaults."""
+    """Reset "view", "exposure", "gamma", "look" and "use curves" values. Rendered images might look wrong when these settings are not not the defaults."""
 
     bl_idname = "luxrender.fix_color_management"
-    bl_label = "Fix Color Management"
+    bl_label = "Reset Color Management to Default"
 
     def execute(self, context):
         vs = context.scene.view_settings
@@ -424,6 +424,12 @@ class LUXRENDER_OT_fix_color_management(bpy.types.Operator):
 
         if vs.gamma != 1:
             vs.gamma = 1
+
+        if vs.look != 'None':
+            vs.look = 'None'
+
+        if vs.use_curve_mapping:
+            vs.use_curve_mapping = False
 
         return {'FINISHED'}
 
