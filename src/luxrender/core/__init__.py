@@ -2097,7 +2097,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             update_changes.set_cause(light = True)
                             update_changes.changed_objects_transform.add(ob)
                         elif ob.type in ['CAMERA'] and ob.name == context.scene.camera.name:
-                            update_changes.set_cause(camera = True, config = True)
+                            update_changes.set_cause(camera = True)
 
                     if ob.is_updated:
                         if ob.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'EMPTY']:
@@ -2401,7 +2401,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 props.Set(self.luxcore_exporter.convert_lightgroup_scales())
 
                 LuxCoreSessionManager.get_session(self.space).luxcore_session.Parse(props)
-                self.luxcore_view_draw(context)
+                #self.luxcore_view_draw(context) # Why did I put this here?
 
             # Resume in case the session was paused
             LuxCoreSessionManager.resume(self.space)

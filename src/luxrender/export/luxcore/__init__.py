@@ -265,7 +265,7 @@ class LuxCoreExporter(object):
             path = efutil.filesystem_path(imagepipeline_settings.background_image)
             gamma = imagepipeline_settings.background_image_gamma
 
-            if os.path.exists(path):
+            if os.path.exists(path) and os.path.isfile(path):
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BACKGROUND_IMG'))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.file', path))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.gamma', gamma))
