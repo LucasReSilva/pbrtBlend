@@ -265,7 +265,12 @@ class LuxCoreExporter(object):
             path = efutil.filesystem_path(imagepipeline_settings.background_image)
             gamma = imagepipeline_settings.background_image_gamma
 
-            if os.path.exists(path) and os.path.isfile(path):
+            if self.is_viewport_render and imagepipeline_settings.background_camera_view_only:
+                show_in_view = self.context.region_data.view_perspective == 'CAMERA'
+            else:
+                show_in_view = True
+
+            if os.path.exists(path) and os.path.isfile(path) and show_in_view:
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BACKGROUND_IMG'))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.file', path))
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.gamma', gamma))

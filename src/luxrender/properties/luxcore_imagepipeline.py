@@ -159,7 +159,7 @@ class luxcore_imagepipeline(declarative_property_group):
         'crf_file',
         # Background image
         'label_compositing',
-        'use_background_image',
+        ['use_background_image', 'background_camera_view_only'],
         'background_image',
         'background_image_gamma',
         # Intervals
@@ -189,6 +189,7 @@ class luxcore_imagepipeline(declarative_property_group):
         'crf_file': {'crf_type': 'FILE'},
         'background_image': {'use_background_image': True},
         'background_image_gamma': {'use_background_image': True},
+        'background_camera_view_only': {'use_background_image': True},
     }
 
     def update_background_image(self, context):
@@ -481,6 +482,13 @@ class luxcore_imagepipeline(declarative_property_group):
             'description': 'Use a background image (requires alpha pass). The image will be stretched to fit the film size.',
             'default': False,
             'update': update_background_image
+        },
+        {
+            'type': 'bool',
+            'attr': 'background_camera_view_only',
+            'name': 'Camera View Only',
+            'description': 'Only use the background image when in camera mode. Only applies to the viewport render',
+            'default': False,
         },
         {
             'attr': 'background_image',
