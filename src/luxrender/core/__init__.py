@@ -1672,8 +1672,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 scene.render.border_min_y, scene.render.border_max_y
             ]
 
-            filmWidth = int(filmWidth * x_max - filmWidth * x_min)
-            filmHeight = int(filmHeight * y_max - filmHeight * y_min)
+            filmWidth = int(filmWidth * x_max - filmWidth * x_min) + 1
+            filmHeight = int(filmHeight * y_max - filmHeight * y_min) + 1
 
         return filmWidth, filmHeight
 
