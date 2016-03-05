@@ -123,8 +123,8 @@ class luxrender_mesh(declarative_property_group):
                          'type': 'bool',
                          'attr': 'generatetangents',
                          'name': 'Generate Tangents',
-                         'description': 'Generate tanget space for this mesh. Enable when using a bake-generated \
-normal map',
+                         'description': 'Generate tanget space for this mesh. Enable when using a bake-generated '
+                                        'normal map',
                          'default': False,
                      },
                      {
@@ -157,8 +157,8 @@ normal map',
                          'attr': 'splitnormal',
                          'name': 'Keep Split Edges',
                          'default': False,
-                         'description': 'Preserves effects of split-edges by splitting at breaks in the normal. \
-WARNING: This will cause solid-shaded meshes to rip open!'},
+                         'description': 'Preserves effects of split-edges by splitting at breaks in the normal. '
+                                        'WARNING: This will cause solid-shaded meshes to rip open!'},
                      {
                          'type': 'int',
                          'attr': 'sublevels',
