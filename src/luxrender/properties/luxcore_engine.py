@@ -198,8 +198,8 @@ class luxcore_enginesettings(declarative_property_group):
         # Halt conditions
         'use_halt_samples': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'halt_samples': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        'use_halt_time': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
-        'halt_time': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
+        'use_halt_time': {'show_halt_conditions': True},
+        'halt_time': {'show_halt_conditions': True},
         'use_halt_noise': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'halt_noise': {'show_halt_conditions': True, 'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'label_halt_conditions_preview': {'show_halt_conditions': True},

@@ -1048,8 +1048,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Add time stats for realtime preview because Blender doesn't display it there
         # For final renderings, only display time if it is set as halt condition
         # Don't show when engine is BIASPATH because it uses different halt conditions
-        if ((not realtime_preview and settings.use_halt_time) or (realtime_preview and settings.use_halt_time_preview)) \
-                and engine not in ['BIASPATHCPU', 'BIASPATHOCL']:
+        if (not realtime_preview and settings.use_halt_time) or (realtime_preview and settings.use_halt_time_preview):
             stats_list.append('Time: %.1fs/%ds' % (time_running, halt_time))
             if not realtime_preview:
                 progress_time = time_running / halt_time
@@ -1202,9 +1201,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         else:
             halt_noise_met = rendered_noise == 1.0
 
-        # Samples and time make no sense as halt conditions when BIASPATH is used
+        # Samples make no sense as halt condition when BIASPATH is used
         if not realtime_preview and settings.renderengine_type == 'BIASPATH':
-            return halt_noise_met
+            return halt_noise_met or halt_time_met
 
         return halt_samples_met or halt_time_met or halt_noise_met or scene.luxcore_rendering_controls.pause_viewport_render
 
