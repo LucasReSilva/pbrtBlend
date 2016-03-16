@@ -75,6 +75,10 @@ class ObjectExporter(object):
         """
         obj = self.blender_object
 
+        # If the object uses motion blur, the transformation must not be baked into the mesh, that's why we return True
+        if anim_matrices and len(anim_matrices) > 1:
+           return True
+
         # Use instancing on every object when in viewport render, to be able to transform them without re-exporting
         # the mesh
         if self.is_viewport_render:
@@ -83,10 +87,6 @@ class ObjectExporter(object):
         # Duplis and proxies are always instanced
         if self.is_dupli or (obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh'):
             return True
-
-        # If the object is animated, for motion blur we need instances
-        #if anim_matrices and len(anim_matrices) > 1:
-        #    return True
 
         # If the mesh is only used once, instancing is a waste of memory
         # However, duplis don't increase the users count, so we count those separately
@@ -283,11 +283,14 @@ class ObjectExporter(object):
         self.properties.Set(pyluxcore.Property(prefix + '.material', luxcore_material_name))
         self.properties.Set(pyluxcore.Property(prefix + '.shape', luxcore_shape_name))
 
-        if transform is not None and self.__use_instancing(anim_matrices):
+        use_motion_blur = anim_matrices and len(anim_matrices) > 1
+
+        if transform is not None and self.__use_instancing(anim_matrices) and not use_motion_blur:
+            # In case of motion blur, the object is only transformed by the .motion.n.transformation properties
             self.properties.Set(pyluxcore.Property(prefix + '.transformation', transform))
 
         # Motion blur (needs at least 2 matrices in anim_matrices)
-        if anim_matrices and len(anim_matrices) > 1:
+        if use_motion_blur:
             shutter_open, shutter_close = calc_shutter(self.blender_scene, self.blender_scene.camera.data.luxrender_camera)
             step = (shutter_close - shutter_open) / self.blender_scene.camera.data.luxrender_camera.motion_blur_samples
 
