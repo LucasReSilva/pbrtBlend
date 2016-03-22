@@ -808,20 +808,28 @@ class luxrender_film(declarative_property_group):
         xr, yr = self.resolution(scene)
         params = ParamSet()
 
+        def calc_border_filmsize(scene, width, height):
+            x_min, x_max, y_min, y_max = [
+                scene.render.border_min_x, scene.render.border_max_x,
+                scene.render.border_min_y, scene.render.border_max_y
+            ]
+
+            width = int(x_max * width) - int(x_min * width)
+            height = int(y_max * height) - int(y_min * height)
+
+            # In case border becomes too small
+            width = max(width, 1)
+            height = max(height, 1)
+
+            return width, height
+
         # Border rendering handler, this gets a bit tricky. Blender ALWAYS expects to get back a cropped image,
         # it will handle the padding itself if the user asked for it.
         if scene.render.use_border:
             if scene.render.use_crop_to_border:  # user asked to crop, so always crop
-                (x1, x2, y1, y2) = [
-                    scene.render.border_min_x, scene.render.border_max_x,
-                    scene.render.border_min_y, scene.render.border_max_y
-                ]
-
-                # Set resolution
-                # This is a new method of "rounding" the cropped image to match blenders expected rectangle_size
-                # I tested this with several cases which failed with the former rounding, pls check - Jens
-                params.add_integer('xresolution', int((xr * x2) - (xr * x1) + 1))
-                params.add_integer('yresolution', int((yr * y2) - (yr * y1) + 1))
+                width, height = calc_border_filmsize(scene, xr, yr)
+                params.add_integer('xresolution', width)
+                params.add_integer('yresolution', height)
 
             # user asked for padded-to-full-frame output, there are a few cases where Lux needs to do this
             # itself since the rendered image will not be returned to Blender
@@ -844,16 +852,9 @@ class luxrender_film(declarative_property_group):
                 else:
                     # We are returning the image to blender which will pad for us,
                     # so have LuxRender send back a cropped frame anyway
-                    x1, x2, y1, y2 = [
-                        scene.render.border_min_x, scene.render.border_max_x,
-                        scene.render.border_min_y, scene.render.border_max_y
-                    ]
-
-                    # Set resolution
-                    # This is a new method of "rounding" the cropped image to match blenders expected rectangle_size
-                    # I tested this with several cases which failed with the former rounding, pls check - Jens
-                    params.add_integer('xresolution', int((xr * x2) - (xr * x1) + 1))
-                    params.add_integer('yresolution', int((yr * y2) - (yr * y1) + 1))
+                    width, height = calc_border_filmsize(scene, xr, yr)
+                    params.add_integer('xresolution', width)
+                    params.add_integer('yresolution', height)
 
         else:
             # Set resolution
