@@ -1663,7 +1663,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return result
 
     def get_film_size(self, scene):
-        filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+        width, height = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
 
         if scene.render.use_border:
             x_min, x_max, y_min, y_max = [
@@ -1671,10 +1671,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 scene.render.border_min_y, scene.render.border_max_y
             ]
 
-            filmWidth = int(filmWidth * x_max - filmWidth * x_min) + 1
-            filmHeight = int(filmHeight * y_max - filmHeight * y_min) + 1
+            width = int(x_max * width) - int(x_min * width)
+            height = int(y_max * height) - int(y_min * height)
 
-        return filmWidth, filmHeight
+            # In case border becomes too small
+            width = max(width, 1)
+            height = max(height, 1)
+
+        return width, height
 
     def import_aov_channels(self, scene, lcSession, filmWidth, filmHeight, passes):
         channelCalcStartTime = time.time()
