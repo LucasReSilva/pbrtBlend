@@ -275,6 +275,18 @@ class MaterialExporter(object):
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.type', ['fresnelsopra']))
                     self.properties.Set(pyluxcore.Property('scene.textures.' + fcol + '.file', full_name))
 
+                elif m2_type == 'fresneltex':
+                    texture_name = lux_mat.fresnel_fresneltexturename
+
+                    if texture_name:
+                        texture = get_texture_from_scene(self.blender_scene, texture_name)
+
+                        if texture:
+                            self.luxcore_exporter.convert_texture(texture)
+                            texture_exporter = self.luxcore_exporter.texture_cache[get_elem_key(texture)]
+
+                            fcol = texture_exporter.luxcore_name
+
                 else:
                     print('WARNING: Not yet supported metal2 type: %s' % m2_type)
 
