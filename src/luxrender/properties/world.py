@@ -951,7 +951,8 @@ class luxrender_materialgroup_data(declarative_property_group):
             'type': 'int',
             'attr': 'id',
             'name': 'ID',
-            'description': '', # TODO
+            'description': 'Material groups with the same ID will have the same color in the MATERIAL_ID pass. '
+                           'The ID is just another representation of the color.',
             'min': 0,
             'max': 0xffffff,
             'default': 0,
@@ -961,7 +962,7 @@ class luxrender_materialgroup_data(declarative_property_group):
             'type': 'float_vector',
             'attr': 'color',
             'name': '',
-            'description': 'RGB gain',
+            'description': 'Color that is used to mask this material in the MATERIAL_ID pass',
             'default': (0, 0, 0),
             'min': 0,
             'max': 1,

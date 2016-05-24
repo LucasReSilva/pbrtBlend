@@ -176,7 +176,9 @@ class render_settings(render_panel):
                     col.label(text='Specular: %d (with max. bounces %d: %d)' %
                                       (specularSamplesCount, maxSpecularPathDepth, maxSpecularSamplesCount))
 
-                    # Direct light samples # TODO: implement
+                    # TODO: implement - problem: how to get the number of light sources in the scene? (remember that
+                    # each triangle of a meshlight counts as one lightsource)
+                    # Direct light samples
                     #directLightSamplesCount = aaSamplesCount * firstVertexLightSampleCount *
                     #        (directLightSamples * directLightSamples) * renderConfig->scene->lightDefs.GetSize()
                     #SLG_LOG("[BiasPathCPURenderEngine] Direct light samples on first hit: " << directLightSamplesCount)

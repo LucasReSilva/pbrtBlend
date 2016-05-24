@@ -398,7 +398,7 @@ class luxcore_imagepipeline(declarative_property_group):
             'type': 'bool',
             'attr': 'use_color_aberration',
             'name': 'Color Aberration',
-            'description': '', # TODO
+            'description': 'Shift red and blue channels near the image edges',
             'default': False
         },
         {

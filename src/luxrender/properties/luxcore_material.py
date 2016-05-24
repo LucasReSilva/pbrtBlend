@@ -89,7 +89,7 @@ class luxcore_material(declarative_property_group):
             'trg': lambda s, material: material.luxcore_material,
             'trg_attr': 'materialgroup',
             'name': 'Material Group',
-            'icon': 'IMASEL' # TODO
+            'icon': 'IMASEL'
         },
         ##########
         {
