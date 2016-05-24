@@ -106,7 +106,7 @@ def find_config_value(module, section, key, default):
         print('Cannot find %s config file path' % module)
         return default
 
-    cp = configparser.SafeConfigParser()
+    cp = configparser.ConfigParser()
 
     cfg_files = cp.read(fc)
     if len(cfg_files) > 0:
