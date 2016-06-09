@@ -34,6 +34,7 @@ from ..extensions_framework.validate import Logic_Operator as LO, Logic_OR as O,
 from .. import LuxRenderAddon
 from ..export import ParamSet
 from ..properties.texture import ColorTextureParameter, FloatTextureParameter
+from ..properties.material import texture_append_visibility
 from ..util import dict_merge
 from ..outputs.luxcore_api import UseLuxCore
 
@@ -607,6 +608,13 @@ class luxrender_lamp_area(declarative_property_group):
         {'nsamples': lambda: not UseLuxCore()},
         TF_opacity.visibility,
     )
+    visibility = texture_append_visibility(visibility, TF_opacity,
+        {
+            'opacity_multiplyfloat': lambda: UseLuxCore(),
+            'opacity_usefloattexture': lambda: UseLuxCore(),
+            'opacity_floatvalue': lambda: UseLuxCore(),
+            'opacity_floattexturename': lambda: UseLuxCore(),
+        })
 
     properties = TC_L.properties[:] + [
         {
