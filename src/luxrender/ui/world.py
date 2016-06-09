@@ -111,6 +111,9 @@ class volumes_base(object):
 
             # Here we draw the currently selected luxrender_volumes_data property group
             if current_vol.nodetree:
+                if not UseLuxCore():
+                    self.layout.label('Volume nodes not supported in Classic API', icon='ERROR')
+
                 self.layout.prop_search(current_vol, "nodetree", bpy.data, "node_groups")
 
                 if current_vol.nodetree in bpy.data.node_groups:
@@ -133,7 +136,12 @@ class volumes_base(object):
                 # 'name' is not a member of current_vol.properties,
                 # so we draw it explicitly
                 self.layout.prop(current_vol, 'name')
-                self.layout.operator('luxrender.add_volume_nodetree', icon='NODETREE')
+
+                col = self.layout.column()
+                col.enabled = UseLuxCore()
+                col.operator('luxrender.add_volume_nodetree', icon='NODETREE')
+                if not UseLuxCore():
+                    self.layout.label('Volume nodes not supported in Classic API', icon='INFO')
                 self.layout.separator()
 
                 # Here we draw the currently selected luxrender_volumes_data property group
