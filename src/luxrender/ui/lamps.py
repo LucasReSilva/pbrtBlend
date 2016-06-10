@@ -182,6 +182,10 @@ class ui_luxrender_lamp_area(lamps_panel):
     def draw(self, context):
         if context.lamp is not None:
             wide_ui = context.region.width > narrowui
+            lux_lamp = context.lamp.luxrender_lamp
+            lux_lamp_area = lux_lamp.luxrender_lamp_area
+            is_laser = lux_lamp.luxrender_lamp_laser.is_laser
+
             super().draw(context)
 
             # AREA LAMP: Blender Properties
@@ -190,8 +194,6 @@ class ui_luxrender_lamp_area(lamps_panel):
                     col = self.layout.row()
                 else:
                     col = self.layout.column()
-
-                is_laser = context.lamp.luxrender_lamp.luxrender_lamp_laser.is_laser
 
                 row = col.row()
                 row.active = not is_laser
@@ -205,6 +207,12 @@ class ui_luxrender_lamp_area(lamps_panel):
                     sub2 = sub.column(align=True)
                     sub2.active = not is_laser
                     sub2.prop(context.lamp, "size_y", text="Size Y")
+
+                if lux_lamp_area.opacity_floatvalue != 1 or lux_lamp_area.opacity_usefloattexture:
+                    if is_laser:
+                        self.layout.label('Laser does not support opacity setting', icon='INFO')
+                    else:
+                        self.layout.label('Warning: Invisible lamps can cause artifacts', icon='INFO')
 
 
 @LuxRenderAddon.addon_register_class
