@@ -89,6 +89,8 @@ class camera(camera_panel):
                 sub_bokeh.prop(lux_cam, "distribution", text="")
                 sub_bokeh.prop(lux_cam, "power", text="Power")
 
+            layout.label("DoF strength is controlled by f/Stop value", icon="INFO")
+
         if UseLuxCore():
             if lux_cam.enable_clipping_plane or lux_cam.use_dof:
                 layout.separator()
