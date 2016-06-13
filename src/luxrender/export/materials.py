@@ -178,7 +178,7 @@ def get_material_volume_defs(m):
 
         if outputNode is None:
             print('Node tree is assigned, but does not contain an output node')
-            return ""
+            return "", ""
 
         int_vol_name = outputNode.interior_volume
         ext_vol_name = outputNode.exterior_volume
