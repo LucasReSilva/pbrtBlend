@@ -380,7 +380,8 @@ class DupliExporter(object):
         material_exporter = self.luxcore_exporter.material_cache[material]
         luxcore_material_name = material_exporter.luxcore_name
 
-        # Todo: don't use instancing for hair?
+        # The hair shape is located at world origin and implicitly instanced, so we have to
+        # move it to the correct position
         transform = matrix_to_list(obj.matrix_world, apply_worldscale=True)
 
         prefix = 'scene.objects.' + luxcore_shape_name

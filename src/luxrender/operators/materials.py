@@ -250,7 +250,6 @@ def material_converter(report, scene, blender_mat):
                         bump_tex = (tex_slot.texture, tex_slot.normal_factor)
 
         if luxrender_mat.type in ('matte', 'glossy'):
-            # print(len(Kd_stack))
             if len(Kd_stack) == 1:
                 tex = Kd_stack[0][0]
                 dcf = Kd_stack[0][1]
