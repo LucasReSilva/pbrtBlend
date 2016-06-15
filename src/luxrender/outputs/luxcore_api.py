@@ -44,8 +44,10 @@ def ToValidLuxCoreName(name):
 def set_prop(prefix, properties, luxcore_name, property, value):
     """
     Set a LuxCore property.
-    Example: set_luxcore_prop(properties, 'type', 'matte') is the equivalent of
+    Example: set_prop('materials', properties, 'type', 'matte') is the equivalent of
     properties.Set(pyluxcore.Property('scene.materials.<name>.type', 'matte'))
+    For materials, textures, volumes and the camera you can use the shorter set_prop_mat,
+    set_prop_tex, etc. convenience functions where you can omit the prefix.
 
     :param prefix: LuxCore property prefix (e.g. 'scene.materials')
     :param properties: LuxCore properties that are edited. Type: pyluxcore.Properties
