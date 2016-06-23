@@ -905,10 +905,17 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         return self.image_name
 
     def export_texture(self, make_texture):
-        image = bpy.data.images[self.image_name]
+        if self.source == 'blender_image':
+            image = bpy.data.images[self.image_name]
+            if image is None:
+                print("ERROR: could not find image " + self.image_name)
+                return
+            file_path = image.filepath
+        else:
+            file_path = efutil.filesystem_path(self.manual_filepath)
 
         imagemap_params = ParamSet()
-        process_filepath_data(LuxManager.CurrentScene, self, image.filepath, imagemap_params, 'filename')
+        process_filepath_data(LuxManager.CurrentScene, self, file_path, imagemap_params, 'filename')
 
         if self.channel == 'rgb':
             variant = 'color'
