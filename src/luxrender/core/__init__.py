@@ -1005,7 +1005,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     mem_peak = 0
 
-    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview=False, time_until_update=-1,
+    def CreateBlenderStats(self, lcConfig, stats, scene, realtime_preview=False, time_until_update=-1, display_interval=-1,
                            export_errors=False):
         """
         Returns: string of formatted statistics
@@ -1156,8 +1156,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if scene.luxcore_rendering_controls.pause_render:
             stats_list.append('Rendering Paused')
         else:
-            if not realtime_preview and time_until_update > 0.0:
-                stats_list.append('Next update in %ds' % math.ceil(time_until_update))
+            if not realtime_preview and time_until_update > 0:
+                text = 'Next update in %ds ' % math.ceil(time_until_update)
+                # Show a useless progress bar that looks something like this: (-----+--)
+                bar_length = 15
+                percent = math.ceil(time_until_update / display_interval * bar_length)
+                l = ['-' for i in range(bar_length)]
+                l[bar_length - percent] = '+'
+                text += '(' + ''.join(l) + ')'
+                stats_list.append(text)
             elif time_until_update != -1:
                 stats_list.append('Updating preview...')
 
@@ -1591,7 +1598,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 stats = luxcore_session.GetStats()
                 time_until_update = display_interval - time_since_display
-                blender_stats = self.CreateBlenderStats(luxcore_config, stats, scene, False, time_until_update, export_errors)
+                blender_stats = self.CreateBlenderStats(luxcore_config, stats, scene, False, time_until_update,
+                                                        display_interval, export_errors)
                 self.update_stats('Rendering...', blender_stats)
 
                 # check if any halt conditions are met
