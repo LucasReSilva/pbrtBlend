@@ -6,6 +6,10 @@ http://www.luxrender.net/en_GB/blender_2_5
 http://www.luxrender.net/wiki/LuxBlend_2.5_installation_instructions
 
 
+## One-Click Update
+http://www.luxrender.net/wiki/LuxBlend25_LuxCore#Updating_LuxBlend
+
+
 ## Usage
 http://www.luxrender.net/wiki/LuxBlend25_Manual
 
