@@ -2097,7 +2097,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if bpy.data.objects.is_updated:
                 # check objects for updates
                 for ob in bpy.data.objects:
-                    if ob == None:
+                    if ob is None:
                         continue
 
                     if ob.is_updated_data:
@@ -2486,6 +2486,37 @@ class LuxCoreSessionManager(object):
                 del cls.sessions[space]
 
     @classmethod
+    def stop_orphaned_sessions(cls):
+        # Cover the following cases that can happen to a running viewport render space:
+        # - the space is removed from the Blender UI
+        # - the editor type (area.type) is changed to something else than 'VIEW_3D'
+
+        # TODO: rendersession in second window, window is closed --> session runs forever
+
+        existing_spaces = []
+        for screen in bpy.data.screens:
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    for space in area.spaces:
+                        if space.type == 'VIEW_3D':
+                            existing_spaces.append(space)
+
+        orphans = []
+        for space, session in cls.sessions.items():
+            if space not in existing_spaces and session.is_active:
+                orphans.append((space, session))
+
+        for space, session in orphans:
+            print('Stopping orphaned rendersession')
+            if session.is_in_scene_edit():
+                session.luxcore_session.EndSceneEdit()
+
+            session.luxcore_session.Stop()
+            session.luxcore_session = None
+
+            del cls.sessions[space]
+
+    @classmethod
     def begin_scene_edit(cls, space):
         if space in cls.sessions:
             session = cls.sessions[space]
@@ -2524,14 +2555,13 @@ class LuxCoreSessionManager(object):
 
 @persistent
 def stop_viewport_render(context):
-    # Check spaces that are not in rendered mode if they have a corresponding session that is still running
-    for screen in bpy.data.screens:
-        for area in screen.areas:
-            if area.type == 'VIEW_3D':
-                for space in area.spaces:
-                    if (space.type == 'VIEW_3D' and space.viewport_shade != 'RENDERED'
-                                                and space in LuxCoreSessionManager.sessions):
-                            LuxCoreSessionManager.stop_luxcore_session(space)
+    LuxCoreSessionManager.stop_orphaned_sessions()
+
+    # Check registered spaces with rendersessions if they are still in RENDERED mode
+    spaces = list(LuxCoreSessionManager.sessions.keys())  # get a copy of the keys because we will modify the dict
+    for space in spaces:
+        if space.viewport_shade != 'RENDERED':
+            LuxCoreSessionManager.stop_luxcore_session(space)
 
 bpy.app.handlers.scene_update_post.append(stop_viewport_render)
 
