@@ -2454,8 +2454,7 @@ class LuxCoreSessionManager(object):
 
     @classmethod
     def get_session(cls, space):
-        if cls.sessions[space]:
-            return cls.sessions[space]
+        return cls.sessions[space]
 
     @classmethod
     def is_session_active(cls, space):
