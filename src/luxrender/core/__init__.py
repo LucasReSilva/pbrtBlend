@@ -2503,7 +2503,7 @@ class LuxCoreSessionManager(object):
 
         orphans = []
         for space, session in cls.sessions.items():
-            if space not in existing_spaces and session.is_active:
+            if space not in existing_spaces and session.is_active and space is not None:
                 orphans.append((space, session))
 
         for space, session in orphans:
@@ -2560,7 +2560,7 @@ def stop_viewport_render(context):
     # Check registered spaces with rendersessions if they are still in RENDERED mode
     spaces = list(LuxCoreSessionManager.sessions.keys())  # get a copy of the keys because we will modify the dict
     for space in spaces:
-        if space.viewport_shade != 'RENDERED':
+        if space is not None and space.viewport_shade != 'RENDERED':
             LuxCoreSessionManager.stop_luxcore_session(space)
 
 bpy.app.handlers.scene_update_post.append(stop_viewport_render)
