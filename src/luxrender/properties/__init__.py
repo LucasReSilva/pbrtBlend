@@ -162,8 +162,12 @@ def create_luxcore_name(node, suffix=None, name=None):
     Construct a unique name for the node to be used in the LuxCore scene definitions.
     Note: node can also be a socket or anything else with an "id_data" attribute that points to the parent nodetree
     """
-    if name is None:
-        name = node.name
+    if name is not None:
+        # We got passed a valid LuxCore name for the first node in the nodetree.
+        # Use it without changes so switching from non-node to node materials works during viewport renders.
+        return name
+
+    name = node.name
 
     nodetree = node.id_data
     name_parts = [name, nodetree.name]

@@ -79,7 +79,7 @@ class MaterialExporter(object):
             self.__convert_default_matte()
 
         try:
-            self.luxcore_name = output_node.export_luxcore(self.material, self.properties, self.blender_scene, self.luxcore_exporter)
+            output_node.export_luxcore(self.material, self.properties, self.blender_scene, self.luxcore_exporter, self.luxcore_name)
 
             prefix = 'scene.materials.' + self.luxcore_name
             self.__set_material_volumes(prefix, output_node.interior_volume, output_node.exterior_volume)

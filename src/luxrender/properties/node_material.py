@@ -1792,14 +1792,14 @@ class luxrender_material_output_node(luxrender_node):
                 row.prop(self, 'visibility_indirect_glossy_enable')
                 row.prop(self, 'visibility_indirect_specular_enable')
 
-    def export_luxcore(self, material, properties, blender_scene, luxcore_exporter):
+    def export_luxcore(self, material, properties, blender_scene, luxcore_exporter, luxcore_name):
         # Note: volumes are exported in export/luxcore/materials.py (in "parent" function that calls this function)
 
         tree_name = material.luxrender_material.nodetree
         print('Converting material: %s (Nodetree: %s)' % (material.name, tree_name))
 
         # Export the material tree
-        luxcore_name = export_submat_luxcore(properties, self.inputs[0], luxcore_exporter, material.name)
+        export_submat_luxcore(properties, self.inputs[0], luxcore_exporter, luxcore_name)
 
         # Export emission node if attached to this node
         export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)

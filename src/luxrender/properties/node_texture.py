@@ -764,9 +764,6 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
         enum_items = []
 
-        wm = context.window_manager
-        #directory = wm.my_previews_dir
-
         # Get the preview collection
         collection = preview_collections[luxcore_name]
 
