@@ -31,7 +31,6 @@ import os, struct, sys, time
 
 # Blender Libs
 import bpy
-from mathutils import Vector
 from ..extensions_framework import util as efutil
 
 # LuxRender libs
