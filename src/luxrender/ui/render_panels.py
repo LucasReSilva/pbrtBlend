@@ -238,13 +238,15 @@ class device_settings(render_panel):
                 self.layout.operator('luxrender.opencl_device_list_update')
 
                 # This is a "special" panel section for the list of OpenCL devices
-                for dev_index in range(len(context.scene.luxcore_enginesettings.luxcore_opencl_devices)):
-                    dev = context.scene.luxcore_enginesettings.luxcore_opencl_devices[dev_index]
-                    row = self.layout.row()
-                    row.prop(dev, 'opencl_device_enabled', text='')
-                    subrow = row.row()
-                    subrow.enabled = dev.opencl_device_enabled
-                    subrow.label(dev.name)
+                if len(context.scene.luxcore_enginesettings.luxcore_opencl_devices) > 0:
+                    for dev in context.scene.luxcore_enginesettings.luxcore_opencl_devices:
+                        row = self.layout.row()
+                        row.prop(dev, 'opencl_device_enabled', text='')
+                        subrow = row.row()
+                        subrow.enabled = dev.opencl_device_enabled
+                        subrow.label(dev.name)
+                else:
+                    self.layout.label('No OpenCL devices available', icon='ERROR')
 
         if UseLuxCore() and (engine_settings.renderengine_type in ['BIDIR', 'BIDIRVM']
                 or engine_settings.device == 'CPU'
