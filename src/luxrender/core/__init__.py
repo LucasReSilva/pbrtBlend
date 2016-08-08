@@ -2409,9 +2409,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 else:
                     luxcore_scene.DeleteLight('LOCALVIEW_BACKGROUND')
 
-                # Debug output
-                print('Updated scene properties:')
-                print(updated_properties, '\n')
+                if context.scene.luxcore_translatorsettings.print_scn:
+                    # Debug output
+                    print('Updated scene properties:')
+                    print(updated_properties, '\n')
 
                 # parse scene changes and end sceneEdit
                 luxcore_scene.Parse(updated_properties)
