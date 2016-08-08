@@ -31,6 +31,7 @@ import os, struct, sys, time
 
 # Blender Libs
 import bpy
+from mathutils import Vector
 from ..extensions_framework import util as efutil
 
 # LuxRender libs
@@ -664,28 +665,20 @@ def export_smoke(smoke_obj_name, channel):
 
         eps = 0.000001
         if domain is not None:
-            if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 71:
+            if bpy.app.version >= (2, 71, 0):
                 # Blender version 2.71 supports direct access to smoke data structure
                 settings = mod.domain_settings
 
-                channeldata = []
                 if channel == 'density':
-                    for v in settings.density_grid:
-                        channeldata.append(v.real)
+                    channeldata = list(settings.density_grid)
+                elif channel == 'fire':
+                    channeldata = list(settings.flame_grid)
 
-                if channel == 'fire':
-                    for v in settings.flame_grid:
-                        channeldata.append(v.real)
-
-                big_res = []
-                big_res.append(settings.domain_resolution[0])
-                big_res.append(settings.domain_resolution[1])
-                big_res.append(settings.domain_resolution[2])
+                big_res = list(settings.domain_resolution)
 
                 if settings.use_high_resolution:
-                    big_res[0] *= (settings.amplify + 1)
-                    big_res[1] *= (settings.amplify + 1)
-                    big_res[2] *= (settings.amplify + 1)
+                    for i in range(3):
+                        big_res[i] *= settings.amplify + 1
             else:
                 p = []
                 # gather smoke domain settings
