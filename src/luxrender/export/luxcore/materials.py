@@ -585,8 +585,8 @@ class MaterialExporter(object):
                                                  convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, material.luxrender_material, 'bumpmap',
                                                                             'float')))
 
-                # Normal mapping
-                if material.luxrender_material.normalmap_usefloattexture:
+                # Normal mapping (make sure a texture is selected)
+                if material.luxrender_material.normalmap_usefloattexture and material.luxrender_material.normalmap_floattexturename:
                     normalmap = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name,
                                                         material.luxrender_material, 'normalmap', 'float')
                     # We have to set normalmap gamma to 1
