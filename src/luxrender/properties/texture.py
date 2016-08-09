@@ -3209,6 +3209,7 @@ class luxrender_tex_imagesampling(declarative_property_group):
 
     controls = [
         'channel',
+        'channel_luxcore',  # LuxCore needs special channel because it needs the extra "rgb" default option
         'gain',
         'gamma',
         'filtertype',
@@ -3222,6 +3223,8 @@ class luxrender_tex_imagesampling(declarative_property_group):
     # varient is auto-detected for blender image, and file path is supplied from blender tex
 
     visibility = {
+        'channel': lambda: not UseLuxCore(),
+        'channel_luxcore': lambda: UseLuxCore(),
         'discardmipmaps': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UseLuxCore()]),
         'maxanisotropy': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UseLuxCore()]),
         'filtertype': lambda: not UseLuxCore(),
@@ -3259,6 +3262,23 @@ class luxrender_tex_imagesampling(declarative_property_group):
                 ('alpha', 'Alpha', 'alpha'),
                 ('colored_mean', 'Colored mean', 'colored_mean')
             ],
+            'save_in_preset': True
+        },
+        {
+            'type': 'enum',
+            'attr': 'channel_luxcore',
+            'name': 'Channel',
+            'description': 'Channel to sample',
+            'items': [
+                ('rgb', 'RGB', 'Default, use all color channels'),
+                ('red', 'Red', 'Use only the red color channel'),
+                ('green', 'Green', 'Use only the green color channel'),
+                ('blue', 'Blue', 'Use only the blue color channel'),
+                ('alpha', 'Alpha', 'Use only the alpha channel'),
+                ('mean', 'Mean', 'Greyscale'),
+                ('colored_mean', 'Colored Mean', 'Greyscale'),
+            ],
+            'default': 'rgb',
             'save_in_preset': True
         },
         {

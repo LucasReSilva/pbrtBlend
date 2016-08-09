@@ -292,12 +292,15 @@ class TextureExporter(object):
                                 'Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
                         tex_image = efutil.filesystem_path(f_path)
 
+                gamma = texture.luxrender_texture.luxrender_tex_imagesampling.gamma
+                gain = texture.luxrender_texture.luxrender_tex_imagesampling.gain
+                channel = texture.luxrender_texture.luxrender_tex_imagesampling.channel_luxcore
+
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['imagemap']))
                 self.properties.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.gamma', [texture.luxrender_texture.luxrender_tex_imagesampling.gamma]))
-                self.properties.Set(
-                    pyluxcore.Property(prefix + '.gain', [texture.luxrender_texture.luxrender_tex_imagesampling.gain]))
+                self.properties.Set(pyluxcore.Property(prefix + '.gamma', gamma))
+                self.properties.Set(pyluxcore.Property(prefix + '.gain', gain))
+                self.properties.Set(pyluxcore.Property(prefix + '.channel', channel))
 
                 self.__convert_mapping(prefix, texture)
             ####################################################################
