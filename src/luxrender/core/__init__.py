@@ -2143,7 +2143,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                     mat_updated = False
 
-                    if nodetree_name:
+                    if nodetree_name and nodetree_name in bpy.data.node_groups:
                         # Check for nodetree updates
                         nodetree = bpy.data.node_groups[nodetree_name]
 
