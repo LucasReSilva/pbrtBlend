@@ -30,7 +30,7 @@ import bpy, mathutils
 
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework import util as efutil
-from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
+from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO, Logic_AND as A
 
 from .. import LuxRenderAddon
 from ..export import ParamSet, get_worldscale, process_filepath_data
@@ -3215,13 +3215,23 @@ class luxrender_tex_imagesampling(declarative_property_group):
         'discardmipmaps',
         'maxanisotropy',
         'wrap',
+        'wrap_info',  # LuxCore only
+        'is_normalmap',  # LuxCore only
     ]
 
     # varient is auto-detected for blender image, and file path is supplied from blender tex
 
     visibility = {
-        'discardmipmaps': {'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])},
-        'maxanisotropy': {'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])},
+        'discardmipmaps': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UseLuxCore()]),
+        'maxanisotropy': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UseLuxCore()]),
+        'filtertype': lambda: not UseLuxCore(),
+        # Show an info message about unsupported wrapping modes in LuxCore API mode
+        'wrap_info': lambda: UseLuxCore(),
+    }
+
+    enabled = {
+        # wrap modes are not yet supported by LuxCore
+        'wrap': lambda: not UseLuxCore(),
     }
 
     properties = [
@@ -3315,6 +3325,12 @@ class luxrender_tex_imagesampling(declarative_property_group):
                 ('clamp', 'Clamp', 'clamp')
             ],
             'save_in_preset': True
+        },
+        {
+            'type': 'text',
+            'attr': 'wrap_info',
+            'name': 'Only "Repeat" wrapping supported by LuxCore',
+            'icon': 'INFO',
         },
     ]
 
