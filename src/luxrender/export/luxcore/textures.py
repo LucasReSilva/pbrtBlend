@@ -391,11 +391,12 @@ class TextureExporter(object):
                 self.properties.Set(pyluxcore.Property(prefix + '.noisesize', [float(texture.noise_scale)]))
                 self.properties.Set(pyluxcore.Property(prefix + '.turbulence', [float(texture.turbulence)]))
             ####################################################################
-            # Pararameters shared by all blender textures
+            # Parameters shared by all blender textures
             ####################################################################
-            self.properties.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
-            self.properties.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
             if bl_texType != 'IMAGE':
+                # bright/contrast are not supported by LuxCore imagemaps
+                self.properties.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
+                self.properties.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
                 self.__convert_transform(prefix, texture)
 
             self.__convert_colorramp()

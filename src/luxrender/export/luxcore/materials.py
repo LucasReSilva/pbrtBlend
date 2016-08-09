@@ -716,7 +716,10 @@ class MaterialExporter(object):
                             alpha = alpha_tex_exporter.luxcore_name
 
                             self.properties.Set(alpha_tex_exporter.properties)
-                            self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', 'alpha'))
+
+                            # The alpha texture is supposed to be black/white with no alpha channel, right?
+                            # That's why I commented out the following line
+                            #self.properties.Set(pyluxcore.Property('scene.textures.' + alpha + '.channel', 'alpha'))
 
                             if material.luxrender_transparency.inverse:
                                 inverter_name = alpha + '_inverter'
