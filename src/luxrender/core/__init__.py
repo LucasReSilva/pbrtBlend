@@ -379,6 +379,13 @@ def draw_button_show_imagemap_previews(self, context):
 
 _register_elm(bpy.types.NODE_HT_header.append(draw_button_show_imagemap_previews))
 
+def operator_import_multiple_imagenodes(self, context):
+    if context.scene.render.engine == "LUXRENDER_RENDER":
+        self.layout.separator()
+        self.layout.operator("luxrender.import_multiple_imagenodes", icon='IMAGE_COL')
+
+_register_elm(bpy.types.NODE_MT_node.append(operator_import_multiple_imagenodes))
+
 
 @LuxRenderAddon.addon_register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):

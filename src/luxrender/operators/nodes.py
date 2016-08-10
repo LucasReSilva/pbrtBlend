@@ -24,8 +24,15 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
+
+import os
+
 # Blender Libs
 import bpy, bl_operators
+from bpy.props import CollectionProperty, StringProperty
+from bpy.types import OperatorFileListElement
+from bpy_extras.io_utils import ImportHelper
+from bpy_extras.image_utils import load_image
 
 # LuxRender Libs
 from .. import LuxRenderAddon
@@ -48,6 +55,48 @@ def find_node_editor(nodetree_type):
                             node_editor = space
 
     return node_editor
+
+
+@LuxRenderAddon.addon_register_class
+class LUXRENDER_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
+    """"""
+    bl_idname = "luxrender.import_multiple_imagenodes"
+    bl_label = "Import Multiple Images"
+    bl_description = "Import multiple imagemaps into the node editor at once"
+
+    files = CollectionProperty(name="File Path", type=OperatorFileListElement)
+    directory = StringProperty(subtype='DIR_PATH')
+    filter_glob = StringProperty(
+        default="*.jpg;*.jpeg;*.png;*.tga;*.tif;*.tiff",
+        options={'HIDDEN'}
+    )
+    filename_ext = ""  # required by ImportHelper
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.render.engine == 'LUXRENDER_RENDER' and hasattr(context.space_data, "node_tree")
+
+    def execute(self, context):
+        location = context.space_data.cursor_location
+
+        for file_elem in self.files:
+            print("Importing image:", file_elem.name)
+            filepath = os.path.join(self.directory, file_elem.name)
+
+            image = load_image(filepath, check_existing=True)
+
+            if image is None:
+                print("Failed to load image:", filepath)
+                continue
+
+            nodetree = context.space_data.node_tree
+            node = nodetree.nodes.new('luxrender_texture_blender_image_map_node')
+            node.image_name = image.name
+            node.location = location
+            # Nodes are spawned in a vertical column
+            location.y -= 290
+
+        return {'FINISHED'}
 
 
 @LuxRenderAddon.addon_register_class

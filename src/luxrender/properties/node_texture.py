@@ -730,7 +730,7 @@ class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
-        image = load_image(self.filepath)
+        image = load_image(self.filepath, check_existing=True)
 
         # Find the node that requested the opened image and assign the image name, then reset its "requested" flag
         for node in context.space_data.node_tree.nodes:
