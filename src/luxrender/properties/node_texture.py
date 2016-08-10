@@ -837,6 +837,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
                                            ' then plug the output directly into a Bump socket', update=update_is_normal_map)
     normalmap_fake_gamma = bpy.props.FloatProperty(name='Gamma', default=1)
 
+    advanced = bpy.props.BoolProperty(name='Advanced', default=False, description='Show advanced options')
+
     def init(self, context):
         self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
         self.outputs.new('NodeSocketColor', 'Color')
@@ -844,7 +846,10 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         self.outputs['Bump'].enabled = False
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'source', expand=True)
+        layout.prop(self, 'advanced', toggle=True)
+
+        if self.advanced:
+            layout.prop(self, 'source', expand=True)
 
         if self.source == 'blender_image':
             if self.image_name in bpy.data.images:
@@ -878,18 +883,19 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         elif self.source == 'manual_filepath':
             layout.prop(self, 'manual_filepath')
 
-        column = layout.column()
-        column.enabled = not self.is_normal_map or not UseLuxCore()
-        column.prop(self, 'channel')
-        column.prop(self, 'gain')
+        if self.advanced:
+            column = layout.column()
+            column.enabled = not self.is_normal_map or not UseLuxCore()
+            column.prop(self, 'channel')
+            column.prop(self, 'gain')
 
-        # Gamma needs to be 1 for normalmaps
-        if self.is_normal_map and UseLuxCore():
-            row = layout.row()
-            row.enabled = False
-            row.prop(self, 'normalmap_fake_gamma')
-        else:
-            layout.prop(self, 'gamma')
+            # Gamma needs to be 1 for normalmaps
+            if self.is_normal_map and UseLuxCore():
+                row = layout.row()
+                row.enabled = False
+                row.prop(self, 'normalmap_fake_gamma')
+            else:
+                layout.prop(self, 'gamma')
 
         if not UseLuxCore():
             layout.label('Normalmap option not supported in Classic API mode', icon='ERROR')
