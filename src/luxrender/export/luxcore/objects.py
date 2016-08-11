@@ -29,6 +29,7 @@ import os
 
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
+from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import is_obj_visible
 from ...export import object_anim_matrices
@@ -215,8 +216,8 @@ class ObjectExporter(object):
 
         # Create shape definition (always instanciate proxies)
         name_shape = ToValidLuxCoreName(os.path.basename(path) + '_luxblendproxy')
-        self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.type', 'mesh'))
-        self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.ply', path))
+        self.properties.Set(Property('scene.shapes.' + name_shape + '.type', 'mesh'))
+        self.properties.Set(Property('scene.shapes.' + name_shape + '.ply', path))
         self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
 
 
@@ -265,8 +266,8 @@ class ObjectExporter(object):
 
         if use_pointiness:
             pointiness_shape = luxcore_shape_name + '_pointiness'
-            self.properties.Set(pyluxcore.Property('scene.shapes.' + pointiness_shape + '.type', 'pointiness'))
-            self.properties.Set(pyluxcore.Property('scene.shapes.' + pointiness_shape + '.source', luxcore_shape_name))
+            self.properties.Set(Property('scene.shapes.' + pointiness_shape + '.type', 'pointiness'))
+            self.properties.Set(Property('scene.shapes.' + pointiness_shape + '.source', luxcore_shape_name))
             luxcore_shape_name = pointiness_shape
 
         return luxcore_shape_name
@@ -280,14 +281,14 @@ class ObjectExporter(object):
 
         prefix = 'scene.objects.' + luxcore_object_name
 
-        self.properties.Set(pyluxcore.Property(prefix + '.material', luxcore_material_name))
-        self.properties.Set(pyluxcore.Property(prefix + '.shape', luxcore_shape_name))
+        self.properties.Set(Property(prefix + '.material', luxcore_material_name))
+        self.properties.Set(Property(prefix + '.shape', luxcore_shape_name))
 
         use_motion_blur = anim_matrices and len(anim_matrices) > 1
 
         if transform is not None and self.__use_instancing(anim_matrices) and not use_motion_blur:
             # In case of motion blur, the object is only transformed by the .motion.n.transformation properties
-            self.properties.Set(pyluxcore.Property(prefix + '.transformation', transform))
+            self.properties.Set(Property(prefix + '.transformation', transform))
 
         # Motion blur (needs at least 2 matrices in anim_matrices)
         if use_motion_blur:
@@ -297,8 +298,8 @@ class ObjectExporter(object):
             for i in range(len(anim_matrices)):
                 time = i * step
                 matrix = matrix_to_list(anim_matrices[i], apply_worldscale=True, invert=True)
-                self.properties.Set(pyluxcore.Property('%s.motion.%d.time' % (prefix, i), time))
-                self.properties.Set(pyluxcore.Property('%s.motion.%d.transformation' % (prefix, i), matrix))
+                self.properties.Set(Property('%s.motion.%d.time' % (prefix, i), time))
+                self.properties.Set(Property('%s.motion.%d.transformation' % (prefix, i), matrix))
 
 
     def __calc_motion_blur(self):

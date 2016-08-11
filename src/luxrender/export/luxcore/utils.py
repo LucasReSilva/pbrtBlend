@@ -28,6 +28,7 @@
 from  math import pi
 
 from ...outputs.luxcore_api import pyluxcore
+from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 from ...export import get_worldscale
@@ -91,9 +92,9 @@ def convert_texture_channel(luxcore_exporter, properties, element_name, textured
 
 
 def create_scale_texture(properties, base_texture_name, scale_texture_name, multiplier):
-    properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.type', 'scale'))
-    properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.texture1', base_texture_name))
-    properties.Set(pyluxcore.Property('scene.textures.' + scale_texture_name + '.texture2', multiplier))
+    properties.Set(Property('scene.textures.' + scale_texture_name + '.type', 'scale'))
+    properties.Set(Property('scene.textures.' + scale_texture_name + '.texture1', base_texture_name))
+    properties.Set(Property('scene.textures.' + scale_texture_name + '.texture2', multiplier))
 
 
 def convert_param_to_luxcore_property(param):
