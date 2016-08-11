@@ -29,7 +29,6 @@ import os
 
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import is_obj_visible
 from ...export import object_anim_matrices
@@ -38,6 +37,11 @@ from ...properties import find_node
 
 from .utils import calc_shutter, get_elem_key
 from .meshes import MeshExporter
+
+try:
+    from pyluxcore import Property
+except ImportError:
+    pass
 
 
 class ExportedObject(object):

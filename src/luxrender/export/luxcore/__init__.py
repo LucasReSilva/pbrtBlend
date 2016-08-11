@@ -29,7 +29,6 @@ import bpy, time, os
 
 from ...outputs import LuxManager
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...extensions_framework import util as efutil
 
 from .camera import CameraExporter
@@ -42,6 +41,12 @@ from .objects import ObjectExporter
 from .textures import TextureExporter
 from .volumes import VolumeExporter
 from .utils import get_elem_key, LightgroupCache, is_lightgroup_opencl_compatible
+
+try:
+    from pyluxcore import Property
+except ImportError:
+    # Catch ImportError so the user can still edit the addon preferences even when the import fails
+    pass
 
 
 class LuxCoreExporter(object):

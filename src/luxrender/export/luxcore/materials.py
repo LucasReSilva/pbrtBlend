@@ -28,7 +28,6 @@
 import bpy
 
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 from ...export import get_expanded_file_name
@@ -36,6 +35,11 @@ from ...properties import find_node
 
 from .utils import convert_texture_channel, get_elem_key, is_lightgroup_opencl_compatible
 from .textures import TextureExporter
+
+try:
+    from pyluxcore import Property
+except ImportError:
+    pass
 
 
 DEFAULT_MATTE = 'DEFAULT_MATTE'

@@ -28,11 +28,15 @@
 from mathutils import Matrix
 
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...export import matrix_to_list
 
 from . import LuxCoreExporter
 from .utils import get_elem_key
+
+try:
+    from pyluxcore import Property
+except ImportError:
+    pass
 
 
 class MaterialPreviewExporter(object):
