@@ -133,6 +133,9 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 
 _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
+# Particle texture influence panel
+_register_elm(bl_ui.properties_texture.TEXTURE_PT_influence)
+
 if bpy.app.version > (2, 77, 2):
     _register_elm(bl_ui.properties_physics_common.PHYSICS_PT_add, required=True)
     _register_elm(bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dynamic_paint)
