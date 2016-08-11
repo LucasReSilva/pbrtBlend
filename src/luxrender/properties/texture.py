@@ -736,6 +736,7 @@ tex_names = (
          ('subtract', 'Subtract'),
          ('uv', 'UV'),
          ('uvmask', 'UV Mask'),
+         ('hsv', 'HSV'),
      )),
 
 )
@@ -900,6 +901,9 @@ TF_inside = FloatTextureParameter('inside', 'Inside', default=1.0, min=0.0, max=
 TF_outside = FloatTextureParameter('outside', 'Outside', default=0.0, min=0.0, max=100.0, precision=6)
 TF_innertex = FloatTextureParameter('innertex', 'Inner texture', default=1.0, min=0.0, max=100.0, precision=6)
 TF_outertex = FloatTextureParameter('outertex', 'Outer texture', default=0.0, min=0.0, max=100.0, precision=6)
+TF_hue = FloatTextureParameter('hue', 'Hue', default=0.5, min=0.0, max=1.0)  # HSV texture parameters
+TF_saturation = FloatTextureParameter('saturation', 'Saturation', default=1, min=0.0, max=2.0)
+TF_value = FloatTextureParameter('value', 'Value', default=1, min=0.0, max=2.0)
 
 # Color Texture Parameters
 TC_brickmodtex = ColorTextureParameter('brickmodtex', 'Brick modulation texture', default=(0.9, 0.9, 0.9))
@@ -911,6 +915,7 @@ TC_Kr = ColorTextureParameter('Kr', 'Reflection color',
                               default=(0.7, 0.7, 0.7))  # This parameter is used by the fresnelcolor texture
 TC_Kt = ColorTextureParameter('Kt', 'Transmission color',
                               default=(1.0, 1.0, 1.0))  # This parameter is used by the color at depth texture
+TC_input = ColorTextureParameter('input', 'Input Color', default=(0.8, 0.8, 0.8))  # Used by HSV texture
 
 # Fresnel Texture Parameters
 TFR_tex1 = FresnelTextureParameter('tex1', 'Texture 1', default=1.0, min=-40.0, max=40.0)
@@ -4662,15 +4667,52 @@ class luxrender_tex_wrinkled(declarative_property_group):
 
 
 @LuxRenderAddon.addon_register_class
+class luxrender_tex_hsv(declarative_property_group):
+    ef_attach_to = ['luxrender_texture']
+    alert = {}
+
+    controls = (
+        TC_input.controls +
+        TF_hue.controls +
+        TF_saturation.controls +
+        TF_value.controls
+    )
+
+    visibility = dict_merge(
+        TC_input.visibility,
+        TF_hue.visibility,
+        TF_saturation.visibility,
+        TF_value.visibility,
+    )
+
+    properties = (
+        TC_input.properties +
+        TF_hue.properties +
+        TF_saturation.properties +
+        TF_value.properties
+    )
+
+    def get_paramset(self, scene, texture):
+        # Not supported by Classic API
+        return set(), ParamSet()
+
+    def load_paramset(self, variant, ps):
+        pass
+
+
+@LuxRenderAddon.addon_register_class
 class luxrender_tex_pointiness(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
 
     controls = [
-        'curvature_mode'
+        'curvature_mode',
+        'warning_luxcore_tex',
     ]
 
-    visibility = {}
+    visibility = {
+        'warning_luxcore_tex': lambda: not UseLuxCore(),
+    }
 
     properties = [
         {
@@ -4684,13 +4726,18 @@ class luxrender_tex_pointiness(declarative_property_group):
                 ('convex', 'Convex', 'Only use hills'),
             ],
             'expand': True,
+        },
+        {
+            'attr': 'warning_luxcore_tex',
+            'type': 'text',
+            'name': 'Not supported in Classic API mode!',
+            'icon': 'ERROR',
         }
     ]
 
     def get_paramset(self, scene, texture):
-        pointiness_params = ParamSet()
-
-        return set(), pointiness_params
+        # Not supported by Classic API
+        return set(), ParamSet()
 
     def load_paramset(self, variant, ps):
         pass

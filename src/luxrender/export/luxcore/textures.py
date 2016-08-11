@@ -694,6 +694,19 @@ class TextureExporter(object):
 
                 self.__convert_transform(prefix, texture)
             ####################################################################
+            # HSV
+            ####################################################################
+            elif texType == 'hsv':
+                input = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'input', 'color')
+                hue = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'hue', 'float')
+                saturation = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'saturation', 'float')
+                value = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'value', 'float')
+
+                self.properties.Set(Property(prefix + '.texture', input))
+                self.properties.Set(Property(prefix + '.hue', hue))
+                self.properties.Set(Property(prefix + '.saturation', saturation))
+                self.properties.Set(Property(prefix + '.value', value))
+            ####################################################################
             # Fallback to exception
             ####################################################################
             else:

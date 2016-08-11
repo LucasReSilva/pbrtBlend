@@ -84,7 +84,7 @@ from ..ui.textures import (
     checkerboard, cloud, densitygrid, dots, equalenergy, exponential, fbm, fresnelcolor, fresnelname, gaussian,
     harlequin, hitpointcolor, hitpointalpha, hitpointgrey, imagemap, imagesampling, normalmap,
     lampspectrum, luxpop, marble, mix as tex_mix, multimix, sellmeier, scale, subtract, sopra, uv,
-    uvmask, windy, wrinkled, mapping, tabulateddata, transform, pointiness
+    uvmask, windy, wrinkled, mapping, tabulateddata, transform, pointiness, hsv
 )
 
 # Exporter Operators need to be imported to ensure initialisation
