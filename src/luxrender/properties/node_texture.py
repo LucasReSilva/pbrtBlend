@@ -1770,6 +1770,7 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        warning_classic_node(layout)
         layout.prop(self, 'origin')
         layout.prop(self, 'updir')
         layout.prop(self, 'decay')
@@ -1889,7 +1890,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
 
 @LuxRenderAddon.addon_register_class
 class luxrender_texture_type_node_dots(luxrender_texture_node):
-    """Smoke Data node"""
+    """Dots node"""
     bl_idname = 'luxrender_texture_dots_node'
     bl_label = 'Dots Texture'
     bl_icon = 'TEXTURE'
@@ -1920,5 +1921,43 @@ class luxrender_texture_type_node_dots(luxrender_texture_node):
         set_prop_tex(properties, luxcore_name, 'mapping.type', mapping_type)
         set_prop_tex(properties, luxcore_name, 'mapping.uvscale', uvscale)
         set_prop_tex(properties, luxcore_name, 'mapping.uvdelta', uvdelta)
+
+        return luxcore_name
+
+
+@LuxRenderAddon.addon_register_class
+class luxrender_texture_type_node_bilerp(luxrender_texture_node):
+    """Bilerp node"""
+    bl_idname = 'luxrender_texture_bilerp_node'
+    bl_label = 'Bilerp'
+    bl_icon = 'TEXTURE'
+    bl_width_min = 190
+
+    def init(self, context):
+        self.inputs.new('luxrender_color_socket', 'texture00')
+        self.inputs['texture00'].default_value = (0.05, 0.05, 0.05)
+        self.inputs.new('luxrender_color_socket', 'texture01')
+        self.inputs['texture01'].default_value = (0.05, 0.05, 0.05)
+        self.inputs.new('luxrender_color_socket', 'texture10')
+        self.inputs.new('luxrender_color_socket', 'texture11')
+
+        self.outputs.new('NodeSocketColor', 'Color')
+
+    def draw_buttons(self, context, layout):
+        warning_luxcore_node(layout)
+
+    def export_luxcore(self, properties):
+        luxcore_name = create_luxcore_name(self)
+
+        texture00 = self.inputs[0].export_luxcore(properties)
+        texture01 = self.inputs[1].export_luxcore(properties)
+        texture10 = self.inputs[2].export_luxcore(properties)
+        texture11 = self.inputs[3].export_luxcore(properties)
+
+        set_prop_tex(properties, luxcore_name, 'type', 'bilerp')
+        set_prop_tex(properties, luxcore_name, 'texture00', texture00)
+        set_prop_tex(properties, luxcore_name, 'texture01', texture01)
+        set_prop_tex(properties, luxcore_name, 'texture10', texture10)
+        set_prop_tex(properties, luxcore_name, 'texture11', texture11)
 
         return luxcore_name

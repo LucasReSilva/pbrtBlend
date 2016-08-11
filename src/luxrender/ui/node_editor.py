@@ -208,6 +208,7 @@ luxrender_node_categories_material = [
         NodeItem("luxrender_texture_constant_node", label="Value Input", settings={
             "variant": repr("float"),
             }),
+        NodeItem("luxrender_texture_bilerp_node"),
         NodeItem("luxrender_texture_band_node"),
         NodeItem("luxrender_texture_python_node"),
         #NodeItem("luxrender_texture_colorramp_node"), # TODO: activate when ready
