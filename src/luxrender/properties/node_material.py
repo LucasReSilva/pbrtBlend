@@ -28,7 +28,7 @@ import bpy
 
 from . import (create_luxcore_name_mat, create_luxcore_name, warning_classic_node, has_interior_volume,
                export_submat_luxcore, export_emission_luxcore)
-from ..export.luxcore.utils import get_elem_key
+from ..export.luxcore.utils import get_elem_key, is_lightgroup_opencl_compatible
 from ..export.materials import TextureCounter
 
 from ..outputs.luxcore_api import set_prop_mat, set_prop_vol, set_prop_tex
@@ -1646,6 +1646,7 @@ class luxrender_light_area_node(luxrender_material_node):
                                      description='Number of shadow samples per bounce')
     luxcore_samples = bpy.props.IntProperty(name='Samples', default=-1, min=-1, max=64,
                                      description='Number of shadow samples per bounce (-1 = use global settings)')
+    lightgroup = bpy.props.StringProperty(description='Lightgroup; leave blank to use default')
 
     def init(self, context):
         self.inputs.new('luxrender_TC_L_socket', 'Light Color')
@@ -1654,6 +1655,11 @@ class luxrender_light_area_node(luxrender_material_node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'gain')
+
+        if UseLuxCore():
+            layout.prop_search(self, 'lightgroup', context.scene.luxrender_lightgroups, 'lightgroups',
+                               'Lightgroup', icon='OUTLINER_OB_LAMP')
+
         layout.prop(self, 'advanced', toggle=True)
 
         if self.advanced:
@@ -1682,7 +1688,7 @@ class luxrender_light_area_node(luxrender_material_node):
 
         return 'area', arealight_params
 
-    def export_luxcore(self, properties, parent_luxcore_name, is_volume_emission=False):
+    def export_luxcore(self, properties, luxcore_exporter, parent_luxcore_name, is_volume_emission=False):
         emission = self.inputs[0].export_luxcore(properties)
 
         set_prop = set_prop_vol if is_volume_emission else set_prop_mat
@@ -1692,8 +1698,14 @@ class luxrender_light_area_node(luxrender_material_node):
         set_prop(properties, parent_luxcore_name, 'emission.power', self.power)
         set_prop(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
         set_prop(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
-        # TODO: lightgroup
-        #set_prop_mat(properties, parent_luxcore_name, 'emission.id', )
+
+        # Lightgroup
+        blender_scene = luxcore_exporter.blender_scene
+        lightgroup_id = luxcore_exporter.lightgroup_cache.get_id(self.lightgroup, blender_scene, self)
+        is_opencl_compatible = is_lightgroup_opencl_compatible(luxcore_exporter, lightgroup_id)
+
+        if not blender_scene.luxrender_lightgroups.ignore and is_opencl_compatible:
+            set_prop_mat(properties, parent_luxcore_name, 'emission.id', lightgroup_id)
 
 
 @LuxRenderAddon.addon_register_class
@@ -1802,7 +1814,7 @@ class luxrender_material_output_node(luxrender_node):
         export_submat_luxcore(properties, self.inputs[0], luxcore_exporter, luxcore_name)
 
         # Export emission node if attached to this node
-        export_emission_luxcore(properties, self.inputs['Emission'], luxcore_name)
+        export_emission_luxcore(properties, luxcore_exporter, self.inputs['Emission'], luxcore_name)
 
         # Material group
         materialgroup_name = self.materialgroup
