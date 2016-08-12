@@ -230,11 +230,11 @@ def export_volume_luxcore(properties, socket, name=None):
 
     return volume_name
 
-def export_emission_luxcore(properties, socket, parent_luxcore_name, is_volume_emission=False):
+def export_emission_luxcore(properties, luxcore_exporter, socket, parent_luxcore_name, is_volume_emission=False):
     """
     NodeSocketShader sockets cannot export themselves, so this function does it
     """
     node = get_linked_node(socket)
 
     if node is not None:
-        node.export_luxcore(properties, parent_luxcore_name, is_volume_emission)
+        node.export_luxcore(properties, luxcore_exporter, parent_luxcore_name, is_volume_emission)
