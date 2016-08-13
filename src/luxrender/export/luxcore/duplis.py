@@ -111,6 +111,7 @@ class DupliExporter(object):
         # Create our own DupliOb list to work around incorrect layers
         # attribute when inside create_dupli_list()..free_dupli_list()
         duplis = []
+        non_invertible_count = 0
         for dupli_ob in obj.dupli_list:
             if not is_obj_visible(self.blender_scene, dupli_ob.object, True, self.is_viewport_render):
                 continue
@@ -120,7 +121,9 @@ class DupliExporter(object):
                 continue
 
             if dupli_ob.matrix.determinant() == 0:
-                print('WARNING: Particle with non-invertible matrix! Skipping it.')
+                # Objects with non-invertible matrices cannot be loaded by LuxCore (RuntimeError)
+                #print('WARNING: Particle with non-invertible matrix! Skipping it.')
+                non_invertible_count += 1
                 continue
 
             if dupli_ob.object not in self.luxcore_exporter.instanced_duplis:
@@ -134,6 +137,9 @@ class DupliExporter(object):
                     dupli_ob.persistent_id[:]
                 )
             )
+
+        if non_invertible_count > 0:
+            print('WARNING: %d particles with non-invertible matrix were skipped.' % non_invertible_count)
 
         obj.dupli_list_clear()
 
