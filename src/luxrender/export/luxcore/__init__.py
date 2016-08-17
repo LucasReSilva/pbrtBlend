@@ -143,7 +143,7 @@ class LuxCoreExporter(object):
                 self.convert_object(blender_object, luxcore_scene)
 
             background_props = pyluxcore.Properties()
-            background_props.Set(Property('scene.lights.LOCALVIEW_BACKGROUND.type', 'constantinfinite'))
+            background_props.Set(pyluxcore.Property('scene.lights.LOCALVIEW_BACKGROUND.type', 'constantinfinite'))
 
             self.__set_scene_properties(background_props)
         else:
@@ -226,42 +226,42 @@ class LuxCoreExporter(object):
         # Output switcher
         if imagepipeline_settings.output_switcher_pass != 'disabled':
             channel = imagepipeline_settings.output_switcher_pass
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'OUTPUT_SWITCHER'))
-            temp_properties.Set(Property(prefix + str(index) + '.channel', channel))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'OUTPUT_SWITCHER'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.channel', channel))
             index += 1
 
         # Tonemapper
         tonemapper = imagepipeline_settings.tonemapper_type
 
         if tonemapper == 'TONEMAP_LINEAR' and imagepipeline_settings.use_auto_linear:
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'TONEMAP_AUTOLINEAR'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'TONEMAP_AUTOLINEAR'))
             index += 1
 
-        temp_properties.Set(Property(prefix + str(index) + '.type', tonemapper))
+        temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', tonemapper))
 
         if tonemapper == 'TONEMAP_LINEAR':
             scale = imagepipeline_settings.linear_scale
-            temp_properties.Set(Property(prefix + str(index) + '.scale', scale))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', scale))
         elif tonemapper == 'TONEMAP_REINHARD02':
             prescale = imagepipeline_settings.reinhard_prescale
             postscale = imagepipeline_settings.reinhard_postscale
             burn = imagepipeline_settings.reinhard_burn
-            temp_properties.Set(Property(prefix + str(index) + '.prescale', prescale))
-            temp_properties.Set(Property(prefix + str(index) + '.postscale', postscale))
-            temp_properties.Set(Property(prefix + str(index) + '.burn', burn))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.prescale', prescale))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.postscale', postscale))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.burn', burn))
         elif tonemapper == 'TONEMAP_LUXLINEAR':
             lux_camera = self.blender_scene.camera.data.luxrender_camera
             sensitivity = lux_camera.sensitivity
             exposure = lux_camera.exposure_time() if not self.is_viewport_render else lux_camera.exposure_time() * 2.25
             fstop = lux_camera.fstop
-            temp_properties.Set(Property(prefix + str(index) + '.sensitivity', sensitivity))
-            temp_properties.Set(Property(prefix + str(index) + '.exposure', exposure))
-            temp_properties.Set(Property(prefix + str(index) + '.fstop', fstop))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.sensitivity', sensitivity))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.exposure', exposure))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.fstop', fstop))
         index += 1
 
         # Premultiply Alpha
         if imagepipeline_settings.transparent_film and not export_to_luxcoreui and 'ALPHA' in self.passes_cache:
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'PREMULTIPLY_ALPHA'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'PREMULTIPLY_ALPHA'))
             index += 1
 
         # Background image
@@ -275,10 +275,10 @@ class LuxCoreExporter(object):
                 show_in_view = True
 
             if os.path.exists(path) and os.path.isfile(path) and show_in_view:
-                temp_properties.Set(Property(prefix + str(index) + '.type', 'BACKGROUND_IMG'))
-                temp_properties.Set(Property(prefix + str(index) + '.file', path))
-                temp_properties.Set(Property(prefix + str(index) + '.gamma', gamma))
-                temp_properties.Set(Property(prefix + str(index) + '.storage', 'byte'))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BACKGROUND_IMG'))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.file', path))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.gamma', gamma))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.storage', 'byte'))
                 index += 1
 
         # Bloom
@@ -286,23 +286,23 @@ class LuxCoreExporter(object):
             # radius and weight are in percent (0-100) in Blender, LuxCore needs range 0..1
             radius = imagepipeline_settings.bloom_radius / 100
             weight = imagepipeline_settings.bloom_weight / 100
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'BLOOM'))
-            temp_properties.Set(Property(prefix + str(index) + '.radius', radius))
-            temp_properties.Set(Property(prefix + str(index) + '.weight', weight))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BLOOM'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.radius', radius))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.weight', weight))
             index += 1
 
         # Color aberration
         if imagepipeline_settings.use_color_aberration:
             amount = imagepipeline_settings.color_aberration_amount
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'COLOR_ABERRATION'))
-            temp_properties.Set(Property(prefix + str(index) + '.amount', amount))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'COLOR_ABERRATION'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.amount', amount))
             index += 1
 
         # Vignetting
         if imagepipeline_settings.use_vignetting:
             scale = imagepipeline_settings.vignetting_scale
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'VIGNETTING'))
-            temp_properties.Set(Property(prefix + str(index) + '.scale', scale))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'VIGNETTING'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', scale))
             index += 1
 
         # Camera response function
@@ -315,24 +315,24 @@ class LuxCoreExporter(object):
                 crf_name = False
 
             if crf_name:
-                temp_properties.Set(Property(prefix + str(index) + '.type', 'CAMERA_RESPONSE_FUNC'))
-                temp_properties.Set(Property(prefix + str(index) + '.name', crf_name))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'CAMERA_RESPONSE_FUNC'))
+                temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.name', crf_name))
                 index += 1
 
         # Contour lines for IRRADIANCE pass
         if imagepipeline_settings.output_switcher_pass == 'IRRADIANCE':
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'CONTOUR_LINES'))
-            temp_properties.Set(Property(prefix + str(index) + '.range', imagepipeline_settings.contour_range))
-            temp_properties.Set(Property(prefix + str(index) + '.scale', imagepipeline_settings.contour_scale))
-            temp_properties.Set(Property(prefix + str(index) + '.steps', imagepipeline_settings.contour_steps))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'CONTOUR_LINES'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.range', imagepipeline_settings.contour_range))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', imagepipeline_settings.contour_scale))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.steps', imagepipeline_settings.contour_steps))
             temp_properties.Set(
-                Property(prefix + str(index) + '.zerogridsize', imagepipeline_settings.contour_zeroGridSize))
+                pyluxcore.Property(prefix + str(index) + '.zerogridsize', imagepipeline_settings.contour_zeroGridSize))
             index += 1
 
         # Gamma correction: Blender expects gamma corrected image in realtime preview, but not in final render
         if self.is_viewport_render or export_to_luxcoreui:
-            temp_properties.Set(Property(prefix + str(index) + '.type', 'GAMMA_CORRECTION'))
-            temp_properties.Set(Property(prefix + str(index) + '.value', 2.2))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'GAMMA_CORRECTION'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.value', 2.2))
             index += 1
 
         self.config_properties.Set(temp_properties)
@@ -357,14 +357,14 @@ class LuxCoreExporter(object):
                     if verbose:
                         print('Converting lightgroup "%s" (ID: %d)' % (lg.name, id))
 
-                    temp_properties.Set(Property(prefix + str(id) + '.enabled', lg.lg_enabled))
-                    temp_properties.Set(Property(prefix + str(id) + '.globalscale', lg.gain))
+                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.enabled', lg.lg_enabled))
+                    temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.globalscale', lg.gain))
 
                     if lg.use_rgb_gain:
-                        temp_properties.Set(Property(prefix + str(id) + '.rgbscale', list(lg.rgb_gain)))
+                        temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.rgbscale', list(lg.rgb_gain)))
 
                     if lg.use_temperature:
-                        temp_properties.Set(Property(prefix + str(id) + '.temperature', lg.temperature))
+                        temp_properties.Set(pyluxcore.Property(prefix + str(id) + '.temperature', lg.temperature))
                 elif verbose:
                     print('NOT converting lightgroup "%s" (ID: %d) (max. 8 lightgroups in OpenCL engines)' % (lg.name, id))
 
@@ -486,7 +486,7 @@ class LuxCoreExporter(object):
                 self.convert_volume(cam_exterior)
 
                 volume_exporter = self.volume_cache[cam_exterior]
-                properties.Set(Property('scene.world.volume.default', volume_exporter.luxcore_name))
+                properties.Set(pyluxcore.Property('scene.world.volume.default', volume_exporter.luxcore_name))
                 self.__set_scene_properties(properties)
                 return
 
@@ -498,7 +498,7 @@ class LuxCoreExporter(object):
             self.convert_volume(world_exterior)
 
             volume_exporter = self.volume_cache[world_exterior]
-            properties.Set(Property('scene.world.volume.default', volume_exporter.luxcore_name))
+            properties.Set(pyluxcore.Property('scene.world.volume.default', volume_exporter.luxcore_name))
             self.__set_scene_properties(properties)
             return
 

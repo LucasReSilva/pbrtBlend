@@ -116,7 +116,7 @@ class ConfigExporter(object):
 
         # channel type (e.g. 'film.outputs.1.type')
         outputStringType = 'film.outputs.' + str(self.outputCounter) + '.type'
-        self.properties.Set(Property(outputStringType, [channelName]))
+        self.properties.Set(pyluxcore.Property(outputStringType, [channelName]))
 
         # output filename (e.g. 'film.outputs.1.filename')
         suffix = ('.png' if (channelName in LDR_channels) else '.exr')
@@ -133,12 +133,12 @@ class ConfigExporter(object):
 
         path = os.path.join(output_path, filename)
 
-        self.properties.Set(Property(outputStringFilename, path))
+        self.properties.Set(pyluxcore.Property(outputStringFilename, path))
 
         # output id
         if id != -1:
             outputStringId = 'film.outputs.' + str(self.outputCounter) + '.id'
-            self.properties.Set(Property(outputStringId, [id]))
+            self.properties.Set(pyluxcore.Property(outputStringId, [id]))
 
 
     def get_engine(self):
@@ -165,8 +165,8 @@ class ConfigExporter(object):
 
 
     def __convert_film_size(self, film_width, film_height):
-        self.properties.Set(Property('film.width', film_width))
-        self.properties.Set(Property('film.height', film_height))
+        self.properties.Set(pyluxcore.Property('film.width', film_width))
+        self.properties.Set(pyluxcore.Property('film.height', film_height))
 
 
     def __convert_seed(self):
@@ -178,7 +178,7 @@ class ConfigExporter(object):
         else:
             seed = engine_settings.seed
 
-        self.properties.Set(Property('renderengine.seed', seed))
+        self.properties.Set(pyluxcore.Property('renderengine.seed', seed))
 
 
     def __convert_halt_conditions(self):
@@ -186,35 +186,35 @@ class ConfigExporter(object):
 
         if engine_settings.use_halt_noise:
             haltthreshold = engine_settings.halt_noise
-            self.properties.Set(Property('batch.haltthreshold', haltthreshold))
+            self.properties.Set(pyluxcore.Property('batch.haltthreshold', haltthreshold))
             # All other halt conditions are controlled in core/__init__.py and not set via luxcore properties
 
     
     def __convert_sampler(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
     
-        self.properties.Set(Property('sampler.type', [engine_settings.sampler_type]))
+        self.properties.Set(pyluxcore.Property('sampler.type', [engine_settings.sampler_type]))
     
         if engine_settings.advanced and engine_settings.sampler_type == 'METROPOLIS':
-            self.properties.Set(Property('sampler.metropolis.largesteprate', [engine_settings.largesteprate]))
+            self.properties.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [engine_settings.largesteprate]))
             self.properties.Set(
-                Property('sampler.metropolis.maxconsecutivereject', [engine_settings.maxconsecutivereject]))
+                pyluxcore.Property('sampler.metropolis.maxconsecutivereject', [engine_settings.maxconsecutivereject]))
             self.properties.Set(
-                Property('sampler.metropolis.imagemutationrate', [engine_settings.imagemutationrate]))
+                pyluxcore.Property('sampler.metropolis.imagemutationrate', [engine_settings.imagemutationrate]))
     
     
     def __convert_filter(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
     
-        self.properties.Set(Property('film.filter.type', [engine_settings.filter_type]))
-        self.properties.Set(Property('film.filter.width', [engine_settings.filter_width]))
+        self.properties.Set(pyluxcore.Property('film.filter.type', [engine_settings.filter_type]))
+        self.properties.Set(pyluxcore.Property('film.filter.width', [engine_settings.filter_width]))
     
     
     def __convert_accelerator(self):
         # The optimal accelerator settings are chosen by LuxCore automatically, so we let the user decide only
         # if instancing should be allowed or not
         engine_settings = self.blender_scene.luxcore_enginesettings
-        self.properties.Set(Property('accelerator.instances.enable', engine_settings.instancing))
+        self.properties.Set(pyluxcore.Property('accelerator.instances.enable', engine_settings.instancing))
 
 
     def __convert_engine(self):
@@ -230,11 +230,11 @@ class ConfigExporter(object):
 
         if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui' and not self.is_viewport_render:
             # efutil.export_path is set at the beginning of the render() function in core/__init__.py
-            self.properties.Set(Property('renderengine.type', 'FILESAVER'))
-            self.properties.Set(Property('filesaver.directory', efutil.export_path))
-            self.properties.Set(Property('filesaver.renderengine.type', engine))
+            self.properties.Set(pyluxcore.Property('renderengine.type', 'FILESAVER'))
+            self.properties.Set(pyluxcore.Property('filesaver.directory', efutil.export_path))
+            self.properties.Set(pyluxcore.Property('filesaver.renderengine.type', engine))
         else:
-            self.properties.Set(Property('renderengine.type', engine))
+            self.properties.Set(pyluxcore.Property('renderengine.type', engine))
 
         if engine_settings.use_clamping:
             radiance_clamp = engine_settings.biaspath_clamping_radiance_maxvalue
@@ -244,13 +244,13 @@ class ConfigExporter(object):
             pdf_clamp = 0
 
         if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
-            self.properties.Set(Property('biaspath.clamping.variance.maxvalue', radiance_clamp))
-            self.properties.Set(Property('biaspath.clamping.pdf.value', pdf_clamp))
+            self.properties.Set(pyluxcore.Property('biaspath.clamping.variance.maxvalue', radiance_clamp))
+            self.properties.Set(pyluxcore.Property('biaspath.clamping.pdf.value', pdf_clamp))
 
-            self.properties.Set(Property('tile.size', [engine_settings.tile_size]))
-            self.properties.Set(Property('tile.multipass.enable',
+            self.properties.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
+            self.properties.Set(pyluxcore.Property('tile.multipass.enable',
                                                  [engine_settings.tile_multipass_enable]))
-            self.properties.Set(Property('tile.multipass.convergencetest.threshold',
+            self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold',
                                                  [engine_settings.tile_multipass_convergencetest_threshold]))
 
             if engine_settings.tile_multipass_use_threshold_reduction:
@@ -259,9 +259,9 @@ class ConfigExporter(object):
                 noise_threshold_reduction = 0
 
             # Transparent film enables using black bg
-            self.properties.Set(Property('biaspath.forceblackbackground.enable', force_black_background))
+            self.properties.Set(pyluxcore.Property('biaspath.forceblackbackground.enable', force_black_background))
 
-            self.properties.Set(Property('tile.multipass.convergencetest.threshold.reduction',
+            self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction',
                                                  [noise_threshold_reduction]))
 
             # Always use only 1 sample in viewport render to make it usable
@@ -273,57 +273,57 @@ class ConfigExporter(object):
                 glossy_samples = engine_settings.biaspath_sampling_glossy_size
                 specular_samples = engine_settings.biaspath_sampling_specular_size
 
-            self.properties.Set(Property('biaspath.sampling.aa.size', aa_samples))
-            self.properties.Set(Property('biaspath.sampling.diffuse.size', diffuse_samples))
-            self.properties.Set(Property('biaspath.sampling.glossy.size', glossy_samples))
-            self.properties.Set(Property('biaspath.sampling.specular.size', specular_samples))
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_samples))
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', diffuse_samples))
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.glossy.size', glossy_samples))
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.specular.size', specular_samples))
 
             # Path depths, note that for non-specular paths +1 is added to the path depth.
             # For details see http://www.luxrender.net/forum/viewtopic.php?f=11&t=11101&start=390#p114959
-            self.properties.Set(Property('biaspath.pathdepth.total',
+            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.total',
                                                  [engine_settings.biaspath_pathdepth_total + 1]))
-            self.properties.Set(Property('biaspath.pathdepth.diffuse',
+            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.diffuse',
                                                  [engine_settings.biaspath_pathdepth_diffuse + 1]))
-            self.properties.Set(Property('biaspath.pathdepth.glossy',
+            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.glossy',
                                                  [engine_settings.biaspath_pathdepth_glossy + 1]))
-            self.properties.Set(Property('biaspath.pathdepth.specular',
+            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.specular',
                                                  [engine_settings.biaspath_pathdepth_specular]))
-            self.properties.Set(Property('biaspath.lights.samplingstrategy.type',
+            self.properties.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type',
                                                  [engine_settings.biaspath_lights_samplingstrategy_type]))
         elif engine in ['PATHCPU', 'PATHOCL']:
-            self.properties.Set(Property('path.maxdepth', [engine_settings.path_maxdepth + 1]))
-            self.properties.Set(Property('path.clamping.variance.maxvalue', radiance_clamp))
-            self.properties.Set(Property('path.clamping.pdf.value', pdf_clamp))
+            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth + 1]))
+            self.properties.Set(pyluxcore.Property('path.clamping.variance.maxvalue', radiance_clamp))
+            self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
             # Transparent film enables using black bg
-            self.properties.Set(Property('path.forceblackbackground.enable', force_black_background))
+            self.properties.Set(pyluxcore.Property('path.forceblackbackground.enable', force_black_background))
         elif engine in ['BIDIRCPU']:
-            self.properties.Set(Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
-            self.properties.Set(Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
+            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidir_eyedepth]))
+            self.properties.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidir_lightdepth]))
         elif engine in ['BIDIRVMCPU']:
-            self.properties.Set(Property('path.maxdepth', [engine_settings.bidirvm_eyedepth]))
-            self.properties.Set(Property('light.maxdepth', [engine_settings.bidirvm_lightdepth]))
-            self.properties.Set(Property('bidirvm.lightpath.count',
+            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.bidirvm_eyedepth]))
+            self.properties.Set(pyluxcore.Property('light.maxdepth', [engine_settings.bidirvm_lightdepth]))
+            self.properties.Set(pyluxcore.Property('bidirvm.lightpath.count',
                                                  [engine_settings.bidirvm_lightpath_count]))
-            self.properties.Set(Property('bidirvm.startradius.scale',
+            self.properties.Set(pyluxcore.Property('bidirvm.startradius.scale',
                                                  [engine_settings.bidirvm_startradius_scale]))
-            self.properties.Set(Property('bidirvm.alpha', [engine_settings.bidirvm_alpha]))
+            self.properties.Set(pyluxcore.Property('bidirvm.alpha', [engine_settings.bidirvm_alpha]))
 
         # Light strategy
-        self.properties.Set(Property('lightstrategy.type', engine_settings.lightstrategy_type))
+        self.properties.Set(pyluxcore.Property('lightstrategy.type', engine_settings.lightstrategy_type))
     
     
     def __convert_realtime_settings(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
 
         # Sampler settings (same as for final render)
-        self.properties.Set(Property('sampler.type', engine_settings.sampler_type))
+        self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))
 
         # Special filter settings optimized for realtime preview
         if engine_settings.device_preview == 'CPU':
-            self.properties.Set(Property('film.filter.type', 'BLACKMANHARRIS'))
-            self.properties.Set(Property('film.filter.width', 1.0))
+            self.properties.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
+            self.properties.Set(pyluxcore.Property('film.filter.width', 1.0))
         else:
-            self.properties.Set(Property('film.filter.type', 'NONE'))
+            self.properties.Set(pyluxcore.Property('film.filter.type', 'NONE'))
 
         if engine_settings.use_opencl_always_enabled:
             # remember to have a whitespace character at the end of each line
@@ -336,7 +336,7 @@ class ConfigExporter(object):
                 'IMAGEMAPS_BYTE_FORMAT IMAGEMAPS_HALF_FORMAT IMAGEMAPS_1xCHANNELS IMAGEMAPS_3xCHANNELS '
                 'HAS_BUMPMAPS '
             )
-            self.properties.Set(Property('opencl.code.alwaysenabled', enabled_features))
+            self.properties.Set(pyluxcore.Property('opencl.code.alwaysenabled', enabled_features))
 
 
     def __convert_compute_settings(self):
@@ -344,17 +344,17 @@ class ConfigExporter(object):
 
         # CPU settings
         if not engine_settings.auto_threads:
-            self.properties.Set(Property('native.threads.count', engine_settings.native_threads_count))
+            self.properties.Set(pyluxcore.Property('native.threads.count', engine_settings.native_threads_count))
 
         # OpenCL settings
         if engine_settings.opencl_settings_type == 'SIMPLE':
-            self.properties.Set(Property('opencl.cpu.use', engine_settings.opencl_use_all_cpus))
-            self.properties.Set(Property('opencl.gpu.use', engine_settings.opencl_use_all_gpus))
-            self.properties.Set(Property('opencl.devices.select', ''))
+            self.properties.Set(pyluxcore.Property('opencl.cpu.use', engine_settings.opencl_use_all_cpus))
+            self.properties.Set(pyluxcore.Property('opencl.gpu.use', engine_settings.opencl_use_all_gpus))
+            self.properties.Set(pyluxcore.Property('opencl.devices.select', ''))
 
         elif engine_settings.opencl_settings_type == 'ADVANCED':
-            self.properties.Set(Property('opencl.cpu.use', True))
-            self.properties.Set(Property('opencl.gpu.use', True))
+            self.properties.Set(pyluxcore.Property('opencl.cpu.use', True))
+            self.properties.Set(pyluxcore.Property('opencl.gpu.use', True))
 
             if len(engine_settings.luxcore_opencl_devices) > 0:
                 dev_string = ''
@@ -362,17 +362,17 @@ class ConfigExporter(object):
                     dev = engine_settings.luxcore_opencl_devices[dev_index]
                     dev_string += '1' if dev.opencl_device_enabled else '0'
 
-                self.properties.Set(Property('opencl.devices.select', dev_string))
+                self.properties.Set(pyluxcore.Property('opencl.devices.select', dev_string))
 
-        self.properties.Set(Property('film.opencl.enable', engine_settings.film_use_opencl))
+        self.properties.Set(pyluxcore.Property('film.opencl.enable', engine_settings.film_use_opencl))
 
         kernelcache = engine_settings.kernelcache
-        self.properties.Set(Property('opencl.kernelcache', kernelcache))
+        self.properties.Set(pyluxcore.Property('opencl.kernelcache', kernelcache))
 
 
     def __convert_epsilon(self):
         # Lux(Core) default is 10^-9, which causes dark specks in the world center
-        self.properties.Set(Property('scene.epsilon.min', 10**-5))
+        self.properties.Set(pyluxcore.Property('scene.epsilon.min', 10**-5))
 
     
     def __convert_custom_props(self):
@@ -382,7 +382,7 @@ class ConfigExporter(object):
             custom_params = engine_settings.custom_properties.replace(' ', '').replace(';', ' ').split('|')
             for prop in custom_params:
                 prop = prop.split('=')
-                self.properties.Set(Property(prop[0], prop[1]))
+                self.properties.Set(pyluxcore.Property(prop[0], prop[1]))
 
 
     def __convert_all_channels(self):
