@@ -28,6 +28,7 @@
 import bpy, mathutils, math, os
 
 from ...outputs.luxcore_api import pyluxcore
+from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import is_obj_visible
 from ...export import get_worldscale
@@ -36,10 +37,6 @@ from ...export import get_expanded_file_name
 
 from .utils import is_lightgroup_opencl_compatible, convert_texture_channel
 
-try:
-    from pyluxcore import Property
-except ImportError:
-    pass
 
 class ExportedLight(object):
     def __init__(self, name, type):

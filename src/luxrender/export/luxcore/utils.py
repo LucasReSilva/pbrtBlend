@@ -28,14 +28,10 @@
 from  math import pi
 
 from ...outputs.luxcore_api import pyluxcore
+from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 from ...export import get_worldscale
-
-try:
-    from pyluxcore import Property
-except ImportError:
-    pass
 
 def get_elem_key(elem):
         # Construct unique key for the object (respecting objects from libraries etc.)
