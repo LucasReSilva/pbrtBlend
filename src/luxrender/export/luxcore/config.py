@@ -28,7 +28,6 @@
 import os
 
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...extensions_framework import util as efutil
 from ...export import get_output_filename
 from .utils import is_lightgroup_opencl_compatible

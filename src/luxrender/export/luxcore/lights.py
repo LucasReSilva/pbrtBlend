@@ -28,7 +28,6 @@
 import bpy, mathutils, math, os
 
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import is_obj_visible
 from ...export import get_worldscale

@@ -28,7 +28,6 @@
 import math
 
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...properties import find_node_in_volume
 
 from .utils import convert_texture_channel, generate_volume_name, log_exception

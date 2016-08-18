@@ -29,7 +29,6 @@ import os
 
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import is_obj_visible
 from ...export import object_anim_matrices

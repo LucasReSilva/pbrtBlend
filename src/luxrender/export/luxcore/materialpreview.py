@@ -28,7 +28,6 @@
 from mathutils import Matrix
 
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...export import matrix_to_list
 
 from . import LuxCoreExporter

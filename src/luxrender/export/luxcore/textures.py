@@ -30,7 +30,6 @@ import bpy, math, mathutils, os, tempfile
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
-from pyluxcore import Property
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
 from ...export.volumes import export_smoke

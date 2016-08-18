@@ -28,7 +28,6 @@
 import bpy
 
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export.materials import get_texture_from_scene
 from ...export import get_expanded_file_name

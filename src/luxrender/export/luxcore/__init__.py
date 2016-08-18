@@ -29,7 +29,6 @@ import bpy, time, os
 
 from ...outputs import LuxManager
 from ...outputs.luxcore_api import pyluxcore
-from pyluxcore import Property
 from ...extensions_framework import util as efutil
 
 from .camera import CameraExporter
