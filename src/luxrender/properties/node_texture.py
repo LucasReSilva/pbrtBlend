@@ -960,6 +960,13 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
             if image.source in ['GENERATED', 'FILE']:
                 scene = bpy.context.scene
+                if image.packed_file:
+                    # Store the render output setting
+                    orig_render_format = scene.render.image_settings.file_format
+                    # Read the fileformat
+                    temp_unpack_format = image.file_format
+                    # Temporary change the file_format to render packed images in their original format
+                    scene.render.image_settings.file_format = temp_unpack_format
 
                 if image.source == 'GENERATED':
                     temp_file = tempfile.NamedTemporaryFile(delete=False)
@@ -976,6 +983,11 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
                             file_path = efutil.filesystem_path(bpy.path.abspath(image.filepath, self.id_data.library.filepath))
                         else:
                             file_path = efutil.filesystem_path(image.filepath)
+
+                if image.packed_file:
+                    # Restore the render output setting
+                    scene.render.image_settings.file_format = orig_render_format
+
         else:
             # Manual path
             file_path = efutil.filesystem_path(self.manual_filepath)
