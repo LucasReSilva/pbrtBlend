@@ -229,7 +229,7 @@ class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
 
 @LuxRenderAddon.addon_register_class
 class LUXRENDER_OT_materialgroup_add(bpy.types.Operator):
-    """Add a new light group definition to the scene"""
+    """Add a new material group definition to the scene"""
 
     bl_idname = "luxrender.materialgroup_add"
     bl_label = "Add LuxRender Material Group"
