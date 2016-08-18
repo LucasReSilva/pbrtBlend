@@ -217,6 +217,14 @@ class TextureExporter(object):
                 temp_file = tempfile.NamedTemporaryFile(delete=False)
                 tex_image = temp_file.name
 
+                if texture.image.packed_file:
+                    # Store the render output setting
+                    orig_render_format = self.blender_scene.render.image_settings.file_format
+                    # Read the fileformat
+                    temp_unpack_format = texture.image.file_format
+                    # Temporary change the file_format to render packed images in their original format
+                    self.blender_scene.render.image_settings.file_format = temp_unpack_format
+
                 if texture.image.source == 'GENERATED':
                     texture.image.save_render(tex_image, self.blender_scene)
 
@@ -292,6 +300,10 @@ class TextureExporter(object):
                             raise Exception(
                                 'Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
                         tex_image = efutil.filesystem_path(f_path)
+
+                if texture.image.packed_file:
+                    # Restore the render output setting
+                    self.blender_scene.render.image_settings.file_format = orig_render_format
 
                 gamma = texture.luxrender_texture.luxrender_tex_imagesampling.gamma
                 gain = texture.luxrender_texture.luxrender_tex_imagesampling.gain
