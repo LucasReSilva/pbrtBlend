@@ -133,10 +133,6 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 
 _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
-# Particle texture influence panel
-# TODO: influence panel should ONLY show up in particle texture panel...
-#_register_elm(bl_ui.properties_texture.TEXTURE_PT_influence)
-
 if bpy.app.version > (2, 77, 2):
     _register_elm(bl_ui.properties_physics_common.PHYSICS_PT_add, required=True)
     _register_elm(bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dynamic_paint)
@@ -322,6 +318,23 @@ blender_texture_ui_list = [
     bl_ui.properties_texture.TEXTURE_PT_wood,
     bl_ui.properties_texture.TEXTURE_PT_ocean,
 ]
+
+# Particle texture influence panel
+@classmethod
+def blender_psys_poll(cls, context):
+    psys = context.particle_system
+    tex = context.texture
+    show = psys and tex and context.scene.render.engine in cls.COMPAT_ENGINES
+
+    return show
+
+blender_psys_ui_list = [
+    bl_ui.properties_texture.TEXTURE_PT_influence,
+]
+
+for blender_psys_ui in blender_psys_ui_list:
+    _register_elm(blender_psys_ui)
+    blender_psys_ui.poll = blender_psys_poll
 
 def lux_texture_chooser(self, context):
     if context.scene.render.engine == 'LUXRENDER_RENDER':
