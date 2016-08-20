@@ -302,6 +302,7 @@ def convert_texture(scene, texture, variant_hint=None):
     # Translate Blender Image/movie into lux tex
     if texture.type == 'IMAGE' and texture.image and texture.image.source in ['GENERATED', 'FILE', 'SEQUENCE']:
         extract_path = os.path.join(
+            efutil.export_path,
             efutil.scene_filename(),
             bpy.path.clean_name(scene.name),
             '%05d' % scene.frame_current
