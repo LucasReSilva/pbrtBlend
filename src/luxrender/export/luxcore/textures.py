@@ -709,10 +709,10 @@ class TextureExporter(object):
                 saturation = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'saturation', 'float')
                 value = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'value', 'float')
 
-                self.properties.Set(Property(prefix + '.texture', input))
-                self.properties.Set(Property(prefix + '.hue', hue))
-                self.properties.Set(Property(prefix + '.saturation', saturation))
-                self.properties.Set(Property(prefix + '.value', value))
+                self.properties.Set(pyluxcore.Property(prefix + '.texture', input))
+                self.properties.Set(pyluxcore.Property(prefix + '.hue', hue))
+                self.properties.Set(pyluxcore.Property(prefix + '.saturation', saturation))
+                self.properties.Set(pyluxcore.Property(prefix + '.value', value))
             ####################################################################
             # Fallback to exception
             ####################################################################
