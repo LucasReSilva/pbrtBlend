@@ -385,7 +385,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.power',
                                                  light.luxrender_lamp.luxrender_lamp_area.power))
-                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.efficiency',
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.efficency',
                                                      light.luxrender_lamp.luxrender_lamp_area.efficacy))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.samples', samples))
 
