@@ -308,7 +308,7 @@ def convert_texture(scene, texture, variant_hint=None):
             '%05d' % scene.frame_current
         )
 
-        if texture.image.packed_file:
+        if texture.image.packed_file and not LuxManager.CurrentScene.name == "preview":
             # Store the render output setting
             orig_render_format = scene.render.image_settings.file_format
             # Read the fileformat
@@ -403,7 +403,7 @@ def convert_texture(scene, texture, variant_hint=None):
 
                 tex_image = efutil.filesystem_path(f_path)
 
-        if texture.image.packed_file:
+        if texture.image.packed_file and not LuxManager.CurrentScene.name == "preview":
             # Restore the render output setting
             scene.render.image_settings.file_format = orig_render_format
 
