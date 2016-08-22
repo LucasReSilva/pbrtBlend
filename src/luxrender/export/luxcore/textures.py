@@ -216,7 +216,7 @@ class TextureExporter(object):
                 temp_file = tempfile.NamedTemporaryFile(delete=False)
                 tex_image = temp_file.name
 
-                if texture.image.packed_file:
+                if texture.image.packed_file and self.blender_scene != 'preview':
                     # Store the render output setting
                     orig_render_format = self.blender_scene.render.image_settings.file_format
                     # Read the fileformat
@@ -300,7 +300,7 @@ class TextureExporter(object):
                                 'Image referenced in blender texture %s doesn\'t exist: %s' % (texture.name, f_path))
                         tex_image = efutil.filesystem_path(f_path)
 
-                if texture.image.packed_file:
+                if texture.image.packed_file and self.blender_scene != 'preview':
                     # Restore the render output setting
                     self.blender_scene.render.image_settings.file_format = orig_render_format
 

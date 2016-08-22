@@ -336,6 +336,7 @@ for blender_psys_ui in blender_psys_ui_list:
     _register_elm(blender_psys_ui)
     blender_psys_ui.poll = blender_psys_poll
 
+
 def lux_texture_chooser(self, context):
     if context.scene.render.engine == 'LUXRENDER_RENDER':
         self.layout.separator()
