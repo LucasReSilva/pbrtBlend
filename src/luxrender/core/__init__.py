@@ -1505,7 +1505,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 settings = scene.luxcore_enginesettings
 
                 if settings.renderengine_type == 'BIASPATH':
-                    halt_enabled = not settings.tile_multipass_enable or not settings.tile_multipass_use_threshold_reduction
+                    halt_enabled = (not settings.tile_multipass_enable
+                                    or not settings.tile_multipass_use_threshold_reduction) or settings.use_halt_time
                 else:
                     halt_enabled = settings.use_halt_samples or settings.use_halt_noise or settings.use_halt_time
 
