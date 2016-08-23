@@ -2312,7 +2312,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 self.viewFilmWidth = context.region.width
                 self.viewFilmHeight = context.region.height
-
                 self.create_view_buffer(self.viewFilmWidth, self.viewFilmHeight)
 
                 # Export the Blender scene
@@ -2330,14 +2329,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.critical_errors = True
 
                 LuxLog('View update aborted: %s' % exc)
-
-                message = str(exc)
-                if message == 'An empty DataSet can not be preprocessed':
-                    # more user-friendly error message
-                    message = 'The scene does not contain any meshes'
-
                 # Show error message to user in the viewport UI
-                self.update_stats('Error: ', message)
+                self.update_stats('Error: ', str(exc))
 
                 import traceback
                 traceback.print_exc()
@@ -2446,7 +2439,6 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 props.Set(self.luxcore_exporter.convert_lightgroup_scales())
 
                 LuxCoreSessionManager.get_session(self.space).luxcore_session.Parse(props)
-                #self.luxcore_view_draw(context) # Why did I put this here?
 
             # Resume in case the session was paused
             LuxCoreSessionManager.resume(self.space)
