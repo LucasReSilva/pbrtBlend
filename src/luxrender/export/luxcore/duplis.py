@@ -62,7 +62,7 @@ class DupliExporter(object):
                 elif particle_system.settings.render_type == 'PATH' and export_settings.export_hair:
                     self.__convert_hair(luxcore_scene, particle_system)
 
-            # The particle convert function converts all particle systems and duplis at once
+            # The particle convert function converts all particle systems and duplis of one emitter at once
             if (has_particle_systems or is_duplicator_without_psys) and export_settings.export_particles:
                 self.__convert_particles(luxcore_scene)
 
@@ -141,6 +141,15 @@ class DupliExporter(object):
 
         obj.dupli_list_clear()
 
+        # Preprocessing step to speed up particle export below.
+        # Export all unique objects used by particle systems once, then only use their luxcore names in the main loop below
+        unique_objs = {}
+        for do, dm, psys_name, persistent_id in duplis:
+            if do.name not in unique_objs:
+                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render, do)
+                object_exporter.convert(False, False, luxcore_scene, None, dm)
+                unique_objs[do.name] = object_exporter.exported_objects
+
         # dupli object, dupli matrix
         for do, dm, psys_name, persistent_id in duplis:
             # Increment dupli number for progress display
@@ -166,13 +175,21 @@ class DupliExporter(object):
 
             if do.type == 'LAMP':
                 light_exporter = LightExporter(self.luxcore_exporter, self.blender_scene, do, dupli_name_suffix)
-                properties = light_exporter.convert(luxcore_scene, dm)
+                self.properties.Set(light_exporter.convert(luxcore_scene, dm))
             else:
-                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render,
-                                                 do, dupli_name_suffix)
-                properties = object_exporter.convert(update_mesh=False, update_material=False,
-                                                     luxcore_scene=luxcore_scene, anim_matrices=None, matrix=dm)
-            self.properties.Set(properties)
+                exported_objects = unique_objs[do.name]
+
+                name = do.name + dupli_name_suffix
+                if do.library:
+                    name += do.library.name
+                name = ToValidLuxCoreName(name)
+
+                for mat_index, exp_obj in enumerate(exported_objects):
+                    prefix = 'scene.objects.%s%d' % (name, mat_index)
+                    self.properties.Set(pyluxcore.Property(prefix + '.shape', exp_obj.luxcore_shape_name))
+                    self.properties.Set(pyluxcore.Property(prefix + '.material', exp_obj.luxcore_material_name))
+                    transform = matrix_to_list(dm, apply_worldscale=True)
+                    self.properties.Set(pyluxcore.Property(prefix + '.transformation', transform))
 
         del duplis
 
