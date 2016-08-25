@@ -146,7 +146,8 @@ class DupliExporter(object):
         unique_objs = {}
         for do, dm, psys_name, persistent_id in duplis:
             if do.name not in unique_objs:
-                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render, do)
+                # Note: the dupli_suffix does not matter here, we just have to pass anything so the visibility test works
+                object_exporter = ObjectExporter(self.luxcore_exporter, self.blender_scene, self.is_viewport_render, do, 'dupli')
                 object_exporter.convert(False, False, luxcore_scene, None, dm)
                 unique_objs[do.name] = object_exporter.exported_objects
 
