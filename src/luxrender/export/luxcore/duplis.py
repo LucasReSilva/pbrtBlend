@@ -120,7 +120,6 @@ class DupliExporter(object):
 
             if dupli_ob.matrix.determinant() == 0:
                 # Objects with non-invertible matrices cannot be loaded by LuxCore (RuntimeError)
-                #print('WARNING: Particle with non-invertible matrix! Skipping it.')
                 non_invertible_count += 1
                 continue
 
@@ -165,11 +164,13 @@ class DupliExporter(object):
             if not gviz:
                 continue
 
-            # Make it possible to interrupt the export process
-            if self.luxcore_exporter.renderengine.test_break():
-                return
+            # Make it possible to interrupt the export process and report status in the UI
+            # (only every 10000 loop iterations for performance reasons)
+            if self.dupli_number % 10000 == 0:
+                self.__report_progress()
 
-            self.__report_progress()
+                if self.luxcore_exporter.renderengine.test_break():
+                    return
 
             persistent_id_str = '_'.join([str(elem) for elem in persistent_id])
             dupli_name_suffix = '%s_%s_%s' % (self.duplicator.name, psys_name, persistent_id_str)
@@ -288,12 +289,13 @@ class DupliExporter(object):
         self.dupli_amount = num_parents + num_children
 
         for pindex in range(start, num_parents + num_children):
-            # Make it possible to interrupt the export process
-            if self.luxcore_exporter.renderengine.test_break():
-                return
-
             self.dupli_number += 1
-            self.__report_progress(psys)
+            # Make it possible to interrupt the export process
+            if self.dupli_number % 10000 == 0:
+                self.__report_progress(psys)
+
+                if self.luxcore_exporter.renderengine.test_break():
+                    return
 
             point_count = 0
             i = 0
