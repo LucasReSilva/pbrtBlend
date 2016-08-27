@@ -32,7 +32,7 @@ from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
-from ...export.volumes import export_smoke
+from ...export.volumes import SmokeCache
 
 from .utils import convert_texture_channel
 
@@ -674,19 +674,14 @@ class TextureExporter(object):
             # Densitygrid
             ####################################################################
             elif texType == 'densitygrid':
-                grid = export_smoke(luxTex.domain_object, luxTex.source)
-
-                if grid[0] * grid[1] * grid[2] == 1:
-                    #special case for material/texture preview rendering
-                    data = float(grid[3])
-                else:
-                    data = grid[3]
-
-                self.properties.Set(pyluxcore.Property(prefix + '.data', data))
-                self.properties.Set(pyluxcore.Property(prefix + '.nx', int(grid[0])))
-                self.properties.Set(pyluxcore.Property(prefix + '.ny', int(grid[1])))
-                self.properties.Set(pyluxcore.Property(prefix + '.nz', int(grid[2])))
                 self.properties.Set(pyluxcore.Property(prefix + '.wrap', luxTex.wrapping))
+
+                if SmokeCache.needs_update(self.blender_scene, luxTex.domain_object, luxTex.source):
+                    grid = SmokeCache.convert(self.blender_scene, luxTex.domain_object, luxTex.source)
+                    self.properties.Set(pyluxcore.Property(prefix + '.data', grid[3]))
+                    self.properties.Set(pyluxcore.Property(prefix + '.nx', int(grid[0])))
+                    self.properties.Set(pyluxcore.Property(prefix + '.ny', int(grid[1])))
+                    self.properties.Set(pyluxcore.Property(prefix + '.nz', int(grid[2])))
 
                 self.__convert_transform(prefix, texture)
             ####################################################################

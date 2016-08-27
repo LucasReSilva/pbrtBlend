@@ -48,6 +48,7 @@ from ..extensions_framework import util as efutil
 from .. import LuxRenderAddon
 from ..export import get_output_filename, get_worldscale
 from ..export.scene import SceneExporter
+from ..export.volumes import SmokeCache
 from ..outputs import LuxManager, LuxFilmDisplay
 from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
@@ -2197,13 +2198,25 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             for volume in context.scene.luxrender_volumes.volumes:
                 self.luxcore_exporter.convert_volume(volume)
 
-            newVolumeSettings = str(self.luxcore_exporter.pop_updated_scene_properties())
+            # Exclude all densitygrid data properties from the update check
+            # All lines of the form "scene.textures.<densitygrid_tex_name>.data = [...]" will be removed
+            # This allows us to avoid re-exports of the smoke for every volume update check
+            newVolumeProperties = self.luxcore_exporter.pop_updated_scene_properties()
+            lines = str(newVolumeProperties).split('\n')
+            densitygrid_textures = [line for line in lines if 'type = "densitygrid"' in line]
+            names = [elem.split('.')[2] for elem in densitygrid_textures]
+            to_delete = ['scene.textures.' + name + '.data' for name in names]
+            newVolumeProperties.DeleteAll(to_delete)
+
+            newVolumeSettings = str(newVolumeProperties)
 
             if self.lastVolumeSettings == '':
                 self.lastVolumeSettings = newVolumeSettings
             elif self.lastVolumeSettings != newVolumeSettings:
                 update_changes.set_cause(volumes = True)
                 self.lastVolumeSettings = newVolumeSettings
+                # reset the smoke cache because we need to redefine volume properties
+                SmokeCache.reset()
 
             # Check for changes in halt conditions
             newHaltTime = context.scene.luxcore_enginesettings.halt_time_preview

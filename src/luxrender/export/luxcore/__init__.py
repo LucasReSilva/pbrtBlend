@@ -30,6 +30,7 @@ import bpy, time, os
 from ...outputs import LuxManager
 from ...outputs.luxcore_api import pyluxcore
 from ...extensions_framework import util as efutil
+from ...export.volumes import SmokeCache
 
 from .camera import CameraExporter
 from .config import ConfigExporter
@@ -131,6 +132,7 @@ class LuxCoreExporter(object):
         self.convert_camera()
         luxcore_scene.Parse(self.pop_updated_scene_properties())
 
+        SmokeCache.reset()
         self.convert_all_volumes()
 
         if self.is_viewport_render and self.context.space_data.local_view:

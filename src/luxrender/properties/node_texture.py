@@ -37,7 +37,7 @@ from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
 from .. import LuxRenderAddon
 
 from ..export import ParamSet, process_filepath_data, matrix_to_list
-from ..export.volumes import export_smoke
+from ..export.volumes import export_smoke, SmokeCache
 
 from ..extensions_framework import util as efutil
 
@@ -1845,14 +1845,15 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
     def export_luxcore(self, properties):
         luxcore_name = create_luxcore_name(self)
 
-        grid = export_smoke(self.domain, self.source)
-
         set_prop_tex(properties, luxcore_name, 'type', 'densitygrid')
-        set_prop_tex(properties, luxcore_name, 'nx', int(grid[0]))
-        set_prop_tex(properties, luxcore_name, 'ny', int(grid[1]))
-        set_prop_tex(properties, luxcore_name, 'nz', int(grid[2]))
         set_prop_tex(properties, luxcore_name, 'wrap', self.wrap)
-        set_prop_tex(properties, luxcore_name, 'data', grid[3])
+
+        if SmokeCache.needs_update(LuxManager.CurrentScene, self.domain, self.source):
+            grid = SmokeCache.convert(LuxManager.CurrentScene, self.domain, self.source)
+            set_prop_tex(properties, luxcore_name, 'data', grid[3])
+            set_prop_tex(properties, luxcore_name, 'nx', int(grid[0]))
+            set_prop_tex(properties, luxcore_name, 'ny', int(grid[1]))
+            set_prop_tex(properties, luxcore_name, 'nz', int(grid[2]))
 
         if self.domain in bpy.data.objects:
             obj = bpy.data.objects[self.domain]

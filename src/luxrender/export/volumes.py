@@ -635,8 +635,40 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
     return 0, 0, 0, [], []
 
 
+class SmokeCache(object):
+    """
+    Only needed for LuxCore export.
+    Only speeds up viewport updates that are not related to volume updates (e.g. when a material in the scene is edited,
+    this cache prevents that smoke is re-exported and pyluxcore.Properties are set just to check for volume updates.
+    The really expensive operation is *not* the smoke export, but the Property setting.)
+    """
+    cache = {}
+
+    @classmethod
+    def convert(cls, blender_scene, smoke_obj_name, channel):
+        key = cls.create_key(blender_scene, smoke_obj_name, channel)
+
+        if key not in cls.cache:
+            cls.cache[key] = export_smoke(smoke_obj_name, channel)
+
+        return cls.cache[key]
+
+    @classmethod
+    def reset(cls):
+        cls.cache = {}
+
+    @classmethod
+    def needs_update(cls, blender_scene, smoke_obj_name, channel):
+        key = cls.create_key(blender_scene, smoke_obj_name, channel)
+        return key not in cls.cache
+
+    @staticmethod
+    def create_key(blender_scene, smoke_obj_name, channel):
+        return blender_scene.name + smoke_obj_name + channel + str(blender_scene.frame_current)
+
+
 def export_smoke(smoke_obj_name, channel):
-    print('Beginning smoke export...')
+    print('[%s] Beginning smoke export (channel: %s)' % (smoke_obj_name, channel))
     start_time = time.time()
 
     if LuxManager.CurrentScene.name == 'preview':
@@ -742,6 +774,7 @@ def export_smoke(smoke_obj_name, channel):
                     #
                     #	        	LuxLog('Binary SMOKE file written: %s' % (smoke_path))
 
-    print('Smoke export took %.3fs' % (time.time() - start_time))
+    elapsed_time = time.time() - start_time
+    print('[%s] Smoke export of channel %s took %.3fs' % (smoke_obj_name, channel, elapsed_time))
 
     return big_res[0], big_res[1], big_res[2], channeldata

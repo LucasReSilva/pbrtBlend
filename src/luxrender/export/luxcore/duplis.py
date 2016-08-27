@@ -186,11 +186,12 @@ class DupliExporter(object):
                     name += do.library.name
                 name = ToValidLuxCoreName(name)
 
+                transform = matrix_to_list(dm, apply_worldscale=True)
+
                 for mat_index, exp_obj in enumerate(exported_objects):
                     prefix = 'scene.objects.%s%d' % (name, mat_index)
                     self.properties.Set(pyluxcore.Property(prefix + '.shape', exp_obj.luxcore_shape_name))
                     self.properties.Set(pyluxcore.Property(prefix + '.material', exp_obj.luxcore_material_name))
-                    transform = matrix_to_list(dm, apply_worldscale=True)
                     self.properties.Set(pyluxcore.Property(prefix + '.transformation', transform))
 
         del duplis
