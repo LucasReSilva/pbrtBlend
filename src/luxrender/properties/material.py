@@ -333,7 +333,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
         else:
             weights = [1.0, 1.0]
 
-        # In API mode need to tell Lux how many slots explicity
+        # In API mode need to tell Lux how many slots explicitly
         if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
             mm_params.add_integer('nweights', 2)
 
