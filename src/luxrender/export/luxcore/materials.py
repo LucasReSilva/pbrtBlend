@@ -584,8 +584,10 @@ class MaterialExporter(object):
 
                     # We have to set normalmap gamma to 1
                     self.properties.Set(pyluxcore.Property('scene.textures.' + material.luxrender_material.normalmap_floattexturename + '.gamma', 1))
-                    # Overide the initial multiplier, we attach this later to the normalmap_helper
-                    self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap_texture + '.texture2', 1))
+                    if getattr(material.luxrender_material, 'normalmap_multiplyfloat'):
+                        # Overide the initial multiplier, we attach this later to the normalmap_helper
+                        # Note: the normalmap_texture is the scaled returntype here
+                        self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap_texture + '.texture2', 1))
 
                     normalmap_helper = '%s_normal_map_float' % material.luxrender_material.normalmap_floattexturename
                     normalmap_multiplier = getattr(material.luxrender_material, 'normalmap_floatvalue')
@@ -596,7 +598,8 @@ class MaterialExporter(object):
                     add_texture = '%s_bump_normal_add' % material.luxrender_material.bumpmap_floattexturename
                     self.properties.Set(pyluxcore.Property('scene.textures.' + add_texture + '.type', 'add'))
                     self.properties.Set(pyluxcore.Property('scene.textures.' + add_texture + '.texture1', bump_texture))
-                    self.properties.Set(pyluxcore.Property('scene.textures.' + add_texture + '.texture2', normalmap_helper))
+                    if getattr(material.luxrender_material, 'normalmap_multiplyfloat'):
+                        self.properties.Set(pyluxcore.Property('scene.textures.' + add_texture + '.texture2', normalmap_helper))
                     self.properties.Set(pyluxcore.Property(prefix + '.bumptex', add_texture))
 
                 # Bump mapping
