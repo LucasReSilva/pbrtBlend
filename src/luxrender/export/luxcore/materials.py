@@ -140,9 +140,6 @@ class MaterialExporter(object):
 
 
     def __convert_material(self):
-        """
-        :param material: material to convert
-        """
         try:
             material = self.material
 

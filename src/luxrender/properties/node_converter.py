@@ -887,11 +887,13 @@ class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
     bl_icon = 'TEXTURE'
     bl_width_min = 260
 
-    translate = bpy.props.FloatVectorProperty(name='Translate')
-    rotate = bpy.props.FloatVectorProperty(name='Rotate', subtype='DIRECTION', unit='ROTATION', min=-radians(359.99),
-                                           max=radians(359.99))
-    scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
-    uniform_scale = bpy.props.FloatProperty(name='', default=1.0)
+    translate = bpy.props.FloatVectorProperty(name='Translate', subtype='TRANSLATION', description='Moves the texture')
+    rotate = bpy.props.FloatVectorProperty(name='Rotate', unit='ROTATION', default=(0, 0, 0), subtype='EULER',
+                                           description='Rotates the texture')
+    scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0), subtype='XYZ',
+                                          description='Scales the texture')
+    uniform_scale = bpy.props.FloatProperty(name='', default=1.0,
+                                            description='Scales the texture uniformly along all axis')
     use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
                                                description='Use the same scale value for all axis')
 

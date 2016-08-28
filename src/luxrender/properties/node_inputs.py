@@ -56,10 +56,10 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
             coordinate_items = prop['items']
 
     coordinates = bpy.props.EnumProperty(name='Coordinates', items=coordinate_items)
-    translate = bpy.props.FloatVectorProperty(name='Translate')
-    rotate = bpy.props.FloatVectorProperty(name='Rotate', unit='ROTATION', default=(0, 0, 0))
-    scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0))
-    uniform_scale = bpy.props.FloatProperty(name='', default=1.0)
+    translate = bpy.props.FloatVectorProperty(name='Translate', subtype='TRANSLATION', description='Moves the texture')
+    rotate = bpy.props.FloatVectorProperty(name='Rotate', unit='ROTATION', default=(0, 0, 0), subtype='EULER', description='Rotates the texture')
+    scale = bpy.props.FloatVectorProperty(name='Scale', default=(1.0, 1.0, 1.0), subtype='XYZ', description='Scales the texture')
+    uniform_scale = bpy.props.FloatProperty(name='', default=1.0, description='Scales the texture uniformly along all axis')
     use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
                                                description='Use the same scale value for all axis')
 
