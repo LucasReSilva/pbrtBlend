@@ -1813,6 +1813,13 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
+        engine_settings = context.scene.luxcore_enginesettings
+        is_opencl_engine = not engine_settings.renderengine_type.startswith('BIDIR') \
+                           and (engine_settings.device == 'OCL' or engine_settings.device_preview == 'OCL')
+
+        if is_opencl_engine:
+            layout.label('Smoke not supported by OpenCL engines', icon='ERROR')
+
         if self.domain not in bpy.data.objects:
             layout.label('Specify a smoke domain object!', icon='ERROR')
 

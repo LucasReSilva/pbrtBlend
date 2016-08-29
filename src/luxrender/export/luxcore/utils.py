@@ -140,8 +140,9 @@ def is_lightgroup_opencl_compatible(luxcore_exporter, lightgroup_id):
     user defined lightgroups.
     """
     engine_settings = luxcore_exporter.blender_scene.luxcore_enginesettings
-    is_opencl_engine = (engine_settings.device == 'OCL' and not luxcore_exporter.is_viewport_render) or (
-                        engine_settings.device_preview == 'OCL' and luxcore_exporter.is_viewport_render)
+    is_opencl_engine = not engine_settings.renderengine_type.startswith('BIDIR') and (
+                        (engine_settings.device == 'OCL' and not luxcore_exporter.is_viewport_render) or (
+                        engine_settings.device_preview == 'OCL' and luxcore_exporter.is_viewport_render))
     return not (is_opencl_engine and lightgroup_id > 6)
 
 class ExportedLightgroup(object):
