@@ -2079,6 +2079,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         else:
             output_type = pyluxcore.FilmOutputType.RGB_TONEMAPPED
 
+        session.luxcore_session.WaitNewFrame()
         session.luxcore_session.GetFilm().GetOutputFloat(output_type, self.viewImageBufferFloat)
         draw_framebuffer()
 
