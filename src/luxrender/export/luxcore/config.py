@@ -153,7 +153,8 @@ class ConfigExporter(object):
 
         # Use realtime engines for viewport render (BIDIR* engines don't have RT versions, and there's no RTBIASPATHCPU engine yet)
         if self.is_viewport_render and engine not in ['BIDIR', 'BIDIRVM'] and not (engine == 'BIASPATH' and device == 'CPU'):
-            engine = 'RT' + engine
+            if pyluxcore.Version() > '1.6':
+                engine = 'RT' + engine
 
         # Set device type
         engine += device
