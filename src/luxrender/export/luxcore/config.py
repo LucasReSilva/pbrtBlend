@@ -315,9 +315,15 @@ class ConfigExporter(object):
 
         # Special filter settings optimized for realtime preview
         if engine_settings.device_preview == 'CPU':
+            if hasattr(pyluxcore.RenderSession, 'WaitNewFrame'):
+                self.properties.Set(pyluxcore.Property('renderengine.type', 'RTPATHCPU'))
+
             self.properties.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
             self.properties.Set(pyluxcore.Property('film.filter.width', 1.0))
         else:
+            if hasattr(pyluxcore.RenderSession, 'WaitNewFrame'):
+                self.properties.Set(pyluxcore.Property('renderengine.type', 'RTPATHOCL'))
+
             self.properties.Set(pyluxcore.Property('film.filter.type', 'NONE'))
 
         if engine_settings.use_opencl_always_enabled:
