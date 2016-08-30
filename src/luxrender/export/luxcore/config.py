@@ -144,17 +144,19 @@ class ConfigExporter(object):
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = engine_settings.renderengine_type
         device = engine_settings.device_preview if self.is_viewport_render else engine_settings.device
+        # (BIDIR* engines don't have OpenCL versions)
+        if engine in ['BIDIR', 'BIDIRVM']:
+            device = 'CPU'
 
         if engine == 'BIASPATH' and self.is_viewport_render and engine_settings.biaspath_use_path_in_viewport:
             engine = 'PATH'
 
-        # Set engine type
-        if engine in ['BIDIR', 'BIDIRVM'] or device == 'CPU':
-            # CPU only engines
-            engine += 'CPU'
-        else:
-            # OpenCL engines
-            engine += 'OCL'
+        # Use realtime engines for viewport render (BIDIR* engines don't have RT versions, and there's no RTBIASPATHCPU engine yet)
+        if self.is_viewport_render and engine not in ['BIDIR', 'BIDIRVM'] and not (engine == 'BIASPATH' and device == 'CPU'):
+            engine = 'RT' + engine
+
+        # Set device type
+        engine += device
 
         return engine
 
@@ -315,15 +317,9 @@ class ConfigExporter(object):
 
         # Special filter settings optimized for realtime preview
         if engine_settings.device_preview == 'CPU':
-            if hasattr(pyluxcore.RenderSession, 'WaitNewFrame'):
-                self.properties.Set(pyluxcore.Property('renderengine.type', 'RTPATHCPU'))
-
             self.properties.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
             self.properties.Set(pyluxcore.Property('film.filter.width', 1.0))
         else:
-            if hasattr(pyluxcore.RenderSession, 'WaitNewFrame'):
-                self.properties.Set(pyluxcore.Property('renderengine.type', 'RTPATHOCL'))
-
             self.properties.Set(pyluxcore.Property('film.filter.type', 'NONE'))
 
         if engine_settings.use_opencl_always_enabled:
