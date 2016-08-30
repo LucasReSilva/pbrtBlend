@@ -312,8 +312,12 @@ class ConfigExporter(object):
     def __convert_realtime_settings(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
 
-        # Sampler settings (same as for final render)
-        self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))
+        if self.get_engine() == 'RTPATHCPU':
+            # RTPATHCPU needs a special sampler
+            self.properties.Set(pyluxcore.Property('sampler.type', 'RTPATHCPUSAMPLER'))
+        else:
+            # Sampler settings (same as for final render)
+            self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))
 
         # Special filter settings optimized for realtime preview
         if engine_settings.device_preview == 'CPU':

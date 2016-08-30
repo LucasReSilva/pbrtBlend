@@ -1052,6 +1052,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'BIDIRCPU' : 'Bidir',
             'BIDIRVMCPU' : 'BidirVCM',
             'RTPATHOCL': 'RT Path OpenCL',
+            'RTPATHCPU': 'RT Path',
             'RTBIASPATHOCL': 'RT Biased Path OpenCL',
         }
 
@@ -1059,7 +1060,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         sampler_dict = {
             'RANDOM' : 'Random',
             'SOBOL' : 'Sobol',
-            'METROPOLIS' : 'Metropolis'
+            'METROPOLIS' : 'Metropolis',
+            'RTPATHCPUSAMPLER': 'RT Path Sampler'
         }
 
         settings = scene.luxcore_enginesettings
