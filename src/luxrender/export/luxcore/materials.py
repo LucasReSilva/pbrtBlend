@@ -583,10 +583,10 @@ class MaterialExporter(object):
                     # We have to set normalmap gamma to 1
                     self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap_luxcore_name + '.gamma', 1))
                     if getattr(material.luxrender_material, 'normalmap_multiplyfloat'):
-                        # Overide the initial multiplier, we attach this later to the normalmap_helper
-                        # Note: the normalmap_texture is the scaled returntype here
+                        # Overide the multiplier in the created scale texture, we attach this later to the normalmap_helper
                         self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap_texture + '.texture2', 1))
 
+                    # Create a normalmap
                     normalmap_helper = '%s_normal_map_float' % normalmap_luxcore_name
                     normalmap_multiplier = getattr(material.luxrender_material, 'normalmap_floatvalue')
                     self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap_helper + '.type', 'normalmap'))
@@ -594,6 +594,7 @@ class MaterialExporter(object):
                     if getattr(material.luxrender_material, 'normalmap_multiplyfloat'):
                         self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap_helper + '.scale', normalmap_multiplier))
 
+                    # Create combined texture ( add, or rather mix ? )
                     add_texture = '%s_bump_normal_add' % normalmap_luxcore_name
                     self.properties.Set(pyluxcore.Property('scene.textures.' + add_texture + '.type', 'add'))
                     self.properties.Set(pyluxcore.Property('scene.textures.' + add_texture + '.texture1', bump_texture))
