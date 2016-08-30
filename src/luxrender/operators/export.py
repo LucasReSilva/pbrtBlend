@@ -151,9 +151,16 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
-        for obj in context.selected_objects:
+        selection = context.selected_objects.copy()
+
+        for obj in selection:
+            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select = True
+            context.scene.objects.active = obj
+
             if obj.type in ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT']:
-                # make sure mesh has only one user (is NOT duplicated with Alt+D
+                # make sure it's a single-user mesh (is NOT duplicated with Alt+D)
                 if obj.data.users > 1:
                     print("[Object: %s] Can't make proxy from multiuser mesh" % obj.name)
                     print("-----------------")
@@ -166,7 +173,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                 if obj.type == 'CURVE':
                     test_mesh = obj.to_mesh(context.scene, True, 'RENDER')
                     if len(test_mesh.polygons) == 0:
-                        print("[Object: %s] Skipping curve object because of missing faces" % obj.name)
+                        print("[Object: %s] Skipping curve (does not contain geometry)" % obj.name)
                         print("-----------------")
                         continue
                     bpy.data.meshes.remove(test_mesh)
@@ -179,8 +186,6 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                 obj.name = obj.name + '_lux_proxy'
 
                 # apply all modifiers
-                bpy.ops.object.mode_set(mode = 'OBJECT')
-                context.scene.objects.active = obj
                 for modifier in obj.modifiers:
                     bpy.ops.object.modifier_apply(modifier = modifier.name)
 
@@ -194,41 +199,17 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
 
                 # save bounding box for later use
                 dimensions = obj.dimensions.copy()
+                location = obj.location.copy()
+                rotation = obj.rotation_euler.copy()
+
                 # clear parent
                 bpy.ops.object.parent_clear(type = 'CLEAR_KEEP_TRANSFORM')
-
                 # split object by materials
                 bpy.ops.mesh.separate(type = 'MATERIAL')
 
                 # create list of references to the created objects
-                names = [obj.name]
-                for i in range(0, used_materials_amount - 1):
-                    names.append('%s.%03d' % (obj.name, i + 1))
-
-                created_objects = []
-                for name in names:
-                    created_objects.append(bpy.data.objects[name])
-
-                # create bounding box cube and parent objects to it
-                if used_materials_amount > 1:
-                    bpy.ops.mesh.primitive_cube_add(rotation = obj.rotation_euler,
-                                                    location = obj.location,
-                                                    layers = obj.layers)
-
-                    bounding_cube = context.active_object
-                    bounding_cube.name = obj.name + '_boundingBox'
-                    bounding_cube.draw_type = 'WIRE'
-                    bounding_cube.hide_render = True
-
-                    bounding_cube.dimensions = dimensions
-                    bpy.ops.object.transform_apply(location = False,
-                                                   rotation = False,
-                                                   scale = True)
-
-                    for object in created_objects:
-                        object.select = True
-                        bpy.ops.object.parent_set(type = 'OBJECT', keep_transform = False)
-                        object.select = False
+                created_objects = context.selected_objects.copy()
+                proxy_objects = []
 
                 #################################################################
                 # Export split objects to PLY files
@@ -242,33 +223,47 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
 
                     #################################################################
                     # Create lowpoly preview mesh with decimate modifier
+                    # We have to replace the objects with new ones because we can't apply modifiers in this loop
+                    # for some reason (only the last one is applied), so we have to use to_mesh() as a workaround
                     #################################################################
                     context.scene.objects.active = object
                     decimate = object.modifiers.new('proxy_decimate', 'DECIMATE')
                     decimate.ratio = self.proxy_quality
-                    bpy.ops.object.modifier_apply(apply_as = 'DATA', modifier = decimate.name)
+
+                    temp = object.to_mesh(context.scene, True, 'RENDER')
+
+                    context.scene.objects.unlink(object)
+
+                    ob = bpy.data.objects.new(object.name, temp)
+                    context.scene.objects.link(ob)
+                    proxy_objects.append(ob)
 
                     #################################################################
                     # Set exported PLY as proxy file
                     #################################################################
-                    object.luxrender_object.append_proxy = True
+                    ob.luxrender_object.append_proxy = True
+                    ob.luxrender_object.external_mesh = ply_path
 
-                    # check if the object had smooth faces
-
-                    was_smooth = False
-                    for poly in proxy_mesh.polygons:
-                        if poly.use_smooth:
-                            was_smooth = True
-                            break
-
-                    if was_smooth:
-                        object.luxrender_object.use_smoothing = True
-
-                    # set path to PLY
-                    object.luxrender_object.external_mesh = ply_path
-
-                    print("[Object: %s] Created proxy object" % object.name)
+                    print("[Object: %s] Created proxy object" % ob.name)
                     print("-----------------")
+
+                # create bounding box cube and parent objects to it
+                if used_materials_amount > 1:
+                    bpy.ops.object.empty_add(rotation=(0, 0, 0),
+                                             location=(0, 0, 0),
+                                             layers=obj.layers)
+
+                    bounding_cube = context.active_object
+                    bounding_cube.name = obj.name + '_boundingBox'
+                    bounding_cube.empty_draw_type = 'CUBE'
+                    # bounding_cube.scale = dimensions / 2
+
+                    for object in proxy_objects:
+                        object.location = (0, 0, 0)
+                        object.parent = bounding_cube
+
+                    bounding_cube.location = location
+                    bounding_cube.rotation_euler = rotation
 
         return {'FINISHED'}
 
