@@ -44,6 +44,7 @@ class luxcore_translatorsettings(declarative_property_group):
         'override_materials',
         ['override_glass', 'override_lights', 'override_null'],
         ['label_debug', 'print_cfg', 'print_scn'],
+        'use_rtpathcpu',
     ]
 
     visibility = {
@@ -155,5 +156,13 @@ class luxcore_translatorsettings(declarative_property_group):
             'description': 'After exporting, start LuxCoreUI with the exported scene files',
             'default': True,
             'save_in_preset': True
+        },
+        {   # TODO: remove when daily builds catch up
+            'type': 'bool',
+            'attr': 'use_rtpathcpu',
+            'name': 'Use RTPathCPU',
+            'description': 'Use RTPathCPU instead of PathCPU for viewport render. Note that you need to compile the '
+                           'very latest LuxCore from source for this to work, daily builds do not contain it yet',
+            'default': False,
         },
     ]

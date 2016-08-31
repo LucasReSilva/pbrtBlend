@@ -153,7 +153,9 @@ class ConfigExporter(object):
 
         # Use realtime engines for viewport render (BIDIR* engines don't have RT versions, and there's no RTBIASPATHCPU engine yet)
         if self.is_viewport_render and engine not in ['BIDIR', 'BIDIRVM'] and not (engine == 'BIASPATH' and device == 'CPU'):
-            if pyluxcore.Version() > '1.6':
+            # TODO: remove disable_rtpathcpu check when daily builds catch up
+            disable_rtpathcpu = (engine == 'PATH' and device == 'CPU' and not self.blender_scene.luxcore_translatorsettings.use_rtpathcpu)
+            if pyluxcore.Version() > '1.6' and not disable_rtpathcpu:
                 engine = 'RT' + engine
 
         # Set device type
