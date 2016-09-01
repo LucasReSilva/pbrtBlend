@@ -835,6 +835,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     gamma = bpy.props.FloatProperty(name='Gamma', default=2.2, min=0.0, max=5.0, description='Gamma correction to apply')
     is_normal_map = bpy.props.BoolProperty(name='Normalmap', default=False, description='Enable if this is a normalmap,'
                                            ' then plug the output directly into a Bump socket', update=update_is_normal_map)
+    normalmap_scale = bpy.props.FloatProperty(name='Height', default=1, min=0, soft_max=2,
+                                              description='Scaling factor for normalmap strength (relative, not in world units)')
     normalmap_fake_gamma = bpy.props.FloatProperty(name='Gamma', default=1)
 
     advanced = bpy.props.BoolProperty(name='Advanced', default=False, description='Show advanced options')
@@ -903,6 +905,8 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         row = layout.row()
         row.enabled = UseLuxCore()
         row.prop(self, 'is_normal_map')
+        if self.is_normal_map:
+            row.prop(self, 'normalmap_scale')
 
     def draw_label(self):
         return self.image_name
@@ -1004,6 +1008,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
             normalmap_name = create_luxcore_name(self, suffix='normal')
             set_prop_tex(properties, normalmap_name, 'type', 'normalmap')
             set_prop_tex(properties, normalmap_name, 'texture', luxcore_name)
+            set_prop_tex(properties, normalmap_name, 'scale', self.normalmap_scale)
             luxcore_name = normalmap_name
 
         return luxcore_name
