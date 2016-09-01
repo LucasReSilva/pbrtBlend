@@ -121,8 +121,26 @@ class film(camera_panel):
                          text=context.camera.luxrender_camera.luxrender_film.luxrender_colorspace.crf_preset)
 
     def draw(self, context):
+        layout = self.layout
+
+        if UseLuxCore():
+            imagepipeline_settings = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline
+
+            # Show warning in case of missing passes
+            if imagepipeline_settings.use_background_image:
+                if not context.scene.luxrender_channels.enable_aovs:
+                    layout.label('Background image not available (passes disabled)', icon='ERROR')
+                elif not context.scene.luxrender_channels.ALPHA:
+                    layout.label('Background image not available (Alpha pass disabled)', icon='ERROR')
+
+            if imagepipeline_settings.use_mist:
+                if not context.scene.luxrender_channels.enable_aovs:
+                    layout.label('Mist not available (passes disabled)', icon='ERROR')
+                elif not context.scene.luxrender_channels.DEPTH:
+                    layout.label('Mist not available (Depth pass disabled)', icon='ERROR')
+
         super().draw(context)
 
         if UseLuxCore():
             imagepipeline_settings = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline
-            self.layout.label('Framerate: %d fps' % (1 / (imagepipeline_settings.viewport_interval / 1000)))
+            layout.label('Framerate: %d fps' % (1 / (imagepipeline_settings.viewport_interval / 1000)))
