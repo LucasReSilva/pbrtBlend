@@ -285,12 +285,14 @@ class LuxCoreExporter(object):
             amount = imagepipeline_settings.mist_amount
             start = imagepipeline_settings.mist_startdistance
             end = imagepipeline_settings.mist_enddistance
+            exclude_background = imagepipeline_settings.mist_excludebackground
 
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'MIST'))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.color', color))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.amount', amount))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.startdistance', start))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.enddistance', end))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.excludebackground', exclude_background))
             index += 1
 
         # Bloom

@@ -158,6 +158,7 @@ class tonemapping_panel(imageeditor_panel):
 
             sub = layout.column(align=True)
             sub.active = depth_pass_available
+            sub.prop(imagepipeline_settings, 'mist_excludebackground')
             sub.prop(imagepipeline_settings, 'mist_color')
             sub.prop(imagepipeline_settings, 'mist_amount')
             sub.prop(imagepipeline_settings, 'mist_startdistance')

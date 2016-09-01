@@ -163,7 +163,7 @@ class luxcore_imagepipeline(declarative_property_group):
         'background_image',
         'background_image_gamma',
         # Mist
-        'use_mist',
+        ['use_mist', 'mist_excludebackground'],
         ['mist_color', 'mist_amount'],
         ['mist_startdistance', 'mist_enddistance'],
         # Intervals
@@ -194,6 +194,7 @@ class luxcore_imagepipeline(declarative_property_group):
         'background_image': {'use_background_image': True},
         'background_image_gamma': {'use_background_image': True},
         'background_camera_view_only': {'use_background_image': True},
+        'mist_excludebackground': {'use_mist': True},
         'mist_color': {'use_mist': True},
         'mist_amount': {'use_mist': True},
         'mist_startdistance': {'use_mist': True},
@@ -536,7 +537,7 @@ class luxcore_imagepipeline(declarative_property_group):
             'attr': 'mist_color',
             'name': '',
             'description': 'Mist color',
-            'default': (0.2, 0.6, 1.0),
+            'default': (0.3, 0.4, 0.55),
             'min': 0,
             'max': 1,
         },
@@ -544,7 +545,8 @@ class luxcore_imagepipeline(declarative_property_group):
             'type': 'float',
             'attr': 'mist_amount',
             'name': 'Amount',
-            'default': 1,
+            'description': 'Strength of the mist overlay',
+            'default': 0.3,
             'min': 0,
             'max': 1,
             'slider': True,
@@ -554,7 +556,8 @@ class luxcore_imagepipeline(declarative_property_group):
             'subtype': 'DISTANCE',
             'attr': 'mist_startdistance',
             'name': 'Start',
-            'default': 0,
+            'description': 'Distance from the camera where the mist starts to be visible',
+            'default': 100,
             'min': 0,
         },
         {
@@ -562,10 +565,17 @@ class luxcore_imagepipeline(declarative_property_group):
             'subtype': 'DISTANCE',
             'attr': 'mist_enddistance',
             'name': 'End',
-            'default': 500,
+            'description': 'Distance from the camera where the mist is at full strength',
+            'default': 1000,
             'min': 0,
         },
-
+        {
+            'type': 'bool',
+            'attr': 'mist_excludebackground',
+            'name': 'Exclude Background',
+            'description': 'Disable mist over background parts of the image (where distance = infinity)',
+            'default': True,
+        },
         # Update and save intervals
         {
             'attr': 'label_intervals',
