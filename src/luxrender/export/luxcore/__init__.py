@@ -279,6 +279,20 @@ class LuxCoreExporter(object):
                 temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.storage', 'byte'))
                 index += 1
 
+        # Mist
+        if imagepipeline_settings.use_mist:
+            color = list(imagepipeline_settings.mist_color)
+            amount = imagepipeline_settings.mist_amount
+            start = imagepipeline_settings.mist_startdistance
+            end = imagepipeline_settings.mist_enddistance
+
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'MIST'))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.color', color))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.amount', amount))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.startdistance', start))
+            temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.enddistance', end))
+            index += 1
+
         # Bloom
         if imagepipeline_settings.use_bloom:
             # radius and weight are in percent (0-100) in Blender, LuxCore needs range 0..1

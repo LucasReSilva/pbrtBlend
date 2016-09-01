@@ -137,6 +137,13 @@ class tonemapping_panel(imageeditor_panel):
             layout.prop(imagepipeline_settings, 'background_image', text='')
             layout.prop(imagepipeline_settings, 'background_image_gamma')
 
+        layout.prop(imagepipeline_settings, 'use_mist')
+        if imagepipeline_settings.use_mist:
+            layout.prop(imagepipeline_settings, 'mist_amount')
+            layout.prop(imagepipeline_settings, 'mist_color')
+            layout.prop(imagepipeline_settings, 'mist_startdistance')
+            layout.prop(imagepipeline_settings, 'mist_enddistance')
+
 
 @LuxRenderAddon.addon_register_class
 class halt_conditions_panel(imageeditor_panel):

@@ -162,6 +162,10 @@ class luxcore_imagepipeline(declarative_property_group):
         ['use_background_image', 'background_camera_view_only'],
         'background_image',
         'background_image_gamma',
+        # Mist
+        'use_mist',
+        ['mist_color', 'mist_amount'],
+        ['mist_startdistance', 'mist_enddistance'],
         # Intervals
         'label_intervals',
         #['writeinterval_png', 'writeinterval_flm'],
@@ -190,12 +194,21 @@ class luxcore_imagepipeline(declarative_property_group):
         'background_image': {'use_background_image': True},
         'background_image_gamma': {'use_background_image': True},
         'background_camera_view_only': {'use_background_image': True},
+        'mist_color': {'use_mist': True},
+        'mist_amount': {'use_mist': True},
+        'mist_startdistance': {'use_mist': True},
+        'mist_enddistance': {'use_mist': True},
     }
 
     def update_background_image(self, context):
         # Enable alpha AOV so the background image plugin works
         if not context.scene.luxrender_channels.ALPHA and self.use_background_image:
             context.scene.luxrender_channels.ALPHA = True
+
+    def update_mist(self, context):
+        # Enable depth AOV so the mist plugin works
+        if not context.scene.luxrender_channels.DEPTH and self.use_mist:
+            context.scene.luxrender_channels.DEPTH = True
 
     properties = [
         # Output switcher
@@ -508,6 +521,51 @@ class luxcore_imagepipeline(declarative_property_group):
             'soft_min': 1.0,
             'max': 5.0,
         },
+        # Mist
+        {
+            'type': 'bool',
+            'attr': 'use_mist',
+            'name': 'Mist',
+            'description': '',
+            'default': False,
+            'update': update_mist
+        },
+        {
+            'type': 'float_vector',
+            'subtype': 'COLOR',
+            'attr': 'mist_color',
+            'name': '',
+            'description': 'Mist color',
+            'default': (0.2, 0.6, 1.0),
+            'min': 0,
+            'max': 1,
+        },
+        {
+            'type': 'float',
+            'attr': 'mist_amount',
+            'name': 'Amount',
+            'default': 1,
+            'min': 0,
+            'max': 1,
+            'slider': True,
+        },
+        {
+            'type': 'float',
+            'subtype': 'DISTANCE',
+            'attr': 'mist_startdistance',
+            'name': 'Start',
+            'default': 0,
+            'min': 0,
+        },
+        {
+            'type': 'float',
+            'subtype': 'DISTANCE',
+            'attr': 'mist_enddistance',
+            'name': 'End',
+            'default': 500,
+            'min': 0,
+        },
+
         # Update and save intervals
         {
             'attr': 'label_intervals',
