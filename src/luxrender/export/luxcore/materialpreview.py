@@ -49,7 +49,7 @@ class MaterialPreviewExporter(object):
         self.preview_object = preview_object
 
         self.is_world_sphere_type = self.preview_object.name == 'preview.004'
-
+        self.is_plane_type = self.preview_object.name == 'preview'
 
     def convert(self, film_width, film_height):
         # Make the strands in strand preview mode thicker so they are visible
@@ -79,7 +79,11 @@ class MaterialPreviewExporter(object):
             luxcore_exporter.convert_all_volumes()
 
             # Convert objects
-            luxcore_exporter.convert_object(self.preview_object, luxcore_scene)
+            if self.is_plane_type:
+                # special export path for plane material preview mode
+                self.__export_plane_scene(luxcore_exporter, scn_props, luxcore_scene)
+            else:
+                luxcore_exporter.convert_object(self.preview_object, luxcore_scene)
 
             # Add light and ground plane definitions
             scn_props.Set(luxcore_exporter.scene_properties)
@@ -95,7 +99,7 @@ class MaterialPreviewExporter(object):
             else:
                 # Scene setup for all other preview objects
                 self.__create_setup_material_preview(luxcore_scene, scn_props)
-        else: # Texture preview
+        else:  # Texture preview
             # Convert camera
             scn_props.Set(pyluxcore.Property('scene.camera.type', 'orthographic'))
             scn_props.Set(pyluxcore.Property('scene.camera.lookat.target', [0, 0, 0]))
@@ -161,6 +165,40 @@ class MaterialPreviewExporter(object):
 
         return luxcore_config
 
+    def __export_plane_scene(self, luxcore_exporter, scn_props, luxcore_scene):
+        # The default plane from the Blender preview scene is ugly (wrong scale and UVs), so we make our own.
+        # A quadratic texture (with UV mapping) is tiled exactly 2 times in horizontal directon on this plane,
+        # so it's also a nice tiling preview
+
+        luxcore_exporter.convert_material(self.preview_material)
+        mat_name = luxcore_exporter.material_cache[self.preview_material].luxcore_name
+
+        mesh_name = 'mat_preview_planemesh'
+        size_z = 7
+        size_x = size_z * 2
+        ypos = -1.00001
+        zpos = 2
+        vertices = [
+            (-size_x / 2, ypos, zpos + size_z / 2),
+            (size_x / 2, ypos, zpos + size_z / 2),
+            (size_x / 2, ypos, zpos - size_z / 2),
+            (-size_x / 2, ypos, zpos - size_z / 2)
+        ]
+        faces = [
+            (0, 1, 2),
+            (2, 3, 0)
+        ]
+        uv = [
+            (1, 2),
+            (1, 0),
+            (0, 0),
+            (0, 2)
+        ]
+        luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, uv, None, None)
+        # Create object
+        obj_name = 'mat_preview_planeobj'
+        scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.ply', mesh_name))
+        scn_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.material', mat_name))
 
     def __create_setup_worldsphere(self, luxcore_exporter, scn_props):
         scn_props.Set(pyluxcore.Property('scene.lights.sky.type', 'sky'))
@@ -182,7 +220,6 @@ class MaterialPreviewExporter(object):
         exported_props.Set(pyluxcore.Property('scene.objects.' + obj_name + '.transformation', transform))
         scn_props.Set(exported_props)
         '''
-
 
     def __create_setup_material_preview(self, luxcore_scene, scn_props):
         # Add custom elements to the scene (lights, floor)
@@ -239,7 +276,6 @@ class MaterialPreviewExporter(object):
         ]
         self.__create_checker_plane(luxcore_scene, scn_props, 'plane_behind_object', vertices, faces)
 
-
     def __create_checker_plane(self, luxcore_scene, scn_props, name, vertices, faces, light=False):
         mesh_name = name + '_mesh'
         mat_name = name + '_mat'
@@ -266,7 +302,6 @@ class MaterialPreviewExporter(object):
         # Object
         scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.shape', mesh_name))
         scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.material', mat_name))
-        
 
     def __create_area_light(self, luxcore_scene, scn_props, name, color, position, rotation_matrix, scale):
         mat_name = name + '_mat'
@@ -306,7 +341,6 @@ class MaterialPreviewExporter(object):
         luxcore_scene.DefineMesh(mesh_name, vertices, faces, None, None, None, None, transform)
         # assign mesh to object
         scn_props.Set(pyluxcore.Property('scene.objects.' + name + '.shape', [mesh_name]))
-
 
     def __create_preview_config(self, film_width, film_height):
         cfg_props = pyluxcore.Properties()
