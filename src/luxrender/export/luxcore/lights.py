@@ -289,9 +289,11 @@ class LightExporter(object):
         elif light.type == 'POINT':
             self.exported_lights.add(ExportedLight(luxcore_name, 'POINT'))
 
-            valid_mapfile = lux_lamp.projector and os.path.exists(lux_lamp.mapname)
+            mapfile, basename = get_expanded_file_name(light, lux_lamp.mapname)
+            valid_mapfile = lux_lamp.projector and os.path.exists(mapfile)
 
             if valid_mapfile or os.path.exists(iesfile):
+                # Note: we need mappoint type for ies support, but the ies file is defined at the beginning of this file
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'mappoint'))
 
                 if valid_mapfile:
