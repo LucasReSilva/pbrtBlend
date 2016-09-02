@@ -325,7 +325,8 @@ blender_texture_ui_list = [
 def blender_psys_poll(cls, context):
     psys = context.particle_system
     tex = context.texture
-    show = tex and context.scene.render.engine in cls.COMPAT_ENGINES
+    brush = context.brush
+    show = tex and not brush and (context.scene.render.engine in cls.COMPAT_ENGINES)
 
     if context.scene.render.engine == 'LUXRENDER_RENDER':
         show = show and psys
