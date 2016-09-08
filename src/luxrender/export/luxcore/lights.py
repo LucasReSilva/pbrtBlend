@@ -394,6 +394,12 @@ class LightExporter(object):
                 if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
                     self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.id', [lightgroup_id]))
 
+                # Ies fix attempt
+                iesfile = light.luxrender_lamp.iesname
+                iesfile, basename = get_expanded_file_name(light.luxrender_lamp, iesfile)
+                if os.path.exists(iesfile):
+                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.iesfile', iesfile))
+
                 # Opacity
                 area = light.luxrender_lamp.luxrender_lamp_area
                 opacity = convert_texture_channel(self.luxcore_exporter, self.properties, mat_name, area, 'opacity', 'float')

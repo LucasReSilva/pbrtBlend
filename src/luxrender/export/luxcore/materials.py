@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 
-import bpy
+import bpy, os
 
 from ...outputs.luxcore_api import pyluxcore
 from ...outputs.luxcore_api import ToValidLuxCoreName
@@ -700,6 +700,12 @@ class MaterialExporter(object):
 
                         gain = material.luxrender_emission.gain
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.gain', [gain] * 3))
+
+                        # Ies fix attempt
+                        iesfile = material.luxrender_emission.iesname
+                        iesfile, basename = get_expanded_file_name(material.luxrender_emission, iesfile)
+                        if os.path.exists(iesfile):
+                            self.properties.Set(pyluxcore.Property(prefix + '.emission.iesfile', iesfile))
 
             # alpha transparency
             if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
