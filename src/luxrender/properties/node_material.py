@@ -24,12 +24,13 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import bpy
+import bpy, os
 
 from . import (create_luxcore_name_mat, create_luxcore_name, warning_classic_node, has_interior_volume,
                export_submat_luxcore, export_emission_luxcore)
 from ..export.luxcore.utils import get_elem_key, is_lightgroup_opencl_compatible
 from ..export.materials import TextureCounter
+from ..export import get_expanded_file_name
 
 from ..outputs.luxcore_api import set_prop_mat, set_prop_vol, set_prop_tex
 
@@ -1698,6 +1699,12 @@ class luxrender_light_area_node(luxrender_material_node):
         set_prop(properties, parent_luxcore_name, 'emission.power', self.power)
         set_prop(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
         set_prop(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
+
+        # Ies
+        iesfile = self.iesname
+        iesfile, basename = get_expanded_file_name(self, iesfile)
+        if os.path.exists(iesfile):
+            set_prop(properties, parent_luxcore_name, 'emission.iesfile', iesfile)
 
         # Lightgroup
         blender_scene = luxcore_exporter.blender_scene
