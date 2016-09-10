@@ -701,7 +701,7 @@ class MaterialExporter(object):
                         gain = material.luxrender_emission.gain
                         self.properties.Set(pyluxcore.Property(prefix + '.emission.gain', [gain] * 3))
 
-                        # Ies fix attempt
+                        # Ies
                         iesfile = material.luxrender_emission.iesname
                         iesfile, basename = get_expanded_file_name(material.luxrender_emission, iesfile)
                         if os.path.exists(iesfile):

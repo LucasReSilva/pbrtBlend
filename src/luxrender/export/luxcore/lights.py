@@ -394,7 +394,7 @@ class LightExporter(object):
                 if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
                     self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.id', [lightgroup_id]))
 
-                # Ies fix attempt
+                # Ies
                 iesfile = light.luxrender_lamp.iesname
                 iesfile, basename = get_expanded_file_name(light.luxrender_lamp, iesfile)
                 if os.path.exists(iesfile):
