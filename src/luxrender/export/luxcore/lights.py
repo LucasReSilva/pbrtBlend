@@ -398,7 +398,7 @@ class LightExporter(object):
                 iesfile = light.luxrender_lamp.iesname
                 iesfile, basename = get_expanded_file_name(light.luxrender_lamp, iesfile)
                 if os.path.exists(iesfile):
-                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.iesfile', iesfile))
+                    self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.mapfile', iesfile))
 
                 # Opacity
                 area = light.luxrender_lamp.luxrender_lamp_area
