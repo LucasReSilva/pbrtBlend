@@ -7,7 +7,7 @@
 # --------------------------------------------------------------------------
 #
 # Authors:
-# Simon Wendsche
+# Simon Wendsche, Michael Klemm
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -168,6 +168,10 @@ class CameraExporter(object):
 
         if blCameraData.type == 'ORTHO':
             set_prop_cam(self.properties, 'type', 'orthographic')
+        elif blCameraData.type == 'PANO':
+            set_prop_cam(self.properties, 'type', 'environment')
+        else:
+            set_prop_cam(self.properties, 'type', 'perspective')
 
         # Motion blur
         self.__convert_camera_motion_blur(blCamera)
