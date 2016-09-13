@@ -412,18 +412,17 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.objects.' + luxcore_name + '.material', [mat_name]))
 
                 # copy transformation of area lamp object
-                scale_matrix = mathutils.Matrix()
-                scale_matrix[0][0] = light.size / 2.0 * obj.scale.x
-                scale_matrix[1][1] = light.size_y / 2.0 if light.shape == 'RECTANGLE' else light.size / 2.0
-                scale_matrix[1][1] *= obj.scale.y
-                rotation_matrix = obj.rotation_euler.to_matrix()
-                rotation_matrix.resize_4x4()
-                transform_matrix = mathutils.Matrix()
-                transform_matrix[0][3] = obj.location.x
-                transform_matrix[1][3] = obj.location.y
-                transform_matrix[2][3] = obj.location.z
+                transform_matrix = obj.matrix_world.copy()
+                scale_x = mathutils.Matrix.Scale(light.size / 2, 4, (1, 0, 0))
+                if light.shape == 'RECTANGLE':
+                    scale_y = mathutils.Matrix.Scale(light.size_y / 2, 4, (0, 1, 0))
+                else:
+                    scale_y = scale_x
 
-                transform = matrix_to_list(transform_matrix * rotation_matrix * scale_matrix, apply_worldscale=True)
+                transform_matrix *= scale_x
+                transform_matrix *= scale_y
+
+                transform = matrix_to_list(transform_matrix, apply_worldscale=True)
                 # Only use mesh transform for final renders (disables instancing which is needed for viewport render
                 # so we can move the light object)
                 mesh_transform = None if self.luxcore_exporter.is_viewport_render else transform
