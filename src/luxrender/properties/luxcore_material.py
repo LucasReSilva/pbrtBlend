@@ -43,7 +43,7 @@ class luxcore_material(declarative_property_group):
 
     controls = [
         'materialgroup_chooser',
-        'is_shadow_catcher',
+        ['is_shadow_catcher', 'sc_onlyinfinitelights'],
         #'id',
         #'create_MATERIAL_ID_MASK',
         #'create_BY_MATERIAL_ID',
@@ -70,6 +70,7 @@ class luxcore_material(declarative_property_group):
             {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
         'visibility_indirect_specular_enable':
             {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+        'sc_onlyinfinitelights': {'is_shadow_catcher': True},
     }
 
     alert = {}
@@ -97,6 +98,13 @@ class luxcore_material(declarative_property_group):
             'attr': 'is_shadow_catcher',
             'name': 'Shadow Catcher',
             'description': 'Make material transparent where hit by light and opaque where shadowed (alpha transparency)',
+            'default': False,
+        },
+        {
+            'type': 'bool',
+            'attr': 'sc_onlyinfinitelights',
+            'name': 'Only Infinite Lights',
+            'description': 'Only consider infinite lights for this shadow catcher',
             'default': False,
         },
         {

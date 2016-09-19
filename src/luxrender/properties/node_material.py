@@ -1760,6 +1760,8 @@ class luxrender_material_output_node(luxrender_node):
     materialgroup = bpy.props.StringProperty(description='Materialgroup for Material ID pass; leave blank to use default')
     is_shadow_catcher = bpy.props.BoolProperty(name='Shadow Catcher', default=False, description=
         'Make material transparent where hit by light and opaque where shadowed (alpha transparency)')
+    sc_onlyinfinitelights = bpy.props.BoolProperty(name='Only Infinite Lights', default=False, description=
+        'Only consider infinite lights for this shadow catcher')
     advanced = bpy.props.BoolProperty(name='Advanced Options', default=False, description=
         'Show advanced material settings')
     samples = bpy.props.IntProperty(name='Samples', default=-1, min=-1, soft_max=16, max=256, description=
@@ -1794,6 +1796,8 @@ class luxrender_material_output_node(luxrender_node):
 
         if UseLuxCore():
             layout.prop(self, 'is_shadow_catcher')
+            if self.is_shadow_catcher:
+                layout.prop(self, 'sc_onlyinfinitelights')
             layout.prop_search(self, 'materialgroup', context.scene.luxrender_materialgroups, 'materialgroups',
                                'MGroup', icon='IMASEL')
 
@@ -1846,6 +1850,7 @@ class luxrender_material_output_node(luxrender_node):
 
         # Shadow catcher
         set_prop_mat(properties, luxcore_name, 'shadowcatcher.enable', self.is_shadow_catcher)
+        set_prop_mat(properties, luxcore_name, 'shadowcatcher.onlyinfinitelights', self.sc_onlyinfinitelights)
 
         return luxcore_name
 
