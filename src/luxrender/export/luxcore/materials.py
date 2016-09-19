@@ -656,6 +656,7 @@ class MaterialExporter(object):
             lc_mat = material.luxcore_material
 
             self.properties.Set(pyluxcore.Property(prefix + '.shadowcatcher.enable', lc_mat.is_shadow_catcher))
+            self.properties.Set(pyluxcore.Property(prefix + '.shadowcatcher.onlyinfinitelights', lc_mat.sc_onlyinfinitelights))
 
             # Material group
             materialgroup_name = lc_mat.materialgroup
