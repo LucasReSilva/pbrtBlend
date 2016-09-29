@@ -238,7 +238,7 @@ class LuxCoreExporter(object):
         temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', tonemapper))
 
         if tonemapper == 'TONEMAP_LINEAR':
-            scale = imagepipeline_settings.linear_scale
+            scale = imagepipeline_settings.linear_scale if self.is_viewport_render else imagepipeline_settings.linear_scale / 2.25
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', scale))
         elif tonemapper == 'TONEMAP_REINHARD02':
             prescale = imagepipeline_settings.reinhard_prescale
