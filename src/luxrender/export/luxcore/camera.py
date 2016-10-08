@@ -158,7 +158,7 @@ class CameraExporter(object):
             if blCamera.data.sensor_fit == 'VERTICAL':
                 aspect_fix = float(format(width / height , '.1f'))
             elif blCamera.data.sensor_fit == 'HORIZONTAL':
-                aspect_fix = blCamera.data.sensor_width / blCamera.data.sensor_height * float(format(height / width , '.1f'))
+                aspect_fix = blCamera.data.sensor_width / blCamera.data.sensor_width  * height / width * xaspect * float(format(width / height , '.1f'))
             else:
                 aspect_fix = 1.0
 
