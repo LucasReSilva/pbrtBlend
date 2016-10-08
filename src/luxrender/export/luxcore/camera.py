@@ -180,8 +180,11 @@ class CameraExporter(object):
         self.__convert_shutter(luxCamera)
 
         # Field of view
+        # Correction for vertical fit sensor, must truncate the float to .1f precision !
+        aspect_fix = round(width / height - 0.05, 1) if blCameraData.sensor_fit == 'VERTICAL' else 1.0
+
         if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
-            set_prop_cam(self.properties, 'fieldofview', math.degrees(blCameraData.angle))
+            set_prop_cam(self.properties, 'fieldofview', math.degrees(blCameraData.angle * aspect_fix))
 
         # screenwindow (for border rendering and camera shift)
         width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
