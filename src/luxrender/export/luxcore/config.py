@@ -192,9 +192,16 @@ class ConfigExporter(object):
     
     def __convert_sampler(self):
         engine_settings = self.blender_scene.luxcore_enginesettings
-    
-        self.properties.Set(pyluxcore.Property('sampler.type', [engine_settings.sampler_type]))
-    
+
+        if self.get_engine() == 'RTPATHCPU':
+            # RTPATHCPU needs a special sampler
+            self.properties.Set(pyluxcore.Property('sampler.type', 'RTPATHCPUSAMPLER'))
+        elif self.get_engine() in ('BIASPATHOCL', 'RTBIASPATHOCL'):
+            # (RT)BIASPATHOCL needs a special sampler
+            self.properties.Set(pyluxcore.Property('sampler.type', 'BIASPATHSAMPLER'))
+        else:
+            self.properties.Set(pyluxcore.Property('sampler.type', [engine_settings.sampler_type]))
+
         if engine_settings.advanced and engine_settings.sampler_type == 'METROPOLIS':
             self.properties.Set(pyluxcore.Property('sampler.metropolis.largesteprate', [engine_settings.largesteprate]))
             self.properties.Set(
@@ -318,6 +325,9 @@ class ConfigExporter(object):
         if self.get_engine() == 'RTPATHCPU':
             # RTPATHCPU needs a special sampler
             self.properties.Set(pyluxcore.Property('sampler.type', 'RTPATHCPUSAMPLER'))
+        elif self.get_engine() in ('BIASPATHOCL', 'RTBIASPATHOCL'):
+            # (RT)BIASPATHOCL needs a special sampler
+            self.properties.Set(pyluxcore.Property('sampler.type', 'BIASPATHSAMPLER'))
         else:
             # Sampler settings (same as for final render)
             self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))

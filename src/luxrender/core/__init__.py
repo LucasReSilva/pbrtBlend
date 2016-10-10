@@ -1068,7 +1068,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'RANDOM' : 'Random',
             'SOBOL' : 'Sobol',
             'METROPOLIS' : 'Metropolis',
-            'RTPATHCPUSAMPLER': 'RT Path Sampler'
+            'RTPATHCPUSAMPLER': 'RT Path Sampler',
+            'BIASPATHSAMPLER': 'Bias Path Sampler'
         }
 
         settings = scene.luxcore_enginesettings
