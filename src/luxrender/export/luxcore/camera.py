@@ -156,7 +156,7 @@ class CameraExporter(object):
             width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
 
             if blCamera.data.sensor_fit == 'VERTICAL':
-                aspect_fix = float(format(width / height, '.1f'))
+                aspect_fix = yaspect * (float(format(width / height + 0.1, '.1f')))
             elif blCamera.data.sensor_fit == 'HORIZONTAL':
                 aspect_fix = xaspect
             else:
