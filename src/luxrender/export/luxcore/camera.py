@@ -152,9 +152,6 @@ class CameraExporter(object):
 
             # TODO: in border render mode, the screenwindow should be adapted to the border
 
-            # Correction for vertical fit sensor, must truncate the float to .1f precision !
-            width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
-
             if blCamera.data.sensor_fit == 'VERTICAL':
                 aspect_fix = yaspect
             elif blCamera.data.sensor_fit == 'HORIZONTAL':
