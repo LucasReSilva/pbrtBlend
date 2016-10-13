@@ -194,7 +194,7 @@ class CameraExporter(object):
         if width / height - 1 >= 0.5:
             aspect = width / height - 0.05
         else:
-            aspect = 1.0
+            aspect = width / height
 
         aspect_fix = round(aspect, 1) if blCameraData.sensor_fit == 'VERTICAL' and not self.is_viewport_render else 1.0
 
