@@ -192,10 +192,7 @@ class CameraExporter(object):
         width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
 
         if blCameraData.sensor_fit == 'VERTICAL' and not self.is_viewport_render and width > height:
-            if width / height - 1 >= 0.5:
-                aspect_fix = round(width / height - 0.05, 1) # make sure it rounds down
-            else:
-                aspect_fix = round(width / height, 1)
+            aspect_fix = round(width / height - 0.05, 1) # make sure it rounds down
         else:
             aspect_fix = 1.0
 
