@@ -191,8 +191,10 @@ class CameraExporter(object):
         # Correction for vertical fit sensor, must truncate the float to .1f precision and round down !
         width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
 
-        if width / height - 1 >= 0.5:
+        if width > height and width / height - 1 >= 0.5:
             aspect = width / height - 0.05
+        elif width < height:
+            aspect = 1.0
         else:
             aspect = width / height
 
