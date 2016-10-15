@@ -191,15 +191,10 @@ class CameraExporter(object):
         # Correction for vertical fit sensor, must truncate the float to .1f precision and round down !
         width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
 
-        if width > height:
-            if width / height - 1 >= 0.5:
-                aspect = width / height - 0.05 # make sure it rounds down
-            else:
-                aspect = width / height
+        if blCameraData.sensor_fit == 'VERTICAL' and not self.is_viewport_render and width > height:
+            aspect_fix = round(width / height - 0.05, 1) # make sure it rounds down
         else:
-            aspect = 1.0
-
-        aspect_fix = round(aspect, 1) if blCameraData.sensor_fit == 'VERTICAL' and not self.is_viewport_render else 1.0
+            aspect_fix = 1.0
 
         if blCameraData.type == 'PERSP' and luxCamera.type == 'perspective':
             set_prop_cam(self.properties, 'fieldofview', math.degrees(blCameraData.angle * aspect_fix))
