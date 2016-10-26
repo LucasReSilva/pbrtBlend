@@ -642,8 +642,9 @@ class GeometryExporter(object):
                 instance |= mod.type in ('COLLISION', 'PARTICLE_INSTANCE', 'PARTICLE_SYSTEM', 'SMOKE')
 
             return instance
-        else:
-            return not self.is_preview
+
+        if self.is_preview:
+            return False
 
     def exportShapeDefinition(self, obj, mesh_definition, parent=None):
         """
