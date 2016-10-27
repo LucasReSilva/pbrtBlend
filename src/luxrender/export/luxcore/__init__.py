@@ -238,7 +238,15 @@ class LuxCoreExporter(object):
         temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', tonemapper))
 
         if tonemapper == 'TONEMAP_LINEAR':
-            scale = imagepipeline_settings.linear_scale
+            # With autogain final render exposure is too bright for blender. I use the same factor empirically
+            # found for lux_camera.exposure_time(). This will nearly match viewport and final render, but while
+            # the viewport gain is calculated from the whole area not filmsize, differences are expected.
+            # TODO: find out reason for color diffences, which colorspace is Blender expecting ?
+            if not (self.is_viewport_render or export_to_luxcoreui) and imagepipeline_settings.use_auto_linear:
+                scale = imagepipeline_settings.linear_scale / 2.25
+            else:
+                scale = imagepipeline_settings.linear_scale
+
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.scale', scale))
         elif tonemapper == 'TONEMAP_REINHARD02':
             prescale = imagepipeline_settings.reinhard_prescale
