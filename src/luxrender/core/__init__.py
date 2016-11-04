@@ -141,6 +141,8 @@ if bpy.app.version > (2, 77, 2):
     _register_elm(bl_ui.properties_physics_field.PHYSICS_PT_collision)
     _register_elm(bl_ui.properties_physics_fluid.PHYSICS_PT_fluid)
     _register_elm(bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body)
+    _register_elm(bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body_dynamics)
+    _register_elm(bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body_collisions)
     _register_elm(bl_ui.properties_physics_rigidbody_constraint.PHYSICS_PT_rigid_body_constraint)
     _register_elm(bl_ui.properties_physics_softbody.PHYSICS_PT_softbody)
     _register_elm(bl_ui.properties_physics_cloth.PHYSICS_PT_cloth)
