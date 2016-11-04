@@ -135,22 +135,60 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview)
 _register_elm(bl_ui.properties_data_lamp.DATA_PT_context_lamp)
 
 if bpy.app.version > (2, 77, 2):
-    _register_elm(bl_ui.properties_physics_common.PHYSICS_PT_add, required=True)
-    _register_elm(bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dynamic_paint)
-    _register_elm(bl_ui.properties_physics_field.PHYSICS_PT_field)
-    _register_elm(bl_ui.properties_physics_field.PHYSICS_PT_collision)
-    _register_elm(bl_ui.properties_physics_fluid.PHYSICS_PT_fluid)
-    _register_elm(bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body)
-    _register_elm(bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body_dynamics)
-    _register_elm(bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body_collisions)
-    _register_elm(bl_ui.properties_physics_rigidbody_constraint.PHYSICS_PT_rigid_body_constraint)
-    _register_elm(bl_ui.properties_physics_softbody.PHYSICS_PT_softbody)
-    _register_elm(bl_ui.properties_physics_cloth.PHYSICS_PT_cloth)
-    _register_elm(bl_ui.properties_physics_smoke.PHYSICS_PT_smoke)
-    _register_elm(bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_groups)
-    _register_elm(bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_cache)
-    _register_elm(bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_highres)
-    _register_elm(bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_field_weights)
+
+    blender_psys_list = [
+        # Common
+        bl_ui.properties_physics_common.PHYSICS_PT_add,
+        # Dynamic paint
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dynamic_paint,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_advanced_canvas,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_canvas_output,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_canvas_initial_color,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_effects,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_cache,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_brush_source,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_brush_velocity,
+        bl_ui.properties_physics_dynamicpaint.PHYSICS_PT_dp_brush_wave,
+        # Forcefields
+        bl_ui.properties_physics_field.PHYSICS_PT_field,
+        # Collisions
+        bl_ui.properties_physics_field.PHYSICS_PT_collision,
+        # Fluid
+        bl_ui.properties_physics_fluid.PHYSICS_PT_fluid,
+        bl_ui.properties_physics_fluid.PHYSICS_PT_domain_gravity,
+        bl_ui.properties_physics_fluid.PHYSICS_PT_domain_boundary,
+        bl_ui.properties_physics_fluid.PHYSICS_PT_domain_particles,
+        # Rigidbody
+        bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body,
+        bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body_dynamics,
+        bl_ui.properties_physics_rigidbody.PHYSICS_PT_rigid_body_collisions,
+        # Rigidbody constraints
+        bl_ui.properties_physics_rigidbody_constraint.PHYSICS_PT_rigid_body_constraint,
+        # Softbody
+        bl_ui.properties_physics_softbody.PHYSICS_PT_softbody,
+        bl_ui.properties_physics_softbody.PHYSICS_PT_softbody_cache,
+        bl_ui.properties_physics_softbody.PHYSICS_PT_softbody_goal,
+        bl_ui.properties_physics_softbody.PHYSICS_PT_softbody_edge,
+        bl_ui.properties_physics_softbody.PHYSICS_PT_softbody_collision,
+        bl_ui.properties_physics_softbody.PHYSICS_PT_softbody_solver,
+        bl_ui.properties_physics_softbody.PHYSICS_PT_softbody_field_weights,
+        # Cloth
+        bl_ui.properties_physics_cloth.PHYSICS_PT_cloth,
+        bl_ui.properties_physics_cloth.PHYSICS_PT_cloth_cache,
+        bl_ui.properties_physics_cloth.PHYSICS_PT_cloth_collision,
+        bl_ui.properties_physics_cloth.PHYSICS_PT_cloth_stiffness,
+        bl_ui.properties_physics_cloth.PHYSICS_PT_cloth_sewing,
+        bl_ui.properties_physics_cloth.PHYSICS_PT_cloth_field_weights,
+        # Smoke
+        bl_ui.properties_physics_smoke.PHYSICS_PT_smoke,
+        bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_groups,
+        bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_cache,
+        bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_highres,
+        bl_ui.properties_physics_smoke.PHYSICS_PT_smoke_field_weights
+    ]
+
+    for blender_psys in blender_psys_list:
+        _register_elm(blender_psys)
 
 # Some additions to Blender panels for better allocation in context
 # Use this example for such overrides
