@@ -32,7 +32,7 @@ bl_info = {
     "name": "LuxRender",
     "author": "LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), "
     "Jens Verwiebe, Jason Clarke (JtheNinja), Michael Klemm (neo2068), Simon Wendsche (B.Y.O.B.)",
-    "version": (1, 6),
+    "version": (1, 7, 'dev'),
     "blender": (2, 67, 1),
     "api": 57908,
     "category": "Render",
