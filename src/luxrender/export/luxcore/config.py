@@ -300,7 +300,18 @@ class ConfigExporter(object):
             self.properties.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type',
                                                  [engine_settings.biaspath_lights_samplingstrategy_type]))
         elif engine in ['PATHCPU', 'PATHOCL']:
-            self.properties.Set(pyluxcore.Property('path.maxdepth', [engine_settings.path_maxdepth + 1]))
+            self.properties.Set(pyluxcore.Property('path.maxdepth',
+                                                 [engine_settings.path_maxdepth + 1]))
+            if engine == 'PATHOCL':
+                self.properties.Set(pyluxcore.Property('path.pathdepth.diffuse',
+                                                     [engine_settings.path_pathdepth_diffuse + 1]))
+                self.properties.Set(pyluxcore.Property('path.pathdepth.glossy',
+                                                     [engine_settings.path_pathdepth_glossy + 1]))
+                self.properties.Set(pyluxcore.Property('path.pathdepth.specular',
+                                                     [engine_settings.path_pathdepth_specular]))
+                self.properties.Set(pyluxcore.Property('path.lights.samplingstrategy.type',
+                                                     [engine_settings.path_lights_samplingstrategy_type]))
+
             self.properties.Set(pyluxcore.Property('path.clamping.variance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
             # Transparent film enables using black bg
