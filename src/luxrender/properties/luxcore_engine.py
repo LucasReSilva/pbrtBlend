@@ -146,9 +146,9 @@ class luxcore_enginesettings(declarative_property_group):
         # BIASPATH sampling
         'label_sampling': {'renderengine_type': 'BIASPATH'},
         'biaspath_sampling_aa_size': {'renderengine_type': 'BIASPATH'},
-        'biaspath_sampling_diffuse_size': {'renderengine_type': 'BIASPATH'},
-        'biaspath_sampling_glossy_size': {'renderengine_type': 'BIASPATH'},
-        'biaspath_sampling_specular_size': {'renderengine_type': 'BIASPATH'},
+        'biaspath_sampling_diffuse_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
+        'biaspath_sampling_glossy_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
+        'biaspath_sampling_specular_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
         # BIASPATH path depth
         'label_path_depth': {'renderengine_type': 'BIASPATH'},
         'biaspath_pathdepth_total': {'renderengine_type': 'BIASPATH'},
