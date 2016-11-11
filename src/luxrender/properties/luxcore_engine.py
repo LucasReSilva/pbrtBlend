@@ -360,7 +360,7 @@ class luxcore_enginesettings(declarative_property_group):
         {   # PATH
             'type': 'text',
             'attr': 'label_path_depth',
-            'name': 'Path Depths:',
+            'name': 'Path Engine Depths:',
         },
         {
             'type': 'int',
@@ -555,7 +555,7 @@ rendering with the reduced noise level',
         },
         {
             'type': 'text',
-            'name': 'Biaspath Depths:',
+            'name': 'Biaspath Engine Depths:',
             'attr': 'label_biaspath_depth',
         },
         {
