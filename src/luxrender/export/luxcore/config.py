@@ -279,7 +279,7 @@ class ConfigExporter(object):
 
             self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_samples))
 
-            if engine == 'BIASPATHCPU' and not self.is_viewport_render:
+            if engine == 'BIASPATHCPU':
                 diffuse_samples = engine_settings.biaspath_sampling_diffuse_size
                 glossy_samples = engine_settings.biaspath_sampling_glossy_size
                 specular_samples = engine_settings.biaspath_sampling_specular_size
