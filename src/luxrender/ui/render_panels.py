@@ -125,7 +125,7 @@ class render_settings(render_panel):
                 row.label('')
                 row.prop(engine_settings, 'biaspath_use_path_in_viewport')
 
-            if engine_settings.renderengine_type == 'BIASPATH':
+            if engine_settings.renderengine_type == 'BIASPATH' and engine_settings.device == 'CPU':
                 split = layout.split()
 
                 row = split.row()
