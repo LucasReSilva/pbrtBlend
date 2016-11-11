@@ -276,14 +276,16 @@ class ConfigExporter(object):
                 aa_samples = diffuse_samples = glossy_samples = specular_samples = 1
             else:
                 aa_samples = engine_settings.biaspath_sampling_aa_size
+
+            self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_samples))
+
+            if engine == 'BIASPATHCPU' and not self.is_viewport_render:
                 diffuse_samples = engine_settings.biaspath_sampling_diffuse_size
                 glossy_samples = engine_settings.biaspath_sampling_glossy_size
                 specular_samples = engine_settings.biaspath_sampling_specular_size
-
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_samples))
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', diffuse_samples))
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.glossy.size', glossy_samples))
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.specular.size', specular_samples))
+                self.properties.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', diffuse_samples))
+                self.properties.Set(pyluxcore.Property('biaspath.sampling.glossy.size', glossy_samples))
+                self.properties.Set(pyluxcore.Property('biaspath.sampling.specular.size', specular_samples))
 
             # Path depths, note that for non-specular paths +1 is added to the path depth.
             # For details see http://www.luxrender.net/forum/viewtopic.php?f=11&t=11101&start=390#p114959
