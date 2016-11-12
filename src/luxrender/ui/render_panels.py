@@ -152,10 +152,10 @@ class render_settings(render_panel):
                     glossy = engine_settings.biaspath_sampling_glossy_size
                     specular = engine_settings.biaspath_sampling_specular_size
                     # Pathdepth settings
-                    depth_total = engine_settings.biaspath_pathdepth_total
-                    depth_diffuse = engine_settings.biaspath_pathdepth_diffuse
-                    depth_glossy = engine_settings.biaspath_pathdepth_glossy
-                    depth_specular = engine_settings.biaspath_pathdepth_specular
+                    depth_total = engine_settings.path_maxdepth
+                    depth_diffuse = engine_settings.path_pathdepth_diffuse
+                    depth_glossy = engine_settings.path_pathdepth_glossy
+                    depth_specular = engine_settings.path_pathdepth_specular
 
                     col = layout.column(align=True)
                     col.scale_y = 0.6
