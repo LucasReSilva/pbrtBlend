@@ -135,7 +135,7 @@ class luxcore_enginesettings(declarative_property_group):
         'bidir_lightdepth': {'renderengine_type': 'BIDIR'},
         # (BIAS)PATH
         'label_path_depth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'path_pathdepth_total': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'path_maxdepth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         'path_pathdepth_diffuse': O([{'renderengine_type': 'BIASPATH'}, A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}])]),
         'path_pathdepth_glossy': O([{'renderengine_type': 'BIASPATH'}, A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}])]),
         'path_pathdepth_specular': O([{'renderengine_type': 'BIASPATH'}, A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}])]),

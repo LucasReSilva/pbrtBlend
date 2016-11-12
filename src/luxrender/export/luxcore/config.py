@@ -290,7 +290,7 @@ class ConfigExporter(object):
             # Path depths, note that for non-specular paths +1 is added to the path depth.
             # For details see http://www.luxrender.net/forum/viewtopic.php?f=11&t=11101&start=390#p114959
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.total',
-                                                 [engine_settings.path_pathdepth_total + 1]))
+                                                 [engine_settings.path_maxdepth + 1]))
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.diffuse',
                                                  [engine_settings.path_pathdepth_diffuse + 1]))
             self.properties.Set(pyluxcore.Property('biaspath.pathdepth.glossy',
