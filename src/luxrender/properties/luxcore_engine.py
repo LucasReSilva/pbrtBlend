@@ -347,7 +347,7 @@ class luxcore_enginesettings(declarative_property_group):
             'max': 2048,
             'save_in_preset': True
         },
-        {   # PATH
+        {   # (BIAS)PATH
             'type': 'text',
             'attr': 'label_path_depth',
             'name': 'Path Depths:',
@@ -362,7 +362,7 @@ class luxcore_enginesettings(declarative_property_group):
             'max': 2048,
             'save_in_preset': True
         },
-        {
+        {   # BISASPATH + PATHHOCL
             'type': 'int',
             'attr': 'path_pathdepth_diffuse',
             'name': 'Diffuse',
@@ -503,7 +503,7 @@ rendering with the reduced noise level',
             'name': 'Sampling:',
             'attr': 'label_sampling',
         },
-        {
+        {   # BISASPATH + PATH
             'type': 'int',
             'attr': 'biaspath_sampling_aa_size',
             'name': 'AA Samples',
@@ -513,7 +513,7 @@ rendering with the reduced noise level',
             'max': 64,
             'save_in_preset': True
         },
-        {
+        {   # BISASPATH + PATHHOCL
             'type': 'int',
             'attr': 'biaspath_sampling_diffuse_size',
             'name': 'Diffuse',
@@ -523,7 +523,7 @@ rendering with the reduced noise level',
             'max': 64,
             'save_in_preset': True
         },
-        {
+        {   # BISASPATH + PATHHOCL
             'type': 'int',
             'attr': 'biaspath_sampling_glossy_size',
             'name': 'Glossy',
@@ -533,7 +533,7 @@ rendering with the reduced noise level',
             'max': 64,
             'save_in_preset': True
         },
-        {
+        {   # BISASPATH + PATHHOCL
             'type': 'int',
             'attr': 'biaspath_sampling_specular_size',
             'name': 'Specular',
