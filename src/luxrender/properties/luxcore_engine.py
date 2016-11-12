@@ -83,7 +83,7 @@ class luxcore_enginesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        ['label_renderengine_type', 'renderengine_type'],
+        # ['label_renderengine_type', 'renderengine_type'],
         # BIDIR
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH

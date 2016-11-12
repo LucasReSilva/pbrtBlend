@@ -85,6 +85,15 @@ class render_settings(render_panel):
                 col.label('Viewport render might not match final render.')
                 layout.operator('luxrender.fix_color_management')
 
+            # Engines
+            split = layout.split()
+
+            row = split.row()
+            sub = row.row()
+            sub.label(text='Engines:')
+
+            sub.prop(engine_settings, 'renderengine_type')
+
             # Device enums
             split = layout.split()
 
