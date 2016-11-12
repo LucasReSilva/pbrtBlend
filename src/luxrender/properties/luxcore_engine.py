@@ -87,7 +87,7 @@ class luxcore_enginesettings(declarative_property_group):
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH
         'label_path_depth',
-        'path_maxdepth',
+        'path_pathdepth_total',
         ['path_pathdepth_diffuse', 'path_pathdepth_glossy', 'path_pathdepth_specular'],
         # BIDIRVMCPU
         ['bidirvm_eyedepth', 'bidirvm_lightdepth'],
@@ -134,7 +134,7 @@ class luxcore_enginesettings(declarative_property_group):
         'bidir_lightdepth': {'renderengine_type': 'BIDIR'},
         # (BIAS)PATH
         'label_path_depth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'path_maxdepth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'path_pathdepth_total': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         'path_pathdepth_diffuse': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         'path_pathdepth_glossy': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         'path_pathdepth_specular': {'renderengine_type': O(['BIASPATH', 'PATH'])},
@@ -353,7 +353,7 @@ class luxcore_enginesettings(declarative_property_group):
         },
         {
             'type': 'int',
-            'attr': 'path_maxdepth',
+            'attr': 'path_pathdepth_total',
             'name': 'Max Total Depth',
             'description': 'Max recursion depth for ray casting from eye',
             'default': 8,
