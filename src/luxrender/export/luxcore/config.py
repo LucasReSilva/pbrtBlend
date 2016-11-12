@@ -302,13 +302,12 @@ class ConfigExporter(object):
         elif engine in ['PATHCPU', 'PATHOCL']:
             self.properties.Set(pyluxcore.Property('path.maxdepth',
                                                  [engine_settings.path_maxdepth + 1]))
-            if engine == 'PATHOCL':
-                self.properties.Set(pyluxcore.Property('path.pathdepth.diffuse',
-                                                     [engine_settings.path_pathdepth_diffuse + 1]))
-                self.properties.Set(pyluxcore.Property('path.pathdepth.glossy',
-                                                     [engine_settings.path_pathdepth_glossy + 1]))
-                self.properties.Set(pyluxcore.Property('path.pathdepth.specular',
-                                                     [engine_settings.path_pathdepth_specular]))
+            self.properties.Set(pyluxcore.Property('path.pathdepth.diffuse',
+                                                 [engine_settings.path_pathdepth_diffuse + 1]))
+            self.properties.Set(pyluxcore.Property('path.pathdepth.glossy',
+                                                 [engine_settings.path_pathdepth_glossy + 1]))
+            self.properties.Set(pyluxcore.Property('path.pathdepth.specular',
+                                                 [engine_settings.path_pathdepth_specular]))
 
             self.properties.Set(pyluxcore.Property('path.clamping.variance.maxvalue', radiance_clamp))
             self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
