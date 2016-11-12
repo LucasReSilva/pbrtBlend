@@ -135,9 +135,9 @@ class luxcore_enginesettings(declarative_property_group):
         # (BIAS)PATH
         'label_path_depth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         'path_maxdepth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'path_pathdepth_diffuse': {'renderengine_type': O(['PATH', 'BIASPATH'])},
-        'path_pathdepth_glossy': {'renderengine_type': O(['PATH', 'BIASPATH'])},
-        'path_pathdepth_specular': {'renderengine_type': O(['PATH', 'BIASPATH'])},
+        'path_pathdepth_diffuse': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'path_pathdepth_glossy': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'path_pathdepth_specular': {'renderengine_type': O(['BIASPATH', 'PATH'])},
         # BIDIRVM
         'bidirvm_eyedepth': {'renderengine_type': 'BIDIRVM'},
         'bidirvm_lightdepth': {'renderengine_type': 'BIDIRVM'},
@@ -361,7 +361,7 @@ class luxcore_enginesettings(declarative_property_group):
             'max': 2048,
             'save_in_preset': True
         },
-        {   # BISASPATH + PATHHOCL
+        {   # (BIAS)PATH
             'type': 'int',
             'attr': 'path_pathdepth_diffuse',
             'name': 'Diffuse',
