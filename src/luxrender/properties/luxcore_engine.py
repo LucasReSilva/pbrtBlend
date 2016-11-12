@@ -83,7 +83,6 @@ class luxcore_enginesettings(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
-        # ['label_renderengine_type', 'renderengine_type'],
         # BIDIR
         ['bidir_eyedepth', 'bidir_lightdepth'],
         # PATH
@@ -367,7 +366,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'path_pathdepth_diffuse',
             'name': 'Diffuse',
             'description': 'Max recursion depth for a diffuse path',
-            'default': 2,
+            'default': 8,
             'min': 0,
             'max': 2048,
             'save_in_preset': True
@@ -377,7 +376,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'path_pathdepth_glossy',
             'name': 'Glossy',
             'description': 'Max recursion depth for a glossy path',
-            'default': 1,
+            'default': 8,
             'min': 0,
             'max': 2048,
             'save_in_preset': True
@@ -387,7 +386,7 @@ class luxcore_enginesettings(declarative_property_group):
             'attr': 'path_pathdepth_specular',
             'name': 'Specular',
             'description': 'Max recursion depth for a specular path',
-            'default': 5,
+            'default': 8,
             'min': 0,
             'max': 2048,
             'save_in_preset': True
