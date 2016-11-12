@@ -98,9 +98,6 @@ class luxcore_enginesettings(declarative_property_group):
         'label_sampling',
         'biaspath_sampling_aa_size',
         ['biaspath_sampling_diffuse_size', 'biaspath_sampling_glossy_size', 'biaspath_sampling_specular_size'],
-        'label_biaspath_depth',
-        'biaspath_pathdepth_total',
-        ['biaspath_pathdepth_diffuse', 'biaspath_pathdepth_glossy', 'biaspath_pathdepth_specular'],
         ['use_clamping', 'biaspath_clamping_radiance_maxvalue'],
         ['label_sampler_type', 'sampler_type'],
         ['label_biaspath_sampler_type', 'biaspath_sampler_type'],
@@ -136,13 +133,12 @@ class luxcore_enginesettings(declarative_property_group):
         # BIDIR
         'bidir_eyedepth': {'renderengine_type': 'BIDIR'},
         'bidir_lightdepth': {'renderengine_type': 'BIDIR'},
-        # PATH
-        'label_path_depth': {'renderengine_type': 'PATH'},
-        'path_maxdepth': {'renderengine_type': 'PATH'},
-        'path_pathdepth_total': {'renderengine_type': 'PATH'},
-        'path_pathdepth_diffuse': A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}]),
-        'path_pathdepth_glossy': A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}]),
-        'path_pathdepth_specular': A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}]),
+        # (BIAS)PATH
+        'label_path_depth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'path_pathdepth_total': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'path_pathdepth_diffuse': O([{'renderengine_type': 'BIASPATH'}, A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}])]),
+        'path_pathdepth_glossy': O([{'renderengine_type': 'BIASPATH'}, A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}])]),
+        'path_pathdepth_specular': O([{'renderengine_type': 'BIASPATH'}, A([{'device': 'OCL'}, {'renderengine_type': 'PATH'}])]),
         # BIDIRVM
         'bidirvm_eyedepth': {'renderengine_type': 'BIDIRVM'},
         'bidirvm_lightdepth': {'renderengine_type': 'BIDIRVM'},
@@ -155,12 +151,6 @@ class luxcore_enginesettings(declarative_property_group):
         'biaspath_sampling_diffuse_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
         'biaspath_sampling_glossy_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
         'biaspath_sampling_specular_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
-        # BIASPATH path depth
-        'label_biaspath_depth': {'renderengine_type': 'BIASPATH'},
-        'biaspath_pathdepth_total': {'renderengine_type': 'BIASPATH'},
-        'biaspath_pathdepth_diffuse': {'renderengine_type': 'BIASPATH'},
-        'biaspath_pathdepth_glossy': {'renderengine_type': 'BIASPATH'},
-        'biaspath_pathdepth_specular': {'renderengine_type': 'BIASPATH'},
         # BIASPATH obscure features
         'label_biaspath_lights_samplingstrategy_type':  A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
         'biaspath_lights_samplingstrategy_type': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
@@ -360,7 +350,7 @@ class luxcore_enginesettings(declarative_property_group):
         {   # PATH
             'type': 'text',
             'attr': 'label_path_depth',
-            'name': 'Path Engine Depths:',
+            'name': 'Path Depths:',
         },
         {
             'type': 'int',
@@ -551,51 +541,6 @@ rendering with the reduced noise level',
             'default': 1,
             'min': 1,
             'max': 64,
-            'save_in_preset': True
-        },
-        {
-            'type': 'text',
-            'name': 'Biaspath Engine Depths:',
-            'attr': 'label_biaspath_depth',
-        },
-        {
-            'type': 'int',
-            'attr': 'biaspath_pathdepth_total',
-            'name': 'Max Total Depth',
-            'description': 'Max recursion total depth for a path',
-            'default': 10,
-            'min': 1,
-            'max': 2048,
-            'save_in_preset': True
-        },
-        {
-            'type': 'int',
-            'attr': 'biaspath_pathdepth_diffuse',
-            'name': 'Diffuse',
-            'description': 'Max recursion depth for a diffuse path',
-            'default': 2,
-            'min': 0,
-            'max': 2048,
-            'save_in_preset': True
-        },
-        {
-            'type': 'int',
-            'attr': 'biaspath_pathdepth_glossy',
-            'name': 'Glossy',
-            'description': 'Max recursion depth for a glossy path',
-            'default': 1,
-            'min': 0,
-            'max': 2048,
-            'save_in_preset': True
-        },
-        {
-            'type': 'int',
-            'attr': 'biaspath_pathdepth_specular',
-            'name': 'Specular',
-            'description': 'Max recursion depth for a specular path',
-            'default': 5,
-            'min': 0,
-            'max': 2048,
             'save_in_preset': True
         },
         {
