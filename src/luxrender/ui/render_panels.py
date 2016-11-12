@@ -134,7 +134,7 @@ class render_settings(render_panel):
                 row.label('')
                 row.prop(engine_settings, 'biaspath_use_path_in_viewport')
 
-            if engine_settings.renderengine_type == 'BIASPATH' and engine_settings.device == 'CPU':
+            if engine_settings.renderengine_type == 'BIASPATH':
                 split = layout.split()
 
                 row = split.row()
@@ -148,9 +148,12 @@ class render_settings(render_panel):
                 if engine_settings.biaspath_show_sample_estimates:
                     # Sample settings
                     aa = engine_settings.biaspath_sampling_aa_size
-                    diffuse = engine_settings.biaspath_sampling_diffuse_size
-                    glossy = engine_settings.biaspath_sampling_glossy_size
-                    specular = engine_settings.biaspath_sampling_specular_size
+                    if engine_settings.device == 'CPU':
+                        diffuse = engine_settings.biaspath_sampling_diffuse_size
+                        glossy = engine_settings.biaspath_sampling_glossy_size
+                        specular = engine_settings.biaspath_sampling_specular_size
+                    else:
+                        diffuse = glossy = specular = aa
                     # Pathdepth settings
                     depth_total = engine_settings.path_pathdepth_total
                     depth_diffuse = engine_settings.path_pathdepth_diffuse
