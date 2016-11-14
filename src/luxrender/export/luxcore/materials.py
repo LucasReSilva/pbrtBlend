@@ -793,7 +793,13 @@ class MaterialExporter(object):
                     use_alpha_transparency = False
 
                 if use_alpha_transparency:
-                    self.properties.Set(pyluxcore.Property(prefix + '.transparency', alpha))
+                    if not prefix.endswith('_coated'):
+                        self.properties.Set(pyluxcore.Property(prefix + '.transparency', alpha))
+                    else:
+                        # We must apply the transparency to the basemat
+                        base_prefix = prefix.replace('_coated', '')
+                        self.properties.Set(pyluxcore.Property(base_prefix + '.transparency', alpha))
+
         except Exception as err:
             message = 'Material export failed, skipping material: %s\n%s' % (self.material.name, err)
             log_exception(self.luxcore_exporter, message)
