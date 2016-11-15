@@ -84,7 +84,7 @@ class tonemapping_panel(imageeditor_panel):
         layout.label('Tonemapper:')
         layout.prop(imagepipeline_settings, 'tonemapper_type')
 
-        if imagepipeline_settings.tonemapper_type in ['TONEMAP_LINEAR', 'TONEMAP_LUXLINEAR']:
+        if imagepipeline_settings.tonemapper_type == 'TONEMAP_LINEAR':
             layout.prop(imagepipeline_settings, 'use_auto_linear')
 
         if imagepipeline_settings.tonemapper_type == 'TONEMAP_LINEAR':
