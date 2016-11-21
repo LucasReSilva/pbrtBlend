@@ -362,28 +362,28 @@ class ui_luxrender_material_utils(luxrender_material_base):
             return False
 
 
-@LuxRenderAddon.addon_register_class
-class ui_luxrender_material_db(luxrender_material_base):
-    bl_label = 'LuxRender Materials Database'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-        if not lrmdb_state._active:
-            self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
-        else:
-            self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
-
-            for action in lrmdb_state.actions:
-                if action.callback is None:
-                    self.layout.label(text=action.label)
-                else:
-                    self.layout.operator('luxrender.lrmdb', text=action.label).invoke_action_id = action.aid
-
-    @classmethod
-    def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
-            return False
-        try:
-            return not context.material.luxrender_material.nodetree
-        except:
-            return False
+# @LuxRenderAddon.addon_register_class
+# class ui_luxrender_material_db(luxrender_material_base):
+#     bl_label = 'LuxRender Materials Database'
+#     bl_options = {'DEFAULT_CLOSED'}
+#
+#     def draw(self, context):
+#         if not lrmdb_state._active:
+#             self.layout.operator('luxrender.lrmdb', text='Enable').invoke_action_id = -1
+#         else:
+#             self.layout.operator('luxrender.lrmdb', text='Disable').invoke_action_id = -2
+#
+#             for action in lrmdb_state.actions:
+#                 if action.callback is None:
+#                     self.layout.label(text=action.label)
+#                 else:
+#                     self.layout.operator('luxrender.lrmdb', text=action.label).invoke_action_id = action.aid
+#
+#     @classmethod
+#     def poll(cls, context):
+#         if context.scene.render.engine != 'LUXRENDER_RENDER':
+#             return False
+#         try:
+#             return not context.material.luxrender_material.nodetree
+#         except:
+#             return False
