@@ -395,8 +395,9 @@ class ConfigExporter(object):
 
 
     def __convert_epsilon(self):
-        # Lux(Core) default is 10^-9, which causes dark specks in the world center
-        self.properties.Set(pyluxcore.Property('scene.epsilon.min', 10**-5))
+        engine_settings = self.blender_scene.luxcore_enginesettings
+        self.properties.Set(pyluxcore.Property('scene.epsilon.min', engine_settings.epsilon_min))
+        self.properties.Set(pyluxcore.Property('scene.epsilon.max', engine_settings.epsilon_max))
 
     
     def __convert_custom_props(self):
