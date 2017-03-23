@@ -114,6 +114,7 @@ class luxcore_enginesettings(declarative_property_group):
         ['label_largesteprate', 'largesteprate'],
         ['label_maxconsecutivereject', 'maxconsecutivereject'],
         ['label_imagemutationrate', 'imagemutationrate'],
+        ['epsilon_min', 'epsilon_max'],
 
         # Halt conditions
         'show_halt_conditions',
@@ -211,6 +212,9 @@ class luxcore_enginesettings(declarative_property_group):
         'label_seed': {'advanced': True},
         'seed': {'advanced': True},
         'use_animated_seed': {'advanced': True},
+        # Epsilon (advanced option)
+        'epsilon_min': {'advanced': True},
+        'epsilon_max': {'advanced': True},
     }
 
     alert = {}
@@ -993,5 +997,26 @@ may mute lamps and caustics',
             'default': False,
             'icon': 'TIME',
             'toggle': True,
+        },
+        # Epsilon
+        {
+            'type': 'float',
+            'attr': 'epsilon_min',
+            'name': 'Min Epsilon',
+            'description': 'User higher values when artifacts appear in large scenes',
+            # Lux(Core) default is 10^-9, which causes dark specks in the world center
+            'default': 10**-5,
+            'soft_min': 10**-9,
+            'soft_max': 0.1,
+            'precision': 10000,
+        },
+        {
+            'type': 'float',
+            'attr': 'epsilon_max',
+            'name': 'Max Epsilon',
+            'description': '',
+            'default': 0.1,
+            'soft_min': 0.001,
+            'soft_max': 100,
         },
     ]
