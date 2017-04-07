@@ -1341,6 +1341,22 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 
         add_common_sockets(self)
 
+    def draw_buttons(self, context, layout):
+        # OpenCL or CPU?
+        enginesettings = context.scene.luxcore_enginesettings
+
+        if UseLuxCore() and (enginesettings.device == 'OCL' or enginesettings.device_preview == 'OCL'):
+            mix_mats = [get_linked_node(self.inputs[1]), get_linked_node(self.inputs[2])]
+            submats_have_bump = False
+            for mat in mix_mats:
+                if mat and 'Bump' in mat.inputs and mat.inputs['Bump'].is_linked:
+                    submats_have_bump = True
+                    break
+
+            if submats_have_bump:
+                layout.label('Bump on submats not supported by OpenCL engines!', icon='ERROR')
+                layout.label('Use the bump slot of this node instead', icon='INFO')
+
     def export_material(self, make_material, make_texture):
         print('export node: mix')
 
