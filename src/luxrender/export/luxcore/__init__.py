@@ -264,9 +264,9 @@ class LuxCoreExporter(object):
             fstop = lux_camera.fstop
 
             if self.is_viewport_render or export_to_luxcoreui:
-                exposure = lux_camera.exposure_time() * 2.25
-            else:
                 exposure = lux_camera.exposure_time()
+            else:
+                exposure = lux_camera.exposure_time() / 2.25
 
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.sensitivity', sensitivity))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.exposure', exposure))
