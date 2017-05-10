@@ -140,7 +140,7 @@ class LightExporter(object):
         gain_spectrum = self.__multiply_gain(energy, gain_r, gain_g, gain_b)  # luxcore gain is rgb
 
         # not for distant light,
-        # not for area lamps (because these are meshlights and gain is controlled by material settings
+        # not for area lamps (because these are meshlights and gain is controlled by material settings)
         if lux_lamp.L_color and not (
                         light.type == 'SUN' and lux_lamp.sunsky_type != 'distant') and not (
                         light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
@@ -372,19 +372,16 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.specular.enable',
                                                  light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
+                emission_color = list(light.luxrender_lamp.luxrender_lamp_area.L_color)
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
-                raw_color = light.luxrender_lamp.luxrender_lamp_area.L_color * energy * (
-                    get_worldscale(as_scalematrix=False) ** 2)
-
-                gain_r = light.luxrender_lamp.luxcore_lamp.gain_r
-                gain_g = light.luxrender_lamp.luxcore_lamp.gain_g
-                gain_b = light.luxrender_lamp.luxcore_lamp.gain_b
-                emission_color = [raw_color[0] * gain_r, raw_color[1] * gain_g, raw_color[2] * gain_b]
+                area_gain = energy * (get_worldscale(as_scalematrix=False) ** 2)
+                area_gain = self.__multiply_gain(area_gain, gain_r, gain_g, gain_b)
     
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.type', ['matte']))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.kd', [0.0, 0.0, 0.0]))
 
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.gain', area_gain))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.power',
                                                  light.luxrender_lamp.luxrender_lamp_area.power))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.efficency',
