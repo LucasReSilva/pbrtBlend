@@ -44,6 +44,10 @@ class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_rendere
     def draw(self, context):
         if UseLuxCore():
             self.layout.label('Displacement and portals not yet supported by LuxCore', icon='INFO')
+
+            if context.object.data.luxrender_mesh.portal:
+                self.layout.label('This mesh was flagged as portal and won\'t be exported', icon='INFO')
+
         else:
             if context.object.luxrender_object.append_proxy and context.object.luxrender_object.hide_proxy_mesh:
                 msg = ['Mesh options not available when',
