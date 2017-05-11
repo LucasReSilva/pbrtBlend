@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-import bpy, os
+import bpy, os, math
 
 from . import (create_luxcore_name_mat, create_luxcore_name, warning_classic_node, has_interior_volume,
                export_submat_luxcore, export_emission_luxcore)
@@ -1654,6 +1654,11 @@ class luxrender_light_area_node(luxrender_material_node):
     gain = bpy.props.FloatProperty(name='Gain', default=1.0, min=0.0, description='Multiplier for light intensity')
     power = bpy.props.FloatProperty(name='Power (W)', default=100.0, min=0.0)
     efficacy = bpy.props.FloatProperty(name='Efficacy (lm/W)', default=17.0, min=0.0)
+    theta = bpy.props.FloatProperty(name='Spread Angle', default=math.radians(90), subtype='ANGLE', unit='ROTATION',
+                                    min=0.0, soft_min=math.radians(5), max=math.radians(90),
+                                    description='How directional the light is emitted, set as the half-angle of the light source. '
+                                    'Default is 90°. Smaller values mean that more light is emitted in the direction '
+                                    'of the light and less to the sides.')
     iesname = bpy.props.StringProperty(name='IES Data', description='IES file path', subtype='FILE_PATH')
     importance = bpy.props.FloatProperty(name='Importance', default=1.0, min=0.0,
                                          description='How often the light is sampled compared to other light sources. '
@@ -1682,6 +1687,10 @@ class luxrender_light_area_node(luxrender_material_node):
         if self.advanced:
             layout.prop(self, 'power')
             layout.prop(self, 'efficacy')
+
+            if UseLuxCore():
+                layout.prop(self, 'theta')
+
             layout.prop(self, 'iesname')
 
             if UseLuxCore():
@@ -1715,8 +1724,9 @@ class luxrender_light_area_node(luxrender_material_node):
         set_prop(properties, parent_luxcore_name, 'emission.power', self.power)
         set_prop(properties, parent_luxcore_name, 'emission.efficency', self.efficacy)
         set_prop(properties, parent_luxcore_name, 'emission.samples', self.luxcore_samples)
+        set_prop(properties, parent_luxcore_name, 'emission.theta', math.degrees(self.theta))
 
-        # Ies
+        # IES
         iesfile = self.iesname
         iesfile, basename = get_expanded_file_name(self, iesfile)
         if os.path.exists(iesfile):

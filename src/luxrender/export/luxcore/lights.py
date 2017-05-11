@@ -359,6 +359,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
             else:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'AREA'))
+                area = light.luxrender_lamp.luxrender_lamp_area
     
                 # Area lamp workaround: create plane and add emitting material
                 mat_name = luxcore_name + '_helper_mat'
@@ -372,7 +373,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.specular.enable',
                                                  light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
-                emission_color = list(light.luxrender_lamp.luxrender_lamp_area.L_color)
+                emission_color = list(area.L_color)
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
                 area_gain = energy * (get_worldscale(as_scalematrix=False) ** 2)
                 area_gain = self.__multiply_gain(area_gain, gain_r, gain_g, gain_b)
@@ -382,11 +383,10 @@ class LightExporter(object):
 
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission', emission_color))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.gain', area_gain))
-                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.power',
-                                                 light.luxrender_lamp.luxrender_lamp_area.power))
-                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.efficency',
-                                                     light.luxrender_lamp.luxrender_lamp_area.efficacy))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.power', area.power))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.efficency', area.efficacy))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.samples', samples))
+                self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.theta', math.degrees(area.theta)))
 
                 if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
                     self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.id', [lightgroup_id]))
@@ -398,7 +398,6 @@ class LightExporter(object):
                     self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.iesfile', iesfile))
 
                 # Opacity
-                area = light.luxrender_lamp.luxrender_lamp_area
                 opacity = convert_texture_channel(self.luxcore_exporter, self.properties, mat_name, area, 'opacity', 'float')
 
                 if not (type(opacity) is list and opacity[0] == 1):

@@ -602,12 +602,14 @@ class luxrender_lamp_area(declarative_property_group):
         'power',
         'efficacy',
         'null_lamp',
+        'theta',
     ] + TF_opacity.controls
 
     visibility = dict_merge(
         TC_L.visibility,
         {'null_lamp': lambda: not UseLuxCore()},
         {'nsamples': lambda: not UseLuxCore()},
+        {'theta': lambda: UseLuxCore()},
         TF_opacity.visibility,
     )
     visibility = texture_append_visibility(visibility, TF_opacity,
@@ -659,6 +661,21 @@ class luxrender_lamp_area(declarative_property_group):
             'description': 'Use a null material for lamp geometry (lamp will still be visible when viewed on \
 emitting side, as it emits its own light',
             'default': True,
+        },
+        {
+            'type': 'float',
+            'attr': 'theta',
+            'name': 'Spread Angle',
+            'description': 'How directional the light is emitted, set as the half-angle of the light source. '
+                           'Default is 90°. Smaller values mean that more light is emitted in the direction '
+                           'of the light and less to the sides.',
+            'default': math.pi / 2,
+            'min': 0.0,
+            'soft_min': math.radians(5),
+            'max': math.pi / 2,
+            'subtype': 'ANGLE',
+            # Angle params is in radians, so conversion is necessary
+            'unit': 'ROTATION'
         },
     ] + \
     TF_opacity.get_properties()
