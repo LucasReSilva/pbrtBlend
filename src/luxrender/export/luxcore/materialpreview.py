@@ -179,10 +179,10 @@ class MaterialPreviewExporter(object):
         ypos = -1.00001
         zpos = 2
         vertices = [
-            (-size_x / 2, ypos, zpos + size_z / 2),
-            (size_x / 2, ypos, zpos + size_z / 2),
+            (-size_x / 2, ypos, zpos - size_z / 2),
             (size_x / 2, ypos, zpos - size_z / 2),
-            (-size_x / 2, ypos, zpos - size_z / 2)
+            (size_x / 2, ypos, zpos + size_z / 2),
+            (-size_x / 2, ypos, zpos + size_z / 2),
         ]
         faces = [
             (0, 1, 2),
