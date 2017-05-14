@@ -59,17 +59,17 @@ class luxcore_material(declarative_property_group):
     }
 
     enabled = {
-        'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+        'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
         'label_material_visibility': {
-        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
         'emission_samples': {
-        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+        ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
         'visibility_indirect_diffuse_enable':
-            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
         'visibility_indirect_glossy_enable':
-            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
         'visibility_indirect_specular_enable':
-            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+            {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
         'sc_onlyinfinitelights': {'is_shadow_catcher': True},
     }
 

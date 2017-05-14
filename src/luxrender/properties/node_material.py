@@ -1832,7 +1832,7 @@ class luxrender_material_output_node(luxrender_node):
             if self.advanced:
                 layout.label('Biased Path Settings:')
                 column = layout.column()
-                column.enabled = context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH'
+                column.enabled = context.scene.luxcore_enginesettings.renderengine_type == 'TILEPATH'
 
                 column.prop(self, 'samples')
                 column.label('Visibility for indirect rays:')

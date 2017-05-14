@@ -180,8 +180,8 @@ class halt_conditions_panel(imageeditor_panel):
     @classmethod
     def poll(cls, context):
         engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
-        # Custom poll because the halt conditions of BIASPATH cannot be adjusted during the rendering
-        return engine_is_lux and UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type != 'BIASPATH'
+        # Custom poll because the halt conditions of TILEPATH cannot be adjusted during the rendering
+        return engine_is_lux and UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type != 'TILEPATH'
 
     def draw(self, context):
         layout = self.layout
@@ -215,7 +215,7 @@ class rendering_statistics_panel(imageeditor_panel):
         for elem in context.scene.luxcore_rendering_controls.controls:
             box.prop(context.scene.luxcore_rendering_controls, elem)
 
-        if bpy.context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
+        if bpy.context.scene.luxcore_enginesettings.renderengine_type == 'TILEPATH':
             box = self.layout.box()
             box.prop(context.scene.luxcore_tile_highlighting, 'use_tile_highlighting')
 

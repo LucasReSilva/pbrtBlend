@@ -104,7 +104,7 @@ class render_settings(render_panel):
             row = split.row()
             sub = row.row()
 
-            if engine_settings.renderengine_type in ['PATH', 'BIASPATH']:
+            if engine_settings.renderengine_type in ['PATH', 'TILEPATH']:
                 # These engines have OpenCL versions
                 sub.prop(engine_settings, 'device', expand=True)
             else:
@@ -121,7 +121,7 @@ class render_settings(render_panel):
             row = split.row()
             sub = row.row()
 
-            if engine_settings.renderengine_type in ['PATH', 'BIASPATH']:
+            if engine_settings.renderengine_type in ['PATH', 'TILEPATH']:
                 # These engines have OpenCL versions
                 sub.prop(engine_settings, 'device_preview', expand=True)
             else:
@@ -129,12 +129,12 @@ class render_settings(render_panel):
                 sub.enabled = False
                 sub.prop(engine_settings, 'device_cpu_only', expand=True)
 
-            if engine_settings.renderengine_type == 'BIASPATH':
+            if engine_settings.renderengine_type == 'TILEPATH':
                 row = layout.row()
                 row.label('')
                 row.prop(engine_settings, 'biaspath_use_path_in_viewport')
 
-            if engine_settings.renderengine_type == 'BIASPATH':
+            if engine_settings.renderengine_type == 'TILEPATH':
                 split = layout.split()
 
                 row = split.row()
@@ -228,7 +228,7 @@ class device_settings(render_panel):
         render_mode = context.scene.luxrender_rendermode.rendermode
     
         if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl'] and not UseLuxCore()) \
-                or ((UseLuxCore() and (engine_settings.renderengine_type in ['PATH', 'BIASPATH']
+                or ((UseLuxCore() and (engine_settings.renderengine_type in ['PATH', 'TILEPATH']
                                        and engine_settings.device == 'OCL')
                 or engine_settings.device_preview == 'OCL')):
             self.layout.label('OpenCL Settings:')
@@ -282,7 +282,7 @@ class device_settings(render_panel):
                 row.prop(threads, 'threads')
 
         # Tile settings
-        if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type == 'BIASPATH':
+        if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type == 'TILEPATH':
             self.layout.prop(engine_settings, 'tile_size')
 			
 @LuxRenderAddon.addon_register_class

@@ -358,7 +358,8 @@ class MaterialPreviewExporter(object):
             cfg_props.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))
             cfg_props.Set(pyluxcore.Property('film.filter.width', 1.5))
 
-            cfg_props.Set(pyluxcore.Property('renderengine.type', 'BIASPATHCPU'))
+            cfg_props.Set(pyluxcore.Property('renderengine.type', 'TILEPATHCPU'))
+            cfg_props.Set(pyluxcore.Property('sampler.type', 'TILEPATHSAMPLER'))
 
             cfg_props.Set(pyluxcore.Property('tile.size', 16))
             cfg_props.Set(pyluxcore.Property('tile.multipass.enable', not self.is_thumbnail))
@@ -366,10 +367,10 @@ class MaterialPreviewExporter(object):
             cfg_props.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction', 0))
 
             aa_size = 3 if self.is_thumbnail else 1
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_size))
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', 1))
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.glossy.size', 1))
-            cfg_props.Set(pyluxcore.Property('biaspath.sampling.specular.size', 1))
+            cfg_props.Set(pyluxcore.Property('tilepath.sampling.aa.size', aa_size))
+            cfg_props.Set(pyluxcore.Property('tilepath.sampling.diffuse.size', 1))
+            cfg_props.Set(pyluxcore.Property('tilepath.sampling.glossy.size', 1))
+            cfg_props.Set(pyluxcore.Property('tilepath.sampling.specular.size', 1))
 
             if self.is_world_sphere_type:
                 total_depth = 4
@@ -380,12 +381,12 @@ class MaterialPreviewExporter(object):
                 diffuse_depth = 3
                 specular_depth = 4
 
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.total', total_depth))
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.diffuse', diffuse_depth))
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.glossy ', 1))
-            cfg_props.Set(pyluxcore.Property('biaspath.pathdepth.specular', specular_depth))
+            cfg_props.Set(pyluxcore.Property('path.pathdepth.total', total_depth))
+            cfg_props.Set(pyluxcore.Property('path.pathdepth.diffuse', diffuse_depth))
+            cfg_props.Set(pyluxcore.Property('path.pathdepth.glossy ', 1))
+            cfg_props.Set(pyluxcore.Property('path.pathdepth.specular', specular_depth))
 
-            cfg_props.Set(pyluxcore.Property('biaspath.clamping.variance.maxvalue', 3))
+            cfg_props.Set(pyluxcore.Property('path.clamping.variance.maxvalue', 3))
         else:
             # Texture preview
             cfg_props.Set(pyluxcore.Property('film.filter.type', 'BLACKMANHARRIS'))

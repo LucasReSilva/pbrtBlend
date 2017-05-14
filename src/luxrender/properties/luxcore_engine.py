@@ -93,7 +93,7 @@ class luxcore_enginesettings(declarative_property_group):
         ['bidirvm_eyedepth', 'bidirvm_lightdepth'],
         'bidirvm_lightpath_count',
         ['bidirvm_startradius_scale', 'bidirvm_alpha'],
-        # BIASPATH
+        # TILEPATH
         'label_sampling',
         'biaspath_sampling_aa_size',
         ['biaspath_sampling_diffuse_size', 'biaspath_sampling_glossy_size', 'biaspath_sampling_specular_size'],
@@ -134,34 +134,34 @@ class luxcore_enginesettings(declarative_property_group):
         'bidir_eyedepth': {'renderengine_type': 'BIDIR'},
         'bidir_lightdepth': {'renderengine_type': 'BIDIR'},
         # (BIAS)PATH
-        'label_path_depth': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'path_pathdepth_total': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'path_pathdepth_diffuse': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'path_pathdepth_glossy': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'path_pathdepth_specular': {'renderengine_type': O(['BIASPATH', 'PATH'])},
+        'label_path_depth': {'renderengine_type': O(['TILEPATH', 'PATH'])},
+        'path_pathdepth_total': {'renderengine_type': O(['TILEPATH', 'PATH'])},
+        'path_pathdepth_diffuse': {'renderengine_type': O(['TILEPATH', 'PATH'])},
+        'path_pathdepth_glossy': {'renderengine_type': O(['TILEPATH', 'PATH'])},
+        'path_pathdepth_specular': {'renderengine_type': O(['TILEPATH', 'PATH'])},
         # BIDIRVM
         'bidirvm_eyedepth': {'renderengine_type': 'BIDIRVM'},
         'bidirvm_lightdepth': {'renderengine_type': 'BIDIRVM'},
         'bidirvm_lightpath_count': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
         'bidirvm_startradius_scale': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
         'bidirvm_alpha': {'advanced': True, 'renderengine_type': 'BIDIRVM'},
-        # BIASPATH sampling
-        'label_sampling': {'renderengine_type': 'BIASPATH'},
-        'biaspath_sampling_aa_size': {'renderengine_type': 'BIASPATH'},
-        'biaspath_sampling_diffuse_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
-        'biaspath_sampling_glossy_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
-        'biaspath_sampling_specular_size': A([{'device': 'CPU'}, {'renderengine_type': 'BIASPATH'}]),
-        # BIASPATH obscure features
-        'label_biaspath_lights_samplingstrategy_type':  A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
-        'biaspath_lights_samplingstrategy_type': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
-        'label_biaspath_lights_nearstart': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
-        'biaspath_lights_nearstart': A([{'advanced': True}, {'renderengine_type': 'BIASPATH'}]),
+        # TILEPATH sampling
+        'label_sampling': {'renderengine_type': 'TILEPATH'},
+        'biaspath_sampling_aa_size': {'renderengine_type': 'TILEPATH'},
+        'biaspath_sampling_diffuse_size': A([{'device': 'CPU'}, {'renderengine_type': 'TILEPATH'}]),
+        'biaspath_sampling_glossy_size': A([{'device': 'CPU'}, {'renderengine_type': 'TILEPATH'}]),
+        'biaspath_sampling_specular_size': A([{'device': 'CPU'}, {'renderengine_type': 'TILEPATH'}]),
+        # TILEPATH obscure features
+        'label_biaspath_lights_samplingstrategy_type':  A([{'advanced': True}, {'renderengine_type': 'TILEPATH'}]),
+        'biaspath_lights_samplingstrategy_type': A([{'advanced': True}, {'renderengine_type': 'TILEPATH'}]),
+        'label_biaspath_lights_nearstart': A([{'advanced': True}, {'renderengine_type': 'TILEPATH'}]),
+        'biaspath_lights_nearstart': A([{'advanced': True}, {'renderengine_type': 'TILEPATH'}]),
         # Clamping (all unidirectional path engines)
-        'use_clamping': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'biaspath_clamping_radiance_maxvalue': {'renderengine_type': O(['BIASPATH', 'PATH'])},
-        'spacer_pdf_clamping': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
-        'biaspath_clamping_pdf_value': A([{'advanced': True}, {'renderengine_type': O(['BIASPATH', 'PATH'])}]),
-        # Sampler settings, show for all but BIASPATH
+        'use_clamping': {'renderengine_type': O(['TILEPATH', 'PATH'])},
+        'biaspath_clamping_radiance_maxvalue': {'renderengine_type': O(['TILEPATH', 'PATH'])},
+        'spacer_pdf_clamping': A([{'advanced': True}, {'renderengine_type': O(['TILEPATH', 'PATH'])}]),
+        'biaspath_clamping_pdf_value': A([{'advanced': True}, {'renderengine_type': O(['TILEPATH', 'PATH'])}]),
+        # Sampler settings, show for all but TILEPATH
         'label_sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'sampler_type': {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])},
         'label_largesteprate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
@@ -176,9 +176,9 @@ class luxcore_enginesettings(declarative_property_group):
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
         'imagemutationrate': A([{'advanced': True}, {'sampler_type': 'METROPOLIS'},
             {'renderengine_type': O(['PATH', 'BIDIR', 'BIDIRVM'])}]),
-        # Fake sampler settings for BIASPATH
-        'label_biaspath_sampler_type': {'renderengine_type': 'BIASPATH'},
-        'biaspath_sampler_type': {'renderengine_type': 'BIASPATH'},
+        # Fake sampler settings for TILEPATH
+        'label_biaspath_sampler_type': {'renderengine_type': 'TILEPATH'},
+        'biaspath_sampler_type': {'renderengine_type': 'TILEPATH'},
         # Filter settings
         'label_filter_type': {'advanced': True},
         'filter_type': {'advanced': True},
@@ -203,11 +203,11 @@ class luxcore_enginesettings(declarative_property_group):
         'halt_samples_preview': {'show_halt_conditions': True},
         'use_halt_time_preview': {'show_halt_conditions': True},
         'halt_time_preview': {'show_halt_conditions': True},
-        # BIASPATH noise controls
-        'tile_multipass_enable': {'show_halt_conditions': True, 'renderengine_type': 'BIASPATH'},
-        'tile_multipass_convergencetest_threshold': {'show_halt_conditions': True, 'renderengine_type': 'BIASPATH'},
-        'tile_multipass_use_threshold_reduction': {'show_halt_conditions': True, 'renderengine_type': 'BIASPATH'},
-        'tile_multipass_convergencetest_threshold_reduction': {'show_halt_conditions': True, 'renderengine_type': 'BIASPATH'},
+        # TILEPATH noise controls
+        'tile_multipass_enable': {'show_halt_conditions': True, 'renderengine_type': 'TILEPATH'},
+        'tile_multipass_convergencetest_threshold': {'show_halt_conditions': True, 'renderengine_type': 'TILEPATH'},
+        'tile_multipass_use_threshold_reduction': {'show_halt_conditions': True, 'renderengine_type': 'TILEPATH'},
+        'tile_multipass_convergencetest_threshold_reduction': {'show_halt_conditions': True, 'renderengine_type': 'TILEPATH'},
         # Seed (advanced option)
         'label_seed': {'advanced': True},
         'seed': {'advanced': True},
@@ -229,7 +229,7 @@ class luxcore_enginesettings(declarative_property_group):
         'halt_noise': {'use_halt_noise': True},
         'halt_samples_preview': {'use_halt_samples_preview': True},
         'halt_time_preview': {'use_halt_time_preview': True},
-        # BIASPATH noise multiplier
+        # TILEPATH noise multiplier
         'tile_multipass_convergencetest_threshold': {'tile_multipass_enable': True},
         'tile_multipass_use_threshold_reduction': {'tile_multipass_enable': True},
         'tile_multipass_convergencetest_threshold_reduction': {'tile_multipass_enable': True,
@@ -274,7 +274,7 @@ class luxcore_enginesettings(declarative_property_group):
             'default': 'BIDIR',
             'items': [
                 ('PATH', 'Path', 'Path tracer', '', 0),
-                ('BIASPATH', 'Biased Path', 'Biased path tracer', '', 1),
+                ('TILEPATH', 'Biased Path', 'Biased path tracer', '', 1),
                 ('BIDIR', 'Bidir', 'Bidirectional path tracer', '', 2),
                 ('BIDIRVM', 'BidirVM (Experimental)', 'Bidirectional path tracer with vertex merging. '
                  'Warning: Experimental! May use large amounts of RAM or crash!', 'ERROR', 3),
@@ -446,7 +446,7 @@ class luxcore_enginesettings(declarative_property_group):
             'max': 0.99,
             'save_in_preset': True
         },
-        {   # BIASPATH
+        {   # TILEPATH
             'type': 'text',
             'name': 'Tiles:',
             'attr': 'label_tiles',
@@ -679,7 +679,7 @@ may mute lamps and caustics',
             'slider': True,
             'save_in_preset': True
         },
-        # Fake sampler to show to the user that BIASPATH sampler is fixed
+        # Fake sampler to show to the user that TILEPATH sampler is fixed
         {
             'type': 'text',
             'attr': 'label_biaspath_sampler_type',

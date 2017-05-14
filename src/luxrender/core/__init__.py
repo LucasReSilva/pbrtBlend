@@ -1092,15 +1092,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         engine = lcConfig.GetProperties().Get('renderengine.type').GetString()
         engine_dict = {
-            'PATHCPU' : 'Path',
+            'PATHCPU' : 'Path CPU',
             'PATHOCL' : 'Path OpenCL',
-            'BIASPATHCPU' : 'Biased Path',
-            'BIASPATHOCL' : 'Biased Path OpenCL',
-            'BIDIRCPU' : 'Bidir',
-            'BIDIRVMCPU' : 'BidirVCM',
+            'TILEPATHCPU' : 'Tile Path CPU',
+            'TILEPATHOCL' : 'Tile Path OpenCL',
+            'BIDIRCPU' : 'Bidir CPU',
+            'BIDIRVMCPU' : 'BidirVCM CPU',
             'RTPATHOCL': 'RT Path OpenCL',
-            'RTPATHCPU': 'RT Path',
-            'RTBIASPATHOCL': 'RT Biased Path OpenCL',
+            'RTPATHCPU': 'RT Path CPU',
         }
 
         sampler = lcConfig.GetProperties().Get('sampler.type').GetString()
@@ -1109,7 +1108,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             'SOBOL' : 'Sobol',
             'METROPOLIS' : 'Metropolis',
             'RTPATHCPUSAMPLER': 'RT Path Sampler',
-            'BIASPATHSAMPLER': 'Bias Path Sampler'
+            'TILEPATHSAMPLER': 'Tile Path Sampler'
         }
 
         settings = scene.luxcore_enginesettings
@@ -1128,7 +1127,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         time_running = stats.Get('stats.renderengine.time').GetFloat()
         # Add time stats for realtime preview because Blender doesn't display it there
         # For final renderings, only display time if it is set as halt condition
-        # Don't show when engine is BIASPATH because it uses different halt conditions
+        # Don't show when engine is TILEPATH because it uses different halt conditions
         if (not realtime_preview and settings.use_halt_time) or (realtime_preview and settings.use_halt_time_preview):
             stats_list.append('Time: %.1fs/%ds' % (time_running, halt_time))
             if not realtime_preview:
@@ -1137,11 +1136,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         # Samples/Passes stats
         if rendering_controls.stats_samples:
             samples_count = stats.Get('stats.renderengine.pass').GetInt()
-            samples_term = 'Pass' if engine in ['BIASPATHCPU', 'BIASPATHOCL'] else 'Samples'
+            samples_term = 'Pass' if engine in ['TILEPATHCPU', 'TILEPATHOCL'] else 'Samples'
 
-            # Do not show when engine is BIASPATH because it uses different halt conditions
+            # Do not show when engine is TILEPATH because it uses different halt conditions
             if ((not realtime_preview and settings.use_halt_samples) or (realtime_preview and settings.use_halt_samples_preview)) \
-                    and engine not in ['BIASPATHCPU', 'BIASPATHOCL']:
+                    and engine not in ['TILEPATHCPU', 'TILEPATHOCL']:
                 stats_list.append('%s: %d/%d' % (samples_term, samples_count, halt_samples))
                 if not realtime_preview:
                     progress_samples = samples_count / halt_samples
@@ -1149,10 +1148,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 stats_list.append('%s: %d' % (samples_term, samples_count))
 
         # Tile stats
-        if engine in ['BIASPATHCPU', 'BIASPATHOCL'] and rendering_controls.stats_tiles:
-            converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
-            notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
-            pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
+        if engine in ['TILEPATHCPU', 'TILEPATHOCL'] and rendering_controls.stats_tiles:
+            converged = stats.Get('stats.tilepath.tiles.converged.count').GetInt()
+            notconverged = stats.Get('stats.tilepath.tiles.notconverged.count').GetInt()
+            pending = stats.Get('stats.tilepath.tiles.pending.count').GetInt()
 
             tiles_amount = converged + notconverged + pending
             stats_list.append('Tiles: %d/%d Converged' % (converged, tiles_amount))
@@ -1226,7 +1225,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if rendering_controls.stats_engine_info:
             try:
                 engine_info = engine_dict[engine]
-                if not 'BIASPATH' in engine:
+                if not 'TILEPATH' in engine:
                     engine_info += ' + ' + sampler_dict[sampler]
             except KeyError:
                 engine_info = 'Unkown engine or sampler'
@@ -1289,8 +1288,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         else:
             halt_noise_met = rendered_noise == 1.0
 
-        # Samples make no sense as halt condition when BIASPATH is used
-        if not realtime_preview and settings.renderengine_type == 'BIASPATH':
+        # Samples make no sense as halt condition when TILEPATH is used
+        if not realtime_preview and settings.renderengine_type == 'TILEPATH':
             return halt_noise_met or halt_time_met
 
         return halt_samples_met or halt_time_met or halt_noise_met or scene.luxcore_rendering_controls.pause_viewport_render
@@ -1516,22 +1515,22 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         pass
 
         # collect stats
-        count_converged = stats.Get('stats.biaspath.tiles.converged.count').GetInt()
-        count_notconverged = stats.Get('stats.biaspath.tiles.notconverged.count').GetInt()
-        count_pending = stats.Get('stats.biaspath.tiles.pending.count').GetInt()
+        count_converged = stats.Get('stats.tilepath.tiles.converged.count').GetInt()
+        count_notconverged = stats.Get('stats.tilepath.tiles.notconverged.count').GetInt()
+        count_pending = stats.Get('stats.tilepath.tiles.pending.count').GetInt()
 
         if count_converged > 0 and show_converged:
-            coords_converged = stats.Get('stats.biaspath.tiles.converged.coords').GetInts()
+            coords_converged = stats.Get('stats.tilepath.tiles.converged.coords').GetInts()
             color_green = (0.0, 1.0, 0.0, 1.0)
             draw_tile_type(count_converged, coords_converged, color_green)
 
         if count_notconverged > 0 and show_unconverged:
-            coords_notconverged = stats.Get('stats.biaspath.tiles.notconverged.coords').GetInts()
+            coords_notconverged = stats.Get('stats.tilepath.tiles.notconverged.coords').GetInts()
             color_red = (1.0, 0.0, 0.0, 1.0)
             draw_tile_type(count_notconverged, coords_notconverged, color_red)
 
         if count_pending > 0 and show_pending:
-            coords_pending = stats.Get('stats.biaspath.tiles.pending.coords').GetInts()
+            coords_pending = stats.Get('stats.tilepath.tiles.pending.coords').GetInts()
             color_yellow = (1.0, 1.0, 0.0, 1.0)
             draw_tile_type(count_pending, coords_pending, color_yellow)
 
@@ -1556,7 +1555,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Check if a halt condition is set, cancel the rendering and warn the user otherwise
                 settings = scene.luxcore_enginesettings
 
-                if settings.renderengine_type == 'BIASPATH':
+                if settings.renderengine_type == 'TILEPATH':
                     halt_enabled = (not settings.tile_multipass_enable
                                     or not settings.tile_multipass_use_threshold_reduction) or settings.use_halt_time
                 else:
@@ -1742,7 +1741,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         result = self.begin_result(0, 0, filmWidth, filmHeight)
         layer = result.layers[0] if bpy.app.version < (2, 74, 4) else result.layers[0].passes[0]
 
-        if (scene.luxcore_enginesettings.renderengine_type == 'BIASPATH' and
+        if (scene.luxcore_enginesettings.renderengine_type == 'TILEPATH' and
                 scene.luxcore_tile_highlighting.use_tile_highlighting and not is_final_result):
             # Use a temp image because layer.rect does not support list slicing
             tempImage = convert(filmWidth, filmHeight, imageBufferFloat)

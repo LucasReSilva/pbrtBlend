@@ -33,7 +33,7 @@ from .. import LuxRenderAddon
 @LuxRenderAddon.addon_register_class
 class luxcore_tile_highlighting(declarative_property_group):
     """
-    Storage class for tile highlighting settings for BIASPATH render modes.
+    Storage class for tile highlighting settings for TILEPATH render modes.
     """
     
     ef_attach_to = ['Scene']

@@ -138,7 +138,7 @@ class ConfigExporter(object):
 
     def get_engine(self):
         """
-        Create the final renderengine string from the general type setting ('PATH', 'BIASPATH' etc.) and the device type
+        Create the final renderengine string from the general type setting ('PATH', 'TILEPATH' etc.) and the device type
         :return: LuxCore renderengine string ('PATHOCL', 'PATHCPU' etc.)
         """
         engine_settings = self.blender_scene.luxcore_enginesettings
@@ -148,15 +148,12 @@ class ConfigExporter(object):
         if engine in ['BIDIR', 'BIDIRVM']:
             device = 'CPU'
 
-        if engine == 'BIASPATH' and self.is_viewport_render and engine_settings.biaspath_use_path_in_viewport:
-            engine = 'PATH'
+        #if engine == 'TILEPATH' and self.is_viewport_render and engine_settings.biaspath_use_path_in_viewport:
+        #    engine = 'PATH'
 
-        # Use realtime engines for viewport render (BIDIR* engines don't have RT versions, and there's no RTBIASPATHCPU engine yet)
-        if self.is_viewport_render and engine not in ['BIDIR', 'BIDIRVM'] and not (engine == 'BIASPATH' and device == 'CPU'):
-            # TODO: remove disable_rtpathcpu check when daily builds catch up
-            disable_rtpathcpu = (engine == 'PATH' and device == 'CPU' and not self.blender_scene.luxcore_translatorsettings.use_rtpathcpu)
-            if pyluxcore.Version() > '1.6' and not disable_rtpathcpu:
-                engine = 'RT' + engine
+        # Use realtime engines for viewport render (only CPU version for now because OCL version is unstable)
+        if self.is_viewport_render and engine not in ['BIDIR', 'BIDIRVM'] and device == 'CPU':
+            engine = 'RTPATH'
 
         # Set device type
         engine += device
@@ -196,9 +193,9 @@ class ConfigExporter(object):
         if self.get_engine() == 'RTPATHCPU':
             # RTPATHCPU needs a special sampler
             self.properties.Set(pyluxcore.Property('sampler.type', 'RTPATHCPUSAMPLER'))
-        elif self.get_engine() in ('BIASPATHOCL', 'RTBIASPATHOCL'):
-            # (RT)BIASPATHOCL needs a special sampler
-            self.properties.Set(pyluxcore.Property('sampler.type', 'BIASPATHSAMPLER'))
+        elif self.get_engine() in ('TILEPATHCPU', 'TILEPATHOCL', 'RTPATHOCL'):
+            # (RT)TILEPATHOCL needs a special sampler
+            self.properties.Set(pyluxcore.Property('sampler.type', 'TILEPATHSAMPLER'))
         else:
             self.properties.Set(pyluxcore.Property('sampler.type', [engine_settings.sampler_type]))
 
@@ -250,9 +247,9 @@ class ConfigExporter(object):
             radiance_clamp = 0
             pdf_clamp = 0
 
-        if engine in ['BIASPATHCPU', 'BIASPATHOCL']:
-            self.properties.Set(pyluxcore.Property('biaspath.clamping.variance.maxvalue', radiance_clamp))
-            self.properties.Set(pyluxcore.Property('biaspath.clamping.pdf.value', pdf_clamp))
+        if engine in ['TILEPATHCPU', 'TILEPATHOCL']:
+            self.properties.Set(pyluxcore.Property('path.clamping.variance.maxvalue', radiance_clamp))
+            self.properties.Set(pyluxcore.Property('path.clamping.pdf.value', pdf_clamp))
 
             self.properties.Set(pyluxcore.Property('tile.size', [engine_settings.tile_size]))
             self.properties.Set(pyluxcore.Property('tile.multipass.enable',
@@ -266,7 +263,7 @@ class ConfigExporter(object):
                 noise_threshold_reduction = 0
 
             # Transparent film enables using black bg
-            self.properties.Set(pyluxcore.Property('biaspath.forceblackbackground.enable', force_black_background))
+            self.properties.Set(pyluxcore.Property('tilepath.forceblackbackground.enable', force_black_background))
 
             self.properties.Set(pyluxcore.Property('tile.multipass.convergencetest.threshold.reduction',
                                                  [noise_threshold_reduction]))
@@ -280,26 +277,26 @@ class ConfigExporter(object):
                 glossy_samples = engine_settings.biaspath_sampling_glossy_size
                 specular_samples = engine_settings.biaspath_sampling_specular_size
 
-            self.properties.Set(pyluxcore.Property('biaspath.sampling.aa.size', aa_samples))
+            self.properties.Set(pyluxcore.Property('tilepath.sampling.aa.size', aa_samples))
 
-            if engine == 'BIASPATHCPU':
-                self.properties.Set(pyluxcore.Property('biaspath.sampling.diffuse.size', diffuse_samples))
-                self.properties.Set(pyluxcore.Property('biaspath.sampling.glossy.size', glossy_samples))
-                self.properties.Set(pyluxcore.Property('biaspath.sampling.specular.size', specular_samples))
+            if engine == 'TILEPATHCPU':
+                self.properties.Set(pyluxcore.Property('tilepath.sampling.diffuse.size', diffuse_samples))
+                self.properties.Set(pyluxcore.Property('tilepath.sampling.glossy.size', glossy_samples))
+                self.properties.Set(pyluxcore.Property('tilepath.sampling.specular.size', specular_samples))
 
             # Path depths, note that for non-specular paths +1 is added to the path depth.
             # For details see http://www.luxrender.net/forum/viewtopic.php?f=11&t=11101&start=390#p114959
-            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.total',
+            self.properties.Set(pyluxcore.Property('path.pathdepth.total',
                                                  [engine_settings.path_pathdepth_total + 1]))
-            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.diffuse',
+            self.properties.Set(pyluxcore.Property('path.pathdepth.diffuse',
                                                  [engine_settings.path_pathdepth_diffuse + 1]))
-            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.glossy',
+            self.properties.Set(pyluxcore.Property('path.pathdepth.glossy',
                                                  [engine_settings.path_pathdepth_glossy + 1]))
-            self.properties.Set(pyluxcore.Property('biaspath.pathdepth.specular',
+            self.properties.Set(pyluxcore.Property('path.pathdepth.specular',
                                                  [engine_settings.path_pathdepth_specular]))
-            self.properties.Set(pyluxcore.Property('biaspath.lights.samplingstrategy.type',
+            self.properties.Set(pyluxcore.Property('path.lights.samplingstrategy.type',
                                                  [engine_settings.biaspath_lights_samplingstrategy_type]))
-        elif engine in ['PATHCPU', 'PATHOCL']:
+        elif engine in ['PATHCPU', 'PATHOCL', 'RTPATHCPU']:
             self.properties.Set(pyluxcore.Property('path.pathdepth.total',
                                                  [engine_settings.path_pathdepth_total + 1]))
             self.properties.Set(pyluxcore.Property('path.pathdepth.diffuse',
@@ -335,9 +332,9 @@ class ConfigExporter(object):
         if self.get_engine() == 'RTPATHCPU':
             # RTPATHCPU needs a special sampler
             self.properties.Set(pyluxcore.Property('sampler.type', 'RTPATHCPUSAMPLER'))
-        elif self.get_engine() in ('BIASPATHOCL', 'RTBIASPATHOCL'):
-            # (RT)BIASPATHOCL needs a special sampler
-            self.properties.Set(pyluxcore.Property('sampler.type', 'BIASPATHSAMPLER'))
+        elif self.get_engine() in ('TILEPATHOCL', 'RTPATHOCL'):
+            # (RT)TILEPATHOCL needs a special sampler
+            self.properties.Set(pyluxcore.Property('sampler.type', 'TILEPATHSAMPLER'))
         else:
             # Sampler settings (same as for final render)
             self.properties.Set(pyluxcore.Property('sampler.type', engine_settings.sampler_type))

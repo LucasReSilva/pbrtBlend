@@ -50,11 +50,11 @@ class luxcore_lamp(declarative_property_group):
     visibility = {}
 
     enabled = {
-        'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
-        'label_light_visibility': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
-        'visibility_indirect_diffuse_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
-        'visibility_indirect_glossy_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
-        'visibility_indirect_specular_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'BIASPATH'},
+        'samples': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
+        'label_light_visibility': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
+        'visibility_indirect_diffuse_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
+        'visibility_indirect_glossy_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
+        'visibility_indirect_specular_enable': {ScenePrefix() + 'luxcore_enginesettings.renderengine_type': 'TILEPATH'},
     }
 
     alert = {}
