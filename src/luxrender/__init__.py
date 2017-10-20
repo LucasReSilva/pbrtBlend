@@ -88,9 +88,9 @@ def import_bindings_module(name):
         return module
 
 if 'core' in locals():
-    import imp
+    import importlib
 
-    imp.reload(core)
+    importlib.reload(core)
 else:
     import bpy
     from bpy.types import AddonPreferences
