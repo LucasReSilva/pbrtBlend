@@ -109,7 +109,7 @@ class MeshExporter(object):
         luxcore_shape_name = self.__generate_shape_name()
         self.__export_mesh_to_shape(luxcore_shape_name, prepared_mesh, luxcore_scene)
 
-        bpy.data.meshes.remove(prepared_mesh)
+        bpy.data.meshes.remove(prepared_mesh, do_unlink=False)
 
         end_time = time.time() - start_time
         if end_time > 0.5:

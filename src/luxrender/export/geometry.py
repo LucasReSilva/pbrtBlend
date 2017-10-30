@@ -444,7 +444,7 @@ class GeometryExporter(object):
                     LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 
             del ffaces_mats
-            bpy.data.meshes.remove(mesh)
+            bpy.data.meshes.remove(mesh, do_unlink=False)
 
         except UnexportableObjectException as err:
             LuxLog('Object export failed, skipping this object: %s' % err)
@@ -604,7 +604,7 @@ class GeometryExporter(object):
                     LuxLog('Mesh export failed, skipping this mesh: %s' % err)
 
             del ffaces_mats
-            bpy.data.meshes.remove(mesh)
+            bpy.data.meshes.remove(mesh, do_unlink=False)
 
         except UnexportableObjectException as err:
             LuxLog('Object export failed, skipping this object: %s' % err)

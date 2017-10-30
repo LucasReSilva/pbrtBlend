@@ -144,7 +144,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
         if active_obj is not None:
             test_mesh = active_obj.to_mesh(context.scene, True, 'RENDER')
             self.original_facecount = len(test_mesh.polygons) * 2
-            bpy.data.meshes.remove(test_mesh)
+            bpy.data.meshes.remove(test_mesh, do_unlink=False)
 
         self.proxy_facecount = 5000
 
@@ -176,7 +176,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                         print("[Object: %s] Skipping curve (does not contain geometry)" % obj.name)
                         print("-----------------")
                         continue
-                    bpy.data.meshes.remove(test_mesh)
+                    bpy.data.meshes.remove(test_mesh, do_unlink=False)
 
                 # make sure object is of type 'MESH'
                 if obj.type in ['CURVE', 'SURFACE', 'META', 'FONT']:
