@@ -318,6 +318,7 @@ class LightExporter(object):
         elif light.type == 'SPOT':
             coneangle = math.degrees(light.spot_size) * 0.5
             conedeltaangle = math.degrees(light.spot_size * 0.5 * light.spot_blend)
+            gamma = lux_lamp.gamma
 
             if lux_lamp.projector:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'PROJECTION'))
@@ -326,6 +327,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.type', 'projection'))
                 self.properties.Set(
                     pyluxcore.Property('scene.lights.' + luxcore_name + '.mapfile', projector_map_path_abs))
+                self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gamma', gamma))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.fov', coneangle * 2))
             else:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'SPOT'))

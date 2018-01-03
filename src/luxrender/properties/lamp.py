@@ -295,6 +295,7 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
     controls = luxrender_lamp_basic.controls[:] + [
         'projector',
         'mapname',
+        'gamma',
         'power',
         'efficacy'
     ]
@@ -323,6 +324,13 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
             'name': 'Projector Image',
             'description': 'Image to project from this lamp',
             'default': ''
+        },
+        {
+            'type': 'float',
+            'attr': 'gamma',
+            'name': 'Gamma',
+            'description': 'Gamma of the projection image',
+            'default': 2.2,
         },
         {
             'type': 'float',
