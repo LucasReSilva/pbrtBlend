@@ -1,0 +1,18 @@
+syntax: regexp
+^\.project$
+^\.pydevproject$
+^\.idea$
+^.settings
+^nbproject$
+syntax: glob
+*.pyc
+*.so
+*.pyd
+*.DS_Store
+liblzo2*
+liblzmadec*
+liblux*
+*.dll
+*.dylib
+*.orig
+*.patch
