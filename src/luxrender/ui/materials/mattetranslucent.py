@@ -30,7 +30,7 @@ from ...ui.materials import luxrender_material_sub
 
 @LuxRenderAddon.addon_register_class
 class ui_material_mattetranslucent(luxrender_material_sub):
-    bl_label = 'LuxRender Matte Translucent Material'
+    bl_label = 'PBRTv3 Matte Translucent Material'
 
     LUX_COMPAT = {'mattetranslucent'}
 

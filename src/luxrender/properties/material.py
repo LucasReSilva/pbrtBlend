@@ -213,7 +213,7 @@ mat_names = {
 @LuxRenderAddon.addon_register_class
 class MATERIAL_OT_set_luxrender_type(bpy.types.Operator):
     bl_idname = 'material.set_luxrender_type'
-    bl_label = 'Set LuxRender material type'
+    bl_label = 'Set PBRTv3 material type'
 
     mat_name = bpy.props.StringProperty()
 

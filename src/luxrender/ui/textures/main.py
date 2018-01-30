@@ -35,7 +35,7 @@ class ui_texture_main(luxrender_texture_base):
     Texture Editor UI Panel
     '''
 
-    bl_label = 'LuxRender Textures'
+    bl_label = 'PBRTv3 Textures'
     bl_options = {'HIDE_HEADER'}
 
     display_property_groups = [

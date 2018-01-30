@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_blackbody(luxrender_texture_base):
-    bl_label = 'LuxRender Blackbody Texture'
+    bl_label = 'PBRTv3 Blackbody Texture'
 
     LUX_COMPAT = {'blackbody'}
 

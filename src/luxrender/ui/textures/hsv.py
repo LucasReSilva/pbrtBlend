@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_hsv(luxrender_texture_base):
-    bl_label = 'LuxRender HSV Texture'
+    bl_label = 'PBRTv3 HSV Texture'
 
     LUX_COMPAT = {'hsv'}
 

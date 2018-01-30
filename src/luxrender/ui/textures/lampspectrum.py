@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_lampspectrum(luxrender_texture_base):
-    bl_label = 'LuxRender Lamp spectrum Texture'
+    bl_label = 'PBRTv3 Lamp spectrum Texture'
 
     LUX_COMPAT = {'lampspectrum'}
 

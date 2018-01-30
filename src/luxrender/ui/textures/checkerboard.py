@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_checkerboard(luxrender_texture_base):
-    bl_label = 'LuxRender Checkerboard Texture'
+    bl_label = 'PBRTv3 Checkerboard Texture'
 
     LUX_COMPAT = {'checkerboard'}
 

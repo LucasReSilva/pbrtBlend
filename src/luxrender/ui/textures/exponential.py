@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_exponential(luxrender_texture_base):
-    bl_label = 'LuxRender Exponential Texture'
+    bl_label = 'PBRTv3 Exponential Texture'
 
     LUX_COMPAT = {'exponential'}
 

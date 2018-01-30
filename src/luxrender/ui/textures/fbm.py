@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_fbm(luxrender_texture_base):
-    bl_label = 'LuxRender FBM Texture'
+    bl_label = 'PBRTv3 FBM Texture'
 
     LUX_COMPAT = {'fbm'}
 

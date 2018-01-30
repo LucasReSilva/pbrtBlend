@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_hitpointcolor(luxrender_texture_base):
-    bl_label = 'LuxRender Vertex Color (hitpointcolor) Texture'
+    bl_label = 'PBRTv3 Vertex Color (hitpointcolor) Texture'
 
     LUX_COMPAT = {'hitpointcolor'}
 

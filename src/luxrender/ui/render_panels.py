@@ -49,7 +49,7 @@ class render_settings(render_panel):
     Render settings UI Panel
     """
 
-    bl_label = 'LuxRender Render Settings'
+    bl_label = 'PBRTv3 Settings'
 
     display_property_groups = [
         ( ('scene',), 'luxrender_rendermode', lambda: not UseLuxCore() ),
@@ -221,7 +221,7 @@ class device_settings(render_panel):
     OpenCL Devices UI Panel
     """
 
-    bl_label = 'LuxRender Compute Settings'
+    bl_label = 'PBRTv3 Compute Settings'
 
     def draw(self, context):
         engine_settings = context.scene.luxcore_enginesettings
@@ -291,7 +291,7 @@ class translator(render_panel):
     Translator settings UI Panel
     """
 
-    bl_label = 'LuxRender Export Settings'
+    bl_label = 'PBRTv3 Export Settings'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
@@ -317,7 +317,7 @@ class networking(render_panel):
     Networking settings UI Panel
     """
 
-    bl_label = 'LuxRender Networking'
+    bl_label = 'PBRTv3 Networking'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [

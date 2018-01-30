@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_cloud(luxrender_texture_base):
-    bl_label = 'LuxRender Cloud Texture'
+    bl_label = 'PBRTv3 Cloud Texture'
 
     LUX_COMPAT = {'cloud'}
 

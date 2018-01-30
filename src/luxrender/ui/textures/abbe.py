@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_abbe(luxrender_texture_base):
-    bl_label = 'LuxRender Abbe Texture'
+    bl_label = 'PBRTv3 Abbe Texture'
 
     LUX_COMPAT = {'abbe'}
 

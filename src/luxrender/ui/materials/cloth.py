@@ -30,7 +30,7 @@ from ...ui.materials import luxrender_material_sub
 
 @LuxRenderAddon.addon_register_class
 class ui_material_cloth(luxrender_material_sub):
-    bl_label = 'LuxRender Cloth Material'
+    bl_label = 'PBRTv3 Cloth Material'
 
     LUX_COMPAT = {'cloth'}
 

@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_colordepth(luxrender_texture_base):
-    bl_label = 'LuxRender Color at Depth Texture'
+    bl_label = 'PBRTv3 Color at Depth Texture'
 
     LUX_COMPAT = {'colordepth'}
 

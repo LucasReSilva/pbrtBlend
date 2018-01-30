@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_cauchy(luxrender_texture_base):
-    bl_label = 'LuxRender Cauchy Texture'
+    bl_label = 'PBRTv3 Cauchy Texture'
 
     LUX_COMPAT = {'cauchy'}
 

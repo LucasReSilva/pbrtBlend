@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_brick(luxrender_texture_base):
-    bl_label = 'LuxRender Brick Texture'
+    bl_label = 'PBRTv3 Brick Texture'
 
     LUX_COMPAT = {'brick'}
 

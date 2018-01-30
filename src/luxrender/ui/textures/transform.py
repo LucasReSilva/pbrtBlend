@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_transform(luxrender_texture_base):
-    bl_label = 'LuxRender 3D Texture Transform'
+    bl_label = 'PBRTv3 3D Texture Transform'
     bl_options = {'DEFAULT_CLOSED'}
 
     LUX_COMPAT = {'BLENDER', 'brick', 'checkerboard', 'cloud', 'densitygrid', 'exponential', 'fbm', 'marble', 'windy',

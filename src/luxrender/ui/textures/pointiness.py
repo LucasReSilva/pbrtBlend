@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_pointiness(luxrender_texture_base):
-    bl_label = 'LuxRender Pointiness Texture'
+    bl_label = 'PBRTv3 Pointiness Texture'
 
     LUX_COMPAT = {'pointiness'}
 

@@ -169,7 +169,7 @@ class ui_luxrender_material_transparency(luxrender_material_base):
     Material Transparency Settings
     """
 
-    bl_label = 'LuxRender Alpha Transparency'
+    bl_label = 'PBRTv3 Alpha Transparency'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
@@ -198,7 +198,7 @@ class ui_luxrender_material_emission(luxrender_material_base):
     Material Emission Settings
     """
 
-    bl_label = 'LuxRender Light Emission'
+    bl_label = 'PBRTv3 Light Emission'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
@@ -224,7 +224,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
     Material Glossy Coating Settings
     """
 
-    bl_label = 'LuxRender Glossy Coating'
+    bl_label = 'PBRTv3 Glossy Coating'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [

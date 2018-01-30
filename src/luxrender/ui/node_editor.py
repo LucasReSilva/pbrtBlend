@@ -41,7 +41,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
     '''LuxRender Material Nodes'''
 
     bl_idname = 'luxrender_material_nodes'
-    bl_label = 'LuxRender Material Nodes'
+    bl_label = 'PBRTv3 Material Nodes'
     bl_icon = 'MATERIAL'
 
     @classmethod
@@ -88,7 +88,7 @@ class luxrender_vol_node_editor(bpy.types.NodeTree):
 
     # The bl_idname is named this way so the volume editor entry comes after the material editor entry in the enum
     bl_idname = 'luxrender_volume_nodes_a'
-    bl_label = 'LuxRender Volume Nodes'
+    bl_label = 'PBRTv3 Volume Nodes'
     bl_icon = 'MOD_FLUIDSIM'
 
     @classmethod

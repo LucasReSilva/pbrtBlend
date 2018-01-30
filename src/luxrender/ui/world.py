@@ -41,10 +41,10 @@ class world_panel(bl_ui.properties_world.WorldButtonsPanel, property_group_rende
 @LuxRenderAddon.addon_register_class
 class world_helper(world_panel):
     """
-    LuxRender World Help
+    PBRTv3 World Help
     """
 
-    bl_label = 'LuxRender World Helper'
+    bl_label = 'PBRTv3 World Helper'
 
     def draw(self, context):
         layout = self.layout
@@ -64,7 +64,7 @@ class world(world_panel):
     LuxRender World Settings
     """
 
-    bl_label = 'LuxRender World Settings'
+    bl_label = 'PBRTv3 World Settings'
 
     display_property_groups = [
         ( ('scene',), 'luxrender_world' )
@@ -74,7 +74,7 @@ class volumes_base(object):
     """
     Interior/Exterior Volumes Settings
     """
-    bl_label = 'LuxRender Volumes'
+    bl_label = 'PBRTv3 Volumes'
 
     display_property_groups = [
         ( ('scene',), 'luxrender_volumes' )

@@ -34,7 +34,7 @@ from .. import LuxRenderAddon
 
 @LuxRenderAddon.addon_register_class
 class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_renderer):
-    bl_label = 'LuxRender Mesh Options'
+    bl_label = 'PBRTv3 Mesh Options'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
     display_property_groups = [

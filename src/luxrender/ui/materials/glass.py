@@ -30,7 +30,7 @@ from ...ui.materials import luxrender_material_sub
 
 @LuxRenderAddon.addon_register_class
 class ui_material_glass(luxrender_material_sub):
-    bl_label = 'LuxRender Glass Material'
+    bl_label = 'PBRTv3 Glass Material'
 
     LUX_COMPAT = {'glass'}
 

@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_subtract(luxrender_texture_base):
-    bl_label = 'LuxRender Subtract Texture'
+    bl_label = 'PBRTv3 Subtract Texture'
 
     LUX_COMPAT = {'subtract'}
 

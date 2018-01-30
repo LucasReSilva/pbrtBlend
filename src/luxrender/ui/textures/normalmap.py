@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_normalmap(luxrender_texture_base):
-    bl_label = 'LuxRender Normal Map Texture'
+    bl_label = 'PBRTv3 Normal Map Texture'
 
     LUX_COMPAT = {'normalmap'}
 

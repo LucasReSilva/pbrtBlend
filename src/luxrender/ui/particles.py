@@ -43,7 +43,7 @@ class luxrender_ui_controls(hair_panel):
     """
     Hair settings
     """
-    bl_label = "LuxRender Hair Rendering"
+    bl_label = "PBRTv3 Hair Rendering"
     display_property_groups = [
         ( ('particle_system', 'settings',), 'luxrender_hair' )
     ]

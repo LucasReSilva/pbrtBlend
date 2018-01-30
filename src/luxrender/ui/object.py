@@ -37,7 +37,7 @@ class ui_object(bl_ui.properties_object.ObjectButtonsPanel, property_group_rende
     Object settings
     """
 
-    bl_label = 'LuxRender Object Settings'
+    bl_label = 'PBRTv3 Object Settings'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
     @classmethod

@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_windy(luxrender_texture_base):
-    bl_label = 'LuxRender Windy Texture'
+    bl_label = 'PBRTv3 Windy Texture'
 
     LUX_COMPAT = {'windy'}
 

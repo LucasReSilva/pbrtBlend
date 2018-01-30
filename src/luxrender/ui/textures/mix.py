@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_mix(luxrender_texture_base):
-    bl_label = 'LuxRender Mix Texture'
+    bl_label = 'PBRTv3 Mix Texture'
 
     LUX_COMPAT = {'mix'}
 

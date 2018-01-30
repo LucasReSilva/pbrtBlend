@@ -106,7 +106,7 @@ class lightgroups_base(object):
     Light Groups Settings
     """
 
-    bl_label = 'LuxRender Light Groups'
+    bl_label = 'PBRTv3 Light Groups'
 
     is_imageeditor_panel = False
 
@@ -224,7 +224,7 @@ class materialgroups(render_layers_panel):
     Material Groups Settings
     """
 
-    bl_label = 'LuxRender Material Groups'
+    bl_label = 'PBRTv3 Material Groups'
     bl_context = 'render_layer'
 
     def draw_header(self, context):
@@ -279,7 +279,7 @@ class passes_aov(render_layers_panel):
     Render passes UI panel
     """
 
-    bl_label = 'LuxRender Passes'
+    bl_label = 'PBRTv3 Passes'
     bl_options = {'DEFAULT_CLOSED'}
     bl_context = "render_layer"
 

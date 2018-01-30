@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_gaussian(luxrender_texture_base):
-    bl_label = 'LuxRender Gaussian Texture'
+    bl_label = 'PBRTv3 Gaussian Texture'
 
     LUX_COMPAT = {'gaussian'}
 

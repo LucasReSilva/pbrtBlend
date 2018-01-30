@@ -40,7 +40,7 @@ class lamps_panel(bl_ui.properties_data_lamp.DataButtonsPanel, property_group_re
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamps(lamps_panel):
-    bl_label = 'LuxRender Lamps'
+    bl_label = 'PBRTv3 Lamps'
 
     display_property_groups = [
         ( ('lamp',), 'luxrender_lamp' )
@@ -66,7 +66,7 @@ class ui_luxrender_lamps(lamps_panel):
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_point(lamps_panel):
-    bl_label = 'LuxRender Point Lamp'
+    bl_label = 'PBRTv3 Point Lamp'
 
     display_property_groups = [
         ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_point' )
@@ -79,7 +79,7 @@ class ui_luxrender_lamp_point(lamps_panel):
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_spot(lamps_panel):
-    bl_label = 'LuxRender Spot Lamp'
+    bl_label = 'PBRTv3 Spot Lamp'
 
     display_property_groups = [
         ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_spot' )
@@ -114,7 +114,7 @@ class ui_luxrender_lamp_spot(lamps_panel):
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_sun(lamps_panel):
-    bl_label = 'LuxRender Sun Lamp'
+    bl_label = 'PBRTv3 Sun Lamp'
 
     display_property_groups = [
         ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_sun' )
@@ -155,7 +155,7 @@ class ui_luxrender_lamp_sun(lamps_panel):
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_hemi(lamps_panel):
-    bl_label = 'LuxRender Hemi Lamp'
+    bl_label = 'PBRTv3 Hemi Lamp'
 
     display_property_groups = [
         ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_hemi' )
@@ -168,7 +168,7 @@ class ui_luxrender_lamp_hemi(lamps_panel):
 
 @LuxRenderAddon.addon_register_class
 class ui_luxrender_lamp_area(lamps_panel):
-    bl_label = 'LuxRender Area Lamp'
+    bl_label = 'PBRTv3 Area Lamp'
 
     display_property_groups = [
         ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_area' ),

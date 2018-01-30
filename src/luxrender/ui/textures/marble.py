@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_marble(luxrender_texture_base):
-    bl_label = 'LuxRender Marble Texture'
+    bl_label = 'PBRTv3 Marble Texture'
 
     LUX_COMPAT = {'marble'}
 

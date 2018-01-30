@@ -30,7 +30,7 @@ from ...ui.materials import luxrender_material_sub
 
 @LuxRenderAddon.addon_register_class
 class ui_material_layered(luxrender_material_sub):
-    bl_label = 'LuxRender Layered Material'
+    bl_label = 'PBRTv3 Layered Material'
 
     LUX_COMPAT = {'layered'}
 

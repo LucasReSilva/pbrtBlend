@@ -30,7 +30,7 @@ from ...ui.materials import luxrender_material_sub
 
 @LuxRenderAddon.addon_register_class
 class ui_material_glossycoating(luxrender_material_sub):
-    bl_label = 'LuxRender Glossy Coating Material'
+    bl_label = 'PBRTv3 Glossy Coating Material'
 
     LUX_COMPAT = {'glossycoating'}
 

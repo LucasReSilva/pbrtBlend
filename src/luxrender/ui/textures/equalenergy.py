@@ -30,7 +30,7 @@ from ...ui.textures import luxrender_texture_base
 
 @LuxRenderAddon.addon_register_class
 class ui_texture_equalenergy(luxrender_texture_base):
-    bl_label = 'LuxRender Equal Energy Texture'
+    bl_label = 'PBRTv3 Equal Energy Texture'
 
     LUX_COMPAT = {'equalenergy'}
 

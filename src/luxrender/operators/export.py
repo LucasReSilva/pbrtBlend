@@ -39,7 +39,7 @@ from ..extensions_framework import util as efutil
 @LuxRenderAddon.addon_register_class
 class EXPORT_OT_luxrender(bpy.types.Operator):
     bl_idname = 'export.luxrender'
-    bl_label = 'Export LuxRender Scene (.lxs)'
+    bl_label = 'Export PBRTv3 Scene (.PBRTv3S)'
 
     filter_glob = bpy.props.StringProperty(default='*.lxs', options={'HIDDEN'})
     use_filter = bpy.props.BoolProperty(default=True, options={'HIDDEN'})
