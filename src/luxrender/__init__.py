@@ -3,10 +3,11 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.79 PBRT Render Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
+# Lucas Silva
 # Doug Hammond
 #
 # This program is free software; you can redistribute it and/or
@@ -29,18 +30,18 @@ from .extensions_framework import util as efutil
 import sys
 
 bl_info = {
-    "name": "LuxRender",
-    "author": "LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), "
+    "name": "PBRTv3",
+    "author": "Lucas Silva; LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), "
     "Jens Verwiebe, Jason Clarke (JtheNinja), Michael Klemm (neo2068), Simon Wendsche (B.Y.O.B.)",
-    "version": (1, 7, 'dev'),
-    "blender": (2, 67, 1),
+    "version": (0, 0, 'dev'),
+    "blender": (2, 79),
     "api": 57908,
     "category": "Render",
     "location": "Info header, render engine menu",
-    "warning": "",
+    "warning": "In Development!!!",
     "wiki_url": "http://www.luxrender.net/wiki/LuxBlend25_Manual",
     "tracker_url": "http://www.luxrender.net/mantis",
-    "description": "LuxRender integration for Blender"
+    "description": "PBRTv3 integration for Blender"
 }
 
 def find_luxrender_path():
