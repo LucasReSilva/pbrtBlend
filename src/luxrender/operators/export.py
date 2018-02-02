@@ -41,7 +41,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
     bl_idname = 'export.luxrender'
     bl_label = 'Export PBRTv3 Scene (.PBRTv3S)'
 
-    filter_glob = bpy.props.StringProperty(default='*.lxs', options={'HIDDEN'})
+    filter_glob = bpy.props.StringProperty(default='*.PBRTv3S', options={'HIDDEN'})
     use_filter = bpy.props.BoolProperty(default=True, options={'HIDDEN'})
     filename = bpy.props.StringProperty(name='LXS filename')
     directory = bpy.props.StringProperty(name='LXS directory')
@@ -54,7 +54,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
     scene = bpy.props.StringProperty(options={'HIDDEN'}, default='')  # Specify scene to export
 
     def invoke(self, context, event):
-        self.filename = efutil.scene_filename() + '.lxs'  # prefill with blender (temp-) filename
+        self.filename = efutil.scene_filename() + '.PBRTv3S'  # prefill with blender (temp-) filename
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 

@@ -168,7 +168,7 @@ class SceneExporter(object):
             if not self.scene_is_lit(GE):
                 raise Exception('Scene is not lit!')
 
-            if self.properties.filename.endswith('.lxs'):
+            if self.properties.filename.endswith('.PBRTv3S'):
                 self.properties.filename = self.properties.filename[:-4]
 
             if self.properties.api_type == 'FILE':

@@ -117,7 +117,7 @@ class Custom_Context(object):
         self.files = []
         self.file_names = []
 
-        self.file_names.append('%s.lxs' % name)
+        self.file_names.append('%s.PBRTv3S' % name)
         self.files.append(open(self.file_names[Files.MAIN], 'w'))
         self.wf(Files.MAIN, '# Main Scene File')
 
