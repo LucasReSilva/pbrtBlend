@@ -117,7 +117,7 @@ class Custom_Context(object):
         self.files = []
         self.file_names = []
 
-        self.file_names.append('%s.PBRTv3S' % name)
+        self.file_names.append('%s.PBRTv3s' % name)
         self.files.append(open(self.file_names[Files.MAIN], 'w'))
         self.wf(Files.MAIN, '# Main Scene File')
 
@@ -127,11 +127,11 @@ class Custom_Context(object):
         if not os.path.exists(subdir):
             os.makedirs(subdir)
 
-        self.file_names.append('%s/LuxRender-Materials.lxm' % subdir)
+        self.file_names.append('%s/LuxRender-Materials.PBRTv3m' % subdir)
         self.files.append(open(self.file_names[Files.MATS], 'w'))
         self.wf(Files.MATS, '# Materials File')
 
-        self.file_names.append('%s/LuxRender-Geometry.lxo' % subdir)
+        self.file_names.append('%s/LuxRender-Geometry.PBRTv3o' % subdir)
         self.files.append(open(self.file_names[Files.GEOM], 'w'))
         self.wf(Files.GEOM, '# Geometry File')
 

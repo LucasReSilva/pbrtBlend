@@ -796,7 +796,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 '%s/%s.exr' % (self.output_dir, output_filename)
             )
 
-        return "%s.PBRTv3S" % output_filename
+        return "%s.PBRTv3s" % output_filename
 
     def rendering_behaviour(self, scene):
         internal = (scene.luxrender_engine.export_type in ['INT'])
