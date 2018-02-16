@@ -73,7 +73,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
             .export()
 
 
-menu_func = lambda self, context: self.layout.operator("export.luxrender", text="Export LuxRender Scene")
+menu_func = lambda self, context: self.layout.operator("export.luxrender", text="Export PBRTv3 Scene")
 bpy.types.INFO_MT_file_export.append(menu_func)
 
 
@@ -500,5 +500,5 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
             return None, None
 
 # Register operator in Blender File -> Export menu
-proxy_menu_func = lambda self, context: self.layout.operator("export.export_luxrender_proxy", text="Export LuxRender Proxy")
-bpy.types.INFO_MT_file_export.append(proxy_menu_func)
+#proxy_menu_func = lambda self, context: self.layout.operator("export.export_luxrender_proxy", text="Export LuxRender Proxy")
+#bpy.types.INFO_MT_file_export.append(proxy_menu_func)
