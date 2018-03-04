@@ -97,7 +97,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class luxrender_integrator(declarative_property_group):
     """
-    Storage class for LuxRender SurfaceIntegrator settings.
+    Storage class for LuxRender Integrator settings.
     """
 
     ef_attach_to = ['Scene']

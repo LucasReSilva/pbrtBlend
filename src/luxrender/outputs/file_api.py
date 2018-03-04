@@ -188,7 +188,7 @@ class Custom_Context(object):
         self._api('PortalInstance ', [name, []])
 
     def renderer(self, *args):
-        self._api('Renderer', args)
+        self._api('#Renderer', args)
 
     def sampler(self, *args):
         self._api('Sampler', args)
@@ -197,10 +197,10 @@ class Custom_Context(object):
         self._api('Accelerator', args)
 
     def surfaceIntegrator(self, *args):
-        self._api('SurfaceIntegrator', args)
+        self._api('Integrator', args)
 
     def volumeIntegrator(self, *args):
-        self._api('VolumeIntegrator', args)
+        self._api('#VolumeIntegrator', args)
 
     def pixelFilter(self, *args):
         self._api('PixelFilter', args)
