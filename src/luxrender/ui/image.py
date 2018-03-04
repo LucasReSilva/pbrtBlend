@@ -76,11 +76,11 @@ class luxrender_ui_rendering_controls(property_group_renderer):
             pylux = self.ctx.PYLUX
             tm_data = context.scene.camera.data.luxrender_camera.luxrender_film.luxrender_tonemapping
             tm_map = {
-                'reinhard': pylux.FlexImageFilm.TonemapKernels.Reinhard,
-                'linear': pylux.FlexImageFilm.TonemapKernels.Linear,
-                'autolinear': pylux.FlexImageFilm.TonemapKernels.AutoLinear,
-                'contrast': pylux.FlexImageFilm.TonemapKernels.Contrast,
-                'maxwhite': pylux.FlexImageFilm.TonemapKernels.MaxWhite,
+                'reinhard': pylux.ImageFilm.TonemapKernels.Reinhard,
+                'linear': pylux.ImageFilm.TonemapKernels.Linear,
+                'autolinear': pylux.ImageFilm.TonemapKernels.AutoLinear,
+                'contrast': pylux.ImageFilm.TonemapKernels.Contrast,
+                'maxwhite': pylux.ImageFilm.TonemapKernels.MaxWhite,
             }
 
             self.ctx.setAttribute('film', 'TonemapKernel', tm_map[tm_data.type])

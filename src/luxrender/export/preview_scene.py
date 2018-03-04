@@ -119,7 +119,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     film_params \
         .add_bool('write_exr', False) \
         .add_integer('writeinterval', 2)
-    lux_context.film('fleximage', film_params)
+    lux_context.film('image', film_params)
 
     # Pixel Filter
     pixelfilter_params = ParamSet() \

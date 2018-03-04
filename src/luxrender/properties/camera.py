@@ -978,7 +978,7 @@ class luxrender_film(declarative_property_group):
         # update the film settings with tonemapper settings
         params.update(self.luxrender_tonemapping.get_paramset())
 
-        return 'fleximage', params
+        return 'image', params
 
 # Valid CRF preset names (case sensitive):
 # See lux/core/cameraresponse.cpp to keep this up to date
