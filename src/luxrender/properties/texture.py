@@ -32,7 +32,7 @@ from ..extensions_framework import declarative_property_group
 from ..extensions_framework import util as efutil
 from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO, Logic_AND as A
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs.luxcore_api import UseLuxCore
@@ -742,7 +742,7 @@ tex_names = (
 )
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
     bl_idname = 'texture.set_luxrender_type'
     bl_label = 'Set LuxRender texture type'
@@ -779,7 +779,7 @@ def draw_generator(operator, m_names):
     return draw
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class TEXTURE_MT_luxrender_type(bpy.types.Menu):
     bl_label = 'Texture Type'
     submenus = []
@@ -792,7 +792,7 @@ class TEXTURE_MT_luxrender_type(bpy.types.Menu):
     for tex_cat, tex_cat_list in tex_names:
         submenu_idname = 'TEXTURE_MT_luxrender_tex_cat%d' % len(submenus)
         submenus.append(
-            LuxRenderAddon.addon_register_class(type(
+            PBRTv3Addon.addon_register_class(type(
                 submenu_idname,
                 (bpy.types.Menu,),
                 {
@@ -804,7 +804,7 @@ class TEXTURE_MT_luxrender_type(bpy.types.Menu):
         )
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture(declarative_property_group):
     """
     Storage class for LuxRender Texture settings.
@@ -939,7 +939,7 @@ for i in range(1, BAND_MAX_TEX + 1):
     )
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_add(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -1036,7 +1036,7 @@ class luxrender_tex_add(declarative_property_group):
             TC_tex2.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_band(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -1206,7 +1206,7 @@ class luxrender_tex_band(declarative_property_group):
                 setattr(self, 'offsetfresnel%d' % i, offsets[i])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_bilerp(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -1401,7 +1401,7 @@ class luxrender_tex_bilerp(declarative_property_group):
                 setattr(self, '%s_%s' % (psi['name'], variant[0]), psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_blackbody(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -1442,7 +1442,7 @@ class luxrender_tex_blackbody(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_brick(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -1665,7 +1665,7 @@ class luxrender_tex_brick(declarative_property_group):
             TC_mortartex.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_abbe(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -1897,7 +1897,7 @@ class luxrender_tex_abbe(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_cauchy(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2006,7 +2006,7 @@ class luxrender_tex_cauchy(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_checkerboard(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2095,7 +2095,7 @@ class luxrender_tex_checkerboard(declarative_property_group):
         TF_tex2.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_cloud(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2287,7 +2287,7 @@ class luxrender_tex_cloud(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_constant(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2380,7 +2380,7 @@ class luxrender_tex_constant(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_colordepth(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2443,7 +2443,7 @@ class luxrender_tex_colordepth(declarative_property_group):
         TC_Kt.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_densitygrid(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2524,7 +2524,7 @@ class luxrender_tex_densitygrid(declarative_property_group):
                 setattr(self, psi['name'].lower(), psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_dots(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2574,7 +2574,7 @@ class luxrender_tex_dots(declarative_property_group):
         TF_outside.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_equalenergy(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2620,7 +2620,7 @@ class luxrender_tex_equalenergy(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_exponential(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2685,7 +2685,7 @@ class luxrender_tex_exponential(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_fbm(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2747,7 +2747,7 @@ class luxrender_tex_fbm(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_fresnelcolor(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2784,7 +2784,7 @@ class luxrender_tex_fresnelcolor(declarative_property_group):
         TC_Kr.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_fresnelname(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2854,7 +2854,7 @@ class luxrender_tex_fresnelname(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_gaussian(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2928,7 +2928,7 @@ class luxrender_tex_gaussian(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_harlequin(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2955,7 +2955,7 @@ class luxrender_tex_harlequin(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_hitpointcolor(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -2981,7 +2981,7 @@ class luxrender_tex_hitpointcolor(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_hitpointgrey(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3007,7 +3007,7 @@ class luxrender_tex_hitpointgrey(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_hitpointalpha(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3033,7 +3033,7 @@ class luxrender_tex_hitpointalpha(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_imagemap(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3207,7 +3207,7 @@ class luxrender_tex_imagemap(declarative_property_group):
 
 # This class holds the parameters for the image sampling panel
 # which exposes Lux params when blender's image texture is selected
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_imagesampling(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3361,7 +3361,7 @@ class luxrender_tex_imagesampling(declarative_property_group):
 
 
 # We do not build a paramset for imagesampling, that is handled by convert_texture in export/materials.py
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_normalmap(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3473,7 +3473,7 @@ class luxrender_tex_normalmap(declarative_property_group):
                 bdecode_string2file(filename_data, fn)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_lampspectrum(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3520,7 +3520,7 @@ class luxrender_tex_lampspectrum(declarative_property_group):
                 setattr(self, 'preset', psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_mapping(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3682,7 +3682,7 @@ class luxrender_tex_mapping(declarative_property_group):
                 setattr(self, psi['name'] if psi['name'] != 'mapping' else 'type', psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_marble(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3774,7 +3774,7 @@ class luxrender_tex_marble(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_mix(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -3885,7 +3885,7 @@ class luxrender_tex_mix(declarative_property_group):
             TFR_tex2.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_multimix(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4043,7 +4043,7 @@ class luxrender_tex_multimix(declarative_property_group):
                 setattr(self, 'weightfresnel%d' % i, weights[i])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_sellmeier(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4132,7 +4132,7 @@ class luxrender_tex_sellmeier(declarative_property_group):
                 setattr(self, psi['name'].lower(), psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_scale(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4228,7 +4228,7 @@ class luxrender_tex_scale(declarative_property_group):
             TC_tex2.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_subtract(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4384,25 +4384,25 @@ class tabulatedfresnel(tabulatedbase):
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_tabulateddata(tabulatedcolor):
     ef_attach_to = ['luxrender_texture']
     alert = {}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_luxpop(tabulatedfresnel):
     ef_attach_to = ['luxrender_texture']
     alert = {}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_sopra(tabulatedfresnel):
     ef_attach_to = ['luxrender_texture']
     alert = {}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_transform(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4510,7 +4510,7 @@ class luxrender_tex_transform(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_uv(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4536,7 +4536,7 @@ class luxrender_tex_uv(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_uvmask(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4578,7 +4578,7 @@ class luxrender_tex_uvmask(declarative_property_group):
         TF_outertex.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_windy(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4604,7 +4604,7 @@ class luxrender_tex_windy(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_wrinkled(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4666,7 +4666,7 @@ class luxrender_tex_wrinkled(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_hsv(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}
@@ -4700,7 +4700,7 @@ class luxrender_tex_hsv(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tex_pointiness(declarative_property_group):
     ef_attach_to = ['luxrender_texture']
     alert = {}

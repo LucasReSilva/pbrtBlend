@@ -30,7 +30,7 @@ import bpy
 import mathutils
 
 from . import warning_luxcore_node, create_luxcore_name
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 from ..export import ParamSet, get_worldscale
 
@@ -42,7 +42,7 @@ from ..properties.node_sockets import mapping_2d_socketname, mapping_3d_socketna
 from ..properties.node_texture import variant_items, triple_variant_items
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_add(luxrender_texture_node):
     """Add texture node"""
     bl_idname = 'luxrender_texture_add_node'
@@ -104,7 +104,7 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_bump_map(luxrender_texture_node):
     """Bump map texture node"""
     bl_idname = 'luxrender_texture_bump_map_node'
@@ -154,7 +154,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_mix(luxrender_texture_node):
     """Mix texture node"""
     bl_idname = 'luxrender_texture_mix_node'
@@ -261,7 +261,7 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_scale(luxrender_texture_node):
     """Scale texture node"""
     bl_idname = 'luxrender_texture_scale_node'
@@ -324,7 +324,7 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_subtract(luxrender_texture_node):
     """Subtract texture node"""
     bl_idname = 'luxrender_texture_subtract_node'
@@ -387,7 +387,7 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_colordepth(luxrender_texture_node):
     """Color at Depth node"""
     bl_idname = 'luxrender_texture_colordepth_node'
@@ -422,7 +422,7 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_math(luxrender_texture_node):
     """Math node with several math operations"""
     bl_idname = 'luxrender_texture_math_node'
@@ -537,7 +537,7 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_colormix(luxrender_texture_node):
     """ColorMix node with several mixing methods"""
     bl_idname = 'luxrender_texture_colormix_node'
@@ -656,7 +656,7 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
     """ColorInvert node"""
     bl_idname = 'luxrender_texture_colorinvert_node'
@@ -695,7 +695,7 @@ class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_hsv(luxrender_texture_node):
     """Color at Depth node"""
     bl_idname = 'luxrender_texture_hsv_node'
@@ -733,12 +733,12 @@ class luxrender_texture_type_node_hsv(luxrender_texture_node):
 
         return luxcore_name
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ColorRampItem(bpy.types.PropertyGroup):
     offset = bpy.props.FloatProperty(name='Offset', default=0.0, min=0, max=1)
     value = bpy.props.FloatVectorProperty(name='', min=0, soft_max=1, subtype='COLOR')
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_band(luxrender_texture_node):
     """Band texture node"""
     bl_idname = 'luxrender_texture_band_node'
@@ -833,7 +833,7 @@ class luxrender_texture_type_node_band(luxrender_texture_node):
         return luxcore_name
 
 '''
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_colorramp(luxrender_texture_node):
     """Colorramp texture node"""
     bl_idname = 'luxrender_texture_colorramp_node'
@@ -879,7 +879,7 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
 '''
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
     """Manipulate 3D texture coordinates node"""
     bl_idname = 'luxrender_manipulate_3d_mapping_node'
@@ -946,7 +946,7 @@ class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
         return [mapping_type, output_mapping]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_manipulate_2d_mapping_node(luxrender_texture_node):
     """Manipulate 2D texture coordinates node"""
     bl_idname = 'luxrender_manipulate_2d_mapping_node'

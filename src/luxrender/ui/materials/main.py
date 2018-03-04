@@ -26,7 +26,7 @@
 #
 import bpy
 
-from ... import LuxRenderAddon
+from ... import PBRTv3Addon
 from ...properties import (find_node, find_node_input)
 from ...ui.materials import luxrender_material_base
 from ...operators.lrmdb import lrmdb_state
@@ -85,7 +85,7 @@ def panel_node_draw(layout, id_data, output_type, input_name):
     return True
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_material_header(luxrender_material_base):
     """
     Material Editor UI Panel
@@ -163,7 +163,7 @@ class ui_luxrender_material_header(luxrender_material_base):
                                    'Exterior', icon='MOD_FLUIDSIM')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_material_transparency(luxrender_material_base):
     """
     Material Transparency Settings
@@ -192,7 +192,7 @@ class ui_luxrender_material_transparency(luxrender_material_base):
             return super().poll(context)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_material_emission(luxrender_material_base):
     """
     Material Emission Settings
@@ -218,7 +218,7 @@ class ui_luxrender_material_emission(luxrender_material_base):
             return False
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_material_coating(luxrender_material_base):
     """
     Material Glossy Coating Settings
@@ -262,7 +262,7 @@ class ui_luxrender_material_coating(luxrender_material_base):
             return super().poll(context)
 
 '''
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_material_node_volume(luxrender_material_base):
     bl_label = 'Volumes'
 
@@ -283,7 +283,7 @@ class ui_luxrender_material_node_volume(luxrender_material_base):
 '''
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_material_node_emit(luxrender_material_base):
     bl_label = 'Light Emission'
 
@@ -304,7 +304,7 @@ class ui_luxrender_material_node_emit(luxrender_material_base):
             return False
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxcore_material(luxrender_material_base):
     """
     LuxCore only settings
@@ -327,9 +327,9 @@ class ui_luxcore_material(luxrender_material_base):
             return False
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_material_utils(luxrender_material_base):
-    bl_label = 'LuxRender Materials Utils'
+    bl_label = 'PBRTv3 Materials Utils'
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -362,7 +362,7 @@ class ui_luxrender_material_utils(luxrender_material_base):
             return False
 
 
-# @LuxRenderAddon.addon_register_class
+# @PBRTv3Addon.addon_register_class
 # class ui_luxrender_material_db(luxrender_material_base):
 #     bl_label = 'LuxRender Materials Database'
 #     bl_options = {'DEFAULT_CLOSED'}

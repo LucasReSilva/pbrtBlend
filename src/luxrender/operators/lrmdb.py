@@ -26,7 +26,7 @@
 #
 import bpy
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..outputs import LuxLog, LuxManager
 from ..export import materials as export_materials
 
@@ -200,7 +200,7 @@ class LrmdbActionButton(object):
         self.callback(context, *self.callback_args)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_lrmdb_login(bpy.types.Operator):
     """Log in to the LuxRender Materials Database"""
 
@@ -236,7 +236,7 @@ class LUXRENDER_OT_lrmdb_login(bpy.types.Operator):
         return wm.invoke_props_dialog(self)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
     """Log out of the LuxRender Materials Database"""
 
@@ -256,7 +256,7 @@ class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
             return {'CANCELLED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_lrmdb(bpy.types.Operator):
     """Start the LuxRender Materials Database Interface"""
 
@@ -294,7 +294,7 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
         return context.scene.render.engine == 'LUXRENDER_RENDER'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_upload_material(bpy.types.Operator):
     bl_idname = 'luxrender.lrmdb_upload'
     bl_label = 'Upload material to LRMDB'

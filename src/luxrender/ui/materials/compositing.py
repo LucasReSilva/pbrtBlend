@@ -24,11 +24,11 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ... import LuxRenderAddon
+from ... import PBRTv3Addon
 from ...ui.materials import luxrender_material_base
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_mat_compositing(luxrender_material_base):
     bl_label = 'PBRTv3 Material Compositing'
 

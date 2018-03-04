@@ -29,11 +29,11 @@ from ..outputs.luxcore_api import UseLuxCore
 
 import math
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_object(declarative_property_group):
     ef_attach_to = ['Object']
 

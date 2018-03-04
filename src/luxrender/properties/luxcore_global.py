@@ -26,10 +26,10 @@
 #
 import bpy
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..extensions_framework import declarative_property_group
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxcore_global(declarative_property_group):
     """
     Global settings only used in LuxCore API mode

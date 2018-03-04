@@ -27,11 +27,11 @@
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import ParamSet
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_accelerator(declarative_property_group):
     """
     Storage class for LuxRender Accelerator settings.

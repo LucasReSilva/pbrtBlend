@@ -31,7 +31,7 @@ from ..extensions_framework import declarative_property_group
 from ..extensions_framework import util as efutil
 from ..extensions_framework.validate import Logic_Operator as LO, Logic_OR as O, Logic_AND as A
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..properties.texture import ColorTextureParameter, FloatTextureParameter
 from ..properties.material import texture_append_visibility
@@ -101,7 +101,7 @@ class LampColorTextureParameter(ColorTextureParameter):
 TC_L = LampColorTextureParameter('L', 'Colour', default=(1.0, 1.0, 1.0))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lamp(declarative_property_group):
     """
     Storage class for LuxRender Lamp settings.
@@ -162,7 +162,7 @@ class luxrender_lamp_basic(declarative_property_group):
         return params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lamp_point(luxrender_lamp_basic):
     ef_attach_to = ['luxrender_lamp']
 
@@ -288,7 +288,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
         return params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lamp_spot(luxrender_lamp_basic):
     ef_attach_to = ['luxrender_lamp']
 
@@ -368,7 +368,7 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
         return params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lamp_sun(declarative_property_group):
     ef_attach_to = ['luxrender_lamp']
 
@@ -601,7 +601,7 @@ class OpacityFloatTextureParameter(FloatTextureParameter):
 TF_opacity = OpacityFloatTextureParameter('opacity', 'Opacity', add_float_value=True, default=1.0, min=0.0, max=1.0)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lamp_area(declarative_property_group):
     ef_attach_to = ['luxrender_lamp']
 
@@ -698,7 +698,7 @@ emitting side, as it emits its own light',
         return params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lamp_hemi(declarative_property_group):
     ef_attach_to = ['luxrender_lamp']
 
@@ -810,7 +810,7 @@ images. Will disable use of portals for this light!',
         
 #####################################
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lamp_laser(declarative_property_group):
     ef_attach_to = ['luxrender_lamp']
 

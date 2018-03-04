@@ -28,10 +28,10 @@ import bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_object(bl_ui.properties_object.ObjectButtonsPanel, property_group_renderer):
     """
     Object settings

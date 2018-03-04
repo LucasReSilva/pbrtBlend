@@ -29,14 +29,14 @@ import bpy, bl_operators
 import json, math, os, mathutils
 
 # LuxRender Libs
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..outputs import LuxLog, LuxManager
 from ..export import materials as export_materials
 
 from .cycles_converter import cycles_material_converter
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_load_material(bpy.types.Operator):
     bl_idname = 'luxrender.load_material'
     bl_label = 'Load material'
@@ -75,7 +75,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
             return {'CANCELLED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_save_material(bpy.types.Operator):
     bl_idname = 'luxrender.save_material'
     bl_label = 'Save material'
@@ -463,7 +463,7 @@ def material_converter(report, scene, blender_mat):
         return {'CANCELLED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_material_reset(bpy.types.Operator):
     bl_idname = 'luxrender.material_reset'
     bl_label = 'Reset material to defaults'
@@ -474,7 +474,7 @@ class LUXRENDER_OT_material_reset(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
     bl_idname = 'luxrender.convert_all_materials'
     bl_label = 'Convert all Blender Internal materials'
@@ -491,7 +491,7 @@ class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_convert_material(bpy.types.Operator):
     bl_idname = 'luxrender.convert_material'
     bl_label = 'Convert this Blender Internal material'
@@ -509,7 +509,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_material_copy(bpy.types.Operator):
     bl_idname = 'luxrender.material_copy'
     bl_label = 'Copy'

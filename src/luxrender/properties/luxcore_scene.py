@@ -27,10 +27,10 @@
 
 from ..extensions_framework import declarative_property_group
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxcore_scenesettings(declarative_property_group):
     """
     Storage class for LuxCore scene settings.

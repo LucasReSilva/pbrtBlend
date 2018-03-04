@@ -29,7 +29,7 @@ import bpy, bl_ui
 from ..extensions_framework.ui import property_group_renderer
 
 from ..outputs.luxcore_api import UseLuxCore, pyluxcore
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 from .lamps import lamps_panel
 from .imageeditor_panel import imageeditor_panel
@@ -43,7 +43,7 @@ class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_re
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class render_settings(render_panel):
     """
     Render settings UI Panel
@@ -215,7 +215,7 @@ class render_settings(render_panel):
         super().draw(context)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class device_settings(render_panel):
     """
     OpenCL Devices UI Panel
@@ -285,7 +285,7 @@ class device_settings(render_panel):
         if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type == 'TILEPATH':
             self.layout.prop(engine_settings, 'tile_size')
 			
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class translator(render_panel):
     """
     Translator settings UI Panel
@@ -311,7 +311,7 @@ class translator(render_panel):
             self.layout.label('Custom LuxCore config properties:')
             self.layout.prop(context.scene.luxcore_enginesettings, 'custom_properties')
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class networking(render_panel):
     """
     Networking settings UI Panel
@@ -339,7 +339,7 @@ class networking(render_panel):
 
         super().draw(context)
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class postprocessing(render_panel):
     """
     Post Pro UI panel

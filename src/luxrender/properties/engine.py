@@ -30,7 +30,7 @@ from ..extensions_framework import declarative_property_group
 from ..extensions_framework import util as efutil
 from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic_Operator as LO
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..outputs.pure_api import PYLUX_AVAILABLE
 from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore
 
@@ -81,7 +81,7 @@ def find_apis():
     return apis
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_testing(declarative_property_group):
     """
     Properties related to exporter and scene testing
@@ -122,7 +122,7 @@ class luxrender_testing(declarative_property_group):
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_engine(declarative_property_group):
     """
     Storage class for LuxRender Engine settings.
@@ -368,7 +368,7 @@ class luxrender_engine(declarative_property_group):
         return self.is_saving_lbm2 or (saving_files and self.embed_filedata)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_networking(declarative_property_group):
     ef_attach_to = ['Scene']
 

@@ -31,7 +31,7 @@ import bpy
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..export.materials import ExportedTextures
 from ..outputs.pure_api import LUXRENDER_VERSION
@@ -66,7 +66,7 @@ def WorldVolumeParameter(attr, name):
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_world(declarative_property_group):
     ef_attach_to = ['Scene']
 
@@ -158,7 +158,7 @@ def volume_types():
     return v_types
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_volume_data(declarative_property_group):
     """
     Storage class for LuxRender volume data. The
@@ -664,7 +664,7 @@ class luxrender_volume_data(declarative_property_group):
             self.sigma_a_color = [math.e ** -(c * self.depth) for c in abs_col]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_volumes(declarative_property_group):
     """
     Storage class for LuxRender Material volumes.
@@ -718,7 +718,7 @@ class luxrender_volumes(declarative_property_group):
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lightgroup_data(declarative_property_group):
     """
     Storage class for LuxRender light group settings. The
@@ -797,7 +797,7 @@ class luxrender_lightgroup_data(declarative_property_group):
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_lightgroups(declarative_property_group):
     """
     Storage class for LuxRender Light Groups.
@@ -904,7 +904,7 @@ class luxrender_lightgroups(declarative_property_group):
         return True
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_materialgroup_data(declarative_property_group):
     """
     Storage class for LuxRender material group settings. The
@@ -987,7 +987,7 @@ class luxrender_materialgroup_data(declarative_property_group):
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_materialgroups(declarative_property_group):
     """
     Storage class for LuxRender Material Groups.
@@ -1020,7 +1020,7 @@ class luxrender_materialgroups(declarative_property_group):
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_channels(declarative_property_group):
     """
     Storage class for LuxCore AOVs

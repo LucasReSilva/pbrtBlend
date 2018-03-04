@@ -73,7 +73,7 @@ mapping_2d_socketname = '2D Mapping'
 mapping_3d_socketname = '3D Mapping'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_fresnel_socket(bpy.types.NodeSocket):
     """Fresnel texture input socket"""
     bl_idname = 'luxrender_fresnel_socket'
@@ -148,7 +148,7 @@ class luxrender_fresnel_socket(bpy.types.NodeSocket):
 
 # #### custom color sockets #####
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
     """Absorption Color socket"""
     bl_idname = 'luxrender_TC_Ka_socket'
@@ -205,7 +205,7 @@ class luxrender_TC_Ka_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
     """Diffuse Color socket"""
     bl_idname = 'luxrender_TC_Kd_socket'
@@ -260,7 +260,7 @@ class luxrender_TC_Kd_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
     """Reflection color socket"""
     bl_idname = 'luxrender_TC_Kr_socket'
@@ -313,7 +313,7 @@ class luxrender_TC_Kr_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
     """Specular color socket"""
     bl_idname = 'luxrender_TC_Ks_socket'
@@ -366,7 +366,7 @@ class luxrender_TC_Ks_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
     """Specular color socket"""
     bl_idname = 'luxrender_TC_Ks1_socket'
@@ -419,7 +419,7 @@ class luxrender_TC_Ks1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
     """Specular color socket"""
     bl_idname = 'luxrender_TC_Ks2_socket'
@@ -472,7 +472,7 @@ class luxrender_TC_Ks2_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
     """Specular color socket"""
     bl_idname = 'luxrender_TC_Ks3_socket'
@@ -525,7 +525,7 @@ class luxrender_TC_Ks3_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
     """Transmission Color socket"""
     bl_idname = 'luxrender_TC_Kt_socket'
@@ -578,7 +578,7 @@ class luxrender_TC_Kt_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
     """Warp Diffuse Color socket"""
     bl_idname = 'luxrender_TC_warp_Kd_socket'
@@ -632,7 +632,7 @@ class luxrender_TC_warp_Kd_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
     """Warp Diffuse Color socket"""
     bl_idname = 'luxrender_TC_warp_Ks_socket'
@@ -685,7 +685,7 @@ class luxrender_TC_warp_Ks_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
     """Weft Diffuse Color socket"""
     bl_idname = 'luxrender_TC_weft_Kd_socket'
@@ -739,7 +739,7 @@ class luxrender_TC_weft_Kd_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
     """Weft Specular Color socket"""
     bl_idname = 'luxrender_TC_weft_Ks_socket'
@@ -792,7 +792,7 @@ class luxrender_TC_weft_Ks_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
     """Backface Absorption Color socket"""
     bl_idname = 'luxrender_TC_backface_Ka_socket'
@@ -845,7 +845,7 @@ class luxrender_TC_backface_Ka_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
     """Backface Specular Color socket"""
     bl_idname = 'luxrender_TC_backface_Ks_socket'
@@ -898,7 +898,7 @@ class luxrender_TC_backface_Ks_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_L_socket(bpy.types.NodeSocket):
     """Light Color socket"""
     bl_idname = 'luxrender_TC_L_socket'
@@ -951,7 +951,7 @@ class luxrender_TC_L_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
     """Volume absorption Color socket"""
     bl_idname = 'luxrender_AC_absorption_socket'
@@ -1006,7 +1006,7 @@ class luxrender_AC_absorption_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
     """Volume scatter absorption Color socket"""
     bl_idname = 'luxrender_SC_absorption_socket'
@@ -1061,7 +1061,7 @@ class luxrender_SC_absorption_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.color))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_SC_color_socket(bpy.types.NodeSocket):
     """Scattering Color socket"""
     bl_idname = 'luxrender_SC_color_socket'
@@ -1117,7 +1117,7 @@ class luxrender_SC_color_socket(bpy.types.NodeSocket):
 
 # #### custom float sockets #####
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_amount_socket(bpy.types.NodeSocket):
     """Amount socket"""
     bl_idname = 'luxrender_TF_amount_socket'
@@ -1180,7 +1180,7 @@ class luxrender_TF_amount_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.amount)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_bump_socket(bpy.types.NodeSocket):
     """Bump socket"""
     bl_idname = 'luxrender_TF_bump_socket'
@@ -1236,7 +1236,7 @@ class luxrender_TF_bump_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
     """Cauchy B socket"""
     bl_idname = 'luxrender_TF_cauchyb_socket'
@@ -1297,7 +1297,7 @@ class luxrender_TF_cauchyb_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.cauchyb)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
     """Thin film IOR socket"""
     bl_idname = 'luxrender_TF_film_ior_socket'
@@ -1376,7 +1376,7 @@ class luxrender_TF_film_ior_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.filmindex)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
     """Thin film thickness socket"""
     bl_idname = 'luxrender_TF_film_thick_socket'
@@ -1434,7 +1434,7 @@ class luxrender_TF_film_thick_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.film)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_ior_socket(bpy.types.NodeSocket):
     """IOR socket"""
     bl_idname = 'luxrender_TF_ior_socket'
@@ -1506,7 +1506,7 @@ class luxrender_TF_ior_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.index)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
     """U-Roughness socket"""
     bl_idname = 'luxrender_TF_uroughness_socket'
@@ -1586,7 +1586,7 @@ class luxrender_TF_uroughness_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.uroughness)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
     """V-Roughness socket"""
     bl_idname = 'luxrender_TF_vroughness_socket'
@@ -1649,7 +1649,7 @@ class luxrender_TF_vroughness_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.vroughness)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
     """Sigma socket"""
     bl_idname = 'luxrender_TF_sigma_socket'
@@ -1705,7 +1705,7 @@ class luxrender_TF_sigma_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.sigma)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
     """Scattering asymmetry socket"""
     bl_idname = 'luxrender_SC_asymmetry_socket'
@@ -1759,7 +1759,7 @@ class luxrender_SC_asymmetry_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.sc_asym))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_d_socket(bpy.types.NodeSocket):
     """Absorption depth socket"""
     bl_idname = 'luxrender_TF_d_socket'
@@ -1815,7 +1815,7 @@ class luxrender_TF_d_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.d)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_OP1_socket(bpy.types.NodeSocket):
     """Opacity1 socket"""
     bl_idname = 'luxrender_TF_OP1_socket'
@@ -1871,7 +1871,7 @@ class luxrender_TF_OP1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.opacity1)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_OP2_socket(bpy.types.NodeSocket):
     """Opacity2 socket"""
     bl_idname = 'luxrender_TF_OP2_socket'
@@ -1927,7 +1927,7 @@ class luxrender_TF_OP2_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.opacity2)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_OP3_socket(bpy.types.NodeSocket):
     """Opacity3 socket"""
     bl_idname = 'luxrender_TF_OP3_socket'
@@ -1983,7 +1983,7 @@ class luxrender_TF_OP3_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.opacity3)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_OP4_socket(bpy.types.NodeSocket):
     """Opacity4 socket"""
     bl_idname = 'luxrender_TF_OP4_socket'
@@ -2041,7 +2041,7 @@ class luxrender_TF_OP4_socket(bpy.types.NodeSocket):
 
 # Sockets for carpaint nodes
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_M1_socket(bpy.types.NodeSocket):
     """M1 socket"""
     bl_idname = 'luxrender_TF_M1_socket'
@@ -2097,7 +2097,7 @@ class luxrender_TF_M1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.M1)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_M2_socket(bpy.types.NodeSocket):
     """M2 socket"""
     bl_idname = 'luxrender_TF_M2_socket'
@@ -2153,7 +2153,7 @@ class luxrender_TF_M2_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.M2)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_M3_socket(bpy.types.NodeSocket):
     """M3 socket"""
     bl_idname = 'luxrender_TF_M3_socket'
@@ -2209,7 +2209,7 @@ class luxrender_TF_M3_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.M3)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_R1_socket(bpy.types.NodeSocket):
     """R1 socket"""
     bl_idname = 'luxrender_TF_R1_socket'
@@ -2265,7 +2265,7 @@ class luxrender_TF_R1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.R1)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_R2_socket(bpy.types.NodeSocket):
     """R2 socket"""
     bl_idname = 'luxrender_TF_R2_socket'
@@ -2321,7 +2321,7 @@ class luxrender_TF_R2_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.R2)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_R3_socket(bpy.types.NodeSocket):
     """R3 socket"""
     bl_idname = 'luxrender_TF_R3_socket'
@@ -2379,7 +2379,7 @@ class luxrender_TF_R3_socket(bpy.types.NodeSocket):
 
 # Sockets for texture/utitlity nodes
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
     """brickmodtex socket"""
     bl_idname = 'luxrender_TC_brickmodtex_socket'
@@ -2431,7 +2431,7 @@ class luxrender_TC_brickmodtex_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.brickmodtex))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
     """bricktex socket"""
     bl_idname = 'luxrender_TC_bricktex_socket'
@@ -2483,7 +2483,7 @@ class luxrender_TC_bricktex_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.bricktex))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
     """mortartex socket"""
     bl_idname = 'luxrender_TC_mortartex_socket'
@@ -2535,7 +2535,7 @@ class luxrender_TC_mortartex_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.mortartex))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_brickmodtex_socket(bpy.types.NodeSocket):
     """brickmodtex socket"""
     bl_idname = 'luxrender_TF_brickmodtex_socket'
@@ -2569,7 +2569,7 @@ class luxrender_TF_brickmodtex_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.brickmodtex)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_bricktex_socket(bpy.types.NodeSocket):
     """bricktex socket"""
     bl_idname = 'luxrender_TF_bricktex_socket'
@@ -2603,7 +2603,7 @@ class luxrender_TF_bricktex_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.bricktex)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_mortartex_socket(bpy.types.NodeSocket):
     """mortartex socket"""
     bl_idname = 'luxrender_TF_mortartex_socket'
@@ -2639,7 +2639,7 @@ class luxrender_TF_mortartex_socket(bpy.types.NodeSocket):
 
 # Custom sockets for the mix/add/scale/subtract nodes, in all 3 variants. *sigh*
 # First, floats...
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_tex1_socket(bpy.types.NodeSocket):
     """Texture 1 socket"""
     bl_idname = 'luxrender_TF_tex1_socket'
@@ -2673,7 +2673,7 @@ class luxrender_TF_tex1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.tex1)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TF_tex2_socket(bpy.types.NodeSocket):
     """Texture 2 socket"""
     bl_idname = 'luxrender_TF_tex2_socket'
@@ -2708,7 +2708,7 @@ class luxrender_TF_tex2_socket(bpy.types.NodeSocket):
 
 
 # Now, colors:
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_tex1_socket(bpy.types.NodeSocket):
     """Texture 1 socket"""
     bl_idname = 'luxrender_TC_tex1_socket'
@@ -2743,7 +2743,7 @@ class luxrender_TC_tex1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.tex1))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TC_tex2_socket(bpy.types.NodeSocket):
     """Texture 2 socket"""
     bl_idname = 'luxrender_TC_tex2_socket'
@@ -2778,7 +2778,7 @@ class luxrender_TC_tex2_socket(bpy.types.NodeSocket):
 
 
 # And fresnel!
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TFR_tex1_socket(bpy.types.NodeSocket):
     """Texture 1 socket"""
     bl_idname = 'luxrender_TFR_tex1_socket'
@@ -2812,7 +2812,7 @@ class luxrender_TFR_tex1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.tex1)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
     """Texture 2 socket"""
     bl_idname = 'luxrender_TFR_tex2_socket'
@@ -2846,7 +2846,7 @@ class luxrender_TFR_tex2_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.tex2)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_float_socket(bpy.types.NodeSocket):
     """Float socket"""
     bl_idname = 'luxrender_float_socket'
@@ -2870,7 +2870,7 @@ class luxrender_float_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.default_value)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_float_limited_0_1_socket(bpy.types.NodeSocket):
     """Float socket with soft limits between 0 and 1"""
     bl_idname = 'luxrender_float_limited_0_1_socket'
@@ -2891,7 +2891,7 @@ class luxrender_float_limited_0_1_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.default_value)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_float_limited_0_2_socket(bpy.types.NodeSocket):
     """Float socket with soft limits between 0 and 2"""
     bl_idname = 'luxrender_float_limited_0_2_socket'
@@ -2912,7 +2912,7 @@ class luxrender_float_limited_0_2_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, self.default_value)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_color_socket(bpy.types.NodeSocket):
     """Color socket"""
     bl_idname = 'luxrender_color_socket'
@@ -2940,7 +2940,7 @@ class luxrender_color_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, list(self.default_value))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_float_socket(bpy.types.NodeSocket):
     """LuxCore transparency socket"""
     bl_idname = 'luxrender_transparency_socket'
@@ -2968,7 +2968,7 @@ class luxrender_float_socket(bpy.types.NodeSocket):
 
 
 # 3D coordinate socket, 2D coordinates is luxrender_transform_socket. Blender does not like numbers in these names
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_coordinate_socket(bpy.types.NodeSocket):
     """3D coordinate socket"""
     bl_idname = 'luxrender_coordinate_socket'
@@ -2988,7 +2988,7 @@ class luxrender_coordinate_socket(bpy.types.NodeSocket):
         return export_socket_luxcore(properties, self, [default_mapping_type, default_transformation])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_transform_socket(bpy.types.NodeSocket):
     """2D transform socket"""
     bl_idname = 'luxrender_transform_socket'

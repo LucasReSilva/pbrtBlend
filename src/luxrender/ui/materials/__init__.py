@@ -28,7 +28,7 @@ import bl_ui
 
 from ...extensions_framework.ui import property_group_renderer
 
-from ... import LuxRenderAddon
+from ... import PBRTv3Addon
 
 
 class luxrender_material_base(bl_ui.properties_material.MaterialButtonsPanel, property_group_renderer):

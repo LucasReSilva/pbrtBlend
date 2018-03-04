@@ -34,7 +34,7 @@ import math
 from bpy_extras.image_utils import load_image
 
 from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 from ..export import ParamSet, process_filepath_data, matrix_to_list
 from ..export.volumes import export_smoke, SmokeCache
@@ -81,7 +81,7 @@ triple_variant_items = [
 ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
     """Blend texture node"""
     bl_idname = 'luxrender_texture_blender_blend_node'
@@ -169,7 +169,7 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_brick(luxrender_texture_node):
     """Brick texture node"""
     bl_idname = 'luxrender_texture_brick_node'
@@ -290,7 +290,7 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_checker(luxrender_texture_node):
     """Checker texture node"""
     bl_idname = 'luxrender_texture_checker_node'
@@ -350,7 +350,7 @@ class luxrender_texture_type_node_checker(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
     """Clouds texture node"""
     bl_idname = 'luxrender_texture_blender_clouds_node'
@@ -418,7 +418,7 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node):
     """Distorted noise texture node"""
     bl_idname = 'luxrender_texture_blender_distortednoise_node'
@@ -490,7 +490,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_fbm(luxrender_texture_node):
     """FBM texture node"""
     bl_idname = 'luxrender_texture_fbm_node'
@@ -580,7 +580,7 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_harlequin(luxrender_texture_node):
     """Harlequin texture node"""
     bl_idname = 'luxrender_texture_harlequin_node'
@@ -598,7 +598,7 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
         return make_texture('color', 'harlequin', self.name, harlequin_params)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_image_map(luxrender_texture_node):
     """Image map texture node (deprecated, replaced by luxrender_texture_type_node_blender_image_map)"""
     bl_idname = 'luxrender_texture_image_map_node'
@@ -714,7 +714,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
     """
     Wrapper for Blender's load_image() function so we know which image was opened
@@ -745,7 +745,7 @@ class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
 preview_collections = {}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     """Blender image map texture node"""
     bl_idname = 'luxrender_texture_blender_image_map_node'
@@ -1014,7 +1014,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
     """Marble texture node"""
     bl_idname = 'luxrender_texture_blender_marble_node'
@@ -1109,7 +1109,7 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
     """Musgrave texture node"""
     bl_idname = 'luxrender_texture_blender_musgrave_node'
@@ -1218,7 +1218,7 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_normal_map(luxrender_texture_node):
     """Normal map texture node"""
     bl_idname = 'luxrender_texture_normal_map_node'
@@ -1300,7 +1300,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
     """Stucci texture node"""
     bl_idname = 'luxrender_texture_blender_stucci_node'
@@ -1378,7 +1378,7 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_uv(luxrender_texture_node):
     """UV texture node"""
     bl_idname = 'luxrender_texture_uv_node'
@@ -1415,7 +1415,7 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
     """Voronoi texture node"""
     bl_idname = 'luxrender_texture_blender_voronoi_node'
@@ -1510,7 +1510,7 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_windy(luxrender_texture_node):
     """Windy texture node"""
     bl_idname = 'luxrender_texture_windy_node'
@@ -1546,7 +1546,7 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
     """Wood texture node"""
     bl_idname = 'luxrender_texture_blender_wood_node'
@@ -1636,7 +1636,7 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
     """Wrinkled texture node"""
     bl_idname = 'luxrender_texture_wrinkled_node'
@@ -1683,7 +1683,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_cloud(luxrender_texture_node):
     """Cloud volume texture node"""
     bl_idname = 'luxrender_texture_vol_cloud_node'
@@ -1757,7 +1757,7 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
     # TODO: LuxCore export
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
     """Exponential texture node"""
     bl_idname = 'luxrender_texture_vol_exponential_node'
@@ -1792,7 +1792,7 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
     # TODO: LuxCore export once supported by LuxCore
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
     """Smoke Data node"""
     bl_idname = 'luxrender_texture_vol_smoke_data_node'
@@ -1902,7 +1902,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_dots(luxrender_texture_node):
     """Dots node"""
     bl_idname = 'luxrender_texture_dots_node'
@@ -1939,7 +1939,7 @@ class luxrender_texture_type_node_dots(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_bilerp(luxrender_texture_node):
     """Bilerp node"""
     bl_idname = 'luxrender_texture_bilerp_node'

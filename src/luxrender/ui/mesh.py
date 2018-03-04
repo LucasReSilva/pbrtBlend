@@ -29,10 +29,10 @@ import bl_ui
 from ..extensions_framework.ui import property_group_renderer
 
 from ..outputs.luxcore_api import UseLuxCore
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_renderer):
     bl_label = 'PBRTv3 Mesh Options'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'

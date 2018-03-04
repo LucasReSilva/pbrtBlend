@@ -29,7 +29,7 @@ import bpy, bl_ui
 from ..extensions_framework.ui import property_group_renderer
 from ..outputs.luxcore_api import UseLuxCore
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from .lamps import lamps_panel
 from .materials import luxrender_material_base
 
@@ -38,7 +38,7 @@ class world_panel(bl_ui.properties_world.WorldButtonsPanel, property_group_rende
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class world_helper(world_panel):
     """
     PBRTv3 World Help
@@ -58,7 +58,7 @@ class world_helper(world_panel):
         add_hemi.type = 'HEMI'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class world(world_panel):
     """
     LuxRender World Settings
@@ -157,12 +157,12 @@ class volumes_base(object):
                         )
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class volumes_world(volumes_base, world_panel):
     pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class volumes_material(volumes_base, luxrender_material_base):
     @classmethod
     def poll(cls, context):

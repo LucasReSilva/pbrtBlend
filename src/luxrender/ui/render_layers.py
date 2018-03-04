@@ -29,7 +29,7 @@ import bpy, bl_ui
 from ..extensions_framework.ui import property_group_renderer
 
 from ..outputs.luxcore_api import UseLuxCore, pyluxcore
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 from .lamps import lamps_panel
 from .imageeditor_panel import imageeditor_panel
@@ -43,7 +43,7 @@ class render_layers_panel(bl_ui.properties_render.RenderButtonsPanel, property_g
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class layer_selector(render_layers_panel):
     """
     Render Layers Selector panel
@@ -75,7 +75,7 @@ class layer_selector(render_layers_panel):
         row.prop(rd, "use_single_layer", text="", icon_only=True)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class layers(render_layers_panel):
     """
     Render Layers panel
@@ -201,24 +201,24 @@ class lightgroups_base(object):
             self.layout.operator('luxrender.lightgroup_add', text='Add Lightgroup', icon='ZOOMIN')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class lightgroups_renderlayer(lightgroups_base, render_layers_panel):
     bl_context = 'render_layer'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class lightgroups_imageeditor(lightgroups_base, imageeditor_panel):
     is_imageeditor_panel = True
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class lightgroups_lamps(lightgroups_base, lamps_panel):
     @classmethod
     def poll(cls, context):
         return super().poll(context) and context.lamp.luxrender_lamp.lightgroup
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class materialgroups(render_layers_panel):
     """
     Material Groups Settings
@@ -273,7 +273,7 @@ class materialgroups(render_layers_panel):
         self.layout.operator('luxrender.materialgroup_add', text='Add Materialgroup', icon='ZOOMIN')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class passes_aov(render_layers_panel):
     """
     Render passes UI panel

@@ -24,11 +24,11 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ... import LuxRenderAddon
+from ... import PBRTv3Addon
 from ...ui.textures import luxrender_texture_base
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_texture_fbm(luxrender_texture_base):
     bl_label = 'PBRTv3 FBM Texture'
 

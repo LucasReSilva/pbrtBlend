@@ -27,11 +27,11 @@
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..outputs.luxcore_api import ScenePrefix
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxcore_lamp(declarative_property_group):
     """
     Storage class for LuxCore lamp settings.

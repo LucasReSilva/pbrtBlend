@@ -31,7 +31,7 @@ from ..extensions_framework import util as efutil
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
 from ..export import fix_matrix_order
@@ -39,7 +39,7 @@ from ..outputs.pure_api import LUXRENDER_VERSION
 from ..outputs.luxcore_api import UseLuxCore
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_hair(declarative_property_group):
     """
     Storage class for LuxRender Hair Rendering settings.

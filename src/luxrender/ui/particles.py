@@ -27,7 +27,7 @@ import bpy
 
 from ..extensions_framework.ui import property_group_renderer
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
 class hair_panel(bl_ui.properties_particle.ParticleButtonsPanel, property_group_renderer):
@@ -38,7 +38,7 @@ class hair_panel(bl_ui.properties_particle.ParticleButtonsPanel, property_group_
         return super().poll(context) and context.particle_settings.type == 'HAIR'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_ui_controls(hair_panel):
     """
     Hair settings

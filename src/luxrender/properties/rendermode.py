@@ -29,11 +29,11 @@ import bpy
 
 from ..extensions_framework import declarative_property_group
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..extensions_framework.validate import Logic_OR as O
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_rendermode(declarative_property_group):
     """
     This class holds the renderingmode menu and renderer prefs. Surface integrators settings are
@@ -318,7 +318,7 @@ class luxrender_rendermode(declarative_property_group):
         return self.renderer, renderer_params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_halt(declarative_property_group):
     """
     Storage class for LuxRender Halt settings.

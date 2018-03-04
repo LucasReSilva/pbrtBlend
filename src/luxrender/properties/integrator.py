@@ -27,13 +27,13 @@
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..outputs import LuxLog
 from ..outputs.pure_api import LUXRENDER_VERSION
 # from .engine import check_renderer_settings
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_volumeintegrator(declarative_property_group):
     """
     Storage class for LuxRender Volume Integrator settings.
@@ -94,7 +94,7 @@ class luxrender_volumeintegrator(declarative_property_group):
         return self.volumeintegrator, params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_integrator(declarative_property_group):
     """
     Storage class for LuxRender SurfaceIntegrator settings.

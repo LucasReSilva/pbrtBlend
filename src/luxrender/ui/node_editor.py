@@ -33,10 +33,10 @@ from ..extensions_framework import declarative_property_group
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_node_editor(bpy.types.NodeTree):
     '''LuxRender Material Nodes'''
 
@@ -82,7 +82,7 @@ class luxrender_mat_node_editor(bpy.types.NodeTree):
     refresh = bpy.props.BoolProperty(name='Links Changed', default=False, update=acknowledge_connection)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_vol_node_editor(bpy.types.NodeTree):
     '''LuxRender Volume Nodes'''
 

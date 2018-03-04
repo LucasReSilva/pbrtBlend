@@ -107,7 +107,7 @@ def set_common_properties(properties, luxcore_name, bump, transparency):
 
 
 # Material nodes alphabetical
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_carpaint(luxrender_material_node):
     # Description string
     """Car paint material node"""
@@ -219,7 +219,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_cloth(luxrender_material_node):
     """Cloth material node"""
     bl_idname = 'luxrender_material_cloth_node'
@@ -285,7 +285,7 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_doubleside(luxrender_material_node):
     """Doubel-sided material node"""
     bl_idname = 'luxrender_material_doubleside_node'
@@ -344,7 +344,7 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
     # TODO: add LuxCore support once supported by LuxCore
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_glass(luxrender_material_node):
     """Glass material node"""
     bl_idname = 'luxrender_material_glass_node'
@@ -516,7 +516,7 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 
 
 # Deprecated, replaced by unified glass node
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_glass2(luxrender_material_node):
     """Glass2 material node"""
     bl_idname = 'luxrender_material_glass2_node'
@@ -553,7 +553,7 @@ class luxrender_material_type_node_glass2(luxrender_material_node):
         return make_material(mat_type, self.name, glass2_params)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_glossy(luxrender_material_node):
     """Glossy material node"""
     bl_idname = 'luxrender_material_glossy_node'
@@ -656,7 +656,7 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_glossycoating(luxrender_material_node):
     """Glossy Coating material node"""
     bl_idname = 'luxrender_material_glossycoating_node'
@@ -775,7 +775,7 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
     """Glossytranslucent material node"""
     bl_idname = 'luxrender_material_glossytranslucent_node'
@@ -976,7 +976,7 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_layered(luxrender_material_node):
     """Layered material node"""
     bl_idname = 'luxrender_material_layered_node'
@@ -1037,7 +1037,7 @@ class luxrender_material_type_node_layered(luxrender_material_node):
         return make_material(mat_type, self.name, layered_params)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_matte(luxrender_material_node):
     """Matte material node"""
     bl_idname = 'luxrender_material_matte_node'
@@ -1079,7 +1079,7 @@ class luxrender_material_type_node_matte(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
     """Mattetranslucent material node"""
     bl_idname = 'luxrender_material_mattetranslucent_node'
@@ -1128,7 +1128,7 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 
 
 # Deprecated, replaced with metal2 node
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_metal(luxrender_material_node):
     """Metal material node"""
     bl_idname = 'luxrender_material_metal_node'
@@ -1195,7 +1195,7 @@ class luxrender_material_type_node_metal(luxrender_material_node):
         return make_material(mat_type, self.name, metal_params)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_metal2(luxrender_material_node):
     """Metal2 material node"""
     bl_idname = 'luxrender_material_metal2_node'
@@ -1289,7 +1289,7 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_mirror(luxrender_material_node):
     """Mirror material node"""
     bl_idname = 'luxrender_material_mirror_node'
@@ -1326,7 +1326,7 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_mix(luxrender_material_node):
     """Mix material node"""
     bl_idname = 'luxrender_material_mix_node'
@@ -1399,7 +1399,7 @@ class luxrender_material_type_node_mix(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_null(luxrender_material_node):
     """Null material node"""
     bl_idname = 'luxrender_material_null_node'
@@ -1439,7 +1439,7 @@ class luxrender_material_type_node_null(luxrender_material_node):
 
 
 # Deprecated, replaced by unified glass node
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_roughglass(luxrender_material_node):
     """Rough Glass material node"""
     bl_idname = 'luxrender_material_roughglass_node'
@@ -1493,7 +1493,7 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
         return make_material(mat_type, self.name, roughglass_params)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_scatter(luxrender_material_node):
     """Scatter material node"""
     bl_idname = 'luxrender_material_scatter_node'
@@ -1520,7 +1520,7 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 
 
 # Deprecated
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_shinymetal(luxrender_material_node):
     """Shiny metal material node"""
     bl_idname = 'luxrender_material_shinymetal_node'
@@ -1568,7 +1568,7 @@ class luxrender_material_type_node_shinymetal(luxrender_material_node):
         return make_material(mat_type, self.name, shinymetal_params)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_velvet(luxrender_material_node):
     """Velvet material node"""
     bl_idname = 'luxrender_material_velvet_node'
@@ -1641,7 +1641,7 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_light_area_node(luxrender_material_node):
     """Area Light node"""
     bl_idname = 'luxrender_light_area_node'
@@ -1741,7 +1741,7 @@ class luxrender_light_area_node(luxrender_material_node):
             set_prop_mat(properties, parent_luxcore_name, 'emission.id', lightgroup_id)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_type_node_datablock(luxrender_material_node):
     """Datablock material node"""
     bl_idname = 'luxrender_material_type_node_datablock'
@@ -1773,7 +1773,7 @@ class luxrender_material_type_node_datablock(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material_output_node(luxrender_node):
     """Material output node"""
     bl_idname = 'luxrender_material_output_node'

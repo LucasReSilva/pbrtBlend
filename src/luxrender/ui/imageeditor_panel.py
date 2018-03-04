@@ -29,7 +29,7 @@ import bpy, bl_ui
 from ..extensions_framework.ui import property_group_renderer
 
 from ..outputs.luxcore_api import UseLuxCore, pyluxcore
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
 class imageeditor_panel(property_group_renderer):
@@ -43,7 +43,7 @@ class imageeditor_panel(property_group_renderer):
         return engine_is_lux and UseLuxCore()
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class rendering_controls_panel(imageeditor_panel):
     bl_label = 'LuxRender Controls'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
@@ -60,7 +60,7 @@ class rendering_controls_panel(imageeditor_panel):
                          icon=button_icon)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class tonemapping_panel(imageeditor_panel):
     bl_label = 'LuxRender Imagepipeline'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
@@ -171,7 +171,7 @@ class tonemapping_panel(imageeditor_panel):
             sub.prop(imagepipeline_settings, 'mist_enddistance')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class halt_conditions_panel(imageeditor_panel):
     bl_label = 'LuxRender Halt Conditions'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
@@ -205,7 +205,7 @@ class halt_conditions_panel(imageeditor_panel):
         draw_condition_pair('halt_noise')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class rendering_statistics_panel(imageeditor_panel):
     bl_label = 'LuxRender Statistics'
     COMPAT_ENGINES = 'LUXRENDER_RENDER'

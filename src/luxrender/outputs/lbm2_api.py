@@ -26,7 +26,7 @@
 #
 import collections, json
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
 class Custom_Context(object):
@@ -43,7 +43,7 @@ class Custom_Context(object):
     _default_data = {
         'name': '',
         'category_id': -1,
-        'version': LuxRenderAddon.BL_VERSION,
+        'version': PBRTv3Addon.BL_VERSION,
         'objects': [],
         'metadata': {}
     }

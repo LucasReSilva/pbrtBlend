@@ -35,7 +35,7 @@ from bpy_extras.io_utils import ImportHelper
 from bpy_extras.image_utils import load_image
 
 # LuxRender Libs
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
 def find_node_editor(nodetree_type):
@@ -57,7 +57,7 @@ def find_node_editor(nodetree_type):
     return node_editor
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
     """"""
     bl_idname = "luxrender.import_multiple_imagenodes"
@@ -99,7 +99,7 @@ class LUXRENDER_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_material_nodetree"
@@ -294,7 +294,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_volume_nodetree"

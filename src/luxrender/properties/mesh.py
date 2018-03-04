@@ -27,7 +27,7 @@
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_Operator as LO
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..export.materials import get_texture_from_scene
 from ..properties.material import texture_append_visibility
@@ -51,7 +51,7 @@ TF_displacementmap = MeshFloatTextureParameter(
 )
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mesh(declarative_property_group):
     """
     Storage class for LuxRender Mesh settings.

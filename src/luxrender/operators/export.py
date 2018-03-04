@@ -29,14 +29,14 @@ import bpy, bl_operators
 import os, struct, mathutils
 
 # LuxRender Libs
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..outputs import LuxManager
 from ..export.scene import SceneExporter
 
 from ..extensions_framework import util as efutil
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class EXPORT_OT_luxrender(bpy.types.Operator):
     bl_idname = 'export.luxrender'
     bl_label = 'Export PBRTv3 Scene (.PBRTv3s)'
@@ -83,7 +83,7 @@ class InvalidGeometryException(Exception):
 class UnexportableObjectException(Exception):
     pass
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
     """Export an object as ply file, replace the original mesh with a preview version and set path to the exported ply file."""
 

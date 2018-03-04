@@ -30,7 +30,7 @@ import bpy
 import mathutils
 
 from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 from ..export import ParamSet, process_filepath_data, get_worldscale
 
@@ -43,7 +43,7 @@ from ..properties.node_texture import triple_variant_items
 from ..properties.texture import luxrender_tex_transform, luxrender_tex_mapping, luxrender_tex_imagemap
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_3d_coordinates_node(luxrender_texture_node):
     """3D texture coordinates node"""
     bl_idname = 'luxrender_3d_coordinates_node'
@@ -154,7 +154,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
         return [mapping_type, transformation]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_2d_coordinates_node(luxrender_texture_node):
     """2D texture coordinates node"""
     bl_idname = 'luxrender_2d_coordinates_node'
@@ -276,7 +276,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
         return [mapping_type, uvscale, uvdelta]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_blackbody(luxrender_texture_node):
     """Blackbody spectrum node"""
     bl_idname = 'luxrender_texture_blackbody_node'
@@ -307,7 +307,7 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_gaussian(luxrender_texture_node):
     """Gaussian spectrum node"""
     bl_idname = 'luxrender_texture_gaussian_node'
@@ -341,7 +341,7 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
     # TODO: LuxCore export once supported by LuxCore
 
 
-@LuxRenderAddon.addon_register_class  # Drawn in "input" menu, since it does not have any input sockets
+@PBRTv3Addon.addon_register_class  # Drawn in "input" menu, since it does not have any input sockets
 class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
     """Glossy exponent node"""
     bl_idname = 'luxrender_texture_glossyexponent_node'
@@ -370,7 +370,7 @@ class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
         return self.calc_roughness()
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
     """Tabulated Data spectrum node"""
     bl_idname = 'luxrender_texture_tabulateddata_node'
@@ -397,7 +397,7 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
     # TODO: LuxCore export once supported by LuxCore
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_constant(luxrender_texture_node):
     """Constant texture node"""
     bl_idname = 'luxrender_texture_constant_node'
@@ -489,7 +489,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
         return value
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
     """Vertex Colors texture node"""
     bl_idname = 'luxrender_texture_hitpointcolor_node'
@@ -512,7 +512,7 @@ class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
     """Vertex Grey texture node"""
     bl_idname = 'luxrender_texture_hitpointgrey_node'
@@ -556,7 +556,7 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_pointiness(luxrender_texture_node):
     """Pointiness texture node"""
     bl_idname = 'luxrender_texture_pointiness_node'
@@ -634,7 +634,7 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_python(luxrender_texture_node):
     """Python expression node"""
     bl_idname = 'luxrender_texture_python_node'
@@ -691,7 +691,7 @@ class luxrender_texture_type_node_python(luxrender_texture_node):
 
 
 # Hitpointalpha is kind of useless with Blender's vertex color system, so we don't use it
-# @LuxRenderAddon.addon_register_class
+# @PBRTv3Addon.addon_register_class
 # class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
 # '''Vertex Alpha texture node'''
 # bl_idname = 'luxrender_texture_hitpointalpha_node'

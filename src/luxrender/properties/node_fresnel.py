@@ -27,7 +27,7 @@
 import bpy
 
 from . import create_luxcore_name, warning_luxcore_node, warning_classic_node
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 from ..export import ParamSet, process_filepath_data,  get_expanded_file_name
 
@@ -39,7 +39,7 @@ from ..properties.node_material import get_socket_paramsets
 from ..properties.texture import luxrender_tex_fresnelname
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
     """Fresnel Color Node"""
     bl_idname = 'luxrender_texture_fresnelcolor_node'
@@ -69,7 +69,7 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
     """Fresnel Name Node"""
     bl_idname = 'luxrender_texture_fresnelname_node'
@@ -124,7 +124,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_fresnelfile(luxrender_texture_node):
     """Fresnel Sopra/Luxpop Node"""
     bl_idname = 'luxrender_texture_fresnelfile_node'
@@ -160,7 +160,7 @@ class luxrender_texture_type_node_fresnelfile(luxrender_texture_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_cauchy(luxrender_texture_node):
     """Cauchy Node"""
     bl_idname = 'luxrender_texture_cauchy_node'
@@ -213,7 +213,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
         return make_texture('fresnel', 'cauchy', self.name, cauchy_params)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
     """Sellmeier Node"""
     bl_idname = 'luxrender_texture_sellmeier_node'

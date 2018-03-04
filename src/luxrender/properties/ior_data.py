@@ -26,7 +26,7 @@
 #
 import bpy
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 ior_tree = [
     ("Liquids", [
@@ -354,7 +354,7 @@ ior_dict = {
 }
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
     bl_idname = 'luxrender.set_old_ior_preset'
     bl_label = 'Apply IOR preset'
@@ -419,7 +419,7 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_set_volume_ior_preset(bpy.types.Operator):
     bl_idname = 'luxrender.set_volume_ior_preset'
     bl_label = 'Apply Volume IOR preset'
@@ -441,7 +441,7 @@ class LUXRENDER_OT_set_volume_ior_preset(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_set_coating_ior_preset(bpy.types.Operator):
     bl_idname = 'luxrender.set_coating_ior_preset'
     bl_label = 'Apply IOR preset'
@@ -481,7 +481,7 @@ def create_ior_menu(name, opname):
     for label, iors in ior_tree:
         submenu_idname = 'LUXRENDER_MT_ior_%s_cat%d' % (name, len(submenus))
         submenus.append(
-            LuxRenderAddon.addon_register_class(type(
+            PBRTv3Addon.addon_register_class(type(
                 submenu_idname,
                 (bpy.types.Menu,),
                 {
@@ -503,21 +503,21 @@ class LUXRENDER_MT_ior_presets_base(bpy.types.Menu):
             sl.menu(sm.bl_idname)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_MT_ior_presets(LUXRENDER_MT_ior_presets_base):
     bl_label = 'IOR Presets'
 
     submenus = create_ior_menu('old', 'LUXRENDER_OT_set_old_ior_preset')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_MT_ior_presets_volumes(LUXRENDER_MT_ior_presets_base):
     bl_label = 'Volume IOR Presets'
 
     submenus = create_ior_menu('volume', 'LUXRENDER_OT_set_volume_ior_preset')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_MT_coating_ior_presets(LUXRENDER_MT_ior_presets_base):
     bl_label = 'IOR Presets'
 

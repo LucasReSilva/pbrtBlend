@@ -29,7 +29,7 @@ import bpy, bl_operators
 import os, re, mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
 
 # LuxRender Libs
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 # Per-IDPropertyGroup preset handling
 
@@ -40,13 +40,13 @@ class LUXRENDER_MT_base(bpy.types.Menu):
         return bpy.types.Menu.draw_preset(self, context)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base):
     bl_label = "LuxRender Engine Presets"
     preset_subdir = "luxrender/engine"
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_preset_engine_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     """Save the current settings as a preset"""
     bl_idname = 'luxrender.preset_engine_add'
@@ -78,13 +78,13 @@ class LUXRENDER_OT_preset_engine_add(bl_operators.presets.AddPresetBase, bpy.typ
         return super().execute(context)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base):
     bl_label = "LuxRender Networking Presets"
     preset_subdir = "luxrender/networking"
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     '''Save the current settings as a preset'''
     bl_idname = 'luxrender.preset_networking_add'
@@ -103,13 +103,13 @@ class LUXRENDER_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy
 
 # Volume data handling
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_MT_presets_volume(LUXRENDER_MT_base):
     bl_label = "LuxRender Volume Presets"
     preset_subdir = "luxrender/volume"
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_preset_volume_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     """Save the current settings as a preset"""
     bl_idname = 'luxrender.preset_volume_add'
@@ -128,7 +128,7 @@ class LUXRENDER_OT_preset_volume_add(bl_operators.presets.AddPresetBase, bpy.typ
         return super().execute(context)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_volume_add(bpy.types.Operator):
     """Add a new material volume definition to the scene"""
 
@@ -173,7 +173,7 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_volume_remove(bpy.types.Operator):
     """Remove the selected material volume definition"""
 
@@ -189,7 +189,7 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_lightgroup_add(bpy.types.Operator):
     """Add a new light group definition to the scene"""
 
@@ -208,7 +208,7 @@ class LUXRENDER_OT_lightgroup_add(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
     """Remove the selected lightgroup definition"""
 
@@ -227,7 +227,7 @@ class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_materialgroup_add(bpy.types.Operator):
     """Add a new material group definition to the scene"""
 
@@ -246,7 +246,7 @@ class LUXRENDER_OT_materialgroup_add(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_materialgroup_remove(bpy.types.Operator):
     """Remove the selected materialgroup definition"""
 
@@ -265,7 +265,7 @@ class LUXRENDER_OT_materialgroup_remove(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_opencl_device_list_update(bpy.types.Operator):
     """Update the OpenCL device list"""
 
@@ -291,7 +291,7 @@ class LUXRENDER_OT_opencl_device_list_update(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
     """Update LuxBlend to the latest version"""
     bl_idname = "luxrender.update_luxblend"
@@ -394,7 +394,7 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_open_daily_builds_webpage(bpy.types.Operator):
     """Open the "daily builds" webpage"""
     bl_idname = 'luxrender.open_daily_builds_webpage'
@@ -406,7 +406,7 @@ class LUXRENDER_OT_open_daily_builds_webpage(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class LUXRENDER_OT_fix_color_management(bpy.types.Operator):
     """Reset "view", "exposure", "gamma", "look" and "use curves" values. Rendered images might look wrong when these settings are not not the defaults."""
 

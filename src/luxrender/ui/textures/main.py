@@ -24,12 +24,12 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ... import LuxRenderAddon
+from ... import PBRTv3Addon
 from ...ui.textures import luxrender_texture_base
 from ...outputs.luxcore_api import UseLuxCore
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_texture_main(luxrender_texture_base):
     '''
     Texture Editor UI Panel

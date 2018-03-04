@@ -34,7 +34,7 @@ from . import (create_luxcore_name_vol, create_luxcore_name, export_emission_lux
                warning_luxcore_node, export_volume_luxcore, luxrender_node, luxrender_material_node)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_volume_output_node(luxrender_node):
     """Volume output node"""
     bl_idname = 'luxrender_volume_output_node'
@@ -82,7 +82,7 @@ class luxrender_volume_output_node(luxrender_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_volume_type_node_clear(luxrender_material_node):
     """Clear volume node"""
     bl_idname = 'luxrender_volume_clear_node'
@@ -117,7 +117,7 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_volume_type_node_homogeneous(luxrender_material_node):
     '''Homogeneous volume node'''
     bl_idname = 'luxrender_volume_homogeneous_node'
@@ -178,7 +178,7 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
         return luxcore_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
     """Heterogeneous volume node"""
     bl_idname = 'luxrender_volume_heterogeneous_node'

@@ -111,7 +111,7 @@ else:
         return efutil.find_config_value('luxrender', 'defaults',
                                         'install_path', '')
 
-    class LuxRenderAddonPreferences(AddonPreferences):
+    class PBRTv3AddonPreferences(AddonPreferences):
         # this must match the addon name
         bl_idname = __name__
 
@@ -140,22 +140,22 @@ else:
 
             layout.prop(self, "install_path")
 
-    LuxRenderAddon = Addon(bl_info)
-    addon_register, addon_unregister = LuxRenderAddon.init_functions()
+    PBRTv3Addon = Addon(bl_info)
+    addon_register, addon_unregister = PBRTv3Addon.init_functions()
 
     def register():
-        bpy.utils.register_class(LuxRenderAddonPreferences)
+        bpy.utils.register_class(PBRTv3AddonPreferences)
         nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_categories_material)
         nodeitems_utils.register_node_categories("LUX_VOLUME", ui.node_editor.luxrender_node_categories_volume)
         addon_register()
 
     def unregister():
-        bpy.utils.unregister_class(LuxRenderAddonPreferences)
+        bpy.utils.unregister_class(PBRTv3AddonPreferences)
         nodeitems_utils.unregister_node_categories("LUX_SHADER")
         nodeitems_utils.unregister_node_categories("LUX_VOLUME")
         addon_unregister()
 
 
     # Importing the core package causes extensions_framework managed
-    # RNA class registration via @LuxRenderAddon.addon_register_class
+    # RNA class registration via @PBRTv3Addon.addon_register_class
     from . import core

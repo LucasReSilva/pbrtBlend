@@ -45,7 +45,7 @@ from bpy.app.handlers import persistent
 from ..extensions_framework import util as efutil
 
 # Exporter libs
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import get_output_filename, get_worldscale
 from ..export.scene import SceneExporter
 from ..export.volumes import SmokeCache
@@ -446,7 +446,7 @@ def draw_button_show_imagemap_previews(self, context):
 _register_elm(bpy.types.NODE_HT_header.append(draw_button_show_imagemap_previews))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     """
     LuxRender Engine Exporter/Integration class

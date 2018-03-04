@@ -30,7 +30,7 @@ import bpy
 from ..extensions_framework.ui import property_group_renderer
 
 from ..outputs.luxcore_api import UseLuxCore
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import get_worldscale
 
 
@@ -38,7 +38,7 @@ class camera_panel(bl_ui.properties_data_camera.CameraButtonsPanel, property_gro
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class camera(camera_panel):
     bl_label = 'LuxRender Camera'
 
@@ -101,7 +101,7 @@ class camera(camera_panel):
                 layout.prop_search(lux_cam, "clipping_plane_obj", context.scene, "objects", text="Plane")
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class film(camera_panel):
     bl_label = 'LuxRender Film'
 

@@ -28,10 +28,10 @@
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO, Logic_AND as A
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxcore_opencl_devices(declarative_property_group):
     """
     Storage class for available OpenCL devices
@@ -65,7 +65,7 @@ def detect_cpu_corecount():
     finally:
         return corecount
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxcore_enginesettings(declarative_property_group):
     """
     Storage class for LuxCore engine settings.

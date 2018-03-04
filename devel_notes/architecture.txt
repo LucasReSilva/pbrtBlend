@@ -74,7 +74,7 @@ In order to get the custom property groups and panels loaded, they are first
 imported in the core/ package. Importing UI modules alone is enough to register
 the panel with Blender.
 
-The mechanism which makes this work is the @LuxRenderAddon.addon_register_class
+The mechanism which makes this work is the @PBRTv3Addon.addon_register_class
 decorator. When the file the class is defined in is imported, the decorator
 is executed and adds the class definition to a list containing all of the
 classes which this addon should register in Blender. When the addon is

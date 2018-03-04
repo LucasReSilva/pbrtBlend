@@ -26,7 +26,7 @@
 #
 import bpy
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 lampspectrum_tree = [
     ("Natural", [
@@ -154,7 +154,7 @@ lampspectrum_names = {
 }
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class TEXTURE_OT_set_lampspectrum_preset(bpy.types.Operator):
     bl_idname = 'texture.set_lampspectrum_preset'
     bl_label = 'Apply lampspectrum preset'
@@ -186,7 +186,7 @@ def draw_generator(operator, m_names):
     return draw
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class TEXTURE_MT_lampspectrum_presets(bpy.types.Menu):
     bl_label = 'Lampspectrum presets'
     submenus = []
@@ -200,7 +200,7 @@ class TEXTURE_MT_lampspectrum_presets(bpy.types.Menu):
     for label, spectra in lampspectrum_tree:
         submenu_idname = 'TEXTURE_MT_lampspectrum_cat%d' % len(submenus)
         submenus.append(
-            LuxRenderAddon.addon_register_class(type(
+            PBRTv3Addon.addon_register_class(type(
                 submenu_idname,
                 (bpy.types.Menu,),
                 {

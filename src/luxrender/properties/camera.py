@@ -33,7 +33,7 @@ from ..extensions_framework import util as efutil
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
 from ..export import fix_matrix_order
@@ -86,7 +86,7 @@ def ArbitraryClippingPlane():
     ]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_camera(declarative_property_group):
     """
     Storage class for LuxRender Camera settings.
@@ -537,7 +537,7 @@ class luxrender_camera(declarative_property_group):
 
         return cam_type, params
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_film(declarative_property_group):
     ef_attach_to = ['luxrender_camera']
 
@@ -1033,7 +1033,7 @@ crf_preset_names = [s.strip() for s in
                     Portra_800CD""".splitlines()]
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
     bl_idname = 'camera.set_luxrender_crf'
     bl_label = 'Set LuxRender Film Response Function'
@@ -1050,7 +1050,7 @@ class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class CAMERA_MT_luxrender_crf(bpy.types.Menu):
     bl_label = 'CRF Preset'
 
@@ -1067,7 +1067,7 @@ class CAMERA_MT_luxrender_crf(bpy.types.Menu):
             op.preset_name = crf_name
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_colorspace(declarative_property_group):
     """
     Storage class for LuxRender Colour-Space settings.
@@ -1340,7 +1340,7 @@ class colorspace_presets(object):
         cs_blueY = 0.0089
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_tonemapping(declarative_property_group):
     """
     Storage class for LuxRender ToneMapping settings.

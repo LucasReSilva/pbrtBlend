@@ -30,7 +30,7 @@ import bpy
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_AND as A
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..properties import find_node
 from ..properties.texture import (
     FloatTextureParameter, ColorTextureParameter, FresnelTextureParameter,
@@ -210,7 +210,7 @@ mat_names = {
 }
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class MATERIAL_OT_set_luxrender_type(bpy.types.Operator):
     bl_idname = 'material.set_luxrender_type'
     bl_label = 'Set PBRTv3 material type'
@@ -226,7 +226,7 @@ class MATERIAL_OT_set_luxrender_type(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class MATERIAL_MT_luxrender_type(bpy.types.Menu):
     bl_label = 'Material Type'
 
@@ -357,7 +357,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
     return bump_params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_material(declarative_property_group):
     """
     Storage class for LuxRender Material settings.
@@ -796,7 +796,7 @@ class luxrender_material(declarative_property_group):
         blender_mat.preview_render_type = blender_mat.preview_render_type
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_compositing(declarative_property_group):
     """
     Storage class for LuxRender Material compositing settings
@@ -1066,7 +1066,7 @@ class TransparencyFloatTextureParameter(FloatTextureParameter):
 TF_alpha = TransparencyFloatTextureParameter('alpha', 'Alpha', add_float_value=False, default=1.0, min=0.0, max=1.0)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_transparency(declarative_property_group):
     """
     Storage class for LuxRender Material alpha transparency settings.
@@ -1307,7 +1307,7 @@ TC_c_Ka = CoatingColorTextureParameter('Ka', 'Absorption color', default=(0.0, 0
 TC_c_Ks = CoatingColorTextureParameter('Ks', 'Specular color', default=(0.04, 0.04, 0.04))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_coating(declarative_property_group):
     """
     Storage class for LuxRender Material glossy coating settings.
@@ -1472,7 +1472,7 @@ class luxrender_coating(declarative_property_group):
         return glossycoating_params
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_carpaint(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -1600,7 +1600,7 @@ class luxrender_mat_carpaint(declarative_property_group):
         TF_R3.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_glass(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -1681,7 +1681,7 @@ class luxrender_mat_glass(declarative_property_group):
         TC_Kt.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_glass2(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -1733,7 +1733,7 @@ class luxrender_mat_glass2(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_roughglass(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -1863,7 +1863,7 @@ class luxrender_mat_roughglass(declarative_property_group):
                 setattr(self, psi['name'], psi['value'])
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_glossy(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2045,7 +2045,7 @@ class luxrender_mat_glossy(declarative_property_group):
         TF_alpha.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_matte(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2078,7 +2078,7 @@ class luxrender_mat_matte(declarative_property_group):
         TF_sigma.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_mattetranslucent(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2134,7 +2134,7 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
         TF_sigma.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_glossytranslucent(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2430,7 +2430,7 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
         TF_backface_vroughness.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_glossycoating(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2589,7 +2589,7 @@ class luxrender_mat_glossycoating(declarative_property_group):
         TF_vroughness.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_metal(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2715,7 +2715,7 @@ class luxrender_mat_metal(declarative_property_group):
         TF_vroughness.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_metal2(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2902,7 +2902,7 @@ class luxrender_mat_metal2(declarative_property_group):
         TF_vroughness.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_scatter(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -2952,7 +2952,7 @@ class luxrender_mat_scatter(declarative_property_group):
         TF_g.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_shinymetal(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -3060,7 +3060,7 @@ class luxrender_mat_shinymetal(declarative_property_group):
         TF_vroughness.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_mirror(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -3105,7 +3105,7 @@ class luxrender_mat_mirror(declarative_property_group):
         TC_Kr.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_mix(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -3147,7 +3147,7 @@ class luxrender_mat_mix(declarative_property_group):
         TF_amount.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_layered(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -3214,7 +3214,7 @@ class luxrender_mat_layered(declarative_property_group):
         TF_OP4.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_null(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -3230,7 +3230,7 @@ class luxrender_mat_null(declarative_property_group):
         pass
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_velvet(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -3330,7 +3330,7 @@ class luxrender_mat_velvet(declarative_property_group):
         TC_Kd.load_paramset(self, ps)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_mat_cloth(declarative_property_group):
     ef_attach_to = ['luxrender_material']
     alert = {}
@@ -3461,7 +3461,7 @@ class EmissionColorTextureParameter(ColorTextureParameter):
 TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0, 1.0, 1.0))
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_emission(declarative_property_group):
     """
     Storage class for LuxRender Material emission settings.

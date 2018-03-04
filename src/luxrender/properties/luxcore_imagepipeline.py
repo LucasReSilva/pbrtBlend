@@ -30,7 +30,7 @@ import bpy
 from ..extensions_framework import declarative_property_group
 from ..extensions_framework.validate import Logic_AND as A, Logic_OR as O
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 
 # Valid CRF preset names (case sensitive):
@@ -84,7 +84,7 @@ crf_preset_names = [s.strip() for s in
                     Portra_400VCCD
                     Portra_800CD""".splitlines()]
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
     bl_idname = 'imagepipeline.set_luxrender_crf'
     bl_label = 'Set LuxRender Film Response Function'
@@ -104,7 +104,7 @@ class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
 
         return {'FINISHED'}
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class IMAGEPIPELINE_MT_luxrender_crf(bpy.types.Menu):
     bl_label = 'CRF Preset'
     bl_description = 'Simulate analog film'
@@ -121,7 +121,7 @@ class IMAGEPIPELINE_MT_luxrender_crf(bpy.types.Menu):
             op = cl.operator('IMAGEPIPELINE_OT_set_luxrender_crf', text=crf_name)
             op.preset_name = crf_name
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxcore_imagepipeline(declarative_property_group):
     """
     Storage class for LuxCore imagepipeline settings.

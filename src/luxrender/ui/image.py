@@ -26,12 +26,12 @@
 #
 from ..extensions_framework.ui import property_group_renderer
 
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 from ..outputs import LuxManager as LM
 from ..outputs.pure_api import PYLUX_AVAILABLE
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class luxrender_ui_rendering_controls(property_group_renderer):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'

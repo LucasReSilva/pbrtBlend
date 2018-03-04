@@ -29,7 +29,7 @@ import bl_ui
 from ..extensions_framework.ui import property_group_renderer
 
 from ..outputs.luxcore_api import UseLuxCore
-from .. import LuxRenderAddon
+from .. import PBRTv3Addon
 
 narrowui = 180
 
@@ -38,7 +38,7 @@ class lamps_panel(bl_ui.properties_data_lamp.DataButtonsPanel, property_group_re
     COMPAT_ENGINES = 'LUXRENDER_RENDER'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_lamps(lamps_panel):
     bl_label = 'PBRTv3 Lamps'
 
@@ -64,7 +64,7 @@ class ui_luxrender_lamps(lamps_panel):
                 self.layout.prop(context.lamp.luxrender_lamp, "iesname", text="IES Data")
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_lamp_point(lamps_panel):
     bl_label = 'PBRTv3 Point Lamp'
 
@@ -77,7 +77,7 @@ class ui_luxrender_lamp_point(lamps_panel):
         return super().poll(context) and context.lamp.type == 'POINT'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_lamp_spot(lamps_panel):
     bl_label = 'PBRTv3 Spot Lamp'
 
@@ -112,7 +112,7 @@ class ui_luxrender_lamp_spot(lamps_panel):
                 row.prop(context.lamp, "show_cone", text="Show Cone")
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_lamp_sun(lamps_panel):
     bl_label = 'PBRTv3 Sun Lamp'
 
@@ -153,7 +153,7 @@ class ui_luxrender_lamp_sun(lamps_panel):
                         row.prop(sun_props, 'link_albedo_groundcolor', icon='CONSTRAINT', toggle=True)
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_lamp_hemi(lamps_panel):
     bl_label = 'PBRTv3 Hemi Lamp'
 
@@ -166,7 +166,7 @@ class ui_luxrender_lamp_hemi(lamps_panel):
         return super().poll(context) and context.lamp.type == 'HEMI'
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxrender_lamp_area(lamps_panel):
     bl_label = 'PBRTv3 Area Lamp'
 
@@ -215,7 +215,7 @@ class ui_luxrender_lamp_area(lamps_panel):
                         self.layout.label('Warning: Invisible lamps can cause artifacts', icon='INFO')
 
 
-@LuxRenderAddon.addon_register_class
+@PBRTv3Addon.addon_register_class
 class ui_luxcore_lamp(lamps_panel):
     """
     LuxCore light settings
