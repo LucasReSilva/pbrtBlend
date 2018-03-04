@@ -23,5 +23,17 @@ pipeline {
         sh '/home/lucas/Documentos/TCC/blender-2.79-linux-glibc219-x86_64/blender -b Cycles.blend -f 1 -E CYCLES'
       }
     }
+    stage('Render scene') {
+      steps {
+        sh 'pbrt PBRTv3_Exemple'
+      }
+    }
+    stage('Compare') {
+      steps {
+        sh 'wget http://www.graphics.cornell.edu/online/box/box.jpg'
+        sh ' convert box.jpg -resize 500x500 box_resized.png'
+        sh 'composite cornell-box.png box_resized.png -compose difference difference.png'
+      }
+    }
   }
 }
