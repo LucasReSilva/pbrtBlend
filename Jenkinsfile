@@ -5,7 +5,7 @@ pipeline {
       parallel {
         stage('Blender') {
           steps {
-            sh '''/home/lucas/Documentos/TCC/blender-2.79-linux-glibc219-x86_64/blender -v
+            sh '''/home/lucas/Documentos/TCC/Blender/blender -v
 '''
           }
         }
@@ -15,12 +15,18 @@ pipeline {
             sh 'pbrt PBRTv3_Exemple'
           }
         }
+        stage('pbrtBlend') {
+          steps {
+            sh '''git -C /home/lucas/Documentos/TCC/pbrtBlend pull
+'''
+          }
+        }
       }
     }
     stage('Export file') {
       steps {
         sh 'wget "https://github.com/LucasReSilva/Cornell-Box/raw/master/Blender%20files/Cycles.blend"'
-        sh '/home/lucas/Documentos/TCC/blender-2.79-linux-glibc219-x86_64/blender -b Cycles.blend -f 1 -E CYCLES'
+        sh '/home/lucas/Documentos/TCC/Blender/blender -b Cycles.blend -f 1 -E CYCLES'
       }
     }
     stage('Render scene') {
