@@ -190,9 +190,9 @@ class luxrender_hair(declarative_property_group):
             'attr': 'acceltype',
             'name': 'Hair Accelerator',
             'description': 'Acceleration structure used for this hair system',
-            'default': 'qbvh',
+            'default': 'bvh',
             'items': [
-                ('qbvh', 'QBVH', 'SSE-accelerated quad bounding volume hierarchy'),
+                ('bvh', 'BVH', 'SSE-accelerated quad bounding volume hierarchy'),
                 ('kdtree', 'KD-Tree', 'KD-Tree'),
             ],
         },

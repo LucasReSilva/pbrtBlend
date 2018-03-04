@@ -152,7 +152,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     lux_context.volumeIntegrator('multi', ParamSet())
 
     # Accelerator
-    lux_context.accelerator('qbvh', ParamSet())
+    lux_context.accelerator('bvh', ParamSet())
     lux_context.worldBegin()
     bl_scene = LuxManager.CurrentScene  # actual blender scene keeping default volumes
 

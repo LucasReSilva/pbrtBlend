@@ -52,7 +52,7 @@ class luxrender_rendermode(declarative_property_group):
         'raybuffersize',
         'statebuffercount',
         'workgroupsize',
-        'qbvhstacksize',
+        'bvhstacksize',
         'kernelcache'
     ]
 
@@ -65,7 +65,7 @@ class luxrender_rendermode(declarative_property_group):
         'statebuffercount': {'opencl_prefs': True, 'renderer': 'hybrid'},
         'workgroupsize': {'opencl_prefs': True,
                           'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl'])},
-        'qbvhstacksize': {'opencl_prefs': True, 'renderer': 'hybrid'},
+        'bvhstacksize': {'opencl_prefs': True, 'renderer': 'hybrid'},
         'kernelcache': {'opencl_prefs': True, 'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl'])},
         'usegpus': {'rendermode': O(['hybridpath', 'hybridbidir', 'luxcorepathocl', 'luxcorebiaspathocl'])},
         'usecpus': {'rendermode': O(['luxcorepathocl', 'luxcorebiaspathocl'])},
@@ -209,9 +209,9 @@ class luxrender_rendermode(declarative_property_group):
         },
         {
             'type': 'int',
-            'attr': 'qbvhstacksize',
-            'name': 'QBVH Stack Size',
-            'description': 'Max depth of GPU QBVH stack. Lower this if you get an out-of-resources error',
+            'attr': 'bvhstacksize',
+            'name': 'BVH Stack Size',
+            'description': 'Max depth of GPU BVH stack. Lower this if you get an out-of-resources error',
             'default': 32,
             'min': 16,
             'max': 64,
@@ -269,7 +269,7 @@ class luxrender_rendermode(declarative_property_group):
                 renderer_params.add_integer('raybuffersize', self.raybuffersize)
                 renderer_params.add_integer('statebuffercount', self.statebuffercount)
                 renderer_params.add_integer('opencl.gpu.workgroup.size', self.workgroupsize)
-                renderer_params.add_integer('accelerator.qbvh.stacksize.max', self.qbvhstacksize)
+                renderer_params.add_integer('accelerator.bvh.stacksize.max', self.bvhstacksize)
                 renderer_params.add_string('opencl.devices.select', dev_string if '1' in dev_string else "") # blank
 
         if self.renderer in ['luxcore']:

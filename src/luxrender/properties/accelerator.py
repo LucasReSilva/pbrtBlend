@@ -62,9 +62,9 @@ class luxrender_accelerator(declarative_property_group):
         'emptybonus': {'advanced': True, 'accelerator': 'tabreckdtree'},
         'maxprims': {'advanced': True, 'accelerator': 'tabreckdtree'},
         'maxdepth': {'advanced': True, 'accelerator': 'tabreckdtree'},
-        'maxprimsperleaf': {'advanced': True, 'accelerator': O(['qbvh', 'sqbvh'])},
-        'fullsweepthreshold': {'advanced': True, 'accelerator': O(['qbvh', 'sqbvh'])},
-        'skipfactor': {'advanced': True, 'accelerator': O(['qbvh', 'sqbvh'])},
+        'maxprimsperleaf': {'advanced': True, 'accelerator': O(['bvh', 'sbvh'])},
+        'fullsweepthreshold': {'advanced': True, 'accelerator': O(['bvh', 'sbvh'])},
+        'skipfactor': {'advanced': True, 'accelerator': O(['bvh', 'sbvh'])},
     }
 
     properties = [
@@ -78,13 +78,13 @@ class luxrender_accelerator(declarative_property_group):
             'attr': 'accelerator',
             'name': 'Accelerator',
             'description': 'Scene accelerator type',
-            'default': 'qbvh',
+            'default': 'bvh',
             'items': [  # As of 0.9, other accelerator types have been removed from the core entirely
                         ('tabreckdtree', 'KD Tree', 'A traditional KD Tree'),
-                        ('qbvh', 'QBVH', 'Quad bounding volume hierarchy'),
-                        ('sqbvh', 'SQBVH',
+                        ('bvh', 'BVH', 'Quad bounding volume hierarchy'),
+                        ('sbvh', 'SBVH',
                          'Spatial quad bounding volume hierarchy. Should be faster than normal \
-                         QBVH, but may use more memory'),
+                         BVH, but may use more memory'),
             ],
             'save_in_preset': True
         },
@@ -171,7 +171,7 @@ class luxrender_accelerator(declarative_property_group):
                 params.add_integer('maxprims', self.maxprims)
                 params.add_integer('maxdepth', self.maxdepth)
 
-            if self.accelerator in ('qbvh', 'sqbvh'):
+            if self.accelerator in ('bvh', 'sbvh'):
                 params.add_integer('maxprimsperleaf', self.maxprimsperleaf)
                 params.add_integer('fullsweepthreshold', self.fullsweepthreshold)
                 params.add_integer('skipfactor', self.skipfactor)
