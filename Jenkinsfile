@@ -15,12 +15,6 @@ pipeline {
             sh 'pbrt PBRTv3_Exemple'
           }
         }
-        stage('pbrtBlend') {
-          steps {
-            sh '''git -C /home/lucas/Documentos/TCC/pbrtBlend pull
-'''
-          }
-        }
       }
     }
     stage('Export file') {
