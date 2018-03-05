@@ -20,12 +20,12 @@ pipeline {
     stage('Export file') {
       steps {
         sh 'wget "https://github.com/LucasReSilva/Cornell-Box/raw/master/Blender%20files/Cycles.blend"'
-        sh '/home/lucas/Documentos/TCC/Blender/blender -b Cycles.blend -f 1 -E CYCLES'
+        sh '/home/lucas/Documentos/TCC/Blender/blender -b Cycles.blend -f 1 -E PBRTv3_RENDER --python /home/lucas/Documentos/TCC/blendToPBRTv3.py'
       }
     }
     stage('Render scene') {
       steps {
-        sh 'pbrt PBRTv3_Exemple'
+        sh 'pbrt /tmp/untitled.Scene.00001.PBRTv3s'
       }
     }
     stage('Compare') {
