@@ -20,8 +20,8 @@ pipeline {
     stage('Export file') {
       steps {
         sh 'wget "https://github.com/LucasReSilva/Cornell-Box/raw/master/Blender%20files/Cycles.blend"'
-        sh '/home/lucas/Documentos/TCC/Blender/blender -b -E help && /home/lucas/Documentos/TCC/Blender/blender -b Cycles.blend --addons'
-        sh '/home/lucas/Documentos/TCC/Blender/blender -b Cycles.blend -E PBRTv3_RENDER -f 1  --python /home/lucas/Documentos/TCC/blendToPBRTv3.py'
+        sh '/home/lucas/Documentos/TCC/Blender/blender -b -E help && /home/lucas/Documentos/TCC/Blender/blender -b Cycles.blend --addons pbrtBlend'
+        sh '/home/lucas/Documentos/TCC/Blender/blender --addons pbrtBlend -b Cycles.blend -E PBRTv3_RENDER -f 1  --python /home/lucas/Documentos/TCC/blendToPBRTv3.py'
       }
     }
     stage('Render scene') {
